@@ -7,6 +7,7 @@ package Slash::Stats::Writer;
 use strict;
 use DBIx::Password;
 use Slash;
+use Slash::Stats;
 use Slash::Utility;
 use Slash::DB::Utility;
 
@@ -15,24 +16,27 @@ use base 'Slash::DB::MySQL';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-# On a side note, I am not sure if I liked the way I named the methods either.
-# -Brian
-sub new {
-	my($class, $user, $options) = @_;
-	my $self = {};
+sub init {
+	my($self, $options) = @_;
 
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'Stats'};
+	return 0 if ! $self->SUPER::init();
 
-	bless($self, $class);
-	$self->{virtual_user} = $user;
+	# Might want to use Slash::Stats::init, not sure, there's some
+	# duplication and a whole lot of other code too.  For now just
+	# skip that class entirely.
+
 	my @time = localtime();
-	$self->{_day} = $options->{day} ? $options->{day} : sprintf "%4d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
+	$self->{_day} = $options->{day}
+		? $options->{day}
+		: sprintf "%4d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
 	$self->{_overwrite} = 1 if $options->{overwrite};
-	$self->sqlConnect;
 
-	return $self;
+	1;
+}
+
+sub isInstalled {
+	my($class) = @_;
+	return Slash::Stats->isInstalled();
 }
 
 ########################################################

@@ -77,7 +77,6 @@ sub isInstalled {
 
 sub init {
 	my($self) = @_;
-warn "DB/Utility.pm init() called, setting _querylog for $self, can: " . ($self->can('SUPER::init') ? 1 : 0);
 	# Consider clearing any existing fields matching /_cache_/ too.
 	my @fields_to_clear = qw(
 		_querylog       _codeBank
@@ -382,7 +381,11 @@ sub _querylog_enabled {
 	my($self) = @_;
 
 	return 0 unless dbAvailable();
-use Carp; if (!exists $self->{_querylog}) { Carp::cluck "no ql for $self" }
+	if (!exists $self->{_querylog}) {
+		use Carp;
+		Carp::cluck "no ql for $self, perhaps SUPER::init was not called correctly?";
+		$self->{_querylog} = { };
+	}
 	return $self->{_querylog}{enabled}
 		if defined $self->{_querylog}{enabled}
 			&& $self->{_querylog}{next_check_time} > time;

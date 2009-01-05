@@ -7,7 +7,7 @@ CREATE TABLE firehose (
 	uid mediumint(8) unsigned NOT NULL default '0',
 	globjid int unsigned NOT NULL default '0',
 	discussion mediumint UNSIGNED NOT NULL default '0',
-	type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion") default 'submission',
+	type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion","project") default 'submission',
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	popularity float NOT NULL default '0',
 	editorpop float NOT NULL default '0',
@@ -30,6 +30,7 @@ CREATE TABLE firehose (
 	ipid varchar(32) NOT NULL default '',
 	subnetid varchar(32) NOT NULL default '',
 	category varchar(30) NOT NULL default '',
+	nexuslist varchar(32) NOT NULL default '',
 	last_update TIMESTAMP,
 	signoffs VARCHAR(255) NOT NULL DEFAULT '',
 	stoid MEDIUMINT UNSIGNED DEFAULT '0',
@@ -38,12 +39,15 @@ CREATE TABLE firehose (
 	srcname VARCHAR(32) NOT NULL DEFAULT '',
 	thumb MEDIUMINT UNSIGNED,
 	mediatype enum("text", "none", "video", "image", "audio") default "none" NOT NULL,
+	offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no',
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
 	KEY popularity (popularity),
 	KEY neediness (neediness),
-	KEY url_id (url_id)
+	KEY url_id (url_id),
+	KEY uid (uid),
+	KEY last_update (last_update)
 ) TYPE=InnoDB;
 
 # The table giving an Object's Generally Accepted Story Publication Time
@@ -51,6 +55,14 @@ CREATE TABLE firehose_ogaspt (
 	globjid		int(10) unsigned NOT NULL default '0',
 	pubtime		datetime NOT NULL default '0000-00-00 00:00:00',
 	PRIMARY KEY	(globjid)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS firehose_topics_rendered;
+CREATE TABLE firehose_topics_rendered (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	tid SMALLINT(5) UNSIGNED NOT NULL,
+	UNIQUE id_tid (id, tid),
+	INDEX tid_id (tid, id)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_text;
@@ -76,6 +88,32 @@ CREATE TABLE firehose_tab(
 	PRIMARY KEY (tabid),
 	UNIQUE uid_tabname(uid,tabname)
 ) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS firehose_view;
+CREATE TABLE firehose_view(
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	viewname VARCHAR(24) NOT NULL DEFAULT 'unnamed',
+	useparentfilter ENUM("no","yes") DEFAULT "yes",
+	tab_display ENUM("no","yes") DEFAULT "no",
+	options_edit ENUM("no","yes") DEFAULT "no",
+	admin_maxitems tinyint NOT NULL DEFAULT -1,
+	maxitems tinyint NOT NULL DEFAULT -1,
+	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+
+	filter VARCHAR(255) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	duration ENUM("7","-1","") DEFAULT '',
+	mode ENUM ("full","fulltitle", "") DEFAULT "",
+	mixedmode ENUM("1","0","") DEFAULT "",
+	pause ENUM("1","0","") DEFAULT "";
+
+	PRIMARY KEY (id),
+	UNIQUE id_viewname(id,viewname)
+);
+
 
 DROP TABLE IF EXISTS firehose_update_log;
 CREATE TABLE firehose_update_log(

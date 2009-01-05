@@ -1,20 +1,40 @@
 __section__
 default
 __description__
-Edit all those checkboxes for authors, topics, sections, slashboxes
+Edit all those menus and checkboxes for authors, topics,
+sections (nexuses), and slashboxes.
 
-* title = passed to titlebar
-* tilded_customize_msg = some message
-* tilded_box_msg = some message
-* aidref = hashref of authors
-* aid_order = arrayref of author order
-* tidref = hashref of topics
-* tid_order = arrayref of topic order
-* sectionref = hashref of sections
+* title = passed to top titlebar, just above the section, author,
+  and topic selection
+* criteria_msg = a note to appear between that titlebar and the
+  section, author, and topic selection itself
+* customize_title = title for the titlebar just above the slashboxes
+* tilded_customize_msg = a note to appear between
+  the list of slashboxes and the User Space textbox
+* tilded_box_msg = any text to display under the User Space textbox
+
+* authorref = hashref of author information
+	$n = nickname for author with uid $n
+* aid_order = list of the fields of authorref to display, in display order
+
+* nexusref = hashref of nexus information
+	$n = name (textname) for nexus with tid $n
+* nexustid_order = list of the fields of nexusref to display, in display order
+
+* topicref = hashref of topic information
+	$n = name (textname) for topic with tid $n
+* topictid_order = list of the fields of topicref to display, in display order
+
+* story023_data = hashref of what the existing settings are
+	author = hashref for author settings
+		$n = existing setting for uid $n
+	nexus = hashref for nexus settings
+		$n = existing setting for tid $n
+	topic = hashref for topic settings
+		$n = existing setting for tid $n
+
 * section_descref = hashref of slashboxes
 * box_order = arrayref of slashbox order
-* userspace = text for userspace
-* customize_title = title for "customize" titlebar
 
 __title__
 
@@ -25,63 +45,211 @@ en_US
 __name__
 tildeEd
 __template__
-[% PROCESS titlebar title=title width="100%" %]
+<p>
 
-<TABLE WIDTH="95%" BORDER="0" CELLPADDING="3" CELLSPACING="3" ALIGN="CENTER">
-	<TR BGCOLOR="[% user.bg.3 %]">
-		<TH><FONT COLOR="[% user.fg.3 %]">Authors</FONT></TH>
-		<TH><FONT COLOR="[% user.fg.3 %]">Topics</FONT></TH>
-		<TH><FONT COLOR="[% user.fg.3 %]">Sections</FONT></TH>
-	</TR>
-	<TR BGCOLOR="[% user.bg.2 %]">
-		<TD VALIGN="TOP">
+[% PROCESS titlebar title=title %]
+<div class="message">
+	[% criteria_msg %]
+</div>	
 
-[% FOREACH aid = aid_order %]
-		<INPUT TYPE="CHECKBOX" NAME="exaid_[% aid %]"[% aidref.$aid.checked %]>[% aidref.$aid.nickname %]<BR>
-[% END %]
+[% story023_data = Slash.db.getDescriptions('story023');
+   checked = constants.markup_checked_attribute %]
 
-		</TD>
-		<TD VALIGN="TOP"><MULTICOL COLS="3">
+[%-	######################
+	# Sections and Authors
+	######################
+-%]
 
-[% FOREACH tid = tid_order %]
-		<INPUT TYPE="CHECKBOX" NAME="extid_[% tid %]"[% tidref.$tid.checked %]>[% tidref.$tid.alttext %]<BR>
-[% END %]
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
 
-		</MULTICOL></TD>
-		<TD VALIGN="TOP"><MULTICOL COLS="3">
-[% FOREACH section = sectionref.keys.sort %]
-		<INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]<BR>
-[% END %]
-		</MULTICOL>
-		</TD>
-	</TR>
-</TABLE>
-[% PROCESS titlebar width='100%' title=customize_title %]
-[% tilded_customize_msg %]
+[%-	# Sections (nexuses)
+-%]
 
-[% FOREACH bid = box_order %]
-	[% IF section_descref.$bid.boldflag %]
-		<B>
-	[% END %]
-
-		<INPUT TYPE="CHECKBOX" NAME="exboxes_[% bid %]"[% section_descref.$bid.checked %]>
-		<A HREF="[% env.script_name %]?op=previewbox&amp;bid=[% bid %]">
-
-	[% IF bid == 'srandblock' %]
-		Semi-Random Box
+<td valign="top">
+	<script type="text/javascript">
+	<!--
+	function updateNexusAllTidPrefs(el) {
+		theForm = document.forms["edithome"];
+		for(i=0; i<theForm.elements.length; i++){
+			var regex = /^nexustid\d+$/;
+			if (regex.test(theForm.elements[i].name)) {
+				if (theForm.elements[i].type == "hidden") {
+					theForm.elements[i].value = el.value;
+				} else {
+					if (theForm.elements[i].value == el.value) {
+						theForm.elements[i].checked = true;
+					} else {
+						theForm.elements[i].checked = false;
+					}
+				}
+			}
+		}
+	}
+	-->
+	</script>
+<table border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<td valign="top">Sections</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_none.gif" alt="Never"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief Best Only"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full Best Only"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Full / Brief"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All">
+		</td>
+	</tr>
+	<tr align="center">
+		<td align="left">
+			<b>All Sections</b> <noscript>Sorry, this functionality requires Javascript enabled</noscript>
+		</td>
+		<td>&nbsp;</td>
+		[% FOREACH value = [ 1 2 3 4 5] -%]
+			<td><input type="radio" name="nexustid_master" value="[% value %]" onclick="updateNexusAllTidPrefs(this); return true;">
+			</td>
+		[% END %]
+	</tr>	
+	<tr><td colspan="7">[% PROCESS horiz_rule %]</td></tr>
+[% FOREACH nexustid = nexustid_order %]
+	[% IF nexustid == constants.mainpage_nexus_tid %]
+		<tr><td colspan="7">
+		<input type="hidden" name="nexustid[% nexustid %]" value="[% story023_default.nexus.$nexustid %]">
+		</td></tr>
 	[% ELSE %]
-		[% section_descref.$bid.title or bid %]
+	<tr align="center">
+		[%-	# really should have nexusref have another field for the
+			# url of the (first) skin that uses it, and link this in
+			# here, but ... I'm in a hurry
+		-%]
+		<td align="left">[% nexusref.$nexustid | strip_literal %]</td>
+[% FOREACH value = [ 0 1 2 3 4 5] -%]
+		<td><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
+			[%- checked IF story023_default.nexus.$nexustid == value %]></td>
+[%- END %]
+	</tr>
 	[% END %]
+[% END %]
+</table>
+</td>
 
-	 	</A><BR>
+[%-	# Authors
+-%]
 
-	[% IF section_descref.$bid.boldflag %]
-		</B>
+<td valign="TOP">
+<table border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<th>Authors</th>
+	</tr>
+[% FOR aid = aid_order %]
+	<tr>
+		<td><input type="checkbox" name="aid[% aid %]"
+			[%- checked IF story023_default.author.$aid > 0 %]>
+			[% authorref.$aid | strip_literal %]</td>
+	</tr>
+[% END %]
+</table>
+</td>
+
+</tr></table>
+
+[% IF constants.story_never_topic_allow == 2
+	|| (user_edit.is_subscriber && constants.story_never_topic_allow == 1) %]
+
+<br>
+
+[%-	######################
+	# Topics
+	######################
+-%]
+
+<input type="hidden" name="topictids_present" value="1">
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+	<tr>
+		<th colspan="6">Topics</th>
+	</tr>
+
+	<tr><td colspan="6">&nbsp;</td></tr>
+
+[% FOREACH topictid = topictid_order -%]
+	[%- IF loop.index % 3 == 0 -%]
+		<tr>
+	[%- END -%]
+		<td valign="TOP"><input type="checkbox" name="topictid[% topictid %]"
+			[%- checked IF story023_default.topic.$topictid > 0 %]></td>
+		<td valign="TOP" align="left">&nbsp;
+	[%-	topicref.$topictid | strip_literal	-%]
+		</td>
+	[%- IF loop.index % 3 == 2 -%]
+		</tr>
 	[% END %]
+[%- END -%]
+[% remaining_cells = 2 - (topictid_order.max % 3);
+   WHILE remaining_cells;
+   	remaining_cells = remaining_cells - 1; -%]
+	<td>&nbsp;</td><td>&nbsp;</td>
+[%- END -%]
+
+	</tr>
+</table>
 
 [% END %]
 
-[% tilded_box_msg %]
+<p>
+
+[%-	######################
+	# Slashboxes
+	######################
+-%]
+
+[% PROCESS titlebar title=customize_title %]
+
+<input type="checkbox" name="useslashboxes"[% checked IF !user_edit.noboxes %]><strong>Use Slashboxes</strong>
+<div class="uslashboxes">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	[% FOREACH bid = box_order -%]
+		[%- IF loop.index % 3 == 0 -%]
+			<tr valign="top" align="left">
+		[%- END -%]
+			<td><input type="checkbox" name="showbox_[% bid | strip_attribute %]"[% section_descref.$bid.checked %]>
+			<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
+			[% IF bid == 'srandblock' %]
+				Semi-Random Box
+                        [% ELSIF bid == 'srandblock_ostg' %]
+                                Semi-Random OSTG Content
+			[% ELSE %]
+				[% section_descref.$bid.title || bid %]
+			[% END %]
+			</a></td>
+		[%- IF loop.index % 3 == 2 -%]
+			</tr>
+		[% END -%]
+	[%- END -%]
+	[%- remaining_cells = 2 - (box_order.max % 3);
+ 	  WHILE remaining_cells;
+   		remaining_cells = remaining_cells - 1; -%]
+		<td>&nbsp;</td>
+	[%- END -%]
+		</tr>
+	</table>
+
+	[% tilded_customize_msg %]
+	[% tilded_box_msg %]
+</div>
 
 __seclev__
 500

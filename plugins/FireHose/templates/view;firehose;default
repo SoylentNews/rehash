@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+view
+__seclev__
+10000
+__template__
+<div class="view">
+	[% IF user.is_anon;
+	   	this_fhid = form.id | fixparam;
+	   	PROCESS userlogin_cover
+   		return_url = gSkin.rootdir _ '/firehose.pl?op=view&id=' _ this_fhid;
+	END %]
+	<div class="head">
+       		<div class="yui-b">
+		<!-- block -->
+		</div>
+		[% firehosetext %]
+	</div>
+</div>
+<script type="text/javascript">
+var firehose_user_class = [% user.is_anon ? 0 : 1 %];
+$(function(){
+	$().article_info__find_articles().click(firehose_click_tag);
+	if ( fh_is_admin ) {
+		firehose_init_note_flags();
+	}
+});
+</script>
+__version__
+$Id$

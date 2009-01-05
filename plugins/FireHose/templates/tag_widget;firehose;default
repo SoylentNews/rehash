@@ -1,0 +1,105 @@
+__section__
+default
+__description__
+This builds a tag-widget bound to a containing firehose entry.
+
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+tag_widget
+__seclev__
+10000
+__template__
+[% IF user.tags_canread_stories %]
+	[%  tags_reader = Slash.getObject('Slash::Tags'); tags = tags_reader.setGetCombinedTags(item.id, 'firehose-id'); %]
+	[%# the nod/nix 'capsule' %]
+	[% IF !form.skipvote && !options.nothumbs && !skipvote %]
+	<div class="tags">
+		<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
+			<a href="#" class="up" title="Vote this item up">+</a>
+			<a href="#" class="down" title="Vote this item down">-</a>
+		</span>
+	</div>
+	[% END %]
+
+	[% IF user.tags_canwrite_stories %]
+	[%# if you can tag... %]
+
+	[%# the tag-widget itself %]
+	<div id="tag-widget-[% id %]" class="tag-widget-stub body-widget" init="context_timeout:15000">
+		[% IF user.is_admin && !user.firehose_usermode %]
+		<span class="admin-buttons">
+			[%# the note %]
+			<div class="note-wrapper[% IF !item.note %] no-note[% END %]">
+				[%# the note edit field (hidden by default) %]
+				<span id="note-form-[% item.id %]" class="hide">
+					<input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')">
+					<input type="button" value="save" onclick="firehose_save_note('[% item.id %]')">
+				</span>
+				[%# the note button %]
+				<span class="admin-note">
+					<a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">[%- IF !item.note  %]<img src="//images.slashdot.org/sic_notes.png" alt="Note">[% END -%][% item.note | strip_literal -%]</a>
+				</span>
+			</div>
+		</span>
+		[% END %]
+		[%# the disclosure triangle %]
+		<a class="edit-toggle" href="#" onclick="this.blur(); firehose_toggle_tag_ui(this); return false"><span class="button collapse"></span></a>
+		[%# the tag input field %]
+		<form class="tag-editor" onsubmit="form_submit_tags(this, {fade_remove: 400, order: 'prepend', classes:'not-saved'}); return false">
+			<input class="tag-entry" type="text" size="10">
+			<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% END %].gif"></span>
+		</form>
+		[%# the tag 'bars' %]
+		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
+		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
+		<div class="tag-display-stub" context="system">[% tags.system;
+IF options.view == "usersubmission";
+	this_submission = Slash.db.getSubmission(item.srcid);
+	SWITCH this_submission.del;
+		CASE 0; ' pending';
+		CASE 1; ' rejected';
+		CASE 2; ' accepted';
+	END;
+END %]</div>
+		[%- IF item.type == "story" &&
+			constants.signoff_use &&
+			((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
+			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
+			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="menu:false">unsigned</div>
+		[%- END -%]
+		<div class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</div>
+		[%# the suggestions bar %]
+		<div class="related">
+			<div class="tag-display-stub" context="related" init="menu:false"></div>
+		</div>
+	</div>
+	[% ELSE %]
+	[%# ...else if you _can't_ tag, it's all easy %]
+	<div id="tag-widget-[% id %]" class="tag-widget-stub body-widget">
+		[%# the disclosure triangle %]
+		<a class="edit-toggle"
+		[%- IF user.is_anon			%] href="#" onclick="this.blur(); show_login_box(); return false"
+		[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
+		[%- END %]><span class="button collapse"></span></a>
+		[%# the tag 'bars' %]
+		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
+		<div class="tag-display-stub" context="system">[% tags.system;
+IF options.view == "usersubmission";
+	this_submission = Slash.db.getSubmission(item.srcid);
+	SWITCH this_submission.del;
+		CASE 0; ' pending';
+		CASE 1; ' rejected';
+		CASE 2; ' accepted';
+	END;
+END %]</div>
+		<div class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</div>
+	</div>
+	[% END %]
+[% END %]
+__version__
+$Id$

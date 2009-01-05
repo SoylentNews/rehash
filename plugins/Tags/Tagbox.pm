@@ -6,10 +6,24 @@
 # direct subclass of Slash::Tagbox.
 
 # This class's object creation methods are class methods:
-#	new() - checks isInstalled() and calls getTagboxes(no_objects) to initialize $self
-#	isInstalled() - self-evident
-#	getTagboxes() - pulls in data from tagboxes table, returns it as base hash
-#	DESTROY() - disconnect the dbh
+#	new()		- checks isInstalled() and calls
+#			  getTagboxes(no_objects) to initialize $self
+#	isInstalled()
+#	DESTROY()	- disconnect the dbh
+#
+# Information about tagboxes, including each tagbox's object, are
+# returned by:
+#	getTagboxes()		- pulls in data from tagboxes table, returns it as base hash
+#	getTagboxObject()	- returns a Slash::Tagbox subclass object for the given tbid
+#
+# Each subclass must override these methods:
+#	get_affected_type()	- 'globj' usually, but for some tagboxes 'user'
+#	get_clid()		- a clout_type, either numeric or string
+# and may override any or all of these:
+#	get_nosy_gtids()
+#	get_userkeyregex()
+#	get_gtt_extralevels()
+#	get_gtt_options()
 #
 # Its utility/convenience methods are these object methods:
 #	getTagboxesNosyForGlobj()
@@ -19,30 +33,36 @@
 #	getMostImportantTagboxAffectedIDs()
 #	addFeederInfo() - add a row to tagboxlog_feeder, later read by getMostImportantTagboxAffectedIDs()
 #	forceFeederRecalc() - like addFeederInfo() but forced
-#	markTagboxLogged
-#	markTagboxRunComplete
+#	markTagboxLogged()
+#	markTagboxRunComplete()
+#	info_log()
+#	debug_log()
 #
 # An important object method worth mentioning is:
 #	getTagboxTags() - recursively fetches tags of interest to a tagbox;
 #		designed to be generic enough for almost any tagbox
 #
-# These are the main four methods of the tagbox API:
-#	feed_newtags() - more likely a subclass will override feed_newtags_process
-#	feed_deactivatedtags()
-#	feed_userchanges()
-#	run()
+# These are the main four methods of the tagbox API.  Overriding these, and
+# run() in particular, is how a tagbox defines its algorithm;  it's what
+# makes a tagbox a tagbox.  Two of these have separate *_process methods
+# that are commonly what gets overridden:
+#	feed_newtags()		- some subclasses will override feed_newtags_process(),
+#				  many won't need to override at all
+#	feed_deactivatedtags()	- most subclasses can leave alone
+#	feed_userchanges()	- most subclasses can leave alone
+#	run()			- most subclasses will override run_process(),
+#				  all will need to override something
+#
+# I haven't attempted to segregate out a list of methods which could operate
+# on a reader database, so for now assume everything requires a writer.
 
 package Slash::Tagbox;
 
 use strict;
+
 use Slash;
-use Slash::Display;
-use Apache::Cookie;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
-
-use Data::Dumper;
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -50,13 +70,20 @@ our $VERSION = $Slash::Constants::VERSION;
 
 #################################################################
 
+sub new {
+	my($class, $user, @extra_args) = @_;
+	my $self = $class->SUPER::new($user, @extra_args);
+	$self->init_tagfilters();
+	$self;
+}
+
 sub isInstalled {
 	my($class) = @_;
 	my $constants = getCurrentStatic();
 	return undef if !$constants->{plugin}{Tags};
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return undef if !$constants->{tagbox}{$tagbox_name};
-	return 1;
+	return 1 if $class eq 'Slash::Tagbox';
+	my($tagbox_name) = $class =~ /^Slash::Tagbox::(\w+)$/;
+	return $tagbox_name && $constants->{tagbox}{$tagbox_name} ? 1 : undef;
 }
 
 sub init {
@@ -64,13 +91,24 @@ sub init {
 	$self->SUPER::init() if $self->can('SUPER::init');
 
 	my $class = ref $self;
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ $self->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	for my $key (keys %self_hash) {
-		$self->{$key} = $self_hash{$key};
+	if ($class ne 'Slash::Tagbox') {
+		my($tagbox_name) = $class =~ /(\w+)$/;
+		my %self_hash = %{ $self->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
+		for my $key (keys %self_hash) {
+			$self->{$key} = $self_hash{$key};
+		}
 	}
 
-	$self->init_tagfilters();
+	# Because 'nod' and 'nix' are used so often, their tagnameid's
+	# are pre-loaded into every tagbox object for convenience, as
+	# $self->{nodid} and $self->{nixid}.  Subclasses are encouraged
+	# to use $self->{fooid} to store the tagnameid for any 'foo'
+	# which is commonly used..
+	my $constants = getCurrentStatic();
+	my $tagsdb = getObject('Slash::Tags');
+	$self->{nodid} = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
+	$self->{nixid} = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+
 	1;
 }
 
@@ -82,14 +120,51 @@ sub init_tagfilters {
 #################################################################
 #################################################################
 
-# Return information about tagboxes, from the 'tagboxes' and
-# 'tagbox_userkeyregexes' tables.
+sub get_affected_type {
+	my($class) = @_;
+	# no default can be assumed
+	die "Slash::Tagbox::get_affected_type called for '$class', needs to be overridden";
+}
+
+sub get_clid {
+	my($class) = @_;
+	# no default can be assumed
+	die "Slash::Tagbox::get_clid called for '$class', needs to be overridden";
+}
+
+sub get_nosy_gtids {
+	my($class) = @_;
+	# by default, tagboxes are not nosy about any untagged globjs
+	return [ ];
+}
+
+sub get_userkeyregex {
+	my($class) = @_;
+	# by default, tagboxes don't care about any user key changes
+	return undef;
+}
+
+sub get_gtt_extralevels {
+	my($class) = @_;
+	# by default, tagboxes only want the first "level" of tags from
+	# getTagboxTags()
+	return 0;
+}
+
+sub get_gtt_options {
+	my($class) =@_;
+	# by default, tagboxes don't pass getTagboxTags() any options
+	return { };
+}
+
+#################################################################
+
+# Return information about tagboxes, from the 'tagboxes' table.
 #
 # If neither $id nor $field is specified, returns an arrayref of
 # hashrefs, where each hashref has keys and values from the
-# 'tagboxes' table, and additionally has the 'userkeyregexes' key
-# with its value being an arrayref of (plain string) regexes from
-# the tagbox_userkeyregexes.userkeyregex column.
+# 'tagboxes' table, and additionally has the 'object' key which
+# is a Slash::Tagbox subclass object.
 #
 # If $id is a true value, it must be a string, either the tbid or
 # the name of a tagbox.  In this case only the hashref for that
@@ -138,19 +213,48 @@ sub getTagboxes {
 			}
 		}
 	} else {
+		# Get the raw data from the DB.
 		$tagboxes = $self->sqlSelectAllHashrefArray('*', 'tagboxes', '', 'ORDER BY tbid');
-		my $regex_ar = $self->sqlSelectAllHashrefArray('name, userkeyregex',
-			'tagbox_userkeyregexes',
-			'', 'ORDER BY name, userkeyregex');
+
+		# Add each class's values for these parameters as returned by
+		# its class methods.  (Because these are class methods, not
+		# object methods, it doesn't matter that the class's new()
+		# might re-invoke getTagboxes().)
 		for my $hr (@$tagboxes) {
-			$hr->{userkeyregexes} = [
-				map { $_->{userkeyregex} }
-				grep { $_->{name} eq $hr->{name} }
-				@$regex_ar
-			];
+			my $class = "Slash::Tagbox::$hr->{name}";
+			Slash::Utility::Environment::loadClass($class);
+			$hr->{affected_type} = $class->get_affected_type();
+			$hr->{userkeyregex} = $class->get_userkeyregex();
+			$hr->{clid} = $class->get_clid();
+			if ($hr->{clid} =~ /^[a-z]/) {
+				# Allow subclasses' get_clid() class method
+				# to optionally return the string (e.g. 'vote')
+				# instead of the numeric equivalent.
+				$hr->{clid} = $self->getCloutTypes()->{ $hr->{clid} };
+			}
+			my $nosy_gtids_ar = $class->get_nosy_gtids() || [ ];
+			$nosy_gtids_ar = [ $nosy_gtids_ar ] if !ref $nosy_gtids_ar;
+			if (grep { /^[a-z]/ } @$nosy_gtids_ar) {
+				# Allow subclasses' get_nosy_gtids() class method
+				# to optionally return strings (e.g. 'urls')
+				# instead of the numeric equivalents.
+				$nosy_gtids_ar = [ map {
+					/^[a-z]/	? $self->getGlobjTypes()->{ $_ }
+							: $_
+				} @$nosy_gtids_ar ];
+			}
+			$hr->{nosy_gtids} = $nosy_gtids_ar;
 		}
-		# the getObject() below calls new() on each tagbox class,
+
+		# The getObject() below calls new() on each tagbox class,
 		# which calls getTagboxes() with no_objects set.
+		# XXX I'm pretty sure this has only worked because I've been
+		# lucky enough to have getTagboxes() called normally before
+		# any Slash::Tagbox::Foo->new() calls invoke
+		# getTagboxes({no_objects}).  This logic needs to be changed
+		# so that if a stray no_objects invocation appears first
+		# the $tagboxes cache doesn't store an object-less hash.
+		# That would be a particularly difficult bug to find.
 		if (!$options->{no_objects}) {
 			for my $hr (@$tagboxes) {
 				my $object = getObject("Slash::Tagbox::$hr->{name}");
@@ -195,8 +299,8 @@ sub getTagboxes {
 	# and strip out the fields that were not requested.
 	if (@fields) {
 		for my $tagbox (@$tbc) {
-			my @stale = grep { !$fields{$_} } keys %$tagbox;
-			delete @$tagbox{@stale};
+			my @unwanted = grep { !$fields{$_} } keys %$tagbox;
+			delete @$tagbox{@unwanted};
 		}
 	}
 
@@ -207,6 +311,26 @@ sub getTagboxes {
 }
 }
 
+# This is a wrapper around getTagboxes that just gets the object.
+# It's a lot like getObject() except it takes a tbid instead of a
+# class name -- and of course it's a Slash::Tagbox method, not a
+# utility function.
+
+sub getTagboxObject {
+	my($self, $tbid) = @_;
+	# XXX I'm pretty sure this could be optimized.
+	my $tagbox_hr = $self->getTagboxes($tbid, [qw( object )]);
+	return $tagbox_hr ? $tagbox_hr->{object} : undef;
+}
+
+# A tagbox being "nosy" about a globj means that it wants a feederlog
+# row inserted for a globjid when it is created, whether or not the
+# globj has any tags applied yet.
+#
+# Right now the only way to filter globjs for nosiness is by gtid.
+# (This may change in the future.)  If a tagbox is nosy for a gtid, it
+# must set $self->{filter_gtid_nosy} in its init_tagfilters().
+#
 # Cache a list of which gtids map to which tagboxes, so we can quickly
 # return a list of tagboxes that want a "nosy" entry for a given gtid.
 # Input is a hashref with the globj fields (the only one this cares
@@ -225,8 +349,8 @@ sub getTagboxesNosyForGlobj {
 		}
 		my $tagboxes = $self->getTagboxes();
 		for my $tb_hr (@$tagboxes) {
-			my @nosy = grep /^\d+$/, split / /, $tb_hr->{nosy_gtids};
-			for $gtid (@nosy) {
+			my $nosy_ref = $tb_hr->{nosy_gtids};
+			for $gtid (@$nosy_ref) {
 				push @{ $gtid_to_tbids->{$gtid} }, $tb_hr->{tbid};
 			}
 		}
@@ -245,6 +369,7 @@ sub userKeysNeedTagLog {
 		my $tagboxes = $self->getTagboxes();
 		my @regexes = ( );
 		for my $tagbox (@$tagboxes) {
+# XXX pull this from methods not data
 			for my $regex (@{$tagbox->{userkeyregexes}}) {
 				push @regexes, $regex;
 			}
@@ -258,7 +383,7 @@ sub userKeysNeedTagLog {
 	}
 
 	# If no tagboxes have regexes, nothing can match.
-	return if !$userkey_masterregex;
+	return ( ) if !$userkey_masterregex;
 
 	my @update_keys = ( );
 	for my $k (@$keys_ar) {
@@ -291,14 +416,23 @@ sub logUserChange {
 }
 
 sub getMostImportantTagboxAffectedIDs {
-	my($self, $num, $min_weightsum) = @_;
-	$num ||= 10;
-	$min_weightsum ||= 1;
+	my($self, $options) = @_;
+	my $num = $options->{num} || 10;
+	my $min_weightsum = $options->{min_weightsum} || 1;
+
+	my $sum_imp_weight = 'SUM(importance*weight)';
+	if ($options->{try_to_reduce_rowcount}) {
+		# Factor row count into the weight, because the main
+		# goal here is to eliminate as many rows as possible.
+		$sum_imp_weight = 'SUM(GREATEST(LEAST(importance*weight, 0.5), 2) + 1)';
+	}
+	$sum_imp_weight .= ' AS sum_imp_weight';
+
 	return $self->sqlSelectAllHashrefArray(
-		'tagboxes.tbid,
+		"tagboxes.tbid,
 		 affected_id,
 		 MAX(tfid) AS max_tfid,
-		 SUM(importance*weight) AS sum_imp_weight',
+		 $sum_imp_weight",
 		'tagboxes, tagboxlog_feeder',
 		'tagboxes.tbid=tagboxlog_feeder.tbid',
 		"GROUP BY tagboxes.tbid, affected_id
@@ -310,8 +444,8 @@ sub getTagboxTags {
 	my($self, $tbid, $affected_id, $extra_levels, $options) = @_;
 	warn "no tbid for $self" if !$tbid;
 	$extra_levels ||= 0;
-	my $type = $options->{type} || $self->getTagboxes($tbid, 'affected_type')->{affected_type};
-	$self->debugLog("getTagboxTags(%d, %d, %d), type=%s",
+	my $type = $options->{type} || $self->get_affected_type();
+	$self->debug_log("getTagboxTags(%d, %d, %d), type=%s",
 		$tbid, $affected_id, $extra_levels, $type);
 	my $hr_ar = [ ];
 	my $colname = ($type eq 'user') ? 'uid' : 'globjid';
@@ -323,55 +457,70 @@ sub getTagboxTags {
 		$max_time_clause = " AND created_at <= $mtq";
 	}
 	$hr_ar = $self->sqlSelectAllHashrefArray(
-		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
-		'tags',
-		"$colname=$affected_id $max_time_clause",
+		'tags.*, tagname, UNIX_TIMESTAMP(created_at) AS created_at_ut',
+		'tags, tagnames',
+		"tags.tagnameid=tagnames.tagnameid
+		 AND $colname=$affected_id $max_time_clause",
 		'ORDER BY tagid');
-	$self->debugLog("colname=%s pre_filter hr_ar=%d",
+	$self->debug_log("colname=%s pre_filter hr_ar=%d",
 		$colname, scalar(@$hr_ar));
 	$hr_ar = $self->feed_newtags_filter($hr_ar);
-	$self->debugLog("colname=%s post_filter hr_ar=%d",
+	$self->debug_log("colname=%s post_filter hr_ar=%d",
 		$colname, scalar(@$hr_ar));
 
 	# If extra_levels were requested, fetch them.  
 	my $old_colname = $colname;
 	while ($extra_levels) {
-		$self->debugLog("el %d", $extra_levels);
+		$self->debug_log("el %d", $extra_levels);
 		my $new_colname = ($old_colname eq 'uid') ? 'globjid' : 'uid';
 		my %new_ids = ( map { ($_->{$new_colname}, 1) } @$hr_ar );
 		my $new_ids = join(',', sort { $a <=> $b } keys %new_ids);
-		$self->debugLog("hr_ar=%d with %s=%s",
-			scalar(@$hr_ar), $colname, $affected_id);
+
 		$hr_ar = $self->sqlSelectAllHashrefArray(
-			'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
-			'tags',
-			"$new_colname IN ($new_ids) $max_time_clause",
+			'tags.*, tagname, UNIX_TIMESTAMP(created_at) AS created_at_ut',
+			'tags, tagnames',
+			"tags.tagnameid=tagnames.tagnameid
+			 AND $new_colname IN ($new_ids) $max_time_clause",
 			'ORDER BY tagid');
-		$self->debugLog("new_colname=%s pre_filter hr_ar=%d",
+
+		$self->debug_log("new_colname=%s pre_filter hr_ar=%d new_ids=%d (%.20s)",
+			$new_colname, scalar(@$hr_ar), scalar(keys %new_ids), $new_ids);
+
+		$hr_ar = $self->gtt_filter($hr_ar);
+
+		$self->debug_log("new_colname=%s post_filter hr_ar=%d",
 			$new_colname, scalar(@$hr_ar));
-		$hr_ar = $self->feed_newtags_filter($hr_ar);
-		$self->debugLog("new_colname=%s new_ids=%d (%.20s) hr_ar=%d",
-			$new_colname, scalar(keys %new_ids), $new_ids, scalar(@$hr_ar));
 		$old_colname = $new_colname;
 		--$extra_levels;
-		$self->debugLog("el %d", $extra_levels);
+		$self->debug_log("el %d", $extra_levels);
 	}
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
+	# XXX do we want to $tagsdb->addCloutsToTagArrayref($hr_ar, (globj type string)) here?
 	return $hr_ar;
 }
 
+sub gtt_filter {
+	my($self, $tags_ar) = @_;
+	return $self->_do_default_filter($tags_ar);
+}
+
 sub addFeederInfo {
-	my($self, $tbid, $info_hr) = @_;
+	my($self, $info_hr) = @_;
+	$self->debug_log("tbid=%d affected_id=%d importance=%f",
+		$self->{tbid}, $info_hr->{affected_id}, $info_hr->{importance});
 	$info_hr->{-created_at} = 'NOW()';
-	$info_hr->{tbid} = $tbid;
+	$info_hr->{tbid} = $self->{tbid};
 	return $self->sqlInsert('tagboxlog_feeder', $info_hr);
 }
 
 sub forceFeederRecalc {
-	my($self, $tbid, $affected_id) = @_;
+	my($self, $affected_id) = @_;
+	# XXX make this a debug_log maybe?
+	$self->info_log("tbid=%d affected_id=%d",
+		$self->{tbid}, $affected_id);
 	my $info_hr = {
 		-created_at =>	'NOW()',
-		tbid =>		$tbid,
+		tbid =>		$self->{tbid},
 		affected_id =>	$affected_id,
 		importance =>	999999,
 		tagid =>	undef,
@@ -382,12 +531,18 @@ sub forceFeederRecalc {
 }
 
 sub markTagboxLogged {
-	my($self, $tbid, $update_hr) = @_;
-	$self->sqlUpdate('tagboxes', $update_hr, "tbid=$tbid");
+	my($self, $update_hr) = @_;
+	$self->sqlUpdate('tagboxes', $update_hr, "tbid=$self->{tbid}");
 }
 
 sub markTagboxRunComplete {
 	my($self, $affected_hr) = @_;
+
+	# markTagboxRunComplete() is not specific to any tagbox subclass,
+	# and so $self here might well be an object of the Slash::Tagbox
+	# base class.  The $affected_hr defines which tagbox id needs to
+	# have this operation performed, so we ignore $self's own tbid
+	# and take $affected_hr's as authoritative.
 
 	my $delete_clause = "tbid=$affected_hr->{tbid} AND affected_id=$affected_hr->{affected_id}";
 	$delete_clause .= " AND tfid <= $affected_hr->{max_tfid}";
@@ -398,54 +553,127 @@ sub markTagboxRunComplete {
 		"tbid=$affected_hr->{tbid}");
 }
 
+sub _generic_log {
+	my($self, $format, @args) = @_;
+	my $caller_sub_full = (caller(2))[3];
+	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
+	my $class = ref($self);
+	my $msg = sprintf("%s %s $format", $class, $caller_sub, @args);
+	if (defined &main::tagboxLog) {
+		main::tagboxLog($msg);
+	} else {
+		print STDERR scalar(gmtime) . " $msg";
+	}
+}
+
 sub info_log {
 	my($self, $format, @args) = @_;
-	my $caller = join ',', (caller(1))[3,4];
-	main::tagboxLog("%s $format", $caller, @args);
+	$self->_generic_log($format, @args);
 }
 
 sub debug_log {
 	my($self, $format, @args) = @_;
-	if ($self->{debug} > 0) {
-		my $caller = join ',', (caller(1))[3,4];
-		main::tagboxLog("%s $format", $caller, @args);
-	}
+	return if !$self->{debug};
+	$self->_generic_log($format, @args);
 }
 
 #################################################################
 #################################################################
 
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	$tags_ar = $self->feed_newtags_filter($tags_ar);
-	$self->feed_newtags_pre($tags_ar);
+sub _do_default_filter {
+	my($self, $tags_ar, $options) = @_;
 
-	my $ret_ar = $self->feed_newtags_process($tags_ar);
+	$tags_ar = $self->_do_filter_activeonly($tags_ar) unless $options->{deactivated_ok};
+	$tags_ar = $self->_do_filter_publiconly($tags_ar);
+	$tags_ar = $self->_do_filter_firehoseonly($tags_ar);
+	$tags_ar = $self->_do_filter_tagnameid($tags_ar);
+	$tags_ar = $self->_do_filter_gtid($tags_ar);
+	$tags_ar = $self->_do_filter_uid($tags_ar);
 
-	$self->feed_newtags_post($ret_ar);
-	return $ret_ar;
+	return $tags_ar;
 }
 
-sub feed_newtags_filter {
-	my($self, $tags_ar) = @_;
+# "activeonly" is the simplest and ironically the trickiest of the
+# filters.  Its mission is simply:  if the tagbox wants only
+# still-active tags, eliminate any inactivated tags.
+#
+# However, when feed_newtags_filter is informed of the _de_activation
+# of a tag, we probably _do_ want to know, because the tag being
+# deactivated may be one we already processed as active in a previous
+# invocation.  In those cases, the tag will have a {tdid} field and
+# we will include it.
+#
+# When called by run_filter or gtt_filter, though, we probably don't,
+# because run doesn't care what changed, it just cares what things
+# look like now.  If an inactivated tag has no {tdid} field, either
+# its deactivation was old news or we've been called from run/gtt,
+# and either way we don't care and will exclude it.
 
-	# If the tagbox wants only still-active tags, eliminate any
-	# inactivated tags.
+sub _do_filter_activeonly {
+	my($self, $tags_ar) = @_;
 	if ($self->{filter_activeonly}) {
-		$tags_ar = [ grep { $_->{inactivated} } @$tags_ar ];
+		$tags_ar = [ grep {
+			   !$_->{inactivated}
+			||  $_->{tdid}
+		} @$tags_ar ];
 	}
+	return $tags_ar;
+}
 
-	# If a tagnameid filter is in place, eliminate any tags with
-	# tagnames not on the list.
+# "publiconly", if a tagbox has set that option, only allows tags
+# with private='no'
+
+sub _do_filter_publiconly {
+	my($self, $tags_ar) = @_;
+	if ($self->{filter_publiconly}) {
+		$tags_ar = [ grep { $_->{private} eq 'no' } @$tags_ar ];
+	}
+	return $tags_ar;
+}
+
+# If a tag is applied to a globj that's in the firehose, we include
+# it.  If its globj is not (yet) in the hose, we do not.
+
+sub _do_filter_firehoseonly {
+	my($self, $tags_ar) = @_;
+	if ($self->{filter_firehoseonly}) {
+		my %globjs = ( map { $_->{globjid}, 1 } @$tags_ar );
+		my $globjs_str = join(', ', sort keys %globjs);
+		my $fh_globjs_ar = [ ];
+		if ($globjs_str) {
+			$fh_globjs_ar = $self->sqlSelectColArrayref(
+				'globjid',
+				'firehose',
+				"globjid IN ($globjs_str)");
+		}
+		return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
+		my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
+		$tags_ar = [ grep { $fh_globjs{ $_->{globjid} } } @$tags_ar ];
+	}
+	return $tags_ar;
+}
+
+# If a tagnameid filter is in place, eliminate any tags with
+# tagnames not on the list.
+
+sub _do_filter_tagnameid {
+	my($self, $tags_ar) = @_;
 	if ($self->{filter_tagnameid}) {
 		my $tagnameid_ar = ref($self->{filter_tagnameid})
 			? $self->{filter_tagnameid} : [ $self->{filter_tagnameid} ];
 		my %tagnameid_wanted = ( map { ($_, 1) } @$tagnameid_ar );
 		$tags_ar = [ grep { $tagnameid_wanted{ $_->{tagnameid} } } @$tags_ar ];
 	}
+	return $tags_ar;
+}
 
-	# If a gtid filter is in place, eliminate any tags on globjs
-	# not of those type(s).
+# If a gtid filter is in place, eliminate any tags on globjs
+# not of those type(s).
+#
+# This requires a DB hit but it's a quick primary key lookup.
+
+sub _do_filter_gtid {
+	my($self, $tags_ar) = @_;
 	if ($self->{filter_gtid}) {
 		my $gtid_ar = ref($self->{filter_gtid})
 			? $self->{filter_gtid} : [ $self->{filter_gtid} ];
@@ -464,38 +692,76 @@ sub feed_newtags_filter {
 			$tags_ar = [ ];
 		}
 	}
-
 	return $tags_ar;
+}
+
+# If a uid filter is in place, eliminate any tags not from those users.
+
+sub _do_filter_uid {
+	my($self, $tags_ar) = @_;
+	if ($self->{filter_uid}) {
+		my $uid_ar = ref($self->{filter_uid})
+			? $self->{filter_uid} : [ $self->{filter_uid} ];
+		my %uid_wanted = ( map { ($_, 1) } @$uid_ar );
+		$tags_ar = [ grep { $uid_wanted{ $_->{uid} } } @$tags_ar ];
+	}
+	return $tags_ar;
+}
+
+#################################################################
+
+sub feed_newtags {
+	my($self, $tags_ar) = @_;
+	$tags_ar = $self->feed_newtags_filter($tags_ar);
+	$self->feed_newtags_pre($tags_ar);
+
+	my $ret_ar = $self->feed_newtags_process($tags_ar);
+
+	$self->feed_newtags_post($ret_ar);
+	return $ret_ar;
+}
+
+sub feed_newtags_filter {
+	my($self, $tags_ar) = @_;
+	return $self->_do_default_filter($tags_ar);
 }
 
 sub feed_newtags_pre {
 	my($self, $tags_ar) = @_;
-	# XXX only if debugging is on
 	# XXX note in log here, instead of feed_d_pre, if tdid's present
 	my $count = scalar(@$tags_ar);
-	if ($count < 9) {
-		$self->infoLog("filtered tags '%s'",
+	if ($count < 1) {
+		$self->debug_log('filtered tags none');
+	} elsif ($count < 9) {
+		$self->info_log("filtered tags '%s'",
 			 join(' ', map { $_->{tagid} } @$tags_ar));
 	} else {
-		$self->infoLog("%d filtered tags '%s ... %s'",
+		$self->info_log("%d filtered tags '%s ... %s'",
 			scalar(@$tags_ar), $tags_ar->[0]{tagid}, $tags_ar->[-1]{tagid});
 	}
 }
 
 sub feed_newtags_post {
 	my($self, $ret_ar) = @_;
-	# XXX only if debugging is on
-	$self->infoLog("returning %d", scalar(@$ret_ar));
+	if (!@$ret_ar) {
+		$self->debug_log('returning 0');
+	} else {
+		$self->info_log("returning %d", scalar(@$ret_ar));
+	}
 }
 
 sub feed_newtags_process {
 	my($self, $tags_ar) = @_;
-	# by default, add importance of 1 for each tag that made it through filtering
+
+	# By default, add importance of 1 for each tag that made it through filtering.
+	# If a subclass calling up to this method has set an {importance} field for
+	# any tag, use that instead.
+
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		my $ret_hr = {
 			affected_id =>  $tag_hr->{globjid},
-			importance =>   1,
+			importance =>   defined($tag_hr->{importance}) ? $tag_hr->{importance} : 1,
 		};
 		# Both new tags and deactivated tags are considered important.
 		# Pass along either the tdid or the tagid field, depending on
@@ -511,18 +777,36 @@ sub feed_newtags_process {
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
+	$tags_ar = $self->feed_deactivatedtags_filter($tags_ar);
 	$self->feed_deactivatedtags_pre($tags_ar);
 
 	# by default, just pass along to feed_newtags (which will have to
 	# check $tags_ar->[]{tdid} to determine whether the changes were
 	# really new tags or just deactivated tags)
-	return $self->feed_newtags($tags_ar);
+	my $ret_ar = $self->feed_newtags_process($tags_ar);
+
+	$self->feed_deactivatedtags_post($ret_ar);
+	return $ret_ar;
 }
 
 sub feed_deactivatedtags_pre {
 	my($self, $tags_ar) = @_;
-	main::tagboxLog("$self->{name}->feed_deactivatedtags called: tags_ar='"
-		. join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
+	$self->info_log("tagids='%s'",
+		join(' ', map { $_->{tagid} } @$tags_ar) );
+}
+
+sub feed_deactivatedtags_filter {
+	my($self, $tags_ar) = @_;
+	return $self->_do_default_filter($tags_ar, { deactivated_ok => 1 });
+}
+
+sub feed_deactivatedtags_post {
+	my($self, $ret_ar) = @_;
+	if (!@$ret_ar) {
+		$self->debug_log('returning 0');
+	} else {
+		$self->info_log("returning %d", scalar(@$ret_ar));
+	}
 }
 
 #################################################################
@@ -537,16 +821,89 @@ sub feed_userchanges {
 
 sub feed_userchanges_pre {
 	my($self, $users_ar) = @_;
-	main::tagboxLog("$self->{name}->feed_userchanges called: users_ar='"
-		. join(' ', map { $_->{tuid} } @$users_ar) .  "'");
+	$self->info_log("uids='%s'",
+		join(' ', map { $_->{tuid} } @$users_ar) );
 }
+
+# XXX consider adapting this code, found in Top.pm, and making a
+# default feed_userchanges_process that handles the standard
+# /^tag_clout$/ regex
+
+#sub feed_userchanges {
+#	my($self, $users_ar) = @_;
+#	my $constants = getCurrentStatic();
+#	my $tagsdb = getObject('Slash::Tags');
+#	main::tagboxLog("Top->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
+#
+#	my %max_tuid = ( );
+#	my %uid_change_sum = ( );
+#	my %globj_change = ( );
+#	for my $hr (@$users_ar) {
+#		next unless $hr->{user_key} eq 'tag_clout';
+#		$max_tuid{$hr->{uid}} ||= $hr->{tuid};
+#		$max_tuid{$hr->{uid}}   = $hr->{tuid}
+#			if $max_tuid{$hr->{uid}} < $hr->{tuid};
+#		$uid_change_sum{$hr->{uid}} ||= 0;
+#		$uid_change_sum{$hr->{uid}} += abs(($hr->{value_old} || 1) - $hr->{value_new});
+#	}
+#	for my $uid (keys %uid_change_sum) {
+#		my $tags_ar = $tagsdb->getAllTagsFromUser($uid);
+#		for my $tag_hr (@$tags_ar) {
+#			$globj_change{$tag_hr->{globjid}}{max_tuid} ||= $max_tuid{$uid};
+#			$globj_change{$tag_hr->{globjid}}{max_tuid}   = $max_tuid{$uid}
+#				if $globj_change{$tag_hr->{globjid}}{max_tuid} < $max_tuid{$uid};
+#			$globj_change{$tag_hr->{globjid}}{sum} ||= 0;
+#			$globj_change{$tag_hr->{globjid}}{sum} += $uid_change_sum{$uid};
+#		}
+#	}
+#	my $ret_ar = [ ];
+#	for my $globjid (sort { $a <=> $b } keys %globj_change) {
+#		push @$ret_ar, {
+#			tuid =>         $globj_change{$globjid}{max_tuid},
+#			affected_id =>  $globjid,
+#			importance =>   $globj_change{$globjid}{sum},
+#		};
+#	}
+#
+#	$self->info_log("returning %d", scalar(@$ret_ar));
+#	return $ret_ar;
+#}
 
 #################################################################
 
 sub run {
+	my($self, $affected_id, $options) = @_;
+	$self->run_pre($affected_id);
+	my $tags_ar = $self->run_gettags($affected_id);
+	$tags_ar = $self->run_filter($tags_ar);
+	$self->run_process($affected_id, $tags_ar, $options);
+}
+
+sub run_pre {
 	my($self, $affected_id) = @_;
-	warn "Slash::Tagbox::run($affected_id) not overridden, called for $self";
-	return undef;
+	$self->debug_log("id %d", $affected_id);
+}
+
+sub run_gettags {
+	my($self, $affected_id) = @_;
+	# By default, make use of getTagboxTags().
+	return $self->getTagboxTags(
+		$self->{tbid},
+		$affected_id,
+		$self->get_gtt_extralevels(),
+		$self->get_gtt_options());
+}
+
+sub run_filter {
+	my($self, $tags_ar) = @_;
+	return $self->_do_default_filter($tags_ar);
+}
+
+sub run_process {
+	my($self, $tags_ar) = @_;
+	# This method needs to be overridden by the subclass that implements
+	# the tagbox.
+	die "Slash::Tagbox::run_process called for $self, needs to be overridden";
 }
 
 #################################################################

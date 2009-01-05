@@ -1176,7 +1176,7 @@ sub createMenu {
 		my $nick_fix = fixparam($ll_nick);
 		my $nick_attribute = strip_attribute($ll_nick);
 		push @$menu_items, {
-			value =>	"$gSkin->{rootdir}/~$nick_fix",
+			value =>	"$gSkin->{real_rootdir}/~$nick_fix",
 			label =>	"~$nick_attribute ($user->{lastlookuid})",
 			sel_label =>	"otheruser",
 			menuorder =>	99999,
@@ -1322,7 +1322,10 @@ sub _hard_linkComment {
 
 	my $subject = $linkdata->{subject};
 
-	my $display = qq|<a href="$gSkin->{rootdir}/comments.pl?sid=$linkdata->{sid}|;
+	my $display = qq|<a |;
+	$display .= qq|id="$linkdata->{a_id}" |    if $linkdata->{a_id};
+	$display .= qq|class="$linkdata->{a_class}" | if $linkdata->{a_class};
+	$display .= qq|href="$gSkin->{rootdir}/comments.pl?sid=$linkdata->{sid}|;
 	$display .= "&amp;op=$linkdata->{op}" if defined($linkdata->{op});
 	$display .= "&amp;threshold=$linkdata->{threshold}" if defined($linkdata->{threshold});
 	$display .= "&amp;commentsort=$user->{commentsort}" if defined $linkdata->{commentsort};

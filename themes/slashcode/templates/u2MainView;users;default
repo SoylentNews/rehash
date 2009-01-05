@@ -1,0 +1,251 @@
+__section__
+default
+__description__
+Display user's info
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+u2MainView
+__template__
+[% orig_title = title %]
+
+[% IF main_view %]
+<div class="head">
+	<div class="yui-b">
+		[% PROCESS u2UserBio useredit=useredit %]
+	</div>
+
+	[% IF firehose_marquee.defined %]
+		[% IF firehose_marquee && firehose_marquee.id %]
+		<a name="articles"></a>
+			[% fh = Slash.getObject("Slash::FireHose") %]
+			[% item = fh.getFireHose(firehose_marquee.id) %]
+			[% fh.dispFireHose(item, { mode => "full", tags_top => fh.getFireHoseTagsTop(item), options => options, bodycontent_include => 1, featured => 1}) %]
+		
+		[% ELSE %]
+		<h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
+		[% END %]
+	[% ELSE %]
+	<div class="article" id="marquee_content">
+		[% IF !marquee.body %]
+			<h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
+		[% ELSE %]
+			<h3>[% marquee.subject %]</h3>
+			<div class="body">
+				[% marquee.body %]
+				[% IF marquee.truncated %]&nbsp;...<p>[% END %]
+			</div>
+		[% END %]
+	
+
+		[%
+		'<br><a href="';
+
+		IF marquee.type == 'journal';
+			constants.real_rootdir; '/~'; useredit.nickname | strip_paramattr; '/journal/'; marquee.id;
+		ELSIF marquee.type == 'submission';
+			gSkin.rootdir; '/firehose.pl?op=view&id='; marquee.id;
+		ELSIF marquee.type == 'comment';
+			gSkin.rootdir; '/comments.pl?sid='; marquee.sid; '&cid='; marquee.id;
+		END;
+	
+		'">Read More</a>';
+		%]
+		</div>
+	[% END %]
+</div>
+[% END %]
+
+[% PROCESS u2Menu
+	main_view=main_view
+        data_pane=data_pane
+        comments_size=latest_comments.size
+        journals_size=latest_journals.size
+        submissions_size=latest_submissions.size
+        bookmarks_size=latest_bookmarks.size
+        tagshist_size=tagshist.size
+        is_admin=user.is_admin
+        nickname=useredit.nickname
+%]
+
+<div class="yui-b" id="userboxes">
+        [% IF !main_view; PROCESS u2UserBio useredit=useredit; END; %]
+
+        [% PROCESS u2UserBoxes
+                latest_comments=latest_comments
+		reasons=reasons
+                latest_journals=latest_journals
+                latest_submissions=latest_submissions
+                latest_bookmarks=latest_bookmarks
+                latest_friends=latest_friends
+                tagshist=tagshist
+                is_admin=user.is_admin
+        %]
+
+</div>
+
+
+<div id="yui-main">
+        <div class="yui-b">
+
+        [% IF data_pane == 'admin' && admin_flag %]
+                [% admin_block %]
+
+                <p>
+
+                [%
+                IF constants.m2;
+                        mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+                        mod_options.need_m2_form = 1;
+                        mod_options.need_m2_button = 1;
+                        mod_options.meta_mod_only = 1;
+                END;
+
+                m1_classname = "Slash::" _ constants.m1_pluginname;
+                moddb = Slash.getObject(m1_classname);
+                IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
+
+                IF !constants.m1_admin_show_mods_with_comments;
+                        mod_options.title = "Moderations performed on";
+                        mod_options.title = mod_options.title _ nickname | strip_literal;
+                        mod_options.title = mod_options.title _ "'s comments";
+                        mod_options.hr_hours_back = hr_hours_back;
+
+                        IF moddb; moddb.dispModCommentLog('cuid', useredit.uid, mod_options); END;
+                END;
+
+                IF constants.m2;
+                        m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+                        IF m2_listing;
+                                "<h3>Recent M2s</h3>";
+                                PROCESS listMetamods
+                                        m2_listing = m2_listing
+                                        metamods = metamods
+                                        the_user = useredit;
+                        END;
+                END;
+
+                '<p>';
+
+                IF tagshist && tagshist.size > 0;
+                        "<h3>Recent Tags</h3>";
+                        '<table class="data" width="100%">';
+                        '<tr class="data_head"><th>Tag</th><th>Object</th><th>Time</th></tr>';
+                        toggle = 0;
+                        FOREACH tag = tagshist.keys.sort;
+                                '<tr class="data_hl'; toggle ? "2" : "1"; '">';
+                                '<td>'; tagshist.$tag.0.tagname; '</td>';
+                                '<td>';
+                                IF tagshist.$tag.0.globj_type == "stories";
+                                        PROCESS linkStory dynamic=1 sid=tagshist.$tag.0.story.sid text=tagshist.$tag.0.story.title title=tagshist.$tag.0.story.title;
+                                ELSIF tagshist.$tag.0.globj_type == "urls";
+                                        '<a href="';
+                                        tagshist.$tag.0.url.url;
+                                        '">'; tagshist.$tag.0.url.bookmark.title || tagshist.$tag.0.url.validtitle || tagshist.$tag.0.url.initialtitle | strip_literal;
+                                        '</a>';
+                                ELSIF tagshist.$tag.0.globj_type == "journals";
+                                        nick = Slash.db.getUser(tagshist.$tag.0.journal.uid, 'nickname');
+                                        '<a href="';
+                                        constants.real_rootdir;
+                                        '/~';
+                                        nick | fixparam;
+                                        '/journal/';
+                                        tagshist.$tag.0.journal.id;
+                                        '/">';
+                                        tagshist.$tag.0.journal.description | strip_literal;
+                                        '</a>';
+                                ELSIF tagshist.$tag.0.globj_type == "submissions";
+                                        '<a href="';
+                                        gSkin.rootdir;
+                                        '/submit.pl?op=viewsub&amp;subid=';
+                                        tagshist.$tag.0.submission.subid;
+                                        '">';
+                                        tagshist.$tag.0.submission.subj | strip_literal;
+                                        '</a>';
+                                END;
+                                '&nbsp;('; tagshist.$tag.0.globj_type; ')';
+                                '</td>';
+                                '<td>'; Slash.timeCalc(tagshist.$tag.0.created_at); '</td>';
+                                '</tr>';
+                                toggle = !toggle;
+                        END;
+                        '</table>';
+                END;
+                %]
+
+        [% ELSIF data_pane == 'journal';
+                fh = Slash.getObject("Slash::FireHose");
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournal', user_view => useredit, not_id => not_fhid });
+                fhbox;
+
+           ELSIF data_pane == 'journalfriends';
+                fh = Slash.getObject("Slash::FireHose");
+                fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournalfriends', user_view => useredit, not_id => not_fhid });
+                fhbox;
+
+           ELSIF data_pane == 'submissions';
+                fh = Slash.getObject("Slash::FireHose");
+                fhbox = fh.listView({ fh_page => 'users.pl', view => 'usersubmission', user_view => useredit, not_id => not_fhid });
+                fhbox;
+
+           ELSIF data_pane == 'bookmarks';
+		'<div id="friendsmenu">';
+                	'<ul>';
+                	'<li><a href="'; constants.real_rootdir; '/bookmark.pl/?op=showbookmarks&recent=1">Recent</a></li>';
+                	'<li><a href="'; constants.real_rootdir; '/bookmark.pl/?op=showbookmarks&popular=1">Popular</a></li>';
+                	'</ul>';
+                '</div>';
+                fh = Slash.getObject("Slash::FireHose");
+                fhbox = fh.listView({ fh_page => 'users.pl', view => 'userbookmark', user_view => useredit, not_id => not_fhid });
+                fhbox;
+        %]
+        [% ELSIF (data_pane == 'friends') ||
+                 (data_pane == 'fans')    ||
+                 (data_pane == 'freaks')  ||
+                 (data_pane == 'foes')    ||
+                 (data_pane == 'fof')     ||
+                 (data_pane == 'eof')     ||
+                 (data_pane == 'all') %]
+                <p>
+                <div id="friendsmenu">
+                        <ul>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/friends">Friends</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/fans">Fans</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/foes">Foes</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/freaks">Freaks</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/friends/friends">Friends of Friends</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/friends/foes">Foes of Friends</a></li>
+                        </ul>
+                </div>
+                [% relations_datapane %]
+
+        [% ELSIF data_pane == 'tags' %]
+                [% tags_datapane %]
+
+        [% ELSIF data_pane == 'comments' %]
+                [% PROCESS u2ListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+
+        [% ELSIF data_pane == 'firehose' || data_pane == '';
+                fh = Slash.getObject("Slash::FireHose");
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userfirehose', user_view => useredit, not_id => not_fhid });
+                fhbox;
+	%]
+        [% ELSIF data_pane == 'usertag';
+                fh = Slash.getObject("Slash::FireHose");
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'usertag', user_view => useredit, not_id => not_fhid, tag => form.tagname });
+                fhbox;
+        END %]
+        </div>
+</div>
+
+
+[% title = orig_title %]
+
+__seclev__
+500
+__version__

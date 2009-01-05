@@ -3,10 +3,6 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
-# This goes by seclev right now but perhaps should define "editor"
-# to be more about author than admin seclev.  In which case the
-# getAdmins() calls should be getAuthors().
-
 package Slash::Tagbox::FHEditorPop;
 
 =head1 NAME
@@ -23,124 +19,68 @@ Slash::Tagbox::FHEditorPop - keep track of popularity of firehose for editors
 
 use strict;
 
-use Slash;
-use Slash::DB;
-use Slash::Utility::Comments;
-use Slash::Utility::Environment;
-use Slash::Tagbox;
+use Digest::MD5 'md5_hex';
 
-use Data::Dumper;
+use Slash;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
+use base 'Slash::Tagbox';
 
-sub new {
-	my($class, $user) = @_;
-
-	return undef if !$class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
+sub init {
+	my($self) = @_;
+	return 0 if ! $self->SUPER::init();
+	my $tagsdb = getObject('Slash::Tags');
+	$self->{maybeid}	= $tagsdb->getTagnameidCreate('maybe');
+	$self->{metanodid}	= $tagsdb->getTagnameidCreate('metanod');
+	$self->{metanixid}	= $tagsdb->getTagnameidCreate('metanix');
+	$self->{nodornixid}	= {(
+		$self->{nodid},		1,
+		$self->{nixid},		1,
+		$self->{metanodid},	1,
+		$self->{metanixid},	1,
+	)};
+	my $admins = $self->getAdmins();
+	$self->{admins} = {
+		map { ($_, 1) }
+		grep { $tagsdb->getUser($_, 'seclev') >= 100 }
+		keys %$admins
+	};
+	1;
 }
 
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return $constants->{plugin}{Tags} && $constants->{tagbox}{$tagbox_name} || 0;
+sub init_tagfilters {
+	my($self) = @_;
+	$self->{filter_activeonly} = 1;
+	$self->{filter_firehoseonly} = 1;
+	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid maybeid metanodid metanixid )} ];
 }
 
-sub feed_newtags {
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'vote' }
+
+sub feed_newtags_process {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("FHEditorPop->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("FHEditorPop->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
-	my $tagsdb = getObject('Slash::Tags');
-
-	# The algorithm of the importance of tags to this tagbox is simple.
-	# 'nod' and 'nix', esp. from editors, are important.  Other tags are not.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	my $maybeid    = $tagsdb->getTagnameidCreate('maybe');
-	my $admins = $self->getAdmins();
-	for my $uid (keys %$admins) {
-		$admins->{$uid}{seclev} = $tagsdb->getUser($uid, 'seclev');
-	}
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
-		next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid
-			|| $tag_hr->{tagnameid} == $maybeid;
-		my $seclev = exists $admins->{ $tag_hr->{uid} }
-			? $admins->{ $tag_hr->{uid} }{seclev}
-			: 1;
+		my $is_admin = $self->{admins}{ $tag_hr->{uid} } || 0;
 		my $ret_hr = {
 			affected_id =>	$tag_hr->{globjid},
-			importance =>	$seclev >= 100 ? ($constants->{tagbox_fheditorpop_edmult} || 10) : 1,
+			importance =>	$is_admin ? ($constants->{tagbox_fheditorpop_edmult} || 10) : 1,
 		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
 		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
 		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
 		push @$ret_ar, $ret_hr;
 	}
 	return [ ] if !@$ret_ar;
 
-	# Tags applied to globjs that have a firehose entry associated
-	# are important.  Other tags are not.
-	my %globjs = ( map { $_->{affected_id}, 1 } @$ret_ar );
-	my $globjs_str = join(', ', sort keys %globjs);
-	my $fh_globjs_ar = $self->sqlSelectColArrayref(
-		'globjid',
-		'firehose',
-		"globjid IN ($globjs_str)");
-	return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
-	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
-	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
-
-	main::tagboxLog("FHEditorPop->feed_newtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("FHEditorPop->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("FHEditorPop->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	my $constants = getCurrentStatic();
-	main::tagboxLog("FHEditorPop->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
-
-	# XXX need to fill this in
-
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id, $options) = @_;
+sub run_process {
+	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -162,9 +102,12 @@ sub run {
 	} elsif ($type eq "journals") {
 		my $journal = getObject("Slash::Journal");
 		my $j = $journal->get($target_id);
-		$color_level = $j->{promotetype} && $j->{promotetype} eq 'publicize'
-			? 5  # requested to be publicized
-			: 6; # not requested
+		my $publicize = $j->{promotetype} && $j->{promotetype} eq 'publicize';
+		my $publish = $j->{promotetype} && $j->{promotetype} eq 'publish';
+		# Depending on whether the journal author asked for it to be
+		# publicized, published, or merely posted, its starting color
+		# for editors will be blue, indigo, or black.
+		$color_level = $publicize ? 5 : $publish ? 6 : 8;
 	} elsif ($type eq 'urls') {
 		$extra_pop = $self->sqlCount('bookmarks', "url_id=$target_id_q") || 0;
 		$color_level = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id")
@@ -192,55 +135,53 @@ sub run {
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
 	} elsif ($type eq "comments") {
-		my $comment = $self->getComment($target_id);
-		my $score = constrain_score($comment->{points} + $comment->{tweak});
-		   if ($score >= 3) {	$color_level = 4 }
-		elsif ($score >= 2) {	$color_level = 5 }
-		elsif ($score >= 1) {	$color_level = 6 }
-		else {			$color_level = 7 }
+		if (0) {
+			my $comment = $self->getComment($target_id);
+			my $score = Slash::Utility::Comments::constrain_score($comment->{points} + $comment->{tweak});
+			   if ($score >= 3) {	$color_level = 4 }
+			elsif ($score >= 2) {	$color_level = 5 }
+			elsif ($score >= 1) {	$color_level = 6 }
+			else {			$color_level = 7 }
+		} else {
+			$color_level = 8;
+		}
 	}
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	my $maybeid    = $tagsdb->getTagnameidCreate('maybe') || 0;
-	my $admins = $self->getAdmins();
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
+
+	# XXX add this automatically?
 	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
+
 	my $udc_cache = { };
 	my($n_admin_maybes, $n_admin_nixes, $maybe_pop_delta) = (0, 0, 0);
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};
 		next if $tag_hr->{inactivated};
 		my $sign = 0;
-		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
-		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
+		$sign =  1 if $tag_hr->{tagnameid} == $self->{nodid} && !$options->{downvote_only};
+		$sign = -1 if $tag_hr->{tagnameid} == $self->{nixid} && !$options->{upvote_only};
 		next unless $sign;
-		my $seclev = exists $admins->{ $tag_hr->{uid} }
-			? $admins->{ $tag_hr->{uid} }{seclev}
-			: 1;
-		my $editor_mult    = $seclev >= 100 ? ($constants->{tagbox_fheditorpop_edmult}    || 10   ) : 1;
-		my $noneditor_mult = $seclev ==   1 ? ($constants->{tagbox_fheditorpop_nonedmult} ||  0.75) : 1;
+		my $is_admin = $self->{admins}{ $tag_hr->{uid} } || 0;
+		my $editor_mult    =  $is_admin ? ($constants->{tagbox_fheditorpop_edmult}    || 10   ) : 1;
+		my $noneditor_mult = !$is_admin ? ($constants->{tagbox_fheditorpop_nonedmult} ||  0.75) : 1;
 		my $extra_pop = $tag_hr->{total_clout} * $editor_mult * $noneditor_mult * $sign;
-		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
-#main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
+		my $udc_mult = $self->get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
 		$extra_pop *= $udc_mult;
-		if ($seclev > 1 && $sign == 1) {
+		if ($is_admin && $sign == 1) {
 			# If this admin nod comes with a 'maybe', don't change
 			# popularity yet;  save it up and wait to see if any
 			# admins end up 'nix'ing.
 			if (grep {
-				     $_->{tagnameid} == $maybeid
+				     $_->{tagnameid} == $self->{maybeid}
 				&&   $_->{uid}       == $tag_hr->{uid}
 				&&   $_->{globjid}   == $tag_hr->{globjid}
-				&& ! $_->{inactivated}
 			} @$tags_ar) {
 				++$n_admin_maybes;
 				$maybe_pop_delta += $extra_pop;
 				$extra_pop = 0;
 			}
-		} elsif ($seclev > 1 && $sign == -1) {
+		} elsif ($is_admin && $sign == -1) {
 			++$n_admin_nixes;
 		}
 		$popularity += $extra_pop;
@@ -257,6 +198,17 @@ sub run {
 		}
 	}
 
+	# If color level was set to black, none of the nods matter, it just never
+	# shows up.
+	$popularity = -50 if $color_level == 8;
+
+	# If this is a comment, it normally only shows up for an editor if
+	# it's one of a select few.
+	if ($fhitem->{type} eq 'comment'
+		&& !$self->showCommentToEditors($target_id)) {
+		$popularity = -50 if $popularity > -50;
+	}
+
 	# If more than a certain number of users have tagged this item with
 	# public non-voting tags and its popularity is low, there may be a
 	# bad reason why.  Boost its editor score up so that an editor sees
@@ -267,11 +219,11 @@ sub run {
 		my %tagger_uids = ( );
 		my $tagged_by_admin = 0;
 		for my $tag_hr (@$tags_ar) {
-			next if    $tag_hr->{tagnameid} == $upvoteid
-				|| $tag_hr->{tagnameid} == $downvoteid
+			next if    $tag_hr->{tagnameid} == $self->{nodid}
+				|| $tag_hr->{tagnameid} == $self->{nixid}
 				|| $tag_hr->{private};
 			my $uid = $tag_hr->{uid};
-			$tagged_by_admin = 1, last if $admins->{$uid};
+			$tagged_by_admin = 1, last if $self->{admins}{$uid};
 			$tagger_uids{$uid} = 1;
 		}
 		if (!$tagged_by_admin && scalar(keys %tagger_uids) > $max_taggers) {
@@ -291,9 +243,8 @@ sub run {
 	# its score goes way down (so no other editors have to bother with it).
 	if ($fhitem->{type} eq 'comment') {
 		for my $tag_hr (@$tags_ar) {
-			if ( (     $tag_hr->{tagnameid} == $upvoteid
-				|| $tag_hr->{tagnameid} == $downvoteid )
-			    && $admins->{ $tag_hr->{uid} }
+			if (	   $self->{admins}{ $tag_hr->{uid} }
+				&& $self->{nodornixid}{ $tag_hr->{tagnameid} }
 			) {
 				$popularity = -50 if $popularity > -50;
 				last;
@@ -306,14 +257,27 @@ sub run {
 	if ($options->{return_only}) {
 		return $popularity;
 	}
-	main::tagboxLog(sprintf("FHEditorPop->run setting %d (%d) to %.6f", $fhid, $affected_id, $popularity));
+	$self->info_log("setting %d (%d) to %.6f", $fhid, $affected_id, $popularity);
 	$firehose->setFireHose($fhid, { editorpop => $popularity });
+}
+
+# XXX hex_percent should be a library function, it's used by CommentScoreReason too
+
+sub showCommentToEditors {
+	my($self, $cid) = @_;
+	my $constants = getCurrentStatic();
+
+	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
+	# within the range determined, add it to the hose.
+	my $percent = $constants->{tagbox_fheditorpop_needypercent} || 3;
+	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+	return $hex_percent < $percent;
 }
 
 { # closure
 my $udc_mult_cache = { };
 sub get_udc_mult {
-	my($time, $cache) = @_;
+	my($self, $time, $cache) = @_;
 
 	# Round off time to the nearest 10 second interval, for caching.
 	$time = int($time/10+0.5)*10;
@@ -345,16 +309,16 @@ sub get_udc_mult {
 	if ($udc == 0) {
 		# This shouldn't happen on a site with any reasonable amount of
 		# up and down voting.  If it does, punt.
-		main::tagboxLog(sprintf("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
+		$self->info_log("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
 			$prevhour, $cache->{$prevhour}, $curhour, $cache->{$curhour}, $nexthour,  $cache->{$nexthour},
-			$time, $thru_frac, $prevweight, $curweight, $nextweight));
+			$time, $thru_frac, $prevweight, $curweight, $nextweight);
 		$udc = $constants->{tagbox_fheditorpop_udcbasis};
 	}
 	my $udc_mult = $constants->{tagbox_fheditorpop_udcbasis}/$udc;
 	my $max_mult = $constants->{tagbox_fheditorpop_maxudcmult} || 5;
 	$udc_mult = $max_mult if $udc_mult > $max_mult;
-#	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
-#		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
+#	$self->info_log("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
+#		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc);
 	$udc_mult_cache->{$time} = $udc_mult;
 	return $udc_mult;
 }

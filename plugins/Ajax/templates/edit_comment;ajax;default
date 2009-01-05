@@ -1,0 +1,85 @@
+__section__
+default
+__description__
+Template which renders the comment editor.
+
+* error_message = error message if there is an error
+* preview = preview of comment, if applicable
+* reply = hashref of comment replying to
+* hide_name = hide name / log out link
+* hide_email = hide email display
+* extras = array of any extras associated with this comment
+ 
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+edit_comment
+__template__
+[% IF user.is_anon %]
+<div class="warning">
+	[% IF constants.allow_anonymous %]
+You are not logged in.  You can <a href="[% gSkin.rootdir %]/login.pl">log
+in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
+or post as <b>[% user.nickname | strip_literal %]</b>.
+	[% ELSE %]
+You are not logged in.  You can <a href="[% gSkin.rootdir %]/login.pl">log
+in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
+	[% END %]
+</div>
+[% END %]
+
+[% IF !user.is_anon || constants.allow_anonymous %]
+<div class="inline_comment">
+	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
+		<div id="replyto_preview_[% pid %]" class="replyto_reply" ondblclick="editReply([% pid %])"></div>
+		<div id="replyto_reply_[% pid %]" class="replyto_reply">
+			<input type="hidden" name="sid" value="[% sid %]">
+			[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+			<input type="hidden" name="gotmodwarning_[% pid %]" id="gotmodwarning_[% pid %]" value="0">
+			[% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
+			<div class="generaltitle">
+				<div class="title">
+					<h3>
+						<input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
+						[% UNLESS user.is_anon %]
+							[%- IF constants.allow_anonymous && user.karma > -1 && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in') -%]
+									<label><input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously</label>
+							[%- END %]
+						[% END %]
+					</h3>
+					[% UNLESS user.is_anon %]<span class="pref"><a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Preferences</a></span>[% END %]
+				</div>
+			</div>
+			<div class="generalbody">
+				<textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea>
+			</div>
+		</div>
+		<div id="replyto_msg_[% pid %]" class="replyto_msg" style="display: none"></div>
+		<div class="replyto_buttons">
+			<span id="replyto_buttons_1_[% pid %]">
+				<span id="preview_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.previewReply([% pid %]); return false;">Preview</a></b></p></span>
+				[%- IF pid # not for root-level reply %]
+				<span id="quotereply_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.quoteReply([% pid %]); return false;">Quote Parent</a></b></p></span>[% END %]
+				[%- UNLESS user.is_anon %]
+				<span id="prefs_[% pid %]" class="nbutton"><p><b><a href="#" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Options</a></b></p></span>[% END %]
+			</span>
+			<span id="replyto_buttons_2_[% pid %]" style="display: none">
+				<span id="submit_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.submitReply([% pid %]); return false;">Submit<span id="submit_countdown_[% pid %]"></span></a></b></p></span>
+				<span id="edit_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.editReply([% pid %]); return false;">Continue Editing</a></b></p></span>
+				<span class="state">Preview</span>
+			</span>
+			<span id="replyto_buttons_3_[% pid %]">
+				<span id="cancel_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.cancelReply([% pid %]); return false;">Cancel</a></b></p></span>
+			</span>
+		</div>
+	</form>
+</div>
+[% END # IF !user.is_anon || constants.allow_anonymous %]
+__seclev__
+1000
+__version__
+$Id$

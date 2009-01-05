@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
 use strict;
 use Slash 2.003;	# require Slash 2.3.x
-use Slash::Constants qw(:messages);
+use Slash::Constants qw(:messages :web);
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
@@ -18,20 +18,34 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	my $formkey = $form->{formkey};
-	my $formname = 'submissions';
+	
+	slashProfInit();
+	my $submiss_view = $constants->{submiss_view} || $user->{is_admin};
 
-	$form->{del}	||= 0;
-	$form->{op}	||= '';
-	my $error_flag = 0;
-	my $success = 0;
+	my %ops = (
+		blankform		=> [1,			\&blankForm],
+		previewstory		=> [1,			\&previewStory],
+		pending			=> [!$user->{is_anon},	\&yourPendingSubmissions],
+		submitstory		=> [1,			\&saveSub],
+		list			=> [$submiss_view,	\&submissionEd],
+		viewsub			=> [$submiss_view,	\&previewForm],
+		update			=> [$user->{is_admin},	\&updateSubmissions],
+		'delete'		=> [$user->{is_admin},	\&deleteSubmissions],
+		merge			=> [$user->{is_admin},	\&mergeSubmissions],
+		changesubmission	=> [$user->{is_admin},	\&changeSubmission],
+	);
 
-	if (($form->{content_type} eq 'rss') and ($form->{op} eq 'list') and $constants->{submiss_view}) {
-		my $success = displayRSS($slashdb, $constants, $user, $form);
-		return if $success;
+	$ops{default} = $ops{blankform};
+
+	my $op = lc($form->{op} || 'default');
+	$op = 'default' if !$ops{$op} || !$ops{$op}[ALLOWED];
+
+	$form->{del} ||= 0;
+
+	if ($form->{content_type} && $form->{content_type} =~ $constants->{feed_types}
+		&& $op eq 'list' && $submiss_view) {
+		return if displayRSS($slashdb, $constants, $user, $form);
 	}
-
-	my $section = $form->{section};
 
 	# this really should not be done now, but later, it causes
 	# a lot of problems, but it causes a LOT of problems
@@ -44,103 +58,67 @@ sub main {
 	$form->{name}   = strip_nohtml($form->{name})     if $form->{name};
 
 	# Show submission title on browser's titlebar.
-	my($tbtitle) = $form->{title};
-	$tbtitle =~ s/^"?(.+?)"?$/$1/ if $tbtitle;
-
-	my $ops = {
-		# initial form, no formkey needed due to 'preview' requirement
-		blankform		=> {
-			seclev		=> 0,
-			checks		=> ['max_post_check', 'generate_formkey'],
-			function 	=> \&blankForm,
-		},
-		previewstory	=> {
-			seclev		=>  0,
-			checks		=> ['update_formkeyid'],
-			function 	=> \&previewStory,
-		},
-		pending	=> {
-			seclev		=>  1,
-			function 	=> \&yourPendingSubmissions,
-		},
-		submitstory	=> {
-			function	=> \&saveSub,
-			seclev		=> 0,
-			post		=> 1,
-			checks		=> [ qw (max_post_check valid_check response_check
-						interval_check formkey_check) ],
-		},
-		list		=> {
-			seclev		=> $constants->{submiss_view} ? 0 : 100,
-			function	=> \&submissionEd,
-		},
-		viewsub		=> {
-			seclev		=> $constants->{submiss_view} ? 0 : 100,
-			function	=> \&previewForm,
-		},
-		update		=> {
-			seclev		=> 100,
-			function	=> \&updateSubmissions,
-		},
-		delete		=> {
-			seclev		=> 100,
-			function	=> \&deleteSubmissions,
-		},
-		merge		=> {
-			seclev		=> 100,
-			function	=> \&mergeSubmissions,
-		},
-	};
-
-	$ops->{default} = $ops->{blankform};
-
-	my $op = lc($form->{op});
-	$op ||= 'default';
-	$op = 'default' if (
-		($user->{seclev} < $ops->{$op}{seclev})
-			||
-		! $ops->{$op}{function}
-	);
+	my($tbtitle);
+	if ($form->{subid} && $op ne "changesubmission") {
+		$tbtitle = $slashdb->getSubmission($form->{subid}, [ 'subj' ]);
+		$tbtitle = $tbtitle->{subj} if $tbtitle;
+		$tbtitle =~ s/^"?(.+?)"?$/$1/ if $tbtitle;
+	}
 
 	# the submissions tab should always be highlighted,
 	# being submit.pl and all
-	my $data = {
-		admin => 1,
-		tab_selected => 'submissions',
-	};
 	header(
-		getData('header', { tbtitle => $tbtitle } ),
-		'', $data
+		getData('header', { tbtitle => $tbtitle } ), '', {
+			admin => 1,
+			tab_selected => 'submissions',
+		}
 	) or return;
 
-	if ($user->{seclev} < 100) {
-		if ($ops->{$op}{checks}) {
-			for my $check (@{$ops->{$op}{checks}}) {
-				$ops->{$op}{update_formkey} = 1
-					if ($check eq 'formkey_check');
-				$error_flag = formkeyHandler(
-					$check, $formname, $formkey
-				);
-				last if $error_flag;
-			}
-		}
-	}
-
-	# call the method
-	$success = $ops->{$op}{function}->($constants, $slashdb, $user, $form) if ! $error_flag;
-
-	if ($ops->{$op}{update_formkey} && $success && ! $error_flag) {
-		my $updated = $slashdb->updateFormkey($formkey, $form->{tid}, length($form->{story}));
-	}
+	slashProf("submit-op");
+	$ops{$op}[FUNCTION]->($constants, $slashdb, $user, $form);
+	slashProf("","submit-op");
 
 	footer();
+	slashProfEnd();
 }
 
 #################################################################
-# update the notes and sections fields but don't delete anything.
+# Update note, comment and skin with the option to delete based
+# on extra form elements in the submission view.
+sub changeSubmission {
+	my($constants, $slashdb, $user, $form) = @_;
+	my($gSkin, $subid) = (getCurrentSkin(), $form->{subid});
+	my($option, $title);
+		
+	if (!$subid) {
+		submissionEd(@_);
+	} else {
+		$option->{nodelete} = 1 unless $form->{"del_$form->{subid}"};
+
+		# Must remove subid from $form when updating submission data
+		# since Slash::DB::MySQL::deleteSubmission() will make extra
+		# queries to the database if it exists.
+		delete $form->{subid};
+		my @subids = $slashdb->deleteSubmission($option);
+		# Restore subid for proper functioning of the next page view.
+		$form->{subid} = $subid;
+		if (@subids) {
+			$title = getData('updatehead', { subids => \@subids });
+			submissionEd(@_, $title);
+		} else {
+			# Behavior here was unspecified. I chose this route, 
+			# although returning to submissionEd() would simplify
+			# things.		- Cliff
+			submissionEd(@_, "");
+		}
+	}
+}
+
+#################################################################
+# update the notes and skin fields but don't delete anything.
 sub updateSubmissions {
 	my($constants, $slashdb, $user, $form) = @_;
-	$slashdb->deleteSubmission(0, 1);
+	$slashdb->deleteSubmission({ nodelete => 1 });
 	submissionEd(@_);
 }
 
@@ -154,33 +132,72 @@ sub deleteSubmissions {
 #################################################################
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
-	yourPendingSubmissions(@_);
-	displayForm($user->{nickname}, $user->{fakeemail}, $form->{section}, getData('defaulthead'));
+	print getData('submit_body_open');
+	slashProf("pendingsubs");
+	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
+	slashProf("","pendingsubs");
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	if ($rkey->create) {
+		slashProf("displayForm");
+		displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
+		slashProf("", "displayForm");
+	} else {
+		print $rkey->errstr;
+	}		
+
+	print getData('submit_body_close');
 }
 
 #################################################################
 sub previewStory {
 	my($constants, $slashdb, $user, $form) = @_;
-	displayForm($form->{name}, $form->{email}, $form->{section}, getData('previewhead'));
+
+	my $error_message = '';
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	unless ($rkey->touch) {
+		$error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+			return 0;
+		}
+	}		
+
+	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'), '', $error_message);
 }
 
 #################################################################
 sub yourPendingSubmissions {
-	my($constants, $slashdb, $user, $form) = @_;
-
-	my $summary;
+	my($constants, $slashdb, $user, $form, $options) = @_;
+	$options ||= {};
 	return if $user->{is_anon};
-
-	if (my $submissions = $slashdb->getSubmissionsPending()) {
-		for my $submission (@$submissions) {
-			$summary->{$submission->[4]}++;
-		}
+	print getData("submit_body_open") unless $options->{skip_submit_body};
+	if (my $submissions = $slashdb->getSubmissionsByUID($user->{uid}, "", { limit_days => 365 })) {
 		slashDisplay('yourPendingSubs', {
 			submissions	=> $submissions,
 			width		=> '100%',
-			summary		=> $summary,
 		});
 	}
+	print getData("submit_body_close") unless $options->{skip_submit_body};
+}
+
+#################################################################
+sub getSubmissionSelections {
+	my($constants) = @_;
+
+	# Terminology mismatch..."selections" is legacy but the data is 
+	# for submissions.note -- time for a nomenclature adjustment?
+	# - Cliff
+	my %selections = map { ($_, $_) }
+		(qw(Hold Quik), '',	# '' is special
+		(ref $constants->{submit_categories}
+			? @{$constants->{submit_categories}} : ())
+	);
+
+	return \%selections;
 }
 
 #################################################################
@@ -190,17 +207,31 @@ sub previewForm {
 	my $admin_flag = $user->{seclev} >= 100 ? 1 : 0;
 
 	my $sub = $slashdb->getSubmission($form->{subid});
+	
+	$slashdb->updateSubMemory($form->{submatch}, $form->{subnote}) if $form->{submatch} && $user->{is_admin};
+	my($sub_memory, $subnotes_ref);
+	$sub_memory = $slashdb->getSubmissionMemory if $user->{is_admin};
 
+	my @topics;
+	
 	my $topic = $slashdb->getTopic($sub->{tid});
-	$topic->{image} = "$constants->{imagedir}/topics/$topic->{image}"
-                if $topic->{image} =~ /^\w+\.\w+$/;
+	push @topics, $sub->{tid} if $sub->{tid};
 
-	my $extracolumns = $slashdb->getSectionExtras($sub->{section}) || [ ];
+	my $nexus_id = $slashdb->getNexusFromSkid($sub->{primaryskid} || $constants->{mainpage_skid});
+	push @topics, $nexus_id if $nexus_id;
+
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+	
+	my $extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr) || [ ];
 	vislenify($sub); # add $sub->{ipid_vis}
 
 	my $email_known = "";
 	$email_known = "mailto" if $sub->{email} eq $user->{fakeemail};
 	$sub->{email} = processSub($sub->{email}, $email_known);
+
+	my $last_admin_text = $slashdb->getLastSessionText($user->{uid});
+	my $lasttime = $slashdb->getTime();
+	$slashdb->setUser($user->{uid}, { adminlaststorychange => $lasttime }) if $last_admin_text ne $sub->{subj};
 
 	$slashdb->setSession(getCurrentUser('uid'), {
 		lasttitle	=> $sub->{subj},
@@ -208,13 +239,25 @@ sub previewForm {
 		last_sid	=> '',
 	}) if $user->{is_admin};
 
+	my $num_from_uid = 0;
+	my $accepted_from_uid = 0;
+	my $num_with_emaildomain = 0;
+	my $accepted_from_emaildomain = 0;
+	if ($user->{is_admin}) {
+		$accepted_from_uid = $slashdb->countSubmissionsFromUID($sub->{uid}, { del => 2 });
+		$num_from_uid = $slashdb->countSubmissionsFromUID($sub->{uid});
+		$accepted_from_emaildomain = $slashdb->countSubmissionsWithEmaildomain($sub->{emaildomain}, { del => 2 });
+		$num_with_emaildomain = $slashdb->countSubmissionsWithEmaildomain($sub->{emaildomain});
+	}
+
 	my $num_sim = $constants->{similarstorynumshow} || 5;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $storyref = {
 		title =>	$sub->{subj},
 		introtext =>	$sub->{story},
 	};
-	my $similar_stories = $reader->getSimilarStories($storyref, $num_sim);
+	my $similar_stories = [];
+	$similar_stories = $reader->getSimilarStories($storyref, $num_sim) if $user->{is_admin};
 
 	# Truncate that data to a reasonable size for display.
 
@@ -226,29 +269,43 @@ sub previewForm {
 				# Max of 12 chars per word.
 				$word = substr($word, 0, 12);
 			}
-			if (length($sim->{title}) > 35) {
-				# Max of 35 char title.
-				$sim->{title} = substr($sim->{title}, 0, 30);
-				$sim->{title} =~ s/\s+\S+$//;
-				$sim->{title} .= "...";
-			}
+			$sim->{title} = chopEntity($sim->{title}, 35);
 		}
 	}
 
+	my $url = "";
+	$url = $slashdb->getUrl($sub->{url_id}) if $sub->{url_id};
+
+        foreach my $memory (@$sub_memory) {
+                my $match = $memory->{submatch};
+
+                if ($sub->{email} =~ m/$match/i ||
+                    $sub->{name}  =~ m/$match/i ||
+                    $sub->{subj}  =~ m/$match/i ||
+                    $sub->{ipid}  =~ m/$match/i ||
+                    $sub->{story} =~ m/$match/i ||
+		    $url =~ m/$match/i ) {
+                        push @$subnotes_ref, $memory;
+                }
+        }
 
 	slashDisplay('previewForm', {
-		submission	=> $sub,
-		submitter	=> $sub->{uid},
-		subid		=> $form->{subid},
-		topic		=> $topic,
-		ipid		=> $sub->{ipid},
-		ipid_vis	=> $sub->{ipid_vis},
-		admin_flag 	=> $admin_flag,
-		extras 		=> $extracolumns,
-		lockTest	=> lockTest($sub->{subj}),
-		section		=> $form->{section} ||
-				   $constants->{defaultsection},
-		similar_stories	=> $similar_stories,
+		submission			=> $sub,
+		submitter			=> $reader->getUser($sub->{uid}),
+		subid				=> $form->{subid},
+		topic				=> $topic,
+		ipid				=> $sub->{ipid},
+		ipid_vis			=> $sub->{ipid_vis},
+		admin_flag 			=> $admin_flag,
+		extras 				=> $extracolumns,
+		lockTest			=> lockTest($sub->{subj}),
+		similar_stories			=> $similar_stories,
+		num_from_uid			=> $num_from_uid,
+		num_with_emaildomain 		=> $num_with_emaildomain,
+		accepted_from_uid 	  	=> $accepted_from_uid,
+		accepted_from_emaildomain 	=> $accepted_from_emaildomain,
+		note_options			=> getSubmissionSelections($constants),
+		subnotes_ref			=> $subnotes_ref,
 	});
 }
 
@@ -266,53 +323,53 @@ sub mergeSubmissions {
 	}
 
 	# need to do this even if nothing is checked, so we update notes etc.
-	my @subids = $slashdb->deleteSubmission;
+	my @subids = $slashdb->deleteSubmission({ accepted => 1 });
 
 	submissionEd(@_, getData('mergehead', { subids => \@subids }));
 }
 
 #################################################################
 sub submissionEd {
-	# mmmm, code comments in here sure would be nice
 	my($constants, $slashdb, $user, $form, $title) = @_;
-	my($def_section, $cur_section, $def_note, $cur_note,
-		$sections, @sections, @notes,
-		%all_sections, %all_notes, %sn);
+	my($def_skin, $cur_skin, $def_note, $cur_note,
+		$skins, @skins, @notes,
+		%all_skins, %all_notes, %sn);
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	$form->{del} = 0 if $user->{is_admin};
 
-	$def_section	= getData('defaultsection');
-	$def_note	= getData('defaultnote');
-	if ($user->{section} && !$form->{section}) {
-		$cur_section = $user->{section};
-	} else {
-		$cur_section = $form->{section} || $def_section;
+	if (defined $form->{toggle_bin_refresh} && $user->{is_admin}) {
+		$slashdb->setUser($user->{uid}, { opt_disable_submit_bin_refresh => $form->{toggle_bin_refresh} ? 1 : 0 });
 	}
-	$cur_note	= $form->{note} || $def_note;
-	$sections = $slashdb->getSubmissionsSections;
 
-	for (@$sections) {
-		my($section, $note, $cnt) = @$_;
-		$all_sections{$section} = 1;
+	$def_skin = getData('defaultskin');
+	$def_note = getData('defaultnote');
+	$cur_skin = $form->{skin} || $def_skin;
+	$cur_note = $form->{note} || $def_note;
+	$skins    = $reader->getSubmissionsSkins();
+
+	for (@$skins) {
+		my($skin, $note, $cnt) = @$_;
+		$all_skins{$skin} = 1;
 		$note ||= $def_note;
 		$all_notes{$note} = 1;
-		$sn{$section}{$note} = $cnt;
+		$sn{$skin}{$note} = $cnt;
 	}
 
 	for my $note_str (keys %all_notes) {
-		$sn{$def_section}{$note_str} = 0;
-		for (grep { $_ ne $def_section } keys %sn) {
-			$sn{$def_section}{$note_str} += $sn{$_}{$note_str};
+		$sn{$def_skin}{$note_str} = 0;
+		for (grep { $_ ne $def_skin } keys %sn) {
+			$sn{$def_skin}{$note_str} += $sn{$_}{$note_str} || 0;
 		}
 	}
 
-	$all_sections{$def_section} = 1;
+	$all_skins{$def_skin} = 1;
 
 	# self documentation, right?
-	@sections =	map  { [$_->[0], ($_->[0] eq $def_section ? '' : $_->[0])] }
+	@skins =	map  { [$_->[0], ($_->[0] eq $def_skin ? '' : $_->[0])] }
 			sort { $a->[1] cmp $b->[1] }
-			map  { [$_, ($_ eq $def_section ? '' : $_)] }
-			keys %all_sections;
+			map  { [$_, ($_ eq $def_skin ? '' : $_)] }
+			keys %all_skins;
 
 	@notes =	map  { [$_->[0], ($_->[0] eq $def_note ? '' : $_->[0])] }
 			sort { $a->[1] cmp $b->[1] }
@@ -320,19 +377,19 @@ sub submissionEd {
 			keys %all_notes;
 
 	slashDisplay('subEdTable', {
-		cur_section	=> $cur_section,
+		cur_skin	=> $cur_skin,
 		cur_note	=> $cur_note,
-		def_section	=> $def_section,
+		def_skin	=> $def_skin,
 		def_note	=> $def_note,
-		sections	=> \@sections,
+		skins		=> \@skins,
 		notes		=> \@notes,
 		sn		=> \%sn,
 		title		=> $title || ('Submissions ' . ($user->{is_admin} ? 'Admin' : 'List')),
 		width		=> '100%',
 	});
 
-	my($submissions, %selection);
-	$submissions = $slashdb->getSubmissionForUser();
+	my($submissions);
+	$submissions = $slashdb->getSubmissionForUser;
 
 	for my $sub (@$submissions) {
 		$sub->{name}  =~ s/<(.*)>//g;
@@ -340,26 +397,20 @@ sub submissionEd {
 		$sub->{is_anon} = isAnon($sub->{uid});
 
 		my @strs = (
-			substr($sub->{subj}, 0, 35),
-			substr($sub->{name}, 0, 20),
-			substr($sub->{email}, 0, 20)
+			chopEntity($sub->{subj}, 35),
+			chopEntity($sub->{name}, 20),
+			chopEntity($sub->{email}, 20)
 		);
-		$strs[0] .= '...' if length($sub->{subj}) > 35;
 		$sub->{strs} = \@strs;
 
-		$sub->{ssection} =
-			$sub->{section} ne $constants->{defaultsection} ?
-				"&section=$sub->{section}" : '';
-		$sub->{stitle}  = '&title=' . fixparam($sub->{subj});
-		$sub->{section} = ucfirst($sub->{section})
-			unless $user->{is_admin};
+		my $skin = $slashdb->getSkin($sub->{primaryskid});
+		$sub->{sskin}  =
+			$sub->{primaryskid} ne $constants->{mainpage_skid} ?
+				"&skin=$skin->{name}" : '';
+		$sub->{stitle} = '&title=' . fixparam($sub->{subj});
+		
+		$sub->{skin}   = $skin->{name};
 	}
-
-	%selection = map { ($_, $_) }
-		(qw(Hold Quik), '',	# '' is special
-		(ref $constants->{submit_categories}
-			? @{$constants->{submit_categories}} : ())
-	);
 
 	# Do we provide a submission list based on a custom sort?
 	my @weighted;
@@ -375,7 +426,7 @@ sub submissionEd {
 	my $template = $user->{is_admin} ? 'Admin' : 'User';
 	slashDisplay('subEd' . $template, {
 		submissions	=> $submissions,
-		selection	=> \%selection,
+		selection	=> getSubmissionSelections($constants),
 		weighted	=> \@weighted,
 	});
 }
@@ -383,6 +434,7 @@ sub submissionEd {
 #################################################################
 sub displayRSS {
 	my($slashdb, $constants, $user, $form) = @_;
+	my $gSkin = getCurrentSkin();
 	my($submissions, @items);
 	$submissions = $slashdb->getSubmissionForUser();
 
@@ -390,14 +442,14 @@ sub displayRSS {
 		# title should be cleaned up
 		push(@items, {
 			title	=> $_->{subj},
-			'link'	=> "$constants->{absolutedir}/submit.pl?op=viewsub&subid=$_->{subid}",
+			'link'	=> "$gSkin->{absolutedir}/submit.pl?op=viewsub&subid=$_->{subid}",
 		});
 	}
 
-	xmlDisplay('rss', {
+	xmlDisplay($form->{content_type} => {
 		channel	=> {
 			title	=> "$constants->{sitename} Submissions",
-			'link'	=> "$constants->{absolutedir}/submit.pl?op=list",
+			'link'	=> "$gSkin->{absolutedir}/submit.pl?op=list",
 		},
 		image	=> 1,
 		items	=> \@items,
@@ -407,21 +459,21 @@ sub displayRSS {
 
 #################################################################
 sub displayForm {
-	my($username, $fakeemail, $section, $title, $error_message) = @_;
+	my($username, $fakeemail, $skin, $title, $error_message) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 
-	if (length($form->{story}) > $constants->{max_submission_size}) {
+	if ($form->{story} && length($form->{story}) > $constants->{max_submission_size}) {
 		titlebar('100%', getData('max_submissionsize_title'));
 		print getData('max_submissionsize_err', { size => $constants->{max_submission_size}});
 	}
 
 	my %keys_to_check = ( story => 1, subj => 1 );
-	if ($error_message ne '') {
-		titlebar('100%', getData('filtererror', { err_message => $error_message}));
-		print getData('filtererror', { err_message => $error_message });
+	if ($error_message && $error_message ne '') {
+		titlebar('100%', "Error");
+		print $error_message;
 	} else {
 		my $message = "";
 		for (keys %$form) {
@@ -444,8 +496,10 @@ sub displayForm {
 		}
 	}
 
+	my $skins = $slashdb->getSkins();
+	my $topic_values = $slashdb->getDescriptions('non_nexus_topics-submittable');
+	my $skin_values = $slashdb->getDescriptions('skins-submittable');
 
-	my $topic_values = $slashdb->getDescriptions('topics_section', $section);
 	$form->{tid} ||= 0;
 	unless ($form->{tid}) {
 		my $current_hash = { %$topic_values };
@@ -453,53 +507,72 @@ sub displayForm {
 		$topic_values = $current_hash;
 	}
 
+	$form->{primaryskid} ||= $constants->{submission_default_skid} || 0;
+	unless ($form->{primaryskid}) {
+		my $current_hash = { %$skin_values };
+		$current_hash->{0} = "Select Section";
+		$skin_values = $current_hash;
+	}
+	
+	my @topics = ();
+	my $nexus_id = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{submission_default_skid} || $constants->{mainpage_skid});
+	push @topics, $nexus_id if $nexus_id;
+	push @topics, $form->{tid} if $form->{tid};
+
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+	
+	my $extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr) || [ ];
+	my @required = map {$_->[1]} grep{$_->[4] eq "yes"} @$extracolumns;
+
+	my @missing_required = grep{$_->[4] eq "yes" && !$form->{$_->[1]}} @$extracolumns;
 
 	my $topic = $slashdb->getTopic($form->{tid});
 
 	my $known = "";
+	$fakeemail ||= '';
 	if ($form->{email}) {
 		$fakeemail = $form->{email};
-	} elsif ($fakeemail eq $user->{fakeemail}) {
+	} elsif ($fakeemail && $user->{fakeemail} && $fakeemail eq $user->{fakeemail}) {
 		$known = "mailto";
 		# we assume this is like if form.email is passed in
-		$fakeemail = strip_attribute($user->{fakeemail});
+		$fakeemail = strip_attribute($fakeemail);
 	}
-	my $extracolumns = $slashdb->getSectionExtras($form->{section}
-		|| $section || $constants->{defaultsection}) || [ ];
 
-	my $fixedstory;
-	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
-		$fixedstory = strip_plaintext(url2html($form->{story}));
-	} else {
-		$fixedstory = strip_html(url2html($form->{story}));
-	}
-	$form->{story} = balanceTags($form->{story});
+	my $fixedstory = fixStory($form->{story}, { sub_type => $form->{sub_type} });
+	# don't let preview screen be used to pump up pagerank, if anyone
+	# would waste their time doing so -- pudge
+	$fixedstory = noFollow($fixedstory);
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,
-		savestory	=> $form->{story} && $form->{subj} && $form->{tid},
+		savestory	=> $form->{story} && $form->{subj} && $form->{tid} && !@missing_required,
+		missing_required => \@missing_required,
 		username	=> $form->{name} || $username,
 		fakeemail	=> processSub($fakeemail, $known),
-		section		=> $form->{section} || $section || $constants->{defaultsection},
 		uid		=> $user->{uid},
 		extras 		=> $extracolumns,
 		topic		=> $topic,
 		width		=> '100%',
 		title		=> $title,
 		topic_values	=> $topic_values,
+		skin_values	=> $skin_values,
+		skins		=> $skins,
 	});
 }
-
 #################################################################
 sub saveSub {
 	my($constants, $slashdb, $user, $form) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	my $url_id;
 
 	$form->{name} ||= '';
 
 	if (length($form->{subj}) < 2) {
 		titlebar('100%', getData('error'));
 		my $error_message = getData('badsubject');
-		displayForm($form->{name}, $form->{email}, $form->{section}, '', '', $error_message);
+		displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
 		return(0);
 	}
 
@@ -509,46 +582,100 @@ sub saveSub {
 		next unless $keys_to_check{$_};
 		# run through filters
 		if (! filterOk('submissions', $_, $form->{$_}, \$message)) {
-			displayForm($form->{name}, $form->{email}, $form->{section}, '', '', $message);
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', $message);
 			return(0);
 		}
 		# run through compress test
 		if (! compressOk($form->{$_})) {
 			my $err = getData('compresserror');
-			displayForm($form->{name}, $form->{email}, $form->{section}, '', '');
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', '');
 			return(0);
 		}
 	}
 
-	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
-		$form->{story} = strip_plaintext(url2html($form->{story}));
-	} else {
-		$form->{story} = strip_html(url2html($form->{story}));
+	if ($form->{url}) {
+	
+		if (!validUrl($form->{url})) {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', getData("invalidurl"));
+			return(0);
+		} else {
+			my $url_data = {
+				url		=> fudgeurl($form->{url}),
+				initialtitle	=> strip_notags($form->{subj})
+			};
+
+			$url_id = $slashdb->getUrlCreate($url_data);
+			my $url_id_q = $slashdb->sqlQuote($url_id);
+			if ($constants->{plugin}{FireHose}) {
+				my $firehose = getObject("Slash::FireHose");
+				if (!$firehose->allowSubmitForUrl($url_id)) {
+					my $submitted_items = $firehose->getFireHoseItemsByUrl($url_id);
+					displayForm($form->{name}, $form->{email}, $form->{skin}, '', getData("duplicateurl", { submitted_items => $submitted_items } ));
+					return(0);
+				}
+			}
+		}
 	}
-	$form->{story} = balanceTags($form->{story});
+	
+	unless ($rkey->use) {
+		my $error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+		} else {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
+		}
+		return 0;
+	}		
+
+	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
 
 	my $uid ||= $form->{name}
 		? getCurrentUser('uid')
 		: getCurrentStatic('anonymous_coward_uid');
 
 	my $submission = {
-		email	=> $form->{email},
-		uid	=> $uid,
-		name	=> $form->{name},
-		story	=> $form->{story},
-		subj	=> $form->{subj},
-		tid	=> $form->{tid},
-		section	=> $form->{section}
+		email		=> $form->{email},
+		uid		=> $uid,
+		name		=> $form->{name},
+		story		=> $form->{story},
+		subj		=> $form->{subj},
+		tid		=> $form->{tid},
+		primaryskid	=> $form->{primaryskid},
+		mediatype	=> $form->{mediatype},
 	};
-	my $extras = $slashdb->getSectionExtras($submission->{section});
+	$submission->{url_id} = $url_id if $url_id;
+
+	my @topics = ();
+	my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
+
+	push @topics, $nexus;
+	push @topics, $form->{tid} if $form->{tid};
+	
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+
+	my $extras = $slashdb->getNexusExtrasForChosen($chosen_hr) || [];
+
+	my @missing_required = grep{$_->[4] eq "yes" && !$form->{$_->[1]}} @$extras;
+
+	if (@missing_required) {
+		displayForm($form->{name}, $form->{email}, $form->{skin}, '', '');
+		return 0;
+	}
+	
 	if ($extras && @$extras) {
 		for (@$extras) {
 			my $key = $_->[1];
 			$submission->{$key} = strip_nohtml($form->{$key}) if $form->{$key};
 		}
 	}
-	$submission->{subid} = $slashdb->createSubmission($submission);
-	# $slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
+
+	my $messagesub = { %$submission };
+	$messagesub->{subid} = $slashdb->createSubmission($submission);
+
+	if ($url_id) {
+		my $globjid = $slashdb->getGlobjidCreate("submissions", $messagesub->{subid});
+		$slashdb->addUrlForGlobj($url_id, $globjid);
+	}
 
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
@@ -556,22 +683,21 @@ sub saveSub {
 		my $data  = {
 			template_name	=> 'messagenew',
 			subject		=> { template_name => 'messagenew_subj' },
-			submission	=> $submission,
+			submission	=> $messagesub,
 		};
-		for (@$users) {
-			my $user_section = $slashdb->getUser($_,'section');
-			next if ($user_section && $user_section ne $submission->{section});
-			$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
-		}
+		$messages->create($users, MSG_CODE_NEW_SUBMISSION, $data) if @$users;
 	}
-
+	
+	
+	print getData("submit_body_open");
 	slashDisplay('saveSub', {
 		title		=> 'Saving',
 		width		=> '100%',
 		missingemail	=> length($form->{email}) < 3,
 		anonsubmit	=> isAnon($uid) && length($form->{name}) < 3 && length($form->{email}) < 3,
 	});
-	yourPendingSubmissions(@_);
+	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
+	print getData("submit_body_close");
 
 	return(1);
 }
@@ -592,26 +718,56 @@ sub processSub {
 }
 
 #################################################################
-sub url2html {
-	my($introtext) = @_;
-	$introtext =~ s/\n\n/\n<P>/gi;
-	$introtext .= " ";
+sub fixStory {
+	my($str, $opts) = @_; 
 
-	# this is kinda experimental ... esp. the $extra line
-	# we know it can break real URLs, but probably will preserve
-	# real URLs more often than it will break them
-	$introtext =~  s{(?<!['"=>])(http|https|ftp|gopher|telnet)://([$URI::uric#]+)}{
-		my($proto, $url) = ($1, $2);
-		my $extra = '';
-		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
-		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
-		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
-	}ogie;
-	$introtext =~ s/\s+$//;
-	return $introtext;
+	if ($opts->{sub_type} && $opts->{sub_type} eq 'plain') {
+		$str = strip_plaintext(url2html($str));
+	} else {
+		$str = strip_html(url2html($str));
+	}
+
+	# remove leading and trailing whitespace
+	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+
+	# and let's just get rid of these P tags; we don't need them, and they
+	# cause too many problems in submissions
+	unless (getCurrentStatic('submit_keep_p')) {
+		$str =~ s|</p>||g;
+		$str =~ s|<p(?: /)?>|<br><br>|g;
+	}
+
+	# smart conversion of em dashes to real ones
+	# leave if - has nonwhitespace on either side, otherwise, convert
+	unless (getCurrentStatic('submit_keep_dashes')) {
+		$str =~ s/(\s+-+\s+)/ &mdash; /g;
+	}
+
+	$str = balanceTags($str, { deep_nesting => 1 });
+
+	# do it again, just in case balanceTags added more ...
+	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+
+	return $str;
 }
 
 #################################################################
+sub genChosenHashrefForTopics {
+	my($topics) = @_;
+	my $constants = getCurrentStatic();
+	my $chosen_hr ={};
+	for my $tid (@$topics) {
+		$chosen_hr->{$tid} = 
+			$tid == $constants->{mainpage_nexus_tid}
+				? 30
+				: $constants->{topic_popup_defaultweight} || 10;
+	}
+	return $chosen_hr;
+}
+
+
 createEnvironment();
 main();
 

@@ -10,6 +10,7 @@
 package Slash::Plugin;
 
 use strict;
+use Slash::Utility::Environment;
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
@@ -22,6 +23,7 @@ sub isInstalled {
 	my($class) = @_;
 	return 1 if $class eq 'Slash::Plugin';
 	my($plugin_name) = $class =~ /^Slash::(\w+)$/;
+	return 0 if !$plugin_name;
 	my $constants = getCurrentStatic();
 	return $constants->{plugin}{$plugin_name} || 0;
 }

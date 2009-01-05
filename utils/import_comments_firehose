@@ -1,0 +1,112 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+
+use Slash::Test shift || 'slash';
+
+my $slashdb = getCurrentDB();
+my $firehose = getObject("Slash::FireHose");
+my $tags = getObject("Slash::Tags");
+
+my $log_loc; 		#  set to something to log  inserts
+my $sleep = 0; 		# time to pause between inserts
+my $v = 0; 		# Switch to true for verbose output
+my $calc_pause = 0;	# Switch to true to recalculate sleep interval by tagbox backlog
+
+my $days_back = 30;	# Number of days of history to import
+
+
+my $cids = $slashdb->sqlSelectColArrayref("cid","comments","uid!=666 AND date >DATE_SUB(NOW(), INTERVAL $days_back DAY)", "ORDER BY DATE DESC");
+
+print "Total cids left: " . scalar(@$cids) ."\n";
+
+my ($lastlog, $comments_added) = (0,0);
+
+
+foreach my $cid(@$cids) {
+	my ($added_tag, $added_comment);
+	my $comment = $slashdb->getComment($cid);
+	my $item = $firehose->getFireHoseByTypeSrcid("comment", $cid);
+	if($item && $item->{id}) {
+		my $up_id = $tags->getTagnameidFromNameIfExists("nod");
+		my $has_nod = $slashdb->sqlCount("tags", "uid=$comment->{uid} AND tagnameid=$up_id AND globjid=$item->{globjid}");
+		print "HAS NOD: $has_nod $comment->{date}\n" if $v;
+		if (!$has_nod) {
+			my $tagid = $tags->createTag({
+				uid             => $comment->{uid},
+				name            => "nod",
+				globjid         => $item->{globjid},
+				private         => 1,
+			});
+			print "ADDING NOD $item->{globjid} TAGID: $tagid\n" if $v;
+			$added_tag = 1;
+		}
+	} else {
+		print "ADDING COMMENT $comment->{date}\n" if $v;
+		$added_comment = 1;
+		$comments_added++;
+		$firehose->createUpdateItemFromComment($comment->{cid});
+		if ($log_loc) {
+			open LOG, ">>$log_loc";
+			print LOG "$comment->{cid} $comment->{date}\n";
+			close LOG;
+		}
+	}
+	
+	if (time - $lastlog > 60) {
+		$lastlog = time;
+		my $new_sleep = $sleep;
+		my $secs_back = get_secs_back();
+		my $feeder_back = get_feeder_back();
+		$feeder_back = int($feeder_back / 1000);
+		print "SECS BACK: $secs_back\n" if $v;
+		print "FEEDER BACK: $feeder_back\n" if $v;
+		
+		if($calc_pause) {
+			if ($secs_back < 2) {
+				$new_sleep = 0
+			} elsif($secs_back < 2 ) {
+				$new_sleep = 1 
+			} elsif($secs_back < 4 ) {
+				$new_sleep = 3 
+			} elsif($secs_back < 6 ) {
+				$new_sleep = 4 
+			} elsif($secs_back < 10 ) {
+				$new_sleep = 5 
+			} else {
+				if ($sleep <= 10) {
+					$new_sleep = 10
+				} else {
+					$new_sleep = $sleep +1 if $sleep < 20;
+				}
+			}
+
+			my $feeder_penalty = 0;
+		
+			if ($feeder_back > 25) {
+				$feeder_penalty = int(($feeder_back - 25) / 5);
+				print "FEEDER PENALTY: $feeder_penalty\n" if $v;
+			}
+			$new_sleep += $feeder_penalty;
+		}
+
+		print "$comment->{date} ADDED $comments_added BEHIND = $secs_back FB= $feeder_back SLEEP $sleep -> $new_sleep\n";
+		$sleep = $new_sleep;
+	}
+
+	if($added_tag || $added_comment) {
+		print "SLEEPING $sleep\n" if $v;
+		sleep $sleep;
+	}
+
+
+		
+}
+
+sub get_secs_back {
+	return $slashdb->sqlSelect("(select unix_timestamp(created_at) from tags where tagid=(select max(tagid) from tags))     - (select unix_timestamp(created_at) from tags where tagid=(select min(last_tagid_logged) from tagboxes))");
+}
+
+sub get_feeder_back {
+	return $slashdb->sqlCount("tagboxlog_feeder");
+}

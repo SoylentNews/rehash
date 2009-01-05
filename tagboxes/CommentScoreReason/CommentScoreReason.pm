@@ -26,18 +26,31 @@ use strict;
 use Digest::MD5 'md5_hex';
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-use Slash::Tagbox;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Tagbox';
 
+sub isInstalled {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	return 0 if ! $constants->{plugin}{TagModeration};
+	return $self->SUPER::isInstalled();
+}
+
 sub init {
 	my($self) = @_;
+
+	return 0 if ! $self->SUPER::init();
+
+	# Initialize reason-related fields:
+	#
+	# $self->{reasons}{$id} is a hashref of the modreasons row with
+	# that id, for all reasons including Normal.
+	# $self->{reason_ids} is an arrayref of only the reasons with
+	# a nonzero val (i.e. excluding Normal).
+	# $self->{reason_tagnameid}{$id} is a hashref of the modreasons
+	# row with that _tagnameid_, for nonzero vals.
 
 	my $tagsdb = getObject('Slash::Tags');
 	my $moddb = getObject('Slash::TagModeration');
@@ -52,14 +65,31 @@ sub init {
 		my $tagnameid = $tagsdb->getTagnameidCreate($name);
 		$self->{reason_tagnameid}{$tagnameid} = $self->{reasons}{$id};
 	}
-	for my $tagname (qw( nod nix metanod metanix )) {
+
+	# Initialize $self->{metamod} and {metanix}.
+
+	for my $tagname (qw( metanod metanix )) {
 		my $tagnameid = $tagsdb->getTagnameidCreate($tagname);
 		$self->{"${tagname}id"} = $tagnameid;
 	}
+
+	1;
 }
+
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'moderate' }
+
+	# CommentScoreReason wants to know about each comment globj as
+	# soon as it is created, not waiting until the first tag is
+	# applied to it.
+sub get_nosy_gtids	{ 'comments' }
 
 sub init_tagfilters {
 	my($self) = @_;
+
+	# CommentScoreReason only cares about active tags.
+
+	$self->{filter_activeonly} = 1;
 
 	# CommentScoreReason only cares about tags on comments.
 
@@ -79,8 +109,8 @@ sub init_tagfilters {
 
 }
 
-sub run {
-	my($self, $affected_id) = @_;
+sub run_process {
+	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -95,11 +125,6 @@ sub run {
 		return;
 	}
 
-	# Load tags applied to this comment.
-
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
-	return unless $tags_ar && @$tags_ar;
-
 	my($keep_karma_bonus, $karma_bonus_downmods_left) = (1, $constants->{mod_karma_bonus_max_downmods});
 	my $current_reason_mode = 0;
 	my $base_neediness = $constants->{tagbox_csr_baseneediness} || 60;
@@ -108,20 +133,23 @@ sub run {
 	# First scan: neediness (comments.f3).
 	my($up_rnf, $down_rnf) = (0, 0);
 	for my $tag (@$tags_ar) {
-		# Do nothing if this tag was inactivated.
-		next if $tag->{inactivated};
 		# If this was a moderation _or_ a nod/nix (indicating dis/agreement),
 		# neediness changes.  If this was done by an admin, neediness
 		# changes a lot.
 		my $tagnameid = $tag->{tagnameid};
 		my $reason = $self->{reason_tagnameid}{$tagnameid};
 		my $dir = 0;
-		if ($reason->{val} > 0 || $tagnameid == $self->{nodid} || $tagnameid == $self->{metanodid}) {
+		if ($reason && $reason->{val} > 0
+			|| $tagnameid == $self->{nodid} || $tagnameid == $self->{metanodid}) {
 			$dir = 1;
-		} elsif ($reason->{val} < 0 || $tagnameid == $self->{nixid} || $tagnameid == $self->{metanixid}) {
+		} elsif ($reason && $reason->{val} < 0
+			|| $tagnameid == $self->{nixid} || $tagnameid == $self->{metanixid}) {
 			$dir = -1;
 		}
-		next unless $dir;
+		if (!$dir) {
+			$self->info_log("ERROR - tagid=$tag->{tagid} has no dir");
+			next;
+		}
 		my $mod_user = $self->getUser($tag->{uid});
 		my $net_fairs = $mod_user->{up_fair} + $mod_user->{down_fair}
 			- ($mod_user->{up_unfair} + $mod_user->{down_unfair});
@@ -138,9 +166,12 @@ sub run {
 		$top_entry_score = $firehose->getEntryPopularityForColorLevel(1);
 	}
 	$neediness *= $top_entry_score/$base_neediness;
-	# If we are only doing a certain percentage of neediness here,
-	# this would be the place to hash the comment cid with salt and
-	# drop its score to -50 unless it randomly qualified.
+
+	# Only a certain percentage of comments are allowed to be needy.
+	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
+	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+	$neediness = -50 if $hex_percent >= $percent;
+
 	# Minimum neediness is -50.
 	$neediness = -50 if $neediness < -50;
 
@@ -154,8 +185,6 @@ sub run {
 		$allreasons_hr->{$id} = { reason => $id, c => 0 };
 	}
 	for my $tag (@$tags_ar) {
-		# Do nothing if this tag was inactivated.
-		next if $tag->{inactivated};
 		# Currently, only actual moderations (not nod/nixes) change a
 		# comment's score (and reason).  Only continue processing if
 		# this is an actual moderation.
@@ -177,16 +206,27 @@ sub run {
 	my $new_score = $points_orig + $mod_score_sum;
 	my $new_karma_bonus = ($karma_bonus eq 'yes' && $keep_karma_bonus) ? 1 : 0;
 
-	$self->debugLog("setting cid %d to score: %d, %s kb %d->%d",
-		$cid, $new_score, $reasons->{$current_reason_mode}{name}, $karma_bonus, $new_karma_bonus);
+	if ($options->{return_only}) {
+		return {
+			score =>	$new_score,
+			karma_bonus =>	$new_karma_bonus,
+			reason =>	$current_reason_mode,
+			neediness =>	$neediness,
+		};
+	}
+
+	$self->info_log("cid %d to score: %d, %s kb %d->%d, neediness %.1f",
+		$cid, $new_score, $reasons->{$current_reason_mode}{name}, ($karma_bonus eq 'yes' ? 1 : 0), $new_karma_bonus, $neediness);
 
 	if ($firehose) {
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
-		if (!$fhid) {
-			$fhid = $self->addCommentToHoseIfAppropriate($firehose,
-				$affected_id, $cid, $neediness, $new_score);
+		if ($fhid) {
+			$firehose->setFireHose($fhid, { neediness => $neediness });
+		} else {
+			# For now, this tagbox is no longer responsible for adding
+			# needy comments to the hose;  we assume they're already
+			# there, and if not, we ignore.
 		}
-		$firehose->setFireHose($fhid, { neediness => $neediness }) if $fhid;
 	}
 
 	$self->sqlUpdate('comments', {
@@ -196,26 +236,28 @@ sub run {
 		}, "cid='$cid'");
 }
 
-sub addCommentToHoseIfAppropriate {
-	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
-	my $constants = getCurrentStatic();
+# XXX hex_percent should be a library function, it's used by FHEditorPop too
 
-	my $fhid = 0;
-
-	# If neediness exceeds a threshold, the comment has a chance of appearing.
-	my $min = $constants->{tagbox_csr_minneediness} || 138;
-	return 0 if $neediness < $min;
-
-	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
-	# within the range determined, add it to the hose.
-	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
-	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
-	return 0 if $hex_percent >= $percent;
-
-	$fhid = $firehose->createItemFromComment($cid);
-
-	return $fhid;
-}
+#sub addCommentToHoseIfAppropriate {
+#	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
+#	my $constants = getCurrentStatic();
+#
+#	my $fhid = 0;
+#
+#	# If neediness exceeds a threshold, the comment has a chance of appearing.
+#	my $min = $constants->{tagbox_csr_minneediness} || 138;
+#	return 0 if $neediness < $min;
+#
+#	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
+#	# within the range determined, add it to the hose.
+#	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
+#	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+#	return 0 if $hex_percent >= $percent;
+#
+#	$fhid = $firehose->createUpdateItemFromComment($cid);
+#
+#	return $fhid;
+#}
 
 1;
 

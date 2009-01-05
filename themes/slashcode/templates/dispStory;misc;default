@@ -10,6 +10,7 @@ Display a story (normally called from within displayStory())
 * topic = topic data structure
 * author = author data structure
 * full = boolean to display full story (incl. bodytext)
+* dispmode = 'full' (default) or 'brief'
 * magic = boolean to put section name in story title
 
 __title__
@@ -21,109 +22,159 @@ en_US
 __name__
 dispStory
 __template__
+[% dispmode = dispmode || "full" %]
+[% IF dispmode == "full" %]
+<div class="article">
+<span class="sd-info-block" style="display: none">
+	<span class="sd-key-sid">[% story.sid %]</span>
+	<span class="type">story</span>
+	[% IF user.is_admin %]<span class="stoid">[% story.stoid %]</span>[% END %]
+</span>
 [% IF magic;
-	IF section.rootdir;
-		title = "<A HREF=\"$section.rootdir/\">";
+	thisskin = Slash.db.getSkin(story.primaryskid);
+	IF thisskin.rootdir;
+		title = "<a href=\"$thisskin.rootdir/\">";
 	ELSE;
 		IF user.is_anon;
-			title = "<A HREF=\"$constants.rootdir/$story.section/\">";
+			title = "<a href=\"$gSkin.rootdir/$thisskin.name/\">";
 		ELSE;
-			title = "<A HREF=\"$constants.rootdir/index.pl?section=$story.section\">";
+			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
 		END;
 	END;
-	title = "$title<FONT COLOR=\"$user.fg.3\">$section.title</FONT></A>: $story.title";
+	title = title _ thisskin.title _ "</a>: $story.title";
 ELSE;
 	title = story.title;
 END %]
-
+[% seen_topics = {} %]
 [% PROCESS titlebar future=story.is_future %]
-
-	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
-		<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="#E6E6E6" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
-				<TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; "#E6E6E6"; END %]">
-					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
-						[% story.atstorytime %]</FONT>
-						[% IF constants.plugin.Print %] 
-							&nbsp;&nbsp;<A HREF="[% constants.rootdir -%]/print.pl?sid=[% story.sid %]"><IMG SRC="[% constants.imagedir %]/print.gif" BORDER="0"></A>
-						[% END %]
-						[% IF constants.plugin.Email %]
-							&nbsp;&nbsp;<A HREF="[% constants.rootdir -%]/email.pl?sid=[% story.sid %]"><IMG SRC="[% constants.imagedir -%]/email.gif" BORDER="0"></A>
-						[% END %]<BR>
-					[% IF constants.use_dept && story.dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
-					[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">[% mypagemenu %]</FONT>[% END %]
-				</TD>
-			</TR></TABLE>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-	</TR>
-	<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	<TR>
-		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; user.bg.1; END %]">
-				<TABLE ALIGN="RIGHT"><TR><TD ALIGN="RIGHT">
-				[% IF user.noicons %]
-					[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]<BR>
-				[% ELSE %]
-					[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
-						<IMG
-							SRC="[% constants.imagedir %]/topics/[% image.image %]"
-							WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
-							HSPACE="20" VSPACE="10"
-							ALT="[% topic.alttext %]"
-							TITLE="[% topic.alttext %]"></A><BR>
-				[% END %]
-				[% FOREACH tid = stid %]
-					[% IF story.tid == tid ; NEXT ; END %]
-					[% topic2 = Slash.db.getTopic(tid) %]
-					[% image = Slash.db.getTopicImageBySection(topic2, constants.section) %]
-					[% IF user.noicons %]
-						[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic2.tid %]"><B>[% topic2.alttext %]</B></A> ]<BR>
-					[% ELSE %]
-						<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic2.tid %]">
-							<IMG
-								SRC="[% constants.imagedir %]/topics/[% image.image %]"
-								WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
-								HSPACE="20" VSPACE="10"
-								ALT="[% topic2.alttext %]"
-								TITLE="[% topic2.alttext %]"></A><BR>
+	<div class="details">
+		[% IF story.journal_id;
+			# at some point, we should maybe have a link
+			# directly to the journal entry, perhaps
+			# in the storylinks?  for now, just to the journal.
+			journal     = Slash.getObject('Slash::Journal');
+			thisjournal = journal.get(story.journal_id);
+			IF thisjournal && thisjournal.uid;
+				thisuser    = Slash.db.getUser(thisjournal.uid); %]
+		Journal written by <a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"
+			>[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])</a> and [%
+			ELSIF story.by %]
+		Written by [% story.by | strip_literal %] and [%
+			END;
+		END %]
+		posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
+		[% story.atstorytime %]
+		[% IF constants.plugin.Print %] 
+			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
+		[% END %]
+		[% IF constants.plugin.Email %]
+			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/email.pl?sid=[% story.sid %]"><img src="[% constants.imagedir -%]/email.gif" height="14" width="20" alt="Email story" ></a>
+		[% END %]<br>
+		[% IF constants.use_dept && story.dept %]<strong>from the <b>[% story.dept %]</b> dept.</strong>[% END %]
+	</div>
+	<div class="body">
+		[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<br>[% mypagemenu %][% END %] 
+		<div class="topic">
+			[% seen_topics.${topic.tid} = 1 %]
+			[% IF user.noicons || user.simpledesign || user.lowbandwidth || user.pda %]
+				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
+			[% ELSIF topic.image %]
+				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
+					<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
+				</a>
+			[% END %]
+			[% FOREACH tid = topiclist %]
+				[% IF seen_topics.$tid ; NEXT ; END %]
+				[% seen_topics.$tid = 1 %]
+				[% topic2 = Slash.db.getTopic(tid) %]
+					[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
+						[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic2.tid %]" class="topic2">[% topic2.textname %]</a> ]
+					[% ELSIF topic2.image %]
+						<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic2.tid %]" class="topic2">
+							<img src="[% constants.imagedir %]/topics/[% topic2.image %]" width="[% topic2.width %]" height="[% topic2.height %]" alt="[% topic2.textname %]" title="[% topic2.textname %]" >
+						</a>
 					[% END %]
-				[% END %]
-</TD></TR></TABLE>
-				[% story.introtext %]
-			</TD></TR></TABLE>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	</TABLE>
+			[% END %]
+		</div>
+		<div class="intro">
+			[% story.introtext %]
+		</div>
 
-[% IF full && user.is_admin && !preview %]<BR><A HREF="[% constants.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
+[% IF full && user.is_admin && !preview && env.script_name != '/admin.pl' %]<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;[% END %]
+[% IF full && !preview && env.script_name != '/admin.pl' %]
+	[% IF constants.plugin.Ajax %]
+		[% IF user.is_admin || user.acl.signoff_allowed %]
+			[% PROCESS signoff stoid = story.stoid %]
+		[% END %]
+		[% IF user.is_admin %]
+			[% PROCESS neverdisplay stoid = stoid %]
+		[% END %]
+	[% END %]
+[% END %]
+
+[% IF story.is_future && !user.is_admin %]<p>See any serious problems with this story?
+[% IF constants.ircslash_remarks %]
+	Paste a short message here (if it's a dupe, the URL would be great)
+	<form action="[% gSkin.rootdir %]/index.pl" method="post">
+	<input type="text" name="remark" size="20" maxlength="100">
+	<input type="hidden" name="sid" value="[% story.sid | strip_attribute %]" >
+	</form>
+	or email
+[% ELSE %]
+	Email
+[% END %]
+<a href="mailto:[% constants.adminmail %]?subject=[DP]%20[% story.title | strip_paramattr_nonhttp %]">our on-duty editor</a>.
+[% END %]
 
 [% IF full && story.bodytext %]
-
-<BR><TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	<TR>
-		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
-				[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
-				[% story.bodytext %]
-			</TD></TR></TABLE>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-</TABLE>
-
-[% ELSE %]
-[% IF constants.run_ads && constants.ad_messaging_num;
-	Slash.getAd(constants.ad_messaging_num);
-END -%]
+	[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
+		<div class="full">
+			[% story.bodytext %]
+		</div>
+	[% ELSE %]
+		[% IF constants.run_ads && constants.ad_messaging_num;
+			Slash.getAd(constants.ad_messaging_num);
+	END -%]
+[% END %]
+	</div>
+</div>
+[% ELSIF dispmode == "brief" %]
+[% IF story.is_future %]<div class="future">[% END %]
+<div class="briefarticle">
+[% storylink = Slash.linkStory ({
+	sid => story.sid,
+	link => story.title,
+	tid  => story.tid
+	skin => story.primaryskid
+ }, 1 );
+%]
+[% title = ''; IF magic;
+	thisskin = Slash.db.getSkin(story.primaryskid);
+	IF thisskin.rootdir;
+		title = "<a href=\"$thisskin.rootdir/\">";
+	ELSE;
+		IF user.is_anon;
+			title = "<a href=\"$gSkin.rootdir/$thisskin.name/\">";
+		ELSE;
+			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
+		END;
+	END;
+	title = "<span class=\"section\">" _ title _ thisskin.title _ "</a></span>: ";
+END;
+	title = title _ "<span class=\"storytitle\">" _ storylink _ "</span>";
+%]
+	[% title %]  [% IF story.commentcount %][% IF thresh_commentcount && story.commentcount != thresh_commentcount %][% thresh_commentcount %] of [% END %][% story.commentcount %] comment[% IF story.commentcount > 1 %]s[% END %][% END %] 
+	[% IF user.is_admin %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">(edit)</a>[% END %]
+	[% IF expandable %]
+	<a href="#" onclick="toggleIntro('intro-[% story.stoid %]','togglest-[% story.stoid %]'); return false"><span id="togglest-[% story.stoid %]">[+]</span></a>
+	[% END %]
+	[% IF getintro %]
+	<div class="introhide" id="intro-[% story.stoid %]">
+		[% story.introtext %]
+	</div>
+	[% END %]
+</div>
+[% IF story.is_future %]</div>[% END %]
 [% END %]
 __seclev__
 10000

@@ -36,7 +36,6 @@ sub new {
 		my $dbclass = ($ENV{GATEWAY_INTERFACE})
 			? "Slash::DB::$modname"
 			: "Slash::DB::Static::$modname";
-#use Carp; Carp::cluck("$$ Slash::DB->new evaling 'use $dbclass'");
 		eval "use $dbclass"; die $@ if $@;
 
 		# Slash::DB->new() returns an object of the preferred
@@ -96,7 +95,6 @@ sub isInstalled {
 
 sub init {
 	my($self) = @_;
-warn "DB.pm init() called, setting _querylog for $self, probably cannot: " . ($self->can('SUPER::init') ? 1 : 0);
 	# Consider clearing any existing fields matching /_cache_/ too.
 	my @fields_to_clear = qw(
 		_querylog	_codeBank

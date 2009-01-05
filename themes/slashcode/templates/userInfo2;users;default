@@ -18,12 +18,12 @@ __template__
                 <div class="yui-b">
                         <div class="block" id="user_bio">
                                 <div class="title" id="user_bio_title">
-                                        <h4>User Bio</h4>
+                                        <h4>[% useredit.nickname %] ([% useredit.uid %])</h4>
                                 </div>
 
                                 <div class="content" id="user_bio_content">
                                         [%
-                                '<a href="'; gSkin.rootdir; '/~';
+                                '<a href="'; gSkin.rootdir; '/^';
                                 useredit.nickname | strip_paramattr; '/">';
                                 useredit.nickname | strip_literal; '</a> ';
                                 PROCESS zoo_icons person=useredit.uid implied="";
@@ -120,15 +120,13 @@ __template__
                         %]
 
                                 </div>
-
-                                <div class="foot"></div>
                         </div>
                 </div>
 
                 <div class="article" id="marquee_content">
-                        <h3>[% latest_event.subject %]</h3>
+                        <h3>[% latest_thing.subject %]</h3>
                         <div class="body">
-                                [% latest_event.text %]
+                                [% latest_thing.body %]
                         </div>
                 </div>
 
@@ -136,9 +134,14 @@ __template__
 
         <div class="nav">
                 <ul class="menu" id="tablist">
-                [% IF latest_comments.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
-                [% IF latest_journals.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
-                [% IF latest_submissions.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
+                <li[% IF data_pane == 'firehose' || (data_pane == '' && !user.is_admin) %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/firehose">Firehose</a></li>
+                [% IF latest_comments.size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
+                [% IF latest_journals.size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
+                [% IF latest_submissions.size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
+                [% IF latest_bookmarks.size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
+                [% IF latest_friends.size != 0 %]<li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
+                [% IF tagshist.size > 2 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
+                [% IF user.is_admin %]<li[% IF data_pane == '' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
 
@@ -146,12 +149,12 @@ __template__
         [% IF latest_comments.size != 0 %]
         <div class="block" id="latest_comments">
                 <div class="title" id="latest_comments_title">
-                        <h4>Latest Comments</h4>
+                        <h4>Comments</h4>
                 </div>
                 <div class="content" id="latest_comments_content">
                         <ul>
                         [% FOREACH cid = latest_comments.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
+                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
                         [% END %]
                         </ul>
                 </div>
@@ -161,13 +164,13 @@ __template__
         [% IF latest_journals.size != 0 %]
         <div class="block" id="latest_journals">
                 <div class="title" id="latest_journals_titles">
-                        <h4>Latest Journal Entries</h4>
+                        <h4>Journal Entries</h4>
                 </div>
 
                 <div class="content" id="latest_journals_content">
                         <ul>
                         [% FOREACH jid = latest_journals.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.desc %]</a><br></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
                         [% END %]
                         </ul>
                 </div>
@@ -177,29 +180,125 @@ __template__
         [% IF latest_submissions.size != 0 %]
         <div class="block" id="latest_submissions">
                 <div class="title" id="latest_submissions_title">
-                        <h4>Latest Submissions</h4>
+                        <h4>Submissions</h4>
                 </div>
 
                 <div class="content" id="latest_submissions_content">
                         <ul>
                         [% FOREACH sid = latest_submissions.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
+                        <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
                         [% END %]
                         </ul>
                 </div>
         </div>
         [% END %]
 
+        [% IF latest_bookmarks.size != 0 %]
+        <div class="block" id="latest_bookmarks">
+                <div class="title" id="latest_bookmarks_title">
+                        <h4>Bookmarks</h4>
+                </div>
+
+                <div class="content" id="latest_bookmarks_content">
+                        <ul>
+                        [% FOREACH bid = latest_bookmarks %]
+                        <li><a href="[% bid.url %]">[% bid.initialtitle %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF latest_friends.size != 0 %]
+        <div class="block" id="latest_friends">
+                <div class="title" id="latest_friends_title">
+                        <h4>Friends</h4>
+                </div>
+
+                <div class="content" id="latest_friends_content">
+                        <ul>
+                        [% FOREACH fid = latest_friends.keys.sort %]
+                        <li><a href="[% constants.real_rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF tagshist.size > 2 %]
+        <div class="block" id="latest_tags">
+                <div class="title" id="latest_tags_title">
+                        <h4>Tags</h4>
+                </div>
+        
+                <div class="content" id="latest_tags_content">
+                        <ul>
+                        [% FOREACH tag = tagshist.keys.sort %]
+                               [% NEXT IF !user.is_admin && tagshist.$tag.0.private == 1 %]
+                                <li>
+                                <a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
+                                </li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>          
+        [% END %]
+
         </div>
 
         <div id="yui-main">
                 <div class="yui-b">
+			<div class="yui-u maincol">
+                		[% IF data_pane == '' && user.is_admin %]
+		                        [% admin_block %]
+                                        <p>
+                                        [%
+                                        IF constants.m2;
+                                                m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+                                                "<h3>Recent M2s</h3>";
+                                                PROCESS listMetamods
+                                                        m2_listing = m2_listing
+                                                        metamods = metamods
+                                                        the_user = useredit;
+                                        END;
+                                        %]
 
-                [% IF data_pane == 'journal' %]
-                [% ELSIF data_pane == 'submissions' %]
-                [% ELSE %]
-                        [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
-                [% END %]
+		                [% ELSIF data_pane == 'journal';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournal', user_view => useredit });
+					fhbox;
+
+		                   ELSIF data_pane == 'journalfriends';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournalfriends', user_view => useredit });
+					fhbox;
+
+		                   ELSIF data_pane == 'submissions';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'usersubmission', user_view => useredit });
+					fhbox;
+
+		                   ELSIF data_pane == 'bookmarks';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userbookmark', user_view => useredit });
+					fhbox;
+				%]	
+		                [% ELSIF data_pane == 'friends' %]
+       	                                [% friends_datapane %]
+
+				[% ELSIF data_pane == 'tags' %]
+                                        [% tags_datapane %] 
+
+				[% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userfirehose', user_view => useredit });
+					fhbox;
+		
+		                 ELSE %]
+                       			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+			                [% END %]
+				</div>
+			</div>
 
                 </div>
         </div>

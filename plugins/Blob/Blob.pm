@@ -32,6 +32,8 @@ my %mimetype_overrides = (
 sub init {
 	my($self) = @_;
 
+	return 0 if ! $self->SUPER::init();
+
 	$self->{_table} = 'blobs';
 	$self->{_prime} = 'id';
 

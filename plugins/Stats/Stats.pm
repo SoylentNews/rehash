@@ -13,6 +13,7 @@ Slash::Stats - Stats plugin for Slash
 use strict;
 use LWP::UserAgent;
 use Slash;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 
@@ -20,6 +21,9 @@ our $VERSION = $Slash::Constants::VERSION;
 
 sub init {
 	my($self, $options) = @_;
+
+	return 0 if ! $self->SUPER::init($options);
+
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	
@@ -229,7 +233,6 @@ sub init {
 
 	1;
 }
-
 
 ########################################################
 sub getAL2Counts {
@@ -584,7 +587,7 @@ sub getErrorStatuses {
 
 ########################################################
 sub getStoryHitsForDay {
-	my ($self, $day, $options) = @_;
+	my($self, $day, $options) = @_;
 	my $sids = $self->sqlSelectAllHashrefArray("sid,hits","stories","day_published=".$self->sqlQuote($day));
 	return $sids;
 }
@@ -1058,7 +1061,7 @@ sub countCommentsDaily {
 
 
 sub getSummaryStats {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	my @where;
 	
 	my $no_op = $options->{no_op} || [ ];
@@ -1068,8 +1071,10 @@ sub getSummaryStats {
 		push @where,  "op NOT IN ($op_not_in)";
 	}
 
-	push @where, "op = ".$self->sqlQuote($options->{op}) if $options->{op};
-	push @where, "skid = ".$self->sqlQuote($options->{skid}) if $options->{skid};
+	push @where, 'op = ' . $self->sqlQuote($options->{op}) if $options->{op};
+	push @where, 'skid = ' . $self->sqlQuote($options->{skid}) if $options->{skid};
+	push @where, 'query_string LIKE ' . $self->sqlQuote($options->{qs_like}) if $options->{qs_like};
+	push @where, 'query_string NOT LIKE ' . $self->sqlQuote($options->{qs_not_like}) if $options->{qs_not_like};
 
 	my $where = join ' AND ', @where;
 	my $table_suffix = $options->{table_suffix} || '';
@@ -1120,7 +1125,7 @@ sub getOpCombinationStats {
 
 ########################################################
 sub getSectionSummaryStats {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	my @where;
 	push @where, "skid IN (" . join(',', map { $self->sqlQuote($_)} @{$options->{skids}}) . ")" if ref $options->{skids} eq "ARRAY";
 
@@ -1139,7 +1144,7 @@ sub getSectionSummaryStats {
 
 ########################################################
 sub getPageSummaryStats {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	my @where;
 	push @where, "op IN (" . join(',', map { $self->sqlQuote($_)} @{$options->{ops}}) . ")" if ref $options->{ops} eq "ARRAY";
 	my $where_clause = join ' AND ', @where;
@@ -1148,7 +1153,7 @@ sub getPageSummaryStats {
 }
 ########################################################
 sub getSectionPageSummaryStats {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	my @where;
 	push @where, "op IN (" . join(',', map { $self->sqlQuote($_)} @{$options->{ops}}) . ")" if ref $options->{ops} eq "ARRAY";
 	push @where, "skid IN (" . join(',', map { $self->sqlQuote($_)} @{$options->{skids}}) . ")" if ref $options->{skids} eq "ARRAY";
@@ -1188,7 +1193,7 @@ sub countBytesByPages {
 
 ########################################################
 sub countUsersMultiTable {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	$self->sqlDo("DELETE FROM accesslog_build_unique_uid");
 	my $tables = $options->{tables} || [];
 
@@ -1201,7 +1206,7 @@ sub countUsersMultiTable {
 ########################################################
 
 sub countUniqueIPs {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	my $where;
 	$where = "anon=".$self->sqlQuote($options->{anon}) if $options->{anon};
 	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp_host_addr", $where);
@@ -2205,7 +2210,7 @@ sub numTagsForDayByType {
 }
 
 sub getTopicStats {
-	my ($self, $days, $order) = @_;
+	my($self, $days, $order) = @_;
 	$days = 30 if $days !~/^\d+$/;
 	my $order_clause = $order eq "name" ? "1 ASC" : "4 DESC";
 

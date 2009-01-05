@@ -69,7 +69,7 @@ sub main {
 			# feel free to send msgdiv => 'thisdivhere' to the ajax call,
 			# and any reskey error messages will be sent to it
 			if ($form->{msgdiv}) {
-				header_ajax({ content_type => 'application/json' });
+				http_send({ content_type => 'application/json' });
 				(my $msgdiv = $form->{msgdiv}) =~ s/[^\w-]+//g;
 				print Data::JavaScript::Anon->anon_dump({
 					html	  => { $msgdiv => $rkey->errstr },
@@ -89,7 +89,7 @@ sub main {
 #	print STDERR "AJAX7 $$: $user->{uid}, $op ($retval)\n";
 
 	if ($retval) {
-		header_ajax($options);
+		http_send($options);
 		print $retval;
 	}
 
@@ -296,7 +296,7 @@ sub submitReply {
 		my $max_duration = $options->{rkey}->max_duration;
 		if (defined($max_duration) && length($max_duration)) {
 			$max_duration = 0 if $max_duration > 60;
-			$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
+			$to_dump{eval_last} = "D2.submitCountdown($pid,$max_duration);"
 		}
 	}
 
@@ -337,7 +337,7 @@ sub previewReply {
 	my $max_duration = $options->{rkey}->max_duration;
 	if (defined($max_duration) && length($max_duration)) {
 		$max_duration = 0 if $max_duration > 60;
-		$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
+		$to_dump{eval_last} = "D2.submitCountdown($pid,$max_duration);"
 	}
 
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
@@ -378,7 +378,7 @@ sub replyForm {
 	}
 
 	$options->{content_type} = 'application/json';
-	$to_dump{eval_first} = "comment_body_reply[$pid] = '$pid_reply';" if $pid_reply;
+	$to_dump{eval_first} = "D2.comment_body_reply()[$pid] = '$pid_reply';" if $pid_reply;
 
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 
@@ -410,13 +410,13 @@ sub fetchComments {
 
 	my $cids          = [ grep { defined && /^\d+$/ } ($form->{_multi}{cids} ? @{$form->{_multi}{cids}} : $form->{cids}) ];
 	my $id            = $form->{discussion_id} || 0;
-	my $cid           = $form->{cid} || 0; # root id
+	my $base_comment  = $form->{cid} || 0; # root id
 	my $d2_seen       = $form->{d2_seen};
 	my $placeholders  = [ grep { defined && /^\d+$/ } ($form->{_multi}{placeholders}  ? @{$form->{_multi}{placeholders}}  : $form->{placeholders}) ];
 	my $read_comments = [ grep { defined && /^\d+$/ } ($form->{_multi}{read_comments} ? @{$form->{_multi}{read_comments}} : $form->{read_comments}) ];
 
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
-#use Data::Dumper; print STDERR Dumper [ $form, $cids, $id, $cid, $d2_seen, $read_comments ];
+#use Data::Dumper; print STDERR Dumper [ $form, $cids, $id, $base_comment, $d2_seen, $read_comments ];
 	return unless $id;
 
 	$slashdb->saveCommentReadLog($read_comments, $id, $user->{uid}) if @$read_comments;
@@ -446,12 +446,21 @@ sub fetchComments {
 
 	my($comments) = selectComments(
 		$discussion,
-		$cid,
+		$base_comment,
 		\%select_options,
 	);
 
-	# XXX error?
-	return unless $comments && keys %$comments;
+	while ($base_comment && (!$comments || keys(%$comments) < 2)) {
+		my $comment = $slashdb->getComment($base_comment);
+		$base_comment = $comment->{pid};
+		($comments) = selectComments(
+			$discussion,
+			$base_comment,
+			\%select_options,
+		);
+	}
+
+	return unless $comments && keys(%$comments) > 1;
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
 	#delete $comments->{0}; # non-comment data
@@ -477,6 +486,7 @@ sub fetchComments {
 					uid     => $comments->{$cid}{uid},
 					pid     => $comments->{$cid}{pid},
 					points  => $comments->{$cid}{points},
+					read    => $comments->{$cid}{has_read} || 0,
 					kids    => []
 				};
 				if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
@@ -584,25 +594,30 @@ sub fetchComments {
 	}
 
 # XXX update noshow_comments, pieces_comments -- pudge
-#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
+#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data, $d2_seen_0;
+
+	$user->{d2_comment_order} ||= 0;
 
 	$options->{content_type} = 'application/json';
 	my %to_dump = (
 		read_comments      => $read_comments,  # send back so we can just mark them
 		update_data        => \%data,
 		html               => \%html,
-		html_append_substr => \%html_append_substr
+		html_append_substr => \%html_append_substr,
+		eval_first         => "D2.d2_comment_order($user->{d2_comment_order});"
 	);
+
 	if ($d2_seen_0) {
 		my $total = $slashdb->countCommentsBySid($id);
 		$total -= $d2_seen_0 =~ tr/,//; # total
 		$total--; # off by one
-		$to_dump{eval_first} ||= '';
-		$to_dump{eval_first} .= "d2_seen = '$d2_seen_0'; updateMoreNum($total);";
+		$to_dump{eval_first} .= "D2.d2_seen('$d2_seen_0'); D2.updateMoreNum($total);";
 	}
 	if (@$placeholders) {
-		$to_dump{eval_first} ||= '';
-		$to_dump{eval_first} .= "placeholder_no_update = " . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @$placeholders }) . ';';
+		$to_dump{eval_first} .= "D2.placeholder_no_update(" . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @$placeholders }) . ');';
+	}
+	if ($base_comment) {
+		$to_dump{eval_first} .= "D2.base_comment($base_comment);";
 	}
 	writeLog($id);
 #print STDERR "\n\n\n", Data::JavaScript::Anon->anon_dump(\%to_dump), "\n\n\n";
@@ -775,7 +790,6 @@ sub getModalPrefs {
 		}
 
 	} else {
-		
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
 				user   => $user,
@@ -971,6 +985,7 @@ sub saveModalPrefs {
 			willing		=> ($params{willing}	     ? 1 : 0),
 			tags_turnedoff	=> ($params{showtags}	     ? undef : 1),
 			opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
+			index_beta	=> ($params{index_beta} ? 1 : 0 ),
 		};
 
 		if (defined $params{tzcode} && defined $params{tzformat}) {
@@ -1092,17 +1107,6 @@ sub saveModalPrefs {
 
 ##################################################################
 sub default { }
-
-##################################################################
-sub header_ajax {
-	my($options) = @_;
-	my $ct = $options->{content_type} || 'text/plain';
-
-	my $r = Apache->request;
-	$r->content_type($ct);
-	$r->header_out('Cache-Control', 'no-cache');
-	$r->send_http_header;
-}
 
 ##################################################################
 sub getOps {

@@ -13,43 +13,64 @@ list
 __seclev__
 10000
 __template__
+[%
+   hide_topic_icons = 0;
+   IF user.noicons || user.simpledesign || user.lowbandwidth || user.pda;
+      hide_topic_icons = 1;
+   END;
+%]
+
+[%# this stuff may move later -- pudge %]
+[% IF options.view == "usersubmission";
+	submission_list = Slash.db.getSubmissionsByUID(options.user_view_uid);
+	submission_count = 0;
+	submission_reject = 0;
+	submission_pend = 0;
+	submission_hash = {};
+	FOR submission = submission_list;
+		submission_count = submission_count + 1;
+		IF submission.del == 0;
+			submission_pend = submission_pend + 1;
+		ELSIF submission.del == 1;
+			submission_reject = submission_reject + 1;
+		END;
+		submission_hash.${submission.subid} = submission;
+	END;
+	submission_accept = submission_count - (submission_reject + submission_pend) %]
+<div id="message"><div class="content"><p class="submissions">Submission Summary:
+[% submission_pend %] pending,
+[% submission_reject %] rejected,
+[% submission_accept %] accepted ([%
+	submission_count;
+	" total, ";
+	USE format;
+	percentage = format('%.2f');
+	percentage((100 * submission_accept) / (submission_accept + submission_reject + submission_pend))
+%]% accepted)</p></div></div>
+
+
+[% ELSIF options.view == "userjournal" %]
+<div id="message"><div class="content">
+	[% IF user.uid == options.user_view_uid -%]
+	<a href="[% constants.real_rootdir %]/journal.pl?op=list">Manage Journal Entries</a> |
+	<a href="[% constants.real_rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a> |
+	[%- END; this_user_nickname = Slash.db.getUser(options.user_view_uid, 'nickname') # options.user_view is not always there ... %]
+	<a href="[% constants.real_rootdir %]/~[% this_user_nickname | strip_paramattr %]/journal/friends">[% this_user_nickname | strip_literal %]'s Friends' Journals</a>
+</div></div>
+
+[% END %]
+
+
+[% IF form.metamod %]
+<div id="metamodwrap">
+[% END %]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
-[% IF env.script_name == "/firehose.pl" || form.ssi %]
-<script type="text/javascript">
-  YAHOO.slashdot.SlashBoxApp = function()
-    {
-      return {
-          init: function()
-            {
-              var slashboxes_container = document.getElementById('slashboxes');
-              var block_titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', slashboxes_container);
-
-              for ( i=0; i<block_titles.length; ++i)
-                {
-                  var inner_title = block_titles[i];
-                  var sb = inner_title.parentNode;
-                  // var inner_title = YAHOO.util.Dom.getElementsByClassName('title', 'div', sb)[0];
-                  
-                  if ( ! sb.id )
-                    sb.id = inner_title.id + "-container";
-
-                  var dd = new YAHOO.slashdot.SlashBox(sb.id, "slashboxes");
-                  dd.setHandleElId(inner_title.id);
-                  dd.setXConstraint(0,0);
-                }
-              // var t0 = new YAHOO.util.DDTarget("slashboxes", "slashboxes");
-            }
-        };
-    } ();
-
-YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
-</script>
+[% IF env.script_name == "/firehose.pl" || env.script_name == "/index2.pl" || form.ssi %]
 [% ua = env.HTTP_USER_AGENT %]
-
 <div id="slashboxes">
 [% Slash.getAd(2) %]
 [% UNLESS user.noboxes %]
-  [% IF slashboxes && !(form.smalldevices || form.embed || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
+  [% IF slashboxes && !(form.smalldevices || form.embed || form.metamod || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
     slashboxes %]
   [% END %]
 [% END %]
@@ -57,7 +78,11 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 <div id="message">
 	<div class="content">
 		<p>
-		[% PROCESS rand_mesg %]
+		[% IF form.metamod %]
+			Meta-Moderation
+		[% ELSE %]
+			[% PROCESS firehosehead %]
+		[% END %]
 		</p>
 	</div>
 </div>
@@ -78,8 +103,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
    END; # login_block
    IF form.skipmenu || options.skipmenu;
 	IF user.is_anon; login_block; END;
-   ELSE;
-     PROCESS nodnix_menus %]
+   ELSE; %]
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% refresh_text = "";
@@ -88,7 +112,6 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
    END;
 %]
 [% PROCESS titlebar title="$constants.sitename Firehose $refresh_text" %]
-[% PROCESS autocomplete %]
 <div class="submenu">
 <div id="message_area">
 </div>
@@ -118,7 +141,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
      END;
   %]
                         [% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' date=startdate start_mode = start_mode %]
-<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" onfocus="focusCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)" id="firehose-filter"></label>
+<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" id="firehose-filter"></label>
 <div id="colorsliderbg">
         <div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.png" alt="Filter firehose to" id="fh_slider_img" title="Filter firehose to"></div>
 </div>
@@ -147,7 +170,22 @@ cmdrtaco dot net but be forgiving of beta code!
 [% END %]
 [% END # form.skipmenu %]
 [% Slash.getAd(6) %]
-<div id="firehoselist">
+[% IF form.index %]
+<script type="text/javascript">
+	//<![CDATA[
+	$(document).ready(function(){
+		if (typeof(ad6) != "undefined" && ad6 == "active") {
+			$('.article:first, #firehoselist div:first').css('margin-right','110px');
+			$('#firehose #message').css('margin-right','355px');
+			$('#fad6').css("position","absolute").css("top","0").css("right","0").css("z-index","10000");
+			$('#slashboxes').css("margin-top","320px");
+		}
+	});
+	//]]>
+</script>
+[% END %]
+
+<div id="firehoselist" [% IF options.nobylines || options.nodates || hide_topic_icons %]class="[% IF options.nobylines %]nobylines [% END %][% IF options.nodates %]nodates[% END %] [% IF hide_topic_icons %] noicons[% END %]"[% END %]>
 [% itemstext %]
 [% page = page || "0" %]
 </div>
@@ -156,7 +194,7 @@ cmdrtaco dot net but be forgiving of beta code!
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page last_day = last_day firehose_more_data = firehose_more_data %]
 <script type="text/javascript">
-	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color'] %]
+	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color', 'view', 'tab', 'base_filter'] %]
 		[%- opt_value = options.$opt -%]
 		[% IF opt == 'startdate' %]
 			[% opt_value = opt_value.replace('-',''); %]
@@ -171,9 +209,16 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% ELSIF fh_page == "users.pl" %]
 		firehose_settings.pageval = 2;
 	[% END %]
+	[% IF options.index %]
+		firehose_settings.index = 1;
+	[% END %]
+	[% IF options.admin_filters || env.script_name == "/console.pl" %]
+		firehose_settings.admin_filters = 1;
+	[% END %]
 
 	var firehose_action_time = 0;
-	[% IF options.pagesize == "large" %]
+	var firehose_user_class = [% user.is_anon ? 0 : 1 %];
+	[% IF options.pagesize == "large" && !form.metamod %]
 	firehose_more_increment = 15;
 	[% END %]
 	[% options_color = (options.color || user.firehose_color || "indigo") %]
@@ -200,13 +245,37 @@ cmdrtaco dot net but be forgiving of beta code!
 		firehose_play();
 	[% END %]
 
+[% IF 0 && constants.run_ads && !user.state.page_adless && !user.state.page_buying %]
+	fh_adTimerUrl = '/images/iframe/firehose.html';
+[% END %]
+
 fh_ticksize = 15;
+[% IF !user.is_anon %]
 firehose_slider_init();
+[% END %]
+$(function(){
+	$('#firehose-filter').
+		focus(function(event){
+			gFocusedText = this;
+		}).
+		blur(function(event){
+			if ( gFocusedText === this ) {
+				gFocusedText = null;
+			}
+		});
+
+	if ( fh_is_admin ) {
+		firehose_init_note_flags();
+	}
+});
 
 
 
 [% END %]
 </script>
+[% IF form.metamod %]
+</div>
+[% END %]
 
 __version__
 $Id$

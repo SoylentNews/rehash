@@ -11,7 +11,6 @@ en_US
 __name__
 journaltop
 __template__
-[% USE Slash %]
 [% IF type == 'top';
 	title = "Top Posters By Number of Entries";
 ELSIF type == 'recent';
@@ -26,26 +25,24 @@ ELSE;
 	col2 = "Entries";
 END %]
 
+<fieldset>
+	<legend>[% title %]</legend>
+	<table width="90%" border="0" cellpadding="2" cellspacing="0">
+		<tr>
+			<td valign="top" width="40%"><b>User</b></td>
+			<td valign="top" width="20%"><b>[% col2 %]</b></td>
+			<td valign="top" width="40%"><b>Last Updated</b></td>
+		</tr>
 
-[% PROCESS titlebar width => "100%" %]
-<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-  <TR BGCOLOR="[% user.bg.2 %]">
-    <TD VALIGN="TOP" WIDTH="40%"><B>User</B></TD>
-    <TD VALIGN="TOP" WIDTH="20%"><B>[% col2 %]</B></TD>
-    <TD VALIGN="TOP" WIDTH="40%"><B>Last Updated</B></TD>
-  </TR>
-
-[% FOREACH journal = journals %]
-  <TR>
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% journal.1 | fixparam %]/journal/">[% journal.1 | strip_literal %]</A></TD>
-    <TD VALIGN="TOP">[% journal.0 %]</TD>
-    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(journal.3) %]</EM></TD>
-  </TR>
-[% END %]
-
-</TABLE>
-
-<BR><BR>
+	[% FOREACH journal = journals %]
+		<tr>
+			<td valign="top"><a href="[% constants.real_rootdir %]/~[% journal.1 | strip_paramattr %]/journal/">[% journal.1 | strip_literal %]</a></td>
+			<td valign="top">[% journal.0 %]</td>
+			<td valign="top"><em>[% Slash.timeCalc(journal.3) %]</em></td>
+		</tr>
+	[% END %]
+	</table>
+</fieldset>
 
 __seclev__
 100

@@ -28,7 +28,7 @@ __template__
    ELSE;
    	horiz = 1 IF constants.comments_control_horizontal;
    END;
-   count = 0 UNLESS count;
+   count = count || 0;
    discussion2 = Slash.discussion2();
    this_title = title;
    spilltext = "Spill at <b>${user.commentspill}</b>!";
@@ -135,18 +135,14 @@ __template__
 		<div class="loki" id="gods">
 		<div class="block">
 			<div class="title">
-[% # this DOES NOT WORK.  we need logic for getting "fh_item." and for the pop color -- pudge %]
-[% IF user.state.d2asp -%]<span class="soda pop[% fh_item.pop || 0 %]"></span>
-<span id="updown-[% fh_item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
-  <a href="#" onclick="firehose_up_down('[% fh_item.id %]','+'); return false" class="up" title="Vote this item up"
-     [% IF !user.is_anon %]onMouseDown="show_nod_menu(this, '[% fh_item.id %]')" onMouseOver="show_nod_menu(this, '[% fh_item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>+</a>
-  <a href="#" onclick="firehose_up_down('[% fh_item.id %]','-'); return false" class="down" title="Vote this item down"
-     [% IF !user.is_anon %]onMouseDown="show_nix_menu(this, '[% fh_item.id %]')" onMouseOver="show_nix_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>-</a>
-</span>[% END %]
+[% IF user.state.d2asp -%]<span class="soda pop[% options.fh_item.popval || 0 %]"></span>
+<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% options.fh_item.id %]"><span id="updown-[% options.fh_item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]" style="top: 0.3em">
+<span class="up">+</span><span class="down">-</span>
+</span></a>[% END %]
 				<h4>
 				[% IF this_title %]
 					<span class="h-inline">[% IF user.state.d2asp -%]
-					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]">[% constants.sitename %]</a>:[% END %]
+					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]" style="margin-left:4em">[% constants.sitename %]</a>:[% END %]
 					<a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>
 					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% this_title | strip_attribute %]"><span id="titlecountnum">[% count %]</span>&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
 				[% ELSE %] 
@@ -158,7 +154,7 @@ __template__
 				}) %]
 				[% END %]
 		<span class="ccw-header-links">[% PROCESS printCommentsLinks commentslinks_id => 'b' %]</span>
-		<span id="d2toggle" title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
+		<span id="d2toggle" title="Toggle window location" onclick="D2.toggleDisplayOptions()" class="close">/</span>
 				</h4>
 			</div>
 		</div>
@@ -169,8 +165,8 @@ YAHOO.slashdot.ThresholdApp = function() {
   return {
     init: function() {
       gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget([% "'X'" IF horiz %]);
-      gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
-      updateTotals();
+      gCommentControlWidget.setTHT(D2.user_threshold(), D2.user_highlightthresh());
+      D2.updateTotals();
     }
   };
 }();

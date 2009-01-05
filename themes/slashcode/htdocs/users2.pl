@@ -28,8 +28,6 @@ sub main {
 	my $postflag = $user->{state}{post};
 	my $op = lc($form->{op});
 
-        return if (!$user->{is_admin});
-
 	# savepasswd is a special case, because once it's called, you
 	# have to reload the form, and you don't want to do any checks if
 	# you've just saved.
@@ -70,20 +68,6 @@ sub main {
 			tab_selected_1	=> 'me',
 			tab_selected_2	=> 'firehose'
 		},
-		usersubmissions	=>  {
-			function	=> \&showSubmissions,
-			#I made this change, not all sites are going to care. -Brian
-			seclev		=> $constants->{users_show_info_seclev},
-			checks		=> [],
-			tab_selected_1	=> 'me',
-		},
-		usercomments	=>  {
-			function	=> \&showComments,
-			#I made this change, not all sites are going to care. -Brian
-			seclev		=> $constants->{users_show_info_seclev},
-			checks		=> [],
-			tab_selected_1	=> 'me',
-		},
 		display	=>  {
 			function	=> \&showInfo,
 			#I made this change, not all sites are going to care. -Brian
@@ -93,42 +77,12 @@ sub main {
 			tab_selected_1	=> 'me',
 			tab_selected_2	=> 'info',
 		},
-#		savepasswd	=> {
-#			function	=> \&savePasswd,
-#			seclev		=> 1,
-#			post		=> 1,
-#			formname	=> $formname,
-#			checks		=> [ qw (max_post_check valid_check
-#						formkey_check regen_formkey) ],
-#			tab_selected_1	=> 'preferences',
-#			tab_selected_2	=> 'password',
-#		},
 		saveuseradmin	=> {
 			function	=> \&saveUserAdmin,
 			seclev		=> 10000,
 			post		=> 1,
 			formname	=> $formname,
 			checks		=> [],
-		},
-		savehome	=> {
-			function	=> \&saveHome,
-			seclev		=> 1,
-			post		=> 1,
-			formname	=> $formname,
-			checks		=> [ qw (valid_check
-						formkey_check regen_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'home',
-		},
-		savecomm	=> {
-			function	=> \&saveComm,
-			seclev		=> 1,
-			post		=> 1,
-			formname	=> $formname,
-			checks		=> [ qw (valid_check
-						formkey_check regen_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'comments',
 		},
 		saveuser	=> {
 			function	=> \&saveUser,
@@ -140,15 +94,6 @@ sub main {
 			tab_selected_1	=> 'preferences',
 			tab_selected_2	=> 'user',
 		},
-#		changepasswd	=> {
-#			function	=> \&changePasswd,
-#			seclev		=> 1,
-#			formname	=> $formname,
-#			checks		=> $savepass_flag ? [] :
-#						[ qw (generate_formkey) ],
-#			tab_selected_1	=> 'preferences',
-#			tab_selected_2	=> 'password',
-#		},
 		editmiscopts	=> {
 			function	=> \&editMiscOpts,
 			seclev		=> 1,
@@ -179,29 +124,6 @@ sub main {
 			formname	=> $formname,
 			checks		=> [],
 		},
-		edithome	=> {
-			function	=> \&editHome,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [ qw (generate_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'home',
-		},
-		editcomm	=> {
-			function	=> \&editComm,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [ qw (generate_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'comments',
-		},
-#		newuser		=> {
-#			function	=> \&newUser,
-#			seclev		=> 0,
-#			formname	=> "${formname}/nu",
-#			checks		=> [ qw (max_post_check valid_check
-#						formkey_check regen_formkey) ],
-#		},
 		newuseradmin	=> {
 			function	=> \&newUserForm,
 			seclev		=> 10000,
@@ -214,71 +136,12 @@ sub main {
 			formname	=> $formname,
 			checks		=> [],
 		},
-#		mailpasswd	=> {
-#			function	=> \&mailPasswd,
-#			seclev		=> 0,
-#			formname	=> "${formname}/mp",
-#			checks		=> [ qw (max_post_check valid_check
-#						interval_check formkey_check ) ],
-#			tab_selected_1	=> 'preferences',
-#			tab_selected_2	=> 'password',
-#		},
 		validateuser	=> {
 			function	=> \&validateUser,
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> ['regen_formkey'],
 		},
-		showtags => {
-			function	=> \&showTags,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'tags',
-		},
-		showbookmarks => {
-			function	=> \&showBookmarks,
-			seclev		=> 0,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'bookmarks',
-		},
-		edittags => {
-			function	=> \&editTags,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'tags',
-		},
-		savetags => {
-			function	=> \&saveTags,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'tags',
-		},
-#		userclose	=>  {
-#			function	=> \&displayForm,
-#			seclev		=> 0,
-#			formname	=> $formname,
-#			checks		=> [],
-#		},
-#		newuserform	=> {
-#			function	=> \&displayForm,
-#			seclev		=> 0,
-#			formname	=> "${formname}/nu",
-#			checks		=> [ qw (max_post_check
-#						generate_formkey) ],
-#		},
-#		mailpasswdform 	=> {
-#			function	=> \&displayForm,
-#			seclev		=> 0,
-#			formname	=> "${formname}/mp",
-#			checks		=> [ qw (max_post_check
-#						generate_formkey) ],
-#			tab_selected_1	=> 'preferences',
-#			tab_selected_2	=> 'password',
-#		},
 		displayform	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
@@ -386,6 +249,10 @@ sub main {
 	}
 
 	# Figure out what the op really is.
+	if ($gSkin->{skid} == 36 && (! $form->{op} && ! ($form->{uid} || $form->{nick}))) {
+		# Default to ThinkGeek user if we're in the ThinkGeek skin
+		$form->{uid} = 1387321;
+	}
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
 	if ($user->{is_anon} && ( ($ops->{$op}{seclev} > 0) || ($op =~ /^newuserform|mailpasswdform|displayform$/) )) {
@@ -535,7 +402,7 @@ sub previewSlashbox {
 		title		=> $title,
 		block 		=> $block,
 		is_editable	=> $is_editable,
-	});
+	}, { Page => 'users' });
 
 	print portalbox($constants->{fancyboxwidth}, $block->{title},
 		$block->{block}, '', $block->{url});
@@ -759,119 +626,6 @@ sub mailPasswd {
 
 
 #################################################################
-sub showSubmissions {
-	my($hr) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-	my($uid, $nickname);
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
-
-	if ($form->{uid} or $form->{nick}) {
-		$uid		= $form->{uid} || $reader->getUserUID($form->{nick});
-		$nickname	= $reader->getUser($uid, 'nickname');
-	} else {
-		$nickname	= $user->{nickname};
-		$uid		= $user->{uid};
-	}
-
-	my $storycount = $reader->countStoriesBySubmitter($uid);
-	my $stories = $reader->getStoriesBySubmitter(
-		$uid,
-		$constants->{user_submitter_display_default}
-	) unless !$storycount;
-
-	slashDisplay('userSub', {
-		nick			=> $nickname,
-		uid			=> $uid,
-		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
-		stories 		=> $stories,
-		storycount 		=> $storycount,
-	});
-}
-
-#################################################################
-sub showComments {
-	my($hr) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-	my $commentstruct = [];
-	my($uid, $nickname);
-
-	my $user_edit;
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $reader->getUserUID($form->{nick});
-		$user_edit = $reader->getUser($uid);
-	} else {
-		$uid = $user->{uid};
-		$user_edit = $user;
-	}
-	$nickname = $user_edit->{nickname};
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $user_edit->{uid} == $user->{uid} ? 'me' : 'otheruser',
-	});
-
-	my $min_comment = $form->{min_comment} || 0;
-	$min_comment = 0 unless $user->{seclev} > $constants->{comments_more_seclev}
-		|| $constants->{comments_more_seclev} == 2 && $user->{is_subscriber};
-	my $comments_wanted = $user->{show_comments_num}
-		|| $constants->{user_comment_display_default};
-	my $commentcount = $reader->countCommentsByUID($uid);
-	my $comments = $reader->getCommentsByUID(
-		$uid, $comments_wanted, $min_comment
-	) if $commentcount;
-
-	if (ref($comments) eq 'ARRAY') {
-		my $kinds = $reader->getDescriptions('discussion_kinds');
-		for my $comment (@$comments) {
-			# This works since $sid is numeric.
-			$comment->{replies} = $reader->countCommentsBySidPid($comment->{sid}, $comment->{cid});
-
-			# This is ok, since with all luck we will not be hitting the DB
-			# ...however, the "sid" parameter here must be the string
-			# based SID from either the "stories" table or from
-			# pollquestions.
-			my $discussion = $reader->getDiscussion($comment->{sid});
-
-			if ($kinds->{ $discussion->{dkid} } =~ /^journal(?:-story)?$/) {
-				$comment->{type} = 'journal';
-			} elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
-				$comment->{type} = 'poll';
-			} else {
-				$comment->{type} = 'story';
-			}
-			$comment->{disc_title}	= $discussion->{title};
-			$comment->{url}	= $discussion->{url};
-		}
-	}
-
-	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
-	slashDisplay('userCom', {
-		nick			=> $nickname,
-		useredit		=> $user_edit,
-		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
-		commentstruct		=> $comments,
-		commentcount		=> $commentcount,
-		min_comment		=> $min_comment,
-		reasons			=> $mod_reader->getReasons(),
-		karma_flag		=> 0,
-		admin_flag		=> $user->{is_admin},
-	});
-}
-
 sub noUser {
 	print getData("no_user");
 }
@@ -897,16 +651,10 @@ sub showFireHose {
 		tab_selected	=> $user_edit->{uid} == $user->{uid} ? 'me' : 'otheruser',
 	});
 	
-	$form->{mode} = "full";
-	$form->{color} = "black";
-	$form->{orderby} = "createtime";
-	$form->{orderdidr} = "DESC";
 	$form->{skipmenu} = 1;
-	$form->{duration} = -1;
-	$form->{fhfilter} = "\"user:$user_edit->{nickname}\"";
 	$form->{pause} = 1;
 
-	my $fhbox = $firehose->listView({ fh_page => 'users.pl'});
+	my $fhbox = $firehose->listView({ fh_page => 'users.pl', tab => 'userfirehose', user_view => $user_edit });
 	slashDisplay("userFireHose", { firehosebox => $fhbox, uid => $uid, useredit => $user_edit });
 }
 
@@ -918,11 +666,13 @@ sub showInfo {
 	my $id = $hr->{uid} || 0;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $fh_reader = getObject('Slash::FireHose', { db_type => 'reader' });
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-
+	
+	$user->{state}{firehose_page} = "user";
 
 	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
 	my($title, $admin_block, $fieldkey) = ('', '', '');
@@ -1000,12 +750,12 @@ sub showInfo {
 				$uid = $requested_user->{uid};
 				$nick = $requested_user->{nickname};
 				if ((my $conflict_id = $reader->getUserUID($id)) && $form->{userinfo}) {
-					#slashDisplay('showInfoConflict', {
-						#op		=> 'userinfo',
-						#id		=> $uid,
-						#nick		=> $nick,
-						#conflict_id	=> $conflict_id
-					#});
+					slashDisplay('showInfoConflict', {
+						op		=> 'userinfo',
+						id		=> $uid,
+						nick		=> $nick,
+						conflict_id	=> $conflict_id
+					}, { Page => 'users' });
 					return 1;
 				}
 			}
@@ -1074,7 +824,13 @@ sub showInfo {
 	# showInfo's header information is delayed until here, because
 	# the target user's info is not available until here.
 	vislenify($requested_user);
-	header(getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey })) or return;
+	$requested_user->{shill_info} = $reader->getShillInfo($requested_user->{shill_id});
+        my $msg = getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey });
+        header($msg, '', {
+		shill_id   => $requested_user->{shill_id},
+		shill_info => $requested_user->{shill_info},
+		U2         => 1
+	}) or return;
 	# This is a hardcoded position, bad idea and should be fixed -Brian
 	# Yeah, we should pull this into a template somewhere...
 	print getMessage('note', { note => $hr->{note} }) if defined $hr->{note};
@@ -1122,7 +878,7 @@ sub showInfo {
 
 		$title = getTitle('user_netID_user_title', $data);
 
-		$admin_block = getUserAdmin($netid, $fieldkey, 0) if $admin_flag;
+		$admin_block = getUserAdmin($netid, $fieldkey, 0) if ($form->{dp} && $form->{dp} eq 'admin' && $admin_flag);
 
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
@@ -1162,7 +918,7 @@ sub showInfo {
 			}
 		}	
 	} else {
-		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
+		$admin_block = getUserAdmin($id, $fieldkey, 1) if ($form->{dp} && $form->{dp} eq 'admin' && $admin_flag);
 
 		$commentcount      = $reader->countCommentsByUID($requested_user->{uid});
 		$commentcount_time = $reader->countCommentsByUID($requested_user->{uid}, { cid_at_or_after => $cid_for_time_period });
@@ -1304,24 +1060,24 @@ sub showInfo {
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
 	if ($requested_user->{nonuid}) {
-		#slashDisplay('netIDInfo', {
-			#title			=> $title,
-			#id			=> $id,
-			#useredit		=> $requested_user,
-			#commentstruct		=> $commentstruct || [],
-			#commentcount		=> $commentcount,
-			#min_comment		=> $min_comment,
-			#admin_flag		=> $admin_flag,
-			#admin_block		=> $admin_block,
-			#netid			=> $netid,
-			#netid_vis		=> $netid_vis,
-			#reasons			=> $mod_reader->getReasons(),
-			#subcount		=> $subcount,
-			#submissions		=> $submissions,
-			#hr_hours_back		=> $ipid_hoursback,
-			#cids_to_mods		=> $cids_to_mods,
-			#comment_time		=> $comment_time
-		#});
+		slashDisplay('netIDInfo', {
+			title			=> $title,
+			id			=> $id,
+			useredit		=> $requested_user,
+			commentstruct		=> $commentstruct || [],
+			commentcount		=> $commentcount,
+			min_comment		=> $min_comment,
+			admin_flag		=> $admin_flag,
+			admin_block		=> $admin_block,
+			netid			=> $netid,
+			netid_vis		=> $netid_vis,
+			reasons			=> $mod_reader->getReasons(),
+			subcount		=> $subcount,
+			submissions		=> $submissions,
+			hr_hours_back		=> $ipid_hoursback,
+			cids_to_mods		=> $cids_to_mods,
+			comment_time		=> $comment_time
+		}, { Page => 'users' });
 
 	} else {
 		if (! $requested_user->{uid}) {
@@ -1357,75 +1113,94 @@ sub showInfo {
 			$metamods = $metamod_reader->getMetamodlogForUser($uid, 30);
 		}
 
+		my $users2 = getObject('Slash::Users2', { db_type => 'reader' });
+
+		# Tags slashbox
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-		my $tagshist = [];
-		if ($tags_reader && $user->{is_admin}) {
-			$tagshist = $tags_reader->getAllTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 30, include_private => 1 });
+		my $tagshist;
+		if ($tags_reader) {
+			$tagshist = $tags_reader->getGroupedTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', include_private => 1, limit => 100 });
+			# This prevents the slashbox from being populated with only private tags,
+			# which leaves it visible but empty for non-admins.
+			my $all_private = 1;
+			if ($tagshist && !$user->{is_admin}) {
+				foreach my $tag (keys %$tagshist) {
+					if (!$tagshist->{$tag}->[0]->{private}) {
+						$all_private = 0;
+						last;
+					}
+				}
+				$tagshist = '' if ($all_private);
+			}
 		}
 
-                # Latest comments
-                my $comment_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 1");
+		# Comments slashbox
+		my $latest_comments = $users2->getLatestComments($uid);
 
-                my @block_ids = split(/,/, $comment_blocks->{$uid}->{block});
+		# Journals slashbox
+		my $latest_journals = $users2->getLatestJournals($uid);
 
-                my %latest_comments;
-                foreach my $comment_block (@block_ids) {
-                        ($latest_comments{$comment_block}->{sid}, $latest_comments{$comment_block}->{subject})
-                                = $reader->sqlSelect("sid, subject", "comments", "cid = $comment_block");
+		# Submissions slashbox
+		my $latest_submissions = $users2->getLatestSubmissions($uid);
+
+		# Bookmarks slashbox
+		my $latest_bookmarks =
+                        $users2->getLatestBookmarks($uid, $latest_journals, $latest_submissions);
+
+		# Friends slashbox
+		my $latest_friends = $users2->getLatestFriends($uid);
+
+		# Relationship pane
+		my $relations_datapane;
+                if ($form->{dp} && $form->{dp} =~ /^(?:friends|fans|freaks|foes|fof|eof|all)$/) {
+			# Need better use of Zoo constants here.
+			my %relations = (
+                                friends => 1,
+                                freaks  => 2,
+                                fans    => 3,
+                                foes    => 4,
+                                fof     => 5,
+                                eof     => 6,
+                                all     => undef,
+                        );
+
+			$relations_datapane =
+				$users2->getRelations($uid, $relations{$form->{dp}}, $nick, $user->{uid});
+		}
+
+		# Tags pane
+		my $tags_datapane;
+                if ($form->{dp} && $form->{dp} eq 'tags') {
+                        $tags_datapane =
+				$users2->getTagsDatapane($uid, $requested_user, $user->{is_admin});
                 }
 
-                # Latest journals
-                my $journal_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 2");
+		# Set up default view (remove marquee for subsections)
+		my $main_view = 0;
+		my $marquee;
+		my $firehose_marquee;
+		my $not_fhid;
+		if ((!$form->{dp}) || ($form->{dp} eq 'admin' && !$user->{is_admin})) {
+			$main_view = 1;
+			$form->{dp} = 'firehose';
+			# Marquee is the "latest thing"
+			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
+			$firehose_marquee = $users2->getFireHoseMarquee($requested_user->{uid});
+			#$marquee = $users2->truncateMarquee($marquee);
+			if ($firehose_marquee) {
+				$not_fhid = $firehose_marquee->{id};
+			} else {
+				$not_fhid = $users2->getMarqueeFireHoseId($marquee);
+			}
+		}
 
-                @block_ids = split(/,/, $journal_blocks->{$uid}->{block});
+		if ($main_view || $form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag') {
 
-                my %latest_journals;
-                foreach my $journal_block (@block_ids) {
-                        ($latest_journals{$journal_block}->{id}, $latest_journals{$journal_block}->{desc})
-                                = $reader->sqlSelect("id, description", "journals", "discussion = $journal_block");
-                }
+			$form->{listonly} = 1;
+			$form->{skipmenu} = 1;
+		}
 
-                # Latest submissions
-                my $submissions_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 3");
-
-                @block_ids = split(/,/, $submissions_blocks->{$uid}->{block});
-
-                my %latest_submissions;
-                foreach my $submission_block (@block_ids) {
-                        ($latest_submissions{$submission_block}->{id}, $latest_submissions{$submission_block}->{title})
-                                = $reader->sqlSelect("id, title", "firehose_text", "id = $submission_block");
-                }
-
-                # Latest event
-                my @latest_event_index = $reader->sqlSelect("event, code", "user_events", "uid = $uid", "order by date desc limit 1");
-
-                my $latest_event;
-                if ($latest_event_index[1] == 1) {
-                        ($latest_event->{key}, $latest_event->{subject}) =
-                                $reader->sqlSelect("cid, subject", "comments", "uid = $uid and cid = " . $latest_event_index[0]);
-
-                        $latest_event->{text} =
-                                $reader->sqlSelect("comment, comment_text", "id = " . $latest_event->{key});
-                } elsif ($latest_event_index[1] == 2) {
-                        ($latest_event->{key}, $latest_event->{subject}) =
-                                $reader->sqlSelect("id, description", "journals", "uid = $uid and discussion = " . $latest_event_index[0]);
-
-                        $latest_event->{text} =
-                                $reader->sqlSelect("article", "journals_text", "id = " . $latest_event->{key});
-                } else {
-                        ($latest_event->{key}, $latest_event->{subject}) =
-                                $reader->sqlSelect("id, title", "firehose_text", "id = " . $latest_event_index[0]);
-
-                        $latest_event->{text} =
-                                $reader->sqlSelect("introtext", "firehose_text", "id = " . $latest_event->{key});
-                }
-
-                $latest_event->{code} = $latest_event_index[1];                
-
-		slashDisplay('userInfo2', {
+		slashDisplay('u2MainView', {
 			title			=> $title,
 			uid			=> $uid,
 			useredit		=> $requested_user,
@@ -1447,11 +1222,18 @@ sub showInfo {
 			subcount		=> $subcount,
 			metamods		=> $metamods,
 			tagshist		=> $tagshist,
-                        latest_comments         => \%latest_comments,
-                        latest_journals         => \%latest_journals,
-                        latest_submissions      => \%latest_submissions,
-                        latest_event            => $latest_event,
-                        data_pane               => $form->{dp},
+			latest_comments         => $latest_comments,
+			latest_journals         => $latest_journals,
+			latest_submissions      => $latest_submissions,
+			latest_bookmarks        => $latest_bookmarks,
+			latest_friends          => $latest_friends,
+			firehose_marquee	=> $firehose_marquee,
+			marquee                 => $marquee,
+			relations_datapane      => $relations_datapane,
+			tags_datapane           => $tags_datapane,
+			data_pane               => $form->{dp},
+			main_view               => $main_view,
+			not_fhid		=> $not_fhid,
 		}, { Page => 'users', Skin => 'default'});
 	}
 
@@ -1623,112 +1405,6 @@ sub validateUser {
 }
 
 #####################################################################
-sub editTags {
-	my($hr) = @_;
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser(); 
-	my $constants = getCurrentStatic();
-	my $note = $hr->{note} || "";
-
-	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
-
-	my $user_edit = $slashdb->getUser($user->{uid});
-	my $title = getTitle('editTags_title');
-
-	slashDisplay('editTags', {
-		user_edit	=> $user_edit,
-		title		=> $title,
-		note		=> $note,
-	});
-}
-
-sub saveTags {
-	my($hr) = @_;
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-
-	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
-
-	$slashdb->setUser($user->{uid}, {
-		tags_turnedoff =>	$form->{showtags} ? '' : 1 });
-	editTags({ note => getMessage('savetags_msg') });
-}
-
-#####################################################################
-sub showTags {
-	my($hr) = @_;
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-
-	my($uid, $user_edit);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
-		$user_edit = $tags_reader->getUser($uid);
-	}
-	if (!$user_edit || $user_edit->{is_anon}) {
-		$uid = $user->{uid};
-		$user_edit = $user;
-	}
-	my $nickname = $user_edit->{nickname};
-
-	if (!$constants->{plugin}{Tags}) {
-		print getError('bad_op', { op => $form->{op}});
-		return;
-	}
-
-	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
-	slashDisplay('usertags', {
-		useredit	=> $user_edit,
-		tags_grouped	=> $tags_ar,
-	});
-}
-
-#################################################################
-sub showBookmarks {
-	my($hr) = @_;
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-
-	my($uid, $user_edit);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
-		$user_edit = $tags_reader->getUser($uid);
-	}
-	if (!$user_edit || $user_edit->{is_anon}) {
-		$uid = $user->{uid};
-		$user_edit = $user;
-	}
-	my $nickname = $user_edit->{nickname};
-
-	if (!$constants->{plugin}{Tags}) {
-		print getError('bad_op', { op => $form->{op}});
-		return;
-	}
-
-	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid}, { type => "urls", only_bookmarked => 1 });
-
-	slashDisplay('userbookmarks', {
-		useredit	=> $user_edit,
-		tags_grouped	=> $tags_ar,
-	});
-}
-
-#################################################################
 sub editKey {
 	my($uid) = @_;
 
@@ -1766,12 +1442,6 @@ sub adminDispatch {
 		header(getMessage('user_header'), '', {}) or return;
 		if ($form->{edituser}) {
 			editUser($hr);
-
-		} elsif ($form->{edithome}) {
-			editHome($hr);
-
-		} elsif ($form->{editcomm}) {
-			editComm($hr);
 
 		} elsif ($form->{changepasswd}) {
 			changePasswd($hr);
@@ -1864,7 +1534,7 @@ sub tildeEd {
 			$story023_default{nexus}{$tid} = 3;
 		} elsif ($prefs{story_full_best_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 2;
-		} elsif ($prefs{story_brief_best_nexus}) {
+		} elsif ($prefs{story_brief_best_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 1;
 		} else {
 			# If brief_sectional_mainpage is set, then all
@@ -1964,78 +1634,6 @@ sub tildeEd {
 }
 
 #################################################################
-sub changePasswd {
-	my($hr) = @_;
-	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
-
-	my $user_edit = {};
-	my $title;
-	my $suadmin_flag = ($user->{seclev} >= 10000) ? 1 : 0;
-
-	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
-	my $admin_block = '';
-
-	my $id = '';
-	if ($admin_flag) {
-		if ($form->{userfield}) {
-			$id ||= $form->{userfield};
-			if ($id =~ /^\d+$/) {
-				$user_edit = $slashdb->getUser($id);
-			} else {
-				$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
-			}
-		} else {
-			$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
-			$id = $user_edit->{uid};
-		}
-	} else {
-		$id = $user->{uid};
-		$user_edit = $user;
-	}
-
-	$admin_block = getUserAdmin($id, 'uid', 1) if $admin_flag;
-
-	# print getMessage('note', { note => $form->{note}}) if $form->{note};
-
-	$title = getTitle('changePasswd_title', { user_edit => $user_edit });
-
-	my $session = $slashdb->getDescriptions('session_login');
-	my $session_select = createSelect('session_login', $session, $user_edit->{session_login}, 1);
-
-	my $clocation = $slashdb->getDescriptions('cookie_location');
-	my @clocation_order = grep { exists $clocation->{$_} } qw(none classbid subnetid ipid);
-	my $clocation_select = createSelect('cookie_location', $clocation,
-		$user_edit->{cookie_location}, 1, 0, \@clocation_order
-	);
-
-	my $got_oldpass = 0;
-	if ($form->{oldpass}) {
-		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass}, 1);
-		$got_oldpass = 1 if $return_uid && $id == $return_uid;
-	}
-
-	slashDisplay('changePasswd', {
-		useredit 		=> $user_edit,
-		admin_flag		=> $suadmin_flag,
-		title			=> $title,
-		session 		=> $session_select,
-		clocation 		=> $clocation_select,
-		admin_block		=> $admin_block,
-		got_oldpass		=> $got_oldpass
-	});
-}
-
-#################################################################
 sub editUser {
 	my($hr) = @_;
 	my $id = $hr->{uid} || '';
@@ -2095,253 +1693,6 @@ sub editUser {
 		editkey 		=> $editkey,
 		admin_block		=> $admin_block,
 		note			=> $note,
-	});
-}
-
-#################################################################
-sub editHome {
-	my($hr) = @_;
-	my $id = $hr->{uid} || '';
-	my $note = $hr->{note} || '';
-
-	my $slashdb = getCurrentDB();
-	my $form = getCurrentForm();
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
-
-	my($formats, $title, $tzformat_select);
-	my $user_edit = {};
-	my $fieldkey;
-
-	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
-	my $admin_block = '';
-
-	if ($admin_flag && $form->{userfield}) {
-		$id ||= $form->{userfield};
-		if ($form->{userfield} =~ /^\d+$/) {
-			$user_edit = $slashdb->getUser($id);
-			$fieldkey = 'uid';
-		} else {
-			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
-			$fieldkey = 'nickname';
-		}
-	} else {
-		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
-		$fieldkey = 'uid';
-	}
-#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR scalar(localtime) . " user_edit: " . Dumper($user_edit);
-
-	return if isAnon($user_edit->{uid}) && ! $admin_flag;
-	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
-
-	$title = getTitle('editHome_title');
-
-	return if $user->{seclev} < 100 && isAnon($user_edit->{uid});
-
-	$formats = $slashdb->getDescriptions('dateformats');
-	$tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
-
-	my $lb_check = $user_edit->{lowbandwidth} ? $constants->{markup_checked_attribute} : '';
-	my $sd_check = $user_edit->{simpledesign} ? $constants->{markup_checked_attribute} : '';
-	my $i_check = $user_edit->{noicons}	? $constants->{markup_checked_attribute} : '';
-	my $w_check = $user_edit->{willing}	? $constants->{markup_checked_attribute} : '';
-
-	my $tilde_ed = tildeEd($user_edit);
-
-	slashDisplay('editHome', {
-		title			=> $title,
-		admin_block		=> $admin_block,
-		user_edit		=> $user_edit,
-		tzformat_select		=> $tzformat_select,
-		i_check			=> $i_check,
-		w_check			=> $w_check,
-		lb_check		=> $lb_check,
-		sd_check		=> $sd_check,
-		tilde_ed		=> $tilde_ed,
-		note			=> $note,
-	});
-}
-
-#################################################################
-sub editComm {
-	my($hr) = @_;
-	my $id = $hr->{uid} || '';
-	my $note = $hr->{note} || '';
-
-	my $slashdb = getCurrentDB();
-	my $form = getCurrentForm();
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-	my $user_edit = {};
-	my($formats, $commentmodes_select, $commentsort_select, $title,
-		$uthreshold_select, $highlightthresh_select, $posttype_select,
-		$bytelimit_select);
-
-	my $admin_block = '';
-	my $fieldkey;
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
-
-	my $admin_flag = $user->{is_admin} ? 1 : 0;
-
-	if ($admin_flag && $form->{userfield}) {
-		$id ||= $form->{userfield};
-		if ($form->{userfield} =~ /^\d+$/) {
-			$user_edit = $slashdb->getUser($id);
-			$fieldkey = 'uid';
-		} else {
-			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
-			$fieldkey = 'nickname';
-		}
-	} else {
-		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
-		$fieldkey = 'uid';
-	}
-
-	my $hi = $constants->{comment_maxscore} - $constants->{comment_minscore};
-	my $lo = -$hi;
-	my @range = map { $_ > 0 ? "+$_" : $_ } ($lo .. $hi);
-
-	my @reasons = ( );
-	my %reason_select = ( );
-	if ($constants->{m1}) {
-		my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
-		my $reasons = $mod_reader->getReasons();
-		for my $id (sort { $a <=> $b } keys %$reasons) {
-			push @reasons, $reasons->{$id}{name};
-		}
-		# Reason modifiers
-		for my $reason_name (@reasons) {
-			my $key = "reason_alter_$reason_name";
-			$reason_select{$reason_name} = createSelect(
-				$key, \@range, 
-				$user_edit->{$key} || 0, 1, 1
-			);
-		}
-	}
-
-	# Zoo relation modifiers
-	my %people_select;
-	my @people =  qw(friend foe anonymous fof eof freak fan);
-	for (@people) {
-		my $key = "people_bonus_$_";
-		$people_select{$_} = createSelect($key, \@range, 
-			$user_edit->{$key} || 0, 1, 1
-		);
-	}
-
-	# New-user modifier
-	my $new_user_bonus_select = createSelect('new_user_bonus', \@range, 
-			$user_edit->{new_user_bonus} || 0, 1, 1);
-	my $new_user_percent_select = createSelect('new_user_percent',
-			[( 1..15, 20, 25, 30, 35, 40, 45, 50, 55,
-			  60, 65, 70, 75, 80, 85, 90, 95 )], 
-			$user_edit->{new_user_percent} || 100, 1, 1);
-	# Karma modifier
-	my $karma_bonus = createSelect('karma_bonus', \@range, 
-			$user_edit->{karma_bonus} || 0, 1, 1);
-	# Subscriber modifier
-	my $subscriber_bonus = createSelect('subscriber_bonus', \@range, 
-			$user_edit->{subscriber_bonus} || 0, 1, 1);
-
-	# Length modifier
-	my $small_length_bonus_select = createSelect('clsmall_bonus', \@range, 
-			$user_edit->{clsmall_bonus} || 0, 1, 1);
-	my $long_length_bonus_select = createSelect('clbig_bonus', \@range, 
-			$user_edit->{clbig_bonus} || 0, 1, 1);
-
-	return if isAnon($user_edit->{uid}) && ! $admin_flag;
-	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
-
-	$title = getTitle('editComm_title');
-
-	$formats = $slashdb->getDescriptions('commentmodes');
-	$commentmodes_select=createSelect('umode', $formats, $user_edit->{mode}, 1);
-
-	$formats = $slashdb->getDescriptions('sortcodes');
-	$commentsort_select = createSelect(
-		'commentsort', $formats, $user_edit->{commentsort}, 1
-	);
-
-	$formats = $slashdb->getDescriptions('threshcodes');
-	$uthreshold_select = createSelect(
-		'uthreshold', $formats, $user_edit->{threshold}, 1
-	);
-
-	$formats = $slashdb->getDescriptions('threshcodes');
-	$highlightthresh_select = createSelect(
-		'highlightthresh', $formats, $user_edit->{highlightthresh}, 1
-	);
-
-	$user_edit->{bytelimit} = $constants->{defaultbytelimit}
-		if $user_edit->{bytelimit} < 0 || $user_edit->{bytelimit} > 7;
-	my $bytelimit_desc = $user_edit->{is_subscriber} ? 'bytelimit' : 'bytelimit_sub';
-	$formats = $slashdb->getDescriptions($bytelimit_desc);
-	$bytelimit_select = createSelect(
-		'bytelimit', $formats, $user_edit->{bytelimit}, 1
-	);
-
-	my $h_check  = $user_edit->{hardthresh}		 ? $constants->{markup_checked_attribute} : '';
-	my $r_check  = $user_edit->{reparent}		 ? $constants->{markup_checked_attribute} : '';
-	my $n_check  = $user_edit->{noscores}		 ? $constants->{markup_checked_attribute} : '';
-	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
-	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
-	my $sb_check = $user_edit->{nosubscriberbonus}	 ? $constants->{markup_checked_attribute} : '';
-	my $p_check  = $user_edit->{postanon}		 ? $constants->{markup_checked_attribute} : '';
-	my $nospell_check = $user_edit->{no_spell}	 ? $constants->{markup_checked_attribute} : '';
-	my $s_mod_check = $user_edit->{mod_with_comm}	 ? $constants->{markup_checked_attribute} : '';
-	my $s_m2_check = $user_edit->{m2_with_mod}	 ? $constants->{markup_checked_attribute} : '';
-	my $s_m2c_check = $user_edit->{m2_with_comm_mod} ? $constants->{markup_checked_attribute} : '';
-
-	$formats = $slashdb->getDescriptions('postmodes');
-	$posttype_select = createSelect(
-		'posttype', $formats, $user_edit->{posttype}, 1
-	);
-
-	slashDisplay('editComm', {
-		title			=> $title,
-		admin_block		=> $admin_block,
-		user_edit		=> $user_edit,
-		h_check			=> $h_check,
-		r_check			=> $r_check,
-		n_check			=> $n_check,
-		s_check			=> $s_check,
-		b_check			=> $b_check,
-		sb_check		=> $sb_check,
-		p_check			=> $p_check,
-		s_mod_check		=> $s_mod_check,
-		s_m2_check		=> $s_m2_check,
-		s_m2c_check		=> $s_m2c_check,
-		nospell_check		=> $nospell_check,
-		commentmodes_select	=> $commentmodes_select,
-		commentsort_select	=> $commentsort_select,
-		highlightthresh_select	=> $highlightthresh_select,
-		uthreshold_select	=> $uthreshold_select,
-		posttype_select		=> $posttype_select,
-		reasons			=> \@reasons,
-		reason_select		=> \%reason_select,
-		people			=> \@people,
-		people_select		=> \%people_select,
-		new_user_percent_select	=> $new_user_percent_select,
-		new_user_bonus_select	=> $new_user_bonus_select,
-		note			=> $note,
-		karma_bonus		=> $karma_bonus,
-		subscriber_bonus	=> $subscriber_bonus,
-		small_length_bonus_select => $small_length_bonus_select,
-		long_length_bonus_select => $long_length_bonus_select,
-		bytelimit_select	=> $bytelimit_select,
 	});
 }
 
@@ -2502,92 +1853,6 @@ sub saveUserAdmin {
 }
 
 #################################################################
-sub savePasswd {
-	my($hr) = @_;
-	my $note = $hr->{noteref} || undef;
-
-	my $slashdb = getCurrentDB();
-	my $form = getCurrentForm();
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-
-	my $error_flag = 0;
-	my $user_edit = {};
-	my $uid;
-
-	my $user_edits_table = {};
-
-	if ($user->{is_admin}) {
-		$uid = $form->{uid} || $user->{uid};
-	} else {
-		$uid = ($user->{uid} == $form->{uid}) ? $form->{uid} : $user->{uid};
-	}
-
-	$user_edit = $slashdb->getUser($uid);
-
-	if (!$user_edit->{nickname}) {
-		$$note .= getError('cookie_err', { titlebar => 0 }, 0, 1)
-			if $note;
-		$error_flag++;
-	}
-
-	if ($form->{pass1} ne $form->{pass2}) {
-		$$note .= getError('saveuser_passnomatch_err', { titlebar => 0 }, 0, 1)
-			if $note;
-		$error_flag++;
-	}
-
-	if (!$form->{pass1} || length $form->{pass1} < 6) {
-		$$note .= getError('saveuser_passtooshort_err', { titlebar => 0 }, 0, 1)
-			if $note;
-		$error_flag++;
-	}
-
-	if (!$user->{is_admin}){
-		# not an admin -- check old password before changing passwd
-		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass}, 1);
-		if (!$return_uid || $return_uid != $uid) {
-			$$note .= getError('saveuser_badoldpass_err', { titlebar => 0 }, 0, 1) 
-				if $note;
-			$error_flag++;
-
-		}
-	}
-
-	if (! $error_flag) {
-		$user_edits_table->{passwd} = $form->{pass1} if $form->{pass1};
-		$user_edits_table->{session_login} = $form->{session_login};
-		$user_edits_table->{cookie_location} = $form->{cookie_location};
-
-		# changed pass, so delete all logtokens
-		$slashdb->deleteLogToken($form->{uid}, 1);
-
-		if ($user->{admin_clearpass}
-			&& !$user->{state}{admin_clearpass_thisclick}) {
-			# User is an admin who sent their password in the clear
-			# some time ago; now that it's been changed, we'll forget
-			# about that incident, unless this click was sent in the
-			# clear as well.
-			$user_edits_table->{admin_clearpass} = '';
-		}
-
-		getOtherUserParams($user_edits_table);
-		$slashdb->setUser($uid, $user_edits_table) ;
-		$$note .= getMessage('saveuser_passchanged_msg',
-			{ nick => $user_edit->{nickname}, uid => $user_edit->{uid} },
-		0, 1) if $note;
-
-		# only set cookie if user is current user
-		if ($form->{uid} eq $user->{uid}) {
-			$user->{logtoken} = bakeUserCookie($uid, $slashdb->getLogToken($form->{uid}, 1));
-			setCookie('user', $user->{logtoken}, $user_edits_table->{session_login});
-		}
-	}
-
-	return $error_flag;
-}
-
-#################################################################
 sub saveUser {
 	my($hr) = @_;
 	my $slashdb = getCurrentDB();
@@ -2745,409 +2010,6 @@ sub saveUser {
 	editUser({ uid => $uid, note => $note });
 }
 
-
-#################################################################
-sub saveComm {
-	my($hr) = @_;
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-	my($uid, $user_fakeemail);
-
-	if ($user->{is_admin}) {
-		$uid = $form->{uid} || $user->{uid};
-	} else {
-		$uid = ($user->{uid} == $form->{uid}) ?
-			$form->{uid} : $user->{uid};
-	}
-
-	# Do the right thing with respect to the chosen email display mode
-	# and the options that can be displayed.
-	my $user_edit = $slashdb->getUser($uid);
-	my $new_fakeemail = '';		# at emaildisplay 0, don't show any email address
-	if ($form->{emaildisplay}) {
-		$new_fakeemail = getArmoredEmail($uid)		if $form->{emaildisplay} == 1;
-		$new_fakeemail = $user_edit->{realemail}	if $form->{emaildisplay} == 2;
-	}
-
-	my $name = $user->{seclev} && $form->{name} ?
-		$form->{name} : $user->{nickname};
-
-	my $note = getMessage('savenickname_msg',
-		{ nickname => $name });
-
-	print getError('cookie_err') if isAnon($uid) || !$name;
-
-	# Take care of the lists
-	# Enforce Ranges for variables that need it
-	$form->{commentlimit} = 0 if $form->{commentlimit} < 1;
-	my $cl_max = $constants->{comment_commentlimit} || 0;
-	$form->{commentlimit} = $cl_max if $cl_max > 0 && $form->{commentlimit} > $cl_max;
-	$form->{commentspill} = 0 if $form->{commentspill} < 1;
-
-	# For some of these values, namely the ones that we happen to
-	# know get stored in users_param, we change them to 'undef'
-	# if they are the default value.  This deletes them from the
-	# users_param table, which has the same effect as storing the
-	# default except it's faster all around.  If we ever change
-	# the schema to promote these fields from params into a
-	# proper users_* table, then this will no longer be correct.
-	# See prepareUser().
-	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
-	my $min = -$max;
-	my $karma_bonus = ($form->{karma_bonus} !~ /^[\-+]?\d+$/) ? "+1" : $form->{karma_bonus};
-	my $subscriber_bonus = ($form->{subscriber_bonus} !~ /^[\-+]?\d+$/) ? "+1" : $form->{subscriber_bonus};
-	my $new_user_bonus = ($form->{new_user_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{new_user_bonus};
-	my $new_user_percent = (($form->{new_user_percent} <= 100 && $form->{new_user_percent} >= 0) 
-			? $form->{new_user_percent}
-			: 100); 
-	my $clsmall_bonus = ($form->{clsmall_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clsmall_bonus};
-	my $clbig_bonus = ($form->{clbig_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clbig_bonus};
-
-	my $user_edits_table = {
-		discussion2		=> $form->{discussion2} || undef,
-		d2_comment_q		=> $form->{d2_comment_q} || undef,
-		d2_comment_order	=> $form->{d2_comment_order} || undef,
-		clsmall			=> $form->{clsmall},
-		clsmall_bonus		=> ($clsmall_bonus || undef),
-		clbig			=> $form->{clbig},
-		clbig_bonus		=> ($clbig_bonus || undef),
-		commentlimit		=> $form->{commentlimit},
-		bytelimit		=> $form->{bytelimit},
-		commentsort		=> $form->{commentsort},
-		commentspill		=> $form->{commentspill},
-		domaintags		=> ($form->{domaintags} != 2 ? $form->{domaintags} : undef),
-		emaildisplay		=> $form->{emaildisplay} || undef,
-		fakeemail		=> $new_fakeemail,
-		highlightthresh		=> $form->{highlightthresh},
-		maxcommentsize		=> $form->{maxcommentsize},
-		mode			=> $form->{umode},
-		posttype		=> $form->{posttype},
-		threshold		=> $form->{uthreshold},
-		nosigs			=> ($form->{nosigs}     ? 1 : 0),
-		reparent		=> ($form->{reparent}   ? 1 : 0),
-		noscores		=> ($form->{noscores}   ? 1 : 0),
-		hardthresh		=> ($form->{hardthresh} ? 1 : 0),
-		no_spell		=> ($form->{no_spell}   ? 1 : undef),
-		nobonus			=> ($form->{nobonus} ? 1 : undef),
-		nosubscriberbonus	=> ($form->{nosubscriberbonus} ? 1 : undef),
-		postanon		=> ($form->{postanon} ? 1 : undef),
-		new_user_percent	=> ($new_user_percent && $new_user_percent != 100
-						? $new_user_percent : undef),
-		new_user_bonus		=> ($new_user_bonus || undef),
-		karma_bonus		=> ($karma_bonus ne '+1' ? $karma_bonus : undef),
-		subscriber_bonus	=> ($subscriber_bonus || undef),
-		textarea_rows		=> ($form->{textarea_rows} != $constants->{textarea_rows}
-						? $form->{textarea_rows} : undef),
-		textarea_cols		=> ($form->{textarea_cols} != $constants->{textarea_cols}
-						? $form->{textarea_cols} : undef),
-		user_comment_sort_type	=> ($form->{user_comment_sort_type} != 2
-						? $form->{user_comment_sort_type} : undef ),
-		mod_with_comm		=> ($form->{mod_with_comm} ? 1 : undef),
-		m2_with_mod		=> ($form->{m2_with_mod} ? 1 : undef),
-        	m2_with_comm_mod		=> ($form->{m2_with_mod_on_comm} ? 1 : undef),
-
-	};
-	
-	# set our default values for the items where an empty-string won't do 
-	my $defaults = {
-		posttype        => 2,
-		highlightthresh => 4,
-		maxcommentsize  => 4096,
-		reparent        => 1,
-		commentlimit    => 100,
-		commentspill    => 50,
-		mode            => 'thread'
-	};
-
-	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
-	my @reasons = ( );
-	my $reasons = $mod_reader->getReasons();
-	for my $id (sort { $a <=> $b } keys %$reasons) {
-		push @reasons, $reasons->{$id}{name};
-	}
-
-	for my $reason_name (@reasons) {
-		my $key = "reason_alter_$reason_name";
-		my $answer = $form->{$key} || 0;
-		$answer = 0 if !$answer || $answer !~ /^[\-+]?\d+$/;
-		$user_edits_table->{$key} = ($answer == 0) ? '' : $answer;
-	}
-
-	for (qw| friend foe anonymous fof eof freak fan |) {
-		my $answer = $form->{"people_bonus_$_"};
-		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
-		$user_edits_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
-	}
-	getOtherUserParams($user_edits_table);
-	setToDefaults($user_edits_table, {}, $defaults) if $form->{restore_defaults};
-	$slashdb->setUser($uid, $user_edits_table);
-
-	editComm({ uid => $uid, note => $note });
-}
-
-#################################################################
-sub saveHome {
-	my($hr) = @_;
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-	my($uid, $error);
-
-	if ($user->{is_admin}) {
-		$uid = $form->{uid} || $user->{uid} ;
-	} else {
-		$uid = ($user->{uid} == $form->{uid}) ?
-			$form->{uid} : $user->{uid};
-	}
-	my $edit_user = $slashdb->getUser($uid);
-
-	my $name = $user->{seclev} && $form->{name} ?
-		$form->{name} : $user->{nickname};
-	$name = substr($name, 0, 20);
-
-	my $note = getMessage('savenickname_msg',
-		{ nickname => $name });
-
-	if (isAnon($uid) || !$name) {
-		my $cookiemsg = getError('cookie_err');
-		print $cookiemsg;
-	}
-
-	# Using the existing list of slashboxes and the set of
-	# what's checked and not, build up the new list.
-	# (New arrivals go at the end.)
-	my $slashboxes = $edit_user->{slashboxes};
-	# Only go through all this if the user clicked save,
-	# not "Restore Slashbox Defaults"!
-	my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
-	my $default_slashboxes_textlist = join ",",
-		@{$skinBoxes->{$constants->{mainpage_skid}}};
-	if (!$form->{restore_slashbox_defaults}) {
-		$slashboxes = $default_slashboxes_textlist if !$slashboxes;
-		my @slashboxes = split /,/, $slashboxes;
-		my %slashboxes = ( );
-		for my $i (0..$#slashboxes) {
-			$slashboxes{$slashboxes[$i]} = $i;
-		}
-		# Add new boxes in.
-		for my $key (sort grep /^showbox_/, keys %$form) {
-			my($bid) = $key =~ /^showbox_(\w+)$/;
-			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
-			if (! exists $slashboxes{$bid}) {
-				$slashboxes{$bid} = 999; # put it at the end
-			}
-		}
-		# Remove any boxes that weren't checked.
-		for my $bid (@slashboxes) {
-			delete $slashboxes{$bid} unless $form->{"showbox_$bid"};
-		}
-		@slashboxes = sort {
-			$slashboxes{$a} <=> $slashboxes{$b}
-			||
-			$a cmp $b
-		} keys %slashboxes;
-		# This probably should be a var (and appear in tilded_customize_msg)
-		$#slashboxes = 19 if $#slashboxes > 19;
-		$slashboxes = join ",", @slashboxes;
-	}
-	# If we're right back to the default, that means the
-	# empty string.
-	if ($slashboxes eq $default_slashboxes_textlist) {
-		$slashboxes = "";
-	}
-
-	# Set the story_never and story_always fields.
-	my $author_hr = $slashdb->getDescriptions('authors');
-	my $tree = $slashdb->getTopicTree();
-	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
-	my(@story_always_topic, @story_always_author);
-	my(@story_always_nexus, @story_full_brief_nexus, @story_brief_always_nexus, @story_full_best_nexus, @story_brief_best_nexus);
-	my($story_topic_all, $story_author_all, $story_nexus_all) = (0, 0, 0);
-	
-	# Topics are either present (value=2) or absent (value=0).  If absent,
-	# push them onto the never list.  Otherwise, do nothing.  (There's no
-	# way to have an "always" topic, at the moment.)  If the hidden
-	# field topictids_present is false, then there are no topic tids,
-	# skip this.
-	if ($form->{topictids_present}) {
-		for my $tid (
-			sort { $a <=> $b }
-			grep { !$tree->{$_}{nexus} }
-			keys %$tree
-		) {
-			my $key = "topictid$tid";
-			$story_topic_all++;
-			if (!$form->{$key}) {		push @story_never_topic, $tid	}
-		}
-	}
-	# Authors are either present (value=2) or absent (value=0).  If
-	# absent, push them onto the never list.  Otherwise, do nothing.
-	# (There's no way to have an "always" author, at the moment.)
-	for my $aid (sort { $a <=> $b } keys %$author_hr) {
-		my $key = "aid$aid";
-		$story_author_all++;
-		if (!$form->{$key}) {			push @story_never_author, $aid	}
-	}
-	# Nexuses can have value 0, 1, 2, 3, 4, 5.  
-	# 0 means the never list,
-	# 1 means brief view of mainpage articles only
-	# 2 means full view of mainpage articles only
-	# 3 means brief view of all content
-	# 4 means full view of mainpage content, brief view of sectional
-	# 5 means full view of all content
-	for my $tid (
-		sort { $a <=> $b }
-		map { /^nexustid(\d+)$/; $1 }
-		grep { /^nexustid\d+$/ }
-		keys %$form
-	) {
-		my $key = "nexustid$tid";
-		next unless $tid && $tree->{$tid} && $tree->{$tid}{nexus};
-		$story_nexus_all++;
-		   if (!$form->{$key}) {		push @story_never_nexus, $tid	}
-		elsif ($form->{$key} == 5 ) {		push @story_always_nexus, $tid	}
-		elsif ($form->{$key} == 4 ) {		push @story_full_brief_nexus, $tid }
-		elsif ($form->{$key} == 3 ) {		push @story_brief_always_nexus, $tid }
-		elsif ($form->{$key} == 2 ) {		push @story_full_best_nexus, $tid }
-		elsif ($form->{$key} == 1 ) {		push @story_brief_best_nexus, $tid }
-		
-						
-	}
-#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR scalar(localtime) . " s_n_t '@story_never_topic' s_n_a '@story_never_author' s_n_n '@story_never_nexus' s_a_n '@story_always_nexus' form: " . Dumper($form);
-	# Sanity check.
-	$#story_never_topic		= 299 if $#story_never_topic   > 299;
-	$#story_never_author		= 299 if $#story_never_author  > 299;
-	$#story_never_nexus 		= 299 if $#story_never_nexus   > 299;
-	$#story_always_topic		= 299 if $#story_always_topic  > 299;
-	$#story_always_author 		= 299 if $#story_always_author > 299;
-	$#story_always_nexus 		= 299 if $#story_always_nexus  > 299;
-	$#story_full_brief_nexus 	= 299 if $#story_full_brief_nexus > 299;
-	$#story_brief_always_nexus	= 299 if $#story_brief_always_nexus > 299;
-	$#story_brief_best_nexus 	= 299 if $#story_brief_best_nexus > 299;
-	$#story_full_best_nexus		= 299 if $#story_full_best_nexus > 299;
-	
-	my $story_never_topic   = join ",", @story_never_topic;
-	$story_never_topic = ($constants->{subscribe} && $user->{is_subscriber})
-		? checkList($story_never_topic, 1024)
-		: checkList($story_never_topic);
-	my $story_never_author  	= checkList(join ",", @story_never_author);
-	my $story_never_nexus   	= checkList(join ",", @story_never_nexus);
-	my $story_always_topic  	= checkList(join ",", @story_always_topic);
-	$story_always_topic = ($constants->{subscribe} && $user->{is_subscriber})
-		? checkList($story_always_topic, 1024)
-		: checkList($story_always_topic);
-	my $story_always_author 	= checkList(join ",", @story_always_author);
-
-	my $story_always_nexus  	= checkList(join ",", @story_always_nexus);
-	my $story_full_brief_nexus	= checkList(join ",", @story_full_brief_nexus);
-	my $story_brief_always_nexus    = checkList(join ",", @story_brief_always_nexus);
-	my $story_brief_best_nexus	= checkList(join ",", @story_brief_best_nexus);
-	my $story_full_best_nexus	= checkList(join ",", @story_full_best_nexus);
-	
-
-	my $user_edits_table = {
-		story_never_topic		=> $story_never_topic,
-		story_never_author		=> $story_never_author,
-		story_never_nexus		=> $story_never_nexus,
-		story_always_topic		=> $story_always_topic,
-		story_always_author		=> $story_always_author,
-		story_always_nexus		=> $story_always_nexus,
-		story_brief_always_nexus	=> $story_brief_always_nexus,
-		story_full_brief_nexus 		=> $story_full_brief_nexus,
-		story_full_best_nexus		=> $story_full_best_nexus,
-		story_brief_best_nexus		=> $story_brief_best_nexus,
-
-		slashboxes	=> checkList($slashboxes, 1024),
-
-		maxstories	=> 30, # XXXSKIN fix this later
-		noboxes		=> ($form->{useslashboxes} ? 0 : 1),
-		lowbandwidth	=> ($form->{lowbandwidth} ? 1 : 0),
-		simpledesign	=> ($form->{simpledesign} ? 1 : 0),
-		noicons		=> ($form->{noicons} ? 1 : 0),
-		willing		=> ($form->{willing} ? 1 : 0),
-	};
-
-	if (defined $form->{tzcode} && defined $form->{tzformat}) {
-		$user_edits_table->{tzcode} = $form->{tzcode};
-		$user_edits_table->{dfid}   = $form->{tzformat};
-		$user_edits_table->{dst}    = $form->{dst};
-	}
-
-	# Force the User Space area to contain only known-good HTML tags.
-	# Unfortunately the cookie login model makes it just too risky
-	# to allow scripts in here;  CSS's steal passwords.  There are
-	# no known vulnerabilities at this time, but a combination of the
-	# social engineering taking place (inviting users to put Javascript
-	# from websites in here, and making available script URLs for that
-	# purpose), plus the fact that this could be used to amplify the
-	# seriousness of any future vulnerabilities, means it's way past
-	# time to shut this feature down.  - Jamie 2002/03/06
-
-	# it's a VARCHAR ...
-	my $mylinks_limit = 255;
-	$user_edits_table->{mylinks} = balanceTags(strip_html(
-		chopEntity($form->{mylinks} || '', $mylinks_limit)
-	), { deep_nesting => 2, length => $mylinks_limit });
-
-	$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
-
-	$error = 1;
-	# must select at least 1/4 of nexuses, topics, authors
-	if      ( scalar(@story_never_author) > ($story_author_all * 3/4) ) {
-		$note = getError('editHome_too_many_disabled');
-	} elsif ( scalar(@story_never_nexus) > ($story_nexus_all * 3/4) ) {
-		$note = getError('editHome_too_many_disabled');
-	} elsif ( scalar(@story_never_topic) > ($story_topic_all * 3/4) ) {
-		$note = getError('editHome_too_many_disabled');
-	} else {
-		$error = 0;
-	}
-
-	unless ($error) {
-		# If a user is unwilling to moderate, we should cancel all points, lest
-		# they be preserved when they shouldn't be.
-		if (!isAnon($uid) && !$form->{willing}) {
-			$slashdb->setUser($uid, { points => 0 });
-		}
-
-		getOtherUserParams($user_edits_table);
-		if ($form->{restore_defaults}) {
-			setToDefaults($user_edits_table, {}, {
-				maxstories	=> 30,
-				tzcode		=> "EST",
-				# XXX shouldn't this reset ALL the defaults,
-				# not just these two?
-			});
-		}
-		if ($form->{restore_slashbox_defaults}) {
-			setToDefaults($user_edits_table, {
-				'story_never_topic' => 1,
-				'story_never_author' => 1,
-				'story_never_nexus' => 1,
-				'story_always_topic' => 1,
-				'story_always_author' => 1,
-				'story_always_nexus' => 1,
-				'story_full_brief_nexus' => 1,
-				'story_brief_always_nexus' => 1,
-				'story_full_best_nexus' => 1,
-				'story_brief_best_nexus' => 1,
-				'maxstories' => 1,
-				'noboxes' => 1,
-				'light' => 1,
-				'noicons' => 1,
-				'willing' => 1
-			}, { slashboxes => "" });
-	}
-
-#print scalar(localtime) . " uet: " . Dumper($user_edits_table);
-		$slashdb->setUser($uid, $user_edits_table);
-	}
-
-	editHome({ uid => $uid, note => $note });
-}
 
 #################################################################
 # A generic way for a site to allow users to edit data about themselves.
@@ -3397,7 +2259,7 @@ sub getMessage {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	return slashDisplay('messages', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
+		{ Return => 1, Nocomm => $nocomm, Page => 'users' });
 }
 
 #################################################################
@@ -3408,7 +2270,7 @@ sub getError {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	return slashDisplay('errors', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
+		{ Return => 1, Nocomm => $nocomm, Page => 'users' });
 }
 
 #################################################################
@@ -3419,7 +2281,7 @@ sub getTitle {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	return slashDisplay('titles', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
+		{ Return => 1, Nocomm => $nocomm, Page => 'users' });
 }
 
 #################################################################
@@ -3450,7 +2312,7 @@ sub getUserAdmin {
 		) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my $sectionref = $reader->getDescriptions('skins');
-	$sectionref->{''} = getData('all_sections');
+	$sectionref->{''} = getData('all_sections', undef, 'users');
 
 	$field ||= 'uid';
 	if ($field eq 'uid') {

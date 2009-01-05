@@ -9,7 +9,7 @@ use Apache::Cookie;
 use Date::Format qw( time2str );
 use Slash;
 use Slash::Display;
-#use Slash::Clout;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 
@@ -166,7 +166,15 @@ sub createTag {
 		# a tag_clout in tagname_params.
 		my $admincmds_ar = $self->getTagnameAdmincmds(
 			$tag->{tagnameid}, $tag->{globjid});
-		# Any negative admin command means clout must be set to 0.
+		for my $opp_tagnameid (@$opp_tagnameids) {
+			my $opp_ar = $self->getTagnameAdmincmds(
+				$opp_tagnameid, $tag->{globjid});
+			push @$admincmds_ar, @$opp_ar;
+		}
+		# XXX Also, if the tag is on a project, check
+		# getTagnameSfnetadmincmds().
+		# Any negative admin command, to either this tagname or
+		# its opposite, means clout must be set to 0.
 		if (grep { $_->{cmdtype} =~ /^[_#]/ } @$admincmds_ar) {
 			my $count = $self->sqlInsert('tag_params', {
 				tagid =>	$tagid,
@@ -188,33 +196,6 @@ sub createTag {
 	$self->sqlDo('SET AUTOCOMMIT=1');
 
 	return $rows ? $tagid : 0;
-}
-
-sub ajaxCreateTag {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $tags = getObject('Slash::Tags');
-	return if !$tags;
-
-	my $hr = { uid =>	$user->{uid},
-	 	   name =>	lc($form->{name}) };
-
-	if ( $form->{type} eq 'firehose' ) {
-		my $firehose = getObject("Slash::FireHose");
-		my $item = $firehose->getFireHose($form->{id});
-		if ($user->{is_admin}) {
-			$firehose->setSectionTopicsFromTagstring($form->{id}, $form->{name});
-		}
-		$hr->{globjid} = $item->{globjid};
-	} else {
-		$hr->{id} = $form->{id};
-		$hr->{table} = $form->{type};
-	}
-
-	my $priv_tagnames = $tags->getPrivateTagnames();
-	$hr->{private} = 1 if $priv_tagnames->{lc($form->{name})};
-
-	$tags->createTag($hr);
-	return 0;
 }
 
 sub deactivateTag {
@@ -366,7 +347,7 @@ sub setTag {
 				my $tbid = $tagbox_hr->{tbid};
 				my $affected = $tagbox_hr->{affected_type} eq 'user'
 					? $uid : $globjid;
-				$tagboxdb->addFeederInfo($tbid, {
+				$tagbox_hr->{object}->addFeederInfo({
 					affected_id =>	$affected,
 					importance =>	1,
 					tagid =>	$id,
@@ -641,12 +622,12 @@ sub addCloutsToTagArrayref {
 		'tagid, value', 'tag_params',
 		"tagid IN ($tagids_in_str) AND name='tag_clout'");
 
-	# Pull values from tagname params named 'tag_clout'
+	# Pull values from tagname params named 'tagname_clout'
 	my $tagname_clout_hr = { };
 	my %tagnameid = map { ($_->{tagnameid}, 1) } @$ar;
 	for my $tagnameid (keys %tagnameid) {
 		my $tn_data = $self->getTagnameDataFromId($tagnameid);
-		$tagname_clout_hr->{$tagnameid} = $tn_data->{tag_clout} || 1;
+		$tagname_clout_hr->{$tagnameid} = defined($tn_data->{tagname_clout}) ? $tn_data->{tagname_clout} : 1;
 	}
 
 	# Record which clout type each tagname uses
@@ -740,6 +721,7 @@ sub getAllTagsFromUser {
 	$self->addTagnameDataToHashrefArray($ar);
 	$self->addGlobjTargetsToHashrefArray($ar);
 	for my $hr (@$ar) {
+		next unless $hr->{globj_type}; # XXX throw warning?
 		if ($hr->{globj_type} eq 'stories') {
 			$hr->{story} = $self->getStory($hr->{globj_target_id});
 		} elsif ($hr->{globj_type} eq 'urls') {
@@ -908,21 +890,15 @@ sub getTagnameAdmincmds {
 		$where_clause);
 }
 
-sub getExampleTagsForStory {
-	my($self, $story) = @_;
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $cur_time = $slashdb->getTime();
-	my @examples = split / /,
-		$constants->{tags_stories_examples};
-	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
-	$#$chosen_ar = 3 if $#$chosen_ar > 3; # XXX should be a var
-	my $tree = $self->getTopicTree();
-	push @examples,
-		grep { $self->tagnameSyntaxOK($_) }
-		map { $tree->{$_}{keyword} }
-		@$chosen_ar;
-	return @examples;
+sub getTagnameSfnetadmincmds {
+	my($self, $tagnameid, $globjid) = @_;
+	return [ ] if !$tagnameid || !$globjid;
+	my $where_clause = "tagnameid=$tagnameid AND globjid=$globjid";
+	return $self->sqlSelectAllHashrefArray(
+		"tagnameid, globjid, cmdtype, created_at,
+		 UNIX_TIMESTAMP(created_at) AS created_at_ut",
+		'tagcommand_adminlog_sfnet',
+		$where_clause);
 }
 
 sub removeTagnameFromIndexTop {
@@ -958,91 +934,11 @@ sub adminPseudotagnameSyntaxOK {
 	return $self->tagnameSyntaxOK($tagname);
 }
 
-sub ajaxGetUserStory {
-	my($self, $constants, $user, $form) = @_;
-
-	my $sidenc = $form->{sidenc};
-	my $sid = $sidenc; $sid =~ tr{-}{/};
-	my $stoid = $self->getStoidFromSid($sid);
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-#print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
-	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
-		return getData('error', {}, 'tags');
-	}
-	my $uid = $user->{uid};
-
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid }); # XXX allow private since this is to show specifically to this user
-	my @tags = sort tagnameorder map { $_->{tagname} } @$tags_ar;
-#print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
-
-	my @newtagspreload = @tags;
-	push @newtagspreload,
-		grep { $tags_reader->tagnameSyntaxOK($_) }
-		split /[\s,]+/,
-		($form->{newtagspreloadtext} || '');
-	my $newtagspreloadtext = join ' ', @newtagspreload;
-
-	return slashDisplay('tagsstorydivuser', {
-		sidenc =>		$sidenc,
-		newtagspreloadtext =>	$newtagspreloadtext,
-	}, { Return => 1 });
-}
-
-sub ajaxGetUserUrls {
-	my($self, $constants, $user, $form) = @_;
-
-	my $id = $form->{id};
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-#print STDERR scalar(localtime) . " ajaxGetUserUrls for url_id=$id tr=$tags_reader\n";
-	if (!$id || $id !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
-		return getData('error', {}, 'tags');
-	}
-	my $uid = $user->{uid};
-
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('urls', $id, { uid => $uid }); # XXX allow private since this is to show specifically to this user
-	my @tags = sort map { $_->{tagname} } @$tags_ar;
-#print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
-
-	my @newtagspreload = @tags;
-	push @newtagspreload,
-		grep { $tags_reader->tagnameSyntaxOK($_) }
-		split /[\s,]+/,
-		($form->{newtagspreloadtext} || '');
-	my $newtagspreloadtext = join ' ', @newtagspreload;
-
-	return slashDisplay('tagsurldivuser', {
-		id =>		$id,
-		newtagspreloadtext =>	$newtagspreloadtext,
-	}, { Return => 1 });
-}
-
-
-sub ajaxGetAdminStory {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $sidenc = $form->{sidenc};
-	my $sid = $sidenc; $sid =~ tr{-}{/};
-
-	if (!$sid || $sid !~ regexSid() || !$user->{is_admin}) {
-		return getData('error', {}, 'tags');
-	}
-
-	return slashDisplay('tagsstorydivadmin', {
-		sidenc =>		$sidenc,
-		tags_admin_str =>	'',
-	}, { Return => 1 });
-}
-
-sub ajaxGetAdminUrl {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $id = $form->{id};
-	if (!$id || !$user->{is_admin}) {
-		return getData('error', {}, 'tags');
-	}
-
-	return slashDisplay('tagsurldivadmin', {
-		id =>		$id,
-		tags_admin_str =>	'',
-	}, { Return => 1 });
+sub sfnetadminPseudotagnameSyntaxOK {
+	my($self, $command) = @_;
+	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($command);
+	return 0 if !$type || $type ne '_'; # only command sfnetadmins get is '_', for now
+	return $self->tagnameSyntaxOK($tagname);
 }
 
 # XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
@@ -1068,6 +964,15 @@ sub setTagsForGlobj {
 			$tag_string;
 		for my $c (@admin_commands) {
 			$self->processAdminCommand($c, $id, $table);
+		}
+	} elsif ($options->{is_sfnetadmin}) {
+		my @admin_commands =
+			grep { $tags->sfnetadminPseudotagnameSyntaxOK($_) }
+			map { lc }
+			split /[\s,]+/,
+			$tag_string;
+		for my $c (@admin_commands) {
+			$self->processSfnetadminCommand($c, $id, $table);
 		}
 	}
 
@@ -1127,73 +1032,6 @@ sub setTagsForGlobj {
 	return $newtagspreloadtext;
 }
 
-sub ajaxCreateForUrl {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $id = $form->{id};
-	my $tagsstring = $form->{tags};
-	my $tags = getObject('Slash::Tags');
-
-	my $newtagspreloadtext = $tags->setTagsForGlobj($id, "urls", $tagsstring);
-
-	# If any of those new tags start with "not", let the user know
-	# they might want to use "!" instead.
-	my $firstnottag_orig = '';
-# Not sure if we want to do this...
-#	if ($newtagspreloadtext) {
-#		my @newtags = split / /, $newtagspreloadtext;
-#		my($firstnot) = grep /^not./, @newtags;
-#		if ($firstnot) {
-#			$firstnottag_orig = $firstnot;
-#			$firstnottag_orig =~ s/^not//;
-#		}
-#	}
-
-	my $retval = slashDisplay('tagsurldivuser', {
-		id			=> $id,
-		newtagspreloadtext	=> $newtagspreloadtext,
-		firstnottag_orig	=> $firstnottag_orig,
-	}, { Return => 1 });
-#print STDERR scalar(localtime) . " ajaxCreateForUrl ntplt='$newtagspreloadtext' retval='$retval'\n";
-	return $retval;
-}
-
-sub ajaxCreateForStory {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $sidenc = $form->{sidenc};
-	my $sid = $sidenc; $sid =~ tr{-}{/};
-	my $tags = getObject('Slash::Tags');
-	my $tagsstring = $form->{tags};
-	if (!$sid || $sid !~ regexSid() || $user->{is_anon} || !$tags) {
-		return getData('error', {}, 'tags');
-	}
-	my $stoid = $slashdb->getStoidFromSid($sid);
-	if (!$stoid) {
-		return getData('error', {}, 'tags');
-	}
-	
-	my $newtagspreloadtext = $tags->setTagsForGlobj($stoid, "stories", $tagsstring);
-	
-	# If any of those new tags start with "not", let the user know
-	# they might want to use "!" instead.
-	my $firstnottag_orig = '';
-	if ($newtagspreloadtext) {
-		my @newtags = split / /, $newtagspreloadtext;
-		my($firstnot) = grep /^not./, @newtags;
-		if ($firstnot) {
-			$firstnottag_orig = $firstnot;
-			$firstnottag_orig =~ s/^not//;
-		}
-	}
-
-	my $retval = slashDisplay('tagsstorydivuser', {
-		sidenc			=> $sidenc,
-		newtagspreloadtext	=> $newtagspreloadtext,
-		firstnottag_orig	=> $firstnottag_orig,
-	}, { Return => 1 });
-#print STDERR scalar(localtime) . " ajaxCreateForStory 4 for stoid=$stoid newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
-	return $retval;
-}
-
 sub ajaxDeactivateTag {
 	my($self, $constants, $user, $form) = @_;
 	my $type = $form->{type} || "stories";
@@ -1218,105 +1056,40 @@ sub ajaxDeactivateTag {
 	});
 }
 
-sub ajaxProcessAdminTags {
-	my($slashdb, $constants, $user, $form) = @_;
-#print STDERR "ajaxProcessAdminTags\n";
-	my $commands = $form->{commands};
-	my $type = $form->{type} || "stories";
-	my($id, $table, $sid, $sidenc, $itemid);
-	if ($type eq "stories") {
-		$sidenc = $form->{sidenc};
-		$sid = $sidenc; $sid =~ tr{-}{/};
-		$id = $slashdb->getStoidFromSid($sid);
-		$table = "stories";
-	} elsif ($type eq "urls") {
-		$table = "urls";
-		$id = $form->{id};
-	} elsif ($type eq "firehose") {
-		if ($constants->{plugin}{FireHose}) {
-			$itemid = $form->{id};
-			my $firehose = getObject("Slash::FireHose");
-			my $item = $firehose->getFireHose($itemid);
-			my $tags = getObject("Slash::Tags");
-			($table, $id) = $tags->getGlobjTarget($item->{globjid});
-		}
-	}
-	
-	my $tags = getObject('Slash::Tags');
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my @commands =
-		grep { $tags->adminPseudotagnameSyntaxOK($_) }
-		split /[\s,]+/,
-		($commands || '');
-#use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags table=$table id=$id sid=$sid commands='$commands' commands='@commands' tags='$tags' form: " . Dumper($form);
-	if (!$id || !$table || !@commands) {
-		# Error, but we really have no way to return it...
-		# return getData('tags_none_given', {}, 'tags');
-	}
-
-	@commands = $tags->normalizeAndOppositeAdminCommands(@commands);
-	for my $c (@commands) {
-		$tags->processAdminCommand($c, $id, $table);
-	}
-
-	my $globjid = $tags_reader->getGlobjidFromTargetIfExists($table, $id);
-	my $tagboxdb = getObject('Slash::Tagbox');
-	my $tagboxes = $tagboxdb->getTagboxes();
-	for my $tagbox_hr (@$tagboxes) {
-		next if $tagbox_hr->{affected_type} eq 'user';
-		$tagboxdb->forceFeederRecalc($tagbox_hr->{tbid}, $globjid);
-	}
-
-	my $tags_admin_str = "Performed commands: '@commands'.";
-	if ($type eq "stories") {
-		return slashDisplay('tagsstorydivadmin', {
-			sidenc =>		$sidenc,
-			tags_admin_str =>	$tags_admin_str,
-		}, { Return => 1 });
-	} elsif ($type eq "urls") {
-		return slashDisplay('tagsurldivadmin', {
-			id 		=>	$id,
-			tags_admin_str  =>	$tags_admin_str,
-		}, { Return => 1 });
-	} elsif ($type eq "firehose") {
-		return slashDisplay('tagsfirehosedivadmin', {
-			id 		=>	$itemid,
-			tags_admin_str  =>	$tags_admin_str,
-		}, { Return => 1 });
-	}
-}
-
-sub getUserNodNixForGlobj {
-	my($self, $globjid, $uid) = @_;
-	my $current_vote_tags_array = $self->getTagsByGlobjid($globjid, {
-		uid => $uid,
-		include_private => 1,
-		limit_to_tagnames => ['nod', 'nix']
-	});
-	return join ' ', sort map { $_->{tagname} } @$current_vote_tags_array;
-}
-
 sub ajaxSetGetCombinedTags {
 	my($slashdb, $constants, $user, $form) = @_;
 
-	my $type = $form->{type} || 'firehose';
+	my $key = $form->{key};
+	my $key_type = $form->{key_type};
 
-	my ($base_item, $base_writer);
-	my $globjid;
-	if ( $type eq 'firehose' ) {
-		$base_writer = getObject('Slash::FireHose');
-		$base_item = $base_writer->getFireHose($form->{id});
-		$globjid = $base_item->{globjid} if $base_item;
+	my $firehose = getObject('Slash::FireHose');
+	my ($globjid, $firehose_id, $firehose_item);
+
+	if ( $key_type eq 'url' ) {
+		$key = $firehose->getFireHoseIdFromUrl($key);
+		$key_type = 'firehose-id';
+	} elsif ( $key_type eq 'sid' ) {
+		$key = $slashdb->getStoidFromSidOrStoid($key);
+		$key_type = 'stoid';
 	}
-	# XXX TO DO: handle other types here, setting $base_item appropriately
+
+	if ( $key_type eq 'stoid' ) {
+		$globjid = $slashdb->getGlobjidFromTargetIfExists('stories', $key);
+		$firehose_id = $firehose->getFireHoseIdFromGlobjid($globjid);
+		$firehose_item = $firehose->getFireHose($firehose_id);
+	} elsif ( $key_type eq 'firehose-id' ) {
+		$firehose_item = $firehose->getFireHose($key);
+		$globjid = $firehose_item->{globjid} if $firehose_item;
+		$firehose_id = $key;
+	}
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
+	if (!$globjid || $globjid !~ /^\d+$/ || !$tags_reader) {
 		return getData('error', {}, 'tags');
 	}
 	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
 
-	my $uid = $user->{uid};
+	my $uid = $user && $user->{uid} || 0;
 
 	# if we have to execute commands, do them _before_ we fetch any tag lists
 	my $user_tags = '';
@@ -1324,49 +1097,77 @@ sub ajaxSetGetCombinedTags {
 		my $tags_writer = getObject('Slash::Tags');
 		$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
 			deactivate_by_operator => 1,
-			tagname_required => 1
+			tagname_required => 1,
+			include_private => 1
 		});
-		if ( $user->{is_admin} && $type eq 'firehose' ) {
+		if ( $user->{is_admin} && $firehose_id ) {
 			my $added_tags =
 				join ' ',
-				map { $1 unless /^-(.+)/ }
+				grep { /^[^-]/ }
 				split /\s+/,
 				lc $form->{tags};
 
-			$base_writer->setSectionTopicsFromTagstring($form->{id}, $added_tags);
+			$firehose->setSectionTopicsFromTagstring($firehose_id , $added_tags);
+			$firehose_item = $firehose->getFireHose($firehose_id);
 		};
-	} else {
-		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid });
+	} elsif ( ! $form->{global_tags_only} ) {
+		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid, include_private => 1 });
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
-	my $datatype_tag = $base_item ? $base_item->{type} : '';
-	my $top_tags = $base_item ? $base_item->{toptags} : '';
+	my ($datatype_tag, $top_tags, $section_tag, $topic_tags);
+	if ( $firehose_item ) {
+		$datatype_tag = $firehose_item->{type};
+		$top_tags = $firehose_item->{toptags};
 
-	my $section_tag = '';
-	my $s = $base_item->{primaryskid};
-	if ( $s ) {
-		if ( $s != $constants->{mainpage_skid} ) {
-			my $skin = $base_writer->getSkin($s);
-			$section_tag = $skin->{name};
-		} else {
-			$section_tag = 'slashdot';
+		my $skid = $firehose_item->{primaryskid};
+		if ( $skid ) {
+			if ( $skid != $constants->{mainpage_skid} ) {
+				my $skin = $firehose->getSkin($skid);
+				$section_tag = $skin->{name};
+			}
+		}
+
+		my $tid = $firehose_item->{tid};
+		if ( $tid ) {
+			my $topic = $firehose->getTopic($tid);
+			$topic_tags = $topic->{keyword};
 		}
 	}
 
-	my $topic_tags = '';
-	my $t = $base_item->{tid};
-	if ( $t ) {
-		my $topic = $base_writer->getTopic($t);
-		$topic_tags = $topic->{keyword};
+	my $system_tags = $section_tag . ' ' . $topic_tags;
+
+	my $response = '<datatype>' . ($datatype_tag || 'unknown') . '<system>' . $system_tags . '<top>'. $top_tags;
+	$response .= '<user>' . $user_tags unless $form->{global_tags_only};
+
+	return $response;
+}
+
+sub setGetCombinedTags {
+	my($self, $key, $key_type, $user, $commands) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $options = {
+		'key'		=> $key,
+		'key_type'	=> $key_type,
+	};
+	$options->{global_tags_only} = 1 unless $user;
+	$options->{tags} = $commands if $commands;
+
+	my @tuples = split /<([\w:]*)>/, ajaxSetGetCombinedTags($slashdb, $constants, $user, $options);
+	shift @tuples; # bogus empty first elem when capturing separators
+
+	my $response = {};
+	while ( @tuples ) {
+		my $k = shift @tuples;
+		$response->{$k} = shift @tuples || '' if $k;
+#print STDERR "key => $key; value => $response->{$key}\n";
 	}
+#print STDERR "---------\n";
 
-	my $vote_tags = $tags_reader->getUserNodNixForGlobj($globjid, $uid);
-
-	# XXX how to get the system tags?
-	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
-
-	return '<vote>' . $vote_tags . '<user>' . $user_tags . '<top>'. $top_tags . '<system>' . $system_tags;
+	return $response;
 }
 
 {
@@ -1524,7 +1325,9 @@ sub ajaxListTagnames {
 }
 
 { # closure
+
 my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  ); # should be a var
+
 sub processAdminCommand {
 	my($self, $c, $id, $table) = @_;
 
@@ -1533,6 +1336,10 @@ sub processAdminCommand {
 
 	my $constants = getCurrentStatic();
 	my $tagnameid = $self->getTagnameidCreate($tagname);
+	my $opp_tagnameids = $self->getOppositeTagnameids($tagnameid);
+	my %affected_tagnameid = (
+		map { ( $_, 1 ) } ( $tagnameid, @$opp_tagnameids )
+	);
 
 	my $systemwide = $type =~ /^\$/ ? 1 : 0;
 	my $globjid = $systemwide ? undef : $self->getGlobjidCreate($table, $id);
@@ -1544,9 +1351,6 @@ sub processAdminCommand {
 
 	my $new_user_clout = 1-$user_clout_reduction;
 
-	my $new_min_tagid = 0;
-
-#print STDERR "type '$type' s=$systemwide for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
 	if ($type eq '*') {
 		# Asterisk means admin is saying this tagname is "OK",
 		# which (at least so far, 2007/12) means it is not
@@ -1557,31 +1361,26 @@ sub processAdminCommand {
 		# descriptive.  Mnemonic: ")" looks like "D"
 		$self->setTagname($tagnameid, { descriptive => 1 });
 	} elsif ($type eq '^') {
-		# Set individual clouts to 0 for tags of this name on
-		# this story that have already been applied.  Future
-		# tags of this name on this story will apply with
-		# their full clout.
+		# Set individual clouts to 0 for tags of this name
+		# (and its opposite) on this story that have already
+		# been applied.  Future tags of this name (or its
+		# opposite) on this story will apply with their full
+		# clout.
 		my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id);
-		my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
-#print STDERR "tags_ar '@$tags_ar' tags '@tags'\n";
+		my @tags = grep { $affected_tagnameid{ $_->{tagnameid} } } @$tags_ar;
 		for my $tag (@tags) {
-#print STDERR "setting $tag->{tagid} to 0\n";
 			$self->setTag($tag->{tagid}, { tag_clout => 0 });
 		}
 	} else {
 		if ($systemwide) {
 			$self->setTagname($tagnameid, { tag_clout => 0 });
-			$new_min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
-				"tagnameid=$tagnameid");
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND inactivated IS NULL");
-#print STDERR "systemwide uids: '@$uids'\n";
 				if (@$uids) {
 					my @uids_changed = ( );
 					for my $uid (@$uids) {
 						my $max_clout = $self->getAdminCommandMaxClout($uid);
-#print STDERR "systemwide maxclout=$max_clout for uid=$uid\n";
 						$max_clout = $new_user_clout if $new_user_clout < $max_clout;
 						push @uids_changed, $uid
 							if $self->setUser($uid, {
@@ -1591,7 +1390,6 @@ sub processAdminCommand {
 					my $uids_str = join(',', @uids_changed);
 					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
 						"uid IN ($uids_str)");
-					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
 				}
 			}
 		} else {
@@ -1599,12 +1397,11 @@ sub processAdminCommand {
 			# applied to this story (that's the way we're doing it now,
 			# though I'm not ecstatic about it and it may change).
 			my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id, { include_private => 1 });
-			my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
-			for my $tag (@tags) {
+			my $opp_tagnameids = $self->getOppositeTagnameids($tagnameid);
+			my @tags_to_zero = grep { $affected_tagnameid{ $_->{tagnameid} } } @$tags_ar;
+			for my $tag (@tags_to_zero) {
 				$self->setTag($tag->{tagid}, { tag_clout => 0 });
 			}
-			$new_min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
-				"tagnameid=$tagnameid AND globjid=$globjid");
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND inactivated IS NULL
@@ -1614,15 +1411,10 @@ sub processAdminCommand {
 					for my $uid (@$uids) {
 						my $max_clout = $self->getAdminCommandMaxClout($uid);
 						$max_clout = $new_user_clout if $new_user_clout < $max_clout;
-						push @uids_changed, $uid
-							if $self->setUser($uid, {
-								-tag_clout => "LEAST(tag_clout, $max_clout)"
-							});
+						$self->setUser($uid, {
+							-tag_clout => "LEAST(tag_clout, $max_clout)"
+						});
 					}
-					my $uids_str = join(',', @uids_changed);
-					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
-						"uid IN ($uids_str)");
-					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
 				}
 			}
 		}
@@ -1630,8 +1422,12 @@ sub processAdminCommand {
 
 	$self->logAdminCommand($type, $tagname, $globjid);
 
-	# XXX this part isn't gonna work since tagboxes
-	$self->setLastscanned($new_min_tagid);
+	my $tagboxdb = getObject('Slash::Tagbox');
+	my $tagboxes = $tagboxdb->getTagboxes();
+	for my $tagbox_hr (@$tagboxes) {
+		my $field = $tagbox_hr->{affected_type} . 'id';
+		$tagbox_hr->{object}->forceFeederRecalc($globjid);
+	}
 
 	return $tagnameid;
 }
@@ -1664,7 +1460,50 @@ sub getAdminCommandMaxClout {
 	return $max_clout;
 }
 
+sub processSfnetadminCommand {
+	my($self, $c, $id, $table) = @_;
+
+	return 0 if $table ne 'projects';
+
+	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($c);
+	return 0 if !$type || $type ne '_';
+
+	my $user = getCurrentUser();
+	return 0 if ! $self->sfuserIsAdminOnProject($user->{uid}, $id);
+
+	my $constants = getCurrentStatic();
+	my $tagnameid = $self->getTagnameidCreate($tagname);
+
+	my $globjid = $self->getGlobjidCreate($table, $id);
+
+	my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id, { include_private => 1 });
+	my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
+	for my $tag (@tags) {
+		$self->setTag($tag->{tagid}, { tag_clout => 0 });
+	}
+	$self->logSfnetadminCommand($type, $tagname, $globjid);
+	my $tagboxdb = getObject('Slash::Tagbox');
+	my $tagboxes = $tagboxdb->getTagboxes();
+	for my $tagbox_hr (@$tagboxes) {
+		my $field = $tagbox_hr->{affected_type} . 'id';
+		$tagbox_hr->{object}->forceFeederRecalc($globjid);
+	}
+}
+
 } # closure
+
+sub sfuserIsAdminOnProject {
+	my($self, $uid, $project_id) = @_;
+
+	# XXX For now, my belief is that only sf.net project admins
+	# will be allowed to submit _ commands, and only on their
+	# own projects, so any such commands by definition will be
+	# authorized.  There's no great way to fill in the logic of
+	# this method at the moment, but in the future we may need
+	# to find a way.  - Jamie 2008-09-25
+
+	return 1;
+}
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
@@ -1686,6 +1525,19 @@ sub logAdminCommand {
 		globjid =>	$globjid || undef,
 		adminuid =>	getCurrentUser('uid'),
 		-created_at =>	'NOW()',
+	});
+}
+
+sub logSfnetadminCommand {
+	my($self, $type, $tagname, $globjid) = @_;
+	return 0 if !$globjid;
+	my $tagnameid = $self->getTagnameidFromNameIfExists($tagname);
+	$self->sqlInsert('tagcommand_adminlog_sfnet', {
+		cmdtype =>		$type,
+		tagnameid =>		$tagnameid,
+		globjid =>		$globjid || undef,
+		sfnetadminuid =>	getCurrentUser('uid'),
+		-created_at =>		'NOW()',
 	});
 }
 
@@ -1816,7 +1668,11 @@ sub listTagnamesActive {
 
 	# This seems like a horrendous query, but I _think_ it will run
 	# in acceptable time, even under fairly heavy load.
+	# (But see below, in listTagnamesRecent, for a possible
+	# optimization.)
+
 	# Round off time to the last minute.
+
 	my $now_ut = $self->getTime({ unix_format => 1 });
 	my $next_minute_ut = int($now_ut/60+1)*60;
 	my $next_minute_q = $self->sqlQuote( time2str( '%Y-%m-%d %H:%M:00', $next_minute_ut, 'GMT') );
@@ -1920,21 +1776,49 @@ sub listTagnamesRecent {
 	my $seconds =         $options->{seconds}         || (3600*6);
 	my $include_private = $options->{include_private} || 0;
 	my $private_clause = $include_private ? '' : " AND private='no'";
-	my $recent_ar = $self->sqlSelectColArrayref(
-		'DISTINCT tagnames.tagname',
-		"users_info,
-		 tags LEFT JOIN tag_params
-		 	ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout'),
-		 tagnames LEFT JOIN tagname_params
-			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
-		"tagnames.tagnameid=tags.tagnameid
-		 AND inactivated IS NULL $private_clause
+
+	# Previous versions of this method grabbed tagname string along
+	# with tagnameid, and did a LEFT JOIN on tagname_params to exclude
+	# tagname_params with tagname_clout=0.  Its performance was
+	# acceptable up to about 50K tags, on the order of 1 tag insert/sec
+	# at the time interval used.  But performance fell off a cliff
+	# somewhere before 300K tags.  So I'm optimizing this to do an
+	# initial select of more-raw data from the DB and then do a
+	# second and third select to grab the full data set needed.
+	# Early testing suggests this runs at least 10x faster.
+	# - Jamie 2008-08-28
+
+	my $tagnameids_ar = $self->sqlSelectColArrayref(
+		'DISTINCT tags.tagnameid',
+		"users_info, tags LEFT JOIN tag_params
+			ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout')",
+		"inactivated IS NULL
+		 $private_clause
 		 AND tags.created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
 		 AND (tag_params.value IS NULL OR tag_params.value > 0)
-		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)
-		 AND tags.uid=users_info.uid AND users_info.tag_clout > 0",
-		'ORDER BY tagnames.tagname'
+		 AND tags.uid=users_info.uid AND users_info.tag_clout > 0"
 	);
+
+	# Eliminate any tagnameid's with a reduced tagname_clout.
+	# This is probably smaller than the list of distinct tagnames
+	# used in the past n hours, so it's probably faster (and should
+	# never be noticeably slower) to grab them all and do a difference
+	# on the two lists in perl instead of SQL.
+	# XXX Not sure whether it's the best thing here to exclude all
+	# tagnames with even slightly-reduced clout, but I think so.
+	# Those tagnames probably aren't ones that would be valuable to
+	# see in a list of recent tags.
+	my $tagnameids_noclout_ar = $self->sqlSelectColArrayref(
+		'tagnameid',
+		'tagname_params',
+		"name='tag_clout' AND value+0 < 1");
+	my %noclout = ( map { $_, 1 } @$tagnameids_noclout_ar );
+	$tagnameids_ar = [ grep { ! $noclout{$_} } @$tagnameids_ar ];
+
+	# Get the tagnames for those id's.
+	my $tagnameids_str = join(',', sort { $a <=> $b } @$tagnameids_ar);
+	my $recent_ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
+		"tagnameid IN ($tagnameids_str)");
 	@$recent_ar = sort tagnameorder @$recent_ar;
 	return $recent_ar;
 }
@@ -2043,11 +1927,11 @@ sub listTagnamesByPrefix_cache {
 }
 
 sub getPrivateTagnames {
-	my ($self) = @_;
+	my($self) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	my @private_tags = ();
+	my @private_tags = qw( metanod metanix );
 	push @private_tags, ($constants->{tags_upvote_tagname} || "nod");
 	push @private_tags, ($constants->{tags_downvote_tagname} || "nix");
 	if ($user->{is_admin}) {
@@ -2348,6 +2232,11 @@ sub getPositivePopupTags {
 sub getExcludedTags {
 	my($self) = @_;
 	return $self->getTagnamesByParam('exclude', '1');
+}
+
+sub getFirehoseExcludeTags {
+	my($self) = @_;
+	return $self->getTagnamesByParam('fh_exclude', '1');
 }
 
 sub getNegativeTags {

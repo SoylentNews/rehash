@@ -1,0 +1,172 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'loginhead' %]
+	[% SWITCH form.op %]
+
+	[% CASE 'userclose' %]
+		Logging Out
+
+	[% CASE DEFAULT %]
+		Log In
+
+	[% END %]
+
+[% CASE 'mailpasswdhead' %]
+	[% returnme.data_constant = 1 %]
+	Mail Password
+
+[% CASE 'newuserformhead' %]
+	[% returnme.data_constant = 1 %]
+	Create Account
+
+[% CASE 'newuserhead' %]
+	[% returnme.data_constant = 1 %]
+	Account Created
+
+[% CASE 'prefshead' %]
+	[% returnme.data_constant = 1 %]
+	Change Login Preferences
+
+[% CASE 'passnomatch' %]
+	[% returnme.data_constant = 1 %]
+	Passwords don't match.
+
+[% CASE 'passtooshort' %]
+	[% returnme.data_constant = 1 %]
+	Password too short.
+
+[% CASE 'passtoolong' %]
+	[% returnme.data_constant = 1 %]
+	Password too long.
+
+[% CASE 'oldpassbad' %]
+	[% returnme.data_constant = 1 %]
+	Current password is incorrect.
+
+[% CASE 'notchanged' %]
+	[% returnme.data_constant = 1 %]
+	Preferences not changed.
+
+[% CASE 'passchanged' %]
+	[% returnme.data_constant = 1 %]
+	Preferences changed.
+
+[% CASE 'nick_invalid' %]
+	The user name "[% form.newusernick | strip_literal %]" is not valid.
+
+[% CASE 'email_invalid' %]
+	The email address "[% (form.realemail || form.email) | strip_literal %]" is
+	not a valid email address. Please try again, with a properly
+	formatted email address.
+
+[% CASE 'email_do_not_match' %]
+	[% returnme.data_constant = 1 %]
+	The email addresses you've entered do not match.  Please re-enter
+	your email address information again.
+
+[% CASE 'duplicate_user' %]
+	The nickname '[% nick %]', or another similar to it, is already in use.
+	Please choose another.
+
+[% CASE 'new_user_open_proxy' %]
+	According to our tests, you are trying to create an account 
+	from an HTTP proxy that is open to the world.  Please close the proxy or
+	ask your sysadmin to do so, because open proxies are used to spam web
+	sites like this one. 
+
+	<p>Feel free to contact [% constants.adminmail_ban %] if you have questions.
+	Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
+[% CASE 'email_exists' %]
+	The email address "[% (form.realemail || form.email) | strip_literal %]"
+	already exists in our user database. If you've forgotten your password
+	to an existing account, you can
+	<a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
+	password mailed to you</a>.
+
+
+[% CASE 'mail_acl_nopasswd' %]
+	[% returnme.data_constant = 1 %]
+	This account is not allowed to log in normally.  No password was mailed.
+
+[% CASE 'mail_nonickname' %]
+	[% returnme.data_constant = 1 %]
+	User was not found.  No password was mailed.
+
+[% CASE 'mail_readonly' %]
+	Sorry, you cannot use the "mail password" function from your
+	IP number or subnet. If you don't think you should be seeing
+	this error, please email [% constants.adminmail_ban %]
+	with your IPID, which is "[% user.ipid %]";
+	a note that this is regarding an attempt to mail your password;
+	and the name, uid, and email address of the account in question.
+
+[% CASE 'mail_toooften' %]
+	To prevent you from being harassed with email,
+	[% constants.sitename %] limits you to
+	[% constants.mailpass_max_num || 2 %]
+	password[% IF constants.mailpass_max_num > 1 %]s[% END %]
+	sent to you every
+	[% constants.mailpass_max_hours || 48 %] hours. You're over your
+	limit and we're cutting you off. If you really are that
+	forgetful and need another one, try the human at
+	[% constants.adminmail %].
+
+[% CASE 'mail_mailed_note' %]
+	The password for [% name %] was emailed to its registered
+	email address. It will remain valid for
+	[% constants.mailpass_valid_days %] days.
+
+[% CASE 'mail_subject' %]
+	[% constants.sitename %] User Password for [% nickname %]
+
+[% CASE 'mail_msg' %]
+
+Your new password is [% newpasswd %].  Your old password will still work until
+this password is used.  Go to the URL below to log in:
+
+<[% gSkin.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
+
+Make sure you then CHANGE YOUR PASSWORD!
+
+If you have received this message without having requested it, it is
+because someone attempted to use your username or e-mail address.  It
+was mostly likely an innocent mistake, and they are not getting your
+password, so you can safely disregard this message.
+
+Thanks.
+
+In case you get multiple emails you didn't request, the requester's IP
+was [% remote_ip %].[% IF user_agent %]  Its user agent was
+"[% user_agent %]"
+(not that you should trust that value, but it might be interesting).[% END %]
+[% IF x_forwarded_for %]In case that's a properly-configured proxy,
+the value of its X-Forwarded-For header was "[% x_forwarded_for %]" --
+but don't trust that value unless you know a reason to (we don't).[% END %]
+
+If you don't use this new password within [% constants.mailpass_valid_days %] days, it will expire
+and you'll have to send yourself another one.
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

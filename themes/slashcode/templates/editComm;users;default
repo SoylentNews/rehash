@@ -25,268 +25,277 @@ en_US
 __name__
 editComm
 __template__
+[% orig_title = title %]
+<div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
+[% PROCESS userboxes %]
+[% END %]
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
 [% PROCESS prefs_titlebar tab_selected='comments' %]
+<div class="generalbody">
 
 [% note %]
 
 [% admin_block %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-
+<form action="[% env.script_name %]" method="post">
+<fieldset>
+<legend>Comment Settings</legend>
 [% PROCESS formkey_tag %]
 
-<INPUT TYPE="HIDDEN" NAME="formname"  VALUE="editcomm">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="savecomm">
-<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user_edit.uid %]">
+<input type="hidden" name="formname"  value="editcomm">
+<input type="hidden" name="op" value="savecomm">
+<input type="hidden" name="uid" value="[% user_edit.uid %]">
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
-	<TR>
-		<TD VALIGN=MIDDLE>
-        	<P><B>Email Display</B>
+<table width="100%">
+	<tr>
+		<td valign="middle">
+        	<p><b>Discussion Style</b><p>
+		<blockquote><div>
+        	<input type="radio" name="discussion2" value="none"[% constants.markup_checked_attribute IF !user_edit.discussion2 || (user_edit.discussion2 && user_edit.discussion2 != "slashdot") %]> Slashdot Classic Discussion System<br>
+        	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Slashdot Interactive Discussion System (a.k.a. D2)<br>
+		</div></blockquote>
+
+		[% IF user_edit.discussion2 && user_edit.discussion2 == "slashdot" %]
+		<blockquote><div>
+		Retrieve [% comment_q_name = ( Slash.isSubscriber(user_edit) || (user_edit.seclev >= 100) ) ? 'd2_comment_q_all' : 'd2_comment_q';
+		   comment_q = Slash.db.getDescriptions(comment_q_name);
+		   Slash.createSelect('d2_comment_q', comment_q, user_edit.d2_comment_q, 1) %] Comments<br>
+
+                Get [% comment_order = Slash.db.getDescriptions('d2_comment_order');
+		   comment_order_def = user_edit.d2_comment_order || 0;
+		   Slash.createSelect('d2_comment_order', comment_order, comment_order_def, 1) %] Comments First
+		</div></blockquote>
+		[% END %]
+
+        	<p><b>Email Display</b>
 		(currently
 		[%- IF !user_edit.fakeemail; " not displayed";
-		ELSE; ": <TT>"; user_edit.fakeemail | strip_literal; "</TT>";
-		END %])<BR>
+		ELSE; ": <tt>"; user_edit.fakeemail | strip_literal; "</tt>";
+		END %])<br>
 		[% IF !user_edit.emaildisplay.defined;
 			IF user_edit.fakeemail %]
 			<i>(Your current email address was apparently set before
 			users' email addresses were forced to one of the below
-			choices. Please pick one and click Save.)</i><BR>
+			choices. Please pick one and click Save.)</i><br>
 			[% END;
 			user_edit.emaildisplay = 0;
 		END;
 		IF user_edit.emaildisplay.defined;
-			emaildisplay.${user_edit.emaildisplay} = 'CHECKED';
+			emaildisplay.${user_edit.emaildisplay} = constants.markup_checked_attribute;
 		END %]
-                &nbsp;&nbsp;&nbsp;
-		<INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.0 %] 
-		VALUE=0>&nbsp;
-        	Do not display an e-mail address.<BR>
-                &nbsp;&nbsp;&nbsp;
-                <INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.1 %] 
-		VALUE=1>&nbsp;
-                Show your email with random SPAM-armoring applied (this
-		changes weekly).<BR> &nbsp;&nbsp;&nbsp;
-                <INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.2 %] 
-		VALUE=2>&nbsp;
-                Show your real email address without cowering behind childish
-		anonymity or obfuscation.<BR>
-
-		<P><B>Disable Sigs</B> (strip sig quotes from comments)
-		<INPUT TYPE="CHECKBOX" NAME="nosigs"[% s_check %]>
+		<blockquote><div>
+		<input type="radio" name="emaildisplay" value="0"[% emaildisplay.0 %]> Do not display an e-mail address.<br>
+                <input type="radio" name="emaildisplay" value="1"[% emaildisplay.1 %]> Show your email address with random SPAM-armoring applied.<br>
+		[% PROCESS formNote note='This changes weekly' %]
+                <input type="radio" name="emaildisplay" value="2"[% emaildisplay.2 %]> Show your real email address without cowering behind childish anonymity or obfuscation.
+		</div></blockquote>
+		<label>Disable Sigs
+		<input type="checkbox" name="nosigs"[% s_check %]>
+		</label>
+		[% PROCESS formNote note='Strip sig quotes from comments' %]
 
 		[% IF user.is_admin %]
-		<P><B>Disable Spellchecker</B>
-		<INPUT TYPE="CHECKBOX" NAME="no_spell"[% nospell_check %]>
+		<label>Disable Spellchecker <input type="checkbox" name="no_spell"[% nospell_check %]></label>
 		[% END %]
 
-		<P><B>Display Mode</B>
+		<label>Display Mode [% commentmodes_select %]</label>
 
-		[% commentmodes_select %]
+		<label>Sort Order [% commentsort_select %]</label>
 
-		<P><B>Sort Order</B> (self explanatory?  I hope?)
+		<label>Threshold [% uthreshold_select %]</label>
+		<div class="notes">
+			Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/moderation.shtml">Guidelines</a>
+		</div>
 
-		[% commentsort_select %]
+		<label>Highlight Threshold [% highlightthresh_select %]</label>
+		[% PROCESS formNote note='Comments scoring this are displayed even after an article spills into index mode' %]
 
-		<P><B>Threshold</B>
+		<label>Hard Thresholds
+		<input type="checkbox" name="hardthresh"[% h_check %]></label>
+		[% PROCESS formNote note="Hides 'X Replies Below Current Threshold' Message from Threads" %]
 
-		[% uthreshold_select %]
+		<label>Reparent Highly Rated Comments
+		<input type="checkbox" name="reparent"[% r_check %]></label>
+		[% PROCESS formNote note="Causes comments to be displayed even if they are replies to comments under current threshold" %]
 
-		<BR>(comments scored less than this setting will be ignored.
-		Anonymous posts start at 0, logged in posts start
-		at 1.  Moderators add and subtract points according to
-		the <A 
-		HREF="[% constants.rootdir %]/moderation.shtml">Guidelines</A>)
+		<label>Do Not Display Scores
+		<input type="checkbox" name="noscores"[% n_check %]></label>
+		[% PROCESS formNote note="Hides score: They still <b>apply</b> you just don't see them." %]
 
-		<P><B>Highlight Threshold</B>
-
-		[% highlightthresh_select %]
-
-		<BR>(comments scoring this are displayed even after an article spills into index mode)
-
-		<P><B>Hard Thresholds</B> (Hides 'X Replies Below
-		Current Threshold' Message from Threads)
-		<INPUT TYPE="CHECKBOX" NAME="hardthresh"[% h_check %]>
-
-		<P><B>Reparent Highly Rated Comments</B> (causes comments
-		to be displayed even if they are replies to comments
-		under current threshold)
-		<INPUT TYPE="CHECKBOX" NAME="reparent"[% r_check %]>
-
-		<P><B>Do Not Display Scores</B> (Hides score:
-		They still <B>apply</B> you just don't see them.)
-		<INPUT TYPE="CHECKBOX" NAME="noscores"[% n_check %]>
-
-		<P><B>Signature Dash</B> (Prefix everyone's signature with "--" to make
-		it blazingly obvious where comment ends and sig begins)
-		<INPUT TYPE="CHECKBOX" NAME="sigdash"[% d_check %]>
-
-		[%# doesn't this need to be flexible for sites that
-		    already have different reasons, in the code?  why
+		[%# XXX this needs to be flexible for sites that
+		    already have different reasons, in the code.  why
 		    not just loop over the reasons already existing,
 		    like it did before?
 		 %]
-		<P><B><A NAME="reason_bonus">Reason Modifier</A></B> (assign a modifier to different moderation reasons)<br>
-		<TABLE>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Insightful			</TD>
-				<TD>	[% reason_select.Insightful %]	</TD>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Offtopic			</TD>
-				<TD>	[% reason_select.Offtopic %]	</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Interesting			</TD>
-				<TD>	[% reason_select.Interesting %]	</TD>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Flamebait			</TD>
-				<TD>	[% reason_select.Flamebait %]	</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Funny				</TD>
-				<TD>	[% reason_select.Funny %]	</TD>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Troll				</TD>
-				<TD>	[% reason_select.Troll %]	</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Informative			</TD>
-				<TD>	[% reason_select.Informative %]	</TD>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Redundant			</TD>
-				<TD>	[% reason_select.Redundant %]	</TD>
-			</TR>
-		</TABLE>
 
-		<P><B><A NAME="people_bonus_friend">P</A>e<A NAME="people_bonus_foe">o</A>p<A NAME="people_bonus_freak">l</A>e <A NAME="people_bonus_fan">M</A>o<A NAME="people_bonus_fof">d</A>i<A NAME="people_bonus_eof">f</A>ier</B> (assign a modifier to different people)<br>
-		<TABLE>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Friend <IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif">				</TD>
-				<TD>	[% people_select.friend %]	</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Fan <IMG BORDER=0 SRC="[% constants.imagedir %]/fan.gif">				</TD>
-				<TD>	[% people_select.fan %]		</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Foe <IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif">				</TD>
-				<TD>	[% people_select.foe %]		</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Freak <IMG BORDER=0 SRC="[% constants.imagedir %]/freak.gif">				</TD>
-				<TD>	[% people_select.freak %]		</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Friends of Friends <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif">				</TD>
-				<TD>	[% people_select.fof %]		</TD>
-			</TR>
-			<TR>
-				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Foes of Friends <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif">				</TD>
-				<TD>	[% people_select.eof %]		</TD>
-			</TR>
-		</TABLE>
+[% IF constants.m1 %]
+		<p><b><a name="reason_bonus">Reason Modifier</a></b> (assign a modifier to different moderation reasons)<br>
+		<table>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Insightful			</td>
+				<td>	[% reason_select.Insightful %]	</td>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Offtopic			</td>
+				<td>	[% reason_select.Offtopic %]	</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Interesting			</td>
+				<td>	[% reason_select.Interesting %]	</td>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Flamebait			</td>
+				<td>	[% reason_select.Flamebait %]	</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Funny				</td>
+				<td>	[% reason_select.Funny %]	</td>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Troll				</td>
+				<td>	[% reason_select.Troll %]	</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Informative			</td>
+				<td>	[% reason_select.Informative %]	</td>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Redundant			</td>
+				<td>	[% reason_select.Redundant %]	</td>
+			</tr>
+		</table>
+[% END %]
 
-		<P><B><A NAME="people_bonus_anonymous">Anonymous Modifier</A></B> (modifier assigned to anonymous posts)<BR>
+		<p><b>People Modifier</b> (assign a modifier to different people)<br>
+		<table>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	
+				<a name="people_bonus_friend">Friend</a>
+			<img src="[% constants.imagedir %]/friend.gif" alt="friend">				</td>
+				<td>	[% people_select.friend %]	</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	<a name="people_bonus_fan">Fan</a> <img src="[% constants.imagedir %]/fan.gif" alt="fan">				</td>
+				<td>	[% people_select.fan %]		</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	<a name="people_bonus_foe">Foe</a> <img src="[% constants.imagedir %]/foe.gif" alt="foe">				</td>
+				<td>	[% people_select.foe %]		</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	<a name="people_bonus_freak">Freak</a> <img src="[% constants.imagedir %]/freak.gif" alt="freak">				</td>
+				<td>	[% people_select.freak %]		</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	<a name="people_bonus_fan">Friends of Friends</a> <img src="[% constants.imagedir %]/fof.gif" alt="fof">				</td>
+				<td>	[% people_select.fof %]		</td>
+			</tr>
+			<tr>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	<a name="people_bonus_eof">Foes of Friends</a> <img src="[% constants.imagedir %]/eof.gif" alt="eof">				</td>
+				<td>	[% people_select.eof %]		</td>
+			</tr>
+		</table>
+
+		<p><b><a name="people_bonus_anonymous">Anonymous Modifier</a></b> (modifier assigned to anonymous posts)<br>
 		[% people_select.anonymous %]<br>
 
-		<P><B><A NAME="karma_bonus">Karma Bonus</A></B> (modifier assigned to posts where the user has good karma)<BR>
+		<p><b><a name="karma_bonus">Karma Bonus</a></b> (modifier assigned to posts where the user has good karma)<br>
 		[% karma_bonus %]<br>
 
-		<P><B><A NAME="subscriber_bonus">Subscriber Bonus</A></B> (modifier assigned to posts where the user was a subscriber)<BR>
+		<p><b><a name="subscriber_bonus">Subscriber Bonus</a></b> (modifier assigned to posts where the user was a subscriber)<br>
 		[% subscriber_bonus %]<br>
 
-		<P><B><A NAME="new_user_bonus">New User Modifier</A></B> (assign modifiers to recently created accounts)<BR>
+		<p><b><a name="new_user_bonus">New User Modifier</a></b> (assign modifiers to recently created accounts)<br>
 		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
 		[% new_user_bonus_select %] (modifier assigned to new user posts)<br>
 
-		<P><B>Comment Limit</B> (only display this many comments, 
-		for best results, set this to a low number and sort by score)
-		If set above [% constants.breaking %], then it is ignored and
-		[% constants.breaking / 2 %] is used instead.<BR>
-		<INPUT TYPE="TEXT" NAME="commentlimit" SIZE="6" VALUE="[% user_edit.commentlimit %]">
+		<label>Comment Limit <input type="text" name="commentlimit" size="6" value="[% user_edit.commentlimit %]"></label>
+		<div class="notes">Only display this many comments, for best results, set this to a low number and sort by score) If set above [% constants.breaking %], then it is ignored and [% constants.breaking / 2 %] is used instead.</div>
 
-		<P><B>Comment Byte Limit</B> (number of bytes of comments
-		to display. If this is reached before comment limit, break
-		the page, else use above comment limit)<BR>
-		[% bytelimit_select %]<br>
+		<label>Comment Byte Limit [% bytelimit_select %]</label>
+		[% PROCESS formNote note="Number of bytes of comments to display. If this is reached before comment limit, break the page, else use above comment limit." %]
 
-		<P><B>Index Spill</B> (When an article has this many comments,
-		it switches to indexed mode)<BR>
-		<INPUT TYPE="TEXT" NAME="commentspill" VALUE="[% user_edit.commentspill %]" SIZE="3">
+		<label>Index Spill <input type="text" name="commentspill" value="[% user_edit.commentspill %]" size="3"></label>
+		[% PROCESS formNote note="When an article has this many comments, it switches to indexed mode." %]
 
-		<P><B><A NAME="clsmall">Small Comment Penalty</A></B> (Assign a bonus to smaller comments)<BR>
-		<INPUT TYPE="TEXT" NAME="clsmall" VALUE="[% user_edit.clsmall %]" SIZE="6"> (length of comment in bytes)<BR>
+		<p><b><a name="clsmall">Small Comment Modifier</a></b> (Modifier assigned to smaller comments)<br>
+		<input type="text" name="clsmall" value="[% user_edit.clsmall %]" size="6"> (length of comment in bytes)<br>
 		[% small_length_bonus_select %] (modifier assigned)<br>
 
-		<P><B><A NAME="clbig">Long Comment Bonus</A></B> (Assign a bonus to lengthy comments)<BR>
-		<INPUT TYPE="TEXT" NAME="clbig" VALUE="[% user_edit.clbig %]" SIZE="6"> (length of comment in bytes)<BR>
+		<p><b><a name="clbig">Long Comment Modifier</a></b> (Modifier assigned to lengthy comments)<br>
+		<input type="text" name="clbig" value="[% user_edit.clbig %]" size="6"> (length of comment in bytes)<br>
 		[% long_length_bonus_select %] (modifier assigned)<br>
 
-		<P><B>Max Comment Size</B> (Truncates long comments, and
-		adds a "Read the rest" link.  Set really big to disable)<BR>
-		<INPUT TYPE="TEXT" NAME="maxcommentsize" SIZE="6" VALUE="[% user_edit.maxcommentsize %]">
+		<label>Comment Box Size</label>
+		Columns: <input type="text" name="textarea_cols" size="4" value="[% user_edit.textarea_cols || constants.textarea_cols %]">
+		Rows: <input type="text" name="textarea_rows" size="4" value="[% user_edit.textarea_rows || constants.textarea_rows %]">
+		[% PROCESS formNote note="Also applies to other large text boxes" %]
 
-		<P><B>Comment Box Size</B> (Also applies to other large
-		text boxes)<BR>
-		Rows: <INPUT TYPE="TEXT" NAME="textarea_rows" SIZE="4" VALUE="[% user_edit.textarea_rows || constants.textarea_rows %]">
-		Columns: <INPUT TYPE="TEXT" NAME="textarea_cols" SIZE="4" VALUE="[% user_edit.textarea_cols || constants.textarea_cols %]">
-
-		<P><B>Comment Post Mode</B>
-
+		<label>Comment Post Mode</label>
 		[% posttype_select %]
 
 [% IF user.karma > constants.goodkarma %]
-		<P><B>No Karma Bonus</B>
-		<INPUT TYPE="hidden" NAME="nobonus_present" VALUE="1">
-		<INPUT TYPE="checkbox" NAME="nobonus"[% b_check %]>
+		<label>No Karma Bonus
+		<input type="hidden" name="nobonus_present" value="1">
+		<input type="checkbox" name="nobonus"[% b_check %]>
+		</label>
 [% END %]
 
 [% IF user.is_subscriber %]
-		<P><B>No Subscriber Bonus</B>
-		<INPUT TYPE="hidden" NAME="nosubscriberbonus_present" VALUE="1">
-		<INPUT TYPE="checkbox" NAME="nosubscriberbonus"[% sb_check %]>
+		<label>No Subscriber Bonus
+		<input type="hidden" name="nosubscriberbonus_present" value="1">
+		<input type="checkbox" name="nosubscriberbonus"[% sb_check %]>
+		</label>
 [% END %]
 
-[% IF constants.allow_anonymous && user.karma > -1 %]
-		<P><B>Post Anonymously</B>
-		<INPUT TYPE="hidden" NAME="postanon_present" VALUE="1">
-		<INPUT TYPE="checkbox" NAME="postanon"[% p_check %]>
+[% IF constants.allow_anonymous && (user.karma > -1 || p_check) %]
+		<label>Post Anonymously
+		<input type="hidden" name="postanon_present" value="1">
+		<input type="checkbox" name="postanon"[% p_check %]>
+		</label>
 [% END %]
 
 
 [% UNLESS user_edit.domaintags.defined; user_edit.domaintags=2; END %]
-[% domaintags.${user_edit.domaintags} = 'CHECKED' -%]
-		<P><B>Display Link Domains?</B> (shows the actual domain of any link in brackets)<BR>
-		&nbsp;&nbsp;&nbsp;
-		<INPUT TYPE="RADIO" NAME="domaintags" [% domaintags.0 %] 
-		VALUE=0>&nbsp;
-		Never show link domains<BR>
-		&nbsp;&nbsp;&nbsp;
-		<INPUT TYPE="RADIO" NAME="domaintags" [% domaintags.1 %] 
-		VALUE=1>&nbsp;
-		Show the links domain only in recommended situations<BR>
-		&nbsp;&nbsp;&nbsp;
-		<INPUT TYPE="RADIO" NAME="domaintags" [% domaintags.2 %] 
-		VALUE=2>&nbsp;
-		Always show link domains<BR>
-
-		</TD>
-	</TR>
-</TABLE>
-<P>
-<INPUT TYPE="SUBMIT" VALUE="Save"> <INPUT TYPE="SUBMIT" NAME="restore_defaults" VALUE="Restore Defaults">
-</FORM>
-
+[% domaintags.${user_edit.domaintags} = constants.markup_checked_attribute -%]
+		<p><b>Display Link Domains?</b> (shows the actual domain of any link in brackets)<br>
+		<blockquote><div>
+		<input type="radio" name="domaintags" value="0"[% domaintags.0 %]> Never show link domains<br>
+		<input type="radio" name="domaintags" value="1"[% domaintags.1 %]> Show the links domain only in recommended situations<br>
+		<input type="radio" name="domaintags" value="2"[% domaintags.2 %]> Always show link domains
+		</div></blockquote>
+		<label>User Page Comment Listing</label>
+		<blockquote><div>
+		[% UNLESS user_edit.user_comment_sort_type.defined; user_edit.user_comment_sort_type=2; END %]
+		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = constants.markup_checked_attribute -%]
+		<input type="radio" name="user_comment_sort_type" value="1"[% user_comment_sort_type.1 %]> Selected by create time descending<br>
+		<input type="radio" name="user_comment_sort_type" value="2"[% user_comment_sort_type.2 %]> Selected by create time descending, results grouped by discussion, newest discussion first.
+		</div></blockquote>
+		[% IF user.is_admin %]
+		<label>Show Moderations in User Comment Listing <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></label>
+			[% IF constants.m2 %]
+				<label>Show Metamoderation in User Moderation Listing <input type="checkbox" name="m2_with_mod" [% s_m2_check %]></label>
+				<label>Show Metamoderation in Comment Moderation Listing <input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]></label>
+			[% END %]
+		[% END %]
+		</td>
+	</tr>
+</table>
+<p>
+<input type="submit" value="Save"> <input type="submit" name="restore_defaults" value="Restore Defaults">
+</fieldset>
+</form>
+</div>
+</div>
 __seclev__
 500
 __version__

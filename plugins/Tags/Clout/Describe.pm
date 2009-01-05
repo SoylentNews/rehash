@@ -4,19 +4,20 @@ use strict;
 use warnings;
 use Date::Parse qw( str2time );
 use Slash::Utility;
+
 use base 'Slash::Clout';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 sub init {
 	my($self) = @_;
-	$self->SUPER::init(@_);
+	$self->SUPER::init() if $self->can('SUPER::init');
 	# Hard-coded constants should be in the vars table.
 	# cumfrac is the cumulative fraction of how much weight is propagated
 	# for each matching tag.  E.g. if $cumfrac is 0.5, the first match may
 	# propagate up to 50% of the weight, the second another 25%, the
 	# third another 12.5% etc.
-	$self->{cumfrac} = 0.5;
+	$self->{cumfrac} = 0.6;
 	my $constants = getCurrentStatic();
 	$self->{debug_uids} = { map { ($_, 1) } split / /,
 		($constants->{tags_updateclouts_debuguids} || '')

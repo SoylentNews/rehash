@@ -6,7 +6,7 @@ package Slash::Moderation;
 
 use strict;
 use Date::Format qw(time2str);
-use Slash;
+use Slash::Utility;
 use Slash::Display;
 
 use base 'Slash::Plugin';
@@ -14,12 +14,12 @@ use base 'Slash::Plugin';
 our $VERSION = $Slash::Constants::VERSION;
 
 sub isInstalled {
-	my($self) = @_;
+	my($class) = @_;
 	my $constants = getCurrentStatic();
 	return 0 if ! $constants->{m1};
-	my($plugin_name) = ref($self) =~ /^Slash::(\w+)$/;
+	my($plugin_name) = $class =~ /^Slash::(\w+)$/;
 	return 0 if $constants->{m1_pluginname} ne $plugin_name;
-	return $self->SUPER::isInstalled();
+	return $class->SUPER::isInstalled();
 }
 
 ########################################################

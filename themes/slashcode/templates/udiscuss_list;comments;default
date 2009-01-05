@@ -7,6 +7,9 @@ arguments.
 
 * discussions = arrayref of arrayrefs of discussions (sid = 0, title=1, url=2)
 * suppress_create = if it has value then the create is not displayed even if the user has enough of a seclev
+
+NO LONGER USED
+
 __title__
 
 __page__
@@ -17,18 +20,18 @@ __name__
 udiscuss_list
 __template__
 [% PROCESS titlebar title=title width='100%' %]
-<MULTICOLS COLS=2>
+<multicol cols=2>
 [% FOR discussion = discussions %]
 	[% nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
-IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
-	created by <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> on [% Slash.timeCalc(discussion.ts) %]
+	<li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
+IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</a>
+	created by <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname %]</a> on [% Slash.timeCalc(discussion.ts) %]
 [% END %]
-</MULTICOL>
-<P>
+</multicol>
+<p>
 [% PROCESS pagination label=label %]
 
-<P>
+<p>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !suppress_create;
     # PROCESS discreate topic=constants.discussion_default_topic label=label; 

@@ -6,6 +6,10 @@ Template which renders the comment editor.
 * error_message = error message if there is an error
 * preview = preview of comment, if applicable
 * reply = hashref of comment replying to
+* hide_name = hide name / log out link
+* hide_email = hide email display
+* extras = array of any extras associated with this comment
+ 
 __title__
 
 __page__
@@ -15,143 +19,142 @@ en_US
 __name__
 edit_comment
 __template__
-<!-- error message -->
-<!-- newdiscussion [% newdiscussion %] form.newdiscussion [% form.newdiscussion %] -->
-[% IF error_message %]<P><B>[% error_message %]</B><P>[% END %]
-<!-- end error message -->
+<div id="wide">
+[% discussion2 = Slash.discussion2() %]
 [% IF form.pid %]
-	[% PROCESS titlebar width="100%" title=reply.subject %]
-	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="95%" ALIGN="CENTER">
-	[% Slash.dispComment(reply) %]
-	</TABLE><P>
+        [% PROCESS titlebar title="Reply to: $reply.subject" %]
+        <div class="generalbody">
+		<ul id="commentlisting" class="[% discussion2 ? 'd2' : 'd1' %]">
+                [% Slash.dispComment(reply) %]
+		</li>
+		</ul>
+        </div>
 [% END %]
-[% IF preview %]
-	[% IF newdiscussion || form.newdiscussion %]
-	[% PROCESS titlebar width="100%" title="Preview $label" %]
-	[% ELSE %]
-	[% PROCESS titlebar width="100%" title="Preview Comment" %]
+
+[% PROCESS titlebar title="Post Comment" %]
+	<div class="generalbody">
+<!-- error message -->
+[% IF error_message %]
+        <div class="error">
+                [% error_message %]
+        </div>
+[% END %]
+<!-- end error message -->
+<form action="[% gSkin.rootdir %]/comments.pl" method="post">
+[% IF preview %]                
+	<fieldset>
+		<legend>Preview Comment</legend>
+		[% preview %]   
+	</fieldset>
+[% END %]    
+	<fieldset>
+	<legend>Edit Comment</legend>
+	<input type="hidden" name="sid" value="[% form.sid || sid %]">
+	<input type="hidden" name="pid" value="[% form.pid %]">
+	[% IF form.returnto_commentpostsuccess && form.returnto_commentpostsuccess_confirm %]
+		<input type="hidden" name="returnto_commentpostsuccess"
+			value="[% form.returnto_commentpostsuccess | strip_attribute %]">
+		<input type="hidden" name="returnto_commentpostsuccess_confirm"
+			value="[% form.returnto_commentpostsuccess_confirm | strip_attribute %]">
 	[% END %]
-	[% preview %]
-	<P>
-
-[% END %]
-
-[% IF newdiscussion || form.newdiscussion %]
-	[% PROCESS titlebar width="100%" title="Create New $label" %]
-[% ELSE %]
-	[% PROCESS titlebar width="100%" title="Post Comment" %]
-[% END %]
-
-<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
-
-	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid || sid %]">
-	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% form.pid %]">
-	<INPUT TYPE="HIDDEN" NAME="mode" VALUE="[% user.mode %]">
-	<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% user.startat %]">
-	<INPUT TYPE="HIDDEN" NAME="threshold" VALUE="[% user.threshold %]">
-	<INPUT TYPE="HIDDEN" NAME="commentsort" VALUE="[% user.commentsort %]">
-        [% IF gotmodwarning %]<INPUT TYPE="HIDDEN" NAME="gotmodwarning" VALUE="1">[% END %]
-
-[% IF newdiscussion || form.newdiscussion %]
-	<INPUT TYPE="HIDDEN" NAME="indextype" VALUE="[% indextype %]">
-	<INPUT TYPE="HIDDEN" NAME="newdiscussion" VALUE="[% newdiscussion %]">
-[% END %]
+	<input type="hidden" name="mode" value="[% user.mode %]">
+	<input type="hidden" name="startat" value="[% user.startat %]">
+	<input type="hidden" name="threshold" value="[% user.threshold %]">
+	<input type="hidden" name="commentsort" value="[% user.commentsort %]">
+        [% IF gotmodwarning %]<input type="hidden" name="gotmodwarning" value="1">[% END %]
 
 [% PROCESS formkey_tag %]
 
-	<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1">
 [% userlink = '' %]
 [% IF user.is_anon %]
 <!-- anon login code -->
-	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create an Account</A>" %]
-	<TR><TD> </TD><TD>
+	[% userlink = "<a href=\"${gSkin.rootdir}/users.pl\">Create an Account</a>" %]
 		You are not logged in.  You can log in now using the
 		convenient form below, or
-		<A HREF="[% constants.rootdir %]/users.pl">Create an Account</A>,
-		or post as <B>[% user.nickname %]</B>.
-	</TD></TR>
-	<INPUT TYPE="HIDDEN" NAME="rlogin" VALUE="1">
+		<a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
+		or post as <b>[% user.nickname | strip_literal %]</b>.
+	<input type="hidden" name="rlogin" value="1">
 
-	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Nick' %]</TD><TD>
-		<INPUT TYPE="TEXT" NAME="unickname" VALUE="[% form.nickname | strip_attribute %]">
+	[% PROCESS formLabel value => 'Nick' %]
+		<input type="text" name="unickname" value="[% form.nickname | strip_attribute %]">
 
-	</TD></TR><TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Password' %]</TD><TD>
-		<INPUT TYPE="PASSWORD" NAME="upasswd">
-		<INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal
+	[% PROCESS formLabel value => 'Password' %]
+		<input type="password" name="upasswd">
+		<input type="checkbox" name="login_temp" value="yes"> Public Terminal
 
-	</TD></TR>
 [% ELSE;
-	userlink = "<A HREF=\"${constants.rootdir}/users.pl?op=userclose\">Log Out</A>";
+	userlink = "<a href=\"${gSkin.rootdir}/login.pl?op=userclose\">Log Out</a>";
 END %]
-
-	<TR><TD WIDTH="130" ALIGN="RIGHT">[% PROCESS formLabel value => 'Name' %]</TD><TD WIDTH="500">
-		<A HREF="[% constants.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
+	[% UNLESS hide_name %]
+	[% PROCESS formLabel value => 'Name' %]
+		<a href="[% gSkin.rootdir %]/users.pl">[% user.nickname | strip_literal %]</a> [ [% userlink %] ]
+	[% END %]
 [% IF user.fakeemail %]
-	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Email' %]</TD>
-		<TD>[% user.fakeemail | strip_literal %]</TD></TR>
+	[% UNLESS hide_email %]
+	[% PROCESS formLabel value => 'Email' %]
+		[% user.fakeemail | strip_literal %]
+	[% END %]
 <!-- end anon login code -->
 [% END %]
 [% IF user.homepage %]
-	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'URL' %]</TD>
-		<TD><A HREF="[% user.homepage %]">[% user.homepage | strip_literal %]</A></TD></TR>
+	[% PROCESS formLabel value => 'URL' %]
+		<a href="[% user.homepage %]" rel="nofollow">[% user.homepage | strip_literal %]</a>
 [% END %]
 
-	[% IF newdiscussion || form.newdiscussion %]
-		<TR>
-			<TD ALIGN="RIGHT">Topic: </TD>
-			<TD>
-				[% Slash.selectTopic('topic', form.topic, section, 1) %]
-			</TD>
-		</TR>
-		[% IF section_select %]
-		<TR>
-			<TD ALIGN="RIGHT">Section: </TD>
-			<TD>
-				[% section_select %]
-			</TD>
-		</TR>
+	[% PROCESS formLabel value => 'Subject' %]
+		<input type="text" name="postersubj" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
+	[% FOR extra = extras %]
+	
+		<b>[% extra.0 %]
+		
+		[% IF extra.2 == 'text' %]
+			<input type="text" name="[% extra.1 %]" value="[% form.${extra.1} | strip_attribute %]" size="50">
+		[% ELSIF extra.2 == 'list' %]
+			[% pulldown = extra.1 %]
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), form.${extra.1}, 1, 1) %]	
 		[% END %]
-		<TR>
-			<TD ALIGN="RIGHT">URL: </TD>
-			<TD>
-				<INPUT TYPE="text" NAME="url" VALUE="[% form.url | strip_attribute %]" SIZE=60>
-			</TD>
-		</TR>
+		</b>
 	[% END %]
-
-	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Subject' %]</TD>
-		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% form.postersubj | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
-	</TR>
-	<TR>
-		<TD ALIGN="RIGHT" VALIGN="TOP">[% PROCESS formLabel value => 'Comment' %]</TD>
-		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</TEXTAREA>
-		<BR>(Use the Preview Button! Check those URLs!)
+	
+		[% PROCESS formLabel value => 'Comment' %]
+		<textarea wrap="virtual" name="postercomment" id="postercomment" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</textarea>
+		[% PROCESS formNote note => 'Use the Preview Button! Check those URLs!' %]
+		<br>
 		[% IF user.is_anon %]
 		[% anon_messages = [
 			"Logged-in users aren't forced to preview their comments.",
 		#	"Logged-in posts are seen by xx as many users.",
 			"Score: 0 (Logged-in users start at Score: 1)."
 		]%]
-		<BR>[% anon_messages.rand %]
-		<B><A HREF="[% constants.rootdir %]/users.pl">Create an Account!</A>
+		<br>[% anon_messages.rand %]
+		<a href="[% gSkin.rootdir %]/users.pl">Create an Account!</a>
 		[% END %]
-	</TD></TR>
 
-	<TR><TD> </TD><TD>
+[% IF !user.is_anon && discussion2;
+        prefslink = "<a href=\"" _ gSkin.rootdir _ "/my/comments\" target=\"_blank\"";
+
+        IF constants.modal_prefs_active;
+                prefslink = prefslink _ "  onclick=\"getModalPrefs('d2_posting', 'Discussion 2')\; return false\"";
+        END;
+
+        prefslink = prefslink _ ">Customize Posting Preferences</a><p>&nbsp;<br>";
+
+        prefslink;
+END %]
 
 [% IF !user.is_anon && user.karma > constants.goodkarma %]
-		<INPUT TYPE="hidden" NAME="nobonus_present" VALUE="1">
-		<INPUT TYPE="checkbox" NAME="nobonus"[% form.nobonus ? " CHECKED" : "" %]> No Karma Bonus
+		<input type="hidden" name="nobonus_present" value="1">
+		<input type="checkbox" name="nobonus"[% constants.markup_checked_attribute IF form.nobonus %]> No Karma Bonus
 [% do_br = 1; END;
 IF !user.is_anon && user.is_subscriber %]
-		<INPUT TYPE="hidden" NAME="nosubscriberbonus_present" VALUE="1">
-		<INPUT TYPE="checkbox" NAME="nosubscriberbonus"[% form.nosubscriberbonus ? " CHECKED" : "" %]> No Subscriber Bonus
+		<input type="hidden" name="nosubscriberbonus_present" value="1">
+		<input type="checkbox" name="nosubscriberbonus"[% constants.markup_checked_attribute IF form.nosubscriberbonus %]> No Subscriber Bonus
 [% do_br = 1; END;
-IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && discussion.commentstatus == 'enabled'  %]
-		<INPUT TYPE="hidden" NAME="postanon_present" VALUE="1">
-		<INPUT TYPE="checkbox" NAME="postanon"[% form.postanon ? " CHECKED" : "" %]> Post Anonymously
+IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in')  %]
+		<input type="hidden" name="postanon_present" value="1">
+		<input type="checkbox" name="postanon"[% constants.markup_checked_attribute IF form.postanon %]> Post Anonymously
 [% do_br = 1; END;
-IF do_br %]<BR>[% END %]
+IF do_br %]<br>[% END %]
 
 [% 
 	formats = Slash.db.getDescriptions('postmodes');
@@ -162,59 +165,70 @@ IF do_br %]<BR>[% END %]
 	Slash.createSelect('posttype', formats, user.posttype, 1);
 %]
 
-
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_comments && user.state.hc %]
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
 	[% ELSE %]
-		<TABLE CELLSPACING=1 BORDER=0><TR VALIGN="MIDDLE">
-		<TD>[% user.state.hcquestion %]</TD>
-		<TD>[% user.state.hchtml %]</TD>
-		<TD><INPUT TYPE="TEXT" NAME="hcanswer"
-			VALUE="[% form.hcanswer | strip_attribute %]"
-			SIZE=8 MAXLENGTH=8></TD>
-		</TR></TABLE>
+		[% user.state.hcquestion %]
+		[% user.state.hchtml %]
+		<input type="text" name="hcanswer" value="[% form.hcanswer | strip_attribute %]" size=8 maxlength=8>
 		[% IF !user.is_anon || (user.is_anon && preview) %]
-		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
+		<input type="submit" name="op" value="Submit" class="button">
 		[% END %]
-		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
+		<input type="submit" name="op" value="Preview" class="button">
 		[% format_select %]
 	[% END %]
 [% ELSE %]
-	[% IF !user.is_anon || (user.is_anon && preview) %]
-	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
-	[% END %]
-	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
+<p>
 	[% format_select %]
-[% END %]
-
-	</TD></TR><TR>
-		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
-			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
-		</FONT>
-	</TD></TR>
-</TABLE>
-
-</FORM>
-
-<B>Important Stuff:</B>
-	<LI>Please try to keep posts on topic.
-	<LI>Try to reply to other people's comments instead of starting new threads.
-	<LI>Read other people's messages before posting your own to avoid simply duplicating
-		what has already been said.
-	<LI>Use a clear subject that describes what your message is about.
-	<LI>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be
-		moderated. (You can read everything, even moderated posts, by adjusting your
-		threshold on the User Preferences Page)
-	[% IF user.is_anon %]
-		<LI>If you want replies to your comments sent to you, consider
-		<A HREF="[% constants.rootdir %]/my/">logging in</A> or
-		<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">creating
-		an account</A>.
+	<input type="submit" name="op" value="Preview" class="button">
+	[% IF !user.is_anon || (user.is_anon && preview) %]
+	<input type="submit" name="op" value="Submit" class="button">
+	[% END %]
+	[% IF form.pid && discussion2 %]
+	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+	<script type="text/javascript">
+<!--
+	D2.comment_body_reply()[[% form.pid %]] = '[% pid_reply %]';
+	document.write('<input type="button" name="quotereply" id="quotereply" value="Quote" class="button" onclick="D2.quoteReply([% form.pid %])">');
+//-->
+	</script>
 	[% END %]
 
-<P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
-	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.</FONT>
+</p>
+[% END %]
+			<div class="notes">
+				<b>Allowed HTML</b><br>
+				&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+				[% IF constants.approvedtags.grep("ECODE").0 %]
+					(Use "ECODE" instead of "PRE" or "CODE".)
+				[% END %]
+	
+				<br>	
+				<b>URLs</b><br>
+				<code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
+				<br>
+				<b>Important Stuff</b>
+				<ul>
+					<li>Please try to keep posts on topic.</li>
+					<li>Try to reply to other people's comments instead of starting new threads.</li>
+					<li>Read other people's messages before posting your own to avoid simply duplicating what has already been said.</li>
+					<li>Use a clear subject that describes what your message is about.</li>
+					<li>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be moderated. (You can read everything, even moderated posts, by adjusting your threshold on the User Preferences Page)</li>
+					[% IF user.is_anon %]
+						<li>If you want replies to your comments sent to you, consider <a href="[% gSkin.rootdir %]/my/">logging in</a> or <a href="[% gSkin.rootdir %]/login.pl?op=newuserform">creating an account</a>.</li>
+					[% END %]
+				</ul>
+
+				<p>
+					If you are having a problem with accounts or comment posting,
+					please <a href="mailto:[% constants.adminmail | strip_attribute %]">yell for help</a>.
+				</p>
+			</div>	
+		</fieldset>
+		</form>
+	</div>
+</div>
 
 __seclev__
 1000

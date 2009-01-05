@@ -11,72 +11,40 @@ en_US
 __name__
 slashdot
 __template__
-[% USE Slash %]
-<P><TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	[% FOREACH article = articles %]
-		[% FOREACH diatribe = article.article; topic = diatribe.topic %]
-  <TR><TD VALIGN="TOP">
-[% PROCESS titlebar title => diatribe.description, width => "100%" %]
-<TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
-<I>[% Slash.timeCalc(diatribe.date) %]</I>
-	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP" ALIGN="RIGHT">
-
-[
-[%- IF !user.is_anon;
-	IF user.uid == uid %]
-<A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</A> |
-<A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A> |
-[%-	ELSE;
-		IF is_friend %]
-<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&amp;type=friend">Remove Friend</A> |
-[%-		ELSE %]
-<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</A> |
-[%-		END;
-	END;
-    END %]
-[%- IF diatribe.discussion; IF !show_discussion %]
-<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A> |
-[%- END; ELSIF user.uid == uid %]
-<A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</A> |
-[%- END %]
-<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</A>
-]
-
-	</TD></TR><TR><TD COLSPAN="2">
-[%# at some point, this needs to be linked to the topic lookup by discussion %]
-[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]" ALIGN="RIGHT">
-[% diatribe.article %]
-	</TD></TR>
-</TABLE>
-
-<BR><BR>
+<div id="journalslashdot">
+    [% FOREACH article = articles %]
+	<div class="journaldate">[% Slash.timeCalc(article.day,"%A %B %d, %Y") %]</div>
+	[% FOREACH diatribe = article.article; topic = diatribe.topic %]
+	<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>
+	<div class="title">
+		<h3>[% diatribe.description %]</h3>
+	</div>
+	<div class="adminoptions">
+		[
+		[%- IF !user.is_anon && user.uid == uid %]
+			<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</a> |
+			<a href="[% gSkin.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</a> |
 		[% END %]
-	[% END %]
 
-	[% back = back || 0;
-	   IF (back > -1) || forward %]
-		<TR VALIGN="TOP">
-			<TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
-				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
-				[% END %]
-				[% IF (back > -1) && forward %]
-					|
-				[% END %]
-				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
-				[% END %]
-			</FONT></TD>
-		</TR>
-	[% END %]
+		[%- IF diatribe.discussion; IF !show_discussion %]
+			<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a> |
+		[%- END; ELSIF user.uid == uid %]
+			<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a> |
+		[%- END %]
+			<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
+		]
+	</div>
 
-	<TR VALIGN="TOP"><TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
-		<A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% uid %]">List all Journal entries</A>
-	</FONT></TD></TR>
-</TABLE>
-<br>
+	<div class="intro">[% diatribe.article %]</div>
+	[% END %]
+    [% END %]
+
+	<div class="journalpage">
+		[% PROCESS pagination %]
+		<br>
+		<a href="[% gSkin.rootdir %]/journal.pl?op=list&amp;uid=[% uid %]" class="all">List all Journal entries</a>
+	</div>
+</div>
 
 __seclev__
 500

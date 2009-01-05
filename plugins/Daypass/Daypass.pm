@@ -7,6 +7,8 @@ package Slash::Daypass;
 use strict;
 use Apache::Cookie;
 
+use Slash::Utility;
+
 use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;

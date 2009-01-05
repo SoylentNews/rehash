@@ -1,0 +1,105 @@
+__section__
+default
+__description__
+* tabs = arrayref of active tabs
+* nodiv = set to 1 if you just want div contents
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+firehose_tabs
+__seclev__
+10000
+__template__
+[% fh = Slash.getObject("Slash::FireHose"); %]
+
+[% rss_options = { "fhfilter" => "fhfilter", "orderdir" => "orderdir", "orderby" => "orderby", color => "color", "duration" => "duration" } %]
+[% rss_param_str = "" %]
+[% IF !user.is_anon %]
+[% FOREACH param = rss_options.keys;
+	rss_param_str = rss_param_str _ "&amp;=" _ param;
+	rss_param_str = rss_param_str _ "=" _ Slash.strip_attribute(options.${rss_options.$param});
+END %]
+[% rss_skin_pre = "";
+   IF (section && section != constants.mainpage_skid);
+	   rss_skin = Slash.db.getSkin(section);
+	   rss_skin_pre = rss_skin.name _ "_";
+   END;
+%]
+[% END %]
+[% active_set = 0; %]
+[% UNLESS nodiv %]<ul class="menu" id="fhtablist">[% END %]
+	[% IF options.smalldevices %]
+		[% FOREACH tab = tabs;
+			tabnames.${tab.tabname} = tab.tabname;
+			IF tab.active;
+				tab_current = tab.tabname;
+			END;
+		 END;
+		Slash.createSelect('tab', tabnames, { default => tab_current, return => 1, onchange => "firehose_set_options('tab', this.options[this.selectedIndex].value])"});
+	 ELSE %]
+		[% FOREACH view = views %]
+			[% active_view = 0 %]
+			[% IF options.view == view.viewname;
+				active_view = 1;
+				active_set = 1;
+			 END %]
+			[% IF active_view %]
+				[% rss_link = "";
+				   IF view.viewname == "stories";
+					rss_link = Slash.root2abs() _ "/" _ rss_skin_pre _ "firehose_stories.rss";
+                                   ELSIF view.viewname == "recent";
+					rss_link = Slash.root2abs() _ "/" _ rss_skin_pre _ "firehose_recent.rss";
+				   ELSIF view.viewname == "popular";
+					rss_link = Slash.root2abs() _ "/" _ rss_skin_pre _ "firehose_popular.rss";
+				   ELSIF !user.is_anon;
+					rss_link = Slash.root2abs() _ "/firehose.pl?op=rss&amp;content_type=rss" _ rss_param_str _ "&amp;logtoken=" _ Slash.strip_paramattr(Slash.getPublicLogToken());
+				   END;
+				%]
+			[% END %]
+			<li [% IF active_view %]class="active"[% END %]><a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">[% view.viewname %]</a> [% IF active_view && rss_link %]<a href="[% rss_link %]" title="RSS for [% view.viewname %]"><img src="[% constants.imagedir %]/feed.png"></a>[% END %]</li>
+		[% END %]
+
+
+	[% FOREACH tab = tabs %]
+		[% this_tab_active = 0 %]
+		<li id="fhtab-[% tab.tabid %]"[% IF options.tab == tab.tabname && !active_set; active_set = 1; this_tab_active = 1; %] class="active"[% END %]>
+		[% IF this_tab_active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]"></span>[% END %]
+		<a href="[% IF this_tab_active %]#[% ELSE %]?tab=[% tab.tabname | strip_attribute %][% END %]" id="tab-text-[% tab.tabid %]" onClick="[% IF this_tab_active %]firehose_open_tab('[% tab.tabid %]');[% ELSE %]firehose_set_options('tab','[% tab.tabname %]');[% END %] return false;" [% IF this_tab_active %]title="Edit this tab"[% END %]>[% tab.tabname | strip_literal %][% IF this_tab_active %]<img src="[% constants.imagedir %]/sic_edit.png" alt="Edit">[% END %]</a>
+		[% IF this_tab_active && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for [% tab.tabname | strip_literal %]"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
+		[% IF this_tab_active && tab.tabname != "untitled" %]<span id="fhtabdel" class="close" title="Close this tab"><a href="#" onclick="firehose_remove_tab([% tab.tabid %])">[X]</a></span>[% END %]</li>
+	[% END %]
+	[% END %]
+[% UNLESS nodiv %]</ul>[% END %]
+<script type="text/javascript">
+$(function(){ // on document ready
+
+$('input[id^=tab-input-]').
+	each(function(){
+		var tab_id = this.id.substr('tab-input-'.length);
+		$(this).
+			blur(function(){
+				firehose_save_tab(tab_id);
+			}).
+			keypress(function(event){
+				var RETURN=13, SPACE=32;
+
+				var $this = $(this);
+				switch ( event.which || event.keyCode ) {
+					case RETURN:
+					case SPACE:
+						firehose_save_tab(tab_id);
+						return false;
+					default:
+						return true;
+				}
+			});
+	})
+
+});
+</script>
+__version__
+$Id$

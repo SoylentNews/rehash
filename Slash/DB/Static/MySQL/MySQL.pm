@@ -182,6 +182,9 @@ sub updateArchivedDiscussions {
 	my $days_to_archive = getCurrentStatic('archive_delay');
 	return 0 if !$days_to_archive;
 
+	# discussion types to NOT archive, comma-separated
+	my $skip_dkids = '9'; # XXX this should be in DB
+
 	# Close old discussions
 	my $count = $self->sqlUpdate(
 		"discussions",
@@ -189,13 +192,14 @@ sub updateArchivedDiscussions {
 		"TO_DAYS(NOW()) - TO_DAYS(ts) > $days_to_archive
 		 AND type = 'open'
 		 AND flags != 'delete'
-		 AND archivable = 'yes'"
+		 AND archivable = 'yes'
+		 AND dkid NOT IN ($skip_dkids)"
 	);
 
 	# Close expired submission discussions
 	$count += $self->sqlUpdate(
 		"firehose, discussions",
-		{ 'firehose.type' => 'archived' },
+		{ 'discussions.type' => 'archived' },
 		"firehose.type = 'submission'
 		 AND firehose.accepted = 'yes'
 		 AND firehose.discussion IS NOT NULL
@@ -1082,6 +1086,17 @@ sub getSkinInfo {
 	}
 
 	return \%index;
+}
+
+sub getSkinIndex {
+	my($self) = @_;
+	my @skins;
+	my $skins = $self->getSkins;
+	foreach (sort {$skins->{$a}{title} cmp $skins->{$b}{title}} keys %$skins) {
+		next if $skins->{$_}{skinindex} eq "no";
+		push @skins, $skins->{$_};
+	}
+	return \@skins;
 }
 
 # XXXSRCID This needs to actually be, like, written.

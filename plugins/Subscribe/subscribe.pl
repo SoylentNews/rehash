@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -49,32 +49,26 @@ sub main {
 			function	=> \&confirm,
 			seclev		=> 1
 		},
-		msg 	=> {
-			function	=> \&message,
-			seclev		=> 1
-		}
 	};
 
-	if ($user->{is_anon} && $op !~ /^(paypal|makepayment)$/) {
-		my $rootdir = getCurrentStatic('rootdir');
+	$op = 'pause' if $form->{merchant_return_link};
+	$user->{state}{page_adless} = 1 if $op eq 'pause';
+
+	if ($user->{is_anon} && $op !~ /^(paypal|makepayment|pause)$/) {
+		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
 	}
 
 	$op = 'default' unless $ops->{$op};
 
-	if ($op ne 'pause') {
-		# "pause" is special, it does a 302 redirect so we need
-		# to not output any HTML.  Everything else gets this,
-		# header and menu.
-		header("subscribe") or return;
-		print createMenu('users', {
-			style =>	'tabbed',
-			justify =>	'right',
-			color =>	'colored',
-			tab_selected =>	'preferences',
-		});
-	}
+	header("subscribe") or return;
+	print createMenu('users', {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	'preferences',
+	});
 
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
 
@@ -109,7 +103,7 @@ sub edit {
 		? $user->{hits_bought_today_max}
 		: "";
 
-	titlebar("100%", "Editing Subscription...", {
+	titlebar("100%", "Configuring Subscription", {
 		template =>		'prefs_titlebar',
 		tab_selected =>		'subscription',
 	});
@@ -174,7 +168,7 @@ sub save {
 		$hbtm;
 	$slashdb->setUser($user_edit->{uid}, $user_update);
 
-	titlebar("100%", "Editing Subscription...", {
+	titlebar("100%", "Configuring Subscription", {
 		template =>		'prefs_titlebar',
 		tab_selected =>		'subscription',
 	});
@@ -233,13 +227,16 @@ sub makepayment {
 	}
 }
 
-# Wait a moment for an instant payment notification to take place
-# "behind the scenes," then redirect the user to the main subscribe.pl
-# page where they will see their new subscription options.
+# Thank the user for subscribing.  Don't include details about their
+# subscription because the transaction may still be happening
+# behind-the-scenes and so may not be complete yet.  Once they read
+# this page and click through, though, all should be updated.
+
 sub pause {
 	my($form, $slashdb, $user, $constants) = @_;
-	sleep 5;
-	redirect("$constants->{rootdir}/subscribe.pl");
+	titlebar("100%", "Thanks!");
+	my $thanksblock = $slashdb->getBlock('subscriber_plug', 'block');
+	slashDisplay('pause', { thanksblock => $thanksblock });
 }
 
 sub grant {

@@ -6,6 +6,7 @@ package Slash::Admin;
 
 use strict;
 use Slash;
+use Slash::Utility;
 use Slash::Display;
 
 use base 'Slash::Plugin';
@@ -373,23 +374,24 @@ sub showStoryAdminBox {
 		$storysignoffcnt	= $self->getSignoffCountHashForStoids($stoid_list);
 	}
 
-
-	my $authortext = slashDisplay('futurestorybox', {
+	my $needed_signoffs = $self->getActiveAdminCount;
+	my $futurestorybox = slashDisplay('futurestorybox', {
 		pastextras	  => $extras,
 		past		  => $past,
 		present		  => $storyref,
 		future		  => $future,
 		user_signoffs 	  => $usersignoffs,
 		story_signoffs	  => $storysignoffcnt,
+		needed_signoffs	  => $needed_signoffs,
 	}, { Return => 1 });
 
-	return $authortext if $options->{contents_only};
+	return $futurestorybox if $options->{contents_only};
 	
 	$updater = getData('storyadminbox_js', {}, "admin") if $options->{updater}; 
 	slashDisplay('sidebox', {
 		updater 	=> $updater,
 		title 		=> 'Story Admin',
-		contents	=> $authortext,
+		contents	=> $futurestorybox,
 		name 		=> 'storyadmin',
 	}, { Return => 1});
 }

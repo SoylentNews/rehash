@@ -29,16 +29,16 @@ __template__
 	[% ELSIF item.type == "story" %]
 		Posted
 	[% ELSIF item.type == "bookmark" %]
-		Bookmark
 	[% ELSIF item.type == "feed" %]
 		From feed
 	[% ELSIF item.type != "comment" %]
 		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% IF adminmode && item.type != "story" %]
-		[% the_user.nickname | strip_literal %]
-		(<a href="[% gSkin.rootdir %]/users.pl?uid=[% the_user.uid %]">[% the_user.uid %]</a>)
+	[% IF item != "bookmark" %]by [% END %][% IF adminmode && item.type != "story" && item.type != "bookmark" %]
+		[% IF Slash.isAnon(the_user.uid) %][% the_user.nickname | strip_literal %]
+		[% ELSIF item.type != "bookmark" %]<a href="[% constants.real_rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %] ([% the_user.uid %])</a>
+		[% END %]
 	[% END %]
 	[% IF extras && num_from_uid != '0' %]
 		([% accepted_from_uid %]/[% num_from_uid %]) 
@@ -51,7 +51,9 @@ __template__
 		[% ELSIF item.type == "story" %]
 			[% IF the_user.homepage %]<a href="[% the_user.homepage %]"[% rnf %]>[% END %][% the_user.nickname %][% IF the_user.homepage %]</a>[% END %]
 		[% ELSE %]
-			[% the_user.nickname | strip_literal %]
+			[% IF Slash.isAnon(the_user.uid) %][% the_user.nickname | strip_literal %]
+			[% ELSE %]<a href="[% constants.real_rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %]</a>
+			[% END %]
 		[% END %]
 	[% END %]
 	[% IF extras && num_with_emaildomain != '0' %]
@@ -60,7 +62,7 @@ __template__
 
 	[% IF adminmode %]
 		[%  Slash.vislenify(item); %]
-		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
+		<a href="[% constants.real_rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
 		[% IF item.type == "story" %]
 			[% story = Slash.db.getStory(item.srcid) %]
 			[% IF story && story.fhid %]<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% story.fhid %]">Original Submission</a>[% END %]
@@ -72,7 +74,7 @@ __template__
 	[% IF extras && adminmode && num_with_ipid != '0' %]
 		([% accepted_from_ipid %]/[% num_with_ipid %])
 	[% END %]
-	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b>
+	<span id="fhtime-[% item.id %]">[% item.atstorytime %]</span></b>
 	[% IF item.type == "comment" %]
 		(<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]&amp;cid=[% item.srcid %]">#[% item.srcid %]</a>)
 	[% END %]
@@ -107,10 +109,6 @@ __template__
 		[% IF !contentsonly %]
 		<span id="firehose_more">
 		[% END %]
-		[% IF !need_label;
-			label = "more &rsaquo;";
-		   END;
-		%]
 		[% IF day_label && day_count && options.duration != -1;
 			IF need_day_label;
 				label = $day_label _ " ";
@@ -139,12 +137,11 @@ __template__
 				END;
 			END;
 		   END;
+		   IF !label;
+			label = "More &raquo;";
+		   END;
 		%]
-		[% IF user.is_anon %]
-			<a href="#" onclick="show_login_box(); return false;">[% label %]</a>
-		[% ELSE %]
-			<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
-		[% END %]
+		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
 		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 		[% IF !contentsonly %]
 		</span>

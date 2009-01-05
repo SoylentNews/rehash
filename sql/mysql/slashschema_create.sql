@@ -398,10 +398,12 @@ CREATE TABLE css (
 	ordernum int(11) DEFAULT '0',
 	ie_cond VARCHAR(16) DEFAULT '',
 	lowbandwidth ENUM('no','yes') DEFAULT 'no',
+	layout VARCHAR(16) DEFAULT '',
 	PRIMARY KEY  (csid),
 	KEY ctid (ctid),
 	KEY page_skin (page,skin),
-	KEY skin_page (skin,page)
+	KEY skin_page (skin,page),
+	KEY layout (layout)
 ) TYPE=InnoDB;
 
 #
@@ -731,6 +733,20 @@ CREATE TABLE pollvoters (
 	uid mediumint UNSIGNED NOT NULL,
 	KEY qid (qid,id,uid)
 ) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS projects;
+CREATE TABLE projects (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	uid mediumint UNSIGNED NOT NULL DEFAULT 0,
+	unixname varchar(24) NOT NULL DEFAULT '',
+	textname varchar(64) NOT NULL DEFAULT '',
+	url_id INT(10) UNSIGNED NOT NULL DEFAULT 0,
+	createtime DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL,
+	srcname varchar(32) NOT NULL DEFAULT 0,
+	description         TEXT NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	UNIQUE unixname (unixname)
+) Type=InnoDB;
 
 #
 # Table structure for table 'querylog'
@@ -1540,6 +1556,15 @@ CREATE TABLE vars (
 	description varchar(255),
 	PRIMARY KEY (name)
 ) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS xsite_auth_log;
+CREATE TABLE xsite_auth_log (
+	site VARCHAR(30) DEFAULT '' NOT NULL,
+	ts DATETIME DEFAULT '0000-00-00 00:00' NOT NULL,
+	nonce VARCHAR(30) DEFAULT '' NOT NULL,
+	UNIQUE KEY (site,ts,nonce)
+) TYPE=InnoDB;
+
 
 #ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
 #ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);

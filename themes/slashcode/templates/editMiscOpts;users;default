@@ -15,38 +15,55 @@ en_US
 __name__
 editMiscOpts
 __template__
+[% orig_title = title %]
+<div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
+[% PROCESS userboxes %]
+[% END %]
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
 [% PROCESS prefs_titlebar tab_selected='misc' %]
-
-[% note %]
-
+<div class="generalbody">
+[% IF note %]	
+	<div class="message">
+		[% note %]
+	</div>
+[% END %]	
 [%# admin_block %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
+	<form action="[% env.script_name %]" method="post">
+		<fieldset>
+			<legend>Edit Options</legend>
+				[% PROCESS formkey_tag %]
 
-[% PROCESS formkey_tag %]
+			<input type="hidden" name="formname" value="editmiscopts">
+			<input type="hidden" name="op" value="savemiscopts">
 
-<INPUT TYPE="HIDDEN" NAME="formname" VALUE="editmiscopts">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="savemiscopts">
-
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
-	<TR>
-		<TD>
+<table align="center" width="100%">
+	<tr>
+		<td>
 
 [%# Only checkboxes are supported for now. %]
 [% FOREACH opt = opts %]
-	<P><B>[% opt.short_desc %]</B>
-	[% opt.long_desc %]<BR>
-	&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="opt_[% opt.name %]" value="0"
-		[% IF !opt.checked; "CHECKED"; END %]>&nbsp;Off
-	&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="opt_[% opt.name %]" value="1"
-		[% IF opt.checked; "CHECKED"; END %]>&nbsp;On<BR>
+	<p><b>[% opt.short_desc %]</b>
+	<br>
+	&nbsp;&nbsp;&nbsp;<input type="radio" name="opt_[% opt.name %]" value="0"
+		[% constants.markup_checked_attribute IF !opt.checked %]>&nbsp;Off
+	&nbsp;&nbsp;&nbsp;<input type="radio" name="opt_[% opt.name %]" value="1"
+		[% constants.markup_checked_attribute IF opt.checked %]>&nbsp;On
+		<div class="notes">[% opt.long_desc %]</div>
+	</p>
 [% END %]
 
-		<INPUT TYPE="SUBMIT" VALUE="Save">
-		</TD>
-	</TR>
-</TABLE>
-</FORM>
+		<input type="submit" value="Save" class="button">
+		</td>
+	</tr>
+</table>
+</fieldset>
+</form>
+</div>
+</div>
 __seclev__
 500
 __version__

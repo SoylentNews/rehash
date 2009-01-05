@@ -1344,9 +1344,13 @@ sub setCookie {
 	# ".slashdot.org" is OK.  the only way to set a cookie
 	# to a *host* is to leave the domain blank, which is
 	# why we set the first cookie with no domain. -- pudge
+	# unless domain does not match the root domain -- pudge
 
 	# domain must start with a '.' and have one more '.'
-	# embedded in it, else we ignore it
+	# embedded in it, else we ignore it, so you can
+	# enter an *invalid* value in skins.cookiedomain to
+	# override constants.cookiedomain, and *not* have
+	# any domain cookie set -- pudge
 	my $domain = ($cookiedomain && $cookiedomain =~ /^\..+\./)
 		? $cookiedomain
 		: '';
@@ -1362,8 +1366,6 @@ sub setCookie {
 
 	my $cookie = Apache::Cookie->new($r, %cookiehash);
 
-	# this should be fine, but if there is a problem, comment the following
-	# lines, and uncomment the one right above "bake"
 	if (!$val) {
 		$cookie->expires('-1y');  # delete
 	} elsif ($session && $session =~ /^\+\d+[mhdy]$/) {
@@ -1586,7 +1588,7 @@ sub prepareUser {
 			@headers{map lc, keys %headers} = values %headers;
 			my $ua = $r->headers_in->{'user-agent'};
 			if ($ua =~ /MSIE (\d+)/) {
-				$d2 = 'none';# if $1 < 7;
+				$d2 = 'none' if $1 < 7;
 			}
 		}
 		$user->{discussion2} = $d2;
@@ -1871,7 +1873,7 @@ Hashref of cleaned-up data.
 		logtoken	=> sub { $_[0] = '' unless
 					 $_[0] =~ m|^\d+::[A-Za-z0-9]{22}$|		},
 		sid		=> sub { $_[0] = '' unless
-					 $_[0] =~ Slash::Utility::Data::regexSid()	},
+					 $_[0] =~ Slash::Utility::Data::regexSid(1)	},
 		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g			},
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
 			        	 $_[0] =~ s|\s+| |g;				},
@@ -2469,8 +2471,8 @@ sub errorLog {
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		$errors[0] = $ENV{SCRIPT_NAME} . $errors[0];
-		$errors[-1] .= "\n";
-		$r->log_error($_) for @errors;
+		#$errors[-1] .= "\n";
+		$r->log_error(join ' ;; ', @errors); # for @errors;
 	} else {
 		$errors[0] = 'Error' . $errors[0];
 		print STDERR $_, "\n" for @errors;

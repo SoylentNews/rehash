@@ -247,11 +247,14 @@ sub SlashCompileTemplates ($$$) {
 # use a closure to store the regex that matches incoming IP number.
 {
 my $trusted_ip_regex = undef;
+my $trusted_header = undef;
 sub ProxyRemoteAddr ($) {
 	my($r) = @_;
 
-	if (!defined($trusted_ip_regex)) {
-		$trusted_ip_regex = getCurrentStatic("x_forwarded_for_trust_regex");
+	# Set up the variables that are loaded only once.
+	if (!defined($trusted_ip_regex) || !defined($trusted_header)) {
+		my $constants = getCurrentStatic();
+		$trusted_ip_regex = $constants->{clientip_xff_trust_regex};
 		if ($trusted_ip_regex) {
 			# Avoid a little processing each time by doing
 			# the regex parsing just once.
@@ -263,16 +266,29 @@ sub ProxyRemoteAddr ($) {
 			# If defined but false, disable.
 			$trusted_ip_regex = '0';
 		}
+		$trusted_header = $constants->{clientip_trust_header} || '';
 	}
-	return OK if $trusted_ip_regex eq '0';
 
-	# Since any client can forge X-Forwarded-For, we ignore it...
-	return OK unless $r->connection->remote_ip =~ $trusted_ip_regex;
+	# If the actual IP the connection came from is not trusted, we
+	# skip the following processing.  An untrusted client could send
+	# any header with any value.
+	if ($trusted_ip_regex eq '0'
+		|| $r->connection->remote_ip !~ $trusted_ip_regex) {
+		return OK;
+	}
 
-	# ...unless the connection comes from a trusted source.
-	my $xf = $r->header_in('X-Forward-Pound') || $r->header_in('X-Forwarded-For');
-	if (my($ip) = $xf =~ /([^,\s]+)$/) {
-		$r->connection->remote_ip($ip);
+	# The connection comes from a trusted IP.  Use either the
+	# specified header (which presumably the trusted IP overwrites
+	# or modifies) and pull from it the last IP on its list (so
+	# presumably if the trusted IP does merely modify the header,
+	# it appends the actual original IP to its value).
+	my $xf = undef;
+	$xf = $r->header_in($trusted_header) if $trusted_header;
+	$xf ||= $r->header_in('X-Forwarded-For');
+	if ($xf) {
+		if (my($ip) = $xf =~ /([\d.]+)$/) {
+			$r->connection->remote_ip($ip);
+		}
 	}
 
 	return OK;
@@ -288,13 +304,17 @@ sub ConnectionIsSSL {
 	# That probably didn't work so let's get that data the hard way.
 	my $r = Apache->request;
 	return 0 if !$r;
+
+	my $x = $r->header_in('X-SFINC-SSL');
+	return 1 if $x && $x eq 'true';
+
 	my $subr = $r->lookup_uri($r->uri);
 	if ($subr) {
 		my $se = $subr->subprocess_env('HTTPS');
 		return 1 if $se && $se eq 'on'; # https is on
 	}
 
-	my $x = $r->header_in('X-SSL-On');
+	$x = $r->header_in('X-SSL-On');
 	return 1 if $x && $x eq 'yes'; 
 
 	# We're out of ideas.  If the above didn't work we must not be
@@ -361,7 +381,7 @@ sub IndexHandler {
 		my $basedir = $constants->{basedir};
 
 		# $USER_MATCH defined above
-		if ($dbon && ($is_user || $has_daypass)) {
+		if ($dbon && ($is_user || $has_daypass || $gSkin->{index_handler} =~ /^users/)) {
 			$r->uri("/$gSkin->{index_handler}");
 			$r->filename("$basedir/$gSkin->{index_handler}");
 			return OK;
@@ -376,6 +396,8 @@ sub IndexHandler {
 			# consider using File::Basename::basename() here
 			# for more robustness, if it ever matters -- pudge
 			my($base) = split(/\./, $gSkin->{index_handler});
+			$base = "index_firehose" if $constants->{index_anon_index_firehose} && $r->header_in('User-Agent') !~ /MSIE [2-6]/;
+
 			$base = $constants->{index_handler_noanon}
 				if $constants->{index_noanon};
 			if ($gSkin->{skid} == $constants->{mainpage_skid}) {

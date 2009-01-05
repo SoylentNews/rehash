@@ -7,16 +7,17 @@ package Slash::Metamod;
 use strict;
 use Date::Format qw(time2str);
 use Slash;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 sub isInstalled {
-	my($self) = @_;
+	my($class) = @_;
 	my $constants = getCurrentStatic();
 	return 0 if ! $constants->{m2};
-	return $self->SUPER::isInstalled();
+	return $class->SUPER::isInstalled();
 }
 
 ########################################################

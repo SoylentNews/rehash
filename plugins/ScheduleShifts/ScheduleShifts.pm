@@ -34,6 +34,8 @@ sub getDayOfWeekOffset {
 sub init {
 	my($self) = @_;
 
+	return 0 if ! $self->SUPER::init();
+
 	my $static_shift_defs = getCurrentStatic('shift_definitions');
 
 	# What about error handling for bad shift definitions?

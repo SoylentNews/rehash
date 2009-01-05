@@ -11,16 +11,23 @@ CREATE TABLE journals (
 	posttype TINYINT DEFAULT '2' NOT NULL,
 	discussion MEDIUMINT  UNSIGNED,
 	tid SMALLINT UNSIGNED NOT NULL,
+	promotetype ENUM ("publicize","publish", "post") NOT NULL DEFAULT "publish",
+	last_update timestamp NOT NULL,
+	srcid_32 BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	srcid_24 BIGINT UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
-	KEY uidarticle (uid),
+	KEY uid_date_id (uid,date,id),
 	KEY IDandUID (id,uid),
-	KEY tid (tid)
+	KEY tid (tid),
+	KEY srcid_32 (srcid_32),
+	KEY srcid_24 (srcid_24)
 );
 
 DROP TABLE IF EXISTS journals_text;
 CREATE TABLE journals_text (
 	id MEDIUMINT UNSIGNED NOT NULL,
 	article TEXT NOT NULL,
+	introtext TEXT NOT NULL,
 	PRIMARY KEY (id)
 );
 
@@ -32,5 +39,14 @@ CREATE TABLE journal_themes (
 	PRIMARY KEY (id)
 );
 
-ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+#ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 
+DROP TABLE IF EXISTS journal_transfer;
+CREATE TABLE journal_transfer (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	subid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	stoid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	updated TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (id),
+	KEY stoid_updated (stoid, updated)
+);

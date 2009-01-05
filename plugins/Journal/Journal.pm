@@ -34,22 +34,36 @@ sub set {
 		}
 	}
 
-	$j2{article}  = delete $j1{article};
+	$j2{article}   = delete $j1{article};
+	$j2{introtext} = $self->getIntrotext($id, $j2{article}) if $j2{article};
 	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
-	if ($constants->{plugin}{FireHose}) {
+
+	$self->insertFireHose($id, $j1{promotetype});
+}
+
+sub insertFireHose {
+	my($self, $id, $promotetype) = @_;
+
+	return unless getCurrentStatic()->{plugin}{FireHose};
+
+	if ($promotetype ne 'post') {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key('submit', { nostate => 1 });
-		if ($rkey && $rkey->createuse) {
-			my $journal_item = $self->get($id);
-			my $firehose = getObject("Slash::FireHose");
-			if ($journal_item->{promotetype} eq "publicize" || $journal_item->{promotetype} eq "publish") {
-				$firehose->createUpdateItemFromJournal($id);
-			}
+		if (!$rkey || !$rkey->createuse) {
+			# user is not able to submit, so we make it
+			# a "non-submitted" FH entry
+			$self->sqlUpdate('journals',
+				{ promotetype => 'post' },
+				"id=" . $self->sqlQuote($id)
+			);
 		}
 	}
+
+	my $firehose = getObject("Slash::FireHose");
+	$firehose->createUpdateItemFromJournal($id);
 }
 
 sub getsByUid {
@@ -186,27 +200,18 @@ sub create {
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
 	return unless $id;
 
+	my $introtext = $self->getIntrotext(0, $article, $posttype) || '';
 	$self->sqlInsert("journals_text", {
-		id		=> $id,
-		article 	=> $article,
+		id        => $id,
+		article   => $article,
+		introtext => $introtext
 	});
 
 	my($date) = $self->sqlSelect('date', 'journals', "id=$id");
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($user->{uid}, { journal_last_entry_date => $date });
-	if ($constants->{plugin}{FireHose}) {
-		my $reskey = getObject('Slash::ResKey');
-		my $rkey = $reskey->key('submit', { nostate => 1 });
-		if ($rkey && $rkey->createuse) {
-			my $firehose = getObject("Slash::FireHose");
-			my $journal = getObject("Slash::Journal");
-			my $j = $journal->get($id);
-			if ($j->{promotetype} eq "publicize" || $j->{promotetype} eq "publish") {
-				$firehose->createItemFromJournal($id);
-			}
-		}
-	}
 
+	$self->insertFireHose($id, $promotetype);
 
 	return $id;
 }
@@ -227,23 +232,25 @@ sub remove {
 	$self->sqlDelete("journals_text", "id=$id");
 
 	if ($journal->{discussion}) {
-		my $slashdb = getCurrentDB();
+#		my $slashdb = getCurrentDB();
 		# if has been submitted as story or submission, don't
 		# delete the discussion
-		if ($journal->{promotetype} eq 'publicize' || $journal->{promotetype} eq "publish") {
-			my $kind = $self->getDiscussion($journal->{discussion}, 'kind');
-			my $kinds = $self->getDescriptions('discussion_kinds');
-			# set to disabled only if the journal has not been
-			# converted to a journal-story (it will get re-enabled
-			# later if it is converted to a journal-story)
-			if ($kinds->{$kind} eq 'journal') {
-				$slashdb->setDiscussion($journal->{discussion}, {
-					commentstatus	=> 'disabled',
-				});
-			}
-		} else {
-			$slashdb->deleteDiscussion($journal->{discussion});
-		}
+#		my $kind = $self->getDiscussion($journal->{discussion}, 'dkid');
+#		my $kinds = $self->getDescriptions('discussion_kinds');
+
+		# discussions can be re-used in the hose and stories ...
+		# just leave it alone entirely -- pudge 2008-11-17
+
+		# set to disabled only if the journal has not been
+		# converted to a journal-story (it will get re-enabled
+		# later if it is converted to a journal-story)
+#		if ($kinds->{$kind} eq 'journal') {
+#			$slashdb->setDiscussion($journal->{discussion}, {
+#				commentstatus	=> 'disabled',
+#			});
+#		} else {
+#			$slashdb->deleteDiscussion($journal->{discussion});
+#		}
 	}
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
@@ -254,6 +261,15 @@ sub remove {
 	}
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($uid, { -journal_last_entry_date => $date });
+
+	if (getCurrentStatic()->{plugin}{FireHose}) {
+		$slashdb->sqlUpdate('firehose',
+			{ public => 'no' },
+			"type='journal' AND srcid=$id"
+		);
+	}
+
+
 	return $count;
 }
 
@@ -381,6 +397,7 @@ sub get {
 	my($self, $id, $val) = @_;
 	my $answer;
 
+	# XXX I have no idea what this does ... what is "comment"?
 	if ((ref($val) eq 'ARRAY')) {
 		# the grep was failing before, is this right?
 		my @articles = grep /^comment$/, @$val;
@@ -390,17 +407,18 @@ sub get {
 			$answer = $self->sqlSelectHashref($values, 'journals', "id=$id");
 		}
 		if (@articles) {
-			$answer->{comment} = $self->sqlSelect('article', 'journals', "id=$id");
+			$answer->{comment} = $self->sqlSelect('article', 'journals_text', "id=$id");
 		}
 	} elsif ($val) {
-		if ($val eq 'article') {
-			($answer) = $self->sqlSelect('article', 'journals', "id=$id");
+		if ($val eq 'article' || $val eq 'introtext') {
+			($answer) = $self->sqlSelect($val, 'journals_text', "id=$id");
 		} else {
 			($answer) = $self->sqlSelect($val, 'journals', "id=$id");
 		}
 	} else {
 		$answer = $self->sqlSelectHashref('*', 'journals', "id=$id");
 		($answer->{article}) = $self->sqlSelect('article', 'journals_text', "id=$id");
+		($answer->{introtext}) = $self->sqlSelect('introtext', 'journals_text', "id=$id");
 	}
 
 	return $answer;
@@ -539,6 +557,10 @@ sub createStoryFromJournal {
 	$self->logJournalTransfer($src_journal->{id}, 0, $stoid);
 }
 
+# this is kindof a "dumb" split for stories, we do a smarter split for
+# firehose (see getIntrotext), but it can't be rejoined into intro/body
+# like this one can -- pudge
+
 sub splitJournalTextForStory {
 	my($self, $text) = @_;
 	my($intro, $body) = split(/<br>|<\/p>/i, $text, 2);
@@ -668,6 +690,51 @@ sub updateTransferredJournalDiscussions {
 		}
 	}
 }
+
+
+{
+my $linebreak = qr{(?:
+	<br>\s*<br> |
+	</?p> |
+	</(?:
+		div | (?:block)?quote | [oud]l
+	)>
+)}x;
+my $min_chars = 50;
+my $max_chars = 500;
+
+sub getIntrotext {
+	my($self, $id, $bodytext, $posttype) = @_;
+	return unless $id || $bodytext;
+
+	if ($id && (!$bodytext || !$posttype)) {
+		my $article = $self->get($id);
+		$bodytext ||= $article->{article};
+		$posttype ||= $article->{posttype};
+	}
+	return unless $bodytext && $posttype;
+
+	my $strip_art = balanceTags(
+		strip_mode($bodytext, $posttype),
+		{ deep_nesting => 1 }
+	);
+
+	my $intro;
+	if (length($strip_art) < $min_chars) {
+		$intro = $strip_art;
+	} else {
+		$intro = $1 if $strip_art =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
+	}
+
+	$intro ||= chopEntity($strip_art, $max_chars);
+	local $Slash::Utility::Data::approveTag::admin = 1;
+	$intro = strip_html($intro);
+	$intro = balanceTags($intro, { admin => 1 });
+	$intro = addDomainTags($intro);
+
+	return $intro;
+} }
+
 
 
 sub DESTROY {

@@ -346,6 +346,7 @@ sub getBadgeDescriptions {
 sub createComment {
 	my($self, $comment) = @_;
 	return -1 unless dbAvailable("write_comments");
+	my $constants = getCurrentStatic();
 	my $comment_text = $comment->{comment};
 	delete $comment->{comment};
 	$comment->{signature} = md5_hex($comment_text);
@@ -433,6 +434,11 @@ sub createComment {
 #		$searchtoo->storeRecords(comments => $cid, { add => 1 });
 	}
 
+	my $firehose = getObject('Slash::FireHose');
+	if ($firehose && !isAnon($comment->{uid})) {
+		$firehose->createUpdateItemFromComment($cid);
+	}
+
 	return $cid;
 }
 
@@ -471,12 +477,13 @@ sub getCSSValuesHashForCol {
 }
 
 sub getCSS {
-	my($self) = @_;
+	my($self, $layout) = @_;
 	my $user = getCurrentUser();
 	my $page = $user->{currentPage};
 	my $skin = getCurrentSkin('name');
 	my $admin = $user->{is_admin};
 	my $theme = ($user->{simpledesign} || $user->{pda}) ? "light" : $user->{css_theme};
+	$layout ||= '';
 	my $constants = getCurrentStatic();
 
 	my $expire_time = $constants->{css_expire} || 3600;
@@ -490,19 +497,22 @@ sub getCSS {
 	my $css_pages_ref	= $self->{_css_pages_cache};
 	my $css_skins_ref	= $self->{_css_skins_cache};
 	my $css_themes_ref	= $self->{_css_themes_cache};
+	my $css_layouts_ref	= $self->{_css_layouts_cache};
 
 	$css_pages_ref = $self->getCSSValuesHashForCol('page') if !$css_pages_ref;
 	$css_skins_ref = $self->getCSSValuesHashForCol('skin')   if !$css_skins_ref;
 	$css_themes_ref= $self->getCSSValuesHashForCol('theme') if !$css_themes_ref;
+	$css_layouts_ref= $self->getCSSValuesHashForCol('layout') if !$css_layouts_ref;
 
 	my $lowbandwidth = ($user->{lowbandwidth} || $user->{pda}) ? "yes" : "no";
 
 	$page   = '' if !$css_pages_ref->{$page};
 	$skin   = '' if !$css_skins_ref->{$skin};
 	$theme  = '' if !$css_themes_ref->{$theme};
+	$layout = '' if !$css_layouts_ref->{$layout};
 
-	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}
-		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth};
+	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}
+		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout};
 
 	my @clauses;
 
@@ -521,12 +531,15 @@ sub getCSS {
 
 	push @clauses, "lowbandwidth='$lowbandwidth'" if $lowbandwidth eq "no";
 
+	my $layout_q = $self->sqlQuote($layout);
+	push @clauses, "layout=$layout_q";
+
 	my $where = "css.ctid=css_type.ctid AND ";
 	$where .= join ' AND ', @clauses;
 
 	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
 
-	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth} = $css;
+	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout} = $css;
 	return $css;
 }
 
@@ -1188,7 +1201,7 @@ sub createSubmission {
 	# The next line makes sure that we get any section_extras in the DB - Brian
 	$self->setSubmission($subid, $submission) if $subid && keys %$submission;
 
-	if ($constants->{plugin}{FireHose}) {
+	if ($constants->{plugin}{FireHose} && $subid) {
 		my $firehose = getObject("Slash::FireHose");
 		my $firehose_id = $firehose->createItemFromSubmission($subid);
 
@@ -1509,6 +1522,69 @@ sub deleteUser {
 	$self->setUser_delete_memcached($uid);
 	return $rows;
 }
+
+
+########################################################
+# Get user info from the users table.
+sub getUserCrossSiteAuthenticate {
+	my($self, $site, $params, $user) = @_;
+	$user ||= getCurrentUser();
+	my $gSkin = getCurrentSkin();
+
+	errorLog("xsite: wrong host"), return unless $site->{host} eq $gSkin->{hostname};
+
+	errorLog("xsite: no timestamp/nonce"), return unless $params->{tstamp} && $params->{'rand'};
+
+	errorLog("xsite: expired timestamp"), return unless ( ($params->{tstamp} + 60) >= time() );
+
+	unless ($self->sqlInsert('xsite_auth_log', {
+		site    => $site->{site},
+		ts      => $params->{tstamp},
+		nonce   => $params->{'rand'}
+	})) {
+		errorLog("xsite: duplicate nonce");
+		return;
+	};
+
+	my $new = 0;
+	my $uid = $self->sqlSelect('uid', 'users_param',
+		"name=" . $self->sqlQuote($site->{auth_param_name}) .
+		" AND value=" . $self->sqlQuote($params->{user_id})
+	);
+
+	if (!$uid) {
+		my $newnick = sprintf($site->{user_name_format}, $params->{shortname} || $params->{user_id});
+		my $matchname = nick2matchname($newnick);
+		my $email = $params->{shortname}
+			? sprintf($site->{email_format}, $params->{shortname})
+			: '';
+
+		# for matchname, we don't care if someone already has an
+		# "sfpudge", that should not stop us from making a "SF:pudge"
+		$uid = $self->createUser(
+			$matchname, $email, $newnick, { skipchecks => 1 }
+		);
+		$new = 1;
+
+		if ($uid) {
+			# XXX consider disallowing these accounts from
+			# authenticating on other domains
+			my $data = {};
+			$data->{creation_ipid} = $user->{ipid};
+			$data->{ $site->{auth_param_name} } = $params->{user_id};
+			$data->{acl}{nopasswd} = 1;
+			$self->setUser($uid, $data);
+		}
+	}
+
+	return unless $uid; # dunno!
+
+	my $logtoken = $self->getLogToken($uid, 1);
+
+	# return UID alone in scalar context
+	return wantarray ? ($uid, $logtoken, $new) : $uid;
+}
+
 
 ########################################################
 # Get user info from the users table.
@@ -2347,21 +2423,25 @@ sub existsUid {
 # while this is going on, we won't end up with a half created user.
 # -Brian
 sub createUser {
-	my($self, $matchname, $email, $newuser) = @_;
-	return unless $matchname && $email && $newuser;
+	my($self, $matchname, $email, $newuser, $opts) = @_;
+	return unless $matchname && $newuser;
+	$opts ||= {};
+	return if !$email && !$opts->{skipchecks};
 
 	$email =~ s/\s//g; # strip whitespace from emails
 
-	return if ($self->sqlSelect(
-		"uid", "users",
-		"matchname=" . $self->sqlQuote($matchname)
-	))[0] || $self->existsEmail($email);
+	if (!$opts->{skipchecks}) {
+		return if ($self->sqlSelect(
+			"uid", "users",
+			"matchname=" . $self->sqlQuote($matchname)
+		))[0] || $self->existsEmail($email);
+	}
 
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	$self->sqlInsert("users", {
 		uid		=> undef,
-		realemail	=> $email,
+		realemail	=> $email || '',
 		nickname	=> $newuser,
 		matchname	=> $matchname,
 		seclev		=> 1,
@@ -2416,6 +2496,7 @@ sub createUser {
 		'user_expiry_days'	=> $constants->{min_expiry_days},
 		initdomain		=> $initdomain,
 		created_ipid		=> getCurrentUser('ipid') || '',
+		index_beta		=> $constants->{index_new_user_beta} ? 1 : 0,
 	});
 
 	$self->sqlDo("COMMIT");
@@ -3472,7 +3553,7 @@ sub setStory {
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
 		my @non_cchp = grep !/^(commentcount|hitparade|hits)$/, keys %$change_hr;
-		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|mediatype|thumb)$/, keys %$change_hr;
+		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|mediatype|thumb|offmainpage)$/, keys %$change_hr;
 		
 		if (@non_cchp > 0) {
 			$change_hr->{-last_update} = 'NOW()';
@@ -8437,7 +8518,7 @@ sub _getMCDStats_percentify {
 # prettier compromise.  I'm just saying. - Jamie
 sub autoUrl {
 	my($self, $section, @data) = @_;
-	my $data = @data ? join(' ', @data) : '';
+	my $data = @data ? join(' ', map { $_ || '' } @data) : '';
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
@@ -9894,6 +9975,7 @@ sub getStoriesTopicsRenderedHash {
 # Pass in $chosen_hr to save a query.
 sub setStoryRenderedFromChosen {
 	my($self, $stoid, $chosen_hr, $info) = @_;
+	my $constants = getCurrentStatic();
 
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$chosen_hr ||= $self->getStoryTopicsChosen($stoid);
@@ -9917,6 +9999,11 @@ sub setStoryRenderedFromChosen {
 
 	my $rendered_tids = [ keys %$rendered_hr ];
 	$self->setStory_delete_memcached_by_tid($rendered_tids);
+
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->setTopicsRenderedForStory($stoid, $rendered_tids);
+	}
 
 	return($primaryskid, $tids);
 }
@@ -10916,10 +11003,11 @@ sub _getUser_do_selects {
 				$this_clout = $clout_hr->{$clid};
 			} else {
 				my $this_info = $clout_info->{$clid};
-				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' });
-				$this_clout = $clout_obj->getUserClout($answer);
+				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' }); warn "no obj for '$this_info->{class}'" unless $clout_obj;
+				$this_clout = $clout_obj->getUserClout($answer) if $clout_obj;
 			}
-			$answer->{clout}{ $clout_types->{$clid} } = $this_clout;
+			$answer->{clout}{ $clout_types->{$clid} } = $this_clout
+				if defined($this_clout);
 		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
 		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);
@@ -12078,7 +12166,7 @@ sub getGlobjTarget {
 }
 
 # Given an arrayref of globjids, returns a hashref where each key is a
-# globjid and its value is an arrayref of its gtid,target_id.
+# globjid and its value is an arrayref of its globj_type,target_id.
 # XXX should memcached
 
 sub getGlobjTargets {
@@ -12088,8 +12176,9 @@ sub getGlobjTargets {
 	my $target_hr = { };
 	my $in_str = join(',', grep /^\d+$/, @$globjid_ar);
 	my $ar_ar = $self->sqlSelectAll('globjid, gtid, target_id', 'globjs', "globjid IN ($in_str)");
+	my $types = $self->getGlobjTypes;
 	for my $ar (@$ar_ar) {
-		$target_hr->{ $ar->[0] } = [ $ar->[1], $ar->[2] ];
+		$target_hr->{ $ar->[0] } = [ $types->{ $ar->[1] }, $ar->[2] ];
 	}
 	return $target_hr;
 }
@@ -12138,11 +12227,17 @@ sub setGlobjAdminnote {
 
 sub addGlobjTargetsToHashrefArray {
 	my($self, $ar) = @_;
+	my @globjids =
+		map { $_->{globjid} }
+		grep { $_->{globjid} && !$_->{globj_type} } # skip if already added
+		@$ar;
+	my $target = $self->getGlobjTargets(\@globjids);
 	for my $hr (@$ar) {
-		next unless $hr->{globjid}; # skip if bogus data
-		next if $hr->{globj_type};  # skip if already added
-		my($type, $target_id) = $self->getGlobjTarget($hr->{globjid});
-		next unless $type;          # skip if bogus data
+		next unless $hr->{globjid};	# skip if bogus data
+		next unless $target->{ $hr->{globjid} }; # skip if globj missing (?!)
+		next if $hr->{globj_type};	# skip if already added
+		my($type, $target_id) = @{ $target->{ $hr->{globjid} } };
+		next unless $type;		# skip if bogus data
 		$hr->{globj_type} = $type;
 		$hr->{globj_target_id} = $target_id;
 	}
@@ -12179,19 +12274,22 @@ sub addGlobjEssentialsToHashrefArray {
 	# Add the fields globj_type and globj_target_id to each object.
 	# If this was already done, this runs very quickly.
 	$self->addGlobjTargetsToHashrefArray($ar);
-
 	# Select all the needed information about each object and drop it
 	# into %data.
 
 	my %data = ( );
 
-	$self->_addGlobjEssentials_stories($ar, \%data);
-	$self->_addGlobjEssentials_urls($ar, \%data);
+	# Some of these are not written (yet).
 	$self->_addGlobjEssentials_submissions($ar, \%data);
 	$self->_addGlobjEssentials_journals($ar, \%data);
+	$self->_addGlobjEssentials_urls($ar, \%data);
+#	$self->_addGlobjEssentials_feeds($ar, \%data);
+	$self->_addGlobjEssentials_stories($ar, \%data);
+#	$self->_addGlobjEssentials_vendors($ar, \%data);
+#	$self->_addGlobjEssentials_miscs($ar, \%data);
 	$self->_addGlobjEssentials_comments($ar, \%data);
-
-#use Data::Dumper; print STDERR "data: " . Dumper(\%data);
+#	$self->_addGlobjEssentials_discussions($ar, \%data);
+	$self->_addGlobjEssentials_projects($ar, \%data);
 
 	# Scan over the arrayref and insert the information from %data
 	# for each object.
@@ -12235,7 +12333,7 @@ sub _addGlobjEssentials_urls {
 	my($self, $ar, $data_hr) = @_;
 	my $constants = getCurrentStatic();
 	my $urls_hr = _addGlobjEssentials_getids($ar, 'urls');
-	my @url_ids = sort { $a <=> $b } keys %$urls_hr;
+	my @url_ids = keys %$urls_hr;
 	my $id_str = join(',', @url_ids);
 	my $urldata_hr = $id_str
 		? $self->sqlSelectAllHashref('url_id',
@@ -12272,7 +12370,7 @@ sub _addGlobjEssentials_submissions {
 	my($self, $ar, $data_hr) = @_;
 	my $skins = $self->getSkins();
 	my $submissions_hr = _addGlobjEssentials_getids($ar, 'submissions');
-	my @subids = sort { $a <=> $b } keys %$submissions_hr;
+	my @subids = keys %$submissions_hr;
 	my $subid_str = join(',', @subids);
 	my $submissiondata_hr = $subid_str
 		? $self->sqlSelectAllHashref('subid',
@@ -12307,7 +12405,7 @@ sub _addGlobjEssentials_journals {
 		my $fixnick = $journaldata_hr->{$id}{nickname};
 if (!defined $fixnick) { print STDERR scalar(gmtime) . " _addGlobjEssentials_journals no nick for journal $id\n"; }
 		$fixnick = fixparam($fixnick || '');
-		$data_hr->{$globjid}{url} = "$constants->{rootdir}/~$fixnick/journal/$id";
+		$data_hr->{$globjid}{url} = "$constants->{real_rootdir}/~$fixnick/journal/$id";
 		$data_hr->{$globjid}{title} = $journaldata_hr->{$id}{description};
 		$data_hr->{$globjid}{created_at} = $journaldata_hr->{$id}{date};
 	}
@@ -12330,6 +12428,26 @@ sub _addGlobjEssentials_comments {
 		$data_hr->{$globjid}{url} = "$constants->{rootdir}/comments.pl?sid=$commentdata_hr->{$cid}{sid}&cid=$cid";
 		$data_hr->{$globjid}{title} = $commentdata_hr->{$cid}{subject};
 		$data_hr->{$globjid}{created_at} = $commentdata_hr->{$cid}{date};
+	}
+}
+
+sub _addGlobjEssentials_projects {
+	my($self, $ar, $data_hr) = @_;
+	my $constants = getCurrentStatic();
+	my $projects_hr = _addGlobjEssentials_getids($ar, 'projects');
+	my @project_ids = sort { $a <=> $b } keys %$projects_hr;
+	my $id_str = join(',', @project_ids);
+	my $projectdata_hr = $id_str
+		? $self->sqlSelectAllHashref('id',
+			'id, url, textname, projects.createtime',
+			'projects, urls',
+			"id IN ($id_str) AND projects.url_id=urls.url_id")
+		: { };
+	for my $id (@project_ids) {
+		my $globjid = $projects_hr->{$id};
+		$data_hr->{$globjid}{url} = $projectdata_hr->{$id}{url};
+		$data_hr->{$globjid}{title} = $projectdata_hr->{$id}{textname};
+		$data_hr->{$globjid}{created_at} = $projectdata_hr->{$id}{createtime};
 	}
 }
 
@@ -12518,11 +12636,14 @@ sub updateSubMemory {
 
 	my $user = getCurrentUser();
 
+	return if !$submatch;
+
 	my $noid = $self->sqlSelect('noid','submissions_notes',
 		'submatch=' . $self->sqlQuote($submatch));
 
+
 	$self->sqlInsert('submissions_notes', {
-       		submatch        => $submatch,
+		submatch        => $submatch,
 		subnote         => $subnote,
 		uid             => $user->{uid},
                 '-time'         => 'NOW()',
@@ -12684,6 +12805,32 @@ sub logCommentPromotion {
 	$self->sqlInsert("comment_promote_log", { cid => $cid, -ts => "NOW()" });
 }
 
+sub createProject {
+	my($self, $data) = @_;
+	$self->sqlInsert("projects", $data);
+	my $pid = $self->getLastInsertId();
+	return $pid;
+}
+
+sub getProject {
+	my $answer = _genericGetCache({
+		table		=> 'projects',
+		table_prime	=> 'id',
+		arguments	=> \@_,
+	});
+	return $answer;
+}
+
+sub setProject {
+	_genericSet('projects', 'id', '', @_);
+}
+
+sub getProjectByName {
+	my ($self, $name) = @_;
+	my $name_q = $self->sqlQuote($name);
+	return $self->sqlSelectHashref("*","projects", "unixname=$name_q");
+}
+
 sub _getStorySelfLink {
 	my($self, $stoid, $change_hr) = @_; 
 	my $story = $self->getStory($stoid);
@@ -12699,6 +12846,14 @@ sub _getStorySelfLink {
 		skin	=> $skin
 	});
 	return $story_link_ar->[0];
+}
+
+sub getShillInfo {
+        my($self, $shill_id) = @_;
+        my $shill_id_q = $self->sqlQuote($shill_id);
+
+        return $self->sqlSelectHashref('*', 'shill_ids', "shill_id=$shill_id_q");
+
 }
 
 ########################################################

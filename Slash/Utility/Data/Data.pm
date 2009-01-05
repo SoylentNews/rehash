@@ -38,6 +38,7 @@ use HTML::FormatText;
 use HTML::Tagset ();
 use HTML::TreeBuilder;
 use Lingua::Stem;
+use Mail::Address;
 use POSIX qw(UINT_MAX);
 use Safe;
 use Slash::Constants qw(:strip);
@@ -3374,10 +3375,11 @@ sub addDomainTags {
 
 sub email_to_domain {
 	my($email) = @_;
-	my $emailuri = URI->new($email);
-	my $emailhost = '';
-	$emailhost = $emailuri->host() if $emailuri && $emailuri->can('host');
-	return $emailhost ? fullhost_to_domain($emailhost) : undef;
+	my $addr = Mail::Address->new('', $email);
+	return '' if !$addr;
+	my $host = $addr->host();
+	return '' if !$host;
+	return fullhost_to_domain($host);
 }
 
 sub fullhost_to_domain {

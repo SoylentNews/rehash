@@ -1,0 +1,40 @@
+__section__
+default
+__description__
+Display user's info
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+u2CommentsDatapane
+__template__
+[% IF commentstruct.size %]
+	[% n = min_comment %]
+	[% FOREACH comment = commentstruct %]
+		[% n = n + 1 %]
+		[% IF comment.type == 'poll';
+			label   = "Poll: $comment.disc_title ";
+			ELSIF comment.type == 'journal';
+			label   = "Journal Discussion: $comment.disc_title";
+			ELSE;
+			label    = comment.disc_title;
+		END %]
+		<br><b>[% n %]</b> <a href="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
+		[% comment.subject %]</a> posted on [% Slash.timeCalc(comment.date) %]
+	(Score:[% comment.points %][% IF comment.replies %] Replies: [% comment.replies %][% END %])
+		<br>attached to <a href="[% comment.url %]">[% label %]</a>
+	[% END %]
+	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber)) && commentcount > n %]
+		<p><a href="[% gSkin.rootdir %]/users2.pl?dp=comments&amp;min_comment=[% n %]"     >More Comments...</a>
+	[% END %]
+[% ELSE %]
+	<b>[% useredit.nickname | strip_literal %] has yet to post any comments.</b>
+[% END %]
+
+__seclev__
+500
+__version__

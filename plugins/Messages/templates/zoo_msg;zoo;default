@@ -15,26 +15,26 @@ zoo_msg
 __template__
 [% IF msg.mode == Slash.MSG_MODE_WEB %]
 
-<P>
+<p>
 [% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
-<B><A HREF="[% constants.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
->[% zoo_user.nickname | strip_literal %]</A></B> ([% zoo_user.uid %]) has made you their <B>[% type %]</B>.
+<b><a href="[% constants.real_rootdir %]/~[% zoo_user.nickname | strip_paramattr %]/"
+>[% zoo_user.nickname | strip_literal %]</a></b> ([% zoo_user.uid %]) has made you their <b>[% type %]</b>.
 [% ELSIF type == 'neutral' %]
-<B><A HREF="[% constants.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
->[% zoo_user.nickname | strip_literal %]</A></B> ([% zoo_user.uid %]) has ceased their relationship with you.
+<b><a href="[% constants.real_rootdir %]/~[% zoo_user.nickname | strip_paramattr %]/"
+>[% zoo_user.nickname | strip_literal %]</a></b> ([% zoo_user.uid %]) has ceased their relationship with you.
 [% END %]
-</P>
+</p>
 
 If you'd like to, view or edit your
-<A HREF="[% constants.rootdir %]/my/friends">friends</A> and 
-<A HREF="[% constants.rootdir %]/my/foes">foes</A>.
+<a href="[% constants.real_rootdir %]/my/friends">friends</a> and
+<a href="[% constants.real_rootdir %]/my/foes">foes</a>.
 
 [% ELSE %]
 
 [% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
-[% zoo_user.nickname %] ([% zoo_user.uid %]) has made you their [% type %].
+[% zoo_user.nickname | strip_literal %] ([% zoo_user.uid %]) has made you their [% type %].
 [% ELSIF type == 'neutral' %]
-[% zoo_user.nickname %] ([% zoo_user.uid %]) has ceased their relationship with you.
+[% zoo_user.nickname | strip_literal %] ([% zoo_user.uid %]) has ceased their relationship with you.
 [% END %]
     [% absolutedir %]/~[% zoo_user.nickname | fixparam %]/
 

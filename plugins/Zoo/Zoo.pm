@@ -51,14 +51,12 @@ sub getFriendsUIDs {
 
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
-	my $people = $slashdb->getUser($uid, 'people');
-	if ($uid == $user->{uid}) {
-		$people = $user->{people};
-	} else {
-		$people = $slashdb->getUser($uid, 'people');
-	}
-	my @people = keys %{$people->{FRIEND()}};
-	return \@people;
+	my $people = $uid == $user->{uid}
+		? $user->{people}
+		: $slashdb->getUser($uid, 'people');
+
+	return [] if !$people || !$people->{FRIEND()};
+	return [ keys %{$people->{FRIEND()}} ];
 }
 
 sub setFriend {

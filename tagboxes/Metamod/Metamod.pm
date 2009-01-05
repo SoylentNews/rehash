@@ -20,136 +20,71 @@ Slash::Tagbox::Metamod - update user values based on metamoderation of their mod
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-use Slash::Tagbox;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
+use base 'Slash::Tagbox';
 
-sub new {
-	my($class, $user) = @_;
-
-	return undef if !$class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
+sub init {
+        my($self) = @_;
+        return 0 if ! $self->SUPER::init();
 
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
-	$self->{upvoteid}   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	$self->{downvoteid} = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	$self->{metanodid}  = $tagsdb->getTagnameidCreate('metanod');
 	$self->{metanixid}  = $tagsdb->getTagnameidCreate('metanix');
-	$self->{care_ids} = [ $self->{upvoteid}, $self->{downvoteid}, $self->{metamodid}, $self->{metanixid} ];
+
+	# XXX set these 4 to be hashes and change all the grep{}s to hash lookups
 	$self->{modup_ids} = [ ];
 	$self->{moddown_ids} = [ ];
-	$self->{metamodup_ids} = [   $self->{upvoteid},   $self->{metanodid} ];
-	$self->{metamoddown_ids} = [ $self->{downvoteid}, $self->{metanixid} ];
-	my $reasons = $constants->{reasons};
-	for my $id (sort keys %$reasons) {
-		next unless $reasons->{$id}{val}; # skip 'Normal'
-		my $name = lc $reasons->{$id}{name};
-		my $nameid = $tagsdb->getTagnameidCreate($name);
-		push @{$self->{care_ids}}, $nameid;
-		if ($reasons->{$id}{val} > 0) {
-			push @{$self->{modup_ids}}, $nameid;
-		} else {
-			push @{$self->{moddown_ids}}, $nameid;
+	$self->{metamodup_ids} = [   $self->{nodid}, $self->{metanodid} ];
+	$self->{metamoddown_ids} = [ $self->{nixid}, $self->{metanixid} ];
+
+	my $moddb = getObject('Slash::TagModeration');
+	$self->{reasons} = $moddb->getReasons();
+	$self->{reason_tagnameid} = { };
+	$self->{reason_ids} = [
+		grep { $self->{reasons}{$_}{val} != 0 }
+		keys %{$self->{reasons}}
+	];
+	for my $id (@{$self->{reason_ids}}) {
+		my $name = lc $self->{reasons}{$id}{name};
+		my $tagnameid = $tagsdb->getTagnameidCreate($name);
+		$self->{reason_tagnameid}{$tagnameid} = $self->{reasons}{$id};
+		if ($self->{reasons}{$id}{val} > 0) {
+			push @{$self->{modup_ids}}, $tagnameid;
+		} elsif ($self->{reasons}{$id}{val} < 0) {
+			push @{$self->{moddown_ids}}, $tagnameid;
 		}
 	}
 
-	return $self;
+	1;
 }
 
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return $constants->{plugin}{Tags} && $constants->{tagbox}{$tagbox_name} || 0;
+sub init_tagfilters {
+	my($self) = @_;
+
+	# XXX should check how long tags were active, penalties may still apply
+	$self->{filter_activeonly} = 1;
+
+	$self->{filter_firehoseonly} = 1;
+	$self->{filter_gtid} = $self->getGlobjTypes()->{comments};
+
+        $self->{filter_tagnameid} = [ ];
+        for my $tagnameid (keys %{ $self->{reason_tagnameid} }) {
+                push @{ $self->{filter_tagnameid} }, $tagnameid;
+        }
+        for my $tagname (qw( nod nix metanod metanix )) {
+                push @{ $self->{filter_tagnameid} }, $self->{"${tagname}id"};
+        }
+
 }
 
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("Metamod->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("Metamod->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
-	my $tagsdb = getObject('Slash::Tags');
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'moderate' }
 
-	# We care about nod and nix (the precursors to metamod and metanix),
-	# metanod and metanix, and all moderations.
-
-	my $ret_ar = [ ];
-	for my $tag_hr (@$tags_ar) {
-		next unless grep { $_ == $tag_hr->{tagnameid} } @{$self->{care_ids}};
-		my $ret_hr = {
-			affected_id =>	$tag_hr->{globjid},
-			importance =>	1,
-		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
-		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
-		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
-		push @$ret_ar, $ret_hr;
-	}
-	return [ ] if !@$ret_ar;
-
-	# Tags applied to globjs that have a firehose entry associated
-	# are important (because only comments in the hose are eligible
-	# to be metamodded).  Other tags are not.
-	my %globjs = ( map { $_->{affected_id}, 1 } @$ret_ar );
-	my $globjs_str = join(', ', sort keys %globjs);
-	my $fh_globjs_ar = $self->sqlSelectColArrayref(
-		'globjid',
-		'firehose',
-		"globjid IN ($globjs_str)");
-	return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
-	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
-	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
-
-	main::tagboxLog("Metamod->feed_newtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("Metamod->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("Metamod->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	my $constants = getCurrentStatic();
-	main::tagboxLog("Metamod->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
-
-	# XXX need to fill this in
-
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id, $options) = @_;
+sub run_process {
+	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -164,23 +99,28 @@ sub run {
 
 	# Get some basic information about the tag array we're processing.
 
-	my $tag_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
+#	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
+	if (!@$tags_ar) {
+		$self->info_log("error, empty tags_ar for %d, skipping", $affected_id);
+		return ;
+	}
+
 	my $prev_max = $self->get_maxtagid_seen($affected_id);
-	my $new_max = $tag_ar->[-1]{tagid};
+	my $new_max = $tags_ar->[-1]{tagid};
 
 	# Do the hard work:  process the tag array twice, once for the
 	# previous time (if any) this tagbox was run on this globj,
 	# and once for now.  Calculate the difference between the two runs:
 	# that is what must be applied this time around.
 
-	my $new_delta = $self->get_delta($tag_ar, $new_max);
+	my $new_delta = $self->get_delta($tags_ar, $new_max);
 	if (!defined($new_delta)) {
-		main::tagboxLog("Metamod->run no consensus yet on $fhid ($affected_id)");
+		$self->info_log("no consensus yet on $fhid ($affected_id)");
 		# Don't bother setting maxtagid seen.  When consensus is
 		# achieved, it'll run from the start anyway.
 		return ;
 	}
-	my $old_delta = $self->get_delta($tag_ar, $prev_max);
+	my $old_delta = $self->get_delta($tags_ar, $prev_max);
 	my $change_delta = $self->get_change($old_delta, $new_delta);
 
 	if ($options->{return_only}) {
@@ -191,8 +131,9 @@ sub run {
 	# mark it as having been done, and log it.
 
 	my $change_str = $self->apply_change($change_delta);
-	$self->set_maxtagid_seen($new_max);
-	main::tagboxLog("Metamod->run change for $fhid ($affected_id) from $prev_max to $new_max: $change_str");
+	$self->set_maxtagid_seen($affected_id, $new_max);
+	$self->info_log("change for %d (%d) from %d to %d: %s",
+		$fhid, $affected_id, $prev_max, $new_max, $change_str);
 }
 
 sub get_maxtagid_seen {
@@ -218,20 +159,17 @@ sub set_maxtagid_seen {
 # case an empty delta is returned.
 
 sub get_delta {
-	my($self, $tag_ar, $max) = @_;
-	my @tags = grep { $_->{tagid} <= $max } @$tag_ar;
+	my($self, $tags_ar, $max) = @_;
+	my @tags = grep { $_->{tagid} <= $max } @$tags_ar;
 	my($upfrac, $dissenters) = $self->calc_agreement(\@tags);
 	return undef if !defined($upfrac);
 
 	my $delta = { };
 
-	my $metamod_reader = getObject('Slash::Metamod::Static', { db_type => 'reader' });
-	my $up_csq = $metamod_reader->getM2Consequences($upfrac);
-	my $down_csq = $metamod_reader->getM2Consequences(1 - $upfrac);
+	my $up_csq = $self->getM2Consequences($upfrac);
+	my $down_csq = $self->getM2Consequences(1 - $upfrac);
 	for my $tag_hr (@tags) {
 		my $id = $tag_hr->{tagnameid};
-		next unless grep { $_ == $id } @{$self->{care_ids}};
-		next if $tag_hr->{inactivated}; # XXX should check how long it was active, penalties may still apply
 		my $uid = $tag_hr->{uid};
 		for my $key (qw(
 			tokens karma
@@ -309,6 +247,7 @@ sub get_change {
 
 sub apply_change {
 	my($self, $change_delta) = @_;
+	my @changes = ( );
 	$change_delta ||= { };
 	for my $uid (sort { $a <=> $b } keys %$change_delta) {
 		my $update_hr = { };
@@ -321,10 +260,15 @@ sub apply_change {
 		)) {
 			next unless $change_delta->{$uid}{$field};
 			$update_hr->{"-$field"} = "ROUND($field $change_delta->{$uid}{$field})";
+			my $abbrev = $field;
+			$abbrev =~ s/([a-z])([a-z0-9]+)(_|$)/$1/g;
+			push @changes, "$abbrev$change_delta->{$uid}{$field}";
 		}
 		my $rows = $self->setUser($uid, $update_hr);
-		main::tagboxLog("Metamod->run changed $rows rows for $uid: " . join(" ", sort keys %$update_hr));
+		$self->debug_log("changed %d rows for %d: %s",
+			$rows, $uid, join(" ", sort keys %$update_hr));
 	}
+	return join '', @changes;
 }
 
 # Return two numbers:  the fraction of upvotes (0.0 = total agreement on down,
@@ -332,14 +276,14 @@ sub apply_change {
 # in the minority.  If not enough votes have been cast yet, return (undef,undef).
 
 sub calc_agreement {
-	my($self, $tag_ar) = @_;
+	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $adminmult = $constants->{tagbox_metamod_adminmult} || 10;
 	my $admins = $self->getAdmins();
 	my($modc, $metac) = (0, 0);
 	my($upc, $downc) = (0, 0);
 	my($upvotes, $downvotes) = (0, 0);
-	for my $tag_hr (@$tag_ar) {
+	for my $tag_hr (@$tags_ar) {
 		next if $tag_hr->{inactivated};
 		my $user = $self->getUser($tag_hr->{uid});
 		my $is_admin = $admins->{$tag_hr->{uid}} ? 1 : 0;

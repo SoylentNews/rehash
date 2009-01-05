@@ -25,7 +25,12 @@ $task{$me}{code} = sub {
 	my $firehose = getObject("Slash::FireHose");
 	my $skins = $slashdb->getSkins();
 
-	foreach my $skid (%$skins) {
+	for my $skid (keys %$skins) {
+		# I don't understand why skid=1 can't be looked up;  the firehose,
+		# at least right now, has the majority of its items with
+		# primaryskid=0 but items exist with every other valid primaryskid,
+		# including 1, the mainpage skid.  Maybe for the mainpage it
+		# should look up both? - Jamie 2008-09-29
 		my $skid_lookup = $skid == $constants->{mainpage_skid} ? 0 : $skid;
 		my $story_vol = $firehose->genFireHoseWeeklyVolume({
 			type => "story",

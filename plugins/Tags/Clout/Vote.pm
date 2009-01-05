@@ -4,19 +4,22 @@ use strict;
 use warnings;
 use Date::Parse qw( str2time );
 use Slash::Utility;
+
 use base 'Slash::Clout';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 sub init {
         my($self) = @_;
-        $self->SUPER::init(@_);
+
+        $self->SUPER::init(@_) if $self->can('SUPER::init');
+
         # Hard-coded constants should be in the vars table.
         # cumfrac is the cumulative fraction of how much weight is propagated
         # for each matching tag.  E.g. if $cumfrac is 0.5, the first match may
         # propagate up to 50% of the weight, the second another 25%, the
         # third another 12.5% etc.
-        $self->{cumfrac} = 0.45;
+        $self->{cumfrac} = 0.6;
 	my $constants = getCurrentStatic();
 	$self->{debug_uids} = { map { ($_, 1) } split / /,
 		($constants->{tags_updateclouts_debuguids} || '')
@@ -101,6 +104,8 @@ sub get_nextgen {
 	sleep 10;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $mintagid = $reader->sqlSelect('MIN(tagid)', 'tags',
+		"created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)");
 	my $hr_ar = $reader->sqlSelectAllHashrefArray(
 		"sourcetag.uid AS sourcetag_uid,
 		 UNIX_TIMESTAMP(newtag.created_at)-UNIX_TIMESTAMP(sourcetag.created_at)
@@ -114,7 +119,6 @@ sub get_nextgen {
 		 newtag.uid AS newtag_uid,
 		 simil,
 		 users_info.tag_clout,
-		 UNIX_TIMESTAMP(users_info.created_at) AS created_at_ut,
 		 IF(firehose_ogaspt.pubtime IS NULL,
 			NULL,
 			UNIX_TIMESTAMP(firehose_ogaspt.pubtime)-UNIX_TIMESTAMP(newtag.created_at))
@@ -138,8 +142,9 @@ sub get_nextgen {
 			 AND sourcetag.tagnameid=tagnames_similar.src_tnid
 			 AND tagnames_similar.dest_tnid=newtag.tagnameid
 		 AND simil != 0
+		 AND sourcetag.tagid >= $mintagid
 		 AND sourcetag.tagid != newtag.tagid
-		 AND newtag.created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)
+		 AND newtag.tagid >= $mintagid
 		 AND newtag.uid=users.uid
 		 AND newtag.uid=users_info.uid
 		 AND newtpc.uid IS NULL
@@ -172,8 +177,8 @@ sub process_nextgen {
 				($user_nodnixes_full+1-$user_nodnixes_min);
 		}
 		if ($self->{debug_uids}{$newtag_uid}) {
-			print STDERR sprintf("%s tags_updateclouts %s process_nextgen starting uid=%d user_nodnixes_mult=%.6f\n",
-				scalar(gmtime), ref($self), $newtag_uid, $user_nodnixes_mult);
+			print STDERR sprintf("%s tags_updateclouts %s process_nextgen starting uid=%d user_nodnixes_count=%d _mult=%.6f\n",
+				scalar(gmtime), ref($self), $newtag_uid, $user_nodnixes_count, $user_nodnixes_mult);
 			++$self->{debug};
 		}
 
@@ -237,7 +242,7 @@ sub count_uid_nodnix {
 	return unless keys %uid_needed;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my @uids_needed = sort { $a <=> $b } keys %uid_needed;
-	my $splice_count = 2000;
+	my $splice_count = 20;
 	while (@uids_needed) {
 		my @uid_chunk = splice @uids_needed, 0, $splice_count;
 		my $uid_str = join(",", @uid_chunk);
@@ -253,9 +258,22 @@ sub count_uid_nodnix {
 			"tagnameid='$self->{nixid}' AND uid IN ($uid_str)
 			 AND created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)",
 			'GROUP BY uid');
+		if (grep { $self->{debug_uids}{$_} } @uid_chunk) {
+			my $nod_d = Dumper($nod_hr); $nod_d =~ s/\s+/ /g;
+			my $nix_d = Dumper($nix_hr); $nix_d =~ s/\s+/ /g;
+			print STDERR sprintf("%s tags_updateclouts %s count_uid_nodnix splice nod_d=%s nix_d=%s\n",
+				scalar(gmtime), ref($self),
+				$nod_d, $nix_d);
+		}
 		for my $uid (@uid_chunk) {
 			$self->{nodc}{$uid} = $nod_hr->{$uid} || 0;
 			$self->{nixc}{$uid} = $nix_hr->{$uid} || 0;
+			if ($self->{debug_uids}{$uid}) {
+				print STDERR sprintf("%s tags_updateclouts %s count_uid_nodnix uid=%d nod=%s nix=%s nodc=%s nixc=%s\n",
+					scalar(gmtime), ref($self), $uid,
+					$nod_hr->{$uid}, $nix_hr->{$uid},
+					$self->{nodc}{$uid}, $self->{nixc}{$uid});
+			}
 		}
 		sleep 1 if @uids_needed;
 	}

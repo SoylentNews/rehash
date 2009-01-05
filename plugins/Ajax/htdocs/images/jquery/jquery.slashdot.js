@@ -1,11 +1,14 @@
 // slashdot.jquery.js: jquery-related general utilities we wrote ourselves
 
-;$(function(){
-	$.ajaxSetup({
-		url:	'/ajax.pl',
-		type:	'POST'
-	});
+// global setup
+
+$.ajaxSetup({
+	url:	'/ajax.pl',
+	type:	'POST',
+	contentType: 'application/x-www-form-urlencoded'
 });
+
+// code to be exported
 
 function $dom( id ) {
 	return document.getElementById(id);
@@ -49,12 +52,12 @@ jQuery.fn.extend({
 
 	nearest_parent: function( selector ) {
 		var answer = this.map(function(){
-			var match;
-
 			var $this = $(this);
-			if ( $this.is(selector) )
-				match = this;
+			if ( $this.is(selector) ) {
+				return this;
+			}
 
+			var match;
 			$this.parents().each(function(){
 				if ( $(this).is(selector) ) {
 					match = this;
@@ -69,11 +72,10 @@ jQuery.fn.extend({
 	},
 
 	separate: function( f ){
-		var pass, fail;
-		[ pass, fail ] = separate(this, $.isFunction(f) ? f : function(e){
+		var sublists = separate(this, $.isFunction(f) ? f : function(e){
 			return $(e).is(f)
 		});
-		return [ $(pass), $(fail) ]
+		return [ this.pushStack(sublists[0]), this.pushStack(sublists[0]) ]
 	}
 
 });
@@ -210,9 +212,19 @@ function values( dict ){
 
 
 function separate( list, fn ){
-	var answer = { true: [], false: [] };
+	var answer = {};
+	answer[true] = [];
+	answer[false] = [];
+
 	$.each(list_as_array(list), function(i, elem){
 		answer[!!fn.apply(elem, [elem, i])].push(elem)
 	})
 	return [ answer[true], answer[false] ]
+}
+
+
+function splice_string( s, offset, length, replacement ){
+	if ( length || replacement )
+		s = s.slice(0, offset) + (replacement||'') + s.slice(offset+(length||0))
+	return s
 }

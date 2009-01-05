@@ -5359,7 +5359,6 @@ UPDATE stories SET archive_last_update=last_update, last_update=last_update;
 # 2008-06-04
 UPDATE vars SET value = 'T_2_5_0_208' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
 
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_overnight_minweightsum', '0.1', 'Minimum tagbox weight sum for overnight processing. To disable overnight difference, set to 1');
@@ -5374,7 +5373,6 @@ UPDATE vars SET value = 'T_2_5_0_209' WHERE name = 'cvs_tag_currentcode';
 
 # for plugins/FireHose
 # INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
-
 ALTER TABLE firehose ADD COLUMN neediness float NOT NULL default '0' AFTER editorpop;
 ALTER TABLE firehose ADD INDEX neediness (neediness);
 
@@ -5433,10 +5431,333 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_
 # 2008-07-16
 UPDATE vars SET value = 'T_2_5_0_213' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # 2008-07-31
 UPDATE vars SET value = 'T_2_5_0_214' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
+# for plugins/FireHose
+ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment","discussion","project") default 'submission';
 
+DROP TABLE IF EXISTS xsite_auth_log;
+CREATE TABLE xsite_auth_log (
+	site VARCHAR(30) DEFAULT '' NOT NULL,
+	ts DATETIME DEFAULT '0000-00-00 00:00' NOT NULL,
+	nonce VARCHAR(30) DEFAULT '' NOT NULL,
+	UNIQUE KEY (site,ts,nonce)
+) TYPE=InnoDB;
+
+
+# 2008-08-07
+UPDATE vars SET value = 'T_2_5_0_215' WHERE name = 'cvs_tag_currentcode';
+
+CREATE TABLE projects (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	uid mediumint UNSIGNED NOT NULL DEFAULT 0,
+	unixname varchar(24) NOT NULL DEFAULT '',
+	textname varchar(64) NOT NULL DEFAULT '',
+	url_id INT(10) UNSIGNED NOT NULL DEFAULT 0,
+	createtime DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL,
+	srcname varchar(32) NOT NULL DEFAULT 0,
+	description         TEXT NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	UNIQUE unixname (unixname)
+) Type=InnoDB;
+
+INSERT INTO globj_types VALUES (NULL, 'projects');
+INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'project');
+
+INSERT IGNORE INTO vars (name, value, description) VALUES ('optipng', '', 'path to optipng if it is to be used for compressing thumbnails');
+
+# 2008-08-13
+UPDATE vars SET value = 'T_2_5_0_216' WHERE name = 'cvs_tag_currentcode';
+
+# 2008-08-21
+UPDATE vars SET value = 'T_2_5_0_217' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Tags
+ALTER TABLE tagname_params ADD INDEX name (name);
+
+# 2008-08-28
+UPDATE vars SET value = 'T_2_5_0_218' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Tags
+ALTER TABLE tagboxes DROP COLUMN affected_type, DROP COLUMN clid, DROP COLUMN nosy_gtids;
+DROP TABLE tagbox_userkeyregexes;
+
+# for tagboxes/FHEditorPop
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_needypercent', '3', 'Percentage of all comments which show up in an editor\'s hose (should be <= tagbox_csr_needinesspercent)');
+
+UPDATE ajax_ops set reskey_name='ajax_base' where op="firehose_get_updates";
+
+# 2008-09-04
+UPDATE vars SET value = 'T_2_5_0_219' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/FireHose
+DROP TABLE IF EXISTS firehose_topics_rendered;
+CREATE TABLE firehose_topics_rendered (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	tid SMALLINT(5) UNSIGNED NOT NULL,
+	UNIQUE id_tid (id, tid),
+	INDEX tid_id (tid, id)
+) TYPE=InnoDB;
+ALTER TABLE firehose ADD COLUMN nexuslist varchar(32) NOT NULL DEFAULT '' AFTER category, ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no';
+
+###################################################################
+# Read the comments at the top of utils/convertFirehoseData200809 #
+# to learn about converting firehose data to use new code in this #
+# tag.  You should run this utility after the sql above is        #
+# executed and the code for this tag is installed.                #
+#                                                                 #
+# Code after this point will expect and rely on the data created  #
+# by this utility existing                                        #
+#                                                                 #
+# To run this utility:                                            #
+# convertFirehoseData200809 -u <virtual_user>                     #
+###################################################################
+
+# for plugins/Metamod and plugins/FireHose
+# if you want to use firehose for metamoderation set this to 1 otherwise set to 0
+INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0', 'Use firehose for metamodding');
+
+# for User2
+INSERT INTO user_event_types VALUES (4, 'Bookmarks');
+INSERT INTO user_event_types VALUES (5, 'Friends');
+
+# 2008-09-11
+UPDATE vars SET value = 'T_2_5_0_220' WHERE name = 'cvs_tag_currentcode';
+
+# For plugins/FireHose
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','index2','no','',2,0, '');
+
+# 2008-09-17
+UPDATE vars SET value = 'T_2_5_0_221' WHERE name = 'cvs_tag_currentcode';
+
+INSERT INTO vars (name, value, description) VALUES ('index_new_user_beta', '0', 'Use index beta for new users?');
+
+# for plugins/FireHose
+INSERT INTO vars (name, value, description) VALUES ('firehose_memcached_disp_exptime', '180', 'Seconds to cache firehose display');
+
+# for plugins/Tags
+DROP TABLE IF EXISTS tagcommand_adminlog_sfnet;
+CREATE TABLE tagcommand_adminlog_sfnet (
+	id		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	cmdtype		VARCHAR(6) NOT NULL,
+	tagnameid	int UNSIGNED NOT NULL,
+	globjid		int UNSIGNED DEFAULT NULL,
+	sfnetadminuid	mediumint UNSIGNED NOT NULL,
+	created_at	datetime NOT NULL,
+	PRIMARY KEY id (id),
+	KEY created_at (created_at),
+	KEY tagnameid_globjid (tagnameid, globjid)
+) TYPE=InnoDB;
+
+# 2008-09-25
+UPDATE vars SET value = 'T_2_5_0_222' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Subscribe
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('subscriber_plug', '', 10000, 'static', 'Plug for subscribers', 'mainpage', 0, 'Subscriber plug', 0, NULL, '', 0);
+
+# 2008-10-02
+UPDATE vars SET value = 'T_2_5_0_223' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Journal
+ALTER TABLE journals_text ADD COLUMN introtext TEXT NOT NULL;
+
+# 2008-10-09
+UPDATE vars SET value = 'T_2_5_0_224' WHERE name = 'cvs_tag_currentcode';
+
+# For Thinkgeek related stuff
+ALTER TABLE users ADD COLUMN shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL;
+UPDATE users SET shill_id = 1 WHERE seclev = 10000 OR author = 1;
+DROP TABLE IF EXISTS shill_ids;
+CREATE TABLE shill_ids (
+        shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL PRIMARY KEY,
+        user varchar(16) NOT NULL default ''
+);
+INSERT INTO shill_ids VALUES (1, 'Admin');
+INSERT INTO shill_ids VALUES (2, 'ThinkGeek');
+
+# for plugins/Zoo
+INSERT INTO vars (name, value, description) VALUES ('badge_icon_ext', 'gif', 'Badge icon extension ("gif" or "png", probably)');
+INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '15', 'Badge icon height/width');
+INSERT INTO vars (name, value, description) VALUES ('badge_icon_size_wide', '15', 'Badge icon width for wide icons');
+# for Slashdot ...
+#INSERT INTO vars (name, value, description) VALUES ('badge_icon_ext', 'png', 'Badge icon extension ("gif" or "png", probably)');
+#INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '16', 'Badge icon height/width');
+#INSERT INTO vars (name, value, description) VALUES ('badge_icon_size_wide', '32', 'Badge icon width for wide icons');
+
+# adding ie-version specific css for www.slashdot.org
+#INSERT INTO `css` VALUES
+#(NULL,'stylesheet','text/css','screen/projection','ie6.css','','','','no','',3,1,'lt IE 7','no'),
+#(NULL,'stylesheet','text/css','screen/projection','ie7.css','','','','no','',3,1,'IE 7','no'),
+#(NULL,'stylesheet','text/css','screen/projection','ie8.css','','','','no','',3,1,'gte IE 8','no');
+
+# 2008-10-16
+UPDATE vars SET value = 'T_2_5_0_225' WHERE name = 'cvs_tag_currentcode';
+
+ALTER TABLE css ADD layout VARCHAR(16) DEFAULT '';
+ALTER TABLE css ADD INDEX layout (layout);
+
+# for Slashdot run latest set of changes from /themes/slashdot/sql/mysql/upgrades here
+
+# 2008-10-23
+UPDATE vars SET value = 'T_2_5_0_226' WHERE name = 'cvs_tag_currentcode';
+
+# Fixing incorrectly defined media types in 'css' table
+UPDATE css SET media="screen, projection" WHERE media="screen/projection";
+
+# 2008-10-24
+UPDATE vars SET value = 'T_2_5_0_227' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Bookmark
+ALTER TABLE bookmark_feeds ADD COLUMN nofilter TINYINT UNSIGNED DEFAULT 0 NOT NULL;
+
+# for plugins/Tags
+UPDATE tagname_params SET name='tagname_clout' WHERE name='tag_clout';
+UPDATE tagname_params SET value=0 WHERE name='tagname_clout' AND value+0 < 0.001;
+
+
+# 2008-10-30
+UPDATE vars SET value = 'T_2_5_0_228' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Bookmark
+ALTER TABLE bookmarks CHANGE COLUMN url_id url_id INT UNSIGNED NOT NULL;
+
+# For plugins/FireHose
+CREATE TABLE firehose_view(
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	viewname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
+	useparentfilter ENUM("no","yes") DEFAULT "yes",
+	tab_display ENUM("no","yes") DEFAULT "no",
+	options_edit ENUM("no","yes") DEFAULT "no",
+	admin_maxitems tinyint NOT NULL DEFAULT -1,
+	maxitems tinyint NOT NULL DEFAULT -1,
+	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+	filter VARCHAR(255) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	duration ENUM("7","-1","") DEFAULT '',
+	mode ENUM ("full","fulltitle", "") DEFAULT "",
+	mixedmode ENUM("1","0","") DEFAULT "",
+	pause ENUM("1","0","") DEFAULT "",
+
+	PRIMARY KEY (id),
+	UNIQUE id_viewname(id,viewname)
+);
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "metamod", "no", "comment", "neediness", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 1,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userjournal", "no", '"author:{nickname}" journal', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "usersubmission", "no", '"author:{nickname}" submission', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userbookmark", "no", '"author:{nickname}" bookmark', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userfirehose", "no", '"user:{nickname}"', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "stories", "yes", 'story', "createtime", "DESC", "black", "-1", "full", "1", "yes", "yes", 30, 30, 0,"");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "recent", "yes", '-story', "createtime", "DESC", "blue", "7", "fulltitle", "0", "yes", "yes", 50, 30, 0,"");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "popular", "yes", '-story', "createtime", "DESC", "black", "7", "full", "1", "yes", "yes", 50, 30, 0,"");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "daddypants", "yes", 'unsigned', "createtime", "DESC", "indigo", "-1", "fulltitle", "1", "yes", "yes", 50, 30, 100,"");
+
+UPDATE firehose_view SET filter="-story" WHERE viewname="popular";
+
+# 2008-11-06
+UPDATE vars SET value = 'T_2_5_0_229' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Tags
+CREATE TABLE globjs_viewed_archived (
+	gvid            int UNSIGNED NOT NULL,
+	globjid         int UNSIGNED NOT NULL,
+	uid             mediumint UNSIGNED NOT NULL,
+	viewed_at       datetime NOT NULL,
+	PRIMARY KEY (gvid),
+	UNIQUE globjid_uid (globjid, uid)
+) TYPE=InnoDB;
+
+# For plugins/Users2
+INSERT INTO vars (name, value, description) VALUES ('u2','0','Toggle on/off Users2');
+
+# For plugins/FireHose
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "usertag", "no", '"user:{nickname}" "tag:{tag}"', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+UPDATE firehose_view SET mixedmode="" WHERE viewname="daddypants";
+ALTER TABLE firehose_view MODIFY COLUMN viewname VARCHAR(24) DEFAULT 'unnamed';
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userjournalfriends", "no", '"authorfriend:{nickname}" journal', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+
+# skipping _230 because i goofed
+# 2008-11-20
+UPDATE vars SET value = 'T_2_5_0_231' WHERE name = 'cvs_tag_currentcode';
+
+UPDATE firehose SET public="yes" WHERE type="journal";
+
+create temporary table firehose_deletedjournal (id int unsigned not null primary key);
+insert ignore into firehose_deletedjournal select firehose.id from firehose left join journals on (firehose.srcid=journals.id) where firehose.type='journal' and journals.id is null;
+update firehose, firehose_deletedjournal set firehose.public='no' where firehose.id=firehose_deletedjournal.id;
+drop table firehose_deletedjournal;
+
+# For plugins/FireHose
+UPDATE firehose_view SET mode="fulltitle" where viewname="usertag";
+
+# For plugins/Users2
+ALTER TABLE shill_ids ADD COLUMN extra VARCHAR(40) DEFAULT '' NOT NULL;
+
+# 2008-11-25
+UPDATE vars SET value = 'T_2_5_0_232' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/FireHose
+ALTER TABLE firehose ADD INDEX uid (uid);
+
+UPDATE menus SET value=REPLACE(value, '/~', '[% constants.real_rootdir %]/~') WHERE menu='users' AND value REGEXP '^/~';
+
+# For plugins/Users2
+ALTER TABLE shill_ids ADD COLUMN skid SMALLINT DEFAULT '0' NOT NULL;
+
+# 2008-11-26
+UPDATE vars SET value = 'T_2_5_0_233' WHERE name = 'cvs_tag_currentcode';
+
+UPDATE firehose_view SET filter='"user:{nickname}" bookmark' WHERE viewname="userbookmark";
+
+# 2008-12-04
+UPDATE vars SET value = 'T_2_5_0_234' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/FireHose
+ALTER TABLE firehose ADD INDEX last_update (last_update);
+
+# 2008-12-11
+UPDATE vars SET value = 'T_2_5_0_235' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+UPDATE firehose_view SET mode="fulltitle" WHERE viewname="userbookmark";
+
+# We've let stale templates build up for too long:
+DELETE FROM templates WHERE name='alllist' AND page='zoo' AND skin='default';
+DELETE FROM templates WHERE name='autocomplete' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='combined_tags' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='commentreply' AND page='messages' AND skin='default';
+DELETE FROM templates WHERE name='d2prefs' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='data' AND page='unsubscribe' AND skin='default';
+DELETE FROM templates WHERE name='firehose_tags_top' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='form' AND page='unsubscribe' AND skin='default';
+DELETE FROM templates WHERE name='init_tag_ui' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='init_tagui' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='listpolls' AND page='pollBooth' AND skin='polls';
+DELETE FROM templates WHERE name='miniAdminMenu' AND page='users' AND skin='default';
+DELETE FROM templates WHERE name='moderation' AND page='comments' AND skin='default';
+DELETE FROM templates WHERE name='nodnix_menus' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='printCommentsNone' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='reject' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='reject_firehose' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='slashd_log' AND page='admin' AND skin='default';
+DELETE FROM templates WHERE name='slashdot_it' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='submit' AND page='slashdot-it' AND skin='default';
+DELETE FROM templates WHERE name='tag_display' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tag_widget' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsfirehosedivadmin' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsfirehosedivtagbox' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsfirehosedivuser' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsnodnixuser' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagstack' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='topicsearch' AND page='search' AND skin='default';
+
+# 2008-12-18
+UPDATE vars SET value = 'T_2_5_0_236' WHERE name = 'cvs_tag_currentcode';

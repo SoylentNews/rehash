@@ -11,53 +11,68 @@ en_US
 __name__
 generic
 __template__
-[% USE Slash %]
-<P><TABLE BORDER="0" BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TR><TD>
+<div id="journalgeneric">
 	[% FOREACH article = articles %]
-	<TABLE WIDTH="100%" BGCOLOR="[% user.bg.0 %]" BORDER="0" CELLPADDING="5" CELLSPACING="0">
-		<TR VALIGN="TOP"><TD ALIGN="RIGHT" BGCOLOR="[% user.bg.3 %]">
-			<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
-				<B>[% Slash.timeCalc(article.day,"%A %B %d, %y") %]</B>
-			</FONT>
-		</TD></TR>
-
+		<div class="journaldate">[% Slash.timeCalc(article.day,"%A %B %d, %y") %]</div>
 		[% FOREACH diatribe = article.article %]
-			<TR VALIGN="TOP"><TD ALIGN="LEFT">
-					<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.2 %]">
-						[% Slash.timeCalc(diatribe.date, "%I:%M %p") %] -  [% diatribe.description %]
-					</FONT><BR>
-			</TD></TR>
-
-			<TR VALIGN="TOP"><TD>
-				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.2 %]">
-					[% diatribe.article %]
-						[% image = Slash.db.getTopicImageBySection(diatribe.topic, constants.section) %]
-						<A HREF="[% constants.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]"
-							><IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" WIDTH="[% image.width %]"
-								HEIGHT="[% image.height %]" BORDER="0" ALIGN="RIGHT"
-								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.alttext %]"></A>
-				</FONT>
-			</TD> </TR>
-			[% IF diatribe.discussion && !show_discussion %]
-				<TR><TD VALIGN="RIGHT">
-					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</A>
-				</TD></TR>
-			[% END %]
+			<div class="article">
+				<div class="title">
+					<h3>
+						[% diatribe.description %]
+					</h3>
+				</div>
+				<div class="details">
+					[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]
+				</div>   
+				<div class="body">
+					<div class="topic">
+						<a href="[% gSkin.rootdir %]/search.pl?tid=[% diatribe.topic.tid %]"><img src="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" width="[% diatribe.topic.width %]" height="[% diatribe.topic.height %]" alt="[% diatribe.topic.textname %]"></a>
+					</div>
+					<div class="intro">
+						[% diatribe.article %]
+					</div>
+				</div>
+                                        [% IF diatribe.discussion && !show_discussion %]
+                                               <div class="storylinks">
+						<div>
+                                                        <ul>
+                                                        [%- IF !user.is_anon;
+                                                                IF user.uid == uid %]
+                                                                 <li class="edit">
+                                                                    <a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</a>
+                                                                </li>
+                                                                <li class="delete">
+                                                                        <a href="[% gSkin.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</a>
+                                                                  </li>
+                                                             [%- END;
+                                                         END %]
+                                                    [%- IF diatribe.discussion; IF !show_discussion %]
+                                                                <li [% UNLESS user.uid == uid %]class="discussion"[% END %]>
+                                                                        <a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>
+                                                              </li>
+                                                        [%- END; ELSIF user.uid == uid %]
+                                                                <li class="enable">
+                                                                        <a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a>
+                                                                 </li>
+                                                        [%- END %]
+                                                        <li [% IF show_discussion %]class="journalid"[% END %]>
+                                                                <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
+                                                         </li>
+                                                </ul>
+						</div>
+					</div>
+                                        [% END %]
+			</div>			
 		[% END %]
-
-	</TABLE>
 	[% END %]
 
-[% PROCESS pagination %]
-
-	[% IF !user.is_anon && uid && uid != user.uid %]
-		</TD></TR>
-		<TR VALIGN="TOP" BGCOLOR="[% user.bg.0 %]">
-			<TD ALIGN="RIGHT" BGCOLOR="[% user.bg.0 %]">
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</A>
-	[% END %]
-
-</TD></TR></TABLE>
+	<div class="journalpage">	
+	[% IF !user.is_anon && uid && uid != user.uid && !is_friend %]
+                <a href="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</a>
+        [% END %]
+		[% PROCESS pagination %]
+	</div>	
+</div>
 
 __seclev__
 100

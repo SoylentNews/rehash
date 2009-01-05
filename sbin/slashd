@@ -2,7 +2,6 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 ############################################################
 #
@@ -15,6 +14,18 @@
 # to see, it's because this script uses your database machine
 # to decide when to run scripts, but the machine it runs on when
 # logging timestamps.  This may help you notice unsynched clocks.
+#
+# An improvement I'd like to make:  multi-machine processing.  Multiple
+# slashd's should be able to run on separate machines.  They'd still
+# each use their own slashd.pid, but:  tasks could set params to
+# indicate that they would only run on a particular hostname;
+# slashd_status would store machine name and pid (to coordinate who
+# gets to override in case of crash/restart);  %resource_info would
+# also be moved into slashd_status;  runtask would need similar changes
+# (and would benefit in that runtask/slashd would no longer step on
+# each other for resources or even running the same task).  There may
+# be other shared information that would need to move from perl vars
+# into the DB, I haven't looked carefully.
 #
 ############################################################
 

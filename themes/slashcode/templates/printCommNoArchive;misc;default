@@ -13,9 +13,9 @@ en_US
 __name__
 printCommNoArchive
 __template__
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="2">
-
-<TR><TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]" SIZE="2">
+<a name="comments"></a>
+<div class="commentwrap">
+<div class="commentBox">
 	[% IF discussion.is_future %]
 		Posting will only be possible
 		[% constants.subscribe_future_name %]
@@ -24,7 +24,7 @@ __template__
 	[% ELSE %]
 		[%- d_nickname = Slash.db.getUser(discussion.uid, 'nickname') -%]
 		[%- msg = BLOCK -%]
-This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as
+This discussion was created[% IF discussion.uid %] by <a href="[% constants.real_rootdir %]/~[% d_nickname | strip_paramattr %]/">[% d_nickname %] ([% discussion.uid %])</a>[% END %] as
 		[%- END -%]
 		[% IF discussion.commentstatus == 'friends_only' %]
 			[% type = "Friends only" %]
@@ -38,24 +38,30 @@ This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname |
 		[% ELSIF discussion.commentstatus == 'no_foe_eof' %]
 			[% type = "no Foes and no Friends' foes" %]
 			[% snark = "They and their friends think you suck." %]
+		[% ELSIF discussion.commentstatus == 'logged_in' %]
+			[% type = "logged-in users only" %]
+			[% snark = "Log in and try again!" %]
 		[% END %]
 
-		[% IF discussion.type != 'archived' %]
-			[% msg %] [% type %].
-		[% ELSE %]
+		[% IF discussion.user_nopost %]
+			[% msg %] [% type %].  [% snark %]
+		[% ELSIF discussion.type == 'archived' %]
 			[% IF discussion.commentstatus == 'friends_only'
 			|| discussion.commentstatus == 'friends_fof_only'
 			|| discussion.commentstatus == 'no_foe'
-			|| discussion.commentstatus == 'no_foe_eof' %]
-				[% msg %] [% type %].  [% snark %]
+			|| discussion.commentstatus == 'no_foe_eof'
+			|| discussion.commentstatus == 'logged_in' %]
+				[% msg %] [% type %], but now has been archived.
 			[% ELSE %]
 				This discussion has been archived.
-				No new comments can be posted.
 			[% END %]
+			No new comments can be posted.
+		[% ELSE %]
+			[% msg %] [% type %].
 		[% END %]
 	[% END %]
-</FONT></TD></TR>
-
+</div>
+</div>
 __seclev__
 10000
 __version__

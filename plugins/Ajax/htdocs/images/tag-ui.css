@@ -1,0 +1,554 @@
+
+.tag-widget, .tag-entry {
+	user-select: text;
+	-moz-user-select: text;
+}
+
+/* for unregistered users*/
+.tag-widget-stub span.button.collapse {
+        position:absolute;
+        margin-top:-1.6em;
+        margin-left:7em;
+}
+
+
+span.tag, .tmenu, .tag-display, .tag-display-set,
+.tag-display ul, .tag-display li, .tag-display h1.legend,
+.edit-toggle, .tag-widget .related {
+	user-select: none;
+	-moz-user-select: none;
+}
+
+span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
+	cursor: pointer;
+}
+
+.tag-entry {
+	cursor: text !important;
+}
+
+
+.tag-display span.tag,
+.tag-widget .admin-buttons {
+	font-family: arial, sans serif;
+	color: #666;
+}
+
+div.head .tag-display span.tag,
+div.head .tag-widget .admin-buttons {
+       color: #fff;
+}
+
+/* style tags based on what they are */
+/* ...for everyone */
+.bang > span.tag > .punct { font-weight: bold }
+.minus > .tag { text-decoration: line-through; background-color: inherit !important; }
+.not-saved > .tag { color: darkgray; background-color: inherit !important; }
+
+/* only for admins */
+.adminmode[tag-server] .s1 > .tag,
+.adminmode[tag-server] .t2 > .tag {
+	font-weight: bold;
+	font-variant: small-caps;
+}
+.adminmode[tag-server] .pound > .tag { font-weight: bold }
+.adminmode[tag-server] .descriptive > .tag { color: orange }
+.adminmode[tag-server] .ignore > .tag { color: darkgray }
+
+/* tag "suggestions" look different than tags actually applied */
+.tag-display[context=related] li.suggestion span.tag {
+	font-weight: bold;
+}
+
+div.tag-display ul, div.tag-display li {
+	display: inline;
+	list-style: none inherit none !important;
+}
+
+/* your personal tags hidden if that tag already in top|system... */
+.tag-display[context=user] li.p,
+.tag-display[context=top] li.p,
+.tag-display[context=system] li.p,
+.tag-display[context=user] li.t,
+.tag-display[context=user] li.s,
+.tag-display[context=top]  li.s {
+	display: none;
+}
+
+div.tag-display .tmenu li {
+	text-align: center;
+	margin: 0 !important;
+}
+
+
+div.tag-display .tmenu li.minus,
+div.tag-display .tmenu li.ignore,
+div.tag-display .tmenu li.pound,
+div.tag-display .tmenu li.descriptive {
+	display: none;
+}
+
+div.tag-display li.u > .tmenu li.minus,
+div.tag-display li.u > .tmenu li.descriptive,
+div.tag-display li.t > .tmenu li.pound,
+div.tag-display li.t > .tmenu li.ignore,
+div.tag-display li.t > .tmenu li.descriptive {
+	display: inline-block;
+/*text-decoration:none !important;*/
+}
+
+div.tag-display li.u {
+text-decoration:none !important;
+}
+
+
+
+/* no menus for newly added tags */
+.tag-display li.not-saved .tmenu,
+.tag-display[context=signoff] .tmenu,
+.tag-display li.d .tmenu {
+	display: none !important;
+}
+
+/* but style the tag that hid yours, so you know */
+.tag-display[context=top] li.u,
+.tag-display[context=system] li.u,
+.tag-display[context=related] li.u {
+	text-decoration: underline;
+}
+
+.tag-display li:hover span.tag {
+	cursor: arrow;
+	color: white;
+	background-color: #066;
+}
+
+.tag-display[context=signoff] {
+	padding-left: 0.5em;
+}
+
+.tag-display[context=signoff] .w span.tag {
+	background-color: #ff4949 !important;
+}
+
+.tag-display[context=signoff] .w:hover span.tag {
+	background-color: #f00 !important;
+}
+
+/* no mouse over highlight for datatypes */
+.tag-display li.d:hover span.tag {
+	color: inherit;
+	background-color: inherit !important;
+}
+
+div.tag-display,
+div.tag-display > h1.legend,
+div.tag-display > ul {
+	width: auto !important;
+}
+
+/* round edges */
+.tag-display ul,
+.tag-display span.tag,
+.tag-display .tmenu,
+.tag-display .tmenu li,
+.tag-display h1.legend {
+	border: 0 solid transparent;
+	-moz-border-radius: 0.4em;
+	-webkit-border-radius: 0.4em;
+}
+
+/* padding so hover highlighting is bigger than the contents */
+div.tag-display > ul,
+#contents div.tag-display > ul {
+	padding: 0.1em 0.5em !important;
+	margin: -0.1em -0.5em !important;
+}
+
+div.tag-display span.tag,
+div.tag-display > h1.legend,
+#contents div.tag-display > h1.legend {
+	padding: 0.1em 0.3em !important;
+	margin: -0.1em -0.1em !important;
+	color:#333;
+}
+
+div.tag-display .tmenu li span,
+#contents div.tag-display .tmenu li span {
+	text-align: center;
+}
+
+
+/* give the menus something to position against */
+.tag-display > ul > li {
+	position: relative;
+}
+
+/* tag menus are hidden by default... */
+.tag-display .tmenu {
+	display: none;
+	position: absolute;
+	top:-2em;
+	right: .5em;
+	font-size: 85%;
+	color: #fff;
+	background-color: #066;
+	white-space:nowrap;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	padding: 0 .3em 0 .2em !important;
+	text-align: center;
+	margin:0 !important;
+
+}
+
+/*www.*/
+div.tag-display .tmenu
+{
+padding-bottom:0.05em !important;
+}
+
+/*idle.*/
+div.yui-b div.tag-display .tmenu
+{
+padding-bottom:0.5em !important;
+/*
+padding-top:0.3em !important;
+*/
+}
+
+
+
+/*www.*/
+div.tag-display .tmenu li span,
+#contents div.tag-display .tmenu li span
+{
+margin:-0.1em -0.25em !important;
+padding:0 0.55em 0.45em !important;
+}
+
+
+/*idle.*/
+div.yui-b div.tag-display .tmenu li span,
+div.yui-b #contents div.tag-display .tmenu li span
+{
+margin:-0.1em -0.25em !important;
+padding:0 0.55em 0.45em !important;
+}
+
+
+/* ...until you mouse over element to which they are attached */
+.tag-display li:hover ul.tmenu {
+	display: block;
+}
+
+/* no hover menus for datatypes */
+.tag-display li.d:hover ul.tmenu {
+	display: none;
+}
+
+/* the menu item itself */
+.tag-display .tmenu:hover {
+	opacity: 0.9;
+}
+
+.tag-display .tmenu > li:hover {
+	color: white;
+	background-color: black !important;
+}
+
+/* separate tags, also menu items */
+div.tag-display > ul > li,
+div.tag-display .tmenu > li {
+	margin-left: 0 !important;
+}
+
+div.tag-display .tmenu > li + li,
+div.tag-display > ul > li + li {
+	margin-left: 0.25em !important;
+}
+
+
+.tag-display > h1.legend {
+	display: none;
+	position: absolute;
+
+	top: -2.2em;
+	left: -0.2em;
+
+	color: #444;
+	background-color: white;
+	opacity: 0.85;
+
+	font-size: 85% !important;
+	text-align: left;
+	text-transform: capitalize;
+}
+
+.tag-display:hover > h1.legend {
+	display: block;
+}
+
+.tag-display h1.legend {
+	-moz-border-radius-bottomleft: 0;
+	-moz-border-radius-bottomright: 0;
+	-webkit-border-bottom-left-radius: 0em;
+	-webkit-border-bottom-right-radius: 0em;
+}
+
+.tag-display[context=related] > h1.legend {
+	bottom: -2em !important;
+	top: inherit;
+
+	-moz-border-radius-bottomleft: 0.4em;
+	-moz-border-radius-bottomright: 0.4em;
+	-webkit-border-bottom-left-radius: 0.4em;
+	-webkit-border-bottom-right-radius: 0.4em;
+
+	-moz-border-radius-topleft: 0;
+	-moz-border-radius-topright: 0;
+	-webkit-border-top-left-radius: 0;
+	-webkit-border-top-right-radius: 0;
+}
+
+/* ...that's everything _in_ a tag-display... now let's do the display itself */
+
+div.tag-display-stub,
+div.tag-display {
+	display: inline;
+	position: relative;
+	margin-left: 0 !important;
+	overflow: hidden;
+	/*	border:1px dotted #000;	*//*	troubleshooting safari		*/
+}
+
+.tag-display:hover > ul {
+	background-color: #dfdfdf;
+}
+
+.tag-display.no-tags,
+.tag-display[context=related].no-tags,
+.tag-display[context=user].no-visible-tags {
+	display: none !important;
+}
+
+.tag-widget .tag-display[context=user] {
+	display: none;
+}
+
+.tag-widget.expanded .tag-display[context=user] {
+	display: inline;
+}
+
+
+.tag-display[context=related] {
+	display: block;
+	text-align: left;
+}
+
+
+.tag-display-set.train {
+
+	display: inline !important;
+
+	margin-right: 1em;
+	/*	border:1px dotted #000;	*//*	troubleshooting safari		*/
+}
+
+.tag-widget.expanded .tag-display-set.train {
+	padding-right: 1em;
+}
+
+
+.tag-widget .tag-entry {
+	display: none;
+	margin-right: 0.4em;
+}
+
+.tag-widget.expanded .tag-entry {
+	display: inline;
+}
+
+.tag-widget .working + .tag-server-busy {
+	display: block;
+}
+
+.tag-widget .tag-server-busy {
+	display: none;
+	position: absolute;
+}
+
+.tag-widget.expanded .tag-server-busy {
+	top: 0.5em;
+	right: 0.25em;
+}
+
+.tag-editor {
+	display: none;
+}
+
+.tag-widget.expanded .tag-editor {
+	display: inline;
+}
+
+
+
+div.tag-widget-stub,
+div.tag-widget {
+	display: block;
+	position: absolute;
+	background-color: transparent;
+}
+
+
+
+div.head div.tag-widget-stub,
+{
+	display: block;
+	background-color: transparent;
+	margin-left:10em;
+	margin-top:2.8em;
+}
+
+
+/* firehose-specific [to the end of the file] */
+
+#firehose div.tag-widget-stub.body-widget,
+#firehose div.tag-widget.body-widget {
+	right: -0.5em;
+	bottom: 6px;
+	z-index: 10;
+	padding: 0 0.4em 0 0.8em;
+	text-align: right;
+	/*margin-left:15em;*/
+	left:10em;
+}
+
+
+
+
+
+
+#firehose div.tag-widget-stub.body-widget.expanded,
+#firehose div.tag-widget.body-widget.expanded {
+	right: 0;
+}
+
+.tag-widget .note-wrapper {
+	display: block;
+	font-style: italic;
+	padding-right: 0.4em;
+	margin: 0 1em 0.5em 0;
+}
+
+.tag-widget .note-wrapper.no-note {
+	display: inline;
+	font-style: inherit;
+	padding-right: 0;
+}
+
+.tag-widget .admin-buttons {
+	padding-right: 0.7em;
+}
+
+.tag-widget .admin-buttons .note-input {
+	font-style: italic;
+}
+
+.tag-widget .admin-buttons a {
+	text-decoration: none;
+}
+
+.tag-widget .admin-buttons .note-wrapper:before {
+	content: 'Note: ';
+}
+
+
+
+/*
+.tag-widget .admin-buttons a:before,
+.tag-widget .admin-buttons .note-wrapper.no-note a:before {
+	content: '[';
+}
+
+.tag-widget .admin-buttons a:after,
+.tag-widget .admin-buttons .note-wrapper.no-note a:after {
+	content: ']';
+}
+*/
+
+.tag-widget .admin-buttons .note-wrapper a:before,
+.tag-widget .admin-buttons .note-wrapper a:after,
+.tag-widget .admin-buttons .note-wrapper.no-note:before {
+	content: '';
+}
+
+
+.tag-widget div.tags {
+	display: inline;
+	position: relative;
+	right: 1em !important;
+	top: 0.8em;
+	margin-left: 1em;
+}
+
+.briefarticle .tag-widget-stub.body-widget,
+.briefarticle .tag-widget.body-widget {
+	display: none !important;
+}
+
+
+/* nod/nix suggestion bar */
+
+.tag-widget.nod-nix-reasons {
+	position: relative;
+	bottom: 0;
+	color: inherit;
+	background-color: inherit;
+	text-align: inherit;
+	padding-left: 0.8em;
+
+	z-index: 10;
+}
+
+div.article div.title div.nod-nix-reasons span.tag {
+	color: white;
+}
+
+.nod-nix-reasons .tag-display li:hover span.tag {
+	color: white;
+	background-color: black;
+}
+
+.nod-nix-reasons .tag-display:hover ul {
+	background-color: inherit;
+}
+
+a.edit-toggle {
+	text-decoration:none;
+}
+
+
+
+div.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
+border-top:1px solid transparnt !important;
+}
+
+
+
+
+/* trying to fix opera */ /*commented out because this breaks ff2*/
+/*
+div.tag-display ul, div.tag-display li {display: inline-block;}
+*/
+
+
+/*Opera tag bugs*/
+div.tag-widget.opera div.tag-display li {/*ensures the damn pop up things stay with its parents and don't "run away"*/
+display: inline-block
+}
+
+div.tag-widget.opera {/*fixing spacing between this widget and article*/
+padding-top:18px;
+margin-top:-16px;
+}

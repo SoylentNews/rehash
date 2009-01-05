@@ -1,0 +1,122 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_user
+__template__
+
+        [% IF tabbed == 1 %]
+                <div style="margin-top: 1em; text-align: center;">
+                &nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">User</span>
+                &nbsp;|&nbsp;
+                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
+                [% IF user.is_admin %]
+                &nbsp;|&nbsp;
+                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('admin', 'Admin', 1); return false;">Admin</a>
+                [% END %]
+                </div>
+                [% END %]
+
+                [% IF constants.offer_insecure_login_link %]
+                &nbsp;<br>
+                You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | strip_paramattr %]" onclick="hide_modal_box()">This Link</a> and Bookmarking the resulting page. This is totally insecure, but very convenient.
+                [% END %]
+
+                <form id ="modal_prefs" method="post">
+                        <input type="hidden" name="formname" value="user">
+                        <input type="hidden" name="uid" value="[% user.uid %]">
+                        <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">
+
+                        &nbsp;<p>
+
+                        <b>Real Name</b>&nbsp;<input type="text" name="realname" value="[% user.realname | strip_attribute %]" size="40">
+
+                        &nbsp;<p><br>
+
+                        <b>Email Address</b>&nbsp;<input type="text" name="realemail" value="[% user.realemail | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_email');" class="help">?</a>
+                        <br>
+                        <div id="modalprefhelp_email" class="modalprefhelp" style="display: none;">
+                                Required but never displayed publicly, unless you specify so in your comment preferences. This is where your passwd is mailed. If you change this address, a notification will be sent, and you will need to follow the enclosed instructions to re-register.
+                        </div>
+
+                        &nbsp;<p>
+
+                        <b>Homepage</b>&nbsp;<input type="text" name="homepage" value="[% user.homepage | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_homepage');" class="help">?</a>
+                        <br>
+                        <div id="modalprefhelp_homepage" class="modalprefhelp" style="display: none;">
+                                You must enter a fully qualified URL for your homepage.
+                        </div>
+
+                        &nbsp;<p>
+
+                        <b>AIM</b>&nbsp;<input type="text" name="aim" value="[% user.aim | strip_attribute %]" size="40">
+                        <br>
+
+                        <span style="padding-left: 15px;"><label><input type="checkbox" name="aimdisplay" value="1"[% IF user.aimdisplay %] checked="checked" [% END %]>&nbsp;<b>Do not make this AIM nick public</label></b></span>
+
+                        &nbsp;<p><br>
+
+                        <b>ICQ UIN</b>&nbsp;<input type="text" name="icq" value="[% user.icq | strip_attribute %]" size="40">
+
+                        &nbsp;<p><br>
+
+                        <b>Yahoo! ID</b>&nbsp;<input type="text" name="yahoo" value="[% user.yahoo | strip_attribute %]" size="40">
+
+                        &nbsp;<p><br>
+
+                        <b>Jabber</b>&nbsp;<input type="text" name="jabber" value="[% user.jabber | strip_attribute %]" size="40">
+
+                        &nbsp;<p><br>
+
+                        <b>Public Calendar</b>&nbsp;<input type="text" name="calendar_url" value="[% user.calendar_url | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_calendar');" class="help">?</a>
+                        <br>
+                        <div id="modalprefhelp_calendar" class="modalprefhelp" style="display: none;">
+                                You must enter a fully qualified URL for your iCal calendar.
+                        </div>
+
+                        &nbsp;<p>
+
+                        <b>Mobile Text Address</b>&nbsp;<input type="text" name="mobile_text_address" value="[% user.mobile_text_address | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_mobile');" class="help">?</a>
+                        <br>
+                        <div id="modalprefhelp_mobile" class="modalprefhelp" style="display: none;">
+                                Set this if you plan to have Messages sent to your mobile device.
+                        </div>
+
+                        &nbsp;<p>
+
+                        <b>Sig</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sig');" class="help">?</a>
+                        <div id="modalprefhelp_sig" class="modalprefhelp" style="display: none;">
+                                Appended to the end of comments you post. The maximum is 120 characters.
+                        </div>
+
+                        <div style="padding-top: 1px; padding-bottom: 1px;"></div>
+
+                        <textarea name="sig" rows="2" cols="30">[% user.sig | strip_literal %]</textarea>
+
+                        &nbsp;<p>
+
+                        <b>Bio</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_bio');" class="help">?</a>
+                        <div id="modalprefhelp_bio" class="modalprefhelp" style="display: none;">
+                                This information is publicly displayed on your user page. The maximum is 255 characters.
+                        </div>
+
+                        <div style="padding-top: 1px; padding-bottom: 1px;"></div>
+
+                        <textarea name="bio" rows="5" cols="30" wrap="virtual">[% user.bio | strip_literal %]</textarea>
+
+                        &nbsp;<p>
+
+                        <input type="button" value="Save" onclick="saveModalPrefs()">
+
+                </form>
+__seclev__
+500
+__version__
+$Id$

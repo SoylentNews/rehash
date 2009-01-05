@@ -1,0 +1,60 @@
+__section__
+default
+__description__
+useredit = user whose tags are being displayed
+user_submenu = html text of user submenu, if any
+tags_grouped = grouped user tags: a hashref, each duple having a key of a tagname and a value of an arrayref of hashrefs of the tags applied with that tagname
+
+This template and its API will likely change.
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+usertags
+__template__
+[% thisnickname = useredit.nickname | strip_literal;
+   url_nick = useredit.nickname | strip_paramattr;
+   url_base = "$constants.real_rootdir/~$url_nick/";
+   uid = useredit.uid;
+   title = "Tags by <a href=\"$constants.real_rootdir/~$url_nick/\">$thisnickname ($uid)</a>";
+   PROCESS user_titlebar tab_selected='tags' %]
+
+[% IF user.tags_canread_stories && tags_grouped.keys.size %]
+<div><table class="tagslist">
+[% FOREACH tagname = tags_grouped.keys.sort;
+        tagname_shown = 0;
+	FOREACH tag = tags_grouped.$tagname %]
+		[% UNLESS tag.globj_type == "submissions" %]
+			<tr>[% IF !tagname_shown; tagname_shown = 1 %]<td class="tagname" valign="top"><a href="[% url_base %]tags/[% tagname | strip_paramattr %]">[% tagname | strip_literal %]</a></td>[% ELSE %]<td>&nbsp;</td>[% END %]
+			<td>&nbsp;</td>
+			<td valign="top">
+				[% IF tag.globj_type == "stories" %]
+					[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title title=tag.story.title %]
+				[% ELSIF tag.globj_type == "urls" %]
+					<a href="[% tag.url.url %]" rel="nofollow">[% tag.url.bookmark.title || tag.url.validtitle || tag.url.initialtitle | strip_literal %]</a>
+				[% ELSIF tag.globj_type == "journals" %]
+					[% nick = Slash.db.getUser(tag.journal.uid, 'nickname') %]
+					<a href="[% constants.real_rootdir %]/~[% nick | fixparam %]/journal/[% tag.journal.id %]/">[% tag.journal.description | strip_literal %]</a>
+				[% END %]
+			</td>
+			</tr>
+		[% END %]
+	[% END;
+END %]
+</table></div>
+[% ELSE %]
+	[% IF !user.tags_canread_stories %]
+	<div>You are unable to read tags at this time.</div>
+	[% ELSE %]
+	<div>No tags have been assigned.</div>
+	[% END %]
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

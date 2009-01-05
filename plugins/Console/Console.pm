@@ -49,6 +49,28 @@ sub ajaxConsoleUpdate {
 	});
 }
 
+sub consoleBoxes {
+	my($self) = @_;
+	my $admindb 	= getObject('Slash::Admin');
+	my $storyadmin 	= $admindb->showStoryAdminBox("");
+	my $perfbox	= $admindb->showPerformanceBox();
+	my $authorbox	= $admindb->showAuthorActivityBox();
+	my $admintodo	= $admindb->showAdminTodo();
+	my $tagnamesbox = '';
+	my $tags = getObject('Slash::Tags');
+	if ($tags) {
+		$tagnamesbox = $tags->showRecentTagnamesBox({ box_only => 1});
+	}
+
+	slashDisplay('console_boxes', {
+		storyadmin 	=> $storyadmin,
+		perfbox		=> $perfbox,
+		authorbox	=> $authorbox,
+		tagnamesbox	=> $tagnamesbox,
+	}, { Return => 1});
+	
+}
+
 1;
 
 __END__

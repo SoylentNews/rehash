@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-
 DROP TABLE IF EXISTS tags;
 CREATE TABLE tags (
 	tagid		int UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -51,7 +47,8 @@ CREATE TABLE tagname_params (
 	tagnameid	int UNSIGNED NOT NULL,
 	name		VARCHAR(32) DEFAULT '' NOT NULL,
 	value		VARCHAR(64) DEFAULT '' NOT NULL,
-	UNIQUE tagname_name (tagnameid, name)
+	UNIQUE tagname_name (tagnameid, name),
+	KEY name (name)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS tagcommand_adminlog;
@@ -67,27 +64,31 @@ CREATE TABLE tagcommand_adminlog (
 	KEY tagnameid_globjid (tagnameid, globjid)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS tagcommand_adminlog_sfnet;
+CREATE TABLE tagcommand_adminlog_sfnet (
+	id		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	cmdtype		VARCHAR(6) NOT NULL,
+	tagnameid	int UNSIGNED NOT NULL,
+	globjid		int UNSIGNED DEFAULT NULL,
+	sfnetadminuid	mediumint UNSIGNED NOT NULL,
+	created_at	datetime NOT NULL,
+	PRIMARY KEY id (id),
+	KEY created_at (created_at),
+	KEY tagnameid_globjid (tagnameid, globjid)
+) TYPE=InnoDB;
+
 ALTER TABLE users_info ADD COLUMN tag_clout FLOAT UNSIGNED NOT NULL DEFAULT 1.0 AFTER created_at;
 
 CREATE TABLE tagboxes (
 	tbid			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
 	name			VARCHAR(32) DEFAULT '' NOT NULL,
-	affected_type		ENUM('user', 'globj') NOT NULL,
-	clid			smallint UNSIGNED NOT NULL,
 	weight			FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
 	last_run_completed	datetime,
 	last_tagid_logged	int UNSIGNED NOT NULL,
 	last_tdid_logged	int UNSIGNED NOT NULL,
 	last_tuid_logged	int UNSIGNED NOT NULL,
-	nosy_gtids		varchar(255) DEFAULT '' NOT NULL,
 	PRIMARY KEY tbid (tbid),
 	UNIQUE name (name)
-) TYPE=InnoDB;
-
-CREATE TABLE tagbox_userkeyregexes (
-	name			varchar(32) NOT NULL,
-	userkeyregex		varchar(255) NOT NULL,
-	UNIQUE name_regex (name, userkeyregex)
 ) TYPE=InnoDB;
 
 CREATE TABLE tagboxlog_feeder (
@@ -175,6 +176,15 @@ CREATE TABLE tags_searched (
 
 CREATE TABLE globjs_viewed (
 	gvid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	globjid		int UNSIGNED NOT NULL,
+	uid		mediumint UNSIGNED NOT NULL,
+	viewed_at	datetime NOT NULL,
+	PRIMARY KEY (gvid),
+	UNIQUE globjid_uid (globjid, uid)
+) TYPE=InnoDB;
+
+CREATE TABLE globjs_viewed_archived (
+	gvid		int UNSIGNED NOT NULL,
 	globjid		int UNSIGNED NOT NULL,
 	uid		mediumint UNSIGNED NOT NULL,
 	viewed_at	datetime NOT NULL,

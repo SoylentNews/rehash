@@ -1,0 +1,297 @@
+__section__
+default
+__description__
+Template for editing user
+
+* useredit = hashref for user being edited
+* seclev_field = boolean to display seclev editing field
+* uid_checked = whether or not uid is checked
+* nickname_checked = whether or not nickname is checked
+* author_flag = current user is author
+* authoredit_flag = current user can edit authors
+
+__title__
+users admin
+__page__
+users2
+__lang__
+en_US
+__name__
+getUserAdmin
+__template__
+<div class="user_admin">
+<form action="[% env.script_name %]" method="post">
+<fieldset>
+	<legend>
+		User Admin
+	</legend>
+			[% PROCESS formkey_tag %]
+				<input type="hidden" name="op" value="admin">
+				[%- IF field == 'uid' -%]
+				<input type="hidden" name="uid" value="[% useredit.uid | strip_attribute %]">
+				[%- ELSIF field == 'ipid' -%]
+				<input type="hidden" name="ipid" value="[% useredit.ipid | strip_attribute %]">
+				[%- ELSIF field == 'md5id' -%]
+				<input type="hidden" name="md5id" value="[% useredit.md5id | strip_attribute %]">
+				<input type="hidden" name="fieldname" value="[% form.fieldname | strip_attribute %]">
+				[%- ELSIF field == 'subnetid' -%]
+				<input type="hidden" name="subnetid" value="[% useredit.subnetid | strip_attribute %]">
+				[%- ELSIF field == 'srcid' -%]
+				<input type="hidden" name="srcid" value="[% useredit.srcid | strip_attribute %]">
+				[%- END -%]
+
+				<label>
+					User
+				</label>
+				<input type="text" name="userfield" value="[% form.userfield | strip_attribute %]" size="32">
+				<br>
+				[% IF form.fieldname %]<input type="hidden" name="fieldname" value="[% form.fieldname | strip_attribute %]">[% END %]
+				<input type="submit" name="userinfo" value="Info" class="button">
+				<input type="submit" name="edituser" value="Edit" class="button">
+				<input type="submit" name="changepasswd" value="Password" class="button">
+				<input type="submit" name="edithome" value="Homepage" class="button">
+				<input type="submit" name="editcomm" value="Comments" class="button">
+		[% IF userinfo_flag %]
+			[% IF authoredit_flag && seclev_field && !useredit.nonuid  %]
+				<label>
+					Seclev
+				</label>
+				[% IF user.seclev >= 10000 %]
+					<input type="text" name="seclev" size="7" value="[% useredit.seclev | strip_attribute %]">
+					<input type="checkbox" name="author" [% useredit.author %]>
+				[% ELSE %]
+					[% useredit.seclev %]
+				[% END %]
+					Author in 
+				[% section_select %]
+			[% END %]
+			[% IF !useredit.nonuid %]
+				<label>
+					Default&nbsp;points
+				</label>
+				[% thresh_select %]
+			[% END %]
+				<label>ACLs and Access Modifiers</label>
+				<input type="hidden" name="aclams_srcid" value="[% srcid %]">
+				[% FOR acl = useredit.acl.keys %]
+					<input type="hidden" name="acl_old_multiple" value="[% acl %]">
+				[% END %]
+				[% FOR al2 = al2_old.keys %]
+					<input type="hidden" name="al2_old_multiple" value="[% al2_old.${al2}.name %]">
+				[% END %]
+				[% Slash.createSelect("aclams_new_multiple",
+					all_aclam_hr, user_aclam_hr,
+					1, '', all_aclam_ar, 1) %]
+				&nbsp;
+				[% rowcount = useredit.acl.keys.size + al2_old.keys.keys.size - 1;
+				   IF rowcount < 3; rowcount = 3; END %]
+				<textarea name="al2_new_comment" cols="40" rows="[% rowcount %]" wrap="virtual"></textarea>
+			<table class="data" border="0" cellpadding="2" cellspacing="0">
+			<tr class="data_head"><th>[% IF useredit.nonuid%]NetID[% ELSE %]User[% END %] History</th></tr>
+			[% toggle = 0 %]
+			[% FOREACH com = al2_log.reverse %]
+			<tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]"><td>
+				[%# Don't show every log entry: just the comments %]
+				[% NEXT UNLESS com.al2tid == al2_tid_comment %]
+				[% com.ts %]&nbsp;
+				&nbsp;<i>[% al2_nick.${com.adminuid} || com.adminuid || '?' %]:</i>
+				[%# XXXSRCID strip_html this? or trust admins to type valid HTML? %]
+				[% com.comment %]
+				</td>
+				[% toggle = !toggle %]
+			</tr>
+			[% END %]
+			</table>
+
+			[% IF subnet_karma.defined %]
+				<label>
+					Karma
+				</label>
+				<b>[% IF ipid_karma.defined %]IPID Karma: [% ipid_karma %] [% END %]Subnet Karma: [% subnet_karma %] [% IF post_restrictions.no_post %]All posting disabled[% ELSIF post_restrictions.no_anon%]Anonymous Posting Disabled[% END %]</b>
+			[% END %]
+			[% IF useredit.uid and useredit.waiting_for_account_verify %]
+				<label>
+					Awaiting account verification request at
+				</label>
+				[% useredit.account_verify_request_time %]
+			[% END %]
+			[% IF proxy_check.available || proxy_check.ipid %]
+				<label>
+					Proxy Info
+				</label>
+					[% IF proxy_check.available %]
+						<a href="[% gSkin.rootdir %]/users.pl?userfield=[% form.userfield | strip_paramattr %]&amp;check_proxy=1">Test [% form.userfield %] for open proxy</a> 
+						[% IF proxy_check.results.defined %]
+							<b>
+							Test Results:
+							[% IF proxy_check.results %]
+								Open proxy found on port: [% proxy_check.results %]
+							[% ELSE %]
+								No proxy detected
+							[% END %]
+							</b>
+						[% END %]
+						[% need_br = 1 %]
+					[% END %]
+					[% IF proxy_check.ipid %]
+						[% IF need_br %]
+							<br>
+						[% END %]
+						<b>
+						Saved proxy status:
+						[% IF !proxy_check.currently.defined %]
+							Untested
+						[% ELSIF proxy_check.currently == 0 %]
+							No proxy detected
+						[% ELSE %]
+							Open proxy found on port: [% proxy_check.currently %]
+						[% END %]
+						</b>
+					[% END %]
+			[% END %]
+			[% IF useredit.uid %]
+				<b>Tokens:</b>
+				<input type="text" name="tokens" size="6" value="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
+				<b>Tagclout:</b>
+				<input type="text" name="tag_clout" size="6" value="[% useredit.tag_clout | strip_attribute %]">&nbsp;&nbsp;
+				<b>M2Info:</b>
+				<input type="text" name="m2info" value="[% useredit.m2info | strip_attribute %]">
+			[% END %]
+				<p>
+				<input type="submit" name="saveuseradmin" value="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]" class="button">
+				</p>
+			[% IF ! useredit.nonuid %]
+				[% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
+					<label>
+						Subscription
+					</label>
+					[% IF useredit.subscribe_payments.size or useredit.subscribe_purchases.size%]
+					<table cellspacing="0" border="0" class="data">
+						<tr class="data_head">
+							<th>Date</th>
+							<th>Email</th>
+							<th>&nbsp;</th>
+							<th>Pages</th>
+							<th>Method</th>
+							<th>TransID</th>
+							<th>PUID</th>
+							<th>Type</th>
+						</tr>
+						[% FOREACH sp = useredit.subscribe_payments %]
+						<tr class="data_hl3">
+							<td>&nbsp;[% sp.0 %]&nbsp;</td>
+							<td>&nbsp;[% sp.1.chunk(12).join("<br>"); %]&nbsp;</td>
+							<td>&nbsp;[% sp.2 %]&nbsp;</td>
+							<td>&nbsp;[% sp.3 %]&nbsp;</td>
+							<td>&nbsp;[% sp.4 %]&nbsp;</td>
+							<td>&nbsp;[% sp.5.chunk(10).join("<br>"); %]&nbsp;</td>
+							<td>&nbsp;[% sp.6 %]&nbsp;</td>
+							<td>&nbsp;[% sp.7 %]&nbsp;</td>
+						</tr>
+						[% END %]
+						[% IF useredit.subscribe_purchases.size %]
+							<tr class="data_hl3"><td colspan="8" align="CENTER"><b>Subscriptions given by user</b></td></tr>
+							[% FOREACH sp = useredit.subscribe_purchases %]
+								<tr class="data_hl3">
+									<td>&nbsp;[% sp.0 %]&nbsp;</td>
+									<td>&nbsp;[% sp.1.chunk(12).join("<br>"); %]&nbsp;</td>
+									<td>&nbsp;[% sp.2 %]&nbsp;</td>
+									<td>&nbsp;[% sp.3 %]&nbsp;</td>
+									<td>&nbsp;[% sp.4 %]&nbsp;</td>
+									<td>&nbsp;[% sp.5.chunk(10).join("<br>"); %]&nbsp;</td>
+									<td>&nbsp;[% sp.6 %]&nbsp;</td>
+									<td>&nbsp;[% sp.7 %]&nbsp;</td>
+								</tr>
+							[% END %]
+						[% END  %]
+					</table>
+					[% END %]
+					[% IF useredit.hits_bought+useredit.hits_bought_today+useredit.hits_paidfor == 0 AND useredit.subscribe_payments.size == 0 %]
+						<i>none</i>
+					[% ELSE %]
+						<b>Pages Spent:</b> [% useredit.hits_bought %], <b>Today</b>  [% useredit.hits_bought_today %].<br>
+						<b>Paid For:</b> [% useredit.hits_paidfor %]
+					[% END %]
+				[% END %]
+			[% END %]
+				<label>
+					Activity
+				</label>
+				[% IF uidstruct %]
+					<table border="0" cellpadding="2" cellspacing="0" class="data">
+						<tr class="data_head">
+							<th>UID</th>
+							<th>Nickname</th>
+							<th>Com</th>
+							<th>Sub</th>
+							<th>Mod</th>
+						</tr>
+					[% toggle = 0 %]
+					[% FOREACH tmpuid = uidstruct.keys %]
+						<tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
+							<td><a href="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]">[% tmpuid %]</a></td>
+							<td>[% uidstruct.$tmpuid.nickname | strip_literal %]</td>
+							<td align="CENTER">[% IF uidstruct.$tmpuid.comments %]X[% END %]&nbsp;</td>
+							<td align="CENTER">[% IF uidstruct.$tmpuid.submissions %]X[% END %]&nbsp;</td>
+							<td align="CENTER">[% IF uidstruct.$tmpuid.moderatorlog %]X[% END %]&nbsp;</td>
+						</tr>
+						[% toggle = !toggle %]
+					[% END %]
+					</table>
+				[% END %]
+				
+		
+				[% IF ipstruct %]
+					<table border="0" cellpadding="2" cellspacing="0" class="data">
+						<tr class="data_head">
+							<td>IPID</td>
+							<td>#</td>
+							<td>Date(s)</td>
+							<td>Com</td>
+							<td>Sub</td>
+							<td>Mod</td>
+						</tr>
+					[% toggle = 0 %]
+					[% FOREACH tmpip = ipstruct_order %]
+						<tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
+							<td><a href="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip %]&amp;fieldname=ipid">[% ipstruct.$tmpip.ipid_vis %]</a></td>
+
+							<td>[% ipstruct.$tmpip.count %]</td>
+							<td>[% ipstruct.$tmpip.dmin; IF ipstruct.$tmpip.dmin != ipstruct.$tmpip.dmax %] to [% ipstruct.$tmpip.dmax; END %]</td>
+							<td align="CENTER">[% IF ipstruct.$tmpip.comments %]X[% END %]&nbsp;</td>
+							<td align="CENTER">[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</td>
+							<td align="CENTER">[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</td>
+						</tr>
+						[% toggle = !toggle %]
+					[% END %]
+					</table>
+				[% END %]
+				[% IF userinfo_flag %]
+					[% IF accesshits.0 > 0 %]
+			                	Requested <b>[% accesshits.0 %]</b> of the last 1000 pages (2xx: [% accesshits.2 %], 4xx: [% accesshits.4 %]).<br>
+					[% END %]
+					[% IF !useredit.nonuid %]
+						Last access <b>[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
+						ELSE; useredit.lastaccess; END %]</b>
+					[% END %]
+				[% END %]
+		[% END %]
+		</fieldset>
+		</form>
+		[% IF useredit.uid %]
+		 <form action="[% gSkin.rootdir %]/users.pl" method="post">
+		 <fieldset>
+		 <legend>Verify Account</legend>
+		 <label>
+			Verify Account
+		 </label>
+		 <input type="hidden" name="uid" value="[% useredit.uid %]">
+		 <input type="hidden" name="op" value="force_acct_verify">
+		 <input type="submit" value="Force User to Verify Account" class="button">
+		 </fieldset>
+		 </form>
+		[% END %]
+</div>
+__seclev__
+10000
+__version__

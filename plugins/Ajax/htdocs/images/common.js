@@ -1,6 +1,24 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 ; // $Id$
 
+/*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody attachCompleter createTag
+	firehose_remove_all_items firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
+	json_update firehose_reorder firehose_get_next_updates getFirehoseUpdateInterval run_before_update
+	firehose_play firehose_add_update_timerid firehose_collapse_entry firehose_slider_end
+	firehose_slider_set_color vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
+	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
+	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen */
+
+YAHOO.namespace('slashdot');
+
+;$(function(){
+	$.ajaxSetup({
+		url:	'/ajax.pl',
+		type:	'POST',
+		contentType: 'application/x-www-form-urlencoded'
+	});
+});
+
 var reskey_static = '';
 
 // global settings, but a firehose might use a local settings object instead
@@ -11,6 +29,10 @@ var firehose_settings = {};
   firehose_settings.color = '';
   firehose_settings.orderby = '';
   firehose_settings.orderdir = '';
+  firehose_settings.view = '';
+  firehose_settings.tab = '';
+  firehose_settings.fhfilter  = '';
+  firehose_settings.base_filter = '';
 
   firehose_settings.issue = '';
   firehose_settings.is_embedded = 0;
@@ -18,14 +40,15 @@ var firehose_settings = {};
   firehose_settings.section = 0;
   firehose_settings.more_num = 0;
   firehose_settings.metamod = 0;
+  firehose_settings.admin_filters = 0;
 
 // Settings to port out of settings object
   firehose_item_count = 0;
-  firehose_updates = Array(0);
+  firehose_updates = [];
   firehose_updates_size = 0;
-  firehose_ordered = Array(0);
-  firehose_before = Array(0);
-  firehose_after = Array(0);
+  firehose_ordered = [];
+  firehose_before = [];
+  firehose_after = [];
   firehose_removed_first = '0';
   firehose_removals = null;
   firehose_future = null;
@@ -37,18 +60,24 @@ var firehose_settings = {};
 var fh_play = 0;
 var fh_is_timed_out = 0;
 var fh_is_updating = 0;
-var fh_update_timerids = Array(0);
+var fh_update_timerids = [];
 var fh_is_admin = 0;
 var console_updating = 0;
 var fh_colorslider;
 var fh_ticksize;
-var fh_colors = Array(0);
-var fh_use_jquery = 0;
-var vendor_popup_timerids = Array(0);
+var fh_colors = [];
+var fh_idle_skin = 0;
+var vendor_popup_timerids = [];
 var vendor_popup_id = 0;
 var fh_slider_init_set = 0;
 var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
+
+// ads
+var fh_adTimerSecsMax   = 15;
+var fh_adTimerClicksMax = 0;
+var fh_adTimerUrl       = '';
+//fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
 
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
@@ -123,26 +152,31 @@ function moveByXY(div, x, y) {
 	}
 }
 
-function getXYForId(id, addWidth, addHeight) {
-	var div = $('#'+id);
-	var offset = div.offset();
-	if (addWidth) offset.left += div.attr('offsetWidth');
-	if (addHeight) offset.top += div.attr('offsetHeight');
-	return [ offset.left, offset.top ];
+function getXYForSelector( selector, addWidth, addHeight ){
+	var $elem = $(selector);
+	var dX = addWidth ? $elem.attr('offsetWidth') : 0;
+	var dY = addHeight ? $elem.attr('offsetHeight') : 0;
+
+	var o = $elem.offset();
+	return [ o.left+dX, o.top+dY ];
 }
+
+// function getXYForId(id, addWidth, addHeight){ return getXYForSelector('#'+id, addWidth, addHeight); }
 
 function firehose_id_of( expr ) {
 	try {
 		// We accept a number, or...
-		if ( typeof expr === 'number' )
+		if ( typeof expr === 'number' ) {
 			return expr;
+		}
 
 		// ...a dom element that is or is within a firehose entry, or...
 		else if ( typeof expr === 'object' && expr.parentNode ) {
-			if ( expr.id && expr.id.match(/-\d+$/) )
+			if ( expr.id && expr.id.match(/-\d+$/) ) {
 				expr = expr.id;
-			else
+			} else {
 				expr = $(expr).parents('[id^=firehose-]').attr('id');
+			}
 		}
 
 		// ...a string that is a number or the id of
@@ -150,8 +184,9 @@ function firehose_id_of( expr ) {
 		var match = /(?:.+-)?(\d+)$/.exec(expr);
 
 		// We return an integer id.
-		if ( match )
-			return parseInt(match[1]);
+		if ( match ) {
+			return parseInt(match[1], 10);
+		}
 	}
 	catch ( e ) {
 		// If we can't deduce an integer id; we won't throw...
@@ -159,6 +194,19 @@ function firehose_id_of( expr ) {
 
 	// ...but we won't return an answer, either.
 	return undefined;
+}
+
+function after_article_moved( article ){
+	var data = article ? $(article).nextAll(':visible').andSelf() : null;
+	$('#firehoselist').trigger('articlesMoved', data);
+}
+
+function before_article_removed( article, if_also_trigger_moved ){
+	var next_article = article ? $(article).next(':visible')[0] : null;
+	$('#firehoselist').trigger('beforeArticleRemoved', article);
+	if ( if_also_trigger_moved ) {
+		after_article_moved(next_article);
+	}
 }
 
 function firehose_toggle_advpref() {
@@ -183,17 +231,21 @@ function toggleIntro(id, toggleid) {
 	$('#'+toggleid).setClass(new_class).html(new_html);
 }
 
+
 function tagsToggleStoryDiv(id, is_admin, type) {
-	($('#toggletags-body-'+id).hasClass('tagshide') ? tagsShowBody : tagsHideBody)(id, is_admin, '', type);
+	if ( $('#toggletags-body-'+id).hasClass('tagshide') ) {
+		tagsShowBody(id, is_admin, '', type);
+	} else {
+		tagsHideBody(id);
+	}
 }
 
 function tagsHideBody(id) {
-	close_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id);
-
 	$('#toggletags-body-'+id).setClass('tagshide');		// Make the body of the tagbox vanish
 	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
 	$('#tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
 	$('#toggletags-button-'+id).html('[+]');		// Toggle the button back.
+	after_article_moved($('#firehose-'+id)[0]);
 }
 
 function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
@@ -205,8 +257,6 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 		if (fh_is_admin) {
 			firehose_get_admin_extras(id);
 		}
-
-		open_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id, 'fetch-tags-now')
 	}
 
 	//alert("Tags show body / Type: " + type );
@@ -214,69 +264,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	$('#tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
 	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
 	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
-
-	// If the tags-user div hasn't been filled, fill it.
-	var tagsuser = $('#tags-user-' + id);
-	if (tagsuser.html() == "") {
-		// The tags-user-123 div is empty, and needs to be
-		// filled with the tags this user has already
-		// specified for this story, and a reskey to allow
-		// the user to enter more tags.
-		tagsuser.html("Retrieving...");
-		var params = {};
-		if (type == "stories") {
-			params['op'] = 'tags_get_user_story';
-			params['sidenc'] = id;
-		} else if (type == "urls") {
-			//alert('getting user urls ' + id);
-			params['op'] = 'tags_get_user_urls';
-			params['id'] = id;
-		} else if (type == "firehose") {
-			params['op'] = 'tags_get_user_firehose';
-			params['id'] = id;
-		}
-		params['newtagspreloadtext'] = newtagspreloadtext;
-		var handlers = {
-			onComplete: function() {
-				$dom('newtags-'+id).focus();
-			}
-		}
-		ajax_update(params, 'tags-user-' + id, handlers);
-		//alert('after ajax_update ' + tagsuserid);
-
-		// Also fill the admin div.  Note that if the user
-		// is not an admin, this call will not actually
-		// return the necessary form (which couldn't be
-		// submitted anyway).  The is_admin parameter just
-		// saves us an ajax call to find that out, if the
-		// user is not actually an admin.
-		if (is_admin) {
-			var tagsadminid = 'tags-admin-' + id;
-			params = {};
-			if (type == "stories") {
-				params['op'] = 'tags_get_admin_story';
-				params['sidenc'] = id;
-			} else if (type == "urls") {
-				params['op'] = 'tags_get_admin_url';
-				params['id'] = id;
-			} else if (type == "firehose") {
-				params['op'] = 'tags_get_admin_firehose';
-				params['id'] = id;
-			}
-			ajax_update(params, tagsadminid);
-		}
-
-	} else {
-		if (newtagspreloadtext) {
-			// The box was already open but it was requested
-			// that we append some text to the user text.
-			// We can't do that by passing it in, so do it
-			// manually now.
-			var textinput = $dom('newtags-'+id);
-			textinput.value += ' ' + newtagspreloadtext;
-			textinput.focus();
-		}
-	}
+	after_article_moved($('#firehose-'+id)[0]);
 }
 
 function tagsOpenAndEnter(id, tagname, is_admin, type) {
@@ -284,186 +272,73 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 	tagsShowBody(id, is_admin, tagname, type);
 }
 
-function completer_renameMenu( s, params ) {
-	if ( s )
-		params._sourceEl.innerHTML = s;
-}
-
-function completer_setTag( s, params ) {
-	createTag(s, params._id, params._type);
-	var tagField = document.getElementById('newtags-'+params._id);
-	if ( tagField ) {
-		var s = tagField.value.slice(-1);
-		if ( s.length && s != " " )
-			tagField.value += " ";
-		tagField.value += s;
-	}
-}
-
-function completer_handleNeverDisplay( s, params ) {
-	if ( s == "neverdisplay" )
-		admin_neverdisplay("", "firehose", params._id);
-}
-
-function completer_save_tab(s, params) {
-	firehose_save_tab(params._id);
-}
-
-function clickCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
-}
-
-function focusCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	if ( navigator.vendor !== undefined ) {
-		var vendor = navigator.vendor.toLowerCase();
-		if ( vendor.indexOf("apple") != -1
-				|| vendor.indexOf("kde") != -1 )
-			return false;
-	}
-
-	return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
-}
-
-function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	if ( customize === undefined )
-		customize = new Object();
-	customize._id = id;
-	customize._is_admin = is_admin;
-	customize._type = type;
-	if ( tagDomain != 0 && customize.queryOnAttach === undefined )
-		customize.queryOnAttach = true;
-
-	if ( !YAHOO.slashdot.gCompleterWidget )
-		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
-
-	YAHOO.slashdot.gCompleterWidget.attach(obj, customize, tagDomain);
-	return false;
-}
-
 function reportError(request) {
 	// replace with something else
 	alert("error");
 }
 
-function createTag(tag, id, type) {
-	var params = {};
-	params['id'] = id;
-	params['type'] = type;
-	if ( fh_is_admin && ("_#)^*".indexOf(tag[0]) != -1) ) {
-	  params['op'] = 'tags_admin_commands';
-	  params['reskey'] = $('#admin_commands-reskey-' + id).val();
-	  params['command'] = tag;
-	} else {
-	  params['op'] = 'tags_create_tag';
-	  params['reskey'] = reskey_static;
-	  params['name'] = tag;
-	  if ( fh_is_admin && (tag == "hold") ) {
-	    firehose_collapse_entry(id);
-	  }
-	}
-	ajax_update(params, '');
-}
-
-function tagsCreateForStory(id) {
-	var status = $('#toggletags-message-'+id).html('Saving tags...');
-
-	ajax_update({
-		op: 'tags_create_for_story',
-		sidenc: id,
-		tags: $('#newtags-'+id).val(),
-		reskey: $('#newtags-reskey-'+id).val()
-	}, 'tags-user-' + id);
-
-	// XXX How to determine failure here?
-	status.html('Tags saved.');
-}
-
-function tagsCreateForUrl(id) {
-	var status = $('#toggletags-message-'+id).html('Saving tags...');
-
-	ajax_update({
-		op:	'tags_create_for_url',
-		id:	id,
-		tags:	$('#newtags-'+id).val(),
-		reskey:	$('#newtags-reskey-'+id).val()
-	}, 'tags-user-' + id);
-
-	// XXX How to determine failure here?
-	status.html('Tags saved.');
-}
-
 //Firehose functions begin
-function setOneTopTagForFirehose(id, newtag) {
-	ajax_update({
-		op: 'firehose_update_one_tag',
-		id: id,
-		tags: newtag
-	});
-}
-
-function tagsCreateForFirehose(id) {
-	var status = $('#toggletags-message-'+id).html('Saving tags...');
-
-	ajax_update({
-		op:	'tags_create_for_firehose',
-		id:	id,
-		tags:	$('#newtags-'+id).val(),
-		reskey:	$('#newtags-reskey-'+id).val()
-	}, 'tags-user-'+id);
-
-	status.html('Tags saved.');
-}
-
-function toggle_firehose_body(id, is_admin) {
-	var params = {};
+function toggle_firehose_body( id, is_admin ) {
 	setFirehoseAction();
-	params['op'] = 'firehose_fetch_text';
-	params['id'] = id;
-	var fhbody = $dom('fhbody-'+id);
-	var fh = $dom('firehose-'+id);
 
-	var usertype = fh_is_admin ? " adminmode" : " usermode";
-	if (fhbody.className == "empty") {
-		var handlers = {
-			onComplete: function() {
-				if(firehoseIsInWindow(id)) {
-					scrollWindowToFirehose(id);
-				}
-				firehose_get_admin_extras(id);
-			}
-		};
-		params['reskey'] = reskey_static;
-		ajax_update(params, 'fhbody-'+id, is_admin ? handlers : null);
-		fhbody.className = "body";
-		fh.className = "article" + usertype;
-		if (is_admin)
-			tagsShowBody(id, is_admin, '', "firehose");
-	} else if (fhbody.className == "body") {
-		fhbody.className = "hide";
-		fh.className = "briefarticle" + usertype;
-		close_tag_widget($(fh).find('#tag-widget-'+id));
-		/*if (is_admin)
-			tagsHideBody(id);*/
-	} else if (fhbody.className == "hide") {
-		fhbody.className = "body";
-		fh.className = "article" + usertype;
-		open_tag_widget($(fh).find('#tag-widget-'+id), 'fetch-tags-now');
-		/*if (is_admin)
-			tagsShowBody(id, is_admin, '', "firehose"); */
+	var	$article	= $('#firehose-'+id),
+		body_id		= 'fhbody-'+id,
+		$body		= $article.find('#'+body_id),
+		$h3 		=  $article.find('h3');
+		usertype	= fh_is_admin ? " adminmode" : "usermode";
+		if_empty	= $body.is('.empty'),
+		if_show		= if_empty || $body.is('.hide');
+
+	if ( if_empty ) {
+		ajax_update({	op:	'firehose_fetch_text',
+				id:	id,
+				reskey:	reskey_static
+			},
+			body_id,
+			is_admin ? {	onComplete: function() {
+						if( firehoseIsInWindow(id) ) {
+							scrollWindowToFirehose(id);
+						}
+						firehose_get_admin_extras(id);
+					}
+				} :
+				null
+		);
 	}
+
+	if ( if_show ) {
+		$body.setClass('body');
+		$article.setClass('article ' + usertype);
+		$h3.find('a img').hide("fast");
+		if ( is_admin ) {
+			firehose_toggle_tag_ui_to(true, $article);
+		}
+	} else {
+		$body.setClass('hide');
+		$h3.find('a img').show("fast");
+		$article.setClass('briefarticle ' + usertype);
+	}
+	after_article_moved($article[0]);
+	inlineAdFirehose( if_show && $article );
+
+	return false;
 }
 
 function toggleFirehoseTagbox(id) {
 	$('#fhtagbox-'+id).toggleClasses('tagbox', 'hide');
+	after_article_moved($('#firehose-'+id)[0]);
 }
 
-function firehose_set_options(name, value) {
+function firehose_set_options(name, value, context) {
+	if (firehose_user_class === 0) {
+		return;
+	}
 	if (name == "color" && value === undefined) {
 		return;
 	}
 
 	var pairs = [
-		// name		value		curid		newid		newvalue 	title 
+		// name		value		curid		newid		newvalue 	title
 		["orderby", 	"createtime", 	"popularity",	"time",		"popularity"	],
 		["orderby", 	"popularity", 	"time",		"popularity",	"createtime"	],
 		["orderdir", 	"ASC", 		"asc",		"desc",		"DESC"],
@@ -472,25 +347,21 @@ function firehose_set_options(name, value) {
 		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"]
 	];
 	var params = {};
-	params['setting_name'] = name;
-	params['op'] = 'firehose_set_options';
-	params['reskey'] = reskey_static;
-	var theForm = document.forms["firehoseform"];
-	if (name == "firehose_usermode") {
-		if (value ==  true) {
-			value = 1;
-		}
-		if (value == false) {
-			value = 0;
-		}
-		params['setusermode'] = 1;
+	params.setting_name = name;
+	params.context = context;
+	params.op = 'firehose_set_options';
+	params.reskey = reskey_static;
+	var theForm = document.forms.firehoseform;
+	if (name == "usermode") {
+		value = value ? 1 : 0;
+		params.setusermode = 1;
 		params[name] = value;
 	}
 
 	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode" || name == "nocommentcnt" || name == "nomarquee" || name == "noslashboxes") {
-		value = value == true ? 1 : 0;
+		value = value ? 1 : 0;
 		params[name] = value;
-		params['setfield'] = 1;
+		params.setfield = 1;
 		var classname;
 		if (name == "nodates") {
 			classname = "date";
@@ -499,7 +370,11 @@ function firehose_set_options(name, value) {
 		}
 
 		if (classname) {
-			$('#firehoselist .'+classname).setClass(classname + value ? ' hide' : '');
+			if (value) {
+				$('#firehoselist .'+classname).addClass('hide');
+			} else {
+				$('#firehoselist .'+classname).removeClass('hide').css('display','inline');
+			}
 		}
 	}
 
@@ -511,10 +386,26 @@ function firehose_set_options(name, value) {
 		}
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
+		params.filterchanged = 1;
 	}
 
 	if (name == "setfhfilter") {
 		firehose_settings.fhfilter = value;
+		firehose_settings.page = 0;
+		firehose_settings.more_num = 0;
+		params.filterchanged = 1;
+	}
+
+	if (name == "view") {
+		firehose_settings.view = value;	
+		params.viewchanged = 1;
+		firehose_settings.page = 0;
+		firehose_settings.more_num = 0;
+	}
+	
+	if (name == "tab") {
+		firehose_settings.tab = value;	
+		params.tabchanged = 1;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
 	}
@@ -524,17 +415,18 @@ function firehose_set_options(name, value) {
 		var el = pairs[i];
 		if (name == el[0] && value == el[1]) {
 			firehose_settings[name] = value;
-			if ($dom(el[2])) {
-				$dom(el[2]).id = el[3];
-				if($dom(el[3])) {
-					var namenew = el[0];
-					var valuenew = el[4];
-					$dom(el[3]).firstChild.onclick = function() { firehose_set_options(namenew, valuenew); return false;}
-				}
+			var $ctrl = $('#'+el[2]);
+			if ( $ctrl.length ) {
+				$ctrl.attr('id', el[3]);
+				var namenew = el[0], valuenew = el[4];
+				$ctrl.children().eq(0).click(function(){
+					firehose_set_options(namenew, valuenew);
+					return false;
+				});
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -558,6 +450,10 @@ function firehose_set_options(name, value) {
 			firehose_remove_all_items();
 		}
 	}
+	}
+
+	if (name == "view" || name == "tab") {
+		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
 	}
 
 	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") {
@@ -598,80 +494,49 @@ function firehose_set_options(name, value) {
 
 	if (name == 'tabsection') {
 		firehose_settings.section = value;
-		params['tabtype'] = 'tabsection';
+		params.tabtype = 'tabsection';
 	}
 
 	if (name == 'tabtype') {
-		params['tabtype'] = value;
+		params.tabtype = value;
 	}
 
 	if (name == 'more_num') {
-		params['ask_more'] = 1;
+		params.ask_more = 1;
 	}
 
-	params['section'] = firehose_settings.section;
-	for (i in firehose_settings) {
-		params[i] = firehose_settings[i];
-	}
+	params.section = firehose_settings.section;
+	$.extend(params, firehose_settings);
 	ajax_update(params, '', handlers);
 }
 
 function firehose_remove_all_items() {
-	$('#firehoselist').children().remove();
+	$('#firehoselist').empty();
+	after_article_moved();
 }
 
 
-function firehose_up_down(id, dir, type) {
-	if (!check_logged_in()) return;
-
-	setFirehoseAction();
-	var meta = 0;
-	if (type && type == "comment") {
-		meta = 1;
-	}
-	ajax_update({
-		op:	'firehose_up_down',
-		id:	id,
-		reskey:	reskey_static,
-		dir:	dir,
-		meta:	meta
-	}, '', { onComplete: json_handler });
-
-
-	// We changed the tags outside the notice of the tag widget (if any).
-	// If there is one, we need to tell it.  Look for the tag widget.
-	var new_context = {'+':'nod', '-':'nix'}[dir];
-	var found_widgets = 0;
-
-	var $server = $('#firehoselist > [tag-server='+id+']');
-	$server
-		.find('.tag-widget:not(.stub)')
-			.each(function(){
-				++found_widgets;
-				this.set_context(new_context)
-			});
-
-	if ( found_widgets ) {
-		$server[0].fetch_tags()
-	} else {
-		// No tag widget; we have to call directly...
-		firehose_fix_up_down(id, {'+':'votedup', '-':'voteddown'}[dir])
-	}
-}
-
-function firehose_fix_up_down(id, new_state) {
+function firehose_fix_up_down( id, new_state ){
 	// Find the (possibly) affected +/- capsule.
 	var $updown = $('#updown-'+id);
 
 	if ( $updown.length && ! $updown.hasClass(new_state) ) {
 		// We found the capsule, and it's state needs to be fixed.
 		$updown.setClass(new_state);
-
-		// When ad admin nixes something, it should collapse and get out of the way.
-		if ( fh_is_admin && (new_state=='voteddown' || $('#title-'+id).is(':contains("Comment:")')) )
-			firehose_collapse_entry(id);
 	}
 }
+
+function firehose_click_nodnix_reason( event ) {
+	var $entry = $(event.target).nearest_parent('[tag-server]');
+	var id = $entry.attr('tag-server');
+
+	if ( (fh_is_admin || firehose_settings.metamod) && ($('#updown-'+id).hasClass('voteddown') || $entry.is('[type=comment]')) ) {
+		firehose_collapse_entry(id);
+	}
+
+	return true;
+}
+
 
 function firehose_remove_tab(tabid) {
 	setFirehoseAction();
@@ -685,33 +550,303 @@ function firehose_remove_tab(tabid) {
 }
 
 
+//
+// firehose + tag_ui
+//
+
+var $related_trigger = $().filter();
+
+var kExpanded=true, kCollapsed=false;
+
+function firehose_toggle_tag_ui_to( if_expanded, selector ){
+	var	$server = $(selector).nearest_parent('[tag-server]'),
+		id	= $server.attr('tag-server'),
+		$widget = $server.find('.tag-widget.body-widget'),
+		toggle	= if_expanded != $widget.hasClass('expanded');
+
+	if ( toggle ) {
+		setFirehoseAction();
+		$server.find('.tag-widget').each(function(){ this.set_context(); });
+
+		$widget.toggleClassTo('expanded', if_expanded);
+
+		var toggle_button={}, toggle_div={};
+		if ( if_expanded ){
+			$server.each(function(){ this.fetch_tags(); });
+			if ( fh_is_admin ) {
+				firehose_get_admin_extras(id);
+			}
+			$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
+
+			toggle_button['+'] = (toggle_button.collapse = 'expand');
+			toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
+		} else {
+			toggle_button['+'] = (toggle_button.expand = 'collapse');
+			toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
+		}
+
+		$widget.find('a.edit-toggle .button').mapClass(toggle_button);
+		$server.find('#toggletags-body-'+id).mapClass(toggle_div);
+		after_article_moved($server[0]);
+	}
+
+	return $widget;
+}
+
+function firehose_toggle_tag_ui( toggle ) {
+	firehose_toggle_tag_ui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
+}
+
+function firehose_click_tag( event ) {
+	var $target = $(event.target), command = '', $menu;
+
+	// skip for non-JS hrefs
+	if (! $target.find_nearest('a[href]:not([href=#])', 'self', 'up').length) {
+		// _any_ click can trigger, but click-specific ad will win
+		setTimeout(function(){ inlineAdFirehose(); }, 0);
+	}
+
+	$related_trigger = $target;
+
+	if ( $target.is('a.up') ) {
+		command = 'nod';
+	} else if ( $target.is('a.down') ) {
+		command = 'nix';
+	} else if ( $target.is('.tag') ) {
+		command = $target.text();
+	} else if ( ($menu = $target.nearest_parent('.tmenu')).length ) {
+		var op = $target.text();
+		var $tag = $target.nearest_parent(':has(span.tag)').find('.tag');
+		$related_trigger = $tag;
+
+		var tag = $tag.text();
+		command = normalize_tag_menu_command(tag, op);
+	} else {
+		$related_trigger = $().filter();
+	}
+
+	if ( command ) {
+		// No!  You no hurt Dr. Jones!  You log-in first!
+		if ( ! check_logged_in() ) {
+			return false;
+		}
+
+		var $server = $target.nearest_parent('[tag-server]');
+
+		// Make sure the user sees some feedback...
+		if ( $menu || event.shiftKey ) {
+			// for a menu command or copying a tag into edit field, open the tag_ui
+			var $widget = firehose_toggle_tag_ui_to(kExpanded, $server);
+
+			// the menu is hover css, you did the command, so the menu should go away
+			// but you're still hovering
+			if ( $menu ) {
+				// so explicitly hide the menu
+				$menu.hide();
+				// Yikes! that makes it permanently gone; so undo at our earliest convenience
+				setTimeout(function(){ $menu.removeAttr('style'); });
+				// it can't immediately re-pop because you no longer qualify for the hover
+			}
+		}
+
+		if ( event.shiftKey ) { // if the shift key is down, append the tag to the edit field
+			$widget.find('.tag-entry:text:visible:first').each(function(){
+				if ( this.value ) {
+					var last_char = this.value[ this.value.length-1 ];
+					if ( '-^#!)_ '.indexOf(last_char) == -1 ) {
+						this.value += ' ';
+					}
+				}
+				this.value += command;
+				this.focus();
+			});
+		} else { // otherwise, send it the server to be processed
+			$server.each(function(){
+				this.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
+			});
+		}
+		return false;
+	}
+
+	return true;
+}
+
+
+function firehose_handle_context_triggers( commands ){
+	var context;
+	commands = $.map(commands, function(cmd){
+		if ( cmd in context_triggers ) {
+			context = cmd;
+			cmd = null;
+		}
+		return cmd;
+	});
+
+	$('.tag-widget:not(.nod-nix-reasons)', this).
+		each(function(){
+			this.set_context(context);
+		});
+
+	return commands;
+}
+
+
+function firehose_handle_nodnix( commands ){
+	if ( commands.length ) {
+		var $reasons = $('.nod-nix-reasons', this);
+		var nodnix_context = function( ctx ){
+			$reasons.each(function(){
+				this.set_context(ctx);
+			});
+		};
+
+		var tag_server=this, context_not_set=true;
+		$.each(commands.slice(0).reverse(), function(i, cmd){
+			if ( cmd=='nod' || cmd=='nix' ) {
+				nodnix_context(cmd);
+				context_not_set = false;
+				firehose_fix_up_down(
+					tag_server.getAttribute('tag-server'),
+					{ nod:'votedup', nix:'voteddown' }[cmd] );
+				return false;
+			}
+		});
+
+		if ( context_not_set ) {
+			nodnix_context(undefined);
+		}
+	}
+
+	return commands;
+}
+
+function firehose_handle_comment_nodnix( commands ){
+	if ( commands.length ) {
+		var tag_server=this, handled_underlying=false;
+		commands = $.map(commands.reverse(), function( cmd ){
+			var match = /^([\-!]*)(nod|nix)$/.exec(cmd);
+			if ( match ) {
+				var modifier = match[1], vote = match[2];
+				cmd = modifier + 'meta' + vote;
+				if ( !handled_underlying && !modifier ) {
+					var id = tag_server.getAttribute('tag-server');
+					firehose_fix_up_down(
+						id,
+						{ nod:'votedup', nix:'voteddown' }[vote] );
+					firehose_collapse_entry(id);
+					handled_underlying = true;
+				}
+			}
+			return cmd;
+		}).reverse();
+
+		$('.nod-nix-reasons', this).each(function(){
+			this.set_context(undefined);
+		});
+	}
+
+	return commands;
+}
+
+
+$(function(){
+	firehose_init_tag_ui();
+	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
+});
+
+
+function firehose_init_tag_ui( $new_entries ){
+	var $firehoselist = $('#firehoselist');
+
+	if ( ! $new_entries || ! $new_entries.length ) {
+		if ( $firehoselist.length ) {
+			$new_entries = $firehoselist.children('[id^=firehose-][class*=article]');
+		} else {
+			$new_entries = $('[class*=article]');
+		}
+	}
+
+	$new_entries = $new_entries.filter(':not([tag-server])');
+	var have_nodnix = $new_entries.children('[id^=updown-]').length;
+
+	$new_entries.
+		each(function(){
+			var $this = $(this), id = firehose_id_of(this);
+
+			install_tag_server(this, id);
+
+			if ( tag_admin ) {
+				this.command_pipeline.push(firehose_handle_admin_commands);
+			}
+
+			this.command_pipeline.push(firehose_handle_context_triggers);
+
+			if ( have_nodnix ) {
+				// install nod/nix handling only if I see the nod/nix buttons
+				this.command_pipeline.push(
+					($this.attr('type') == 'comment') ?
+						firehose_handle_comment_nodnix :
+						firehose_handle_nodnix);
+				$this.
+					find('> h3').
+						append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
+								'<div class="tag-display-stub" context="related" init="menu:false" />' +
+							'</div>').
+						find('.tag-display-stub').
+							click(firehose_click_nodnix_reason);
+			}
+		});
+
+	if ( ! $firehoselist.length ) {
+		$new_entries.click(firehose_click_tag);
+	}
+
+	var $widgets = $init_tag_widgets($new_entries.find('.tag-widget-stub'));
+
+	if ( tag_admin ) {
+		$widgets.
+			filter('.body-widget').
+				each(function(){
+					this.modify_context = firehose_admin_context;
+				});
+	}
+
+	return init_tag_ui_styles($new_entries);
+}
 // firehose functions end
 
 // helper functions
 function ajax_update(request_params, id, handlers, options) {
 	// make an ajax request to request_url with request_params, on success,
 	//  update the innerHTML of the element with id
-	if (!options)
+	if ( !options ) {
 		options = {};
+	}
 
 	var opts = {
-		url: options['request_url'] || '/ajax.pl',
-		data: request_params,
-		type: 'POST',
-		contentType: 'application/x-www-form-urlencoded'
+		data: request_params
 	};
 
-	if (options['async_off'])
-		opts['async'] = false;
+	if ( options.request_url ) {
+		opts.url = options.request_url;
+	}
+
+	if ( options.async_off ) {
+		opts.async = false;
+	}
 
 	if ( id ) {
-		opts['success'] = function(html){
+		opts.success = function(html){
 			$('#'+id).html(html);
-		}
+		};
 	}
 
 	if ( handlers && handlers.onComplete ) {
-		opts['complete'] = handlers.onComplete;
+		opts.complete = handlers.onComplete;
+	}
+
+	if ( handlers && handlers.onError ) {
+		opts.error = handlers.onError;
 	}
 
 	jQuery.ajax(opts);
@@ -726,7 +861,9 @@ function ajax_periodic_update(interval_in_seconds, request_params, id, handlers,
 function eval_response(transport) {
 	var response;
 	try {
-		eval("response = " + transport.responseText)
+/*jslint evil: true */
+		eval("response = " + transport.responseText);
+/*jslint evil: false */
 	} catch (e) {
 		//alert(e + "\n" + transport.responseText)
 	}
@@ -740,64 +877,96 @@ function json_handler(transport) {
 }
 
 function json_update(response) {
+	if ( ! response ) {
+		return;
+	}
+
 	if (response.eval_first) {
 		try {
-			eval(response.eval_first)
-		} catch (e) {
+/*jslint evil: true */
+			eval(response.eval_first);
+/*jslint evil: false */
+		} catch (e0) {
 
 		}
 	}
 
 	if (response.html) {
-		for (el in response.html) {
-			$('#'+el).html(response.html[el]);
+		var new_content = response.html;
+		for (id in new_content) {
+			if ( new_content.hasOwnProperty(id) ) {
+				$('#'+id).html(new_content[id]);
+			}
 		}
 
 	}
 
 	if (response.value) {
-		for (el in response.value) {
-			$('#'+el).val(response.value[el]);
+		var new_value = response.value;
+		for (id in new_value) {
+			if ( new_value.hasOwnProperty(id) ) {
+				var elem = $dom(id);
+				if ( elem !== gFocusedText ) {
+					$(elem).val(new_value[id]);
+				}
+			}
 		}
 	}
 
 	if (response.html_append) {
-		for (el in response.html_append) {
-			$('#'+el).each(function(){
-				this.innerHTML += response.html_append[el];
-			});
+		new_content = response.html_append;
+		for (id in new_content) {
+			if ( new_content.hasOwnProperty(id) ) {
+				$('#'+id).each(function(){
+					this.innerHTML += new_content[id];
+				});
+			}
 		}
 	}
 
 	if (response.html_append_substr) {
-		for (el in response.html_append_substr) {
-			var found = $('#'+el);
-			if (found.size()) {
-				var this_html = found.html();
-				var pos = this_html.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
-				if ( pos != -1 )
-					this_html = this_html.substr(0, pos);
-				found.html(this_html + response.html_append_substr[el]);
+		new_content = response.html_append_substr;
+		for (id in new_content) {
+			if ( new_content.hasOwnProperty(id) ) {
+				var $found = $('#'+id);
+				if ($found.size()) {
+					var existing_content = $found.html();
+					var pos = existing_content.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
+					if ( pos != -1 ) {
+						existing_content = existing_content.substr(0, pos);
+					}
+					$found.html(existing_content + new_content[id]);
+				}
 			}
 		}
 	}
 
 	if (response.eval_last) {
 		try {
-			eval(response.eval_last)
-		} catch (e) {
+/*jslint evil: true */
+			eval(response.eval_last);
+/*jslint evil: false */
+		} catch (e1) {
 
 		}
 	}
 }
 
-
 function firehose_handle_update() {
+	var saved_selection = new $.TextSelection(gFocusedText);
+	var $menu = $('.ac_results:visible');
+
+	var add_behind_scenes = $("#firehoselist .loading_msg").length;
+	if (add_behind_scenes) { $('.busy').show(); }
+
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
 		var fh = 'firehose-' + el[1];
 		var wait_interval = 800;
 		var need_animate = 1;
+
+		var attributes = {};
+		var myAnim;
 
 		if(el[0] == "add") {
 			if (firehose_before[el[1]] && $('#firehose-' + firehose_before[el[1]]).size()) {
@@ -806,7 +975,14 @@ function firehose_handle_update() {
 					need_animate = 0;
 				}
 			} else if (firehose_after[el[1]] && $('#firehose-' + firehose_after[el[1]]).size()) {
-				$('#firehose-' + firehose_after[el[1]]).before(el[2]);
+
+				// don't insert a new article between the floating slashbox ad and its article
+				var $landmark = $('#firehose-' + firehose_after[el[1]]), $prev = $landmark.prev();
+				if ( $prev.is('#floating-slashbox-ad') ) {
+					$landmark = $prev;
+				}
+
+				$landmark.before(el[2]);
 				if (!isInWindow($dom('title-'+ firehose_after[el[1]]))) {
 					need_animate = 0;
 				}
@@ -819,18 +995,22 @@ function firehose_handle_update() {
 				$('#firehoselist').prepend(el[2]);
 			}
 
+			if (add_behind_scenes) {
+				need_animate = 0;
+			}
+
 			var toheight = 50;
 			if (fh_view_mode == "full") {
 				toheight = 200;
 			}
 
-			var attributes = {
+			attributes = {
 				height: { from: 0, to: toheight }
 			};
 			if (!is_ie) {
 				attributes.opacity = { from: 0, to: 1 };
 			}
-			var myAnim = new YAHOO.util.Anim(fh, attributes);
+			myAnim = new YAHOO.util.Anim(fh, attributes);
 			myAnim.duration = 0.7;
 
 			if (firehose_updates_size > 10) {
@@ -850,13 +1030,14 @@ function firehose_handle_update() {
 			myAnim.onComplete.subscribe(function() {
 				var fh_node = $dom(fh);
 				if (fh_node) {
+					after_article_moved(fh_node);
 					fh_node.style.height = "";
-					if (fh_use_jquery) {
-						$("h3 a[class!='skin']", fh_node).click(function(){
+					if (fh_idle_skin) {
+						/* $("h3 a[class!='skin']", fh_node).click(function(){
 							var h3 = $(this).parent('h3');
 							h3.next('div.hid').and(h3.find('a img')).toggle("fast");
 							return false;
-						});
+						}); */
 					}
 				}
 			});
@@ -868,14 +1049,14 @@ function firehose_handle_update() {
 			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node && fh_node.className == "article" ) {
 				// Don't delete admin looking at this in expanded view
 			} else {
-				var attributes = {
+				attributes = {
 					height: { to: 0 }
 				};
 
 				if (!is_ie) {
 					attributes.opacity = { to: 0};
 				}
-				var myAnim = new YAHOO.util.Anim(fh, attributes);
+				myAnim = new YAHOO.util.Anim(fh, attributes);
 				myAnim.duration = 0.4;
 				wait_interval = 500;
 
@@ -892,10 +1073,11 @@ function firehose_handle_update() {
 					need_animate = 0;
 				}
 
-				if ((firehose_removals < 10 ) || !need_animate) {
+				if ((firehose_removals < 10 ) && !add_behind_scenes ) {
 					myAnim.onComplete.subscribe(function() {
 						var elem = this.getEl();
 						if (elem && elem.parentNode) {
+							before_article_removed(elem, true);
 							elem.parentNode.removeChild(elem);
 						}
 					});
@@ -909,34 +1091,38 @@ function firehose_handle_update() {
 				}
 			}
 		}
-		if(!need_animate) {
-			wait_interval = 10;
+		if(!need_animate || add_behind_scenes) {
+			wait_interval = 0;
 		}
+		
+		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_reorder();
+		if (add_behind_scenes) {
+			$('#firehoselist .loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
+			if (elem && elem.parentNode) {
+				elem.parentNode.removeChild(elem);
+			}
+			$('#firehoselist').show('slow');
+			$('.busy').hide();
+
+		}
 		firehose_get_next_updates();
 	}
 
-	// XXX temporary admin-only access to the unfinished tag-wiget
-	if ( fh_is_admin && $('.tag-widget').length ) {
-		add_firehose_nodnix_glue(
-			$('#firehoselist > [class*=article]:not([tag-server])')
-				.each(function(){
-					install_tag_server(this, firehose_id_of(this))
-				})
-				.find('.up, .down')
-					.click(click_tag)
-				.end()
-				.find('.title')
-		)
-	}
+	var $new_entries = firehose_init_tag_ui();
+	if ( fh_idle_skin ) { firehose_init_idle($new_entries); }
+	if ( fh_is_admin ) { firehose_init_note_flags($new_entries); }
+
+	saved_selection.restore().focus();
+	$menu.show();
 }
 
 function firehose_adjust_window(onscreen) {
 	var i=0;
 	var on = 0;
-	while(i < onscreen.length && on == 0) {
+	while(i < onscreen.length && on === 0) {
 		if(isInWindow($(onscreen[i]))) {
 			on = 1;
 		} else {
@@ -950,25 +1136,30 @@ function firehose_adjust_window(onscreen) {
 }
 
 function firehose_reorder() {
-	var onscreen = firehose_get_onscreen();
 	if (firehose_ordered) {
 		var fhlist = $('#firehoselist');
 		if (fhlist) {
 			firehose_item_count = firehose_ordered.length;
+			var moved = false;
 			for (i = 0; i < firehose_ordered.length; ++i) {
 				if (!/^\d+$/.test(firehose_ordered[i])) {
 					--firehose_item_count;
 				}
-				$('#firehose-'+firehose_ordered[i]).appendTo(fhlist);
+				if ( $('#firehose-'+firehose_ordered[i]).appendTo(fhlist).length ) {
+					moved = true;
+				}
 				if ( firehose_future[firehose_ordered[i]] ) {
 					$('#ttype-'+firehose_ordered[i]).setClass('future');
+					$('#firehose-'+firehose_ordered[i] + " h3").setClass('future');
 				} else {
 					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
+					$('#firehose-'+firehose_ordered[i] + " h3.future").setClass('story');
 				}
 			}
+			if ( moved ) after_article_moved();
 			var newtitle = document.title;
 			if (/\(\d+\)/.test(newtitle)) {
-				newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
+				newtitle = newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
 			} else {
 				newtitle = newtitle + " (" + firehose_item_count + ")";
 			}
@@ -985,16 +1176,31 @@ function firehose_get_next_updates() {
 	firehose_add_update_timerid(setTimeout(firehose_get_updates, interval));
 }
 
-
 function firehose_get_updates_handler(transport) {
 	$('.busy').hide();
 	var response = eval_response(transport);
+
+	var updated_tags = response.update_data.updated_tags;
+	if ( updated_tags ) {
+		var $tag_servers = $('[tag-server]');
+		$.each(updated_tags, function( id, tags ){
+			var updates = '';
+			if ( tags.system_tags !== undefined )	{ updates += '<system>' + tags.system_tags; }
+			if ( tags.top_tags !== undefined )	{ updates += '<top>' + tags.top_tags; }
+			if ( updates ) {
+				$tag_servers.filter('[tag-server='+id+']').each(function(){
+					this.broadcast_tag_lists(updates);
+				});
+			}
+		});
+	}
+
 	var processed = 0;
 	firehose_removals = response.update_data.removals;
 	firehose_ordered = response.ordered;
 	firehose_future = response.future;
-	firehose_before = Array(0);
-	firehose_after = Array(0);
+	firehose_before = [];
+	firehose_after = [];
 	for (i = 0; i < firehose_ordered.length; i++) {
 		if (i > 0) {
 			firehose_before[firehose_ordered[i]] = firehose_ordered[i - 1];
@@ -1012,6 +1218,10 @@ function firehose_get_updates_handler(transport) {
 		firehose_updates_size = firehose_updates.length;
 		firehose_removed_first = 0;
 		processed = processed + 1;
+		if ($('#firehoselist .loading_msg').length) {
+			$('#firehoselist').hide();
+			$('#firehoselist .loading_msg').show();
+		}
 		firehose_handle_update();
 	}
 }
@@ -1026,16 +1236,16 @@ function firehose_get_item_idstring() {
 function firehose_get_updates(options) {
 	options = options || {};
 	run_before_update();
-	if ((fh_play == 0 && !options.oneupdate) || fh_is_updating == 1) {
+	if ((fh_play === 0 && !options.oneupdate) || fh_is_updating == 1) {
 		firehose_add_update_timerid(setTimeout(firehose_get_updates, 2000));
 	//	alert("wait loop: " + fh_is_updating);
 		return;
 	}
 	if (fh_update_timerids.length > 0) {
 		var id = 0;
-		while(id = fh_update_timerids.pop()) { clearTimeout(id) };
+		while((id = fh_update_timerids.pop())) { clearTimeout(id); }
 	}
-	fh_is_updating = 1
+	fh_is_updating = 1;
 	var params = {
 		op:		'firehose_get_updates',
 		ids:		firehose_get_item_idstring(),
@@ -1045,13 +1255,20 @@ function firehose_get_updates(options) {
 	};
 
 	for (i in firehose_settings) {
-		params[i] = firehose_settings[i];
+		if ( firehose_settings.hasOwnProperty(i) ) {
+			params[i] = firehose_settings[i];
+		}
 	}
 
 	$('.busy').show();
-	ajax_update(params, '', { onComplete: firehose_get_updates_handler });
+	ajax_update(params, '', { onComplete: firehose_get_updates_handler, onError: firehose_updates_error_handler });
 }
 
+function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
+	if (fh_is_admin) {
+		firehose_update_failed_modal();
+	}
+}
 
 function setFirehoseAction() {
 	var thedate = new Date();
@@ -1062,7 +1279,7 @@ function setFirehoseAction() {
 		firehose_play();
 		firehose_get_updates();
 		if (console_updating) {
-			console_update(1, 0)
+			console_update(1, 0);
 		}
 	}
 }
@@ -1091,15 +1308,21 @@ function run_before_update() {
 	var secs = getSecsSinceLastFirehoseAction();
 	if (secs > inactivity_timeout) {
 		fh_is_timed_out = 1;
-		$('#message_area').html("Automatic updates have been slowed due to inactivity")
-		//firehose_pause();
+		firehose_inactivity_modal();
 	}
 }
 
-function firehose_play() {
+function firehose_inactivity_modal() {
+	$('#preference_title').html('Firehose Paused due to inactivity');
+	show_modal_box();
+	$('#modal_box_content').html("<a href='#' onclick='setFirehoseAction();hide_modal_box()'>Click to unpause</a>");
+	show_modal_box();
+}
+
+function firehose_play(context) {
 	fh_play = 1;
 	setFirehoseAction();
-	firehose_set_options('pause', '0');
+	firehose_set_options('pause', '0', context);
 	$('#message_area').html('');
 	$('#pauseorplay').html('Updated');
 	$('#play').setClass('hide');
@@ -1110,12 +1333,12 @@ function is_firehose_playing() {
   return fh_play==1;
 }
 
-function firehose_pause() {
+function firehose_pause(context) {
 	fh_play = 0;
 	$('#pause').setClass('hide');
 	$('#play').setClass('show');
 	$('#pauseorplay').html('Paused');
-	firehose_set_options('pause', '1');
+	firehose_set_options('pause', '1', context);
 }
 
 function firehose_add_update_timerid(timerid) {
@@ -1123,12 +1346,12 @@ function firehose_add_update_timerid(timerid) {
 }
 
 function firehose_collapse_entry(id) {
-	$('#firehoselist > #firehose-'+id)
-		.find('#fhbody-'+id+'.body')
-			.setClass('hide')
-		.end()
-		.setClass('briefarticle');
-	tagsHideBody(id)
+	$('#firehoselist > #firehose-'+id).
+		find('#fhbody-'+id+'.body').
+			setClass('hide').
+		end().
+		setClass('briefarticle');
+	tagsHideBody(id);
 }
 
 function firehose_remove_entry(id) {
@@ -1144,6 +1367,7 @@ function firehose_remove_entry(id) {
 		myAnim.duration = 0.5;
 		myAnim.onComplete.subscribe(function() {
 			var el = this.getEl();
+			after_article_moved(el);
 			el.parentNode.removeChild(el);
 		});
 		myAnim.animate();
@@ -1180,10 +1404,10 @@ function firehose_slider_end(offsetFromStart) {
 	if (color !== undefined) {
 		$dom('fh_slider_img').title = "Firehose filtered to " + color;
 		if (fh_slider_init_set) {
-			firehose_set_options("color", color)
+			firehose_set_options("color", color);
 		}
 	} else if (firehohse_settings.color !== undefined) {
-		firehose_slider_set_color(firehose_settings.color)
+		firehose_slider_set_color(firehose_settings.color);
 	}
 }
 
@@ -1211,16 +1435,16 @@ function vendorStoryPopup() {
 	var buttons = createPopupButtons("<a href=\"#\" onclick=\"closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
 	var closepopup = function (e) {
-	if (!e) var e = window.event;
-	var relTarg = e.relatedTarget || e.toElement;
-	if (relTarg && relTarg.id == "vendorStory-26-popup") {
-		closePopup("vendorStory-26-popup");
-	}
+		if (!e) { e = window.event; }
+		var relTarg = e.relatedTarget || e.toElement;
+		if (relTarg && relTarg.id == "vendorStory-26-popup") {
+			closePopup("vendorStory-26-popup");
+		}
 	};
-	createPopup(getXYForId('sponsorlinks', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
+	createPopup(getXYForSelector('#sponsorlinks'), title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = {};
-	params['op'] = 'getTopVendorStory';
-	params['skid'] = id;
+	params.op = 'getTopVendorStory';
+	params.skid = id;
 	ajax_update(params, "vendorStory-" + id + "-contents");
 }
 
@@ -1236,16 +1460,16 @@ function vendorStoryPopup2() {
 	var buttons = createPopupButtons("<a href=\"#\" onclick=\"closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
 	var closepopup = function (e) {
-		if (!e) var e = window.event;
+		if (!e) { e = window.event; }
 		var relTarg = e.relatedTarget || e.toElement;
 		if (relTarg && relTarg.id == "vendorStory-26-popup") {
 			closePopup("vendorStory-26-popup");
 		}
 	};
-	createPopup(getXYForId('sponsorlinks2', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
+	createPopup(getXYForSelector('#sponsorlinks'), title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = {};
-	params['op'] = 'getTopVendorStory';
-	params['skid'] = id;
+	params.op = 'getTopVendorStory';
+	params.skid = id;
 	ajax_update(params, "vendorStory-" + id + "-contents");
 }
 
@@ -1261,17 +1485,24 @@ function firehose_open_tab(id) {
 }
 
 function firehose_save_tab(id) {
+	var	$tab		= $('#fhtab-'+id),
+		new_name	= $tab.find('#tab-input-'+id).val(),
+		$title		= $tab.find('#tab-text-'+id),
+		$saved		= $title.children().remove(); // please ... think of the children
+	// let's not wait for a server response to reflect the name-change
+	$title.text(new_name).append($saved);
+
+	// XXX: I'm having problems where the server occasionaly refuses,
+	//	resets the title, and gives no explanation as to why
 	ajax_update({
 		op:		'firehose_save_tab',
-		tabname:	$('#tab-input-'+id).val(),
+		tabname:	new_name,
 		section:	firehose_settings.section,
 		tabid:		id
 	}, '',  { onComplete: json_handler });
-	$('#tab-form-'+id).setClass('hide');
-	$('#tab-text-'+id).removeClass();
+	$tab.find('#tab-form-'+id).setClass('hide');
+	$title.removeClass();
 }
-
-
 var logged_in   = 1;
 var login_cover = 0;
 var login_box   = 0;
@@ -1283,14 +1514,17 @@ function init_login_divs() {
 }
 
 function install_login() {
-	if (login_inst)
+	if (login_inst) {
 		return;
+	}
 
-	if (!login_cover || !login_box)
+	if (!login_cover || !login_box) {
 		init_login_divs();
+	}
 
-	if (!login_cover || !login_box)
+	if (!login_cover || !login_box) {
 		return;
+	}
 
 	login_cover.parentNode.removeChild(login_cover);
 	login_box.parentNode.removeChild(login_box);
@@ -1302,8 +1536,9 @@ function install_login() {
 }
 
 function show_login_box() {
-	if (!login_inst)
+	if (!login_inst) {
 		install_login();
+	}
 
 	if (login_cover && login_box) {
 		login_cover.style.display = '';
@@ -1314,8 +1549,9 @@ function show_login_box() {
 }
 
 function hide_login_box() {
-	if (!login_inst)
+	if (!login_inst) {
 		install_login();
+	}
 
 	if (login_cover && login_box) {
 		login_box.style.display = 'none';
@@ -1332,7 +1568,6 @@ function check_logged_in() {
 	}
 	return 1;
 }
-
 var modal_cover = 0;
 var modal_box   = 0;
 var modal_inst  = 0;
@@ -1343,14 +1578,17 @@ function init_modal_divs() {
 }
 
 function install_modal() {
-	if (modal_inst)
+	if (modal_inst) {
 		return;
+	}
 
-	if (!modal_cover || !modal_box)
+	if (!modal_cover || !modal_box) {
 		init_modal_divs();
+	}
 
-	if (!modal_cover || !modal_box)
+	if (!modal_cover || !modal_box) {
 		return;
+	}
 
 	modal_cover.parentNode.removeChild(modal_cover);
 	modal_box.parentNode.removeChild(modal_box);
@@ -1362,8 +1600,9 @@ function install_modal() {
 }
 
 function show_modal_box() {
-	if (!modal_inst)
+	if (!modal_inst) {
 		install_modal();
+	}
 
 	if (modal_cover && modal_box) {
 		modal_cover.style.display = '';
@@ -1374,8 +1613,9 @@ function show_modal_box() {
 }
 
 function hide_modal_box() {
-	if (!modal_inst)
+	if (!modal_inst) {
 		install_modal();
+	}
 
 	if (modal_cover && modal_box) {
 		modal_box.style.display = 'none';
@@ -1386,8 +1626,9 @@ function hide_modal_box() {
 }
 
 function getModalPrefs(section, title, tabbed) {
-	if (!reskey_static)
+	if (!reskey_static) {
 		return show_login_box();
+	}
 	$('#preference_title').html(title);
 	ajax_update({
 		op:		'getModalPrefs',
@@ -1407,35 +1648,31 @@ function firehose_get_media_popup(id) {
 	}, 'modal_box_content');
 }
 
+function firehose_reinit_updates() {
+	fh_is_updating = 0;
+	firehose_add_update_timerid(setTimeout(firehose_get_updates, 5000));
+}
+
+function firehose_update_failed_modal() {
+	$('#preference_title').html('Firehose updates failed');
+	$('#modal_box_content').html('Update failed or timed out.  <a href="#" onclick="firehose_reinit_updates();hide_modal_box();">Click to retry</a>');
+	show_modal_box();
+}
+
 function saveModalPrefs() {
 	var params = {};
-	params['op'] = 'saveModalPrefs';
-	params['data'] = jQuery("#modal_prefs").serialize();
-	params['reskey'] = reskey_static;
+	params.op = 'saveModalPrefs';
+	params.data = jQuery("#modal_prefs").serialize();
+	params.reskey = reskey_static;
 	var handlers = {
 		onComplete: function() {
 			hide_modal_box();
-			if (document.forms['modal_prefs'].refreshable.value)
+			if (document.forms.modal_prefs.refreshable.value) {
 				document.location=document.URL;
+			}
 		}
 	};
 	ajax_update(params, '', handlers);
-}
-
-function ajaxSaveSlashboxes() {
-	ajax_update({
-		op:	'page_save_user_boxes',
-		reskey:	reskey_static,
-		bids:	$('#slashboxes div.title').map(function(){
-				return this.id.slice(0,-6);
-			}).get().join(',')
-	});
-}
-
-function ajaxRemoveSlashbox( id ) {
-	if ( $('#slashboxes > #'+id).remove().size() ) {
-		ajaxSaveSlashboxes();
-	}
 }
 
 function displayModalPrefHelp(id) {
@@ -1447,7 +1684,7 @@ function toggle_filter_prefs() {
 	var fps = $dom('filter_play_status');
 	var fp  = $dom('filter_prefs');
 	if (fps) {
-		if (fps.className == "") {
+		if (fps.className === "") {
 			fps.className = "hide";
 			if (fp) {
 				fp.className = "";
@@ -1462,18 +1699,6 @@ function toggle_filter_prefs() {
 	}
 
 }
-
-function admin_signoff(stoid, type, id) {
-	var params = {};
-	params['op'] = 'admin_signoff';
-	params['stoid'] = stoid;
-	params['reskey'] = reskey_static;
-	ajax_update(params, 'signoff_' + stoid);
-	if (type == "firehose") {
-		firehose_collapse_entry(id);
-	}
-}
-
 
 function scrollWindowToFirehose(fhid) {
 	scrollWindowToId('firehose-'+fhid);
@@ -1501,11 +1726,13 @@ function viewWindowLeft() {
 }
 
 function getOffsetTop (el) {
-	if (!el)
+	if (!el) {
 		return false;
+	}
 	var ot = el.offsetTop;
-	while((el = el.offsetParent) != null)
+	while((el = el.offsetParent)) {
 		ot += el.offsetTop;
+	}
 	return ot;
 }
 
@@ -1594,13 +1821,363 @@ function firehose_more() {
 	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();
 	}
-	firehose_set_options('more_num', firehose_settings.more_num);
+	if (firehose_user_class) {
+		firehose_set_options('more_num', firehose_settings.more_num);
+	} else {
+		firehose_get_updates({ oneupdate: 1 });
+	}
+
+	inlineAdFirehose();
 }
 
 function firehose_get_onscreen() {
-	var onscreen = new Array();
-	$('#firehoselist').children().each(function() { if(isInWindow(this)){ onscreen.push(this.id)} });
+	var onscreen = [];
+	$('#firehoselist').children().each(function() { if(isInWindow(this)){ onscreen.push(this.id);} });
 	return onscreen;
 }
 
 
+function getSeconds () {
+	return new Date().getTime()/1000;
+}
+
+
+// ads!  ads!  ads!
+var adTimerSeen   = {};
+var adTimerSecs   = 0;
+var adTimerClicks = 0;
+var adTimerInsert = 0;
+
+function inlineAdReset(id) {
+	if (id !== undefined)
+		adTimerSeen[id] = 2;
+	adTimerSecs   = getSeconds();
+	adTimerClicks = 0;
+	adTimerInsert = 0;
+}
+
+
+function inlineAdClick(id) {
+	//adTimerSeen[id] = adTimerSeen[id] || 1;
+	adTimerClicks = adTimerClicks + 1;
+}
+
+
+function inlineAdInsertId(id) {
+	if (id !== undefined)
+		adTimerInsert = id;
+	return adTimerInsert;
+}
+
+
+function inlineAdVisibles() {
+	var $visible_ads = $('.inlinead').filter(function(){ if ( isInWindow(this) ) return this; });
+	return $visible_ads.length;
+}
+
+
+function inlineAdCheckTimer(id, url, clickMax, secsMax) {
+	if (!url || !id)
+		return 0;
+
+	if (adTimerSeen[id] && adTimerSeen[id] == 2)
+		return 0;
+
+	// ignore clicks if adTimerClicksMax == 0
+	if (clickMax > 0 && !adTimerSeen[id])
+		inlineAdClick(id);
+
+	var ad = 0;
+	if (clickMax > 0 && adTimerClicks >= clickMax)
+		ad = 1;
+	else {
+		var secs = getSeconds() - adTimerSecs;
+		if (secs >= secsMax)
+			ad = 1;
+	}
+
+	if (!ad)
+		return 0;
+
+	return inlineAdInsertId(id);
+}
+
+// TODO: remove this jQuery method when integration is complete and this method is really provided by Slash.TagUI
+(function($){
+$.fn.tag_ui__tags = function(){
+	var tags = {};
+	this.find('span.tag').each(function(){
+		tags[ $(this).text() ] = true;
+	});
+	return Slash.Util.qw(tags);
+}
+})(Slash.jQuery);
+
+function inlineAdFirehose($article) {
+	if (!fh_adTimerUrl)
+		return 0;
+
+	if ($article)
+		$article = Slash.Firehose.ready_ad_space($article);
+	else
+		$article = Slash.Firehose.choose_article_for_next_ad();
+
+	if (!$article || !$article.length)
+		return 0;
+
+	var id = $article.article_info__key().key;
+	if (!id)
+		return 0;
+
+	// we need to remove the existing ad from the hash so it can be re-used
+	var old_id = inlineAdInsertId();
+
+	if (! inlineAdCheckTimer(id, fh_adTimerUrl, fh_adTimerClicksMax, fh_adTimerSecsMax))
+		return 0;
+
+	if (Slash.Firehose.floating_slashbox_ad.is_visible())
+		return 0;
+
+	var $system = $article.find('[context=system]');
+	var topic = $system.find('.t2:not(.s1)').tag_ui__tags().join(',');
+	var skin  = $system.find('.s1').tag_ui__tags()[0];
+	var adUrl = fh_adTimerUrl + '?skin=' + (skin || 'mainpage');
+	if (topic)
+		adUrl = adUrl + '&topic=' + topic;
+
+	var ad_content = '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
+
+	Slash.Firehose.floating_slashbox_ad($article, ad_content);
+
+	inlineAdReset(id);
+	if (old_id)
+		adTimerSeen[old_id] = 0;
+
+	return id;
+}
+
+
+;(function($){
+
+//
+// Firehose Floating Slashbox Ad
+//
+
+
+var	AD_HEIGHT = 300, AD_WIDTH = 300,
+
+	$ad_position,		// 300x300 div that holds the current (if any) ad
+	ad_target_article,	// the article to which that ad is attached
+	$ad_offset_parent,	// the container in which the ad _position_ floats (between articles)
+	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child) 
+	$footer,
+
+	is_ad_locked;		// ad must be shown for at least 30 seconds
+
+$(function(){
+	is_ad_locked = false;
+	$ad_position = $([]);
+	ad_target_article = null;
+
+	$footer = $('#ft');
+	$slashboxes = $('#slashboxes, #userboxes').eq(0);
+
+	$('#firehoselist').
+		bind('articlesMoved', fix_ad_position).
+		bind('beforeArticleRemoved', notice_article_removed);
+});
+
+function notice_article_removed( event, removed_article ){
+	if ( ad_target_article === removed_article ) {
+		remove_ad();
+	}
+}
+
+function remove_ad(){
+	ad_target_article = null;
+
+	if ( is_ad_locked ) {
+		return false;
+	}
+
+	$ad_position.remove();
+	$ad_position = $([]);
+	return true;
+}
+
+function insert_ad( $article, ad ){
+	if ( !ad || !$article || $article.length != 1 || !remove_ad() ) {
+		return;
+	}
+
+	ad_target_article = $article[0];
+	$ad_position = $article.
+		before('<div id="floating-slashbox-ad" class="No" />').
+		prev().
+			append(ad);
+
+	setTimeout(function(){
+		is_ad_locked = false;
+		if ( ! ad_target_article ) {
+			remove_ad();
+		}
+	}, 30000);
+	is_ad_locked = true;
+
+	if ( ! $ad_offset_parent ) {
+		$ad_offset_parent = $article.offsetParent();
+	}
+
+	fix_ad_position();
+	$ad_position.fadeIn('fast');
+}
+
+function nearest_article_edge(){
+	// Why not just ask for the offset of $ad_position?
+	// ...because $ad_position may be absolutely positioned already
+
+	var $article = $ad_position.next();
+	var pos = $article.offset();
+	if ( pos !== undefined ) {
+		return pos.top;
+	}
+
+	$article = $ad_position.prev();
+	pos = $other.offset();
+	if ( pos !== undefined ) {
+		return pos.top + $article.height();
+	}
+
+	return 0;
+}
+
+function pin( lo, n, hi ){
+	// return n', the nearest value to n such that lo<=n'<=hi
+
+	if ( hi < lo ) return { value: undefined, description: 'Empty' };	// pin-range is empty, there is no n' such that lo<=n'<=hi
+	if ( n <= lo ) return { value: lo, description: 'Min' };
+	if ( n <= hi ) return { value: n, description: 'No' };
+	return { value: hi, description: 'Max' };
+}
+
+function fix_ad_position(){
+	if ( $ad_position.length ) {
+		var	footer		= $footer.offset(),
+			slashboxes	= $slashboxes.offset();
+
+		if ( ! footer || ! slashboxes ) {
+			return;
+		}
+
+		var	min_top		= slashboxes.top + $slashboxes.height(),
+			max_top		= footer.top - AD_HEIGHT,
+			pinned_top	= pin(min_top, nearest_article_edge(), max_top),
+
+			prev_top	= $ad_position.offset().top,
+			prev_class	= $ad_position.attr('className'),
+			prev_pinned	= prev_class !== 'No',
+
+			next_top	= pinned_top.value,
+			next_class	= pinned_top.description,
+			next_pinned	= next_class !== 'No',
+			next_css	= {};
+
+		if ( prev_pinned > next_pinned ) {
+			// if we're un-pinning the ad, clear our explicit 'top' setting
+			next_css.top = '';
+		} else if ( next_pinned && (!prev_pinned || prev_top!=next_top) ) {
+			// else if we're becoming pinned or are already pinned, but need a different top
+			next_css.top = '' + (next_top - $ad_offset_parent.offset().top) + 'px';
+		}
+
+		if ( next_css.top !== undefined ) {
+			$ad_position.css(next_css);
+		}
+
+		if ( prev_class != next_class ) {
+			$ad_position.setClass(next_class);
+		}
+	}
+}
+
+
+Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
+	api: {
+		is_visible:		function(){ return isInWindow($ad_position.children().get(0)); },
+		remove:			function(){ remove_ad() },
+	},
+	stem_function: insert_ad
+});
+
+Slash.Firehose.articles_on_screen = function(){
+	var	window_top = window.pageYOffset,
+		window_bottom = window_top + window.innerHeight,
+		lo,	// index within the jQuery selection of the first article visible on the screen
+		hi=0;	// index one beyond the last article visible on the screen
+
+	var $articles = $('#firehose > #firehoselist').
+		article_info__find_articles().
+			filter(':visible').
+				// examine articles in order until I _know_ no further articles can be on screen
+				each(function(){
+					var $this=$(this), this_top=$this.offset().top;
+					// hi is the index of this article
+
+					if ( this_top >= window_bottom ) {
+						// ...then this article, and all that follow must be entirely below the screen
+						// the last article on screen (if any) must be the previous one (at hi-1)
+						return false;
+					}
+
+					// until we find the first on-screen article...
+					if ( lo === undefined ) {
+						var this_bottom = this_top + $this.height();
+
+						// we know this_top is above window_bottom, so...
+						if ( this_bottom > window_top ) {
+							// ...then _this_ article must be (the first) on screen
+							lo = hi;
+						}
+
+						if ( this_bottom >= window_bottom ) {
+							// ...then we must be the _only_ article on screen
+							++hi; // starting one past this article, everything is below the screen
+							return false;
+						}
+					}
+					++hi;
+				});
+
+	if ( lo === undefined ) {
+		return $([]);
+	} else if ( lo===0 && hi==$articles.length ) {
+		return $articles;
+	} else {
+		return $(Array.prototype.slice.call($articles, lo, hi));
+	}
+}
+
+// filter $articles to only those adjacent to available space for an ad
+// return empty list if none, or if not enough time has yet passed to place a new ad
+Slash.Firehose.ready_ad_space = function( $articles ){
+	var $result = $([]);
+	try {
+		if ( !is_ad_locked ) {
+			var min_top = Math.max(window.pageYOffset, $slashboxes.offset().top + $slashboxes.height());
+			$result = $articles.filter(function(){
+				return $(this).offset().top >= min_top;
+			});
+		}
+	} catch ( e ) {
+		// don't throw
+	}
+		// just tell the caller no articles supplied are at or below ad-space
+	return $result;
+}
+
+Slash.Firehose.choose_article_for_next_ad = function(){
+	var Fh=Slash.Firehose, $articles=Fh.ready_ad_space(Fh.articles_on_screen());
+	return $articles.eq( Math.floor(Math.random()*$articles.length) );
+}
+
+})(Slash.jQuery);

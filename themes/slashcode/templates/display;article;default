@@ -19,61 +19,58 @@ en_US
 __name__
 display
 __template__
-[% Slash.displayStory(story.sid, 'Full', { is_future => story.is_future }) %]
+<div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
+[% PROCESS userboxes hits = story.hits stoid = story.stoid; %]
+[%
+IF show_poll;
+	PROCESS sidebox
+		title		= 'Article Poll'
+		contents	= poll
+		name		= "poll";
+END
+%]
+[%
+IF story.relatedtext;
+	PROCESS sidebox
+		title		= 'Related Links'
+		contents	= story.relatedtext
+		name		= "related";
+ END;
+%]
+[%
+IF section_block.block;
+	PROCESS sidebox
+		title		= section.title
+		contents	= section_block.block
+		name		= section.title;
+END %]
+[% END %]
+</div>
+<a name="main-articles"></a>
+<div id="articles">
+[% Slash.displayStory(story.sid, 'Full', { is_future => story.is_future, topiclist => Slash.db.getTopiclistForStory(story.sid) }) %]
 
-<P>
-
+<div class="prev-next">
 [% IF constants.use_prev_next_link %]
 [% n = BLOCK; PROCESS nextStory s=stories.next; END %]
 [% p = BLOCK; PROCESS nextStory s=stories.prev; END %]
-[% IF p %] <BR>&lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END; END %]
+[% IF p %] <br>&laquo;&nbsp; [% p %][% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<br>[% END %][% n %] &nbsp;&raquo; [% END; END %]
 
 [% IF constants.use_prev_next_link_section %]
 [% n = BLOCK; PROCESS nextStory s=stories.s_next; END %]
 [% p = BLOCK; PROCESS nextStory s=stories.s_prev; END %]
-[% IF p %] <BR>Section: &lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END; END %]
+[% IF p %] <br>Section: laquo;&nbsp; [% p %][% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<br>[% END %][% n %] &nbsp;&raquo; [% END; END %]
 
 [% IF constants.use_prev_next_link_series %]
 [% n = BLOCK; PROCESS nextStory s=stories.t_next; END %]
 [% p = BLOCK; PROCESS nextStory s=stories.t_prev; END %]
-[% IF p %] <BR>Series: &lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END; END %]
+[% IF p %] <br>Series: laquo;&nbsp; [% p %][% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<br>[% END %][% n %] &nbsp;&raquo; [% END; END %]
+</div>
 
-</P><P>&nbsp;</P></TD>
-
-[% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="CENTER" mt_valign="TOP" %]
-
-[% PROCESS userboxes hits => story.hits;
-
-IF show_poll;
-	PROCESS fancybox
-		title		= 'Article Poll'
-		contents	= poll
-		center		= 1;
-END;
-
-IF story.relatedtext;
-	PROCESS fancybox
-		title		= 'Related Links'
-		contents	= story.relatedtext
-		center		= 1;
-END;
-
-IF section_block.block;
-	PROCESS fancybox
-		title		= section.title
-		contents	= section_block.block
-		center		= 1;
-END %]
-
-</TD>
-[% PROCESS maintable_tr_end %]
-
-[% PROCESS maintable_tr %]
-[% PROCESS maintable_td mt_colspan="4" %]
 
 [% BLOCK nextStory;
 	IF !s;
@@ -88,10 +85,18 @@ END %]
 			section	=> s.section
 		};
 		storylinks = Slash.linkStory(ls) -%]
-<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
+<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] title="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
 	[%- END;
 END %]
+[% relatedtext = Slash.displayRelatedStories(story.stoid) %]
 
+[% IF relatedtext %]
+	<p></p>
+	[% PROCESS titlebar title="Related Stories" %]
+	[% relatedtext %]
+[% END %]
+
+</div>
 __seclev__
 1000
 __version__

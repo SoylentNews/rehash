@@ -22,16 +22,17 @@ Slash is the code that runs Slashdot.
 
 =cut
 
-use strict;  # ha ha ha ha ha!
+use strict;
+
 use Symbol 'gensym';
+use File::Spec::Functions;
+use Time::HiRes;
+use Time::Local;
 
 use Slash::Constants ':people';
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
-use File::Spec::Functions;
-use Time::Local;
-use Time::HiRes;
 
 use base 'Exporter';
 
@@ -39,6 +40,23 @@ our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
 	getData gensym displayStory displayRelatedStories dispStory
 	getOlderStories getOlderDays getOlderDaysFromDay
+
+	getCurrentAnonymousCoward
+	getCurrentCookie
+	getCurrentDB
+	getCurrentForm
+	getCurrentMenu
+	getCurrentSkin
+	getCurrentStatic
+	getCurrentUser
+	getCurrentVirtualUser
+	getCurrentCache
+
+	getObject
+
+	isAnon
+	isAdmin
+	isSubscriber
 );
 
 
@@ -263,21 +281,19 @@ sub displayStory {
 		}
 		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
 
-		if ($constants->{plugin}{Tags}
-			&&  $user->{tags_canread_stories}
-			&& !$user->{tags_turnedoff}
-			&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
+		#if ($constants->{plugin}{Tags}
+		#	&&  $user->{tags_canread_stories}
+		#	&& !$user->{tags_turnedoff}
+		#	&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
 
-			my @tags_top = split / /, ($story->{tags_top} || '');
-			my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-			my @tags_example = $tags_reader->getExampleTagsForStory($story);
-			$return .= slashDisplay('tagsstorydivtagbox', {
-				story		=>  $story,
-				tags_top	=> \@tags_top,
-				tags_example	=> \@tags_example,
-			}, { Return => 1 });
+		#	$return .= slashDisplay('tag_ui_widget', {
+		#		user		=> $user,
+		#		item		=> $story,
+		#		key		=> $stoid,
+		#		key_type	=> 'stoid',
+		#	}, { Return => 1 });
 
-		}
+		#}
 	}
 
 	return $return;
@@ -519,7 +535,7 @@ Returns data snippet with all necessary data interpolated.
 Gets little snippets of data, determined by the value parameter, from
 a data template. A data template is a colletion of data snippets
 in one template, which are grouped together for efficiency. Each
-script can have it's own data template (specified by the PAGE
+script can have its own data template (specified by the PAGE
 parameter). If PAGE is unspecified, snippets will be retrieved from
 the last page visited by the user as determined by Slash::Apache::User.
 

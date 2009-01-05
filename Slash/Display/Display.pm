@@ -177,8 +177,6 @@ sub slashDisplay {
 	)};
 
 	local $TEMPNAME = 'anon';
-	my $tmpl_id_attr = '';
-	my $tmpl_name_attr = '';
 	unless (ref $name) {
 		# we don't want to have to call this here, but because
 		# it is cached the performance hit is generally light,
@@ -196,9 +194,6 @@ sub slashDisplay {
 
 		$TEMPNAME = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{skin}";
-
-		$tmpl_id_attr = " template-id=\"$tempdata->{tpid}\"";
-		$tmpl_name_attr = " template-name=\"$name;$tempdata->{page};$tempdata->{skin}\"";
 	}
 
 	# copy parent data structure so it is not modified,
@@ -229,11 +224,13 @@ sub slashDisplay {
 	# template_show_comments == 1		show them if !$opt->{Nocomm}
 	# template_show_comments == 2		always show them - debug only!
 
-	my $tmpl_span_attrs = $tmpl_id_attr . $tmpl_name_attr . ' style="display:none"';
+	my $tmpl_span_attrs = "title=\"$TEMPNAME\" style=\"display:none\"";
 
 	my $show_comm = $constants->{template_show_comments} ? 1 : 0;
 	$show_comm &&= 0 if $opt->{Nocomm} && $constants->{template_show_comments} < 2;
-	$out = "\n\n<span class=\"start-template\"$tmpl_span_attrs></span>\n\n$out\n\n<span class=\"end-template\"$tmpl_span_attrs></span>\n\n"
+	# still having some problems with span, disabling for now -- pudge 2008-09-23
+	$out = "\n\n<!-- start template: $TEMPNAME -->\n\n$out\n\n<!-- end template: $TEMPNAME -->\n\n"
+#	$out = "\n\n<span class=\"start-template\"$tmpl_span_attrs></span>\n\n$out\n\n<span class=\"end-template\"$tmpl_span_attrs></span>\n\n"
 		if $show_comm;
 
 	if ($err) {

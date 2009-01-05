@@ -1,0 +1,9 @@
+# $Id$
+name=Console
+description="Console"
+htdocs=console.pl
+mysql_dump=mysql_dump.sql
+requiresplugin=Ajax
+requiresplugin=Remarks
+template=templates/console_boxes;misc;default
+template=templates/display;console;default

@@ -13,20 +13,19 @@ en_US
 __name__
 alllist
 __template__
-[% USE Slash %]
-<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<table width="90%" border="0" cellpadding="2" cellspacing="0">
 [% FOREACH item = people %]
-    <TR>
-	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A>
-	</TD>
-	<TD VALIGN="TOP">
+    <tr>
+	<td valign="top">
+		<a href="[% constants.real_rootdir %]/~[% item.1 | strip_paramattr %]/">[% item.1 %]</a>
+	</td>
+	<td valign="top">
 		[% PROCESS zoo_icons person=item.0 %]
-	</TD>
-</TR>
+	</td>
+</tr>
 [% END %]
-</TABLE>
-<BR><BR>
+</table>
+<br><br>
 __seclev__
 100
 __version__

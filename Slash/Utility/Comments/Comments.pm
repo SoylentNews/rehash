@@ -431,9 +431,6 @@ sub jsSelectComments {
 		$comments = $comments_new;
 	}
 
-	my($max_cid) = sort { $b <=> $a } keys %$comments;
-	$max_cid ||= -1;
-
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
@@ -452,13 +449,13 @@ sub jsSelectComments {
 		my $total = $slashdb->countCommentsBySid($id);
 		$total -= $d2_seen_0 =~ tr/,//; # total
 		$total--; # off by one
-		$extra .= "d2_seen = '$d2_seen_0';\nmore_comments_num = $total;\n";
+		$extra .= "D2.d2_seen('$d2_seen_0');\nD2.more_comments_num($total);\n";
 	}
 	if ($user->{d2_keybindings_switch}) {
-		$extra .= "d2_keybindings_off = 1;\n";
+		$extra .= "D2.d2_keybindings_off(1);\n";
 	}
 	if ($user->{d2_reverse_switch}) {
-		$extra .= "d2_reverse_shift = 1;\n";
+		$extra .= "D2.d2_reverse_shift(1);\n";
 	}
 
 	# maybe also check if this ad should be running with some other var?
@@ -470,30 +467,29 @@ sub jsSelectComments {
 	 &&  $constants->{run_ads_inline_comments}
 	) {
 		(my $url = $constants->{run_ads_inline_comments}) =~ s/<topic>/$gSkin->{name}/g;
-		$extra .= "adTimerUrl = '$url';\n";
+		$extra .= "D2.adTimerUrl('$url');\n";
 	}
 #slashProf("", "jsSelectComments");
 
 	return <<EOT;
-comments = $anon_comments;
+D2.comments($anon_comments);
 
-thresh_totals = $anon_thresh;
+D2.thresh_totals($anon_thresh);
 
-root_comment = $root_comment;
-root_comments = $anon_roots;
-root_comments_hash = $anon_rootsh;
-max_cid = $max_cid;
+D2.root_comment($root_comment);
+D2.root_comments($anon_roots);
+D2.root_comments_hash($anon_rootsh);
 
-d2_comment_order = $user->{d2_comment_order};
-user_uid = $user->{uid};
-user_is_anon = $user->{is_anon};
-user_is_admin = $user->{is_admin};
-user_is_subscriber = $user->{is_subscriber};
-user_threshold = $threshold;
-user_highlightthresh = $highlightthresh;
-user_d2asp = $user->{state}{d2asp};
+D2.d2_comment_order($user->{d2_comment_order});
+D2.user_uid($user->{uid});
+D2.user_is_anon($user->{is_anon});
+D2.user_is_admin($user->{is_admin});
+D2.user_is_subscriber($user->{is_subscriber});
+D2.user_threshold($threshold);
+D2.user_highlightthresh($highlightthresh);
+D2.user_d2asp($user->{state}{d2asp});
 
-discussion_id = $id;
+D2.discussion_id($id);
 
 $extra
 EOT
@@ -1200,7 +1196,7 @@ sub printComments {
 
 		if (@abbrev) {
 			my $abbrev_comments = join ',', map { "$_:$comments->{$_}{abbreviated}" } @abbrev;
-			$comment_html =~ s|abbrev_comments      = {};|abbrev_comments      = {$abbrev_comments};|;
+			$comment_html =~ s|D2\.abbrev_comments\({}\);|D2.abbrev_comments({$abbrev_comments});|;
 		}
 	}
 
@@ -1956,7 +1952,7 @@ sub _hard_dispComment {
 		my $readtext = 'Read the rest of this comment...';
 		my $link;
 		if ($discussion2) {
-			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return readRest($comment->{cid})">$readtext</a>';
+			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.readRest($comment->{cid})">$readtext</a>';
 		} else {
 			$link = linkComment({
 				sid	=> $comment->{sid},
@@ -2065,23 +2061,40 @@ EOT
 		&& $comment->{nickname} ne "-") { # this last test probably useless
 		my @link = ( );
 
-		push @link, (qq'<span id="reply_link_$comment->{cid}" class="nbutton"><p><b>' . linkComment({
+		my($prefix, $a_id, $a_class, $suffix) = ('', '', '', '');
+		my $is_idle = $gSkin->{name} eq 'idle';
+		if ($is_idle) {
+			$a_class = 'vbutton bg_666666 rd_5';
+			$a_id = "reply_link_$comment->{cid}";
+		} else {
+			$prefix = qq'<span id="reply_link_$comment->{cid}" class="nbutton"><p><b>';
+			$suffix = qq'</b></p></span>'
+		}
+
+		push @link, ($prefix . linkComment({
+			a_id	=> $a_id,
+			a_class	=> $a_class,
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-			onclick	=> ($discussion2 ? "replyTo($comment->{cid}); return false;" : '')
-		}) . '</b></p></span>') unless $user->{state}{discussion_archived};
+			onclick	=> ($discussion2 ? "D2.replyTo($comment->{cid}); return false;" : '')
+		}) . $suffix) unless $user->{state}{discussion_archived};
 
-		push @link, (qq'<span class="nbutton"><p><b>' . linkComment({
+		if (! $is_idle) {
+			$prefix = qq'<span class="nbutton"><p><b>';
+		}
+
+		push @link, ($prefix . linkComment({
+			a_class	=> $a_class,
 			sid	=> $comment->{sid},
 			cid	=> $comment->{original_pid},
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
-			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
-		}, 1) . '</b></p></span>') if $comment->{original_pid};
+			onclick	=> ($discussion2 ? "return D2.selectParent($comment->{original_pid})" : '')
+		}, 1) . $suffix) if $comment->{original_pid};
 
 #use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
 
@@ -2089,7 +2102,7 @@ EOT
 			createSelect("reason_$comment->{cid}", $reasons, {
 				'return'	=> 1,
 				nsort		=> 1, 
-				onchange	=> ($discussion2 ? 'return doModerate(this)' : '')
+				onchange	=> ($discussion2 ? 'return D2.doModerate(this)' : '')
 			}) . "</div>" if $can_mod
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
@@ -2124,42 +2137,56 @@ EOT
 	}
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		my $person = $comment->{uid};
+		my $zooicon = qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person">|
+			. qq|<img src="$constants->{imagedir}/__IMG__.$constants->{badge_icon_ext}" alt="__TITLE__" title="__TITLE__" |
+			. qq|width="$constants->{badge_icon_size}" height="$constants->{badge_icon_size}"></a></span>|;
 		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person} && !$user->{people}{FOF()}{$person} && !$user->{people}{EOF()}{$person}) {
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person"><img src="$constants->{imagedir}/neutral.gif" alt="Alter Relationship" title="Alter Relationship"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/neutral/g;
+				$zoosphere_display =~ s/__TITLE__/Alter Relationship/g;
 		} else {
 			if ($user->{people}{FRIEND()}{$person}) {
 				my $title = $user->{people}{people_bonus_friend} ? "Friend ($user->{people}{people_bonus_friend})" : "Friend";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/friend.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/friend/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FOE()}{$person}) {
 				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/foe.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/foe/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FAN()}{$person}) {
 				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/fan.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/fan/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FREAK()}{$person}) {
 				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/freak.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/freak/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_fof} ? "Friend of a Friend ($user->{people}{people_bonus_fof})" : "Friend of a Friend";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/fof.gif" alt="$title" title="$title"></a></span>|;
+				(my $tmp = $zooicon) =~ s/__IMG__/fof/g;
+				$tmp =~ s/__TITLE__/$title/g;
+				$tmp =~ s/width="\d+" /width="$constants->{badge_icon_size_wide}" /g;
+				$zoosphere_display .= $tmp;
 			}
 			if ($user->{people}{EOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_eof} ? "Foe of a Friend ($user->{people}{people_bonus_eof})" : "Foe of a Friend";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/eof.gif" alt="$title" title="$title"></a></span>|;
+				(my $tmp = $zooicon) =~ s/__IMG__/eof/g;
+				$tmp =~ s/__TITLE__/$title/g;
+				$tmp =~ s/width="\d+" /width="$constants->{badge_icon_size_wide}" /g;
+				$zoosphere_display .= $tmp;
 			}
 		}
 	}
 
 	my $class = $comment->{class}; 
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
-	my $contain = $class eq 'full' ? ' contain' : '';
+	my $contain = $class eq 'full' && $discussion2 ? ' contain' : '';
 
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a>
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.setFocusComment($comment->{cid})">$comment->{subject}</a>
 EOT1
 			<h4><a name="$comment->{cid}">$comment->{subject}</a>
 EOT2

@@ -114,7 +114,7 @@ sub header {
 	$data = { title => $data } unless ref($data) eq 'HASH';
 	$data->{title} = strip_notags($data->{title} || '');
 
-	unless ($form->{ssi}) {
+	unless ($form->{ssi} || $form->{taskgen}) {
 		my $r = Apache->request;
 
 		$r->content_type($constants->{content_type_webpage}
@@ -156,8 +156,8 @@ sub header {
 
 	# This is ALWAYS displayed. Let the template handle the title
 	# of the whole webpage itself.
-	my $template_vars = { title => $data->{title} };
-	# Other data that the template may want:  the text for the
+	my $template_vars = { title => $data->{title}, extra_options => $options };
+        # Other data that the template may want:  the text for the
 	# meta-description tag, and if a story is being displayed,
 	# the title of the story.
 	for my $key (qw( meta_desc story_title )) {
@@ -432,22 +432,28 @@ sub ssiHeadFoot {
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
 	my $gSkin = getCurrentSkin();
+
 	(my $dir = $gSkin->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
 	my $hostname = $gSkin->{hostname};
 	my $page = $options->{Page} || $user->{currentPage} || 'misc';
 
 	# if there's a special .inc header for this page, use it, else it's
 	# business as usual.
-	$page = '' unless ($page ne 'misc' && 
+	$page = '' unless ($page ne 'misc' && (
 		$slashdb->existsTemplate({
 			name	=> $headorfoot,
 		        skin	=> $gSkin->{name},
 	        	page	=> $user->{currentPage} 
-		}) 
+		}) ||
+
+		$slashdb->existsTemplate({
+			name 	=> $headorfoot,
+			skin	=> "default",
+			page	=> $user->{currentPage},
+		}))
 
 	);
 	
-
 	my $ssiheadorfoot = 'ssi' . substr($headorfoot, 0, 4);
 
 	slashDisplay($ssiheadorfoot, {

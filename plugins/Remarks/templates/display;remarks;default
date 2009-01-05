@@ -1,0 +1,53 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+remarks
+__lang__
+en_US
+__name__
+display
+__template__
+
+[% IF print_whole %]
+<!-- reload this div every 30 seconds -->
+<script type="text/javascript">remarks_fetch(30, [% remarks_max %]);</script>
+
+<div id="remarks_whole">
+[% END;
+
+   IF print_div || print_whole %]
+	<input type="hidden" id="remarks_max" name="remarks_max" value="[% remarks_max %]">
+	[% PROCESS ajax_reskey_tag reskey_label => 'remarks_reskey', reskey_name => 'ajax_admin' %]
+
+<div id="remarks_table">
+[% END %]
+
+<table class="data" width="100%">
+	<tr class="data_head">
+		<th colspan="5">Remarks (Last Updated [% Slash.timeCalc(Slash.db.getTime, '%Y-%m-%d %H:%M:%S %Z', 0) %]) <a href="#" onclick="remarks_popup(); return false">[Config]</a></th>
+	</tr>
+[% i = 1; FOREACH remark = remarks_ref; i = i == 1 ? 2 : 1 %]
+	<tr class="data_hl[% i %]"> <!-- remark.id:[% remark.rid %] -->
+		<td>[% Slash.timeCalc(remark.time, '%H:%M:%S', 0) %]</td>
+		<td>[% IF !Slash.isAnon(remark.uid); Slash.db.getUser(remark.uid, 'nickname'); END %]</td>
+		<td>[% remark.priority || 0 %]</td>
+                [% isstory_flag = 0 %]
+                [% IF remark.stoid;
+                        thisstory = Slash.db.getStory(remark.stoid);
+                        isstory_flag = 1;
+                   END;
+                %]
+                <td>[% IF isstory_flag %]<a href="[% gSkin.rootdir %]/admin.pl?sid=[% thisstory.sid %]&amp;op=edit">[% END %][% Slash.chopEntity(remark.remark, 130) %][% IF isstory_flag %]</a>[% END %]</td>		
+	</tr>
+[% END # FOREACH %]
+</table>
+[% IF print_div || print_whole %]</div>[% END %]
+[% IF print_whole %]</div>[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

@@ -1,10 +1,11 @@
 __section__
 default
 __description__
-Displays currently logged-in admin users.
+Displays currently logged-in admin users and other useful data.
 
 * ids = admin uids
 * can_edit_admins = boolean for if current user can edit admins
+* reader_vus = arrayref of virtual users of type='reader'
 
 __title__
 
@@ -15,28 +16,45 @@ en_US
 __name__
 currentAdminUsers
 __template__
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<table width="100%" border="0" cellpadding="2" cellspacing="0" class="data">
 
 [% FOREACH author = ids %]
 	[% id         = author.0;
 	   lastsecs   = author.1;
 	   lasttitle  = author.2;
-	   uid        = author.3;
+	   last_subid = author.3;
+	   last_sid   = author.4;
+	   uid        = author.5;
 	%]
 
-	<TR><TD BGCOLOR="[% user.bg.3 %]">
-		<A HREF="[% constants.rootdir %]/~[% id | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" 
-		SIZE="2"><B>[% id %]</B></FONT></A>
-	</TD><TD BGCOLOR="[% user.bg.2 %]">
-		<FONT COLOR="[% user.fg.1 %]" SIZE="2">[% lastsecs %]
-		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;[% lasttitle %]
+	<tr class="data_hl1"><td class="data_bgc1">
+		<a href="[% constants.real_rootdir %]/~[% id | strip_paramattr %]/"><b>[% id %]</b></a>
+	</td><td>
+		[% lastsecs %]
+		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;<a href="[% constants.absolutedir_secure %]/[% IF last_subid %]submit.pl?op=viewsub&amp;subid=[% last_subid %][% ELSIF last_sid %]/admin.pl?op=edit&amp;sid=[% last_sid %][% END %]">[% lasttitle %]</a>
 		[% END %]
-		</FONT>&nbsp;
-	</TD></TR>
+		&nbsp;
+	</td></tr>
 
 [% END %]
 
-</TABLE>
+[% IF constants.cur_performance_stats_disp %]
+	<tr class="data_hl1">
+	<td valign="top" class="data_bgc1">Performance</td>
+	<td valign="top">[% PROCESS performance_stats %]</td>
+	</tr>
+[% END %]
+
+[% IF constants.dbsparklines_disp %]
+	[% FOR vu = reader_vus %]
+	<tr class="data_hl1">
+		<td valign="top" class="data_bgc1">[% vu %]</td>
+		<td valign="top"><img src="[% gSkin.rootdir %]/images/dbsparklines/[% vu %]_[% constants.dbsparklines_pngsuffix %].png" width="[% constants.dbsparklines_width %]" height="[% constants.dbsparklines_height %]" alt="[% vu %] dbsparkline"></td>
+	</tr>
+	[% END %]
+[% END %]
+
+</table>
 
 __seclev__
 10000

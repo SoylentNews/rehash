@@ -7,16 +7,17 @@ package Slash::HumanConf;
 use strict;
 
 use Slash;
+use Slash::Utility::Environment;
 
 use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 sub isInstalled {
-	my($self) = @_;
+	my($class) = @_;
 	my $constants = getCurrentStatic();
 	return 0 if ! $constants->{hc};
-	return $self->SUPER::isInstalled();
+	return $class->SUPER::isInstalled();
 }
 
 sub _formnameNeedsHC {
