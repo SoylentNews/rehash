@@ -543,7 +543,7 @@ form owner_id: 		[% form.owner_aid %]
 [% CASE "formatted_excerpt" -%]
 [% slug %]
 
-<A HREF="[% url | strip_attribute %]">[% url | strip_literal %]</A>
+<a href="[% url | strip_attribute %]">[% url | strip_literal %]</a>
 [%# "</i>
 
 
@@ -557,8 +557,8 @@ Miner 'none' is a placeholder and can not be deleted!
 Can't add spider since its name is undefined!
 
 [% CASE "update_spider_add_results" -%]
-[% IF rc %]Added spider '[% form.newname | strip_html %]' (#[% rc %])<BR>
-[% ELSE %]Failed adding spider '[% form.newname | strip_html %]'!<BR>
+[% IF rc %]Added spider '[% form.newname | strip_html %]' (#[% rc %])<br>
+[% ELSE %]Failed adding spider '[% form.newname | strip_html %]'!<br>
 Either the name given already exists or another error has occured. Please
 contact the administrator.
 [% END -%]
@@ -576,14 +576,14 @@ Deletion of this spider has been cancelled.
 Spider '[% spider_name %]' deleted.
 
 [% CASE "update_spider_confirmdelete" -%]
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
-<INPUT TYPE="HIDDEN" NAME="deletespider" value="1">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="spider_id" value="[% spider_id %]">
+<input type="hidden" name="deletespider" value="1">
+<input type="hidden" name="op" value="updatespider">
 Delete Spider '[% spider_name %]'?
-<INPUT TYPE="SUBMIT" NAME="noconfirm" VALUE="Cancel">&nbsp;&nbsp;
-<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
-</FORM>
+<input type="submit" name="noconfirm" value="Cancel">&nbsp;&nbsp;
+<input type="submit" name="confirm" value="Yes">
+</form>
 
 [% CASE "updateKeyword_emptyfields" -%]
 Not all fields filled! Save aborted. Please fill all empty fields before
@@ -603,15 +603,15 @@ Add operation cancelled, no tag given!
 Deletion of this keyword has been cancelled.
 
 [% CASE "deleteKeyword_confirm" -%]
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% form.keyword_id %]">
-<INPUT TYPE="HIDDEN" NAME="keyword_tag" VALUE="[% 
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="keyword_id" value="[% form.keyword_id %]">
+<input type="hidden" name="keyword_tag" value="[% 
 form.keyword_tag | strip_html -%]">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="deletekeyword">
+<input type="hidden" name="op" value="deletekeyword">
 Delete this Keyword, #[% form.keyword_id %]'?
-<INPUT TYPE="SUBMIT" NAME="noconfirm" VALUE="Cancel">&nbsp;&nbsp;
-<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
-</FORM>
+<input type="submit" name="noconfirm" value="Cancel">&nbsp;&nbsp;
+<input type="submit" name="confirm" value="Yes">
+</form>
 
 [% CASE "deleteKeyword_deleted" -%]
 Keyword #[% form.keyword_id %], deleted.

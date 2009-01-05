@@ -20,36 +20,36 @@ __seclev__
 10000
 __template__
 [% UNLESS form.nohtml;
-	topic = "<A HREF=\"$constants.absolutedir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
+	topic = "<a href=\"$gSkin.absolutedir/search.pl?tid=$topic.tid\">$topic.alttext</a>";
 ELSE;
 	topic = topic.alttext;
 END -%]
 
-<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
-<TR><TD><B>Title</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% story.title %]</TD></TR>
-<TR><TD><B>Date</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% story.storytime %]</TD></TR>
-<TR><TD><B>Author</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% author.nickname %]</TD></TR>
-<TR><TD><B>Topic</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% topic %]</TD></TR>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr><td><b>Title</b></td>	<td>&nbsp;&nbsp;</td>	<td>[% story.title %]</td></tr>
+<tr><td><b>Date</b></td>	<td>&nbsp;&nbsp;</td>	<td>[% story.storytime %]</td></tr>
+<tr><td><b>Author</b></td>	<td>&nbsp;&nbsp;</td>	<td>[% author.nickname | strip_literal %]</td></tr>
+<tr><td><b>Topic</b></td>	<td>&nbsp;&nbsp;</td>	<td>[% topic %]</td></tr>
 [% IF constants.use_dept -%]
-<TR><TD COLSPAN="2" NOWRAP>from the <EM>[% story.dept %]</EM> dept.</TD></TR>
+<tr><td colspan="2" NOWRAP>from the <em>[% story.dept %]</em> dept.</td></tr>
 [% END -%]
-</TABLE>
-<SMALL>[% constants.absolutedir -%]/article.pl?sid=[% story.sid %]</SMALL>
+</table>
+<small>[% gSkin.absolutedir -%]/article.pl?sid=[% story.sid %]</small>
 
-<P>[% Slash.parseSlashizedLinks(story.introtext) %]</P>
+<p>[% Slash.parseSlashizedLinks(story.introtext) %]</p>
 [% IF story.bodytext -%]
-<P>[% Slash.parseSlashizedLinks(story.bodytext) %]</P>
+<p>[% Slash.parseSlashizedLinks(story.bodytext) %]</p>
 [% END -%]
 
 [% IF links.size -%]
-<TABLE BORDER="0" WIDTH="25%" CELLSPACING="0" CELLPADDING="0">
-<TR><TD>Links</TD></TR>
-<TR><TD><HR NOSHADE></TD></TR>
-</TABLE>
+<table border="0" width="25%" cellspacing="0" cellpadding="0">
+<tr><td>Links</td></tr>
+<tr><td><HR NOSHADE></td></tr>
+</table>
 
-<OL>[% FOR l=links -%]
-<LI>"[% l.1 %]" - [% l.0 %]</LI>
-[% END %]</OL>
+<ol>[% FOR l=links -%]
+<li>"[% l.1 %]" - [% l.0 %]</li>
+[% END %]</ol>
 [% END -%]
 __version__
 $Id$

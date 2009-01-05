@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -16,8 +16,8 @@ sub main {
 
 	my $link = $relocateDB->get($form->{id});
 	if (!$link) {
-		my $constants = getCurrentStatic();
-		redirect("$constants->{rootdir}/404.pl");
+		my $gSkin = getCurrentSkin();
+		redirect("$gSkin->{rootdir}/404.pl");
 	} elsif ($link->{is_alive} eq 'no') {
 		header("D'Oh") or return; # Needs to be templated -Brian
 		printDeadPage($link);

@@ -13,43 +13,43 @@ listKeywords
 __template__
 [% INCLUDE titlebar width="100%", title="List Keywords" -%]
 
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="listkeywords">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="op" value="listkeywords">
 Select Tag: 
 [% Slash.createSelect('keyword_tag', valid_tags, form.keyword_tag, 1) -%]
 &nbsp;&nbsp;
-<INPUT TYPE="SUBMIT" VALUE="Select Tag">
-</FORM>
+<input type="submit" value="Select Tag">
+</form>
 
 [% IF form.keyword_tag && keywords.size -%]
-<TABLE BORDER=0>
-<TR BGCOLOR="[% user.bg.3 %]">
-	<TH><FONT COLOR="[% user.fg.0 %]">ID</FONT></TH>
-	<TH><FONT COLOR="[% user.fg.0 %]">Tag</FONT></TH>
-	<TH><FONT COLOR="[% user.fg.0 %]">Reg Ex.</FONT></TH>
-	<TH><FONT COLOR="[% user.fg.0 %]">Weight</FONT></TH>
-</TR>
+<table border=0>
+<tr bgcolor="[% user.colors.bg_3 %]">
+	<th>ID</th>
+	<th>Tag</th>
+	<th>Reg Ex.</th>
+	<th>Weight</th>
+</tr>
 [% FOR k=keywords;
 	# Insure that the regex is printable.
 	k.regex = k.regex.replace('&','&amp;');
 	k.regex = k.regex.replace(' ', '&nbsp;') -%]
-<TR>
-	<TD><A HREF="[% constants.rootdir 
-	-%]/newsvac.pl?op=editkeyword&keyword_id=[% k.id %]">[% k.id %]</A>
-	</TD>
-	<TD>[% k.tag %]</TD>
-	<TD>[% k.regex %]</TD>
-	<TD>[% k.weight %]</TD>
-</TR>
+<tr>
+	<td><a href="[% gSkin.rootdir 
+	-%]/newsvac.pl?op=editkeyword&keyword_id=[% k.id %]">[% k.id %]</a>
+	</td>
+	<td>[% k.tag %]</td>
+	<td>[% k.regex %]</td>
+	<td>[% k.weight %]</td>
+</tr>
 [% END -%]
-</TABLE>
+</table>
 [% END -%]
 
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="addkeyword">
-<INPUT TYPE="SUBMIT" VALUE="Add Keyword using Tag">:&nbsp;&nbsp;
-<INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>
-</FORM>
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="op" value="addkeyword">
+<input type="submit" value="Add Keyword using Tag">:&nbsp;&nbsp;
+<input type="text" name="keyword_tag" value="" size=10>
+</form>
 __seclev__
 10000
 __version__

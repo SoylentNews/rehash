@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -16,133 +16,78 @@ use vars qw($VERSION);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub main {
-	my $zoo   = getObject('Slash::Zoo');
-	my $constants = getCurrentStatic();
-	my $slashdb   = getCurrentDB();
-	my $user      = getCurrentUser();
-	my $form      = getCurrentForm();
-	my $formname = 'zoo';
-	my $formkey = $form->{formkey};
+	my $zoo		= getObject('Slash::Zoo');
+	my $constants	= getCurrentStatic();
+	my $slashdb	= getCurrentDB();
+	my $user	= getCurrentUser();
+	my $form	= getCurrentForm();
+	my $gSkin	= getCurrentSkin();
 
 	# require POST and logged-in user for these ops
-	my $user_ok   = $user->{state}{post} && !$user->{is_anon};
+	# we could move even this out to reskeys ... but right now, no real reason to
+	my $user_ok   = $user->{state}{post};
 
 	# possible value of "op" parameter in form
-	my $ops = {
-		action		=> { 
-			check => $user_ok,		
-			formkey    => ['formkey_check', 'valid_check'],
-			function => \&action		
-		},
-		add		=> { 
-			check => $user_ok,		
-			formkey    => ['formkey_check', 'valid_check'],
-			function => \&action		
-		},
-		'delete'		=> { 
-			check => $user_ok,		
-			formkey    => ['formkey_check', 'valid_check'],
-			function => \&action		
-		},
-		addcheck		=> { 
-			check => $user->{seclev},		
-			formkey    => ['generate_formkey'],
-			function => 	\&check		
-		}, 
-		deletecheck		=> { 
-			check => $user->{seclev},		
-			formkey    => ['generate_formkey'],
-			function => \&check		
-		},
-		check		=> { 
-			check => $user->{seclev},		
-			formkey    => ['generate_formkey'],
-			function => \&check		
-		},
-		friends		=> { 
-			check => 1,			
-			function => \&friends		
-		},
-		fans		=> { 
-			check => 1,			
-			function => \&fans		
-		},
-		foes		=> { 
-			check => 1,			
-			function => \&foes		
-		},
-		freaks		=> { 
-			check => 1,			
-			function => \&freaks		
-		},
-		fof		=> { 
-			check => 1,			
-			function => \&fof		
-		},
-		'eof'		=> { 
-			check => 1,			
-			function => \&enof		
-		},
-		all		=> { 
-			check => 1,			
-			function => \&all		
-		},
-		default		=> { 
-			check => 0,			
-			function => \&list	
-		},
-	};
+	my %ops = (
+		action	=> [ $user_ok,	\&action  ],
+		check	=> [ 1,		\&check   ],
+		all	=> [ 1,		\&people  ],
+	);
 
-	my ($note, $error_flag);
+	$ops{$_} = $ops{action} for qw(add delete);
+	$ops{$_} = $ops{check}  for qw(addcheck deletecheck);
+	$ops{$_} = $ops{all}    for qw(friends fans foes freaks fof eof);
+
 	my $op = $form->{'op'};
-	if ($user->{seclev} < 100) {
-		if ($ops->{$op}{formkey}) {
-			for my $check (@{$ops->{$op}{formkey}}) {
-				$error_flag = formkeyHandler($check, $formname, $formkey, \$note);
-				$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
-				last if $error_flag;
-			}
-		}
-	}
-	if ($error_flag) {
-		header() or return;
-		print $note;
-		footer();
+	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
-	if ($ops->{$op}{update_formkey} && $user->{seclev} < 100 && ! $error_flag) {
-		# successful save action, no formkey errors, update existing formkey
-		# why assign to an unused variable? -- pudge
-		my $updated = $slashdb->updateFormkey($formkey, length($ENV{QUERY_STRING}));
-	}
-	errorLog("zoo.pl error_flag '$error_flag'") if $error_flag;
+	# We really should have a $zoo_reader that we also pass to
+	# these functions. - Jamie
 
-	if (!$op || !exists $ops->{$op} || !$ops->{$op}->{check}) {
-		redirect("$constants->{rootdir}/");
-		return;
-	}
-
-	$ops->{$op}->{function}->($zoo, $constants, $user, $form, $slashdb);
+	$ops{$op}[FUNCTION]->($zoo, $constants, $user, $form, $slashdb, $gSkin);
 	my $r;
 	if ($r = Apache->request) {
 		return if $r->header_only;
 	}
-	footer() unless $form->{content_type} eq 'rss';
+	footer() unless $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
 }
 
-sub list {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-	# This was never linked to, but basically we send people to search who try to just hit the blank URL
-	# -Brian
-	redirect("$constants->{rootdir}/search.pl?op=users");
-	return 1;
-}
-
-sub friends {
+sub people {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	my ($uid, $nick);
+	my %main_vars = (
+		friends	=> { constant => FRIEND },
+		fans	=> { constant => FAN    },
+		foes	=> { constant => FOE    },
+		freaks	=> { constant => FREAK  },
+		fof	=> { constant => FOF,
+			name1	=> 'friends',
+			name2	=> 'friendsoffriends',
+		},
+		eof	=> { constant => EOF,
+			name1	=> 'friends',
+			name2	=> 'friendsenemies',
+		},
+		all	=> { constant => undef,
+			op	=> 'people',
+			name1	=> undef,
+			name2	=> 'all',
+		},
+	);
+
+	my $zoo_vars = $main_vars{$form->{op}};
+	$zoo_vars->{op}    ||= $form->{op};
+	$zoo_vars->{name1} ||= $form->{op};
+	$zoo_vars->{name2} ||= $form->{op};
+	$zoo_vars->{head1} ||= "your$zoo_vars->{name2}head";
+	$zoo_vars->{head2} ||= "$zoo_vars->{name2}head";
+	$zoo_vars->{no1}   ||= "yourno$zoo_vars->{name2}";
+	$zoo_vars->{no2}   ||= "no$zoo_vars->{name2}";
+
+	my($uid, $nick);
 	if ($form->{uid} || $form->{nick}) {
 		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
 		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
@@ -162,430 +107,45 @@ sub friends {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $friends = $zoo->getRelationships($uid, FRIEND);
-		
-	if ($form->{content_type} eq 'rss') {
-		_rss($friends, $nick, 'friends');
+	my $people = $zoo->getRelationships($uid, $zoo_vars->{constant});
+
+	if ($form->{content_type} && $form->{content_type} =~ $constants->{feed_types}) {
+		_rss($people, $nick, $zoo_vars->{op});
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfriendshead", {
-				nickname => $nick,
-				uid => $uid,
+			_printHead($zoo_vars->{head1}, {
+				nickname	=> $nick,
+				uid		=> $uid,
 				tab_selected_1	=> 'me',
-				tab_selected_2	=> 'friends'
+				tab_selected_2	=> $zoo_vars->{name1},
 			}) or return;
-			$implied = FRIEND;
-		} else {
-			_printHead("friendshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'otheruser',
-				tab_selected_2	=> 'friends'
-			}) or return;
-		}
-		
-		if (@$friends) {
-			slashDisplay('plainlist', {
-				people => $friends,
-				editable => $editable,
-				implied => $implied,
-				nickname => $nick
-			});
-		} else {
-			if ($editable) {
-				print getData('yournofriends');
-			} else {
-				print getData('nofriends', { nickname => $nick, uid => $uid });
-			}
-		}
-	}
-
-	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
-		$slashdb->setUser($user->{uid}, $user_change);
-	}
-
-	return 1;
-}
-
-sub fof {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	my ($uid, $nick);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid = $user->{uid};
-		$nick = $user->{nick};
-	}
-
-	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
-		# Store the fact that this user last looked at that user.
-		# For maximal convenience in stalking.
-		$user_change->{lastlookuid} = $uid;
-		$user_change->{lastlooktime} = time;
-		$user->{lastlookuid} = $uid;
-		$user->{lastlooktime} = time;
-	}
-
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $friends = $zoo->getRelationships($uid, FOF);
-		
-	if ($form->{content_type} eq 'rss') {
-		_rss($friends, $nick, 'fof');
-	} else {
-		my $implied;
-		if ($editable) {
-			_printHead("yourfriendsoffriendshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'me',
-				tab_selected_2	=> 'friends'
-			}) or return;
-			$implied = FOF;
-		} else {
-			_printHead("friendsoffriendshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'otheruser',
-				tab_selected_2	=> 'friends'
-			}) or return;
-		}
-		
-		if (@$friends) {
-			slashDisplay('plainlist', {
-				people => $friends,
-				editable => $editable,
-				implied => $implied,
-				nickname => $nick
-			});
-		} else {
-			if ($editable) {
-				print getData('yournofriendsoffriends');
-			} else {
-				print getData('nofriendsoffriends', { nickname => $nick, uid => $uid });
-			}
-		}
-	}
-
-	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
-		$slashdb->setUser($user->{uid}, $user_change);
-	}       
-
-	return 1;
-}
-
-sub enof {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	my ($uid, $nick);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid = $user->{uid};
-		$nick = $user->{nick};
-	}
-
-	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
-		# Store the fact that this user last looked at that user.
-		# For maximal convenience in stalking.
-		$user_change->{lastlookuid} = $uid;
-		$user_change->{lastlooktime} = time;
-		$user->{lastlookuid} = $uid;
-		$user->{lastlooktime} = time;
-	}
-
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $friends = $zoo->getRelationships($uid, EOF);
-		
-	if ($form->{content_type} eq 'rss') {
-		_rss($friends, $nick, 'friends');
-	} else {
-		my $implied;
-		if ($editable) {
-			_printHead("yourfriendsenemieshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'me',
-				tab_selected_2	=> 'friends',
-			}) or return;
-			$implied = EOF;
-		} else {
-			_printHead("friendsenemieshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'otheruser',
-				tab_selected_2	=> 'friends',
-			}) or return;
-		}
-		
-		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied, nickname => $nick });
-		} else {
-			if ($editable) {
-				print getData('yournofriendsenemies');
-			} else {
-				print getData('nofriendsenemies', { nickname => $nick, uid => $uid });
-			}
-		}
-	}
-
-	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
-		$slashdb->setUser($user->{uid}, $user_change);
-	}
-
-	return 1;
-}
-
-sub foes {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	my ($uid, $nick);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid = $user->{uid};
-		$nick = $user->{nick};
-	}
-
-	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
-		# Store the fact that this user last looked at that user.
-		# For maximal convenience in stalking.
-		$user_change->{lastlookuid} = $uid;
-		$user_change->{lastlooktime} = time;
-		$user->{lastlookuid} = $uid;
-		$user->{lastlooktime} = time;
-	}
-
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $foes = $zoo->getRelationships($uid, FOE);
-
-	if ($form->{content_type} eq 'rss') {
-		_rss($foes, $nick, 'foes');
-	} else {
-		my $implied;
-		if ($editable) {
-			_printHead("yourfoeshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'me',
-				tab_selected_2	=> 'foes',
-			}) or return;
-			$implied = FOE;
-		} else {
-			_printHead("foeshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'otheruser',
-				tab_selected_2	=> 'foes',
-			}) or return;
-		}
-		
-		if (@$foes) {
-			slashDisplay('plainlist', { people => $foes, editable => $editable, implied => $implied, nickname => $nick });
-		} else {
-			if ($editable) {
-				print getData('yournofoes');
-			} else {
-				print getData('nofoes', { nickname => $nick, uid => $uid });
-			}
-		}
-	}
-
-	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
-		$slashdb->setUser($user->{uid}, $user_change);
-	}
-
-	return 1;
-}
-
-sub fans {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	my ($uid, $nick);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid = $user->{uid};
-		$nick = $user->{nick};
-	}
-
-	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
-		# Store the fact that this user last looked at that user.
-		# For maximal convenience in stalking.
-		$user_change->{lastlookuid} = $uid;
-		$user_change->{lastlooktime} = time;
-		$user->{lastlookuid} = $uid;
-		$user->{lastlooktime} = time;
-	}
-
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $fans = $zoo->getRelationships($uid, FAN);
-
-	if ($form->{content_type} eq 'rss') {
-		_rss($fans, $nick, 'fans');
-	} else {
-		my $implied;
-		if ($editable) {
-			_printHead("yourfanshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'me',
-				tab_selected_2	=> 'fans',
-			}) or return;
-			$implied = FAN;
-		} else {
-			_printHead("fanshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'otheruser',
-				tab_selected_2	=> 'fans',
-			}) or return;
-		}
-		if (@$fans) {
-			slashDisplay('plainlist', { people => $fans, editable => $editable, implied => $implied, nickname => $nick });
-		} else {
-			if ($editable) {
-				print getData('yournofans');
-			} else {
-				print getData('nofans', { nickname => $nick, uid => $uid });
-			}
-		}
-	}
-
-	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
-		$slashdb->setUser($user->{uid}, $user_change);
-	}
-
-	return 1;
-}
-
-sub freaks {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	my ($uid, $nick);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid = $user->{uid};
-		$nick = $user->{nick};
-	}
-
-	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
-		# Store the fact that this user last looked at that user.
-		# For maximal convenience in stalking.
-		$user_change->{lastlookuid} = $uid;
-		$user_change->{lastlooktime} = time;
-		$user->{lastlookuid} = $uid;
-		$user->{lastlooktime} = time;
-	}
-
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $freaks = $zoo->getRelationships($uid, FREAK);
-
-	if ($form->{content_type} eq 'rss') {
-		_rss($freaks, $nick, 'freaks');
-	} else {
-		my $implied;
-		if ($editable) {
-			_printHead("yourfreakshead", {
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'me',
-				tab_selected_2	=> 'freaks',
-			}) or return;
-			$implied = FREAK;
+			$implied = $zoo_vars->{constant};
 			
 		} else {
-			_printHead("freakshead", {
-				nickname => $nick,
-				uid => $uid,
+			_printHead($zoo_vars->{head2}, {
+				nickname	=> $nick,
+				uid		=> $uid,
 				tab_selected_1	=> 'otheruser',
-				tab_selected_2	=> 'freaks',
+				tab_selected_2	=> $zoo_vars->{name1},
 			}) or return;
 		}
-		if (@$freaks) {
-			slashDisplay('plainlist', { people => $freaks, editable => $editable, implied => $implied, nickname => $nick });
-		} else {
-			if ($editable) {
-				print getData('yournofreaks');
-			} else {
-				print getData('nofreaks', { nickname => $nick, uid => $uid });
-			}
-		}
-	}
 
-	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
-		$slashdb->setUser($user->{uid}, $user_change);
-	}
-
-	return 1;
-}
-
-sub all {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	my ($uid, $nick);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid = $user->{uid};
-		$nick = $user->{nick};
-	}
-
-	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
-		# Store the fact that this user last looked at that user.
-		# For maximal convenience in stalking.
-		$user_change->{lastlookuid} = $uid;
-		$user_change->{lastlooktime} = time;
-		$user->{lastlookuid} = $uid;
-		$user->{lastlooktime} = time;
-	}
-
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $people = $zoo->getRelationships($uid);
-
-	if ($form->{content_type} eq 'rss') {
-		_rss($people, $nick, 'people');
-	} else {
-		if ($editable) {
-			_printHead("yourall", { # this doesn't look right to me - Jamie
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'me',
-			}) or return;
-		} else {
-			_printHead("yourhead", { # this doesn't look right to me - Jamie
-				nickname => $nick,
-				uid => $uid,
-				tab_selected_1	=> 'otheruser',
-			}) or return;
-		}
 		if (@$people) {
-			slashDisplay('plainlist', { people => $people, editable => $editable, nickname => $nick });
+			slashDisplay('plainlist', {
+				people		=> $people,
+				editable	=> $editable,
+				implied		=> $implied,
+				nickname	=> $nick
+			});
 		} else {
 			if ($editable) {
-				print getData('yournoall');
+				print getData($zoo_vars->{no1});
 			} else {
-				print getData('noall', { nickname => $nick, uid => $uid });
+				print getData($zoo_vars->{no2}, {
+					nickname	=> $nick,
+					uid		=> $uid
+				});
 			}
 		}
 	}
@@ -599,15 +159,25 @@ sub all {
 }
 
 sub action {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
+	my($zoo, $constants, $user, $form, $slashdb, $gSkin) = @_;
 
-	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
-		_printHead("mainhead", { nickname => $user->{nick}, uid => $user->{uid} }) or return;
-		print getData("no_go");
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('zoo');
+	unless ($rkey->use) {
+		_printHead('mainhead', { errstr => $rkey->errstr, rkey => $rkey }) or return;
+		use Data::Dumper;
+		print STDERR Dumper({ reskey => $rkey });
+		return 1;
+	}
+
+	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}) {
+		_printHead('mainhead', { nickname => $user->{nick}, uid => $user->{uid} }) or return;
+		print getData('no_go');
 		return 1;
 	} else {
 		if (testSocialized($zoo, $constants, $user) && ($form->{type} ne 'neutral' || $form->{op} eq 'delete' )) {
-			print getData("no_go");
+			_printHead('mainhead', { nickname => $user->{nick}, uid => $user->{uid} }) or return;
+			print getData('no_go');
 			return 1;
 		}
 
@@ -657,11 +227,12 @@ sub action {
 
 
 	}
+
 	# This is just to make sure the next view gets it right
 	if ($form->{type} eq 'foe') {
-		redirect("$constants->{rootdir}/my/foes/");
+		redirect("$gSkin->{rootdir}/my/foes");
 	} else {
-		redirect("$constants->{rootdir}/my/friends/");
+		redirect("$gSkin->{rootdir}/my/friends");
 	}
 
 	return 1;
@@ -670,15 +241,24 @@ sub action {
 sub check {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	my $uid = $form->{uid} || "";
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('zoo');
+	unless ($rkey->create) {
+		_printHead('mainhead', { errstr => $rkey->errstr, rkey => $rkey }) or return;
+		use Data::Dumper;
+		print STDERR Dumper({ reskey => $rkey });
+		return 1;
+	}
+
+	my $uid = $form->{uid} || '';
 	my $nickname = $slashdb->getUser($uid, 'nickname');
 
 	if (!$uid || $nickname eq '') {
         	# See comment in plugins/Journal/journal.pl for its call of
-        	# getSectionColors() as well.
-                Slash::Utility::Anchor::getSectionColors();
+        	# getSkinColors() as well.
+                Slash::Utility::Anchor::getSkinColors();
 
-		my $title = getData("no_uid");
+		my $title = getData('no_uid');
 		header($title) or return;
 		print $title;
 		return 1;
@@ -693,27 +273,20 @@ sub check {
 		$user->{lastlookuid} = $uid;
 		$user->{lastlooktime} = time;
 	}
-	_printHead("confirm", {
+
+	_printHead('confirm', {
 		nickname	=> $nickname,
 		uid		=> $uid,
 		tab_selected_1	=> ($uid == $user->{uid} ? 'me' : 'otheruser'),
 		tab_selected_2	=> 'relation'
 	}) or return;
+
 	if ($uid == $user->{uid} || $uid == $constants->{anonymous_coward_uid}  ) {
-		print getData("no_go");
+		print getData('no_go');
 		return 1;
 	}
 
-#	my (%mutual, @mutual);
-#	for my $rel (keys %{$user->{people}}) {
-#		for my $person (keys %{$user->{people}{$rel}}) {
-#			if ($compare->{$rel}{$person}) {
-#				push @{$mutual{$rel}}, $person;
-#				push @mutual, $person;
-#			}
-#		}
-#	}
-	my (%mutual, @mutual);
+	my(%mutual, @mutual);
 	if ($user->{people}{FOF()}{$uid}) {
 		for my $person (keys %{$user->{people}{FOF()}{$uid}}) {
 			next unless $person;
@@ -721,6 +294,7 @@ sub check {
 			push @mutual, $person;
 		}
 	}
+
 	if ($user->{people}{EOF()}{$uid}) {
 		for my $person (keys %{$user->{people}{EOF()}{$uid}}) {
 			next unless $person;
@@ -728,21 +302,24 @@ sub check {
 			push @mutual, $person;
 		}
 	}
+
 	my $uids_2_nicknames = $slashdb->getUsersNicknamesByUID(\@mutual)
 		if scalar(@mutual);
 
 	my $type = $user->{people}{FOE()}{$uid} ? 'foe': ($user->{people}{FRIEND()}{$uid}? 'friend' :'neutral');
+
 	slashDisplay('confirm', { 
-		uid => $uid,
-		nickname => $nickname,
-		type => $type,
-		over_socialized => testSocialized($zoo, $constants, $user),
-		uids_2_nicknames => $uids_2_nicknames,
-		mutual => \%mutual
+		uid			=> $uid,
+		nickname		=> $nickname,
+		type			=> $type,
+		over_socialized		=> testSocialized($zoo, $constants, $user),
+		uids_2_nicknames	=> $uids_2_nicknames,
+		mutual 			=> \%mutual,
+		rkey			=> $rkey,
 	});
 
 	# Store the new user we're looking at, if any.
-	if ($user_change && %$user_change) {
+	if ($user_change && keys %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 
@@ -752,48 +329,55 @@ sub check {
 sub _printHead {
 	my($head, $data) = @_;
 	my $slashdb = getCurrentDB();
+
 	# See comment in plugins/Journal/journal.pl for its call of
-	# getSectionColors() as well.
-	Slash::Utility::Anchor::getSectionColors();
+	# getSkinColors() as well.
+	Slash::Utility::Anchor::getSkinColors();
+
 	my $user = getCurrentUser();
 	my $useredit = $data->{uid}
 		? $slashdb->getUser($data->{uid})
 		: $user;
+
 	$data->{user} = $user;
 	$data->{useredit} = $useredit;
+
 	my $title = getData($head, $data);
 	$data->{title} = $title;
 	header($title) or return;
 	$data->{tab_selected_1} ||= 'me';
-	slashDisplay("zoohead", $data);
+	slashDisplay('zoohead', $data);
 }
 
 sub _rss {
-	my ($entries, $nick, $type) = @_;
+	my($entries, $nick, $type) = @_;
 	my $constants = getCurrentStatic();
+	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 	my @items;
 	for my $entry (@$entries) {
 		push @items, {
 			title	=> $entry->[1],
-			'link'	=> ($constants->{absolutedir} . '/~' . fixparam($entry->[1])  . "/"),
+			'link'	=> ($gSkin->{absolutedir} . '/~' . fixparam($entry->[1])  . '/'),
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} $nick's ${type}",
-			'link'		=> "$constants->{absolutedir}/",
+			'link'		=> "$gSkin->{absolutedir}/",
 			description	=> "$constants->{sitename} $nick's ${type}",
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc => 1,
 	});
 }
 
 sub testSocialized {
-	my ($zoo, $constants, $user) = @_;
-	return 0 
-		if $user->{is_admin};
+	my($zoo, $constants, $user) = @_;
+	return 0 if $user->{is_admin};
+
 	if ($user->{is_subscriber} && $constants->{people_max_subscriber}) {
 		return ($zoo->count($user->{uid}) > $constants->{people_max_subscriber}) ? 1 : 0;
 	} else {

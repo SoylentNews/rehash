@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+sub_out_msg
+__seclev__
+10000
+__template__
+[% IF msg.mode == 1 %]
+	<p>This message is to inform you that your [% constants.sitename %] subscription has run out.</p>
+	<p>To renew your subscription <a href="[% gSkin.rootdir %]/subscribe.pl">click here</a>.
+[% ELSE %]
+	This message is to inform you that your [% constants.sitename %] subscription has run out.
+
+	You can renew your subscription at [% absolutedir %]/subscribe.pl
+[% END %]
+__version__
+$Id$

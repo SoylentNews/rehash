@@ -12,7 +12,8 @@ en_US
 __name__
 siteInfo
 __template__
-[% PROCESS titlebar title="Installed Plugins" width='100%' %]
+[% PROCESS titlebar title="Installed Plugins" %]
+<div class="generalbody">
 <table>
 	<tr>
 		<td><b>Plugin</b></td><td><b>Description</b></td>
@@ -38,6 +39,7 @@ __template__
 	</tr>
 	[% END %]
 </table>
+</div>
 __seclev__
 100
 __version__

@@ -3,7 +3,7 @@ default
 __description__
 Text that makes up the top of a page
 
-* link, an optional variable with data for the <LINK> tags
+* link, an optional variable with data for the <link> tags
 __title__
 
 __page__
@@ -14,63 +14,57 @@ __name__
 header
 __template__
 [% INCLUDE linkrel %]
-</HEAD>
-<BODY BGCOLOR="[% user.bg.0 %]" TEXT="[% user.fg.1 %]" LINK="[% user.bg.3 %]" VLINK="[% user.fg.1 %]">
-
-[% IF constants.run_ads %]
-<!-- add code. You can use your own ad system - we use one that 
-sets a env variable in apache that contains the ad itself and just put it
-in this block -->
-<!-- end ad code -->
-[% END %]
- 
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="99%" ALIGN="CENTER">
-	<TR VALIGN="TOP">
-		<TD BACKGROUND="[% constants.imagedir %]/line-bg.gif" ALIGN="LEFT"><IMG SRC="[% constants.imagedir %]/line-corner.gif" WIDTH="1" HEIGHT="74" ALT=""></TD>
-		<TD BACKGROUND="[% constants.imagedir %]/line-bg.gif" ALIGN="LEFT" WIDTH="100%"><A HREF="[% constants.real_rootdir %]/"><IMG SRC="[% constants.imagedir %]/slashhead.gif" WIDTH="300" HEIGHT="74" BORDER="0" ALT="[% constants.sitename %]"></A></TD>
-
-		<TD VALIGN="BOTTOM" BACKGROUND="[% constants.imagedir %]/line-bg.gif">
-			[% UNLESS user.noicons || user.light %]
-			<TABLE BORDER="0"><TR>
-				[% PROCESS recentTopics %]
-			</TR></TABLE>
-			[% END %]
-		</TD>
-
-		<TD VALIGN="MIDDLE" BACKGROUND="[% constants.imagedir %]/line-bg.gif" ALIGN="RIGHT">
-			<FORM ACTION="[% constants.rootdir %]/search.pl">
-			<FONT FACE="[% constants.mainfontface %]" SIZE="1">search&nbsp;[% constants.sitename %]:<BR></FONT>
-				<INPUT TYPE="text" NAME="query">&nbsp;<INPUT TYPE="submit" VALUE=" Go ">
-			</FORM>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/line-bg.gif" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/line-corner.gif" WIDTH="1" HEIGHT="74" ALT=""></TD>
-	</TR>
-	<TR>
-		<TD BACKGROUND="[% constants.imagedir %]/wl.gif" ALIGN="LEFT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11"></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" ALIGN="LEFT" WIDTH="100%"><IMG SRC="[% constants.imagedir %]/slashslogan.gif" WIDTH="300" HEIGHT="20" ALT="[% constants.slogan %]"></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" COLSPAN="2"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD>
-		<TD BACKGROUND="[% constants.imagedir %]/wr.gif" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11"></TD>
-	</TR>
-	<TR><TD BGCOLOR="[% user.bg.3 %]" COLSPAN="5"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-</TABLE>
-
-&nbsp;
-
-<FONT COLOR="[% user.fg.1 %]">
-
-<TABLE WIDTH="99%" ALIGN="CENTER" CELLPADDING="0" CELLSPACING="0" BORDER="[% constants.debug_maintable_border || 0 %]">
-[% PROCESS maintable_tr %]
-[% PROCESS maintable_td mt_valign="TOP" mt_rowspan="5" mt_width="100" %]
-		[% text = INCLUDE mainmenu; Slash.fancybox('120', "Navigation", text, '', 1) %]
-		<br>
-		[% text = INCLUDE organisation; Slash.fancybox('120', constants.sitename, text, '', 1) %]
-	</TD>
-	[% PROCESS maintable_td %]&nbsp;</TD>
-	[% PROCESS maintable_td mt_valign="TOP" mt_align="LEFT" mt_width="100%" mt_height="1" %]
+</head>
+<body>
+<div id="top_parent"></div>
 [% IF user.is_admin %]
-	<P>[% Slash.createMenu(adminmenu) %]</P>
+	<div id="adminmenu">
+        	<small>
+                	<b>
+                        	<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
+                	</b>
+ 	               Admin:
+        	</small>
+	        [% Slash.createMenu(adminmenu) %]
+	</div>
 [% END %]
+<div id="jump">
+	<a href="#main-articles">Stories</a>
+	<br>
+	<a href="#blocks">Slash Boxes</a>
+	<br>
+	<a href="#acomments">Comments</a>
+</div>
 
+<div id="frame">
+	<div id="topnav">
+		<div id="logo">
+			<h1>
+				<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
+			</h1>
+		</div>
+		[% UNLESS user.lowbandwidth || user.simpledesign %]
+		<ul>
+			[% PROCESS recentTopics %]
+		</ul>
+		[% END %]
+		</div>
+		<div id="slogan">
+		<h2>
+			[% constants.slogan %]
+		</h2>
+		</div>
+		<div id="links">
+			[% UNLESS user.lowbandwidth %]
+				[% text = INCLUDE mainmenu; Slash.sidebox("Navigation", text, "navigation", 1) %]
+				[% text = INCLUDE organisation; Slash.sidebox(constants.sitename, text, "sitebox", 1) %]
+			[% END %]
+		</div>
+		<div id="contents">
+			[% UNLESS nopageid %]
+			[% id_page = user.currentPage || "general" %]
+			<div id="[% id_page %]">
+			[% END %]
 __seclev__
 10000
 __version__

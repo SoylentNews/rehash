@@ -1,0 +1,4 @@
+# $Id$
+name=OAI
+description="Open Archives Initiative"
+htdocs=oai.pl

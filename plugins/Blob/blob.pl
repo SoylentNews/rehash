@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -14,30 +14,31 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 	my $blob = getObject("Slash::Blob", { db_type => 'reader' });
 	
 	unless ($form->{id}) {
-		redirect("$constants->{rootdir}/404.pl");
+		redirect("$gSkin->{rootdir}/404.pl");
 		return;
 	}
 	
 	my $data = $blob->get($form->{id});
 	if (!$data || $user->{seclev} < $data->{seclev}) {
-		redirect("$constants->{rootdir}/404.pl");
+		redirect("$gSkin->{rootdir}/404.pl");
 		return;
 	}
 
-	my $r = Apache->request;
-	$r->content_type($data->{content_type});
-	$r->header_out('Cache-Control', 'private');
-	$r->header_out('Content-Disposition', "filename=$data->{filename}")
-		if $data->{filename};
-	$r->status(200);
-	$r->send_http_header;
-	$r->rflush;
-	$r->print($data->{data});
-	$r->rflush;
-	$r->status(200);
+	http_send({
+		content_type	=> $data->{content_type},
+		filename	=> $data->{filename},
+		do_etag		=> 1,
+		dis_type	=> 'inline',	# best to default to inline,
+						# users can choose to download
+						# if they wish, and most file
+						# types will auto-download anyway,
+						# even if set to inline
+		content		=> $data->{data}
+	});
 }
 main();
 

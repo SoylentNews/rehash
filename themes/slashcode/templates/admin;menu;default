@@ -15,20 +15,21 @@ __name__
 admin
 __template__
 [% IF constants.panic %]
-	<TD><P ALIGN="CENTER"><B>**&nbsp;PANIC&nbsp;LEVEL&nbsp;[%
-	constants.panic %]&nbsp;**</B></P></TD>
+        **&nbsp;PANIC&nbsp;LEVEL&nbsp;[% constants.panic %]&nbsp;**
 [% END %]
 [% subs = Slash.db.getSubmissionCount() %]
 [% tabs = [
-	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "$constants.rootdir/admin.pl?op=edit",		label = "New",			sel_label = "new" },
-	{ link = "$constants.rootdir/submit.pl?op=list",	label = "$subs&nbsp;Submissions", sel_label = "submissions" },
-	{ link = "$constants.rootdir/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
-	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "topics" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Info",			sel_label = "recent" },
-	{ link = "$constants.rootdir/slashguide.shtml",		label = "Help",			sel_label = "help" },
+        { link = "$gSkin.rootdir/admin.pl",                     label = "Stories",              sel_label = "stories" },
+        { link = "$gSkin.rootdir/admin.pl?op=edit",             label = "New",                  sel_label = "new" },
+        { link = "$gSkin.rootdir/submit.pl?op=list",    label = "$subs&nbsp;Submissions", sel_label = "submissions" },
+        { link = "$gSkin.rootdir/pollBooth.pl?op=edit", label = "Poll",                 sel_label = "poll" },
+        { link = "$gSkin.rootdir/admin.pl?op=topics",   label = "Config",               sel_label = "topics" },
+        { link = "$gSkin.rootdir/stats.pl",                     label = "Info",                 sel_label = "stats" },
+        { link = "$gSkin.rootdir/admin.pl?op=recent",   label = "Security",             sel_label = "recent" },
+	{ link = "$gSkin.rootdir/admin.pl?op=peerweights",	label = "PeerWeights",	sel_label = "peerweights" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; lightfontcolor=lightfontcolor || "" %]
+
 __seclev__
 10000
 __version__

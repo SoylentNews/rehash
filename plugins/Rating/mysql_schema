@@ -1,0 +1,16 @@
+CREATE TABLE comment_vote (
+	cid mediumint UNSIGNED NOT NULL,
+	active ENUM("no", "yes") DEFAULT "yes" NOT NULL,
+	val tinyint DEFAULT '0' NOT NULL,
+	PRIMARY KEY (cid),
+	INDEX cid_active_val (cid, active, val)
+);
+
+CREATE TABLE discussion_rating (
+	discussion mediumint UNSIGNED NOT NULL UNIQUE,
+	total_votes mediumint NOT NULL DEFAULT 0,
+	active_votes mediumint NOT NULL DEFAULT 0,
+	avg_rating float DEFAULT NULL,
+	PRIMARY KEY (discussion)
+);
+

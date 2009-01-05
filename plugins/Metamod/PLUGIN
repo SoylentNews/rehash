@@ -1,0 +1,11 @@
+# $Id$
+name=Metamod
+description="Metamoderation"
+htdoc=metamod.pl
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
+requiresplugin=Moderation
+task=process_metamod.pl
+template=templates/data;metamod;default
+template=templates/dispTheComments;metamod;default
+template=templates/isEligible;metamod;default

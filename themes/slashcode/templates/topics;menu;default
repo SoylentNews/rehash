@@ -14,13 +14,11 @@ en_US
 __name__
 topics
 __template__
-[
+<ul class="menu">
 [% FOR i = items %]
-	<A HREF="[% i.value %]">[% i.label %]</A>
-	[% " | " UNLESS loop.last %]
+	<li><a href="[% i.value %]">[% i.label %]</a></li>
 [% END %]
-]
-
+</ul>
 __seclev__
 10000
 __version__

@@ -1,15 +1,18 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
-# Based on jamie's createTestStories. Any bugs are probably HIS fault.
+
+# Based on jamie's createTestStories. Any bugs are probably HIS fault
+# but I'll take the heat for them, because he's a really cool guy.
+# - Cliff
 
 BEGIN {
-	{
+	eval {
 		require Silly::Werder;
 		Silly::Werder->import;
-	}
+	};
 	die "Installation of Silly::Werder is required for this util, sorry!\n"
 		if $@;
 }
@@ -23,7 +26,7 @@ use Slash;
 use Slash::Utility;
 use Benchmark;
 
-use vars qw( $slashdb $werder $constants );
+use vars qw( $slashdb $werder $constants $gSkin );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -38,11 +41,18 @@ $opts{num_subs} = $ARGV[0] || 10;
 usage('Invalid number of submissions') 
 	if $opts{num_subs} !~ /^\d+$/ || $opts{num_subs} < 0;
 
+# Optional. Used later.
+eval { require Time::HiRes };
+my $shortDelay = 0;
+$shortDelay = 1 if $INC{'Time/HiRes.pm'} && Time::HiRes->can('usleep');
+
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $werder = new Silly::Werder;
 $werder->set_syllables_num(2, 6);
 $constants = getCurrentStatic();
+$gSkin = getCurrentSkin();
 
 my $user;
 if (exists $opts{'U'}) {
@@ -55,16 +65,16 @@ if (exists $opts{'U'}) {
 # main program logic (in braces to offset nicely)
 {
 	my $max_uid = $slashdb->countUsers({ max => 1});
-	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
+	my $min_uid = $slashdb->sqlSelect('MIN(uid)', 'users');
 
 	my $user_name = $user->{nickname} if $opts{'U'};
 
-	$opts{'w'} =~ /(\d+)?\-(\d+)?/;
+	$opts{'w'} =~ /(\d+)?\-(\d+)?/ if $opts{'w'};
 	my($min_weight, $max_weight) = ($1, $2);
 	$min_weight ||= 0;
 	$max_weight ||= 99;
 
-	my $rootdir = $constants->{rootdir};
+	my $rootdir = $gSkin->{rootdir};
  
 	my $t0 = new Benchmark;
 	my $count = $opts{num_subs};
@@ -75,7 +85,7 @@ if (exists $opts{'U'}) {
 		$subject =~ s/<[^>]+>//g;
 		$subject =~ s/\b(\w)/\U$1/g if rand(1) < 0.4;
 
-	        my $story = make_werds(10 + rand(30));
+		my $story = make_werds(10 + rand(30));
 		my $odds = rand(1);
 		if ($odds < 0.1) {
 			$story .= make_werds(10 + (rand 20) * (rand 50), 0.1);
@@ -84,22 +94,26 @@ if (exists $opts{'U'}) {
 			}xge if $odds < 0.05;
 		}
 		$story .= typical_remark() if rand(1) < 0.05;
-	        my $submitter=	$opts{'U'} ||
+		my $submitter=	$opts{'U'} ||
 				getRandomUserID($min_uid, $max_uid);
 
 		my $time = UnixDate(
 			ParseDateString('epoch ' . get_time(-1)),
 
-			'%Y-%m-%d %H:%M:%S'
+			"'%Y-%m-%d %H:%M:%S'"
 		);
 
 		my $tid = getRandomTopicID();
-		my $section = $opts{'S'} || getRandomSection();
+		my $section = $opts{'S'} || getRandomSkin();
 
-		my $name;
-		$name = $user_name || sprintf 'Random %s User', make_werds(1);
+		my $name = make_werds(1);
+		$name =~ s/[.?!]$//;
+		$name = $user_name || sprintf 'Random %s User', $name;
 
 		my $weight = $min_weight + rand($max_weight - $min_weight);
+		my $comment;
+		$comment = typical_remark() if rand(1) > 0.87;
+		$comment =~ s/^ // if $comment;
 
 		my $submission = {
 			name 		=> $name,
@@ -107,9 +121,10 @@ if (exists $opts{'U'}) {
 			tid		=> $tid,
 			'time'		=> $time,
 			subj		=> $subject,
-			section		=> $section,
+			primaryskid	=> $section,
 			story		=> $story,
 			weight		=> $weight,
+			comment		=> $comment,
 		};
 
 		print Dumper($submission), "\n\n" if $opts{'D'};
@@ -123,12 +138,18 @@ C
 ($count) Submission creation failed!!
 F
 			
-        	$count--;
-		sleep 1 if $count; # otherwise subids may collide!
+		$count--;
+
+		# Slight delay or subids may collide.
+		if ($INC{'Time/HiRes.pm'} && Time::HiRes->can('usleep')) {
+			Time::HiRes::usleep(50000) if $count;
+		} else {
+			sleep 1 if $count;
+		}
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_subs} submissions created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
@@ -152,35 +173,31 @@ sub get_time {
 
 sub getRandomTopicID {
 	# Yes, inefficient.  I do not care.
-	my $tids = $slashdb->sqlSelectAll("tid", "topics");
+	my $tids = $slashdb->sqlSelectAll('tid', 'topics');
 	my @tids = map { $_->[0] } @$tids;
-        my $rand_tid = @tids[ rand @tids ];
-        return $rand_tid;
+	my $rand_tid = @tids[ rand @tids ];
+	return $rand_tid;
 }
 
-sub getRandomSection {
+sub getRandomSkin {
 	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectAll("section", "sections", "1=1 AND type='contained'", "ORDER BY RAND()");
+	my $sections = $slashdb->sqlSelectAll(
+		'skid', 'skins', '', 'ORDER BY RAND()'
+	);
 	my @sections = map { $_->[0] } @$sections;
 	my $num = rand @sections;
 	$num = 0 if rand(1) < 1/3;
-        my $rand_section = $sections[$num];
-        return $rand_section;
+	my $rand_section = $sections[$num];
+	return $rand_section;
 }
 
 sub getRandomUserID {
 	my($min_uid, $max_uid) = @_;
-	my $n_tries = 100;
-	my $rand_uid = 1;
-	my $ok = 0;
-	while (!$ok) {
-		die "can't get random user! $max_uid" if --$n_tries<0;
-		$rand_uid = $min_uid + int(rand($max_uid-$min_uid+1));
-		$ok = 1;
-		$ok = 0 if $rand_uid == $constants->{anonymous_coward_uid};
-		$ok = 0 if !$slashdb->sqlSelect("COUNT(*)",
-			"users", "uid=$rand_uid");
-	}
+	my $rand_uid = $slashdb->sqlSelect(
+			'uid', 'users',
+			"uid BETWEEN $min_uid AND $max_uid",
+			'ORDER BY RAND() LIMIT 1'
+	);
 	return $rand_uid;
 }
 
@@ -197,26 +214,33 @@ sub make_werds {
 	}
 	my @links = qw(
 		http://slashdot.org/		http://www.brunching.com/
-		http://www.newsforge.com	http://osdn.com
+		http://www.newsforge.com	http://ostg.com
 		http://whitehouse.gov		http://www.whitehouse.gov/
 		http://us.imdb.com/		http://www.kernel.org
 		http://ic.ac.uk			http://cr.yp.to/
 		http://www.verizonreallyreallyreallysucks.com/
-		ftp://ftp.kernel.org/		ftp://ftp.gnu.org/gnu/Licenses/COPYING-2.0
-		news:news.admin.net-abuse.email gopher://ccat.sas.upenn.edu:3333/11/Fiction/
+		ftp://ftp.kernel.org/
+		ftp://ftp.gnu.org/gnu/Licenses/COPYING-2.0
+		news:news.admin.net-abuse.email
+		gopher://ccat.sas.upenn.edu:3333/11/Fiction/
 		http://List-Etiquette.com/about/
 		http://slashdot.org/features/99/03/31/0137221.shtml
 		http://www.nap.edu/readingroom/books/newpath/chap2.html
 		http://www.forthnet.gr/forthnet/isoc/short.history.of.internet
 		http://www.freenix.fr/unix/linux/HOWTO/French-HOWTO.html
-		http://www.linux.org.mx/	http://www.linux.net.mx/linux.php
-		http://www.linux.org.uk/diary/	http://hepwww.ph.qmw.ac.uk/HEPpc/
-		http://www.w3.org		http://peipa.essex.ac.uk/tp-linux/
+		http://www.linux.org.mx/
+		http://www.linux.net.mx/linux.php
+		http://www.linux.org.uk/diary/
+		http://hepwww.ph.qmw.ac.uk/HEPpc/
+		http://www.w3.org
+		http://peipa.essex.ac.uk/tp-linux/
 		http://www.crosswinds.net/~tvquotes/futurama/2.html
+		www.google.com			bad_link
+		b.a.d l.i.n.k . .. ... ....
+		mailto:jamie@slashdot.org	mailto:pater@slashdot.org
+		mailto:cliff@slashdot.org	mailto:pudge@slashdot.org
 		http://www.google.com/search?q=cache:h58W7o4qU-w:www.space.com/sciencefiction/tv/futurama_gore_000516_wg.html+Futurama+Fry&amp;hl=en
 		http://dmoz.org/Regional/Europe/United_Kingdom/Wales/Isle_of_Anglesey/Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch/
-		www.google.com			bad_link b.a.d l.i.n.k . .. ... ....
-		mailto:jamie@slashdot.org	mailto:pater@slashdot.org
 	);
 	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
 	my $comment;
@@ -234,20 +258,22 @@ sub make_werds {
 		} else {
 			$new_werds = $werder->sentence;
 		}
-		if ($link_prob and rand(1) < $link_prob) {
-			my @new_werds = split / /, $new_werds;
-			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
-			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
-			my $insert_start = int(rand(@new_werds-2));
-			my $insert_end = $insert_start + int(rand(4))+1;
-			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
-			$new_werds = join(" ",
-				@new_werds[0..$insert_start-1],
-				$a_href . $new_werds[$insert_start],
-				@new_werds[$insert_start+1..$insert_end-1],
-				$new_werds[$insert_end] . $close_a,
-				@new_werds[$insert_end+1..$#new_werds]
-			);
+		if ($link_prob && rand(1) < $link_prob) {
+                        my @new_werds = split / /, $new_werds;
+                        if ($#new_werds > 2) {
+                                my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+                                my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+                                my $insert_start = int(rand($#new_werds-2));
+                                my $insert_end = $insert_start + int(rand(4))+1;
+                                $insert_end = $#new_werds - 1 if $insert_end > $#new_werds - 1;
+                                $new_werds = join(" ",
+                                        @new_werds[0..$insert_start-1],
+                                        $a_href . $new_werds[$insert_start],
+                                        @new_werds[$insert_start+1..$insert_end-1],
+                                        $new_werds[$insert_end] . $close_a,
+                                        @new_werds[$insert_end+1..$#new_werds]
+                                );
+                        }
 		}
 		if ($cur_werds and !$tag and rand > $cur_werds/$werds+0.3) {
 			if (rand(1) < 0.95) { $tag = "i" }
@@ -334,7 +360,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

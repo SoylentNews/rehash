@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+form.reskey is filtered in filter_params to be [a-zA-Z0-9_],
+and rkey.reskey is filtered in key()
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+reskey_tag
+__template__
+[% this_reskey = '';
+   # use the rkey object if it is there, or the form otherwise
+   IF rkey;
+   	this_reskey = rkey.reskey;
+   ELSE;
+   	this_reskey = user.state.reskey;
+   END;
+
+   IF !reskey_label;
+	   reskey_label = 'reskey';
+   END;
+
+   IF this_reskey %]
+<input type="hidden" id="[% reskey_label %]" name="[% reskey_label %]" value="[% this_reskey %]">
+[% END;
+
+   # don't carry over to subsequent calls
+   reskey_label = ''; %]
+__seclev__
+500
+__version__
+$Id$

@@ -28,7 +28,7 @@
 # 	ISBN: 0-596-00200-2
 
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -46,12 +46,13 @@ sub main {
 	my $user = getCurrentUser;
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
+	my $gSkin = getCurrentSkin();
 
 	my $sid = $form->{sid};
 	unless ($sid) {
 		# Where should we redirect to if not to the rootdir? 
 		# Do we care?
-		redirect("$constants->{rootdir}/");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
@@ -60,6 +61,7 @@ sub main {
 	my $story;
 	#Yeah, I am being lazy and paranoid  -Brian
 	if (!($user->{author} or $user->{is_admin}) and 
+	    #XXXSECTIONTOPICS verify this is still correct	
 	    !$slashdb->checkStoryViewable($form->{sid})) 
 	{
 		$story = '';
@@ -70,7 +72,7 @@ sub main {
 	unless ($story) {
 		# Again, an error condition, but we're routed to the rootdir so
 		# how is the user supposed to know something is wrong?
-		redirect("$constants->{rootdir}/");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
@@ -97,7 +99,9 @@ sub main {
 	# routine in admin.pl to use it instead -- pudge
 	my @story_links;
 	my $tree = new HTML::TreeBuilder;
-	$tree->parse(parseSlashizedLinks($story->{introtext} . $story->{bodytext}));
+	my $storytext = $story->{introtext} || '';
+	$storytext .= $story->{bodytext} if defined $story->{bodytext};
+	$tree->parse(processSlashTags(parseSlashizedLinks($storytext)));
 	$tree->eof;
 	my $links = $tree->extract_links('a');  # get "A" tags only
 
@@ -105,7 +109,7 @@ sub main {
 		my $content = get_content($_->[1]);
 
 		# make all relative links absolute to the site's root
-		my $uri = URI->new_abs($_->[0], $constants->{absolutedir} . $ENV{REQUEST_URI});
+		my $uri = URI->new_abs($_->[0], $gSkin->{absolutedir} . $ENV{REQUEST_URI});
 
 		# http://foo -> http://foo/
 		$uri->path('/') if ! length $uri->path;
@@ -151,9 +155,12 @@ sub main {
 # Thanks for the assist here, pudge!
 sub get_content {
 	my($ref) = @_;
-	my $content;
+	return '' if !$ref || !ref($ref->{_content});
 
-	$content .= (ref) ? get_content($_) : $_ for @{$ref->{_content}};
+	my $content = '';
+	for my $c (@{$ref->{_content}}) {
+		$content .= ref($c) ? get_content($c) : $c;
+	}
 	
 	return $content;
 }

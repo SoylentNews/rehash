@@ -21,17 +21,17 @@ __template__
 	width="99%"
 	title="Opt-Out of Story Mailings" -%]
 
-<FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
+<form action="[% gSkin.rootdir %]/email.pl" method="post">
 [% IF form.formkey -%]
-<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+<input type="hidden" name="formkey" value="[% form.formkey %]">
 [% END -%]
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="optout_save">
+<input type="hidden" name="op" value="optout_save">
 
-Enter email address to be removed from further story mailings:<BR>
-<INPUT TYPE="TEXT" NAME="email" SIZE="50">
-<BR><BR>
-<INPUT TYPE="SUBMIT" VALUE="Opt Out">
-</FORM>
+Enter email address to be removed from further story mailings:<br>
+<input type="text" name="email" size="50">
+<br><br>
+<input type="submit" value="Opt Out">
+</form>
 
 __version__
 $Id$

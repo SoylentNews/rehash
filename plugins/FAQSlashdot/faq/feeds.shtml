@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <title>Slashdot FAQ - Feeds</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Feeds</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="subscriptions.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="slashmeta.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
+
+<h2><a name="fe100">Where can I get Slashdot's main feed?</a></h2>
+	<p>The syndication feed for the Slashdot front page is available in <a href="http://rss.slashdot.org/Slashdot/slashdot/to">RSS 0.9</a>, <a href="http://rss.slashdot.org/Slashdot/slashdot">RSS 1.0</a>, and <a href="http://rss.slashdot.org/Slashdot/slashdotatom">Atom 1.0</a> formats.  Please do not request feeds more than once every 30 minutes.</p>
+	<p><em><small>
+		Answered by: <a href="mailto:pudge@slashdot.org">pudge</a><br>
+		Last Modified: 12/12/06
+	</small></em></p>
+
+<h2><a name="fe200">What other feeds are available?</a></h2>
+                <p>On most pages, if there is feed content available, it will be noted in the &lt;HEAD&gt; of the page.</p>
+                <p>Wherever you see <tt>rss</tt> below, you can also substitute with <tt>atom</tt> to get an Atom 1.0 feed, such as <tt>content_type=atom</tt> and <tt>journal/atom</tt>, or append <tt>atom</tt> to the end of the <tt>rss.slashdot.org</tt> URLs, like <tt>slashdotGamesatom</tt> (although some feeds, like Zoo and some search results, need some more work for Atom).</p>
+                <p>Where you see <tt><b>$username</b></tt> below, substitute the URI-encoded username of the user in question (such as <tt>Clifton+Wood</tt>).</p>
+                <p>Where you see <tt><b>$logtoken</b></tt>, you must include a token so the server knows you are you, in lieu of a cookie, as most newsreaders can't handle cookies well (you can find it in the &lt;HEAD&gt; of the page, if you are a logged in, and a subscriber).  <b>NOTE</b>: your logtoken is subject to change when you log out or change your login preferences.  See <a href="/faq/accounts.shtml#ac1200">the Accounts FAQ</a> for more information.</p>
+
+                <ul>
+			<li>Append the section name to the index link for individual section feeds.  For example:
+				<ul>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotGames">http://rss.slashdot.org/Slashdot/slashdotGames</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotAskSlashdot">http://rss.slashdot.org/Slashdot/slashdotAskSlashdot</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotYourRightsOnline">http://rss.slashdot.org/Slashdot/slashdotYourRightsOnline</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotApple">http://rss.slashdot.org/Slashdot/slashdotApple</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotHardware">http://rss.slashdot.org/Slashdot/slashdotHardware</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotIT">http://rss.slashdot.org/Slashdot/slashdotIT</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotScience">http://rss.slashdot.org/Slashdot/slashdotScience</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotPolitics">http://rss.slashdot.org/Slashdot/slashdotPolitics</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotLinux">http://rss.slashdot.org/Slashdot/slashdotLinux</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotInterviews">http://rss.slashdot.org/Slashdot/slashdotInterviews</a></li>
+					<li><a href="http://rss.slashdot.org/Slashdot/slashdotDevelopers">http://rss.slashdot.org/Slashdot/slashdotDevelopers</a></li>
+				</ul>
+			</li>
+			<li><tt>http://slashdot.org/index.pl?content_type=rss&amp;logtoken=<b>$logtoken</b></tt>
+						<ul><li>(this special subscriber version will respect your user homepage prefs; including
+						which stories appear from which sections; to get only a specific section, replace the
+						hostname, such as "apple.slashdot.org")</li></ul>
+					</li>
+
+			<li>Journals (add "<tt>/<b>$logtoken</b></tt>" if you are a subscriber, to get full HTML in the feed)<ul>
+					<li><tt>http://slashdot.org/~<b>$username</b>/journal/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/journal/friends/rss</tt></li>
+			</ul></li>
+
+			<li>Messages<ul>
+					<li><tt>http://slashdot.org/my/inbox/rss/<b>$logtoken</b></tt></li>
+			</ul></li>
+
+			<li>Zoo<ul>
+					<li><tt>http://slashdot.org/~<b>$username</b>/friends/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/foes/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/fans/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/freaks/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/zoo/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/friends/friends/rss</tt></li>
+					<li><tt>http://slashdot.org/~<b>$username</b>/friends/foes/rss</tt></li>
+			</ul></li>
+
+			<li>Search Results<ul>
+					<li>Merely add <tt>&amp;content_type=rss</tt> to the query string</li>
+			</ul></li>
+                </ul>
+
+	<p><em><small>
+		Answered by: <a href="mailto:pudge@slashdot.org">pudge</a><br>
+		Last Modified: 12/12/06
+	</small></em></p>
+
+
+        <hr>
+        <ul class="menu">
+		<li><a href="subscriptions.shtml">Previous Section</a></li>
+		<li><a href="slashmeta.shtml">Next section</a></li>
+		<li><a href="index.shtml">Index</a></li>
+	</ul>
+
+<!--#include virtual="/slashfoot.inc"-->

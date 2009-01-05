@@ -38,7 +38,7 @@ CREATE TABLE url_content (
 
 DROP TABLE IF EXISTS url_info;
 CREATE TABLE url_info (
-  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  url_id INT(10) UNSIGNED NOT NULL auto_increment,
   url_digest VARCHAR(32) NOT NULL,
   url TEXT NOT NULL,
   url_base TEXT,
@@ -72,7 +72,7 @@ CREATE TABLE url_plaintext (
 
 DROP TABLE IF EXISTS rel;
 CREATE TABLE rel (
-  rel_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  rel_id INT(10) UNSIGNED NOT NULL auto_increment,
   from_url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
   to_url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
   parse_code enum('html_linkextor','miner','nugget','plaintext') DEFAULT 'html_linkextor' NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE nugget_sub (
 
 DROP TABLE IF EXISTS miner;
 CREATE TABLE miner (
-  miner_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  miner_id INT(10) UNSIGNED NOT NULL auto_increment,
   name VARCHAR(20) DEFAULT '' NOT NULL,
   last_edit timestamp(14),
   last_edit_aid VARCHAR(30),
@@ -117,7 +117,7 @@ CREATE TABLE miner (
 
 DROP TABLE IF EXISTS spider;
 CREATE TABLE spider (
-  spider_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  spider_id INT(10) UNSIGNED NOT NULL auto_increment,
   name VARCHAR(20) DEFAULT '' NOT NULL,
   last_edit timestamp(14),
   last_edit_aid VARCHAR(30),
@@ -137,7 +137,7 @@ CREATE TABLE spiderlock (
 # Yes, I said "BIGINT"
 DROP TABLE IF EXISTS spider_timespec;
 CREATE TABLE spider_timespec (
-  timespec_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  timespec_id INT(10) UNSIGNED NOT NULL auto_increment,
   name VARCHAR(20) NOT NULL,
   timespec VARCHAR(64) DEFAULT '' NOT NULL,
   results VARCHAR(30) DEFAULT '' NOT NULL,

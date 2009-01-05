@@ -2,4 +2,11 @@
 # $Id$
 #
 
+INSERT IGNORE INTO discussion_kinds (dkid, name) VALUES (NULL, 'poll');
+
 INSERT INTO hooks (param, class, subroutine) VALUES ('admin_save_story_success','Slash::PollBooth','createAutoPollFromStory');
+
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','polls.css','','','pollBooth','no','',2,0, '');
+
+INSERT INTO vars (name, value, description) VALUES ('allow_anon_poll_voting', '1', 'Set this to decide whether anonymous users can vote in polls)');
+

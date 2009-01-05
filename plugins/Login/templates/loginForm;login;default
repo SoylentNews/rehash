@@ -1,0 +1,82 @@
+__section__
+default
+__description__
+users login form
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+loginForm
+__template__
+<div id="users" class="wide">
+[% title = form.unickname ? 'Error Logging In' : 'Log In' %]
+	[% PROCESS titlebar %]
+	<div class="generalbody">
+		<form action="[% constants.real_rootdir %]/login.pl" method="post">
+			<fieldset>
+			<legend>Log In</legend>
+			<input type="hidden" name="op" value="userlogin">
+			[% IF form.unickname %]
+				[% user_uid = Slash.db.getUserUID(form.unickname) %]
+				<p class="message">
+					[% IF user.state.login_failed_reason == 'nopost' %]
+						This IP address or network has been used to abuse the system and logins from it have been disabled.  If you feel that this is unwarranted, feel free to include your IP address (<b>[% env.remote_addr %]</b>) in the subject of an email to <a href="mailto:[% constants.adminmail_ban | strip_attribute %]">[% constants.adminmail_ban %]</a>, and we will examine why there is a ban. If you fail to include the IP address (again, <em>in the subject!</em>), then your message will be deleted and ignored. I mean come on, we're good, we're not psychic.
+					[% ELSE %]
+						Danger, Will Robinson!  You didn't log in!  You apparently put in the wrong password, or the wrong nickname.  Either try again, or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your password mailed to you</a> if you forgot your password.
+					[% END %]
+				</p>
+				[% IF user_uid and Slash.db.getUser(user_uid, "waiting_for_account_verify") %]
+					<p class="message">
+						A request to verify your account information has been sent to the e-mail associated with this account.  Your password has been reset.  This is likely the reason you're having difficult logging in at the moment.
+						<br>
+						<br>
+						Please check your e-mail for your updated login information or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have the updated password mailed to you</a>.
+					</p>
+				[% END %]
+				[% IF constants.allow_anonymous %]
+					<p class="message">
+					   	Logging in will allow you to post comments as yourself.  If you don't log in, you will only be able to post as [% Slash.getCurrentAnonymousCoward("nickname") %].
+					</p>
+
+				[% ELSE %]
+					<p class="message">
+						You can only post comments if you have a valid account.
+					</p>
+				[% END %]
+			[% END %]
+                                <label>
+                                        Nickname
+                                </label>
+                                <input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+                                <label>
+                                        Password
+                                </label>
+                                <input type="password" name="upasswd" size="20" maxlength="20">
+                                <div class="note">
+                                        (6-20 characters long)
+                                </div>
+                                <label class="checkbox">
+                                	<input type="checkbox" name="login_temp" value="yes" class="checkbox">
+					Public Terminal
+				</label>
+                                <input type="submit" name="userlogin" value="Log in" class="button">
+				</fieldset>
+		</form>
+
+		<p>
+			Forget your password? <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">Have your password mailed to you</a> by entering your nickname, uid, or email address.
+		</p>
+		<p>
+			<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a> if you don't have one already.
+		</p>
+	</div>
+</div>
+
+__seclev__
+500
+__version__
+$Id$

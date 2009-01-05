@@ -1,0 +1,97 @@
+__section__
+default
+__description__
+Popup tree for topics in admin editor
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+topic_popup_tree
+__template__
+[% name = name.0 %]
+<div id="[% name %]-outer" class="hpts-outer">
+  <div class="hpts-title" id="[% name %]-title">[% title %]</div>
+  <div class="hpts-inner" id="[% name %]-inner">
+[% thisname = []; thisparent = []; thisseen = {};
+   FOREACH leaf = loop;
+     IF thisseen.${leaf.value};  # don't open again if seen again
+       leaf.open = 0;
+     END;
+     UNLESS leaf.end_block;
+       thisname.push(leaf.label) %]
+<div nowrap>
+[%-    IF leaf.has_children -%]
+<img id="[% name %]-plus-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]minus[% ELSE %]plus[% END %].png" onclick="[% name %]_toggle_expand([% leaf.id %])"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
+[%-    ELSE -%]
+<img width=16 height=16 src="[% image_path %]L.png"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
+[%-    END -%]
+<img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]open[% ELSE %]closed[% END %]_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label | strip_literal %]</a>
+[%-    IF slashtopics.${leaf.value}.image -%]
+<input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% slashtopics.${leaf.value}.image %]">
+[%-    END -%]
+<input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% constants.topic_popup_defaultweight || 1 %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% leaf.label | strip_attribute %]"><input type="hidden" id="[% name %]-tid-[% leaf.id %]" value="[% leaf.value | html %]"></span></div>
+[%-    IF leaf.has_children;
+         thisparent.push(leaf.value) -%]
+<div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% IF leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
+[%-    ELSE;
+         CALL thisname.pop();
+       END;
+       thisseen.${leaf.value} = 1;
+     ELSE;
+       CALL thisparent.pop();
+       CALL thisname.pop()
+-%]
+</div>
+[%-  END;
+   END;
+-%]
+  </div>
+  <div class="hpts-bbar" nowrap>
+    <input class="hpts-button" type="button" value="Add"      onclick="[% name %]_ok()">
+    <input class="hpts-button" type="button" value="Close"    onclick="[% name %]_cancel()">
+    <input class="hpts-button" type="button" value="Index"    onclick="[% name %]_switch('', 'ab')">
+    <input class="hpts-button" type="button" value="Collapse" onclick="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+  </div>
+  <div style="text-align: center">
+    <img name="[% name %]_main_img">
+  </div>
+</div>
+
+<!-- address book style -->
+<div id="[% name %]-ab-outer" class="hpts-outer">
+  <div class="hpts-title" id="[% name %]-title">Select Topics</div>
+  <div class="hpts-inner">
+
+<table><tr><td><p>
+<input width="30" name="[% name %]_ab_searchfield" id="[% name %]-ab-searchfield" onkeyup="st_search_key_handler('ab', event);">
+<input width="30" type="button" value="Search" onclick="[% name %]_search('ab')">
+<br>
+[%- FOREACH letter = ['A' .. 'Z'] %]
+<a href="#" class="topic_sel" onclick="return [% name %]_search('ab','[% letter %]');">[% letter %]</a>
+[%- END %]
+<br>
+</p><p>
+
+    <div id="[% name %]-ab-searchlist">
+      <!-- div nowrap><span id="[% name %]-ab-line-22" ondblclick="[% name %]_ok('ab')" onclick="[% name %]_toggle_select(22,4,'ab')"><a href="javascript:void(0);">Ask Slashdot</a><input type="hidden" id="[% name %]-ab-weight-22" value="10"><input type="hidden" id="[% name %]-ab-fullname-22" value="Index :: Ask Slashdot"></span></div -->
+    </div>
+</p></td></tr></table>
+  </div>
+
+  <div class="hpts-bbar" nowrap>
+    <input class="hpts-button" type="button" value="Add"      onclick="[% name %]_ok('ab')">
+    <input class="hpts-button" type="button" value="Close"    onclick="[% name %]_cancel('ab')">
+    <input class="hpts-button" type="button" value="Tree"     onclick="[% name %]_switch('ab', '')">
+  </div>
+  <div style="text-align: center">
+    <img name="[% name %]_ab_main_img">
+  </div>
+</div>
+
+__seclev__
+10000
+__version__
+$Id$

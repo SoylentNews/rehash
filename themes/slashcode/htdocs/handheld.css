@@ -1,0 +1,68 @@
+body
+{
+        background: #fff;
+        font-family: sans-serif;
+        font-size: 100%;
+        margin: 0;
+        padding: 0;
+}
+#frame {margin: 0 2px; padding: 0;}
+ul li { display: inline; margin: 0 .2em; }
+
+/* Header */
+#logo h1 a {padding: 0 5px; height: 20px; background: #000; color: #fff; font-size: 14px;}
+#slogan h2
+{
+        display: block;
+        color: #000;
+        margin: 1em 0;
+        padding: 0 5px;
+        font-size: x-small;
+}
+h3 {margin: .6em 0 0 0;}
+.details
+{
+        font-size: x-small;
+        color: #666;
+        padding: 0;
+        margin: 0;
+}
+.article .body {font-size: small;}
+.storylinks ul
+{
+        margin: 0;
+        display: inline;
+        font-size: small;
+}
+
+.btmnav ul, ul, .aduserbox #articles, .admin #articles, div#search.aduserbox .generaltitle, div#search.aduserbox .generalbody, #contents, #messages, #submit, #comments, #login, #pollBooth, #wide, #search, #authors, #topics, #articles, #users-blocks, #polls
+{
+        margin: 0;
+        padding: 0;
+}
+.generaltitle, .generaltitle div.title { background: transparent; margin-top: .5em;}
+.generaltitle h3 a {color: #00e;}
+.generaltitle h3 {padding: 0; margin: 0; color: #000;}
+.article .topic img, #ostgnavbar, #slashboxes, #links, #topnav ul, #jump, #user-section, #topnav .search { display: none; }
+#topnav { margin: 0; padding: 0; height: 20px; }
+
+#footer { margin: 1em; }
+
+#footer .search
+{
+        margin: 1em 0;
+        float: none;
+        clear: both;
+}
+
+#footer .rightcontent
+{
+        margin: 2.4em 0 0 0;
+        float: none;
+        clear: both;
+}
+
+#footer .copyright { margin: 1em 0; }
+a, a:visited, .btmnav ul li a, .btmnav ul li a:visited { color: #00e; }
+
+.ccw-upzone, .ccw-downzone { display: block; position: absolute; }

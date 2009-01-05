@@ -27,19 +27,19 @@ __template__
 
 [% vote_result = { '-1' => 'Unfair', '0' => 'Half-Fair (a tie)', '1' => 'Fair' }; %]
 
-[% IF msg.mode == 1 %]<P>[% END %]
+[% IF msg.mode == 1 %]<p>[% END %]
 Some of your past moderations have been meta-moderated by other
 [% constants.sitename %] readers. Here are the exciting results:
 
 [% IF msg.mode == 1%]
-<UL>
+<ul>
 [% FOREACH m2item = m2 -%]
-	<LI> "<A HREF="[% constants.rootdir; m2item.url | strip_attribute %]">[% m2item.subj %]</A>" from the discussion
-	"[% m2item.title %]" which you moderated as <B>[% m2item.reason.name %]</B> was voted 
-	<B>[% vote_result.${m2item.vote} %]</B>.
+	<li> "<a href="[% gSkin.rootdir; m2item.url | strip_attribute %]">[% m2item.subj %]</a>" from the discussion
+	"[% m2item.title %]" which you moderated as <b>[% m2item.reason.name %]</b> was voted 
+	<b>[% vote_result.${m2item.vote} %]</b>.
 
 [% END %]
-</UL>
+</ul>
 [% ELSE %]
 [% FOREACH m2item = m2 -%]
 	[%- reason = m2item.reason -%]
@@ -52,6 +52,12 @@ Some of your past moderations have been meta-moderated by other
 [%- END %]
 [% END %]
 [%- END -%]
+[% IF (m2_summary.fair + m2_summary.unfair) > 0;
+	"Summary of your recent moderation: " ;
+	Slash.getData("percentage", { sum => m2_summary.fair, count => (m2_summary.fair + m2_summary.unfair )}, "misc");
+	" Fair";
+	IF msg.mode == 1; "<p>"; END;
+END %]
 [%
 	msg1 = '';
 	msg2 = '';
@@ -68,7 +74,7 @@ Some of your past moderations have been meta-moderated by other
 %][% IF msg1 && msg2 %]
 For your [% msg1 %] moderation, you have been [% msg2 %].
 [% END %]
-[% IF msg.mode == 1 %]<P>[% END %]Thank you for moderating.
+[% IF msg.mode == 1 %]<p>[% END %]Thank you for moderating.
 
 __seclev__
 500

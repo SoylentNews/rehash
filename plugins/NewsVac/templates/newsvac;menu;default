@@ -16,15 +16,15 @@ newsvac
 __seclev__
 1000
 __template__
-<TABLE BGCOLOR="[% user.bg.5 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
-	<TR>
-		<TD><I>NewsVac Menu</I>:
+<table bgcolor="[% user.colors.bg_5 %]" border="0"  width="100%" cellpadding="2" cellspacing="0">
+	<tr>
+		<td><i>NewsVac Menu</i>:
 [ [% FOR i = items %]
-		<FONT SIZE="2"><A HREF="[% i.value %]">[% i.label %]</A>
+		<a href="[% i.value %]">[% i.label %]</a>
 	[% " | " UNLESS loop.last %]
-[% END %] ]	<FONT></TD>
-	</TR>
-</TABLE>
+[% END %] ]	</td>
+	</tr>
+</table>
 
 __version__
 $Id$

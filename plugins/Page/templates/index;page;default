@@ -14,10 +14,7 @@ __name__
 index
 __template__
 	
-		<table width="100%" border="0" cellspacing="0" cellpadding="0">
-			<tr>
 				<!- begin whats new -->
-				<td width="60%" valign="top">
 				<p>[% PROCESS titlebar title="WHAT'S NEW" %]
 				[% 
 					misc.count = 3;
@@ -28,8 +25,8 @@ __template__
 					[% END;
 				%]
 
-				<small><b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b><br>
-				<b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_50=What%27s+New">What's old?</a> ]</b>  
+				<small><b>[ <a href="[% gSkin.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b><br>
+				<b>[ <a href="[% gSkin.rootdir %]/search.pl?query=&section=[% form.section %]&amp;topic_50=What%27s+New">What's old?</a> ]</b>  
 				</small>
 				<!-- end whats new -->
 
@@ -61,15 +58,13 @@ __template__
 				%]
 
 
-				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_49=News">Older news</a> ]</b><br> 
-				<b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b>
+				<small><b>[ <a href="[% gSkin.rootdir %]/search.pl?query=&section=[% form.section %]&amp;topic_49=News">Older news</a> ]</b><br> 
+				<b>[ <a href="[% gSkin.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b>
 				</small>
 				<!-- end of news -->
 
 				<!-- begin right column -->
-				</td>
-				<td><img src="[% constants.imagedir %]/pix.gif" width="16" height="1" alt=""></td>
-				<td width="40%" valign="top"> 
+				<img src="[% constants.imagedir %]/pix.gif" width="16" height="1" alt="">
 				<p>[% PROCESS titlebar title="CALENDAR" %]
 				<!-- SECTION [% form.section %] -->
 				[% 
@@ -86,13 +81,13 @@ __template__
 
 						FOREACH event=myevents; %]
 				
-				<small><b><A HREF="[% constants.rootdir %]/article.pl?sid=[% event.sid %]">
-				[% event.title %]</A></b><br>
+				<small><b><a href="[% gSkin.rootdir %]/article.pl?sid=[% event.sid %]">
+				[% event.title %]</a></b><br>
 				[% event.begin %] - [% event.end %]</small><p>
 						[% END;
 					END;
 				%]
-				<small><b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest an event</a> ]</b></small> 
+				<small><b>[ <a href="[% gSkin.rootdir %]/submit.pl?section=[% form.section %]">Suggest an event</a> ]</b></small> 
 				<! -- end calendar -->
 				
 				<!-- begin past features -->
@@ -108,7 +103,7 @@ __template__
 					[% END;
 				%]
 		
-				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_52=Past+Features">Older features</a> ]</b></small>
+				<small><b>[ <a href="[% gSkin.rootdir %]/search.pl?query=&section=[% form.section %]&amp;topic_52=Past+Features">Older features</a> ]</b></small>
 				<!-- end pastfeatures -->
 				
 				<!-- guided opinion -->	
@@ -120,7 +115,7 @@ __template__
 				[% story.widget %]
 					[% END;
 				%]
-				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=opinions&section=[% form.section %]&topic_51=Guided+Opinion">Past opinions</a> ]</b></small> 
+				<small><b>[ <a href="[% gSkin.rootdir %]/search.pl?query=opinions&section=[% form.section %]&amp;topic_51=Guided+Opinion">Past opinions</a> ]</b></small> 
 				<!-- end guided opinion -->
 	
 				<!-- begin new forum -->
@@ -131,6 +126,7 @@ __template__
 				IF searchobj;
 
 					type = constants.enable_discussion_topic || 'topic_2';
+					# XXXSKIN - i don't know what this is but it is broken because topics_section_type does not exist
 					forum_topics = Slash.db.getDescriptions('topics_section_type', form.section, type); 
 
 					FOR t = forum_topics.keys; 
@@ -143,7 +139,7 @@ __template__
 						
 						IF discussions; %]
 				<small>
-				<b><a href="[% constants.rootdir %]/comments.pl?op=user_created_index&amp;tid=[% t %]&amp;section=[% form.section %]&amp;type=recycle">[% forum_topics.$t %]</a> Total: ([%
+				<b><a href="[% gSkin.rootdir %]/comments.pl?op=user_created_index&amp;tid=[% t %]&amp;section=[% form.section %]&amp;type=recycle">[% forum_topics.$t %]</a> Total: ([%
 				total_discussions %])</b>
 				</small>
 				<ul>
@@ -151,13 +147,13 @@ __template__
 					<li>
 					<small>
 					<b>
-					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">
+					<a href="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">
 								[% IF discussion.title.defined && discussion.title.length %]
 					[% discussion.title %]
 								[% ELSE %]
 					untitled
 								[% END %]
-					</A>
+					</a>
 					</b>
 					</small>
 							[% END %]
@@ -168,10 +164,6 @@ __template__
 
 				<!-- end new forum -->
 
-				</td>
-			</tr>
-		</table>
-		</td>
 __seclev__
 10000
 __version__

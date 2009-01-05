@@ -1,0 +1,4 @@
+This plugin allows for users to bookmark and tag on and off-site urls, and also submit or journal on the url
+after they are done saving the bookmark.
+
+The source for the JavaScript bookmarklet is in the bookmarklink;misc;default template

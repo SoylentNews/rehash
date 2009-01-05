@@ -1,0 +1,4 @@
+# $Id$
+name=TagCountUser
+description=Count active tags for each user
+mysql_dump=mysql_dump.sql

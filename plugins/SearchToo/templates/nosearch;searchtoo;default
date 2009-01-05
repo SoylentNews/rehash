@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+nosearch
+__template__
+<blockquote>
+<p>Sorry, search is down at the moment.
+Until it's back up, you may wish to search
+[% constants.sitename %] through Google:<br>
+<form method="get" action="http://www.google.com/search">
+	<input type="text" name="query" value="[% form.query | strip_attribute %]" size="20">
+	<input type="hidden" name="as_sitesearch" value="[% gSkin.basedomain %]">
+	<input type="submit" value="Google [% constants.sitename %]">
+</form>
+</blockquote>
+<p>
+
+__seclev__
+100
+__version__
+$Id$

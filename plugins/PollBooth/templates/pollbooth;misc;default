@@ -8,11 +8,9 @@ Prints a pollbooth
 * qid = question ID
 * has_activated = has this poll become active?
 * poll_open = is this poll still open?
-* has_voted = has this user already voted?
-* can_vote = can this user still vote?
 * voters = number of voters
 * comments = number of comments
-* sect = section
+* primaryskid = primaryskid
 * returnto = Optional URL to return to once vote is registered.
 
 
@@ -26,49 +24,59 @@ __name__
 pollbooth
 __template__
 [% IF has_activated or user.is_admin %]
-[% IF user.is_admin %]
-	[% IF !has_activated %]
-	(Poll not yet active)<BR>
-	[% END %]
-[% END %]
-[% IF !can_vote %]
-
-	<B>[% question %]</B>
-
-	[% FOREACH ans = answers %]
-		<BR>&middot; [% ans.answer %] ([% ans.votes %])
-	[% END %]
-
-	<P><EM>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</EM><BR>
-	[ <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% constants.rootdir %]/pollBooth.pl?"><B>Polls</B></A> ] <BR>
-	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
-
-[% ELSE %]
-
-	<FORM ACTION="[% constants.rootdir %]/pollBooth.pl">
-		[%- IF returnto -%]
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="vote_return">
-		<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% returnto | strip_attribute %]">
-		[%- END -%]
-		<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
-		[% IF user.currentSection %]
-		<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSection | strip_attribute %]">
+	[% IF user.is_admin %]
+		[% IF !has_activated %]
+		(Poll not yet active.)<br>
 		[% END %]
-	<B>[% question %]</B>
-
-	[% FOREACH ans = answers %]
-		<BR><INPUT TYPE="radio" NAME="aid"
-		VALUE="[% ans.aid | strip_attribute %]">[% ans.answer | strip_html %]
 	[% END %]
 
-	<BR><INPUT TYPE="submit" VALUE="Vote">
-	[ <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% constants.rootdir %]/pollBooth.pl"><B>Polls</B></A> ] <BR>
-	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
-	</FORM>
+	[% can_vote = poll_open ? 1 : 0 %]
 
-[% END %]
+	[% IF env.script_name && can_vote;
+	      reskey = Slash.getObject('Slash::ResKey');
+	      rkey = reskey.key('pollbooth', { qid => qid });
+	      IF !rkey.create;  # didn't work, bail
+	         can_vote = 0;
+	      END;
+	   ELSE;	
+	      rkey = '';
+	   END;
+	%]
+
+	[% IF !can_vote %]
+		<b>[% question | strip_literal %]</b>
+	   [% FOREACH ans = answers %]
+		<li>[% ans.answer | strip_literal %] <em>([% ans.votes %])</em></li>
+	   [% END %]
+
+		<p><em>[% IF rkey && rkey.errstr %]([% rkey.errstr %])[% ELSIF !poll_open %](Poll is closed.)[% END %]</em><br>
+		[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1[% IF fromrss %]&amp;from=rss[% END %]"><b>Results</b></a> |
+		<a href="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]"><b>Polls</b></a> ] <br>
+		Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
+
+	[% ELSE %]
+	
+		<form action="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]" method="post">
+			<fieldset>
+				<legend>Poll</legend>
+				<input type="hidden" name="qid" value="[% qid | strip_attribute %]">
+			[% IF user.currentSkin %]
+				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">
+			[% END %]
+				<b>[% question | strip_literal %]</b>
+
+			[% FOREACH ans = answers %]
+				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]&amp;from=rss">[% END %][% ans.answer | strip_literal %][% IF fromrss %]</a>[% END %]
+			[% END %]
+
+				<br><input type="submit" value="Vote">
+				[% IF env.gateway_interface; PROCESS reskey_tag; END %]
+				[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1[% IF fromrss %]&amp;from=rss[% END %]"><b>Results</b></a> |
+				<a href="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]"><b>Polls</b></a> ] <br>
+				[% IF !fromrss %]Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>[% END %]
+			</fieldset>
+		</form>
+	[% END %]
 [% END %]
 __seclev__
 10000

@@ -1,0 +1,120 @@
+__section__
+default
+__description__
+Template handles listing of comments for both IPIDs and UIDS
+Also can interleave moderations performed against the
+comments if they're provided and the user is an admin
+
+* admin_flag    - whether or not the user is an admin
+* title         - title to display
+* submissions   - structure containing submissions
+* stories	- structure containing stories
+
+__title__
+listSubmissions;users;default
+__page__
+users
+__lang__
+en_US
+__name__
+listSubmissions
+__template__
+[%
+light_text_color = "#AAAAAA";
+approved = 0;
+count = 0;
+bg_toggle = 0;
+bg_col_1 = "DDDDDD";
+bg_col_2 = user.colors.bg_2;
+cur_time = Slash.db.getTime();
+%]
+[% admin_link_user = admin_flag && !useredit.uid && !useredit.nickname %]
+[% admin_link_ipid = admin_flag && !useredit.ipid %]
+[% IF submissions.size > 0 %]
+	[% PROCESS titlebar title = title -%]
+	<table width="100%" border=0 cellpadding=3 cellspacing=0 class="data">
+		<tr class="data_head">
+			<th>Title</th>
+			<th>[% IF admin_link_user %]<span class="admin_data_label">User</span>[% END %]</th>
+			<th>[% IF admin_link_ipid %]<span class="admin_data_label">IPID</span>[% END %]</th>
+			<th>Datestamp</th>
+			<th>[% IF admin_flag %]<span class="admin_data_label">State</span>[% END %]</th>
+		</tr>
+	
+		[% secs_back = -86400 * 2 %]
+		[% cutoff_time = Slash.timeCalc(Slash.db.getTime(), "%Y-%m-%d %T", secs_back) %]
+		[% FOREACH sub = submissions %]
+		[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]
+		[% link_sid = sub.del == 2 and sub.sid and story_viewable %]
+		[% link_subid = admin_flag and !link_sid %]
+		<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
+			[% bg_toggle = !bg_toggle %]
+			<td>
+				[%- IF link_sid -%]
+					<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</a>
+				[%- ELSIF link_subid -%]
+					<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</a>
+				[%- ELSE -%]
+					[% sub.subj %]
+				[%- END -%]
+			</td>
+			<td>[% IF admin_link_user %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</td>
+			<td>[% IF admin_link_ipid %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</td>
+			<td>[% Slash.timeCalc(sub.time) %]</td>
+			<td>[% IF admin_flag || user.uid == sub.uid %]
+				[% sub_del = sub.del;
+	   			IF constants.plugin.FireHose && sub_del == 0;
+			   	   	firehose = Slash.getObject("Slash::FireHose");
+					item = firehose.getFireHoseByTypeSrcid("submission", sub.subid);
+					IF item && item.id;
+						pop_level = firehose.getPopLevelForPopularity(item.popularity);
+						IF sub.time.lt(cutoff_time) && pop_level >= 6;
+							sub_del = 1;
+						END;
+					END;
+	   			END;
+				%]
+				[% SWITCH sub_del %]
+					[%- CASE 0 -%]
+						Pending
+					[%- CASE 1 -%]
+						Rejected
+					[%- CASE 2 -%]
+						Accepted
+						[% approved = approved + 1; %]	
+				[%- END -%]
+			     [%-  END -%]
+			</td>
+		</tr>
+		[% total = total + 1 %]
+		[% END %]
+		[% IF admin_flag %]
+		<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>
+		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
+		[% ELSIF user.uid != sub.uid %]
+		<tr class="data_hl1"><td colspan="5"><i>(Rejected submissions are not listed.)</i></td></tr>
+		[% END %]
+	</table>
+[% END %]
+
+[% BLOCK nick_and_uid;
+	nickname | strip_literal;
+	IF uid != constants.anonymous_coward_uid;
+		' (<a href="';
+		gSkin.rootdir;
+		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
+		uid;
+		'">';
+		uid;
+		'</a>)';
+	END;
+END %]
+
+[% BLOCK link_ipid %]
+<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

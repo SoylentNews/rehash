@@ -1,0 +1,47 @@
+.bar
+{
+	font-weight: bold;
+	margin: 0 0 1em 0;
+	border: 1px #ddd solid;
+	font-size: 80%;
+}
+
+.barAnswer
+{
+	font-size: 120%; 
+	text-align: left;
+	margin: .5em 0 0 0;
+}
+
+.barColor
+{
+	background: #aaa;
+	border: 1px #ddd solid;
+	border-bottom: 1px #555 solid;
+	border-right: 1px #555 solid;
+}
+
+.barPercent
+{
+	padding: 0 .3em;
+	background: #eee;
+	color: #555;
+}
+
+.barVotes
+{
+	padding: 0 .3em;
+	background: #eee;
+	color: #555;
+	white-space: nowrap;
+}
+
+.totalVotes { float: right; }
+#polls-wide li { margin: 0 0 1em 0; }
+.note ul 
+{
+	font-size: 80%;
+	font-family: arial, sans-serif;
+}
+#pollBooth .generalbody table {width: 80%; margin: 0 0 1em 10%}
+#pollBooth .generalbody caption {margin-left: 10%}

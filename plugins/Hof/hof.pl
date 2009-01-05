@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -62,7 +62,7 @@ sub main {
 # 		#Something tells me we could simplify this with some
 # 		# thought -Brian
 # 		foreach my $bid (keys %b) {
-# 			$b{$bid} = $I{dbobject}->countUsersIndexExboxesByBid($bid);
+# 			$b{$bid} = $I{dbobject}->countUsersIndexSlashboxesByBid($bid);
 # 		}
 # 
 # 		my $x;

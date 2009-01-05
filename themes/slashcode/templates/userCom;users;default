@@ -11,7 +11,7 @@ Display user's info
 * nickmatch_flag = current user is same as viewed user
 * karma_flag = boolean for display karma
 * admin_flag = boolean for whether to display admin stuff
-* reasons = hashref from $slashdb->getReasons()
+* reasons = hashref from $moddb->getReasons()
 
 __title__
 
@@ -35,20 +35,18 @@ __template__
 			ELSE;
 			label    = comment.disc_title;
 		END %]
-		<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
-		[% comment.subject %]</A> posted on [% Slash.timeCalc(comment.date) %]
+		<br><b>[% n %]</b> <a href="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
+		[% comment.subject %]</a> posted on [% Slash.timeCalc(comment.date) %]
 	(Score:[% comment.points %][% IF comment.replies %] Replies: [% comment.replies %][% END %])
-		<FONT SIZE="2">
-		<BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
-		</FONT>
+		<br>attached to <a href="[% comment.url %]">[% label %]</a>
 	[% END %]
 	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber)) && commentcount > n %]
-		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | fixparam %]&amp;min_comment=[% n %]"     >More Comments...</A>
+		<p><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | strip_paramattr %]&amp;min_comment=[% n %]"     >More Comments...</a>
 	[% END %]
 [% ELSE %]
 	[% title = useredit.nickname | strip_literal %]
 	[% PROCESS titlebar width="100%" %]
-	<B>[% useredit.nickname | strip_literal %] has yet to post any comments.</B>
+	<b>[% useredit.nickname | strip_literal %] has yet to post any comments.</b>
 [% END %]
 
 __seclev__

@@ -16,10 +16,10 @@ en_US
 __name__
 otherLinks
 __template__
-[% FOR tid = tids %]
-&middot; <A HREF="[% constants.rootdir %]/search.pl?topic=[% tid | fixparam %]">More [% topics.$tid.alttext %] stories</A><BR>
-[% END %]
-&middot; <A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid | fixparam %]">Also by [% aid %]</A>
+	[% FOR tid = tids %]
+		<li><a href="[% gSkin.rootdir %]/search.pl?tid=[% tid | strip_paramattr %]">More [% topics.$tid.textname %] stories</a></li>
+	[% END %]
+	<li><a href="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% uid | strip_paramattr %]">Also by [% aid %]</a></li>
 __seclev__
 500
 __version__

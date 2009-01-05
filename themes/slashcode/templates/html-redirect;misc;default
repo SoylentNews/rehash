@@ -14,9 +14,9 @@ __name__
 html-redirect
 __template__
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<HTML><HEAD><TITLE>302 Moved</TITLE></HEAD><BODY>
-<P>You really want to be on <A HREF="[% url %]">[% url %]</A> now.</P>
-</BODY>
+<html><head><title>302 Moved</title></head><body>
+<p>You really want to be on <a href="[% url %]">[% url %]</a> now.</p>
+</body>
 
 __seclev__
 10000

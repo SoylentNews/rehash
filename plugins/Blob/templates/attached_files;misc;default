@@ -12,15 +12,15 @@ __name__
 attached_files
 __template__
 [% FOREACH file=files %]
-	[% file.description %]<BR>
+	[% file.description %]<br>
 	[% FILTER strip_literal %]
 		[% IF file.isimage == 'yes' %]
 			<SLASH-IMAGE ID="[% file.file_id %]" TITLE="[% file.description | strip_attribute %]">
 		[% ELSE %]
-			<SLASH-FILE ID="[% file.file_id %]" TITLE="[% file.description | strip_attribute %]">[% file.description %]</SLASH>
+			<SLASH-FILE ID="[% file.file_id %]" TITLE="[% file.description | strip_attribute %]">[% file.description | strip_literal %]</slash>
 		[% END %]
 	[% END %]
-	<BR><BR>
+	<br><br>
 [% END %]
 
 __seclev__

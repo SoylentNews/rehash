@@ -4,8 +4,8 @@
 
 DROP TABLE IF EXISTS humanconf;
 CREATE TABLE humanconf (
-	hcid		MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	hcpid		MEDIUMINT UNSIGNED NOT NULL,
+	hcid		INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	hcpid		INT UNSIGNED NOT NULL,
 	formkey		VARCHAR(20) NOT NULL,
 	tries_left	SMALLINT UNSIGNED NOT NULL DEFAULT '3',
 	PRIMARY KEY(hcid),
@@ -15,14 +15,15 @@ CREATE TABLE humanconf (
 
 DROP TABLE IF EXISTS humanconf_pool;
 CREATE TABLE humanconf_pool (
-	hcpid		MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	hcpid		INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	hcqid		SMALLINT UNSIGNED NOT NULL,
 	answer		CHAR(8) NOT NULL,
 	lastused	TIMESTAMP,
 	created_at	DATETIME NOT NULL,
 	inuse		TINYINT DEFAULT '0' NOT NULL,
-	filename	CHAR(63) NOT NULL,
-	html		CHAR(255) NOT NULL,
+	filename_img	VARCHAR(63) NOT NULL,
+	filename_mp3	VARCHAR(63) DEFAULT NULL,
+	html		TEXT NOT NULL,
 	PRIMARY KEY (hcpid),
 	KEY answer (answer),
 	KEY lastused (lastused)
@@ -35,7 +36,7 @@ CREATE TABLE humanconf_pool (
 #
 #DROP TABLE IF EXISTS humanconf_pool_data;
 #CREATE TABLE humanconf_pool_data (
-#	hcpid		MEDIUMINT UNSIGNED NOT NULL,
+#	hcpid		INT UNSIGNED NOT NULL,
 #	data		BLOB NOT NULL,
 #	PRIMARY KEY(hcpid)
 #) TYPE = InnoDB;

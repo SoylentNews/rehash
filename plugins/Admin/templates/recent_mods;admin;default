@@ -11,13 +11,19 @@ en_US
 __name__
 recent_mods
 __template__
-
-[% USE Slash %]
-<TABLE>
-	<TR><TD ALIGN="CENTER">Latest Moderations</TD></TR>
+<p>
 	[% mod_options.hours_back = 72 %]
-	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog("global", "", mod_options) %] </TD></TR>
-</TABLE>
+        [% mod_options.title = "Latest Moderations";
+	   IF constants.m2;
+		   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+		   mod_options.need_m2_form = 1;
+		   mod_options.need_m2_button = 1;
+		   mod_options.meta_mod_only = 1;
+	   END
+	%]
+	[% m1_classname = "Slash::" _ constants.m1_pluginname;
+	   moddb = Slash.getObject(m1_classname);
+	   IF moddb; moddb.dispModCommentLog("global", "", mod_options); END %] 
 
 __seclev__
 500

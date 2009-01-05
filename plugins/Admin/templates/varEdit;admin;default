@@ -11,29 +11,23 @@ en_US
 __name__
 varEdit
 __template__
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="vars">
-<TABLE>
-	<TR>
-		<TD>Select Variable Name</TD><TD>[% vars_select %]
-		<INPUT TYPE="SUBMIT" NAME="varedit" VALUE="Select Var"></TD>
-	</TR>
-	<TR>
-		<TD>Variable Name</TD>
-		<TD><INPUT TYPE="TEXT" NAME="thisname" VALUE="[% varsref.name %]"></TD>
-	</TR>
-	<TR>
-		<TD>Value</TD><TD><INPUT TYPE="TEXT" NAME="value" VALUE="[% varsref.value %]"></TD>
-	</TR>
-	<TR>
-		<TD>Description</TD><TD>
-	<INPUT TYPE="TEXT" NAME="desc" VALUE="[% FILTER strip_attribute %][% varsref.description %][% END %]" size="60"></TD>
-	</TR>
-	<TR>
-		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" NAME="varsave" VALUE="Save"></TD>
-	<TR>
-</TABLE>
-</FORM>
+[% PROCESS titlebar %]
+<div class="generalbody">
+	<form action="[% env.script_name %]" method="post">
+		<fieldset>
+			<legend>Vars editor</legend>
+			<input type="hidden" name="op" value="vars">
+			<label>Select Variable Name</label>[% vars_select %]
+			<input type="submit" name="varedit" value="Select Var" class="button"
+			<label>Variable Name</label>
+			<input type="text" name="thisname" value="[% varsref.name %]">
+			<label>Value</label><input type="text" name="value" value="[% varsref.value %]">
+			<label>Description</label>
+			<input type="text" name="desc" value="[% FILTER strip_attribute %][% varsref.description %][% END %]" size="60">
+			<input type="submit" name="varsave" value="Save" class="button">
+		</fieldset>
+	</form>
+</div>
 
 __seclev__
 500

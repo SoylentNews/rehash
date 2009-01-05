@@ -21,14 +21,14 @@ __template__
 	width="99%"
 	title="Remove an Email Address from Opt-out List" -%]
 
-<FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="optoutrem">
+<form action="[% gSkin.rootdir %]/email.pl" method="post">
+<input type="hidden" name="op" value="optoutrem">
 
-Enter email address to be removed from the opt-out list:<BR>
-<INPUT TYPE="TEXT" NAME="email" SIZE="50">
-<BR><BR>
-<INPUT TYPE="SUBMIT" VALUE="Remove from Opt-out List">
-</FORM>
+Enter email address to be removed from the opt-out list:<br>
+<input type="text" name="email" size="50">
+<br><br>
+<input type="submit" value="Remove from Opt-out List">
+</form>
 
 __version__
 $Id$

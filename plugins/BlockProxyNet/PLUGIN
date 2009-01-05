@@ -1,0 +1,7 @@
+# $Id$
+name=BlockProxyNet
+description="Apply an access modifier like nopost to a proxy network"
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
+task=block_proxy_net.pl
+

@@ -21,4 +21,4 @@ The subscription was purchased on your behalf by [% IF from %][% from %][% ELSE 
 Subscription Details:
 - [% pages %] Page Gift Subscription to [% constants.sitename %]
 
-You can configure your subscription preferences by going to [% constants.absolutedir %]/subscribe.pl
+You can configure your subscription preferences by going to [% gSkin.absolutedir %]/subscribe.pl

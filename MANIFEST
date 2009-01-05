@@ -380,7 +380,6 @@ themes/slashcode/templates/delSection;sections;default
 themes/slashcode/templates/del_message;comments;default
 themes/slashcode/templates/deleted_cids;comments;default
 themes/slashcode/templates/discreate;comments;default
-themes/slashcode/templates/discuss_list;comments;default
 themes/slashcode/templates/dispComment;misc;default
 themes/slashcode/templates/dispComment;misc;light
 themes/slashcode/templates/dispLinkComment;misc;default
@@ -409,7 +408,6 @@ themes/slashcode/templates/footer;misc;light
 themes/slashcode/templates/formLabel;misc;default
 themes/slashcode/templates/formbox;misc;default
 themes/slashcode/templates/formkeyErrors;misc;default
-themes/slashcode/templates/genQuickies;submit;default
 themes/slashcode/templates/getOlderStories;misc;default
 themes/slashcode/templates/getUserAdmin;users;default
 themes/slashcode/templates/header;misc;admin
@@ -436,7 +434,6 @@ themes/slashcode/templates/main;authors;default
 themes/slashcode/templates/mainmenu;misc;default
 themes/slashcode/templates/messages;users;default
 themes/slashcode/templates/metaModerate;metamod;default
-themes/slashcode/templates/miniAdminMenu;users;default
 themes/slashcode/templates/modCommentLog;misc;default
 themes/slashcode/templates/mod_footer;comments;default
 themes/slashcode/templates/mod_header;comments;default
@@ -444,7 +441,6 @@ themes/slashcode/templates/moderation;comments;default
 themes/slashcode/templates/motd;misc;default
 themes/slashcode/templates/netIDInfo;users;default
 themes/slashcode/templates/newUserForm;users;default
-themes/slashcode/templates/newdiscussion;comments;default
 themes/slashcode/templates/organisation;misc;default
 themes/slashcode/templates/pollbooth;misc;default
 themes/slashcode/templates/portalboxtitle;misc;default
@@ -461,7 +457,7 @@ themes/slashcode/templates/regResult;users;default
 themes/slashcode/templates/rereg_mail;messages;default
 themes/slashcode/templates/saveSub;submit;default
 themes/slashcode/templates/savepoll;pollBooth;default
-themes/slashcode/templates/sectionindexd;misc;default
+themes/slashcode/templates/skinindexd;misc;default
 themes/slashcode/templates/sectionisolate;misc;default
 themes/slashcode/templates/select;misc;default
 themes/slashcode/templates/selectThreshLabel;misc;default

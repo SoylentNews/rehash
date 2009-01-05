@@ -12,21 +12,17 @@ __name__
 pagination
 __template__
 	[% back = back || 0;
+	   journal_pagination_op = form.op || 'display';
 	   IF (back > -1) || forward %]
-		</TD></TR>
-		<TR VALIGN="TOP" BGCOLOR="#FFFFFF">
-			<TD ALIGN="RIGHT" BGCOLOR="#FFFFFF">
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt;Next [% constants.journal_default_display %] entries</A>
-				[% END %]
+					<a href="[% gSkin.rootdir %]/journal.pl?op=[% journal_pagination_op %]&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous [% constants.journal_default_display %] entries</a>
+ 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Last [% constants.journal_default_display %] entries&gt;</A>
+					<a href="[% gSkin.rootdir %]/journal.pl?op=[% journal_pagination_op %]&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</a>
 				[% END %]
-			</TD>
-		</TR>
 	[% END %]
 __seclev__
 100

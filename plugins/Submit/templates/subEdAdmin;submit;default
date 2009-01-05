@@ -14,27 +14,21 @@ en_US
 __name__
 subEdAdmin
 __template__
-<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;section=[% form.section | strip_attribute %]">
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="note" VALUE="[% form.note | strip_attribute %]">
-<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% form.section | strip_attribute %]">
+[% refresh = 1 %]
+[% IF form.toggle_bin_refresh.defined; 
+	IF form.toggle_bin_refresh; refresh = 0; ELSE; refresh = 1; END;
+   ELSE;
+	refresh = !user.opt_disable_submit_bin_refresh;
+ END %]
+[% IF refresh %]
+	<meta http-equiv="Refresh" content="900; url=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %][% IF form.nowrapper %]&amp;nowrapper=1[% END %][% IF form.fromconsole %]&amp;fromconsole=1[% END %]">
+[% END %]
+<form action="[% env.script_name %]" method="post">
+<div>
+<input type="hidden" name="note" value="[% form.note | strip_attribute %]">
+<input type="hidden" name="skin" value="[% form.skin | strip_attribute %]">
 
-<TABLE WIDTH="100%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
-
-[%# # temporarily disable %]
-[% IF 0 && weighted.size -%]
-	<TR><TD COLSPAN=4 ALIGN="CENTER"><NOBR>
-	Top Submissions by Weight
-	</NOBR></TD></TR>
-	[%	count = 0;
-			FOR sub = weighted;
-				PROCESS sub_display;
-				"\n";
-				count = count + 1;
-				LAST IF count > constants.submit_num_weighted;
-		END -%]
-	<TR><TD COLSPAN=4 ALIGN="CENTER"><HR NOSHADE></TD></TR>
-[% END -%]
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="submit_story_list">
 
 [% separatecount = 0 %]
 [% FOREACH sub = submissions -%]
@@ -46,7 +40,7 @@ __template__
 [% END %]
 
 [% IF separatecount %]
-	<TR><TD COLSPAN="4"><HR></TD></TR>
+	<tr><td colspan="4"><hr></td></tr>
 	[% FOREACH sub = submissions -%]
 		[% IF sub.separate;
 			PROCESS sub_display;
@@ -55,46 +49,78 @@ __template__
 [% END %]
 
 
-</TABLE>
+</table>
 
-<P>
+<p>
 
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Update">
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Delete">
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Merge">
+[% IF !constants.submit_no_update_button %]
+<input type="submit" name="op" value="Update">
+[% END %]
+<input type="submit" name="op" value="Delete">
+<input type="submit" name="op" value="Merge">
+<script type="text/javascript">
+<!--
+	function selectall (myform) {
+		for (var i = 0; i < myform.elements.length; i++)
+			myform.elements[i].checked = true;
+	}
+	function selectnone (myform) {
+		for (var i = 0; i < myform.elements.length; i++)
+			myform.elements[i].checked = false;
+	}
+	document.write('<input type="button" value="Select All" onclick="selectall(this.form)"> ');
+	document.write('<input type="button" value="Select None" onclick="selectnone(this.form)"> ');
+//-->
+</script>
 
-</FORM>
+<p>
+<a href="[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]&amp;toggle_bin_refresh=[% IF !refresh; "0"; ELSE; 1; END %]">[% IF !refresh;  "Enable Bin Refresh"; ELSE; "Disable Bin Refresh"; END; %]</a>
+</div>
+</form>
 
 [% # Now we define that enignatic "sub_display" we referred to, earlier.
 BLOCK sub_display -%]
 	[% this_note = sub.note || '' %]
 
-	<TR><TD><NOBR>
-		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid | strip_attribute %]" VALUE="[% sub.comment | strip_attribute %]" SIZE="20">
+	<tr class="ps_[% sub.primaryskid %]"><td><nobr>
+		<input type="text" name="comment_[% sub.subid | strip_attribute %]" value="[% sub.comment | strip_attribute %]" size="20">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
-		[% Slash.selectSection("section_$sub.subid", sub.section, 0, 1) %]
+		[% IF form.fromconsole %]<div class="hide">[% END %]
+		[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
+		[% IF form.fromconsole %]</div>[% END %]
 
 		[%# this is called del_ for legacy reasons, but is also use for merging %]
-		</FONT><INPUT TYPE="CHECKBOX" NAME="del_[% sub.subid %]">
-	</NOBR></TD><TD>
+		<input type="checkbox" name="del_[% sub.subid %]">
+	</nobr></td><td>
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
 	[% END %]
-	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&amp;table_section=[% form.section | strip_attribute %]&amp;table_note=[% form.note | strip_attribute %]&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.ssection | strip_attribute %]"
-		>[% sub.strs.0 %]&nbsp;</A>
+	</td><td class="sub_title">
+		<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute;
+			IF form.skin; "&amp;table_skin="; form.skin | strip_attribute; END;
+			IF form.note; "&amp;table_note="; form.note | strip_attribute; END;
+			IF sub.sskin; sub.sskin | strip_attribute; END;
+			IF sub.stitle; sub.stitle | strip_attribute; END;
+			IF form.nowrapper; "&amp;nowrapper=1"; END;
+			IF form.fromconsole; "&amp;fromconsole=1"; END;
+		%]">[% sub.strs.0 %]&nbsp;</a>
 		[% IF constants.submit_show_weight %]
-			[% IF sub.keywords %]<BR><FONT SIZE="2">[% sub.keywords %] [% END %]
+			[% IF sub.keywords %]<br>[% sub.keywords %] [% END %]
 			[% IF sub.weight %] ([% sub.weight %])[% END %]
-			[% IF sub.url %] <B><A HREF="[% sub.url | strip_attribute %]">L</A></B>[% END %]
-			[% IF sub.keywords %]</FONT>[% END %]
+			[% IF sub.url %] <b><a href="[% sub.url | strip_attribute %]">L</a></b>[% END %]
+			[% IF sub.keywords %][% END %]
 		[% END %]
-	</TD><TD><FONT SIZE="2">[% sub.strs.1 %]
-	[% UNLESS sub.is_anon %]
-		([% sub.karma || 0 %])
+	</td><td>
+	[% IF !form.fromconsole %]
+		[% sub.strs.1 %]
+		[% UNLESS sub.is_anon %]
+			([% sub.karma || 0 %])
+		[% END %]
+		<br>[% sub.strs.2 %]
 	[% END %]
-		<BR>[% sub.strs.2 %]</FONT></TD></TR>
+	</td></tr>
 [% END %]
+</div>
 __seclev__
 10000
 __version__

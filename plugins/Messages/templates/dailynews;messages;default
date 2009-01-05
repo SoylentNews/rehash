@@ -19,7 +19,7 @@ __template__
 In this issue:[% FOR story = stories.reverse %]
     * [% story.title %][% END %]
 
-[% FOR story = stories.reverse; topicname = topics.${story.tid}.name;
+[% FOR story = stories.reverse; topicname = topics.${story.tid}.textname;
 %]+--------------------------------------------------------------------+
 [% 
 	box(story.title);
@@ -52,7 +52,7 @@ END %]
 
 
 [% END %]
-Copyright 1997-2003 [% constants.sitepublisher %].  All rights reserved.
+Copyright 1997-2008 [% constants.sitepublisher %].  All rights reserved.
 
 __seclev__
 500

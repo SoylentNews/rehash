@@ -13,31 +13,25 @@ en_US
 __name__
 prefs_titlebar
 __template__
-[% title = title || "$user.nickname (This is you!)";
-PROCESS titlebar title=title width="100%";
 
-tabs = [
-	{ link = "/users.pl?op=edituser",	label = "User",		sel_label = "user" },
-	{ link = "/users.pl?op=edithome",	label = "Homepage",	sel_label = "home" },
-	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" }
-];
-IF constants.plugin.Messages; tabs.push(
-	{ link = "/my/messages",		label = "Messages",	sel_label = "messages" },
-); END;
-IF constants.plugin.Journal; tabs.push(
-	{ link = "/journal.pl?op=editprefs",	label = "Journal",	sel_label = "journal" },
-); END;
-IF Slash.db.getMiscUserOpts.size; tabs.push(
-	{ link = "/users.pl?op=editmiscopts",	label = "Misc",		sel_label = "misc" },
-); END;
-IF constants.plugin.Subscribe; tabs.push(
-	{ link = "/subscribe.pl",		label = "Subscription",	sel_label = "subscription" },
-); END;
-tabs.push(
-	{ link = "/users.pl?op=changepasswd",	label = "Password",	sel_label = "password" },
-);
+[%
+thisnickname = user.nickname | strip_literal;
+title = title || "$thisnickname (This is you!)";
+PROCESS titlebar title=title;
+%]
 
-PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
+[% IF title != 'Preferences' && title != 'Help & Preferences' && title != 'Help' %]
+<div id="usermenu">
+
+[%
+tabs = [ { link = '/help', label = "Return to Help & Preferences", sel_label = "preferences" }, ]
+%]
+
+[% PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
+
+</div>
+
+[% END %]
 
 __seclev__
 10000

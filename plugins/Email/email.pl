@@ -1,20 +1,19 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
 # Slash::Email - web script
 # 
 # Email a Slash site story to a friend!
-# (c) OSDN 2002
+# (c) OSTG 2002
 
 use strict;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Display;
 use Slash::Utility;
 use Slash::Constants ':messages';
-use Email::Valid;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -28,10 +27,11 @@ sub main {
 	my $constants	= getCurrentStatic();
 	my $user	= getCurrentUser();
 	my $form	= getCurrentForm();
+	my $gSkin       = getCurrentSkin();
 
 	# Primary fields.
-	my $sid		= $form->{sid};
-	my $email	= $form->{email};
+	my $sid		= $form->{sid} || '';
+	my $email	= $form->{email} || '';
 
 	# Use for ops where anonymous access is optional.
 	my $allow_anon =
@@ -102,7 +102,7 @@ sub main {
 		Messages	=> getObject('Slash::Messages'),
 	);
 	unless ($Plugins{Email} && $Plugins{Messages}) {
-		redirect("$constants->{rootdir}/");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
@@ -130,7 +130,8 @@ sub main {
 			$constants, 
 			$user, 
 			$form,
-			\%Plugins
+			$gSkin,
+			\%Plugins,
 		);
 	} else {
 		print getData('formkeyError', {
@@ -144,11 +145,11 @@ sub main {
 }
 
 sub emailStoryForm {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 
 	unless ($constants->{email_allow_anonymous} || !$user->{is_anon}) {
 		print getData('not_logged_in');
-		my $url = "$constants->{rootdir}/email.pl?op=email_form&sid=$form->{sid}";
+		my $url = "$gSkin->{rootdir}/email.pl?op=email_form&sid=$form->{sid}";
 		slashDisplay('userlogin', { return_url => $url });
 		return;
 	}
@@ -160,12 +161,12 @@ sub emailStoryForm {
 }
 
 sub emailStory {
-	my($slashdb, $constants, $user, $form, $Plugins) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin, $Plugins) = @_;
 	my($Email, $Messages) = @{$Plugins}{qw(Email Messages)};
 
 	# Check input for valid RFC822 email address.
 	my $email = decode_entities($form->{email});
-	if (!Email::Valid->rfc822($email)) {
+	if (!emailValid($email)) {
 		print getData('invalid_email');
 		return;
 	}
@@ -176,17 +177,10 @@ sub emailStory {
 		return;
 	}
 
-	for (qw(ipid subnetid uid)) {
-		# We skip the UID test for anonymous users.
-		next if $_ eq 'uid' && $user->{is_anon};
-		# Otherwise we perform the specific read-only test.
-		my $read_only = $slashdb->checkReadOnly('nopost', {
-			$_ => $user->{$_},
-		});
-		if ($read_only) {
-			print getData('readonly');
-			return;
-		}
+	# XXXSRCID might want to do this on a reader db
+	if ($slashdb->checkAL2($user->{srcids}, [qw( nopost spammer )])) {
+		print getData('readonly');
+		return;
 	}
 
 	# Retrieve story and all information necessary for proper display.
@@ -232,17 +226,17 @@ sub emailStory {
 }
 
 sub emailOptoutForm {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 
 	slashDisplay('emailOptoutForm');
 }
 
 sub emailOptout {
-	my($slashdb, $constants, $user, $form, $Plugins) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin, $Plugins) = @_;
 	my($Email, $Messages) = @{$Plugins}{qw(Email Messages)};
 
 	my $email = decode_entities($form->{email});
-	if (Email::Valid->rfc822($email)) {
+	if (emailValid($email)) {
 		# Send final confirmation email to the address being removed
 		# as another form of abuse protection.
 		my $msg_data = {
@@ -271,16 +265,16 @@ sub emailOptout {
 }
 
 sub removeOptoutForm {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 
 	slashDisplay('removeOptoutForm');
 }
 
 sub removeOptout {
-	my($slashdb, $constants, $user, $form, $Plugins) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin, $Plugins) = @_;
 
-	my $email = decode_entities($form->{email});
-	my $rc = $Plugins->{Email}->removeFromOptoutList($form->{email});
+	my $email = decode_entities($form->{email} || '');
+	my $rc = $Plugins->{Email}->removeFromOptoutList($form->{email} || '');
 	print getData('optout_removed', { result => $rc });
 
 	removeOptoutForm(@_);

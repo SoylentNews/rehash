@@ -13,51 +13,51 @@ en_US
 __name__
 recent_webheads
 __template__
-[% PROCESS titlebar title="Recent Webhead Data" width='100%' %]
+[% PROCESS titlebar title="Recent Webhead Data" %]
+<div class="generalbody">
+<table cellspacing="2" border="0">
 
-<TABLE CELLSPACING="2" BORDER="0">
-
-<TR>
-<TH>&nbsp;</TH>
-<TH ROWSPAN="2" VALIGN="BOTTOM">total<BR>hits</TH>
+<tr>
+<th>&nbsp;</th>
+<th rowspan="2" valign="BOTTOM">total<br>hits</th>
 [% FOREACH wh = webheads %]
-	<TH COLSPAN=2>[% wh %]</TH>
+	<th colspan=2>[% wh %]</th>
 [% END %]
-</TR>
+</tr>
 
-<TR>
-<TH>minute</TH>
+<tr>
+<th>minute</th>
 [% FOREACH wh = webheads %]
-	<TH>time</TH><TH>hits</TH>
+	<th>time</th><th>hits</th>
 [% END %]
-</TR>
+</tr>
 
 [% FOREACH min = data.keys.sort %]
 
-	<TR>
-	<TD ALIGN="RIGHT">
+	<tr>
+	<td align="right">
 		[% min %]
-	</TD>
-	<TD ALIGN="RIGHT">
+	</td>
+	<td align="right">
 		[% total_hits = 0;
 		   FOREACH wh = webheads;
 			total_hits = total_hits + data.$min.$wh.c;
 		   END %]
 		   [% total_hits %]
-	</TD>
+	</td>
 
 	[% FOREACH wh = webheads;
 	   time = data.$min.$wh.dur || '-';
 	   hits = data.$min.$wh.c || '-' %]
-		<TD ALIGN="RIGHT">[% time %]</TD>
-		<TD ALIGN="RIGHT">[% hits %]</TD>
+		<td align="right">[% time %]</td>
+		<td align="right">[% hits %]</td>
 	[% END %]
-	</TR>
+	</tr>
 
 [% END %]
 
-</TABLE>
-
+</table>
+</div>
 __seclev__
 100
 __version__

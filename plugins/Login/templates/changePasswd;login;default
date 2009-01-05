@@ -1,0 +1,85 @@
+__section__
+default
+__description__
+Change password form
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+changePasswd
+__template__
+<div id="slashboxes">
+        [% PROCESS userboxes %]
+</div>
+[% thisnickname = user.nickname | strip_literal;
+   title = "Configuring Password For $thisnickname ($user.uid)" %]
+<div id="users-blocks">
+        [% PROCESS prefs_titlebar tab_selected='password' %]
+        <div class="generalbody">
+[% IF form.note == "Please change your password now!";
+        "Please change your password now! ";
+END; note %]
+
+[% IF constants.offer_insecure_login_link -%]
+		<p>You can automatically log in by clicking
+		 <a href="[% constants.real_rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page. 
+		This is totally insecure, but very convenient.
+		</p>
+[%- END %]
+
+		<form action="[% constants.real_rootdir %]/login.pl" method="post">
+		<fieldset>
+		<legend></legend>
+		[% PROCESS formkey_tag %]
+		<input type="hidden" name="uid" value="[% user.uid %]">
+
+[%- session = Slash.db.getDescriptions('session_login');
+   session_sel = Slash.createSelect('session_login', session, user.session_login, 1);
+
+   clocation = Slash.db.getDescriptions('cookie_location');
+   clocation_order = [];
+   FOREACH cloc = ['none', 'classbid', 'subnetid', 'ipid'];
+      clocation_order.push(cloc) IF clocation.$cloc;
+   END;
+   clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_location, 1, 0, clocation_order);
+-%]
+
+		My <b><a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a></b> [% session_sel %] and [% clocation_sel %]
+
+		<p>Note: changing your password or login cookie preferences will disable all
+		other cookies for this account, requiring all other browsers using this account
+		to reauthenticate.</p>
+
+			<label>
+				Current Password
+			</label>
+			<div class="note">
+				To change your password, enter your current password.
+			</div>
+		
+			<input type="password" name="oldpass" size="20" maxlength="20" value=""><br>
+
+			<label>
+				New Password
+			</label>
+			<div class="note">
+				Enter your new password twice, must be 6-20 chars long.
+			</div>
+			<input type="password" name="pass1" size="20" maxlength="20">
+			<input type="password" name="pass2" size="20" maxlength="20">
+
+
+			<input type="hidden" name="op" value="saveprefs">
+			<input type="submit" value="Change Login Prefs" class="button">
+			</fieldset>
+		</form>
+	</div>
+</div>
+__seclev__
+500
+__version__
+$Id$

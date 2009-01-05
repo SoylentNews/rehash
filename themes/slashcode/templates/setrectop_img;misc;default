@@ -13,14 +13,9 @@ en_US
 __name__
 setrectop_img
 __template__
-[% USE Slash %]
-
-<TD><A HREF="[% constants.rootdir %]/search.pl?topic=[% id %]"><IMG
-                SRC="[% image %]"
-                WIDTH="[% width %]" HEIGHT="[% height %]"
-                BORDER="0" ALT="[% alttext %]" TITLE="[% alttext %]"></A>
-</TD>
-
+<li>
+	<a href="[% gSkin.rootdir %]/search.pl?tid=[% id %]"><img src="[% image %]" width="[% width %]" height="[% height %]" alt="[% textname | strip_attribute %]" title="[% textname | strip_attribute %]" ></a>
+</li>
 __seclev__
 10000
 __version__

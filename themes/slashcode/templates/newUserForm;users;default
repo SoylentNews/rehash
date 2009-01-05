@@ -14,37 +14,37 @@ __name__
 newUserForm
 __template__
 [% PROCESS titlebar title=title width="100%" %]
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+<form action="[% env.script_name %]" method="post">
+<table align="CENTER" width="95%" bgcolor="[% user.colors.bg_2 %]">
 [% PROCESS formkey_tag %]
-	<TR>
-		<TD><P>(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-$</TT>, plus space,
-		are allowed in nicknames, and all others will be stripped out.)<BR>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-		<B>Nick Name</B><BR>
-		<INPUT TYPE="TEXT" NAME="newusernick" VALUE="">
-		</TD>
-	</TR>
-	<TR>
-	 	<TD>
-		<P>Email address to send your registration information to.
-		This address will <B>not</B> be displayed on [% constants.sitename %]
-		without you setting your preferences to display it.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-		<B>Real Email</B> <BR>
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="newuser">
-		<INPUT TYPE="TEXT" NAME="email" VALUE="" SIZE="40"><BR>
-		<B>Retype Real Email</B> (these two email addresses must match)<BR>
-		<INPUT TYPE="TEXT" NAME="email2" VALUE="" SIZE="40"><BR>
-		<INPUT TYPE="CHECKBOX" NAME="comment_reply" VALUE="1" CHECKED> Replies to my comments will be mailed to me<BR>
-		<INPUT TYPE="CHECKBOX" NAME="newsletter" VALUE="1"> Send me the newsletter<BR>
-		<INPUT TYPE="CHECKBOX" NAME="headlines" VALUE="1"> Send me the daily headlines<BR>
+	<tr>
+		<td><p>(Note: only the characters <tt>0-9a-zA-Z_.+!*'(),-$</tt>, plus space,
+		are allowed in nicknames, and all others will be stripped out.)<br>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<b>Nick Name</b><br>
+		<input type="text" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
+		</td>
+	</tr>
+	<tr>
+	 	<td>
+		<p>Email address to send your registration information to.
+		This address will <b>not</b> be displayed on [% constants.sitename %]
+		without you setting your preferences to display it.</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<b>Real Email</b> <br>
+		<input type="hidden" name="op" value="newuser">
+		<input type="text" name="email" value="" size="40"><br>
+		<b>Retype Real Email</b> (these two email addresses must match)<br>
+		<input type="text" name="email2" value="" size="40"><br>
+		<input type="checkbox" name="comment_reply" value="1"[% constants.markup_checked_attribute %]> Replies to my comments will be mailed to me<br>
+		<input type="checkbox" name="newsletter" value="1"> Send me the newsletter<br>
+		<input type="checkbox" name="headlines" value="1"> Send me the daily headlines<br>
 		My timezone is [%
 			USE this_format = format('%+0.4d %s');
 			this_tzdescs = Slash.db.getDescriptions('tzdescription');
@@ -60,38 +60,38 @@ __template__
 			Slash.createSelect('tzcode',
 				these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
 			);
-		%]<BR>
+		%]<br>
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_newuser && user.state.hc %]
         [% IF user.state.hcinvalid %]
                 [% user.state.hcerror %]
         [% ELSE %]
-                <TABLE CELLSPACING=1 BORDER=0><TR VALIGN="MIDDLE">
-                <TD>[% user.state.hcquestion %]</TD>
-                <TD>[% user.state.hchtml %]</TD>
-                <TD><INPUT TYPE="TEXT" NAME="hcanswer"
-                        VALUE=""
-                        SIZE=8 MAXLENGTH=8></TD>
-                </TR></TABLE>
-		<P>Click the button to create your account and be mailed a password.</P>
-		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
+                <table cellspacing=1 border=0><tr valign="MIDDLE">
+                <td>[% user.state.hcquestion %]</td>
+                <td>[% user.state.hchtml %]</td>
+                <td><input type="text" name="hcanswer"
+                        value=""
+                        size=8 maxlength=8></td>
+                </tr></table>
+		<p>Click the button to create your account and be mailed a password.</p>
+		<input type="submit" name="newuser" value="Create Account">
         [% END %]
 [% ELSE %]
-		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
+		<input type="submit" name="newuser" value="Create Account">
 [% END %]
 
-		</TD>
-	</TR>
-</TABLE>
-</FORM>
+		</td>
+	</tr>
+</table>
+</form>
 
-<P>
+<p>
 [% IF ! suadmin_flag %]
 	[% IF ! logged_in %]
-<A HREF="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</A>.<BR>
+<a href="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
 	[% END %]
-Forget your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Have your
-password mailed to you</A> by entering your nickname, uid, or email address.
-</P>
+Forget your password? <a href="[% env.script_name %]?op=mailpasswdform">Have your
+password mailed to you</a> by entering your nickname, uid, or email address.
+</p>
 [% END %]
 __seclev__
 10000

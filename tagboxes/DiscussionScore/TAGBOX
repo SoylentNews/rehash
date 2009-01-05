@@ -1,0 +1,5 @@
+# $Id$
+name=DiscussionScore
+description=Track comment scores within a discussion
+mysql_dump=mysql_dump.sql
+requiresplugin=TagModeration

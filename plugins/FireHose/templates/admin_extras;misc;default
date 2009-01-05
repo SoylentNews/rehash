@@ -1,0 +1,73 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+admin_extras
+__seclev__
+10000
+__template__
+        <form action="[% gSkin.rootdir %]/submit.pl" method="post">
+        <table class="data" width="100%">
+        <tr class="data_head">
+                <th colspan="4">Submissions Memory</th>
+        </tr>
+[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
+        <tr class="data_hl[% i %]">
+                <td>[% subnote.submatch %]</td>
+                <td>[% subnote.subnote %]</td>
+                <td>[% subnote.time %]</td>
+                <td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
+        </tr>
+[% END # FOREACH %]
+        <tr>
+                <td><input name="submatch" size="10" id="submatch-[% item.id %]"></td>
+                <td colspan="2"><input name="subnote" size="40" id="subnote-[% item.id %]"></td>
+                <td>
+                      [% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
+                      [% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
+                      <input type="hidden" name="op" value="viewsub">
+                      <input type="hidden" name="subid" value="[% subid %]">
+                      <input type="submit" value="Remember" onclick="admin_submit_memory([% item.id %]); return false;">
+              </td>
+
+        </tr>
+	<tr>
+		<td colspan="2" id="sub_mem_message-[% item.id %]"></td>
+	</tr>
+</table>
+</form>
+[% IF similar_stories.size > 0 %]
+	<table border="0" cellpadding="2" cellspacing="0" class="data">
+		<tr class="data_head"><td><b>Similar Stories</b></td></tr>
+		[% FOREACH story = similar_stories %]
+			<tr>
+			<td valign="TOP">[% IF story.displaystatus == 0;
+				"&nbsp;";
+				ELSIF story.displaystatus == 1;
+					"<i>sect</i>";
+				ELSE;
+					"<i>ND</i>";
+				END; %]</td>
+			<td align="RIGHT" valign="TOP">[% story.weight %]</td>
+			<td valign="TOP"><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+			[% story.title %]</a></td>
+			<td valign="TOP">[% Slash.timeCalc(story.time, "%Y-%m-%d") %]</td>
+			<td valign="TOP">
+			[% FOREACH word = story.words %]
+				[%- word -%][% UNLESS words_seen.$word %]<input type="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
+				[% words_seen.$word = 1; %]
+			[% END %]
+			</td>
+			</tr>
+		[% END %]
+	</table>
+[% END %]
+__version__
+$Id$

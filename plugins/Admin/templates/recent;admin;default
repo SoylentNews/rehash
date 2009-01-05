@@ -17,13 +17,20 @@ en_US
 __name__
 recent
 __template__
-[% PROCESS titlebar title="Recent Comments and Moderation" width='100%' %]
-
+[% PROCESS titlebar title="Recent Comments and Moderation" %]
+<div class="generalbody">
+[% skins = Slash.db.getSkins %]
+Show only comments from section:
+[% FOREACH skid = skins.keys %]
+	<a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;primaryskid=[% skid %]">[% skins.$skid.title %]</a> |	
+[% END %]
+<a href="[% gSkin.rootdir %]/admin.pl?op=recent">All</a>	
+<br>
 [% IF !startat; startat = 0; END;
    IF startat > 0;
 	next_startat = startat - 100;
 	IF next_startat < 0; next_startat = 0; END; %]
-	<form action="[% constants.rootdir %]/admin.pl" method="GET">
+	<form action="[% gSkin.rootdir %]/admin.pl" method="get">
 	<input type="hidden" name="op" value="recent">
 	[% IF min.defined %]
 		<input type="hidden" name="min" value="[% min | strip_attribute %]">
@@ -31,11 +38,14 @@ __template__
 	[% IF max.defined %]
 		<input type="hidden" name="max" value="[% max | strip_attribute %]">
 	[% END %]
+	<input type="hidden" name="primaryskid" value="[% form.primaryskid | strip_attribute %]">
+	<input type="hidden" name="sid" value="[% form.sid | strip_attribute %]">
 	<input type="hidden" name="startat" value="[% next_startat | strip_attribute %]">
 	<input type="submit" value="&lt;&lt; Next Comments">
 	</form>
 [% END %]
-<form action="[% constants.rootdir %]/admin.pl" method="post">
+<form action="[% gSkin.rootdir %]/admin.pl" method="post">
+[% IF form.sid %]<a href="[% gSkin.rootdir %]/admin.pl?op=recent">View recent comments for all discussions</a><br> [% END %]
 <table>
 	<tr>
 		<th>sid</th>
@@ -54,21 +64,21 @@ __template__
 
 	[% FOREACH comm = recent_comments %]
 	<tr>
-		<td align="right">[% comm.sid %]</td>
-		<td align="right"><A HREF="[% constants.rootdir
+		<td align="right"><a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</a></td>
+		<td align="right"><a href="[% gSkin.rootdir
 			%]/comments.pl?sid=[% comm.sid | strip_attribute
 			%]&amp;cid=[% comm.cid | strip_attribute
 			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[%
-			comm.cid %]</A></td>
-		<td align="left"><A HREF="[% constants.rootdir
+			comm.cid %]</a></td>
+		<td align="left"><a href="[% gSkin.rootdir
 			%]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[%
-			comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</A></td>
+			comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
 		<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
-			IF comm.uid != constants.anonymous_coward_uid %]<A HREF="[%
-			constants.rootdir
+			IF comm.uid != constants.anonymous_coward_uid %]<a href="[%
+			gSkin.rootdir
 			%]/users.pl?op=userinfo&amp;uid=[%
 			comm.uid | strip_attribute %]">[% END %][% comm.uid %][%
-			IF comm.uid != constants.anonymous_coward_uid %]</A>[%
+			IF comm.uid != constants.anonymous_coward_uid %]</a>[%
 			END %]) &nbsp; </td>
 		<td align="right">[% comm.score %]</td>
 		<td align="right">[% comm.sum_val %]</td>
@@ -91,7 +101,7 @@ constants.reasons, '', 1, 1) %]</td>
 <input type="submit" name="submit" value="Moderate">
 <input type="hidden" name="startat" value="[% startat | strip_attribute %]">
 </form>
-<form action="[% constants.rootdir %]/admin.pl" method="GET">
+<form action="[% gSkin.rootdir %]/admin.pl" method="get">
 [% IF min.defined %]
 	<input type="hidden" name="min" value="[% min | strip_attribute %]">
 [% END %]
@@ -100,9 +110,10 @@ constants.reasons, '', 1, 1) %]</td>
 [% END %]
 <input type="hidden" name="startat" value="[% prev_startat | strip_attribute %]">
 <input type="submit" value="Prev Comments &gt;&gt;">
+<input type="hidden" name="sid" value="[% form.sid | strip_attribute %]">
 <input type="hidden" name="op" value="recent">
 </form>
-
+</div>
 __seclev__
 100
 __version__

@@ -13,28 +13,28 @@ listMiners
 __template__
 [% INCLUDE titlebar width="100%" title="List of miners" %]
 
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="GET">
-<TABLE>
-	<TR>
-		<TD><input type="submit" value="Create a new miner named:">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="get">
+<table>
+	<tr>
+		<td><input type="submit" value="Create a new miner named:">
 		<input type="text" size="20" name="newname" value="">
-		<input type="hidden" name="op" value="newminer"> </TD>
-	</TR>
-</TABLE>
-<TABLE BORDER="0">
-	<TR>
-		<TD COLSPAN="8">&nbsp;</TD>
-	</TR>
-	<TR>
-		<TD><B>Name &nbsp; <B></TD>
-		<TD align=right><B>&nbsp; URLs &nbsp; </B></TD>
-		<TD align=right><B>&nbsp; "Hits" &nbsp; </B></TD>
-		<TD align=center><B>&nbsp; Owner &nbsp; </B></TD>
-		<TD align=center><B>&nbsp; Last Editor &nbsp; </B></TD>
-		<TD align=center><B>&nbsp; Last Edit &nbsp; </B></TD>
-		<TD align=center><B>&nbsp; Status &nbsp; </B></TD>
-		<TD><B>&nbsp; Comment &nbsp; </B></TD>
-	</TR>
+		<input type="hidden" name="op" value="newminer"> </td>
+	</tr>
+</table>
+<table border="0">
+	<tr>
+		<td colspan="8">&nbsp;</td>
+	</tr>
+	<tr>
+		<td><b>Name &nbsp; <b></td>
+		<td align=right><b>&nbsp; URLs &nbsp; </b></td>
+		<td align=right><b>&nbsp; "Hits" &nbsp; </b></td>
+		<td align=center><b>&nbsp; Owner &nbsp; </b></td>
+		<td align=center><b>&nbsp; Last Editor &nbsp; </b></td>
+		<td align=center><b>&nbsp; Last Edit &nbsp; </b></td>
+		<td align=center><b>&nbsp; Status &nbsp; </b></td>
+		<td><b>&nbsp; Comment &nbsp; </b></td>
+	</tr>
 
 [% FOR m = miners -%]
 [%
@@ -45,22 +45,22 @@ __template__
 	nugget_numbers = m.nugget_numbers;
 	IF m.name != 'none' &&	(!counttest || (counttest < threeday) || 
 				(counttest < sevenday));
-		nugget_numbers = "<font color=\"red\">$nugget_numbers</font>";
+		nugget_numbers = "$nugget_numbers";
 	END;
 	url_number = BLOCK -%]
-		[% IF m.url_number_highlite %]<font color="red">[% END 
+		[% IF m.url_number_highlite %][% END 
 		%][% m.url_count %]:&nbsp;[% m.week_count %][% 
-		IF m.url_number_highlite %]</font>[% END %]
+		IF m.url_number_highlite %][% END %]
 [%	END -%]
 [%	progress_text = BLOCK -%]
 		[% PROCESS color_progress miner=m -%]
-		<b><font color="[% progress_color %]">[% m.progress 
-		%]</font></b>
+		<b>[% m.progress 
+		%]</b>
 [%	END -%]
-	<TR [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %]> 
-                <td><A HREF="[% constants.rootdir
+	<tr [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %]> 
+                <td><a href="[% gSkin.rootdir
 		-%]/newsvac.pl?op=editminer&miner_id=[% 
-		m.miner_id %]">[% m.name %]</A>&nbsp;</td>
+		m.miner_id %]">[% m.name %]</a>&nbsp;</td>
 		<td align=right>&nbsp;[% url_number %]&nbsp;</td> 
 		<td align=right>&nbsp;[% nugget_numbers %]&nbsp;</td>
        		<td align=center>&nbsp;[% m.owner_aid %]&nbsp;</td>
@@ -68,58 +68,58 @@ __template__
 		<td align=center>&nbsp;[% m.last_edit_formatted %]&nbsp;</td>
 		<td align=center>&nbsp;[% progress_text %]&nbsp;</td>
 		<td>&nbsp;[% m.comment %]</td>
-	</TR>                           
+	</tr>                           
 [%	IF m.newrow -%]
 	<tr><td colspan=8>&nbsp;</td></tr> 
 [%	END -%]
 [% END -%]
-</TABLE>
+</table>
 
 [% IF miners_nourl.size -%]
-<TABLE BORDER=0 WIDTH="90%">
-<TR>
-	<TD COLSPAN="6" ALIGN="CENTER">
-		<BR><B>Miners with no referenced URLs</B><BR>
-	</TD>
-</TR>
-<TR ALIGN="CENTER"">
-	<TH ALIGN="LEFT">Name</TH>
-	<TH>Owner</TH>
-	<TH>Last&nbsp;Editor</TH>
-	<TH>Last&nbsp;Edited</TH>
-	<TH>Progress</TH>
-	<TH>Comment</TH>
-</TR>
+<table border=0 width="90%">
+<tr>
+	<td colspan="6" align="CENTER">
+		<br><b>Miners with no referenced URLs</b><br>
+	</td>
+</tr>
+<tr align="CENTER"">
+	<th align="LEFT">Name</th>
+	<th>Owner</th>
+	<th>Last&nbsp;Editor</th>
+	<th>Last&nbsp;Edited</th>
+	<th>Progress</th>
+	<th>Comment</th>
+</tr>
 [% FOR m=miners_nourl -%]
 [% progress_text = BLOCK -%]
 	[% PROCESS color_progress miner=m -%]
-	<b><font color="[% progress_color %]">[% m.progress 
-	%]</font></b>
+	<b>[% m.progress 
+	%]</b>
 [% END %]
-<TR [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %] ALIGN="LEFT"> 
-	<td><A HREF="[% constants.rootdir %]/newsvac.pl?op=editminer&miner_id=[% 
-	m.miner_id -%]">[% m.name %]</A>&nbsp;</td>
+<tr [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %] align="LEFT"> 
+	<td><a href="[% gSkin.rootdir %]/newsvac.pl?op=editminer&miner_id=[% 
+	m.miner_id -%]">[% m.name %]</a>&nbsp;</td>
 	<td align=center>&nbsp;[% m.owner_aid %]&nbsp;</td>
 	<td align=center>&nbsp;[% m.last_edit_aid %]&nbsp;</td>
 	<td align=center>&nbsp;[% m.last_edit_formatted %]&nbsp;</td>
 	<td align=center>&nbsp;[% progress_text %]&nbsp;</td>
 	<td>&nbsp;[% m.comment %]</td>
-</TR>
+</tr>
 [% END -%]
-</TABLE>
+</table>
 [% END -%]
 
-</FORM>
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<TABLE>
-	<TR>
-		<TD><input type="submit" value="Create a new miner named:">
+</form>
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<table>
+	<tr>
+		<td><input type="submit" value="Create a new miner named:">
 		<input type="text" size="20" name="newname" value="">
 		<input type="hidden" name="op" value="newminer"> 
-		</TD>
-	</TR>
-</TABLE>
-</FORM>
+		</td>
+	</tr>
+</table>
+</form>
 
 [% BLOCK color_progress -%][%
 progress_color = 'green';

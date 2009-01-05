@@ -1,0 +1,72 @@
+__section__
+default
+__description__
+Popup tree UI for topics in admin editor
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+topic_popup_ui
+__template__
+<table cellpadding="2"><tr><td>
+[%- name = name.0 %]
+[%- IF include_css %]
+<link rel="stylesheet" type="text/css" rev="alternate" href="[% gSkin.rootdir %]/admin-topic-popup.css?[% constants.cvs_tag_currentcode %]">
+[%- END %]
+<script src="[% gSkin.rootdir %]/admin-topic-popup.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+
+<input type="hidden" value="preview" name="[% name %]_submit_op">
+[% mykey = name _ "_saved_tree" -%]
+<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
+[% mykey = name _ "_tree_pref" -%]
+<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
+
+<select name="[% name %]_main_select" size=10 multiple>
+[%- myweights = constants.topic_popup_weights.keys.nsort.reverse;
+    myweight = myweights.shift;
+
+    FOREACH this_stid = stid_ordered;
+      WHILE stid.$this_stid < myweight;
+        IF constants.topic_popup_weights.$myweight %]
+<option value="-[% myweight %]">-^- [% constants.topic_popup_weights.$myweight | strip_html %] -^-</option>
+[%-     END;
+        myweight = myweights.shift;
+        LAST IF myweight == 0;
+      END;
+%]
+<option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %]</option>
+[%- END;
+
+    WHILE myweight || myweights.size;
+      IF constants.topic_popup_weights.$myweight %]
+<option value="-[% myweight %]">-^- [% constants.topic_popup_weights.$myweight | strip_html %] -^-</option>
+[%-   END;
+      myweight = myweights.shift;
+    END;
+%]</select>
+
+</td><td style="vertical-align:top">
+
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-arrow-up.gif"   alt="up"     title="Move Item Up"       width="15" height="9"  onclick="[% name %]_move_item(1)"><br>
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-remove.gif"     alt="remove" title="Remove Topic"       width="15" height="15" onmouseup="[% name %]_remove()" onmousedown="document.[% form_field_form %].[% name %]_main_select.focus()"><br>
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-open.gif"       alt="open"   title="Open Topics Window" width="15" height="15" onmouseup="[% name %]_show('[% user.$mykey %]')" onmousedown ="document.[% form_field_form %].[% name %]_main_select.focus()" name="[% name %]_topic_toggle"><br>
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-arrow-down.gif" alt="down"   title="Move Item Down"     width="15" height="9"  onclick="[% name %]_move_item(-1)">
+
+</td><td>
+
+</td></tr></table>
+
+[% mykey = name _ "_saved_tree" -%]
+<script language="javascript">
+	[% name %]_load_names();
+	var list = new Array ([% user.$mykey %]);
+	[% name %]_reset_saved_tree(list);
+</script>
+
+__seclev__
+10000
+__version__
+$Id$

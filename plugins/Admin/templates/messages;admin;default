@@ -15,71 +15,71 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'varSave-message' %]
-Saved [% form.thisname %]<BR>
+Saved [% form.thisname %]<br>
 
 [% CASE 'varDelete-message' %]
-<B>Deleted [% form.thisname %]!</B><BR>
+<b>Deleted [% form.thisname %]!</b><br>
 
 [% CASE 'authorInsert-message' %]
-	Inserted [% form.thisaid %]<BR>
+	Inserted [% form.thisaid %]<br>
 
 [% CASE 'authorSave-message' %]
-	Saved [% form.thisaid %]<BR>
+	Saved [% form.thisaid %]<br>
 
 [% CASE 'authorDelete-message' %]
-	<B>Deleted [% form.thisaid %]!</B><BR>
+	<b>Deleted [% form.thisaid %]!</b><br>
 
 [% CASE 'authorDelete-confirm-message' %]
-	<B>Do you really want to delete [% aid %]?</B><BR>
-	<INPUT TYPE="HIDDEN" VALUE="[% aid %]" NAME="thisaid">
-	<INPUT TYPE="SUBMIT" VALUE="Cancel delete [% aid %]" NAME="authordelete_cancel">
-	<INPUT TYPE="SUBMIT" VALUE="Delete [% aid %]" NAME="authordelete_confirm">
+	<b>Do you really want to delete [% aid %]?</b><br>
+	<input type="hidden" value="[% aid %]" name="thisaid">
+	<input type="submit" value="Cancel delete [% aid %]" name="authordelete_cancel">
+	<input type="submit" value="Delete [% aid %]" name="authordelete_confirm">
 
 [% CASE 'authorDelete-deleted-message' %]
-	<B>Deleted [% aid %]!</B><BR>
+	<b>Deleted [% aid %]!</b><br>
 
 [% CASE 'authorDelete-cancel-message' %]
-	<B>Canceled Deletion of [% aid %]!</B><BR>
+	<b>Canceled Deletion of [% aid %]!</b><br>
 
 [% CASE 'blockSave-exists-message' %]
-	<P><B>This block, [% bid %], already exists! <BR>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</P>
+	<p><b>This block, [% bid %], already exists! <br>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</p>
 
 [% CASE 'templateSave-exists-message' %]
-	<P><B>This template, [% name %], tpid [% tpid %], already exists! <BR>Hit the "back" button, and try another bid (loo
+	<p><b>This template, [% name %], tpid [% tpid %], already exists!
 
 [% CASE 'blockSave-inserted-message' %]
-	Inserted [% bid %]<BR>
+	Inserted [% bid %]<br>
 
 [% CASE 'templateSave-inserted-message' %]
-	Inserted template [% name %], tpid [% tpid %]<BR>
+	Inserted template [% name %], tpid [% tpid %]<br>
 
 [% CASE 'blockSave-saved-message' %]
-	Saved [% bid %]<BR>
+	Saved [% bid %]<br>
 
 [% CASE 'templateSave-saved-message' %]
-	Saved template [% name %], tpid [% tpid %]<BR>
+	Saved template [% name %], tpid [% tpid %]<br>
 
 [% CASE 'blockDelete-message' %]
-	<B>Deleted [% bid %]!</B><BR>
+	<b>Deleted [% bid %]!</b><br>
 
 [% CASE 'templateDelete-message' %]
-	<B>Deleted [% name %], tpid [% tpid %]!</B><BR>
+	<b>Deleted [% name %], tpid [% tpid %]!</b><br>
 
 [% CASE 'topicSave-message' %]
-	<B>Saved [% form.tid %]!</B><BR>
+	<b>Saved [% form.tid %]!</b><br>
 
 [% CASE 'updateFilter-message' %]
 
 	[% IF ! form.regex %]
-	<B>You haven't typed in a regex.</B><BR>
+	<b>You haven't typed in a regex.</b><br>
 	[% END %]
 
 	[% IF ! form.field %]
-	<B>You haven't typed in a form field.</B><BR>
+	<b>You haven't typed in a form field.</b><br>
 	[% END %]
 
 [% CASE 'topicDelete-message' %]
-	<B>Deleted [% tid %]!</B><BR>
+	<b>Deleted [% tid %]!</b><br>
 [% END %]
 __seclev__
 500

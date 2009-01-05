@@ -2,6 +2,8 @@ __section__
 default
 __description__
 
+NO LONGER USED
+
 __title__
 
 __page__
@@ -11,17 +13,16 @@ en_US
 __name__
 pagination
 __template__
-[% USE Slash %]
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&amp;[% END %]start=[% back %]">&lt;Last [% constants.discussion_display_limit %] [% label %]s</A>
+					<a href="[% gSkin.rootdir %]/comments.pl?[% IF args %][% args %]&amp;[% END %]start=[% back %]">&lt;Last [% constants.discussion_display_limit %] [% label %]s</a>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&amp;[% END %]start=[% forward %]">Next [% constants.discussion_display_limit %] [% label %]s&gt;</A>
+					<a href="[% gSkin.rootdir %]/comments.pl?[% IF args %][% args %]&amp;[% END %]start=[% forward %]">Next [% constants.discussion_display_limit %] [% label %]s&gt;</a>
 				[% END %]
 	[% END %]
 __seclev__

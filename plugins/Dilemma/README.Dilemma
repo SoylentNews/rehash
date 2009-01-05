@@ -1,0 +1,267 @@
+$Id$
+
+#################################################################
+
+I. The Agent API: How to write a Dilemma strategy
+
+An API is an Application Programming Interface.  A strategy must define
+functions which will be called to determine how its agents will interact
+in a tournament.  This document is the specification for those functions.
+
+This plugin is a work in progress, so this spec will change.
+
+#################################################################
+
+A.  The 60-second introduction to the Prisoner's Dilemma
+
+The Prisoner's Dilemma is a simulation/game of cooperation and
+competition.  It is a non-zero-sum game:  all agents, as a whole, will
+do better the more they cooperate with each other;  but each individual
+agent will do better by "defecting," which is the opposite of cooperating.
+Pairs of agents usually meet each other more than once, which is their
+incentive to cooperate instead of defecting:  to encourage their partner
+to do the same.
+
+This particular simulation of the Dilemma invites interested humans to
+submit strategies for play, coded in the Perl programming language.
+Each strategem becomes the heart of a "species," and the simulation
+enforces differential reproduction of each "agent" (organism) within
+each species depending on its success.  Since "food" (the single resource)
+is limited, humans whose strategies fail to succeed will see their agents
+die off, replaced by the more successful.
+
+Since this is a simulation, there are no winners or losers;  the point is
+to try to learn about the boundary between cooperation and competition.
+But challenging task for humans is to try writing strategies that will
+guide a species to increase its numbers.
+
+B.  Particulars of this implementation of the Dilemma
+
+Agent strategies are defined by Perl code.  That code may not reference
+any variables in the running program except those provided by the API.
+They may not access disk and many Perl functions are forbidden.  The code
+runs inside a Safe module.  Currently there is no limit to how much
+CPU and real time may be consumed by an algorithm;  in the future there
+will be.
+
+Technically the code is tied to a "species" of agent, so there may at
+any time be zero or more agents of that species all running the same code,
+so "an agent's code" is really shorthand for "an agent's species's code."
+
+There is a spectrum from defection to cooperation, 0.0 to 1.0.  The payoff
+for each participant is calculated by the determinePayoff() method,
+which currently returns 4y-x-xy+1 for an agent playing x with an opponent
+playing y.  This matches the four corners of the classic payoff matrix
+(1,1), (0,5), (5,0), (3,3) with a not-unreasonable middle ground.
+
+"Food" is the single resource.  Each meeting of a pair of agents is for a
+certain foodsize, which is multiplied by the payoff for each agent.
+
+Agents store food.  At each tick, each agent consumes 0.05 units of food,
+and when an agent's food store reaches 0, it dies (is removed from play).
+At a food store of 10, an agent reproduces:  its food store goes to 5,
+and a child of its species is added to play also with a food store of 5.
+At the beginning of the tournament all agents have a food store of 2.
+
+Currently it costs no food to play against another agent and gain food,
+and the meetings are randomly determined;  this may change in the future.
+
+Each agent has a memory which persists from meeting to meeting.  The
+contents of the memory are read and written by the species' algorithm
+however they see fit.  There will be limits on this memory;  currently
+any memory store which exceeds 10 KB is blanked out.  Memories are blank
+(undef) at the start of a tournament and for each child born during a
+tournament (but in the future there may be a way to pass information
+from parent to child).
+
+Currently agents have no distinguishing location;  in the future they may.
+
+All of the numbers above are currently hard-coded, for the most part, but
+in the future they will not only vary from one tournament to the next,
+but many will be readable by an agent's code.
+
+C.  The API
+
+An agent's code must define at least one function, but most will define
+two.  These functions are not passed parameters in @_.  Their input will
+be seen as global variables.
+
+In reality, those functions will be executed inside a "safe," as defined
+by the Safe.pm module.  The permitted operators are those defined by the
+Opcode.pm tags :default and :base_math (see `perldoc Opcode` as well as
+`perldoc Safe` if you really care about the details).
+
+Almost everything below is likely to change in future, but is current
+as of this file's timestamp:
+
+	$Date$
+
+If you have suggestions for changes in the API that would make an
+interesting tournament, please submit ideas to <jamie@mccarthy.vg>.
+Should memory cost food?  Should the code decide when to reproduce?
+How and what information should be passable to children?  Patches
+welcome.
+
+1.  play()
+
+The required function is play().  Its inputs are:
+
+	$memory		The agent's memory.
+	$cur_tick	The number of the current tick.
+	$foodsize	The amount of the food resource being played for.
+	$me_id		The agent's unique ID number.
+	$me_food	The amount of food this agent has before this meeting.
+	$it_id		The unique ID number of the other agent.
+
+It should return a number between 0.0 and 1.0, which represent the
+extremes of defection and cooperation respectively.  Returning any value
+which is not a number between 0.0 and 1.0, including throwing an error,
+will be treated as if 0 (total defection) had been returned.  Numeric
+value will be determined by adding 0 to the return value, so undef,
+"", "0 but true", and all non-numeric strings will all resolve to 0.
+
+(Suggestions for better names are welcome, I'm not in love with any
+of those except $memory.  In particular "me_foo" and "it_foo" don't
+seem right; maybe "my_foo" and "its_foo" or "op_foo" for opposing?
+I don't know.)
+
+2.  The first examples
+
+You now know enough to code the simplest strategy, ALLD, which always
+plays total defection.  That strategy's code is:
+
+	sub play { return 0 }
+
+Note that the "return" keyword is optional;  without it, the value of
+the last expression in the function is returned.  So the ALLC ("always
+cooperate") strategy could be coded:
+
+	sub play { 1 }
+
+The agent's memory is a scalar value which may be both read and written
+by the play() function (indeed, by any function).  Typically a strategy
+will want to write a reference into its memory, so that a complex data
+structure may be maintained, but string or numeric data would work too.
+
+The tick is an integer which increments regularly.  Note that the same
+agent may meet with other agent(s) zero, one, or more times during
+each tick (this depends on the number of living agents and a lot of
+randomness).
+
+The foodsize is the amount of the food resource available for this
+meeting, a non-negative floating-point number.  After the meeting,
+each agent gains this value times the determinePayoff() method.
+Thus, some meetings may be more important than others.
+
+3.  debrief()
+
+The optional but recommended function is debrief().  Its inputs are:
+
+	$memory		The agent's memory.
+	$cur_tick	The number of the current tick.
+	$foodsize	The amount of the food resource being played for.
+	$me_id		The agent's unique ID number.
+	$me_food	The amount of food this agent had, before this meeting.
+	$me_play	The answer from this agent's play() function.
+	$me_gain	The amount of food this agent received from this meeting.
+	$it_id		The unique ID number of the other agent.
+	$it_play	The answer from the other agent's play() function.
+	$it_gain	The amount of food the other agent received from this meeting.
+
+The only purpose of this function is to allow an agent to record the
+details of play in its memory.  The value returned by this function is
+ignored, and no changes to any of the above values will have any effect,
+except for $memory which will persist as long as the agent is alive.
+
+4.  More examples
+
+And now you know enough to code Tit For Tat, TFT, which upon meeting an
+agent for the first time plays 1.0, and upon meeting that opponent again,
+plays whatever its opponent played the previous time.  This will be done
+by having the debrief() method insert or replace the other agent's play
+into a memory hashref for that other agent's ID number.  TFT's code is:
+
+	sub play {
+		if (exists $memory->{$it_id}) { return $memory->{$it_id} }
+		else { return 1.0 }
+	}
+	sub debrief { $memory->{$it_id} = $it_play }
+
+Perl will "autovivify" $memory as a hashref once one of its fields is
+referred to in this way.  This is an example of how to use a hashref as
+memory.
+
+Alternatively, an arrayref or scalar could be used.  Here's an algorithm
+that uses an arrayref, first playing halfway between defection and
+cooperation, and thereafter playing the arithmetic mean of the last
+up-to-5 plays made against it.  This code takes advantage of the fact
+that @foo in a scalar context returns the number of elements in the
+array, and in a list context returns the array itself:
+
+	sub play {
+		if (@$memory) {
+			my $sum = 0;
+			foreach (@$memory) { $sum += $_ }
+			return $sum / @$memory;
+		} else {
+			return 0.5;
+		}
+	}
+	sub debrief {
+		push @$memory, $it_play;
+		shift @$memory if @$memory > 5;
+	}
+
+Though of course it's a fairly simple-minded algorithm that does not make
+any record of how its opponents played, still, as stated before, debrief()
+is optional.  Here are three possibilities for play-only algorithms.
+One cooperates with agents younger than it and defects against its elders.
+One defects when it's hungry and cooperates when it's full.  And one
+picks a random number and always plays that -- which may not be as lousy
+a strategy as it sounds at first, since the tournament's code performs the
+reproduction and selection necessary for design to arise from randomness.
+
+	sub play { return $me_id < $it_id ? 1.0 : 0.0 }
+
+	sub play { return $me_food > 3 ? 1.0 : ($me_food/3) ** 2 }
+
+	sub play { $memory ||= rand(); return $memory; }
+
+Here's one final example, slightly more complicated.  One disadvantage
+of the previous version of TFT is that, once its $memory exceeds 10 KB
+in size as frozen by Storable.pm, that memory will be blanked out and
+the agent will start from scratch, effectively giving every other agent
+in the game a free 1.0.  That 10 KB limit will be reached once about
+600 other agents have been seen, which for very long-lived TFT agents
+is quite possible.
+
+One way to reduce the impact of this disadvantage is to keep track of
+the last time each ID has been seen, and when the limit is neared,
+expire the memory of the opposing agent which has not been seen in the
+longest time.  That agent is the one most likely to have died, and thus
+least valuable to remember.
+
+In this implementation, the data stored for each opposing agent in a
+field of %$memory will be not a scalar, but an arrayref of two scalars,
+the first being the last seen play of the opponent, the second being
+the tickcount at the time of that last seen play.  That increase in the
+amount of data being stored does reduce the effective number of opponents
+able to be remembered from about 600 to about 400, but never having
+memory completely wiped may make up for the loss:
+
+	sub play {
+		if (exists $memory->{$it_id}) { return $memory->{$it_id}[0] }
+		else { return 1.0 }
+	}
+	sub debrief {
+		$memory->{$it_id} = [ $it_play, $cur_tick ];
+		forget_oldest() while scalar(keys %$memory) > 400;
+	}
+	sub forget_oldest {
+		my $oldest_id = (
+			sort { $memory->{$a}[1] <=> $memory->{$b}[1] }
+			keys %$memory
+		) [0];
+		delete $memory->{$oldest_id};
+	}
+

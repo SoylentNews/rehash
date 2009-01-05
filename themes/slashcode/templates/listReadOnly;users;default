@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-lists top abusers
+lists read-only IPs
 __title__
 admin interface siteInfo Template
 __page__
@@ -12,32 +12,32 @@ __name__
 listReadOnly
 __template__
 [% PROCESS titlebar title="Read Only" width='100%' %]
-
+<div class="generalbody">
 [% IF readonlylist %]
-<P><B>Read Only List:</B></P>
-<TABLE BORDER="0" CELLPADDING="0">
-        <TR>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>Time Stamp</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>uid</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
-        </TR>
+<p><b>Read Only List:</b></p>
+<table border="0" cellpadding="0">
+        <tr>
+                <td bgcolor="[% user.colors.fg_4 %]"><b>Time Stamp</b></td>
+                <td bgcolor="[% user.colors.fg_4 %]"><b>uid</b></td>
+                <td bgcolor="[% user.colors.fg_4 %]"><b>IPID</b></td>
+                <td bgcolor="[% user.colors.fg_4 %]"><b>SubnetID</b></td>
+                <td bgcolor="[% user.colors.fg_4 %]"><b>Reason</b></td>
+        </tr>
                 [% FOREACH readonly = readonlylist %]
-        <TR>
-                <TD>[% readonly.ts %]</TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.uid %]">[% readonly.uid %]</A></TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.ipid %]">[% readonly.ipid %]</A></TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.subnetid %]">[% readonly.subnetid %]</A></TD>
-                <TD>[% readonly.reason %]</TD>
-        </TR>
+        <tr>
+                <td>[% readonly.ts %]</td>
+                <td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.uid %]">[% readonly.uid %]</a></td>
+                <td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.ipid %]">[% readonly.ipid %]</a></td>
+                <td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.subnetid %]">[% readonly.subnetid %]</a></td>
+                <td>[% readonly.reason %]</td>
+        </tr>
                 [% END %]
-</TABLE>
+</table>
 
 [% ELSE %]
 No readonly users 
 [% END %]
-
+</div>
 
 __seclev__
 100

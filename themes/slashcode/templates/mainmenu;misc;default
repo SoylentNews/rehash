@@ -13,38 +13,86 @@ en_US
 __name__
 mainmenu
 __template__
-		<A HREF="[% constants.rootdir %]/about.shtml">About</A><BR>
-		<A HREF="[% constants.rootdir %]/faq.shtml">FAQ</A><BR>
-		<A HREF="[% constants.rootdir %]/comments.pl">Discussions</A><BR>
-		<A HREF="[% constants.rootdir %]/journal.pl">Journals</A><BR>
-		<A HREF="[% constants.rootdir %]/messages.pl">Messages</A><BR>
-		<A HREF="[% constants.rootdir %]/topics.pl">Topics</A><BR>
-		<A HREF="[% constants.rootdir %]/authors.pl">Authors</A><BR>
-		<HR NOSHADE SIZE="1">
-		<A HREF="[% constants.rootdir %]/search.pl">Older Stuff</A><BR>
-		<A HREF="[% constants.rootdir %]/pollBooth.pl">Past Polls</A><BR>
-		<A HREF="[% constants.rootdir %]/submit.pl">Submit Story</A><BR>
-		<HR NOSHADE SIZE="1">
+<ul>
+	<li>
+		<a href="[% gSkin.rootdir %]/about.shtml">About</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/faq.shtml">FAQ</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/messages.pl">Messages</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/topics.pl">Topics</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/authors.pl">Authors</a>
+	</li>
+	
+	<li>
+		<a href="[% gSkin.rootdir %]/search.pl">Older Stuff</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/pollBooth.pl">Past Polls</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
+	</li>
 		[% IF user.is_anon %]
-			- <A HREF="[% constants.rootdir %]/my/">Create Account/Log in</A><BR>
+		<li>
+			<a href="[% gSkin.rootdir %]/my/">Create Account/Log In</a>
+		</li>
 		[% ELSE %]
-		You<br>
-			- <A HREF="[% constants.rootdir %]/my/info">Info</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/inbox">Inbox</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/homepage">Homepage</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/comments">Comments</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/journal">Journal</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/messages">Messages</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/misc">Misc</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/amigos">Amigos</A><BR>
-			<br>
-			- <A HREF="[% constants.rootdir %]/my/friends">Friends</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/foes">Foes</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/fans">Fans</A><BR>
-			<br>
-			- <A HREF="[% constants.rootdir %]/my/password">Change Password</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/logout">Log out</A><BR>
+		<li class="user">
+			<em>You</em>
+			<ul>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/info">Info</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/inbox">Inbox</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/homepage">Homepage</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/comments">Comments</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/journal">Journal</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/messages">Messages</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/misc">Misc</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/amigos">Amigos</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/friends">Friends</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/foes">Foes</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/fans">Fans</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/password">Change Password</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/logout">Log out</a>
+				</li>
+			</ul>
+		</li>
 		[% END %]
+	</ul>
 
 __seclev__
 10000

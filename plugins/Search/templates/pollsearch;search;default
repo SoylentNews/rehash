@@ -11,23 +11,31 @@ en_US
 __name__
 pollsearch
 __template__
-[% USE Slash %]
-[% FOREACH poll=polls %]
-	[% section_url = Slash.db.getSection(poll.section, 'url') %]
-	[% link = section_url ? section_url : constants.rootdir %]
-	<B><A HREF="[% link %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</A></B><BR>
-	<FONT SIZE="-1">
-	On [% Slash.timeCalc(poll.date) %]<BR>
-	Voters: [% poll.voters %]<BR>
-	[% IF poll.score %]
+
+<div class="pollsearch">
+[% FOREACH poll = polls %]
+	[% skin = Slash.db.getSkin(poll.primaryskid) %]
+	[% link = skin.rootdir || gSkin.rootdir %]
+	<div class="search-results">
+		<h4>
+			<a href="[% link %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</a>
+		</h4>
+		<div class="data">
+			On [% Slash.timeCalc(poll.date) %]
+		</div>
+		<div class="details">
+			Voters: [% poll.voters %]
+		</div>
+		[% IF poll.score %]
+		<div class="score">
 			Score: [% poll.score %]
-	[% END %]
-	</FONT>
-	<P>
+		</div>	
+		[% END %]
+	</div>
 [% END %]
 [% PROCESS pagination %]
-<P>
-
+</div>
+</div>
 __seclev__
 100
 __version__

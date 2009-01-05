@@ -13,9 +13,7 @@ en_US
 __name__
 footer
 __template__
-</TD>
 
-[% PROCESS maintable_end %]
 
 [% oldpage = user.currentPage;
    user.currentPage = 'misc';

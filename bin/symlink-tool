@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -14,12 +14,14 @@
 use strict;
 use File::Basename;
 use File::Path;
-use File::Spec::Functions qw( :DEFAULT splitpath );
+use File::Spec::Functions qw( :DEFAULT splitpath splitdir);
 use Slash;
 use Slash::Utility;
 use Slash::DB;
 use Slash::Install;
+use Template;
 use Getopt::Std;
+use JavaScript::Minifier 0.02;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -34,11 +36,11 @@ if (!$symlink_exists) {
 
 # Remember to doublecheck these match usage()!
 usage('Options used incorrectly')
-	unless getopts('hvu:TUV', \%opts);
+	unless getopts('hvu:TtUV', \%opts);
 usage() if $opts{h} || !keys %opts;
 version() if $opts{v};
 usage('Right now only -U does anything') if !$opts{U};
-my $testing = $opts{T} ? 1 : 0;
+my $testing = $opts{T} ? 1 : ($opts{t} ? 1 : 0);
 my $verbose = $opts{V} ? 1 : 0;
 
 my $virtuser = $opts{u} || 'slash';
@@ -50,7 +52,9 @@ my $install = Slash::Install->new($virtuser);
 
 # This will read all the themes and all the plugins available for this
 # installation.
-my $site_theme = $install->get("theme")->{value};
+my $get_theme = $install->get("theme");
+die "cannot get theme, DB probably unreachable" if !$get_theme;
+my $site_theme = $get_theme->{value};
 my $site_plugins = $install->get("plugin");
 my @site_plugins = sort
 	map { $site_plugins->{$_}{value} }
@@ -66,20 +70,89 @@ my $plugin_list = $install->_getList(
 );
 
 ############################################################
+# Handle globbing and minifying/tidying, do this first so results can be linked
+for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
+	for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
+		my $destpath = canonpath(
+			catfile($theme_or_plugin->{dir},
+				$theme_or_plugin->{'glob'}{$glob})
+		);
+		my @filelist = ( );
+		for my $file (@{$theme_or_plugin->{$glob}}) {
+			push @filelist, canonpath(catfile($theme_or_plugin->{dir}, $file));
+		}
+
+		my $glob_template = Template->new({
+			INCLUDE_PATH	=> $theme_or_plugin->{dir},
+			PROCESS				=> \@filelist,
+			OUTPUT				=> \$destpath,
+			ABSOLUTE			=> 1,
+			RELATIVE			=> 1,
+			INTERPOLATE		=> 0,
+		}) || die "$Template::ERROR\n";
+		
+		$glob_template->process($filelist[0], $constants, $destpath) || die $glob_template->error(), "\n";
+
+		# system("cat $filelist > $destpath");
+		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+
+		# you can glob any kinds of files you like, even mixing them...
+		# ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
+		# (JavaScript::Minifier is a requirement in the Slash bundle)
+		if ($suffix eq '.js') {
+			my($min_src, $min_dest);
+			open $min_src, '<', $destpath;
+			open $min_dest, '>', "${path}${name}-minified.js";
+			if (JavaScript::Minifier->can('jsmin')) {
+				JavaScript::Minifier::jsmin($min_src, $min_dest);
+			} elsif (JavaScript::Minifier->can('minify')) {
+				&JavaScript::Minifier::minify(
+					input => $min_src, outfile => $min_dest
+				);
+			} else {
+				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
+			}
+		}
+
+		# ...similarly for CSS, I'll also make a `csstidied' version
+		# (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
+ 		elsif ($suffix eq '.css') {
+ 		  my $tidiedpath = "${path}${name}-tidied.css";
+ 		  # create a `tidied' version of css globs if csstidy is available,
+ 		  #   else the tidied version is just a link to the original concatenation
+ 		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
+ 			if ( system("csstidy $destpath --silent=true --template=high $tidiedpath") != 0 ) {
+ 			  link("$destpath", "$tidiedpath");
+ 			}
+ 		}
+	}
+}
+
+
+############################################################
 # Set up the %theme_subdir_files and %plugin_subdir_files hashes,
 # to have a list of all the files that our theme references.
 my %theme_subdir_files = ( );
 my %plugin_subdir_files = ( );
-
+my %theme_css_translate = ();
+my %plugin_css_translate = ();
 # First, pull in the files referenced by the theme.
-my @theme_htdocs_keys = grep /^(htdoc|image|topic)/, keys %$theme_hr;
+my @theme_htdocs_keys = grep /^(htdoc|image|topic|css)/, keys %$theme_hr;
 for my $key (@theme_htdocs_keys) {
 	next unless $key && $theme_hr->{$key};
+	if ($key eq "css" and $constants->{css_use_imagedir}) {		
+		if (ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq "ARRAY") {
+			$theme_css_translate{$_} = 1 foreach @{$theme_hr->{$key}};
+		} else {
+			$theme_css_translate{$theme_hr->{$key}} = 1;
+		}
+	}
 	push @{$theme_subdir_files{htdocs}},
 		ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq 'ARRAY'
 			? @{$theme_hr->{$key}}
 			: $theme_hr->{$key};
 }
+
 for my $key (qw( tasks misc )) {
 	my $src_key = $key;
 	$src_key =~ s/s$//; # theme "task" becomes theme_subdir_files "tasks"
@@ -94,7 +167,7 @@ for my $key (qw( tasks misc )) {
 my %plugin_htdocs_keys = ( );
 my @plugin_htdocs_keys = ( );
 for my $plugin (keys %$plugin_list) {
-	for my $key (grep /^(htdoc|image|topic)/, keys %{$plugin_list->{$plugin}}) {
+	for my $key (grep /^(htdoc|image|topic|css)/, keys %{$plugin_list->{$plugin}}) {
 		$plugin_htdocs_keys{$key} = 1;
 	}
 }
@@ -103,6 +176,13 @@ for my $plugin (keys %$plugin_list) {
 	my $plugin_hr = $plugin_list->{$plugin};
 	for my $key (@plugin_htdocs_keys) {
 		next unless $key && $plugin_hr->{$key};
+		if ($key eq "css" and $constants->{css_use_imagedir}) {		
+			if (ref($plugin_hr->{$key}) && ref($plugin_hr->{$key}) eq "ARRAY") {
+				$plugin_css_translate{$plugin}{$_} = 1 foreach @{$plugin_hr->{$key}};
+			} else {
+				$plugin_css_translate{$plugin}{$_} = $plugin_hr->{$key};
+			}
+		}
 		push @{$plugin_subdir_files{$plugin}{htdocs}},
 			ref($plugin_hr->{$key}) && ref($plugin_hr->{$key}) eq 'ARRAY'
 				? @{$plugin_hr->{$key}}
@@ -123,6 +203,8 @@ for my $plugin (keys %$plugin_list) {
 #print "plugin_list: " . Dumper($plugin_list);
 #print "theme_subdir_files: " . Dumper(\%theme_subdir_files);
 #print "plugin_subdir_files: " . Dumper(\%plugin_subdir_files);
+#print "theme css translate: " . Dumper(\%theme_css_translate);
+#print "plugin css translate: " . Dumper(\%plugin_css_translate);
 
 my $theme_dir = $theme_hr->{dir};
 my $site_dir = $constants->{datadir};
@@ -146,6 +228,9 @@ for my $subdir (sort keys %theme_subdir_files) {
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 		my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
+
+		$site_file_abs 	= css_translate($site_file_abs) if ($theme_css_translate{$target_file});
+
 		if ($processed{$site_file_abs}) {
 			if ($verbose) {
 				print "Skipping file in theme, already processed: '$site_file_abs'\n";
@@ -160,6 +245,8 @@ for my $subdir (sort keys %theme_subdir_files) {
 		# '/usr/local/slash/site/mysite/tasks/.spamarmor.pl'
 		# $theme_file_abs is e.g.
 		# '/usr/local/slash/theme/slashcode/tasks/spamarmor.pl'
+
+
 		$num_changes += handle_file($site_file_abs, $theme_file_abs,
 			$site_file_abs_dot, $site_file_abs_dot_short);
 		$processed{$site_file_abs} = 1;
@@ -180,6 +267,9 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# do that here.
 			$site_rel_file =~ s{^(?:$subdir/)?}{$subdir/};
 			my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
+			
+			$site_file_abs 	= css_translate($site_file_abs) if ($plugin_css_translate{$plugin}{$target_file});
+
 #print "plugin '$plugin' subdir '$subdir' site_rel_file '$site_rel_file' site_file_abs '$site_file_abs'\n";
 			if ($processed{$site_file_abs}) {
 				if ($verbose) {
@@ -195,6 +285,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# '/usr/local/slash/site/mysite/tasks/.adminmail.pl
 			# $plugin_file_abs is e.g.
 			# '/usr/local/slash/plugin/Stats/adminmail.pl'
+			
 			$num_changes += handle_file($site_file_abs, $plugin_file_abs,
 				$site_file_abs_dot, $site_file_abs_dot_short);
 			$processed{$site_file_abs} = 1;
@@ -212,9 +303,15 @@ if (@dotfiles) {
 ###############################################
 sub handle_file {
 	my($symlink_file, $target_file, $symlink_file_dot, $symlink_file_dot_short) = @_;
+
+	if (!-e $target_file) {
+		print "Target file '$target_file' missing, can't create symlink\n";
+		return 1;
+	}
+
 	if (!-e $symlink_file && -e $symlink_file_dot) {
 		# The symlink file is missing and in its place is a
-		# dotfile.  This site must have that file disabled,
+		# dotfile.  The site admin must have disabled that file,
 		# perhaps temporarily.  Make sure it's correct;  do
 		# what we were doing to do on the real file, on the
 		# dotfile instead.
@@ -224,15 +321,16 @@ sub handle_file {
 			print "Checking dotfile replacement at '$symlink_file'\n";
 		}
 	}
+
 	if (-e $symlink_file && !-l $symlink_file) {
 		# The file in place is not a symlink; compare it to
 		# what it should be and only replace it with a symlink
 		# if the two are identical.
 		my $diff;
 		if ($verbose) {
-			$diff = system("diff -U3 $target_file $symlink_file");
+			$diff = system("diff $target_file $symlink_file");
 		} else {
-			$diff = system("diff -U3 $target_file $symlink_file > /dev/null");
+			$diff = system("diff $target_file $symlink_file > /dev/null");
 		}
 		if ($diff) {
 			print "File should be symlink, but is not, and differs from intended target: '$symlink_file' '$target_file'; difference needs to be resolved or symlink-tool will not touch it\n";
@@ -248,6 +346,7 @@ sub handle_file {
 			}
 		}
 	}
+
 	lstat($symlink_file);
 	if (!-e _) {
 		print "Symlink at '$symlink_file' missing, ";
@@ -290,6 +389,16 @@ sub handle_file {
 }
 
 ###############################################
+sub css_translate {
+	my ($file_abs) = @_;
+	my $seen_htdocs = 0;
+	my ($volume, $dirs, $file) = splitpath($file_abs);
+	my @dirs = splitdir($dirs);
+	push @dirs, "images";
+	return catfile(@dirs, $file);
+	
+}
+###############################################
 sub dotfile {
 	my($file_abs) = @_;
 	my($volume, $dirs, $file) = splitpath($file_abs);
@@ -307,7 +416,8 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user (default is "slash")
-	-T	Test run, report but don't do anything
+	-t	Test run, report but don't do anything
+	-T	Synonym for -t
 	-U	Upgrade your symlinks to the latest for your theme and plugins
 
 Debugging options:
@@ -324,7 +434,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

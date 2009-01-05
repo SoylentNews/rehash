@@ -19,31 +19,31 @@ __template__
 
 [% ELSIF form.deleteminer;
 	IF urls && urls.size > 0;
-		title= BLOCK -%]<B>Cannot delete miner '[% 
-		name -%]'. It is in use by [% urls.size %] URLs</B>[% END;
+		title= BLOCK -%]<b>Cannot delete miner '[% 
+		name -%]'. It is in use by [% urls.size %] URLs</b>[% END;
 		INCLUDE titlebar width="100%";
 -%]
 <p>You can't delete that miner, it's being used by the following URL(s):
-<UL>
+<ul>
 [% 		FOREACH u = urls -%]
-<LI>[% u.0 %]&nbsp;&nbsp;<a href="[% u.1 %]">[% IF u.1.length > 35 %][% 
-u.1.substr(0,35) -%]...[% ELSE %][% u.1 %][% END %]</a></LI>
+<li>[% u.0 %]&nbsp;&nbsp;<a href="[% u.1 %]">[% IF u.1.length > 35 %][% 
+u.1.substr(0,35) -%]...[% ELSE %][% u.1 %][% END %]</a></li>
 [% 		END -%]
 
-</UL>
+</ul>
 <p>If you really want to delete it, edit each URL to stop using it.
 [% 	ELSE;
 		IF need_confirm -%]
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="miner_id" VALUE="[% miner_id %]">
-<INPUT TYPE="HIDDEN" NAME="deleteminer" value=1>
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="updateminer">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="miner_id" value="[% miner_id %]">
+<input type="hidden" name="deleteminer" value=1>
+<input type="hidden" name="op" value="updateminer">
 Delete Miner '[% name %]'? 
-<INPUT TYPE="SUBMIT" NAME="noconfirm" VALUE="Cancel">&nbsp;&nbsp;
-<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
-</FORM>
+<input type="submit" name="noconfirm" value="Cancel">&nbsp;&nbsp;
+<input type="submit" name="confirm" value="Yes">
+</form>
 [%		ELSE;
-			title="<B>Deleted miner '$name' (#$miner_id)!</B>";
+			title="<b>Deleted miner '$name' (#$miner_id)!</b>";
 			INCLUDE titlebar width="100%";
 		END -%]
 [% 	END -%]

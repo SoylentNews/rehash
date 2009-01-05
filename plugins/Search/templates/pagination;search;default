@@ -11,18 +11,20 @@ en_US
 __name__
 pagination
 __template__
+	<div class="pagination">
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&amp;start=[% back %]">&lt;Last [% constants.search_default_display %] matches</A>
+					<a href="[% gSkin.rootdir %]/search.pl?[% args %]&amp;start=[% back %]">&laquo; Last [% constants.search_default_display %] matches</a>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&amp;start=[% forward %]">Next [% constants.search_default_display %] matches&gt;</A>
+					<a href="[% gSkin.rootdir %]/search.pl?[% args %]&amp;start=[% forward %]">Next [% constants.search_default_display %] matches &raquo;</a>
 				[% END %]
 	[% END %]
+	</div>
 __seclev__
 100
 __version__

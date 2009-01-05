@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+admin
+__lang__
+en_US
+__name__
+static_files
+__seclev__
+10000
+__template__
+<table cellpadding="3" cellspacing="3">
+[% FOREACH mfile = story_static_files %]
+	<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %][% mfile.namename %]">[% mfile.name %]</td><td>[% constants.imagedir %][% mfile.name %]</td><td>[% mfile.width %]</td><td>[% mfile.height %]</td></tr>
+	[% IF mfile.filetype == "image" %]
+	<tr><td colspan="t"><img src="[% constants.imagedir %][% mfile.name %]"></td></tr>
+	[% END %]
+
+[% END %]
+</table>
+
+
+
+__version__
+$Id$

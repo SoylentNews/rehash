@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+pollsearch
+__template__
+[% FOREACH poll = results.records %]
+	[% skin = Slash.db.getSkin(poll.skin) %]
+	[% link = skin.url ? skin.url : gSkin.rootdir %]
+	<b><a href="[% link %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</a></b><br>
+	
+	On [% Slash.timeCalc(poll.date) %]<br>
+	Voters: [% poll.voters %]<br>
+	[% IF poll.score %]
+			Score: [% poll.score %]
+	[% END %]
+	
+	<p>
+[% END %]
+[% PROCESS pagination %]
+<p>
+
+__seclev__
+100
+__version__
+$Id$

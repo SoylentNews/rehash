@@ -1,0 +1,6 @@
+# $Id$
+name=Rating
+description="Rating"
+mysql_schema=mysql_schema
+mysql_dump=mysql_dump
+task=set_disc_ratings.pl

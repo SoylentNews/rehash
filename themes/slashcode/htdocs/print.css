@@ -1,0 +1,72 @@
+body
+{
+        background: #fff;
+}
+#ostgnavbar, #topnav h4, #topnav ul, #links, #slashboxes, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table, div.storylinks, div.storylinks ul, div.storylinks div, .prev-next, #comments input, .commentwrap
+{
+        display: none;
+}
+/* Header */
+#slogan h2
+{
+        color: #000;
+}
+.topic
+{
+        margin: 0 .4em .4em 0;
+        float: right;
+        position: relative;
+}
+
+img {
+border: none;
+}
+.topic img
+{
+        display: block;
+        position: relative;
+        z-index: 10;
+}
+
+/* General */
+.article, .journalgeneric
+{
+        background: transparent;
+        margin: 0 0 2em 0;
+}
+
+.generaltitle div.title, .article div.title, .journalgeneric div.title
+{
+        background: transparent;
+        border-bottom: 1px solid #000;
+}
+
+.generaltitle h3, .article h3, .journalgeneric h3
+{
+        background: transparent;
+        color: #000;
+        margin: 0;
+}
+
+.generaltitle h3 a, .article h3 a, .generaltitle h3 a:visited, .article h3 a:visited, .journalgeneric h3 a, .journalgeneric h3 a:visited
+{
+        color: #600;
+}
+
+.generalbody, .article .details, .journalgeneric .details
+{
+        border: none;
+        background: transparent;
+        font-size: 75.5%;
+        margin: .2em 0 .5em 0;
+}
+
+.article div.body, .journalgeneric div.body
+{
+        border: 1px solid #fff;
+        background: transparent;
+}
+
+#footer, #footer .rightcontent {
+        text-align: center;
+}

@@ -13,13 +13,13 @@ en_US
 __name__
 listSections
 __template__
-<B>[% FOREACH section = sections %][% IF section.1 %]
-<P><A HREF="[% env.script_name %]?section=[% section.0 %]&amp;op=editsection">[% section.0 %]</A> [% section.1 %]</P>[% END %]</B>
+[% FOREACH section = sections %][% IF section.1 %]
+<p><b><a href="[% env.script_name %]?section=[% section.0 %]&amp;op=editsection">[% section.0 %]</a></b> [% section.1 %]</p>[% END %]
 [% END %]
 
-<FORM ACTION="[% env.script_name %]">
-	<INPUT TYPE="SUBMIT" NAME="addsection" VALUE="add section">
-</FORM>
+<form action="[% env.script_name %]">
+	<input type="submit" name="addsection" value="add section">
+</form>
 
 __seclev__
 10000

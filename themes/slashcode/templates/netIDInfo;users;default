@@ -12,9 +12,9 @@ Display and ipid/subnetid "users" info
 * admin_flag = boolean for whether to display admin stuff
 * netid = the md5 of ip or subnet
 * netid_vis = visible portion of same
-* modval = modval for netId or subnetId
-* trollpoint = trollpoint for netId or subnetId
 * hr_hours_back = hours back to place HR in the moderation tables
+* cids_to_mods   - hashref keyed by cid containing arrays of moderations done to that cid
+* comment_time = number of days back we are limiting the comments shown to.  If 0 or undefined we're showing comments sequentially w/o time limits
 __title__
 
 __page__
@@ -24,108 +24,42 @@ en_US
 __name__
 netIDInfo
 __template__
-
-[% USE Slash %]
-
 [% IF admin_flag %]
 
 [% PROCESS titlebar width="100%" %]
-
-[% IF commentcount > 0 %]
-        <P><TABLE BORDER="0" WIDTH="100%">
-
-        [% n = min_comment %]
-        [% FOREACH comment = commentstruct;
-
-                n = n + 1;
-                replies = comment.replies ? 'Replies:' _ comment.replies : '';
-                score = 'Score:' _ comment.pts;
-                reasonnum = comment.reason;
-                reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
-                IF comment.type == 'poll';
-                        label = 'Poll: ';
-                ELSIF comment.type == 'journal';
-                        label = 'Journal Discussion: ';
-                ELSE;
-                        label = '';
-                END;
-                label = label _ comment.disc_title;
-
-                '<TR>';
-                '<TD VALIGN="TOP">';
-                        IF min_comment > 0; '<B>'; n; '</B> '; END;
-                        '<A HREF="';
-                                constants.rootdir;
-                                '/comments.pl?sid='; comment.sid;
-                                '&amp;cid='; comment.cid;
-                        '">';
-                        comment.subj;
-                        '</A>&nbsp;';
-                '</TD>';
-                '<TD VALIGN="TOP"><NOBR>&nbsp;';
-			comment.nickname | strip_literal;
-			IF comment.uid != constants.anonymous_coward_uid;
-				' (<A HREF="';
-				constants.rootdir;
-				'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
-				comment.uid;
-				'">';
-				comment.uid;
-				'</A>)';
-			END;
-			'&nbsp;</NOBR></TD>';
-                '<TD VALIGN="TOP"><NOBR>&nbsp;'; comment.cdate; '</NOBR></TD>';
-                '<TD VALIGN="TOP"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
-                '<TD VALIGN="TOP"><NOBR>&nbsp;'; score; reasontext; '</NOBR></TD>';
-                '</TR>';
-                '<TR><TD VALIGN="TOP" COLSPAN="5"><FONT SIZE="2">';
-                        '&nbsp;&nbsp;&nbsp;attached to <A HREF="';
-                                comment.url;
-                        '">'; label; '</A>';
-                '</FONT></TD></TR>';
-
-        END %]
-        </TABLE>
-[% END %]
-
-<P>
+[% admin_block %]
+<p>
+[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount reasons=reasons cids_to_mods=cids_to_mods type="netid"  netid=netid netid_vis=netid_vis comment_time = comment_time %]
 
 [% fieldname = form.fieldname | strip_literal %]
 
-<P><B>[% IF fieldname == 'ipid' %] 
-IPID [% netid_vis %] has posted [% commentcount %] comments.
-[% ELSIF fieldname == 'subnetid' %]
-SubnetID [% netid_vis %] has posted [% commentcount %] comments.
-[% END %]</B><P>
-
-[% IF commentcount > n %]
-<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% fieldname %]&amp;min_comment=[% n %]"
->More Comments...</A><P>
-[% END %]
-
-<BR><B>
-[% IF fieldname == 'ipid' %]IPID[% ELSIF fieldname == 'subnetid' %]SubnetID[% END %] [% netid_vis %] has posted [% subcount %] submissions.</B><P>
-
-[% IF subcount > 0 %]
-	[% FOREACH sub = submissions %]
-	<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A> on [% Slash.timeCalc(sub.time) %] by <A HREF="[% constants.rootdir %]/users.pl?uid=[% sub.uid %]">[% sub.name %]</A><BR>
-	[% END %]
-	<BR>
-[% END %]
-
-[% admin_block %]
-
+<p>
 [% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
-	[% mod_options.hr_hours_back = hr_hours_back %]
-        <TABLE BORDER=0>
-	<TR><TD ALIGN="CENTER">ModVal for [% fieldname %] : [% modval %]  TrollPoint for [% fieldname %] : [% trollpoint %] </TD></TR>
-	<TR><TD ALIGN="CENTER">Moderations performed by [% netid_vis %]:</TD></TR>
-	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog("b$fieldname", netid, mod_options) %] </TD></TR>
-	<TR><TD ALIGN="CENTER">&nbsp;<BR>Moderations performed on
-		[% netid_vis %]'s comments</TD></TR>
-	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog(fieldname, netid, mod_options) %] </TD></TR>
-        </TABLE>
+	[% mod_options.hr_hours_back = hr_hours_back;
+	   mod_options.title="Moderations performed by $netid_vis";
+	   IF constants.m2;
+		   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+		   mod_options.need_m2_form = 1;
+		   mod_options.need_m2_button = 1;
+		   mod_options.meta_mod_only = 1;
+	   END;
+	 %]
+	<p>
+	[% m1_classname = "Slash::" _ constants.m1_pluginname;
+	   moddb = Slash.getObject(m1_classname);
+	   IF moddb; moddb.dispModCommentLog("b$fieldname", netid, mod_options); END %]
+	[% IF !constants.m1_admin_show_mods_with_comments %]
+		<p>
+		[% mod_options.title="Moderations performed on $netid_vis's comment" %]
+		[% IF moddb; moddb.dispModCommentLog(fieldname, netid, mod_options); END %]
+	[% END %]
 [% END %]
+<br>
+[% IF subcount > 0 %]
+[% title = "$netid_vis's " _ ((subcount>submissions.size) ? "Latest " : "") _ "Submissions"; %]
+[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
+[% END %]
+
 
 [% END %]
 

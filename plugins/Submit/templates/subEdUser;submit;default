@@ -14,26 +14,25 @@ en_US
 __name__
 subEdUser
 __template__
-<TABLE WIDTH="95%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
+<table width="95%" cellpadding="0" cellspacing="0" border="0">
 
 [% FOREACH sub = submissions %]
-	<TR><TD>[% sub.note | strip_nohtml %]</TD>
+	<tr><td>[% sub.note | strip_nohtml %]</td>
 
-	<TD>[% sub.section %]</TD><TD>
+	<td>[% sub.skin.ucfirst %]</td><td>
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
 	[% END %]
-	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %]"
-		>[% sub.strs.0 %]&nbsp;</A>
-	</TD><TD><FONT SIZE="-1">[% sub.strs.1 %]<BR>[% sub.strs.2 %]</FONT></TD></TR>
-	<TR><TD COLSPAN="6"><IMG SRC="[% constants.imagedir %]/pix.gif" ALT="" HEIGHT="3"></TD></TR>
+	</td><td>
+		<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %]"
+		>[% sub.strs.0 %]&nbsp;</a>
+	</td><td>[% sub.strs.1 %]<br>[% sub.strs.2 %]</td></tr>
+	<tr><td colspan="6"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
 [% END %]
 
-</TABLE>
+</table>
 
-<P>
-
+</div>
 __seclev__
 10000
 __version__

@@ -19,133 +19,97 @@ en_US
 __name__
 displayForm
 __template__
-		<P>
 
-<!-- titlebar -->
-<TABLE WIDTH="75%">
-	<TR>
-		<TD>
-[% PROCESS titlebar title=title width="100%" %]
-		</TD>
-	</TR>
-</TABLE>
-<!-- end titlebar -->
+	[% PROCESS titlebar title=title %]
+	<div class="generalbody">
+		[% IF form.unickname %]
+			<div class="error">
+				You didn't log in!  You apparently put in the wrong password, or the wrong nickname.  Try again, or click on the mail password button if you forgot your password.
+			</div>
+			[% IF constants.allow_anonymous %]
+				<p class="message">
+	   				Logging in will allow you to post comments as yourself.  If you don't log in, you will only be able to post as [% Slash.getCurrentAnonymousCoward("nickname") %].
+				</p> 
+			[% ELSE %]
+				<p class="message">
+					You can only post comments if you have a valid account.
+				</p>
+			[% END %]
+		[% ELSE %]
+		[% END %]
 
-[% IF form.unickname %]
-		<P>
-		Danger, Will Robinson!  You didn't log in!  You apparently put
-		in the wrong password, or the wrong nickname, or else space
-		aliens have infested the server.  I'd suggest trying again,
-		or clicking that mail password button if you forgot your password.
-		</P>
+		<form action="[% env.script_name %]" method="get">
+			<fieldset>
+				<legend>
+					Log In
+				</legend>
+				<input type="hidden" name="op" value="userlogin">
+				<label>
+					Nickname
+				</label>
+				<input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+				<label>
+					Password
+				</label>
+				<input type="password" name="upasswd" size="20" maxlength="20">
+				[% PROCESS formNote note="(6-20 characters long)" %]
+				</div>
+				<input type="checkbox" name="login_temp" value="yes"> Public Terminal
+				<input type="submit" name="userlogin" value="Log in">
+			</fieldset>
+		</form>
 
-	[% IF constants.allow_anonymous %]
-		<P>
-	   	Logging in will allow you to post comments as yourself.  If you
-		don't log in, you will only be able to post as [% Slash.getCurrentAnonymousCoward("nickname") %].
-		</P>
+		<form action="[% env.script_name %]" method="get">
+			[% PROCESS titlebar title="Mail Password" %]
+			<input type="hidden" name="op" value="mailpasswd">
+			<fieldset>
+			        <legend>
+        	  	      		Forget your password? 
+        			</legend>
+				<p>
+					Enter your nickname here to have the system mail your password to you.
+				</p>
+			        <label>
+		                	Nickname
+        			</label>
+			        <input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+				<input type="submit" name="mailpasswd" value="Mail Password">
+			</fieldset>
+		</form>
 
-	[% ELSE %]
-		<P>
-	     You can only post comments if you have a valid account.
-		</P>
-
-	[% END %]
-
-[% ELSE %]
-
-[% END %]
-
-<FORM ACTION="[% env.script_name %]" METHOD="GET">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
-<TABLE WIDTH="75%">
-	<TR>
-		<TD><B>Nickname</B></TD>
-		<TD><INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
-		</TD>
-	</TR>
-	<TR>
-		<TD><B>Password:</B> (6-20 characters long)</TD>
-		<TD><INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20">
-		</TD>
-	</TR>
-	<TR>
-		<TD><INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal</TD>
-		<TD><INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in"></TD>
-	</TR>
-</TABLE>
-</FORM>
-
-<FORM ACTION="[% env.script_name %]" METHOD="GET">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="mailpasswd">
-
-<TABLE WIDTH="75%">
-	<TR>
-		<TD COLSPAN="2">
-[% PROCESS titlebar title="Mail Password" width="100%" %]
-		</TD>
-	</TR>
-	<TR>
-		<TD COLSPAN="2">
-		<P>
-		Forget your password? Enter your nickname here to 
-		have the system mail your password to you.
-		</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD><B>Nickname</B></TD>
-		<TD><INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
-		<INPUT TYPE="SUBMIT" NAME="mailpasswd" VALUE="Mail Password">
-		</TD>
-	</TR>
-</TABLE>
-</FORM>
-
-<FORM ACTION="[% env.script_name %]" METHOD="GET">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="newuser">
-
-<TABLE WIDTH="75%">
-	<TR>
-		<TD COLSPAN="2">
-[% PROCESS titlebar title=title2 width="100%" %]
-		</TD>
-	</TR>
-	<TR>
-		<TD COLSPAN="2">
-		<P>[% msg2 %]</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD COLSPAN="2"><P>(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
-		are allowed in nicknames, and all others will be stripped out.)<BR>
-		</TD>
-	</TR>
-	<TR>
-		<TD><B>Nickname of choice:</B></TD>
-		<TD><INPUT TYPE="TEXT" NAME="newusernick" SIZE="20" MAXLENGTH="20" VALUE="[% newnick %]"></TD>
-	</TR>
-	<TR>
-		<TD><B>Valid email address</B></TD>
-		<TD><INPUT TYPE="TEXT" NAME="email" SIZE="20" VALUE="[% form.email | strip_attribute %]"></TD>
-	</TR>
-	<TR>
-	 	<TD COLSPAN="2">
-		<P>address to send your registration information. This address will <B>not</B> 
-		be displayed on [% constants.sitename %].</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD><INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account"></TD>
-		<TD>Click the button to create your account and be mailed a password.</TD>
-	</TR>
-	<TR>
-	 	<TD COLSPAN="2">
-		<P>[% msg1 %]</P>
-		</TD>
-	</TR>
-</TABLE>
-</FORM>
+		<form action="[% env.script_name %]" method="get">
+		[% PROCESS titlebar title=title2 %]
+		<input type="hidden" name="op" value="newuser">
+			<fieldset>
+				<legend>
+					New User Information
+				</legend>
+				<p class="message">
+					[% msg2 %]
+				</p>
+				<div class="note">
+					(Note: only the characters <tt>0-9a-zA-Z_.+!*'(),-\$</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
+				</div>
+				<label>
+					Nickname of choice
+				</label>
+				<input type="text" name="newusernick" size="20" maxlength="20" value="[% newnick %]">
+				<label>
+					Valid email address
+				</label>
+				<input type="text" name="email" size="20" value="[% form.email | strip_attribute %]">
+				<div class="note">
+					Address to send your registration information. This address will <b>not</b> be displayed on [% constants.sitename %].
+				</div>
+				<input type="submit" name="newuser" value="Create Account">
+				[% PROCESS formNote note="Click the button to create your account and be mailed a password." %]
+				</div>
+				<p class="submessage">
+					[% msg1 %]
+				</p>
+			</fieldset>
+		</form>
+	</div>
 
 __seclev__
 500

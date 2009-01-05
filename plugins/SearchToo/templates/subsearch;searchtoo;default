@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+subsearch
+__template__
+<p>
+[% FOREACH entry = results.records %]
+		<b><a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</a></b><br>
+		On [% Slash.timeCalc(entry.time) %]<br>
+		[% shorten( Slash.strip_notags(entry.story) ) %]<br>
+		
+		[% submission_state = Slash.db.getDescriptions('submission-state') %]
+		[% skin = Slash.db.getSkin(entry.skid) %]
+		Section: [% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/submit.pl?op=list">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : gSkin.rootdir %]/submit.pl?section=[% entry.skin %]&amp;op=list">[% skin.title %]</a>[% END %] &gt;
+		[% FOREACH tid = entry.tid %]
+			[% topic = Slash.db.getTopic(tid) %]
+			<a href="[% gSkin.rootdir %][% env.script_name %]?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
+		[% END %]<br>
+		State: [% del = entry.del; submission_state.$del %]<br>
+		[% IF entry.note %]
+		Note: [% entry.note %]<br>
+		[% END %]
+		[% IF entry.score %]
+			Score: [% entry.score %]<br>
+		[% END %]
+		
+		<p>
+[% END %]
+<p>
+[% PROCESS pagination %]
+<p>
+
+__seclev__
+100
+__version__
+$Id$

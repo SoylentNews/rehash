@@ -13,20 +13,20 @@ slashd_log
 __template__
 [% PROCESS titlebar width='100%', title='slashd tasks' %]
 
-<TABLE WIDTH="100%">
-	<TR>
-		<TD>task name</TD>
-		<TD>latest time for execution</TD>
-		<TD>latest run time</TD>
-	</TR>
+<table width="100%">
+	<tr>
+		<td>task name</td>
+		<td>latest time for execution</td>
+		<td>latest run time</td>
+	</tr>
 	[% FOREACH task = tasks %]
-		<TR>
-			<TD>[% task.0 %]</TD>
-			<TD>[% task.1 %]</TD>
-			<TD>[% Slash.timeCalc(task.2) %]</TD>
-		</TR>
+		<tr>
+			<td>[% task.0 %]</td>
+			<td>[% task.1 %]</td>
+			<td>[% Slash.timeCalc(task.2) %]</td>
+		</tr>
 	[% END %]
-</TABLE>
+</table>
 
 __seclev__
 500

@@ -11,25 +11,33 @@ en_US
 __name__
 commentsearch
 __template__
-[% USE Slash %]
-<P>This search covers only subjects of comments that are posted.<P>
+
+<div class="commentsearch">
+	<div class="message">
+		This search covers only subjects of comments that are posted.
+	</div>
 [% FOREACH comment=comments %]
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
-	<B><A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</A></B>
-
-	by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.date) %]<BR>
-	<FONT SIZE="-1">
-	Attached to:  <A HREF="[% comment.url %]">[% comment.title %]</A> posted on [% Slash.timeCalc(comment.ts) %]<BR>
+	<div class="search-results">
+		<h4>
+			<a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</a>
+		</h4>
+		<div class="author">
+			by <a href="mailto:[% user_email.fakeemail | strip_paramattr_nonhttp %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]
+		</div>
+		<div class="details">
+			Attached to:  <a href="[% comment.url %]">[% comment.title %]</a> posted on [% Slash.timeCalc(comment.ts) %]
+		</div>
 	[% IF comment.score %]
-		Score: [% comment.score %] <br>
+		<div class="score">
+			Score: [% comment.score %]
+		</div>
 	[% END %]
-	</FONT>
-	<P>
+	</div>
 [% END %]
 [% PROCESS pagination %]
-<P>
-
-
+</div>
+</div>
 __seclev__
 100
 __version__

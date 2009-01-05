@@ -1,0 +1,4 @@
+# $Id$
+
+This is an API for writing Slash clients.  Read the POD for more information.
+Right now, it is only useful for writing SOAP clients for Slash journals.

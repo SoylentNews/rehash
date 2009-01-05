@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+sub_low_msg
+__seclev__
+10000
+__template__
+[% IF msg.mode == 1 %]
+	<p>This message is to inform you  that you have less than [% sub_low_value %] pages remaining on your [% constants.sitename %] subscription.</p>
+	<p>To renew your subscription <a href="[% gSkin.rootdir %]/subscribe.pl">click here</a>.
+[% ELSE %]
+	This message is to inform you that you have less than [% sub_low_value %] pages remaining on your [% constants.sitename %] subscription.
+
+	You can renew your subscription at [% absolutedir %]/subscribe.pl
+[% END %]
+__version__
+$Id$

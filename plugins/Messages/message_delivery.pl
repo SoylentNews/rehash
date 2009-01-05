@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -20,7 +20,8 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
 	my $messages = getObject('Slash::Messages');
-	unless ($messages) {
+	my $messages_reader = getObject('Slash::Messages', { db_type => 'reader' });
+	unless ($messages && $messages_reader) {
 		slashdLog("$me: could not instantiate Slash::Messages object");
 		return;
 	}
@@ -39,10 +40,10 @@ $task{$me}{code} = sub {
 
 	my $msgs;
 	if ($constants->{task_options}{all} || $last_deferred ne $now) {
-		$msgs = $messages->gets();  # do it all, baby
+		$msgs = $messages_reader->gets();  # do it all, baby
 		$slashdb->setVar('message_last_deferred', $now);
 	} else {
-		$msgs = $messages->gets($count, { 'send' => 'now' });
+		$msgs = $messages_reader->gets($count, { 'send' => 'now' });
 	}
 
 	# handle collective msgs
@@ -50,7 +51,7 @@ $task{$me}{code} = sub {
 	my $c = 0;
 	for my $msg (@$msgs) {
 		my $code = $msg->{code};
-		$codes{$code} ||= $messages->getMessageCode($code);
+		$codes{$code} ||= $messages_reader->getMessageCode($code);
 		if ($codes{$code}{'send'} eq 'collective') {
 			push @{ $collective{ $code }{ $msg->{user}{uid} } }, $msg;
 			$msgs->[$c] = undef;
@@ -59,12 +60,12 @@ $task{$me}{code} = sub {
 	}
 
 	for my $code (keys %collective) {
-		my $type = $messages->getDescription('messagecodes', $code);
+		my $type = $messages_reader->getDescription('messagecodes', $code);
 
 		for my $uid (keys %{$collective{ $code }}) {
 			my $coll = $collective{ $code }{ $uid };
 			my $msg  = $coll->[0];
-			my $mode = $messages->getMode($msg);
+			my $mode = $messages_reader->getMode($msg);
 			my $message;
 
 			# perhaps put these formatting things in templates?
@@ -85,8 +86,11 @@ $task{$me}{code} = sub {
 			if ($constants->{message_delivery_debug} > 0) {
 				use Data::Dumper;
 				foreach my $m (@$coll) {
+					delete $m->{user}{people};
 					messagedLog("Empty message: " . Dumper($m))
 						unless $m->{message};
+					messagedLog("Good message: " . Dumper($m))
+						if $m->{message};
 				}
 			}
 			
@@ -97,7 +101,7 @@ $task{$me}{code} = sub {
 			];
 
 			$msg->{message} = $message;
-			$msg->{subject} = $type;
+			$msg->{subject} = $type unless $msg->{use_subject_for_collected};
 			$msg->{date}    = $date;
 			push @$msgs, $msg;
 		}

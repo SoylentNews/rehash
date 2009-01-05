@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -11,6 +11,7 @@ use Getopt::Std;
 use File::Basename;
 use File::Path;
 use File::Spec::Functions;
+use File::Temp 'tempfile';
 use FindBin '$Bin';
 use LWP::UserAgent;
 use HTTP::Request;
@@ -26,7 +27,8 @@ use Slash::Utility;
 
 use vars qw(
 	%opts %task $me $task_name $hard_verbosity
-	$virtual_user $constants $slashdb $user $dir
+	$virtual_user $constants $slashdb $user $dir $gSkin
+	$task_exit_flag
 );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -68,6 +70,19 @@ exit 0;
 
 sub slashdLog {
 	doLog('slashd', \@_, 1, 'runtask');
+}
+
+sub tagboxLog {
+	doLog('tagbox', \@_, 1, 'runtask');
+}
+
+# A command to log an error to a DB table.  This is only for messages
+# that are important enough that the admins should see them (maybe in
+# the admin.pl backend, but definitely in email at the end of the day).
+
+sub slashdErrnote {
+	my($errnote, $moreinfo) = @_;
+	$slashdb->insertErrnoteLog($task_name || 'RUNTASK', $errnote, $moreinfo);
 }
 
 sub slashdLogDie {
@@ -113,11 +128,15 @@ sub verbosity {
 ############################################################
 
 sub slashdLogInit {
-	doLogInit('slashd', 1, 'runtask');
+	doLogInit('slashd', {
+		nopid => 1,
+		sname => 'runtask',
+	});
+	$SIG{USR1} = sub { $task_exit_flag = 1 };
 }
 
 sub slashdLogExit {
-	doLogExit('slashd', 1, 'runtask');
+	doLogExit('slashd', { nopid => 1, sname => 'runtask' });
 }
 
 sub get_task_subref {
@@ -159,8 +178,57 @@ EOT
 		my $file = basename($fullname);
 		next unless $file eq $task_name or $file eq "$task_name.pl";
 		$task_name = $file;
+
+		# we want to encapsulate each task automatically.  to do that,
+		# we automatically create a package name for each task, and
+		# then we manually import the symbols we want into that package.
+		# then it is written out as a temp file, and THAT file is
+		# require'd, not the actual task.
+		# we may be importing more than we need for coderefs, but
+		# i didn't feel like looking at each task individually.
+
+		(my $tmppackage = $file) =~ s/\.pl$//;
+		$tmppackage =~ s/\W/_/g;
+		$tmppackage =~ s/^([^a-zA-Z])/a_$1/g;
+		$tmppackage = "Slash::Task::$tmppackage";
+
+		# replace tmppackage in string where appropriate
+		(my $addtxt = <<'EOT') =~ s/\${?tmppackage}?/$tmppackage/g;
+package $tmppackage;
+
+{ no strict 'refs';
+	my @scalar = qw(me task_exit_flag);
+	my @hash   = qw(task);
+	my @code   = (qw(
+			slashdLog slashdErrnote slashdLogDie
+			tagboxLog verbosity db_time init_cron
+		),
+		grep { *{"main::$_"}{CODE} }
+			@Slash::EXPORT, @Slash::Display::EXPORT,
+			@Slash::Utility::EXPORT,
+			@File::Spec::Functions::EXPORT,
+			@LWP::UserAgent::EXPORT, @URI::Escape::EXPORT,
+			@File::Basename::EXPORT, @File::Path::EXPORT,
+			@Time::Local::EXPORT, @Time::HiRes::EXPORT
+	);
+
+	*{"${tmppackage}::$_"} = *{"main::$_"}{HASH}   for @hash;
+	*{"${tmppackage}::$_"} = *{"main::$_"}{SCALAR} for @scalar;
+	*{"${tmppackage}::$_"} = *{"main::$_"}{CODE}   for @code;
+}
+
+#line 1
+EOT
+
+		my($tmpfh, $tmpfile) = tempfile();
+		my $tmptxt = do { open my $fh, '<', $fullname; local $/; <$fh> };
+		print $tmpfh $addtxt, $tmptxt;
+		$tmpfh->flush; # can't close fh until we require the file,
+		               # else the file might disappear
+
 		my $ok = 0;
-		eval { local $me = $file; $ok = require $fullname; };
+		eval { local $me = $file; $ok = require $tmpfile };
+
 		if ($@) {
 			slashdLog("requiring '$fullname' raised exception: $@");
 			$ok = 0;
@@ -169,11 +237,7 @@ EOT
 			slashdLog("requiring '$fullname' caused error: $!");
 			$ok = 0;
 		}
-		if (!$task{$file}{timespec}) {
-			slashdLog("'$fullname' did not set timespec properly");
-			$ok = 0;
-		}
-		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
+		if (!$task{$file}{code} || ref $task{$file}{code} ne 'CODE') {
 			slashdLog("'$fullname' did not set code properly");
 			$ok = 0;
 		}
@@ -223,7 +287,6 @@ sub parse_slash_sites {
 	# will give us 4294967294, so let's get it that way. -- pudge
 	my($c_name, $c_pass, $c_uid, $c_gid) = getpwuid($uid);
 	if ( $uid != $c_uid || $gid != $c_gid ) {
-#	if ( $uid != $orig_euid or $gid != $orig_egid ) {
 		die "can't set uid/gid to $uid/$gid ($>/$))";
 	}
 	# If we made it this far, everything's cool
@@ -275,7 +338,10 @@ sub main {
 	$constants = getCurrentStatic();
 	$slashdb = getCurrentDB();
 	$user = getCurrentUser();
+	setCurrentSkin(determineCurrentSkin());
+	$gSkin = getCurrentSkin();
 	$dir = "$constants->{datadir}/tasks";
+	$task_exit_flag = 0;
 
 	# List what tasks are available
 	if ($opts{'l'}) {
@@ -284,7 +350,7 @@ sub main {
 		exit;
 	}
 
-	$ENV{TZ} = 'GMT' if $ENV{TZ} ne 'GMT';
+	$ENV{TZ} = 'GMT' if !$ENV{TZ} || $ENV{TZ} ne 'GMT';
 	slashdLogInit();
 
 	# Process task specific options, if any.
@@ -314,7 +380,8 @@ sub main {
 
 	my $start_time = Time::HiRes::time;
 	# runtask doesn't fork, there wouldn't be much point
-	my $rc = $subref->($virtual_user, $constants, $slashdb, $user, {});
+	my $rc = $subref->($virtual_user, $constants, $slashdb, $user, {}, $gSkin);
+	$rc = '' if !defined $rc;
 	if (verbosity() >= 2) {
 		my $duration = sprintf("%.2f", Time::HiRes::time - $start_time);
 		slashdLog("$task_name end: $rc (ran in ${duration}s)");
@@ -367,7 +434,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

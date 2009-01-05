@@ -47,7 +47,7 @@ $task{$me}{code} = sub {
 		my $stock = $table->{$stock_key};
 		my($exch, $sym) = ($stock->{exchange}, $stock->{symbol});
 		my %stockfetch = $fq->fetch($exch, $sym);
-		if (!%stockfetch) {
+		if (!%stockfetch || !defined($stockfetch{$sym,"net"})) {
 			slashdLog("failed stockfetch for '$stock_key' '$exch' '$sym'")
 				if verbosity() >= 2;
 			next;
@@ -60,8 +60,9 @@ $task{$me}{code} = sub {
 			$stock->{year_lo}	= sprintf("%.1f", $1);
 			$stock->{year_hi}	= sprintf("%.1f", $2);
 		}
-		if ($stockfetch{$sym,"cap"} ne ""
-			and $stockfetch{$sym,"cap"} =~ /([\d.]+)([KMB])?/) {
+		if (defined $stockfetch{$sym,"cap"}
+			&& $stockfetch{$sym,"cap"} ne ""
+			&& $stockfetch{$sym,"cap"} =~ /([\d.]+)([KMB])?/) {
 			$stock->{cap}		= sprintf("%.0f$2", $1);
 		} else {
 			$stock->{cap}		= "<i>n/a</i>";

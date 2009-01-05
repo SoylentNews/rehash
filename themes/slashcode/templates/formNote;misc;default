@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+formNote
+__seclev__
+10000
+__template__
+<div class="note">
+[% note %]
+</div>
+__version__
+$Id$

@@ -35,29 +35,29 @@ END;
 
 -%]
 
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatekeyword">
-<INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% keyword_id %]">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="op" value="updatekeyword">
+<input type="hidden" name="keyword_id" value="[% keyword_id %]">
 
-<P><B>Tag:</B>&nbsp;&nbsp;
-<INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="[% data.tag %]">
+<p><b>Tag:</b>&nbsp;&nbsp;
+<input type="text" name="keyword_tag" value="[% data.tag %]">
 
-<P><B>Reg Ex:</B>&nbsp;&nbsp;
-<INPUT TYPE="TEXT" NAME="keyword_regex" VALUE="[% data.regex %]" SIZE=40>
+<p><b>Reg Ex:</b>&nbsp;&nbsp;
+<input type="text" name="keyword_regex" value="[% data.regex %]" size=40>
 
-<P><B>Weight:</B>&nbsp;&nbsp;
-<INPUT TYPE="TEXT" NAME="keyword_weight" VALUE="[% data.weight %]" SIZE=10>
+<p><b>Weight:</b>&nbsp;&nbsp;
+<input type="text" name="keyword_weight" value="[% data.weight %]" size=10>
 
-<P>
-<INPUT TYPE="SUBMIT" VALUE="Save Keyword">
-<INPUT TYPE="SUBMIT" NAME="deletekeyword" VALUE="Delete Keyword">
-</FORM>
-<P>
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="addkeyword">
-<INPUT TYPE="SUBMIT" VALUE="Add Keyword using Tag">:&nbsp;&nbsp;
-<INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>
-</FORM>
+<p>
+<input type="submit" value="Save Keyword">
+<input type="submit" name="deletekeyword" value="Delete Keyword">
+</form>
+<p>
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="op" value="addkeyword">
+<input type="submit" value="Add Keyword using Tag">:&nbsp;&nbsp;
+<input type="text" name="keyword_tag" value="" size=10>
+</form>
 __seclev__
 10000
 __version__

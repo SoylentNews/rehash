@@ -1,0 +1,6 @@
+name=Unsubscribe
+description="User Unsubscribe Page for Admins"
+htdoc=unsubscribe.pl
+requiresplugin=Admin
+template=templates/form;unsubscribe;default
+template=templates/data;unsubscribe;default

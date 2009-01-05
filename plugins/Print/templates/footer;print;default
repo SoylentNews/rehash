@@ -26,31 +26,31 @@ in this block -->
 [% END -%]
 
 [% UNLESS form.nohtml;
-	absdir = constants.absolutedir;
+	absdir = gSkin.absolutedir;
 	url = "<a href=\"$absdir/article.pl?sid=$story.sid\">$story.title</a>";
 	sitename = "<a href=\"$absdir/\">$constants.sitename</a>";
 ELSE;
-	absdir = constants.absolutedir;
+	absdir = gSkin.absolutedir;
 	url = "$story.title ($absdir/article.pl?sid=$story.sid)";
 	sitename = "$constants.sitename ($absdir)";
 END -%]
 
-<HR>
-<CENTER><SMALL>&copy; Copyright [% Slash.timeCalc(Slash.db.getTime, '%Y') %]
-- [% constants.sitepublisher %], All Rights Reserved</SMALL></CENTER>
-<HR>
+<hr>
+<center><small>&copy; Copyright [% Slash.timeCalc(Slash.db.getTime, '%Y') %]
+- [% constants.sitepublisher %], All Rights Reserved</small></center>
+<hr>
 
-<P>
-<SMALL>printed from [% sitename %], [% url %] on [% time %]</SMALL>
-</P>
+<p>
+<small>printed from [% sitename %], [% url %] on [% time %]</small>
+</p>
 [% IF form.auto -%]
 <SCRIPT LANGUAGE="JavaScript1.2">
 <!--
 	if (window.print) { window.print(); }
 //-->
-</SCRIPT>
+</script>
 [% END -%]
-</BODY>
-</HTML>
+</body>
+</html>
 __version__
 $Id$

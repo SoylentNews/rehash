@@ -4,6 +4,10 @@ __description__
 Template to handle redirection from old article location to new one
 
 url - url to redirect to
+
+See:
+https://sourceforge.net/tracker/index.php?func=detail&aid=1052367&group_id=4421&atid=104421
+
 __title__
 Useless title to template
 __page__
@@ -12,18 +16,19 @@ __lang__
 en_US
 __name__
 articlemoved
+__template__
+<html>
+<head>
+<meta http-equiv="refresh" content="1;URL=[% url %]">
+<title>Page has moved</title>
+</head>
+<body>
+<b>This page has moved</b>
+<p>
+If your browser doesn't automatically redirect you click the following <a href="[% url %]">Link</a>
+</body>
+</html>
 __seclev__
 10000
-__template__
-<HTML>
-<HEAD>
-<META HTTP-EQUIV="refresh" content="1;URL=[% url %]">
-<TITLE>Page has moved</TITLE>
-</HEAD>
-<BODY>
-<B><font size="+1">This page has moved</font></B>
-<P>
-If your browser doesn't automatically redirect you click the following <A HREF="[% url %]">Link</A>
-</BODY>
-</HTML>
-
+__version__
+$Id$

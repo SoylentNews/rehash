@@ -20,12 +20,12 @@ This is a friendly email from [% constants.sitename %] with a reminder that your
 expired. If you would like to remain registered to this site, please visit the following
 URL:
 
-http:[% constants.rootdir %]/users.pl?validateuser=1&id=[% registryid %]
+http:[% gSkin.rootdir %]/users.pl?validateuser=1&id=[% registryid %]
 
 and follow the displayed instructions. Re-registration should be quick and easy.
 
 We apologize for the inconvenience. If we can improve this procedure in any way, please
-send your suggestions to the <A HREF="[% useradmin %]">administrator</A>.
+send your suggestions to the <a href="[% useradmin %]">administrator</a>.
 
 
 __seclev__

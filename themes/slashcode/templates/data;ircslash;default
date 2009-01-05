@@ -1,0 +1,124 @@
+__section__
+default
+__description__
+Responses that ircslash.pl makes in-channel.
+
+* value = the lowercased text that was said to ircslash.pl
+
+Extra data may be sent along as well.
+
+__title__
+
+__page__
+ircslash
+__lang__
+en_US
+__name__
+data
+__template__
+
+[% SWITCH value %]
+
+[% CASE 'help' %]
+	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (UID|NICK), lcr [SITE], lcrset SITE TAG, quote SYMBOL, dbs, re[% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|N days][% END %]
+
+[% CASE 're' %]
+	Welcome back, [% nickname %].
+
+[% CASE 'roll' %]
+	You rolled a [% num %], [% nickname %].
+
+[% CASE 'exiting' %]
+	Exiting (slashd should restart me within a minute)
+
+[% CASE 'nosuchuser' %]
+	No such user [% uid %]
+
+[% CASE 'alreadyignoring' %]
+	Already ignoring [% nickname %] ([% uid %])
+
+[% CASE 'wasntignoring' %]
+	Wasn't ignoring [% nickname %] ([% uid %])
+
+[% CASE 'ignoring' %]
+	Now ignoring [% nickname %] ([% uid %])
+
+[% CASE 'unignored' %]
+	No longer ignoring [% nickname %] ([% uid %])
+
+[% CASE 'useris' %]
+	Uid [% uid %] is [% nickname %]
+
+[% CASE 'slashd_lasttask' %]
+	Task [% task.task %] finished [% task.last_completed_secs_ago %] seconds ago
+
+[% CASE 'slashd_curtasks' %]
+	Currently running tasks:[% IF tasks.size > 0; FOREACH task = tasks; " "; task.task; END; ELSE; " none"; END %]
+
+[% CASE 'slashd_parentpid' %]
+	Parent slashd running as pid [% process.pid %], lifetime [% process.pctcpu %]% cpu, in state [% process.state %]
+
+[% CASE 'slashd_parent_gone' %]
+	ATTENTION: my parent slashd process is gone. Since this task is still around, the parent's death is probably unplanned. Restarting it would be good.
+
+[% CASE 'quote_response' %]
+	[% IF !stock.success %]
+		ERROR: [% stock.errormsg %]
+	[% ELSE %]
+		Price for [% stock.name %] at [% stock.time %]: [% stock.last %] ([% stock.net %] from last close/open [% stock.close %]/[% stock.open %]) -- Today's lo-hi [% stock.low %]-[% stock.high %] -- Year lo-hi [% stock.year_low %]-[% stock.year_high %]
+	[% END %]
+
+[% CASE 'dbs_response' %]
+	[% ok = 1;
+	   FOREACH dbid = dbids;
+		IF	   dbs.$dbid.was_alive
+			&& dbs.$dbid.was_reachable
+			&& dbs.$dbid.was_running
+			&& dbs.$dbid.lag != '?'
+			&& dbs.$dbid.lag < constants.ircslash_dbalert_lagthresh / 2
+			&& dbs.$dbid.bog != '?'
+			&& dbs.$dbid.bog < constants.ircslash_dbalert_bogthresh / 2;
+			# This DB is fine, don't bother mentioning it.
+			NEXT;
+		END;
+		ok = 0;
+		"lag "; dbs.$dbid.lag;
+		" bog "; dbs.$dbid.bog;
+		IF !dbs.$dbid.was_alive;	" DEAD!";
+		ELSIF !dbs.$dbid.was_reachable;	" UNREACHABLE!";
+		ELSIF !dbs.$dbid.was_running;	" STOPPED!";	END;
+		" - "; dbs.$dbid.virtual_user;
+		"\n";
+	   END;
+	   "All DBs OK." IF ok;
+	%]
+
+[% CASE 'dbalert_prefix' %]
+
+[% CASE 'dbalert_allclear' %]
+	The DBs are much better now.
+
+[% CASE 'dbs_nodata' %]
+	Error: no dbs_readerstatus data found within the last minute.
+
+[% CASE 'lcr_ok' %]
+	[% '/topic ' IF topic %]LCR: [% FOREACH site = lcrs;
+	site.site.uc %]: [% IF site.date; Slash.timeCalc(site.date, "%L/%e %l%p");
+	END %] [% site.tag || "no tag";
+	%][% UNLESS loop.last %] -- [% END; END %]
+
+[% CASE 'lcr_not_found' %]
+	LCR: [% site %] not found
+
+[% CASE 'na' %]
+	Don't understand request, try "help"
+
+[% CASE DEFAULT %]
+	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

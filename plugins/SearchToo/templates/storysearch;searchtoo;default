@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+storysearch
+__template__
+[% FOREACH story=results.records %]
+	[% skin = Slash.db.getSkin(story.skid);
+	   storylinks = Slash.linkStory({
+		section	=> skin.name,
+		tid	=> story.tid,
+		tids	=> story.tids,
+		sid	=> story.sid,
+		'link'	=> story.title
+	}) 
+	%]
+<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
+[% IF user.is_admin %][ <a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">Edit</a> ][% END %]
+	<br>
+	On [% Slash.timeCalc(story.time, '%B %o, %Y') %] with [% story.commentcount %] comments<br>
+	[% shorten( Slash.strip_notags(story.introtext) ) %]<br>
+	
+		[% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : "$gSkin.rootdir$env.script_name?section=$skin.name" %]">[% skin.title %]</a>[% END %] &gt;
+		[% FOREACH tid = story.tids %]
+			[% topic = Slash.db.getTopic(tid) %]
+			<a href="[% gSkin.rootdir %][% env.script_name %]?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
+		[% END %]
+		<br>
+		[% IF story.score %]
+			Score: [% story.score %]<br>
+		[% END %] 
+	
+	<p>
+[% END %]
+[% PROCESS pagination %]
+<p>
+
+__seclev__
+100
+__version__
+$Id$

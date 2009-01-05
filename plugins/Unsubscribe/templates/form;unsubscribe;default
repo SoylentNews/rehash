@@ -1,0 +1,27 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+unsubscribe
+__lang__
+en_US
+__name__
+form
+__template__
+<form action="[% env.script_name %]" method="post">
+
+[% PROCESS titlebar width => "100%", title => "Unsubscribe $constants.sitename User(s)" %]
+<p></p>
+Enter a list of e-mail addresses to be unsubscribed to newsletters and headlines, one per line.
+<textarea name="emails" rows="[% user.textarea_rows || constants.textarea_rows %]" cols = "[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"></textarea>
+<p></p>
+<input name="op" type="submit" value="unsubscribe">
+<p></p>
+</form>
+__seclev__
+1000
+__version__
+$Id$

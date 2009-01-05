@@ -11,83 +11,94 @@ en_US
 __name__
 topicEdit
 __template__
-[% PROCESS titlebar width='100%' %]
-<TABLE>
-	<TR>
-		<FORM ACTION="[% env.script_name %]" METHOD="POST">
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="topics">
-		<TD VALIGN="TOP">
-			[% PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
-			[% topics_select %]
+[% PROCESS titlebar %]
+<div class="generalbody">
+	<form action="[% env.script_name %]" method="post" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
+	<input type="hidden" name="op" value="topics">
+	[% PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
+	[% Slash.createSelect('nexttid', topic_desc, form.nexttid, 1, 0, 1)%]	
+	<input type="button" name="topiced" value="Edit Topic" onclick="stc_submit(this)">
 
-			<INPUT TYPE="SUBMIT" NAME="topiced" VALUE="Select topic"><BR>
+	[% IF topic.tid %]<input type="hidden" name="tid" value="[% topic.tid %]">[% END %]
 
-			[% IF topic.tid %]
-				[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-				[% PROCESS formLabel value => "Image as seen", comment => "" %]
-				<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]">
-			[% END %]
 
-			<BR><INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% topic.tid %]"><BR>
-			[% PROCESS formLabel value => "Short Name" comment => "used in admin interface" %]
-			<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% topic.name %][% END %]">
-			[% PROCESS formLabel value => "Alt Text", comment => "" %]
-			<INPUT TYPE="TEXT" NAME="alttext" VALUE="[% FILTER strip_attribute %][% topic.alttext %][% END %]">
-			[% PROCESS formLabel value => "Parent Topic", comment => "" %]
-			[% Slash.createSelect('parent_topic', parent_topic_values, topic.parent_topic, 1, 0, 1)%]	
+	[% PROCESS formLabel value => "Full Topic Title", comment => "alt tags & user interface" %]
+	<input type="text" name="textname" value="[% FILTER strip_attribute %][% topic.textname %][% END %]">
 
-			[% PROCESS formLabel value => "Is a Series", comment => "Denotes a group of stories in a series, and this topic must be selected first for each story in the series" %]
-			<INPUT TYPE="checkbox" NAME="series" VALUE="1"[% topic.series ? ' CHECKED' : '' %]>
+	[% PROCESS formLabel value => "Abbreviated Topic Title" comment => "admin interface & DNS" %]
+	<input type="text" name="keyword" value="[% topic.keyword | strip_attribute %]">
 
-			[% PROCESS formLabel value => "Dimensions", comment => "leave blank to determine automatically" %]
-			Width: <INPUT TYPE="TEXT" NAME="width" VALUE="[% topic.width %]" SIZE="4">
-			Height: <INPUT TYPE="TEXT" NAME="height" VALUE="[% topic.height %]" SIZE="4">
+	[% IF images_flag %]
+		[% PROCESS formLabel value => "Image" %]
+		[% image_select %] or URL <input type="text" size="30" name="image2" value="[% image2 %]">
 
-			[% IF images_flag %]
-				[% PROCESS formLabel value => "Image", comment => "if you enter a value in the Image URL field below, the image pulldown will be ignored" %]
-				[% image_select %]
-				<BR>Image URL:
-				<INPUT TYPE="TEXT" LENGTH="40" NAME="image2" VALUE="[% image2 %]">
+		[% PROCESS formLabel value => "Dimensions" %]
+		<input type="text" name="width" value="[% topic.width %]" size="4">x<input type="text" name="height" value="[% topic.height %]" size="4">
+		[% PROCESS formNote note = "WxH or leave blank to guess" %] 
 
-			[% ELSE %]
-				[% PROCESS formLabel value => "No images were found in the topic images directory", comment => "" %]
-				([% constants.basedir %]/images/topics).<BR>
-				<INPUT TYPE="TEXT" NAME="image" VALUE="[% image %]">
-
-			[% END %]
-			<P>
-			<INPUT TYPE="SUBMIT" NAME="topicnew" VALUE="Create new topic">
-			<INPUT TYPE="SUBMIT" NAME="topicsave" VALUE="Save Topic">
-			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">
-		</TD>
-		<TD VALIGN="TOP">
-		[% PROCESS formLabel value => "Sections and topic types", comment => "select which sections a topic belongs to and which types a topic is listed as" %]
-		[% types = Slash.db.getDescriptions('genericstring','section_topic_type') %]
-		<TABLE>
-			<TR>
-				<TD><B>section</B></TD>
-				[% FOREACH type=types %]
-				<TD><B>[% type.value %]</B></TD>
-				[% END %]
-			</TR>
-		[% FOREACH section = sectionref.keys %]
-			<TR>
-				<TD>
-				[% sectionref.$section.title %]&nbsp;
-				</TD>
-			[% FOREACH type=types %]
-				<TD>
-				<INPUT TYPE="CHECKBOX" NAME="exsect|[% section %]|[% type.key %]"[% sectionref.$section.${type.key}.checked %]><BR>
-				</TD>
-			[% END %]
-			</TR>
+		[% IF topic.image %]
+		[% PROCESS formLabel value => "Image Preview" %]
+			<img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]"><br>
 		[% END %]
-		</TABLE>
-		</TD>
-		</FORM>
-	</TR>
-</TABLE>
+	[% END %]
+	<label class="checkbox">
+	<input type="checkbox" name="series" value="yes"[% topic.series == 'yes' ? ' checked' : '' %]> Series
+	[%- PROCESS formNote note = "For recurring stories in sequence" %]
+	</label>
+	<label class="checkbox">
+	<input type="checkbox" name="nexus" value="1"[% topic.nexus ? ' checked' : '' %]> Nexus [% IF topic.nexus %]- <a href="[% gSkin.rootdir %]/admin.pl?op=topic_extras&amp;tid=[% topic.tid %]">Edit topic extras for [% topic.keyword | strip_attribute %] topic</a>[% END %]
+	[%- PROCESS formNote note => "Grouping of related stories" %]
+	</label>
 
+	<label class="checkbox">
+	<input type="checkbox" name="submittable" value="1"[% topic.submittable ? ' checked' : '' %]> Submittable
+	[%- PROCESS formNote note => "Users can submit stories under this topic" %]
+	</label>
+	<label class="checkbox">
+	<input type="checkbox" name="searchable" value="1"[% topic.searchable  ? ' checked' : '' %]> Searchable
+	[%- PROCESS formNote note => "Does this topic show up under search?" %]
+	</label>
+	<label class="checkbox">
+	<input type="checkbox" name="storypickable" value="1"[% topic.storypickable ? ' checked' : '' %]> Story Pickable
+	[%- PROCESS formNote note => "Can a user select this topic for story exclusion?" %]
+	</label>
+<fieldset id="st-display">
+	<legend>Select Parent/Children </legend> 
+	[% topic_select %]
+
+	<input type="button" name="topicnew" value="Create New Topic" onclick="stc_submit(this)">
+	<input type="button" name="topicsave" value="Save Topic" onclick="stc_submit(this)">
+</fieldset>
+
+<fieldset>
+        <legend>Topic Parameters</legend>
+	[% IF topic_param.size %]
+	[% PROCESS formLabel value => "Current Topic Parameters" %]
+	<table>
+	[% FOREACH tp = topic_param %]
+		<tr><td>[% tp.name %]:</td><td> <input type="text" name="tp_cur_[% tp.name %]" value="[% tp.value | strip_attribute %]" size="50"></td></tr>
+	[% END %]
+	</table>
+	[% END %]
+
+	[% PROCESS formLabel value => "Custom Topic Parameters" %]
+	<table>
+	<tr><th>Name</th><th>Value</th></tr>
+	[% FOREACH number = [1..2] %]
+	<tr><td><input type="text" name="tpname_new_[% number %]" size="22" maxlength="32"></td><td><input type="text" name="tpvalue_new_[% number %]" size="60"</td></tr>
+	[% END %]
+	</table>
+	</p>
+
+	<input type="button" name="topicnew" value="Create New Topic" onclick="stc_submit(this)">
+	<input type="button" name="topicsave" value="Save Topic" onclick="stc_submit(this)">
+
+	[% PROCESS formLabel value => "Delete & Reparent", comment => "irreversibly delete this topic, and reparent its children" %]
+	[% Slash.createSelect('replacementtid', topic_desc, '', 1, 0, 1) %]
+	<input type="button" name="topicdelete" value="Delete Topic" onclick="stc_submit(this)">
+		</fieldset>
+	</form>
+</div>
 __seclev__
 500
 __version__

@@ -1,0 +1,58 @@
+__section__
+default
+__description__
+* alldata - the two data serieses:
+	first one is the bog, plotted in green going up,
+	second one is lag, plotted in red going down
+	third one should be set to dbsparkline_ymax where bog is undef
+		and undef where bog is not undef
+	fourth one should be set to dbsparkline_ymin where lag is undef
+		and undef where lag is not undef
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+dbsparkline
+__template__
+[% FILTER null;
+
+USE my_graph = GD.Graph.lines(constants.dbsparklines_width, constants.dbsparklines_height);
+
+my_graph.set(
+
+	title			=> "",
+
+	transparent		=> 0,
+
+	dclrs			=> [ 'black', 'green', 'red', 'lgray', 'lgray' ],
+
+	x_ticks			=> 0,
+	y_tick_number		=> 0,
+
+#	x_label_skip		=> 20,
+
+	no_axes			=> 1,
+
+	skip_undef		=> 1,
+
+	overwrite		=> 1,
+
+);
+
+my_graph.set(y_min_value => constants.dbsparklines_ymin - 1);
+my_graph.set(y_max_value => constants.dbsparklines_ymax + 1);
+#my_graph.set(x_min_value => 0);
+#my_graph.set(x_max_value => alldata.0.size);
+
+returnimage = my_graph.plot(alldata).png;
+END;
+
+returnimage -%]
+__seclev__
+1000
+__version__
+$Id$

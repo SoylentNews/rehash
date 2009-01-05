@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -23,19 +23,18 @@ use vars qw( %task $me );
 
 $task{$me}{timespec} = '7 8 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
-$task{$me}{resource_locks} = { log_slave => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $basedir = $constants->{basedir};
 
-	# Takes approx. 10 seconds on Slashdot
-	# (approx. 6 minutes if subscribe_hits_only is set)
+	# Takes approx. 18 minutes on Slashdot
+	# (longer if subscribe_hits_only is set)
 	slashdLog('Updating User Logins Begin');
 	$slashdb->updateLastaccess();
 	slashdLog('Updating User Logins End');
 
-	# Takes approx. 2 seconds on Slashdot
+	# Takes approx. 30 seconds on Slashdot
 	slashdLog('Decaying User Tokens Begin');
 	my $decayed = $slashdb->decayTokens();
 	slashdLog("Decaying User Tokens End ($decayed decayed)");
@@ -43,18 +42,7 @@ $task{$me}{code} = sub {
 		$statsSave->addStatDaily("mod_tokens_lost_decayed", $decayed);
 	}
 
-	# Takes approx. 60 seconds on Slashdot
-	my $logdb = getObject('Slash::DB', { db_type => 'log_slave' });
-	slashdLog('Update Total Counts Begin');
-	# I'm pulling the value out with "+0" because that returns us an
-	# exact integer instead of scientific notation which rounds off.
-	# Another one of those SQL oddities! - Jamie 2003/08/12
-	my $totalHits = $slashdb->sqlSelect("value+0", "vars", "name='totalhits'");
-	$totalHits += $logdb->countAccesslogDaily();
-	$slashdb->setVar("totalhits", $totalHits);
-	slashdLog('Update Total Counts End');
-
-	# Takes approx. 70 minutes on Slashdot
+	# Takes approx. 3 seconds on Slashdot
 	slashdLog('Daily Deleting Begin');
 	$slashdb->deleteDaily();
 	slashdLog('Daily Deleting End');
@@ -74,7 +62,7 @@ $task{$me}{code} = sub {
 		slashdLog("Daily Archival End ($count[0] of $count[1] articles in $count[2]s)");
 	}
 
-	# Takes approx. 15 seconds on Slashdot
+	# Takes approx. 5 seconds on Slashdot
 	slashdLog('Begin Daily Comment Recycle');
 	my $msg = $slashdb->deleteRecycledComments();
 	slashdLog("End Daily Comment Recycle ($msg recycled)");
@@ -89,8 +77,9 @@ sub archiveStories {
 	
 	my $totalTriedStories = 0;
 	my $totalChangedStories = 0;
-	for (@{$to_archive}) {
-		my($sid, $title, $section) = @{$_};
+	for my $story (@$to_archive) {
+		# XXXSECTIONTOPICS - now $section is NOT set here - Jamie
+		my($stoid, $sid, $title, $section) = @$story;
 
 		slashdLog("Archiving $sid") if verbosity() >= 2;
 		$totalTriedStories++;
@@ -125,7 +114,7 @@ sub archiveStories {
 		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file);
 		if (defined($cc)) {
 			# all is well, data was found
-			$slashdb->setStory($sid, {
+			$slashdb->setStory($stoid, {
 				writestatus  => 'archived',
 				commentcount => $cc,
 				hitparade    => $hp,
@@ -167,7 +156,7 @@ sub _read_and_unlink_cchp_file {
 	my $constants = getCurrentStatic();
 	my($cc, $hp) = (undef, undef);
 	my $default_hp = join(",", ("0") x
-		($constants->{maxscore}-$constants->{minscore}+1));
+		($constants->{comment_maxscore}-$constants->{comment_minscore}+1));
 
 	# Now we extract what we need from the file we created
 	if (!open(my $cchp_fh, "<", $cchp_file)) {

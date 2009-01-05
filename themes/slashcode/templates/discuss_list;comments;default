@@ -7,6 +7,9 @@ arguments.
 
 * discussions = arrayref of arrayrefs of discussions (sid = 0, title=1, url=2)
 * suppress_create = if it has value then the create is not displayed even if the user has enough of a seclev
+
+NO LONGER USED
+
 __title__
 
 __page__
@@ -16,27 +19,30 @@ en_US
 __name__
 discuss_list
 __template__
-<table>
+<table width="100%" cellpadding="0" cellspacing="0">
 	<tr>
 		<td align="left">
-<UL>
+[% IF discussions.size > 0  %]
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr bgcolor="[% user.colors.bg_3 %]"><th align="LEFT">Discussion</th><th align="LEFT">Referrer</th><th align="LEFT">Last Update</th><th align="RIGHT">Comment Count</th></tr>
 [% FOR discussion = discussions %]
-	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
-IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
-	(<A HREF="[% discussion.url %]">referrer</A>) Last Updated on [% Slash.timeCalc(discussion.last_update) %] | [% discussion.commentcount %] comments </LI>
+	<tr bgcolor="[% user.colors.bg_2 %]"><td><a href="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
+IF discussion.title.defined %][% discussion.title | strip_html %][% ELSE %]untitled[% END %]</a></td>
+	<td><a href="[% discussion.url | strip_attribute %]">referrer</a></td><td>[% Slash.timeCalc(discussion.last_update) %]</td><td align="RIGHT">[% discussion.commentcount %] comment[% discussion.commentcount == 1 ? "&nbsp;" : "s" %] </td></tr>
 [% END %]
-</UL>
-<P>
+[% END %]
+</table>
+<p>
 [% PROCESS pagination label=label %]
 		</td>
 	</tr>
 </table>
 
-<P>
+<p>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !suppress_create;
     # PROCESS discreate topic=constants.discussion_default_topic label=label; 
-    PROCESS edit_comment indextype=indextype newdiscussion=1 topic=constants.discussion_default_topic label=label; 
+    PROCESS edit_comment indextype=indextype newdiscussion=1 topic=constants.discussion_default_topic label=label hide_name=1 hide_email=1; 
 ELSIF user.seclev < constants.discussion_create_seclev;
 	Slash.getData('no_discreate_msg');
 END %]

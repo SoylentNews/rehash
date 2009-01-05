@@ -1,0 +1,13 @@
+#contents
+{
+     margin: 0 0 0 .3em !important;
+}
+
+div#links {
+	display: none;
+}
+
+div#articles, div#users-blocks, div#polls
+{
+     margin: 0 .3em 1em 0;
+}

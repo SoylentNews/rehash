@@ -26,8 +26,17 @@ __template__
 	   END;
 	%]
 
+[% CASE 'rsshead' %]
+	[% varsection = Slash.db.getVar('section');
+	   IF varsection.value == constants.section;
+	      constants.sitename;
+	   ELSE;
+	      constants.sitename %]: [% section.title;
+	   END;
+	%]
+
 [% CASE 'userboxhead' %]
-	[% user.nickname %]'s Slashbox
+	[% user.nickname | strip_literal %]'s Slashbox
 
 [% CASE 'friends_journal_head' %]
 	[% returnme.data_constant = 1 %] 
@@ -43,7 +52,16 @@ __template__
 
 [% CASE 'readmore' %]
 	[% returnme.data_constant = 1 %] 
-	<B>Read More...</B>
+	<b>Read More...</b>
+
+[% CASE 'readmore_with_bytes' %]
+	[% IF bytes %]
+	<b>Read [% bytes %] More Bytes...</b>
+	[% ELSIF words %]
+	<b>Read [% words %] More Words...</b>
+	[% ELSE %]
+	<b>Read More...</b>
+	[% END %]
 
 [% CASE 'bytes' %]
 	[% returnme.data_constant = 1 %] 
@@ -54,10 +72,26 @@ __template__
 	words in story
 
 [% CASE 'comments' %]
-	<B>[% IF cc.0 -%]
-<A HREF="[% cc.0.0 %]"[% IF cc.0.2 %] TITLE="[% cc.0.2 %]"[% END %]>[% cc.0.1 %]</A> of 
+	<li class="comments">
+[% IF cc.0 -%]
+<a href="[% cc.0.0 | strip_attribute %]"[% IF cc.0.2 %] title="[% cc.0.2 | strip_attribute %]"[% END %]>[% cc.0.1 | strip_html %]</a> of 
 	[%- END -%]
-<A HREF="[% cc.1.0 %]"[% IF cc.1.2 %] TITLE="[% cc.1.2 %]"[% END %]>[% cc.1.1 %]</A></B> comment[% cc.3 != 1 ? 's' : '' %]
+<a href="[% cc.1.0 | strip_attribute %]"[% IF cc.1.2 %] title="[% cc.1.2 | strip_attribute %]"[% END %]>[% cc.1.1 | strip_html %]</a> comment[% cc.3 != 1 ? 's' : '' %]
+	</li>
+
+[% CASE 'edit' %]
+	Edit
+
+[% CASE 'remark_thanks' %]
+	<p><b>Thanks for your remark to our editors!</b><p>
+
+[% CASE 'briefarticles_begin' %]
+	[% returnme.data_constant = 1 %] 
+	<div class="briefarticles">
+
+[% CASE 'briefarticles_end' %]
+	[% returnme.data_constant = 1 %] 
+	</div>
 
 [% END %]
 

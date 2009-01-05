@@ -12,32 +12,32 @@ __name__
 discreate
 __template__
 [% begin = BLOCK %]
-<FORM METHOD="POST" ACTION="[% constants.rootdir %]/comments.pl" ENCTYPE="application/x-www-form-urlencoded">
+<form method="post" action="[% gSkin.rootdir %]/comments.pl" ENCtype="application/x-www-form-urlencoded">
 [% PROCESS formkey_tag %]
-<INPUT TYPE="hidden" NAME="op" VALUE="create_discussion">
+<input type="hidden" name="op" value="create_discussion">
 [% END %]
 
 [% val1 = BLOCK %]
-<INPUT TYPE="text" NAME="title" SIZE=60>
+<input type="text" name="title" size=60>
 [% END %]
 [% val2 = BLOCK %]
-<INPUT TYPE="text" NAME="url" SIZE=60>
-<BR><FONT SIZE="-1">(if a form element needs some help, stick it here)</FONT>
+<input type="text" name="url" size=60>
+<br>(if a form element needs some help, stick it here)
 [% END %]
 
 [% val3 = BLOCK %]
 [% 
 	section = form.section || user.section;
 %]
-<INPUT TYPE="hidden" NAME="section" VALUE="[% section %]">
+<input type="hidden" name="section" value="[% section %]">
 [% Slash.selectTopic('topic', topic, section, 1) %]
 
-<INPUT TYPE="submit" NAME="submit" VALUE="Submit">
+<input type="submit" name="submit" value="Submit">
 [% END %]
 [% PROCESS formbox
     title => "Create a $label.ufirst",
     begin => begin,
-    end   => '</FORM>',
+    end   => '</form>',
     pairs => [
         { label => "Name this $label", value => val1 },
         { label => "Optional referring URL", value => val2 },

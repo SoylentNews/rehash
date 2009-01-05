@@ -14,15 +14,12 @@ jpeg-6b and gd on freshmeat.net :)
 
 If you're on Debian, install these packages:
 
-	libfreetype6 libfreetype6-dev freetype2
+	libfreetype6 libfreetype6-dev libttf2
 	libjpeg62 libjpeg62-dev
 	libgd2-xpm libgd2-xpm-dev libgd-tools
 
-As of this writing (July 2003), only Debian testing and unstable have
-the packages specifically named "libgd2-xpm" and "-dev".  On Debian
-stable, they're called libgd2 and libgd2-dev but they're only version
-2.0.1 -- the latest versions of GD.pm require 2.0.12, so that's a
-problem, you'll probably have to install libgd from source.
+As of this writing (October 2006), all branches of Debian have all
+the above packages, except stable which is missing libgd-tools.
 
 Debian offers a prebuilt package of GD.pm, which you're welcome to
 try;  as of now, they're libgd-gd2-perl and libgd-text-perl in Debian
@@ -33,7 +30,7 @@ We prefer to build the perl modules with the CPAN:
 
 	install GD GD::Text GD::Text::Align
 
-You'll be asked about whether you want to build it with JPEG, FreeType and
+You may be asked about whether you want to build it with JPEG, FreeType and
 XPM support;  answer yes, yes, and I don't think XPM matters either way.
 If you have compile problems during the make, check which version of libgd
 you have installed and compare against the library version that the perl

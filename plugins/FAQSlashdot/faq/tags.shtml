@@ -1,0 +1,261 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <title>Slashdot FAQ - Tags</title>
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+<!--
+($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
+-->
+
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Tags</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="suggestions.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="firehose.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
+
+<a name="tags100" id="tags100"></a>
+<h2>What is this crazy tags thing?</h2>
+<p> Slashdot is currently experimenting with tagging articles.  You are
+encouraged to use this feature to submit a handful of tags: brief labels
+that you think best describe this article.  You might choose to say that
+this is an article about 'security' and 'mozilla'.
+</p>
+
+<p>This is all very beta. Currently, tagging is open to our users whose
+accounts are more than about six months old. If your account is more
+recent, you can still get tag access by
+<a href="/subscribe.pl">becoming a Slashdot subscriber</a>.</p>
+
+<p>We don't know exactly how this will all work, and a lot of it really
+depends on you.  If you choose to add your own tags, be aware:</p>
+
+<ul>
+<li>Your tags are <b>public</b>. Everyone will be able to see them!</li>
+<li>Individual tags should not include spaces: a space is used to enter
+multiple tags. Use "bigbrother", not "big brother".
+<li>For the <b>opposite</b> of a tag, prefix it with "!", e.g.  "!funny"
+means "not funny."</li>
+<li>Keep your tags brief. No full sentences. Tags are not comments.</li>
+<li>We provide a few example tags for you. Use them if you like.</li>
+<li>Don't forget to click 'Tag' to save your tags.</li>
+<li>After you save, your current list of tags is put back into the
+text field for you. If you clear it and re-click Tag, your old tags
+are undone. To add more tags, just add them to your list and
+re-click Tag.</li>
+<li>Tags must be all-lowercase, no punctuation. Numbers can  
+appear but can't be first. Smoosh them up: for "Web 2.0", tag  
+"web20". Max 64 chars.</li>
+<li>Avoid plurals when possible: "harddrive", not "harddrives".
+But sometimes singular would be silly: "starwars".</li>
+</ul>
+
+<p>We're excited about this, and see huge potential for this system.
+From user feedback on articles, to comment moderation, the system is
+really limited only by your participation, and our database hardware! 
+</p>
+
+<p><i><font size=-1>Answered by: <a  
+href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 11/22/07</font></i>
+
+
+
+<a name="tags110" id="tags110"></a>
+<h2>Are tags objective or subjective? Can I use any tag I want?</h2>
+
+<p>Other tagging systems let users make up any tags they want, and
+punt on the issue of objective meaning. So the tag "foo" means for each
+user whatever they want it to mean, and to the system it means nothing
+at all, it's just an identifier.</p>
+
+<p>We're going to build the next generation of moderation on top of
+tags. That means we're going to poach your namespace. Some tags will
+have a substantive effect on the system right from the start (or very
+soon). Our article tagger knows about tags like "dupe" or "typo".
+When we roll out tagging on comments, we will teach it "troll" and
+"informative". These tags can have a meaning in the system. And when
+<em>you</em> come up with ways of using tags that <em>we</em>
+haven't anticipated, we will bring them into the system.</p>
+
+<p>But your tags do not belong to you, they belong to everyone.
+We reserve the right to make changes that we think are necessary.
+Since this system is totally experimental, we don't know exactly what all
+of this might mean: it could mean one day we consolidate and change all
+"canine" to "dog" tags.  It could mean we define some system tag and usurp
+another tag. This is the nature of a system in active development. Don't
+say we didn't warn you!</p>
+
+<p>Tags elsewhere are your own personal playground and nobody cares if
+you mess around. On Slashdot, abusive uses of tags could have negative
+consequences. Precisely what that means, we don't know yet.</p>
+
+<p>Yes, that's pretty arbitrary. We'll spell out policy as this evolves.
+For now, the deal is: tag in good faith, and if there's abuse, we'll
+deal with it in good faith.</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 2/10/06</font></i>
+
+
+<br><a name="tags200" id="tags200"></a>
+<h2>What tags are defined?</h2>
+
+<p>Use <b>dupe</b> only when a Slashdot story is an actual duplicate of a
+previous <b>Slashdot</b> story, offering no new information.</p>
+
+<p>(Misusing the dupe or !dupe tag, by the way, is a great way to ensure
+your user account has reduced effect on our system in the years to come.
+Using it accurately and quickly will do the opposite.)</p>
+
+<p>Use <b>typo</b> when a Slashdot story writeup has spelling or
+grammatical errors, or bad HTML like a malformed link. Do not tag
+the story with the misspelled word in question.</p>
+
+<p>These tags will alert us to problems immediately, which we love!
+But they won't show up on the top tags list. Trying to get around this
+with similarly spelled (but system-meaningless) tags like "dupitydupe"
+is discouraged.</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 11/22/07</font></i>
+
+
+<br><a name="tags300" id="tags300"></a>
+<h2>What are Slashdot Bookmarks?</h2>
+
+<p>Slashdot Bookmarks exist to give you a quick place to save URLs for
+later,  to share them with  the Slashdot Community, and to submit them
+to the Slashdot Editors for consideration for posting.
+
+<p>Remember first and
+foremost that your bookmarks are public: whatever you bookmark will be
+available to any user of Slashdot.   You can also tag your bookmarks to
+aid you in finding them later.</p>
+
+<p>After you bookmark a URL, you will
+have the option to either Submit it directly to the Slashdot submission bin,
+or better yet, to write a Journal Entry about it.  Slashdot Journal Entries
+can now be automatically submitted to Slashdot editors for mainpage post
+consideration, so bookmarks are a great way to quickly
+submit stories.</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 3/22/06</font></i>
+
+
+<br><a name="tags310" id="tags310"></a>
+<h2>How do I save a Slashdot Bookmark?</h2>
+
+<p>You can bookmark a site by directly going to <a
+href="/bookmark.pl">the bookmarks page</a>,
+or alternatively, you can use the following lump of javascript as a
+browser button, and save it dynamically from your browser toolbar:</p>
+
+<p>All you need to do is drag one of the following links to your
+bookmark toolbar, or right-click and save the link as a bookmark.
+Subscribers using SSL will want to use the HTTPS version of this link.</p>
+
+<p>HTTP: <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">Post to Slashdot</a> (general users)
+<br>
+HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">Post to Slashdot</a> (for subscribers using SSL)
+</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 03/22/06</font></i>
+
+
+<br><a name="tags320" id="tags320"></a>
+<h2>How do I encourage my readers to bookmark at Slashdot?</h2>
+
+<p>In case your site's webpages aren't already cluttered enough with
+"Digg It" and "Add to Del.icio.us" links, you can add a badge or link that
+automatically submits your page to Slashdot. If enough readers
+click, your page will be brought to our editors' attention -- it's
+like a cheap, fast
+<a href="/submit.pl">submit.pl</a>.</p>
+
+<p><img src="http://images.slashdot.org/sdit6n.png" alt="sample slashdot badge" style="float:left; padding-right:1.5em;">
+Badges look like this, and besides allowing submission,
+show readers the current popularity of a submitted page
+and let them vote on it themselves. Here's a block of
+HTML you can include in any page:</p>
+
+<blockquote><p><pre>&lt;script src="http://slashdot.org/slashdot-it.js" type="text/javascript"&gt;&lt;/script&gt;</pre></blockquote>
+
+<p>You'll find details and examples in our <a href="/faq/badges.shtml">Badges How-To</a>.</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:scc@slashdot.org">scc</a></font></i>
+<br><i><font size=-1>Last Modified: 10/03/07</font></i>
+
+
+<br><a name="tags400" id="tags400"></a>
+<h2>How do I share my Bookmarks?</h2>
+
+<p>Your bookmarks are available to you at <a
+href="/my/bookmarks">/my/bookmarks</a>.  You can access other users'
+bookmarks from their homepages.  To read mine, you would use
+<a href="/~CmdrTaco/bookmarks/">/~CmdrTaco/bookmarks</a>.
+</p>
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 3/22/06</font></i>
+
+
+<br><a name="tags410" id="tags410"></a>
+<h2>How can I see what Slashdotters are tagging?</h2>
+
+<p>At <a href="/tags">http://slashdot.org/tags</a>
+you can see some of the most popular tags. Each tag shows something
+about readers' thoughts on stories and bookmarks. Categorizational
+tags often work like a mini-search
+(<a href="/tags/web20">web20</a>,
+<a href="/tags/google">google</a>,
+<a href="/tags/globalwarming">globalwarming</a>,
+<a href="/tags/diebold">diebold</a>,
+<a href="/tags/bush">bush</a>,
+<a href="/tags/rumor">rumor</a>,
+<a href="/tags/xbox">xbox</a>),
+and commentary tags give a glimpse into Slashdotters' opinions
+(<a href="/tags/itsatrap">itsatrap</a>,
+<a href="/tags/fud">fud</a>,
+<a href="/tags/snakeoil">snakeoil</a>,
+<a href="/tags/cool">cool</a>,
+<a href="/tags/finally">finally</a>,
+<a href="/tags/whocares">whocares</a>,
+and the Jeopardy-style answers
+<a href="/tags/yes">yes</a> and <a href="/tags/no">no</a>).</p>
+
+<p>You can see your own tags by visiting
+<a href="/my/tags">/my/tags</a>,
+or any user's tags at
+<a href="/~CmdrTaco/tags">/~CmdrTaco/tags</a>.
+
+<p>We'll be doing the usual improvements -- RSS feeds, tag clouds,
+nicer formatting -- a little while down the road.</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+
+
+<hr>
+<table>
+<tr>
+<td><a href="suggestions.shtml">Previous section</a></td>
+<td><a href="firehose.shtml">Next section</a></td>
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+<!--#include virtual="/slashfoot.inc"-->
+</body>
+</html>
+

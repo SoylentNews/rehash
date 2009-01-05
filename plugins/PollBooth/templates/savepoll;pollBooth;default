@@ -17,7 +17,7 @@ __template__
 	[% aid = "aid$n" %]
 	[% votes = "votes$n" %]
 	[% IF form.$aid %]
-<BR>Answer [% n %] '[% form.$aid %]' [% form.$votes %]
+<br>Answer [% n %] '[% form.$aid %]' [% form.$votes %]
 	[% END %]
 [% END %]
 

@@ -33,25 +33,25 @@ __template__
 [% END -%]
 
 <!-- begin editUrl -->
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
 
 [% IF !url_id -%] 
 <p>no URL found with ID '[% url_id %]'
 
 [% ELSE -%] 
 [%	IF miner_id;
-		miner_id = BLOCK %]<a href="[% constants.rootdir -
+		miner_id = BLOCK %]<a href="[% gSkin.rootdir -
 		%]/newsvac.pl?op=editminer&miner_id=[% miner_id %]">[%
 		miner_id -%]</a>[% END;
    	END -%]
 [%	DEFAULT 
-		miner_id = "<I>n/a</I>",
-		title = "<I>n/a</I>",
-		last_attempt = "<I>n/a</I>",
-		last_success = "<I>n/a</I>",
-		status_code = "<I>n/a</I>",
-		reason_phrase = "<I>n/a</I>",
-		message_body_length = "<I>n/a</I>"
+		miner_id = "<i>n/a</i>",
+		title = "<i>n/a</i>",
+		last_attempt = "<i>n/a</i>",
+		last_success = "<i>n/a</i>",
+		status_code = "<i>n/a</i>",
+		reason_phrase = "<i>n/a</i>",
+		message_body_length = "<i>n/a</i>"
 -%]
 
 <table border="0">
@@ -116,7 +116,7 @@ __template__
         </tr>
 </table>
 [% END %]
-</FORM>
+</form>
 <p>&nbsp;<p>
 <!-- end editUrl -->
 __seclev__

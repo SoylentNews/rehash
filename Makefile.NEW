@@ -1,5 +1,5 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -32,7 +32,7 @@ GROUP = nobody
 CP = cp
 
 # Plugins (any directory in plugins/)
-PLUGINS = `find . -name CVS -prune -o -type d -maxdepth 1 -print`
+PLUGINS = `find . -maxdepth 1 -name CVS -prune -o -type d -print`
 
 # Perl scripts, grouped by directory.
 BINFILES = `find bin -name CVS -prune -o -type f -print`

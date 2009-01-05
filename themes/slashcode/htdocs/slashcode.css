@@ -1,0 +1,340 @@
+body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
+body { background: #e5e5e5 url("/images/bg2.gif") repeat-x; }
+a { color: #600; }
+a:visited { color: #000; }
+
+/* layout */
+#contents
+{
+	min-width: 37em;
+}
+
+body #index #articles
+{
+	margin: 0 15.6em 1em 0;
+	position: relative;
+}
+
+/* Header */
+#logo h1 a
+{
+	width: 115px;
+	height: 80px;
+	background: url("/images/logo.gif") no-repeat;
+}
+
+#slogan h2
+{
+	color: #555;
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 70%;
+}
+
+/* links */
+#links { background: #e5e5e5; }
+#links div.block { background: #fff url("/images/cbl.gif") bottom left no-repeat; }
+#links div.title { background: #b2b2b2 url("/images/ctl_grey.gif") top left no-repeat; }
+
+#links h4
+{
+	background: url("/images/ctr_grey.gif") top right no-repeat;
+	font-weight: bold;
+	font-size: 80%;
+	font-family: sans-serif;
+}
+
+#links div.content
+{
+	background: url("/images/cbr.gif") bottom right no-repeat;
+	padding: .3em .3em .6em .3em;
+	font-size: 75.5%;
+	line-height: 140%;
+	position: relative;
+}
+
+#navigation-content ul ul { border-bottom: 1px #eee solid; }
+
+/* slashboxes */
+#slashboxes { background: #e5e5e5; }
+#slashboxes div.block { background: #fff url("/images/cbr.gif") bottom right no-repeat; }
+#slashboxes div.title { background: #b2b2b2 url("/images/ctl_grey.gif") top left no-repeat; }
+
+#slashboxes h4
+{
+	background: url("/images/ctr_grey.gif") top right no-repeat;
+	font-weight: bold;
+	font-family: sans-serif;
+	font-size: 80%;
+	color: #fff;
+}
+
+#slashboxes div.content
+{
+	background: url("/images/cbl.gif") bottom left no-repeat;
+	font-size: 75.5%;
+	line-height: 140%;
+}
+
+/* Quick links content */
+#slashboxes #index_qlinks-content ul, #slashboxes #index_qlinks-content li, #slashboxes #features_qlinks-content ul, #slashboxes #features_qlinks-content li
+{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+/* General */
+.generaltitle { background: url("/images/bg_red.gif") #933 repeat-x; }
+.generaltitle div.title { background: transparent url("/images/ctl_red.gif") top left no-repeat; }
+
+.generaltitle h3
+{
+	background: transparent url("/images/ctr_red.gif") top right no-repeat;
+	color: #fff;
+	font-family: sans-serif;
+	font-size: 100%;
+}
+
+.generalbody
+{
+	background: #fff;
+	border: 1px solid #aaa;
+	border-top: none;
+}
+
+
+/* articles */
+.article { background: #933 url("/images/bg_red.gif") repeat-x; }
+.article div.title { background: url("/images/ctl_red.gif") top left no-repeat; }
+
+#journal .article h3
+{
+	background: url("/images/ctr_red.gif") top right no-repeat;
+	color: #fff;
+	font-family: sans-serif;
+	font-size: 100%;
+}
+
+.article .details
+{
+	font-size: 70%;
+	font-weight: normal;
+	font-family: sans-serif;
+	border: 1px solid #aaa;
+	background: #ddd url("/images/bg_details.gif") repeat-x;
+}
+.article .body
+{
+	border: 1px solid #aaa;
+	border-top: none;
+	background: #fff url("/images/bg_white.gif") repeat-x;
+}
+
+div.storylinks
+{
+	background: #eee url("/images/bg_storylinks.gif") bottom repeat-x;
+	font-size: 80%;
+	font-family: sans-serif;
+	
+}
+
+div.storylinks div { background: url("/images/cbr_ltgrey.gif") bottom right no-repeat; }
+div.storylinks div ul { height: 1em;} 
+div.storylinks div ul 
+{
+	padding: .6em 1em; 
+	margin: 0; 
+	background: url("/images/cbl_ltgrey.gif") bottom left no-repeat;
+}
+div.storylinks ul li 
+{ 
+	padding: .3em; 
+	border-left: 1px solid #555; 
+}
+
+/* Footer */
+#footer { font-family: sans-serif; }
+
+#footer em
+{
+	font-size: 80%;
+	float: right;
+	width: 45%;
+}
+
+#footer .search
+{
+	font-size: 70%;
+	width: 50%;
+	text-align: center;
+	padding: 0;
+	margin: 0;
+}
+
+#footer legend, #footer fieldset, #footer label
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer .search input { margin: 0; }
+
+#footer .copyright
+{
+	font-size: x-small;
+	color: #000;
+}
+
+#footer	.admin li
+{
+	border-left: 1px solid #555;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline;
+}
+
+/* Comments */
+.commentBox { background: #600; }
+
+/* Poll */
+.barColor { background: #600; }
+
+/* Bottom Nav */
+.btmnav
+{
+	color: #600;
+	font-size: 70%;
+}
+
+.btmnav ul li a { color: #600; }
+
+/* Journal */
+.journaldate { position: relative; }
+.generalbody #journalgeneric .article
+{
+	height: auto;
+	margin: 0 0 1em 0;
+}
+
+#journalgeneric div.storylinks ul li { margin: 0; padding: 0; border: none; }
+#journalgeneric div.storylinks ul li a { padding: 0 .4em 0 1em; border-left: 1px solid #000; }
+#journalgeneric div.storylinks ul li.edit a, #journalgeneric div.storylinks ul li.discussion a, #journalgeneric div.storylinks ul li.journalid a { border: none; }
+#journalslashdot .journaldate {font-weight: bold;}
+#journalslashdot .title { margin: 0 0 0 .6em; padding: 0; float: left;}
+#journalslashdot h3 { font-size: 65%; margin: 0; padding: 0; font-family: geneva,verdana,sans-serif;}
+#journalslashdot .details { float: left; font-style: italic; font-size: 65%; font-family: geneva,verdana,sans-serif; background: transparent; }
+#journalslashdot .intro { padding: 1em 0 2em 3.7em;}
+#journalslashdot div.storylinks { margin: 0; padding: 0; background: transparent;font-size: 65%;}
+#journalslashdot div.storylinks ul { margin: 0; padding: 0; background: transparent;}
+#journalslashdot div.storylinks ul li { margin: 0; padding: 0; border: none; font-family: geneva,verdana,sans-serif; }
+#journalslashdot div.storylinks ul li a { padding: 0 .4em 0 1em; border-left: 1px solid #000; }
+#journalslashdot div.storylinks ul li.edit a, #journalslashdot div.storylinks ul li.discussion a, #journalslashdot div.storylinks ul li.journalid a { border: none; }
+#journalslashdot .journalpage {font-size: 65.5%; font-family: geneva,verdana,sans-serif; text-align: right;}
+#journalgrey .journaldate { font-weight: bold; background: #eee; }
+#journalgrey .details { float: left; font-weight: bold; background: #eee; padding: 0 0.6em 0 0; }
+#journalgrey .title { background: #eee; padding: 0 0 0 0.6em; }
+#journalgrey { border: 3px solid #999; padding: 3px;}
+#journalgrey div.storylinks, #journalblue div.storylinks { background: transparent; }
+#journalgrey div.storylinks ul, #journalblue div.storylinks ul { background: transparent; }
+#journalgrey .body, #journalblue .body {min-height: 60px; }
+#journalblue div.storylinks ul li,  #journalgrey div.storylinks ul li { border: none; margin: 0; padding: 0; }
+#journalblue .journaldate { background: #369; font-weight: bold; padding: 3px; }
+#journalblue { border: 3px solid #000; }
+#journalblue .details { float: left; margin: 0 0.6em 0 0.3em; font-weight: bold; }
+#journalblue .title h3 { margin: 0; padding: 0; font-family: serif; }
+
+/* Forms */
+textarea { width: 80%; }
+#journal input.button, #admin input.button { width: auto; }
+
+/* Misc */
+pre, code { font-size: 80%; }
+/* Ad */
+.ad1
+{
+	margin: .3em 0 .5em 0;
+	padding: 0;
+	text-align: center;
+}
+
+.ad2
+{
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+.ad6
+{
+	margin: .2em .2em .2em 0;
+	padding: 0;
+}
+
+.tb_col { background: #600;}
+
+/* Usermenu */
+ul.menu a, ul.menu a:visited { color: #000; }
+.generalbody ul.menu li a { color: #600; }
+
+.menuoldstyle li
+{
+        display: inline;
+        list-style: none;
+        margin: 0;
+        padding: 0 2px 0 1px;
+}
+
+.menuoldstyle ul
+{       
+        padding: 0; 
+        margin: 0 0 1em 0;
+}
+
+.menuoldstyle li:before { content: "| "; }
+.menuoldstyle li:first-child:before { content: ""; }
+
+.briefarticle { padding: 2px; background: #ccc; font-size: 80%}
+.briefarticle a { color: #000 }
+.briefarticle .section { color: #333; }
+.briefarticle .storytitle { font-weight: bold; }
+.briefarticle .introhide { display : none }
+.briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+
+/* Tags */
+
+.tags { width: 100%; font-size: 90%; line-height: 115% }
+.tagname { color: #600; font-weight: bold; padding: 0 }
+.tagtitleopen { background: #600; color: #fff; font-size: 90% }
+.tagtitleopen a { color: #fff; text-decoration: none; font-size: 90% }
+.tagtitleclosed { background: #e5e5e5; font-size: 90% }
+.tagtitleclosed a { text-decoration: none; font-size: 90% }
+.tagmenu a { text-decoration: underline; }
+.tagbody { border: 1px #ccc solid; background: #eee; padding: 8px }
+.tagshide { display: none }
+
+.future .briefarticle { background: #c33; }
+.briefarticles { border-top: solid 2px #933; padding-bottom: 0.5em; margin-top: 3px }
+.curstory { border-top: solid 2px #933; }
+.secpref_master td { border-bottom: solid 2px #066;}
+.secpref_nexus_row { color: #aaa; background: #ccc; }
+.ps_23, .ps_22 { display: none; }
+.curstory { border-top: solid 2px #066; }
+.popup { border: solid 2px #933; }
+.popup .data { font-size: 100% }
+.popup-title {text-align: left; background: #933; font-size: 100%; color: #fff; padding-right: 4em; }
+.popup-title .buttons, .title .buttons {
+	position: absolute;
+        right: 0.2em;
+}
+.popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold; font-family: sans-serif; text-decoration: none;}
+.popup-title .buttons span { margin: -.3em 0; padding: 0 4px; height: 11px; width: 11px;}
+
+.popup-message { background: #933; color: #fff; }
+.popup-title a, .popup-message a { color: #fff }
+.popup-contents { background: #ccc; font-size: 80%; padding: 5px; }
+.popup-message  { background: #933; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
+#sectionprefs-contents { background: #fff }
+
+.horizontal .ccw-header-links { top: 0pt; }

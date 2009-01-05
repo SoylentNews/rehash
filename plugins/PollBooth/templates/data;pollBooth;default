@@ -32,19 +32,14 @@ __template__
 	Story is already attatched to a different poll.  Please detach poll from that story before saving.
 [% CASE 'invalid' %]
 	[% returnme.data_constant = 1 %]
-	Invalid poll!<BR>
+	Invalid poll!<br>
 
 [% CASE 'display' %]
 	[% returnme.data_constant = 1 %]
 	Displaying poll results.
 
-[% CASE 'anon' %]
-	[% returnme.data_constant = 1 %]
-	You may not vote anonymously.  Please
-	<A HREF="[% constants.real_rootdir %]/users.pl">log in</A>.
-
 [% CASE 'uid_voted' %]
-	[% user.nickname %] at [% env.remote_addr %] has already voted.
+	[% user.nickname | strip_literal %] at [% env.remote_addr %] has already voted.
 	[% IF env.http_x_forwarded_for %]
 	(proxy for [% env.http_x_forwarded_for %])
 	[% END %]
@@ -66,6 +61,32 @@ __template__
 [% CASE 'noanswer' %]
 	[% returnme.data_constant = 1 %]
 	You must provide one or more answers.
+
+[% CASE 'slashbox_head' %]
+	[% returnme.data_constant = 1 %]
+	<div id="slashboxes">
+
+[% CASE 'slashbox_foot' %]
+	[% returnme.data_constant = 1 %]
+	</div>
+
+[%# for ResKeys %]
+[% CASE 'anon' %]
+	[% returnme.data_constant = 1 %]
+	You may not vote anonymously.  Please
+	<a href="[% constants.real_rootdir %]/users.pl">log in</a>.
+
+[% CASE 'no qid' %]
+	[% returnme.data_constant = 1 %]
+	The poll ID is missing.
+
+[% CASE 'no polls' %]
+	[% returnme.data_constant = 1 %]
+	Polls are currently disabled.
+
+[% CASE 'already voted' %]
+	[% returnme.data_constant = 1 %]
+	You've already voted.
 
 [% END %]
 

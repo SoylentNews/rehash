@@ -1,0 +1,12 @@
+# $Id$
+name=ScheduleShifts
+description="set up shifts for editors"
+
+htdoc=shifts.pl
+
+template=templates/scheduleForm;shifts;default
+template=templates/data;shifts;default
+template=templates/shift_change;shifts;default
+
+mysql_dump=mysql_dump
+mysql_prep=mysql_schema

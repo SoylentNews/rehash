@@ -14,21 +14,36 @@ en_US
 __name__
 userSub
 __template__
-[% USE Slash %]
+[% nick = nick | strip_literal %]
 [% IF nick_match %]
 	[% title = "Your Stories" %]
 [% ELSE %]
 	[% title = "$nick's stories" %]
 [% END %]
-[% PROCESS titlebar width="100%" title=title %]
-
-<P><B>[% IF nick_match %]You have[% ELSE %][% nick %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B>
-<P>
-[% n = 0 %]
-[% FOREACH story = stories %]
-	[% n = n + 1 %]
-		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
-[% END %]
+[% PROCESS titlebar title=title %]
+<div class="generalbody">
+	<p>
+		<b>
+			[% IF nick_match %]
+				You have
+			[% ELSE %]
+				[% nick %] has
+			[% END %] 
+			submitted [% storycount %] stories.
+			[% IF storycount > constants.user_submitter_display_default %] 
+			Below are the most recent [% form.min %] stories.
+			[% END %]
+		</b>
+	<p>
+	[% n = 0 %]
+	[% FOREACH story = stories %]
+		[% n = n + 1 %]
+			<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+				[% story.title %]
+			</a> 
+			on [% Slash.timeCalc(story.time) %]<br>
+	[% END %]
+</div>
 
 __seclev__
 500

@@ -19,58 +19,52 @@ en_US
 __name__
 changePasswd
 __template__
-[% PROCESS prefs_titlebar tab_selected='password' %]
 
-[% admin_block %]
-
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
-	<TR>
-		<TD>
-[% IF constants.offer_insecure_login_link %]
-		<P>You can automatically log in by clicking
-		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
-		This is totally insecure, but very convenient.
-		</P>
-[% END %]
-		<BR>
-
-		<FORM ACTION="[% env.script_name %]" METHOD="POST">
-
-		[% PROCESS formkey_tag %]
-
-[% IF admin_flag %]
-		<B>User ID</B> (if admin user) <INPUT TYPE="TEXT" NAME="uid" VALUE="[% useredit.uid %]"><BR>
-[% ELSE %]
-		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
-[% END %]
-		My login cookie <B>expires</B> [% session %] and <B>works from</B> [% clocation %]
-
-		<P>Note: currently, to change your login cookie preferences, you must change your
-		password.  This will be fixed in the future.  You can change your password to
-		whatever your current password is, if you like, so it won't actually change.</P>
-
-		<P>Note: changing your password or login cookie preferences will disable all
-		cookies for this account, requiring all browsers to reauthenticate.</P>
-[% IF !admin_flag %]
-		[% IF got_oldpass %]
-			<INPUT TYPE="HIDDEN" NAME="oldpass" VALUE="[% form.oldpass | strip_attribute %]">	
-		[% ELSE %]
-			Enter your <b>current</b> password <BR>
-			<INPUT TYPE="PASSWORD" NAME="oldpass" SIZE="20" MAXLENGTH="20" VALUE=""><BR>
+	[% PROCESS prefs_titlebar tab_selected='password' %]
+	<div class="generalbody">
+		[% admin_block %]
+		[% IF constants.offer_insecure_login_link %]
+			<div class="message">
+				You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page.  This is totally insecure, but very convenient.
+			</div>
 		[% END %]
-[% END %]
-		<B>Password</B> Enter a new password twice to change it.
-		(must be 6-20 chars long)</B><BR>
-		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
-		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20">
-
-		</TD>
-	</TR>
-</TABLE>
-
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="savepasswd">
-<INPUT TYPE="SUBMIT" VALUE="Change Password">
-</FORM>
+		<form action="[% env.script_name %]" method="post">
+			[% PROCESS formkey_tag %]
+			[% IF admin_flag %]
+				<b>User ID</b> (if admin user) <input type="text" name="uid" value="[% useredit.uid %]"><br>
+			[% ELSE %]
+				<input type="hidden" name="uid" value="[% useredit.uid %]">
+			[% END %]
+			My <a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a> [% session %] and [% clocation %]
+			[% PROCESS formNote note="Currently, to change your login cookie preferences, you must change your password.  This will be fixed in the near future.  You can change your password to whatever your current password is, if you like, so it won't actually change." %]
+			[% PROCESS formNote note="Changing your password or login cookie preferences will disable all cookies for this account, requiring all browsers to reauthenticate." %]
+			</p>
+			[% IF !admin_flag %]
+				[% IF got_oldpass %]
+					<input type="hidden" name="oldpass" value="[% form.oldpass | strip_attribute %]">	
+				[% ELSE %]
+					<label>
+						Enter your <b>current</b> password
+					</label>
+					<input type="password" name="oldpass" size="20" maxlength="20" value="">
+				[% END %]
+			[% END %]
+			<label>
+				Password
+			</label>
+			<div class="note">
+				Enter a new password twice to change it.
+			</div>
+			<input type="password" name="pass1" size="20" maxlength="20">
+			<input type="password" name="pass2" size="20" maxlength="20">
+			<div class="note">
+				Must be 6-20 chars long.
+			</div>
+			<br>
+			<input type="hidden" name="op" value="savepasswd">
+			<input type="submit" value="Change Password" class="button">
+		</form>
+	</div>
 
 __seclev__
 500

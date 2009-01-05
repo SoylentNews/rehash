@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+author_activity
+__template__
+<table>
+[% IF daddy %]
+	<tr class="data_hl1"><td><a href="[% $gSkin.rootdir %]/shifts.pl">Daddypants:</a> [% daddy.nickname | strip_literal %]</td></tr>
+[% END %]
+[% seen_uids = {}; num = 0 %]
+[% FOREACH act = activity %]
+	[% NEXT IF seen_uids.${act.uid}; %]
+	[% class = num % 2 ? "data_hl1" : "data_hl2"; %]
+	[% IF act.title %]
+		<tr class="[% class %]"><td>
+		[% act.nickname | strip_literal %]  [% act.verb %] <a href="[% gSkin.rootdir %]/[% IF act.sid %]admin.pl?op=edit&amp;sid=[% act.sid %][% ELSIF act.subid %]submit.pl?op=viewsub&amp;subid=[% act.subid %][% ELSIF act.fhid %]firehose.pl?op=view&amp;id=[% act.fhid %][% END %]">[% act.title %]</a> [% act.usertime %]
+		[% seen_uids.${act.uid} = 1 %]
+		[% num = !num %]
+		</td></tr>
+	[% END %]
+[% END %]
+</table>
+__seclev__
+10000
+__version__
+$Id$

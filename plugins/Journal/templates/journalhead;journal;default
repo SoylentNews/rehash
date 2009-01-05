@@ -11,51 +11,45 @@ en_US
 __name__
 journalhead
 __template__
-[% USE Slash %]
+[% orig_title = title %]
+<div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
+[% PROCESS userboxes %]
+[% END %]
+[% title = orig_title %]
+</div>
+<div id="users-blocks">
 [% IF menutype == 'prefs';
-	Slash.createMenu("users", {
-		tab_selected => "preferences",
-		style => "tabbed",
-		justify => "right",
-	});
-	PROCESS prefs_titlebar width => "100%" tab_selected => "journal";
-	Slash.createMenu("journal", {
-		style => "oldstyle"
-	});
+        Slash.createMenu("users", {
+                tab_selected => "me",
+                style => "tabbed"
+        });
+        PROCESS prefs_titlebar tab_selected => "journal";
+	'<div class="generalbody">';
+        Slash.createMenu("journal", {
+                style => "tabbed"
+        });
 ELSIF useredit && useredit.uid != user.uid;
-	Slash.createMenu("users", {
-		tab_selected => "otheruser",
-		style => "tabbed",
-		justify => "right"
-	});
-	PROCESS user_titlebar width => "100%" tab_selected => "journal";
-	Slash.createMenu("journal", {
-		style => "oldstyle"
-	});
+        Slash.createMenu("users", {
+                tab_selected => "otheruser",
+                style => "tabbed",
+        });
+        PROCESS user_titlebar tab_selected => "journal";
+	'<div class="generalbody">';
+        Slash.createMenu("journal", {
+                style => "tabbed"
+        });
 ELSE;
-	Slash.createMenu("users", {
-		tab_selected => "me",
-		style => "tabbed",
-		justify => "right",
-	});
-	PROCESS user_titlebar width => "100%" tab_selected => "journal";
-	Slash.createMenu("journal", {
-		style => "oldstyle"
-	});
+        Slash.createMenu("users", {
+                tab_selected => "me",
+                style => "tabbed"
+        });
+        PROCESS user_titlebar tab_selected => "journal";
+	'<div class="generalbody">';
+        Slash.createMenu("journal", {
+                style => "tabbed"
+        });
 END %]
-
-</TD>
-
-[% PROCESS maintable_td %]&nbsp;</TD>
-
-[% PROCESS maintable_td mt_rowspan="2" mt_valign="TOP" mt_width=(constants.fancyboxwidth + 10) mt_height="1" %]
-[% PROCESS userboxes %]</TD>
-[% PROCESS maintable_td %]&nbsp;</TD>
-</TR>
-
-[% PROCESS maintable_tr mt_height="100%" %]
-[% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td mt_colspan="1" mt_valign="TOP" %]
 
 __seclev__
 500

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -32,24 +32,22 @@ unless (-f $opts{f}) {
 	exit(0);
 }
 
-my ($file, $data);
-open($file, $opts{f});
-while (<$file>) {
+my ($fh, $data);
+open($fh, $opts{f});
+while (<$fh>) {
 	$data .= $_;
 }
-close($file);
+close($fh);
 
 my $content = {
-	seclev => $opts{s},
-	content_type => $opts{c},
-	data => $data,
+	seclev =>	$opts{'s'},
+	content_type =>	$opts{c} || undef,
+	data =>		$data,
+	filename =>	$opts{f},
 };
 
-$content->{filename} = $opts{f} unless $opts{c};
-
 my $id = $blobs->create($content);
-print "Stored in $id\n";
-
+print "$id $opts{f}\n";
 
 sub usage {
 	print "*** $_[0]\n" if $_[0];
@@ -79,7 +77,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

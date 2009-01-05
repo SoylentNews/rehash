@@ -1,0 +1,19 @@
+__section__
+default
+__description__
+Horizontal rule template.  This exists as a template
+so you can customize if you'd prefer not to use a plain
+old <hr>
+__title__
+__page__
+misc
+__lang__
+en_US
+__name__
+horiz_rule
+__template__
+<hr>
+__seclev__
+10000
+__version__
+$Id$

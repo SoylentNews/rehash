@@ -19,32 +19,46 @@ __template__
 
 [% CASE 'nousers' %]
 	[% returnme.data_constant = 1 %]
-	No usernames were found that match your query.
-
+	<div class="usersearch">
+		No usernames were found that match your query.
+	</div>
+</div>
 [% CASE 'nostories' %]
 	[% returnme.data_constant = 1 %]
-	No stories were found that match your query.
-
+	<div class="storysearch">
+		No stories were found that match your query.
+	</div>
+</div>
 [% CASE 'nocomments' %]
 	[% returnme.data_constant = 1 %]
-	No comments were found that match your query.
-
+	<div class="commentsearch">
+		No comments were found that match your query.
+	</div>
+</div>
 [% CASE 'nopolls' %]
 	[% returnme.data_constant = 1 %]
-	No poll questions were found that match your query.
-
+	<div class="pollsearch">
+		No poll questions were found that match your query.
+	</div>
+</div>
 [% CASE 'nojournals' %]
 	[% returnme.data_constant = 1 %]
-	No journals were found to match your query.
-
+	<div class="journalsearch">
+		No journals were found to match your query.
+	</div>
+</div>
 [% CASE 'nosubmissions' %]
 	[% returnme.data_constant = 1 %]
-	No submissions were found to match your query.
-
+	<div class="subsearch">
+		No submissions were found to match your query.
+	</div>
+</div>
 [% CASE 'norss' %]
 	[% returnme.data_constant = 1 %]
-	No rss entries were found to match your query.
-
+	<div class="rsssearch">
+		No rss entries were found to match your query.
+	</div>
+</div>
 [% CASE 'all_sections' %]
 	[% returnme.data_constant = 1 %]
 	All Sections
@@ -61,7 +75,22 @@ __template__
 	[% returnme.data_constant = 1 %]
 	All Subsections
 
+[% CASE 'search_titlebar_title' %]
+	[% IF text.length > 0 %]
+		Searching For: [% text %]
+	[% ELSE %]
+		Search [% constants.sitename %]
+	[% END %]
+
+[% CASE 'search_header_title' %]
+	[% IF text.length > 0 %]
+		Search '[% text %]'
+	[% ELSE %]
+		Search [% constants.sitename %]
+	[% END %]
+[% CASE 'search_slashboxes' # Not needed unless you have slashboxes on the search page %]
 [% END %]
+
 
 __seclev__
 10000

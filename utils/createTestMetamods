@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -12,7 +12,7 @@ use Slash::Utility;
 use Benchmark;
 use Data::Dumper;
 
-use vars qw( $slashdb $constants );
+use vars qw( $slashdb $constants $moddb $metamod_db );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -26,12 +26,18 @@ version() if $opts{'v'};
 $opts{'u'} ||= 'slash';
 $opts{num_closed} = $ARGV[0] || 10;
 usage('Invalid number of meta-moderations') 
-	if $opts{num_closed} !~ /^\d+$/ || $opts{num_mods} < 0;
+	if $opts{num_closed} !~ /^\d+$/ || ($opts{num_mods} && $opts{num_mods} < 0);
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
-my $reasons = $slashdb->getReasons();
+$metamod_db = getObject('Slash::Metamod');
+if (!$constants->{m2}) {
+	usage('Metamoderation has been disabled with the "m2" var');
+}
+$moddb = getObject("Slash::$constants->{m1_pluginname}");
+my $reasons = $moddb->getReasons();
 
 # Insure we don't exceed the maximum number of moderations that can be made.
 {
@@ -61,7 +67,7 @@ my $reasons = $slashdb->getReasons();
 		my($m2user, $comments);
 		if ($m2uid) {
 			$m2user = $slashdb->getUser($m2uid);
-			$comments = $slashdb->getMetamodsForUser(
+			$comments = $metamod_db->getMetamodsForUser(
 				$m2user, $constants->{m2_comments}
 			);
 
@@ -113,9 +119,9 @@ my $reasons = $slashdb->getReasons();
 		}
 
 		# Do the metamod.
-		$slashdb->setModsSaved($m2user, [( keys %m2s )]);
+		$metamod_db->setM2ModsSaved($m2user, [( keys %m2s )]);
 		$m2user = $slashdb->getUser($m2user->{uid});
-		$slashdb->createMetaMod($m2user, \%m2s, $multicount);
+		$metamod_db->createMetaMod($m2user, \%m2s, $multicount);
 
 		$m2count++;
 
@@ -220,7 +226,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

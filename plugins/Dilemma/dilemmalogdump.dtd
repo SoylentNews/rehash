@@ -1,0 +1,20 @@
+<!DOCTYPE dilemmalogdump [
+	<!ELEMENT dilemmalogdump (species*, agent*, meeting*)>
+	<!ELEMENT species (dsid, name, code)>
+        <!ELEMENT dsid (#PCDATA)>
+        <!ELEMENT name (#PCDATA)>
+        <!ELEMENT code (#PCDATA)>
+	<!ELEMENT agent (daid, dsid, born)>
+        <!ELEMENT daid (#PCDATA)>
+        <!ELEMENT born (#PCDATA)>
+        <!ELEMENT meeting (meetid, tick, foodsize, agentplay*)>
+        <!ELEMENT meetid (#PCDATA)>
+        <!ELEMENT tick (#PCDATA)>
+        <!ELEMENT foodsize (#PCDATA)>
+        <!ELEMENT agentplay (daid, playtry, playactual, reward, sawdaid)>
+        <!ELEMENT playtry (#PCDATA)>
+        <!ELEMENT playactual (#PCDATA)>
+        <!ELEMENT reward (#PCDATA)>
+        <!ELEMENT sawdaid (#PCDATA)>
+]>
+

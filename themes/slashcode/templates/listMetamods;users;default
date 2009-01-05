@@ -1,0 +1,153 @@
+__section__
+default
+__description__
+Prints table showing metamoderations performed by user
+__page__
+users
+__lang__
+en_US
+__name__
+listMetamods
+__template__
+
+[% IF constants.m2 && metamods.size > 0 %]
+	[%
+		bg_toggle = 0;
+		total_m2s = 0;
+		done_m2s = 0;
+		unfair_m2s = 0;
+		offside_m2s = 0;
+		lone_dissent_m2s = 0;
+		unanimous_m2s = 0;
+		
+	%]
+
+	[% IF title %]
+		[% m2_listing_op = m2_listing ? 0 : 1;
+		   self_url = PROCESS base_url_m2 value=the_user.uid;
+		   url_tail = PROCESS state_url_m2 override = { m2_listing => m2_listing_op };
+		   self_url = self_url  _ url_tail;
+		   extra = "<a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\"></a>";
+		%]
+		[% PROCESS titlebar width="100%" title=title max_min_button = extra %]
+	[% END %]
+	<table cellspacing="0" cellpadding="2" width="100%">
+	<tr class="data_head">
+		<th>Date</th>
+		<th>Comment</th>
+		<th>Mod</th>
+		<th>Vote</th>
+		<th>M2</th>
+		<th align="center">Unan</th>
+		<th align="center">Off</th>
+		<th align="center">LD</th>
+	</tr>
+	[% FOREACH m2 = metamods %]
+	[%
+		total_m2s = total_m2s + 1;
+		IF m2.val < 0;
+			unfair_m2s = unfair_m2s + 1;
+		END;
+		IF m2.m2status > 0;
+			done_m2s = done_m2s + 1;
+			IF m2.m2fair == 0 || m2.m2unfair == 0;
+				unanimous_m2s = unanimous_m2s + 1;
+				m2.unanimous = 1;
+			END;
+			IF m2.val > 0;
+				IF m2.m2unfair > m2.m2fair;
+					offside_m2s = offside_m2s + 1;
+					m2.offside = 1;
+					IF m2.m2fair == 1;
+						lone_dissent_m2s = lone_dissent_m2s + 1;
+						m2.ld = 1;
+					END;
+				END;
+			ELSIF m2.val < 0;
+				IF m2.m2fair > m2.m2unfair;
+					offside_m2s = offside_m2s + 1;
+					m2.offside = 1;
+					IF m2.m2fair == 1;
+						lone_dissent_m2s = lone_dissent_m2s + 1;
+						m2.ld = 1;
+					END;
+				END;
+			END;
+		END;
+	%]
+	[% IF m2_listing %]
+	<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
+		[% bg_toggle = !bg_toggle %]
+		<td>[% Slash.timeCalc(m2.ts) %]</td>
+		<td><a href="[% gSkin.rootdir %]/comments.pl?sid=[% m2.sid %]&amp;cid=[% m2.cid %]">[% m2.subject %]</a></td>
+		<td>[% IF m2.modval > 0 %]+[% ELSIF m2.modval < 0 %]-[% END %][% m2.modval %] [% reasons.${m2.reason}.name %]</td>
+		<td>[% IF m2.val>0 %]Fair[% ELSE %]Unfair[% END %]</td>
+		[% IF !reasons.${m2.reason}.m2able;
+			m2fair_str = "-";
+			m2unfair_str = "-";
+		ELSE;
+			IF m2.m2status > 0; 
+				m2fair_str = "<b><i>" _ m2.m2fair _ "</i></b>"; m2unfair_str = "<b><i>" _ m2.m2unfair _ "</i></b>";
+		 	  ELSE;
+				m2fair_str = m2.m2fair; m2unfair_str =  m2.m2unfair;
+		   	END; 
+			
+		END %]
+		<td align="left">[% m2fair_str _ "&nbsp;" _ m2unfair_str; %]</td>
+		<td align="center">[% IF m2.unanimous %]X[% END %]</td>
+		<td align="center">[% IF m2.offside %]X[% END %]</td>
+		<td align="center">[% IF m2.ld %]X[% END %]</td>
+	</tr>
+	[% END %]
+	[% END %]
+	[% IF m2_listing %]
+	<tr class="data_hl2"><td colspan="8">[% PROCESS horiz_rule %]</td></tr>
+	[% END %]
+	<tr class="data_hl2"><td colspan="2"><b>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></td>
+	<td colspan="3"><b>
+		Unfair Votes: [% unfair_m2s %]
+		([% Slash.getData('percentage', { sum => unfair_m2s, count => total_m2s}, 'misc') %]) 
+	</b></td>
+	<td align="center"><b>
+		[% unanimous_m2s %]<br>
+		([% Slash.getData('percentage', { sum => unanimous_m2s, count => done_m2s}, 'misc') %]) 
+	</b></td>
+	<td align="center"><b>
+		[% offside_m2s %]<br>
+		([% Slash.getData('percentage', { sum => offside_m2s, count => done_m2s}, 'misc') %]) 
+	</b></td>
+	<td align="center"><b>
+		[% lone_dissent_m2s %]<br>
+		([% Slash.getData('percentage', { sum => lone_dissent_m2s, count => done_m2s}, 'misc') %]) 
+	</b></td>
+
+	</tr>
+	</table>
+		
+[% END %]
+
+[% BLOCK base_url_m2; 
+	base_url = gSkin.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
+	base_url;
+END %]
+[% BLOCK state_url_m2;
+	state_url="";
+	state_params = ["show_m2s","show_m1s","min_comment","m2_listing"];
+
+	FOREACH param = state_params;
+		IF form.${param}.defined || override.${param}.defined;
+			state_url = state_url _ "&amp;" _ param _ "=";
+			IF override.${param}.defined;
+				fp_val = BLOCK; override.${param} | fixparam; END;
+			ELSE;
+				fp_val = BLOCK; form.${param} | fixparam; END;
+			END;
+			state_url = state_url _ fp_val;
+		END;
+	END;
+	state_url;
+END %]
+__seclev__
+10000
+__version__
+$Id$

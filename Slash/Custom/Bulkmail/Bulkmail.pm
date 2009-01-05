@@ -7,6 +7,7 @@ package Slash::Custom::Bulkmail;
 $VERSION = "2.051";
 
 use Socket;
+use Carp 'cluck';
 use 5.004;
 
 use strict;
@@ -468,7 +469,7 @@ use strict;
 			
 			#get rid of those sendmail-ified carriage returns
 			$value =~ s/\015\012$//g;
-			print $handle $value, $self->lineterm();
+			print $handle $value, $self->lineterm() or cluck("Tried to print: '$value'");
 		}
 		else {return $self->error("Logging error: Nothing to log to")};
 		
@@ -751,6 +752,9 @@ sub lc_domain {
 };
 
 
+# Why not use Email::Valid here? - Jamie
+# Because I don't have the time or inclination to test it, as long as
+# it is working.  if it barfs again, i will.  or someone else can.  -- pudge
 sub valid_email {
 	
 	my $self = shift || undef;
@@ -777,7 +781,7 @@ sub valid_email {
 							@							#and an at symbol
 							$atom+						#followed by as many atoms as we want
 							(?:\.$atom+)*				#optionally followed by a dot, and more atoms, as many times as we'd like
-							\.[a-zA-Z]{2,3})\s*$		#followed by 2 or 3 letters
+							\.[a-zA-Z]{2,})\s*$		#followed by at least 2 letters
 							>xo;						
 };
 
@@ -1269,8 +1273,23 @@ sub send_message_data {
 		return $self->error("Server disconnected: $response");
 	};		
 #print "MESSAGE:::((($$message)))\n";
-	print $bulk $$message;
-	
+
+	# XXX The 'print $bulk $$message' below can spew many thousands of
+	# lines of the warning "Wide character in print" into slashd.log.
+	# Until we fix whatever that bug is, we should silence that warning.
+	# `perldoc perldiag` recommends doing this:
+	# binmode $bulk, ':utf8';
+	# (presumably immediately after BULK returns $bulk) but I am unsure
+	# of what other ramifications that may have, so I am just shutting
+	# off the warning around this call.  See also `perldoc perllexwarn`.
+	# - Jamie 2007-08-07
+	# we really should fix it to NOT print UTF, but ASCII; this is a problem
+	# in our code that converts HTML entities to characters -- pudge
+	{
+		no warnings 'utf8';
+		print $bulk $$message;
+	}
+
 	print $bulk ".";
 	
 	$response = <$bulk> || "";

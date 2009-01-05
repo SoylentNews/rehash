@@ -1,0 +1,13 @@
+INSERT INTO hooks (param, class, subroutine) VALUES ("comment_save_success", "Slash::Rating", "create_comment_vote");
+
+INSERT INTO vars (name, value, description) VALUES ('rating_unlimited_vote_uids', '', 'List of uids allowed to vote multiple times in a discussion, uids delimited by |');
+INSERT INTO vars (name, value, description) VALUES ('set_disc_rating_last_cid', '0', 'Last comment vote cid reconciled');
+
+INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "0", "0 stars");
+INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "1", "1 stars");
+INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "2", "2 stars");
+INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "3", "3 stars");
+INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "4", "4 stars");
+INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "5", "5 stars");
+
+

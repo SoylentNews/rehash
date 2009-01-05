@@ -1,82 +1,101 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-   <title>Slashdot FAQ - User Interface</title>
-<!--#include virtual="/slashhead.inc"-->
+        <title>Slashdot FAQ - User Interface</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
 
-<!--
-($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
--->
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>User Interface</h3>
+                </div>
+        </div>
 
-<table>
-<tr>
-<td><a href="editorial.shtml">Previous section</a></td>
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="editorial.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="interviews.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
-<td><a href="com-mod.shtml">Next section</a></td>
+<h2><a name="ui100" id="ui100">I want a Slashbox that does X</a></h2>
+        <p>The policy for Slashboxes is as follows:</p>
+        <ol>
+                <li>The remote site gives us permission.</li>
+                <li>The remote site provides an RSS feed URL.</li>
+                <li>We decide that it belongs on Slashdot.</li>
+        </ol>
+        <p>Currently the Slashbox contact address is <a href="mailto:help@slashdot.org"></a>. Email us your feed URL, as well as a technical contact, and we'll consider your addition to the roster.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 10/23/2007
+        </small></em></p>
 
-<td><a href="index.shtml">Index</a></td>
-</tr>
-</table>
+<h2><a name="ui200" id="ui200">What is this little [?] I see in stories?</a></h2>
+        <p>It designates a glossary style link to <a href="http://www.everything2.com">Everything2</a>. We use these to link things like acronyms or names when we think that they might be obscure enough that someone else might need some clarification.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 6/14/00
+        </small></em></p>
 
-<hr>
-<br><a NAME="ui100"></a>
-<h2>
-I want a Slashbox that does X</h2>
-The policy for Slashboxes is as follows:
-<ol>
-<li>
-The remote site gives us permission.</li>
+<h2><a name="ui300" id="ui300">How can I see old stories?</a></h2>
+        <p>Slashdot has archived stories going back pretty much to the beginning of the site. You can access them by hitting the "older stuff" link on the main page or by searching for them in the database by using the search form at the bottom of the front page.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 12/17/01
+        </small></em></p>
 
-<li>
-The remote site provides an RDF file for us to parse (here is <a href="/slashdot.rdf">our
-rdf</a> if you want an example).</li>
+<h2><a name="ui400" id="ui400">Why do I see Some Other User's Nickname in my Menu?</a></h2>
+        <p>This is a short cut. Essentially, there is a tab on your user menu (appearing on many pages like Journals and Users) that shows the nickname and UID of the last user that you looked at. This is not a bug! This is a helpful shortcut so that you can hop back and forth between your friends information, and theirs.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 3/3/03
+        </small></em></p>
 
-<li>
-We decide that it belongs on Slashdot.</li>
-</ol>
-Currently the grand Slashbox poobah is <a href="mailto:pater@slashdot.org">CowboyNeal</a>.
-Email him a URL to the RDF, as well as a technical contact, and we'll consider
-your addition to the roster.
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 6/14/00</font></i>
-<br><a NAME="ui200"></a>
-<h2>
-What is this little [?] I see in stories?</h2>
-It designates a glossary style link to <a href="http://www.everything2.com">Everything2</a>.
-We use these to link things like acronyms or names when we think that they
-might be obscure enough that someone else might need some clarification.
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 6/14/00</font></i>
-<br><a NAME="ui300"></a>
-<h2>
-How can I see old stories?</h2>
-Slashdot has archived stories going back pretty much to the beginning of
-the site. You can access them by hitting the "older stuff" link on the
-main page or by searching for them in the database by using the search
-form at the bottom of the front page.
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 12/17/01</font></i>
-<br><a NAME="ui400"></a>
-<h2>
-Why do I see Some Other User's Nickname in my Menu?</h2>
-This is a short cut.  Essentially, there is a tab on your user menu (appearing on
-many pages like Journals and Users) that shows the nickname and UID of the last user
-that you looked at.  This is not a bug!  This is a helpful shortcut so that you can
-hop back and forth between your friends information, and theirs. 
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 3/3/03</font></i>
+<h2><a name="ui500" id="ui500">How do I control the amount of content on my index?</a></h2>
 
-<p>
-<hr>
-<table>
-<tr>
-<td><a href="editorial.shtml">Previous section</a></td>
+<p>Slashdot content is broken down into Sections like Apple or Book  Reviews.  Within each
+of these sections, content is further divided into what we call 'Main  Page' and 'Sectional
+Content'.  The Main Page is the stuff we think is the best.  But we  try to keep
+the number of articles on the main page to 15-20 or so articles.   Some sections have
+more stories than that.  So we pick some stories as "Sectional Content".</p>
 
-<td><a href="com-mod.shtml">Next section</a></td>
+<p>You have the ability to choose how much or how little content you  want to see from
+each section.  Further, you have th ability to choose if you want to  view each type
+of article in 'Full Text' or 'Abbreviated' format.</p>
 
-<td><a href="index.shtml">Index</a></td>
-</tr>
-</table>
+<p>Today on Slashdot, we default to having you see all Main Page  content in Full Text
+mode, and all Sectional Content in the new 'Abbreviated' format.  You  can change these
+settings both globally, as well as on a per section basis using a  tool usable from
+the left hand sectional menu, as well as from your user preference  page.  Each of these
+features a 'spectrum' of options.  On the far right, you will see  every single story
+posted to every section in full text.  On the far left, you will see  only main page
+stories, and even those only abbreviated.  The break down is as follows:
+
+<ul>
+<li><b>Full, Full</b> - Displays every single story we post, in full  text.</li>
+<li><b>Full, Abbreviated</b> - The current default is to display the  main page articles in full text, but to abbreviate all sectional content.</li>
+<li><b>Abbreviated, Abbreviated</b> - This setting abbreviates every  story posted to the section.</li>
+<li><b>Full, None</b> - This setting most closely mimics the old  Slashdot settings, where the main page stories were included up top, but the sectional stories were relegated to the sectional indexes.</li>
+<li><b>Abbreviated, None</b> - Abbreviate the main page content, and  hide the sectional content.</li>
+<li><b>None</b> - Completely suppress this section.  Hide it entirely  from your index.</li>
+</ul>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 1/21/06 
+        </small></em></p>
+
+        <hr>
+        <ul class="menu">
+                
+                        <li><a href="editorial.shtml">Previous section</a></li>
+                        <li><a href="com-mod.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
+
 <!--#include virtual="/slashfoot.inc"-->
-</body>
-</html>

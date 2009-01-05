@@ -1,0 +1,119 @@
+#!/usr/bin/perl -w
+
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2005 by Open Source Technology Group. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This script converts your accesslist table into the new al2 table.
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Data::Dumper;
+$Data::Dumper::Sortkeys=1;
+use Slash;
+use Slash::Utility;
+
+use vars qw( $slashdb );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my (%opts, %family_tree);
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:', \%opts);
+usage() if $opts{h};
+die "Username required" unless $opts{u};
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+
+my $al2_types = $slashdb->getAL2Types;
+my $curbitmap = { };
+
+# Get the existing data.
+
+my $al1 = $slashdb->sqlSelectAllHashref("id", "*", "accesslist", "", "ORDER BY id");
+
+# Loop through all the existing data three times, once for uids,
+# once for ipids, and once for subnetids.
+
+my %uids      = map { ($al1->{$_}{uid},      1) } keys %$al1;
+my %ipids     = map { ($al1->{$_}{ipid},     1) } keys %$al1;
+my %subnetids = map { ($al1->{$_}{subnetid}, 1) } keys %$al1;
+
+my @uids      = sort { $a <=> $b } keys %uids;
+my @ipids     = sort               keys %ipids;
+my @subnetids = sort               keys %subnetids;
+
+for my $uid (@uids) {
+	next unless $uid;
+	my @ids = grep { $al1->{$_}{uid} == $uid } keys %$al1;
+print STDERR "ids for uid=$uid: '@ids'\n";
+	do_inserts(convert_srcid(uid => $uid), [@ids]);
+}
+
+for my $ipid (@ipids) {
+	next unless $ipid;
+	my @ids = grep { $al1->{$_}{ipid} eq $ipid } keys %$al1;
+print STDERR "ids for ipid=$ipid: '@ids'\n";
+	do_inserts(convert_srcid(ipid => $ipid), [@ids]);
+}
+
+for my $subnetid (@subnetids) {
+	next unless $subnetid;
+	my @ids = grep { $al1->{$_}{subnetid} eq $subnetid } keys %$al1;
+print STDERR "ids for subnetid=$subnetid: '@ids'\n";
+	do_inserts(convert_srcid(subnetid => $subnetid), [@ids]);
+}
+
+sub do_inserts {
+	my($id, $al1_ids) = @_;
+	for my $al1_id (@$al1_ids) {
+		my $row = $al1->{$al1_id};
+		my $old_bitmap = $curbitmap->{ $row->{$id} } || 0;
+		my $new_bitmap = get_bitmask($row);
+		my $change_map = $old_bitmap ^ $new_bitmap;
+		# Determine the changed bits.
+		my $changed_types = { };
+		for my $type (sort keys %$al2_types) {
+			next if !defined($al2_types->{$type}{bitpos});
+			my $bitpos = $al2_types->{$type}{bitpos};
+			my $mask = 1 << $bitpos;
+			next unless $change_map & $mask;
+			# This bit changed.  Record that fact.  The
+			# key is the name of this type, the value is
+			# always 1 because the al1 system basically
+			# takes an OR of all existing rows.
+			$changed_types->{$type} = 1 if $new_bitmap & $mask;
+		}
+		# Check to see if there is a reason that needs to be
+		# copied into a comment.
+		if ($row->{reason}) {
+			$changed_types->{comment} = $row->{reason};
+		}
+		my $options = { adminuid => $row->{adminuid} || 0 };
+		$options->{ts} = $row->{ts} if $row->{ts};
+#print STDERR "setting for row: " . Dumper($row) . "changed_types: " . Dumper($changed_types) . "options: " . Dumper($options);
+		$slashdb->setAL2($id, $changed_types, $options);
+	}
+}
+
+sub get_bitmask {
+	my($hr) = @_;
+	my $bitmask = 0;
+	for my $type (sort keys %$al2_types) {
+		# For the 'comment' type, or any other type without a
+		# corresponding bit position, there is no effect on
+		# the bitmask.
+		next if !defined($al2_types->{$type}{bitpos});
+		# Types not turned on also don't have an effect.
+		next unless defined($hr->{"now_$type"}) && $hr->{"now_$type"} eq 'yes';
+		my $bitpos = $al2_types->{$type}{bitpos};
+		$bitmask |= 1 << $bitpos;
+	}
+#print STDERR "bitmask=$bitmask for: " . Dumper($hr);
+	return $bitmask;
+}
+

@@ -1,0 +1,22 @@
+For using admin.pl's option to visually see your topic tree, you need
+the perl module GraphViz, which requires some libraries to be installed.
+Note that the GraphViz libraries are apparently not under a license that
+is strictly open-source;  IBM has some mild but nonetheless restrictive
+terms about how you have to let them know if you change its code.
+So if non-Free software gives you the willies, simply don't install this
+module, set the topic_tree_draw constant to 0, and all will be well
+except that you won't get the pretty picture.
+
+If you leave that constant 1, you'll want to install the GraphViz perl
+module and whatever it requires.  You can read its own advice on doing
+that if you like.  On Debian unstable as of July 2004, we simply had to
+do:
+
+	apt-get install graphviz
+
+and for the free monospaced font we use by default for labels, we did:
+
+	apt-get install ttf-freefont
+
+(You can use your own font, of course.)
+

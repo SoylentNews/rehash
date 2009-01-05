@@ -16,22 +16,22 @@ __template__
 [% INCLUDE titlebar width="100%" title="List of spiders" %]
 
 <!-- begin list spiders section -->
-<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="get">
 
 <table>
-        <TR>
-                <TD>
+        <tr>
+                <td>
 		<input type="submit" name="like" value="List Only Spiders Containing:">
 		<input type="text" size="60" name="like" value="">
 		<input type="hidden" name="op" value="listspiders">
-		</TD>
-        </TR>
+		</td>
+        </tr>
 </table>
 </form>
 
-<form enctype="multipart/form-data" action="[% constants.rootdir 
--%]/newsvac.pl" method="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
+<form enctype="multipart/form-data" action="[% gSkin.rootdir 
+-%]/newsvac.pl" method="post">
+<input type="hidden" name="op" value="updatespider">
 <table>
         <tr>
                 <td>
@@ -61,9 +61,9 @@ __template__
 
 [% ELSE -%]
 	[% FOREACH hashref = arrayref -%]
-        <TR>
+        <tr>
                 <td align=right>
-		<A HREF="[% constants.rootdir 
+		<a href="[% gSkin.rootdir 
 		-%]/newsvac.pl?op=editspider&spider_id=[% hashref.spider_id 
 		-%]">[% hashref.spider_id %]</a>
 		</td>
@@ -73,20 +73,20 @@ __template__
                 <td>[% hashref.conditions %]</td>
                 <td>[% hashref.group_0_selects %]</td>
                 <td>[% hashref.commands %]</td>
-        </TR>
+        </tr>
 	[% END %]
 [% END -%]
 
-</TABLE>
-<TABLE>
-        <TR>
-                <TD>
+</table>
+<table>
+        <tr>
+                <td>
 		<input type="submit" name="newspider" value="Add Spider:">
 		<input type="text" size="60" name="newname" value="">
-		</TD>
-        </TR>
-</TABLE>
-</FORM>
+		</td>
+        </tr>
+</table>
+</form>
 <!-- end list spiders -->
 __seclev__
 100

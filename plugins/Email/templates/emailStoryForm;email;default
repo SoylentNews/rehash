@@ -22,28 +22,28 @@ __template__
 	width="99%"
 	title="Email a Story" -%]
 
-<FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
+<form action="[% gSkin.rootdir %]/email.pl" method="post">
 [% IF form.formkey -%]
-<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+<input type="hidden" name="formkey" value="[% form.formkey %]">
 [% END -%]
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="email_send">
+<input type="hidden" name="op" value="email_send">
 [% IF form.sid -%]
-<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid | strip_attribute %]">
+<input type="hidden" name="sid" value="[% form.sid | strip_attribute %]">
 [% END -%]
 
 [% UNLESS form.sid -%]
-<P>Enter story ID to mail: 
-<INPUT TYPE="TEXT" NAME="sid" SIZE="16">
+<p>Enter story ID to mail: 
+<input type="text" name="sid" size="16">
 [% ELSE -%]
-Selected story: <I>[% story.title %]</I>
-<SMALL>[% Slash.timeCalc(story.time) %] ([% story.sid %])</SMALL>
-</BLOCKQUOTE>
+Selected story: <i>[% story.title %]</i>
+<small>[% Slash.timeCalc(story.time) %] ([% story.sid %])</small>
+</blockquote>
 [% END -%]
 
-<P>Enter email address to send story to: 
-<INPUT TYPE="TEXT" NAME="email" SIZE="50">
-<P><INPUT TYPE="SUBMIT" VALUE="Send Email">
-</FORM>
+<p>Enter email address to send story to: 
+<input type="text" name="email" size="50">
+<p><input type="submit" value="Send Email">
+</form>
 
 __version__
 $Id$

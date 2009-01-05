@@ -18,16 +18,17 @@ __name__
 saveSub
 __template__
 [% PROCESS titlebar %]
-
 [% IF missingemail %]
-	<P>Perhaps you would like to enter an email address or a URL next time.</P>
+	<p>Perhaps you would like to enter an email address or a URL next time.</p>
 [% END %]
 
 [% IF anonsubmit %]
-	<P>This story has been submitted anonymously.</P>
+	<p>This story has been submitted anonymously.</p>
 [% END %]
 
-<P>Thanks for the submission.</P>
+	<p>Thanks for the submission.</p>
+
+	[% PROCESS bookmarktext %]
 
 __seclev__
 10000

@@ -1,12 +1,7 @@
 __section__
 default
 __description__
-Prints the bar above each story, containing the actual title of the story.
 
-* width = width of widget
-* title = text for title
-* color = color (colored or white)
-* details = hashref of images and colors
 
 __title__
 
@@ -17,19 +12,13 @@ en_US
 __name__
 mid_tab
 __template__
+
 [% IF tab_is_selected %]
-	<TD BGCOLOR="#EEEEEE" VALIGN="TOP"><IMG [% details.lt_corner_sel %]></TD>
-	<TD [% details.bg_tab_sel %]><NOBR>&nbsp;<A HREF="[% link %]"><B><FONT COLOR="[% details.fg_tab_sel_color %]">[% label %]</FONT></B></A>&nbsp;</NOBR></TD>
-	<TD VALIGN="TOP"><IMG [% details.lt_sel_rt_unsel %]></TD>
-[% ELSIF next_tab_is_selected %]
-	<TD BGCOLOR="#EEEEEE" VALIGN="TOP"><IMG [% details.lt_corner_sel %]></TD>
-	<TD [% details.bg_tab_unsel %]><NOBR>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</NOBR></TD>
-	<TD VALIGN="TOP"><IMG [% details.lt_unsel_rt_sel %]></TD>
+        <li[% details.selected %]><b><a href="[% link %]">[% label %]</a></b></li>
 [% ELSE %]
-	<TD BGCOLOR="#EEEEEE" VALIGN="TOP"><IMG [% details.lt_corner_sel %]></TD>
-	<TD [% details.bg_tab_unsel %]><NOBR>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</NOBR></TD>
-	<TD VALIGN="TOP"><IMG [% details.lt_unsel_rt_unsel %]></TD>
+         <li[% details.unselected %]><a href="[% link %]">[% label %]</a></li>
 [% END %]
+
 __seclev__
 10000
 __version__

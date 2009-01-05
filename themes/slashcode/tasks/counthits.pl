@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -17,7 +17,7 @@ use Slash::Constants ':slashd';
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # Change this var to change how often the task runs.
-$minutes_run = 6;
+$minutes_run = 20;
 
 # Adjust this to maximize how big of a SELECT we'll do on the log DB.
 # (5000 per minute (above) is probably safe, 10000 per minute just to
@@ -37,12 +37,24 @@ $task{$me}{code} = sub {
 
 	# Find out where in the accesslog we need to start scanning from.
 	# Don't start scanning from too far back.
+	# XXX We need to make this getObject() NOT fall back on the log
+	# (from the log_slave).  To do so impacts performance.  And
+	# afterwards, it can throw an error because counthits_lastmaxid
+	# can reflect the max from the master when the slave is behind.
 	my $logdb = getObject('Slash::DB', { db_type => "log_slave" });
 	my $lastmaxid = ($slashdb->getVar('counthits_lastmaxid', 'value', 1) || 0) + 1;
 	my $newmaxid = $logdb->sqlSelect("MAX(id)", "accesslog");
 	$lastmaxid = $newmaxid - $maxrows if $lastmaxid < $newmaxid - $maxrows;
         if ($lastmaxid > $newmaxid) {
                 slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
+		if ($lastmaxid > $newmaxid + 2) {
+			# Something odd is going on... this ID is off.
+			slashdErrnote(<<EOT);
+counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid'.
+Maybe accesslog got rebuilt, or more likely the log_slave was unavailable
+and failover went to the master, now back to the slave.
+EOT
+		}
                 return "";
         }
 
@@ -84,6 +96,7 @@ $task{$me}{code} = sub {
 			"discussions, stories",
 			"discussions.id IN ($disc_ids) AND discussions.sid = stories.sid");
 		for my $disc_id (keys %disc_id_count) {
+			next unless $disc_sid_lookup->{$disc_id}{sid};
 			$sid_count{$disc_sid_lookup->{$disc_id}{sid}} += $disc_id_count{$disc_id};
 		}
 	}
@@ -97,13 +110,13 @@ $task{$me}{code} = sub {
 		my $sid_q = $slashdb->sqlQuote($sid);
 		$successes += $slashdb->sqlUpdate(
 			"stories",
-			{ -hits => "hits + $sid_count{$sid}" },
+			{ -hits => "hits + $sid_count{$sid}",
+			  -last_update => 'last_update'
+			},
 			"sid = $sid_q",
 		);
 		$total_hits += $sid_count{$sid};
 		_update_timehash("update");
-		Time::HiRes::sleep(0.02);
-		_update_timehash("sleep");
 	}
 
 	$slashdb->setVar("counthits_lastmaxid", $newmaxid);

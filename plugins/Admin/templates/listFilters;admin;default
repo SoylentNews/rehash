@@ -13,65 +13,65 @@ listFilters
 __template__
 [% PROCESS titlebar width='100%' %]
 
-<FORM action="[% env.script_name %]" method="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="listfilters">
-<TABLE>
-	<TR>
-		<TD>Select form</TD><TD>[% form_select %]</TD>
-	</TR>
-	<TR>
-		<TD>List Filters</TD><TD><INPUT TYPE="submit" NAME="listfilters" VALUE="List"></TD>
-	</TR>
-</FORM>
-<FORM action="[% env.script_name %]" method="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="editfilter">
-	<TR>
-		<TD>Create a new Filter</TD><TD><INPUT TYPE="submit" NAME="newfilter" VALUE="Create"></TD>
-	</TR>
-</TABLE>
+<form action="[% env.script_name %]" method="post">
+<input type="hidden" name="op" value="listfilters">
+<table>
+	<tr>
+		<td>Select form</td><td>[% form_select %]</td>
+	</tr>
+	<tr>
+		<td>List Filters</td><td><input type="submit" name="listfilters" value="List"></td>
+	</tr>
+</form>
+<form action="[% env.script_name %]" method="post">
+<input type="hidden" name="op" value="editfilter">
+	<tr>
+		<td>Create a new Filter</td><td><input type="submit" name="newfilter" value="Create"></td>
+	</tr>
+</table>
 
 [% IF filter_ref && form.formname %]
 
-<TABLE BORDER="0">
-	<TR>
-		<TD COLSPAN="9">&nbsp;</TD>
-	</TR>
-	<TR>
-		<TD><B> Filter id <B></TD>
-		<TD><B> Form <B></TD>
-		<TD><B> Regex <B></TD>
-		<TD><B> Modifier <B></TD>
-		<TD><B> Field <B></TD>
-		<TD><B> Ratio <B></TD>
-		<TD><B> Minimum match <B></TD>
-		<TD><B> Minimum length <B></TD>
-		<TD><B> Error message <B></TD>
-	</TR>
+<table border="0">
+	<tr>
+		<td colspan="9">&nbsp;</td>
+	</tr>
+	<tr>
+		<td><b> Filter id <b></td>
+		<td><b> Form <b></td>
+		<td><b> Regex <b></td>
+		<td><b> Modifier <b></td>
+		<td><b> Field <b></td>
+		<td><b> Ratio <b></td>
+		<td><b> Minimum match <b></td>
+		<td><b> Minimum length <b></td>
+		<td><b> Error message <b></td>
+	</tr>
 
 	[% FOREACH i = filter_ref %]
-	<TR>
-		<TD>[<A HREF="[% env.script_name %]?op=editfilter&amp;filter_id=[% i.0 %]">[% i.0 %]</A>]</TD>
-		<TD><FONT FACE="courier" size="+1">[% i.1 %]</FONT></TD>
-		<TD> [% i.2 %] </TD>
-		<TD> [% i.3 %] </TD>
-		<TD> [% i.4 %] </TD>
-		<TD> [% i.5 %] </TD>
-		<TD> [% i.6 %] </TD>
-		<TD> [% i.7 %] </TD>
-		<TD> [% i.8 %] </TD>
-	</TR>
+	<tr>
+		<td>[<a href="[% env.script_name %]?op=editfilter&amp;filter_id=[% i.0 %]">[% i.0 %]</a>]</td>
+		<td>[% i.1 %]</td>
+		<td> [% i.2 %] </td>
+		<td> [% i.3 %] </td>
+		<td> [% i.4 %] </td>
+		<td> [% i.5 %] </td>
+		<td> [% i.6 %] </td>
+		<td> [% i.7 %] </td>
+		<td> [% i.8 %] </td>
+	</tr>
 	[% END %]
 
-</TABLE>
-<TABLE>
-	<TR>
-		<TD><INPUT TYPE="submit" NAME="newfilter" VALUE="Create a new filter"></TD>
-	</TR>
-</TABLE>
+</table>
+<table>
+	<tr>
+		<td><input type="submit" name="newfilter" value="Create a new filter"></td>
+	</tr>
+</table>
 
 [% END %]
 
-</FORM>
+</form>
 
 __seclev__
 500

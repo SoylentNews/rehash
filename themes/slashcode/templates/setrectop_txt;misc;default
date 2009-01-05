@@ -14,7 +14,12 @@ __name__
 setrectop_txt
 __template__
 
-&middot; <A HREF="[% constants.rootdir %]/search.pl?tid=[% id %]">[% name %]</A><BR>
+<li>
+	<a href="[% gSkin.rootdir %]/search.pl?tid=[% id %]">
+		[% name %]
+	</a>
+</li>
+
 __seclev__
 10000
 __version__

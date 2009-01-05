@@ -1,0 +1,89 @@
+__section__
+default
+__description__
+Template that describes the meta moderation screen, which shows the
+comments and the metamoderation options, to the user.
+
+* comments = arrayref of hashrefs of comments to display
+
+__title__
+
+__page__
+metamod
+__lang__
+en_US
+__name__
+dispTheComments
+__template__
+[% PROCESS titlebar width="100%" title="Meta Moderation" %]
+[% IF !comments.size %]
+<big><center>No comments available for meta moderation!</center></big>
+[% STOP %]
+[% END %]
+[% user.noscores = 1; # Do not show scores in comment display. %]
+<b>PLEASE READ THE DIRECTIONS CAREFULLY BEFORE EMAILING US!</b>
+<p>What follows are random
+moderations performed on comments in the last few weeks on [% constants.sitename %].
+You are asked to <b>honestly</b> evaluate the actions of the moderator of each
+comment. Moderators who are ranked poorly will cease to be eligible for
+moderator access in the future.
+
+<ul>
+
+<li>If you are confused about the context of a particular comment, just
+link back to the comment page through the parent link, or the #XXX cid
+link.</li>
+
+<li>If you are unsure, feel free to leave it unchanged.</li>
+
+<li>Please read the <a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</a>
+and try to be impartial and fair.  You are not moderating to make your
+opinions heard, you are trying to help promote a rational discussion.
+Play fairly and help make [% constants.sitename %] a little better for everyone.</li>
+
+<li>Scores and information identifying the posters of these comments have been
+removed to help prevent bias in meta moderation. If you really need to know,
+you can click through and see the original message, but we encourage you not
+to do this unless you need more context to fairly meta moderate.<br><br></li>
+
+<li>Today, you have [% comments.size %] moderations to meta-moderate.</li>
+
+</ul>
+
+<form action="[% gSkin.rootdir %]/metamod.pl" method="post">
+[% IF comments.size %]
+<ul id="commentlisting" class="[% Slash.discussion2() ? 'd2' : 'd1' %]">
+[% END %]
+[% FOR C = comments %]
+[%
+	Slash.dispComment(C);
+	context_url="$gSkin.rootdir/comments.pl?sid=$C.sid&amp;cid="
+		_ (C.pid || C.cid)
+		_ "&amp;threshold=-1&amp;mode=nested&amp;commentsort=0"
+%]
+		Original Discussion: <b><a href="[% C.url %]">[% C.title %]</a></b><br>
+		Rating: <b>[% reasons.${C.modreason}.name %]</b>.<br>
+		This
+		[% IF reasons.${C.modreason}.unfairname; "comment"; ELSE; "rating"; END %]
+		is <b>
+		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.unfairname; ELSE; "Unfair"; END %]
+			<input type="radio" name="mm[% C.id %]" value="-">
+			<input type="radio" name="mm[% C.id %]" value="0"[% constants.markup_checked_attribute %]>
+			<input type="radio" name="mm[% C.id %]" value="+">
+		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.name; ELSE; "Fair"; END %]
+		</b>&nbsp;&nbsp;|&nbsp;
+		<a href="[% context_url %]">See Context</a><hr>
+	</li>
+[% END %]
+[% IF comments.size %]
+</ul>
+[% END %]
+<p>
+<input type="submit" name="op" value="MetaModerate">
+</p>
+</form>
+
+__seclev__
+1000
+__version__
+$Id$

@@ -40,18 +40,18 @@ CASE 'optout_email';
 
 CASE 'optout_added';
 	email = form.email | strip_attribute;
-	"Address <TT>$email</TT> added to opt-out list.<BR>";
+	"Address <tt>$email</tt> added to opt-out list.<br>";
 
 CASE 'optout_removed';
 	email = form.email | strip_attribute;
-	"Address <TT>$email</TT> removed from opt-out list.<BR>";
+	"Address <tt>$email</tt> removed from opt-out list.<br>";
 
 CASE 'mail_result';
 	UNLESS rc -%]
 [% storylinks = Slash.linkStory({ link => "the story", sid => form.sid }) %]
 Story mailed successfully.  Return to
-<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
-or to <A HREF="[% constants.rootdir %]/">the home page</A>.
+<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
+or to <a href="[% gSkin.rootdir %]/">the home page</a>.
 	[%- ELSE;
 "An error occured while attempting to mail the story.  Please check that
 the email address is valid.  If you believe this error is due to a
@@ -60,8 +60,8 @@ bug, please send email to $constants.adminmail";
 
 CASE 'formkeyError';
 	linkop = 'email_send' ? 'email_form' : 'optout_form'; -%]
-	<P>Please return back to the <A HREF="[% constants.rootdir
-	-%]/email.pl?op=[% linkop %]">originating form</A> and try again.
+	<p>Please return back to the <a href="[% gSkin.rootdir
+	-%]/email.pl?op=[% linkop %]">originating form</a> and try again.
 	<!-- op=[% operation %], check=[% check %] -->
 	[%
 

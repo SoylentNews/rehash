@@ -13,39 +13,39 @@ table
 __template__
 [% PROCESS calculate %]
 
-<H2 ALIGN="CENTER">[% period %] Report for [% constants.sitename %]</H2>
+<h2 align="CENTER">[% period %] Report for [% constants.sitename %]</h2>
 
-<P ALIGN="CENTER">
-<A HREF="[% constants.rootdir %]/stats.pl?[% env.query_string | replace('op=table', 'op=csv') %]"
->Download CSV data for spreadsheet</A>
-</P>
+<p align="CENTER">
+<a href="[% gSkin.rootdir %]/stats.pl?[% env.query_string | replace('op=table', 'op=csv') %]"
+>Download CSV data for spreadsheet</a>
+</p>
 
-<P ALIGN="CENTER">
-<TABLE BORDER="2" CELLPADDING="2" CELLSPACING="2">
+<p align="CENTER">
+<table border="2" cellpadding="2" cellspacing="2">
 
-	<TR>
-		<TH></TH>
+	<tr>
+		<th></th>
 [% pct = 100 div alldata.size;
    FOREACH this = alldata;
 	NEXT IF loop.index == 0;
 	myindex = loop.index - 1 %]
-		<TH WIDTH="[% pct %]%">[% alltypes.${myindex} %]</TH>
+		<th width="[% pct %]%">[% alltypes.${myindex} %]</th>
 [% END %]
-	</TR>
+	</tr>
 
 [% FOREACH day = days %]
-	<TR>
-		<TH>[% day %]</TH>
+	<tr>
+		<th>[% day %]</th>
 
 	[% myindex = loop.index;
 	   FOREACH this = alldata;
 		NEXT IF loop.index == 0 %]
-		<TD ALIGN="RIGHT">[% Slash.commify(this.${myindex}) %]</TD>
+		<td align="RIGHT">[% Slash.commify(this.${myindex}) %]</td>
 	[% END %]
-	</TR>
+	</tr>
 [% END %]
-</TABLE>
-</P>
+</table>
+</p>
 __seclev__
 1000
 __version__

@@ -1,0 +1,79 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+dilemma
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'head' %]
+	[% varsection = Slash.db.getVar('section');
+	   IF varsection.value == constants.section;
+	      constants.sitename %]: Dilemma Info [%
+	   ELSE;
+	      constants.sitename %]: [% section.title %] - Dilemma Info [%
+	   END;
+	%]
+
+[% CASE 'rsshead' %]
+	[% varsection = Slash.db.getVar('section');
+	   IF varsection.value == constants.section;
+	      constants.sitename;
+	   ELSE;
+	      constants.sitename %]: [% section.title;
+	   END;
+	%]
+
+[% CASE 'userboxhead' %]
+	[% user.nickname | strip_literal %]'s Slashbox
+
+[% CASE 'friends_journal_head' %]
+	[% returnme.data_constant = 1 %] 
+	Your Friends' Journals
+
+[% CASE 'userboxdefault' %]
+	[% returnme.data_constant = 1 %] 
+	This is your user space.  Love it.
+
+[% CASE 'morehead' %]
+	[% returnme.data_constant = 1 %] 
+	Older Stuff
+
+[% CASE 'readmore' %]
+	[% returnme.data_constant = 1 %] 
+	<B>Read More...</B>
+
+[% CASE 'bytes' %]
+	[% returnme.data_constant = 1 %] 
+	bytes in body
+
+[% CASE 'words' %]
+	[% returnme.data_constant = 1 %] 
+	words in story
+
+[% CASE 'comments' %]
+	<B>[% IF cc.0 -%]
+<A HREF="[% cc.0.0 | strip_attribute %]"[% IF cc.0.2 %] TITLE="[% cc.0.2 | strip_attribute %]"[% END %]>[% cc.0.1 | strip_html %]</A> of 
+	[%- END -%]
+<A HREF="[% cc.1.0 | strip_attribute %]"[% IF cc.1.2 %] TITLE="[% cc.1.2 | strip_attribute %]"[% END %]>[% cc.1.1 | strip_html %]</A></B> comment[% cc.3 != 1 ? 's' : '' %]
+
+[% CASE 'edit' %]
+	Edit
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

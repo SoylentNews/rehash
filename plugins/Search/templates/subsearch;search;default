@@ -11,29 +11,52 @@ en_US
 __name__
 subsearch
 __template__
-<P>
-[% FOREACH entry=entries %]
-		<B><A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</A></B><BR>
-		<FONT SIZE="-1">On [% Slash.timeCalc(entry.time) %]</FONT><BR>
-		[% entry.story %]<BR>
-		<FONT SIZE="-1">
+
+<div class="subsearch">
+[% FOREACH entry = entries %]
+	<div class="search-results">
+		<h4>
+			<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</a>
+		</h4>
+		<div class="data">
+			On [% Slash.timeCalc(entry.time) %]
+		</div>
+		<div class="intro">
+			[% entry.story %]
+		</div>
 		[% submission_state = Slash.db.getDescriptions('submission-state') %]
-		[% section = Slash.db.getSection(entry.section); topic = Slash.db.getTopic(entry.tid) %]
-		[% IF section.section == constants.real_section %]<A HREF="[% constants.real_rootdir %]/submit.pl?op=list">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : constants.rootdir %]/submit.pl?section=[% entry.section %]&amp;op=list">[% section.title %]</A>[% END %] &gt; <A HREF="[% constants.rootdir %]/search.pl?tid=[% entry.tid %]&amp;op=submissions">[% topic.alttext %]</A><BR>
-		State: [% del = entry.del; submission_state.$del %]<BR>
+		[% skin = Slash.db.getSkin(entry.skid) %]
+		<div class="details">
+			Section: 
+			[% IF skin.name == 'mainpage' %]
+				<a href="[% constants.real_rootdir %]/submit.pl?op=list">Main</a>
+			[% ELSE %]
+				<a href="[% skin.url ? skin.url : gSkin.rootdir %]/submit.pl?section=[% entry.skin %]&amp;op=list">[% skin.title %]</a>
+			[% END %] 
+			&gt;
+		[% FOREACH tid = entry.tid %]
+			[% topic = Slash.db.getTopic(tid) %]
+			<a href="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
+		[% END %]
+		</div>
+		<div class="state">
+			State: [% del = entry.del; submission_state.$del %]
+		</div>
 		[% IF entry.note %]
-		Note: [% entry.note %]<BR>
+		<div class="note">
+			Note: [% entry.note %]
+		</div>
 		[% END %]
 		[% IF entry.score %]
-			Score: [% entry.score %]<BR>
+		<div class="score">
+			Score: [% entry.score %]
+		</div>
 		[% END %]
-		</FONT>
-		<P>
+	</div>
 [% END %]
-<P>
 [% PROCESS pagination %]
-<P>
-
+</div>
+</div>
 __seclev__
 100
 __version__

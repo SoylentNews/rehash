@@ -20,7 +20,7 @@ The following
 [% FOR c = comments_deleted %]
 #[% c %][% UNLESS c == comments_deleted.last %], [% END %]
 [% END %]
-<BR>
+<br>
 __seclev__
 1000
 __version__

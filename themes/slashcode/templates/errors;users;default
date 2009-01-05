@@ -21,20 +21,21 @@ __template__
 [% CASE 'note' %]
 
 	[% FOREACH n = note %]
-<H2>[% n %]</H2>
+<h2>[% n %]</h2>
 	[% END %]
 
 [% CASE 'userinfo_idnf_err' %]
-	<BR><B>The 
+	<br><b>The 
 	[% fieldkey == 'uid' ? ' UID ' : ' nickname ' %]
-	[% id %] could not be found.</B>
+	[% id %] could not be found.</b>
 
 [% CASE 'saveuseradmin_notsaved' %]
 [% PROCESS titlebar width="100%" title="Unable to save" %]
 	Unable to save [% field %] [% id %] Admin settings
 
 [% CASE 'bad_op' %]
-	Hey! The opcode '[% op | strip_literal %]' is not a valid op! Quit messing around!
+	'[% op | strip_literal %]' is not a valid op.
+	Please try again, or notify the site admin.
 
 [% CASE 'bad_saveparam' %]
 	That user parameter is not valid.
@@ -51,16 +52,16 @@ __template__
 	[% IF titlebar %]
 [% PROCESS titlebar width="100%" title="Cookie Error" %]
 	[% END %]
-	<P>Your browser didn't save a cookie properly. This could mean you are behind a filter that
+	<p>Your browser didn't save a cookie properly. This could mean you are behind a filter that
 	eliminates them, you are using a browser that doesn't support them, or you rejected it.
 
 [% CASE 'mailpasswd_notmailed_err' %]
 [% PROCESS titlebar width="100%" title="Nickname not found" %]
-	Nickname was not found. No Password was mailed.<BR>
+	Nickname was not found. No Password was mailed.<br>
 
 [% CASE 'mailpasswd_toooften_err' %]
 [% PROCESS titlebar width="100%" title="Password already mailed" %]
-	<P>To prevent you from being harassed with email,
+	<p>To prevent you from being harassed with email,
 	[% constants.sitename %] limits you to
 	[% constants.mailpass_max_num || 2 %]
 	password[% IF constants.mailpass_max_num > 1 %]s[% END %]
@@ -72,7 +73,7 @@ __template__
 
 [% CASE 'mailpasswd_readonly_err' %]
 [% PROCESS titlebar width="100%" title="Cannot mail password" %]
-	<P>Sorry, you cannot use the "mail password" function from your
+	<p>Sorry, you cannot use the "mail password" function from your
 	IP number or subnet. If you don't think you should be seeing
 	this error, please email
 	[% IF constants.adminmail_post; constants.adminmail_post;
@@ -82,39 +83,60 @@ __template__
 	a note that this is regarding an attempt to mail your password,
 	and the name, uid, or email address of the account in question.
 
+[% # OPEN PROXY.
+CASE "mailpasswd open proxy" %]
+Sorry, but according to our tests, you are trying to mail your password 
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin
+to do so, because open proxies are used to spam web boards like this
+one. 
+
+<p>Feel free to contact  [% constants.adminmail_ban %] if you have questions.
+Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
+[% # OPEN PROXY.
+CASE "new user open proxy" %]
+Sorry, but according to our tests, you are trying to create an account 
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin
+to do so, because open proxies are used to spam web boards like this
+one. 
+
+<p>Feel free to contact  [% constants.adminmail_ban %] if you have questions.
+Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
 	The nickname [% nick %] or another similar to it has already been taken. 
-	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">Please try another choice</A>.<BR>
+	<a href="[% gSkin.rootdir %]/login.pl?op=newuserform">Please try another choice</a>.<br>
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="100%" title="Too many options" %]
 [%# 15 is an approximation, an upper bound %]
 	The maximum number of selections is [% constants.checklist_length div 15 %].
-	You selected too many.<BR>
+	You selected too many.<br>
 
 [% CASE 'saveuser_passnomatch_err' %]
 	[% IF titlebar %]
 [% PROCESS titlebar width="100%" title="Password fields don't match" %]
 	[% END %]
-	Passwords don't match. Password not changed.<BR>
+	Passwords don't match. Password not changed.<br>
 
 [% CASE 'saveuser_passtooshort_err' %]
 	[% IF titlebar %]
 [% PROCESS titlebar width="100%" title="Password too short" %]
 	[% END %]
-	Password is too short and was not changed.<BR>
+	Password is too short and was not changed.<br>
+
 [% CASE 'saveuser_badoldpass_err' %]
 	[% IF titlebar %]
 [% PROCESS titlebar width="100%" title="Incorrect current password" %]
 	[% END %]
-	Current password entered is incorrect.<BR><BR>
+	Current password entered is incorrect.<br><br>
 
 [% CASE 'anon_validation_attempt' %]
 [% PROCESS titlebar width="100%" title="Anonymous User validation attempt" %]
-	<P>I'm sorry. Anonymous users have no accounts that need to be validated.
+	<p>I'm sorry. Anonymous users have no accounts that need to be validated.
 	If you do have an account on [% constants.sitename %] that you would like
-	to re-register, then please log in as that user, first.<BR>
+	to re-register, then please log in as that user, first.<br>
 
 [% CASE 'emailexists_err' %]
 [% 
@@ -124,39 +146,42 @@ __template__
 -%]
 	Sorry, the email address "[% email %]" already exists in our user
 	database. If you've forgotten your password to an existing account,
-        please go <A HREF="[% env.script_name %]?op=mailpasswdform">here</A>.
-        <BR>
+        please go <a href="[% env.script_name %]?op=mailpasswdform">here</a>.
+        <br>
 
 [% CASE 'email_invalid' %]
 	Sorry! The email address "[% form.realemail | strip_literal %]" is
 	either a null string or a malformed email address. Please 
-	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter your
-	email address</A>, again.
+	<a href="[% gSkin.rootdir %]/users.pl?op=newuserform">re-enter your
+	email address</a>, again.
 
 [% CASE 'email_do_not_match' %]
 	Sorry! The email addresses you've entered do not match.  Please go back and
-	carefully  <A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter
-	your email address information</A>, again.
+	carefully  <a href="[% gSkin.rootdir %]/users.pl?op=newuserform">re-enter
+	your email address information</a>, again.
 
 [% CASE 'sig_too_long_err' %]
 	Sorry, adding domain tags to your sig made it too long. Please try again,
-	using fewer links or shorter domain names.<BR>
+	using fewer links or shorter domain names.<br>
 
 [% CASE "filter message" %]
 [% PROCESS titlebar width="100%" title="Content filter encountered for $item" %]
 [% IF err_message %]
-<B>Reason: [% err_message %]</B><BR>
+<b>Reason: [% err_message %]</b><br>
 [% END %]
-<B>Saving [% item %] aborted.</B>
+<b>Saving [% item %] aborted.</b>
 
 [% CASE "compress filter" %]
 [% PROCESS titlebar width="100%" title="Compression filter encountered" %]
 Your [% item %] violated the "[% ratio %]" compression filter. Try less
 whitespace and/or less repetition.
-<B>Saving [% item %] aborted.</B>
+<b>Saving [% item %] aborted.</b>
+
+[% CASE 'editHome_too_many_disabled' %]
+<b>Error</b>: You disabled too many options.  Nothing saved.  Please try again.
 
 [% CASE DEFAULT %]
-	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.<BR>
+	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.<br>
 
 [% END %]
 __seclev__

@@ -12,9 +12,9 @@ __name__
 editSpider
 __template__
 [% USE date %]
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
-<INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
+<input type="hidden" name="op" value="updatespider">
+<input type="hidden" name="spider_id" value="[% spider_id %]">
 
 [%- INCLUDE titlebar width="100%" title="Editing spider '$name'" -%]
 
@@ -35,19 +35,19 @@ __template__
 	<tr valign=top>
 		<td width="40"><b>Conditions</b></td>
 		<td>
-		<textarea cols=80 rows=3 NAME="conditions">[%
+		<textarea cols=80 rows=3 name="conditions">[%
 		conditions -%]</textarea>
 		</td>
 	</tr>
 	<tr valign=top>
 		<td width="40"><b>Group 0 Selects</b></td>
 		<td>
-		<textarea cols=80 rows=3 NAME="group_0_selects">[% 
+		<textarea cols=80 rows=3 name="group_0_selects">[% 
 		group_0_selects -%]</textarea></td>
 	</tr>
 	<tr valign=top>
 		<td width="40"><b>Commands</b>&nbsp;&nbsp;</td>
-		<td><textarea cols=80 rows=6 NAME="commands">[%
+		<td><textarea cols=80 rows=6 name="commands">[%
 		commands -%]</textarea></td>
 	</tr>
 </table>
@@ -60,40 +60,40 @@ DEFAULT timespecs=[];
 errkey = "timespec_0_err";
 IF form.addtimespec || form.$errkey; timespecs.push({ timespec_id=>0 }); END;
 IF timespecs.size -%]
-<P>
+<p>
 [% INCLUDE titlebar width="75%" title="Time Specifications" -%]
-<P>
+<p>
 [%
 	no_insert_ID=1;
 	FOR t=timespecs;
 		IF t.timespec_id == 0; no_insert_ID = 0; END;
 		errkey = "timespec_${t.timespec_id}_err";
 		IF form.$errkey -%]
-<font color="red">[% form.$errkey %]</font><br>
+[% form.$errkey %]<br>
 [%		END -%]
-<input type="text" size=30 NAME="timespec_[% t.timespec_id 
--%]_timespec" VALUE="[% t.timespec %]">&nbsp;&nbsp;
-[% IF t.timespec_id != 0 %]<input type="checkbox" NAME="timespec_[% 
-t.timespec_id -%]_del">[% END %] <SMALL>(<B>Last run</B>: [%
-date.format(t.last_run, "%F %R") -%] for [% t.duration %]s, '[% t.results %]')</SMALL><BR>
+<input type="text" size=30 name="timespec_[% t.timespec_id 
+-%]_timespec" value="[% t.timespec %]">&nbsp;&nbsp;
+[% IF t.timespec_id != 0 %]<input type="checkbox" name="timespec_[% 
+t.timespec_id -%]_del">[% END %] <small>(<b>Last run</b>: [%
+date.format(t.last_run, "%F %R") -%] for [% t.duration %]s, '[% t.results %]')</small><br>
 [% 
 	END;	# FOR t=timespecs
 	insert_errkey = "timespec_0_err";
 	IF form.$insert_errkey && no_insert_ID -%]
-<font color="red">[% form.$insert_errkey %]</font><br>
+[% form.$insert_errkey %]<br>
 [%	END -%]
 
-<BR><BR>
-<input type="submit" NAME="addtimespec" VALUE="Add Time Specification">
-<BR><BR>
+<br><br>
+<input type="submit" name="addtimespec" value="Add Time Specification">
+<br><br>
 [% ELSE -%]
-<input type="submit" NAME="addtimespec" VALUE="Add Time Specification">
+<input type="submit" name="addtimespec" value="Add Time Specification">
 [% END -%]
 
 <input type="submit" value="Save Spider">
 <input type="submit" name="runspider" value="Run Spider">
 <input type="submit" name="deletespider" value="Delete Spider">
-</FORM>
+</form>
 <!-- end editSpider -->
 __seclev__
 100

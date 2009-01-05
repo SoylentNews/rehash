@@ -11,21 +11,30 @@ en_US
 __name__
 rsssearch
 __template__
-[% USE Slash %]
+<div class="rsssearch">
 [% FOREACH entry=entries %]
-	<B><A HREF="[% entry.link %]">[% entry.title %]</A><B><BR>
-	<FONT SIZE="-1">On [% Slash.timeCalc(entry.created) %]</FONT>
-	[% IF entry.description %]
-		[% entry.description %]...<BR>
-	[% END %]
-	[% IF entry.score %]
-		Score: [% entry.score %]<BR>
-	[% END %]
-	<P>
+	<div class="search-results">
+		<h4>
+			<a href="[% entry.link %]">[% entry.title %]</a>
+		</h4>
+		<div class="data">
+			On [% Slash.timeCalc(entry.created) %]
+		</div>
+		[% IF entry.description %]
+		<div class="intro">
+			[% entry.description %]...
+		</div>
+		[% END %]
+		[% IF entry.score %]
+		<div class="score">
+			Score: [% entry.score %]
+		</div>
+		[% END %]
+	</div>
 [% END %]
 [% PROCESS pagination %]
-<P>
-
+</div>
+</div>
 __seclev__
 100
 __version__

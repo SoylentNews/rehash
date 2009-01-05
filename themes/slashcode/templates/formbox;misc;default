@@ -11,20 +11,19 @@ en_US
 __name__
 formbox
 __template__
-[% USE Slash %]
 [% begin %]
-<TABLE WIDTH="[% boxwidth || "95%" %]" ALIGN="CENTER">
-<TR><TD COLSPAN="2">
+<table width="[% boxwidth || "95%" %]" align="CENTER">
+<tr><td colspan="2">
 [% PROCESS titlebar width => (barwidth || "100%") %]
-</TD></TR>
+</td></tr>
 [% FOR pair = pairs %]
-<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="top">
-<B>[% pair.label %]</B>
-</TD><TD>
+<tr><td bgcolor="[% user.colors.bg_2 %]" valign="top">
+<b>[% pair.label %]</b>
+</td><td>
 [% pair.value %]
-</TD></TR>
+</td></tr>
 [% END %]
-</TABLE>
+</table>
 [% end %]
 
 __seclev__

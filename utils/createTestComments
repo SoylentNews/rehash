@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -38,7 +38,7 @@ if ($opts{R}) {
 		if ! exists $opts{U};
 	usage('Invalid UID specified') unless $opts{U} =~ /^\d+$/;
 }
-if ($opts{T} and $opts{t}) {
+if ($opts{T} && $opts{t}) {
 	usage("Can't specify both -t and -T, pick one");
 }
 $junk = $opts{'J'} ? 1 : 0;
@@ -47,9 +47,8 @@ $opts{num_comments} = $ARGV[0] || 10;
 usage('Invalid number of comments') 
 	if $opts{num_comments} !~ /^\d+$/ || $opts{num_comments} < 0;
 
-my $story_table = 'stories';
-
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 $werder = new Silly::Werder;
@@ -65,17 +64,16 @@ $werder = new Silly::Werder;
 	my $t0 = new Benchmark;
 	my $count = $opts{num_comments};
 	while ($count) {
-		my($sid, $discussion_id) = ('', '');
+		my($stoid, $discussion_id) = ('', '');
 		if ($story_id =~ /^\d+$/) {
 			$discussion_id = $story_id;
 		} else {
 			if ($story_id =~ m{/}) {
-				$sid = $story_id;
+				$stoid = $story_id;
 			} else {
-				$sid = getRandomSid();
+				$stoid = getRandomStoid();
 			}
-			$discussion_id = $slashdb->sqlSelect("discussion",
-				$story_table, "sid=".$slashdb->sqlQuote($sid));
+			$discussion_id = $slashdb->getStory($stoid, 'discussion');
 		}
 		my $discussion = $slashdb->getDiscussion($discussion_id);
 		if (!$discussion_id || !$discussion) {
@@ -125,7 +123,7 @@ $werder = new Silly::Werder;
 			for my $cid (keys %family_tree) {
 				my $count = 0;
 				my $cid_back = $cid;
-				while (exists($family_tree{$cid_back}) and ++$count < 1000) {
+				while (exists($family_tree{$cid_back}) && ++$count < 1000) {
 					$deep_tree{$cid}++;
 					$cid_back = $family_tree{$cid_back};
 				}
@@ -141,12 +139,12 @@ $werder = new Silly::Werder;
 		elsif ($mode_rand < 0.50)	{ $comment = strip_html     ($comment) }
 		elsif ($mode_rand < 0.75)	{ $comment = strip_extrans  ($comment) }
 		else				{ $comment = strip_code     ($comment) }
-		$comment = balanceTags($comment, $constants->{nesting_maxdepth});
+		$comment = balanceTags($comment, { deep_nesting => 1 });
 		$comment = addDomainTags($comment);
 
 		my $score = 1;
 		if ($uid == $constants->{anonymous_coward_uid}
-			or $user->{karma} < $constants->{badkarma}) {
+			|| $user->{karma} < $constants->{badkarma}) {
 			$score = 0;
 		} elsif ($user->{karma} > $constants->{goodkarma}) {
 			$score = 2;
@@ -162,8 +160,8 @@ $werder = new Silly::Werder;
 
 		my $subj = make_werds(1 + rand 5);
 		$subj =~ s/\W+$// if rand(1) < 0.1;
-                $subj =~ s/<[^>]+>//g;
-                $subj =~ s/\b(\w)/\U$1/g if rand(1) < 0.2;
+		$subj =~ s/<[^>]+>//g;
+		$subj =~ s/\b(\w)/\U$1/g if rand(1) < 0.2;
 		if (rand(1) < 0.2) {
 			$subj =~ s/\W*$/ +((qw( . ! ? ))[rand 3]) x (2+rand 5) /e;
 		}
@@ -181,55 +179,62 @@ $werder = new Silly::Werder;
 		my $cid = $slashdb->createComment($clean_comment);
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
-		$slashdb->setStory($sid, { writestatus => 'dirty' }) if $sid;
-	        $family_tree{$cid} = $pid if ! $opts{T};
+		$slashdb->setStory($stoid, { is_dirty => 1 }) if $stoid;
+		$family_tree{$cid} = $pid if ! $opts{T};
 		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};
-	        print <<EOT;
+		print <<EOT;
 ($count) Comment created (user=$uid discussion=$discussion_id cid=$cid pid=$pid)
 EOT
  
-        	$count--;
+		$count--;
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_comments} comments created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
 
-sub getRandomSid {
-	my $ds_clause = "displaystatus = 0";
-	if (rand(1) < 0.3) {
-		# A minority of comments are posted to sectional stories.
-		$ds_clause = "displaystatus > -1";
+sub getRandomStoid {
+	# A minority of comments are posted to sectional stories.
+	my $sectional = rand(1) < 0.3 ? 1 : 0;
+	my $nexus_ar;
+	if ($sectional) {
+		$nexus_ar = [ $slashdb->getNexusTids() ];
+	} else {
+		$nexus_ar = [ $constants->{mainpage_nexus_tid} ];
 	}
-	my $sids = $slashdb->sqlSelectAll("sid",
-		$story_table,
-		"discussion > 0
-		 AND $ds_clause
-		 AND writestatus != 'archived'
+	my $nexus_list = join(", ", @$nexus_ar);
+	my $stoids = $slashdb->sqlSelectColArrayref(
+		"stories.stoid",
+		"stories, story_topics_rendered",
+		"stories.stoid=story_topics_rendered.stoid
+		 AND discussion > 0
+		 AND story_topics_rendered.tid IN ($nexus_list)
+		 AND is_archived = 'no'
+		 AND in_trash = 'no'
 		 AND time < NOW()",
 		"ORDER BY time DESC");
-	my @sids = map { $_->[0] } @$sids;
-	# Try to pick a random sid to post to that weights toward the
+	return undef unless $stoids && @$stoids;
+	# Try to pick a random stoid to post to that weights toward the
 	# most recent sids.
 	my $r;
-	if (rand(1) < 0.05 or scalar(@sids) < 15) {
-		$r = rand(@sids);
+	if (rand(1) < 0.05 || scalar(@$stoids) < 15) {
+		$r = rand(@$stoids);
 	} elsif (rand(1) < 0.8) {
 		$r = rand(1) * rand(1) * 15;
-	} elsif (rand(1) < 0.5 or scalar(@sids) < 30) {
+	} elsif (rand(1) < 0.5 || scalar(@$stoids) < 30) {
 		$r = rand(1) * rand(1) * 10;
 	} else {
 		$r = rand(1) * rand(1) * 30;
 	}
-	return $sids[$r];
+	return $stoids->[$r];
 }
 
 sub getRandomParent {
-        return 0 if $opts{T};
+	return 0 if $opts{T};
 
-        my @a = keys %family_tree;
+	my @a = keys %family_tree;
 
 	if ($opts{t}) {
 		# Weight toward nesting deeply.
@@ -257,18 +262,10 @@ sub getRandomParent {
 }
  
 sub getRandomUserID {
-        my($min_uid, $max_uid) = @_;
-        my $n_tries = 100;
-        my $rand_uid = 1;
-        my $ok = 0;
-        while (!$ok) {
-                die "can't get random user! $max_uid" if --$n_tries<0;
-                $rand_uid = $min_uid + int(rand($max_uid-$min_uid+1));
-                $ok = 1;
-                $ok = 0 if !$slashdb->sqlSelect("COUNT(*)",
-                        "users", "uid=$rand_uid");
-        }
-        return $rand_uid;
+	my($min_uid, $max_uid) = @_;
+	my $rand_uid = $slashdb->sqlSelect("uid", "users",
+		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
+	return $rand_uid;
 }
 
 # CLOSURE!
@@ -313,21 +310,21 @@ sub setRandomIPID {
 		
 
 sub make_werds {
-        my($werds, $link_prob) = @_;
-        $werds = int($werds);
+	my($werds, $link_prob) = @_;
+	$werds = int($werds);
 	$link_prob ||= 0;
-        if ($werds > 40) {
-                $werder->set_werds_num(5,20);
-        } elsif ($werds > 20) {
-                $werder->set_werds_num(3,10);
-        } else {
-                $werder->set_werds_num($werds, $werds);
-        }
+	if ($werds > 40) {
+		$werder->set_werds_num(5,20);
+	} elsif ($werds > 20) {
+		$werder->set_werds_num(3,10);
+	} else {
+		$werder->set_werds_num($werds, $werds);
+	}
 	my $min_syl = int(rand(2)+1);
 	$werder->set_syllables_num($min_syl, $min_syl + int(rand(5)+1));
 	my @links = qw(
 		http://slashdot.org/            http://www.brunching.com/
-		http://www.newsforge.com        http://osdn.com
+		http://www.newsforge.com        http://ostg.com
 		http://whitehouse.gov           http://www.whitehouse.gov/
 		http://us.imdb.com/             http://www.kernel.org
 		http://ic.ac.uk                 http://cr.yp.to/
@@ -351,59 +348,61 @@ sub make_werds {
 	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
 	my $comment;
 	my $cur_werds = 0;
-        my $tag = "";
-        my $quote = q{};
+	my $tag = "";
+	my $quote = q{};
 	my $last_p_werd_num = 0;
-        while ($cur_werds < $werds) {
-                my $new_werds = '';
-                if (int(rand(6))==0 or $werds < $cur_werds * 1.1) {
-                        if (int(rand(2))) {
-                                $new_werds = $werder->question;
-                        } else {
-                                $new_werds = $werder->exclaimation; # Dave, you spelled this word wrong
-                        }
-                } else {
-                        $new_werds = $werder->sentence;
-                }
-		if ($link_prob and rand(1) < $link_prob) {
-			my @new_werds = split / /, $new_werds;
-			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
-			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
-			my $insert_start = int(rand(@new_werds-2));
-			my $insert_end = $insert_start + int(rand(4))+1;
-			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
-			$new_werds = join(" ",
-				@new_werds[0..$insert_start-1],
-				$a_href . $new_werds[$insert_start],
-				@new_werds[$insert_start+1..$insert_end-1],
-				$new_werds[$insert_end] . $close_a,
-				@new_werds[$insert_end+1..$#new_werds]
-			);
+	while ($cur_werds < $werds) {
+		my $new_werds = '';
+		if (int(rand(6))==0 || $werds < $cur_werds * 1.1) {
+			if (int(rand(2))) {
+				$new_werds = $werder->question;
+			} else {
+				$new_werds = $werder->exclaimation; # Dave, you spelled this word wrong
+			}
+		} else {
+			$new_werds = $werder->sentence;
 		}
-		if ($cur_werds and !$tag and rand > 0.9) {
+		if ($link_prob && rand(1) < $link_prob) {
+                        my @new_werds = split / /, $new_werds;
+                        if ($#new_werds > 2) {
+                                my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+                                my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+                                my $insert_start = int(rand($#new_werds-2));
+                                my $insert_end = $insert_start + int(rand(4))+1;
+                                $insert_end = $#new_werds - 1 if $insert_end > $#new_werds - 1;
+                                $new_werds = join(" ",
+                                        @new_werds[0..$insert_start-1],
+                                        $a_href . $new_werds[$insert_start],
+                                        @new_werds[$insert_start+1..$insert_end-1],
+                                        $new_werds[$insert_end] . $close_a,
+                                        @new_werds[$insert_end+1..$#new_werds]
+                                );
+                        }
+		}
+		if ($cur_werds && !$tag && rand > 0.9) {
 			if (rand(1) < 0.95) { $tag = "i" }
 			else { $tag = "b" }
 			if (rand(1) < 0.50) { $quote = int(rand(3)) ? q{'} : q{"} };
 			$new_werds = "<$tag>$quote$new_werds";
 		}
-		if ($tag and rand(1) < 0.5) {
+		if ($tag && rand(1) < 0.5) {
 			$new_werds = "$new_werds$quote</$tag>";
 			$tag = ""; $quote = q{};
-                }
-                $comment .= " $new_werds";
-                $comment =~ s{\s+}{ }g;
-                $cur_werds = $comment =~ tr/ / /;
+		}
+		$comment .= " $new_werds";
+		$comment =~ s{\s+}{ }g;
+		$cur_werds = $comment =~ tr/ / /;
 		if (rand($werds) > 30
 			and rand($cur_werds - $last_p_werd_num) > 20) {
 			$comment .= "<P>";
 			$last_p_werd_num = $cur_werds;
 		}
-        }
-        $comment .= "</$tag>" if $tag;
-        $comment =~ s{</(\w+)>\s+<\1>}{ }g;
-        $comment =~ s/^\s*(.+)\s*$/$1/;
-        $comment =~ s/^\s+//; $comment =~ s/\s+$//;
-	if ($link_prob and $junk) {
+	}
+	$comment .= "</$tag>" if $tag;
+	$comment =~ s{</(\w+)>\s+<\1>}{ }g;
+	$comment =~ s/^\s*(.+)\s*$/$1/;
+	$comment =~ s/^\s+//; $comment =~ s/\s+$//;
+	if ($link_prob && $junk) {
 		my @fragments = (
 			"<a", "href=", 'href="', '"', "'", ">", '>">', " > >",
 			"<", " < ", " <<", ">>", " < < <", "< < ", "<? ", "&lt;<",
@@ -456,7 +455,7 @@ sub make_werds {
 			}
 		}
 	}
-        $comment;
+	$comment;
 }
 
 sub usage {
@@ -496,7 +495,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

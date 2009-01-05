@@ -1,0 +1,40 @@
+__section__
+default
+__description__
+Displays a table listing misspelt words and any available corrections.
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+spellcheck
+__template__
+<table border="0" cellpadding="6" cellspacing="0" class="data" style="background: #ccc; width: 150px;" id="spellcheck_[% form_element %]">
+	<tr class="data_head" style="background: #066;">
+		<td>Spellcheck</td>
+		<td></td>
+	</tr>
+[% FOREACH misspelled_word = words.keys %]
+	<tr class="data_hl3" id="[% misspelled_word %]_[% form_element %]_correction">
+		<td><span style="color: #000;">[% misspelled_word %]</span></td>
+
+		[% escaped_word = misspelled_word.replace("'", "\\'")  %]
+
+		<td><select name="select_[% form_element %]_[% misspelled_word %]" onChange="make_spelling_correction('[% escaped_word %]', '[% form_element %]');">
+		<option value=''>Suggestions
+		<option style="color:#c00;" value=''>- Learn -
+		[% FOREACH correction = words.$misspelled_word %]
+			<option value="[% correction %]">[% correction %]
+		[% END %]
+		</select>
+		</td>
+	</tr>
+[% END %]
+</table>
+
+__seclev__
+10000
+__version__
+$Id$

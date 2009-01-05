@@ -11,12 +11,12 @@ en_US
 __name__
 list
 __template__
-
-[% IF form.stats_section && form.type != 'graphs' && stats_data.${form.stats_section}.names %]
+<div class="generalbody">
+[% IF form.stats_skid.defined && form.type != 'graphs' && stats_data.${form.stats_skid}.names %]
     [% PROCESS dumphead %]
-    <P>
+    <p>
     [% PROCESS doform label => "Individual Categories", select_box =>
-       Slash.createSelect('stats_name', stats_data.${form.stats_section}.names, form.stats_name, 1)
+       Slash.createSelect('stats_name', stats_data.${form.stats_skid}.names, form.stats_name, 1)
      %]
 
     [% IF form.stats_name %]
@@ -25,7 +25,7 @@ __template__
 
 
     [% stats_name_pre = {} %]
-    [% FOREACH myname = stats_data.${form.stats_section}.names.grep('_');
+    [% FOREACH myname = stats_data.${form.stats_skid}.names.grep('_');
         matches = myname.match('^([a-zA-Z0-9]+)_');
         stats_name_pre.${matches.0} = matches.0;
     END %]
@@ -36,14 +36,14 @@ __template__
      %]
 
     [% IF form.stats_name_pre %]
-      [% FOREACH myname = stats_data.${form.stats_section}.names.grep("^${form.stats_name_pre}") %]
+      [% FOREACH myname = stats_data.${form.stats_skid}.names.grep("^${form.stats_name_pre}") %]
     	[% PROCESS dostats myname => myname %]
       [% END %]
     [% END %]
 
 [% ELSIF form.graphname %]
 	[% PROCESS graphshead %]
-	<P>
+	<p>
 	[% PROCESS graphs gtitle => form.graphname %]
 
 [% ELSIF form.op == 'list' && form.type != 'graphs' %]
@@ -54,69 +54,70 @@ __template__
 
 [% ELSE %]
 	[% PROCESS report %]
-	<P>
+	<p>
 	[% PROCESS graphshead %]
-	<P>
+	<p>
 	[% PROCESS dumphead %]
 
 [% END %]
 
 [% BLOCK dostats %]
-        <P><I>[% myname %]</I><BR>
+        <p><i>[% myname %]</i><br>
         [% stats_total = 0 %]
-        [% FOREACH day = stats_data.${form.stats_section}.keys.sort;
+        [% FOREACH day = stats_data.${form.stats_skid}.keys.sort;
         	NEXT IF day == "names";
-        	stats_num = stats_data.${form.stats_section}.${day}.${myname} + 0;
+        	stats_num = stats_data.${form.stats_skid}.${day}.${myname} + 0;
         	stats_total = stats_total + stats_num %]
-        	[% day %]: [% stats_num %]<BR>
+        	[% day %]: [% stats_num %]<br>
         [% END %]
-	<B>Total: [% stats_total %]</B>
+	<b>Total: [% stats_total %]</b>
 [% PROCESS make_graph statdata => [myname] %]
 [% END %]
 
 [% BLOCK doform %]
-    [% PROCESS formLabel value => label, comment => comment %]
-    <FORM METHOD="POST" ACTION="[% env.script_name %]">
-        [% select_box %]
-
-        &nbsp;&nbsp;Range: [% PROCESS stats_days %]
-
-        <INPUT TYPE="hidden" NAME="stats_section" VALUE="[% form.stats_section %]">
-        <INPUT TYPE="hidden" NAME="op" VALUE="list">
-        <INPUT TYPE="submit">
-    </FORM>
+    <form method="post" action="[% env.script_name %]">
+	<fieldset>
+	<legend>List</legend>
+	[% PROCESS formLabel value => label, comment => comment %]
+	[% select_box %]
+	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
+       	<input type="hidden" name="stats_skid" value="[% form.stats_skid %]">
+	<input type="hidden" name="op" value="list">
+        <input type="submit" class="button">
+	</fieldset>
+    </form>
 [% END %]
 
 [% BLOCK dumphead %]
-	[% PROCESS titlebar title => "Available Raw Stats for $constants.sitename", width => '100%' %]
-
-	<FORM METHOD="POST" ACTION="[% env.script_name %]">
-
-	[% PROCESS formLabel value => "Section" %]
-	[% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
-
-	<INPUT TYPE="hidden" NAME="op" VALUE="list">
-	<INPUT TYPE="submit">
-	</FORM>
+	[% PROCESS titlebar title => "Available Raw Stats for $constants.sitename" %]
+	<form method="post" action="[% env.script_name %]">
+	<fieldset>
+	<legend>Stats</legend>
+		[% PROCESS formLabel value => "Section" %]
+		[% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
+		<input type="hidden" name="op" value="list">
+		<input type="submit" class="button">
+	</fieldset>
+	</form>
 [% END %]
 
 [% BLOCK graphshead %]
-	[% PROCESS titlebar title => "Available Graphs for $constants.sitename", width => '100%' %]
-
-	<FORM METHOD="POST" ACTION="[% env.script_name %]">
-
-	[% PROCESS formLabel value => "Graphs" %]
-	[% PROCESS graphs # get mygraphs defined %]
-	[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
-	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
-	&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
-
-	<INPUT TYPE="hidden" NAME="op" VALUE="list">
-	<INPUT TYPE="hidden" NAME="type" VALUE="graphs">
-	<INPUT TYPE="submit">
-	</FORM>
+	[% PROCESS titlebar title => "Available Graphs for $constants.sitename" %]
+	<form method="post" action="[% env.script_name %]">
+		<fieldset>
+		<legend>Graphs</legend>
+		[% PROCESS formLabel value => "Graphs" %]
+		[% PROCESS graphs # get mygraphs defined %]
+		[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
+		&nbsp;&nbsp;Range: [% PROCESS stats_days %]
+		&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
+		<input type="hidden" name="op" value="list">
+		<input type="hidden" name="type" value="graphs">
+		<input type="submit" class="button">
+		</fieldset>
+	</form>
 [% END %]
-
+</div>
 __seclev__
 1000
 __version__

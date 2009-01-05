@@ -1,0 +1,10 @@
+This plugin allows you to add user reviews and ratings to a discussion which are then averaged for the whole discussion.
+
+The options are contained in the string_param table listed under the "comment_vote" type.  The code must be integer
+values for the averaging to work correctly.
+
+Add a line as follows for the nexus in which you'd like the rating form to show up in the comment creation form.  Replace the tid in the line
+below with the correct value for your nexus tid.
+
+
+# INSERT INTO topic_nexus_extras (tid, extras_keyword, extras_textname, type, content_type) values (153, "comment_vote", "Give this product a rating of 0 to 5 stars", "list", "comment");

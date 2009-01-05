@@ -11,7 +11,8 @@ en_US
 __name__
 slashd_status
 __template__
-[% PROCESS titlebar title="Slashd Status" width='100%' %]
+[% PROCESS titlebar title="Slashd Status" %]
+<div class="generalbody">
 <table>
 	<tr>
 		<th>Task</th>
@@ -23,7 +24,7 @@ __template__
 	</tr>
 
 	[% FOREACH task = tasks.keys.sort %]
-	<tr>
+	<tr [% IF tasks.$task.in_progress; "class='progress'"; END %]>
 		<td>[% task %]</td>
 		<td>[% IF tasks.$task.in_progress; "&middot;"; ELSE; "&nbsp;"; END %]</td>
 		<td>[% tasks.$task.last_completed %]</td>
@@ -34,6 +35,7 @@ __template__
 	[% END %]
 
 </table>
+</div>
 	
 __seclev__
 100

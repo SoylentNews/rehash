@@ -19,19 +19,16 @@ en_US
 __name__
 printCommentsNone
 __template__
-[% USE Slash %]
-
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="2">
-
-	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
-		<FONT SIZE="2" COLOR="[% user.fg.3 %]">
+<a name="comments"></a>
+<div class="commentwrap">
+<div class="commentBox">
 [% IF title %]
-		<A HREF="[% link %]"><FONT COLOR="[% user.fg.3 %]">[% title %]</FONT></A>
+		<a href="[% link %]">[% title %]</a>
 [% ELSE %]
 	[% Slash.linkComment({
 		sid	=> sid,
 		pid	=> pid,
-		color	=> user.fg.3,
+		color	=> user.colors.fg_3,
 		subject	=> 'Top',
 		subject_only => 1,
 	}) %]
@@ -40,49 +37,41 @@ __template__
 	|
 
 [% IF user.is_anon %]
-		<A HREF="[% constants.rootdir %]/users.pl">
-			<FONT COLOR="[% user.fg.3 %]">Log in/Create an Account</FONT>
-		</A>
+		<a href="[% gSkin.rootdir %]/users.pl">Log In/Create an Account</a>
 [% ELSE %]
-		<A HREF="[% constants.rootdir %]/users.pl?op=editcomm">
-			<FONT COLOR="[% user.fg.3 %]">Preferences</FONT>
-		</A>
+		<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">Preferences</a>
 [% END %]
 
 [% IF user.points %]
-		| <B>[% user.points %]</B>
-		<A HREF="[% constants.rootdir %]/moderation.shtml">
-		<FONT COLOR="[% user.fg.3 %]">moderator</FONT></A>
+		| <b>[% user.points %]</b>
+		<a href="[% gSkin.rootdir %]/moderation.shtml">
+		moderator</a>
 		point[% user.points == 1 ? '' : 's' %]
 [% END %]
 
-		| <A HREF="[% constants.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
-<FONT COLOR="[% user.fg.3 %]">Search Discussion</FONT></A></FONT>
-	</TD></TR>
-
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER"><FONT SIZE="2">
-		<FORM ACTION="[% constants.rootdir %]/comments.pl">
-		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
+		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
+	</div>
+	<div class="commentBoxForm">
+		<form action="[% gSkin.rootdir %]/comments.pl">
+		<input type="hidden" name="sid" value="[% sid %]">
 
 	 [%
 		Slash.selectMode(user.mode);
 		Slash.selectSortcode(user.commentsort) %]
 
 	[% UNLESS user.is_anon %]
-		Save:<INPUT TYPE="CHECKBOX" NAME="savechanges">
+		Save: <input type="checkbox" name="savechanges">
 	[% END %]
 
-		<INPUT TYPE="submit" NAME="op" VALUE="Change">
-		</FORM>
-	</TD></TR>
-	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
-		<FONT COLOR="[% user.fg.3 %]" SIZE="1">
-<B>The Fine Print:</B>
+		<input type="submit" name="op" value="Change">
+		</form>
+<div class="commentBox">
+<b>The Fine Print:</b>
 The following comments are owned by whoever posted them.
 We are not responsible for them in any way.
-</FONT></TD></TR>
-</TABLE>
-
+</div>
+</div>
+</div>
 __seclev__
 10000
 __version__

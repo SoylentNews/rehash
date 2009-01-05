@@ -12,15 +12,15 @@ __name__
 editbuttons
 __template__
 [% IF newarticle %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
+<input type="button" name="op" value="save"    onclick="st_submit(this)" class="button">
 [% END %]
 
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">
+<input type="button" name="op" value="preview" onclick="st_submit(this)" class="button">
 
 [% IF ! newarticle %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="update">
+<input type="button" name="op" value="update"  onclick="st_submit(this)" class="button">
 [%- IF user.seclev >= 10000 %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="delete">
+<input type="button" name="op" value="delete"  onclick="st_submit(this)" class="button">
 [%- END -%]
 [% END %]
 

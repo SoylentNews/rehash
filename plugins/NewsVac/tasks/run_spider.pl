@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# SlashD Task (c) OSDN 2001
+# SlashD Task (c) OSTG 2001
 #
 # Description: Performs Spidering runs within Task architechture.
 # 	       Converted from original cron jobs from NewsForge

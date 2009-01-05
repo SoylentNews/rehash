@@ -11,46 +11,45 @@ en_US
 __name__
 listevents
 __template__
-[% USE Slash %]
 [% PROCESS titlebar title="List Events" width="100%" %]
-<TABLE>
-	<TR>
-		<TD>Event</TD><TD>Entered</TD><TD>Dates</TD><TD>Section</TD><TD>Topic</TD>
-	</TR>
+<table>
+	<tr>
+		<td>Event</td><td>Entered</td><td>Dates</td><td>Section</td><td>Topic</td>
+	</tr>
 [% FOREACH event=events %]
-	<TR>
-		<TD><A HREF="[% constants.rootdir %]/eventsadmin.pl?op=edit&amp;sid=[% event.sid %]">[% event.title %]</A>&nbsp;</TD>
-		<TD>[% event.time %]&nbsp;</TD>
-		<TD>[% event.begin %] - [% event.end %]&nbsp;</TD>
-		<TD>[% event.section %]&nbsp;</TD>
-		<TD>[% event.altext %] ([% event.tid %])&nbsp;</TD>
-	</TR>
+	<tr>
+		<td><a href="[% gSkin.rootdir %]/eventsadmin.pl?op=edit&amp;sid=[% event.sid %]">[% event.title %]</a>&nbsp;</td>
+		<td>[% event.time %]&nbsp;</td>
+		<td>[% event.begin %] - [% event.end %]&nbsp;</td>
+		<td>[% event.section %]&nbsp;</td>
+		<td>[% event.altext %] ([% event.tid %])&nbsp;</td>
+	</tr>
 [% END %]
-</TABLE>
+</table>
 [% INCLUDE titlebar width="100%" title="Select Date" %]
-<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+<form action="[% gSkin.rootdir %]/eventsadmin.pl" method="post">
 From:
-<SELECT NAME="beginday">
+<select name="beginday">
 [% FOREACH i = days %]
 	
-	<OPTION VALUE="[% i %]" [% IF i == selectedref.beginday %]SELECTED[% END %]>[% i %]
+	<option value="[% i %]" [% IF i == selectedref.beginday %]SELECTED[% END %]>[% i %]
 [% END %]
-</SELECT>
+</select>
 Month [% Slash.createSelect("beginmonth", months, selectedref.beginmonth, 1, 1) %]&nbsp;
 Year [% Slash.createSelect("beginyear", years, selectedref.beginyear, 1, 1) %]&nbsp;
-<BR>
+<br>
 To:
-<SELECT NAME="endday">
+<select name="endday">
 [% FOREACH i = days %]
 	
-	<OPTION VALUE="[% i %]" [% IF i == selectedref.endday %]SELECTED[% END %]>[% i %]
+	<option value="[% i %]" [% IF i == selectedref.endday %]SELECTED[% END %]>[% i %]
 [% END %]
-</SELECT>
+</select>
 Month [% Slash.createSelect("endmonth", months, selectedref.endmonth, 1, 1) %]&nbsp;
 Year [% Slash.createSelect("endyear", years, selectedref.endyear, 1, 1) %]&nbsp;
 &nbsp;
-<INPUT NAME="op" VALUE="List" TYPE="SUBMIT">
-</FORM>
+<input name="op" value="List" type="SUBMIT">
+</form>
 __seclev__
 100
 __version__

@@ -31,12 +31,12 @@ WHILE user.state.mt.curcol < num_cols;
 	user.state.mt.curcol = user.state.mt.curcol + 1;
 	NEXT IF user.state.mt.cols.${user.state.mt.curcol} > min_rows;
 	IF user.state.mt.cols.${user.state.mt.curcol} < num_rows;
-		'<TD>&nbsp;</TD>';
+		'<td>&nbsp;</td>';
 		newvalue = user.state.mt.cols.${user.state.mt.curcol} + 1;
 		user.state.mt.cols.${user.state.mt.curcol} = newvalue;
 	END;
 END;
-"</TR>\n";
+"</tr>\n";
 num_loops = 50;
 need_another_row = 1;
 WHILE num_loops && need_another_row;
@@ -45,7 +45,9 @@ WHILE num_loops && need_another_row;
 	min_rows = 999;
 	FOR rowcheck = user.state.mt.cols;
 		NEXT IF loop.first;
-		need_another_row = 1 IF rowcheck < num_rows;
+		IF rowcheck < num_rows;
+			need_another_row = 1;
+		END;
 		IF rowcheck < min_rows;
 			min_rows = rowcheck;
 			user.state.mt.curcol = loop.index;
@@ -55,7 +57,7 @@ WHILE num_loops && need_another_row;
 		user.state.mt.curcol = user.state.mt.curcol - 1;
 		IF min_rows == 999; min_rows = 0; END;
 		user.state.mt.currow = min_rows + 1;
-		"<TR>";
+		"<tr>";
 		user.state.mt.curcol = 0;
 		WHILE user.state.mt.curcol < num_cols;
 			user.state.mt.curcol = user.state.mt.curcol + 1;
@@ -64,19 +66,19 @@ WHILE num_loops && need_another_row;
 				NEXT;
 			END;
 			IF val < num_rows;
-				'<TD>&nbsp;</TD>';
+				'<td>&nbsp;</td>';
 				newval = val + 1;
 				user.state.mt.cols.${user.state.mt.curcol} = newval;
 			END;
 		END;
-		"</TR>\n";
+		"</tr>\n";
 	END;
 	num_loops = num_loops - 1;
 END;
 
 %]
 
-</TABLE>
+</table>
 
 __seclev__
 10000

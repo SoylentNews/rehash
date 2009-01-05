@@ -28,6 +28,7 @@ __name__
 paypalbut
 __template__
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<p>
 <input type="hidden" name="cmd" value="_xclick">
 <input type="hidden" name="business" value="[% constants.paypal_business %]">
 <input type="hidden" name="undefined_quantity" value="1">
@@ -45,7 +46,8 @@ __template__
 <input type="hidden" name="no_shipping" value="[% constants.paypal_no_shipping %]">
 <input type="hidden" name="return" value="[% constants.paypal_return %]">
 <input type="hidden" name="cancel_return" value="[% constants.paypal_cancel_return %]">
-<input type="image" src="[% constants.paypal_image_src %]" border="0" name="submit" alt="Subscribe With Paypal">
+<input type="image" src="[% constants.paypal_image_src %]" name="submit" alt="Subscribe With Paypal">
+</p>
 </form>
 
 __seclev__

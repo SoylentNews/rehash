@@ -11,32 +11,31 @@ en_US
 __name__
 index
 __template__
-[% USE Slash %]
 [% PROCESS titlebar %]
-<TABLE>
+<table>
 [% FOREACH event=dates %]
-	<TR>
-		<TD>
+	<tr>
+		<td>
 			[% event.begin %] - [% event.end %]
-			<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=delete&amp;id=[% event.id %]">[delete]</A>
-		</TD>
-	</TR>
+			<a href="[% gSkin.rootdir %]/eventsadmin.pl?op=delete&amp;id=[% event.id %]">[delete]</a>
+		</td>
+	</tr>
 [% END %]
-</TABLE>
-<P>
-<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+</table>
+<p>
+<form action="[% gSkin.rootdir %]/eventsadmin.pl" method="post">
 		Begin Date: 
-		<INPUT TYPE="TEXT" NAME="begin" VALUE="[% Slash.db.getTime() %]">
-		<BR>
+		<input type="text" name="begin" value="[% Slash.db.getTime() %]">
+		<br>
 		End Date: 
-		<INPUT TYPE="TEXT" NAME="end" VALUE="[% Slash.db.getTime() %]">
-		<BR>
-<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="add">
-<INPUT TYPE="SUBMIT" VALUE="Save">
-<BR>
-<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
-</FORM>
+		<input type="text" name="end" value="[% Slash.db.getTime() %]">
+		<br>
+<input type="hidden" name="sid" value="[% sid %]">
+<input type="hidden" name="op" value="add">
+<input type="submit" value="Save">
+<br>
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</a>
+</form>
 __seclev__
 100
 __version__

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -19,6 +19,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 	my $blobdb    = getObject('Slash::Blob');
 
 	my $ops = {
@@ -52,7 +53,7 @@ sub main {
 
 	# admin.pl is not for regular users
 	unless ($user->{is_admin}) {
-		redirect("$constants->{rootdir}/");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
@@ -105,7 +106,7 @@ sub addFileForStory {
 				local $/;
 				$data = <$fh>;
 			}
-			$form->{file_content} =~ s|^.+?([^/:\\]+)$|$1|;
+			$form->{file_content} =~ s|^.*?([^/:\\]+)$|$1|;
 		}
 
 		my $content = {
@@ -117,7 +118,13 @@ sub addFileForStory {
 			description	=> $form->{description},
 		};
 
-		$blobdb->createFileForStory($content);
+		unless ($blobdb->createFileForStory($content)) {
+			print "<p><b>File not saved, check logs for errors</b><br>";
+			printf "Filename: %s, description: %s, data size: %dK</p>",
+				strip_literal($form->{file_content}),
+				strip_literal($form->{description}),
+				length($data) / 1024;
+		}
 	}
 
 	if ($form->{delete}) {

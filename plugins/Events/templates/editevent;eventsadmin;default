@@ -11,59 +11,58 @@ en_US
 __name__
 editevent
 __template__
-[% USE Slash %]
 [% PROCESS titlebar title="Edit Event" width="100%" %]
-<TABLE>
+<table>
 [% FOREACH event=dates %]
-	<TR>
-		<TD>
-			<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% storytitle %]</A>
-		</TD>
-		<TD>
+	<tr>
+		<td>
+			<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% storytitle %]</a>
+		</td>
+		<td>
 			[% IF event.begin == event.end %] 
 				[% event.begin %] 
 			[% ELSE %] 
 				[% event.begin %] - [% event.end %] 
 			[% END %]
-		</TD>
-		<TD>
-			<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=delete&amp;sid=[% sid %]&amp;id=[% event.id %]">[delete]</A>
-		</TD>
-	</TR>
+		</td>
+		<td>
+			<a href="[% gSkin.rootdir %]/eventsadmin.pl?op=delete&amp;sid=[% sid %]&amp;id=[% event.id %]">[delete]</a>
+		</td>
+	</tr>
 [% END %]
-</TABLE>
-<BR>
+</table>
+<br>
 [% PROCESS titlebar title="Add Event to \"$storytitle, sid $sid\"" width="100%" %]
-<P>
-<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+<p>
+<form action="[% gSkin.rootdir %]/eventsadmin.pl" method="post">
 		Begin Date: 
-	<SELECT NAME="beginday">
+	<select name="beginday">
 		[% FOREACH i = days %]
 	
-		<OPTION VALUE="[% i %]" [% IF i == selectedref.beginday %]SELECTED[% END %]>[% i %]
+		<option value="[% i %]" [% IF i == selectedref.beginday %]SELECTED[% END %]>[% i %]
 		[% END %]
-	</SELECT>
+	</select>
 		Month [% Slash.createSelect("beginmonth", months, selectedref.beginmonth, 1, 1) %]&nbsp;
 		Year [% Slash.createSelect("beginyear", years, selectedref.beginyear, 1, 1) %]&nbsp;
-		<BR>
+		<br>
 		End Date: 
-<SELECT NAME="endday">
+<select name="endday">
 		[% FOREACH i = days %]
 	
-	<OPTION VALUE="[% i %]" [% IF i == selectedref.endday %]SELECTED[% END %]>[% i %]
+	<option value="[% i %]" [% IF i == selectedref.endday %]SELECTED[% END %]>[% i %]
 		[% END %]
-</SELECT>
+</select>
 Month [% Slash.createSelect("endmonth", months, selectedref.endmonth, 1, 1) %]&nbsp;
 Year [% Slash.createSelect("endyear", years, selectedref.endyear, 1, 1) %]&nbsp;
 		&nbsp;
 
-		<BR>
-<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="add">
-<INPUT TYPE="SUBMIT" VALUE="Save">
-<BR>
-<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
-</FORM>
+		<br>
+<input type="hidden" name="sid" value="[% sid %]">
+<input type="hidden" name="op" value="add">
+<input type="submit" value="Save">
+<br>
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</a>
+</form>
 __seclev__
 100
 __version__

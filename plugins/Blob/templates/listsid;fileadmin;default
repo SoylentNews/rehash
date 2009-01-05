@@ -11,23 +11,23 @@ en_US
 __name__
 listsid
 __template__
-<P>
-<A HREF="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% Slash.db.getStory(sid, 'title') %]</A><BR>
-<FORM ACTION="[% constants.real_rootdir %]/fileadmin.pl" METHOD="POST" enctype="multipart/form-data">
+<p>
+<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% Slash.db.getStory(sid, 'title') %]</a><br>
+<form action="[% constants.real_rootdir %]/fileadmin.pl" method="post" enctype="multipart/form-data">
 [% PROCESS formLabel value => "Add a new file" comment => "filename is used to determine content type so make sure you name them well" %]
-Description <INPUT TYPE="TEXT" NAME="description" SIZE="50"><BR>
-File to upload: <INPUT TYPE="FILE" NAME="file_content"><BR>
+Description <input type="text" name="description" size="50"><br>
+File to upload: <input type="file" name="file_content"><br>
 
 [% PROCESS formLabel value => "Delete Files" comment => "" %]
 	[% FOREACH file=files %]
-		<A href="[% constants.real_rootdir %]/blob.pl?id=[% file.file_id %]">[% file.description %]</A> [% IF file.is_image %](image)[% END %] <input type="checkbox" name="delete" value="[% file.id %]"><br>
+		<a href="[% constants.real_rootdir %]/blob.pl?id=[% file.file_id %]">[% file.description | strip_literal %]</a> [% IF file.is_image %](image)[% END %] <input type="checkbox" name="delete" value="[% file.id %]"><br>
 	[% END %]
-	<P>
-	<B>Checked files will be deleted</B> 
-	<INPUT TYPE="HIDDEN" NAME="op" VALUE="addFileForStory">
-	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
-	<INPUT TYPE="SUBMIT" NAME="Submit" VALUE="Submit">
-</FORM>
+	<p>
+	<b>Checked files will be deleted</b> 
+	<input type="hidden" name="op" value="addFileForStory">
+	<input type="hidden" name="sid" value="[% sid %]">
+	<input type="submit" name="Submit" value="Submit">
+</form>
 
 __seclev__
 10000

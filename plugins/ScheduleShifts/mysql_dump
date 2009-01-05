@@ -1,0 +1,8 @@
+# $Id$
+INSERT INTO message_codes (code, type, seclev) VALUES (17, 'Schedule Change Notification', 100);
+
+INSERT INTO vars (name, value, description) VALUES ('shift_change_managers', '', 'Comma separated list of user IDs that have been designated as "Shift Change Managers," who will receive a copy of all shift change notices');
+INSERT INTO vars (name, value, description) VALUES ('shift_change_message_users', '1', 'Send messages to users who gain/lose shifts');
+INSERT INTO vars (name, value, description) VALUES ('shift_schedule_weeks', 5, 'Number of weeks in advance in which shifts can be schedules');
+INSERT INTO vars (name, value, description) VALUES ('shift_shifts_tz', 'EST', 'Time zone that the shifts are in');
+INSERT INTO vars (name, value, description) VALUES ('shift_definitions', 'morning,6=6:afternoon,12=6:evening,18=6', 'Shift descriptions which contain colon separated triplets of "<shiftname>, <shift start>=<shift length>"');

@@ -11,16 +11,18 @@ en_US
 __name__
 nosearch
 __template__
-<blockquote><p>Sorry, search is down at the moment.
+
+<div class="nosearch">
+Sorry, search is down at the moment.
 Until it's back up, you may wish to search
 [% constants.sitename %] through Google:<br>
-<FORM METHOD="GET" ACTION="http://www.google.com/search">
-<INPUT TYPE="TEXT" NAME="query" VALUE="[% form.query | strip_attribute %]" SIZE="20">
-<INPUT TYPE="HIDDEN" NAME="as_sitesearch" VALUE="[% constants.basedomain %]">
-<INPUT TYPE="SUBMIT" VALUE="Google [% constants.sitename %]">
-</FORM>
-</blockquote><p>
-
+<form method="get" action="http://www.google.com/search">
+<input type="text" name="query" value="[% form.query | strip_attribute %]" size="20">
+<input type="hidden" name="as_sitesearch" value="[% gSkin.basedomain %]">
+<input type="submit" value="Google [% constants.sitename %]">
+</form>
+</div>
+</div>
 __seclev__
 100
 __version__

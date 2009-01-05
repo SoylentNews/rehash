@@ -1,0 +1,19 @@
+# $Id$
+name=SearchToo
+htdoc=searchtoo.pl
+mysql_dump=dump
+mysql_schema=schema.sql
+task=search_index.pl
+description="SearchToo is the frontend search API for Slash"
+requiresplugin=Search
+template=templates/commentsearch;searchtoo;default
+template=templates/data;searchtoo;default
+template=templates/journalsearch;searchtoo;default
+template=templates/nosearch;searchtoo;default
+template=templates/pagination;searchtoo;default
+template=templates/pollsearch;searchtoo;default
+template=templates/searchform;searchtoo;default
+template=templates/searchrss;searchtoo;default
+template=templates/storysearch;searchtoo;default
+template=templates/subsearch;searchtoo;default
+template=templates/usersearch;searchtoo;default

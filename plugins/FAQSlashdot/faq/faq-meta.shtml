@@ -1,73 +1,58 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-   <title>Slashdot FAQ - Meta</title>
-<!--#include virtual="/slashhead.inc"-->
+        <title>Slashdot FAQ - Meta</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
 
-<!--
-($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
--->
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>FAQ Meta</h3>
+                </div>
+        </div>
 
-</head>
-<body>
-&nbsp;
-<table>
-<tr>
-<td><a href="editorial.shtml">Next section</a></td>
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="editorial.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
-<td><a href="index.shtml">Index</a></td>
-</tr>
-</table>
+<h2><a name="fm100" id="fm100">What is this document?</a></h2>
+        <p>This is the Frequently Asked Questions (FAQ) file for Slashdot. As its name implies, it is intended to address questions that the Slashdot crew are asked repeatedly.</p>
+        <p>This particular edition is version 1.2.</p>
+        <p><em><small>
+                Updated by: <a href="mailto:robo@slashdot.org">Robo</a><br>
+                Last Modified: 12/17/01
+        </small></em></p>
 
-<hr>
-<br><a NAME="fm100"></a>
-<h2>
-What is this document?</h2>
-This is the Frequently Asked Questions (FAQ) file for Slashdot. As its
-name implies, it is intended to address questions that the Slashdot crew
-are asked repeatedly.
-<p>This particular edition is version 1.2.
-<p><i><font size=-1>Updated by: <a href="mailto:robo@slashdot.org">Robo</a></font></i>
-<br><i><font size=-1>Last Modified: 12/17/01</font></i>
-<br><a NAME="fm200"></a>
-<h2>
-I have a question that is not answered in this FAQ. What should I do?</h2>
-Email your questions to <a href="mailto:malda@slashdot.org">CmdrTaco</a>,
-<a href="mailto:samzenpus@slashdot.org">Samzenpus</a>, or <a href="mailto:robo@slashdot.org">Robo</a>.
-We'll try our best to get you an answer, and if it's a question we've seen
-before, we'll consider adding it to the FAQ.
-<p><i><font size=-1>Updated by: <a href="mailto:Robo@slashdot.org">Robo</a></font></i>
-<br><i><font size=-1>Last Modified: 12/17/01</font></i>
-<br><a NAME="fm300"></a>
-<h2>
-Who is responsible for the FAQ?</h2>
-The FAQ was originally composed by <a href="mailto:malda@slashdot.org">Rob
-"CmdrTaco" Malda</a>, and indeed much of the verbiage in it is his. In
-June of 2000, <a href="mailto:joe@nigiri.org">Joe Merlino</a> was hired
-by Andover.net to revamp it. Joe updated, edited, and reformatted it, and
-unified it with a number of other documents. The FAQ went through another
-general update at the end of 2001 by <a href="mailto:samzenpus@slashdot.org">Samzenpus</a>
-and <a href="mailto:robo@slashdot.org">Robo</a>. Further, the following
-people have contributed:
-<ul>
-<li>
-<a href="mailto:loonxtall@hotmail.com">Loon</a></li>
+<h2><a name="fm200" id="fm200">I have a question that is not answered in this FAQ. What should I do?</a></h2>
+        <p>Email your questions to <a href="mailto:malda@slashdot.org">CmdrTaco</a>, <a href="mailto:samzenpus@slashdot.org">Samzenpus</a>, or <a href="mailto:robo@slashdot.org">Robo</a>. We'll try our best to get you an answer, and if it's a question we've seen before, we'll consider adding it to the FAQ.</p>
+        <p><em><small>
+                Updated by: <a href="mailto:Robo@slashdot.org">Robo</a><br>
+                Last Modified: 12/17/01
+        </small></em></p>
 
-<li>
-<a href="mailto:dkh2@po.cwru.edu">dkh2</a></li>
-</ul>
+<h2><a name="fm300" id="fm300">Who is responsible for the FAQ?</a></h2>
+        <p>The FAQ was originally composed by <a href="mailto:malda@slashdot.org">Rob "CmdrTaco" Malda</a>, and indeed much of the verbiage in it is his. In June of 2000, <a href="mailto:joe@nigiri.org">Joe Merlino</a> was hired by Andover.net to revamp it. Joe updated, edited, and reformatted it, and unified it with a number of other documents. The FAQ went through another general update at the end of 2001 by <a href="mailto:samzenpus@slashdot.org">Samzenpus</a> and <a href="mailto:robo@slashdot.org">Robo</a>. Further, the following people have contributed:</p>
+        <ul>
+                <li><a href="mailto:loonxtall@hotmail.com">Loon</a></li>
+                <li><a href="mailto:dkh2@po.cwru.edu">dkh2</a></li>
+        </ul>
+        <p><em><small>
+                Updated by: <a href="mailto:robo@slashdot.org">Robo</a><br>
+                Last Modified: 12/17/00
+        </small></em></p>
 
-<p><i><font size=-1>Updated by: </font></i><a href="mailto:robo@slashdot.org">Robo</a>
-<br><i><font size=-1>Last Modified: 12/17/00</font></i>
-<p>
-<hr>
-<table>
-<tr>
-<td><a href="editorial.shtml">Next section</a></td>
+        <hr>
+        <ul class="menu">
+                
+                        <li><a href="editorial.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
 
-<td><a href="index.shtml">Index</a></td>
-</tr>
-</table>
 <!--#include virtual="/slashfoot.inc"-->
-</body>
-</html>

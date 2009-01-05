@@ -11,26 +11,25 @@ en_US
 __name__
 events
 __template__
-[% USE Slash %]
 [% PROCESS titlebar %]
-<TABLE>
+<table>
 [% IF message %]
 				[% message %]
 [% END %]
 [% FOREACH event=events %]
-	<TR>
-		<TD>
-			[<A HREF="[% constants.rootdir %]/search.pl?topic=[% event.tid %]">[% event.alttext %]</A>] &nbsp;
-		</TD>
-		<TD>
-			<A HREF="[% constants.rootdir %]/article.pl?sid=[% event.sid %]">[% event.title %]</A> &nbsp;
-		</TD>
-	</TR>
+	<tr>
+		<td>
+			[<a href="[% gSkin.rootdir %]/search.pl?tid=[% event.tid %]">[% event.alttext %]</a>] &nbsp;
+		</td>
+		<td>
+			<a href="[% gSkin.rootdir %]/article.pl?sid=[% event.sid %]">[% event.title %]</a> &nbsp;
+		</td>
+	</tr>
 [% END %]
-</TABLE>
-<P>
-&lt; <A HREF="[% constants.rootdir %]/events.pl?date=[% date %]&op=previousDate">Previous Day</A> | <A HREF="[% constants.rootdir %]/events.pl?date=[% date %]&op=nextDate">Next Day</A> &gt;
-<P>
+</table>
+<p>
+&lt; <a href="[% gSkin.rootdir %]/events.pl?date=[% date %]&op=previousDate">Previous Day</a> | <a href="[% gSkin.rootdir %]/events.pl?date=[% date %]&op=nextDate">Next Day</a> &gt;
+<p>
 __seclev__
 100
 __version__

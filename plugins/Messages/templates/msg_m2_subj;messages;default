@@ -11,7 +11,8 @@ en_US
 __name__
 msg_m2_subj
 __template__
-Metamoderation Results
+[%- msg.use_subject_for_collected = 1 -%]
+Moderation Rated As Unfair
 __seclev__
 500
 __version__

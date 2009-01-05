@@ -1,223 +1,126 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-   <title>Slashdot FAQ - Meta-moderation</title>
-<!--#include virtual="/slashhead.inc"-->
+        <title>Slashdot FAQ - Meta-moderation</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
 
-<!--
-($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
--->
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Meta-moderation</h3>
+                </div>
+        </div>
 
-<TABLE>
-	<TR width="100%">
-		<TD><A HREF="com-mod.shtml">Previous Section</A>
-		<TD><A HREF="accounts.shtml">Next section</A>
-		<TD><A HREF="index.shtml">Index</A>
-	</TR>
-</TABLE>
-<HR><BR>
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="com-mod.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="accounts.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
+<h2><a name="mm100" id="mm100">What do "M1" and "M2" mean?</a></h2>
+        <p>M1 and M2 are Slashdot shorthand for "moderation" and "metamoderation," respectively. We also use these with suffixes For example, if you see the term "M2ed," it means "metamoderated." Likewise, the term "M1er" means "Moderator."</p>
+        <p><em><small>
+                Answered by:<a href="mailto:loonxtall@hotmail.com">Loon</a><br>
+                Last Modified: 6/12/00
+        </small></em></p>
 
-<A NAME="mm100">
-<H2>What do "M1" and "M2" mean?</H2>
+<h2><a name="mm200" id="mm200">What is metamoderation?</a></h2>
+        <p>Metamoderation is a second layer of moderation. It seeks to address the issue of unfair moderators by letting "metamoderators" (any logged-in Slashdotter) "rate the rating" of ten randomly selected comment posts. The metamoderator decides if the moderator's rating was fair, unfair, or neither.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:loonxtall@hotmail.com">Loon</a><br>
+                Last Modified: 6/12/00
+        </small></em></p>
 
-	<P>M1 and M2 are Slashdot shorthand for "moderation" and 
-	"metamoderation," respectively. We also use these with 
-	suffixes For example, if you see the term "M2ed," it 
-	means "metamoderated." Likewise, the term "M1er" means 
-	"Moderator."
-	
-	<BR><BR>
-	<I><SMALL>
-	Answered by:<A HREF="mailto:loonxtall@hotmail.com">Loon</A>  <BR>
-	Last Modified: 6/12/00 <BR>
-	</SMALL></I>
+<h2><a name="mm300" id="mm300">Why was metamoderation started?</a></h2>
+        <p>Metamoderation began as an experiment to see if the primary moderation system (M1) was actually working. Now, it helps us to remove bad moderators from the M1 eligibility pool and reward good moderators with more delicious mod points.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:loonxtall@hotmail.com">Loon</a><br>
+                Last Modified: 5/21/03
+        </small></em></p>
 
+<h2><a name="mm350" id="mm350">Who can M2?</a></h2>
+        <p>In order to be a metamoderator, your account has to be one of the oldest 92.5% of accounts on the system. This means that once you've created your account, you'll have to wait for several months, depending on the rate at which new accounts are being created.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
+                Last Modified: 6/10/03
+        </small></em></p>
 
-	
-<A NAME="mm200">
-<H2>What is metamoderation?</H2>
+<h2><a name="mm400" id="mm400">How can I metamoderate?</a></h2>
+        <p>If you're eligible, and you're logged in, you can meta-moderate. You will occasionally see a link at the top of the main page that says "Have you Meta Moderated Recently?" Click that link, and you should be taken to the M2 page.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
+                Last Modified: 1/07/08
+        </small></em></p>
 
-	<P>Metamoderation is a second layer of moderation. It seeks to 
-	address the issue of unfair moderators by letting "metamoderators"
-	(any logged-in Slashdotter) "rate the rating" of ten randomly selected
-	comment posts. The metamoderator decides if the moderator's rating was
-	fair, unfair, or neither. 
+<h2><a name="mm500" id="mm500">How often can I M2?</a></h2>
+        <p>Several times per day (we adjust this slightly sometimes, to keep M1 and M2 in balance).</p>
+        <p><em><small>
+                Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
+                Last Modified: 5/21/03
+        </small></em></p>
 
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
-	</SMALL></I>
+<h2><a name="mm600" id="mm600">How does M2 affect the moderator's karma?</a></h2>
+        <p>This is a fairly complicated thing. Depending on some randomness, the moderator's karma and a couple of other factors, a particular instance of meta-moderation may or may not change a moderator's karma score.</p>
+        <p>(We realize that's not much of an answer. If you're really, <em>really</em> interested, <a href="http://slashcode.com">read the code</a>.)</p>
+        <p><em><small>
+                Answered by: <a href="mailto:loonxtall@hotmail.com">Loon</a><br>
+                Last Modified: 6/12/00
+        </small></em></p>
 
-<A NAME="mm300">
-<H2>Why was metamoderation started?</H2>
+<h2><a name="mm700" id="mm700">How often do moderations appear for M2?</a></h2>
+        <p>Five times when the system is humming smoothly, which it usually is. If we get more M1 or more M2 than normal, which happens rarely, we might temporarily go to three or seven.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
+                Last Modified: 5/21/03
+        </small></em></p>
 
-	<P>Metamoderation began as an experiment to see if the primary
-	moderation system (M1) was actually working. Now, it helps us to 
-	remove bad moderators from the M1 eligibility pool and reward
-	good moderators with more delicious mod points.
-	
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 5/21/03 <BR>
-	</SMALL></I>
+<h2><a name="mm800" id="mm800">Why are there duplicate comments?</a></h2>
+        <p>Remember, M2 rates the moderations, not the comments. If the same comment was moderated more than once, it may appear several times to a meta-moderator in order to rate the different moderations that have been applied to it.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:loonxtall@hotmail.com">Loon</a><br>
+                Last Modified: 6/12/00
+        </small></em></p>
 
-<A NAME="mm350">
-<H2>Who can M2?</H2>
+<h2><a name="mm900" id="mm900">Why isn't there a link to M2 on my index.pl?</a></h2>
+        <p>For starters, you have to be logged in, and you have to have spent some time on the site (months) to really get what it's all about, first -- <a href="#mm350">see above</a>. Your karma must be Neutral or better. And if you unchecked the <a href="//slashdot.org/users.pl?op=edithome">Willing To Moderate</a> checkbox, we also assume you're not willing to M2.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
+                Last Modified: 5/21/03
+        </small></em></p>
 
-	<P>In order to be a metamoderator, your account has to be one of the 
-	oldest 92.5% of accounts on the system. This means that once you've 
-	created your account, you'll have to wait for several months,
-	depending on the rate at which new accounts are being created.
-	
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
-	Last Modified: 6/10/03 <BR>
-	</SMALL></I>
+<h2><a name="mm1000" id="mm1000">How should I M2 if the moderator called it "Insightful" and I think it should be "Informative"?</a></h2>
+        <p>This comes under the general category of "don't sweat the small stuff." "Interesting" and "Insightful" will have the same effect on the comment, and the difference between the two is basically just a judgment call. Rate the moderation "Fair," and move on.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:loonxtall@hotmail.com">Loon</a><br>
+                Last Modified: 6/12/00
+        </small></em></p>
 
-<A NAME="mm400">
-<H2>How can I metamoderate?</H2>
+<h2><a name="mm1100" id="mm1100">Can I post to stories I'm M2ing?</a></h2>
+        <p>Yes. <a href="com-mod.shtml#cm600">The posting restriction only applies to M1</a>.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 6/12/00
+        </small></em></p>
 
-	<P>If you're eligible, and you're logged in, you can meta-moderate. You
-	should see a link at the top of the main page that says "Have you Meta
-	Moderated Recently?" Click that link, and you should be taken to the M2
-	page.
+<h2><a name="mm1200" id="mm1200">Does M2 affect my karma?</a></h2>
+	<p>Maybe. If you have relatively little karma, there is a possibility of getting some karma for your efforts. However you won't be able to get enough karma to get <a href="com-mod.shtml#cm800">the +1 karma bonus</a>. That can only be earned by posting comments and getting moderated up. This is to encourage people to M2, but not let them abuse it.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 5/21/03
+        </small></em></p>
 
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
-	Last Modified: 5/21/03 <BR>
-	</SMALL></I>
-
-	
-<A NAME="mm500">
-<H2>How often can I M2?</H2>
-
-	<P>Several times per day (we adjust this slightly sometimes,
-	to keep M1 and M2 in balance).
-	
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
-	Last Modified: 5/21/03 <BR>
-	</SMALL></I>
-	
-<A NAME="mm600">
-<H2>How does M2 affect the moderator's karma?</H2>
-
-	<P>This is a fairly complicated thing. Depending on some randomness, 
-	the moderator's karma and a couple of other factors, a particular
-	instance of meta-moderation may or may not change a moderator's karma
-	score.
-	
-	<P>(We realize that's not much of an answer. If you're really, <I>
-	really</I> interested, <A HREF="http://slashcode.com">read the
-	code</A>.)
-
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
-	</SMALL></I>
-
-
-<A NAME="mm700">
-<H2>How often do moderations appear for M2?</H2>
-
-	<P>Five times when the system is humming smoothly, which it usually
-	is. If we get more M1 or more M2 than normal, which happens rarely,
-	we might temporarily go to three or seven.
-
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
-	Last Modified: 5/21/03 <BR>
-	</SMALL></I>
-
-<A NAME="mm800">
-<H2>Why are there duplicate comments?</H2>
-
-	<P>Remember, M2 rates the moderations, not the comments. If
-	the same comment was moderated more than once, it may appear
-	several times to a meta-moderator in order to rate the different
-	moderations that have been applied to it.
-	
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
-	</SMALL></I>
-
-
-<A NAME="mm900">
-<H2>Why isn't there a link to M2 on my index.pl?</H2>
-
-	<P>For starters, you have to be logged in, and you have to have
-	spent some time on the site (months) to really get what it's all
-	about, first --
-	<a href="#mm350">see above</a>.
-	Your karma must be Neutral or better. And if you unchecked the
-	<A HREF="//slashdot.org/users.pl?op=edithome">Willing To
-	Moderate</A>
-	checkbox, we also assume you're not willing to M2.
-
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
-	Last Modified: 5/21/03 <BR>
-	</SMALL></I>
-
-<A NAME="mm1000"> <H2>How should I M2 if the moderator called it "Insightful"
-and I think it should be "Informative"?</H2>
-	
-	<P>This comes under the general category of "don't sweat the small 
-	stuff." "Interesting" and "Insightful" will have the same effect
-	on the comment, and the difference between the two is basically just
-	a judgment call. Rate the moderation "Fair," and move on.
-	
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
-	</SMALL></I>
-
-
-<A NAME="mm1100">
-<H2>Can I post to stories I'm M2ing?</H2>	
-
-	<P>Yes.  <A HREF="com-mod.shtml#cm600">The posting restriction only
-	applies to M1</A>.
-
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
-	Last Modified: 6/12/00 <BR>
-	</SMALL></I>
-	
-<A NAME="mm1200"><H2>Does M2 affect my karma?</H2>
-
-	Maybe.  If you have relatively little karma, there is a possibility of 
-	getting some karma for your efforts.  However you won't be able to get 
-	enough karma to get <A HREF="com-mod.shtml#cm800">the +1 karma bonus</A>.
-	That can only be earned by posting comments and getting moderated up. 
-	This is to encourage people to M2, but not let them abuse it.
-
-	<BR><BR>
-	<I><SMALL>
-	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
-	Last Modified: 5/21/03 <BR>
-	</SMALL></I> 
-
-<BR><HR>
-<TABLE>
-	<TR width="100%">
-		<TD><A HREF="com-mod.shtml">Previous Section</A>
-		<TD><A HREF="accounts.shtml">Next section</A>
-		<TD><A HREF="index.shtml">Index</A>
-	</TR>
-</TABLE>
+        <hr>
+        <ul class="menu">
+                
+                        <li><a href="com-mod.shtml">Previous Section</a></li>
+                        <li><a href="accounts.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
 
 <!--#include virtual="/slashfoot.inc"-->

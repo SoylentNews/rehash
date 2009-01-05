@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2005 by Open Source Technology Group. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use warnings;
+use strict;
+
+use Getopt::Std;
+use Time::HiRes;
+
+use Slash;
+use Slash::Utility;
+use Slash::Utility::Data;
+use Slash::DB;
+
+use vars qw(
+	$VERSION
+	%opts
+	$count		$runs
+	$no_memcached
+	$slashdb	$reader
+	$tags		$tags_reader
+);
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
+init();
+run();
+
+exit 0;
+
+############################################################
+
+sub init {
+	my $opts_success = getopts('vu:c:r:M', \%opts);
+	if (!$opts_success) {
+		usage('Options used incorrectly');
+	}
+	version() if $opts{v};
+
+	my $virtuser = $opts{u} || 'slash';
+	createEnvironment($virtuser);
+	my $constants = getCurrentStatic();
+
+	$count = $opts{c} || 1000;
+	$runs = $opts{r} || 10;
+	$no_memcached = $opts{M} ? 1 : 0;
+
+	$slashdb = getCurrentDB();
+	$reader = getObject("Slash::DB", { db_type => 'reader' });
+	$tags = getObject("Slash::Tags");
+	$tags_reader = getObject("Slash::Tags", { db_type => 'reader' });
+
+	if ($no_memcached) {
+		$slashdb->{_mcd} = $reader->{_mcd} = $tags->{_mcd} = 0;
+	}
+}
+
+sub run {
+	my $stoids = $slashdb->sqlSelectColArrayref("stoid", "stories", q{time > DATE_SUB(NOW(), INTERVAL 1 YEAR) AND in_trash="no"}, "ORDER BY stoid DESC LIMIT 20");
+	my $uids = $slashdb->sqlSelectColArrayref('uid', 'users', 'seclev > 0', 'ORDER BY RAND() LIMIT 100');
+	my @words = ( ); srand(12345); for (1..1000) { push @words, getRandomWordFromDictFile("/etc/dictionaries-common/words", {min_chars => 3}) }
+	srand;
+	for (1..$runs) {
+		sleep 1;
+		my $start = Time::HiRes::time;
+		for (1..$count) {
+			my $stoid = $stoids->[rand(1)*rand(1)*rand(1)			* @$stoids];
+			my $uid = $uids->    [rand(1)*rand(1)				* @$uids];
+			my $word_index =      rand(1)*rand(1)*rand(1)*rand(1)*rand(1)	* @words;
+			$word_index += $stoid;
+			$word_index = $word_index % scalar(@words);
+			my $word = $words[$word_index];
+			$tags->createTag({ name => $word, table => "stories", id => $stoid, uid => $uid })
+		}
+		my $n_tags = $slashdb->sqlCount("tags");
+		my $added_elapsed = Time::HiRes::time - $start;
+		$start = Time::HiRes::time;
+		for (1..int($count/10)) {
+			my $stoid = $stoids->[rand(@$stoids)];
+			my $ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
+		}
+		my $read_elapsed = Time::HiRes::time - $start;
+		printf "%s added %5d tags, total %6d tags, elapsed %8.3f; read tags from %5d stories, elapsed %8.3f\n",
+			scalar(localtime),
+			$count,
+			$n_tags,
+			$added_elapsed,
+			int($count/10),
+			$read_elapsed;
+	}
+}
+

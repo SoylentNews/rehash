@@ -1,0 +1,127 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+searchrss
+__template__
+[%
+rss.image = 1;
+rss.items = [];
+rss.channel = {
+	title       => "$constants.sitename Search",
+	description => "$constants.sitename Search",
+	link        => "$gSkin.absolutedir$env.script_name",
+};
+
+IF op == 'stories';
+	FOREACH entry = results.records;
+		thisurl  = Slash.db.getSkin(entry.primaryskid).url || gSkin.absolutedir;
+		thislink = thisurl _ '/article.pl?sid=' _ entry.sid;
+		rss.items.push({
+			title		=> entry.title,
+			description	=> entry.introtext,
+			link		=> thislink,
+			time		=> entry.time,
+			creator		=> Slash.db.getUser(entry.uid, 'nickname'),
+		});
+	END;
+	rss.channel.title       = '$constants.sitename Story Search';
+	rss.channel.description = '$constants.sitename Story Search';
+	rss.rdfitemdesc         = constants.search_rdfitemdesc;
+	rss.rdfitemdesc_html    = constants.search_rdfitemdesc_html;
+
+ELSIF op == 'comments';
+	FOREACH entry = results.records;
+		thislink = gSkin.absolutedir _ '/comments.pl?sid=' _ entry.did _ '&cid=' _ entry.cid;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title		=> "$entry.subject ($thistime)",
+			link		=> thislink,
+			time		=> entry.date,
+			creator		=> Slash.db.getUser(entry.uid, 'nickname'),
+		});
+	END;
+	rss.channel.title       = '$constants.sitename Comment Search';
+	rss.channel.description = '$constants.sitename Comment Search';
+
+ELSIF op == 'users';
+	FOREACH entry = results.records;
+		thisnick = entry.nickname | fixparam;
+		thislink = gSkin.absolutedir _ '/~' _ thisnick;
+		rss.items.push({
+			title		=> entry.nickname,
+			link		=> thislink,
+			time		=> entry.journal_last_entry_date,
+		});
+	END;
+	rss.channel.title       = '$constants.sitename User Search';
+	rss.channel.description = '$constants.sitename User Search';
+
+ELSIF op == 'polls';
+	FOREACH entry = results.records;
+		thisurl  = Slash.db.getSkin(entry.primaryskid).url || gSkin.absolutedir;
+		thislink = thisurl _ '/pollBooth.pl?qid=' _ entry.qid;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title		=> entry.nickname,
+			link		=> thislink,
+			time		=> entry.date,
+		});
+	END;
+	rss.channel.title       = '$constants.sitename Poll Search';
+	rss.channel.description = '$constants.sitename Poll Search';
+
+ELSIF op == 'journals';
+	FOREACH entry = results.records;
+		thisnick = entry.nickname | fixparam;
+		thislink = gSkin.absolutedir _ '/~' _ thisnick _ '/journal/' _ entry.id;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title		=> "$entry.description ($thistime)",
+			link		=> thislink,
+			time		=> entry.date,
+			creator		=> entry.nickname,
+		});
+	END;
+	rss.channel.title       = '$constants.sitename Journal Search';
+	rss.channel.description = '$constants.sitename Journal Search';
+
+ELSIF op == 'submissions';
+	FOREACH entry = results.records;
+		thislink = gSkin.absolutedir _ '/submit.pl?subid=' _ entry.subid;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title		=> "$entry.subj ($thistime)",
+			description	=> entry.story,
+			link		=> thislink,
+			time		=> entry.time,
+		});
+	END;
+	rss.channel.title       = '$constants.sitename Submission Search';
+	rss.channel.description = '$constants.sitename Submission Search';
+	rss.rdfitemdesc         = constants.search_rdfitemdesc;
+	rss.rdfitemdesc_html    = constants.search_rdfitemdesc_html;
+
+ELSIF op == 'test';
+	FOREACH entry = results.records;
+		rss.items.push({
+			title		=> entry,
+			link		=> gSkin.absolutedir _ '/search.pl?op=test'
+		});
+	END;
+	rss.channel.title       = '$constants.sitename Test Search';
+	rss.channel.description = '$constants.sitename Test Search';
+
+END;
+%]
+__seclev__
+100
+__version__
+$Id$

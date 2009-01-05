@@ -2,7 +2,7 @@
 # $Id$
 #
 
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('stockquotes','',500,'static','','index',8,'Stock Quotes',1,'','',0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('stockquotes','',500,'static','','mainpage',8,'Stock Quotes',1,'','',0);
 
 INSERT INTO stocks (name, stockorder, exchange, symbol, url) VALUES ('currency',-1,'_DATA','USD','Preferred currency.');
 INSERT INTO stocks (name, stockorder, exchange, symbol, url) VALUES ('timeformat',-1,'_DATA','%R %Z','Date::Format template for last_update time format');

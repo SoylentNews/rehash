@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -12,6 +12,7 @@ use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:web :messages);
 use Slash::Display;
 use Slash::Utility;
+use Slash::XML;
 use Time::HiRes;
 use vars qw($VERSION);
 
@@ -38,6 +39,8 @@ my $start_time = Time::HiRes::time;
 		delete_message	=> [ $user_ok,		\&delete_message	],
 		deletemsgs	=> [ $user_ok,		\&delete_messages	],
 
+		list_rss	=> [ !$user->{is_anon},	\&list_messages_rss	],
+
 # 		send_message	=> [ $user_ok,		\&send_message		],
 # 		edit_message	=> [ !$user->{is_anon},	\&edit_message		],
 
@@ -52,9 +55,9 @@ my $start_time = Time::HiRes::time;
 	}
 
 	# dispatch of op
-printf STDERR scalar(localtime) . " messages.pl before $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+#printf STDERR scalar(localtime) . " messages.pl before $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 	$ops{$op}[FUNCTION]->($messages, $constants, $user, $form);
-printf STDERR scalar(localtime) . " messages.pl after  $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+#printf STDERR scalar(localtime) . " messages.pl after  $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 
 	# writeLog('SOME DATA');	# if appropriate
 }
@@ -62,70 +65,8 @@ printf STDERR scalar(localtime) . " messages.pl after  $$ op $op uid $user->{uid
 sub edit_message {
 	my($messages, $constants, $user, $form, $error_message) = @_;
 
-	my $template = <<EOT;
-[% IF preview %]
-	[% PROCESS titlebar width="100%" title="Preview Message" %]
-	[% preview %]
-	<P>
-[% END %]
-	[% PROCESS titlebar width="100%" title="Send Message" %]
-
-<!-- error message -->
-[% IF error_message %][% error_message %][% END %]
-<!-- end error message -->
-
-<FORM ACTION="[% constants.rootdir %]/messages.pl" METHOD="POST">
-	<INPUT TYPE="HIDDEN" NAME="op" VALUE="send_message">
-[% IF form.formkey %]
-	<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
-[% END %]
-
-	<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1">
-	<TR><TD ALIGN="RIGHT">User: </TD>
-		<TD><INPUT TYPE="text" NAME="to_user" VALUE="[% form.to_user | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
-	</TR>
-	<TR><TD ALIGN="RIGHT">Subject: </TD>
-		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% form.postersubj | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
-	</TR>
-	<TR>
-		<TD ALIGN="RIGHT" VALIGN="TOP">Comment</TD>
-		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</TEXTAREA>
-		<BR>(Use the Preview Button! Check those URLs!
-		Don't forget the http://!)
-	</TD></TR>
-
-	<TR><TD> </TD><TD>
-
-		<INPUT TYPE="SUBMIT" NAME="which" VALUE="Submit">
-		<INPUT TYPE="SUBMIT" NAME="which" VALUE="Preview">
-	</TD></TR><TR>
-		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
-			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
-		</FONT>
-	</TD></TR>
-</TABLE>
-
-</FORM>
-
-<B>Important Stuff:</B>
-	<LI>Please try to keep posts on topic.
-	<LI>Try to reply to other people's comments instead of starting new threads.
-	<LI>Read other people's messages before posting your own to avoid simply duplicating
-		what has already been said.
-	<LI>Use a clear subject that describes what your message is about.
-	<LI>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be
-		moderated. (You can read everything, even moderated posts, by adjusting your
-		threshold on the User Preferences Page)
-
-<P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
-	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.</FONT>
-
-
-EOT
-
 	header(getData('header')) or return;
-	# print edit screen
-	slashDisplay(\$template, {error_message => $error_message});
+	slashDisplay('edit', { error_message => $error_message });
 	footer();
 }
 
@@ -190,8 +131,26 @@ sub display_prefs {
 	my($messages, $constants, $user, $form, $note) = @_;
 	my $slashdb = getCurrentDB();
 
-	my $deliverymodes = $messages->getDescriptions('deliverymodes');
-	my $messagecodes  = $messages->getDescriptions('messagecodes');
+	my $deliverymodes   = $messages->getDescriptions('deliverymodes');
+	my $messagecodes    = $messages->getDescriptions('messagecodes');
+	my $bvdeliverymodes = $messages->getDescriptions('bvdeliverymodes');
+	my $bvmessagecodes  = $messages->getDescriptions('bvmessagecodes');
+	
+	foreach my $bvmessagecode (keys %$bvmessagecodes) {
+		$bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'} = [];
+		foreach my $bvdeliverymode (keys %$bvdeliverymodes) {
+			# skip if we have no valid delivery modes (i.e. off)
+			if (!$bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) {
+				delete $bvmessagecodes->{$bvmessagecode};
+				last;
+			}
+			# build our list of valid delivery modes
+			if (($bvdeliverymodes->{$bvdeliverymode}->{'bitvalue'} & $bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) ||
+			    ($bvdeliverymodes->{$bvdeliverymode}->{'bitvalue'} == 0)) {
+				push(@{$bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'}}, $bvdeliverymodes->{$bvdeliverymode}->{'code'});
+			}
+		}
+	}
 
 	my $uid = $user->{uid};
 	if ($user->{seclev} >= 1000 && $form->{uid}) {
@@ -203,24 +162,28 @@ sub display_prefs {
 
 	header(getData('header')) or return;
 	print createMenu('users', {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	'preferences',
+		style		=> 'tabbed',
+		justify 	=> 'right',
+		color		=> 'colored',
+		tab_selected	=> 'preferences',
 	});
-	slashDisplay('prefs_titlebar', {
-		nickname => $user->{nickname},
-		uid => $user->{uid},
-		tab_selected => 'messages'
-	});
-	print createMenu('messages');
 	slashDisplay('journuserboxes');
+	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
+		nickname	=> $user->{nickname},
+		uid		=> $user->{uid},
+		tab_selected	=> 'messages'
+	}, { Return => 1 });
+	my $messages_menu =  createMenu('messages');
 	slashDisplay('display_prefs', {
 		userm		=> $userm,
 		prefs		=> $prefs,
 		note		=> $note,
 		messagecodes	=> $messagecodes,
 		deliverymodes	=> $deliverymodes,
+		prefs_titlebar	=> $prefs_titlebar,
+		messages_menu	=> $messages_menu,
+		bvmessagecodes  => $bvmessagecodes,
+		bvdeliverymodes => $bvdeliverymodes
 	});
 	footer();
 }
@@ -238,9 +201,10 @@ sub save_prefs {
 	my $messagecodes = $messages->getDescriptions('messagecodes');
 	for my $code (keys %$messagecodes) {
 		my $coderef = $messages->getMessageCode($code);
-		if ($user->{seclev} < $coderef->{seclev} || !exists($form->{"deliverymodes_$code"})) {
-			$params{$code} = MSG_MODE_NONE;
-		} elsif ($coderef->{subscribe} && !isSubscriber($user)) {
+		if (!exists($form->{"deliverymodes_$code"})
+			||
+		    !$messages->checkMessageUser($code, $slashdb->getUser($uid))
+		) {
 			$params{$code} = MSG_MODE_NONE;
 		} else {
 			$params{$code} = fixint($form->{"deliverymodes_$code"});
@@ -265,29 +229,58 @@ sub list_messages {
 	header(getData('header')) or return;
 # Spank me, this won't be here for long (aka Pater's cleanup will remove it) -Brian
 	print createMenu('users', {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	'me',
+		style		=> 'tabbed',
+		justify		=> 'right',
+		color		=> 'colored',
+		tab_selected	=> 'me',
 	});
-	slashDisplay('user_titlebar', {
-		nickname => $user->{nickname},
-		uid => $user->{uid},
-		tab_selected => 'messages'
-	});
-	print createMenu('messages'); # [ Message Preferences | Inbox ]
 	slashDisplay('journuserboxes');
+	my $user_titlebar = slashDisplay('user_titlebar', {
+		nickname	=> $user->{nickname},
+		uid		=> $user->{uid},
+		tab_selected	=> 'messages'
+	}, { Return => 1} );
+	my $messages_menu = createMenu('messages'); # [ Message Preferences | Inbox ]
 	slashDisplay('list_messages', {
 		note		=> $note,
 		messagecodes	=> $messagecodes,
 		message_list	=> $message_list,
+		messages_menu 	=> $messages_menu,
+		user_titlebar	=> $user_titlebar,
 	});
 	footer();
 }
 
-sub list_message_rss {
+sub list_messages_rss {
 	my($messages, $constants, $user, $form) = @_;
-	# ...
+
+	my @items;
+	my $message_list = $messages->getWebByUID();
+	for my $message (@$message_list) {
+		my $title = "Message #$message->{id}";
+		$title .= ": $message->{subject}" if $message->{subject};
+
+		push @items, {
+			story	=> {
+				'time'	=> $message->{date}
+			},
+			title		=> $title,
+			description	=> $message->{message} || '',
+			'link'		=> root2abs() . "/messages.pl?op=display&id=$message->{id}",
+		};
+	}
+
+	xmlDisplay($form->{content_type} => {
+		channel => {
+			title		=> "$constants->{sitename} Messages",
+			description	=> "$constants->{sitename} Messages",
+			'link'		=> root2abs() . '/my/inbox/',
+		},
+		image	=> 1,
+		items	=> \@items,
+		rdfitemdesc		=> 1,
+		rdfitemdesc_html	=> 1,
+	});
 }
 
 sub display_message {

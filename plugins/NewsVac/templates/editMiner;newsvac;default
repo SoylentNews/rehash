@@ -13,7 +13,7 @@ editMiner
 __template__
 [% INCLUDE titlebar width="100%" title="Editing miner $miner.name" -%]
 
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="post">
 
 <table border="0">
         <tr valign=top>
@@ -45,8 +45,8 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Pre-stories (text)</b>&nbsp;&nbsp;</td>
                 <td>
-			<textarea TYPE="text" cols=80 rows=3 
-			NAME="pre_stories_text">[% miner.pre_stories_text 
+			<textarea type="text" cols=80 rows=3 
+			name="pre_stories_text">[% miner.pre_stories_text 
 			| strip_literal %]</textarea>
 		</td>
                 <td>
@@ -57,8 +57,8 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Post-stories (text)</b>&nbsp;&nbsp;</td>
                 <td>
-			<textarea TYPE="text" cols=80 rows=3 
-			NAME="post_stories_text">[% miner.post_stories_text 
+			<textarea type="text" cols=80 rows=3 
+			name="post_stories_text">[% miner.post_stories_text 
 			| strip_literal -%]</textarea>
 		</td>
                 <td>
@@ -70,12 +70,12 @@ __template__
                 <td width="40"><b>Pre-stories (regex)</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.pre_stories_regex -%]
-			<b><font color="red">Regex error: '[% errs.pre_stories_regex
-			-%]'</font></b><br>
+			<b>Regex error: '[% errs.pre_stories_regex
+			-%]'</b><br>
 			[% END -%]
 
-			<textarea TYPE="text" cols=80 rows=6 
-			NAME="pre_stories_regex">[% miner.pre_stories_regex
+			<textarea type="text" cols=80 rows=6 
+			name="pre_stories_regex">[% miner.pre_stories_regex
 			| strip_literal -%]</textarea>
 		</td>
                 <td>
@@ -86,12 +86,12 @@ __template__
                 <td width="40"><b>Post-stories (regex)</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.post_stories_regex -%]
-			<b><font color="red">Regex error: '[% 
-			errs.post_stories_regex -%]'</font></b><br>
+			<b>Regex error: '[% 
+			errs.post_stories_regex -%]'</b><br>
 			[% END -%]
 
-			<textarea TYPE="text" cols=80 rows=6 
-			NAME="post_stories_regex">[% miner.post_stories_regex 
+			<textarea type="text" cols=80 rows=6 
+			name="post_stories_regex">[% miner.post_stories_regex 
 			| strip_literal %]</textarea>
 		</td>
                 <td>
@@ -103,8 +103,8 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Pre-story (text)</b>&nbsp;&nbsp;</td>
                 <td>
-			<textarea TYPE="text" cols=80 rows=3 
-			NAME="pre_story_text">[% miner.pre_story_text 
+			<textarea type="text" cols=80 rows=3 
+			name="pre_story_text">[% miner.pre_story_text 
 			| strip_literal %]</textarea>
 		</td>
                 <td>
@@ -115,8 +115,8 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Post-story (text)</b>&nbsp;&nbsp;</td>
                 <td>
-			<textarea TYPE="text" cols=80 rows=3 
-			NAME="post_story_text">[% miner.post_story_text 
+			<textarea type="text" cols=80 rows=3 
+			name="post_story_text">[% miner.post_story_text 
 			| strip_literal -%]</textarea>
 		</td>
                 <td>
@@ -128,12 +128,12 @@ __template__
                 <td width="40"><b>Pre-story (regex)</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.pre_story_regex -%]
-			<b><font color="red">Regex error: '[% errs.pre_story_regex
-			-%]'</font></b><br>
+			<b>Regex error: '[% errs.pre_story_regex
+			-%]'</b><br>
 			[% END -%]
 
-			<textarea TYPE="text" cols=80 rows=6 
-			NAME="pre_story_regex">[% miner.pre_story_regex
+			<textarea type="text" cols=80 rows=6 
+			name="pre_story_regex">[% miner.pre_story_regex
 			| strip_literal -%]</textarea>
 		</td>
                 <td>
@@ -144,12 +144,12 @@ __template__
                 <td width="40"><b>Post-story (regex)</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.post_story_regex -%]
-			<b><font color="red">Regex error: '[% 
-			errs.post_story_regex -%]'</font></b><br>
+			<b>Regex error: '[% 
+			errs.post_story_regex -%]'</b><br>
 			[% END -%]
 
-			<textarea TYPE="text" cols=80 rows=6 
-			NAME="post_story_regex">[% miner.post_story_regex 
+			<textarea type="text" cols=80 rows=6 
+			name="post_story_regex">[% miner.post_story_regex 
 			| strip_literal %]</textarea>
 		</td>
                 <td>
@@ -167,12 +167,12 @@ __template__
                 <td width="40"><b>Extraction Regex</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.extract_regex -%]
-			<b><font color="red">Regex error: '[% 
-			errs.extract_regex -%]'</font></b><br>
+			<b>Regex error: '[% 
+			errs.extract_regex -%]'</b><br>
 			[% END -%]
 
-			<textarea TYPE="text" cols=80 rows=6 
-			NAME="extract_regex">[% miner.extract_regex 
+			<textarea type="text" cols=80 rows=6 
+			name="extract_regex">[% miner.extract_regex 
 			| strip_literal -%]</textarea>
 		</td>
                 <td>
@@ -183,8 +183,8 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Tweak code</b>&nbsp;&nbsp;</td>
                 <td>
-			<textarea TYPE="text" cols=80 rows=3 
-			NAME="tweak_code">[% miner.tweak_code | strip_literal %]</textarea>
+			<textarea type="text" cols=80 rows=3 
+			name="tweak_code">[% miner.tweak_code | strip_literal %]</textarea>
 		</td>
         </tr>
         <tr valign=top>
@@ -196,7 +196,7 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Comment</b>&nbsp;&nbsp;</td>
                 <td>
-			<textarea TYPE="text" cols=80 rows=3 NAME="comment">[% 
+			<textarea type="text" cols=80 rows=3 name="comment">[% 
 			miner.comment | strip_literal -%]</textarea>
 		</td>
         </tr>
@@ -214,7 +214,7 @@ __template__
                 <input type="text" size="20" name="newname" value=""></td>
         </tr>
 </table>
-</FORM>
+</form>
 
 [% 	IF miner.pre_stories_text && miner.pre_stories_regex -%]
 <p><b>NOTE: This miner has both its pre-stories text and pre-stories regex
@@ -240,7 +240,7 @@ the other to avoid confusion!</b>
 
 [%	FOREACH url = url_ar -%]
 	<br>[% url.0 %]<b>
-	<a href="[% constants.rootdir %]/newsvac.pl?op=editurl&url_id=[% url.0 
+	<a href="[% gSkin.rootdir %]/newsvac.pl?op=editurl&url_id=[% url.0 
 	-%]" target="_new">[% url.1 %]</a></b>
 [%	END -%]
 

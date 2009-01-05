@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -25,6 +25,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 
 	# possible value of "op" parameter in form
 	my %ops = (
@@ -45,7 +46,7 @@ sub main {
 	header(getData('header')) or return;	# from data;SCRIPTNAME;default
 
 	# dispatch of op
-	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form);
+	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
 
 	# writeLog('SOME DATA');	# if appropriate
 	footer();

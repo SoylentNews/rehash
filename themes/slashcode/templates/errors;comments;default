@@ -16,30 +16,51 @@ en_US
 __name__
 errors
 __template__
+
 [% IF ! no_error_comment %]
 <!-- Error type: [% value %] -->
 [% END %]
 
-[% USE Slash %]
 [% SWITCH value;
 
 # LOGIN ERROR.
 CASE "login error" %]
-<P><B>Login for "[% form.unickname %]" has failed</B>. Please try again. [% form.op %]<BR><P>
+<p><b>Login for "[% form.unickname %]" has failed</b>. Please try again. [% form.op %]<br><p>
 
-[% # NO ANONYMOUS POSTING.
-CASE "no anonymous posting" %]
-Sorry, anonymous posting has been turned off. Please
-<A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
+[% # OPEN PROXY.
+CASE "open proxy" %]
+Sorry, but according to our tests, you are trying to post [% IF !constants.comments_portscan==2 %]anonymously [% END %]
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin or ISP 
+to do so, because open proxies are used to spam web boards like this
+one. [% IF constants.comments_portscan!=2 %]If you really can't close it and still want to post, you'll have to
+<a href="[% gSkin.rootdir %]/users.pl">register and log in</a>.[% END %]
+If you have questions, mention that your proxy is at
+<tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
+[% # COMMENT TABLE NOT AVAILABLE FOR WRITING
+CASE "comment_db_down" %]
+Database maintenance is currently taking place.  Some items such
+as comment posting and moderation are currently unavailable.
 
 [% # ALREADY POSTED.
 CASE "already posted" %]
-You've already posted something in this discussion<BR>
+You've already posted something in this discussion.
+
+[% # NO SUCH PARENT COMMENT
+CASE "no such parent" %]
+Apparently the comment you're replying to does not actually exist.
+Odd. If you're quite sure it should exist, please file a bug report.
 
 [% # ANONYMOUS DISALLOWED.
 CASE "anonymous disallowed" %]
 Sorry, anonymous posting has been turned off.
-Please <A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
+Please <a href="[% gSkin.rootdir %]/users.pl">register and log in</a>.
+
+[% # POST ANON OPTION DISABLED.
+CASE "postanon_option_disabled" %]
+Anonymous posting is not available to your user.  If you've checked post-anonymously in your
+user settings you will have to go <a href="[% gSkin.rootdir %]/users.pl?op=editComm">turn that option off</a> until your posting
+history improves and that option becomes available again.
 
 [% # NO BODY.
 CASE "no body" %]
@@ -48,129 +69,128 @@ comment ... like the body or the subject!)
 
 [% # NO POINTS.
 CASE "no points" %]
-You don't have any moderator points.<BR>
+You don't have any moderator points.
 
 [% # NO POINTS.
 CASE "not enough points" %]
-You don't have enough moderator points.<BR>
+You don't have enough moderator points.
 
 [% # COMMENTS MAX POSTS.
 CASE "comments max posts" %]
-<BR><P><B>You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].
-</B></P>
+You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].
 
 [% # COMMENTS MAX POSTS.
 CASE "discussions max posts" %]
-<BR><P><B>You've reached your maximum number of discussions you can submit: [% max_posts %] discussions over [% timeframe %].
-</B></P>
+You've reached your maximum number of discussions you can submit: [% max_posts %] discussions over [% timeframe %].
 
 [% # INVALID FORMKEY
 CASE "invalid formkey" %]
-[% PROCESS titlebar width="100%" title="Invalid form key!" %]
-<BR><P><B>form key: [% formkey %] !</B></P>
+[% PROCESS titlebar width="100%" title="Invalid form key!" UNLESS no_titlebar %]
+Invalid form key: [% formkey %]!
  
 [% # RESPONSE LIMIT 
 CASE "comments response limit" %]
-[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
-hitting 'reply' and submitting a comment.</P>
-<P>It's been [% response %] since you hit 'reply'!</P>
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" UNLESS no_titlebar %]
+[% constants.sitename %] requires you to wait [% limit %] between hitting 'Reply'
+and submitting a comment. It's been [% response %] since you hit 'Reply.'
 
 [% # POST LIMIT
 CASE "comments post limit" %]
-[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
-each successful posting of a comment to allow everyone a fair chance
-at posting a comment.</P>
-<P>It's been [% interval %] since you last successfully posted a comment</P>
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" UNLESS no_titlebar %]
+[% constants.sitename %] requires you to wait between each successful posting of
+a comment to allow everyone a fair chance at posting a comment.  It's been
+[% interval %] since you last successfully posted a comment.
 
 [% # POST LIMIT
 CASE "discussions post limit" %]
-[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
-each successful creation of a discussion .</P>
-<P>It's been [% interval %] since you last successfully created a discussion</P>
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" UNLESS no_titlebar %]
+[% constants.sitename %] requires you to wait between each successful creation
+of a discussion.  It's been [% interval %] since you last successfully created a discussion.
+
 
 [% # USED FORM
 CASE "used form" %]
-[% PROCESS titlebar width="100%" title="Form Error!" %]
+[% PROCESS titlebar width="100%" title="Form Error!" UNLESS no_titlebar %]
 This form has been used already to submit a comment [% interval %] ago.
 You can not use a form and hit the back button to use it again.
 
 [% # READ ONLY
 CASE "readonly" %]
-<BR><B>You can't post to this page.</B><br>
+You can't post to this page.
 
 [% # TOO MANY POSTS
 CASE "comments post limit daily" %]
-[% PROCESS titlebar width="100%" title="Call It A Night, Cowboy!" %]
-<P>[% constants.sitename %] only allows
-[% IF user.is_anon; "anonymous users";
-ELSE; "a user with your karma"; END %]
-to post [% limit %] times per day (more or less, depending on
-moderation).
-[% IF user.is_anon; "A user from your IP has already shared his or her thoughts";
-ELSE; "You've already shared your thoughts"; END %]
+[% PROCESS titlebar width="100%" title="Call It A Night, Cowboy!" UNLESS no_titlebar %]
+[% constants.sitename %] only allows
+[% IF user.is_anon;
+	"anonymous users";
+ELSE;
+	"a user with your karma"; END %]
+to post [% limit %] times per day (more or less, depending on moderation).
+
+[% IF user.is_anon;
+	"A user from your IP has already shared his or her thoughts";
+ELSE;
+	"You've already shared your thoughts"; END %]
 with us that many times. Take a breather, and come back and see us in
 24 hours or so.
-<P>If you think this is unfair, please email
-[% IF constants.adminmail_post; constants.adminmail_post;
-ELSE; constants.adminmail; END %]
-with your
+
+If you think this is unfair, please email
+[% constants.adminmail_post || constants.adminmail %] with your
 [% IF user.is_anon %]
-MD5'd IPID, which is <tt>[% user.ipid %]</tt>[%
-ELSE %]
-username "<tt>[% user.nickname %]</tt>"[%
-END %]. Let us know how many comments <em>you</em> think you've
-posted in the last 24 hours.
+	MD5'd IPID, which is <tt>[% user.ipid %]</tt>[% ELSE %]
+	username "<tt>[% user.nickname | strip_literal %]</tt>"[% END %].
+
+Let us know how many comments <em>you</em> think you've posted in the last 24 hours.
+
 
 [% # TROLL MESSAGE.
 CASE "troll message" %]
-Due to excessive bad posting from this IP or Subnet, comment posting
-has temporarily been disabled. If it's you, consider this a chance to
-sit in the timeout corner. If it's someone else, this is a chance to
-hunt them down.
-If you think this is unfair, please email
-[% IF constants.adminmail_mod; constants.adminmail_mod;
-ELSE; constants.adminmail; END %]
-with your MD5'd IPID and SubnetID, which are
-"<tt>[% user.ipid %]</tt>" and "<tt>[% user.subnetid %]</tt>"[%
-IF !user.is_anon %]
-and (optionally, but preferably) your IP number
-"<tt>[% unencoded_ip %]</tt>" and your username "<tt>[% user.nickname %]</tt>"[%
-END %].
+Due to excessive bad posting from this IP or Subnet, [% IF logged_in_allowed
+%]anonymous [% END %]comment posting has temporarily been disabled. 
 
-[% # NESTING TOO DEEP
-CASE "nesting too deep" %]
-You can only post nested lists and blockquotes [% constants.nesting_maxdepth %]
-levels deep. Please fix your UL, OL, and BLOCKQUOTE tags.
+[% IF logged_in_allowed %]
+You can still login to post.  However, if bad posting continues from your IP
+or Subnet that privilege could be revoked as well.
+[% END %]
+
+If it's you, consider this a chance to sit in the timeout
+corner[% IF logged_in_allowed %] or login and improve your posting[% END %].
+If it's someone else, this is a chance to hunt them down.  If you think this is
+unfair, please email [% constants.adminmail_mod || constants.adminmail %]
+with your MD5'd IPID and SubnetID, which are "<tt>[% user.ipid %]</tt>" and
+"<tt>[% user.subnetid %]</tt>"[% IF !user.is_anon %]
+	and (optionally, but preferably) your IP number
+	"<tt>[% unencoded_ip %]</tt>" and your username
+	"<tt>[% user.nickname | strip_literal %]</tt>"[% END %].
+
+[% CASE "broken html" %]
+Your comment could not be processed.  Please try again.
 
 [% # LOW CHARS-PER-LINE
 CASE "low chars-per-line" %]
-Your comment has too few characters per line (currently [% ratio %]).<BR>
+Your comment has too few characters per line (currently [% ratio %]).
 
 [% # FILTER MESSAGE.
 CASE "filter message" %]
-[% PROCESS titlebar width="100%" title="Lameness filter encountered. Post aborted!" %]
+[% PROCESS titlebar width="100%" title="Lameness filter encountered. Post aborted!" UNLESS no_titlebar %]
 [% IF err_message %]
-<B>Reason: [% err_message %]</B><BR>
+Filter error: [% err_message %]
 [% END %]
 
 [% # COMPRESS FILTER.
 CASE "compress filter" %]
-[% PROCESS titlebar width="100%" title="Lameness filter encountered." %]
-Your comment violated the "[% ratio %]" compression filter. Try less
-whitespace and/or less repetition[%
-IF ratio == 'postersubj' %] in the subject line[% END %].
-<B>Comment aborted.</B>
+[% PROCESS titlebar width="100%" title="Lameness filter encountered." UNLESS no_titlebar %]
+Your comment violated the "[% ratio %]" compression filter. Try less whitespace
+and/or less repetition[% IF ratio == 'postersubj' %] in the subject line[% END %].
 
 [% # SUBMISSION ERROR.
 CASE "submission error" %]
-<P>There was an unknown error in the submission.<BR>
+There was an unknown error in the submission.
 
 [% # MAXCID EXCEEDED.
 CASE "maxcid exceeded" %]
-Don't you have anything better to do with your life?<BR>
+Don't you have anything better to do with your life?
 
 [% # DUPLICATION ERROR.
 CASE "duplication error" %]
@@ -189,27 +209,40 @@ CASE "formabuse_usedform" %]
 form [% formname %] [% formkey %] already submitted 
 
 [% CASE "seclevtoolow" %]
-[% PROCESS titlebar width="100%" title="No permissions" %]
+[% PROCESS titlebar width="100%" title="No permissions" UNLESS no_titlebar %]
 You do not have appropriate permissions to perform that action.
 
 [% CASE "nosubscription" %]
-[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" %]
-You can't see this discussion because it's scheduled in the future,
-where only subscribers can see it.<P>
-Either you are not a subscriber to [% constants.sitename %], or you
-have indicated you don't want comments pages ad-free, or you have
-set your daily limit of ad-free pages to lower than
-the default [% constants.subscribe_hits_btmd %].
-Any of these three possible issues can be resolved at
-<A HREF="[% constants.rootdir %]/subscribe.pl">your subscription page</A>.<P>
+[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" UNLESS no_titlebar %]
+You can't see this discussion because it's scheduled in the future, where only
+subscribers can see it.  Either you are not a subscriber to
+[% constants.sitename %], or you have indicated you don't want comments pages
+ad-free, or you have set your daily limit of ad-free pages to lower than the
+default [% constants.subscribe_hits_btmd %].  Any of these three possible
+issues can be resolved at <a href="[% gSkin.rootdir %]/subscribe.pl">your
+subscription page</a>.
 
 [% CASE "moderations to be lost" %]
-[% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" %]
+[% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" UNLESS no_titlebar %]
 If you continue to post this comment, all moderations done to this discussion will
 be undone!  Are you sure you want to post?
 
+[% # NO DISCUSSION ID SPECIFIED
+CASE "no sid" %]
+[% PROCESS titlebar width="100%" title="No Discussion Specified" UNLESS no_titlebar %]
+You did not specify a discussion ID. If you clicked on a link internal to
+[% constants.sitename %], this is a bug. If not, someone sent you to a silly
+invalid URL.
+
+[% CASE 'no_moderation' %]
+The moderation system is currently down.
+
+[% CASE 'archive_error' %]
+This discussion has been archived; no further changes can be made.
+
+
 [% CASE %]
-An unexpected error has occurred.<BR><B>[% value %]</B><BR>
+An unexpected error has occurred: [% value %]
 [% END %]
 
 __seclev__

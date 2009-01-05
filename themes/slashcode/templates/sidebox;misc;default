@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+Sidebox is used to generate slashboxes
+* name     = name used as base for id in title and content sections
+* title    = title for header of box
+* contents = contents of box
+* updater  = optional spot for <script></script> to auto-update slashbox
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+sidebox
+__seclev__
+10000
+__template__
+[% IF updater; updater; END %]
+<div class="block">
+	<div class="title" [% IF name %]id="[% name | strip_attribute %]-title"[% END %]>
+		<h4>
+			[% title %]
+		</h4>
+	</div>
+	<div class="content" [% IF name %]id="[% name | strip_attribute %]-content"[% END %]>
+		[% contents %]
+	</div>
+</div>
+__version__
+$Id$

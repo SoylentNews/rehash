@@ -17,22 +17,28 @@ __name__
 listTopics
 __template__
 [% PROCESS titlebar %]
-<TABLE ALIGN="CENTER">
-	<TR>
+<div class="generalbody">
+	<table width="100%" cellpadding="0" cellspacing="0">
+		<tr>
 [% x = 0 %]
-[% FOREACH topic = topics.sort("alttext"); x = x + 1; "</TR><TR>" IF (x mod 6) == 1 %]
-	<TD ALIGN="CENTER">
-		[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-			SRC="[% constants.imagedir %]/topics/[% image.image %]"
-			ALT="[% topic.alttext %]" WIDTH="[% image.width %]"
-			HEIGHT="[% image.height %]" BORDER="0">[% IF user.is_admin %]</A>
-			<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]" >
-			[% END %]<BR>[% topic.alttext %]</A>
-	</TD>
+		[% FOREACH topic = topics.sort("textname"); %]
+			[%
+			    match_term = "^" _ constants.topiclist_ignore_prefix IF constants.topiclist_ignore_prefix;
+			    NEXT IF match_term && topic.keyword.match(match_term);
+			    x = x + 1; "</tr><tr>" 
+		            IF (x mod 6) == 1 %]
+			<td align="center">
+				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
+				[% IF user.is_admin %]
+					</a> <a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">
+				[% END %]
+				<br>
+				[% topic.textname %]</a>
+			</td>
 [% END %]
-	</TR>
-</TABLE>
+		</tr>
+	</table>
+</div>
 
 __seclev__
 10000

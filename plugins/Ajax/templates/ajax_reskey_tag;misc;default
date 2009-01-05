@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+ajax_reskey_tag
+__template__
+[%
+	IF !reskey_name;
+		reskey_name = 'ajax_base';
+	END;
+
+	IF !reskey_label;
+		reskey_label = 'reskey';
+	END;
+
+	reskey = Slash.getObject('Slash::ResKey');
+	rkey = reskey.key(reskey_name, { nostate => 1 });
+
+	IF rkey.create;
+		IF reskey_tag_js;
+			IF reskey_tag_js == 2%]
+<script type="text/javascript">[% END %]
+	var [% reskey_label %] = '[% rkey.reskey %]';
+[%-			IF reskey_tag_js == 2 %]
+</script>[% END;
+		ELSE;
+			PROCESS reskey_tag;
+		END;
+	END;
+
+	# don't carry over to subsequent calls
+	reskey_tag_js = '';
+	reskey_name   = '';
+	reskey_label = ''; %]
+__seclev__
+10000
+__version__
+$Id$

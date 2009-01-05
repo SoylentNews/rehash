@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -41,6 +41,7 @@ usage('Invalid number of moderations')
 	if $opts{num_mods} !~ /^\d+$/ || $opts{num_mods} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 
@@ -52,20 +53,16 @@ my $stories = $slashdb->sqlSelectAllHashref(
 	'stories'
 );
 
-# CID->UID lookup hash.
-print "Loading comment authors...\n";
-
-# For chosing random discussions.
+# For choosing random discussions.
 print "Loading discussions...\n";
-my $discussions = [
-	map { $_ = $_->[0][0] }
+my $discussions =
 	$slashdb->sqlSelectAll(
-		'sid, count(*) as c',
+		'sid, COUNT(*) AS c',
 		'comments',
 		'',
-		'group by sid having c > 0'
-	)
-];
+		'GROUP BY sid'
+	);
+$discussions = [ map { $_ = $_->[0] } @$discussions ];
 
 my(%comments, %comment_data);
 
@@ -75,9 +72,11 @@ my(%comments, %comment_data);
 	my $story_id = $opts{I} || '';
 	my $discussion_id;
 	if ($story_id =~ /^\d+$/) {
-		$discussion_id = $story_id;
+		$discussion_id = $story_id || 0;
+	} elsif ($story_id) {
+		$discussion_id = $stories->{$story_id}{discussion} || 0;
 	} else {
-		$discussion_id = $stories->{$discussion_id}{discussion}
+		$discussion_id = 0;
 	}
 
 	my $t0 = new Benchmark;
@@ -86,7 +85,7 @@ my(%comments, %comment_data);
 		my $did = (exists $opts{r}) ?
 			$discussions->[rand $#{$discussions} + 1] : 
 			$discussion_id;
-                if (!$did) {
+		if (!$did) {
 			print "Cannot create comments, no discussions found.\n";
 			exit 0;
 		}
@@ -95,7 +94,7 @@ my(%comments, %comment_data);
 			$comments{$did} = [
 				map { $_ = $_->[0] }
 				@{$slashdb->sqlSelectAll(
-				 	'cid', 'comments', "sid=$did"
+					'cid', 'comments', "sid=$did"
 				)}
 			];
 
@@ -107,7 +106,7 @@ my(%comments, %comment_data);
 			);
 		}
 		
-	 	# Determine the moderator.
+		# Determine the moderator.
 		my $uid = ($opts{R}) ? 
 				getRandomUserID($comment_data{$did}) :
 				$opts{U};
@@ -140,23 +139,24 @@ my(%comments, %comment_data);
 			}
 
 			my $cid = $cidbatch[-1];
-			my $comment = {
-				sid => $did,
-				cid => $cid,
-				uid => $comment_data{$did}{$cid}{uid},
-			};
+			my $comment = $slashdb->getComment($cid);
 
 			my($modval, $reason, $active);
-			my $reasons = $slashdb->getReasons();
-			$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
-			$modval = $reasons->{$reason}{val};
+			my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+			my $reasons = $moddb->getReasons();
+			$modval = 0;
+			while ($modval == 0) {
+				# Need a moderation that actually bumps a score up or down.
+				$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
+				$modval = $reasons->{$reason}{val};
+			}
 			my $pointsneeded = $slashdb->getModPointsNeeded(
 				$comment_data{$did}{$cid}{points},
 				$comment_data{$did}{$cid}{points} + $reasons->{$reason}{val},
 				$reason);
 			my $user = { uid => $uid };
 			setRandomIPID($user);
-			$slashdb->createModeratorLog(
+			$moddb->createModeratorLog(
 				$comment,
 				$user,
 				$modval,
@@ -167,14 +167,14 @@ my(%comments, %comment_data);
 			die if $DBI::errstr;
 
 			printf <<EOT, $comment->{cid}, $comment->{uid}, $modval;
-M($count): Mod=$uid, CID=%s, CUid=%s, R=$reason, V=%s, A=$active
+M($count): Mod=$uid, discussion=$did, CID=%s, CUid=%s, R=$reason, V=%s, A=$active
 EOT
 
 		}
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_mods} moderations created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
@@ -212,50 +212,51 @@ sub getRandomUserID {
 	}
 	$max_uid ||= $slashdb->countUsers({ max => 1});
 	$min_uid ||= $slashdb->sqlSelect('MIN(uid)', 'users');
-	my $ret = $min_uid + int(rand($max_uid - $min_uid + 1));  
+	my $ret = $slashdb->sqlSelect("uid", "users",
+		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
 	for (@{$exception_list{$val->{sid}}}) {
 		$ret = getRandomUserID(@_), last if $_ == $ret;
 	}
 	--$depth;
-        return $ret;
+	return $ret;
 } }
 
 # CLOSURE!
 { 
 my(@subnets) = ();
 sub setRandomIPID {
-        my $user = shift;
-        my $seed = int(rand(65536));
+	my $user = shift;
+	my $seed = int(rand(65536));
 
-        if (!@subnets) {
-                # We now generate 10 random subnets which we will use for
-                # the rest of this execution.
-                srand(12345); 
-                while (@subnets < 10) {
-                        my $subnet = sprintf "%d.%d.%d",
-                                1+rand 254, 1+rand 254, 1+rand 254;
-                        push @subnets, $subnet;
-                }
-        }
+	if (!@subnets) {
+		# We now generate 10 random subnets which we will use for
+		# the rest of this execution.
+		srand(12345); 
+		while (@subnets < 10) {
+			my $subnet = sprintf "%d.%d.%d",
+				1+rand 254, 1+rand 254, 1+rand 254;
+			push @subnets, $subnet;
+		}
+	}
 
-        srand($user->{uid} + (time % 5));
-        my $uid10 = $user->{uid} % 10;
-        my $quad3;
-        my $fourth;
-        if ($uid10 < rand(10)) {
-                $quad3 = $subnets[$uid10];
-                if ($uid10 < rand(10)) {
-                        $fourth = $uid10 + 1 + (int($user->{uid}/50) % 254);
-                } else {
-                        $fourth = 1+int(rand(4))*int(rand(4))*int(rand(12));
-                }
-        } else {
-                $quad3 = $subnets[rand($#subnets + 1)];
-                $fourth = 1+int(rand(16))*int(rand(16));
-        }
-        $user->{subnetid} = md5_hex("$quad3.0");
-        $user->{ipid} = md5_hex("$quad3.$fourth");
-        srand($$ + time + $seed);
+	srand($user->{uid} + (time % 5));
+	my $uid10 = $user->{uid} % 10;
+	my $quad3;
+	my $fourth;
+	if ($uid10 < rand(10)) {
+		$quad3 = $subnets[$uid10];
+		if ($uid10 < rand(10)) {
+			$fourth = $uid10 + 1 + (int($user->{uid}/50) % 254);
+		} else {
+			$fourth = 1+int(rand(4))*int(rand(4))*int(rand(12));
+		}
+	} else {
+		$quad3 = $subnets[rand($#subnets + 1)];
+		$fourth = 1+int(rand(16))*int(rand(16));
+	}
+	$user->{subnetid} = md5_hex("$quad3.0");
+	$user->{ipid} = md5_hex("$quad3.$fourth");
+	srand($$ + time + $seed);
 }
 }
 
@@ -300,7 +301,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

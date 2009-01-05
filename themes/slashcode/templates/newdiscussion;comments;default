@@ -19,13 +19,13 @@ newdiscussion
 __template__
 [% IF id %]
 [% PROCESS titlebar width => "100%", title => "New $label.ucfirst Created" %]
-<P>Your [% label %], <A HREF="[% constants.rootdir %]/comments.pl?sid=[% id %]"><B>[% form.title %]</B></A>,
-has been created.  Go to <A HREF="[% constants.rootdir %]/comments.pl?sid=[% id %]">[% constants.absolutedir %]/comments.pl?sid=[% id %]</A> to begin posting.  Remember this URL!</P>
-<P><B>Please note, without a comment your [% label %] will not be listed in any indexes.</B></P>
-<P>
+<p>Your [% label %], <a href="[% gSkin.rootdir %]/comments.pl?sid=[% id %]"><b>[% form.title %]</b></a>,
+has been created.  Go to <a href="[% gSkin.rootdir %]/comments.pl?sid=[% id %]">[% gSkin.absolutedir %]/comments.pl?sid=[% id %]</a> to begin posting.  Remember this URL!</p>
+<p><b>Please note, without a comment your [% label %] will not be listed in any indexes.</b></p>
+<p>
 [% ELSE %]
 [% IF error; error; ELSE; PROCESS titlebar width => "100%", title => "Unknown error" %]
-<P>An unknown error has occurred.</P>
+<p>An unknown error has occurred.</p>
 [% END; END %]
 
 __seclev__

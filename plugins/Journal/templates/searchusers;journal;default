@@ -11,25 +11,15 @@ en_US
 __name__
 searchusers
 __template__
-[% begin = BLOCK %]
-<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl" ENCTYPE="application/x-www-form-urlencoded">
-<INPUT TYPE="hidden" NAME="op" VALUE="searchusers">
-[% END %]
-
-[% val1 = BLOCK %]
-<INPUT TYPE="text" NAME="nickname" SIZE="20"><INPUT TYPE="submit" VALUE="Find">
-<BR><I><FONT SIZE="-1">(Yes we all need a friend to hold on to)</FONT></I>
-[% END %]
-
-[% PROCESS formbox
-    title => "Find a User's Journal",
-    boxwidth => '100%',
-    begin => begin,
-    end   => '</FORM>',
-    pairs => [
-        { label => "Nickname", value => val1 },
-    ]
-%]
+<form method="post" action="[% gSkin.rootdir %]/journal.pl" enctype="application/x-www-form-urlencoded">
+	<fieldset>
+		<legend>Find a User&#39;s Journal</legend>
+		<input type="hidden" name="op" value="searchusers">
+		<input type="text" name="nickname" size="20">
+		<input type="submit" value="Find" class="button">
+		[% PROCESS formNote note = 'Yes we all need a friend to hold on to' %]
+	</fieldset>
+</form>
 
 __seclev__
 500

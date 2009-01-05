@@ -8,10 +8,11 @@ Create drop-down HTML list
 * default = default key(s) to be selected - this can be a single string,
 	or a hashref where the hash keys with true values are the keys
 	that are selected (this would really only be useful when
-	"multiple" is also true, I believe)
+	"multiple" is also true)
 * numeric = boolean to sort keys numerically
 * ordered = an already sorted arrayref of the keys in items
-* multiple = boolean, whether MULTIPLE is specified in the <SELECT>
+* multiple = boolean, whether MULTIPLE is specified in the <select>
+* onchange = unescaped value for onchange handler
 
 __title__
 
@@ -23,9 +24,9 @@ __name__
 select
 __template__
 [% IF default.ref == 'HASH'; default_hr = default; ELSE; default_hr = { $default = 1 }; END %]
-<SELECT NAME="[% label %]"[% IF multiple %] MULTIPLE[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
-[% FOREACH item = mylist %]	[% IF default_hr.$item; selected = ' SELECTED'; ELSE; selected = ''; END %]<OPTION VALUE="[% item %]"[% selected %]>[% items.$item %]</OPTION>
-[% END %]</SELECT>
+<select id="[% label %]" name="[% label %]"[% IF multiple %] MULTIPLE[% END %][% IF onchange %] onchange="[% onchange | strip_attribute %]"[% END %][% IF onclick %] onclick="[% onclick | strip_attribute %]"[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
+[% FOREACH item = mylist %]	[% IF default_hr.$item; selected = ' selected'; ELSE; selected = ''; END %]<option value="[% item %]"[% selected %]>[% items.$item | strip_literal %]</option>
+[% END %]</select>
 
 __seclev__
 10000

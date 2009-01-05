@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
+#	my($db_name, $db_page, $db_skin) = split $;, $key;
+#
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -30,7 +32,7 @@ my %opts;
 
 # Remember to doublecheck these match usage()!
 usage('Options used incorrectly')
-	unless getopts('cdilrsTtVvUg:D:O:P:S:p:f:u:B:h', \%opts);
+	unless getopts('cdilrsTtVvUDg:O:P:S:p:f:u:B:h', \%opts);
 usage() if ($opts{'h'} || !keys %opts);
 usage('Option -t requires -s or -U') if $opts{'t'} && !$opts{'s'} && !$opts{'U'};
 version() if $opts{'v'};
@@ -53,7 +55,7 @@ my $install = Slash::Install->new($opts{'u'});
 # datastruct of ALL templates, keyed by id
 my $templates = $slashdb->getTemplates();
 
-my($sectionpage_flag, $section_flag, $page_flag, $all_flag) = (0, 0, 0, 0);
+my($skinpage_flag, $skin_flag, $page_flag, $all_flag) = (0, 0, 0, 0);
 
 ##################################
 # compile to perl code
@@ -85,9 +87,9 @@ if ($opts{'O'}) {
 }
 
 if ($opts{'S'} and $opts{'P'}) {
-	$sectionpage_flag = 1;
+	$skinpage_flag = 1;
 } elsif ($opts{'S'}) {
-	$section_flag = 1;
+	$skin_flag = 1;
 } elsif ($opts{'P'}) {
 	$page_flag = 1;
 } else {
@@ -104,19 +106,29 @@ if ($opts{'s'}) {
 		if (!$template
 			|| !$template->{name}
 			|| !$template->{page}
-			|| !$template->{section}) {
+			|| !$template->{skin}) {
 			print STDERR "WARNING: could not readTemplateFile at $_\n";
 			next;
 		}
-		my $tsemi = join(";", @$template{'name','page','section'});
-#		print "Preparing $template->{name} using $filename: $_\n";
-		my $temp2 = $slashdb->getTemplateByName($template->{name},'', 1,
-			$template->{page}, $template->{section}, 1);
+		for my $key (keys %$template) {
+			if ($template->{$key} =~ /^([<>])\1{6} /m
+				|| $template->{$key} =~ /^=======$/m) {
+				print STDERR "WARNING: apparent CVS conflict notification string in $_, but updating anyway\n";
+				next TEMPLATE;
+			}
+		}
+		my $tsemi = join(";", @$template{'name','page','skin'});
+		my $temp2 = $slashdb->getTemplateByName($template->{name}, {
+			cache_flag      => 1,
+			page            => $template->{page},
+			skin            => $template->{skin},
+			ignore_errors   => 1
+		});
 
 		if (defined $temp2 && $temp2->{page} eq $template->{page}
-			&& $temp2->{section} eq $template->{section}
+			&& $temp2->{skin} eq $template->{skin}
 		) {
-			if ($template->{instructions} =~ /placeholder/) {
+			if ($template->{instructions} && $template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
 					if !$opts{t};
 				next;
@@ -137,14 +149,15 @@ if ($opts{'s'}) {
 				if (!scalar(@diffs)) {
 					print "id $temp2->{tpid}\t$filename unchanged \n";
 				} elsif ($slashdb->setTemplate($temp2->{tpid}, $template)) {
-					my $t2semi = join(";", @$temp2{'name','page','section'});
+					my $t2semi = join(";", @$temp2{'name','page','skin'});
 					print "id $temp2->{tpid}\t$filename updated ($changes)\n";
 					if ($tsemi ne $t2semi || $tsemi ne $filename) {
 						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 					}
-					if (length($filename) > 31) {
-						print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
-					}
+# Mac OS is flea-bitten Darwin carcasses, or something like that.
+#					if (length($filename) > 31) {
+#						print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+#					}
 				} else {
 					print "id $temp2->{tpid}\t$filename NOT updated: $_\n";
 					print "\tError: " . $slashdb->{_dbh}->DBI::err_str . "\n";
@@ -157,7 +170,7 @@ if ($opts{'s'}) {
 				if (my($tpid) = $slashdb->createTemplate($template)) {
 					my $temp2 = $slashdb->getTemplate($tpid,'',1);
 					if ($temp2) {
-						my $t2semi = join(";", @$temp2{'name','page','section'});
+						my $t2semi = join(";", @$temp2{'name','page','skin'});
 						print "id $tpid\t$filename CREATED\n";
 						if ($tsemi ne $t2semi || $tsemi ne $filename) {
 							print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
@@ -178,35 +191,68 @@ if ($opts{'s'}) {
 	# in /usr/local/slash.
 
 	my $templates = $install->getSiteTemplates;
-	my %stats = ( 'new' => 0, 'different' => 0);
+	my %stats = ( 'new' => 0, different => 0, extraneous => 0 );
 	my $n_changed = 0;
-	for (@$templates) {
+
+	# Find templates that exist in the DB but not on disk;  do this
+	# by turning the $templates (list of files on disk) into a hash
+	# in the format of getTemplateNameCache() (list of templates in
+	# the DB);  then they can be compared easily.
+	my %templates_in_db = ( );
+	my $template_name = $slashdb->getTemplateNameCache();
+	for my $name (sort keys %$template_name) {
+		for my $page (sort keys %{$template_name->{$name}}) {
+			for my $skin (sort keys %{$template_name->{$name}{$page}}) {
+				my $tsemi = "$name;$page;$skin";
+				$templates_in_db{$tsemi} = $template_name->{$name}{$page}{$skin};
+			}
+		}
+	}
+
+	# We'll build the list of templates on disk as we run through
+	# the list.  (We want to go by the data inside each file, not
+	# just the filename.)
+	my %templates_on_disk = ( );
+
+	TEMPLATE: for (@$templates) {
 	#stolen logic from above, should probably be made into subroutines
 		my($filename) = (File::Spec->splitpath($_))[2];
 		my $template = $install->readTemplateFile($_);
 		if (!$template
 			|| !$template->{name}
 			|| !$template->{page}
-			|| !$template->{section}) {
-			print STDERR "WARNING: could not readTemplateFile at $_\n";
-			next;
+			|| !$template->{skin}) {
+			print STDERR "ERROR: could not readTemplateFile at $_\n";
+			next TEMPLATE;
 		}
-		my $tsemi = join(";", @$template{'name','page','section'});
-#		print "Preparing $template->{name} using $filename: $_\n";
-		my $temp2 = $slashdb->getTemplateByName($template->{name},'', 1,
-			$template->{page}, $template->{section}, 1);
+		for my $key (keys %$template) {
+			if ($template->{$key} =~ /^([<>])\1{6} /m
+				|| $template->{$key} =~ /^=======$/m) {
+				print STDERR "ERROR: apparent CVS conflict notification string in $_, skipping, use -s if you really want this\n";
+				next TEMPLATE;
+			}
+		}
+		my $tsemi = join(";", @$template{'name','page','skin'});
+		$templates_on_disk{$tsemi} = 1;
+		my $temp2 = $slashdb->getTemplateByName($template->{name}, {
+			cache_flag      => 1,
+			page            => $template->{page},
+			skin            => $template->{skin},
+			ignore_errors   => 1
+		});
 
 		if (defined $temp2 && $temp2->{page} eq $template->{page}
-			&& $temp2->{section} eq $template->{section}
+			&& $temp2->{skin} eq $template->{skin}
 		) {
-			if (length($filename) > 31) {
-				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
-			}
+# Mac OS is flea-bitten Darwin carcasses, or something like that.
+#			if (length($filename) > 31) {
+#				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+#			}
 			if ($template->{instructions}
 				&& $template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
 					if !$opts{t} && $opts{V};
-				next;
+				next TEMPLATE;
 			}
 			delete $template->{instructions};
 			my @diffs;
@@ -225,7 +271,7 @@ if ($opts{'s'}) {
 				if (!scalar(@diffs)) {
 				# Do nothing here -Brian
 				} elsif ($slashdb->setTemplate($temp2->{tpid}, $template)) {
-					my $t2semi = join(";", @$temp2{'name','page','section'});
+					my $t2semi = join(";", @$temp2{'name','page','skin'});
 					print "id $temp2->{tpid}\t$filename updated ($changes)\n";
 					if ($tsemi ne $t2semi || $tsemi ne $filename) {
 						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
@@ -244,14 +290,15 @@ if ($opts{'s'}) {
 				if (my($tpid) = $slashdb->createTemplate($template)) {
 					my $temp2 = $slashdb->getTemplate($tpid,'',1);
 					if ($temp2) {
-						my $t2semi = join(";", @$temp2{'name','page','section'});
+						my $t2semi = join(";", @$temp2{'name','page','skin'});
 						print "id $tpid\t$filename CREATED\n";
 						if ($tsemi ne $t2semi || $tsemi ne $filename) {
 							print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 						}
-						if (length($filename) > 31) {
-							print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
-						}
+# Mac OS is flea-bitten Darwin carcasses, or something like that.
+#						if (length($filename) > 31) {
+#							print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+#						}
 					} else {
 						print "\tWARNING: unknown error, cannot tell whether '$tsemi' was successfully created from '$_', id may be $tpid\n";
 					}
@@ -263,17 +310,27 @@ if ($opts{'s'}) {
 			}
 		}
 	}
+
+	for my $name (sort keys %templates_in_db) {
+		next if $templates_on_disk{$name};
+		++$stats{extraneous};
+		next unless $opts{D};
+		print "id $templates_in_db{$name}\t$name is in the DB but not on disk\n";
+	}
+
 	print "Different templates: $stats{different}\n"
 		if $stats{different};
 	print "New templates: $stats{new}\n"
 		if $stats{'new'};
+	print "Extraneous templates: $stats{extraneous}\n"
+		if $stats{extraneous};
 	if (!$n_changed) {
 		print "$0 -U: no template changes necessary\n";
 	}
 
 } else {
 	my $templatelist = {};
-	my($sectionpage_match, $no_sectionpage, $template_counter) = (0, 0, 0);
+	my($skinpage_match, $no_skinpage, $template_counter) = (0, 0, 0);
 	my $filename;
 
 	if ($opts{'f'}) {
@@ -289,22 +346,22 @@ if ($opts{'s'}) {
 			next unless $key =~ /$opts{'m'}/;
 		}
 
-		if ( 	($sectionpage_flag &&
-			$opts{'S'} eq $templates->{$key}{section} &&
+		if ( 	($skinpage_flag &&
+			$opts{'S'} eq $templates->{$key}{skin} &&
 			$opts{'P'} eq $templates->{$key}{page})
 			||
-			($section_flag && $templates->{$key}{section} eq $opts{'S'})
+			($skin_flag && $templates->{$key}{skin} eq $opts{'S'})
 			||
 			($page_flag and $templates->{$key}{page} eq $opts{'P'}) )
 		{
-			$sectionpage_match = 1;
-			# print "section_flag $section_flag template section $templates->{$key}{section}  opts section $opts{'S'}\n";
+			$skinpage_match = 1;
+			# print "skin_flag $skin_flag template skin $templates->{$key}{skin}  opts skin $opts{'S'}\n";
 
 		} elsif ($all_flag) {
-			$no_sectionpage = 1;
+			$no_skinpage = 1;
 		}
 
-		if ($sectionpage_match || $no_sectionpage) {
+		if ($skinpage_match || $no_skinpage) {
 			if (@ARGV) {
 				for (@ARGV) {
 					if ($opts{'i'}) {
@@ -332,7 +389,7 @@ if ($opts{'s'}) {
 				$templatelist->{$key} = $templates->{$key};
 				$template_counter++;
 			}
-			($sectionpage_match, $no_sectionpage) = (0, 0);
+			($skinpage_match, $no_skinpage) = (0, 0);
 		}
 	}
 
@@ -361,7 +418,7 @@ sub dump_templates {
 		if (! $directory || -d $directory) {
 			$filename = $templatelist->{$template}{'name'} . ';' .
 				$templatelist->{$template}{'page'} . ';' .
-				$templatelist->{$template}{'section'};
+				$templatelist->{$template}{'skin'};
 
 			$filename = catfile($directory, $filename);
 		} else {
@@ -398,7 +455,7 @@ sub list_templates {
 		print <<EOT;
 --------------------------------------------------------
 Tpid: $templatelist->{$template}{tpid} Name: $templatelist->{$template}{name}
-Page: $templatelist->{$template}{page} Section: $templatelist->{$template}{section}
+Page: $templatelist->{$template}{page} Skin: $templatelist->{$template}{skin}
 
 EOT
 
@@ -418,7 +475,7 @@ sub delete_templates {
 	
 	print "You are about to delete the following templates:\n\n";
 	printf "%s\t%s;%s;%s\n",
-		@{$templatelist->{$_}}{qw(tpid name page section)}
+		@{$templatelist->{$_}}{qw(tpid name page skin)}
 	for keys %{$templatelist};
 	print "\nDelete these templates? [y/N]";
 	
@@ -442,7 +499,7 @@ sub compile_template {
 	});
 
 	my $page = $opts{P} || 'misc';
-	my $section = $opts{S} || 'default';
+	my $skin = $opts{S} || 'default';
 	my $user = getCurrentUser();
 
 	for (@ARGV) {
@@ -451,10 +508,10 @@ sub compile_template {
 		# get template text or pass template data
 		if ($opts{i}) {
 			my $data = $slashdb->getTemplate(
-				$_, ['name', 'page', 'section']
+				$_, ['name', 'page', 'skin']
 			);
-			@{$user}{qw(currentPage currentSection)} =
-				@{$data}{qw(page section)};
+			@{$user}{qw(currentPage currentSkin)} =
+				@{$data}{qw(page skin)};
 			$template = $data->{name};
 
 		} elsif ($opts{f}) {
@@ -474,16 +531,16 @@ sub compile_template {
 
 		} else {
 			if (/;/) {
-				($template, @{$user}{qw(currentPage currentSection)}) =
+				($template, @{$user}{qw(currentPage currentSkin)}) =
 					split /;/, $_;
 			} else {
 				$template = $_;
-				@{$user}{qw(currentPage currentSection)} =
-					($page, $section);
+				@{$user}{qw(currentPage currentSkin)} =
+					($page, $skin);
 			}
 		}
 
-		die "Requested template '$_' ($section|$page) is empty!\n"
+		die "Requested template '$_' ($skin|$page) is empty!\n"
 			if !$template;
 
 		my $out;
@@ -516,7 +573,7 @@ sub check_site_templates {
 		# and continue.
 		my($tdoc, $out);
 		eval {
-			$user->{currentSection} = $template->{section};
+			$user->{currentSkin} = $template->{skin};
 			$user->{currentPage} = $template->{page};
 			$tdoc = $template_provider->process(
 				\$template->{template}, {}, \$out
@@ -530,7 +587,7 @@ sub check_site_templates {
 		if ($opts{'V'}) {
 			printf "----- Template #%-4d (%31s): ", 
 				$_, 
-				join(';', @{$template}{qw(name page section)});
+				join(';', @{$template}{qw(name page skin)});
 
 			if ($failed) {
 				printf "Error!\n%s\n\n", $err;
@@ -540,7 +597,7 @@ sub check_site_templates {
 		} else {
 			printf "----- Template #%-4d (%31s): Error!\n%s\n\n", 
 				$_, 
-				join(';', @{$template}{qw(name page section)}),
+				join(';', @{$template}{qw(name page skin)}),
 				$err
 			if $failed;
 		}
@@ -564,6 +621,8 @@ Main options:
 	-U	Upgrade your templates to the latest for your theme and
 		plugins, scans base install dir (default /usr/local/slash)
 		and "does the right thing"
+	-D	Print out which templates are in the DB, but not on disk
+		(works only with -U)
 	-t	test saved files, this will return what files are new
 		or modified but does not change the templates
 
@@ -579,33 +638,33 @@ Main options:
 	-s	create/save/update template
 	-O	directory where templates are saved or created
 	-P	<page> template page
-	-S	<section> template section
+	-S	<skin> template skin
 	-r	deletes template(s) (don't shoot yourself in the foot!)
 
 	Notes on the -s "save" option:
 	*	With no args except filename, uses filename to derive
-		section, page and template name.
+		skin, page and template name.
 	*	-s <filenames> allows you to save specific templates from
 		the given files. This needs to be a template in a template
 		file format. Use -b to generate blank ones.
-	*	If you don't supply a template name, or leave the section
+	*	If you don't supply a template name, or leave the skin
 		and page unset, the name will try to be derived from the
 		filename.
-	*	If you supply a section and/or page and you're reading files
+	*	If you supply a skin and/or page and you're reading files
 		out of a directory, those templates will be saved with those
-		sections. If you want to read from a directory and not have
-		your section or page changed, don't provide these arguments.
+		skins. If you want to read from a directory and not have
+		your skin or page changed, don't provide these arguments.
 
-Section, page, and template args logic for listing and dumping functions:
-	-S	<section> all templates in a section
-	-S	<section> <template templateN> all templates in a section
+skin, page, and template args logic for listing and dumping functions:
+	-S	<skin> all templates in a skin
+	-S	<skin> <template templateN> all templates in a skin
 		having the name(s)
 	-P	<page> all templates for a page
 	-P	<page> <template templateN> all templates for a page having
 		the name(s)
-	-S	<section> -P <page> all templates for a page and section
-	-S	<section> -P <page> <template templateN> templates for a page
-		and section with the name(s) <template templateN> all
+	-S	<skin> -P <page> all templates for a page and skin
+	-S	<skin> -P <page> <template templateN> templates for a page
+		and skin with the name(s) <template templateN> all
 		templates having the name(s) all other template fields should
 		be modified via web interface
 
@@ -632,7 +691,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT
@@ -641,7 +700,7 @@ EOT
 
 sub boiler {
 	my @split	= split /;/, $opts{'B'};
-	my $section	= $opts{'S'}  || $split[2] || 'default';
+	my $skin	= $opts{'S'}  || $split[2] || 'default';
 	my $page	= $opts{'P'}  || $split[1] || 'misc';
 	my $name	= shift @ARGV || $split[0] || 'generic';
 
@@ -649,7 +708,7 @@ sub boiler {
 	open($fh, ">$opts{'B'}") or die "Could not open file for blank template";
 	print $fh <<EOT;
 __section__
-$section
+$skin
 __description__
 You should describe stuff here.
 __title__

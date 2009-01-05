@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Initial template for the displayed skinindex.
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+skinindexd
+__instructions__
+placeholder
+__template__
+	<tr>
+  		<td>
+			<b>Skins</b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table border=0 cellspacing=1 cellpadding=1 bgcolor="#FFFFFF" width="100%">
+				<tr>
+					<td>&nbsp;
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+__seclev__
+1000
+__version__
+$Id$

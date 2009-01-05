@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-* reasons = hashref from $slashdb->getReasons()
+* reasons = hashref from $moddb->getReasons()
 * moderation = hashref describing moderation
 
 __title__
@@ -13,18 +13,22 @@ en_US
 __name__
 mod_msg
 __template__
+[% 
+	cur_score = comment.points + comment.tweak;
+	cur_score = Slash.constrain_score(cur_score);
+%]
 [% IF msg.mode == 1 %]
 
-<P>
-<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
->[% comment.subject %]</A></B>, posted to
-<B><A HREF="[% constants.rootdir %][% discussion.realurl %]">[% discussion.title %]</A></B>, has been moderated
-<B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B>.
-</P>
+<p>
+<b><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
+>[% comment.subject %]</a></b>, posted to
+<b><a href="[% gSkin.rootdir %][% discussion.realurl %]">[% discussion.title %]</a></b>, has been moderated
+<b>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</b>.
+</p>
 
-<P>
-It is currently scored <B>[% reasons.${comment.reason}.name %] ([% comment.points %])</B>.
-</P>
+<p>
+It is currently scored <b>[% reasons.${comment.reason}.name %] ([% cur_score %])</b>.
+</p>
 
 [% ELSE %]
 
@@ -35,8 +39,8 @@ A user has moderated your comment "[% reasons.${moderation.reason}.name %]" ([% 
 Attached to:
     [% discussion.title | decode_entities %]
     [% absolutedir %][% discussion.realurl %]
-
-It is currently scored [% reasons.${comment.reason}.name %] ([% comment.points %]).
+    
+It is currently scored [% reasons.${comment.reason}.name %] ([% cur_score %]).
 [% END %]
 
 __seclev__

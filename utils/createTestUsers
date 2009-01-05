@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -37,6 +37,7 @@ usage('Invalid number of users')
 	if $opts{num_users} !~ /^\d+$/ || $opts{num_users} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 $werder = new Silly::Werder;
@@ -97,13 +98,13 @@ $werder = new Silly::Werder;
 		my $sig = "";
 		$sig = make_werds(5+int(rand(20)), 0.2) if int(rand(2));
 		$sig = strip_html(substr($sig, 0, 120));
-		$sig = balanceTags($sig);
+		$sig = balanceTags($sig, { deep_nesting => 1 });
 		$sig = addDomainTags($sig);
 		if (length($sig) <= 160) {
 			$hr->{sig} = $sig;
 		}
-		my $domaintags = int(rand(3));
-		$hr->{domaintags} = $domaintags if $domaintags != 2 or rand(1) < 0.3;
+		my $domaintags = rand(1) < 0.5 ? 2 : int(rand(3));
+		$hr->{domaintags} = $domaintags if $domaintags != 2;
 		$slashdb->setUser($uid, $hr);
 
 		if ($zoo && $opts{'a'}) {
@@ -118,6 +119,8 @@ $werder = new Silly::Werder;
 		print "New user: $username (User #$uid) ($email)";
 		if ($zoo && rand(1) < 0.3) {
 			my $uids = $slashdb->sqlSelectColArrayref('uid', 'users');
+			my $ac_uid = getCurrentAnonymousCoward('uid');
+			$uids = [ grep { $_ != $ac_uid } @$uids ];
 			my $zooness = rand(2)*rand(2);
 			my %friends = ( );
 			my %foes = ( );
@@ -161,7 +164,7 @@ sub make_werds {
 	$werder->set_syllables_num($min_syl, $min_syl + int(rand(4)+1));
 	my @links = qw(
 		http://slashdot.org/            http://www.brunching.com/
-		http://www.newsforge.com        http://osdn.com
+		http://www.newsforge.com        http://ostg.com
 		http://whitehouse.gov           http://www.whitehouse.gov/
 		http://us.imdb.com/             http://www.kernel.org
 		http://ic.ac.uk                 http://cr.yp.to/
@@ -199,20 +202,22 @@ sub make_werds {
                 } else {
                         $new_werds = $werder->sentence;
                 }
-		if ($link_prob and rand(1) < $link_prob) {
-			my @new_werds = split / /, $new_werds;
-			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
-			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
-			my $insert_start = int(rand(@new_werds-2));
-			my $insert_end = $insert_start + int(rand(4))+1;
-			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
-			$new_werds = join(" ",
-				@new_werds[0..$insert_start-1],
-				$a_href . $new_werds[$insert_start],
-				@new_werds[$insert_start+1..$insert_end-1],
-				$new_werds[$insert_end] . $close_a,
-				@new_werds[$insert_end+1..$#new_werds]
-			);
+		if ($link_prob && rand(1) < $link_prob) {
+                        my @new_werds = split / /, $new_werds;
+                        if ($#new_werds > 2) {
+                                my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+                                my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+                                my $insert_start = int(rand($#new_werds-2));
+                                my $insert_end = $insert_start + int(rand(4))+1;
+                                $insert_end = $#new_werds - 1 if $insert_end > $#new_werds - 1;
+                                $new_werds = join(" ",
+                                        @new_werds[0..$insert_start-1],
+                                        $a_href . $new_werds[$insert_start],
+                                        @new_werds[$insert_start+1..$insert_end-1],
+                                        $new_werds[$insert_end] . $close_a,
+                                        @new_werds[$insert_end+1..$#new_werds]
+                                );
+                        }
 		}
 		if ($cur_werds and !$tag and rand > 0.9) {
 			if (rand(1) < 0.95) { $tag = "i" }
@@ -315,7 +320,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

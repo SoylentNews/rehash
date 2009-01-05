@@ -18,48 +18,55 @@ en_US
 __name__
 listpolls
 __template__
-[% PROCESS titlebar %]
-
-<TABLE width="99%">
-	<TR>
-		<TD VALIGN="TOP" ALIGN="LEFT">
-			[% FOREACH question = questions %]
-				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.
+<div id="slashboxes">
+[% Slash.sidebox(
+	Slash.db.getBlock('poll', 'title'),
+	Slash.pollbooth('_currentqid', 1, 0),
+	'poll',
+        1);
+%]
+</div>
+<div id="polls">
+	[% PROCESS titlebar %]
+	<div class="generalbody">
+		[% skins = Slash.db.getSkins %]
+		<ul>
+		[% FOREACH question = questions %]
+			<li><b><a href="[% skins.${question.8}.rootdir || gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</a></b> on [% Slash.timeCalc(question.2, '%B %o, %Y') %]<br>
+			<small>[% question.3 %] votes and [% question.4 %] comments.
 				[% IF user.is_admin %]
 					[% SWITCH question.5 %]
-					[% CASE 'story' %]
-					(<I>story</I>)
-					[% CASE 'section' %]
-					(<I>section</I>)
-					[% CASE 'nodisplay' %]
-					(<I>nd</I>)
+						[% CASE 'story' %]
+						(<i>story</i>)
+						[% CASE 'section' %]
+						(<i>section</i>)
+						[% CASE 'nodisplay' %]
+						(<i>nd</i>)
+					[% END %]
+					[% IF question.6 %]
+						(<i>future</i>)
+					[% END %]
+					(<a href="[% gSkin.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</a>)
+					(<a href="[% gSkin.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</a>)
 				[% END %]
-				[% IF question.6 %](<I>future</I>)[% END %]
-					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</A>)
-					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</A>)
-
-				[% END %]
-				<BR>
-				[% IF type == "story" %]
-				&nbsp;&nbsp;&middot;<A HREF="[% constants.rootdir %]/article.pl?sid=[% question.9 | fixparam %]">[% question.8 %]</A>
-				<BR>
-				[% END %]
+				</small>
+			</li>
+			[% IF type == "story" %]
+				<li>
+					<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.9 | strip_paramattr %]">[% question.8 %]</a>
+				</li>
 			[% END %]
-		</TD>
-		<TD VALIGN="TOP" ALIGN="RIGHT">
-			[% Slash.fancybox(
-				constants.fancyboxwidth,
-				Slash.db.getBlock('poll', 'title'),
-				Slash.pollbooth('_currentqid', 1),
-				0,
-				1	
-			); %]
-		</TD>
-	</TR>
-</TABLE>
+		[% END %]
+		</ul>
 
-<P><FONT SIZE="4"><B><A HREF="[% constants.rootdir %]/search.pl?op=polls">More Polls</A></B></FONT>
-<BR><FONT SIZE="4"><B><A HREF="[% constants.rootdir %]/submit.pl">Submit Poll</A></B></FONT>
+		<p>
+			<b>
+				<a href="[% gSkin.rootdir %]/search.pl?op=polls">More Polls</a><br>
+				<a href="[% gSkin.rootdir %]/submit.pl">Submit Poll</a>
+			</b>
+		</p>
+	</div>
+</div>
 
 __seclev__
 10000

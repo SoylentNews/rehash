@@ -21,19 +21,19 @@ regResult
 __template__
 
 [% IF user.reg_id && user.reg_id == form.id %]
-<H2>Thanks for Reregistering!</H2>
+<h2>Thanks for Reregistering!</h2>
 We're sorry about the bother, but each user who wants to post with an identity
 must have a valid e-mail account registered with the system. Thanks for putting
 up with the hassle.
-<P>We hope you will continue to enjoy [% constants.sitename %]!
+<p>We hope you will continue to enjoy [% constants.sitename %]!
 
 [% ELSE %]
   [% IF form.id && user.reg_id != form.id %]
-<H2>ID Mismatch!</H2>
+<h2>ID Mismatch!</h2>
 Sorry, but the re-registration data which you have provided is invalid, please
-try again!<P>
+try again!<p>
   [% ELSE %]
-<H2>Welcome, [% user.nickname %]!</H2>
+<h2>Welcome, [% user.nickname | strip_literal %]!</h2>
   [% END %]
 
 In the entry field below, please enter the registration ID which should have
@@ -41,13 +41,13 @@ been emailed to the email address associated with your user account.
 
 <!-- Begin entry form for registration data. -->
 
-<FORM ACTION="[% constants.rootdir %]/users.pl" METHOD=POST>
-<INPUT TYPE=HIDDEN NAME="op" VALUE="validateuser">
+<form action="[% gSkin.rootdir %]/users.pl" method=POST>
+<input type=HIDDEN name="op" value="validateuser">
 Registration ID: &nbsp;
-<INPUT TYPE=TEXT NAME="id" VALUE="" SIZE=32>
-<P>
-<INPUT TYPE=SUBMIT>
-</FORM>
+<input type=TEXT name="id" value="" size=32>
+<p>
+<input type=SUBMIT>
+</form>
 
 <!-- End entry form -->
 

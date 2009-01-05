@@ -21,12 +21,17 @@ __name__
 dispFeature
 __template__
 [% IF magic;
-	IF user.is_anon;
-		title = "<A HREF=\"$constants.rootdir/$story.section/\">";
+	thisskin = Slash.db.getSkin(story.primaryskid);
+	IF thisskin.rootdir;
+		title = "<a href=\"$thisskin.rootdir/\">";
 	ELSE;
-		title = "<A HREF=\"$constants.rootdir/index.pl?section=$story.section\">";
+		IF user.is_anon;
+			title = "<a href=\"$gSkin.rootdir/$thisskin.name/\">";
+		ELSE;
+			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
+		END;
 	END;
-	title = "$title<FONT COLOR=\"$user.fg.3\">$section.title</FONT></A>: $story.title";
+	title = "$title$thisskin.title</a>: $story.title";
 ELSE;
 	title = story.title;
 END %]
@@ -35,56 +40,56 @@ END %]
 
 [% PROCESS titlebar %]
 
-	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
-		<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="#E6E6E6" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
-				<TD BGCOLOR="#E6E6E6">
-					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
-						[% story.atstorytime %]</FONT><BR>
-					[% IF constants.use_dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
-				</TD>
-			</TR></TABLE>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-	</TR>
-	<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	<TR>
-		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
-				[% IF user.noicons %][ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
-				[% ELSE %]<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"
-					><IMG SRC="[% topic.image %]" WIDTH="[% topic.width %]"
-						HEIGHT="[% topic.height %]" BORDER="0" ALIGN="RIGHT"
-						HSPACE="20" VSPACE="10" ALT="[% topic.alttext %]"></A>
+	<table border="0" cellpadding="0" cellspacing="0"><tr>
+		<td background="[% constants.imagedir %]/gl.gif"><img src="[% constants.imagedir %]/pix.gif" width="11" height="11" alt=""></td>
+		<td bgcolor="#E6E6E6" width="100%">
+			<table width="100%" border="0" cellpadding="5" cellspacing="0"><tr>
+				<td bgcolor="#E6E6E6">
+					posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
+						[% story.atstorytime %]<br>
+					[% IF constants.use_dept %]from the <b>[% story.dept %]</b> dept.[% END %]
+				</td>
+			</tr></table>
+		</td>
+		<td background="[% constants.imagedir %]/gr.gif"><img src="[% constants.imagedir %]/pix.gif" width="11" height="11" alt=""></td>
+	</tr>
+	<tr><td bgcolor="#006666" colspan="3"><img src="[% constants.imagedir %]/pix.gif" width="1" height="1" alt=""></td></tr>
+	<tr>
+		<td background="[% constants.imagedir %]/wl.gif"><img src="[% constants.imagedir %]/pix.gif" width="11" height="11" alt=""></td>
+		<td bgcolor="[% user.colors.bg_1 %]" width="100%">
+			<table width="100%" border="0" cellpadding="5" cellspacing="0"><tr><td bgcolor="[% user.colors.bg_1 %]">
+				[% IF user.noicons %][ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><b>[% topic.textname %]</b></a> ]
+				[% ELSE %]<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"
+					><img src="[% topic.image %]" width="[% topic.width %]"
+						height="[% topic.height %]" border="0" align="RIGHT"
+						hspace="20" vspace="10" alt="[% topic.textname %]"></a>
 				[% END %]
 				[% story.introtext %]
-			</TD></TR></TABLE>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	</TABLE>
+			</td></tr></table>
+		</td>
+		<td background="[% constants.imagedir %]/wr.gif"><img src="[% constants.imagedir %]/pix.gif" width="11" height="11" alt=""></td>
+	</tr>
+	<tr bgcolor="[% user.colors.bg_3 %]"><td colspan="3"><img src="[% constants.imagedir %]/pix.gif" width="1" height="1" alt=""></td></tr>
+	</table>
 
 
 [% IF full && story.bodytext %]
 
-<BR>
+<br>
 
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	<TR>
-		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+<table border="0" cellpadding="0" cellspacing="0"><tr>
+	<tr bgcolor="[% user.colors.bg_3 %]"><td colspan="3"><img src="[% constants.imagedir %]/pix.gif" width="1" height="1" alt=""></td></tr>
+	<tr>
+		<td background="[% constants.imagedir %]/wl.gif"><img src="[% constants.imagedir %]/pix.gif" width="11" height="11" alt=""></td>
+		<td bgcolor="[% user.colors.bg_1 %]" width="100%">
+			<table width="100%" border="0" cellpadding="5" cellspacing="0"><tr><td bgcolor="[% user.colors.bg_1 %]">
 				[% story.bodytext %]
-			</TD></TR></TABLE>
-		</TD>
-		<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-</TABLE>
+			</td></tr></table>
+		</td>
+		<td background="[% constants.imagedir %]/wr.gif"><img src="[% constants.imagedir %]/pix.gif" width="11" height="11" alt=""></td>
+	</tr>
+	<tr bgcolor="[% user.colors.bg_3 %]"><td colspan="3"><img src="[% constants.imagedir %]/pix.gif" width="1" height="1" alt=""></td></tr>
+</table>
 
 [% END %]
 

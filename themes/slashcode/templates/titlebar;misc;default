@@ -5,8 +5,12 @@ Prints the bar above each story, containing the actual title of the story.
 
 * width = width of widget
 * title = text for title
+* title_type = type of title / future overrides this to make type future
+* title_type_id = id for title type
 * future = boolean: whether story is in the future
-	(currently not used)
+* max_min_button = html for maximize / minimize buttons
+* id = id for generaltitle
+* h3id = id for h3
 
 __title__
 
@@ -17,20 +21,27 @@ en_US
 __name__
 titlebar
 __template__
-<TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	<TR VALIGN="TOP">
-		<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/cl.gif" WIDTH="7" HEIGHT="10" ALT=""><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%">
-		<TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-			<TR>
-				<TD BGCOLOR="[% user.bg.3 %]"><FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><B>[% title %]</B></FONT></TD>
-			</TR>
-		</TABLE>
-		</TD>
-		<TD BGCOLOR="[% user.bg.3 %]" ALIGN="right"><IMG SRC="[% constants.imagedir %]/cr.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
-	</TR>
-</TABLE>
+[% IF future; title_type = "future"; END; %]
 
+
+[% IF title_type %]
+<div class="[% title_type %]"[% IF title_type_id %] id="[% title_type_id %]"[% END %]>
+[% END %]
+[% IF options.nothumbs || options.nocolors %]<div class="[% IF options.nothumbs %]novote [% END %][% IF options.nocolors %]nocolors[% END %]">[% END %]
+<div class="generaltitle" [% IF id %]id="[% id %]"[% END %]>
+	<div class="title">
+		<h3 [% IF h3id %]id="[% h3id %]"[% END %]>
+			[% title %]
+			[% IF max_min_button %]
+			<span class="max_min_button">[% max_min_button %]</span>
+			[% END %]
+		</h3>
+	</div>
+</div>
+[% IF options.nothumbs || options.nocolors %]</div>[% END %]
+[% IF title_type %]
+</div>
+[% END %]
 [% future = 0 %]
 
 __seclev__

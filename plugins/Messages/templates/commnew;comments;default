@@ -11,25 +11,34 @@ en_US
 __name__
 commnew
 __template__
-[% USE Slash %]
+[%
+	IF discussion.section;
+		thisroot = Slash.db.getSection(discussion.section, 'rootdir') || gSkin.rootdir;
+		thisabs = Slash.url2abs(thisroot, absolutedir) || absolutedir;
+	ELSE;
+		thisroot = gSkin.rootdir;
+		thisabs = absolutedir;
+	END;
+%]
+
 [% IF msg.mode == 1 %]
 
-<P>
-[% reply.nickname %] has posted a new comment on [% constants.sitename %],
-<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
-%]">[% reply.subject %]</A></B>, attached to
-<B><A HREF="[% discussion.url %]">[% discussion.title %]</A></B>.
-</P>
+<p>
+[% reply.nickname | strip_literal %] has posted a new comment on [% constants.sitename %],
+<b><a href="[% thisroot %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
+%]">[% reply.subject %]</a></b>, attached to
+<b><a href="[% discussion.url %]">[% discussion.title %]</a></b>.
+</p>
 
 [% ELSE %]
 
 [% reply.nickname %] has posted a new comment on [% constants.sitename %].
     [% reply.subject | decode_entities %]
-    [% absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
+    [% thisabs %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
 
 Attached to:
     [% discussion.title | decode_entities %]
-    [% Slash.url2abs(discussion.url, absolutedir) %]
+    [% Slash.url2abs(discussion.url, thisabs) %]
 
 [% END %]
 __seclev__

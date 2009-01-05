@@ -13,13 +13,13 @@ en_US
 __name__
 mod_footer
 __template__
-</UL>
+</ul>
 [% IF metamod_elig %]
-<BR>For [% constants.sitename %]'s moderation system to properly function,
+<br>For [% constants.sitename %]'s moderation system to function properly,
 we need as many users as possible to
-<A HREF="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>.
+<a href="[% gSkin.rootdir %]/metamod.pl">Meta-Moderate</a>.
 You are currently eligible... why not hop over and help? Meta-moderating well
-(not blowing it off) can help you get your mod points back faster.<BR>
+(not blowing it off) can help you get your mod points back faster.<br>
 [% END %]
 
 __seclev__

@@ -26,6 +26,9 @@ __template__
 [% CASE 'mailPassword_email_title' %]
 	[% constants.sitename %] user password for [% nickname %]
 
+[% CASE 'reset_acct_email_title' %]
+	Verify your [% constants.sitename %] account for user [% nickname %]
+
 [% CASE 'userInfo_main_title' %]
 	Welcome back [% nick %] ([% uid %])
 
@@ -36,25 +39,28 @@ __template__
 	User Info for [% md5id_vis %] ([% id %])
 
 [% CASE 'editUser_title' %]
-	Editing [% user_edit.nickname %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
+        Configuring User Preferences For [% user_edit.nickname | strip_literal %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
 
 [% CASE 'changePasswd_title' %]
-	Change password for [% user_edit.nickname %] ( [% user_edit.uid %]) 
+	Change password for [% user_edit.nickname | strip_literal %] ( [% user_edit.uid %]) 
 
 [% CASE 'tildeEd_title' %]
-	Exclude Stories from the Homepage
+	Customize Stories on the Homepage
 
 [% CASE 'tildeEd_customize_title' %]
 	Customize Slashboxes
 
 [% CASE 'editHome_title' %]
-	Customize [% constants.sitename %]'s Display
+        Configuring [% constants.sitename %]'s Homepage
 
 [% CASE 'editComm_title' %]
-	Comment Options
+        Configuring Comments
 
 [% CASE 'editMiscOpts_title' %]
 	Miscellaneous Options
+
+[% CASE 'editTags_title' %]
+	Tag Options
 
 [% CASE 'displayForm_new_title' %]
 	I'm a New User!
@@ -63,10 +69,10 @@ __template__
 	Duplicate Account!
 
 [% CASE 'displayForm_title' %]
-	Log in
+	Log In
 
 [% CASE 'mailPasswdForm_title' %]
-	Mail password
+	Mail Password
 
 [% CASE 'newUserForm_title' %]
 	Create Account

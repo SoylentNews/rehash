@@ -1,0 +1,5 @@
+# $Id$
+name=FHActivity
+description=Keep track of activity of firehose entries
+mysql_dump=mysql_dump.sql
+requiresplugin=FireHose

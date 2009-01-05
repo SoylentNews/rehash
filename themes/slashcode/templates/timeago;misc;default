@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Gives a nice human readable approximation of how long ago
+or into the future a specified date occurred
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+timeago
+__seclev__
+10000
+__template__
+[% ago_results = Slash.db.getTimeAgo(ago_date); %]
+[% IF ago_results.is_now;
+	"Right now";
+   ELSIF ago_results.days;
+	ago_results.days;
+	ago_results.days > 1 ? " days" : " day";
+   ELSIF ago_results.hours;
+	ago_results.hours;
+	ago_results.hours > 1 ? " hours" : " hour";
+   ELSIF ago_results.minutes;
+	ago_results.minutes;
+	ago_results.minutes > 1 ? " minutes" : " minute";
+   ELSIF aog_results.seconds;
+	ago_results.seconds;
+	ago_results.seconds > 1 ? " seconds" : " second";
+   END;
+%]
+[% 
+	IF ago_results.is_past; " ago"; END;
+	IF ago_results.is_future; " from now"; END;
+%]
+__version__
+$Id$

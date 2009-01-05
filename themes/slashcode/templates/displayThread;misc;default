@@ -13,7 +13,12 @@ en_US
 __name__
 displayThread
 __template__
-	<LI><FONT SIZE="2"><B>[% link %] beneath your current threshold.</B></FONT>
+[% mystr = "<b>$link beneath your current threshold.</b>" %]
+[% IF discussion2 %]
+	<li id="hidestring_[% pid %]"><noscript>[% mystr %]</noscript></li>
+[% ELSE %]
+	<li>[% mystr %]</li>
+[% END %]
 
 __seclev__
 10000

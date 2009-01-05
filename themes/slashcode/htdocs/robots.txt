@@ -1,12 +1,21 @@
 # robots.txt for Slash site
 # $Id$
+# "Any empty [Disallow] value, indicates that all URLs can be retrieved.
+# At least one Disallow field needs to be present in a record."
+
 User-Agent: *
+Crawl-delay: 30
+Disallow: /messages.pl
 Disallow: /metamod.pl
+Disallow: /search.pl
 Disallow: /users.pl
 Disallow: /pubkey.pl
 Disallow: /zoo.pl
+Disallow: /~
+Disallow: messages.pl
 Disallow: metamod.pl
+Disallow: search.pl
 Disallow: users.pl
 Disallow: pubkey.pl
 Disallow: zoo.pl
-Allow: /
+Disallow: ~

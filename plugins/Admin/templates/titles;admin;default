@@ -15,10 +15,10 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'adminLogin-title' %]
-back<I>Slash</I> Login
+back<i>Slash</i> Log In
 
 [% CASE 'adminLogout-title' %]
-back<I>Slash</I> Buh Bye
+back<i>Slash</i> Buh Bye
 
 [% CASE 'listFilters-title' %]
 List of comment filters
@@ -41,9 +41,6 @@ Topic Lister
 [% CASE 'editTopic-title' %]
 Topics Editor [% IF tname %]([% tname %])[% END %]
 
-[% CASE 'rmStory-title' %]
-[% sid %]  will probably be deleted in 60 seconds.
-
 [% CASE 'updateFilter-new-title' %]
 New filter# [% filter_id %].
 
@@ -51,16 +48,19 @@ New filter# [% filter_id %].
 Filter# [% form.filter_id %] saved.
 
 [% CASE 'updateFilter-deleted-title' %]
-<B>Deleted filter# [% form.filter_id %]!</B>
+<b>Deleted filter# [% form.filter_id %]!</b>
 
 [% CASE 'updateStory-title' %]
 Article [% form.sid %] Saved
+[% IF warn_skid; the_skin = Slash.db.getSkin(warn_skid); "<b>Warning Story saved to $warn_skid - $the_skin.name</b>"; END; %]
 
 [% CASE 'saveStory-title' %]
-Inserted [% form.sid %] [% form.title %]
+Inserted [% form.sid %] [% form.title %] 
+|[% warn_skid %]|
+[% IF warn_skid; the_skin = Slash.db.getSkin(warn_skid); "<b>Warning Story saved to $warn_skid - $the_skin.name</b>"; END; %]
 
 [% CASE 'story_update_failed' %]
-Updating [% form.sid %] [% form.title %] failed. Best two out of three?
+Updating [% form.sid %] '[% form.title %]' failed. Best two out of three?
 
 [% CASE 'story_creation_failed' %]
 Failed creating "[% form.title %]". Please try again, the more you play, the more you pay
@@ -75,7 +75,8 @@ Site Color Editor
 new topic
 
 [% CASE 'rmStory-title' %]
-[% sid %] will probably be deleted in 60 seconds.
+[% sid %] will be deleted in a minute or two. If you didn't mean to delete it,
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">click here quick!</a>
 
 [% CASE 'listFilters-title' %]
 List of comment filters
@@ -87,7 +88,7 @@ New filter# [% filter_id %] .
 Filter# [% form.filter_id %] saved.
 
 [% CASE 'updateFilter-delete-title' %]
-<B>Deleted filter# [% form.filter_id %]!</B>
+<b>Deleted filter# [% form.filter_id %]!</b>
 
 [% CASE 'templateEdit-title' %]
 Site Template Editor

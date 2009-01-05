@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 # Based on Cliff's createTestComments, bugs are probably his fault :)
@@ -41,6 +41,7 @@ usage('Invalid number of stories')
 	if $opts{num_stories} !~ /^\d+$/ || $opts{num_stories} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $werder = new Silly::Werder;
 $werder->set_syllables_num(2, 6);
@@ -53,7 +54,7 @@ $constants = getCurrentStatic();
 	my $max_uid = $slashdb->countUsers({ max => 1});
 	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
 
-	my $rootdir = getCurrentStatic("rootdir");
+	my $rootdir = getCurrentSkin('rootdir');
  
 	my $t0 = new Benchmark;
 	my $count = $opts{num_stories};
@@ -63,11 +64,11 @@ $constants = getCurrentStatic();
 		$title =~ s/\W+$// if rand(1) < 0.9;
 		$title =~ s/<[^>]+>//g;
 		$title =~ s/\b(\w)/\U$1/g if rand(1) < 0.4;
-	        my $introtext = make_werds(20 + rand 40 + rand 50, 0.3);
+		my $introtext = make_werds(20 + rand 40 + rand 50, 0.3);
 		$introtext .= typical_remark() if rand(1) < 0.05;
 		$introtext = slashizeLinks($introtext);
 		$introtext = balanceTags($introtext);
-	        my $bodytext = '';
+		my $bodytext = '';
 		if (rand(1) < 0.1) {
 			$bodytext = make_werds(20 + (rand 30) * (rand 50), 0.1);
 			$bodytext =~ s{([.?!] )}{
@@ -80,46 +81,49 @@ $constants = getCurrentStatic();
 		$dept =~ s/<[^>]+>//g;
 		$dept =~ s/\s+/-/g;
 		$dept =~ s/\W+$// if rand(1) < 0.9;
-	        my $author = getRandomAuthorID();
-	        my $submitter = getRandomUserID($min_uid, $max_uid);
+		my $author = getRandomAuthorID();
+		my $submitter = getRandomUserID($min_uid, $max_uid);
 		my $time = UnixDate(ParseDateString(
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
 
-		# 40% of stories have 1 topic ID, 60% have 2
-		my $tid = getRandomTopicID();
-		my $stid = rand(1) < 0.4 ? 0 : getRandomTopicID();
+		my @topics = getRandomTopicList();
 
-		my $section = getRandomSection();
-		my $displaystatus = 0;
-		if ($section =~ /^(articles|index)$/) {
-			if (rand(1) < 0.1) {
-				$displaystatus = -1;
-			}
-		} elsif (rand(1) < 0.7) {
-			$displaystatus = 1;
-		} elsif (rand(1) < 0.1) {
-			$displaystatus = -1;
+		my $topics = { };
+		%$topics = map { $_ => 20 } @topics;
+
+		# If this story will display in multiple nexuses, we might
+		# want to manually remove it from one, just for fun.
+		my $nexuses = $slashdb->getNexuslistFromChosen($topics);
+		if (@$nexuses >= 2 && rand(1) < 0.2) {
+			my $n = $nexuses->[ rand(@$nexuses) ];
+			$topics->{$n} = 0;
 		}
 
+		if (rand(1) < 0.80) {
+			promote_to_mainpage($topics);
+		}
+
+		my $commentstatus = rand(1) < .95 ? "enabled" : "disabled";
+		
 		my $story = {
 			subid		=> '',
 			uid		=> $author,
-			tid		=> $tid,
-			stid		=> $stid,
 			dept		=> $dept,
 			'time'		=> $time,
 			title		=> $title,
-			section		=> $section,
-			displaystatus	=> $displaystatus,
+			topics_chosen	=> $topics,
 			submitter	=> $submitter,
 			introtext	=> $introtext,
 			bodytext	=> $bodytext,
 			rendered	=> undef,
+			commentstatus   => $commentstatus
 		};
 
+		# Small chance of ND'ing this story.
+		$story->{neverdisplay} = 1 if rand(1) < 0.1;
+
 		my $sid = $slashdb->createStory($story);
-		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($slashdb, $story));
 		my $reloDB = getObject("Slash::Relocate");
 		if ($reloDB && $sid) {
 			$slashdb->setStory($sid, { 
@@ -132,14 +136,36 @@ $constants = getCurrentStatic();
 		} else {
 			warn "($count) Story could not be created";
 		}
-        	$count--;
+		$count--;
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_stories} stories created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
+
+sub promote_to_mainpage {
+	my($topics_hr) = @_;
+	my @topics = keys %$topics_hr;
+	# Pick several topics to be mainpage-worthy.
+	my %m_tid = map { $_ => rand(1) < 0.5 ? (rand(1) < 0.3 ? 40 : 30) : 10 }
+		@topics;
+	# Need at least one.
+	my $rand_key = $topics[rand(@topics)];
+	$m_tid{$rand_key} = 30;
+	# elevate those to the mainpage
+	foreach (@topics) {
+		$topics_hr->{$_} = $m_tid{$_};
+	}
+	# Did it work?  If not, add mainpage manually.
+	my $mainpage_nexus = $constants->{mainpage_nexus_tid};
+	my $rendered_hr = $slashdb->renderTopics($topics_hr);
+	if (!$rendered_hr->{$mainpage_nexus}) {
+		$topics_hr->{$mainpage_nexus} = 30;
+	}
+}
+
 
 sub get_time {
 	my($direction) = @_;
@@ -155,7 +181,8 @@ sub get_time {
 		$min = $now;
 		$max = $now + 86400*$direction;
 	}
-	return int(rand($max-$min)) + $min;
+	my $t = int(rand($max-$min)) + $min;
+	return int($t/60) * 60;
 }
 
 sub getRandomAuthorID {
@@ -171,50 +198,64 @@ sub getRandomAuthorID {
 		$ok = 1;
 		$ok = 0 if $rand_uid == $constants->{anonymous_coward_uid};
 	}
-        return $rand_uid;
+	return $rand_uid;
 }
 
 sub getRandomTopicID {
 	# Yes, inefficient.  I do not care.
-	my $tids = $slashdb->sqlSelectAll("tid", "topics");
+	my $tids = $slashdb->sqlSelectAll("tid", "topics", "tid < 10000");
 	my @tids = map { $_->[0] } @$tids;
-        my $rand_tid = @tids[ rand @tids ];
-        return $rand_tid;
+	my $rand_tid = @tids[ rand @tids ];
+	return $rand_tid;
 }
 
-sub getRandomSection {
-	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectAll(
-		"section, hostname",
-		"sections",
-		"type='contained' AND index_handler='index.pl'");
-	my @sections = ( );
-	for my $sect (@$sections) {
-		push @sections, $sect->[0];
-		if (!$sect->[1]) {
-			# Sections with no hostname are probably 'articles'
-			# and are more likely to be chosen.
-			for (1..8) {
-				push @sections, $sect->[0];
-			}
-		}
+sub getRandomTopicList {
+	my @topics = ( );
+	my $r = rand(1);
+	my $min_num = 1;
+	   if ($r < 0.1) {	$min_num = 3	}
+	elsif ($r < 0.5) {	$min_num = 2	}
+	for (1..$min_num) { push @topics, getRandomTopicID(); }
+
+	# First try to get into a section with weight 10.
+	my $in_skin = topiclistInSkin(10, @topics);
+	my $n_tries = 0;
+	while (!$in_skin && $n_tries < 10) {
+		++$n_tries;
+		$topics[ rand(@topics) ] = getRandomTopicID();
+		$in_skin = topiclistInSkin(10, @topics);
 	}
-	return $sections[rand @sections];
+
+	# No?  OK, try adding more topics.
+	$n_tries = 0;
+	while (!$in_skin && $n_tries < 10) {
+		++$n_tries;
+		my $new_tid = getRandomTopicID();
+		if (@topics <= 5 && rand(1) < 0.5) {
+			push @topics, $new_tid;
+		} else {
+			$topics[ rand(@topics) ] = $new_tid;
+		}
+		$in_skin = topiclistInSkin(10, @topics);
+	}
+
+	my %topics = ( map { ($_, 1) } @topics );
+	@topics = keys %topics;
+	return @topics;
+}
+
+sub topiclistInSkin {
+	my($weight, @topics) = @_;
+	my $chosen_hr = { map { ( $_, $weight ) } @topics };
+	my $rendered_hr = $slashdb->renderTopics($chosen_hr);
+	my $skid = $slashdb->getPrimarySkidFromRendered($rendered_hr);
+	return $skid ? 1 : 0;
 }
 
 sub getRandomUserID {
 	my($min_uid, $max_uid) = @_;
-	my $n_tries = 100;
-	my $rand_uid = 1;
-	my $ok = 0;
-	while (!$ok) {
-		die "can't get random user! $max_uid" if --$n_tries<0;
-		$rand_uid = $min_uid + int(rand($max_uid-$min_uid+1));
-		$ok = 1;
-		$ok = 0 if $rand_uid == $constants->{anonymous_coward_uid};
-		$ok = 0 if !$slashdb->sqlSelect("COUNT(*)",
-			"users", "uid=$rand_uid");
-	}
+	my $rand_uid = $slashdb->sqlSelect("uid", "users",
+		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
 	return $rand_uid;
 }
 
@@ -231,7 +272,7 @@ sub make_werds {
 	}
 	my @links = qw(
 		http://slashdot.org/		http://www.brunching.com/
-		http://www.newsforge.com	http://osdn.com
+		http://www.newsforge.com	http://ostg.com
 		http://whitehouse.gov		http://www.whitehouse.gov/
 		http://us.imdb.com/		http://www.kernel.org
 		http://ic.ac.uk			http://cr.yp.to/
@@ -268,20 +309,22 @@ sub make_werds {
 		} else {
 			$new_werds = $werder->sentence;
 		}
-		if ($link_prob and rand(1) < $link_prob) {
+		if ($link_prob && rand(1) < $link_prob) {
 			my @new_werds = split / /, $new_werds;
-			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
-			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
-			my $insert_start = int(rand(@new_werds-2));
-			my $insert_end = $insert_start + int(rand(4))+1;
-			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
-			$new_werds = join(" ",
-				@new_werds[0..$insert_start-1],
-				$a_href . $new_werds[$insert_start],
-				@new_werds[$insert_start+1..$insert_end-1],
-				$new_werds[$insert_end] . $close_a,
-				@new_werds[$insert_end+1..$#new_werds]
-			);
+			if ($#new_werds > 2) {
+				my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+				my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+				my $insert_start = int(rand($#new_werds-2));
+				my $insert_end = $insert_start + int(rand(4))+1;
+				$insert_end = $#new_werds - 1 if $insert_end > $#new_werds - 1;
+				$new_werds = join(" ",
+					@new_werds[0..$insert_start-1],
+					$a_href . $new_werds[$insert_start],
+					@new_werds[$insert_start+1..$insert_end-1],
+					$new_werds[$insert_end] . $close_a,
+					@new_werds[$insert_end+1..$#new_werds]
+				);
+			}
 		}
 		if ($cur_werds and !$tag and rand > $cur_werds/$werds+0.3) {
 			if (rand(1) < 0.95) { $tag = "i" }
@@ -358,7 +401,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

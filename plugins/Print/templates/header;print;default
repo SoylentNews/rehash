@@ -13,12 +13,12 @@ header
 __seclev__
 10000
 __template__
-</HEAD>
-<BODY>
+</head>
+<body>
 
-<H1>[% constants.sitename %]<BR>
-<SMALL>[% constants.slogan %]</SMALL><BR>
-<SMALL>[% constants.absolutedir %]/</SMALL></H1>
+<h1>[% constants.sitename %]<br>
+<small>[% constants.slogan %]</small><br>
+<small>[% gSkin.absolutedir %]/</small></h1>
 
 [% IF constants.run_ads -%]
 <!-- add code. You can use your own ad system - we use one that 

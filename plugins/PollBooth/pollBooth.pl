@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -22,45 +22,23 @@ sub main {
 		list		=> \&listpolls,
 		default		=> \&default,
 		vote		=> \&vote,
-		vote_return	=> \&vote_return,
 		get		=> \&poll_booth,
 		preview         => \&editpoll,
 		detach		=> \&detachpoll,
 		linkstory	=> \&link_story_to_poll
 	);
 
-	my $op = $form->{op};
-	$op = 'default' unless $ops{$form->{op}};
-	if (defined $form->{'aid'} && $form->{'aid'} !~ /^\-?\d$/) {
-		undef $form->{'aid'};
+	my $op = $form->{op} && $ops{$form->{op}} ? $form->{op} : 'default';
+
+	if (defined $form->{aid}) {
+		# Only allow a short range of answer ids here.
+		# (aid is used as the uid of an author elsewhere
+		# in the code, so at least as far as filter_param
+		# allows, it can be any integer.)
+		$form->{aid} += 0;
+		undef $form->{aid} if $form->{aid} < -1 || $form->{aid} > 8;
 	}
-# This is unfinished and has been hacked. I don't trust it anymore and
-# the site that it was written for does not use it currently -Brian
-#
-#	# Paranoia is fine, but why can't this be done from the handler 
-#	# rather than hacking in special case code? - Cliff
-#	if ($op eq "vote_return") {
-#		$ops{$op}->($form, $slashdb);
-#		# Why not do this in a more generic manner you say? 
-#		# Because I am paranoid about this being abused. -Brian
-#		#
-#		# This doesn't answer my question. How is doing this here
-#		# any better or worse than doing it at the end of vote_return()
-#		# -Cliff
-#		my $SECT = $slashdb->getSection();
-#		if ($SECT) {
-#			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
-#
-#			# Remove the scheme and authority portions, if present.
-#			$form->{returnto} =~ s{^(?:.+?)?//.+?/}{/};
-#			
-#			# Form new absolute URL based on section URL and then
-#			# redirect the user.
-#			my $refer = URI->new_abs($form->{returnto}, $url);
-#			redirect($refer->as_string);
-#		}
-#	}
-#
+
 	header(getData('title'), $form->{section}, { tab_selected => 'poll'}) or return;
 
 	$ops{$op}->($form, $slashdb, $constants);
@@ -73,13 +51,13 @@ sub main {
 sub poll_booth {
 	my($form) = @_;
 
-	print pollbooth($form->{'qid'}, 0, 1);
+	print sidebox('Poll', pollbooth($form->{'qid'}, 0, 1), 'poll', 1);
 }
 
 #################################################################
 sub default {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 
 	if (!$form->{'qid'}) {
 		listpolls(@_);
@@ -88,10 +66,10 @@ sub default {
 	} else {
 		my $vote = vote(@_);
 		if ($constants->{poll_discussions}) {
-			my $discussion_id = $reader->getPollQuestion(
+			my $discussion_id = $pollbooth_reader->getPollQuestion(
 				$form->{'qid'}, 'discussion'
 			);
-			my $discussion = $reader->getDiscussion($discussion_id)
+			my $discussion = $pollbooth_reader->getDiscussion($discussion_id)
 				if $discussion_id;
 			if ($discussion) {
 				printComments($discussion);
@@ -103,13 +81,12 @@ sub default {
 #################################################################
 sub link_story_to_poll {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
 	my $sid  = $form->{'sid'};
 	my $user = getCurrentUser();
 	my $min = $form->{min} || 0;
-	my $questions = $reader->getPollQuestionList($min);
-	
+	my $questions = $pollbooth_reader->getPollQuestionList($min);
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -117,6 +94,7 @@ sub link_story_to_poll {
 	}
 	
 	# clear current story.qid
+	# XXX this needs to call setStory_delete_memcached
 	$slashdb->sqlUpdate("stories", { qid=>"" }, "sid = ".$slashdb->sqlQuote($form->{sid}));
 
 	slashDisplay('linkstory', {
@@ -132,12 +110,10 @@ sub link_story_to_poll {
 #################################################################
 sub detachpoll {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
 	my $sid  = $form->{'sid'};
 	my $user = getCurrentUser();
 	my $warning;
-	
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -147,6 +123,7 @@ sub detachpoll {
 		my $where = "sid=".$slashdb->sqlQuote($sid)." AND qid=".$slashdb->sqlQuote($qid);
 		my $count=$slashdb->sqlCount("stories",$where);
 		print STDERR "count $count\n";
+		# XXX this needs to call setStory_delete_memcached
 		if($count){
 			$slashdb->sqlUpdate("stories",{ qid => "" } , $where); 
 		} elsif ( $form->{force} ){
@@ -169,6 +146,7 @@ sub detachpoll {
 #################################################################
 sub editpoll {
 	my($form, $slashdb, $constants) = @_;
+	my $pollbooth_db = getObject('Slash::PollBooth');
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
 	my $user = getCurrentUser();
@@ -181,15 +159,17 @@ sub editpoll {
 
 	my($question, $answers, $pollbooth, $checked, $story_ref);
 	if ($form->{op} eq "preview") {
-		foreach (qw/question voters date section topic polltype/) {
+		foreach (qw/question voters date primaryskid topic polltype/) {
 			$question->{$_} = $form->{$_};
 		}
 		
-		$story_ref = $reader->sqlSelectHashref("sid,qid,time,section,tid,displaystatus",
+		$story_ref = $reader->sqlSelectHashref("stoid,sid,qid,time,primaryskid,tid",
 			"stories",
 			"sid=" . $reader->sqlQuote($form->{sid})
 		) if $form->{sid};
 
+		$story_ref->{displaystatus} = $reader->_displaystatus($story_ref->{stoid}) if $story_ref;
+		
 		$warning->{invalid_sid} = 1 if $form->{sid} and !$story_ref;
 
 		if ($form->{sid}) {
@@ -201,9 +181,9 @@ sub editpoll {
 		}
 
 		if ($story_ref) {
-			$question->{'date'}	= $story_ref->{'time'};
-			$question->{topic}	= $story_ref->{'tid'};
-			$question->{section}	= $story_ref->{section};
+			$question->{'date'}		= $story_ref->{'time'};
+			$question->{topic}		= $story_ref->{'tid'};
+			$question->{primaryskid}	= $story_ref->{primaryskid};
 			$question->{polltype}	= $story_ref->{displaystatus} >= 0 ? "story" : "nodisplay";
 		}
                 
@@ -228,7 +208,7 @@ sub editpoll {
 			poll_open 	=> ($form->{date} le $slashdb->getTime()),
 			question	=> $question->{question},
 			answers		=> $disp_answers,
-			sect		=> $question->{section},
+			primaryskid	=> $question->{primaryskid},
                         has_activated   => 1 
 		}, 1);
 		$pollbooth = fancybox(
@@ -239,37 +219,42 @@ sub editpoll {
                 );
             
         } elsif ($qid) {
-		$question = $slashdb->getPollQuestion($qid);
-		$question->{sid} = $slashdb->getSidForQID($qid)
+		$question = $pollbooth_db->getPollQuestion($qid);
+		$question->{sid} = $pollbooth_db->getSidForQid($qid)
 			unless $question->{autopoll} eq "yes";
 		
 		$question->{sid} = $form->{override_sid} if $form->{override_sid};
 		
 		if ($question->{sid}) {
-			$story_ref = $reader->sqlSelectHashref("sid,qid,time,section,tid,displaystatus",
+			$story_ref = $reader->sqlSelectHashref("sid,qid,time,primaryskid,tid",
 				"stories",
 				"sid=" . $reader->sqlQuote($question->{sid})
 			);
+			
+			# XXX I think this is broken, see editpoll template comment - Jamie
+			$story_ref->{displaystatus} = $reader->_displaystatus($story_ref->{stoid}) if $story_ref;
+
 			if ($story_ref) {
-				$question->{'date'}	= $story_ref->{'time'};
-				$question->{topic}	= $story_ref->{'tid'};
-				$question->{section}	= $story_ref->{section};
+				$question->{'date'}		= $story_ref->{'time'};
+				$question->{topic}		= $story_ref->{'tid'};
+				$question->{primaryskid}	= $story_ref->{primaryskid};
 				$question->{polltype}	= $story_ref->{displaystatus} >= 0 ? "story" : "nodisplay";
 			}
                 }
 		$question->{polltype} ||= "section";
 
 
-		$answers = $slashdb->getPollAnswers(
+		$answers = $pollbooth_db->getPollAnswers(
 			$qid, [qw( answer votes aid )]
 		);
                 $question->{polltype} ||= "section";
-		$checked = ($slashdb->getSection($question->{section}, 'qid', 1) == $qid) ? 1 : 0;
-		my $poll_open = $slashdb->isPollOpen($qid);
+		my $current_qid = $pollbooth_db->getCurrentQidForSkid($question->{primaryskid});
+		$checked = ($current_qid == $qid) ? 1 : 0;
+		my $poll_open = $pollbooth_db->isPollOpen($qid);
 
 		# Just use the DB method, it's too messed up to rebuild the logic
 		# here -Brian
-		my $poll = $slashdb->getPoll($qid);
+		my $poll = $pollbooth_db->getPoll($qid);
 		my $raw_pollbooth = slashDisplay('pollbooth', {
 			qid		=> $qid,
 			voters		=> $question->{voters},
@@ -278,7 +263,7 @@ sub editpoll {
 			answers		=> $poll->{answers},
 			voters		=> $poll->{pollq}{voters},
 			sect		=> $user->{section} || $question->{section},
-                        has_activated   => $slashdb->hasPollActivated($qid)
+                        has_activated   => $pollbooth_db->hasPollActivated($qid)
 		}, 1);
 		$pollbooth = fancybox(
 			$constants->{fancyboxwidth}, 
@@ -301,7 +286,7 @@ sub editpoll {
 	my $date = $question->{date};
         $date ||= $form->{date};
         $date ||= $slashdb->getTime();
-        my $topics = $reader->getDescriptions('topics_section');
+        my $topics = $reader->getDescriptions('non_nexus_topics');
 	slashDisplay('editpoll', {
 		title		=> getData('edit_poll_title', { qid=>$qid }),
 		qid		=> $qid,
@@ -321,6 +306,8 @@ sub savepoll {
 	my($form, $slashdb, $constants) = @_;
 
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
+	my $pollbooth_db = getObject('Slash::PollBooth');
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -367,7 +354,7 @@ sub savepoll {
 	#We are lazy, we just pass along $form as a $poll
 	# Correct section for sectional editor first -Brian
 	$form->{section} = $user->{section} if $user->{section};
-	my $qid = $slashdb->savePollQuestion($form);
+	my $qid = $pollbooth_db->savePollQuestion($form);
 
 	# we have a problem here.  if you attach the poll to an SID,
 	# and then unattach it, it will still be attached to that SID
@@ -381,9 +368,9 @@ sub savepoll {
 	# year.  But one thing at a time. -- jamie 2002/04/15
 
 	if ($constants->{poll_discussions}) {
-		my $poll = $slashdb->getPollQuestion($qid);
+		my $poll = $pollbooth_db->getPollQuestion($qid);
 		my $discussion;
-		if ($poll->{sid}) {
+		if ($form->{sid}) {
 			# if sid lookup fails, then $discussion is empty,
 			# and the poll's discussion is not set
 			$discussion = $slashdb->getStory(
@@ -391,10 +378,11 @@ sub savepoll {
 			);
 		} elsif (!$poll->{discussion}) {
 			$discussion = $slashdb->createDiscussion({
+				kind		=> 'pollbooth',
 				title		=> $form->{question},
 				topic		=> $form->{topic},
 				approved	=> 1, # Story discussions are always approved -Brian
-				url		=> "$constants->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
+				url		=> "$gSkin->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
 			});
 		} elsif ($poll->{discussion}) {
 			# Yep, this is lazy -Brian
@@ -405,46 +393,24 @@ sub savepoll {
 		}
 		# if it already has a discussion (so $discussion is not set),
 		# or discussion ID is unchanged, don't bother setting
-		$slashdb->setPollQuestion($qid, { discussion => $discussion })
+		$pollbooth_db->setPollQuestion($qid, { discussion => $discussion })
 			if $discussion && $discussion != $poll->{discussion};
 	}
 	$slashdb->setStory($form->{sid}, { qid => $qid }) if $form->{sid};
 }
 
 #################################################################
-sub vote_return {
-	my($form, $slashdb) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+sub vote {
+	my($form) = @_;
+	my $pollbooth_db = getObject('Slash::PollBooth');
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 
 	my $qid = $form->{'qid'};
 	my $aid = $form->{'aid'};
 	return unless $qid && $aid;
 
 	my(%all_aid) = map { ($_->[0], 1) }
-		@{$reader->getPollAnswers($qid, ['aid'])};
-	my $poll_open = $reader->isPollOpen($qid);
-	my $has_voted = $slashdb->hasVotedIn($qid);
-
-	if ($has_voted) {
-		# Specific reason why can't vote.
-	} elsif (!$poll_open) {
-		# Voting is closed on this poll.
-	} elsif (exists $all_aid{$aid}) {
-		$slashdb->createPollVoter($qid, $aid);
-	}
-}
-
-#################################################################
-sub vote {
-	my($form, $slashdb) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-
-	my $qid = $form->{'qid'};
-	my $aid = $form->{'aid'};
-	return unless $qid;
-
-	my(%all_aid) = map { ($_->[0], 1) }
-		@{$reader->getPollAnswers($qid, ['aid'])};
+		@{$pollbooth_reader->getPollAnswers($qid, ['aid'])};
 
 	if (! keys %all_aid) {
 		print getData('invalid');
@@ -453,31 +419,32 @@ sub vote {
 		return;
 	}
 
-	my $question = $reader->getPollQuestion($qid, ['voters', 'question']);
+	my $question = $pollbooth_reader->getPollQuestion($qid, ['voters', 'question']);
 	my $notes = getData('display');
-	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anonymous')) {
-		$notes = getData('anon');
-	} elsif ($aid > 0) {
-		my $poll_open = $reader->isPollOpen($qid);
-		my $has_voted = $slashdb->hasVotedIn($qid);
+	if ($aid > 0) {
+		my $poll_open = $pollbooth_reader->isPollOpen($qid);
 
-		if ($has_voted) {
-			# Specific reason why can't vote.
-			$notes = getData('uid_voted');
-		} elsif (!$poll_open) {
+		if (!$poll_open) {
 			# Voting is closed on this poll.
 			$notes = getData('poll_closed');
+		}
+
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('pollbooth', { qid => $qid });
+
+		if (!$rkey->createuse) {
+			$notes = $rkey->errstr;
 		} elsif (exists $all_aid{$aid}) {
 			$notes = getData('success', { aid => $aid });
-			$slashdb->createPollVoter($qid, $aid);
+			$pollbooth_db->createPollVoter($qid, $aid);
 			$question->{voters}++;
 		} else {
 			$notes = getData('reject', { aid => $aid });
 		}
 	}
 
-	my $answers  = $reader->getPollAnswers($qid, ['answer', 'votes']);
-	my $maxvotes = $reader->getPollVotesMax($qid);
+	my $answers  = $pollbooth_reader->getPollAnswers($qid, ['answer', 'votes']);
+	my $maxvotes = $pollbooth_reader->getPollVotesMax($qid);
 	my @pollitems;
 	for (@$answers) {
 		my($answer, $votes) = @$_;
@@ -504,19 +471,31 @@ sub vote {
 sub deletepolls {
 	my($form) = @_;
 	if (getCurrentUser('is_admin')) {
-		my $slashdb = getCurrentDB();
-		$slashdb->deletePoll($form->{'qid'});
+		my $pollbooth_db = getObject('Slash::PollBooth');
+		$pollbooth_db->deletePoll($form->{'qid'});
 	}
 	listpolls(@_);
 }
 
 #################################################################
 sub listpolls {
-	my($form) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my($form, $slashdb, $constants) = @_;
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 	my $min = $form->{min} || 0;
 	my $type = $form->{type};
-	my $questions = $reader->getPollQuestionList($min, { type => $type });
+	my $questions = $pollbooth_reader->getPollQuestionList($min, { type => $type });
+	my $gSkin = getCurrentSkin();
+	my $opts = ();
+	$opts->{type} = $form->{type};
+	$opts->{section} = $gSkin->{skid};
+
+	my $section = $gSkin->{name};
+	if ($gSkin->{skid} == $constants->{mainpage_skid}) {
+		$opts->{section} = '';
+	}
+
+	$questions = $pollbooth_reader->getPollQuestionList($min, $opts);
+
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?
@@ -527,7 +506,7 @@ sub listpolls {
 		admin		=> getCurrentUser('seclev') >= 100,
 		title		=> "$sitename Polls",
 		width		=> '99%',
-                curtime         => $reader->getTime(),
+                curtime         => $pollbooth_reader->getTime(),
 		type		=> $type 
 	});
 }

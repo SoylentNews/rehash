@@ -11,24 +11,24 @@ en_US
 __name__
 adminLoginForm
 __template__
-<CENTER>
-<FORM METHOD = "POST" ACTION = "[% env.script_name %]" ENCTYPE="application/x-www-form-urlencoded">
-<INPUT TYPE="hidden" NAME="op" VALUE="adminlogin">
-<TABLE>
-	<TR>
-		<TD ALIGN="RIGHT">Login</TD>
-		<TD><INPUT TYPE="TEXT" NAME="aaid"></TD>
-	</TR>
-	<TR>
-		<TD ALIGN="RIGHT">Password</TD>
-		<TD><INPUT TYPE="password" NAME="apasswd"></TD>
-	</TR>
-		<TD> </TD>
-		<TD><INPUT TYPE="SUBMIT" VALUE="Login"></TD>
-	</TR>
-</TABLE>
-</FORM>
-</CENTER>
+<center>
+<form method="post" action="[% env.script_name %]" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="op" value="adminlogin">
+<table>
+	<tr>
+		<td align="right">Log In</td>
+		<td><input type="text" name="aaid"></td>
+	</tr>
+	<tr>
+		<td align="right">Password</td>
+		<td><input type="password" name="apasswd"></td>
+	</tr>
+		<td> </td>
+		<td><input type="submit" value="Login"></td>
+	</tr>
+</table>
+</form>
+</center>
 
 __seclev__
 500

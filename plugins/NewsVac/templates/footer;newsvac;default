@@ -15,33 +15,32 @@ __template__
 <!-- begin newsvacadmin footer -->
 
 
-		</FONT>
-		</TD>
-	</TR>
-</TABLE>
+		
+		</td>
+	</tr>
+</table>
 
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="505050" WIDTH="100%">
-	<TR>
-		<TD>
-		<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%" ALIGN="CENTER">
-			<TR>
-				<TD BGCOLOR="CCCCCC" ALIGN="RIGHT">[% PROCESS motd %]</TD>
-				<TD BGCOLOR="CCCCCC" ALIGN="CENTER"><FONT SIZE="2">[% Slash.horizmenu() %]</FONT></TD>
-				<TD BGCOLOR="505050" VALIGN="CENTER">
-				<FONT SIZE="2" COLOR="#FFFFFF">
-				<FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
-				&nbsp;<INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="15">
-				<INPUT TYPE="SUBMIT" VALUE="Search">&nbsp;
-				</FORM></FONT>
-				</TD>   
-			</TR>
-		</TABLE>
-		</TD>
-	</TR>
-</TABLE>
+<table border="0" cellpadding="2" cellspacing="0" bgcolor="505050" width="100%">
+	<tr>
+		<td>
+		<table cellpadding="0" cellspacing="0" border="0" width="100%" align="CENTER">
+			<tr>
+				<td bgcolor="CCCCCC" align="RIGHT">[% PROCESS motd %]</td>
+				<td bgcolor="CCCCCC" align="CENTER">[% Slash.horizmenu() %]</td>
+				<td bgcolor="505050" valign="CENTER">
+				<form method="get" action="[% gSkin.rootdir %]/search.pl">
+				&nbsp;<input type="text" name="query" value="" size="15">
+				<input type="submit" value="Search">&nbsp;
+				</form>
+				</td>   
+			</tr>
+		</table>
+		</td>
+	</tr>
+</table>
 
-</BODY>
-</HTML>
+</body>
+</html>
 
 <!-- end newsvacadmin footer -->
 __seclev__

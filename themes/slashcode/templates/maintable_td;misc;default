@@ -21,18 +21,18 @@ maintable_td
 __template__
 
 <TD[%
-IF mt_align %] ALIGN="[% mt_align %]"[% END;
-IF mt_valign %] VALIGN="[% mt_valign %]"[% END;
-IF mt_rowspan %] ROWSPAN="[% mt_rowspan %]"[% END;
-IF mt_colspan %] COLSPAN="[% mt_colspan %]"[% END;
-IF mt_width %] WIDTH="[% mt_width %]"[% END;
-IF mt_height %] HEIGHT="[% mt_height %]"[% END %]>
+IF mt_align %] align="[% mt_align %]"[% END;
+IF mt_valign %] valign="[% mt_valign %]"[% END;
+IF mt_rowspan %] rowspan="[% mt_rowspan %]"[% END;
+IF mt_colspan %] colspan="[% mt_colspan %]"[% END;
+IF mt_width %] width="[% mt_width %]"[% END;
+IF mt_height %] height="[% mt_height %]"[% END %]>
 
 [%
 IF !mt_rowspan; mt_rowspan = 1; END;
 IF !mt_colspan; mt_colspan = 1; END;
 UNLESS user.state.mt.cols; user.state.mt.cols = []; END;
-curcol = user.state.mt.curcol;
+curcol = user.state.mt.curcol || 0;
 WHILE mt_colspan > 0;
 	curcol = curcol + 1;
 	WHILE curcol > user.state.mt.cols.max;

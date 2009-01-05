@@ -22,7 +22,7 @@ __template__
 	Cheesy Portal
 
 [% CASE 'mysite' %]
-	[% user.nickname %]'s Slashbox
+	[% user.nickname | strip_literal %]'s Slashbox
 
 [% END %]
 

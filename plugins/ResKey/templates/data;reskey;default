@@ -1,0 +1,136 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+reskey
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[%# General %]
+[% CASE 'create failed' %]
+	An unknown error has occurred.  Please try again.
+
+[% CASE 'touch-use failed' %]
+	This resource is no longer valid.  Please return to the beginning and try again.
+
+[% CASE 'reskey not found' %]
+	Requested resource is invalid.  Please return to the beginning and try again.
+
+
+[%# ACL %]
+[% CASE 'has no acl' %]
+	You do not have the permission required to access this resource.
+
+[% CASE 'has acl_no' %]
+	You have been banned from accessing this resource.
+
+
+[%# User %]
+[% CASE 'is_admin too low' %]
+	Only admins may access this resource.
+
+[% CASE 'is_subscriber too low' %]
+	Only subscribers may access this resource.
+
+[% CASE 'seclev too low' %]
+	You do not have the permission required to access this resource.
+
+[% CASE 'karma too low' %]
+	You do not have the permission required to access this resource.
+
+
+[%# AL2 %]
+[% CASE 'nosubmit al2 failure' %]
+	You are not allowed to use this resource.
+
+[% CASE 'nopost al2 failure' %]
+	You are not allowed to use this resource.
+
+[% CASE 'nopostanon al2 failure' %]
+	You are not allowed to use this resource.
+
+
+[%# Duration %]
+[% CASE 'too many uses' %]
+	You have used this resource too much; please try again later.
+
+[% CASE 'too many failures' %]
+	This resource is no longer valid.  Please return to the beginning and try again.
+
+[% CASE 'use duration too short' %]
+	You must wait a little bit before using this resource; please try again later.
+
+[% CASE 'creation-use duration too short' %]
+	You must wait a little bit before using this resource; please try again later.
+
+
+[%# HumanConf %]
+[% CASE 'invalidhcretry' %]
+	You failed to confirm you are a human. Please double-check the image and
+	make sure you typed in what it says.
+
+[% CASE 'invalidhc' %]
+	You failed to confirm you are a human. Please start from the beginning
+	and try again.  If you are a human, we apologize for the inconvenience.
+
+
+[%# ProxyScan %]
+[% CASE 'open proxy' %]
+	You may not post using an open proxy.
+
+
+[%# Post %]
+[% CASE 'post method required' %]
+	You must access this resource using the appropriate method.
+
+[%# Moderate %]
+[% CASE 'no_moderation' %]
+	The moderation system is currently down.
+
+[% CASE 'already moderated' %]
+	Comment already moderated.
+
+[% CASE 'no db' %]
+	Database maintenance is currently taking place.  Some items such
+	as comment posting and moderation are currently unavailable.
+
+[% CASE 'no comment' %]
+	Unknown error.
+
+[% CASE 'no points' %]
+	No points left.
+
+[% CASE 'user not allowed' %]
+	User not allowed to moderate.
+
+[% CASE 'not allowed' %]
+	User not allowed to moderate this comment.
+
+[% CASE 'ip not allowed' %]
+	User not allowed to moderate this comment.
+
+[% CASE 'comment not allowed' %]
+	This discussion has been archived; no further changes can be made.
+
+[% CASE 'user already modded comment' %]
+	User has already moderated this comment.
+
+[% CASE 'time not allowed' %]
+	Comment too old to be moderated.
+
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

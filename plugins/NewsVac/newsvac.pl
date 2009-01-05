@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -140,9 +140,8 @@ sub editMiner {
 	for my $field (@fields) {
 		# set checkbox if field has (?i) at beginning
 		warn $field;
-		$checkboxes{$field} = ' CHECKED' if
-			$miner->{$field} &&
-			$miner->{$field} !~ s{^\(\?i\)}{};
+		$checkboxes{$field} = $constants->{markup_checked_attribute}
+			if $miner->{$field} && $miner->{$field} !~ s{^\(\?i\)}{};
 	}
 
 	for my $field (grep /_regex$/, @fields) {

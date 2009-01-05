@@ -8,6 +8,7 @@ use strict;
 
 use Slash;
 use Slash::Constants qw(:messages);
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 

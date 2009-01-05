@@ -13,14 +13,20 @@ meta
 __template__
 [% name = "del_$article.id" %]
 [% PROCESS titlebar width => "100%" title = "Deleting Article" %]
-<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST">
-<INPUT TYPE="hidden" NAME="op" VALUE="remove">
-<INPUT TYPE="hidden" NAME="[% name %]" VALUE="1">
-<P>Alright, before we do this thing, I just want to really make
-sure that you want to delete your journal entry
-<B>[% article.description | strip_literal %]</B>.</P>
-<P><INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
-</FORM>
+<div class="generalbody">
+	<form action="[% gSkin.rootdir %]/journal.pl" method="post">
+		<fieldset>
+			<legend>Delete entry</legend>
+			[% PROCESS reskey_tag %]
+			<input type="hidden" name="op" value="remove">
+			<input type="hidden" name="[% name %]" value="1">
+			<div class="message">
+				Alright, before we do this thing, I just want to really make sure that you want to delete your journal entry <b>[% article.description | strip_literal %]</b>.
+			</div>
+			<input type="submit" value="Yup, I'm positive">
+		</fieldset>
+	</form>
+</div>
 
 __seclev__
 500

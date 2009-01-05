@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+Responses that ircslash.pl makes in-channel.
+
+* value = the lowercased text that was said to ircslash.pl
+
+__title__
+
+__page__
+ircslash
+__lang__
+en_US
+__name__
+responses
+__template__
+
+[% SWITCH value %]
+
+[% CASE 'ping' %]
+	pong
+
+[% CASE 'who' %]
+	I'm the ircslash.pl task for [% constants.sitename %].
+
+[% CASE DEFAULT %]
+	What?
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

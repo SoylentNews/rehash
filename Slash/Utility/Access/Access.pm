@@ -461,7 +461,11 @@ sub filterOk {
 		if ($minimum_match) {
 			$number_match = "{$minimum_match,}";
 		} elsif ($ratio > 0) {
-			$number_match = "{" . int(length($text_to_test)*$ratio + 1) . ",}";
+			my $num = int(length($text_to_test)*$ratio + 1);
+			my $max = 2**15-1;
+			# temporary fix 2008-05-23
+			$num = $max if $num >= $max;
+			$number_match = "{$num,}";
 		} else {
 			$number_match = "";
 		}
@@ -592,6 +596,13 @@ sub compressOk {
 		# modified slice of the text.
 		$length = length($content_slice);
 		next if $length < 10;
+
+		# compress doesn't like wide characters.  this could in theory
+		# make it easier to run into a filter, with too many '_'
+		# characters being in a comment, but no one should be using
+		# that many wide characters in the standard English
+		# alphabet.  we can adjust filters if necessary. -- pudge
+		$content_slice =~ s/(.)/ord($1) > 2**8-1 ? '_' : $1/ge;
 
 		for (sort { $a <=> $b } keys %$limits) {
 			next unless $length >= $limits->{$_}->[0]

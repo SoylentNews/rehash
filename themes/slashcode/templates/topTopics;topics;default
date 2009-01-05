@@ -5,7 +5,7 @@ Display the top topics
 
 * title = passed to titlebar
 * width = passed to titlebar
-* topics = arrayref of hashrefs of topics (tid, alttext, image, width, height, cnt, count, stories)
+* topics = arrayref of hashrefs of topics (tid, textname, image, width, height, cnt, count, stories)
 * currtime = current time
 __title__
 
@@ -17,18 +17,17 @@ __name__
 topTopics
 __template__
 [% PROCESS titlebar %]
-<TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="3">
+<table width="[% width %]" border="0" cellpadding="3">
 [% FOREACH topic = topics %]
-	<TR><TD ALIGN="RIGHT" VALIGN="TOP>
-		<FONT SIZE="6" COLOR="[% user.bg.3 %]">[% topic.alttext %]</FONT>
-		<BR>( [% topic.count %] )
-		[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-			SRC="[% constants.imagedir %]/topics/[% image.image %]"
-			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT" VALIGN="TOP"
-			HSPACE="0" VSPACE="10" WIDTH="[% image.width %]"
-			HEIGHT="[% image.height %]"></A>
-	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
+	<tr><td align="right" valign="top>
+		[% topic.textname %]
+		<br>( [% topic.count %] )
+		<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><IMG
+			src="[% constants.imagedir %]/topics/[% topic.image %]"
+			border="0" alt="[% topic.textname %]" align="right" valign="top"
+			hspace="0" vspace="10" width="[% topic.width %]"
+			height="[% topic.height %]"></a>
+	</td><td bgcolor="[% user.colors.bg_2 %]" valign="top">
 	[% FOREACH story = topic.stories %]
 		[% IF story.sid %]
 			[% storylinks = Slash.linkStory({
@@ -37,22 +36,20 @@ __template__
 				sid	=> story.sid,
 				'link'	=> story.title
 			}) %]
-<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
-			<FONT SIZE="-1">
+<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] title="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
 				([% story.commentcount %] comments) - [% Slash.timeCalc(story.time, '%B %o, %Y') %]
-			</FONT>
-			<BR>
+			<br>
 		[% END %]
 	[% END %]
 	[% FOREACH question = topic.polls %]
-                                <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [%
- Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.<BR>
+                                <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</a> on [%
+ Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.<br>
 	[% END %]
-	</TD></TR>
+	</td></tr>
 [% END %]
-</TABLE>
+</table>
 
-<BR><FONT SIZE="2"><CENTER>generated on [% currtime %]</CENTER></FONT><BR>
+<br><center>generated on [% currtime %]</center><br>
 
 __seclev__
 10000

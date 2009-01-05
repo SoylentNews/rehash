@@ -12,30 +12,31 @@ en_US
 __name__
 listAbuses
 __template__
-[% PROCESS titlebar title="User Abuses" width='100%' %]
+[% PROCESS titlebar title="User Abuses" %]
+<div class="generalbody">
 [% IF abuses.0 %]
-<TABLE CELLSPACING="0">
-	<TR>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>Timestamp</B></TD>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>UID</B></TD>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>Now</B></TD>
-	</TR>
+<table cellspacing="0">
+	<tr>
+		<td bgcolor="[% user.colors.fg_4 %]"><b>Timestamp</b></td>
+		<td bgcolor="[% user.colors.fg_4 %]"><b>UID</b></td>
+		<td bgcolor="[% user.colors.fg_4 %]"><b>IPID</b></td>
+		<td bgcolor="[% user.colors.fg_4 %]"><b>SubnetID</b></td>
+		<td bgcolor="[% user.colors.fg_4 %]"><b>Now</b></td>
+	</tr>
 [% FOR abuse = abuses %]
-	<TR>
-		<TD>[% abuse.0 %]</TD>
-		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.1 %]">[% abuse.1 %]</TD>
-		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.2 %]">[% abuse.2 %]</TD>
-		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.3 %]">[% abuse.3 %]</TD>
-		<TD>[% abuse.4 %]</TD>
-	</TR>
+	<tr>
+		<td>[% abuse.0 %]</td>
+		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.1 %]">[% abuse.1 %]</td>
+		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.2 %]">[% abuse.2 %]</td>
+		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.3 %]">[% abuse.3 %]</td>
+		<td>[% abuse.4 %]</td>
+	</tr>
 [% END %]
-</TABLE>
+</table>
 [% ELSE %]
 No abuses for this user
 [% END %]
-
+</div>
 
 __seclev__
 100

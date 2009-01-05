@@ -19,39 +19,39 @@ __name__
 editSection
 __template__
 [
-<A HREF="[% constants.rootdir %]/admin.pl?section=[% section %]">Stories</A> |
-<A HREF="[% constants.rootdir %]/submit.pl?section=[% section %]&op=list">Submissions</A> |
-<A HREF="[% constants.rootdir %]/index.pl?section=[% section %]">Preview</A> 
+<a href="[% gSkin.rootdir %]/admin.pl?section=[% section %]">Stories</a> |
+<a href="[% gSkin.rootdir %]/submit.pl?section=[% section %]&op=list">Submissions</a> |
+<a href="[% gSkin.rootdir %]/index.pl?section=[% section %]">Preview</a> 
 ]
 
 [% # Conditions for subsection delete confirmation. If true, show subform.
 IF form.DEL_subsection && !form.confirm;
 key = "del_subsection_${form.DEL_subsection}" %]
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-	<B>Subsection action</B>: [% form.$key %]?
-	<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% form.section | strip_attribute %]">
-	<INPUT TYPE="HIDDEN" NAME="op" VALUE="editsection">
-	<INPUT TYPE="HIDDEN" NAME="action" VALUE="[% form.$key %]">
-	<INPUT TYPE="HIDDEN" NAME="DEL_subsection" VALUE="[% form.DEL_subsection | strip_attribute %]">
-	&nbsp;&nbsp;<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
-	&nbsp;<INPUT TYPE="SUBMIT" NAME="nonconfirm" VALUE="No">
-</FORM>
-<BR><BR>
+<form action="[% env.script_name %]" method="post">
+	<b>Subsection action</b>: [% form.$key %]?
+	<input type="hidden" name="section" value="[% form.section | strip_attribute %]">
+	<input type="hidden" name="op" value="editsection">
+	<input type="hidden" name="action" value="[% form.$key %]">
+	<input type="hidden" name="DEL_subsection" value="[% form.DEL_subsection | strip_attribute %]">
+	&nbsp;&nbsp;<input type="submit" name="confirm" value="Yes">
+	&nbsp;<input type="submit" name="nonconfirm" value="No">
+</form>
+<br><br>
 [% END %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-	<TABLE><TR><TD VALIGN="TOP">
+<form action="[% env.script_name %]" method="post">
+	<table><tr><td valign="TOP">
 				[% PROCESS formLabel value 	=> "Section name" comment => "must be unique" %]
-				<INPUT TYPE="TEXT" NAME="section" VALUE="[% section | strip_attribute %]">
-				<BR><BR>
+				<input type="text" name="section" value="[% section | strip_attribute %]">
+				<br><br>
 
 				[% PROCESS formLabel value="Article Count" comment="how many articles to display on section index" %]
-				<INPUT TYPE="TEXT" NAME="artcount" SIZE="4" VALUE="[% this_section.artcount %]"> 
-				1/3rd of these will display intro text, 2/3rds just headers<BR><BR>
+				<input type="text" name="artcount" size="4" value="[% this_section.artcount %]"> 
+				1/3rd of these will display intro text, 2/3rds just headers<br><br>
 
 				[% PROCESS formLabel value="Title" comment="be descriptive" %]
-				<INPUT TYPE="TEXT" NAME="title" SIZE="30" VALUE="[% 
-				this_section.title %]"><BR>
+				<input type="text" name="title" size="30" value="[% 
+				this_section.title %]"><br>
 
 				[% IF qid.length %]
 				[% PROCESS formLabel value="Polls for this section" comment="" %]
@@ -61,147 +61,147 @@ key = "del_subsection_${form.DEL_subsection}" %]
 				[% PROCESS formLabel value="Type" comment="" %]
 				[% types = Slash.db.getDescriptions("section-types") %]
 				[% Slash.createSelect("type", types, this_section.type, 1) %]
-				<P>
+				<p>
 
 				[% PROCESS formLabel value="Issue mode" comment="" %]
 				[% issue %]
-				<P>
+				<p>
 
 				[% PROCESS formLabel value="URL" comment="if the section has its own url" %]
-				<INPUT TYPE="TEXT" NAME="url" SIZE="30" VALUE="[% this_section.url %]"><BR>
+				<input type="text" name="url" size="30" value="[% this_section.url %]"><br>
 
 				[% PROCESS formLabel value	= "Hostname" comment = "Hostname we should match against" %]
-				<INPUT TYPE="TEXT" NAME="hostname" SIZE="30" VALUE="[% this_section.hostname %]"><BR>
+				<input type="text" name="hostname" size="30" value="[% this_section.hostname %]"><br>
 
 				[% PROCESS formLabel value => "Cookiedomain" comment => "if the section requires that you give out a special cookie"
 				%]
-				<BR><INPUT TYPE="TEXT" NAME="cookiedomain" SIZE="30" VALUE="[% this_section.cookiedomain %]"><BR>
+				<br><input type="text" name="cookiedomain" size="30" value="[% this_section.cookiedomain %]"><br>
 
 				[% PROCESS formLabel value => "Index Handler" comment => "the script that acts as / queries" %]
-				<BR><INPUT TYPE="TEXT" NAME="index_handler" SIZE="30" VALUE="[% this_section.index_handler %]"><BR>
+				<br><input type="text" name="index_handler" size="30" value="[% this_section.index_handler %]"><br>
 
 				[% IF blocks.size %]
 					[% PROCESS formLabel value 	=> "Edit Section slashboxes" comment => "blocks" %]
 					[% FOREACH block = blocks %]
-						<LI>
-						<B><A HREF="[% constants.rootdir %]/admin.pl?op=blocks&bid=[% block.bid %]">[% block.title %]</A></B>
-						<A HREF="[% block.url %]">[% block.url %]</A>
+						<li>
+						<b><a href="[% gSkin.rootdir %]/admin.pl?op=blocks&bid=[% block.bid %]">[% block.title %]</a></b>
+						<a href="[% block.url %]">[% block.url %]</a>
 						[% IF block.ordernum && block.ordernum > 0 %]
 							[% ' (default)' %]
 						[% END %]
 					[% END %]
 				[% END %]
-				<BR>
-				<BR>
+				<br>
+				<br>
 
 
-				<INPUT TYPE="HIDDEN" NAME="subsections" VALUE="[% subsections.join(',') %]">
+				<input type="hidden" name="subsections" value="[% subsections.join(',') %]">
 				[%	INCLUDE titlebar title=>"Subsections" width=>"99%" %]
-				<TABLE BORDER=0 WIDTH="70%">
-					<TR>
-						<TD COLSPAN=3>
-							<TABLE BORDER=0 WIDTH="100%">
-								<TR>
-									<TD WIDTH=75%">
+				<table border=0 width="70%">
+					<tr>
+						<td colspan=3>
+							<table border=0 width="100%">
+								<tr>
+									<td width=75%">
 										Enter name of new subsection:
-										<INPUT TYPE="TEXT" NAME="new_subsection" VALUE="">
-										</TD><TD>
-										<INPUT TYPE="SUBMIT" VALUE="Add Subsection">
-									</TD>
-								</TR>
-							</TABLE>
-							<BR><BR>
-						</TD>
-					</TR>
+										<input type="text" name="new_subsection" value="">
+										</td><td>
+										<input type="submit" value="Add Subsection">
+									</td>
+								</tr>
+							</table>
+							<br><br>
+						</td>
+					</tr>
 					[% IF subsections.size %]
-					<TR>
-						<TH BGCOLOR="[% user.bg.2 %]">Subsection</TH>
-						<TH BGCOLOR="[% user.bg.2 %]">Article Count</TH>
-						<TH BGCOLOR="[% user.bg.2 %]">Remove Subsection</TH>
-					</TR>
+					<tr>
+						<th bgcolor="[% user.colors.bg_2 %]">Subsection</th>
+						<th bgcolor="[% user.colors.bg_2 %]">Article Count</th>
+						<th bgcolor="[% user.colors.bg_2 %]">Remove Subsection</th>
+					</tr>
 					[% END %]
 					[% FOR ss=subsections %]
-					<TR ALIGN="CENTER">
-						<TD WIDTH="33%">
-							<INPUT TYPE="TEXT" NAME="subsection_title_[% ss.id %]" VALUE="[% ss.title %]">
-						</TD>
-						<TD>
-							<INPUT TYPE="TEXT" NAME="subsection_artcount_[% ss.id %]" VALUE="[% ss.artcount %]" SIZE=4>
-						</TD>
-						<TD>
-							<INPUT TYPE="SUBMIT" NAME="del_subsection_[% ss.id %]" VALUE="Remove [% ss.title %]">
-						</TD>
-					</TR>
+					<tr align="CENTER">
+						<td width="33%">
+							<input type="text" name="subsection_title_[% ss.id %]" value="[% ss.title %]">
+						</td>
+						<td>
+							<input type="text" name="subsection_artcount_[% ss.id %]" value="[% ss.artcount %]" size=4>
+						</td>
+						<td>
+							<input type="submit" name="del_subsection_[% ss.id %]" value="Remove [% ss.title %]">
+						</td>
+					</tr>
 					[% END %]
-				</TABLE>
-				<BR><BR>
+				</table>
+				<br><br>
 
 				[% IF form.addextra; extras.push(['','']); END; IF extras.size; INCLUDE titlebar title=>"Extra Story Fields", width=>"99%"; id = 1 %]
-				<TABLE BORDER=0 WIDTH=\"40%\">\n";
+				<table border=0 width=\"40%\">\n";
 					[% FOR e=extras %]
 					[%	UNLESS loop.first %]
-					<TR>
-						<TD BGCOLOR="[% user.bg.0 %]" COLSPAN="4">
+					<tr>
+						<td bgcolor="[% user.colors.bg_0 %]" colspan="4">
 							[% INCLUDE spacer %]
-						</TD>
-						</TR><TR>
-						<TD BGCOLOR="[% user.bg.3 %]" COLSPAN="4">
+						</td>
+						</tr><tr>
+						<td bgcolor="[% user.colors.bg_3 %]" colspan="4">
 							[% INCLUDE spacer %]
-						</TD>
-						</TR><TR>
-						<TD BGCOLOR="[% user.bg.0 %]" COLSPAN="4">
+						</td>
+						</tr><tr>
+						<td bgcolor="[% user.colors.bg_0 %]" colspan="4">
 							[% INCLUDE spacer %]
-						</TD>
-					</TR>
+						</td>
+					</tr>
 					[%	END %]
-					<TR>
-						<TD>
+					<tr>
+						<td>
 							[% PROCESS formLabel value=>"Field Name:" comment='' %]
-							<INPUT TYPE="TEXT" NAME="extraname_[% id %]" VALUE="[% e.1 %]">
-						</TD>
+							<input type="text" name="extraname_[% id %]" value="[% e.1 %]">
+						</td>
 
-						<TD>
+						<td>
 							[% PROCESS formLabel value=>"Field Text:" %]
-							<INPUT TYPE="TEXT" NAME="extraval_[% id %]" VALUE="[% e.0 %]">
+							<input type="text" name="extraval_[% id %]" value="[% e.0 %]">
 							[% nbsp='&nbsp;'; nbsp.repeat(4) %]
-						</TD>
+						</td>
 
-						<TD>
+						<td>
 							[% PROCESS formLabel value="Field&nbsp;Type:" %]
 							[% Slash.createSelect( "extratype_$id", extra_types, e.type, 1) %]
-						</TD>
+						</td>
 
-						<TD VALIGN="BOTTOM" ALIGN="RIGHT">
-							<INPUT TYPE="CHECKBOX" NAME="extradel_[% id %]">&nbsp;Del?</TD>
-					</TR>
+						<td valign="BOTTOM" align="RIGHT">
+							<input type="checkbox" name="extradel_[% id %]">&nbsp;Del?</td>
+					</tr>
 					[% id = id + 1; END %]
-				</TABLE>&nbsp;<INPUT TYPE="SUBMIT" NAME="addextra" VALUE="add extra">
-				<P>
+				</table>&nbsp;<input type="submit" name="addextra" value="add extra">
+				<p>
 				[% ELSE %]
 
-				<BR><INPUT TYPE="SUBMIT" NAME="addextra" VALUE="add extra">
+				<br><input type="submit" name="addextra" value="add extra">
 				[% END %]
 
-				<BR><INPUT TYPE="SUBMIT" NAME="savesection" VALUE="save section">
-				<BR><INPUT TYPE="SUBMIT" NAME="deletesection" VALUE="delete section">
-			</TD>
-			<TD VALIGN="TOP">
+				<br><input type="submit" name="savesection" value="save section">
+				<br><input type="submit" name="deletesection" value="delete section">
+			</td>
+			<td valign="TOP">
 			[% IF this_section.type != 'collected' %]
 				[% PROCESS formLabel value 	=> "Topics" comment => "topics assigned to this section" %]
-				<UL>
+				<ul>
 					[% FOREACH tid = topics.sort %]
-					<LI>
-					<A HREF="[% constants.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</A>
-					</LI>
+					<li>
+					<a href="[% gSkin.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</a>
+					</li>
 					[% END %]
 
-				</UL>
+				</ul>
 			[% END %]
 			&nbsp;
-			</TD>
-		</TR>
-	</TABLE>
-</FORM>
+			</td>
+		</tr>
+	</table>
+</form>
 
 __seclev__
 10000

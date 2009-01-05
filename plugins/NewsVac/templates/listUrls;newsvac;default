@@ -13,26 +13,26 @@ listUrls
 __template__
 [% INCLUDE titlebar width="100%" title="List of urls" -%]
 
-<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="get">
 <input type="hidden" name="op" value="listurls">
 <table>
-        <TR>
-                <TD><input type="submit" value="List Only URLs Containing:">
-		<input type="text" size="60" name="like" value=""></TD>
-        </TR>
+        <tr>
+                <td><input type="submit" value="List Only URLs Containing:">
+		<input type="text" size="60" name="like" value=""></td>
+        </tr>
 </table>
 </form>
-<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="get">
 <input type="hidden" name="op" value="processurls">
 <table>
-        <TR>
-                <TD><input type="submit" value="Process URLs:">
-		<input type="text" size="60" name="ids" value=""></TD>
-        </TR>
+        <tr>
+                <td><input type="submit" value="Process URLs:">
+		<input type="text" size="60" name="ids" value=""></td>
+        </tr>
 </table>
 </form>
 <form enctype="multipart/form-data" action="[% 
-constants.rootdir %]/newsvac.pl" method="POST">
+gSkin.rootdir %]/newsvac.pl" method="post">
 <input type="hidden" name="op" value="newurl">
 <table>
         <tr>
@@ -70,7 +70,7 @@ constants.rootdir %]/newsvac.pl" method="POST">
 	[%- END -%]
 	[%- FOREACH u = urls -%]
 		[%- DEFAULT 
-			u.last_success_formatted = '<I>n/a</I>',
+			u.last_success_formatted = '<i>n/a</i>',
 			u.message_body_length = 0,
 			u.referencing = 0;
 
@@ -78,26 +78,26 @@ constants.rootdir %]/newsvac.pl" method="POST">
 			IF u.is_success.defined;
 		   		success = YesNo.${u.is_success}; 
 			ELSE; 
-		   		success = '<I>n/a</I>'; 
+		   		success = '<i>n/a</i>'; 
 			END
 		-%]
-        <TR>
-                <td><A HREF="[% constants.rootdir 
+        <tr>
+                <td><a href="[% gSkin.rootdir 
 		-%]/newsvac.pl?op=editurl&url_id=[% u.url_id %]">[% u.url_id
 		-%]</a></td>
                 <td>[% success %]</td>
                 <td>[% u.last_success_formatted.replace(' ', '&nbsp;') %]</td>
                 <td>[% u.message_body_length %]</td>
                 <td>[% u.referencing %]</td>
-                <td><a href="[% constants.rootdir
+                <td><a href="[% gSkin.rootdir
 		-%]/newsvac.pl?op=editminer&miner_id=[% u.miner_id %]">[%
 		u.name -%]</a></td>
                 <td><a href="[% u.url %]" target="_blank">[% u.url %]</a></td>
-        </TR>
+        </tr>
 	[%- END -%]
 
-</TABLE>
-</FORM>
+</table>
+</form>
 
 __seclev__
 100

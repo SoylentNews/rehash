@@ -1,0 +1,16 @@
+# $Id$
+name=Bookmark
+description="Bookmark"
+htdoc=bookmark.pl
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
+requiresplugin=Tags
+task=bookmark_backend.pl
+task=fetch_rss_bookmarks.pl
+template=templates/anon_bookmark;bookmark;default
+template=templates/bookmark;misc;default
+template=templates/bookmarklink;misc;default
+template=templates/bookmarktext;misc;default
+template=templates/recentandpop;bookmark;default
+template=templates/userbookmarks;users;default
+

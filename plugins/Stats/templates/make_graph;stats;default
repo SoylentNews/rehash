@@ -16,46 +16,46 @@ __template__
    END;
 
    IF (gtitle);
-      gtitle = gtitle | fixparam;
+      gtitle = gtitle | strip_paramattr;
       gtitle = '&amp;title=' _ gtitle;
    END;
 
-   UNLESS section;
-      section = form.stats_section;
+   UNLESS skid.defined;
+      skid = form.stats_skid;
    END;
-   section = section | fixparam;
+   skid = skid | strip_paramattr;
    statstring = '';
 
    FOREACH stat = statdata;
        IF (stat.0);
-          nstat = stat.0 | fixparam;
+          nstat = stat.0 | strip_paramattr;
 
-          nsection = stat.1 | fixparam;
-          IF (!nsection);
-             nsection = section;
+          nskid = stat.1 | strip_paramattr;
+          IF (!nskid);
+             nskid = skid;
           END;
 
-          nlabel = stat.2 | fixparam;
-          IF (!nsection);
+          nlabel = stat.2 | strip_paramattr;
+          IF (!nlabel);
              nlabel = '';
           END;
 
        ELSE;
-          nstat = stat | fixparam;
-          nsection = section;
+          nstat = stat | strip_paramattr;
+          nskid = skid;
           nlabel = '';
        END;
 
-       statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
+       statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nskid _ ',' _ nlabel;
    END;
    statstring = BLOCK -%]
-&amp;type=[% type | fixparam %]&amp;stats_days=[% days | fixparam %]&amp;byweekavg=[% byweekavg | fixparam %]&amp;showtotal=[% showtotal | fixparam %][% statstring %][% gtitle %]
+&amp;type=[% type | strip_paramattr %]&amp;stats_days=[% days | strip_paramattr %]&amp;byweekavg=[% byweekavg | strip_paramattr %]&amp;showtotal=[% showtotal | strip_paramattr %][% statstring %][% gtitle %]
 [%- END %]
 
-<P>
-<A HREF="[% constants.rootdir %]/stats.pl?op=table[% statstring %]"
-><IMG SRC="[% constants.rootdir %]/stats.pl?op=graph[% statstring %]"></A>
-</P>
+<p>
+<a href="[% gSkin.rootdir %]/stats.pl?op=table[% statstring %]"
+><img src="[% gSkin.rootdir %]/stats.pl?op=graph[% statstring %]"></a>
+</p>
 __seclev__
 1000
 __version__

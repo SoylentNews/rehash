@@ -8,7 +8,7 @@ something like this:
 
 <p>
 [% printurl = 
-	"<a href=\"$constants.rootdir/print.pl?sid=$story.sid\">print</a>";
+	"<a href=\"$gSkin.rootdir/print.pl?sid=$story.sid\">print</a>";
    printurl;
 %]
 </p>
@@ -17,7 +17,7 @@ If you're interested in <link /> tag support, you can change header;misc;default
 to add a link to the printable version.  Note that this must appear before the
 </HEAD> line.  Pudge suggests:
 
-	<link rel="alternate" href="[% constants.rootdir %]/print.pl?sid=[% sid %]"
+	<link rel="alternate" href="[% gSkin.rootdir %]/print.pl?sid=[% sid %]"
 		title="Printing Version" />
 
 This assumes your version of article.pl passes 'sid' to the template.  As of

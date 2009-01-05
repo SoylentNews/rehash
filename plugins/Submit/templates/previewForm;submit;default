@@ -6,7 +6,7 @@ Form for previewing a user's submission
 * submission = submission hashref (email, name, subj, tid, story, time, comment)
 * subid = submission id
 * lockTest = string describing other admins looking at similar submissions
-* section = name of section
+* skin = name of skin
 
 __title__
 
@@ -17,89 +17,205 @@ en_US
 __name__
 previewForm
 __template__
-[% PROCESS formatSub %]
+[% # set the variable 'subtext'
+   PROCESS formatSub %]
 
-[% IF submission.comment && admin_flag %]
-<P>Submission Notes:
-<TABLE WIDTH="95%"><TR><TD BGCOLOR="[% user.bg.2 %]">
-	<FONT SIZE="-1" COLOR="[% user.fg.2 %]">[% submission.comment %]</FONT>
-</TD></TR></TABLE>
-[% END %]
+
+[% title = submission.journal_id ? "Journal Submission Preview" : "Submission Preview" %]
+[% PROCESS titlebar %]
+<div class="generalbody">
 [% IF submission.sid %]
-	<P><A HREF="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</A>
+	<p><a href="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</a>
+[% ELSIF submission.del == 2 %]
+	<p><i>No link to story available</i></p>
 [% END %]
+<p>
+<div class="article">
+	[% PROCESS titlebar title=submission.subj %]
+	<div class="details">
+	[% UNLESS admin_flag -%]
+	[% submission_state = Slash.db.getDescriptions('submission-state') %]
+	[% del = submission.del; submission_state.$del %] submission by <b>[% submission.name %] <a href="[% submission.email %]">[% submission.email %]</a></b>
+        	at [% submission.time %]
+	[% END -%]
+	</div>
+	<div class="body">
+		<div class="topic">
+			<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]"></a>
+		</div>
+	[% IF submission.journal_id;
+		journal     = Slash.getObject('Slash::Journal');
+		thisjournal = journal.get(submission.journal_id);
+		IF thisjournal && thisjournal.uid;
+			thisuser    = Slash.db.getUser(thisjournal.uid); %]
+			<p>This submission comes from <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/">[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])'s journal</a></p>
+		[% END;
+	END %]
+		[% subtext %]
+	</div>
+</div>
+</p>
+[% IF admin_flag -%]
+		<form action="[% gSkin.rootdir %]/submit.pl" method="post">
+		[% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
+		[% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
+		<input type="hidden" name="op" value="changesubmission">
+		<input type="hidden" name="subid" value="[% subid %]">
+	[% IF submission.uid != constants.anonymous_coward_uid || submission.emaildomain -%]
+		<p>In the last [% constants.submission_count_days -%] days, there
+		[%- IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
+			|| submission.uid == constants.anonymous_coward_uid && num_with_emaildomain != 1 -%]
+			have been
+		[%- ELSE -%]
+			has been
+		[%- END -%]
+		[%- IF submission.uid != constants.anonymous_coward_uid -%]
+			[%- IF num_from_uid >= 20 %]<b>[% END -%]
+		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
+		from [% submitter.nickname %]
+		[% IF submitter.realemail %]
+			&lt;<a href="mailto:[% submitter.realemail | strip_attribute %]">[% submitter.realemail | strip_literal %]</a>&gt;
+		[% END %]
+		([% accepted_from_uid %] accepted)
+		[%- IF num_from_uid >= 20 %]</b>[% END -%]
+		[%- IF submission.emaildomain -%]
+			and
+		[%- END -%]
+	[%- END -%]
+	[%- IF submission.emaildomain -%]
+		[%- IF num_with_emaildomain >= 15 %]<b>[% END -%]
+		[% num_with_emaildomain %] submission[% IF num_with_emaildomain != 1 %]s[% END %]
+		from [% submission.emaildomain -%] ([% accepted_from_emaildomain %] accepted)
+		[%- IF num_with_emaildomain >= 15 %]</b>[% END -%]
+	[%- END -%]
+	.</p>
+[%- END %]
 
-[% PROCESS titlebar width="100%" title=submission.subj %]
-[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-SRC="[% constants.imagedir %]/topics/[% image.image %]"
-WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
-ALIGN="RIGHT" HSPACE="20" VSPACE="10"
-ALT="[% topic.alttext %]"
-TITLE="[% topic.alttext %]"></A>
-[% submission_state = Slash.db.getDescriptions('submission-state') %]
-[% del = submission.del; submission_state.$del %] submission by <B>[% submission.name %] <A HREF="[% submission.email %]">[% submission.email %]</A></B>
-	at [% submission.time %] [% IF admin_flag %]<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>[% END %]
+	<br>
+[% submission_state = Slash.db.getDescriptions('submission-state'); del = submission.del -%]
+[% submission_state.$del %] submission by <b>[% submission.name %]
+[%- IF submission.email %] <a href="[% submission.email %]">[% submission.email %]</a>[% END -%]
+</b> at [% submission.time %]
+	<a href="[% gSkin.rootdir 
+		-%]/users.pl?op=userinfo&amp;userfield=[% ipid 
+		-%]&amp;fieldname=ipid">[% ipid_vis 
+		-%]</a><br>
+	<br>
+		<input type="text" name="comment_[% subid %]" value="[% submission.comment %]" size=70><br>
+	[% 
+		this_note = submission.note || '';
+		Slash.createSelect(
+			"note_$subid", note_options, this_note, 1
+		);
+		Slash.createSelect(
+			"skid_$subid", 
+			Slash.db.getDescriptions('skins'),
+			submission.primaryskid, 1, 0, 1
+		);
+	-%]
+	
+		<input type="submit" name="update" value="Update">
+		<input type="submit" name="del_[% subid %]" value="Delete">
+	<br>
+	</form>
 
-<P>[% subtext %]</P>
+	<br>
+        <form action="[% gSkin.rootdir %]/submit.pl" method="post">
+        <table class="data" width="100%">
+        <tr class="data_head">
+                <th colspan="4">Submissions Memory</th>
+        </tr>
+[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
+        <tr class="data_hl[% i %]">
+                <td>[% subnote.submatch %]</td>
+                <td>[% subnote.subnote %]</td>
+                <td>[% subnote.time %]</td>
+                <td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
+        </tr>
+[% END # FOREACH %]
+        <tr>
+                <td><input name="submatch" size="10"></td>
+                <td colspan="2"><input name="subnote" size="40"></td>
+                <td>
+                      [% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
+                      [% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
+                      <input type="hidden" name="op" value="viewsub">
+                      <input type="hidden" name="subid" value="[% subid %]">
+                      <input type="submit" value="Remember">
+              </td>
 
-[% IF admin_flag %]
-	[ <A HREF="[% env.script_name %]?op=Delete&amp;subid=[% subid %]&amp;section=[% form.table_section | strip_attribute %]&amp;note=[% form.table_note | strip_attribute %]">Delete Submission</A> ]<BR>
+        </tr>
+        </table>
+        </form>
 
-	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
-		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
-		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter %]">
-		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50" MAXLENGTH="50">
-		<BR>[% lockTest %]
+	<br>
+	<script type="text/javascript">
+		function submitAndReload() {
+			var form = document.getElementById("adminform");
+			form.submit();
+			window.location.href = "[% gSkin.absolutedir_secure %]/submit.pl?op=list&amp;fromconsole=1&amp;nowrapper=1";
+		}
+	</script>
+	<form id="adminform" action="[% gSkin.rootdir %]/admin.pl" method="post" [% IF form.fromconsole %]target="_blank" onsubmit="submitAndReload();"[% END %]>
+		[% IF form.fromconsole %]<div class="hide">[% END %]
+		<input type="hidden" name="firstpreview" value="1">
+		<input type="hidden" name="subid" value="[% subid %]">
+		<input type="hidden" name="topic_source" value="submission">
+		<input type="hidden" name="submitter" value="[% submitter.uid %]">
+		<label>title <input type="text" name="title" value="[% submission.subj %]" size="50" MAXLENGTH="50"></label>
+		[% lockTest %]
 	[% IF constants.use_dept %]
-		dept <INPUT TYPE="text" NAME="dept" SIZE="50">
+		<label>Dept&nbsp; <input type="text" name="dept" size="50"></label>
 	[% END %]
 	[% FOR extra = extras %]
-		<BR>[% extra.1 %]
+		<br>[% extra.1 %]
 		[% IF extra.2 == 'text' %]
-			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} | strip_attribute %]" SIZE="50">
+			<input type="text" name="[% extra.1 %]" value="[% submission.${extra.1} | strip_attribute %]" size="50">
+		[% ELSIF extra.2 == 'textarea' %]
+			<textarea wrap="VIRTUAL" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% submission.${extra.1} | strip_literal %]</textarea><br>
 		[% ELSIF extra.2 == 'list' %]
-			[% # section:value %]
-			[% pulldown = "$extra.3:$extra.1" %]
-			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), submission.${extra.1}, 1, 1) %]	
-		[% ELSE %]
-			[% type = extra.1 %]
-			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), submission.$type, 1, 1) %]	
+			[% pulldown = "$extra.1" %]
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), submission.${extra.1}, 1, 1) %]
 		[% END %]
-	[% END %]
-		<BR>
-	[% Slash.selectTopic('tid', submission.tid, section, 1) %]
-	[% Slash.selectSection('section', section, 0, 1) %]
+	[% END %]<br>
+	[% Slash.createSelect('primaryskid', Slash.db.getDescriptions('skins'), submission.primaryskid, 1, 0, 1) %]
+	[% Slash.createSelect('tid', Slash.db.getDescriptions('highlighted-topics-submittable'), submission.tid, 1, 0, 1) %]
 
-		<INPUT TYPE="submit" NAME="op" VALUE="preview"><BR>
-		<BR>Intro Copy<BR>
-	<TEXTAREA NAME="introtext" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" WRAP="VIRTUAL"
->[% subtext | strip_literal %]</TEXTAREA><BR>
-		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
-	</FORM>
+		<input type="submit" name="op" value="preview"><br>
+		<label>Intro Copy</label>
+	<textarea name="introtext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"
+>[% subtext | strip_literal %]</textarea><br>
+		[% IF form.fromconsole %]</div>[% END %]
+		<input type="submit" name="op" value="preview"><br>
 [% IF similar_stories.size > 0 %]
-	<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
-		<TR><TD COLSPAN="5" ALIGN="CENTER"><B>Similar Stories:</B></TD></TR>
+	<table border="0" cellpadding="2" cellspacing="0">
+		<tr><td colspan="5" align="CENTER"><b>Similar Stories --</b> check words below before submitting or previewing to mark words as common and not for use in determining similar stories</td></tr>
 		[% FOREACH story = similar_stories %]
-			<TR>
-			<TD VALIGN="TOP">[% IF story.displaystatus == 0;
+			<tr>
+			<td valign="TOP">[% IF story.displaystatus == 0;
 				"&nbsp;";
 				ELSIF story.displaystatus == 1;
-					"<I>sect</I>";
+					"<i>sect</i>";
 				ELSE;
-					"<I>ND</I>";
-				END; %]</TD>
-			<TD ALIGN="RIGHT" VALIGN="TOP">[% story.weight %]</TD>
-			<TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-			[% story.title %]</A></TD>
-			<TD VALIGN="TOP">[% Slash.timeCalc(story.time) %]</TD>
-			<TD VALIGN="TOP">[% story.words.join(" ") %]</TD>
-			</TR>
+					"<i>ND</i>";
+				END; %]</td>
+			<td align="RIGHT" valign="TOP">[% story.weight %]</td>
+			<td valign="TOP"><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+			[% story.title %]</a></td>
+			<td valign="TOP">[% Slash.timeCalc(story.time) %]</td>
+			<td valign="TOP">
+			[% FOREACH word = story.words %]
+				[%- word -%][% UNLESS words_seen.$word %]<input type="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
+				[% words_seen.$word = 1; %]
+			[% END %]
+			</td>
+			</tr>
 		[% END %]
-	</TABLE>
+	</table>
 [% END %]
+</form>
 [% END %]
-
+</div>
 __seclev__
 10000
 __version__

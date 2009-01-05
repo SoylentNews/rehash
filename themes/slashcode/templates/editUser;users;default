@@ -20,75 +20,95 @@ en_US
 __name__
 editUser
 __template__
-[% PROCESS prefs_titlebar tab_selected='user' %]
-
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]"><TR><TD>
-
-[% note %]
-
-[% IF constants.offer_insecure_login_link %]
-You can automatically log in by clicking
-<A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A>
-and Bookmarking the resulting page. This is totally insecure, but very convenient.
+[% orig_title = title %]
+<div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
+[% PROCESS userboxes %]
 [% END %]
-<BR>
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
+	[% PROCESS prefs_titlebar tab_selected='user' %]
+		<div class="generalbody">
+		[% IF note %]
+			<div class="notes">
+				[% note %]
+			</div>
+		[% END %]
+		[% IF constants.offer_insecure_login_link %]
+			You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page. This is totally insecure, but very convenient.
+		[% END %]
 
-	[% IF admin_flag %]
-	[% admin_block %]
-	[% END %]
+		[% IF admin_flag %]
+			[% admin_block %]
+		[% END %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
+		<form action="[% env.script_name %]" method="post">
+			<fieldset>
+			<legend>User Info</legend>
+			[% PROCESS formkey_tag %]
 
-[% PROCESS formkey_tag %]
+			[%# realname isn't really used for anything, but we do store it %]
+			[% PROCESS formLabel value => 'Real Name'  %]
+			<input type="text" name="realname" value="[% useredit.realname | strip_attribute %]" size="40">
+			<input type="hidden" name="formname" value="edituser">
+			<input type="hidden" name="uid" value="[% useredit.uid %]">
+			<input type="hidden" name="name" value="[% useredit.nickname | strip_attribute %]">
+			[% PROCESS formLabel value => 'Email Address' %]
+			<input type="text" name="realemail" value="[% useredit.realemail | strip_attribute %]" size="40">
+			<div class="notes">
+				Required but never displayed publicly, unless you specify so in your comment preferences. This is where your passwd is mailed.  If you change this address, a notification will be sent, and you will need to follow the enclosed instructions to re-register.
+			</div>
 
-<BR>[%# realname isn't really used for anything, but we do store it %]
-	<B>Real Name</B> (optional)<BR>
-		<INPUT TYPE="TEXT" NAME="realname" VALUE="[% useredit.realname | strip_attribute %]" SIZE="40"><BR>
-		<INPUT TYPE="HIDDEN" NAME="formname" VALUE="edituser">
-		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
-		<INPUT TYPE="HIDDEN" NAME="name" VALUE="[% useredit.nickname | strip_attribute %]">
-<BR>
-	<B>Your Email Address</B><BR>
-	<SMALL>(required but never displayed publicly, unless you specify so in
-	your comment preferences. This is where your passwd is mailed.  If you
-	change this address, a notification will be sent, and you will need to
-	follow the enclosed instructions to re-register)</SMALL><BR>
-	<INPUT TYPE="TEXT" NAME="realemail" VALUE="[% useredit.realemail | strip_attribute %]" SIZE="40"><BR>
-<BR>
-	<B>Homepage</B> (optional: you must enter a fully qualified URL)<BR>
-		<INPUT TYPE="TEXT" NAME="homepage" VALUE="[% useredit.homepage | strip_attribute %]" SIZE="60"><BR>
-	[%- IF admin_flag && constants.slashbox_whatsplaying -%]
-	<B>What I'm Playing</B><BR>
-	<SMALL>(optional: a pipe ("|") separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox.)</SMALL><BR>
-		<INPUT TYPE="TEXT" NAME="playing" VALUE="[% useredit.playing | strip_attribute %]" SIZE="60"><BR>
-	[%- END - %]
-	<B>AOL IM</B> (optional)<BR>
-		<INPUT TYPE="TEXT" NAME="aim" VALUE="[% useredit.aim | strip_attribute %]" SIZE="60"><BR>
-	<B>ICQ UIN</B> (optional)<BR>
-		<INPUT TYPE="TEXT" NAME="icq" VALUE="[% useredit.icq | strip_attribute %]" SIZE="60"><BR>
-	<B>Yahoo! ID</B> (optional)<BR>
-		<INPUT TYPE="TEXT" NAME="yahoo" VALUE="[% useredit.yahoo | strip_attribute %]" SIZE="60"><BR>
-	<B>Jabber</B> (optional)<BR>
-		<INPUT TYPE="TEXT" NAME="jabber" VALUE="[% useredit.jabber | strip_attribute %]" SIZE="60"><BR>
-	<B>Public Calendar</B> (optional: you must enter a fully qualified URL, for an ical calendar)<BR>
-		<INPUT TYPE="TEXT" NAME="calendar_url" VALUE="[% useredit.calendar_url | strip_attribute %]" SIZE="60"><BR>
+			[% PROCESS formLabel value => 'Homepage' %]
+			<input type="text" name="homepage" value="[% useredit.homepage | strip_attribute %]" size="40">
+			<div class="notes">
+         		       You must enter a fully qualified URL.
+		        </div>
+			[%- IF admin_flag && constants.slashbox_whatsplaying -%]
+				[% PROCESS formLabel value => 'What I\'m Playing For' %]
+				<div class="notes">
+					A pipe ("|") separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox.
+				</div>
+				<input type="text" name="playing" value="[% useredit.playing | strip_attribute %]" size="40">
+			[%- END - %]
+			[% PROCESS formLabel value => 'AIM' %]
+			<input type="text" name="aim" value="[% useredit.aim | strip_attribute %]" size="40"><br>
+			<div class="notes">Do not make this AIM nick public <input type="checkbox" name="aimdisplay" value="1"[% IF useredit.aimdisplay %] checked="checked" [% END %]></div>
+			[% PROCESS formLabel value => 'ICQ UIN' %]
+			<input type="text" name="icq" value="[% useredit.icq | strip_attribute %]" size="40">
+			[% PROCESS formLabel value => 'Yahoo! ID' %]
+			<input type="text" name="yahoo" value="[% useredit.yahoo | strip_attribute %]" size="40">
+			[% PROCESS formLabel value => 'Jabber' %]
+			<input type="text" name="jabber" value="[% useredit.jabber | strip_attribute %]" size="40">
+			[% PROCESS formLabel value => 'Public Calendar' %]
+			<input type="text" name="calendar_url" value="[% useredit.calendar_url | strip_attribute %]" size="40">
+			<div class="notes">
+				You must enter a fully qualified URL, for an iCal calendar.
+			</div>
+                        [% PROCESS formLabel value => 'Mobile Text Address' %]
+                        <input type="text" name="mobile_text_address" value="[% useredit.mobile_text_address | strip_attribute %]" size="40">
 
-	<P><B>Sig</B> (appended to the end of comments you post, 120 chars)<BR>
-		<TEXTAREA NAME="sig" ROWS="2" COLS="60">[% useredit.sig | strip_literal %]</TEXTAREA>
+			[% PROCESS formLabel value => 'Sig' %]
+			<textarea name="sig" rows="2" cols="30">[% useredit.sig | strip_literal %]</textarea>
+			<div class="notes">
+				Appended to the end of comments you post. 120 chars.
+			</div>
+			[% PROCESS formLabel value => 'Bio' %]
+			<textarea name="bio" rows="5" cols="30" wrap="virtual">[% useredit.bio | strip_literal %]</textarea>
+			<div class="notes">
+				This information is publicly displayed on your user page.  255 chars.
+			</div>
 
-	<P><B>Bio</B> (this information is publicly displayed on your
-		user page.  255 chars)<BR>
-		<TEXTAREA NAME="bio" ROWS="5" COLS="60" WRAP="virtual">[% useredit.bio | strip_literal %]</TEXTAREA>
+			[% editkey %]
+			<br>
+			<input type="hidden" name="op" value="saveuser" class="button">
+			<input type="submit" value="Save User" class="button">
+			</fieldset>
+		</form>
 
-	[% editkey %]
-
-	<INPUT TYPE="HIDDEN" NAME="op" VALUE="saveuser">
-	<INPUT TYPE="SUBMIT" VALUE="Save User">
-	</FORM>
-
-	</TD></TR></TABLE><P>
-
-
+	</div>
+</div>
 __seclev__
 500
 __version__

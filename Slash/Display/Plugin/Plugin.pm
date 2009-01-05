@@ -70,16 +70,25 @@ my %subs;
 sub _populate {
 	return if %subs;
 	# mmmmmm, agic
+	# we are taking all the symbols to exported from certain packages,
+	# and adding them as coderefs to @subs.  then in AUTOLOAD below,
+	# when that symbol is called, we put it in its proper TT context,
+	# and execute it.  simple!
 	no strict 'refs';
-	for my $pkg (qw(Slash Slash::Utility)) {
-		@subs{@{"${pkg}::EXPORT"}} =
-			map { *{"${pkg}::$_"}{CODE} } @{"${pkg}::EXPORT"};
+	for my $pkg (qw(Slash Slash::Utility)) {       # for these packages ...
+	                                               # (read rest bottom-to-top):
+		@subs{@{"${pkg}::EXPORT"}} =           # save the coderefs for later!
+			map  { *{"${pkg}::$_"}{CODE} } # ... get the coderef
+			grep { *{"${pkg}::$_"}{CODE} } # if they have a coderef ...
+			@{"${pkg}::EXPORT"};           # get the syms from @EXPORT
 	}
 
-	# all constants in EXPORT_OK
+	# Slash::Constants uses @EXPORT_OK, not @EXPORT
 	for my $pkg (qw(Slash::Constants)) {
 		@subs{@{"${pkg}::EXPORT_OK"}} =
-			map { *{"${pkg}::$_"}{CODE} } @{"${pkg}::EXPORT_OK"};
+			map  { *{"${pkg}::$_"}{CODE} }
+			grep { *{"${pkg}::$_"}{CODE} }
+			@{"${pkg}::EXPORT_OK"};
 	}
 
 	$subs{version} = sub { Slash->VERSION };
@@ -109,7 +118,8 @@ sub Display {
 sub AUTOLOAD {
 	# pull off first param before sending to function;
 	# that's the whole reason we have AUTOLOAD here,
-	# to de-OOP the call
+	# to de-OOP the call, since TT wants it to all be
+	# OOP-ified and we don't.
 	my $self = shift;
 	(my $name = $AUTOLOAD) =~ s/^.*://;
 	return if $name eq 'DESTROY';

@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
+
+# What's this script for?  Is it still used? - Jamie 2006-08-27
 
 use strict;
 use File::Basename;
@@ -10,8 +12,9 @@ use Getopt::Std;
 use Slash;
 use Slash::Utility;
 use Slash::Constants ':people';
+use Slash::PollBooth;
 
-use vars qw( $slashdb $werder $constants $junk );
+use vars qw( $pollbooth_db $werder $constants $junk );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -23,18 +26,18 @@ usage() if $opts{'h'};
 $opts{'u'} ||= 'slash';
 
 createEnvironment($opts{u});
-$slashdb = getCurrentDB();
+$pollbooth_db = getObject('Slash::PollBooth');
 $constants = getCurrentStatic();
 
-my $entries = $slashdb->sqlSelectAll('section,qid', 'auto_poll');
+my $entries = $pollbooth_db->sqlSelectAll('section,qid', 'auto_poll');
 
 for (@$entries) {
 	my $qid = $_->[1];
-	my $sids = $slashdb->sqlSelectColArrayref('sid', 'stories', "qid IS NULL AND section = '$_->[0]'" );
+	my $sids = $pollbooth_db->sqlSelectColArrayref('sid', 'stories', "qid IS NULL AND section = '$_->[0]'" );
 	for my $sid (@$sids) {
 		print "Doing $sid \n";
-		my $question = $slashdb->getPollQuestion($qid, 'question');
-		my $answers = $slashdb->getPollAnswers($qid, [ qw| answer | ]);
+		my $question = $pollbooth_db->getPollQuestion($qid, 'question');
+		my $answers = $pollbooth_db->getPollAnswers($qid, [ qw| answer | ]);
 		my $newpoll = {
 			section => $_->[0],
 			topic => 1,
@@ -47,8 +50,8 @@ for (@$entries) {
 			$newpoll->{'aid' . $x} = $answer->[0];
 			$x++;
 		}
-		my $qid = $slashdb->savePollQuestion($newpoll);
-		$slashdb->setStory($sid, { qid => $qid, writestatus => 'dirty' });
+		my $qid = $pollbooth_db->savePollQuestion($newpoll);
+		$pollbooth_db->setStory($sid, { qid => $qid, writestatus => 'dirty' });
 	}
 }
 
@@ -61,6 +64,7 @@ sub usage {
 Usage: $PROGNAME [OPTIONS] [#users]
 
 This rebuilds the people table for the Zoo system.
+(Um, I'm pretty sure it doesn't, actually.)
 
 Main options:
 	-h	Help (this message)
@@ -78,7 +82,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT

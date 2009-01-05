@@ -17,15 +17,14 @@ en_US
 __name__
 linkCommentPages
 __template__
-[% USE Slash %][% UNLESS (total < user.commentlimit) || (user.commentlimit < 1) %]
+[% UNLESS (total < user.commentlimit) || (user.commentlimit < 1) %]
 	[% pages = total / user.commentlimit %]
-
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER"><FONT SIZE="2">
+	<div class="linkCommentPage">
 	[% FOREACH p = [0 .. pages] %]
 		[% start = user.commentlimit * p %]
 		[% IF p != 0 %] | [% END %]
 		[% IF start == form.startat || (!form.startat && p == 0) %]
-			<B>([% p + 1 %])</B>
+			<b>([% p + 1 %])</b>
 		[% ELSE %]
 			[% Slash.linkComment({
 				sid	=> sid,
@@ -41,8 +40,7 @@ __template__
 	[% IF user.breaking %]
 		([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
 	[% END %]
-
-	</FONT></TD></TR>
+	</div>
 [% END %]
 
 __seclev__

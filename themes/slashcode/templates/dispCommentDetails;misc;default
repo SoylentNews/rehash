@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+Display a comment
+
+* is_anon = boolean for whether or not comment user is anonymous
+
+Also included are all the individual elements of the comment and its
+poster: sid, cid, pid, date, subject, comment, uid, points, lastmod,
+reason, nickname, fakeemail, homepage, sig, karma_bonus, subscriber_bonus
+also fakeemail_vis which is a possibly-truncated version of fakeemail
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+dispCommentDetails
+__template__
+			[% IF !is_anon && fakeemail %]&lt;<a href="mailto:[% fakeemail | strip_paramattr_nonhttp %]">[% fakeemail_vis | strip_literal %]</a>&gt;[% END %]
+			on [% Slash.timeCalc(time) %]
+			[% IF sid && cid %] ([% Slash.linkComment({
+				sid     => sid,
+				cid     => cid,
+				subject => ('#' _ cid),
+				subject_only => 1
+			}, 1, { noextra => 1 }) %])[% END %]
+			<small>
+			[% has_homepage = homepage && homepage.length > 8;
+			   has_journal = journal_last_entry_date.search('[1-9]');
+			   IF !is_anon && (has_homepage || has_journal);
+				IF has_homepage %]
+				<a href="[% homepage %]" title="[% homepage %]" class="user_homepage_display">Homepage</a>
+				[% END ; IF has_journal %]
+				<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/" title="[% Slash.timeCalc(journal_last_entry_date) %]" class="user_journal_display">Journal</a>
+				[% END ; END %]
+			[% ipid_display %]
+			</small>
+__seclev__
+10000
+__version__
+$Id$

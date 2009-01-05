@@ -13,11 +13,11 @@ messagenew
 __template__
 [% IF msg.mode == 1 %]
 
-<P>
+<p>
 [% submission.name %] has submitted a new story,
-<B><A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% submission.subid %]&amp;title=[%
-submission.subj | fixparam %]">[% submission.subj | strip_literal %]</A></B>.
-</P>
+<b><a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% submission.subid %]&amp;title=[%
+submission.subj | strip_paramattr %]">[% submission.subj | strip_literal %]</a></b>.
+</p>
 
 [% ELSE %]
 

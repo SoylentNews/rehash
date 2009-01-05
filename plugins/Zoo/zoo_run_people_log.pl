@@ -26,12 +26,13 @@ $task{$me}{code} = sub {
 	$stats->createStatDaily("zoo_counts", "0");	
 
 	slashdLog('Zoo fof/eof Begin');
-	my $people = $zoo->getZooUsersForProcessing();
+	my $people = $zoo->getZooUsersForProcessing() || [];
 	slashdLog('Zoo fof/eof Processing ' . scalar(@$people) . ' people');
 	# Each job represents someone who has added or removed someone as a friend/foe. -Brian
 	for my $person (@$people) {
 		my $new_people = $zoo->rebuildUser($person);
 		$slashdb->setUser($person, { people => $new_people, people_status => 'ok'});
+		Time::HiRes::sleep(0.5); # don't tax the DB too much, this isn't high-priority
 	}
 	$stats->updateStatDaily("zoo_counts", "value+" . @$people);	
 	slashdLog('Zoo fof/eof End');
@@ -40,3 +41,4 @@ $task{$me}{code} = sub {
 };
 
 1;
+

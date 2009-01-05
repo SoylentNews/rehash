@@ -16,9 +16,9 @@ __name__
 hrefLink
 __template__
 [%- IF constants.plugin.Relocate -%]
-<A HREF="[% constants.real_rootdir%]/relocate.pl?id=[% id | fixparam %]" TITLE="[% title | strip_attribute %]">[% text %]</A>
+<a href="[% constants.real_rootdir%]/relocate.pl?id=[% id | strip_paramattr %]" title="[% title | strip_attribute %]">[% text %]</a>
 [%- ELSE -%]
-<A HREF="[% (href || title) | strip_urlattr %]">[% text %]</A>
+<a href="[% (href || title) | strip_urlattr %]">[% text %]</a>
 [%- END -%]
 __seclev__
 10000
