@@ -17,7 +17,7 @@ tag_ui_widget
 __seclev__
 10000
 __template__
-[% IF user.tags_canread_stories -%]
+[% IF user.tags_canread_stories && !user.tags_turnedoff -%]
 [%	tags_reader = Slash.getObject('Slash::Tags'); tag_info = tags_reader.setGetCombinedTags(key, key_type); -%]
 [%	IF tag_info.datatype == 'story'			-%]
 [%		IF key_type == 'stoid'			-%]
