@@ -1,0 +1,34 @@
+#ostgnavbar
+{
+	font-family: arial, helvetica, sans-serif;
+	border-top: 1px solid #999;
+	background: #ccc;
+	border-bottom: 2px solid #999;
+	font-weight: normal;
+	font-size: 70%;
+	margin: 0;
+	padding: .2em 0;
+}
+
+#ostgnavbar li
+{
+	list-style: none;
+	display: inline;
+}
+
+#ostgnavbar a
+{
+	text-decoration: none;
+	border-left: 1px solid #999;
+	padding: 0 .2em 0 .4em;
+}
+
+#ostgnavbar a.begin
+{
+	font-weight: bold;
+	color: #039;
+	border: none;
+}
+
+#ostgnavbar a.highlight { font-weight: bold; }
+#ostgnavbar a:hover { color: #666; }

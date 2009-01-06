@@ -1,0 +1,52 @@
+__section__
+default
+__description__
+Displays the main body of 404, including error.
+
+* url  =  The URL you "probably" want to be at
+* message = message text to display
+* error = message number for SWITCH statement (will have either message or error)
+* origin = original URL requested
+__title__
+
+__page__
+404
+__lang__
+en_US
+__name__
+main
+__template__
+<div id="wide">
+[% PROCESS titlebar title="404 File Not Found" %]
+<div class="generalbody">
+The requested URL ([% origin %]) was not found.<p>
+
+[% IF env.request_uri.substr(0, 14) == '/perl-news.cgi' %]
+You are apparently trying to link to an old story.  We tried to find it for you, but were unsuccessful.  Please go to the Search form and use that to find the story.
+[% ELSIF message %]
+	<p>[% message %], so you probably want to be here: <a href="[% url %]">[% url %]</a>
+[% ELSE %]
+[% SWITCH error %]
+	[% CASE 1 %]
+		<p>Someone <i>probably</i> just forgot the "http://" part of the URL, and you might really want to be here: <a href="[% url %]">[% url %]</a>.
+	[% CASE 2 %]
+		<p>Someone <i>probably</i> just forgot the "ftp://" part of the URL, and you might really want to be here: <a href="[% url %]">[% url %]</a>.
+	[% CASE 3 %]
+		<p>Someone <i>probably</i> just forgot the "mailto:" part of the URL, and you might really want to be here: <a href="[% url %]">[% url %]</a>.
+	[% CASE 6 %]
+		<p>All of the older articles have been moved to /articles/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
+	[% CASE 7 %]
+		<p>All of the older features have been moved to /features/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
+	[% CASE 8 %]
+		<p>All of the older book reviews have been moved to /books/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
+	[% CASE 9 %]
+		<p>All of the older Ask [% constants.sitename %] articles have been moved to /ask[% constants.sitename.lc %]/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
+[% END %]
+[% END %]
+<p>If you feel like it, mail the url, and where ya came from to <a href="mailto:[% constants.adminmail | strip_attribute %]">[% constants.adminmail %].</a>
+</div>
+</div>
+__seclev__
+10000
+__version__
+$Id$

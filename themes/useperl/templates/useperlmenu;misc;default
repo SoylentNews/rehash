@@ -1,0 +1,56 @@
+__section__
+default
+__description__
+Main user menu for use Perl
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+useperlmenu
+__template__
+
+<ul>
+	<li class="begin">
+		<a href="[% gSkin.rootdir %]/faq.shtml">FAQ</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/about.shtml">About</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/search.pl">Older Stories</a>
+        </li>
+        <li>	
+		<a href="[% gSkin.rootdir %]/topics.shtml">Topics</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/pollBooth.pl">Polls</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/authors.pl">Authors</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/modulelist/">New Modules</a>
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/users.pl?op=edithome">Preferences</a>
+[% IF !user.is_anon && user.currentPage != 'users' %]
+        </li>
+        <li>
+		<a href="[% gSkin.rootdir %]/users.pl?op=userclose">Logout</a>
+[% END %]
+        </li>
+</ul>
+
+__seclev__
+1000
+__version__
+$Id$

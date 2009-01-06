@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Block of text for incluzion in header.
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+stuff
+__template__
+
+<ul>
+	<li>
+		<a href="http://tangent.org/~brian/">Brian (aka Krow)</a>
+	</li>
+	<li>
+		<a href="http://pudge.net/">Pudge</a>
+	</li>
+	<li>
+		<a href="http://barrapunto.com/">ACS</a>
+	</li>
+	<li>
+		<a href="http://www.tangent.org/">Tangent</a>
+	</li>
+	<li>
+		<a href="http://use.perl.org/">Use Perl</a>
+	</li>
+</ul>
+
+__seclev__
+500
+__version__
+$Id$
+

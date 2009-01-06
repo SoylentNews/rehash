@@ -1,0 +1,100 @@
+__section__
+default
+__description__
+Menu for sidebar and bottom (see header template and Slash::horizmenu() function)
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+mainmenu
+__template__
+<ul>
+	<li>
+		<a href="[% gSkin.rootdir %]/about.shtml">About</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/faq.shtml">FAQ</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/messages.pl">Messages</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/topics.pl">Topics</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/authors.pl">Editors</a>
+	</li>
+	
+	<li>
+		<a href="[% gSkin.rootdir %]/search.pl">Older Stuff</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/pollBooth.pl">Past Polls</a>
+	</li>
+	<li>
+		<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
+	</li>
+		[% IF user.is_anon %]
+		<li>
+			<a href="[% gSkin.rootdir %]/my/">Create Account/Log in</a>
+		</li>
+		[% ELSE %]
+		<li class="user">
+			<em>You</em>
+			<ul>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/info">Info</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/inbox">Inbox</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/homepage">Homepage</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/comments">Comments</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/journal">Journal</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/messages">Messages</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/misc">Misc</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/amigos">Amigos</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/friends">Friends</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/foes">Foes</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/fans">Fans</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/password">Change Password</a>
+				</li>
+				<li>
+					<a href="[% gSkin.rootdir %]/my/logout">Log out</a>
+				</li>
+			</ul>
+		</li>
+		[% END %]
+	</ul>
+
+__seclev__
+10000
+__version__
+$Id$

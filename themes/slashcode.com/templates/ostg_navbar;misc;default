@@ -1,0 +1,47 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+ostg_navbar
+__seclev__
+10000
+__template__
+<ul id="ostgnavbar">
+	<li>
+		<a href="http://www.ostg.com" class="begin">OSTG</a>
+	</li>	
+	<li>
+		<a href="http://www.thinkgeek.com/?cpg=tb">Thinkgeek</a>
+	</li>
+	<li>
+		<a href="http://slashdot.org">Slashdot</a>
+	</li>
+	<li>
+		<a href="http://newsforge.com">NewsForge</a>
+	</li>
+	<li>
+		<a href="http://linux.com">Linux.com</a>
+	</li>
+	<li>
+		<a href="http://itmanagersjournal.com" class="highlight">ITMJ</a>
+	</li>
+	<li>
+		<a href="http://productguide.itmanagersjournal.com">IT Product Guide</a>
+	</li>
+	<li>
+		<a href="http://sf.net">SourceForge</a>
+	</li>
+	<li>
+		<a href="http://freshmeat.net">freshmeat</a>
+	</li>
+	<li>
+		<a href="http://newsletters.osdn.com">Newsletters</a>
+	</li>
+</ul>

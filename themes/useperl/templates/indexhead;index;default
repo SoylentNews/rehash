@@ -1,0 +1,229 @@
+__section__
+default
+__description__
+This is the common stuff that goes at the top of the index page.
+
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+indexhead
+__template__
+<div class="indexhead">
+[% UNLESS user.is_anon %]
+[% IF metamod_elig %]
+Have you <b><a href="[% gSkin.rootdir %]/metamod.pl">Meta Moderated</a></b> recently?<br>
+[% END %]
+[% IF user.points > 0 %]
+You have <b>[% user.points %]
+<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator</a>
+Point[% user.points == 1 ? "!</b> Use it or lose it!" : "s!</b> Use 'em or lose 'em!" %]<br>
+[% END %]
+
+[% messages = Slash.getObject("Slash::Messages");
+   IF messages;
+		message_count = messages.getWebCount();
+		IF message_count.total %]
+You have <b>[%
+	IF message_count.unread
+%]<a href="[% gSkin.rootdir %]/messages.pl?op=list">[%
+	END;
+message_count.unread %] new message[% message_count.unread == 1 ? "" : "s";
+	IF message_count.unread
+%]</a>[%
+	END
+%]</b> waiting for you, and <b>[%
+	IF message_count.read
+%]<a href="[% gSkin.rootdir %]/messages.pl?op=list">[%
+	END;
+message_count.read %] old message[% message_count.read == 1 ? "" : "s";
+	IF message_count.read
+%]</a>[%
+	END
+%]</b>.<br>
+[% END; END %]
+
+	[%# extra groups/modifiers/types from jhi %]
+	[% group    = ['army','array','arrayref','assortment','barrelful',
+	               'bargeful','cadre','caravan','class','clique',
+	               'cloud','club','company','congregation','convoy',
+	               'coterie','council','distribution','drove','emissary',
+	               'envoy','exaltation','flock','flood','gaggle',
+	               'gang','group','harbinger','hash','hashref',
+	               'horde','host','leader','legion','load',
+	               'maelstrom','medley','missive','mothership','mob',
+	               'pack','party','phalanx','plague','posse',
+	               'prophet','queue','row','school','selection',
+	               'squadron','stack','storm','swarm','task force',
+	               'team','tempest','throng','tribe','troupe',
+	               'vortex'];
+	   modifier = ['4-wheel','64-bit','Betelgeusian','Macchiavellian',
+	               'Martian','Pavlovian','Jedi','admirable','admiring',
+	               'agile','amicable','all-terrain','ambidextrous','ammonium-breathing',
+	               'amused','apocalyptic','apologetic','arrogant','artificial',
+	               'astute','asynchronous','attack','azure','beamish',
+	               'berserk','bickering','bimodal','bipedal','black',
+	               'blasphemous','blinking','blue','bluegrass','bonsai',
+	               'bored','bouncing','bouncy','bourgeois','boustrophedon',
+	               'break-dancing','brightly coloured','brilliant','brillig','bristly',
+	               'buoyant','burning','cabbalistic','cackling','cacophonous',
+	               'cathartic','cerulean','chaotic','chartreuse','cheeky',
+	               'cheesy','cherished','cherubic','chivalrous','chtonic',
+	               'chrome','circus','clandestine','clever','complacent',
+	               'confident','confused','considerate','constant','cool',
+	               'cosmic','cosmopolitan','coughing','courteous','coy',
+	               'crazed','curvaceous','cybernetic','cynical','dancing',
+	               'defiant','demonic','depressed','deranged','deviant',
+	               'digital','diplomatic','disgusting','discreet','dissident',
+	               'distributed','disturbing','dogmatic','downsized','drooling',
+	               'drunken','dynamic','eclectic','eidetic','electronic',
+	               'elegant','elite','eloquent','eloquent','elusive',
+	               'emergent','emphatic','encrypted','enigmatic','enlightened',
+	               'erudite','esteemed','ethereal','euphemistic','euphoric',
+	               'evasive','excellent','exclusive','extempore','extra',
+	               'fantastic','faster-than-light','fastidious','flamboyant','flexible',
+	               'flummoxed','fluorescent','flying','fortuitous','frabjous',
+	               'free-range','frivolous','frugal','frumious','fulgent',
+	               'galactic','galumphing','garden variety','giddy','giggling',
+	               'gleeful','global','goofy','greedy','green',
+	               'groovy','grumpy','gullible','hairy','hallucinating',
+	               'haphazard','happy','heavy-duty','heckling','hedonic',
+	               'heroic','heuristic','hibernating','hieratic','hiccuping',
+	               'highly trained','hifalutin','hirsute','holographic','homesick',
+	               'housebroken','humming','hyper','hyperdimensional','hypnotic',
+	               'immense','imminent','impertinent','impractical','inane',
+	               'incomprehensible','indignant','industrial-strength','influential','intergalactic',
+	               'irate','irreverent','jaunting','jeering','jiggling',
+	               'jiving','jolly','jovial','jubilant','juggling',
+	               'juvenile','karmic','laconic','laughing','leaning',
+	               'lexical','levitating','likeable','limbo-dancing','livid',
+	               'local','lounging','lucrative','luminescent','luxurious',
+	               'maniacal','manxsome','massive','massively parallel','masterful',
+	               'meddlesome','memorable','mercurial','metaphoric','migratory',
+	               'mimsy','mind-altering','mind-bending','mind-boggling','mobile',
+	               'modest','moping','motley','mournful','mumbling',
+	               'murmuring','myopic','mysterious','naive','nascent',
+	               'naughty','nervous','neurotic','noble','nomadic',
+	               'nosy','obfuscated','object-oriented','observant','obsolete',
+	               'obvious','ominous','omnipotent','omniscient','onomatopoetic',
+	               'optimistic','orange','pangalactic','paradoxic','parallel',
+	               'paranoid','passionate','pedantic','percussive','perilous',
+	               'persistent','pervasive','perverse','pessimistic','pestilent',
+	               'petty','petulant','picturesque','pink','plaid',
+	               'plastic','playful','pneumatic','poetic','polite',
+	               'polkadot','pompous','pointy-haired','porous','practical',
+	               'pragmatic','preemptive','pretentious','procrastinating','protean',
+	               'provocative','psychedelic','psychotic','punk','purple',
+	               'purring','quaint','quantum','questionable','quintessential',
+	               'quizzical','rabid','radioactive','random','random-access',
+	               'rampant','rebellious','reckless','reclining','reclusive',
+	               'redundant','reluctant','reverent','roaming','rowdy',
+	               'salient','sabertooth','scheming','scrupulous','semantic',
+	               'senile','sequential','sequential-access','serene','shameless',
+	               'shagadelic','shining','shiny','shy','sibilant',
+	               'silicon-based','singleminded','skeptic','sleek','slithy',
+	               'slobbering','slouching','sly','smashing','sneezing',
+	               'snobbish','snuggly','soggy','sonorous','spam',
+	               'spartan','sporadic','spunky','static','stroboscopic',
+	               'stubborn','subversive','sulking','sunbathing','super',
+	               'supreme','svelte','swanky','symbiotic','sympathetic',
+	               'synchronous','tactful','talented','talkative','temporary',
+	               'threadsafe','timeless','tipsy','toroidal','turbo',
+	               'uber','ululating','ultra','unruly','unsuspecting',
+	               'vain','variable','vexed','vibrating','virtual',
+	               'vorpal','warbling','warp-speed','whispering','whistling',
+	               'wiggly','wishful','wireless','wobbly','nipping',
+	               'yapping','zesty'];
+	   type     = ['Bandersnatches','Borg','Chewbaccas',
+	               'Illuminati','Jabberwocks','Klingons','Lederhosen','Ozzies',
+	               'Pacmen','Vikings','Vulcans','Vogons','aardvarks',
+	               'academics','accessors','agents','algorithms','alpacas',
+	               'amino acids','amoebas','analysts','androids','arrays',
+	               'baboons','barnacles','bagpipes','barbarians','beetroots',
+	               'bighorns','bipeds','bisons','boids','black helicopters',
+	               'bosons','bosuns','bosses','borogroves','brain',
+	               'buffalos','bunyips','bytecode','cabbages','camelopards',
+	               'camels','castanets','cauliflowers','cavemen','centaurs',
+	               'centipedes','cetaceans','chimpanzees','clams','clones',
+	               'closures','clowns','coconuts','code','coders',
+	               'colleagues','compilers','constants','constructors','consultants',
+	               'contexts','continuations','coredumps','corsairs','cows',
+	               'crabs','crustaceans','cucumbers','curios','curmudgeons',
+	               'daemons','dandelions','desktops','destructors','divas',
+	               'dodos','doodads','doohickeys','doom','dorns',
+	               'droids','dromedaries','dronts','ducks','dugongs',
+	               'dwarves','earthworms','eels','elves','elevator music',
+	               'emus','endusers','engineers','eukaryotes','eunuchs',
+	               'fembots','filehandles','firewalls','flamingoes','fools',
+	               'frogs','functions','fungi','garden gnomes','gargoyles',
+	               'geckos','geeks','geese','gerbils','gewgaws',
+	               'giraffes','gizmos','gnomes','gnus','goats',
+	               'goldfish','golems','gremlins','groundhogs','grues',
+	               'guanacos','guppies','gurus','hackers','hamsters',
+	               'hashes','hedgehogs','herring','hierophants','high priests',
+	               'hippies','hippos','hobgoblins','hogs','homunculi',
+	               'hyaenas','infobots','inputs','intelligence','interpreters',
+	               'iterators','jellyfish','kangaroos','kittens','kiwis',
+	               'klaxons','knicknacks','ladybugs','lampreys','laptops',
+	               'larks','lemmings','leprechauns','lexicons','limericks',
+	               'librarians','limbo dancers','lizards','llamas','lobsters',
+	               'locusts','magpies','mailing lists','mallards','mammoths',
+	               'manatees','marketroids','mimes','men in black','mimes',
+	               'minotaurs','modules','moles','mollusks','monoliths',
+	               'mongers','monkeys','moose','motherships','motives',
+	               'mutators','naiads','newsgroups','nerds','newts',
+	               'ninjas','nummulites','objects','ocelots','ogres',
+	               'operands','operators','opossums','orangutans','ostriches',
+	               'otters','outputs','oxen','pandas','panthers',
+	               'parakeets','parrots','parsers','past','peacocks',
+	               'pelicans','penguins','pigeons','pigs','pineapples',
+	               'pirates','plugins','portents','porcupines','processes',
+	               'professors','programmers','programs','proportions','prokaryotes',
+	               'prototypes','pseudopods','pumpkins','puppies','pythons',
+	               'quanta','quarks','quetzals','rabbits','raccoons',
+	               'references','referents','regexes','regular expressions','reptilians',
+	               'rhubarbs','routers','rutabagas','sardines','satyrs',
+	               'savants','scalars','scripts','seagulls','seals',
+	               'secretaries','secret agents','servers','sheep','skunks',
+	               'slouches','smurfs','snails','snarks','sponges',
+	               'spores','squids','starfish','subroutines','sumo wrestlers',
+	               'sysadmins','tapirs','threads','thingumabobs','thingumajigs',
+	               'thinguses','toads','toves','trilobites','trivia',
+	               'trolls','tuataras','turtles','typeglobs','umbrellas',
+	               'underwear','unicorns','vegetables','vicunas','warthogs',
+	               'weasels','webmasters','whangdoodles','whatchamacallits','whatnots',
+	               'wildebeest','wizards','wolves','wombats','workstations',
+	               'worms','wumpuses','yaks','yetis','yuppies',
+	               'zebras','zombies','Bruins','Red Sox','Celtics','Patriots'];
+	   extra    = ['in black','on drugs','on nitrous oxide',
+	               'on rampage','rampant','without shame','wearing shades'];
+
+	   theString = {};
+	   theString.modifier = modifier.rand;
+	   theString.article  = theString.modifier.search('^[aeiou]') ? "an" : "a";
+	   theString.extranum   = [0 .. 99];
+
+	   theString.extra      = "";
+	   theString.extra      = " of $modifier.rand $type.rand" IF theString.extranum.rand < 10;
+	   theString.extra      = "$theString.extra $extra.rand" IF theString.extranum.rand < 5;
+
+	   theString.final    = "$theString.article $theString.modifier $group.rand of $modifier.rand ${type.rand}$theString.extra";
+	%]
+
+<b>This page was generated by [% theString.final %] for
+<a href="[% gSkin.rootdir %]/users.pl">[% user.nickname | strip_literal %]</a>
+([% user.uid %]).</b><!-- using words and code from jhi --><p>
+
+<small>Your
+<b><a href="[% gSkin.absolutedir %]/index.pl?content_type=rss&amp;logtoken=[% user.logtoken | strip_paramattr %]">personalized
+RSS feed</a></b>.
+(<a href="//use.perl.org/~pudge/journal/16542">Read More</a>)</small><p> </p>
+[% END %]
+</div>
+__seclev__
+10000
+__version__
+$Id$

@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+        <title>use Perl; Editor Guidelines</title>
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+<h1>use Perl; Editor Guidelines</h1>
+
+<p>Your basic job as editor is to pull stories from the submission queue, and post them.</p>
+
+<p>The admin menu on the site has links to the functions you need: mostly, the Stories list, and the Submissions queue.</p>
+
+<p>It's fairly self-explanatory.  Select a submission to view, and if you decide to post it, click "Preview."  Don't delete submissions, let me do that.  You can move a submission to "Hold," though.</p>
+
+<h2>Story Selection</h2>
+
+<p>You should have a good idea of what is and is not a good story.  Ask me if you have any questions.</p>
+
+<ul>
+	<li>Avoid perl help questions: those are for Perl Monks.</li>
+	<li>Commercial and self-promoting articles are fine, as long as they are relevant, and as long as the tone of them is not overtly me-me-me-me-me (and you can tone it down yourself if it is).</li>
+	<li>Causes and flames and rumors are only rarely acceptable.</li>
+	<li>If you can't reasonably verify the facts in the article, don't post it.</li>
+	<li>Post articles about perl, not people.</li>
+	<li>Try to not post something that has already been posted.</li>
+	<li>Don't post really big news (like Tim O'Reilly burning all the Perl books in his warehouse, or Perl 6 being released) without talking to me first; I want to make sure it is handled appropriately.</li>
+</ul>
+
+<p>After selecting an article, clicking "Preview" brings you to the main story editing page.</p>
+
+
+<h2>Story Editor Fields</h2>
+
+<p>In the story editor, you will see the main things you need to be concerned with: Topics, Title, Date, Intro Copy (introtext), and Extended Copy (bodytext).  Use the guidelines below to fill them out.</p>
+
+<h3>Topics</h3>
+
+<p>This requires JavaScript.  There is a box with three sections in it: mainpage, sectional, and below.  If there is a topic above "Mainpage" then the story will appear in the mainpage, under that topic.  It will also appear under each sectional page listed in the box, unless the topic is <i>below</i> "Sectional."  Get it?</p>
+
+<p>Open the topic selection list with the "+" icon.  Close it with the "-" icon.  Move a topic up and down with the up/down icons, and remove it from the list with the "X" icon.</p>
+
+<p>There are two views of the topic selection list, "Index" and "Tree," selected by a button at the bottom of the list.  Tree is hierarchical, but our topic list really isn't hierarchical, so it's just a list.  Index allows you to type in a portion of the topic name, or click the letter it begins with.</p>
+
+<p>Double-click the name (browser-dependent behavior) to add it, or click it and then click the "Add" button.  In Index, you can also type "+" when in the search box.  Close the list with the "Close" button or the "X" icon.</p>
+
+<ul>
+	<li>You can choose multiple topics, as many as make sense.</li>
+	<li>Put everything on the home page (topic name above the "Mainpage" divider), unless we start posting regular user group meeting stuff, in which case we might put some of those sectional-only.</li>
+</ul>
+
+<h3>Titles</h3>
+
+<ul>
+	<li>Most titles from submitters are bad.  You will likely want to rewrite them, a least in part.</li>
+	<li>Don't make them too long, let the box be your guide; never let them go two lines.</li>
+	<li>Capitalize all words except for articles, conjunctions, and prepositions.</li>
+	<li>Use active verbs.</li>
+	<li>Don't use abbreviations when possible.</li>
+	<li>Never end with a period or exclamation point (question marks are occasionally acceptable).</li>
+</ul>
+
+<h3>Date</h3>
+
+<p>You have to type in the date yourself.  It's in GMT, and the current time in GMT is noted in the current page's &lt;title&gt;, so you don't have to do much math.  Space stories out by at least a few hours.</p>
+
+<h3>Intro Copy</h3>
+
+<p>This is the text that appears on the home page.</p>
+
+<ul>
+	<li>Keep under 150 words.</li>
+	<li>Avoid line breaks, including &lt;br&gt; and &lt;p&gt;, as well as any sort of lists, blockquote, headings, and so on.  If you need line breaks, consider moving the text to the Extended Copy.</li>
+	<li>Make sure text sent by the submitter is in italics.</li>
+</ul>
+
+<h3>Extended Copy</h3>
+
+<p>This is the rest of the text that appears on the article page.</p>
+
+<ul>
+	<li>Be as long as necessary.</li>
+	<li>Feel free to use lists, blockquotes, headings, etc. as necessary.  Do not use &lt;pre&gt; or &lt;table&gt;.</li>
+	<li>This text, even if from the submitter, doesn't necessarily have to be in italics, as long as it is clear that the submitter provided it in some other way.  Otherwise, use italics (and note that italics don't cross HTML block elements, so if you start a new paragraph or list, you need to add a lot of new italics, although can also wrap the whole thing in &lt;div style="font-style: italic"&gt;...&lt;/div&gt;).</li>
+</ul>
+
+
+<h2>Story Editing Tips</h2>
+
+<ul>
+	<li>Slash will fix any invalid (according to Slash!) HTML you put in, so be careful in your previews, because what yuo get back might not be what you put in.</li>
+	<li>Watch nested quote marks.  Double quotes inside double quotes should be made into single quotes, and inside single quotes, use double quotes, and so on.</li>
+	<li>Check spelling in all three boxes: title, introtext, bodytext.  Slash gives you some ideas of incorrect spelling, glance at it, at least.</li>
+	<li>Strip out exclamation points, and repetitive phrases.</li>
+	<li>Use descriptive text, not URLs: e.g., change <i>Go to &lt;a href="http://example.com/"&gt;http://example.com&lt;/a&gt;</i> to <i>&lt;a href="http://example.com/"&gt;the Example site&lt;/a&gt;</i>.  Other examples of bad anchor text are "this" and "here."</li>
+	<li>Check your links, to make sure they work and don't go to goatse.cx.</li>
+	<li>It's OK to add some personal comments to the submission, but try to not be too snarky, and keep it short.</li>
+	<li>Don't allow juvenile notes from the submitter, like using "Micro$oft".  No foul language.</li>
+	<li>Get proper names right, especially in capitalization (e.g., ActiveState, PlayStation, iPod, Mac mini, brian d foy).  Look it up if you are not sure.</li>
+	<li>Feel free to edit the submission for style and brevity and grammar; there is no requirement to put it in exactly as they submitted it.  If the change might modify the content, ask the submitter first.</li>
+</ul>
+
+<h2>Other</h2>
+
+<ul>
+	<li>Editors have unlimited moderation.  Use it very sparingly, pretty much only to curb serious abuse, such as spamming, or people being total jerks.</li>
+	<li>The occasional poll change is a nice thing; if you want to do a new poll, let me know.</li>
+	<li>There may be other admin things you have access to; in general, don't touch anything else.</li>
+	<li>Ask me any questions, about any of this, that you have, including issues with individual articles.</li>
+	<li>Thanks!</li>
+</ul>
+
+<!--#include virtual="/slashfoot.inc"-->

@@ -1,0 +1,59 @@
+__section__
+default
+__description__
+Text that makes up the bottom of a page
+
+No specially passed variables
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+footer
+__template__
+                        </div>
+                </div>
+                <div id="footer">
+			<div class="download">
+                                <!-- START DOWNLOAD PERL -->
+                                <!-- Perl Mongers, Inc.  web@perlmongers.org -->
+                                <a href="http://www.cpan.org/ports/index.html"><img src="http://www.perl.org/Images/download_perl.gif" width="102" height="42" alt="Download Perl Now!"></a>
+                                <!-- END DOWNLOAD PERL -->
+                        </div>	
+			<div class="sitelogo">
+				<a href="[% gSkin.rootdir %]/">
+					<img src="http://images.use.perl.org/topics/useperl.gif" alt="useperl">
+				</a>
+			</div>
+                        <em>
+				[% PROCESS motd %]
+			</em>
+		</div>
+		<div class="copyright">
+			[% PROCESS useperlcopyright %]
+		</div>
+		<div class="btmnav">
+			[% PROCESS useperlmenu;
+				IF user.is_admin;
+  				 Slash.currentAdminUsers();
+			END %]
+		</div>
+        </div>
+[% INCLUDE modal_footer %]
+
+	<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		_uacct = "UA-32013-15";
+		urchinTracker();
+	</script>
+
+</body>
+</html>
+
+
+__seclev__
+10000
+__version__
+$Id$

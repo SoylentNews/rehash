@@ -1,0 +1,30 @@
+__section__
+default
+__description__
+Block of text for incluzion in header.
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+organisation
+__template__
+<a href="http://freshmeat.net/">freshmeat</a><br>
+<a href="http://geocrawler.com/">GeoCrawler</a><br>
+<a href="http://linux.com/">Linux.com</a><br>
+<a href="http://linuxgram.com/">Linuxgram</a><br>
+<a href="http://newsforge.com/">NewsForge</a><br>
+<a href="http://slashdot.org/">Slashdot</a><br>
+<a href="http://sourceforge.net/">SourceForge.net</a><br>
+<a href="http://themes.org/">Themes.org</a><br>
+<a href="http://thinkgeek.com/">ThinkGeek</a><br>
+
+__seclev__
+500
+__version__
+$Id$
+

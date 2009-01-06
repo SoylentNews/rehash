@@ -1,0 +1,64 @@
+__section__
+default
+__description__
+Text that makes up the VERY top of a page (separate from "header" so we can dynamically add stuff between the two)
+
+* title = title for TITLE tag
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+html-header
+__template__
+[% UNLESS only_css %]
+[% DEFAULT title="$constants.sitename: $constants.slogan" %]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="[% constants.content_type_webpage %]">
+<link rel="shortcut icon" href="[% constants.rootdir %]/favicon.ico">
+[% IF meta_desc %]<meta name="description" content="[% meta_desc | strip_attribute %]">[% END %]
+<title>[% title | strip_notags %]</title>
+[% END %]
+[% css = Slash.db.getCSS() %]
+[%- FOREACH file = css -%]
+[% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% IF constants.css_use_imagedir; constants.imagedir; ELSE; constants.rootdir; END %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
+[% END -%]
+[%- IF constants.plugin.Ajax %]
+<script src="[% constants.imagedir %]/jquery/jquery-1.2.6.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.metadata.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/slash.util.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.slashdot.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/yahoo.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/dom.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/event.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/dragdrop.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/animation.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% IF user.currentPage == "firehose" || user.currentPage == "console" -%]
+<script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END -%]
+<script src="[% constants.imagedir %]/yui/calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/sd_calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/slash.article-info.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% IF user.currentPage == "firehose" -%]
+<script src="[% constants.imagedir %]/slash.boxes.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END -%]
+<script src="[% constants.imagedir %]/tag-ui.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% IF user.is_admin -%]
+<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END %]
+[% PROCESS ajax_reskey_tag reskey_label => 'reskey_static', reskey_name => 'ajax_user_static', reskey_tag_js => 2 %]
+[% END # constants.plugin.Ajax %]
+__seclev__
+10000
+__version__
+$Id$

@@ -1,0 +1,79 @@
+__section__
+default
+__description__
+Text that makes up the bottom of a page
+
+No specially passed variables
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+footer
+__template__
+			</div>	
+		</div>
+		<div id="footer">
+			[% IF user.is_admin %]
+				[% Slash.currentAdminUsers() %]
+			[% ELSE %]
+				[% UNLESS user.lowbandwidth %]
+				<em>[% PROCESS motd %]</em>
+				[% END %]
+			[% END %]
+			<div class="search">
+				<form method="get" action="[% constants.rootdir %]/search.pl">
+					<fieldset>
+						<legend></legend>
+						<input type="text" name="query" value="" size="20">
+						<input type="submit" value="Search" class="button">
+					</fieldset>
+				</form>
+			</div>
+			<div class="copyright">
+				[% Slash.db.getBlock('footer', 'block' )  %]
+			</div>
+			<div class="btmnav">
+				<ul>
+					<li class="begin">
+						<a href="[% gSkin.rootdir %]/">home</a>
+					</li>
+					<li>
+						<a href="[% gSkin.rootdir %]/submit.pl">contribute story</a>
+					</li>
+					<li>
+						<a href="[% gSkin.rootdir %]/search.pl">older articles</a>
+					</li>
+					<li>
+						<a href="[% gSkin.rootdir %]/pollBooth.pl">past polls</a>
+					</li>
+					<li>
+						<a href="[% gSkin.rootdir %]/faq.shtml">faq</a>
+					</li>
+					<li>
+						<a href="[% gSkin.rootdir %]/authors.pl">authors</a>
+					</li>
+                                        [%- IF ! user.is_anon %]
+                                        <li>
+                                                <a href="[% gSkin.rootdir %]/users.pl">preferences</a>
+                                        </li>
+                                        [%- END %]
+					<li>
+						<a href="[% PROCESS rsslink %]"><img src="[% constants.imagedir %]/rssicon.gif" width="36" height="14" alt="RSS feed"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+[% INCLUDE modal_footer %]
+
+</body>
+</html>
+
+__seclev__
+10000
+__version__
+$Id$

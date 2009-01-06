@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+         "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+        <title>use Perl; FAQ</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+        <div id="faq">
+                <!-- end template: ID 121, header;misc;default -->
+                <h1>use Perl; FAQ</h1>
+                <ul>
+                        <li>
+                                <a href="#TheSite">The Site</a>
+                                <ul>
+                                        <li><a href="#TheSite0">What's this site for?</a></li>
+                                        <li><a href="#TheSite1">Who runs this site?</a></li>
+                                        <li><a href="#TheSite2">What/where is the Perl News site?</a></li>
+                                        <li><a href="#TheSite3">How do I submit a story / start a discussion / give feedback?</a></li>
+                                        <li><a href="#TheSite4">Can I write for use Perl?</a></li>
+                                        <li><a href="#TheSite5">Where can I get all those quotes at the bottom of the pages?</a></li>
+                                        <li><a href="#TheSite6">Where can I get use Perl's main feed?</a></li>
+                                        <li><a href="#TheSite7">What other feeds are available?</a></li>
+                                        <li><a href="#TheSite8">How may I use the use Perl content?</a></li>
+                                        <li><a href="#TheSite9">Why do some modules listed in the Module News not have descriptions?</a></li>
+                                </ul>
+                        </li>
+                        <li>
+                                <a href="#TheTech">The Tech</a>
+                                <ul>
+                                        <li><a href="#TheTech0">What hardware is this site running on?</a></li>
+                                        <li><a href="#TheTech1">What code is this site running?</a></li>
+                                        <li><a href="#TheTech2">Is this really the same code that runs Slashdot?</a></li>
+                                </ul>
+                        </li>
+                </ul>
+
+                <h2><a name="TheSite" id="TheSite">The Site</a></h2>
+
+                <h3><a name="TheSite0" id="TheSite0">What's this site for?</a></h3>
+                <p>Thanks for asking. This site is intended (for now) to be a site where the Perl user community can get information about and discuss the latest news and issues related to Perl. This site is not (for now :) intended to be a help desk. General "how do I do $x?" questions can be answered in many other places online, including the many Perl mailing lists and news groups.</p>
+                <p>This site cannot be all things to all people, so (for now :-) we are limiting its scope. If it becomes popular enough, we may have a separate section for "help desk" style questions.</p>
+
+                <h3><a name="TheSite1" id="TheSite1">Who runs this site?</a></h3>
+                <p>This site is run primarily by <a href="http://pudge.net/">Chris Nandor</a> (<a href="mailto:pudge@perl.org">pudge@perl.org</a>), and generously hosted by his employer, <a href="http://www.ostg.com/">OSTG</a>. The hostname is being used thanks to <a href="http://www.perl.org/">Perl Mongers</a>. The site is also a testbed for Chris' work on the <a href="http://slashcode.com/">Slash</a> code (see below). Consider yourselves to be guniea pigs.</p>
+                <p>Chris also has help from a small army of other <a href="/authors.pl">authors</a> who will post from time to time. Much of the content on this site (spanning a few years of Perl news) came from the Perl News website, which was the online companion to the Perl News column in <a href="http://www.tpj.com/">The Perl Journal</a>.</p>
+                <p>Call it synergy.</p>
+                <p>The whole was started based on initial work with The Perl Institute, which had a Perl News page. Chip Salzenberg started it, and Chris took it over. Then Perl Mongers hosted Perl News when TPI went under.  Now it's just this web site.  TPJ now has new owners and new Perl news content.</p>
+
+                <h3><a name="TheSite2" id="TheSite2">What/where is the Perl News site?</a></h3>
+                <p>Perl News was the site preexisting this one. It no longer really exists, but all of the stories from that site do exist here.</p>
+
+                <h3><a name="TheSite3" id="TheSite3">How do I submit a story / start a discussion / give feedback?</a></h3>
+                <p>Use the <a href="/submit.pl">Submit Story</a> link. It will go into our submissions bin, where we can have a look at it. You can also send email to <a href="mailto:news@perl.org">news@perl.org</a>, but using the Submit Story link is better.</p>
+
+                <h3><a name="TheSite4" id="TheSite4">Can I write for use Perl?</a></h3>
+                <p>If you would like to write for use Perl, please send mail to <a href="mailto:pudge@perl.org">pudge@perl.org</a>. We have no specific process for accepting authors or articles, but we are open to new authors and to article submissions.</p>
+
+                <h3><a name="TheSite5" id="TheSite5">Where can I get all those quotes at the bottom of the pages?</a></h3>
+                <p>You can get them <a href="/quotes.txt">here</a>. Thanks to Citizen X for help in compiling them, and all those who have contributed.</p>
+
+                <h3><a name="TheSite6" id="TheSite6">Where can I get use Perl's main feed?</a></h3>
+                <p>The syndication feed for the use Perl front page is available in RSS 0.9 (<a href="http://use.perl.org/index.rdf">http://use.perl.org/index.rdf</a>), RSS 1.0 (<a href="http://use.perl.org/index.rss">http://use.perl.org/index.rss</a>), and Atom 1.0 (<a href="http://use.perl.org/index.atom">http://use.perl.org/index.atom</a>). Do not request feeds more than once every 30 minutes.</p>
+
+                <h3><a name="TheSite7" id="TheSite7">What other feeds are available?</a></h3>
+                <p>On most pages, if there is feed content available, it will be noted in the &lt;HEAD&gt; of the page.</p>
+                <p>Wherever you see "rss" below, you can also substitute with "atom" to get an Atom 1.0 feed, such as <i>content_type=atom</i>, <i>journal/atom</i>, or <i>index.atom</i> (although some feeds, like Zoo and some search results, need some more work for Atom).</p>
+                <p>Where you see "$username" below, substitute the URI-encoded username of the user in question.</p>
+                <p>Where you see "$logtoken", you must include a token so the server knows you are you (you can find it in the &lt;HEAD&gt; of the page).</p>
+
+                <ul>
+
+			<li>Index (replace "<tt>index</tt>" with a section name, such as "<tt>apple.rss</tt>")<ul>
+					<li><tt>http://use.perl.org/index.rdf</tt></li>
+					<li><tt>http://use.perl.org/index.rss</tt></li>
+					<li><tt>http://use.perl.org/index.pl?content_type=rss&amp;logtoken=<b>$logtoken</b></tt> (this special version will respect your user homepage prefs; the value of $logtoken will be noted in the RSS link on the HTML index page, and is subject to change when you log out or change your login preferences; logtoken is not necessary if your news reader can handle your cookie)</li>
+			</ul></li>
+
+			<li>Journals<ul>
+					<li><tt>http://use.perl.org/~<b>$username</b>/journal/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/journal/friends/rss</tt></li>
+					<li><tt>http://use.perl.org/journal.pl?op=top&amp;content_type=rss</tt> (most recent journal users)</li>
+			</ul></li>
+
+			<li>Messages<ul>
+					<li><tt>http://use.perl.org/my/inbox/rss/<b>$logtoken</b></tt></li>
+			</ul></li>
+
+			<li>Zoo<ul>
+					<li><tt>http://use.perl.org/~<b>$username</b>/friends/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/foes/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/fans/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/freaks/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/zoo/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/friends/friends/rss</tt></li>
+					<li><tt>http://use.perl.org/~<b>$username</b>/friends/foes/rss</tt></li>
+			</ul></li>
+
+			<li>Search Results<ul>
+					<li>Merely add <tt>&amp;content_type=rss</tt> to the query string</li>
+			</ul></li>
+
+<!-- 
+			<li>Submissions Queue<ul>
+					<li><tt>http://use.perl.org/submit.pl?op=list&content_type=rss</tt></li>
+			</ul></li>
+ -->
+
+                </ul>
+
+                <h3><a name="TheSite8" id="TheSite8">How may I use the use Perl content?</a></h3>
+                <p>You may use the headlines of stories and journal entries and search results to link back to the site. You may use the content of articles for not-for-profit, non-commercial use only, unless special arrangements are made, and as long as proper credit (the site name with a link or URL back, and optionally the site's small logo) is given. The comments and journals on use Perl may not be used without permission of the poster of said content, as they are owned by the respective posters.</p>
+
+                <h3><a name="TheSite9" id="TheSite9">Why do some modules listed in the Module News not have descriptions?</a></h3>
+                <p><a href="http://www.cpan.org/">CPAN</a>, the Comprehensive Perl Archive Network, has a list of all the modules it knows about, and, when available, descriptions of each one. This list is compiled by the folks who run CPAN, and use Perl gets its descriptions for <a href="http://use.perl.org/modulelist/">Module News</a> from that master list. Submit your module description (as described in <a href="http://www.cpan.org/modules/00modlist.long.html#ID1_ModuleListi">The Perl 5 Module List</a>) to <a href="mailto:modules@perl.org">modules@perl.org</a>, and your module, too, will have its description posted when it is updated.</p>
+
+
+                <h2><a name="TheTech" id="TheTech">The Tech</a></h2>
+
+                <h3><a name="TheTech0" id="TheTech0">What hardware is this site running on?</a></h3>
+                <p>This site is running on a dual-proc Pentium III/1GHz with 2GB RAM, running Red Hat 9.  It is shared by <a href="http://www.slashcode.com/">slashcode.com</a>.  The database (one master, and a couple of replicated slaves) are the same hardware, running Red Hat 7.3, and MySQL 4.0.  The databases are shared with slashcode.com, as well as <a href="http://www.linux.com/">Linux.com</a>, <a href="http://www.newsforge.com/">NewsForge</a>, and <a href="http://www.itmanagersjournal.com/">IT Manager's Journal</a>.  It all shares network and support systems with the rest of the OSTG network, including <a href="http://slashdot.org/">Slashdot</a>, <a href="http://freshmeat.net/">Freshmeat</a>, and <a href="http://www.sourceforge.net/">SourceForge.net</a> sites.</p>
+
+                <h3><a name="TheTech1" id="TheTech1">What code is this site running?</a></h3>
+                <p>This site is built on the <a href="http://slashcode.com/">Slash</a> code, the same code that runs <a href="http://slashdot.org/">Slashdot</a>. It is basically built on Perl, Apache 1.x + mod_perl, and MySQL.  For mailing lists, discussions, bug reports, code downloads, patches, and anything else related to the code, see <a href="http://slashcode.com/">Slashcode</a>.</p>
+
+                <h3><a name="TheTech2" id="TheTech2">Is this really the same code that runs Slashdot?</a></h3>
+                <p>Yes.  Normally once a week, this site gets the latest code, and if all goes well, it goes live on Slashdot a day or so later.  So, normally, the code on each site is in close sync with each other, and with the code available on CVS from slashcode.com.</p>
+
+                <p><em>Last updated Thu Aug 25 18:23:39 2005 GMT</em></p>
+        </div>
+
+<!--#include virtual="/slashfoot.inc"-->

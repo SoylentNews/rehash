@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+This is the main block of html and code that gets evaled to create the main
+index page.
+
+* metamod_elig = boolean for whether current user is eligible to metamod
+* future_plug = whether to let the user know about stories they can't see
+  that are coming up soon
+* daypass_plug_text = text of the daypass plug, or empty string if none
+* stories = string containing all the stories
+* boxes = string containing all the slashboxes
+
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+index
+__template__
+<div id="ac-select-widget" class="hidden">
+  <input type="text" id="ac-select-input" />
+  <div class="completer-container" id="ac-choices"></div>
+</div>
+	<a name="blocks"></a>
+	<div id="slashboxes">
+	[% UNLESS user.noboxes %]
+		[% IF boxes;
+			boxes %]
+		[% END %]
+	[% END %]
+	</div>
+	[% PROCESS indexhead %]
+	<a name="main-articles"></a>
+	<div id="articles">
+<!-- google_ad_section_start -->
+	[% stories %]
+<!-- google_ad_section_end -->
+	</div>
+__seclev__
+10000
+__version__
+$Id$

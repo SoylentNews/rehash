@@ -1,0 +1,505 @@
+body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
+
+body
+{
+	font-family: serif;
+	background: #ddd;
+}
+
+a { color: #006; }
+a:visited { color: #669; }
+
+.notes, .note
+{
+	font-family: geneva, verdana, arial, sans-serif;
+	font-size: 80%;
+	padding: .3em;
+}
+
+/* Layout */
+#contents
+{
+	margin: .3em 0 0 0;
+	clear: both;
+	height: 100%;
+}
+
+body #index #articles
+{
+	margin: 0 15.6em 1em 0;
+	position: relative;
+}
+#articles, #users-blocks, #polls { margin: 0 12.6em 1em 0; }
+
+/* Header */
+html > body #logo h1 a { margin: 0 0 0 .2em; }
+
+#logo h1 a
+{
+	width: 248px;
+	height: 74px;
+	background: url("http://images.use.perl.org/slashhead.gif") no-repeat;
+	margin: 0 0 -.1em .2em;
+
+}
+
+#topnav { margin: 1em 0 .1em 0; }
+
+#topnav .search
+{
+	text-align: right;
+	padding: .1em .6em 0 0;
+	text-decoration: none;
+}
+
+#topnav .search fieldset, #topnav .search form
+{
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+#topnav .search legend { display: none; }
+
+#topnav .search label
+{
+	padding: 0;
+	margin: .3em 0 -1em 0;
+	font-size: 65%;
+	font-family: geneva, verdana, arial, sans-serif;
+	color: #000;
+	font-weight: normal;
+}
+
+#slogan h2
+{
+	color: #006;
+	border: 1px solid #006;
+	background: #fff;
+	font-family: geneva, arial, helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 75.5%;
+	padding: .2em .3em .3em .8em;
+}
+
+/* links */
+#links
+{
+	float: none;
+	width: auto;
+	margin: 0 12em 0 0;
+	text-align: center;
+}
+
+#submitnav #links, #topicsnav #links, #loginnav #links, #searchnav #links, #pollBoothnav #links, #commentsnav #links, #authorsnav #links { margin: 0; }
+#links div.block { margin: 0 0 0 0; }
+#links div.title { display: none; }
+
+#links div.content
+{
+	background: transparent;
+	line-height: normal;
+	font-size: 65%;
+	font-family: geneva, verdana, arial, sans-serif;
+}
+
+#links ul li
+{
+	list-style: none;
+	display: inline;
+	padding: 0;
+}
+
+#links ul li a
+{
+	border-left: 1px solid #000;
+	padding: 0 .1em 0 .5em;
+	margin: 0;
+}
+
+#links ul li.begin a
+{
+	border-left: none;
+	padding: 0 .1em 0 .5em;
+	margin: 0;
+}
+
+#navigation-content li.user { background: transparent; }
+#navigation-content ul ul { background: transparent; }
+
+/* slashboxes */
+#slashboxes
+{
+	width: 12em;
+	background: transparent;
+	margin: -1em 0 .3em 0;
+}
+
+#slashboxes div.title
+{
+	background: #006 url("http://images.use.perl.org/cl.gif") top left no-repeat;
+	margin: 0 .3em;
+}
+
+#slashboxes h4
+{
+	background: url("http://images.use.perl.org/cr.gif") top right no-repeat;
+	padding: 0 .6em 0 1.4em;
+	font-weight: bold;
+	font-family: geneva, verdana, arial, sans-serif;
+	font-size: 65%;
+	height: 100%;
+}
+
+#slashboxes div.content
+{
+	background: #fff;
+	border: 1px solid #006;
+	font-family: geneva, verdana, arial, sans-serif;
+	font-size: 65%;
+}
+
+#slashboxes h4 img.map { right: .6em; }
+
+/* General */
+.generaltitle { background: #006; }
+.generaltitle div.title { background: transparent url("http://images.use.perl.org/cl.gif") top left no-repeat; }
+
+.generaltitle h3
+{
+	background: transparent url("http://images.use.perl.org/cr.gif") top right no-repeat;
+	font-family: serif;
+	font-size: 100%;
+}
+
+/* articles */
+.article { background: #006; }
+.article div.title { background: url("http://images.use.perl.org/cl.gif") top left no-repeat; }
+
+#journal .article h3
+{
+	background: url("http://images.use.perl.org/cr.gif") top right no-repeat;
+	font-family: serif;
+	font-size: 100%;
+	padding: .1em .3em .1em .8em;
+}
+
+#journal .article h3 a, #journal .article h3 a:visited
+{
+	color: #ddd;
+	padding: 0 .1em 0 0;
+}
+
+.article div.details
+{
+	font-size: 65%;
+	font-weight: normal;
+	font-family: geneva, verdana, arial, sans-serif;
+	border: 1px solid #006;
+	border-bottom: none;
+	background: #e6e6e6;
+}
+
+.article div.body
+{
+	border: 1px solid #006;
+	background: #fff;
+	padding: .5em 1em;
+	min-height: 90px;
+}
+
+div.body h1, div.body h2, div.body h3, div.body h4
+{
+	font-size: 16px;
+}
+
+div.storylinks
+{
+	background: #ccc;
+	font-size: 65%;
+	font-family: geneva, verdana, arial, sans-serif;
+	border: 1px solid #006;
+	border-top: none;
+	margin: 0 0 3em 0;
+}
+
+div.storylinks div { background: transparent; }
+div.storylinks ul { background: transparent; }
+
+/* Footer */
+#footer
+{
+	font-family: serif;
+	padding: .5em 0;
+	margin: 1em 0;
+	border: 1px solid #006;
+	background: #fff;
+	height: 100%;
+	text-align: center;
+	min-height: 2.5em;
+	font-size: 85.5%;
+}
+
+#footer .download
+{
+	float: right;
+	margin: -.5em .2em 0 .2em;
+	position: relative;
+}
+
+#footer .sitelogo
+{
+	float: left;
+	margin: 0 .2em;
+	position: relative;
+}
+
+#footer em
+{
+	font-family: monospace;
+	padding: 0;
+	margin: 0;
+	font-style: normal;
+}
+
+.copyright
+{
+	font-size: 75.5%;
+	color: #000;
+	margin: 0 0 1em 0;
+}
+
+/* Bottom Nav */
+.btmnav
+{
+	font-size: 65%;
+	font-family: geneva, verdana, arial, sans-serif;
+	color: #006;
+	padding: 0 0 2em 0;
+	clear: both;
+}
+
+.btmnav ul
+{
+	margin: 0;
+	padding: 0;
+}
+
+.btmnav ul li { border: none; }
+
+.btmnav ul li a
+{
+	color: #006;
+	padding: 0 .2em 0 .5em;
+	border-left: 1px solid #006;
+}
+
+/* Comments */
+.commentwrap
+{
+	border: none;
+	background: transparent;
+}
+
+.commentBox
+{
+	background: #006;
+	font-size: 80%;
+	padding: .2em;
+}
+
+.commentBoxForm { 
+	background: transparent; 
+	margin: 0 0 3px 0;
+}
+
+.commentTop
+{
+	background: #006;
+	border: 1px solid #006;
+	border-bottom: none;
+	padding: 0;
+}
+
+.commentTop .title, .commentTop .title h4, .commentTop .title h4 a, .commentTop .comment_links a
+{
+	color: #fff;
+	padding: .1em .2em;
+}
+
+.commentTop .details
+{
+	background: #e6e6e6;
+	padding: .5em 1em;
+	font-size: 65%;
+	font-family: verdana, sans-serif;
+}
+
+.commentBody
+{
+	background: #fff;
+	border: 1px solid #006;
+	padding: .3em 1em;
+}
+
+.commentSub
+{
+	background: transparent;
+	border: none;
+}
+
+/* Poll */
+.barColor { background: #006; }
+
+/* Usermenu */
+#usermenu
+{
+	background: transparent;
+	padding: 0;
+	border: none;
+}
+
+ul.menu { margin: .3em 0 0 .3em; }
+ul.menu li a { color: #006; }
+ul.menu li a:visited { color: #669; }
+ul.menu li.selected { background: #006; }
+ul.menu li.selected a, ul.menu li.selected a:visited { color: #ddd; }
+
+.generalbody ul.menu, .submenu
+{
+	margin: 0 0 1em 0;
+	font-size: 65%;
+	font-family: geneva, verdana, arial, sans-serif;
+}
+
+.generalbody ul.menu li a, .submemu li a { color: #006; }
+#usermenu ul.menu li.selected { background: transparent; }
+#usermenu ul.menu li.selected a:visited { color: #669; }
+
+/* Journal */
+#journalslashdot .journaldate {font-weight: bold;}
+#journalslashdot .title { margin: 0 0 0 .6em; padding: 0; float: left;}
+#journalslashdot h3 { font-size: 65%; margin: 0; padding: 0; font-family: geneva,verdana,sans-serif;}
+#journalslashdot .details { float: left; font-style: italic; font-size: 65%; font-family: geneva,verdana,sans-serif; background: transparent;}
+#journalslashdot .intro { padding: 1em 0 2em 3.7em;}
+#journalslashdot div.storylinks {border: none; margin: 0; padding: 0; background: transparent;font-size: 65%;}
+#journalslashdot div.storylinks ul { margin: 0; padding: 0; background: transparent;}
+#journalslashdot div.storylinks ul li { margin: 0; padding: 0; border: none;  font-family: geneva,verdana,sans-serif; }
+#journalslashdot div.storylinks ul li a { padding: 0 .4em 0 1em;  border-left: 1px solid #000; }
+#journalslashdot div.storylinks ul li.edit a, #journalslashdot div.storylinks ul li.discussion a,  #journalslashdot div.storylinks ul li.journalid a { border: none; }
+#journalslashdot .journalpage {font-size: 65.5%;  font-family: geneva,verdana,sans-serif; text-align: right;}
+
+#journalslashdot .adminoptions {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	font-size: 65%;
+	font-family: geneva,verdana,sans-serif;
+}
+
+#journalslashdot .adminoptions:before { content: "\A0" }
+
+
+
+/* Data tables */
+.data_head
+{
+	color: #fff;
+	background: #006;
+}
+
+.tb_col { background: #006;}
+.sb_header { color: #006;}
+
+/* Usermenu */
+ul.menu a, ul.menu a:visited { color: #000; }
+.generalbody ul.menu li a { color: #006; }
+
+.menuoldstyle li
+{
+        display: inline;
+        list-style: none;
+        margin: 0;
+        padding: 0 2px 0 1px;
+}
+
+.menuoldstyle ul
+{       
+        padding: 0; 
+        margin: 0 0 1em 0;
+}
+
+.menuoldstyle li:before { content: "| "; }
+.menuoldstyle li:first-child:before { content: ""; }
+
+.briefarticle { padding: 2px; background: #ccc; font-size: 80%}
+.briefarticle a { color: #000 }
+.briefarticle .section { color: #333; }
+.briefarticle .storytitle { font-weight: bold; }
+.briefarticle .introhide { display : none }
+.briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+
+/* Tags */
+
+.tags { width: 100%; font-size: 90%; line-height: 115% }
+.tagname { color: #006; font-weight: bold; padding: 0 }
+.tagtitleopen { background: #006; color: #fff; font-size: 90% }
+.tagtitleopen a { color: #fff; text-decoration: none; font-size: 90% }
+.tagtitleclosed { background: #e5e5e5; font-size: 90% }
+.tagtitleclosed a { text-decoration: none; font-size: 90% }
+.tagbody { border: 1px #ccc solid; background: #eee; padding: 8px }
+.tagshide { display: none }
+
+.future .briefarticle { background: #c33; }
+.briefarticles { border-top: solid 2px #006; padding-bottom: 0.5em; margin-top: 3px }
+.curstory { border-top: solid 2px #006; }
+.secpref_master td { border-bottom: solid 2px #006;}
+.secpref_nexus_row { color: #aaa; background: #ccc; }
+.ps_23, .ps_22 { display: none; }
+.curstory { border-top: solid 2px #006; }
+.popup { border: solid 2px #006; }
+.popup .data { font-size: 100% }
+.popup-title {text-align: left; background: #006; font-size: 100%; color: #fff; padding-right: 4em; }
+.popup-title .buttons, .title .buttons {
+	position: absolute;
+        right: 0.2em;
+}
+.popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold; font-family: sans-serif; text-decoration: none;}
+.popup-title .buttons span { margin: -.3em 0; padding: 0 4px; height: 11px; width: 11px;}
+
+.popup-message { background: #006; color: #fff; }
+.popup-title a, .popup-message a { color: #fff }
+.popup-contents { background: #ccc; font-size: 80%; padding: 5px; }
+.popup-message  { background: #006; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
+#sectionprefs-contents { background: #fff }
+
+.comment > .oneline .commentTop, .comment > .oneline .commentBody, .comment > .oneline .details, .comment > .oneline .commentTop .title h4 a, .comment > .oneline .commentTop .score, .comment > .oneline .commentTop .comment_links, .comment > .oneline .commentTop .comment_links a {
+	color: #006;
+}
+
+.comment > .oneline {
+	border: none;
+	border-top: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+	padding: .1em 0 0 0;
+}
+
+.comment > .currcomment {
+	border: 1px dotted #666;
+}
+
+.comment > .oneline .details {
+	padding: 0;
+	font-family: serif;
+	background: transparent;
+}
+
+.comment > .oneline .commentBody * {
+	padding: 0;
+	color: #333;
+}
+
+.horizontal .ccw-header-links { top: 0pt; }
+
+.intro p { margin: 1em 0px }
