@@ -98,10 +98,13 @@ sub run_process {
 	# entries in %scores with negative values.
 
 	my %scores = ( );
+	my %count = ( );
 	for my $tag (@$tags_ar) {
 		$scores{$tag->{tagname}} += $tag->{total_clout};
+		$count {$tag->{tagname}} ++;
 	}
 
+	my $minscore_mult = 1;
 	my @opposite_tagnames =
 		map { $tags_reader->getOppositeTagname($_) }
 		grep { $_ !~ /^!/ && $scores{$_} > 0 }
@@ -114,6 +117,21 @@ sub run_process {
 		my $orig_score = $scores{$orig};
 		$scores{$orig} -= $scores{$opp};
 		$scores{$opp} -= $orig_score;
+		# If there are not many of either, make it harder
+		# for either to appear.  This can help prevent the
+		# problem of one user tagging "poop", then several
+		# others rightfully tagging "!poop", with the result
+		# being that "!poop" appears as a top tag.
+		my $ratio = $scores{$opp} > $scores{$orig}
+			? $scores{$opp}/$scores{$orig}
+			: $scores{$orig}/$scores{$opp};
+		# XXX all these numbers should be vars
+		if ($count{$orig} + $count{$opp} <= 5
+			|| $count{$orig} <= 2
+			|| $count{$opp} <= 2
+			|| $ratio < 3) {
+			$minscore_mult *= 3;
+		}
 	}
 
 	my @top = sort {
@@ -166,8 +184,8 @@ sub run_process {
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
 	# XXX the "4" below (aka "top 5") is hardcoded currently, should be a var
-	my $minscore1 = $constants->{tagbox_top_minscore_urls};
-	my $minscore2 = $constants->{tagbox_top_minscore_stories};
+	my $minscore1 = $constants->{tagbox_top_minscore_urls} * $minscore_mult;
+	my $minscore2 = $constants->{tagbox_top_minscore_stories} * $minscore_mult;
 
 	my $plugin = getCurrentStatic('plugin');
 	if ($plugin->{FireHose}) {
