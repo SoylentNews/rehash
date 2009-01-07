@@ -631,6 +631,8 @@ sub cmd_lcr {
 			my $val = $slashdb->getVar("ircslash_lcr_$site", 'value', 1) || '';
 			my($date, $tag) = split /\|/, $val, 2;
 			slashdLog("lcr: $val, $date, $tag");
+			# if tag is a date, don't show date
+			$date = '' if $tag =~ /^(\d{4}).(\d{2}).(\d{2}).(\d{2}).(\d{2}).(\d{2})\b/;
 			push @lcrs, { site => $site, date => $date, tag => $tag };
 		} else {
 			send_msg(getIRCData('lcr_not_found', { site => $site }), { $service => 1 });
@@ -640,7 +642,8 @@ sub cmd_lcr {
 		for my $site (split /\|/, $constants->{ircslash_lcr_sites}) {
 			my $val = $slashdb->getVar("ircslash_lcr_$site", 'value', 1);
 			my($date, $tag) = split /\|/, $val, 2;
-			my %lcrs = ( $site =>  { date => $date, tag => $tag } );
+			# if tag is a date, don't show date
+			$date = '' if $tag =~ /^(\d{4}).(\d{2}).(\d{2}).(\d{2}).(\d{2}).(\d{2})\b/;
 			push @lcrs, { site => $site, date => $date, tag => $tag };
 		}
 	}
