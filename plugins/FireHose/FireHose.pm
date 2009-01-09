@@ -24,6 +24,7 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
+use Data::Dumper;
 use Data::JavaScript::Anon;
 use Date::Calc qw(Days_in_Month Add_Delta_YMD);
 use POSIX qw(ceil);
@@ -2619,6 +2620,32 @@ sub genUntitledTab {
 	return $user_tabs;
 }
 
+# this serialization code can be heavily modified to taste ... it doesn't
+# really matter what it spits out, as long as we can rely on it being
+# consistent and unique for a given query
+
+sub serializeOptions {
+	my($self, $options, $prefs) = @_;
+
+	# copy the data so we can massage it into place
+	my $data = {};
+	for (keys %$options) {
+		if (ref $options->{$_}) {
+			# ???
+		}
+		$data->{$_} = $options->{$_};
+	}
+
+	# do prefs come before or after options?
+	for (keys %$prefs) {
+		$data->{$_} = $prefs->{$_};
+	}
+
+	local $Data::Dumper::Sortkeys = 1;
+	local $Data::Dumper::Indent   = 0;
+	local $Data::Dumper::Terse    = 1;
+	return Dumper($data);
+}
 
 sub getAndSetOptions {
 	my($self, $opts) = @_;
