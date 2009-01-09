@@ -2418,7 +2418,7 @@ sub getAndSetOptions {
 	$mode = "fulltitle" if $mode eq "mixed";
 
 	my $pagesize = $form->{pagesize} && $validator->{pagesize}{$form->{pagesize}};
-	$options->{pageize} = $pagesize || $options->{pagesize}  || "small";
+	$options->{pagesize} = $pagesize || $options->{pagesize}  || "small";
 
 	$options->{mode} = $mode;
 
