@@ -2623,29 +2623,52 @@ sub genUntitledTab {
 # this serialization code can be heavily modified to taste ... it doesn't
 # really matter what it spits out, as long as we can rely on it being
 # consistent and unique for a given query
+{
+my @options = (
+	# meta search parameters
+	qw(
+		limit nolimit more_num orderby orderdir offset
+		startdate duration fetch_text admin_filters
+	),
+	# other search parameters
+	qw(
+		filter color category not_id not_uid public not_public
+		accepted not_accepted rejected not_rejected type not_type
+		primaryskid not_primaryskid signed unsigned nexus not_nexus
+		tagged_by_uid tagged_as offmainpage smalldevices
+		createtime_no_future createtime_subscriber_future		
+	)
+);
+
+# from the user
+my @prefs = qw(
+	is_admin firehose_usermode
+);
+
+# XXX still need to figure these out ...
+# ids uid qfilter carryover no_search
+# ignore_nix tagged_positive tagged_negative tagged_non_negative
 
 sub serializeOptions {
 	my($self, $options, $prefs) = @_;
 
 	# copy the data so we can massage it into place
 	my $data = {};
-	for (keys %$options) {
-		if (ref $options->{$_}) {
-			# ???
-		}
-		$data->{$_} = $options->{$_};
+	for my $opt (@options) {
+		# XXX how to handle refs, like 'uid' and 'ids'
+		$data->{$opt} = $options->{$opt} if defined $options->{$opt};
 	}
 
 	# do prefs come before or after options?
-	for (keys %$prefs) {
-		$data->{$_} = $prefs->{$_};
+	for my $pref (@prefs) {
+		$data->{$pref} = $prefs->{$pref} if $prefs && defined $prefs->{$pref};
 	}
 
 	local $Data::Dumper::Sortkeys = 1;
 	local $Data::Dumper::Indent   = 0;
 	local $Data::Dumper::Terse    = 1;
 	return Dumper($data);
-}
+} }
 
 sub getAndSetOptions {
 	my($self, $opts) = @_;
