@@ -2645,6 +2645,11 @@ my @prefs = qw(
 	is_admin firehose_usermode
 );
 
+# some things can be arrays; sort numerically unless listed here
+my %stringsort = (map { $_ => 1 } qw(
+	type not_type
+));
+
 # XXX still need to figure these out ...
 # ids uid qfilter carryover no_search
 # ignore_nix tagged_positive tagged_negative tagged_non_negative
@@ -2655,8 +2660,21 @@ sub serializeOptions {
 	# copy the data so we can massage it into place
 	my $data = {};
 	for my $opt (@options) {
-		# XXX how to handle refs, like 'uid' and 'ids'
-		$data->{$opt} = $options->{$opt} if defined $options->{$opt};
+		next unless defined $options->{$opt};
+		my $ref = ref $options->{$opt};
+		
+		if ($ref eq 'ARRAY') {
+			# normalize sort
+			if ($stringsort{$opt}) {
+				$data->{$opt} = [ sort @{ $options->{$opt} } ];
+			} else {
+				$data->{$opt} = [ sort { $a <=> $b } @{ $options->{$opt} } ];
+			}
+		} elsif ($ref) {
+			errorLog("$opt is a $ref, don't know what to do!");
+		} else {
+			$data->{$opt} = $options->{$opt};
+		}
 	}
 
 	# do prefs come before or after options?
