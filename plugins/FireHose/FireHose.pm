@@ -781,7 +781,7 @@ sub getFireHoseEssentials {
 					if (@$cur_opt == 1) {
 						$notlab = $not ? "!" : "";
 						my $quoted_opt = $self->sqlQuote($cur_opt->[0]);
-						push @where, "$base $notlab=$quoted_opt";
+						push @where, "firehose.$base $notlab=$quoted_opt";
 					} elsif (@$cur_opt > 1) {
 						$notlab = $not ? "NOT" : "";
 						my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
