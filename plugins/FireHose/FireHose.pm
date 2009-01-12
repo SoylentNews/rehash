@@ -126,6 +126,45 @@ sub createUpdateItemFromJournal {
 	}
 }
 
+sub getFireHoseSections {
+	my($self) = @_;
+	my $user = getCurrentUser();
+	my($uid_q) = $self->sqlQuote($user->{uid});
+	my $sections = $self->sqlSelectAllHashrefArray("*", "firehose_section", "uid in (0,$uid_q)", "ORDER BY uid, ordernum, section_name");
+	if (!$user->{firehose_section_order}) {
+		return $sections;
+	} else {
+		my %sections_hash = map { $_->{fsid}  => $_ } @$sections;
+		my @ordered_sections;
+		foreach (split /,/, $user->{firehose_section_order}) {
+			if($sections_hash{$_}) {
+				push @ordered_sections, delete $sections_hash{$_};
+			}
+		}
+
+		foreach (@$sections) {
+			push @ordered_sections, $_ if $sections_hash{$_->{fsid}}
+		}
+		return @ordered_sections;
+	}
+}
+
+sub getFireHoseSectionBySkid {
+	my($self, $skid) = @_;
+	my $skid_q = $self->sqlQuote($skid);
+	return $self->sqlSelectHashref("*", "firehose_section","uid=0 AND skid=$skid_q");
+}
+
+sub getFireHoseSection {
+	my($self, $fsid) = @_;
+
+	my $user = getCurrentUser();
+	my $uid_q = $self->sqlQuote($user->{uid});
+	my $fsid_q = $self->sqlQuote($fsid);
+	
+	return $self->sqlSelectHashref("*","firehose_section","uid in(0,$uid_q) AND fsid=$fsid_q");
+}
+
 sub getFireHoseColors {
 	my($self, $array) = @_;
 	my $constants = getCurrentStatic();
@@ -2314,6 +2353,26 @@ sub getSystemViewByName {
 	return $self->sqlSelectHashref("*", "firehose_view", "uid=0 && viewname = $name_q and seclev <= $user->{seclev}");
 }
 
+sub determineCurrentSection {
+	my ($self) = @_;
+	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
+
+	my $section;
+
+	# XXX what to do if fhfilter is specified?
+	
+	if ($form->{section}) {
+		$section = $self->getFireHoseSection($form->{section});
+	}
+	
+	if (!$section && !$section->{fsid}) {
+		$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
+	} 
+	
+	return $section;
+}
+
 sub applyViewOptions {
 	my($self, $view, $options, $second) = @_;
 	my $gSkin = getCurrentSkin();
@@ -2449,12 +2508,17 @@ sub getAndSetOptions {
 			$options->{fhfilter} = $ret_tab->{filter}
 		}
 
+		my $section = $self->determineCurrentSection();
+
+		
 		# Jump to default view as necessary
 		if (!$tab && !defined $options->{fhfilter} && !$opts->{view} && !$form->{view}) {
 			$opts->{view} = "stories";
 		}
 
 		my $view;
+		
+
 		if ($opts->{view} || $form->{view}) {
 			my $viewname = $opts->{view} || $form->{view};
 			$view = $self->getUserViewByName($viewname);
@@ -3184,6 +3248,7 @@ sub listView {
 	if ($gSkin->{skid} != $constants->{mainpage_skid}) {
 		$section = $gSkin->{skid};
 	}
+	
 	my $firehose_more_data = {
 		future_count => $future_count,
 		options => $options,

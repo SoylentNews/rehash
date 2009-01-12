@@ -1,0 +1,41 @@
+__section__
+default
+__description__
+Template for generating the skinindexd template.  Uses an alternate
+form of tags (<++> instead of [%%]) so it can write the standard tag
+form into skinindexd.  Input:
+
+* skins = arrayref of hashref of skin data (containing month,
+	monthname, date, count, skin, rootdir)
+* skin = name of parent skin
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+firehose_sections
+__template__
+[% fh = Slash.getObject("Slash::FireHose")
+   sections = fh.getFireHoseSections;
+%]
+<ul>
+	[% FOREACH fh_section= sections %]
+		[% NEXT IF section.display == "no" %]
+		[% link_loc = gskin.rootdir _ "/firehose.pl?section=" _ section.section_name %]
+		
+		[% IF section.skid %]
+			[% the_skin = Slash.db.getSkin(fh_section.skid) %]
+			[% IF the_skin && the_skin.rootdir;
+				link_loc = the_skin.rootdir;
+			   END %]
+		[% END %]
+		<li id="fhsection-[% fsid %]"><a href="[% link_loc %]"[% IF !user.is_anon; %]onclick="firehose_set_options('section','[% fh_section.fsid %]'); return false;" [% END %]>[% fh_section.section_name %]</a></li>
+	[% END %]
+</ul>
+__seclev__
+1000
+__version__
+$Id$

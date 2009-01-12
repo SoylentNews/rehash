@@ -75,6 +75,21 @@ CREATE TABLE firehose_text(
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS firehose_section;
+CREATE TABLE firehose_section(
+	fsid mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	section_name VARCHAR(32) NOT NULL DEFAULT 'unnamed',
+	section_filter VARCHAR(255) NOT NULL DEFAULT '',
+	skid SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+	display ENUM("yes","no") DEFAULT 'yes',
+	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
+	ordernum tinyint DEFAULT '0',
+	PRIMARY KEY (fsid),
+	UNIQUE uid_section_filter(uid,section_filter)
+	
+);
+
 DROP TABLE IF EXISTS firehose_tab;
 CREATE TABLE firehose_tab(
 	tabid mediumint(8) unsigned NOT NULL auto_increment,
