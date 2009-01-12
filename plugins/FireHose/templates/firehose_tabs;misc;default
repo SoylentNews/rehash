@@ -31,7 +31,10 @@ END %]
 %]
 [% END %]
 [% active_set = 0; %]
-[% UNLESS nodiv %]<ul class="menu" id="fhtablist">[% END %]
+[% UNLESS nodiv %]
+<a id="toggleleftmenu" onclick="return false" class="expanded" href="#" title="Toggle left menu">Toggle left menu</a>
+<ul class="menu" id="fhtablist">[% END %]
+
 	[% IF options.smalldevices %]
 		[% FOREACH tab = tabs;
 			tabnames.${tab.tabname} = tab.tabname;
