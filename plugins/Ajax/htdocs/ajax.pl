@@ -789,6 +789,10 @@ sub getModalPrefs {
 			return $return;
 		}
 
+	} elsif ($form->{section} eq 'firehoseview') {
+		my $fh = getObject("Slash::FireHose");
+		return slashDisplay('fhviewprefs', {}, { Return => 1} );
+		
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
