@@ -2374,7 +2374,8 @@ sub determineCurrentSection {
 	if (!$section && !$section->{fsid}) {
 		$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
 	} 
-	
+	use Data::Dumper;
+	print STDERR Dumper($section);	
 	return $section;
 }
 
@@ -2393,7 +2394,9 @@ sub applyViewOptions {
 		$options->{tab_ref} = "";
 	} else {
 		# Set skin as base filter
-		$options->{fhfilter} = $gSkin->{name};
+		if ($options->{section} && $options->{sectionref}) {
+			$options->{fhfilter} = $options->{sectionref}{section_filter};
+		}
 		
 		$options->{base_filter} = $options->{fhfilter};
 		$options->{fhfilter} = "$options->{fhfilter} $view->{filter}";
@@ -2465,10 +2468,10 @@ sub getAndSetOptions {
 
 	my $mainpage = 0;
 
-	my ($f_change, $v_change, $t_change);
+	my ($f_change, $v_change, $t_change, $s_change);
 
 	if (!$opts->{initial}) {
-		($f_change, $v_change, $t_change) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged});
+		($f_change, $v_change, $t_change, $s_change) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged}, $form->{sectionchanged});
 	}
 	
 	my $validator = $self->getOptionsValidator();
@@ -2514,6 +2517,11 @@ sub getAndSetOptions {
 		}
 
 		my $section = $self->determineCurrentSection();
+		if ($section && $section->{fsid}) {
+			$options->{sectionref} = $section;
+			$options->{section} = $section->{fsid};
+			$options->{base_filter} = $section->{section_filter};
+		}
 
 		
 		# Jump to default view as necessary
@@ -2563,6 +2571,15 @@ sub getAndSetOptions {
 			$options->{base_filter} = $ret_tab->{filter};
 			$options->{fhfilter} = $ret_tab->{filter}
 		}
+
+		if ($s_change && defined $form->{section}) {
+			my $section = $self->determineCurrentSection();
+			if ($section && $section->{fsid}) {
+				$options->{section} = $section->{fsid};
+				$options->{sectionref} = $section;
+				$self->applyViewOptions($options->{viewref}, $options)
+			}
+		}
 		
 		if($form->{view}) {
 			my $view = $self->getUserViewByName($form->{view});
@@ -2607,7 +2624,6 @@ sub getAndSetOptions {
 	if (defined $form->{pause}) {
 		$options->{pause} = $form->{pause} ? 1 : 0;
 	}
-
 	if (defined $form->{duration}) {
 		if ($form->{duration} =~ /^-?\d+$/) {
 			$options->{duration} = $form->{duration};
@@ -2679,10 +2695,10 @@ sub getAndSetOptions {
 	my $the_skin = defined $form->{section} ? $self->getSkin($form->{section}) : $gSkin;
 
 
-	my $skin_prefix="";
-	if ($the_skin && $the_skin->{name} && $the_skin->{skid} != $constants->{mainpage_skid})  {
-		$skin_prefix = "$the_skin->{name} ";
-	}
+	#my $skin_prefix="";
+	#if ($the_skin && $the_skin->{name} && $the_skin->{skid} != $constants->{mainpage_skid})  {
+	#	$skin_prefix = "$the_skin->{name} ";
+	#}
 	
 	$user_tabs = $self->genUntitledTab($user_tabs, $options);	
 

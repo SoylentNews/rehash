@@ -504,8 +504,14 @@ function firehose_set_options(name, value, context) {
 	if (name == 'more_num') {
 		params.ask_more = 1;
 	}
-
+	
+	if (name == 'section') {
+		params.sectionchanged = 1;
+		firehose_settings.section = value;
+	}
+	
 	params.section = firehose_settings.section;
+
 	$.extend(params, firehose_settings);
 	ajax_update(params, '', handlers);
 }
