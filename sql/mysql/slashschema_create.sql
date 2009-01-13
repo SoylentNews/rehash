@@ -1347,7 +1347,8 @@ CREATE TABLE users (
 	KEY login (nickname,uid,passwd),
 	KEY chk4user (realemail,nickname),
 	KEY chk4matchname (matchname),
-	KEY author_lookup (author)
+	KEY author_lookup (author),
+	KEY seclev (seclev)
 ) TYPE=InnoDB;
 
 #
