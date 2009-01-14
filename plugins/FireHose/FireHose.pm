@@ -573,12 +573,10 @@ sub createItemFromStory {
 sub getFireHoseCount {
 	my($self) = @_;
 	my $pop = $self->getEntryPopularityForColorLevel(6);
-	my $user = getCurrentUser();
-	my $pop_q = $self->sqlQuote($pop);
-	my $signoff_label = "sign$user->{uid}\ed";
 
 	#XXXFH - add time limit later?
-	return $self->sqlCount("firehose", "editorpop >= $pop_q and rejected='no' and accepted='no' and type!='story'");
+	return $self->sqlCount("firehose",
+		"editorpop >= $pop AND rejected='no' AND accepted='no' AND type != 'story'");
 }
 
 sub getFireHoseEssentials {
@@ -878,9 +876,13 @@ sub getFireHoseEssentials {
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 	}
 
+	# XXX I would like to change this, as soon as possible, to have
+	# the only column retrieved be 'id', and to pipe the resulting
+	# ids through getFireHoseMulti().  That takes a lot of load off
+	# the DB.  It also eliminates the getGlobjAdminnotes call below.
+	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
-
 
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
@@ -889,12 +891,12 @@ sub getFireHoseEssentials {
 		);
 	}
 
-	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
+	my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
 	my $row_num = @$rows;
 
 	my $count = $row_num;
 	if ($row_num == 1 && !$count_other) {
-		$count = $rows->[0]->{"count(*)"};
+		$count = $rows->[0]{c};
 	}
 
 	my $page_size = $ps || 1;
@@ -922,7 +924,7 @@ sub getFireHoseEssentials {
 		}
 		$items = \@tmp_items;
 
-	# Add globj admin notes to the firehouse hashrefs.
+	# Add globj admin notes to the firehose hashrefs.
 	} else {
 		my $globjids = [ map { $_->{globjid} } @$hr_ar ];
 		my $note_hr = $self->getGlobjAdminnotes($globjids);
@@ -1026,51 +1028,163 @@ sub getFireHoseByTypeSrcid {
 	my $type_q = $self->sqlQuote($type);
 	my $id_q   = $self->sqlQuote($id);
 	my $item = {};
-	my $fid = $self->sqlSelect("id", "firehose", "srcid=$id_q and type=$type_q");
+	my $fid = $self->sqlSelect("id", "firehose", "srcid=$id_q AND type=$type_q");
 	$item = $self->getFireHose($fid) if $fid;
 	return $item;
 }
 
-sub getFireHose {
-	my($self, $id) = @_;
+# getFireHose and getFireHoseMulti are the standard ways to retrieve
+# a firehose item's data, given its firehose id.  It is recommended
+# that all item data retrieval bottleneck through here, to take full
+# advantage of caching.
 
+sub getFireHose {
+	my($self, $id, $options) = @_;
+	my $hr = $self->getFireHoseMulti([$id], $options);
+	return $hr->{$id};
+}
+
+sub getFireHoseMulti {
+	my($self, $id_ar, $options) = @_;
+	my $constants = getCurrentStatic();
+
+	my $exptime = $constants->{firehose_memcached_exptime} || 600;
+	my $ret_hr = { };
+
+	my $mcd_hr = { };
 	my $mcd = $self->getMCD();
 	my $mcdkey;
 	if ($mcd) {
 		$mcdkey = "$self->{_mcd_keyprefix}:firehose";
-		my $item = $mcd->get("$mcdkey:$id");
-		return $item if $item;
+		$mcd_hr = $mcd->get_multi(@$id_ar) unless $options->{memcached_no_read};
 	}
 
-	# XXX cache this eventually
-	my $constants = getCurrentStatic();
-	my $id_q = $self->sqlQuote($id);
-	my $answer = $self->sqlSelectHashref(
-		"*, firehose.popularity AS userpop, UNIX_TIMESTAMP(firehose.createtime) AS createtime_ut",
-		"firehose", "id=$id_q");
-	my $append = $self->sqlSelectHashref("*", "firehose_text", "id=$id_q");
+	my $answer_hr = { };
+	my @remaining_ids = ( );
+	if (!$options->{memcached_hits_only}) {
+		@remaining_ids = ( grep { !defined($mcd_hr->{$_}) } @$id_ar );
+	}
+	my $splice_count = 2000;
+	while (@remaining_ids) {
+		my @id_chunk = splice @remaining_ids, 0, $splice_count;
+		my $id_str = join(',', @id_chunk);
+		my $more_hr = $self->sqlSelectAllHashref('id',
+			'*,
+				firehose.popularity AS userpop,
+				UNIX_TIMESTAMP(firehose.createtime) AS createtime_ut',
+			'firehose, firehose_text',
+			"firehose.id IN ($id_str) AND firehose.id=firehose_text.id");
+		# id's that don't match are ignored from here on out
+		@id_chunk = keys %$more_hr;
 
-	for my $key (keys %$append) {
-		$answer->{$key} = $append->{$key};
+		# globj adminnotes are never the empty string, they are undef
+		# instead.  But firehose notes are (were designed to)
+		# never be undef, they are the empty string instead.
+		# Add a note field to each hose item hashref.
+		my @globjids = ( map { $more_hr->{$_}{globjid} } @id_chunk );
+                my $note_hr = $self->getGlobjAdminnotes(\@globjids);
+		for my $id (@id_chunk) {
+			$more_hr->{$id}{note} = $note_hr->{ $more_hr->{$id}{globjid} } || '';
+		}
+
+		# XXX faster, or slower, than iterating over $more_hr?
+		$answer_hr = {( %$answer_hr, %$more_hr )};
 	}
 
-	# globj adminnotes are never the empty string, they are undef
-	# instead.  Firehose notes are/were designed to never be undef,
-	# the empty string instead.
-	$answer->{note} = $self->getGlobjAdminnote($answer->{globjid}) || '';
-
-	if ($mcd && $answer->{title}) {
-		my $exptime = $constants->{firehose_memcached_exptime} || 600;
-		$mcd->set("$mcdkey:$id", $answer, $exptime);
+	if ($mcd && %$answer_hr && !$options->{memcached_no_write}) {
+		for my $id (keys %$answer_hr) {
+			$mcd->set("$mcdkey:$id", $answer_hr->{$id}, $exptime);
+		}
 	}
 
-	return $answer;
+	$ret_hr = {( %$mcd_hr, %$answer_hr )};
+	return $ret_hr;
+}
+
+# Like getFireHose, but does the lookup by globjid (which is unique).
+#
+# One way to implement this would be to store complete hose data with
+# each globjid, the advantage being half as many memcached requests
+# and thus half the latency.  I wouldn't mind paying most of the price
+# for this:  extra memcached RAM, and extra network bandwidth in some
+# cases.  But that would also interleave hose item cache expiration
+# times, which could lead to confusing bugs.  To avoid that, I'm
+# willing to pay the price of extra latency.
+#
+# So instead this does a lookup from globjid to id (which is cached),
+# and wraps that conversion about a getFireHoseMulti call.
+#
+# The option id_only skips the step of retrieving the actual firehose
+# data and returns a hashref (or values of hashrefs) with only the
+# id field populated.
+
+sub getFireHoseByGlobjid {
+	my($self, $globjid, $options) = @_;
+	my $hr = $self->getFireHoseByGlobjidMulti([$globjid], $options);
+	return $hr->{$globjid};
+}
+
+sub getFireHoseByGlobjidMulti {
+	my($self, $globjid_ar, $options) = @_;
+	my $ret_hr = { };
+
+	# First, convert the globjids to ids.
+
+	my $exptime = 86400*7; # very long because id<->globjid never changes
+	my $globjid_to_id_hr = { };
+
+	my $mcd_hr = { };
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:gl2id";
+		$mcd_hr = $mcd->get_multi(@$globjid_ar) unless $options->{memcached_no_read};
+	}
+
+	my $answer_hr = { };
+	my @remaining_ids = ( grep { !defined($mcd_hr->{$_}) } @$globjid_ar );
+	my $splice_count = 2000;
+	while (@remaining_ids) {
+		my @globjid_chunk = splice @remaining_ids, 0, $splice_count;
+		my $globjid_str = join(',', @globjid_chunk);
+		my $more_hr = $self->sqlSelectAllKeyValue(
+			'globjid, id',
+			'firehose',
+			"globjid IN ($globjid_str)");
+		# XXX faster, or slower, than iterating over $more_hr?
+		$answer_hr = {( %$answer_hr, %$more_hr )};
+	}
+
+	if ($mcd && %$answer_hr && !$options->{memcached_no_write}) {
+		for my $globjid (keys %$answer_hr) {
+			$mcd->set("$mcdkey:$globjid", $answer_hr->{$globjid}, $exptime);
+		}
+	}
+
+	$globjid_to_id_hr = {( %$mcd_hr, %$answer_hr )};
+
+	# If only the ids are desired, we can return those now.
+	if ($options->{id_only}) {
+		return $globjid_to_id_hr;
+	}
+
+	# Now that the globjids have been converted to ids, call
+	# getFireHoseMulti.
+
+	my @ids = grep { $_ } map { $globjid_to_id_hr->{$_} } @$globjid_ar;
+	my $firehose_hr = $self->getFireHoseMulti(\@ids, $options);
+
+	# Then convert the keys in the answer back to globjids.
+	for my $id (keys %$firehose_hr) {
+		$ret_hr->{ $firehose_hr->{$id}{globjid} } = $firehose_hr->{$id};
+	}
+	return $ret_hr;
 }
 
 sub getFireHoseIdFromGlobjid {
 	my($self, $globjid) = @_;
-	my $globjid_q = $self->sqlQuote($globjid);
-	return $self->sqlSelect("id", "firehose", "globjid=$globjid_q");
+	my $hr = $self->getFireHoseByGlobjid($globjid, { id_only => 1 });
+	return $hr ? $hr->{id} : undef;
 }
 
 sub getFireHoseIdFromUrl {
