@@ -1631,17 +1631,24 @@ function hide_modal_box() {
 	return;
 }
 
-function getModalPrefs(section, title, tabbed) {
+function getModalPrefs(section, title, tabbed, params) {
+	if (!params) {
+		params = {};
+	}
+
+
 	if (!reskey_static) {
 		return show_login_box();
 	}
 	$('#preference_title').html(title);
-	ajax_update({
-		op:		'getModalPrefs',
-		section:	section,
-		reskey:		reskey_static,
-		tabbed:		tabbed
-	}, 'modal_box_content', { onComplete: show_modal_box });
+
+	params['op'] 	  = 'getModalPrefs';
+	params['section'] = section;
+	params['reskey']  = reskey_static;
+	params['tabbed']  = tabbed;
+
+
+	ajax_update( params, 'modal_box_content',{ onComplete: show_modal_box });
 }
 
 function firehose_get_media_popup(id) {
@@ -1872,10 +1879,22 @@ function firehose_get_onscreen() {
 	return onscreen;
 }
 
+function firehose_pop_save_section() {
+	var params = {};
+	params['name'] = 'Untitled';
+
+	if($dom('searchquery')) {
+		params['filter'] = $dom('searchquery').value;
+	}
+
+	getModalPrefs('firehoseview','Save Custom Section', 0, params);
+}
+
 
 function getSeconds () {
 	return new Date().getTime()/1000;
 }
+
 
 
 // ads!  ads!  ads!

@@ -13,16 +13,14 @@ fhviewprefs
 __seclev__
 10000
 __template__
-<form>
-Name: <input type="text" name="section_name"><br>
-Filter: <input type="text" name="section_filter"><br>
-Initial View: <select name="view">
-		<option>Stories</option>
-		<option>Recent</option>
-		<option>Popular</option>
-	      </select><br>
-<input type="submit" value="save">
-<input type="submit" value="cancel">
-<input type="submit" value="delete">
+<form id ="modal_prefs" method="post">
+<input type="hidden" name="formname" value="firehoseview">
+Name: <input type="text" name="section_name" value="[% name %]"><br>
+Filter: <input type="text" name="section_filter" value="[% filter %]"><br>
+Initial View: [% Slash.createSelect('viewid', views, { return => 1}) %]<br> 
+
+<input type="button" value="save" onclick="saveModalPrefs()">
+<input type="button" value="cancel">
+<input type="button" value="delete">
 </form>
 

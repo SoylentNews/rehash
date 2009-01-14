@@ -149,6 +149,11 @@ sub getFireHoseSections {
 	}
 }
 
+sub createFireHoseSection {
+	my($self, $data) = @_;
+	$self->sqlInsert("firehose_section", $data);
+}
+
 sub ajaxSaveFireHoseSections {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$slashdb->setUser($user->{uid}, {firehose_section_order => $form->{fsids}});
@@ -2335,6 +2340,16 @@ sub getUserViews {
 	$where = join ' AND ', @where;
 	return $self->sqlSelectAllHashrefArray("*","firehose_view", $where, "ORDER BY uid, id");
 }
+	
+sub getUserViewById {
+	my($self, $id, $options) = @_;
+	my $user = getCurrentUser();
+
+	my $uid_q = $self->sqlQuote($user->{uid});
+	my $id_q = $self->sqlQuote($id);
+
+	return $self->sqlSelectHashref("*", "firehose_view", "uid in (0,$uid_q) && id = $id_q");
+}
 
 sub getUserViewByName {
 	my($self, $name, $options) = @_;
@@ -2479,10 +2494,10 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 
 	my $global_opts = $self->getAndSetGlobalOptions();
-	my $user_tabs        = $self->getUserTabs();
-	my %user_tab_names   = map { $_->{tabname} => 1 } @$user_tabs;
-	my %user_tab_by_name   = map { $_->{tabname} => $_ } @$user_tabs;
-	my %user_tab_filters = map { $_->{filter} => $_->{tabname} } @$user_tabs;
+	# my $user_tabs        = $self->getUserTabs();
+	# my %user_tab_names   = map { $_->{tabname} => 1 } @$user_tabs;
+	# my %user_tab_by_name   = map { $_->{tabname} => $_ } @$user_tabs;
+	# my %user_tab_filters = map { $_->{filter} => $_->{tabname} } @$user_tabs;
 	my $options = {};
 
 	# Beginning of initial pageload handling
@@ -2496,26 +2511,27 @@ sub getAndSetOptions {
 			$options->{fhfilter} = $fhfilter;
 			$options->{base_filter} = $fhfilter;
 
-			if (defined $user_tab_filters{$fhfilter}) {
-				$opts->{tab} = $user_tab_filters{$fhfilter};
-			} else {
-				$opts->{tab} = '';
-			} 
+		#	if (defined $user_tab_filters{$fhfilter}) {
+		#		$opts->{tab} = $user_tab_filters{$fhfilter};
+		#	} else {
+		#		$opts->{tab} = '';
+		#	} 
 			$form->{tab} = '';
 			$opts->{view} = '';
 			$form->{view} = '';
 			
 		}
 		
-		my $tab = $opts->{tab} || $form->{tab};
-		if ($tab) {
-			my $ret_tab = $user_tab_by_name{$tab}; 
-			$options->{tab} = $tab;
-			$options->{tab_ref} = $ret_tab;
-			$options->{base_filter} = $ret_tab->{filter};
-			$options->{fhfilter} = $ret_tab->{filter}
-		}
+		my $tab; # = $opts->{tab} || $form->{tab};
+		#if ($tab) {
+		#	my $ret_tab = $user_tab_by_name{$tab}; 
+		#	$options->{tab} = $tab;
+		#	$options->{tab_ref} = $ret_tab;
+		#	$options->{base_filter} = $ret_tab->{filter};
+		#	$options->{fhfilter} = $ret_tab->{filter}
+		#}
 
+		# XXX Don't do if fhfilter specified?
 		my $section = $self->determineCurrentSection();
 		if ($section && $section->{fsid}) {
 			$options->{sectionref} = $section;
@@ -2525,9 +2541,25 @@ sub getAndSetOptions {
 
 		
 		# Jump to default view as necessary
+
+		print STDERR "Passed initial view". $opts->{view} . " |  " . $form->{view} ."\n";
+		print STDERR "FHFILTER $options->{fhfilter} ". " ". defined($options->{fhfilter}) ."\n";
+
 		if (!$tab && !defined $options->{fhfilter} && !$opts->{view} && !$form->{view}) {
-			$opts->{view} = "stories";
+			if ($options->{sectionref}) {
+				print STDERR "SECTION: ". Dumper($section);
+
+				my $view = $self->getUserViewById($section->{view_id});
+
+				if ($view && $view->{id}) {
+					$opts->{view} = $view->{viewname};
+				} else {
+					$opts->{view} = "stories";
+				}
+			}
 		}
+		
+		print STDERR "After\n";
 
 		my $view;
 		
@@ -2554,22 +2586,14 @@ sub getAndSetOptions {
 			$options->{fhfilter} = $fhfilter;
 			$options->{base_filter} = $fhfilter;
 
-			if (defined $user_tab_filters{$fhfilter}) {
-				$form->{tab} = $user_tab_filters{$fhfilter};
-			} else {
+			#if (defined $user_tab_filters{$fhfilter}) {
+			#	$form->{tab} = $user_tab_filters{$fhfilter};
+			#} else {
 				$form->{tab} = '';
-			} 
+			#} 
 			$opts->{tab} = '';
 			$opts->{view} = '';
 			$form->{view} = '';
-		}
-
-		if($t_change && defined $form->{tab}) {
-			my $ret_tab = $user_tab_by_name{$form->{tab}}; 
-			$options->{tab} = $form->{tab};
-			$options->{tab_ref} = $ret_tab;
-			$options->{base_filter} = $ret_tab->{filter};
-			$options->{fhfilter} = $ret_tab->{filter}
 		}
 
 		if ($s_change && defined $form->{section}) {
@@ -2577,6 +2601,18 @@ sub getAndSetOptions {
 			if ($section && $section->{fsid}) {
 				$options->{section} = $section->{fsid};
 				$options->{sectionref} = $section;
+
+
+				my $view = $self->getUserViewById($section->{view_id});
+
+				if ($view && $view->{id}) {
+					$opts->{view} = $view->{viewname};
+				} else {
+					$opts->{view} = "stories";
+				}
+				
+				$options->{viewref} = $self->getUserViewByName($opts->{view});
+
 				$self->applyViewOptions($options->{viewref}, $options)
 			}
 		}
@@ -2700,7 +2736,7 @@ sub getAndSetOptions {
 	#	$skin_prefix = "$the_skin->{name} ";
 	#}
 	
-	$user_tabs = $self->genUntitledTab($user_tabs, $options);	
+	#$user_tabs = $self->genUntitledTab($user_tabs, $options);	
 
 
 	if ($user->{is_admin} && $form->{setusermode}) {
@@ -2849,7 +2885,7 @@ sub getAndSetOptions {
 		$options->{$_} = $fh_options->{$_};
 	}
 
-	$options->{tabs} = $user_tabs;
+	#$options->{tabs} = $user_tabs;
 
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
