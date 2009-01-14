@@ -29,7 +29,7 @@ __template__
 	[% FOREACH fh_section= sections %]
 		[% is_active = 0 %]
 		[% IF fh_section.fsid == cur_section_id; is_active = 1; END %]
-		[% NEXT IF section.display == "no" %]
+		[% NEXT IF fh_section.display == "no" %]
 		[% link_loc = gskin.rootdir _ "/firehose.pl?section=" _ fh_section.fsid %]
 		
 		[% IF fh_section.skid %]
