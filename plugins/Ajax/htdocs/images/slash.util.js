@@ -143,7 +143,7 @@ function qw_as_array( qw ){
 	if ( ! qw ) { return []; }
 
 	if ( if_inherits_string_like(qw) ) {
-		qw = (' '+qw+' ').split(/\s+/).slice(1, -1);
+		qw = $.map(qw.split(/\s+/), function(w){if(w)return w;});
 	}
 	if ( ! if_inherits_array_iteration(qw) ) {
 		qw = accumulate([], function(k, v){if(v){this.push(k);}}, qw);
