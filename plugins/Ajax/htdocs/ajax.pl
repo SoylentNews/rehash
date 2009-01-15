@@ -797,8 +797,20 @@ sub getModalPrefs {
 		my $fh_section;
 		if ($form->{id}) {
 			$fh_section = $fh->getFireHoseSection($form->{id});
+			$fh_section = $fh->applyUserSectionPrefs($fh_section);
 		}
-		return slashDisplay('fhviewprefs', { name => $form->{name}, id => $form->{id}, filter => $form->{filter}, views => $views_hr, fh_section => $fh_section }, { Return => 1} );
+		
+		my ($name, $filter, $viewid);
+		$name = $form->{name};
+		$filter = $form->{filter};
+
+		if ($fh_section) {
+			$name = $fh_section->{section_name};
+			$filter = $fh_section->{section_filter};
+			$viewid = $fh_section->{view_id};
+		}
+
+		return slashDisplay('fhviewprefs', { name => $name, id => $form->{id}, filter => $filter, views => $views_hr, fh_section => $fh_section, default_view => $viewid }, { Return => 1} );
 		
 	} else {
 		return
@@ -813,8 +825,6 @@ sub getModalPrefs {
 
 sub saveModalPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
-
-	print STDERR "saveModalPrefs() $form->{formname}\n";
 
 	# Ajax returns our form as key=value, so trick URI into decoding for us.
 	require URI;
@@ -1110,16 +1120,19 @@ sub saveModalPrefs {
 
 	if ($params{'formname'} eq "firehoseview") {
 		return if $user->{is_anon};
+		my $fh = getObject("Slash::FireHose");
+
+		my $data = {
+			uid 	=> $user->{uid},
+			section_name => $params{'section_name'},
+			section_filter => $params{'section_filter'},
+			view_id	=> $params{'viewid'}
+		};
 		if (!$params{'id'}) {
-			my $fh = getObject("Slash::FireHose");
-			my $data = {
-				uid 	=> $user->{uid},
-				section_name => $params{'section_name'},
-				section_filter => $params{'section_filter'},
-				view_id	=> $params{'viewid'}
-			};
 
 			$fh->createFireHoseSection($data);
+		} else {
+			$fh->setFireHoseSectionPrefs($params{'id'}, $data);
 		}
 	}
 

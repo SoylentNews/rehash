@@ -126,6 +126,30 @@ sub createUpdateItemFromJournal {
 	}
 }
 
+sub setFireHoseSectionPrefs {
+	my($self, $id, $data) = @_;
+	my $user = getCurrentUser();
+
+	my $cur_section = $self->getFireHoseSection($id);
+	return if $user->{is_anon} || !$cur_section;
+
+	if ($cur_section->{uid} == $user->{uid}) {
+
+		$self->sqlUpdate("firehose_section", $data, "fsid = $cur_section->{fsid}");
+	} elsif ($cur_section->{uid} == 0) {
+		my $cur_prefs = $self->getSectionUserPrefs($cur_section->{fsid});
+		if ($cur_prefs) {
+			$self->sqlUpdate("firehose_section_settings", $data, "id=$cur_prefs->{id}");
+		} else {
+			$data->{uid} = $user->{uid};
+			$data->{fsid} = $cur_section->{fsid};
+			$self->sqlInsert("firehose_section_settings", $data);
+		}
+	}
+
+	
+}
+
 sub getFireHoseSectionsMenu {
 	my($self) = @_;
 	my $user = getCurrentUser();
@@ -2405,6 +2429,12 @@ sub determineCurrentSection {
 		$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
 	}
 
+	$section = $self->applyUserSectionPrefs($section);
+	return $section;
+}
+
+sub applyUserSectionPrefs {
+	my($self, $section) = @_;
 	if ($section->{uid} == 0) {
 		my $user_prefs = $self->getSectionUserPrefs($section->{fsid});
 		if ($user_prefs) {
@@ -2415,7 +2445,7 @@ sub determineCurrentSection {
 	}
 	return $section;
 }
-
+	
 sub applyViewOptions {
 	my($self, $view, $options, $second) = @_;
 	my $gSkin = getCurrentSkin();
@@ -3757,6 +3787,8 @@ sub getProjectsChangedSince {
 
 	return $hr_ar;
 }
+
+
 
 1;
 
