@@ -24,6 +24,15 @@ function saveFirehoseSectionMenu(){
 	});
 }
 
+function firehose_delete_section(id) {
+	ajax_update({
+		op:	'firehose_delete_section_menu',
+		reskey:	reskey_static,
+		id: 	id
+	});
+}
+
+
 function configSectionPopup() { 
 	var title = "<a href=\"#\" onclick=\"window.location.reload()\" style=\"color:#fff;\">Sectional&nbsp;Display&nbsp;Prefs</a>&nbsp;";
 	var buttons = createPopupButtons("<a href=\"/faq/UI.shtml#ui500\">[?]</a>","<a href=\"#\" onclick=\"window.location.reload()\">[X]</a>");

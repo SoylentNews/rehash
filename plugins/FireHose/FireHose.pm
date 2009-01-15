@@ -126,6 +126,25 @@ sub createUpdateItemFromJournal {
 	}
 }
 
+sub deleteHideFireHoseSection {
+	my($self, $id) = @_;
+	my $user = getCurrentUser();
+
+	my $cur_section = $self->getFireHoseSection($id);
+	return if $user->{is_anon} || !$cur_section;
+
+	if ($cur_section->{uid} == $user->{uid}) {
+		$self->sqlDelete("firehose_section", "fsid=$cur_section->{fsid}");
+	} elsif ($cur_section->{uid} == 0) {
+		$self->setFireHoseSectionPrefs($id, { 
+			display 	=> "no",
+			section_name 	=> $cur_section->{section_name},
+			section_filter 	=> $cur_section->{section_filter},
+			view_id 	=> $cur_section->{view_id},
+		});
+	}
+}
+
 sub setFireHoseSectionPrefs {
 	my($self, $id, $data) = @_;
 	my $user = getCurrentUser();
@@ -189,6 +208,13 @@ sub ajaxSaveFireHoseSections {
 	$slashdb->setUser($user->{uid}, {firehose_section_order => $form->{fsids}});
 }
 
+sub ajaxDeleteFireHoseSection {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $fh = getObject("Slash::FireHose");
+	if ($form->{id}) {
+		$fh->deleteHideFireHoseSection($form->{id});
+	}
+}
 sub getFireHoseSectionBySkid {
 	my($self, $skid) = @_;
 	my $skid_q = $self->sqlQuote($skid);
@@ -2593,9 +2619,6 @@ sub getAndSetOptions {
 
 		
 		# Jump to default view as necessary
-
-		print STDERR "Passed initial view". $opts->{view} . " |  " . $form->{view} ."\n";
-		print STDERR "FHFILTER $options->{fhfilter} ". " ". defined($options->{fhfilter}) ."\n";
 
 		if (!$tab && !defined $options->{fhfilter} && !$opts->{view} && !$form->{view}) {
 			if ($options->{sectionref}) {

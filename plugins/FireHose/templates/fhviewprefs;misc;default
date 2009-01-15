@@ -24,9 +24,9 @@ Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => d
 <input type="button" value="cancel" onclick="hide_modal_box()">
 [% IF id %]
 	[% IF fh_section && fh_section.uid == 0 %]
-		<input type="button" value="hide" onclick="$('#fhsection-[% id %]').remove(); hide_modal_box()">
+		<input type="button" value="hide" onclick="firehose_delete_section([% id %]); $('#fhsection-[% id %]').remove(); hide_modal_box()">
 	[% ELSE %]
-		<input type="button" value="delete" onclick="$('#fhsection-[% id %]').remove(); hide_modal_box()">
+		<input type="button" value="delete" onclick="firehose_delete_section([% id %]);$('#fhsection-[% id %]').remove(); hide_modal_box()">
 	[% END %]
 [% END %]
 </form>
