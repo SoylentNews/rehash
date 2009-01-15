@@ -167,6 +167,29 @@ __template__
 				[% END %]
 			[% END %]
 				<p>
+
+				[% marquee_check = '';
+                                IF useredit.shill_static_marquee;
+                                        marquee_check = constants.markup_checked_attribute;
+                                END;
+                                %]
+
+                                <label><input type="checkbox" name="shill_static_marquee"[% marquee_check %]> <b>Enable Static Marquees</b></label>
+
+                                [% u2_friends_bios_check = '';
+                                IF useredit.u2_friends_bios;
+                                        u2_friends_bios_check = constants.markup_checked_attribute;
+                                END;
+                                %]
+
+                                <label><input type="checkbox" name="u2_friends_bios"[% u2_friends_bios_check %]> <b>Enable U2 Friends Bios</b></label>
+
+                                <p>
+
+                                <b>Shill RSS URL:</b>&nbsp;<input type="text" name="shill_rss_url" value="[% useredit.shill_rss_url | strip_attribute %]" size="75">
+
+                                <p>
+
 				<input type="submit" name="saveuseradmin" value="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]" class="button">
 				</p>
 			[% IF ! useredit.nonuid %]

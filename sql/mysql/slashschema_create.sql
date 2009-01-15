@@ -207,6 +207,8 @@ CREATE TABLE blocks (
 	autosubmit ENUM('no','yes') DEFAULT 'no' NOT NULL,
 	rss_cookie varchar(255),
 	all_skins tinyint NOT NULL DEFAULT '0',
+	shill enum('yes','no') NOT NULL default 'no',
+  	shill_uid mediumint(8) unsigned NOT NULL default '0',
 	PRIMARY KEY (bid),
 	KEY type (type),
 	KEY skin (skin)

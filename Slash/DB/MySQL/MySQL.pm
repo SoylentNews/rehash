@@ -166,19 +166,19 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "storypickable='yes'") },
 
 	'static_block'
-		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald'") },
+		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald' AND shill = 'no'") },
 
 	'portald_block'
-		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type = 'portald'") },
+		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type = 'portald' AND shill = 'no'") },
 
 	'static_block_section'
-		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2]->{seclev} >= seclev AND section='$_[2]->{section}' AND type != 'portald'") },
+		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2]->{seclev} >= seclev AND section='$_[2]->{section}' AND type != 'portald' AND shill = 'no'") },
 
 	'portald_block_section'
-		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2]->{seclev} >= seclev AND section='$_[2]->{section}' AND type = 'portald'") },
+		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2]->{seclev} >= seclev AND section='$_[2]->{section}' AND type = 'portald' AND shill = 'no'") },
 
 	'color_block'
-		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "type = 'color'") },
+		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "type = 'color' AND shill = 'no'") },
 
 	'authors'
 		=> sub { $_[0]->sqlSelectMany('uid,nickname', 'authors_cache', "author = 1") },
@@ -3350,7 +3350,7 @@ sub getSectionBlocks {
 	return $self->sqlSelectAll(
 		"bid, title, ordernum",
 		"blocks",
-		"portal=1",
+		"portal=1 AND shill = 'no'",
 		"ORDER BY title");
 }
 
@@ -5621,7 +5621,7 @@ sub getPortals {
 	my($self) = @_;
 	my $mainpage_name = $self->getSkin( getCurrentStatic('mainpage_skid') )->{name};
 	my $portals = $self->sqlSelectAll('block,title,blocks.bid,url','blocks',
-		"skin='$mainpage_name' AND type='portald'",
+		"skin='$mainpage_name' AND type='portald' AND shill = 'no'",
 		'GROUP BY bid ORDER BY ordernum');
 
 	return $portals;
@@ -5643,7 +5643,7 @@ sub getPortalsCommon {
 	my $sth = $self->sqlSelectMany(
 			'bid,title,url,skin,portal,ordernum,all_skins',
 			'blocks',
-			'',
+			"shill = 'no'",
 			'ORDER BY ordernum ASC'
 	);
 	# We could get rid of tmp at some point

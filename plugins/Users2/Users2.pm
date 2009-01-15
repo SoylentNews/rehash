@@ -72,7 +72,7 @@ sub getLatestSubmissions {
 }
 
 sub getLatestFriends {
-        my($self, $uid) = @_;
+        my($self, $uid, $shill_bios) = @_;
 
         my $uid_q = $self->sqlQuote($uid);
         my $friends = $self->sqlSelectAllHashref(
@@ -85,6 +85,7 @@ sub getLatestFriends {
 
         foreach my $id (keys %$friends) {
                 $friends->{$id}->{nickname} = $self->sqlSelect('nickname', 'users', "uid = $id");
+		$friends->{$id}->{bio} = $self->sqlSelect('bio', 'users_info', "uid = $id") if ($shill_bios);
         }
 
         return $friends;
@@ -314,18 +315,32 @@ sub getMarquee {
 }
 
 sub getFireHoseMarquee {
-	my ($self, $uid) = @_;
+	my ($self, $uid, $shill_static_marquee) = @_;
 	my $fh = getObject("Slash::FireHose");
 
-	my $fhe_opts = {
-		type 		=> ['journal', 'submission', 'comment', 'feed'], 
-		orderby 	=> 'createtime', 
-		orderdir 	=> 'DESC', 
-		color 		=> 'black',
-		duration 	=> '-1',
-		limit		=> 1,
-		uid		=> $uid
-	};
+	my $fhe_opts;
+	if ($shill_static_marquee) {
+		$fhe_opts = {
+			type            => ['journal', 'submission', 'comment', 'feed', 'story', 'bookmark'],
+			orderby         => 'createtime',
+			orderdir        => 'DESC',
+			color           => 'black',
+			duration        => '-1',
+			limit           => 1,
+			tagged_by_uid   => $uid,
+			tagged_as       => 'marquee'
+		};
+	} else {
+		$fhe_opts = {
+			type            => ['journal', 'submission', 'comment', 'feed'],
+			orderby         => 'createtime',
+			orderdir        => 'DESC',
+			color           => 'black',
+			duration        => '-1',
+			limit           => 1,
+			uid             => $uid
+        	};
+	}
 
 	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $fh->getFireHoseEssentials($fhe_opts);
 
@@ -384,6 +399,16 @@ sub truncateMarquee {
 
         return $marquee;
 
+}
+
+sub getRSS {
+        my ($self, $uid) = @_;
+
+        my $uid_q = $self->sqlQuote($uid);
+        my $rss_block;
+        ($rss_block->{title}, $rss_block->{block}) = $self->sqlSelect('title, block', 'blocks', "shill = 'yes' && shill_uid != 0 && shill_uid = $uid_q");
+
+        return($rss_block);
 }
 
 sub DESTROY {

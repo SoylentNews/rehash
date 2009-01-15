@@ -1134,6 +1134,10 @@ sub showInfo {
 			}
 		}
 
+		# RSS
+		my $rss_block;
+		$rss_block = $users2->getRSS($uid) if ($requested_user->{shill_rss_url});
+
 		# Comments slashbox
 		my $latest_comments = $users2->getLatestComments($uid);
 
@@ -1148,7 +1152,7 @@ sub showInfo {
                         $users2->getLatestBookmarks($uid, $latest_journals, $latest_submissions);
 
 		# Friends slashbox
-		my $latest_friends = $users2->getLatestFriends($uid);
+		my $latest_friends = $users2->getLatestFriends($uid, $requested_user->{u2_friends_bios});
 
 		# Relationship pane
 		my $relations_datapane;
@@ -1185,7 +1189,7 @@ sub showInfo {
 			$form->{dp} = 'firehose';
 			# Marquee is the "latest thing"
 			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
-			$firehose_marquee = $users2->getFireHoseMarquee($requested_user->{uid});
+			$firehose_marquee = $users2->getFireHoseMarquee($requested_user->{uid}, $requested_user->{shill_static_marquee});
 			#$marquee = $users2->truncateMarquee($marquee);
 			if ($firehose_marquee) {
 				$not_fhid = $firehose_marquee->{id};
@@ -1234,6 +1238,7 @@ sub showInfo {
 			data_pane               => $form->{dp},
 			main_view               => $main_view,
 			not_fhid		=> $not_fhid,
+			rss_block               => $rss_block,
 		}, { Page => 'users', Skin => 'default'});
 	}
 
@@ -1817,6 +1822,9 @@ sub saveUserAdmin {
 		$user_edits_table->{tag_clout} = $form->{tag_clout};
 		$user_edits_table->{m2info} = $form->{m2info};
 		$user_edits_table->{acl} = $acl_change if $acl_change;
+		$user_edits_table->{shill_static_marquee} = $form->{shill_static_marquee} ? 1 : undef;
+                $user_edits_table->{u2_friends_bios} = $form->{u2_friends_bios} ? 1 : undef;
+                $user_edits_table->{shill_rss_url} = $form->{shill_rss_url} ? $form->{shill_rss_url} : undef;
 
 		my $author = $slashdb->getAuthor($id);
 		my $was_author = ($author && $author->{author}) ? 1 : 0;

@@ -13,6 +13,18 @@ __name__
 u2UserBoxes
 __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
+[% IF rss_block %]
+<div class="block" id="rss_block">
+        <div class="title" id="rss_block_title">
+                <h4>[% rss_block.title %]</h4>
+        </div>
+
+        <div class="content" id="rss_block_content">
+                [% rss_block.block %]
+        </div>
+</div>
+[% END %]
+
 [% IF latest_comments.size != 0 %]
 <div class="block" id="latest_comments">
         <div class="title" id="latest_comments_title">
@@ -107,7 +119,7 @@ __template__
         <div class="content" id="latest_friends_content">
                 <ul>
                 [% FOREACH fid = latest_friends.keys.sort %]
-                        <li><a href="[% constants.real_rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a>[% IF latest_friends.$fid.bio; ':&nbsp;'; latest_friends.$fid.bio; END; %]</li>
                 [% END %]
                 </ul>
         </div>
