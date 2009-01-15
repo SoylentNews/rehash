@@ -126,11 +126,17 @@ sub createUpdateItemFromJournal {
 	}
 }
 
-sub getFireHoseSections {
+sub getFireHoseSectionsMenu {
 	my($self) = @_;
 	my $user = getCurrentUser();
 	my($uid_q) = $self->sqlQuote($user->{uid});
-	my $sections = $self->sqlSelectAllHashrefArray("*", "firehose_section", "uid in (0,$uid_q)", "ORDER BY uid, ordernum, section_name");
+	my $sections = $self->sqlSelectAllHashrefArray(
+		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name", 
+		"firehose_section LEFT JOIN firehose_section_settings on firehose_section.fsid=firehose_section_settings.fsid AND firehose_section_settings.uid=$uid_q", 
+		"firehose_section.uid in (0,$uid_q)", 
+		"ORDER BY uid, ordernum, section_name"
+	);
+
 	if (!$user->{firehose_section_order}) {
 		return $sections;
 	} else {
@@ -145,7 +151,7 @@ sub getFireHoseSections {
 		foreach (@$sections) {
 			push @ordered_sections, $_ if $sections_hash{$_->{fsid}}
 		}
-		return @ordered_sections;
+		return \@ordered_sections;
 	}
 }
 
@@ -173,6 +179,15 @@ sub getFireHoseSection {
 	my $fsid_q = $self->sqlQuote($fsid);
 	
 	return $self->sqlSelectHashref("*","firehose_section","uid in(0,$uid_q) AND fsid=$fsid_q");
+}
+
+sub getSectionUserPrefs {
+	my($self, $fsid) = @_;
+	my $user = getCurrentUser();
+	return if $user->{is_anon};
+	my $fsid_q = $self->sqlQuote($fsid);
+	my $uid_q = $self->sqlQuote($user->{uid});
+	return $self->sqlSelectHashref("*", "firehose_section_settings", "uid=$uid_q AND fsid=$fsid_q");
 }
 
 sub getFireHoseColors {
@@ -2388,9 +2403,16 @@ sub determineCurrentSection {
 	
 	if (!$section && !$section->{fsid}) {
 		$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
-	} 
-	use Data::Dumper;
-	print STDERR Dumper($section);	
+	}
+
+	if ($section->{uid} == 0) {
+		my $user_prefs = $self->getSectionUserPrefs($section->{fsid});
+		if ($user_prefs) {
+			foreach (qw(section_name section_filter view_id display)) {
+				$section->{$_} = $user_prefs->{$_};
+			}
+		}
+	}
 	return $section;
 }
 
@@ -2547,7 +2569,6 @@ sub getAndSetOptions {
 
 		if (!$tab && !defined $options->{fhfilter} && !$opts->{view} && !$form->{view}) {
 			if ($options->{sectionref}) {
-				print STDERR "SECTION: ". Dumper($section);
 
 				my $view = $self->getUserViewById($section->{view_id});
 

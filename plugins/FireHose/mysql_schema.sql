@@ -85,10 +85,24 @@ CREATE TABLE firehose_section(
 	display ENUM("yes","no") DEFAULT 'yes',
 	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
 	ordernum tinyint DEFAULT '0',
-	PRIMARY KEY (fsid),
-	UNIQUE uid_section_filter(uid,section_filter)
+	PRIMARY KEY (fsid)
 	
 );
+
+DROP TABLE IF EXISTS firehose_section_settings;
+CREATE TABLE firehose_section_settings(
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	fsid mediumint(8) unsigned NOT NULL,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	section_name VARCHAR(32) NOT NULL DEFAULT 'unnamed',
+	section_filter VARCHAR(255) NOT NULL DEFAULT '',
+	display ENUM("yes","no") DEFAULT 'yes',
+	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
+	PRIMARY KEY (id),
+	UNIQUE uid_fsid(uid,fsid)
+	
+);
+
 
 DROP TABLE IF EXISTS firehose_tab;
 CREATE TABLE firehose_tab(

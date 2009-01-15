@@ -14,10 +14,12 @@ __seclev__
 10000
 __template__
 <form id ="modal_prefs" method="post">
+[% IF id %]ID: [% id %]<br>[% END %]
 <input type="hidden" name="formname" value="firehoseview">
 Name: <input type="text" name="section_name" value="[% name %]"><br>
 Filter: <input type="text" name="section_filter" value="[% filter %]"><br>
-Initial View: [% Slash.createSelect('viewid', views, { return => 1}) %]<br> 
+Initial View: [% Slash.createSelect('viewid', views, { return => 1}) %]<br>
+[% IF id %]<input type="hidden" name="fsid" value="[% id %]">[% END %]
 
 <input type="button" value="save" onclick="saveModalPrefs()">
 <input type="button" value="cancel">
