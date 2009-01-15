@@ -426,7 +426,7 @@ function firehose_set_options(name, value, context) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -508,6 +508,10 @@ function firehose_set_options(name, value, context) {
 	if (name == 'section') {
 		params.sectionchanged = 1;
 		firehose_settings.section = value;
+		firehose_settings.page = 0;
+		firehose_settings.more_num = 0;
+		$('#firehose-sections li').removeClass('active');
+		$('#firehose-sections #fhsection-' + value).addClass('active');
 	}
 	
 	params.section = firehose_settings.section;

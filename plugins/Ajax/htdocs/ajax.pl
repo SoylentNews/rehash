@@ -794,7 +794,11 @@ sub getModalPrefs {
 		my $views = $fh->getUserViews({ tab_display => "yes"});
 		my $views_hr = { };
 		%$views_hr = map { $_->{id} => $_->{viewname} } @$views;
-		return slashDisplay('fhviewprefs', { name => $form->{name}, id => $form->{id}, filter => $form->{filter}, views => $views_hr }, { Return => 1} );
+		my $fh_section;
+		if ($form->{id}) {
+			$fh_section = $fh->getFireHoseSection($form->{id});
+		}
+		return slashDisplay('fhviewprefs', { name => $form->{name}, id => $form->{id}, filter => $form->{filter}, views => $views_hr, fh_section => $fh_section }, { Return => 1} );
 		
 	} else {
 		return
