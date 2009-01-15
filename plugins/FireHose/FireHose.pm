@@ -1219,21 +1219,11 @@ sub getURLsForItem {
 	my $url_id = $item->{url_id};
 	my $url = $url_id ? $self->getUrl($url_id) : undef;
 	$url = $url->{url} if $url;
-	my $url_prepend = $url ? qq{<a href="$url">$url</a>}   : '';
-	my $intro = $item->{introtext} || '';
-	my $body = $item->{bodytext} || '';
-	my $text = "$url_prepend $intro $body";
-
-	my %urls = ( );
-	my $tokens = HTML::TokeParser->new(\$text);
-	return ( ) unless $tokens;
-	while (my $token = $tokens->get_tag('a')) {
-		my $linkurl = $token->[1]{href};
-		next unless $linkurl;
-		my $canon = URI->new($linkurl)->canonical()->as_string();
-		$urls{$canon} = 1;
-	}
-	return sort keys %urls;
+	# The URL is made into an <a href> so, on being parsed, it will
+	# also be canonicalized.
+	my $url_prepend = $url ? qq{<a href="$url">$url</a>} : '';
+	my $urls_ar = getUrlsFromText($url_prepend, $item->{introtext}, $item->{bodytext});
+	return sort @$urls_ar;
 }
 
 sub itemHasSpamURL {

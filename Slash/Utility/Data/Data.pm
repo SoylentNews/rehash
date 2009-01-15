@@ -36,6 +36,7 @@ use Email::Valid;
 use HTML::Entities qw(:DEFAULT %char2entity %entity2char);
 use HTML::FormatText;
 use HTML::Tagset ();
+use HTML::TokeParser;
 use HTML::TreeBuilder;
 use Lingua::Stem;
 use Mail::Address;
@@ -94,6 +95,7 @@ our @EXPORT  = qw(
 	formatDate
 	getArmoredEmail
 	getRandomWordFromDictFile
+	getUrlsFromText
 	createLogToken
 	grepn
 	html2text
@@ -4112,6 +4114,23 @@ sub getRandomWordFromDictFile {
         close $fh;
 #print STDERR "word=$word start_seek=$start_seek bytes_read_thisseek=$bytes_read_thisseek bytes_read_total=$bytes_read_total\n";
         return $word;
+}
+
+sub getUrlsFromText {
+	my(@texts) = @_;
+	my %urls = ( );
+	for my $text (@texts) {
+		next unless $text;
+		my $tokens = HTML::TokeParser->new(\$text);
+		next unless $tokens;
+		while (my $token = $tokens->get_tag('a')) {
+			my $linkurl = $token->[1]{href};
+			next unless $linkurl;
+			my $canon = URI->new($linkurl)->canonical()->as_string();
+			$urls{$canon} = 1;
+		}
+	}
+	return [ keys %$urls ];
 }
 
 ########################################################
