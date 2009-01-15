@@ -38,7 +38,7 @@ __template__
 				link_loc = the_skin.rootdir;
 			   END %]
 		[% END %]
-		<li id="fhsection-[% fh_section.fsid %]">[% IF is_active %]<h2>[% END %]<a href="[% link_loc %]"[% IF !user.is_anon; %]onclick="firehose_set_options('section','[% fh_section.fsid %]'); return false;" [% END %]>[% fh_section.section_name %]</a>[% IF is_active %]</h2>[% END %][% IF !user.is_anon %] <a href=#" onclick="getModalPrefs('firehoseview','Update section filter')">[e]</a>[% END %]</li>
+		<li [% IF is_active %] class="active" [% END %] id="fhsection-[% fh_section.fsid %]"><a href="[% link_loc %]"[% IF !user.is_anon; %] onclick="firehose_set_options('section','[% fh_section.fsid %]'); return false;" [% END %]>[% fh_section.section_name %]</a>[% IF !user.is_anon %] <a onclick="getModalPrefs('firehoseview','Update section filter');return false;" href="#" id="links-sections-edit">[e]</a>[% END %]</li>
 	[% END %]
 </ul>
 __seclev__
