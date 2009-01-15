@@ -2159,7 +2159,7 @@ function fix_ad_position(){
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 	api: {
 		is_visible:		function(){ return isInWindow($ad_position.children().get(0)); },
-		remove:			function(){ remove_ad() },
+		remove:			function(){ remove_ad() }
 	},
 	stem_function: insert_ad
 });
