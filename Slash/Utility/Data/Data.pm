@@ -110,6 +110,7 @@ our @EXPORT  = qw(
 	roundrand
 	set_rootdir
 	sitename2filename
+	split_bayes
 	strip_anchor
 	strip_attribute
 	strip_code
@@ -889,6 +890,33 @@ sub comparePassword {
 	}
 	return 0;
 }
+
+sub split_bayes {
+	my($t) = @_;
+	my $constants = getCurrentStatic();
+	my $min_len = $constants->{fhbayes_min_token_len} ||  2;
+	my $max_len = $constants->{fhbayes_max_token_len} || 20;
+
+	my $urls = getUrlsFromText($t);
+	my(@urls, @domains) = ( );
+	for my $url (@$urls) {
+		push @urls, $url;
+		my $domain = fullhost_to_domain(URI->new($url)->host());
+		next unless $domain;
+		push @domains, $domain;
+	}
+
+	$t = strip_nohtml($t);
+
+	$t =~ s/[^A-Za-z0-9&;.']+/ /g;
+	$t =~ s/\s[.']+/ /g;
+	$t =~ s/[.']+\s/ /g;
+
+	my @tokens = grep { length($_) >= $min_len && length($_) <= $max_len } split ' ', $t;
+
+	return (@urls, @domains, @tokens);
+}
+
 
 #========================================================================
 

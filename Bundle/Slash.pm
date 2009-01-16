@@ -134,6 +134,6 @@ Net::IRC Proc::ProcessTable Net::Jabber File::Type Linux::Pid
 File::Type Apache::SSI String::Similarity Devel::Size Devel::FindGlobals
 Slash::Client JavaScript::Minifier Template::Plugin::GD Net::Telnet
 Finance::Quote Net::OSCAR Date::ICal WWW::Mechanize
-Plucene::Document SOAP::Lite
+Plucene::Document SOAP::Lite Algorithm::NaiveBayes
 
 =cut
