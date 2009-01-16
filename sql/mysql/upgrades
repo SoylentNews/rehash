@@ -5767,3 +5767,6 @@ ALTER TABLE users ADD INDEX seclev (seclev);
 # For blocks
 ALTER TABLE blocks ADD COLUMN shill enum('yes','no') NOT NULL DEFAULT 'no';
 ALTER TABLE blocks ADD COLUMN shill_uid mediumint(8) unsigned NOT NULL DEFAULT '0';
+
+# 2009-01-16
+UPDATE vars SET value = 'T_2_5_0_237' WHERE name = 'cvs_tag_currentcode';
