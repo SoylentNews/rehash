@@ -1898,8 +1898,6 @@ function firehose_new_section() {
 function firehose_new_section_handler(transport) {
 	var response = eval_response(transport);
 	if (response.id) {
-		alert(response.id);
-		alert(response.li);
 		if (response.li) {
 			$('#firehose-sections li:last').after(response.li);
 		}
