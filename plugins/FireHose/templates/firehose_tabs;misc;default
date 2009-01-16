@@ -32,8 +32,8 @@ END %]
 [% END %]
 [% active_set = 0; %]
 [% UNLESS nodiv %]
-	[% IF gSkin.name != 'idle' %]
-		<a id="toggleleftmenu" onclick="return false" class="expanded" href="#" title="Toggle left menu">Toggle left menu</a>
+	[% IF !user.is_anon && gSkin.name != 'idle' %]
+		<a id="toggleleftmenu" onclick="return false" class="[% IF user.firehose_hide_section_menu %]collapsed[% ELSE %]expanded[% END %]" href="#" title="Toggle left menu">Toggle left menu</a>
 	[% END %]
 <ul class="menu" id="fhtablist">[% END %]
 
