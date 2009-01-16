@@ -1051,6 +1051,7 @@ sub getFireHose {
 sub getFireHoseMulti {
 	my($self, $id_ar, $options) = @_;
 	my $constants = getCurrentStatic();
+	$id_ar = [( grep { /^\d+$/ } @$id_ar )];
 
 	my $exptime = $constants->{firehose_memcached_exptime} || 600;
 	my $ret_hr = { };
