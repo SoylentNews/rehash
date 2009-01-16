@@ -32,7 +32,9 @@ END %]
 [% END %]
 [% active_set = 0; %]
 [% UNLESS nodiv %]
-<a id="toggleleftmenu" onclick="return false" class="expanded" href="#" title="Toggle left menu">Toggle left menu</a>
+	[% IF gSkin.name != 'idle' %]
+		<a id="toggleleftmenu" onclick="return false" class="expanded" href="#" title="Toggle left menu">Toggle left menu</a>
+	[% END %]
 <ul class="menu" id="fhtablist">[% END %]
 
 	[% IF options.smalldevices %]
