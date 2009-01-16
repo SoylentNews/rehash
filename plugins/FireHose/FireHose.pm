@@ -1040,6 +1040,10 @@ sub getFireHoseByTypeSrcid {
 
 sub getFireHose {
 	my($self, $id, $options) = @_;
+	if ($id !~ /^\d+$/) {
+		print STDERR scalar(gmtime) . " getFireHose($id) caller=" . join(':', caller(1)[1,2]) . "\n"
+		return undef;
+	}
 	my $hr = $self->getFireHoseMulti([$id], $options);
 	return $hr->{$id};
 }
@@ -1600,6 +1604,9 @@ sub ajaxFireHoseGetUpdates {
 		}
 		my $item = {};
 		if (!$_->{day}) {
+			if ($_->{id} !~ /^\d+$/) {
+				print STDERR scalar(gmtime) . " day='$_->{day}' id='$_->{id}'\n";
+			}
 			$item = $firehose_reader->getFireHose($_->{id});
 			$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 		}
