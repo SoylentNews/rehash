@@ -1659,10 +1659,40 @@ function firehose_update_failed_modal() {
 	show_modal_box();
 }
 
+function serialize_multiple( $form ){
+	// serialize a form for use in a query, but force all fieldnames to be unique
+
+	// extract the form fields into an array
+	var elems = $form.serializeArray();
+
+	// count uses of each fieldname to find those used more than once
+	var uses = {};
+	$.map(	elems,
+		function(el){
+			++uses[el.name] || (uses[el.name]=1);
+		}
+	);
+
+	// return a query string, just as $form.serialize() would, except...
+	var salt = 1;
+	return $.param(
+		$.map(	elems,
+			function(el){
+				// salt fieldnames used more than once
+				if ( uses[el.name] > 1 ) {
+					el.name += salt++;
+				}
+				return el;
+			}
+		)
+	);
+}
+
 function saveModalPrefs() {
 	var params = {};
 	params.op = 'saveModalPrefs';
 	params.data = jQuery("#modal_prefs").serialize();
+	// params.data = serialize_multiple($('#modal_prefs'));
 	params.reskey = reskey_static;
 	var handlers = {
 		onComplete: function() {
