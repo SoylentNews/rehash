@@ -901,7 +901,9 @@ sub split_bayes {
 	my(@urls, @domains) = ( );
 	for my $url (@$urls) {
 		push @urls, $url;
-		my $domain = fullhost_to_domain(URI->new($url)->host());
+		my $uri = URI->new($url);
+		next unless $uri->can('host');
+		my $domain = fullhost_to_domain($uri->host());
 		next unless $domain;
 		push @domains, $domain;
 	}

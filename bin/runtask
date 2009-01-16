@@ -158,6 +158,7 @@ EOT
 	# attackers have local guest access).
 
 	my $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE = 0;
+	$I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE = 1 if -s '/etc/sbhost';
 	if (not $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE
 		and (stat $dir)[2] & 002) {
 		slashdLogDie("you really don't want me to use task files",

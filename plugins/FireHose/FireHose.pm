@@ -1041,7 +1041,7 @@ sub getFireHoseByTypeSrcid {
 sub getFireHose {
 	my($self, $id, $options) = @_;
 	if ($id !~ /^\d+$/) {
-		print STDERR scalar(gmtime) . " getFireHose($id) caller=" . join(':', caller(0)[1,2]) . "\n"
+		print STDERR scalar(gmtime) . " getFireHose($id) caller=" . join(':', (caller(0))[1,2]) . "\n";
 		return undef;
 	}
 	my $hr = $self->getFireHoseMulti([$id], $options);

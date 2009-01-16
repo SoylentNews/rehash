@@ -20,7 +20,7 @@ sub getSourceList {
 		'firehose.id',
 		'firehose, tags, authors_cache, users',
 		"created_at >= DATE_SUB(NOW(), INTERVAL $days_back DAY)
-		 AND created_at < DATE_SUB(NOW(), INTERVAL 8 HOUR
+		 AND created_at < DATE_SUB(NOW(), INTERVAL 8 HOUR)
 		 AND firehose.globjid = tags.globjid
 		 AND tags.uid = authors_cache.uid
 		 AND authors_cache.uid=users.uid

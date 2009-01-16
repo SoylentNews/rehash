@@ -3,7 +3,7 @@
 # Copyright 1997-2009 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
-package Slash::Tagbox::FHBayesPredict
+package Slash::Tagbox::FHBayesPredict;
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ Slash::Tagbox::FHBayesPredict - Use Algorithm::NaiveBayes to predict spam
 
 use strict;
 
+use File::Path;
 use Slash;
 
 our $VERSION = $Slash::Constants::VERSION;
@@ -29,6 +30,7 @@ sub init {
 	my($self) = @_;
 	return 0 if ! $self->SUPER::init();
 
+	my $constants = getCurrentStatic();
 	$self->{taguid} = $constants->{fhbp_uid};
 	return 0 unless $self->{taguid};
 
@@ -40,15 +42,9 @@ sub init_tagfilters {
 	$self->{filter_firehoseonly} = 1;
 }
 
-sub get_nosy_gtids {
-	# Not interested in trying to predict comment spam (yet).
-	return [ map { $types->{$_} }
-	         grep { $_ !~ /^\d+$/ && $_ ne 'comments' }
-	         keys %$types ];
-}
-
 sub get_affected_type	{ 'globj' }
 sub get_clid		{ 'vote' }
+sub get_nosy_gtids { [qw( stories urls submissions journals discussions projects )] }
 
 # This tagbox is only nosy for when a globj is first created.
 # It doesn't care about tags.
@@ -61,8 +57,6 @@ sub feed_newtags_filter {
 sub run_process {
 	my($self, $affected_id, $tags_ar, $options) = @_;
 
-	$self->{taguid} = $constants->{fhbp_uid};
-
 	my $hose_reader = getObject('Slash::FireHose', { db_type => 'reader' });
 	my $fh = $hose_reader->getFireHoseByGlobjid($affected_id);
 	return unless $fh;
@@ -72,7 +66,10 @@ sub run_process {
 	map { $attr{$_} ||= 0; $attr{$_}++ } split_bayes($fh->{introtext});
 	map { $attr{$_} ||= 0; $attr{$_}++ } split_bayes($fh->{bodytext});
 
-	my $nb = Algorithm::NaiveBayes->restore
+	my $constants = getCurrentStatic();
+	my $dir = catdir($constants->{datadir}, 'spam_analysis');
+	my $file = catfile($dir, 'binspam_naivebayes');
+	my $nb = Algorithm::NaiveBayes->restore_state($file);
 	my $result = $nb->predict(attributes => \%attr);
 	my $prediction = $result->{b} || -1;
 	if ($prediction > 0.5) {
