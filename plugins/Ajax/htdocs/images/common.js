@@ -1883,15 +1883,28 @@ function firehose_get_onscreen() {
 	return onscreen;
 }
 
-function firehose_pop_save_section() {
+function firehose_new_section() {
 	var params = {};
 	params['name'] = 'Untitled';
-
 	if($dom('searchquery')) {
 		params['filter'] = $dom('searchquery').value;
 	}
+	params['op'] 	 = 'firehose_new_section';
+	params['reskey'] = reskey_static;
 
-	getModalPrefs('firehoseview','Save Custom Section', 0, params);
+	ajax_update(params, '', { onComplete: firehose_new_section_handler });
+}
+
+function firehose_new_section_handler(transport) {
+	var response = eval_response(transport);
+	if (response.id) {
+		alert(response.id);
+		alert(response.li);
+		if (response.li) {
+			$('#firehose-sections li:last').after(response.li);
+		}
+		getModalPrefs('firehoseview','Save Custom Section', 0, { id: response.id });
+	}
 }
 
 

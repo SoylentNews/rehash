@@ -150,7 +150,8 @@ __template__
 	The item you're trying to view either does not exist, or is not viewable to you.
 [% CASE 'metamod_msg' %]
 For [% constants.sitename %]'s moderation system to function properly, we need your help.  Below are a number of random user comments in our system.  You are asked to decide if these are good or bad.  Clicking the + and - indicates that you think that a comment is good or bad.  You are welcome to skip any comment that you are unsure about.  What is most important is that you are objective and honest- a comment that you mark with the '+' means that you think that other [% constants.sitename %] readers would benefit from this comment.  Don't hesitate to flag mediocrity with the '-' graphic either.  The only way the system gets smarter is if you are honest, objective and a little bit harsh.
-
+[% CASE 'newsectionli' %]
+ <li id="fhsection-[% id %]"><a id="fhsectiontitle-[% id %]" href="[% gSkin.rootdir%]/firehose.pl?section=[% id %]" onclick="firehose_set_options('section','[% id %]'); return false;">Untitled</a><a onclick="getModalPrefs('firehoseview','Save Custom Section', 0, { id: [% id %]});return false;" href="#" id="links-sections-edit">[e]</a></li>
 [% END %]
 
 __version__

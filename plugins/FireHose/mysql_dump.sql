@@ -26,6 +26,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'a
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_set_options', 'Slash::FireHose', 'ajaxFireHoseSetOptions', 'ajax_user_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_section_menu', 'Slash::FireHose', 'ajaxSaveFireHoseSections', 'ajax_user_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_delete_section_menu', 'Slash::FireHose', 'ajaxDeleteFireHoseSection', 'ajax_user_static', 'use');
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_new_section', 'Slash::FireHose', 'ajaxNewFireHoseSection', 'ajax_user_static', 'use');
 INSERT INTO vars (name, value, description) VALUES ('firehose_admindownclout', '0.5', 'Admin clout for downvotes can be reduced by specifying a number between 0 and 1');
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminudcclout', '0.5', 'Admin clout for udc purposes (number between 0 and 1, probably');
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminupclout', '0.5', 'Admin clout for upvotes can be reduced by specifying a number between 0 and 1');

@@ -201,6 +201,8 @@ sub getFireHoseSectionsMenu {
 sub createFireHoseSection {
 	my($self, $data) = @_;
 	$self->sqlInsert("firehose_section", $data);
+	return $self->getLastInsertId({ table => 'firehose_section', prime => 'fsid' });
+
 }
 
 sub ajaxSaveFireHoseSections {
@@ -215,6 +217,30 @@ sub ajaxDeleteFireHoseSection {
 		$fh->deleteHideFireHoseSection($form->{id});
 	}
 }
+
+sub ajaxNewFireHoseSection {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $fh = getObject("Slash::FireHose");
+	return if $user->{is_anon};
+	my $data = {
+		section_name => 'Untitled',
+		section_filter => $form->{filter},
+		uid => $user->{uid},
+		view_id => 0
+	};
+
+	my $id = $fh->createFireHoseSection($data);
+	
+	if ($id) {
+		my $data_dump =  Data::JavaScript::Anon->anon_dump({
+			id 	=> $id,
+			li	=> getData('newsectionli', { id => $id }, 'firehose')
+
+		});
+	}
+}
+
+
 sub getFireHoseSectionBySkid {
 	my($self, $skid) = @_;
 	my $skid_q = $self->sqlQuote($skid);

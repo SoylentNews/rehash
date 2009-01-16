@@ -15,12 +15,12 @@ __seclev__
 __template__
 <form id ="modal_prefs" method="post">
 <input type="hidden" name="formname" value="firehoseview">
-Name: <input type="text" name="section_name" value="[% name %]"><br>
+Name: <input type="text" name="section_name" value="[% name %]" id="fhsectionname"><br>
 Filter: <input type="text" name="section_filter" value="[% filter %]"><br>
 Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]<br>
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
-<input type="button" value="save" onclick="saveModalPrefs()">
+<input type="button" value="save" onclick="$('#fhsectiontitle-[% id %]').html($dom('fhsectionname').value);saveModalPrefs()">
 <input type="button" value="cancel" onclick="hide_modal_box()">
 [% IF id %]
 	[% IF fh_section && fh_section.uid == 0 %]
