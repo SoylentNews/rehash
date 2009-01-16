@@ -1183,8 +1183,7 @@ sub getFireHoseByGlobjidMulti {
 
 sub getFireHoseIdFromGlobjid {
 	my($self, $globjid) = @_;
-	my $hr = $self->getFireHoseByGlobjid($globjid, { id_only => 1 });
-	return $hr ? $hr->{id} : undef;
+	return $self->getFireHoseByGlobjid($globjid, { id_only => 1 });
 }
 
 sub getFireHoseIdFromUrl {
@@ -2778,7 +2777,7 @@ sub getAndSetOptions {
 
 	$options->{public} = "yes";
 
-	if ($options->{view} eq "daddypants" || $form->{admin_filters}) {
+	if ($options->{view} && $options->{view} eq "daddypants" || $form->{admin_filters}) {
 		$options->{admin_filters} = 1;
 	}
 
@@ -2859,6 +2858,7 @@ sub getAndSetOptions {
 
 sub getFireHoseLimitSize {
 	my($self, $mode, $pagesize, $forcesmall, $options) = @_;
+	$pagesize ||= '';
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
@@ -2885,7 +2885,7 @@ sub getFireHoseLimitSize {
 			}
 		} else {
 			$limit = $user->{is_admin} ? 50 :
-			$pagesize eq "large" ? 30 : 20;
+				$pagesize eq "large" ? 30 : 20;
 		}
 	}
 

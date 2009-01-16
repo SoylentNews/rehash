@@ -4158,7 +4158,7 @@ sub getUrlsFromText {
 			$urls{$canon} = 1;
 		}
 	}
-	return [ keys %$urls ];
+	return [ keys %urls ];
 }
 
 ########################################################
