@@ -122,6 +122,10 @@ sub run_process {
 		# problem of one user tagging "poop", then several
 		# others rightfully tagging "!poop", with the result
 		# being that "!poop" appears as a top tag.
+		if ($scores{$orig} == 0 || $scores{$opp} == 0) {
+			$minscore_mult *= 3;
+			next;
+		}
 		my $ratio = $scores{$opp} > $scores{$orig}
 			? $scores{$opp}/$scores{$orig}
 			: $scores{$orig}/$scores{$opp};
