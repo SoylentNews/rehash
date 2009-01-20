@@ -212,7 +212,8 @@ sub ajaxSaveFireHoseSections {
 
 sub ajaxSaveHideSectionMenu {
 	my($slashdb, $constants, $user, $form, $options) = @_;
-	$slashdb->setUser($user->{uid}, {firehose_hide_section_menu => $form->{hide_section_menu}});
+	my $hide = $form->{hide_section_menu} && ($form->{hide_section_menu} ne 'false');
+	$slashdb->setUser($user->{uid}, {firehose_hide_section_menu => $hide});
 }
 
 sub ajaxDeleteFireHoseSection {
