@@ -5803,3 +5803,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_section_menu', 'Slash::FireHos
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_section_menu_visible', 'Slash::FireHose', 'ajaxSaveHideSectionMenu', 'ajax_user_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_delete_section_menu', 'Slash::FireHose', 'ajaxDeleteFireHoseSection', 'ajax_user_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_new_section', 'Slash::FireHose', 'ajaxNewFireHoseSection', 'ajax_user_static', 'use');
+
+# 2009-01-19
+UPDATE vars SET value = 'T_2_5_0_238' WHERE name = 'cvs_tag_currentcode';
