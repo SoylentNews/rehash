@@ -2603,10 +2603,6 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 
 	my $global_opts = $self->getAndSetGlobalOptions();
-	# my $user_tabs        = $self->getUserTabs();
-	# my %user_tab_names   = map { $_->{tabname} => 1 } @$user_tabs;
-	# my %user_tab_by_name   = map { $_->{tabname} => $_ } @$user_tabs;
-	# my %user_tab_filters = map { $_->{filter} => $_->{tabname} } @$user_tabs;
 	my $options = {};
 
 	# Beginning of initial pageload handling
@@ -2620,25 +2616,13 @@ sub getAndSetOptions {
 			$options->{fhfilter} = $fhfilter;
 			$options->{base_filter} = $fhfilter;
 
-		#	if (defined $user_tab_filters{$fhfilter}) {
-		#		$opts->{tab} = $user_tab_filters{$fhfilter};
-		#	} else {
-		#		$opts->{tab} = '';
-		#	} 
 			$form->{tab} = '';
 			$opts->{view} = '';
 			$form->{view} = '';
 			
 		}
 		
-		my $tab; # = $opts->{tab} || $form->{tab};
-		#if ($tab) {
-		#	my $ret_tab = $user_tab_by_name{$tab}; 
-		#	$options->{tab} = $tab;
-		#	$options->{tab_ref} = $ret_tab;
-		#	$options->{base_filter} = $ret_tab->{filter};
-		#	$options->{fhfilter} = $ret_tab->{filter}
-		#}
+		my $tab; 
 
 		# XXX Don't do if fhfilter specified?
 		my $section = $self->determineCurrentSection();
@@ -2664,8 +2648,6 @@ sub getAndSetOptions {
 			}
 		}
 		
-		print STDERR "After\n";
-
 		my $view;
 		
 
@@ -2990,8 +2972,6 @@ sub getAndSetOptions {
 		$options->{$_} = $fh_options->{$_};
 	}
 
-	#$options->{tabs} = $user_tabs;
-
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
 	}
@@ -3083,7 +3063,9 @@ sub getAndSetOptions {
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
 
 #use Data::Dumper;
-#print STDERR Dumper($options);	
+#print STDERR Dumper($options);
+#use Data::Dumper;
+#print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";	
 	return $options;
 }
 
