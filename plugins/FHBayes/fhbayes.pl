@@ -35,7 +35,7 @@ $task{$me}{code} = sub {
 		map { $attr{$_} ||= 0; $attr{$_}++ } split_bayes($fh->{title});
 		map { $attr{$_} ||= 0; $attr{$_}++ } split_bayes($fh->{introtext});
 		map { $attr{$_} ||= 0; $attr{$_}++ } split_bayes($fh->{bodytext});
-		my $label = $source_labels_hr->{$id} ? ['b'] : [];
+		my $label = $source_labels_hr->{$id} ? ['b'] : ['h'];
 		$nb->add_instance(attributes => \%attr, label => $label);
 	}
 
@@ -46,6 +46,7 @@ $task{$me}{code} = sub {
 	my $dir = catdir($constants->{datadir}, 'spam_analysis');
 	File::Path::mkpath($dir, 0, 0755);
 	my $file = catfile($dir, 'binspam_naivebayes');
+	# XXX really should write a 2nd file, then mv it into place
 	$nb->save_state($file);
 
 	return join(' ',

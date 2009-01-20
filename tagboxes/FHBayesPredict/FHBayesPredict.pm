@@ -19,8 +19,11 @@ Slash::Tagbox::FHBayesPredict - Use Algorithm::NaiveBayes to predict spam
 
 use strict;
 
-use File::Path;
+use File::Spec::Functions;
+use Algorithm::NaiveBayes;
+use Algorithm::NaiveBayes::Model::Frequency;
 use Slash;
+use Slash::Utility;
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -81,7 +84,7 @@ sub run_process {
 		});
 	}
 
-	tagboxLog(sprintf("%d prediction %.6f", $affected_id, $prediction));
+	$self->info_log("%d prediction b=%.6f h=%.6f", $affected_id, $prediction, ($result->{h} || -1));
 }
 
 1;
