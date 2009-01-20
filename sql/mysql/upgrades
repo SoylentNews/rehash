@@ -5785,6 +5785,8 @@ CREATE TABLE firehose_section(
 	
 );
 
+# IMPORTAN: run `utils/gen_firehose_sections VIRTUAL_USER` after running upgrades
+
 CREATE TABLE firehose_section_settings(
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	fsid mediumint(8) unsigned NOT NULL,
