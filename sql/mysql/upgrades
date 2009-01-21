@@ -5807,5 +5807,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_new_section', 'Slash::FireHose', 'a
 # 2009-01-19
 UPDATE vars SET value = 'T_2_5_0_238' WHERE name = 'cvs_tag_currentcode';
 # 2009-01-20
-DELETE FROM css WHERE csid='28';
+DELETE FROM css WHERE file='iestyles.css' AND ie_cond='IE';
+
 
