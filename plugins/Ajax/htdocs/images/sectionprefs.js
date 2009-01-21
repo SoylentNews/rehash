@@ -4,7 +4,7 @@ $(function(){
 	$('#firehose-sections').
 		sortable({				// make sections sortable...
 			axis: 'y',
-			containment: 'parent',
+			containment: '#links-sections',
 			opacity: 0.8,
 			update: saveFirehoseSectionMenu	// ...and save their new order
 		});
