@@ -126,6 +126,16 @@ sub run_process {
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my($color_level, $extra_pop) = $self->getStartingColorLevel($type, $target_id);
+
+        # Lose a color level if bayesian analysis suggests spam.
+        for my $tag_hr (@$tags_ar) {
+                if ($tag_hr->{uid} == $constants->{fhbp_uid}
+                        && $tag_hr->{tagnameid} == $self->{nixid}) {
+                        ++$color_level if $color_level < 8;
+                        last;
+                }
+        }
+
 	my $popularity = $firehose_db->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	if ($options->{starting_only}) {
@@ -253,7 +263,7 @@ sub getStartingColorLevel {
 			}
 			# Stories on the mainpage get a color level of 1.
 			$this_color_level = 1 if $nexus_tid == $constants->{mainpage_nexus_tid};
-			# This firehose entry gets the minimum color level of 
+			# This firehose entry gets the minimum color level of
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
