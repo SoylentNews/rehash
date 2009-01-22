@@ -793,7 +793,7 @@ sub getModalPrefs {
 		my $fh = getObject("Slash::FireHose");
 		my $views = $fh->getUserViews({ tab_display => "yes"});
 		my $views_hr = { };
-		%$views_hr = map { $_->{id} => $_->{viewname} } @$views;
+		%$views_hr = map { $_->{id} => ucfirst($_->{viewname}) } @$views;
 		my $fh_section;
 		if ($form->{id}) {
 			$fh_section = $fh->getFireHoseSection($form->{id});
