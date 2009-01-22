@@ -483,7 +483,7 @@ function firehose_set_options(name, value, context) {
 	}
 	}
 
-	if (name == "view" || name == "tab") {
+	if (name == "view" || name == "tab" || name == "section") {
 		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
 	}
 
@@ -1146,7 +1146,7 @@ function firehose_handle_update() {
 			if (elem && elem.parentNode) {
 				elem.parentNode.removeChild(elem);
 			}
-			$('#firehoselist').show('slow');
+			$('#firehoselist').fadeIn('slow');
 			$('.busy').hide();
 
 		}
@@ -1746,7 +1746,7 @@ function saveModalPrefs() {
 	var handlers = {
 		onComplete: function() {
 			hide_modal_box();
-			if (document.forms.modal_prefs.refreshable.value) {
+			if (document.forms.modal_prefs.refreshable && document.forms.modal_prefs.refreshable.value) {
 				document.location=document.URL;
 			}
 		}
@@ -1930,6 +1930,7 @@ function firehose_new_section() {
 function firehose_new_section_handler(transport) {
 	var response = eval_response(transport);
 	if (response.id) {
+		firehose_set_options('section', response.id);
 		if (response.li) {
 			$('#firehose-sections li:last').after(response.li);
 		}
