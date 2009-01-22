@@ -20,7 +20,7 @@ Filter: <input type="text" name="section_filter" value="[% filter %]"><br>
 Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]<br>
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
-<input type="button" value="save" onclick="$('#fhsectiontitle-[% id %]').html($dom('fhsectionname').value);saveModalPrefs()">
+<input type="button" value="save" onclick="$('#fhsectiontitle-[% id %]').html($dom('fhsectionname').value);saveModalPrefs();[% IF id %]firehose_set_options('section',[% id %])[% END %]">
 <input type="button" value="cancel" onclick="hide_modal_box()">
 [% IF id %]
 	[% IF fh_section && fh_section.uid == 0 %]
