@@ -1608,7 +1608,7 @@ sub genSetOptionsReturn {
 	$data->{html}->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
 	$data->{value}->{'firehose-filter'} = $opts->{fhfilter};
-	if ($form->{view} && $form->{viewchanged}) {
+	if (($form->{view} && $form->{viewchanged}) || ($form->{section} && $form->{sectionchanged})) {
 		$data->{eval_last} = "firehose_slider_set_color('$opts->{color}');";
 	}
 
@@ -2729,11 +2729,9 @@ sub getAndSetOptions {
 				
 				$options->{viewref} = $self->getUserViewByName($opts->{view});
 
-				$self->applyViewOptions($options->{viewref}, $options)
+				$options = $self->applyViewOptions($options->{viewref}, $options)
 			}
-		}
-		
-		if($form->{view}) {
+		} elsif($form->{view}) {
 			my $view = $self->getUserViewByName($form->{view});
 			if($view) {
 				$options->{view} = $form->{view};
@@ -2766,7 +2764,7 @@ sub getAndSetOptions {
 	my $pagesize = $form->{pagesize} && $validator->{pagesize}{$form->{pagesize}};
 	$options->{pagesize} = $pagesize || $options->{pagesize}  || "small";
 
-	$options->{mode} = $mode;
+	$options->{mode} = $s_change ? $options->{mode} : $mode;
 
 	$options->{pause} = defined $options->{pause} ? $options->{pause} : 1;
 	$form->{pause} = 1 if $no_saved;
@@ -2806,7 +2804,7 @@ sub getAndSetOptions {
 
 
 	my $colors = $self->getFireHoseColors();
-	if ($form->{color} && $validator->{colors}->{$form->{color}}) {
+	if ($form->{color} && $validator->{colors}->{$form->{color}} && !$s_change) {
 		$options->{color} = $form->{color};
 	}
 
@@ -2991,7 +2989,7 @@ sub getAndSetOptions {
 		delete $fh_options->{nexus} if @{$fh_options->{nexus}} == 0;
 	}
 	
-	my $color = defined $form->{color} && $validator->{colors}->{$form->{color}} ? $form->{color} : "";
+	my $color = (defined $form->{color} && !$s_change) && $validator->{colors}->{$form->{color}} ? $form->{color} : "";
 	$color = defined $options->{color} && $validator->{colors}->{$options->{color}} ? $options->{color} : "" if !$color;
 
 	$fh_options->{color} = $color;
@@ -3093,7 +3091,6 @@ sub getAndSetOptions {
 
 #use Data::Dumper;
 #print STDERR Dumper($options);
-#use Data::Dumper;
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";	
 	return $options;
 }
