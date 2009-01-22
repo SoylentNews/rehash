@@ -5810,3 +5810,5 @@ UPDATE vars SET value = 'T_2_5_0_238' WHERE name = 'cvs_tag_currentcode';
 DELETE FROM css WHERE file='iestyles.css' AND ie_cond='IE';
 
 
+# For plugins/FireHose
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_section_css', 'Slash::FireHose', 'ajaxFireHoseSectionCSS', 'ajax_user_static', 'use');

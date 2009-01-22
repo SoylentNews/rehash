@@ -7,7 +7,8 @@
 	firehose_play firehose_add_update_timerid firehose_collapse_entry firehose_slider_end
 	firehose_slider_set_color vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
 	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
-	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen */
+	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen firehose_style_switch
+	firehose_style_switch_handler */
 
 YAHOO.namespace('slashdot');
 
@@ -329,6 +330,36 @@ function toggleFirehoseTagbox(id) {
 	after_article_moved($('#firehose-'+id)[0]);
 }
 
+function firehose_style_switch(section) {
+	var params = {};
+	params['op'] 	 	= 'firehose_section_css';
+	params['layout'] 	= 'yui';
+	params['reskey'] 	= reskey_static;
+	params['section'] 	= section;
+
+	ajax_update(params, '', { onComplete: firehose_style_switch_handler });
+}
+
+function firehose_style_switch_handler(transport) {
+	var response = eval_response(transport);
+
+	if (response.skin_name) {
+		if ($('html head link[@title=' + response.skin_name + ']').length == 0 ) {
+                      $('html head link:last').after(response.css_includes);
+		}
+
+		$("head link[title]").each(function(i) {
+			        this.disabled = true;
+				if (this.getAttribute('title') == response.skin_name) {
+					this.disabled = false;
+				}
+	        });
+	} else {
+		$("head link[title]").each(function(i) { this.disabled = true; });
+	}
+}
+
+
 function firehose_set_options(name, value, context) {
 	if (firehose_user_class === 0) {
 		return;
@@ -512,6 +543,7 @@ function firehose_set_options(name, value, context) {
 		firehose_settings.more_num = 0;
 		$('#firehose-sections li').removeClass('active');
 		$('#firehose-sections #fhsection-' + value).addClass('active');
+		firehose_style_switch(value);
 	}
 	
 	params.section = firehose_settings.section;

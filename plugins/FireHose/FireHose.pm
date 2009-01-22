@@ -237,13 +237,41 @@ sub ajaxNewFireHoseSection {
 
 	my $id = $fh->createFireHoseSection($data);
 	
+	my $data_dump = {};
+
 	if ($id) {
-		my $data_dump =  Data::JavaScript::Anon->anon_dump({
+		$data_dump =  Data::JavaScript::Anon->anon_dump({
 			id 	=> $id,
 			li	=> getData('newsectionli', { id => $id }, 'firehose')
 
 		});
 	}
+	return $data_dump;
+}
+
+sub ajaxFireHoseSectionCSS {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $fsid_q = $slashdb->sqlQuote($form->{section});
+	my $layout_q = $slashdb->sqlQuote($form->{layout});
+	my $css = $slashdb->sqlSelectAllHashrefArray(
+		"css.*, skins.name as skin_name",
+		"firehose_section, css, skins",
+		"fsid=$fsid_q and firehose_section.skid=skins.skid and css.skin=skins.name and css.layout=$layout_q and admin='no'"
+	);
+
+
+	my $retval = "";
+	my $skin_name = "";
+	foreach (@$css) {
+		$skin_name = $_->{skin_name};
+		$retval .= getData('alternate_section_stylesheet', { css => $_, }, 'firehose');
+	}
+	my $data_dump =  Data::JavaScript::Anon->anon_dump({
+		skin_name 	=> $skin_name,
+		css_includes 	=> $retval,
+	});
+
+	return $data_dump;
 }
 
 
