@@ -811,7 +811,475 @@ sub getModalPrefs {
 		}
 
 		return slashDisplay('fhviewprefs', { name => $name, id => $form->{id}, filter => $filter, views => $views_hr, fh_section => $fh_section, default_view => $viewid }, { Return => 1} );
-		
+
+	} elsif ($form->{'section'} eq 'adminblock') {
+		return if !$user->{is_admin};
+
+		my $logdb = getObject('Slash::DB', { db_type => 'log_slave' });
+                my($expired, $uidstruct, $readonly);
+                my $srcid;
+                my $proxy_check = {};
+                my @accesshits;
+                my($user_edit, $user_editfield, $ipstruct, $ipstruct_order, $authors, $author_flag, $topabusers, $thresh_select, $section_select);
+		my $uid = $user->{uid};
+                my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
+                my $sectionref = $slashdb->getDescriptions('skins');
+                $sectionref->{''} = getData('all_sections', undef, 'users');
+		my $field = $form->{'field'};
+                my $id = $form->{'id'};
+                my $fieldname = $form->{'fieldname'};
+                my $userfield = $form->{'userfield'};
+                my $check_proxy = $form->{'check_proxy'};	
+	
+		if ($field eq 'uid') {
+                        $user_edit = $slashdb->getUser($id);
+                        $user_editfield = $user_edit->{uid};
+                        $srcid = convert_srcid( uid => $id );
+                        $ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
+                        @accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{uid}) if defined($logdb);
+                        $section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
+
+                } elsif ($field eq 'nickname') {
+                        $user_edit = $slashdb->getUser($slashdb->getUserUID($id));
+                        $user_editfield = $user_edit->{nickname};
+                        $ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
+                        @accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
+                        $section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
+
+                } elsif ($field eq 'md5id') {
+                        $user_edit->{nonuid} = 1;
+                        $user_edit->{md5id} = $id;
+                        if ($fieldname && $fieldname =~ /^(ipid|subnetid)$/) {
+                                $uidstruct = $slashdb->getUIDStruct($fieldname, $user_edit->{md5id});
+                                @accesshits = $logdb->countAccessLogHitsInLastX($fieldname, $user_edit->{md5id}) if defined($logdb);
+                        } else {
+                                $uidstruct = $slashdb->getUIDStruct('md5id', $user_edit->{md5id});
+                                @accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{md5id}) if defined($logdb);
+                        }
+
+                } elsif ($field eq 'ipid') {
+                        $user_edit->{nonuid} = 1;
+                        $user_edit->{ipid} = $id;
+                        $srcid = convert_srcid( ipid => $id );
+                        $user_editfield = $id;
+                        $uidstruct = $slashdb->getUIDStruct('ipid', $user_edit->{ipid});
+                        @accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
+
+                        if ($userfield =~/^\d+\.\d+\.\d+\.(\d+)$/) {
+                                if ($1 ne "0"){
+                                        $proxy_check->{available} = 1;
+                                        $proxy_check->{results} = $slashdb->checkForOpenProxy($userfield) if $check_proxy;
+                                }
+                        }
+
+                } elsif ($field eq 'subnetid') {
+                        $user_edit->{nonuid} = 1;
+                        $srcid = convert_srcid( ipid => $id );
+                        if ($id =~ /^(\d+\.\d+\.\d+)(?:\.\d)?/) {
+                                $id = $1 . ".0";
+                                $user_edit->{subnetid} = $id;
+                        } else {
+                                $user_edit->{subnetid} = $id;
+                        }
+
+                        $user_editfield = $id;
+                        $uidstruct = $slashdb->getUIDStruct('subnetid', $user_edit->{subnetid});
+                        @accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{subnetid}) if defined($logdb);
+
+                } elsif ($field eq "srcid") {
+                        $user_edit->{nonuid} = 1;
+                        $user_edit->{srcid}  = $id;
+                        $srcid = $id;
+
+                } else {
+			$user_edit = $id ? $slashdb->getUser($id) : $user;
+                        $user_editfield = $user_edit->{uid};
+                        $ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
+                        @accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
+                }
+
+                my $all_acls_ar = $slashdb->getAllACLNames();
+                my $all_acls_hr = { map { ( $_, 1 ) } @$all_acls_ar };
+
+                for my $acl (keys %{$user_edit->{acl}}) {
+                        $all_acls_hr->{$acl} = 1;
+                }
+
+                my $all_aclam_hr = { };
+                if (!$user_edit->{nonuid}) {
+                        $all_aclam_hr = { map { ( "aclam_$_", "ACL: $_" ) } keys %$all_acls_hr };
+                }
+
+                my $all_al2types = $slashdb->getAL2Types;
+                for my $key (keys %$all_al2types) {
+                        next if $key eq 'comment'; # skip the 'comment' type
+                        $all_aclam_hr->{"aclam_$key"} = $all_al2types->{$key}{title};
+                }
+
+                my $all_acls_longkeys_hr = { map { ( "aclam_$_", 1 ) } keys %$all_acls_hr };
+                my $all_aclam_ar = [
+                        sort {
+                                (exists($all_acls_longkeys_hr->{$a}) ? -1 : 1) <=> (exists($all_acls_longkeys_hr->{$b}) ? -1 : 1)
+                                ||
+                                $all_aclam_hr->{$a} cmp $all_aclam_hr->{$b}
+                        } keys %$all_aclam_hr
+                ];
+
+                my $user_aclam_hr = { };
+                for my $acl (keys %{ $user_edit->{acl} }) {
+                        $user_aclam_hr->{"aclam_$acl"} = 1;
+                }
+                my $al2_tid_comment = $all_al2types->{comment}{al2tid} || 0;
+                my $al2_log_ar = [ ];
+                my $al2_hr = { };
+
+                if ($srcid) {
+			# getAL2 works with either a srcids hashref or a single srcid
+			$al2_hr = $slashdb->getAL2($srcid);
+                        for my $al2 (keys %{ $al2_hr }) {
+                                $user_aclam_hr->{"aclam_$al2"} = 1;
+                        }
+                        $al2_log_ar = $slashdb->getAL2Log($srcid);
+                }
+
+                my $al2_nick_hr = { };
+                for my $al2_log (@$al2_log_ar) {
+                        my $uid = $al2_log->{adminuid};
+                        next if !$uid; # odd error, might want to flag this
+                        $al2_nick_hr->{$uid} ||= $slashdb->getUser($uid, 'nickname');
+                }
+
+                $user_edit->{author} = ($user_edit->{author} && $user_edit->{author} == 1)
+                        ? $constants->{markup_checked_attribute} : '';
+
+
+                if (! $user->{nonuid}) {
+                        my $threshcodes = $slashdb->getDescriptions('threshcode_values','',1);
+                        $thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);
+                }
+
+                if (!ref $ipstruct) {
+                        undef $ipstruct;
+                } else {
+                        @$ipstruct_order = sort { $ipstruct->{$b}{dmin} cmp $ipstruct->{$a}{dmin} } keys %$ipstruct;
+                }
+
+                my $m2total = ($user_edit->{m2fair} || 0) + ($user_edit->{m2unfair} || 0);
+                if ($m2total) {
+                        $user_edit->{m2unfairpercent} = sprintf("%.2f",
+                                $user_edit->{m2unfair}*100/$m2total);
+                }
+                my $mod_total = ($user_edit->{totalmods} || 0) + ($user_edit->{stirred} || 0);
+
+                if ($mod_total) {
+                        $user_edit->{stirredpercent} = sprintf("%.2f",
+                                $user_edit->{stirred}*100/$mod_total);
+                }
+
+                if ($constants->{subscribe} and my $subscribe = getObject('Slash::Subscribe')) {
+                        $user_edit->{subscribe_payments} =
+                                $subscribe->getSubscriptionsForUser($user_edit->{uid});
+                        $user_edit->{subscribe_purchases} =
+                                $subscribe->getSubscriptionsPurchasedByUser($user_edit->{uid},{ only_types => [ "grant", "gift" ] });
+                }
+
+                my $ipid = $user_edit->{ipid};
+                my $subnetid = $user_edit->{subnetid};
+                my $post_restrictions = {};
+                my ($subnet_karma, $ipid_karma);
+
+		if ($ipid && !$subnetid) {
+                        $ipid = md5_hex($ipid) if length($ipid) != 32;
+                        $proxy_check->{ipid} = $ipid;
+                        $proxy_check->{currently} = $slashdb->getKnownOpenProxy($ipid, "ipid");
+                        $subnetid = $slashdb->getSubnetFromIPIDBasedOnComments($ipid);
+                }
+
+                if ($subnetid) {
+                        $subnetid = md5_hex($subnetid) if length($subnetid) != 32;
+                        $post_restrictions = $slashdb->getNetIDPostingRestrictions("subnetid", $subnetid);
+                        $subnet_karma = $slashdb->getNetIDKarma("subnetid", $subnetid);
+                        $ipid_karma = $slashdb->getNetIDKarma("ipid", $ipid) if $ipid;
+                }
+
+                my $clout_types_ar = [ sort grep /\D/, keys %{$slashdb->getCloutTypes} ];
+
+                # Last journal
+                my $lastjournal = undef;
+                my $lastjournal_title;
+                if ($user_edit->{uid}) {
+                        if (my $journal = getObject('Slash::Journal', { db_type => 'reader' })) {
+                                my $j = $journal->getsByUid($user_edit->{uid}, 0, 1);
+                                if ($j && @$j) {
+                                        $j = $j->[0];
+                                }
+
+                                if ($j && @$j) {
+                                        my @field = qw( date article description id posttype tid discussion );
+                                        $lastjournal = { };
+                                        for my $i (0..$#field) {
+                                                $lastjournal->{$field[$i]} = $j->[$i];
+                                        }
+                                }
+                        }
+                }
+
+		if ($lastjournal) {
+
+                        $lastjournal->{article} = strip_mode($lastjournal->{article},
+                                $lastjournal->{posttype});
+
+                        my $art_shrunk = $lastjournal->{article};
+                        my $maxsize = int($constants->{default_maxcommentsize} / 25);
+                        $maxsize =  80 if $maxsize <  80;
+                        $maxsize = 600 if $maxsize > 600;
+                        $art_shrunk = chopEntity($art_shrunk, $maxsize);
+
+                        my $approvedtags_break = $constants->{approvedtags_break} || [];
+                        my $break_tag = join '|', @$approvedtags_break;
+
+                        if (scalar(() = $art_shrunk =~ /<(?:$break_tag)>/gi) > 2) {
+                                $art_shrunk =~ s/\A
+                                (
+                                        (?: <(?:$break_tag)> )?
+                                        .*?   <(?:$break_tag)>
+                                        .*?
+                                        <(?:$break_tag)>.*
+                                )
+                                /$1/six;
+
+                                if (length($art_shrunk) < 15) {
+                                        undef $art_shrunk;
+                                }
+                                $art_shrunk = chopEntity($art_shrunk) if defined($art_shrunk);
+                        }
+
+                        if (defined $art_shrunk) {
+                                if (length($art_shrunk) < length($lastjournal->{article})) {
+                                        $art_shrunk .= " ...";
+                                }
+                                $art_shrunk = strip_html($art_shrunk);
+                                $art_shrunk = balanceTags($art_shrunk);
+                        }
+
+                        $lastjournal->{article_shrunk} = $art_shrunk;
+
+                        if ($lastjournal->{discussion}) {
+                                $lastjournal->{commentcount} = $slashdb->getDiscussion(
+                                        $lastjournal->{discussion}, 'commentcount');
+                        }
+
+                        $lastjournal_title =
+                                slashDisplay('titlebar', {
+                                        title => "Last Journal Entry",
+                                }, { Page => 'users', Return => 1 });
+
+                }
+
+                # Submissions
+		my $sub_limit = $constants->{submissions_all_page_size};
+                my $sub_options = { limit_days => 365 };
+                my $latestsubmissions;
+                $latestsubmissions = $slashdb->getSubmissionsByUID($user_edit->{uid}, $sub_limit, $sub_options);
+                my $submissions =
+                        slashDisplay('listSubmissions', {
+                                title       => "Recent Submissions",
+                                admin_flag  => 1,
+                                submissions => $latestsubmissions,
+                        }, { Page => 'users', Return => 1 });
+
+
+                # Tags
+                my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+                my $tagshist = [];
+                if ($tags_reader) {
+                        $tagshist = $tags_reader->getAllTagsFromUser($user_edit->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 30, include_private => 1 });
+                }
+                my $recent_tags =
+                        slashDisplay('usertaghistory', {
+                                title => "Recent Tags",
+                                tagshist => $tagshist,
+                        }, { Page => 'users', Return => 1 });
+
+                # Comments
+                my $comments = undef;
+                my $commentcount = 0;
+                my $commentcount_time = 0;
+                my $commentstruct = [];
+                my $min_comment = 0;
+                my $time_period = $constants->{admin_comment_display_days} || 30;
+                my $cid_for_time_period = $slashdb->getVar("min_cid_last_$time_period\_days",'value', 1) || 0;
+                my $admin_time_period_limit = $constants->{admin_daysback_commentlimit} || 100;
+                my $admin_non_time_limit = $constants->{admin_comment_subsequent_pagesize} || 24;
+                my $non_admin_limit = $constants->{user_comment_display_default};
+
+                $commentcount = $slashdb->countCommentsByUID($user_edit->{uid});
+                $commentcount_time = $slashdb->countCommentsByUID($user_edit->{uid}, { cid_at_or_after => $cid_for_time_period });
+                $comments = $slashdb->getCommentsByUID($user_edit->{uid}, 25, 0);
+
+                my @users_extra_cols_wanted       = qw( nickname );
+                my @discussions_extra_cols_wanted = qw( type );
+                my $uid_hr = { };
+                my $sid_hr = { };
+
+                if ($comments && @$comments) {
+                        my %uids = ();
+                        my %sids = ();
+
+                        for my $c (@$comments) {
+                                $uids{$c->{uid}}++;
+                                $sids{$c->{sid}}++;
+                        }
+                        my $uids = join(", ", sort { $a <=> $b } keys %uids);
+                        my $sids = join(", ", sort { $a <=> $b } keys %sids);
+                        $uid_hr = $slashdb->sqlSelectAllHashref(
+                                "uid",
+                                "uid, " . join(", ", @users_extra_cols_wanted),
+                                "users",
+                                "uid IN ($uids)"
+                        );
+
+                        $sid_hr = $slashdb->sqlSelectAllHashref(
+                                "id",
+                                "id, " . join(", ", @discussions_extra_cols_wanted),
+                                "discussions",
+                                "id IN ($sids)"
+                        );
+                }
+
+		my $cids_seen = {};
+                my $kinds = $slashdb->getDescriptions('discussion_kinds');
+                for my $comment (@$comments) {
+                        $cids_seen->{$comment->{cid}}++;
+                        my $type;
+                        my $replies = $slashdb->countCommentsBySidPid($comment->{sid}, $comment->{cid});
+                        my $discussion = $slashdb->getDiscussion($comment->{sid});
+                        if (!$discussion || !$discussion->{dkid}) {
+                                next;
+                        } elsif ($kinds->{ $discussion->{dkid} } =~ /^journal(?:-story)?$/) {
+                                $type = 'journal';
+                        } elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
+                                $type = 'poll';
+                        } else {
+                                $type = 'story';
+                        }
+
+                        $comment->{points} += $user_edit->{karma_bonus} if $user_edit->{karma_bonus} && $comment->{karma_bonus} eq 'yes';
+                        $comment->{points} += $user_edit->{subscriber_bonus} if $user_edit->{subscriber_bonus} && $comment->{subscriber_bonus} eq 'yes';
+                        $comment->{points} = $constants->{comment_minscore} if $comment->{points} < $constants->{comment_minscore};
+                        $comment->{points} = $constants->{comment_maxscore} if $comment->{points} > $constants->{comment_maxscore};
+                        vislenify($comment);
+
+                        my $data = {
+                                pid             => $comment->{pid},
+                                url             => $discussion->{url},
+                                disc_type       => $type,
+                                disc_title      => $discussion->{title},
+                                disc_time       => $discussion->{ts},
+                                sid             => $comment->{sid},
+                                cid             => $comment->{cid},
+                                subj            => $comment->{subject},
+                                cdate           => $comment->{date},
+                                pts             => $comment->{points},
+                                reason          => $comment->{reason},
+                                uid             => $comment->{uid},
+                                replies         => $replies,
+                                ipid            => $comment->{ipid},
+                                ipid_vis        => $comment->{ipid_vis},
+                                karma           => $comment->{karma},
+                                tweak           => $comment->{tweak},
+                                tweak_orig      => $comment->{tweak_orig},
+
+                        };
+
+                        for my $col (@users_extra_cols_wanted) {
+                                $data->{$col} = $uid_hr->{$comment->{uid}}{$col} if defined $uid_hr->{$comment->{uid}}{$col};
+                        }
+
+                        for my $col(@discussions_extra_cols_wanted) {
+                                $data->{$col} = $sid_hr->{$comment->{sid}}{$col} if defined $sid_hr->{$comment->{sid}}{$col};
+                        }
+
+                        push @$commentstruct, $data;
+                }
+
+		@$commentstruct = sort {
+                        $b->{disc_time} cmp $a->{disc_time} || $b->{sid} <=> $a->{sid}
+                } @$commentstruct unless $user->{user_comment_sort_type} && $user->{user_comment_sort_type} == 1;
+
+                my $cid_list = [ keys %$cids_seen ];
+                my $cids_to_mods = {};
+                my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+                if ($constants->{m1} && $constants->{show_mods_with_comments}) {
+                        my $comment_mods = $mod_reader->getModeratorCommentLog("DESC", $constants->{mod_limit_with_comments}, "cidin", $cid_list);
+
+                        while (my $mod = shift @$comment_mods) {
+                                push @{$cids_to_mods->{$mod->{cid}}}, $mod;
+                        }
+                }
+
+		my $comments_pane;
+                my $comments_title;
+                if ($commentcount) {
+                        $comments_pane =
+                                slashDisplay('listComments', {
+                                        admin_flag    => 1,
+                                        commentstruct => $commentstruct || [],
+                                        commentcount  => $commentcount,
+                                        reasons       => $mod_reader->getReasons(),
+                                        min_comment   => $min_comment,
+                                        cids_to_mods  => $cids_to_mods,
+                                        type          => "user",
+                                        useredit      => $user_edit,
+                                }, { Page => 'users', Return => 1 });
+
+                        $comments_title =
+                                slashDisplay('titlebar', {
+                                        title => "Comments",
+                                }, { Page => 'users', Return => 1 });
+                }
+
+		return
+                        slashDisplay('prefs_adminblock', {
+                                user               => $user,
+                                useredit           => $user_edit,
+                                field              => $field,
+                                userfield          => $userfield,
+                                fieldname          => $fieldname,
+                                seclev_field       => 1,
+                                authoredit_flag    => $authoredit_flag,
+                                section_select     => $section_select,
+                                thresh_select      => $thresh_select,
+                                srcid              => $srcid,
+                                all_aclam_ar       => $all_aclam_ar,
+                                all_aclam_hr       => $all_aclam_hr,
+                                user_aclam_hr      => $user_aclam_hr,
+                                al2_old            => $al2_hr,
+                                al2_log            => $al2_log_ar,
+                                al2_tid_comment    => $al2_tid_comment,
+                                al2_nick           => $al2_nick_hr,
+                                subnet_karma       => $subnet_karma,
+                                ipid_karma         => $ipid_karma,
+                                post_restrictions  => $post_restrictions,
+                                clout_types_ar     => $clout_types_ar,
+                                proxy_check        => $proxy_check,
+                                uidstruct          => $uidstruct,
+                                ipstruct           => $ipstruct,
+                                ipstruct_order     => $ipstruct_order,
+                                accesshits         => \@accesshits,
+                                lastjournal        => $lastjournal,
+                                lastjournal_title  => $lastjournal_title,
+                                hr_hours_back      => $constants->{istroll_ipid_hours} || 72,
+                                submissions        => $submissions,
+                                recent_tags        => $recent_tags,
+                                commentcount       => $commentcount,
+                                comments_pane      => $comments_pane,
+                                comments_title     => $comments_title,
+                                tabbed             => $form->{'tabbed'},
+                        },
+                        { Return => 1 }
+                );
+
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
@@ -1135,6 +1603,84 @@ sub saveModalPrefs {
 			$fh->setFireHoseSectionPrefs($params{'id'}, $data);
 		}
 	}
+
+	if ($params{'formname'} eq "adminblock") {
+                return if !$user->{is_admin};
+
+                my $user_editfield_flag;
+                my $id;
+                my $srcid;
+                if ($params{'uid'}) {
+                        $user_editfield_flag = 'uid';
+                        $id = $params{'uid'};
+                        $srcid = $id;
+                }
+
+                my $all_al2types = $slashdb->getAL2Types;
+                my $al2_change = { };
+                my @al2_old = ( ); 
+                foreach my $param (keys %params) {
+                        push(@al2_old, $params{$param}) if ($param =~ /al2_old_multiple\d+/);
+                }
+                my %al2_old = ( map { ($_, 1) } @al2_old );
+
+                my @acl_old = ( );
+                foreach my $param (keys %params) {
+                        push(@acl_old, $params{$param}) if ($param =~ /acl_old_multiple\d+/);
+                }
+                my %acl_old = ( map { ($_, 1) } @acl_old );
+
+                my @al2_new_formfields = ( );
+                foreach my $param (keys %params) {
+                        push(@al2_new_formfields, $params{$param}) if ($param =~ /aclams_new_multiple\d+/);
+                }
+                my @al2_new_submitted = map { s/^aclam_//; $_ } @al2_new_formfields;
+                my @al2_new = grep { exists $all_al2types->{$_} } @al2_new_submitted;
+                my %al2_new = ( map { ($_, 1) } @al2_new );
+                my @acl_new = grep { !$al2_new{$_} } @al2_new_submitted;
+                my %acl_new = ( map { ($_, 1) } @acl_new );
+
+                for my $al2 (@al2_old, @al2_new) {
+                        next if defined($al2_old{$al2}) && defined($al2_new{$al2}) && $al2_old{$al2} == $al2_new{$al2};
+                        $al2_change->{$al2} = $al2_new{$al2} ? 1 : 0;
+                }
+
+                if ($params{'al2_new_comment'}) {
+                        $al2_change->{comment} = $params{'al2_new_comment'};
+                }
+                $al2_change = undef if !keys %$al2_change;
+
+                my $acl_change = { };
+                for my $acl (@acl_old, @acl_new) {
+                        next if $acl_old{$acl} == $acl_new{$acl};
+                        $acl_change->{$acl} = $acl_new{$acl} ? 1 : 0;
+                }
+                $acl_change = undef if !keys %$acl_change;
+
+                $slashdb->setAL2($srcid, $al2_change) if ($srcid);
+
+                return if ($user_editfield_flag ne 'uid');
+
+                my $seclev = $params{'seclev'};
+                $seclev = $user->{seclev} if $seclev > $user->{seclev};
+
+		$user_edits_table = {
+                        seclev                => ($seclev ? $params{'seclev'} : 1),
+                        author                => ($params{'author'} ? 1 : 0),
+                        section               => $params{'section'},
+                        tag_clout             => $params{'tag_clout'},
+                        tokens                => $params{'tokens'},
+                        m2info                => $params{'m2info'},
+                        defaultpoints         => $params{'defaultpoints'},
+                        shill_static_marquee  => ($params{'shill_static_marquee'} ? 1 : undef),
+                        shill_rss_url         => ($params{'shill_rss_url'} ? $params{'shill_rss_url'} : undef),
+                        u2_friends_bios       => ($params{'u2_friends_bios'} ? 1 : undef),
+
+                };
+
+                $user_edits_table->{acl} = $acl_change if $acl_change;
+
+        }
 
         # Everything but Sections is saved here.
 	if ($params{'formname'} ne "sectional" && $params{'formname'} ne "firehoseview") {

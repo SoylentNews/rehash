@@ -10,6 +10,388 @@ en_US
 __name__
 prefs_adminblock
 __template__
+
+[% IF user.is_admin %]
+<div class="user_admin">
+
+<form id="modal_prefs" method="post">
+
+<input type="hidden" name="formname" value="adminblock">
+<input type="hidden" name="uid" value="[% useredit.uid %]">
+<input type="hidden" name="refreshable" value="">
+
+        <label>
+                User
+        </label>
+        <br>
+        <input type="text" name="userfield" value="[% userfield | strip_attribute %]" size="32">
+
+        <br>
+
+        <div>
+        <a href="/users.pl?op=admin&userinfo=Info&userfield=[% userfield | strip_attribute %]&fieldname=[% fieldname | strip_attribute %]">Info</a>,&nbsp;
+        <a href="/users.pl?op=admin&edituser=Edit&userfield=[% userfield | strip_attribute %]&fieldname=[% fieldname | strip_attribute %]">Edit</a>,&nbsp;
+        <a href="/users.pl?op=admin&changepasswd=Password&userfield=[% userfield | strip_attribute %]&fieldname=[% fieldname | strip_attribute %]">Password</a>,&nbsp;
+        <a href="/users.pl?op=admin&edithome=Homepage&userfield=[% userfield | strip_attribute %]&fieldname=[% fieldname | strip_attribute %]">Home</a>,&nbsp;
+        <a href="/users.pl?op=admin&editcomm=Comments&userfield=[% userfield | strip_attribute %]&fieldname=[% fieldname | strip_attribute %]">Comments</a>
+        </div>
+
+        <br>
+
+        [% IF authoredit_flag && seclev_field && !useredit.nonuid  %]
+                <label>
+                        Seclev
+                </label>
+                        [% IF user.seclev >= 10000 %]
+                                <input type="text" name="seclev" size="7" value="[% useredit.seclev | strip_attribute %]">
+                                <input type="checkbox" name="author" [% useredit.author %]>
+                        [% ELSE %]
+                                  [% useredit.seclev %]
+                        [% END %]
+                        Author in
+                                [% section_select %]
+        [% END %]
+
+        [% IF !useredit.nonuid %]
+                <p>
+                <label>
+                        Default&nbsp;points
+                </label>
+                        [% thresh_select %]
+        [% END %]
+
+        <p>
+
+        <label>ACLs and Access Modifiers</label>
+
+        <br>
+
+        <input type="hidden" name="aclams_srcid" value="[% srcid %]">
+        [% acl_count = 0 %]
+        [% FOR acl = useredit.acl.keys %]
+                <input type="hidden" name="acl_old_multiple[% acl_count %]" value="[% acl %]">
+                [% acl_count = acl_count + 1 %]
+        [% END %]
+
+        [% FOR al2 = al2_old.keys %]
+		<input type="hidden" name="al2_old_multiple" value="[% al2_old.${al2}.name %]">
+        [% END %]
+
+        [% Slash.createSelect("aclams_new_multiple",
+                       all_aclam_hr, user_aclam_hr,
+                       1, '', all_aclam_ar, 1) %]
+        &nbsp;
+
+        [% rowcount = useredit.acl.keys.size + al2_old.keys.keys.size - 1;
+        IF rowcount < 3; rowcount = 3; END %]
+                <textarea name="al2_new_comment" cols="40" rows="[% rowcount %]" wrap="virtual"></textarea>
+                <table class="data" border="0" cellpadding="2" cellspacing="0">
+                        <tr class="data_head"><th>[% IF useredit.nonuid%]NetID[% ELSE %]User[% END %] History</th></tr>
+                        [% toggle = 0 %]
+                        [% FOREACH com = al2_log.reverse %]
+                                <tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]"><td>
+                                [% NEXT UNLESS com.al2tid == al2_tid_comment %]
+                                [% com.ts %]&nbsp;
+                                &nbsp;<i>[% al2_nick.${com.adminuid} || com.adminuid || '?' %]:</i>
+                                [% com.comment %]
+                                </td>
+                        [% toggle = !toggle %]
+                        </tr>
+                        [% END %]
+                </table>
+
+        [% IF subnet_karma.defined %]
+                <br><br>
+
+                <label>
+                        Karma
+                </label>
+
+                <br>
+
+                <b>[% IF ipid_karma.defined %]IPID Karma: [% ipid_karma %] [% END %]Subnet Karma: [% subnet_karma %] [% IF post_restrictions.no_post %]All posting disabled[% ELSIF post_restrictions.no_anon%]Anonymous Posting Disabled[% END %]</b>
+        [% END %]
+
+	[% IF useredit.uid and useredit.waiting_for_account_verify %]
+                <br><br>
+                <label>
+                        Awaiting account verification request at
+                </label>
+                [% useredit.account_verify_request_time %]
+        [% END %]
+
+        [% IF proxy_check.available || proxy_check.ipid %]
+                <br><br>
+                <label>
+                        Proxy Info
+                </label>
+                [% IF proxy_check.available %]
+                        <a href="[% gSkin.rootdir %]/users.pl?userfield=[% userfield | strip_paramattr %]&amp;check_proxy=1">Test [% userfield %] for open proxy</a>
+                        [% IF proxy_check.results.defined %]
+                                <b>
+                                Test Results:
+                                [% IF proxy_check.results %]
+                                        Open proxy found on port: [% proxy_check.results %]
+                                [% ELSE %]
+                                        No proxy detected
+                                [% END %]
+                                </b>
+                        [% END %]
+
+                        [% need_br = 1 %]
+                [% END %]
+
+                [% IF proxy_check.ipid %]
+                        [% IF need_br %]
+                                <br>
+                        [% END %]
+                                <b>
+                                Saved proxy status:
+                                [% IF !proxy_check.currently.defined %]
+                                        Untested
+                                [% ELSIF proxy_check.currently == 0 %]
+                                        No proxy detected
+                                [% ELSE %]
+                                        Open proxy found on port: [% proxy_check.currently %]
+                                [% END %]
+                                </b>
+                [% END %]
+        [% END %]
+
+        [% IF useredit.uid %]
+                <br>
+                <b>Tokens:</b>
+                <input type="text" name="tokens" size="6" value="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
+                <b>M2Info:</b>
+                <input type="text" name="m2info" value="[% useredit.m2info | strip_attribute %]">
+
+                <p><b>Clout, Manual:</b>
+                <input type="text" name="tag_clout" size="6" value="[% useredit.tag_clout | strip_attribute %]">&nbsp;&nbsp;
+                <b>Automated:</b>
+                [% FOREACH clout_type IN clout_types_ar %]
+                        &nbsp;[% clout_type %]
+                        [% IF useredit.clout.$clout_type.defined;
+                                FILTER format('%.4f'); useredit.clout.$clout_type; END;
+                        ELSE; '(none)'; END %]
+                [% END %]
+
+		[% END %]
+
+        <br><br>
+
+        [% marquee_check = '';
+                IF useredit.shill_static_marquee;
+                        marquee_check = constants.markup_checked_attribute;
+                END;
+        %]
+
+        <label><input type="checkbox" name="shill_static_marquee"[% marquee_check %]> <b>Enable Static Marquees</b></label>
+
+        <br><br>
+
+        [% u2_friends_bios_check = '';
+                IF useredit.u2_friends_bios;
+                        u2_friends_bios_check = constants.markup_checked_attribute;
+                END;
+        %]
+
+        <label><input type="checkbox" name="u2_friends_bios"[% u2_friends_bios_check %]> <b>Enable U2 Friends Bios</b></label>
+
+        <br><br>
+
+        <b>Shill RSS URL:</b>&nbsp;<input type="text" name="shill_rss_url" value="[% useredit.shill_rss_url | strip_attribute %]" size="60">
+
+        <br><br>
+
+        <input type="button" value="Save" onclick="saveModalPrefs()">
+
+</form>
+
+	[% IF ! useredit.nonuid %]
+                [% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
+
+                        <br><br>
+
+                        <label>
+                                Subscription
+                        </label>
+
+                        [% IF useredit.subscribe_payments.size or useredit.subscribe_purchases.size%]
+                                <table cellspacing="0" border="0" class="data">
+                                                <tr class="data_head">
+                                                        <th>Date</th>
+                                                        <th>Email</th>
+                                                        <th>&nbsp;</th>
+                                                        <th>Pages</th>
+                                                        <th>Method</th>
+                                                        <th>TransID</th>
+                                                        <th>PUID</th>
+                                                        <th>Type</th>
+                                                </tr>
+                                                [% FOREACH sp = useredit.subscribe_payments %]
+                                                <tr class="data_hl3">
+                                                        <td>&nbsp;[% sp.0 %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.1.chunk(12).join("<br>"); %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.2 %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.3 %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.4 %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.5.chunk(10).join("<br>"); %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.6 %]&nbsp;</td>
+                                                        <td>&nbsp;[% sp.7 %]&nbsp;</td>
+                                                </tr>
+                                                [% END %]
+                                                [% IF useredit.subscribe_purchases.size %]
+                                                        <tr class="data_hl3"><td colspan="8" align="CENTER"><b>Subscriptions given by user</b></td></tr>
+                                                        [% FOREACH sp = useredit.subscribe_purchases %]
+                                                                <tr class="data_hl3">
+                                                                        <td>&nbsp;[% sp.0 %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.1.chunk(12).join("<br>"); %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.2 %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.3 %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.4 %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.5.chunk(10).join("<br>"); %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.6 %]&nbsp;</td>
+                                                                        <td>&nbsp;[% sp.7 %]&nbsp;</td>
+                                                                </tr>
+                                                        [% END %]
+                                                [% END %]
+                                </table>
+                        [% END %]
+                        [% IF useredit.hits_bought+useredit.hits_bought_today+useredit.hits_paidfor == 0 AND useredit.subscribe_payments.size == 0 %]
+                                                <i>none</i>
+                        [% ELSE %]
+                                                <b>Pages Spent:</b> [% useredit.hits_bought %], <b>Today</b>  [% useredit.hits_bought_today %].<br>
+                                                <b>Paid For:</b> [% useredit.hits_paidfor %]
+                        [% END %]
+                [% END %]
+
+        [% END %]
+
+        <br><br>
+
+	<label>
+                Activity
+        </label>
+
+        <br>
+
+        [% IF uidstruct %]
+        <table border="0" cellpadding="2" cellspacing="0" class="data">
+                <tr class="data_head">
+                <th>UID</th>
+                <th>Nickname</th>
+                <th>Com</th>
+                <th>Sub</th>
+                <th>Mod</th>
+                </tr>
+                [% toggle = 0 %]
+                [% FOREACH tmpuid = uidstruct.keys %]
+                        <tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
+                                <td><a href="/users.pl?op=userinfo&amp;userfield=[% tmpuid %]">[% tmpuid %]</a></td>
+                                <td>[% uidstruct.$tmpuid.nickname | strip_literal %]</td>
+                                <td align="CENTER">[% IF uidstruct.$tmpuid.comments %]X[% END %]&nbsp;</td>
+                                <td align="CENTER">[% IF uidstruct.$tmpuid.submissions %]X[% END %]&nbsp;</td>
+                                <td align="CENTER">[% IF uidstruct.$tmpuid.moderatorlog %]X[% END %]&nbsp;</td>
+                        </tr>
+                        [% toggle = !toggle %]
+                [% END %]
+        </table>
+        [% END %]
+
+        [% IF ipstruct %]
+        <table border="0" cellpadding="2" cellspacing="0" class="data">
+                <tr class="data_head">
+                        <td>IPID</td>
+                        <td>#</td>
+                        <td>Date(s)</td>
+                        <td>Com</td>
+                        <td>Sub</td>
+                        <td>Mod</td>
+                </tr>
+                [% toggle = 0 %]
+                [% FOREACH tmpip = ipstruct_order %]
+                        <tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
+                                <td><a href="/users.pl?op=userinfo&amp;userfield=[% tmpip %]&amp;fieldname=ipid">[% ipstruct.$tmpip.ipid_vis %]</a></td>
+                                <td>[% ipstruct.$tmpip.count %]</td>
+                                <td>[% ipstruct.$tmpip.dmin; IF ipstruct.$tmpip.dmin != ipstruct.$tmpip.dmax %] to [% ipstruct.$tmpip.dmax; END %]</td>
+                                <td align="CENTER">[% IF ipstruct.$tmpip.comments %]X[% END %]&nbsp;</td>
+                                <td align="CENTER">[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</td>
+                                <td align="CENTER">[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</td>
+                        </tr>
+                        [% toggle = !toggle %]
+                [% END %]
+        </table>
+        [% END %]
+
+        [% IF accesshits.0 > 0 %]
+                Requested <b>[% accesshits.0 %]</b> of the last 1000 pages (2xx: [% accesshits.2 %], 4xx: [% accesshits.4 %]).
+        [% END %]
+
+	[% IF !useredit.nonuid %]
+                <br>
+                Last access <b>[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
+                ELSE; useredit.lastaccess; END %]</b>
+        [% END %]
+
+        <br><br>
+
+        [% IF lastjournal %]
+                [% lastjournal_title %]
+                <b><a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">[% lastjournal.description | strip_notags %]</a></b>,
+                [% Slash.timeCalc(useredit.journal_last_entry_date) %]
+                ([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
+                [% IF lastjournal.article_shrunk %]
+                        <br>
+                        [% lastjournal.article_shrunk %]
+                [% END %]
+        [% END %]
+
+        <br><br>
+
+        [% IF commentcount > 0 %]
+                [% comments_title %]
+                [% comments_pane %]
+        [% END %]
+
+        <br>
+
+        [% thisnickname = useredit.nickname | strip_literal %]
+        [% mod_options.title = "Moderations performed by $thisnickname" %]
+        [% IF constants.m2;
+                mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+                mod_options.need_m2_form = 1;
+                mod_options.need_m2_button = 1;
+                mod_options.meta_mod_only = 1;
+        END;
+
+        m1_classname = "Slash::" _ constants.m1_pluginname;
+        moddb = Slash.getObject(m1_classname);
+
+        IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
+
+        IF !constants.m1_admin_show_mods_with_comments;
+                mod_options.title = "Moderations performed on $thisnickname's comments";
+                mod_options.hr_hours_back = hr_hours_back;
+
+                IF moddb; moddb.dispModCommentLog('cuid', useredit.uid, mod_options); END;
+        END; %]
+
+        <br>
+
+        [% IF submissions.size > 0 %]
+                [% submissions %]
+        [% END %]
+
+        <br>
+
+        [% IF recent_tags %]
+                [% recent_tags %]
+        [% END %]
+
+        <br><br>&nbsp;
+
+</div>
+[% END %]
 __seclev__
 10000
 __version__

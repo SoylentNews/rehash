@@ -1708,8 +1708,8 @@ function serialize_multiple( $form ){
 function saveModalPrefs() {
 	var params = {};
 	params.op = 'saveModalPrefs';
-	params.data = jQuery("#modal_prefs").serialize();
-	// params.data = serialize_multiple($('#modal_prefs'));
+	//params.data = jQuery("#modal_prefs").serialize();
+	params.data = serialize_multiple($('#modal_prefs'));
 	params.reskey = reskey_static;
 	var handlers = {
 		onComplete: function() {
