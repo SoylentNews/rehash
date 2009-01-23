@@ -12,7 +12,7 @@ Slash::Tagbox::Despam - Reduce (firehose) spam
 =head1 SYNOPSIS
 
 	my $tagbox_tcu = getObject("Slash::Tagbox::Despam");
-	my $feederlog_ar = $tagbox_tcu->feed_newtags($users_ar);
+	my $feederlog_ar = $tagbox_tcu->feed_newtags($tags_ar);
 	$tagbox_tcu->run($affected_globjid);
 
 =cut

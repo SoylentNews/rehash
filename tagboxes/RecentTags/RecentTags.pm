@@ -17,7 +17,7 @@ Slash::Tagbox::RecentTags - update the Recent Tags slashbox
 =head1 SYNOPSIS
 
 	my $tagbox_tcu = getObject("Slash::Tagbox::RecentTags");
-	my $feederlog_ar = $tagbox_tcu->feed_newtags($users_ar);
+	my $feederlog_ar = $tagbox_tcu->feed_newtags($tags_ar);
 	$tagbox_tcu->run($affected_globjid);
 
 =cut
