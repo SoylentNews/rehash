@@ -94,9 +94,12 @@ sub run {
 			: 6; # not requested
 	} elsif ($type eq 'urls') {
 		$extra_pop = $self->sqlCount('bookmarks', "url_id=$target_id_q") || 0;
-		$color_level = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id")
-			? 6  # feed
-			: 7; # nonfeed
+		$color_level = 7;
+		my $is_feed = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id");
+		my $wanted = $constants->{postedout_wanted} || 2;
+		if ($is_feed && $self->$self->countStoriesPostedOut() < $wanted) {
+			$color_level = 6;
+		}
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
 		my $str_hr = $story->{story_topics_rendered};

@@ -6747,6 +6747,42 @@ sub countStoriesBySubmitter {
 }
 
 ########################################################
+# Count how many stories are "posted out", i.e. have been
+# set up to run in the near future by the editor(s).
+sub countStoriesPostedOut {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+
+	# start checking for stories 5 minutes from now
+	my $window_start = defined($options->{postedout_start_secs})
+		? $options->{postedout_start_secs}
+		: $constants->{postedout_start_secs} || 300;
+	# stories posted more than 6 hours out don't count
+	my $window_end = defined($options->{postedout_end_secs})
+		? $options->{postedout_end_secs}
+		: $constants->{postedout_end_secs} || 6*3600;
+
+	# optionally require that the stories be in a nexus
+	my($tables, $nexus_clause) = ('stories', '');
+	my $req_nexus = $options->{postedout_thisnexusonly}
+		|| $constants->{postedout_thisnexusonly}
+		|| 0;
+	if ($req_nexus) {
+		$tables = 'stories, story_topics_rendered';
+		$nexus_clause = " AND stories.stoid=story_topics_rendered.stoid
+			AND stories_topics_rendered.tid=$req_nexus";
+	}
+
+	my $count = $self->sqlCount(
+		$tables,
+		"time BETWEEN DATE_ADD(NOW(), INTERVAL $window_start SECOND)
+		          AND DATE_ADD(NOW(), INTERVAL $window_end   SECOND)
+		 AND in_trash='no'
+		 $nexus_clause");
+	return $count;
+}
+
+########################################################
 sub _stories_time_clauses {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
