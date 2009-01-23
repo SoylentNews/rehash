@@ -728,7 +728,7 @@ sub feed_newtags {
 	my $max_tagid_processed = undef;
 	my @tags = @$tags_ar;
 	my @tags_to_process = ( );
-	while (scalar(@ret) < $max_tags && @tags) {
+	while (scalar(@tags_to_process) < $max_tags && @tags) {
 		my $tags_splice_ar = [ splice @tags, 0, $max_tags ];
 		$max_tagid_processed = $tags_splice_ar->[-1]{tagid};
 		my $filtered_splice_ar = $self->feed_newtags_filter($tags_splice_ar);

@@ -174,7 +174,7 @@ sub update_feederlog {
 
 	# These are kind of arbitrary constants.
 	my $max_rows_per_tagbox = 1000;
-	my $max_rows_total = $max_rows_per_tagbox * 5;
+	my $max_rows_total = $max_rows_per_tagbox * 3;
 
 	# Pre-tagbox check:
 
@@ -296,7 +296,7 @@ sub update_feederlog {
 	my $clout_types = $tagsdb->getCloutTypes();
 	my $tag_copy = { };
 	for my $tagbox (@$tagboxes) {
-	`	my $clout_type = $clout_types->{ $tagbox->{clid} };
+		my $clout_type = $clout_types->{ $tagbox->{clid} };
 		next if $tag_copy->{$clout_type};
 		tagboxLog("tagbox.pl adding clout $clout_type to $tag_count tags");
 		$tag_copy->{$clout_type} = [ @$tags_ar ];
