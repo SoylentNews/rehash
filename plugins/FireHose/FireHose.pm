@@ -457,12 +457,21 @@ sub createUpdateItemFromBookmark {
 	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
 	my $firehose_id;
-	my $popularity = defined $options->{popularity}
-		? $options->{popularity}
-		: $type eq "feed"
-			? $self->getEntryPopularityForColorLevel(6)
-			: $self->getEntryPopularityForColorLevel(7);
-	my $activity   = defined $options->{activity} ? $options->{activity} : 1;
+	my $popularity = undef;
+	$popularity = $options->{popularity} if defined $options->{popularity};
+	if (!defined $popularity) {
+		my $cl = 7;
+		my $wanted = $constants->{postedout_wanted} || 2;
+		if ($type eq 'feed' && $self->countStoriesPostedOut() < $wanted) {
+			# If there aren't "enough" posted-out stories and
+			# this bookmark is a feed item, it gets bumped up
+			# one color level.
+			$cl = 6;
+		}
+		$popularity = $self->getEntryPopularityForColorLevel($cl);
+	}
+
+	my $activity = defined $options->{activity} ? $options->{activity} : 1;
 
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");

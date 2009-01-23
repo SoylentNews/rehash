@@ -711,14 +711,35 @@ sub _do_filter_uid {
 #################################################################
 
 sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	$tags_ar = $self->feed_newtags_filter($tags_ar);
-	$self->feed_newtags_pre($tags_ar);
+	my($self, $tags_ar, $max_tags) = @_;
 
-	my $ret_ar = $self->feed_newtags_process($tags_ar);
+	# Filter in groups of $max_tags until $max_tags tags are
+	# returned.  Return both the processed data list, and the
+	# max tagid that was used to generate that list.  Note that
+	# for tagboxes that filter out all or most tags, the
+	# max_tagid_processed returned may be the last tagid passed
+	# in, even though no processed data is returned.
+	#
+	# It's vital that $tags_ar be sorted by ascending tagid
+	# for this algorithm to work (which it is, in tagbox.pl
+	# update_feederlog()).
+
+	$max_tags ||= 1000;
+	my $max_tagid_processed = undef;
+	my @tags = @$tags_ar;
+	my @tags_to_process = ( );
+	while (scalar(@tags_to_process) < $max_tags && @tags) {
+		my $tags_splice_ar = [ splice @tags, 0, $max_tags ];
+		$max_tagid_processed = $tags_splice_ar->[-1]{tagid};
+		my $filtered_splice_ar = $self->feed_newtags_filter($tags_splice_ar);
+		push @tags_to_process, @$filtered_splice_ar;
+	}
+	$self->feed_newtags_pre(\@tags_to_process);
+
+	my $ret_ar = $self->feed_newtags_process(\@tags_to_process);
 
 	$self->feed_newtags_post($ret_ar);
-	return $ret_ar;
+	return($ret_ar, $max_tagid_processed);
 }
 
 sub feed_newtags_filter {

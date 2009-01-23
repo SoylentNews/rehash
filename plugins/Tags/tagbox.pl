@@ -174,7 +174,7 @@ sub update_feederlog {
 
 	# These are kind of arbitrary constants.
 	my $max_rows_per_tagbox = 1000;
-	my $max_rows_total = $max_rows_per_tagbox * 5;
+	my $max_rows_total = $max_rows_per_tagbox * 3;
 
 	# Pre-tagbox check:
 
@@ -292,15 +292,23 @@ sub update_feederlog {
 	# data the tagbox returns into the tagboxlog_feeder table and
 	# then mark that tagbox as being logged up to that point.
 
+	my $tag_count = scalar @$tags_ar;
 	my $clout_types = $tagsdb->getCloutTypes();
+	my $tag_copy = { };
+	for my $tagbox (@$tagboxes) {
+		my $clout_type = $clout_types->{ $tagbox->{clid} };
+		next if $tag_copy->{$clout_type};
+		tagboxLog("tagbox.pl adding clout $clout_type to $tag_count tags");
+		$tag_copy->{$clout_type} = [ @$tags_ar ];
+		$tagsdb->addCloutsToTagArrayref($tag_copy->{$clout_type}, $clout_type);
+	}
+	tagboxLog("tagbox.pl all clouts added");
 	for my $tagbox (@$tagboxes) {
 
 		$tagbox->{object}->debug_log("last=$tagbox->{last_tagid_logged}");
 
-		my @tags_copy = @$tags_ar;
 		my $clout_type = $clout_types->{ $tagbox->{clid} };
-		# don't duplicate effort, many tagboxes will share the same clout type
-		$tagsdb->addCloutsToTagArrayref(\@tags_copy, $clout_type);
+		my @tags_copy = @{ $tag_copy->{$clout_type} };
 
 		my $feeder_ar;
 
@@ -315,10 +323,9 @@ sub update_feederlog {
 			$#$tags_this_tagbox_ar = $max_rows_per_tagbox-1
 					if $#$tags_this_tagbox_ar > $max_rows_per_tagbox-1;
 			if (@$tags_this_tagbox_ar) {
-				my $max_tagid_this = $tags_this_tagbox_ar->[-1]{tagid};
 				# Call the class's feed_newtags to determine importance etc.
-				$feeder_ar = undef;
-				$feeder_ar = $tagbox->{object}->feed_newtags($tags_this_tagbox_ar);
+				my($feeder_ar, $max_tagid_this) =
+					$tagbox->{object}->feed_newtags($tags_this_tagbox_ar);
 				# XXX optimize by consolidating here: sum importances, max tagids
 				insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 				# XXX The previous insert and this update should be wrapped
