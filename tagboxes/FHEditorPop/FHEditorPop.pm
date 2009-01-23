@@ -113,7 +113,7 @@ sub run_process {
 		$color_level = 7;
 		my $is_feed = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id");
 		my $wanted = $constants->{postedout_wanted} || 2;
-		if ($is_feed && $self->$self->countStoriesPostedOut() < $wanted) {
+		if ($is_feed && $self->countStoriesPostedOut() < $wanted) {
 			$color_level = 6;
 		}
 	} elsif ($type eq "stories") {
