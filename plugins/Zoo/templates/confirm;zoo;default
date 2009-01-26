@@ -24,7 +24,7 @@ __template__
 				So do you want to remove your relationship with <b><a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname %]</a></b>?
 			</td>
 			<td>
-				<input type="radio" name="type" value="neutral"[% constants.markup_checked_attribute IF type == 'neutral' %]>
+				<label><input type="radio" name="type" value="neutral"[% constants.markup_checked_attribute IF type == 'neutral' %]></label>
 			</td>
 			<td>
 				&nbsp;&nbsp;<input type="submit" value="Yup, I'm positive">
@@ -38,9 +38,9 @@ __template__
 			Change this?
 			</td>
 			<td>
-				[% UNLESS over_socialized %] <input type="radio" name="type" value="friend"[% constants.markup_checked_attribute IF type == 'friend' %]> <img src="[% constants.imagedir %]/friend.[% constants.badge_icon_ext %]" alt="Friend" title="Friend" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]">&nbsp;Friend<br>[% END %]
-				<input type="radio" name="type" value="neutral"[% constants.markup_checked_attribute IF type == 'neutral' %]> <img src="[% constants.imagedir %]/neutral.[% constants.badge_icon_ext %]" alt="Neutral" title="Neutral" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]">&nbsp;Neutral<br>
-				[% UNLESS over_socialized %] <input type="radio" name="type" value="foe"[% constants.markup_checked_attribute IF type == 'foe' %]> <img src="[% constants.imagedir %]/foe.[% constants.badge_icon_ext %]" alt="Foe" title="Foe" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]">&nbsp;Foe <br> [% END %]
+				[% UNLESS over_socialized %] <label><input type="radio" name="type" value="friend"[% constants.markup_checked_attribute IF type == 'friend' %]> <img src="[% constants.imagedir %]/friend.[% constants.badge_icon_ext %]" alt="Friend" title="Friend" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]">&nbsp;Friend</label><br>[% END %]
+				<label><input type="radio" name="type" value="neutral"[% constants.markup_checked_attribute IF type == 'neutral' %]> <img src="[% constants.imagedir %]/neutral.[% constants.badge_icon_ext %]" alt="Neutral" title="Neutral" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]">&nbsp;Neutral</label><br>
+				[% UNLESS over_socialized %] <label><input type="radio" name="type" value="foe"[% constants.markup_checked_attribute IF type == 'foe' %]> <img src="[% constants.imagedir %]/foe.[% constants.badge_icon_ext %]" alt="Foe" title="Foe" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]">&nbsp;Foe</label> <br> [% END %]
 			</td>
 			<td>
 				&nbsp;&nbsp;<input type="submit" value="Yup, I'm positive">
