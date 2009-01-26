@@ -534,3 +534,5 @@ right:0pt;
 left:auto;
 right:0pt;
 }
+
+h3.story .date, h3.future .date { display: none }
