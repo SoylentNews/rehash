@@ -2619,7 +2619,7 @@ my @options = (
 		accepted not_accepted rejected not_rejected type not_type
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
 		tagged_by_uid tagged_as offmainpage smalldevices
-		createtime_no_future createtime_subscriber_future		
+		createtime_no_future createtime_subscriber_future
 	)
 );
 
