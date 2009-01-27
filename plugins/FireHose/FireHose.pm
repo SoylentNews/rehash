@@ -849,7 +849,6 @@ sub getFireHoseEssentials {
 
 	my @where;
 	my $tables = 'firehose';
-	my $filter_globjids;
 	my $tags = getObject('Slash::Tags');
 
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
@@ -864,52 +863,46 @@ sub getFireHoseEssentials {
 		my $tag_by_uid_q = $self->sqlQuote($options->{tagged_by_uid});
 		push @where, "tags.uid = $tag_by_uid_q";
 
-		if ($options->{ignore_nix}) {
+		if ($options->{tagged_non_negative}) {
+			$tables .= ',firehose_tfh';
+			push @where, "firehose_tfh.globjid=firehose.globjid AND firehose_tfh.uid=$tag_by_uid_q";
+		} elsif ($options->{ignore_nix}) {
 			my $downlabel = $constants->{tags_downvote_tagname} || 'nix';
 			my $tags = getObject('Slash::Tags');
 			my $nix_id = $tags->getTagnameidFromNameIfExists($downlabel);
 			push @where, "tags.tagnameid != $nix_id";
-		} elsif ($options->{tagged_positive} || $options->{tagged_negative} || $options->{tagged_non_negative}) {
+		} elsif ($options->{tagged_positive} || $options->{tagged_negative}) {
 			my $labels;
-			my $not = '';
 
 			if ($options->{tagged_positive}) {
 				$labels = $tags->getPositiveTags;
 				$labels = ['nod'] unless @$labels;
-			} else { # tagged_non_negative || tagged_negative
+			} else { # tagged_negative
 				$labels = $tags->getFirehoseExcludeTags;
 				$labels = ['nix'] unless @$labels;
-				$not = 'NOT' if $options->{tagged_non_negative};
 			}
 
 			my $ids = join ',', grep $_, map {
 				s/\s+//g;
 				$tags->getTagnameidFromNameIfExists($_)
 			} @$labels;
-			push @where, "tags.tagnameid $not IN ($ids)";
-
-			if ($not) {
-				$filter_globjids = $self->sqlSelectAllHashref(
-					'globjid', 'DISTINCT globjid', 'tags',
-					"uid = $tag_by_uid_q AND tagnameid IN ($ids)"
-				);
-			}
+			push @where, "tags.tagnameid IN ($ids)";
 		}
 	}
 	my $columns = "firehose.*, firehose.popularity AS userpop";
 
-		if ($options->{createtime_no_future}) {
-			push @where, 'createtime <= NOW()';
-		}
+	if ($options->{createtime_no_future}) {
+		push @where, 'createtime <= NOW()';
+	}
 
-		if ($options->{createtime_subscriber_future}) {
-			my $future_secs = $constants->{subscribe_future_secs};
-			push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
-		}
+	if ($options->{createtime_subscriber_future}) {
+		my $future_secs = $constants->{subscribe_future_secs};
+		push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
+	}
 
-		if ($options->{offmainpage}) {
-			push @where, 'offmainpage=' . $self->sqlQuote($options->{offmainpage});
-		}
+	if ($options->{offmainpage}) {
+		push @where, 'offmainpage=' . $self->sqlQuote($options->{offmainpage});
+	}
 
 	if (!$doublecheck) {
 
@@ -1087,16 +1080,6 @@ sub getFireHoseEssentials {
 	$results->{records_page}  ||= (int(($options->{offset} || 0) / $options->{limit}) + 1) || 1;
 
 	my $future_count = $count - $options->{limit} - ($options->{offset} || 0);
-
-	if (keys %$filter_globjids) {
-		for my $i (0 .. $#{$hr_ar}) {
-			my $el = $hr_ar->[$i] or last;
-			if (exists($filter_globjids->{ $el->{globjid} })) {
-				splice(@$hr_ar, $i, 1);
-				$i--;
-			}
-		}
-	}
 
 	# make sure these items (from SearchToo) still match -- pudge
 	if ($doublecheck) {
