@@ -5722,11 +5722,8 @@ ALTER TABLE firehose ADD INDEX last_update (last_update);
 # 2008-12-11
 UPDATE vars SET value = 'T_2_5_0_235' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
-# PUDGE LAST UPDATED HERE
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
 UPDATE firehose_view SET mode="fulltitle" WHERE viewname="userbookmark";
 
 # We've let stale templates build up for too long:
@@ -5815,6 +5812,10 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_section_css', 'Slash::FireHose', 'a
 
 # 2009-01-22
 UPDATE vars SET value = 'T_2_5_0_239' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('postedout_end_secs','21600','Window to count posted-out stories closes this many seconds in the future');
 INSERT INTO vars (name, value, description) VALUES ('postedout_start_secs','300','Window to count posted-out stories opens this many seconds in the future');
