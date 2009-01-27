@@ -1668,23 +1668,16 @@ function hide_modal_box() {
 }
 
 function getModalPrefs(section, title, tabbed, params) {
-	if (!params) {
-		params = {};
-	}
-
-
-	if (!reskey_static) {
+	if ( !reskey_static ) {
 		return show_login_box();
 	}
 	$('#preference_title').html(title);
-
-	params['op'] 	  = 'getModalPrefs';
-	params['section'] = section;
-	params['reskey']  = reskey_static;
-	params['tabbed']  = tabbed;
-
-
-	ajax_update( params, 'modal_box_content',{ onComplete: show_modal_box });
+	ajax_update($.extend({}, params||{}, {
+		op:		'getModalPrefs',
+		section:	section,
+		reskey:		reskey_static,
+		tabbed:		tabbed
+	}), 'modal_box_content', { onComplete: show_modal_box });
 }
 
 function firehose_get_media_popup(id) {
@@ -1738,20 +1731,18 @@ function serialize_multiple( $form ){
 }
 
 function saveModalPrefs() {
-	var params = {};
-	params.op = 'saveModalPrefs';
-	//params.data = jQuery("#modal_prefs").serialize();
-	params.data = serialize_multiple($('#modal_prefs'));
-	params.reskey = reskey_static;
-	var handlers = {
+	ajax_update({
+		op:	'saveModalPrefs',
+		data:	serialize_multiple($('#modal_prefs')),
+		reskey:	reskey_static
+	}, '', {
 		onComplete: function() {
 			hide_modal_box();
 			if (document.forms.modal_prefs.refreshable && document.forms.modal_prefs.refreshable.value) {
 				document.location=document.URL;
 			}
 		}
-	};
-	ajax_update(params, '', handlers);
+	});
 }
 
 function displayModalPrefHelp(id) {
@@ -1916,15 +1907,12 @@ function firehose_get_onscreen() {
 }
 
 function firehose_new_section() {
-	var params = {};
-	params['name'] = 'Untitled';
-	if($dom('searchquery')) {
-		params['filter'] = $dom('searchquery').value;
-	}
-	params['op'] 	 = 'firehose_new_section';
-	params['reskey'] = reskey_static;
-
-	ajax_update(params, '', { onComplete: firehose_new_section_handler });
+	ajax_update({
+		name:		'Untitled',
+		op:		'firehose_new_section',
+		filter:		$('#searchquery').value(),
+		reskey:		reskey_static
+	}, '', { onComplete: firehose_new_section_handler });
 }
 
 function firehose_new_section_handler(transport) {
