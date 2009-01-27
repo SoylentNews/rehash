@@ -6770,7 +6770,7 @@ sub countStoriesPostedOut {
 	if ($req_nexus) {
 		$tables = 'stories, story_topics_rendered';
 		$nexus_clause = " AND stories.stoid=story_topics_rendered.stoid
-			AND stories_topics_rendered.tid=$req_nexus";
+			AND story_topics_rendered.tid=$req_nexus";
 	}
 
 	my $count = $self->sqlCount(
