@@ -1560,7 +1560,13 @@ function cached_parts( expr ){
 
 function get_modal_parts() { return cached_parts('#modal_cover, #modal_box'); }
 function show_modal_box() { get_modal_parts().show(); }
-function hide_modal_box() { get_modal_parts().hide(); }
+function hide_modal_box() {
+	// clients may have customized; restore defaults before next use
+	get_modal_parts().
+		removeClass().
+		removeAttr('style').
+		hide();
+}
 
 function get_login_parts() { return cached_parts('#login_cover, #login_box'); }
 function show_login_box() { get_login_parts().show(); }

@@ -20,14 +20,40 @@ Filter: <input type="text" name="section_filter" value="[% filter %]"><br>
 Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]<br>
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
-<input type="button" value="save" onclick="$('#fhsectiontitle-[% id %]').html($dom('fhsectionname').value);saveModalPrefs();[% IF id %]firehose_set_options('section',[% id %])[% END %]">
-<input type="button" value="cancel" onclick="hide_modal_box()">
-[% IF id %]
-	[% IF fh_section && fh_section.uid == 0 %]
-		<input type="button" value="hide" onclick="firehose_delete_section([% id %]); $('#fhsection-[% id %]').remove(); hide_modal_box()">
-	[% ELSE %]
-		<input type="button" value="delete" onclick="firehose_delete_section([% id %]);$('#fhsection-[% id %]').remove(); hide_modal_box()">
-	[% END %]
-[% END %]
+<input type="button" value="save">
+<input type="button" value="cancel">
+[% IF id %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %]hide[% ELSE %]delete[% END %]">[% END %]
 </form>
+<script type="text/javascript">
+$(function(){
+	// dialog not yet shown; move to tie it to the menu item
+	var menu_item = $('#fhsection-[% id %]').offset();
+	get_modal_parts().
+		filter('#modal_box').
+			addClass('links-sections-edit').
+			css({
+				position:	'absolute',
+				margin:		0,
+				top:		menu_item.top + 'px',
+				left:		menu_item.left + 'px'
+			});
+	// attach some click handlers, all three (or two) buttons close the diaolg
+	$('#modal_prefs').
+		find('input[type=button]').
+			click(hide_modal_box).
+			filter('[value=hide], [value=delete]').
+				click(function(){
+					firehose_delete_section([% id %]);
+					$('#fhsection-[% id %]').remove();
+				}).
+			end().filter('[value=save]').
+				click(function(){
+					$('#fhsectiontitle-[% id %]').
+						html($('#fhsectioname').val());
+					saveModalPrefs();
+					[% IF id %]firehose_set_options('section', [% id %]);[% END %]
+				});
+});
+</script>
+
 
