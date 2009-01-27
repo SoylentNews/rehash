@@ -770,6 +770,8 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
+	my($sphinx, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
+
 	$options ||= {};
 	$options->{limit} ||= 50;
 	my $ps = $options->{limit};
@@ -853,6 +855,7 @@ sub getFireHoseEssentials {
 	my $filter_globjids;
 	my $tags = getObject('Slash::Tags');
 
+	# SSS: not sure what to do with tag stuff yet
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
 		$tables .= ', tags';
 		push @where, 'tags.globjid=firehose.globjid';
@@ -901,24 +904,47 @@ sub getFireHoseEssentials {
 
 		if ($options->{createtime_no_future}) {
 			push @where, 'createtime <= NOW()';
+
+			if ($sphinx) {
+				my $time = $self->getTime({ unix_format => 1 });
+				push @sphinx_opts, "range=createtime_ut,0,$time";
+			}
 		}
 
 		if ($options->{createtime_subscriber_future}) {
 			my $future_secs = $constants->{subscribe_future_secs};
 			push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
+
+			if ($sphinx) {
+				my $time = $self->getTime({ unix_format => 1 }) + $future_secs;
+				push @sphinx_opts, "range=createtime_ut,0,$time";
+			}
 		}
 
 		if ($options->{offmainpage}) {
 			push @where, 'offmainpage=' . $self->sqlQuote($options->{offmainpage});
+
+			if ($sphinx) {
+				push @sphinx_opts, "filter=offmainpage," . ($options->{offmainpage} eq 'yes' ? 1 : 0);
+			}
 		}
 
 	if (!$doublecheck) {
 
 		if ($options->{public}) {
 			push @where, 'public = ' . $self->sqlQuote($options->{public});
+
+			if ($sphinx) {
+				push @sphinx_opts, "filter=public," . ($options->{public} eq 'yes' ? 1 : 0);
+			}
 		}
 
 		if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
+			if ($sphinx && $options->{filter}) {
+				# SSS: need to filter this, and decide all, any, phrase ... ?
+				push @sphinx_terms, $options->{filter};
+			}
+
 			$tables .= ',firehose_text';
 			push @where, 'firehose.id = firehose_text.id';
 
@@ -935,21 +961,42 @@ sub getFireHoseEssentials {
 
 		my $dur_q = $self->sqlQuote($options->{duration});
 		my $st_q  = $self->sqlQuote(timeCalc($options->{startdate}, '%Y-%m-%d %T', -$user->{off_set}));
+		my $dur_sphinx = $options->{duration} * 86400;
+		my $st_sphinx  = timeCalc($options->{startdate}, '%s', -$user->{off_set});
 
 		if ($options->{startdate}) {
 
 			if ($options->{duration} && $options->{duration} >= 0 ) {
 				push @where, "createtime >= $st_q";
 				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
+
+				if ($sphinx) {
+					push @sphinx_opts, "range=createtime_ut,$st_sphinx," . $st_sphinx+$dur_sphinx;
+				}
 			} elsif ($options->{duration} == -1) {
 				if ($options->{orderdir} eq "ASC") {
 					push @where, "createtime >= $st_q";
+
+					if ($sphinx) { # ! is for negating, since this is >, not <
+						push @sphinx_opts, "!range=createtime_ut,0," . ($st_sphinx-1);
+					}
 				} else {
-					my $end_q = $self->sqlQuote(timeCalc("$options->{startdate} 23:59:59", '%Y-%m-%d %T', -$user->{off_set}));				   push @where, "createtime <= $end_q";
+					my $end_q = $self->sqlQuote(timeCalc("$options->{startdate} 23:59:59", '%Y-%m-%d %T', -$user->{off_set}));
+					push @where, "createtime <= $end_q";
+
+					if ($sphinx) {
+						my $end_sphinx = timeCalc("$options->{startdate} 23:59:59", '%s', -$user->{off_set});
+						push @sphinx_opts, "range=createtime_ut,0,$end_sphinx";
+					}
 				}
 			}
 		} elsif (defined $options->{duration} && $options->{duration} >= 0) {
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
+
+			if ($sphinx) {
+				my $time = ($self->getTime({ unix_format => 1 }) + $dur_sphinx) - 1;
+				push @sphinx_opts, "!range=createtime_ut,0,$time";
+			}
 		}
 
 		foreach my $prefix ("","not_") {
@@ -970,6 +1017,27 @@ sub getFireHoseEssentials {
 						push @where, "$base $notlab IN  ($quote_string)";
 					}
 
+					if ($sphinx) {
+						if ($base eq 'type') {
+							my %types = (
+								story      => 1,
+								submission => 3,
+								journal    => 4,
+								comment    => 5,
+								discussion => 7,
+								project    => 11,
+								bookmark   => 12,
+								feed       => 13,
+								vendor     => 14,
+								misc       => 15,
+							);
+							# SSS: OK to change these values, or should I copy them?
+							$_ = $types{$_} || 9999 for @$cur_opt;
+							$base = 'gtid';
+						}
+						$notlab = $not ? "!" : "";
+						push @sphinx_opts, "${notlab}filter=$base," . join(',', @$cur_opt);
+					}
 				}
 			}
 		}
@@ -984,6 +1052,10 @@ sub getFireHoseEssentials {
 				my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
 				push @where, "firehose_topics_rendered.tid in ($quote_string)";
 			}
+
+			if ($sphinx) {
+				push @sphinx_opts, "filter=tid," . join(',', @$cur_opt);
+			}
 		}
 
 		if ($options->{not_nexus}) {
@@ -991,6 +1063,10 @@ sub getFireHoseEssentials {
 			foreach (@$cur_opt) {
 				my $quoted = $self->sqlQuote("% $_ %");
 				push @where, "nexuslist NOT LIKE $quoted";
+			}
+
+			if ($sphinx) {
+				push @sphinx_opts, "!filter=tid," . join(',', @$cur_opt);
 			}
 		}
 
@@ -1000,10 +1076,20 @@ sub getFireHoseEssentials {
 			my $pop_q = $self->sqlQuote($pop);
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
 				push @where, "editorpop >= $pop_q";
+
+				if ($sphinx) { # in sphinx index, popularity has 1000000 added to it
+					push @sphinx_opts, "!range=editorpop,0," . ( (int($pop)+1_000_000) - 1 );
+				}
 			} else {
 				push @where, "popularity >= $pop_q";
+
+				if ($sphinx) {
+					push @sphinx_opts, "!range=popularity,0," . ( (int($pop)+1_000_000) - 1 );
+				}
 			}
 		}
+
+		# SSS
 		if ($user->{is_admin} || $user->{acl}{signoff_allowed}) {
 			my $signoff_label = 'sign' . $user->{uid} . 'ed';
 
@@ -1018,29 +1104,57 @@ sub getFireHoseEssentials {
 	# and don't take much effort to check
 	if ($options->{attention_needed}) {
 		push @where, 'attention_needed = ' . $self->sqlQuote($options->{attention_needed});
+
+		if ($sphinx) {
+			push @sphinx_opts, "filter=attention_needed," . ($options->{attention_needed} eq 'yes' ? 1 : 0);
+		}
 	}
 
 	if ($options->{accepted}) {
 		push @where, 'accepted = ' . $self->sqlQuote($options->{accepted});
+
+		if ($sphinx) {
+			push @sphinx_opts, "filter=accepted," . ($options->{attention_needed} eq 'yes' ? 1 : 0);
+		}
 	}
 
 	if ($options->{rejected}) {
 		push @where, 'rejected = ' . $self->sqlQuote($options->{rejected});
+
+		if ($sphinx) {
+			push @sphinx_opts, "filter=rejected," . ($options->{rejected} eq 'yes' ? 1 : 0);
+		}
 	}
 
 	if (defined $options->{category} || ($user->{is_admin} && $options->{admin_filters})) {
 		$options->{category} ||= '';
 		push @where, 'category = ' . $self->sqlQuote($options->{category});
+
+		if ($sphinx) {
+			my %types = ('', 0, 'Back', 1, 'Hold', 2, 'Quik', 3);
+			push @sphinx_opts, "filter=category," . ($types{$options->{category}} || 9999);
+		}
 	}
 
+	# SSS
 	if ($options->{ids}) {
 		return($items, $results) if @{$options->{ids}} < 1;
 		my $id_str = join ',', map { $self->sqlQuote($_) } @{$options->{ids}};
 		push @where, "firehose.id IN ($id_str)";
+
+		if ($sphinx) {
+			my @globjids = map { $_->{globjid} } $self->getFireHoseMulti($options->{ids});
+			push @sphinx_where, 'globjid IN (' . join(',', @globjids) . ')';
+		}
 	}
 
 	if ($options->{not_id}) {
 		push @where, "firehose.id != " . $self->sqlQuote($options->{not_id});
+
+		if ($sphinx) {
+			my $globjid = $self->getFireHoseMulti($options->{not_id})->{globjid};
+			push @sphinx_where, "globjid != $globjid";
+		}
 	}
 
 	my $limit_str = '';
@@ -1058,7 +1172,29 @@ sub getFireHoseEssentials {
 		$offset = "$offset, " if length $offset;
 		$limit_str = "LIMIT $offset $fetch_size" unless $options->{nolimit};
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
+
+		if ($sphinx) {
+			my %orderby_sphinx = (
+				createtime => 'createtime_ut',
+				popularity => 'popularity',
+				editorpop  => 'editorpop',
+				neediness  => 'neediness'
+			);
+			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
+			push @sphinx_opts, "offset=$offset" if length $offset;
+			push @sphinx_opts, "limit=$fetch_size" unless $options->{nolimit};
+		}
 	}
+
+	# SSS: mode?  index?
+	if ($sphinx) {
+		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
+		my $where = join ' AND ', @sphinx_where;
+		print STDERR "SELECT globjid FROM sphinx_search WHERE query=$query AND $where;\n";
+	}
+
+	# SSS: everything below this point still needs to be implemented for Sphinx
+
 
 	# XXX I would like to change this, as soon as possible, to have
 	# the only column retrieved be 'id', and to pipe the resulting
