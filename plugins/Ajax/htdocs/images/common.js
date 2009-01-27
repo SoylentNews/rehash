@@ -1545,127 +1545,30 @@ function firehose_save_tab(id) {
 	$tab.find('#tab-form-'+id).setClass('hide');
 	$title.removeClass();
 }
-var logged_in   = 1;
-var login_cover = 0;
-var login_box   = 0;
-var login_inst  = 0;
 
-function init_login_divs() {
-	login_cover = $dom('login_cover');
-	login_box   = $dom('login_box');
+// shared modal dialog box and the login box
+// #modal_cover and #login_cover are the elements that dim the screen
+// TODO: login box really should use the parts from the modal box... no need to duplicate
+
+function cached_parts( expr ){
+	// cache jQuery selection objects in the JS object that _is_ this function
+	if ( ! cached_parts[expr] ){
+		cached_parts[expr] = $(expr).insertBefore('#top_parent');
+	}
+	return cached_parts[expr];
 }
 
-function install_login() {
-	if (login_inst) {
-		return;
-	}
+function get_modal_parts() { return cached_parts('#modal_cover, #modal_box'); }
+function show_modal_box() { get_modal_parts().show(); }
+function hide_modal_box() { get_modal_parts().hide(); }
 
-	if (!login_cover || !login_box) {
-		init_login_divs();
-	}
+function get_login_parts() { return cached_parts('#login_cover, #login_box'); }
+function show_login_box() { get_login_parts().show(); }
+function hide_login_box() { get_login_parts().hide(); }
 
-	if (!login_cover || !login_box) {
-		return;
-	}
+var logged_in = 1;
+function check_logged_in() { return logged_in || (show_login_box(), 0); }
 
-	login_cover.parentNode.removeChild(login_cover);
-	login_box.parentNode.removeChild(login_box);
-
-	var top_parent = document.getElementById('top_parent');
-	top_parent.parentNode.insertBefore(login_cover, top_parent);
-	top_parent.parentNode.insertBefore(login_box, top_parent);
-	login_inst = 1;
-}
-
-function show_login_box() {
-	if (!login_inst) {
-		install_login();
-	}
-
-	if (login_cover && login_box) {
-		login_cover.style.display = '';
-		login_box.style.display = '';
-	}
-
-	return;
-}
-
-function hide_login_box() {
-	if (!login_inst) {
-		install_login();
-	}
-
-	if (login_cover && login_box) {
-		login_box.style.display = 'none';
-		login_cover.style.display = 'none';
-	}
-
-	return;
-}
-
-function check_logged_in() {
-	if (!logged_in) {
-		show_login_box();
-		return 0;
-	}
-	return 1;
-}
-var modal_cover = 0;
-var modal_box   = 0;
-var modal_inst  = 0;
-
-function init_modal_divs() {
-	modal_cover = $dom('modal_cover');
-	modal_box   = $dom('modal_box');
-}
-
-function install_modal() {
-	if (modal_inst) {
-		return;
-	}
-
-	if (!modal_cover || !modal_box) {
-		init_modal_divs();
-	}
-
-	if (!modal_cover || !modal_box) {
-		return;
-	}
-
-	modal_cover.parentNode.removeChild(modal_cover);
-	modal_box.parentNode.removeChild(modal_box);
-
-	var modal_parent = $dom('top_parent');
-	modal_parent.parentNode.insertBefore(modal_cover, modal_parent);
-	modal_parent.parentNode.insertBefore(modal_box, modal_parent);
-	modal_inst = 1;
-}
-
-function show_modal_box() {
-	if (!modal_inst) {
-		install_modal();
-	}
-
-	if (modal_cover && modal_box) {
-		modal_cover.style.display = '';
-		modal_box.style.display = '';
-	}
-
-	return;
-}
-
-function hide_modal_box() {
-	if (!modal_inst) {
-		install_modal();
-	}
-
-	if (modal_cover && modal_box) {
-		modal_box.style.display = 'none';
-		modal_cover.style.display = 'none';
-	}
-
-	return;
-}
 
 function getModalPrefs(section, title, tabbed, params) {
 	if ( !reskey_static ) {
