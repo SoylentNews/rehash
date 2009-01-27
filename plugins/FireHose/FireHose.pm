@@ -2944,7 +2944,7 @@ sub getAndSetOptions {
 
 				$options = $self->applyViewOptions($options->{viewref}, $options)
 			}
-		} elsif($form->{view}) {
+		} elsif ($form->{view}) {
 			my $view = $self->getUserViewByName($form->{view});
 			if($view) {
 				$options->{view} = $form->{view};
