@@ -1576,17 +1576,25 @@ var logged_in = 1;
 function check_logged_in() { return logged_in || (show_login_box(), 0); }
 
 
-function getModalPrefs(section, title, tabbed, params) {
+function getModalPrefs(section, title, tabbed, params){
 	if ( !reskey_static ) {
 		return show_login_box();
 	}
-	$('#preference_title').html(title);
-	ajax_update($.extend({}, params||{}, {
-		op:		'getModalPrefs',
-		section:	section,
-		reskey:		reskey_static,
-		tabbed:		tabbed
-	}), 'modal_box_content', { onComplete: show_modal_box });
+
+	// .load ensures we are fetching as HTML, and that <script> elements will be executed
+	$('#modal_box_content').load(
+		'/ajax.pl',
+		$.extend({
+			op:		'getModalPrefs',
+			section:	section,
+			reskey:		reskey_static,
+			tabbed:		tabbed
+		}, params||{}),
+		function(){
+			$('#preference_title').html(title);
+			show_modal_box();
+		}
+	);
 }
 
 function firehose_get_media_popup(id) {
