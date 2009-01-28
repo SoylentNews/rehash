@@ -33,7 +33,6 @@ $(function(){
 			addClass('links-sections-edit').
 			css({
 				position:	'absolute',
-				margin:		0,
 				top:		menu_item.top + 'px',
 				left:		menu_item.left + 'px'
 			});
