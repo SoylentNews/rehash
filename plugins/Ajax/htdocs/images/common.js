@@ -1558,25 +1558,43 @@ function cached_parts( expr ){
 	return cached_parts[expr];
 }
 
-function get_modal_parts() { return cached_parts('#modal_cover, #modal_box'); }
-function show_modal_box() { get_modal_parts().show(); }
-function hide_modal_box() {
+function get_modal_parts( filter ){
+	var $parts = cached_parts('#modal_cover, #modal_box');
+	if ( filter ) {
+		$parts = $parts.filter(filter);
+	}
+	return $parts;
+}
+function custom_modal_box( action_name ){
+	var	custom_fn_name	= '_custom_' + action_name + '_fn',
+		$all_parts	= get_modal_parts(),
+		$dialog		= $all_parts.filter('#modal_box'),
+		dialog_elem	= $dialog[0],
+		fn		= dialog_elem[custom_fn_name] || function(){ $all_parts[action_name](); };
+	fn($all_parts);
+	delete dialog_elem[custom_fn_name];
+	return $all_parts;
+}
+function show_modal_box(){ custom_modal_box('show'); }
+function hide_modal_box(){
 	// clients may have customized; restore defaults before next use
-	get_modal_parts().
+	custom_modal_box('hide').
 		removeClass().
-		removeAttr('style').
-		hide();
+		attr('style', 'display: none;');
 }
 
-function get_login_parts() { return cached_parts('#login_cover, #login_box'); }
-function show_login_box() { get_login_parts().show(); }
-function hide_login_box() { get_login_parts().hide(); }
+function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
+function show_login_box(){ get_login_parts().show(); }
+function hide_login_box(){ get_login_parts().hide(); }
 
 var logged_in = 1;
-function check_logged_in() { return logged_in || (show_login_box(), 0); }
+function check_logged_in(){ return logged_in || (show_login_box(), 0); }
 
 
 function getModalPrefs(section, title, tabbed, params){
+	// if the modal_box is already in use: close it nicely (cleaning up anything custom)
+	get_modal_parts('#modal_box:visible').each(hide_modal_box);
+
 	if ( !reskey_static ) {
 		return show_login_box();
 	}
