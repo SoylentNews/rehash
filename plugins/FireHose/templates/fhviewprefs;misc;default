@@ -25,34 +25,51 @@ Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => d
 [% IF id %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %]hide[% ELSE %]delete[% END %]">[% END %]
 </form>
 <script type="text/javascript">
-$(function(){
-	// dialog not yet shown; move to tie it to the menu item
-	var menu_item = $('#fhsection-[% id %]').offset();
-	get_modal_parts().
-		filter('#modal_box').
-			addClass('links-sections-edit').
-			css({
-				position:	'absolute',
-				top:		menu_item.top + 'px',
-				left:		menu_item.left + 'px'
-			});
-	// attach some click handlers, all three (or two) buttons close the diaolg
-	$('#modal_prefs').
+// dialog not yet shown; move to tie it to the menu item
+(function(){
+	var	$li		= $('#fhsection-[% id %]'),
+		li_offset	= $li.offset(),
+		$dialog		= get_modal_parts('#modal_box'),
+		dialog_elem	= $dialog[0];
+
+	dialog_elem._custom_show_fn = function(){
+		var $content = $dialog.find('#modal_box_content').css('overflow', 'hidden');
+		$li.animate({ height: $dialog.outerHeight()+'px' });
+		$dialog.slideDown(function(){
+			$content.css('overflow', '');
+		});
+	};
+
+	dialog_elem._custom_hide_fn = function(){
+		// allow the menu item to shrink back down to normal height
+		$li.removeAttr('style');
+	};
+
+	$dialog.addClass('links-sections-edit').
+		css({	// make the dialog look as though it _is_ the menu item
+			position:	'absolute',
+			margin:		0,
+			top:		li_offset.top + 'px',
+			left:		li_offset.left + 'px'
+		}).
 		find('input[type=button]').
 			click(hide_modal_box).
 			filter('[value=hide], [value=delete]').
 				click(function(){
 					firehose_delete_section([% id %]);
-					$('#fhsection-[% id %]').remove();
+					// ...and delete the menu item (so no need to restore its height, either)
+					$li.remove();
+					delete dialog_elem._custom_hide_fn;
 				}).
-			end().filter('[value=save]').
+			end().
+			filter('[value=save]').
 				click(function(){
 					$('#fhsectiontitle-[% id %]').
 						html($('#fhsectioname').val());
 					saveModalPrefs();
 					[% IF id %]firehose_set_options('section', [% id %]);[% END %]
 				});
-});
+})();
 </script>
 
 
