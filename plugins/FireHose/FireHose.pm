@@ -1018,6 +1018,10 @@ sub getFireHoseEssentials {
 					}
 
 					if ($sphinx) {
+						my $newbase = $base;
+						# not sure if OK to manipulate
+						# $cur_opt, so we copy -- pudge
+						my @new_opt = @$cur_opt;
 						if ($base eq 'type') {
 							my %types = (
 								story      => 1,
@@ -1031,12 +1035,11 @@ sub getFireHoseEssentials {
 								vendor     => 14,
 								misc       => 15,
 							);
-							# SSS: OK to change these values, or should I copy them?
-							$_ = $types{$_} || 9999 for @$cur_opt;
-							$base = 'gtid';
+							$_ = $types{$_} || 9999 for @new_opt;
+							$newbase = 'gtid';
 						}
 						$notlab = $not ? "!" : "";
-						push @sphinx_opts, "${notlab}filter=$base," . join(',', @$cur_opt);
+						push @sphinx_opts, "${notlab}filter=$newbase," . join(',', @new_opt);
 					}
 				}
 			}
@@ -1136,7 +1139,6 @@ sub getFireHoseEssentials {
 		}
 	}
 
-	# SSS
 	if ($options->{ids}) {
 		return($items, $results) if @{$options->{ids}} < 1;
 		my $id_str = join ',', map { $self->sqlQuote($_) } @{$options->{ids}};
@@ -1189,12 +1191,11 @@ sub getFireHoseEssentials {
 	# SSS: mode?  index?
 	if ($sphinx) {
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
-		my $where = join ' AND ', @sphinx_where;
-		print STDERR "SELECT globjid FROM sphinx_search WHERE query=$query AND $where;\n";
+		my $swhere = join ' AND ', @sphinx_where;
+		$swhere = " AND $swhere" if $swhere;
+		print STDERR "SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
+		print STDERR "SELECT $columns FROM $tables WHERE $where $other;\n";
 	}
-
-	# SSS: everything below this point still needs to be implemented for Sphinx
-
 
 	# XXX I would like to change this, as soon as possible, to have
 	# the only column retrieved be 'id', and to pipe the resulting
@@ -1204,6 +1205,7 @@ sub getFireHoseEssentials {
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
+	# SSS: ?
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
@@ -1211,12 +1213,19 @@ sub getFireHoseEssentials {
 		);
 	}
 
-	my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
-	my $row_num = @$rows;
+	my $count = 0;
 
-	my $count = $row_num;
-	if ($row_num == 1 && !$count_other) {
-		$count = $rows->[0]{c};
+	if ($sphinx > 1) {
+		# SSS
+		# 'SHOW STATUS LIKE 'sphinx_%'
+	} else {
+		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
+		my $row_num = @$rows;
+
+		$count = $row_num;
+		if ($row_num == 1 && !$count_other) {
+			$count = $rows->[0]{c};
+		}
 	}
 
 	my $page_size = $ps || 1;
