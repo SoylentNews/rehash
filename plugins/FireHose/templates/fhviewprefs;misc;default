@@ -48,11 +48,12 @@ END %]
 (function(){
 	var	$li		= $('#fhsection-[% id %]'),
 		li_offset	= $li.offset(),
-		$dialog		= get_modal_parts('#modal_box');
+		$dialog		= get_modal_parts('#modal_box'),
+		new_classname	= 'links-sections-edit' + ($li.is('.active') ? ' active' : '');
 
 
 	// custom css
-	$dialog.addClass('links-sections-edit').
+	$dialog.addClass(new_classname).
 		css({	// make the dialog look as though it _is_ the menu item
 			position:	'absolute',
 			margin:		0,
@@ -60,15 +61,23 @@ END %]
 			left:		li_offset.left + 'px'
 		});
 
-
 	// custom show/hide
 	var dialog_elem = $dialog[0];
 	dialog_elem._custom_show_fn = function(){
-		var $content = $dialog.find('#modal_box_content').css('overflow', 'hidden');
-		$li.animate({ height: $dialog.outerHeight()+'px' });
-		$dialog.slideDown(function(){
-			$content.css('overflow', '');
-		});
+		var	$content	= $dialog.find('#modal_box_content').css('overflow', 'hidden'),
+			to_height	= $dialog.height(),
+			to_width	= $dialog.width();
+
+		$li.animate({ height: $dialog.outerHeight()-6+'px' });
+		$dialog.height($li.height()).
+			width($li.width() - ($dialog.outerWidth()-to_width)).
+			animate({
+				height:		to_height,
+				width:		to_width
+			}, function(){
+				$content.css('overflow', '');
+				$dialog.find('#fhsectionname').focus();
+			});
 	};
 
 	dialog_elem._custom_hide_fn = function(){
@@ -79,20 +88,19 @@ END %]
 
 	// button behavior
 	var $save_button = $dialog.
-		find('input[type=button]').
+		find('input[type=button], a.close').
 			click(hide_modal_box).
-			filter('[value=hide], [value=delete]').
+			filter('[value$=hide], [value=delete]').
 				click(function(){
-					firehose_delete_section([% id %]);
-					// ...and delete the menu item (so no need to restore its height, either)
-					$li.remove();
-					delete dialog_elem._custom_hide_fn;
+					var action = $(this).val();
+					if ( action == 'delete' ) {
+						$li.remove();
+						$li = $([]);
+					}
+					$li.toggleClassTo('hide', action=='hide');
+					firehose_delete_section([% id %], {unhide:'undo'}[action]);
 				}).
 			end().
-			filter('[value=unhide]').
-				click(function(){
-					firehose_delete_section([% id %],'undo');
-				}).
 			filter('[value=save]').
 				click(function(){
 					$('#fhsectiontitle-[% id %]').

@@ -1579,8 +1579,9 @@ function show_modal_box(){ custom_modal_box('show'); }
 function hide_modal_box(){
 	// clients may have customized; restore defaults before next use
 	custom_modal_box('hide').
-		removeClass().
-		attr('style', 'display: none;');
+		hide().
+		attr('style', 'display: none;').
+		removeClass();
 }
 
 function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
