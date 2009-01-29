@@ -37,15 +37,6 @@ END %]
 	[% END %]
 <ul class="menu" id="fhtablist">[% END %]
 
-	[% IF options.smalldevices %]
-		[% FOREACH tab = tabs;
-			tabnames.${tab.tabname} = tab.tabname;
-			IF tab.active;
-				tab_current = tab.tabname;
-			END;
-		 END;
-		Slash.createSelect('tab', tabnames, { default => tab_current, return => 1, onchange => "firehose_set_options('tab', this.options[this.selectedIndex].value])"});
-	 ELSE %]
 		[% FOREACH view = views %]
 			[% active_view = 0 %]
 			[% IF options.view == view.viewname;
@@ -76,7 +67,6 @@ END %]
 		<a href="[% IF this_tab_active %]#[% ELSE %]?tab=[% tab.tabname | strip_attribute %][% END %]" id="tab-text-[% tab.tabid %]" onClick="[% IF this_tab_active %]firehose_open_tab('[% tab.tabid %]');[% ELSE %]firehose_set_options('tab','[% tab.tabname %]');[% END %] return false;" [% IF this_tab_active %]title="Edit this tab"[% END %]>[% tab.tabname | strip_literal %][% IF this_tab_active %]<img src="[% constants.imagedir %]/sic_edit.png" alt="Edit">[% END %]</a>
 		[% IF this_tab_active && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for [% tab.tabname | strip_literal %]"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
 		[% IF this_tab_active && tab.tabname != "untitled" %]<span id="fhtabdel" class="close" title="Close this tab"><a href="#" onclick="firehose_remove_tab([% tab.tabid %])">[X]</a></span>[% END %]</li>
-	[% END %]
 	[% END %]
 [% UNLESS nodiv %]</ul>[% END %]
 <script type="text/javascript">

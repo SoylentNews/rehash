@@ -149,6 +149,7 @@ sub deleteHideFireHoseSection {
 sub setFireHoseSectionPrefs {
 	my($self, $id, $data) = @_;
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	my $cur_section = $self->getFireHoseSection($id);
 	return if $user->{is_anon} || !$cur_section;
@@ -157,6 +158,9 @@ sub setFireHoseSectionPrefs {
 
 		$self->sqlUpdate("firehose_section", $data, "fsid = $cur_section->{fsid}");
 	} elsif ($cur_section->{uid} == 0) {
+		if ($cur_section->{skid} == $constants->{mainpage_skid}) {
+			$data->{section_name} = $cur_section->{section_name};
+		}
 		my $cur_prefs = $self->getSectionUserPrefs($cur_section->{fsid});
 		if ($cur_prefs) {
 			$self->sqlUpdate("firehose_section_settings", $data, "id=$cur_prefs->{id}");
@@ -252,13 +256,31 @@ sub ajaxNewFireHoseSection {
 
 sub ajaxFireHoseSectionCSS {
 	my($slashdb, $constants, $user, $form, $options) = @_;
-	my $fsid_q = $slashdb->sqlQuote($form->{section});
+	my $fh = getObject("Slash::FireHose");
+	my $section = $fh->getFireHoseSection($form->{section});
+	my $got_section = 0;
+
+	if ($section && $section->{fsid}) {
+		foreach (split(/\s+/, $section->{section_filter})) {
+			last if $got_section;
+			my $cur_skin = $slashdb->getSkin($_);
+			if($cur_skin) {
+				$got_section = $cur_skin->{skid};
+			}
+		}
+	}
+
 	my $layout_q = $slashdb->sqlQuote($form->{layout});
-	my $css = $slashdb->sqlSelectAllHashrefArray(
-		"css.*, skins.name as skin_name",
-		"firehose_section, css, skins",
-		"fsid=$fsid_q and firehose_section.skid=skins.skid and css.skin=skins.name and css.layout=$layout_q and admin='no'"
-	);
+
+	my $css = [];
+	if ($got_section) {
+		my $skid_q = $slashdb->sqlQuote($got_section);
+		$css = $slashdb->sqlSelectAllHashrefArray(
+			"css.*, skins.name as skin_name",
+			"css, skins",
+			"css.skin=skins.name and css.layout=$layout_q and admin='no' AND skins.skid=$skid_q"
+		);
+	}
 
 
 	my $retval = "";
@@ -2658,10 +2680,12 @@ sub determineCurrentSection {
 
 sub applyUserSectionPrefs {
 	my($self, $section) = @_;
+	my $constants = getCurrentStatic();
 	if ($section->{uid} == 0) {
 		my $user_prefs = $self->getSectionUserPrefs($section->{fsid});
 		if ($user_prefs) {
 			foreach (qw(section_name section_filter view_id display)) {
+				next if $_ eq "section_name" && $section->{skid} == $constants->{mainpage_skid};
 				$section->{$_} = $user_prefs->{$_};
 			}
 		}
@@ -2890,7 +2914,9 @@ sub getAndSetOptions {
 		my $tab; 
 
 		# XXX Don't do if fhfilter specified?
+		print STDERR "FireHose.pm '$form->{section}'\n";
 		my $section = $self->determineCurrentSection();
+		print STDERR "FireHose.pm '$form->{section}'\n";
 		if ($section && $section->{fsid}) {
 			$options->{sectionref} = $section;
 			$options->{section} = $section->{fsid};
@@ -3074,7 +3100,7 @@ sub getAndSetOptions {
 
 	if ($opts->{initial}) {
 		if (!defined $form->{section}) {
-			$form->{section} = $gSkin->{skid} == $constants->{mainpage_skid} ? 0 : $gSkin->{skid};
+			#$form->{section} = $gSkin->{skid} == $constants->{mainpage_skid} ? 0 : $gSkin->{skid};
 		}
 	}
 

@@ -13,16 +13,35 @@ fhviewprefs
 __seclev__
 10000
 __template__
+[% rss_link = "";
+   IF !user.is_anon && id;
+	rss_link = Slash.root2abs() _ "/firehose.pl?op=rss&amp;content_type=rss" _ rss_param_str _ "&amp;logtoken=" _ Slash.strip_paramattr(Slash.getPublicLogToken());
+	rss_link = rss_link _ "&amp;section=" _ id;
+   END;
+%]
 <form id ="modal_prefs" method="post">
 <input type="hidden" name="formname" value="firehoseview">
-Name: <input type="text" name="section_name" value="[% name %]" id="fhsectionname"><br>
-Filter: <input type="text" name="section_filter" value="[% filter %]"><br>
+Name:
+[% IF ((fh_section.uid && fh_section.uid == 0) && (fh_section.skid != constants.mainpage_skid)) %]
+	<input type="text" name="section_name" value="[% name | strip_attribute %]" id="fhsectionname">
+[% ELSE %]
+	[% name | strip_literal %]
+[% END %]
+[% IF rss_link %]
+<a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]"><img src="[% constants.imagedir %]/feed.png"></a>
+[% END %]
+<br>
+Filter: <input type="text" name="section_filter" value="[% filter | strip_attribute %]"><br>
 Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]<br>
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
 <input type="button" value="save">
 <input type="button" value="cancel">
-[% IF id %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %]hide[% ELSE %]delete[% END %]">[% END %]
+[% hide_available = 1 %]
+[% IF fh_section && fh_section.uid == 0 && fh_section.skid == constants.mainpage_skid;
+	hide_available = 0;
+END %]
+[% IF id && hide_available %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %][% IF display=="no" %]un[% END %]hide[% ELSE %]delete[% END %]">[% END %]
 </form>
 <script type="text/javascript">
 // dialog not yet shown; move to tie it to the menu item
@@ -70,6 +89,10 @@ Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => d
 					delete dialog_elem._custom_hide_fn;
 				}).
 			end().
+			filter('[value=unhide]').
+				click(function(){
+					firehose_delete_section([% id %],'undo');
+				}).
 			filter('[value=save]').
 				click(function(){
 					$('#fhsectiontitle-[% id %]').

@@ -800,7 +800,7 @@ sub getModalPrefs {
 			$fh_section = $fh->applyUserSectionPrefs($fh_section);
 		}
 		
-		my ($name, $filter, $viewid);
+		my ($name, $filter, $viewid, $display);
 		$name = $form->{name};
 		$filter = $form->{filter};
 
@@ -808,9 +808,10 @@ sub getModalPrefs {
 			$name = $fh_section->{section_name};
 			$filter = $fh_section->{section_filter};
 			$viewid = $fh_section->{view_id};
+			$display = $fh_section->{display};
 		}
 
-		return slashDisplay('fhviewprefs', { name => $name, id => $form->{id}, filter => $filter, views => $views_hr, fh_section => $fh_section, default_view => $viewid }, { Return => 1} );
+		return slashDisplay('fhviewprefs', { name => $name, id => $form->{id}, filter => $filter, views => $views_hr, fh_section => $fh_section, default_view => $viewid, display => $display }, { Return => 1} );
 
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
