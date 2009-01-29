@@ -69,6 +69,7 @@ __template__
         submissions_size=latest_submissions.size
         bookmarks_size=latest_bookmarks.size
         tagshist_size=tagshist.size
+	achievements_size=requested_user_achievements.size
         is_admin=user.is_admin
         nickname=useredit.nickname
 %]
@@ -226,6 +227,9 @@ __template__
 
         [% ELSIF data_pane == 'tags' %]
                 [% tags_datapane %]
+
+	[% ELSIF data_pane == 'achievements' && admin_flag %]
+		[% achievements_datapane %]
 
         [% ELSIF data_pane == 'comments' %]
                 [% PROCESS u2ListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]

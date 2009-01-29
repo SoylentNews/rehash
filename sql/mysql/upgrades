@@ -5822,3 +5822,26 @@ INSERT INTO vars (name, value, description) VALUES ('postedout_start_secs','300'
 INSERT INTO vars (name, value, description) VALUES ('postedout_thisnexusonly','0','If nonzero, only count posted-out stories that are rendered in this nexus, otherwise count all');
 INSERT INTO vars (name, value, description) VALUES ('postedout_wanted','2','Number of posted-out stories considered a satisfying normal amount');
 
+# For plugins/Achievements
+CREATE TABLE achievements (
+        aid mediumint(8) unsigned NOT NULL auto_increment,
+        name varchar(30) NOT NULL default '',
+        description varchar(128) NOT NULL default '',
+        repeatable enum('yes','no') NOT NULL default 'no',
+        increment tinyint(1) unsigned NOT NULL default '0',
+        PRIMARY KEY (aid)
+) TYPE=InnoDB;
+
+CREATE TABLE user_achievements (
+        id mediumint(8) unsigned NOT NULL auto_increment,
+        uid mediumint(8) unsigned NOT NULL default '0',
+        aid mediumint(8) unsigned NOT NULL default '0',
+        exponent tinyint(1) unsigned NOT NULL default '0',
+        createtime datetime NOT NULL default '0000-00-00 00:00:00',
+        PRIMARY KEY  (id),
+        UNIQUE KEY achievement (uid,aid)
+) TYPE=InnoDB;
+
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('story_posted', 'Has Posted a Story', 'yes', 2);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comment_posted', 'Has Posted a Comment', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('journal_posted', 'Has Posted a Journal Entry', 'no', 0);

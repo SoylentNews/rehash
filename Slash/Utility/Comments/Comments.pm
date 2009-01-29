@@ -1770,6 +1770,11 @@ sub saveComment {
 		$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
 	}
 
+	my $achievements = getObject('Slash::Achievements');
+	if ($achievements) {
+		$achievements->setUserAchievement('comment_posted', $user->{uid});
+	}
+
 	if ($constants->{validate_html}) {
 		my $validator = getObject('Slash::Validator');
 		my $test = parseDomainTags($comment->{comment});

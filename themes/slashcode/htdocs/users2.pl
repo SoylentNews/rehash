@@ -1154,6 +1154,28 @@ sub showInfo {
 		# Friends slashbox
 		my $latest_friends = $users2->getLatestFriends($uid, $requested_user->{u2_friends_bios});
 
+		# Achievements pane
+		my $ach_reader = getObject('Slash::Achievements');
+		my ($user_achievements, $requested_user_achievements, $common_achievements, $achievements_datapane);
+		if ($ach_reader) {
+			$requested_user_achievements = $ach_reader->getUserAchievements($requested_user->{uid});
+			if ($user->{uid} != $requested_user->{uid}) {
+				$user_achievements = $ach_reader->getUserAchievements($user->{uid});
+				foreach my $achievement (keys %$user_achievements) {
+					++$common_achievements->{$achievement} if (exists $requested_user_achievements->{$achievement});
+				}
+			}
+
+			$achievements_datapane =
+				slashDisplay('display_achievements', {
+					user_achievements           => $user_achievements,
+					requested_user_achievements => $requested_user_achievements,
+					common_achievements         => $common_achievements,
+					requested_user              => $requested_user,
+					user                        => $user,
+				}, { Page => 'users', Skin => 'default', Return => 1});
+		}
+
 		# Relationship pane
 		my $relations_datapane;
                 if ($form->{dp} && $form->{dp} =~ /^(?:friends|fans|freaks|foes|fof|eof|all)$/) {
@@ -1205,40 +1227,42 @@ sub showInfo {
 		}
 
 		slashDisplay('u2MainView', {
-			title			=> $title,
-			uid			=> $uid,
-			useredit		=> $requested_user,
-			points			=> $points,
-			commentstruct		=> $commentstruct || [],
-			commentcount		=> $commentcount,
-			min_comment		=> $min_comment,
-			nickmatch_flag		=> $nickmatch_flag,
-			mod_flag		=> $mod_flag,
-			karma_flag		=> $karma_flag,
-			admin_block		=> $admin_block,
-			admin_flag 		=> $admin_flag,
-			reasons			=> $mod_reader->getReasons(),
-			lastjournal		=> $lastjournal,
-			hr_hours_back		=> $ipid_hoursback,
-			cids_to_mods		=> $cids_to_mods,
-			comment_time		=> $comment_time,
-			submissions		=> $submissions,
-			subcount		=> $subcount,
-			metamods		=> $metamods,
-			tagshist		=> $tagshist,
-			latest_comments         => $latest_comments,
-			latest_journals         => $latest_journals,
-			latest_submissions      => $latest_submissions,
-			latest_bookmarks        => $latest_bookmarks,
-			latest_friends          => $latest_friends,
-			firehose_marquee	=> $firehose_marquee,
-			marquee                 => $marquee,
-			relations_datapane      => $relations_datapane,
-			tags_datapane           => $tags_datapane,
-			data_pane               => $form->{dp},
-			main_view               => $main_view,
-			not_fhid		=> $not_fhid,
-			rss_block               => $rss_block,
+			title			    => $title,
+			uid			    => $uid,
+			useredit		    => $requested_user,
+			points			    => $points,
+			commentstruct		    => $commentstruct || [],
+			commentcount		    => $commentcount,
+			min_comment		    => $min_comment,
+			nickmatch_flag		    => $nickmatch_flag,
+			mod_flag		    => $mod_flag,
+			karma_flag		    => $karma_flag,
+			admin_block		    => $admin_block,
+			admin_flag 		    => $admin_flag,
+			reasons			    => $mod_reader->getReasons(),
+			lastjournal		    => $lastjournal,
+			hr_hours_back		    => $ipid_hoursback,
+			cids_to_mods		    => $cids_to_mods,
+			comment_time		    => $comment_time,
+			submissions		    => $submissions,
+			subcount		    => $subcount,
+			metamods		    => $metamods,
+			tagshist		    => $tagshist,
+			latest_comments             => $latest_comments,
+			latest_journals             => $latest_journals,
+			latest_submissions          => $latest_submissions,
+			latest_bookmarks            => $latest_bookmarks,
+			latest_friends              => $latest_friends,
+			firehose_marquee	    => $firehose_marquee,
+			marquee                     => $marquee,
+			relations_datapane          => $relations_datapane,
+			tags_datapane               => $tags_datapane,
+			data_pane                   => $form->{dp},
+			main_view                   => $main_view,
+			not_fhid		    => $not_fhid,
+			rss_block		    => $rss_block,
+			requested_user_achievements => $requested_user_achievements,
+			achievements_datapane	    => $achievements_datapane,
 		}, { Page => 'users', Skin => 'default'});
 	}
 
