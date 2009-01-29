@@ -2532,6 +2532,11 @@ sub saveStory {
 			}
 		}
 
+		my $achievements = getObject('Slash::Achievements');
+		if ($achievements) {
+			$achievements->setUserAchievement('story_posted', $form->{uid});
+		}
+
 		listStories(@_);
 	} else {
 		slashHook('admin_save_story_failed', { story => $data });

@@ -214,6 +214,11 @@ sub create {
 
 	$self->insertFireHose($id, $promotetype);
 
+	my $achievements = getObject('Slash::Achievements');
+	if ($achievements) {
+		$achievements->setUserAchievement('journal_posted', $user->{uid});
+	}
+
 	return $id;
 }
 

@@ -1,0 +1,3 @@
+name=Achievements
+description="Achievements"
+template=templates/display_achievements;users;default
