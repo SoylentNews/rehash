@@ -22,13 +22,10 @@ __template__
 <form id ="modal_prefs" method="post">
 <input type="hidden" name="formname" value="firehoseview">
 Name:
-[% IF ((fh_section.uid && fh_section.uid == 0) && (fh_section.skid != constants.mainpage_skid)) %]
+[% IF (fh_section.skid != constants.mainpage_skid) %]
 	<input type="text" name="section_name" value="[% name | strip_attribute %]" id="fhsectionname">
 [% ELSE %]
 	[% name | strip_literal %]
-[% END %]
-[% IF rss_link %]
-<a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]"><img src="[% constants.imagedir %]/feed.png"></a>
 [% END %]
 <br>
 Filter: <input type="text" name="section_filter" value="[% filter | strip_attribute %]"><br>
@@ -42,6 +39,9 @@ Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => d
 	hide_available = 0;
 END %]
 [% IF id && hide_available %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %][% IF display=="no" %]un[% END %]hide[% ELSE %]delete[% END %]">[% END %]
+[% IF rss_link %]
+<a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]"><img src="[% constants.imagedir %]/feed.png"></a>
+[% END %]
 </form>
 <script type="text/javascript">
 // dialog not yet shown; move to tie it to the menu item
