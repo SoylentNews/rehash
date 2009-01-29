@@ -24,7 +24,7 @@ __template__
 [% cur_section_id = 0 %]
 [% cur_section = fh.determineCurrentSection() %]
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
-
+[% hide = 0 %]
 <ul id="firehose-sections">
 	[% FOREACH fh_section= sections %]
 
@@ -33,7 +33,7 @@ __template__
 
 		[% is_active = 0 %]
 		[% IF fh_section.fsid == cur_section_id; is_active = 1; END %]
-		[% NEXT IF (fh_section.display == "no" && is_active == 0)%]
+		[% IF (fh_section.display == "no" && is_active == 0); hide =1; END %]
 		[% link_loc = gskin.rootdir _ "/firehose.pl?section=" _ fh_section.fsid %]
 		
 		[% IF fh_section.skid %]
@@ -42,7 +42,7 @@ __template__
 				link_loc = the_skin.rootdir;
 			   END %]
 		[% END %]
-		<li [% IF is_active %] class="active" [% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !user.is_anon; %] onclick="firehose_set_options('section','[% fh_section.fsid %]'); return false;" [% END %]>[% fh_section.section_name %]</a>[% IF !user.is_anon %] <a onclick="getModalPrefs('firehoseview','Update section filter', 0, { id: [% fh_section.fsid %]});return false;" href="#" id="links-sections-edit">[e]</a>[% END %]</li>
+		<li [% IF is_active %] class="active"[% ELSIF hide %] class="hide"[% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !user.is_anon; %] onclick="firehose_set_options('section','[% fh_section.fsid %]'); return false;" [% END %]>[% fh_section.section_name %]</a>[% IF !user.is_anon %] <a onclick="getModalPrefs('firehoseview','Update section filter', 0, { id: [% fh_section.fsid %]});return false;" href="#" id="links-sections-edit">[e]</a>[% END %]</li>
 	[% END %]
 </ul>
 __seclev__
