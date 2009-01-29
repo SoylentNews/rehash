@@ -1131,6 +1131,7 @@ sub getFireHoseEssentials {
 		}
 	}
 
+	# SSS
 	if ($options->{ids}) {
 		return($items, $results) if @{$options->{ids}} < 1;
 		my $id_str = join ',', map { $self->sqlQuote($_) } @{$options->{ids}};
@@ -1188,6 +1189,9 @@ sub getFireHoseEssentials {
 		print STDERR "sphinx:original sql: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
 		print STDERR "sphinx:new sphinxse: SELECT $columns FROM $tables WHERE $where $other;\n";
 	}
+
+	# SSS: everything below this point still needs to be implemented for Sphinx
+
 
 	# XXX I would like to change this, as soon as possible, to have
 	# the only column retrieved be 'id', and to pipe the resulting
