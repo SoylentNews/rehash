@@ -5845,3 +5845,7 @@ CREATE TABLE user_achievements (
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('story_posted', 'Has Posted a Story', 'yes', 2);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comment_posted', 'Has Posted a Comment', 'no', 0);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('journal_posted', 'Has Posted a Journal Entry', 'no', 0);
+
+# For plugins/FireHose
+SELECT @fsid := fsid FROM firehose_section where skid=1;
+INSERT INTO vars (name,value,description) VALUES ("firehose_mainpage_fsid",@fsid, "Firehose section id of mainpage skid");
