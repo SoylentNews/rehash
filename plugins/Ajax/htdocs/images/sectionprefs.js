@@ -24,10 +24,14 @@ function saveFirehoseSectionMenu(){
 	});
 }
 
-function firehose_delete_section(id) {
+function firehose_delete_section(id,undo) {
+	if (undo == undefined ) {
+		undo = 0;
+	}
 	ajax_update({
 		op:	'firehose_delete_section_menu',
 		reskey:	reskey_static,
+		undo:	undo,
 		id: 	id
 	});
 }
