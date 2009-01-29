@@ -934,8 +934,7 @@ sub getFireHoseEssentials {
 
 		if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
 			if ($sphinx && $options->{filter}) {
-				# SSS: need to filter this, and decide all, any, phrase ... ?
-				push @sphinx_terms, $options->{filter};
+				push @sphinx_terms, sphinxFilterQuery($options->{filter});
 			}
 
 			$tables .= ',firehose_text';
@@ -1139,7 +1138,7 @@ sub getFireHoseEssentials {
 
 		if ($sphinx) {
 			my @globjids = map { $_->{globjid} } $self->getFireHoseMulti($options->{ids});
-			push @sphinx_where, 'globjid IN (' . join(',', @globjids) . ')';
+			push @sphinx_opts, 'filter=globjid,' . join(',', @globjids);
 		}
 	}
 
@@ -1148,7 +1147,7 @@ sub getFireHoseEssentials {
 
 		if ($sphinx) {
 			my $globjid = $self->getFireHoseMulti($options->{not_id})->{globjid};
-			push @sphinx_where, "globjid != $globjid";
+			push @sphinx_opts, "!filter=globjid,$globjid";
 		}
 	}
 
@@ -1186,8 +1185,8 @@ sub getFireHoseEssentials {
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
-		print STDERR "SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
-		print STDERR "SELECT $columns FROM $tables WHERE $where $other;\n";
+		print STDERR "sphinx:original sql: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
+		print STDERR "sphinx:new sphinxse: SELECT $columns FROM $tables WHERE $where $other;\n";
 	}
 
 	# XXX I would like to change this, as soon as possible, to have
@@ -2746,6 +2745,38 @@ sub genUntitledTab {
 		}
 	}
 	return $user_tabs;
+}
+
+
+{
+my $stopwords;
+sub sphinxFilterQuery {
+	my($query) = @_;
+	if (!$stopwords) {
+		open my $fh, '/srv/sphinx/var/data/stopwords.txt';
+		if ($fh) {
+			my @stopwords;
+			while (<$fh>) {
+				chomp;
+				push @stopwords, $_;
+			}
+			$stopwords = join '|', @stopwords;
+			$stopwords = qr{\b(?:$stopwords)\b};
+		}
+	}
+
+	my $basic = 'a-zA-Z0-9_';
+	my $extra = ':\'';  # : and ' are sometimes useful in plain text, like for Perl modules and contractions
+	my $bool  = '()&|!\-';      # boolean Sphinx syntax
+	my $ext   = '@\[\],*"~/=';  # extended Sphinx syntax (also include $bool)
+
+	# keep only these characters
+	$query =~ s/[^$basic]+/ /go;
+	# clean up spaces
+	$query =~ s/ +/ /g; $query =~ s/^ //g; $query =~ s/ $//g;
+
+	$query =~ s/$stopwords//gio if $stopwords;
+}
 }
 
 # this serialization code can be heavily modified to taste ... it doesn't
