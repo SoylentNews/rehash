@@ -48,7 +48,8 @@ END %]
 (function(){
 	var	$li		= $('#fhsection-[% id %]'),
 		li_offset	= $li.offset(),
-		$dialog		= get_modal_parts('#modal_box'),
+		$dialog		= get_modal_parts('#modal_box')
+		$edit_field	= $dialog.find('input#fhsectionname'),
 		new_classname	= 'links-sections-edit' + ($li.is('.active') ? ' active' : '');
 
 
@@ -76,7 +77,7 @@ END %]
 				width:		to_width
 			}, function(){
 				$content.css('overflow', '');
-				$dialog.find('#fhsectionname').focus();
+				$edit_field.focus();
 			});
 	};
 
@@ -103,8 +104,7 @@ END %]
 			end().
 			filter('[value=save]').
 				click(function(){
-					$('#fhsectiontitle-[% id %]').
-						html($('#fhsectioname').val());
+					$li.find('a[id^=fhsectiontitle-]').text($edit_field.val());
 					saveModalPrefs();
 					[% IF id %]firehose_set_options('section', [% id %]);[% END %]
 				});
@@ -121,7 +121,7 @@ END %]
 	invalid_name[''] = true;	// ...nor without a name at all
 
 	// test and enable/disable (as needed) on keyup
-	$dialog.find('input#fhsectionname').keyup(function(){
+	$edit_field.keyup(function(){
 		var next_disabled = invalid_name[$.trim($(this).val()).toLowerCase()];
 		if ( next_disabled != prev_disabled ) {
 			$save_button.attr('disabled', (next_disabled ? 'disabled' : ''));
