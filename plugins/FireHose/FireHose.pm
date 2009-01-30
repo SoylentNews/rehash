@@ -239,7 +239,7 @@ sub ajaxNewFireHoseSection {
 	return if $user->{is_anon};
 	my $data = {
 		section_name => 'Untitled',
-		section_filter => $form->{filter},
+		section_filter => $form->{fhfilter},
 		uid => $user->{uid},
 		view_id => 0
 	};
