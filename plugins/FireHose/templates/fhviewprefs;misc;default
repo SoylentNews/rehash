@@ -1,3 +1,4 @@
+
 __section__
 default
 __description__
@@ -21,27 +22,28 @@ __template__
 %]
 <form id ="modal_prefs" method="post">
 <input type="hidden" name="formname" value="firehoseview">
-Name:
-[% IF (fh_section.skid != constants.mainpage_skid) %]
-	<input type="text" name="section_name" value="[% name | strip_attribute %]" id="fhsectionname">
-[% ELSE %]
-	[% name | strip_literal %]
+<div class="close"><a title="Close" href="#" class="close" onclick="return false" >Close</a></div>
+[% IF rss_link %]
+<div class="rss"><a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]"><img src="[% constants.imagedir %]/feed.png"></a></div>
 [% END %]
-<br>
-Filter: <input type="text" name="section_filter" value="[% filter | strip_attribute %]"><br>
-Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]<br>
+[% IF (fh_section.skid != constants.mainpage_skid) %]
+<div class="section_name"><input type="text" name="section_name" value="[% name | strip_attribute %]" class="section_name" id="fhsectionname"></div>
+[% ELSE %]
+<div class="section_name">[% name | strip_literal %]</div>
+[% END %]
+<div class="section_filter">Filter: <input type="text" name="section_filter" class="section_filter" value="[% filter | strip_attribute %]"></div>
+<div class="section_initialview">Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]</div>
+
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
 <input type="button" value="save">
-<input type="button" value="cancel">
+<!--<input type="button" value="cancel">-->
 [% hide_available = 1 %]
 [% IF fh_section && fh_section.uid == 0 && fh_section.skid == constants.mainpage_skid;
 	hide_available = 0;
 END %]
 [% IF id && hide_available %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %][% IF display=="no" %]un[% END %]hide[% ELSE %]delete[% END %]">[% END %]
-[% IF rss_link %]
-<a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]"><img src="[% constants.imagedir %]/feed.png"></a>
-[% END %]
+
 </form>
 <script type="text/javascript">
 // dialog not yet shown; move to tie it to the menu item
