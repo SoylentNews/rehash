@@ -2220,6 +2220,7 @@ sub ajaxGetAdminExtras {
 
 	my $the_user = $slashdb->getUser($item->{uid});
 
+	$item->{atstorytime} = '__TIME_TAG__';
 	my $byline = getData("byline", {
 		item				=> $item,
 		the_user			=> $the_user,
@@ -2239,6 +2240,10 @@ sub ajaxGetAdminExtras {
 		subnotes_ref			=> $subnotes_ref,
 		similar_stories			=> $similar_stories,
 	}, { Return => 1 });
+	
+	my $atstorytime;
+	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
+	$byline =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
 
 	return Data::JavaScript::Anon->anon_dump({
 		html => {
