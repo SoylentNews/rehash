@@ -24,16 +24,17 @@ __template__
 [% cur_section_id = 0 %]
 [% cur_section = fh.determineCurrentSection() %]
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
-[% hide = 0 %]
 <ul id="firehose-sections">
 	[% FOREACH fh_section= sections %]
+		[% hide = 0 %]
 
 		[% IF fh_section.user_display; fh_section.display = fh_section.user_display; END %]
 		[% IF fh_section.user_section_name; fh_section.section_name = fh_section.user_section_name; END %]
 
 		[% is_active = 0 %]
 		[% IF fh_section.fsid == cur_section_id; is_active = 1; END %]
-		[% IF (fh_section.display == "no" && is_active == 0); hide =1; END %]
+		
+		[% IF (fh_section.display == "no" && is_active == 0); hide=1; END %]
 		[% link_loc = gskin.rootdir _ "/firehose.pl?section=" _ fh_section.fsid %]
 		
 		[% IF fh_section.skid %]
