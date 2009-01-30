@@ -1846,7 +1846,7 @@ function firehose_new_section() {
 	ajax_update({
 		name:		'Untitled',
 		op:		'firehose_new_section',
-		filter:		$('#searchquery').value(),
+		filter:		$('#searchquery').val(),
 		reskey:		reskey_static
 	}, '', { onComplete: firehose_new_section_handler });
 }
