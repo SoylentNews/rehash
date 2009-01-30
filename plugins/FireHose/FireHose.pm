@@ -986,7 +986,7 @@ sub getFireHoseEssentials {
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 
 			if ($sphinx) {
-				my $time = ($self->getTime({ unix_format => 1 }) + $dur_sphinx) - 1;
+				my $time = ($self->getTime({ unix_format => 1 }) - $dur_sphinx) - 1;
 				push @sphinx_opts, "!range=createtime_ut,0,$time";
 			}
 		}
@@ -1185,8 +1185,8 @@ sub getFireHoseEssentials {
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
-		print STDERR "sphinx:original sql: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
-		print STDERR "sphinx:new sphinxse: SELECT $columns FROM $tables WHERE $where $other;\n";
+		print STDERR "sphinx:new sphinxse: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
+		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
 	}
 
 	# XXX I would like to change this, as soon as possible, to have
