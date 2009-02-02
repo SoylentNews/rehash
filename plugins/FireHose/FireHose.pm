@@ -239,7 +239,7 @@ sub ajaxNewFireHoseSection {
 	return if $user->{is_anon};
 	my $data = {
 		section_name => 'Untitled',
-		section_filter => $form->{filter},
+		section_filter => $form->{fhfilter},
 		uid => $user->{uid},
 		view_id => 0
 	};
@@ -1388,6 +1388,7 @@ sub getFireHose {
 sub getFireHoseMulti {
 	my($self, $id_ar, $options) = @_;
 	my $constants = getCurrentStatic();
+	$id_ar = [ $id_ar ] if !ref $id_ar;
 	$id_ar = [( grep { /^\d+$/ } @$id_ar )];
 
 	my $exptime = $constants->{firehose_memcached_exptime} || 600;
@@ -2219,6 +2220,7 @@ sub ajaxGetAdminExtras {
 
 	my $the_user = $slashdb->getUser($item->{uid});
 
+	$item->{atstorytime} = '__TIME_TAG__';
 	my $byline = getData("byline", {
 		item				=> $item,
 		the_user			=> $the_user,
@@ -2238,6 +2240,10 @@ sub ajaxGetAdminExtras {
 		subnotes_ref			=> $subnotes_ref,
 		similar_stories			=> $similar_stories,
 	}, { Return => 1 });
+	
+	my $atstorytime;
+	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
+	$byline =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
 
 	return Data::JavaScript::Anon->anon_dump({
 		html => {
@@ -2957,7 +2963,7 @@ sub getAndSetOptions {
 
 	} else {
 		# set only global options
-		$options->{$_} = $global_opts->{$_} foreach qw(nocommentcnt nobylines nodates nothumbs nomarquee nocolors noslashboxes);
+		$options->{$_} = $global_opts->{$_} foreach qw(nocommentcnt nobylines nodates nothumbs nomarquee nocolors noslashboxes mixedmode);
 
 		# handle non-initial pageload
 		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
@@ -3009,6 +3015,7 @@ sub getAndSetOptions {
 
 	$options->{global} = $global_opts;
 
+	$options->{mixedmode} = $options->{viewref}{mixedmode} if $options->{viewref};
 
 	my $fhfilter = $options->{fhfilter};
 
@@ -3357,7 +3364,7 @@ sub getAndSetOptions {
 
 #use Data::Dumper;
 #print STDERR Dumper($options);
-#print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";	
+#print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 	return $options;
 }
 
