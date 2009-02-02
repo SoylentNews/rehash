@@ -1842,9 +1842,35 @@ function firehose_get_onscreen() {
 	return onscreen;
 }
 
+function firehose_new_section_name() {
+	var used_name   = Slash.Util.qw.as_set(
+			$('#firehose-sections li a[id^=fhsectiontitle-]').
+				map(function(){
+					return $.trim($(this).text()).toLowerCase();
+				}).get()
+			);
+		$('#fhsectionname').each(function(){
+			used_name[$.trim($(this).val()).toLowerCase()];
+		}); 
+	if (!used_name["untitled"]) {
+		return "Untitled";
+	} else {
+		var i = 2;
+                var name;
+                while(1) {
+			name="Untitled "+i;
+			if(!used_name[name.toLowerCase()]) {
+				return name;
+			}
+			i++;
+		}
+	}
+}
+
 function firehose_new_section() {
+	var name = firehose_new_section_name();
 	ajax_update({
-		name:		'Untitled',
+		name:		name,
 		op:		'firehose_new_section',
 		fhfilter:		$('#searchquery').val(),
 		reskey:		reskey_static

@@ -238,7 +238,7 @@ sub ajaxNewFireHoseSection {
 	my $fh = getObject("Slash::FireHose");
 	return if $user->{is_anon};
 	my $data = {
-		section_name => 'Untitled',
+		section_name => $form->{name},
 		section_filter => $form->{fhfilter},
 		uid => $user->{uid},
 		view_id => 0
@@ -251,7 +251,7 @@ sub ajaxNewFireHoseSection {
 	if ($id) {
 		$data_dump =  Data::JavaScript::Anon->anon_dump({
 			id 	=> $id,
-			li	=> getData('newsectionli', { id => $id }, 'firehose')
+			li	=> getData('newsectionli', { id => $id, name => $form->{name} }, 'firehose')
 
 		});
 	}
