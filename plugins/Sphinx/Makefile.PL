@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'Slash::Sphinx',
     'PM'	=>
-    	{
+	{
 		'Sphinx.pm' =>   '$(INST_LIBDIR)/Sphinx.pm',
-    	},
+	},
 );
