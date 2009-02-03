@@ -1,0 +1,37 @@
+After doing install-plugin for the Sphinx plugin, you'll need to:
+
+* install SphinxSE on at least one database (preferably reader,
+  but writer will work)
+* add a 'sphinx01' virtual user to DBIx/Password.pm, pointing to
+  that database
+* install Sphinx itself on the machine 'sphinx01' at least
+* craft a sphinx configuration file (making use of sphinx_counter)
+  to index the firehose (this is vital, but details are pending,
+  sorry)
+	- task to write this?
+		yeah, write to /u/l/s/site/sitename/misc/sphinx_01.conf
+	- vars (or small table?) for 'sphinx01' and each
+	  additional sphinx instance:
+		sql_user
+		sql_pass (password)
+		sql_db
+		sql_host
+		sql_port
+		sql_sock
+		sphinx_01_vardir: /srv/sphinx/var/
+		sphinx_01_hostname: (same as sql_db, at least for now)
+		sphinx_01_port: 3312
+* run searchd, probably on the same machine 'sphinx01' points to
+	- searchd --config /u/l/s/site/sitename/misc/sphinx_01.conf --iostats
+* run indexer in a loop to constantly pick up new firehose changes
+  (details pending)
+* ALTER TABLE sphinx_search CONNECTION='sphinx://hostname:port/*';
+  on the 'sphinx01' database, where host=searchd-hostname, post=searchd-listen
+* set the 'sphinx' var to 1
+
+After those steps are done,
+
+my $sphinxdb = getObject("Slash::Sphinx", { db_type => "sphinx" });
+
+and $sphinxdb->sqlSelect* will work to query the sphinx_search table.
+

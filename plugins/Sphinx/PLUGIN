@@ -1,0 +1,7 @@
+# $Id$
+name=Sphinx
+description="Sphinx search support"
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
+task=sphinx_archive.pl
+task=sphinx_writeconf.pl
