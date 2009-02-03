@@ -796,7 +796,8 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
+	$sphinx = 2 if $options->{sphinx} && $user->{is_admin};
 
 	$options ||= {};
 	$options->{limit} ||= 50;
@@ -1172,7 +1173,7 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id != " . $self->sqlQuote($options->{not_id});
 
 		if ($sphinx) {
-			my $globjid = $self->getFireHoseMulti($options->{not_id})->{globjid};
+			my $globjid = $self->getFireHose($options->{not_id})->{globjid};
 			push @sphinx_opts, "!filter=globjid,$globjid";
 		}
 	}
@@ -1206,14 +1207,22 @@ sub getFireHoseEssentials {
 		}
 	}
 
-	# SSS: mode?  index?
+	# SSS: mode?
+	my($hr_ar, $sphinx_ar, $sphinx_stats);
 	if ($sphinx) {
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
 		print STDERR "sphinx:new sphinxse: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
 		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
+
+		if ($sphinx > 1) {
+			$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('globjid', 'sphinx_search', "query=$query$swhere");
+			$sphinx_stats = $sphinxdb->getSphinxStats;
+		}
 	}
+
 
 	# XXX I would like to change this, as soon as possible, to have
 	# the only column retrieved be 'id', and to pipe the resulting
@@ -1221,9 +1230,16 @@ sub getFireHoseEssentials {
 	# the DB.  It also eliminates the getGlobjAdminnotes call below.
 	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
-	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+	if ($sphinx > 2) {
+		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
+		for my $globjid (@$sphinx_ar) {
+			push @$hr_ar, $hr_hr->{$globjid};
+		}
+	} else {
+		$hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+	}
 
-	# SSS: ?
+	# SSS: does this change for Sphinx?
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
@@ -1233,9 +1249,9 @@ sub getFireHoseEssentials {
 
 	my $count = 0;
 
-	if ($sphinx > 1) {
-		# SSS
-		# 'SHOW STATUS LIKE 'sphinx_%'
+	# SSS: unreliable
+	if (0 && $sphinx > 2) {
+		$count ||= $sphinx_stats->{'total found'};
 	} else {
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
 		my $row_num = @$rows;
@@ -2567,7 +2583,6 @@ sub getGlobalOptionDefaults {
 		nocommentcnt	=> 0,
 		noslashboxes 	=> 0,
 		nomarquee	=> 0,
-		mixedmode	=> 0,
 		pagesize	=> "small",
 		usermode	=> 0,
 	};
@@ -2903,6 +2918,8 @@ sub getAndSetOptions {
 
 	my $global_opts = $self->getAndSetGlobalOptions();
 	my $options = {};
+
+	$options->{firehose_sphinx} if $opts->{firehose_sphinx};
 
 	# Beginning of initial pageload handling
 	if ($opts->{initial}) {

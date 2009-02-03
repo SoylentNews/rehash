@@ -31,3 +31,26 @@ sub getNum {
 	return $num;
 }
 
+sub getSphinxStats {
+	my($self) = @_;
+
+	my $sql = 'SHOW SPHINX ENGINE STATUS';
+	my $sth = $self->{_dbh}->prepare($sql);
+	if (!$sth->execute) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+
+	my @data = $sth->fetchrow;
+	$sth->finish;
+
+	return undef unless $data[2] && $data[2] =~ /:/;
+
+	my %stats;
+	while ($data[2] =~ /(\w[\w\s]+): (\d+)/g) {
+		$stats{$1} = $2;
+	}
+
+	return \%stats;
+}
