@@ -1,31 +1,25 @@
-After doing install-plugin for the Sphinx plugin, you'll need to:
+After doing install-plugin for the Sphinx plugin, you'll need to
+do these steps.  An [S] means sandboxes already come with it done:
 
 * install SphinxSE on at least one database (preferably reader,
-  but writer will work)
+  but writer will work) [S]
 * add a 'sphinx01' virtual user to DBIx/Password.pm, pointing to
-  that database
+  that database [S]
 * install Sphinx itself on the machine 'sphinx01' at least
-* craft a sphinx configuration file (making use of sphinx_counter)
-  to index the firehose (this is vital, but details are pending,
-  sorry)
-	- task to write this?
-		yeah, write to /u/l/s/site/sitename/misc/sphinx_01.conf
-	- vars (or small table?) for 'sphinx01' and each
-	  additional sphinx instance:
-		sql_user
-		sql_pass (password)
-		sql_db
-		sql_host
-		sql_port
-		sql_sock
-		sphinx_01_vardir: /srv/sphinx/var/
-		sphinx_01_hostname: (same as sql_db, at least for now)
-		sphinx_01_port: 3312
-* mkdir vardir/{log,data}
+  [S in /usr/local/sphinx]
+* install-plugin (for this plugin, naturally)
+* set vars if desired (see mysql_dump.sql)
+  (for sandboxes, lower max_children, max_iops, mem_limit)
+* mkdir sphinx_01_vardir if necessary, and its two subdirs,
+  log and data
+* restart slashd, to trigger the sphinx_writeconf task to write out
+  the stopwords and sphinx01.conf files
+* run indexer once to generate all indexes
+    /usr/local/sphinx/bin/indexer --config /usr/local/slash/site/SITENAME/misc/sphinx01.conf --all
 * run searchd, probably on the same machine 'sphinx01' points to
-	- searchd --config /u/l/s/site/sitename/misc/sphinx_01.conf --iostats
+    searchd --config /u/l/s/site/SITENAME/misc/sphinx01.conf --iostats
 * run indexer in a loop to constantly pick up new firehose changes
-  (details pending)
+  (script is forthcoming shortly)
 * ALTER TABLE sphinx_search CONNECTION='sphinx://hostname:port/*';
   on the 'sphinx01' database, where host=searchd-hostname, post=searchd-listen
 * set the 'sphinx' var to 1
