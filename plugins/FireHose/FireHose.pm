@@ -225,8 +225,8 @@ sub ajaxDeleteFireHoseSection {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	my $fh = getObject("Slash::FireHose");
 	if ($form->{id}) {
-		if($form->{undo}) {
-			$fh->setFireHoseSectionPrefs($form->{id}, { display => "yes"});
+		if ($form->{undo}) {
+			$fh->setFireHoseSectionPrefs($form->{id}, { display => "yes" });
 		} else {
 			$fh->deleteHideFireHoseSection($form->{id});
 		}
@@ -268,7 +268,7 @@ sub ajaxFireHoseSectionCSS {
 		foreach (split(/\s+/, $section->{section_filter})) {
 			last if $got_section;
 			my $cur_skin = $slashdb->getSkin($_);
-			if($cur_skin) {
+			if ($cur_skin) {
 				$got_section = $cur_skin->{skid};
 			}
 		}
