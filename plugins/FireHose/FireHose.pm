@@ -791,13 +791,17 @@ sub getFireHoseCount {
 
 sub getFireHoseEssentials {
 	my($self, $options) = @_;
-
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
 	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
-	$sphinx = 3;#testing! if $options->{sphinx} && $user->{is_admin};
+	$sphinx = 3 if $options->{sphinx} && $user->{is_admin};
+
+	if ($sphinx) {
+		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
+		print STDERR Dumper $options; print STDERR "\n";
+	}
 
 	$options ||= {};
 	$options->{limit} ||= 50;
@@ -820,7 +824,7 @@ sub getFireHoseEssentials {
 
 	my($items, $results, $doublecheck) = ([], {}, 0);
 	# for now, only bother to try searchtoo if there is a qfilter value to search on
-	if (!$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
+	if ($sphinx < 3 && !$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
@@ -1164,8 +1168,8 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id IN ($id_str)";
 
 		if ($sphinx) {
-			my @globjids = map { $_->{globjid} } $self->getFireHoseMulti($options->{ids});
-			push @sphinx_opts, 'filter=globjid,' . join(',', @globjids);
+			my @globjids = map { $_->{globjid} } values %{ $self->getFireHoseMulti($options->{ids}) };
+			push @sphinx_opts, 'filter=globjid,' . join(',', @globjids) if @globjids;
 		}
 	}
 
@@ -1231,6 +1235,7 @@ sub getFireHoseEssentials {
 	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	if ($sphinx > 2) {
+		$user->{state}{fh_sphinxtest} = 1;
 		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
 		for my $globjid (@$sphinx_ar) {
 			push @$hr_ar, $hr_hr->{$globjid};
@@ -1997,6 +2002,7 @@ sub ajaxFireHoseGetUpdates {
 			} else {
 				$update_data->{new}++;
 				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
+				$item->{title} .= ' [SPHINX]' if $user->{state}{fh_sphinxtest};
 				my $data = {
 					mode => $curmode,
 					item => $item,
@@ -2802,12 +2808,14 @@ my $stopwords;
 sub sphinxFilterQuery {
 	my($query) = @_;
 	# query size is limited, so strip out stopwords
-	if (!$stopwords) {
+	unless (defined $stopwords) {
 		my $sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 		my @stopwords = $sphinxdb->getSphinxStopwords;
 		if (@stopwords) {
 			$stopwords = join '|', @stopwords;
 			$stopwords = qr{\b(?:$stopwords)\b};
+		} else {
+			$stopwords = 0;
 		}
 	}
 
@@ -2822,6 +2830,8 @@ sub sphinxFilterQuery {
 	$query =~ s/ +/ /g; $query =~ s/^ //g; $query =~ s/ $//g;
 
 	$query =~ s/$stopwords//gio if $stopwords;
+
+	return $query;
 }
 }
 
@@ -3672,6 +3682,7 @@ sub listView {
 		} else {
 	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 			slashProf("firehosedisp");
+			$item->{title} .= ' [SPHINX]' if $user->{state}{fh_sphinxtest};
 			$itemstext .= $self->dispFireHose($item, {
 				mode			=> $curmode,
 				tags_top		=> $tags_top,		# old-style
