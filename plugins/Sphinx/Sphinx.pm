@@ -34,7 +34,7 @@ sub getNum {
 sub getSphinxStats {
 	my($self) = @_;
 
-	my $sql = 'SHOW SPHINX ENGINE STATUS';
+	my $sql = 'SHOW ENGINE SPHINX STATUS';
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		$self->sqlErrorLog($sql);

@@ -797,7 +797,7 @@ sub getFireHoseEssentials {
 	my $colors = $self->getFireHoseColors();
 
 	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
-	$sphinx = 2 if $options->{sphinx} && $user->{is_admin};
+	$sphinx = 3;#testing! if $options->{sphinx} && $user->{is_admin};
 
 	$options ||= {};
 	$options->{limit} ||= 50;
@@ -2801,14 +2801,11 @@ sub genUntitledTab {
 my $stopwords;
 sub sphinxFilterQuery {
 	my($query) = @_;
+	# query size is limited, so strip out stopwords
 	if (!$stopwords) {
-		open my $fh, '/srv/sphinx/var/data/stopwords.txt';
-		if ($fh) {
-			my @stopwords;
-			while (<$fh>) {
-				chomp;
-				push @stopwords, $_;
-			}
+		my $sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+		my @stopwords = $sphinxdb->getSphinxStopwords;
+		if (@stopwords) {
 			$stopwords = join '|', @stopwords;
 			$stopwords = qr{\b(?:$stopwords)\b};
 		}
