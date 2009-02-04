@@ -36,20 +36,28 @@ $task{$me}{code} = sub {
 	return 'no hostname defined' unless $hostname;
 	my $sphinx_port = $constants->{sphinx_01_port} || 3312;
 	my $sql_port = $vu->{port} || 3306;
-	my $vardir = $constants->{sphinx_01_vardir} || '/srv/sphinx/var';
+	my $max_children = $constants->{sphinx_01_max_children} || 100;
+	my $max_iops =     $constants->{sphinx_01_max_iops}     || 40;
+	my $max_matches =  $constants->{sphinx_01_max_matches}  || 10000;
+	my $mem_limit =    $constants->{sphinx_01_mem_limit}    || '512M';
+	my $vardir =       $constants->{sphinx_01_vardir}       || '/srv/sphinx/var';
 
 	my $writedir = catdir($constants->{datadir}, 'misc');
 	my $writefile = catfile($writedir, "sphinx$num.conf");
 
-	$filedata =~ s/ __SPHINX_${num}_HOSTNAME__ /$hostname/gx;
-	$filedata =~ s/ __SPHINX_${num}_PORT__     /$sphinx_port/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_USER__ /$vu->{username}/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_PASS__ /$vu->{password}/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_DB__   /$vu->{database}/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_HOST__ /$vu->{host}/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_PORT__ /$sql_port/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_SOCK__ //gx; # no way to get this info at the moment, which is ok
-	$filedata =~ s/ __SPHINX_${num}_VARDIR__   /$vardir/gx;
+	$filedata =~ s/ __SPHINX_${num}_HOSTNAME__     /$hostname/gx;
+	$filedata =~ s/ __SPHINX_${num}_PORT__         /$sphinx_port/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_USER__     /$vu->{username}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_PASS__     /$vu->{password}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_DB__       /$vu->{database}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_HOST__     /$vu->{host}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_PORT__     /$sql_port/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_SOCK__     //gx; # no way to get this info at the moment, which is ok
+	$filedata =~ s/ __SPHINX_${num}_MAX_CHILDREN__ /$max_children/gx;
+	$filedata =~ s/ __SPHINX_${num}_MAX_IOPS__     /$max_iops/gx;
+	$filedata =~ s/ __SPHINX_${num}_MAX_MATCHES__  /$max_matches/gx;
+	$filedata =~ s/ __SPHINX_${num}_MEM_LIMIT__    /$mem_limit/gx;
+	$filedata =~ s/ __SPHINX_${num}_VARDIR__       /$vardir/gx;
 
 	# XXX considering indexer is running frequently and reading this
 	# file, should write it to a new file and mv it into place.
