@@ -34,20 +34,20 @@ $task{$me}{code} = sub {
 	return 'no sphinx vu!?' unless $vu;
 	my $hostname = $constants->{sphinx_01_hostname} || $vu->{host} || '';
 	return 'no hostname defined' unless $hostname;
-	my $port = $constants->{sphinx_01_port} || 3312;
+	my $sphinx_port = $constants->{sphinx_01_port} || 3312;
+	my $sql_port = $vu->{port} || 3306;
 	my $vardir = $constants->{sphinx_01_vardir} || '/srv/sphinx/var';
 
 	my $writedir = catdir($constants->{datadir}, 'misc');
 	my $writefile = catfile($writedir, "sphinx$num.conf");
 
-	my $filedata = <DATA>;
 	$filedata =~ s/ __SPHINX_${num}_HOSTNAME__ /$hostname/gx;
-	$filedata =~ s/ __SPHINX_${num}_PORT__     /$port/gx;
+	$filedata =~ s/ __SPHINX_${num}_PORT__     /$sphinx_port/gx;
 	$filedata =~ s/ __SPHINX_${num}_SQL_USER__ /$vu->{username}/gx;
 	$filedata =~ s/ __SPHINX_${num}_SQL_PASS__ /$vu->{password}/gx;
 	$filedata =~ s/ __SPHINX_${num}_SQL_DB__   /$vu->{database}/gx;
 	$filedata =~ s/ __SPHINX_${num}_SQL_HOST__ /$vu->{host}/gx;
-	$filedata =~ s/ __SPHINX_${num}_SQL_PORT__ /$vu->{port}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_PORT__ /$sql_port/gx;
 	$filedata =~ s/ __SPHINX_${num}_SQL_SOCK__ //gx; # no way to get this info at the moment, which is ok
 	$filedata =~ s/ __SPHINX_${num}_VARDIR__   /$vardir/gx;
 
@@ -62,7 +62,7 @@ $task{$me}{code} = sub {
 	return 'wrote ' . (-s $writefile) . " bytes to $writefile";
 };
 
-$filedata = <<EOF;
+$filedata = <<'EOF';
 #
 # Sphinx conf file for testing firehose indexing and searching.
 # To be run on __SPHINX_01_HOSTNAME__.
@@ -426,9 +426,9 @@ source src_firehose_delta2 : src_firehose_main
 index idx_firehose_main
 {
 	source			= src_firehose_main
-	path			= __SPHINX_01__VARDIR__/data/firehose_main
+	path			= __SPHINX_01_VARDIR__/data/firehose_main
 	morphology		= none
-	stopwords		= __SPHINX_01__VARDIR__/data/stopwords.txt
+	stopwords		= __SPHINX_01_VARDIR__/data/stopwords.txt
 	min_word_len		= 2
 	charset_type		= sbcs
 	html_strip		= 1
@@ -439,13 +439,13 @@ index idx_firehose_main
 index idx_firehose_delta1 : idx_firehose_main
 {
 	source			= src_firehose_delta1
-	path			= __SPHINX_01__VARDIR__/data/firehose_delta1
+	path			= __SPHINX_01_VARDIR__/data/firehose_delta1
 }
 
 index idx_firehose_delta2 : idx_firehose_main
 {
 	source			= src_firehose_delta2
-	path			= __SPHINX_01__VARDIR__/data/firehose_delta2
+	path			= __SPHINX_01_VARDIR__/data/firehose_delta2
 }
 
 index idx_firehose_dist
@@ -466,10 +466,10 @@ indexer
 searchd
 {
 	listen			= 3312
-	log			= __SPHINX_01__VARDIR__/log/searchd.log
-	query_log		= __SPHINX_01__VARDIR__/log/query.log
+	log			= __SPHINX_01_VARDIR__/log/searchd.log
+	query_log		= __SPHINX_01_VARDIR__/log/query.log
 	max_children		= 100
-	pid_file		= __SPHINX_01__VARDIR__/log/searchd.pid
+	pid_file		= __SPHINX_01_VARDIR__/log/searchd.pid
 	max_matches		= 100000
 }
 EOF
