@@ -17,6 +17,10 @@ $.TextSelection.Error = function( description, obj ){
 // public 'class' methods
 $.TextSelection.get = function( el ){
 	// expected to throw an exception if for any reason el doesn't satisfy
+	if ( ! el ) {
+		throw $.TextSelection.Error('$.TextSelection.get(el): argument is required', el);
+	}
+
 	try {
 		if ( el.selectionStart !== undefined ) {
 			return {
@@ -46,8 +50,8 @@ $.TextSelection.get = function( el ){
 
 $.TextSelection.set = function( el, r ){
 	// expected to throw an exception if for any reason el doesn't satisfy
-	if ( ! r ) {
-		throw $.TextSelection.Error('$.TextSelection.set(el, r): range required', el);
+	if ( !(el && r) ) {
+		throw $.TextSelection.Error('$.TextSelection.set(el, r): both arguments are required', el);
 	}
 
 	try {
