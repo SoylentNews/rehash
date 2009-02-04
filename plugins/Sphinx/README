@@ -21,6 +21,7 @@ After doing install-plugin for the Sphinx plugin, you'll need to:
 		sphinx_01_vardir: /srv/sphinx/var/
 		sphinx_01_hostname: (same as sql_db, at least for now)
 		sphinx_01_port: 3312
+* mkdir vardir/{log,data}
 * run searchd, probably on the same machine 'sphinx01' points to
 	- searchd --config /u/l/s/site/sitename/misc/sphinx_01.conf --iostats
 * run indexer in a loop to constantly pick up new firehose changes

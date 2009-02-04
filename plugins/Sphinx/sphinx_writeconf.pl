@@ -42,6 +42,15 @@ $task{$me}{code} = sub {
 	my $mem_limit =    $constants->{sphinx_01_mem_limit}    || '512M';
 	my $vardir =       $constants->{sphinx_01_vardir}       || '/srv/sphinx/var';
 
+	my $stopwordsfile = catfile($vardir, 'data', 'stopwords.txt');
+	my @stopwords = $sphinxdb->getStopWords();
+	if (open(my $fh, ">$stopwordsfile")) {
+		print $fh join("\n", @stopwords) . "\n";
+		close $fh;
+	} else {
+		# log err
+	}
+
 	my $writedir = catdir($constants->{datadir}, 'misc');
 	my $writefile = catfile($writedir, "sphinx$num.conf");
 
@@ -67,6 +76,7 @@ $task{$me}{code} = sub {
 	} else {
 		return "could not write $writefile, $!";
 	}
+
 	return 'wrote ' . (-s $writefile) . " bytes to $writefile";
 };
 

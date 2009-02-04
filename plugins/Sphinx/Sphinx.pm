@@ -54,3 +54,12 @@ sub getSphinxStats {
 
 	return \%stats;
 }
+
+sub getSphinxStopwords {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $sw = $constants->{sphinx_stopwords} || '';
+	my @sw = split / /, $sw;
+	return @sw;
+}
+
