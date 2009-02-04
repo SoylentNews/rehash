@@ -11,17 +11,18 @@ do these steps.  An [S] means sandboxes already come with it done:
 * set vars if desired (see mysql_dump.sql)
   (for sandboxes, lower max_children, max_iops, mem_limit)
 * mkdir sphinx_01_vardir if necessary, and its two subdirs,
-  log and data
+  log and data. chown slashdot data
 * restart slashd, to trigger the sphinx_writeconf task to write out
   the stopwords and sphinx01.conf files
 * run indexer once to generate all indexes
     /usr/local/sphinx/bin/indexer --config /usr/local/slash/site/SITENAME/misc/sphinx01.conf --all
+    (takes about 30 sec on sandbox)
 * run searchd, probably on the same machine 'sphinx01' points to
     searchd --config /u/l/s/site/SITENAME/misc/sphinx01.conf --iostats
-* run indexer in a loop to constantly pick up new firehose changes
-  (script is forthcoming shortly)
+* run do_index in a `screen`
 * ALTER TABLE sphinx_search CONNECTION='sphinx://hostname:port/*';
-  on the 'sphinx01' database, where host=searchd-hostname, post=searchd-listen
+  on the 'sphinx01' database, where host=sb-sfnet-1xx, port=3312,
+  and * really is a * :)
 * set the 'sphinx' var to 1
 
 After those steps are done,

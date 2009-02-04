@@ -43,7 +43,7 @@ $task{$me}{code} = sub {
 	my $vardir =       $constants->{sphinx_01_vardir}       || '/srv/sphinx/var';
 
 	my $stopwordsfile = catfile($vardir, 'data', 'stopwords.txt');
-	my @stopwords = $sphinxdb->getStopWords();
+	my @stopwords = $sphinxdb->getSphinxStopwords();
 	if (open(my $fh, ">$stopwordsfile")) {
 		print $fh join("\n", @stopwords) . "\n";
 		close $fh;
