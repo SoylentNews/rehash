@@ -14,6 +14,7 @@ use Slash::Constants ':slashd';
 
 use vars qw(
 	%task	$me	$task_exit_flag
+	$filedata
 );
 
 $task{$me}{timespec} = '1 1 1 1 *'; # this really doesn't need to run periodically...
@@ -39,21 +40,21 @@ $task{$me}{code} = sub {
 	my $writedir = catdir($constants->{datadir}, 'misc');
 	my $writefile = catfile($writedir, "sphinx$num.conf");
 
-	my $data = <DATA>;
-	$data =~ s/ __SPHINX_${num}_HOSTNAME__ /$hostname/ gx;
-	$data =~ s/ __SPHINX_${num}_PORT__     /$port/ gx;
-	$data =~ s/ __SPHINX_${num}_SQL_USER__ /$vu->{username}/ gx;
-	$data =~ s/ __SPHINX_${num}_SQL_PASS__ /$vu->{password}/ gx;
-	$data =~ s/ __SPHINX_${num}_SQL_DB__   /$vu->{database}/ gx;
-	$data =~ s/ __SPHINX_${num}_SQL_HOST__ /$vu->{host}/ gx;
-	$data =~ s/ __SPHINX_${num}_SQL_PORT__ /$vu->{port}/ gx;
-	$data =~ s/ __SPHINX_${num}_SQL_SOCK__ // gx; # no way to get this info at the moment, which is ok
-	$data =~ s/ __SPHINX_${num}_VARDIR__   /$vardir/ gx;
+	my $filedata = <DATA>;
+	$filedata =~ s/ __SPHINX_${num}_HOSTNAME__ /$hostname/gx;
+	$filedata =~ s/ __SPHINX_${num}_PORT__     /$port/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_USER__ /$vu->{username}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_PASS__ /$vu->{password}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_DB__   /$vu->{database}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_HOST__ /$vu->{host}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_PORT__ /$vu->{port}/gx;
+	$filedata =~ s/ __SPHINX_${num}_SQL_SOCK__ //gx; # no way to get this info at the moment, which is ok
+	$filedata =~ s/ __SPHINX_${num}_VARDIR__   /$vardir/gx;
 
 	# XXX considering indexer is running frequently and reading this
 	# file, should write it to a new file and mv it into place.
 	if (open(my $fh, ">$writefile")) {
-		print $fh $data;
+		print $fh $filedata;
 		close $fh;
 	} else {
 		return "could not write $writefile, $!";
@@ -61,10 +62,7 @@ $task{$me}{code} = sub {
 	return 'wrote ' . (-s $writefile) . " bytes to $writefile";
 };
 
-1;
-
-__DATA__
-
+$filedata = <<EOF;
 #
 # Sphinx conf file for testing firehose indexing and searching.
 # To be run on __SPHINX_01_HOSTNAME__.
@@ -474,4 +472,7 @@ searchd
 	pid_file		= __SPHINX_01__VARDIR__/log/searchd.pid
 	max_matches		= 100000
 }
+EOF
+
+1;
 
