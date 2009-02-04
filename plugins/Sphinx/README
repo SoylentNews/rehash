@@ -19,10 +19,10 @@ do these steps.  An [S] means sandboxes already come with it done:
     (takes about 30 sec on sandbox)
 * run searchd, probably on the same machine 'sphinx01' points to
     searchd --config /u/l/s/site/SITENAME/misc/sphinx01.conf --iostats
-* run indexer in a loop to constantly pick up new firehose changes
-  (script is forthcoming shortly)
+* run do_index in a `screen`
 * ALTER TABLE sphinx_search CONNECTION='sphinx://hostname:port/*';
-  on the 'sphinx01' database, where host=sb-sfnet-1xx port=3312
+  on the 'sphinx01' database, where host=sb-sfnet-1xx, port=3312,
+  and * really is a * :)
 * set the 'sphinx' var to 1
 
 After those steps are done,
