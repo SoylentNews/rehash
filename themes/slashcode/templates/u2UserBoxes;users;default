@@ -25,6 +25,23 @@ __template__
 </div>
 [% END %]
 
+[% IF achievements.size != 0 %]
+<div class="block" id="achievements">
+        <div class="title" id="achievements_title">
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/achievements">Achievements</a></h4>
+        </div>
+
+        <div class="content" id="achievements_content">
+                <ul>
+                [% FOREACH aid = achievements.keys.sort.reverse %]
+                        [% IF achievements.$aid.name == 'achievement_obtained'; NEXT; END; %]
+                        <li>[% achievements.$aid.description %]</li>
+                [% END %]
+                </ul>
+        </div>
+</div>
+[% END %]
+
 [% IF latest_comments.size != 0 %]
 <div class="block" id="latest_comments">
         <div class="title" id="latest_comments_title">

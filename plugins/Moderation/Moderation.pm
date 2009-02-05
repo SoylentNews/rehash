@@ -217,6 +217,11 @@ sub moderateComment {
 		$user->{points} -= $pointsneeded;
 		$user->{points} = 0 if $user->{points} < 0;
 
+		if (!$user->{is_admin} && $user->{points} == 0) {
+			my $achievements = getObject('Slash::Achievements');
+			$achievements->setUserAchievement('mod_points_exhausted', $user->{uid}, { ignore_lookup => 1 }) if $achievements;
+		}
+
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
 			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);

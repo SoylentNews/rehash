@@ -85,6 +85,7 @@ __template__
                 latest_bookmarks=latest_bookmarks
                 latest_friends=latest_friends
                 tagshist=tagshist
+		achievements=requested_user_achievements
                 is_admin=user.is_admin
         %]
 
