@@ -796,6 +796,7 @@ sub getFireHoseEssentials {
 	my $colors = $self->getFireHoseColors();
 
 	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
+	my @sphinx_tables = ('sphinx_search');
 	$sphinx = 3; # SSS testing! # if $options->{firehose_sphinx} && $user->{is_admin};
 
 	if ($sphinx) {
@@ -886,6 +887,32 @@ sub getFireHoseEssentials {
 	my $tags = getObject('Slash::Tags');
 
 	# SSS: not sure what to do with tag stuff yet
+	my $need_tagged = 0;
+	$need_tagged = 1 if $options->{tagged_by_uid} && $options->{tagged_as};
+	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
+	my $cur_time;
+	if ($sphinx) {
+		$cur_time = $slashdb->getTime({ unix_format => 1 });
+		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
+		$tagged_by_uid =~ s/\D+//g;
+		if ($need_tagged == 1) {
+			# This combination of options means to restrict to only
+			# those hose entries tagged by one particular user with
+			# one particular tag, e.g. /~foo/tags/bar
+			push @sphinx_tables, 'tags';
+			push @sphinx_where, 'tags.globjid = sphinx_search.globjid';
+			my $tag_id = $tags->getTagnameidFromNameIfExists($options->{tagged_as}) || 0;
+			push @sphinx_where, "tags.tagnameid = $tag_id";
+			push @sphinx_where, "tags.uid = $tagged_by_uid";
+		} elsif ($need_tagged == 2) {
+			# This combination of options means to restrict to only
+			# those hose entries tagged by one particular user with
+			# any "tagged for hose" tags, e.g. /~foo/firehose
+			push @sphinx_tables, 'firehose_tfh';
+			push @sphinx_where, 'firehose_tfh.globjid = sphinx_search.globjid';
+			push @sphinx_where, "firehose_tfh.uid = $tagged_by_uid";
+		}
+	}
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
 		$tables .= ', tags';
 		push @where, 'tags.globjid=firehose.globjid';
@@ -930,8 +957,7 @@ sub getFireHoseEssentials {
 		push @where, 'createtime <= NOW()';
 
 		if ($sphinx) {
-			my $time = $self->getTime({ unix_format => 1 });
-			push @sphinx_opts, "range=createtime_ut,0,$time";
+			push @sphinx_opts, "range=createtime_ut,0,$cur_time";
 		}
 	}
 
@@ -940,8 +966,8 @@ sub getFireHoseEssentials {
 		push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
 
 		if ($sphinx) {
-			my $time = $self->getTime({ unix_format => 1 }) + $future_secs;
-			push @sphinx_opts, "range=createtime_ut,0,$time";
+			my $future_time = $cur_time + $future_secs;
+			push @sphinx_opts, "range=createtime_ut,0,$future_time";
 		}
 	}
 
@@ -1017,8 +1043,8 @@ sub getFireHoseEssentials {
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 
 			if ($sphinx) {
-				my $time = ($self->getTime({ unix_format => 1 }) - $dur_sphinx) - 1;
-				push @sphinx_opts, "!range=createtime_ut,0,$time";
+				my $dur_time = ($cur_time - $dur_sphinx) - 1;
+				push @sphinx_opts, "!range=createtime_ut,0,$dur_time";
 			}
 		}
 
@@ -1217,15 +1243,17 @@ sub getFireHoseEssentials {
 	# SSS: mode?
 	my($hr_ar, $sphinx_ar, $sphinx_stats);
 	if ($sphinx) {
+		my $stables = join ',', @sphinx_tables;
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
-		print STDERR "sphinx:new sphinxse: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
+		print STDERR "sphinx:new sphinxse: SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere;\n";
 		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
 
 		if ($sphinx > 1) {
 			$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
-			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('globjid', 'sphinx_search', "query=$query$swhere");
+			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
+				$stables, "query=$query$swhere");
 			$sphinx_stats = $sphinxdb->getSphinxStats;
 		}
 	}
