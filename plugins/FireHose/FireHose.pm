@@ -1121,9 +1121,12 @@ sub getFireHoseEssentials {
 
 			if ($options->{unsigned}) {
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
+				push @sphinx_opts, "filter=signoff,$user->{uid}" if $sphinx;
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
+				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
 			}
+
 		}
 
 	# check these again, just in case, as they are more time-sensitive
