@@ -367,6 +367,16 @@ source src_firehose_main
 	sql_attr_uint		= primaryskid
 	sql_attr_uint		= uid
 
+	sql_attr_multi		= uint signoff from ranged-query		;		\
+		SELECT firehose.globjid, signoff.uid						\
+			FROM firehose, globjs, signoff						\
+			WHERE firehose.globjid BETWEEN $start AND $end				\
+			AND firehose.globjid=globjs.globjid					\
+			AND gtid=1								\
+			AND globjs.target_id=signoff.stoid;					\
+		SELECT MIN(firehose.globjid), MAX(firehose.globjid) FROM firehose, globjs	\
+			WHERE firehose.globjid=globjs.globjid AND gtid = 1
+
 	sql_attr_multi		= uint tid from ranged-query			;		\
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
@@ -482,6 +492,16 @@ source src_firehose_delta1 : src_firehose_main
 			(SELECT MIN(last_seen) FROM sphinx_counter				\
 			WHERE src=0 AND completion <= 1)
 
+	sql_attr_multi		= uint signoff from query			;		\
+		SELECT firehose.globjid, signoff.uid						\
+			FROM firehose, globjs, signoff						\
+			WHERE firehose.globjid=globjs.globjid					\
+			AND gtid=1								\
+			AND globjs.target_id=signoff.stoid					\
+			AND firehose.last_update >=						\
+				(SELECT MIN(last_seen) FROM sphinx_counter			\
+				WHERE src=0 AND completion <= 1)
+
 	sql_attr_multi		= uint tid from query				;		\
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
@@ -596,6 +616,16 @@ source src_firehose_delta2 : src_firehose_main
 			(SELECT MIN(last_seen) FROM sphinx_counter				\
 			WHERE src=1 AND completion <= 1)
 
+	sql_attr_multi		= uint signoff from query			;		\
+		SELECT firehose.globjid, signoff.uid						\
+			FROM firehose, globjs, signoff						\
+			WHERE firehose.globjid=globjs.globjid					\
+			AND gtid=1								\
+			AND globjs.target_id=signoff.stoid					\
+			AND firehose.last_update >=						\
+				(SELECT MIN(last_seen) FROM sphinx_counter			\
+				WHERE src=1 AND completion <= 1)
+
 	sql_attr_multi		= uint tid from query				;		\
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
@@ -604,7 +634,7 @@ source src_firehose_delta2 : src_firehose_main
 			AND firehose.id=firehose_topics_rendered.id				\
 			AND firehose.last_update >=						\
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
-				WHERE src=0 AND completion <= 1)
+				WHERE src=1 AND completion <= 1)
 }
 
 index idx_firehose_main
