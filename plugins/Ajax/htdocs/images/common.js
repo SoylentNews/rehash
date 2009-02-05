@@ -999,7 +999,7 @@ function firehose_handle_update() {
 	var $menu = $('.ac_results:visible');
 
 	var add_behind_scenes = $("#firehoselist .loading_msg").length;
-	if (add_behind_scenes) { $('.busy').show(); }
+	if (add_behind_scenes) { firehose_busy(); }
 
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
@@ -1147,8 +1147,7 @@ function firehose_handle_update() {
 				elem.parentNode.removeChild(elem);
 			}
 			$('#firehoselist').fadeIn('slow');
-			$('.busy').hide();
-
+			firehose_busy_done();
 		}
 		firehose_get_next_updates();
 	}
@@ -1218,8 +1217,18 @@ function firehose_get_next_updates() {
 	firehose_add_update_timerid(setTimeout(firehose_get_updates, interval));
 }
 
-function firehose_get_updates_handler(transport) {
+function firehose_busy() {
+	$('.busy').show();
+	$('#local_last_update_time, #gmt_update_time').hide();
+}
+
+function firehose_busy_done() {
 	$('.busy').hide();
+	$('#local_last_update_time, #gmt_update_time').show();
+}
+
+function firehose_get_updates_handler(transport) {
+	firehose_busy_done();
 	var response = eval_response(transport);
 
 	var updated_tags = response.update_data.updated_tags;
@@ -1302,7 +1311,7 @@ function firehose_get_updates(options) {
 		}
 	}
 
-	$('.busy').show();
+	firehose_busy();
 	ajax_update(params, '', { onComplete: firehose_get_updates_handler, onError: firehose_updates_error_handler });
 }
 
@@ -1864,6 +1873,12 @@ function firehose_new_section_name() {
 			}
 			i++;
 		}
+	}
+}
+
+function firehose_submit_filter() {
+	if ($('#searchquery').length > 0) {
+		firehose_set_options('setfhfilter', $('#searchquery').val());
 	}
 }
 
