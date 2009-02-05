@@ -22,7 +22,17 @@ __template__
                 &nbsp;
                 <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Layout</span>
                 &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Customize Slashdot Home Page', 1); return false;">Exclusions</a>
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false;">Stories</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewpopular', 'Customize Popular View', 1); return false;">Popular</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewrecent', 'Customize Recent View', 1); return false;">Recent</a>
+		[% IF user.is_admin %]
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewdaddypants', 'Customize Daddypants View', 1); return false;">Daddypants</a>
+		[% END %]
                 </div>
                 [% END %]
 

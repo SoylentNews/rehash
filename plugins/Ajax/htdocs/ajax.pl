@@ -716,7 +716,7 @@ sub getModalPrefs {
 
 	} elsif ($form->{'section'} eq 'authors') {
 
-		my $author_hr = $slashdb->getDescriptions('authors');
+		my $author_hr = $slashdb->getDescriptions('authors_recent');
 		my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
 		my %story_never_author;
 		map { $story_never_author{$_} = 1 } keys %$author_hr;
@@ -818,9 +818,41 @@ sub getModalPrefs {
                         tabbed                  => $form->{'tabbed'},
 		}, { Return => 1});
 	} elsif ($form->{section} eq 'fhexclusions') {
-		return slashDisplay('prefs_fhexclusions', {
-                        tabbed                  => $form->{'tabbed'},
-		}, { Return => 1});
+
+		my $author_hr = $slashdb->getDescriptions('authors_recent');
+		my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
+		my %story_never_author;
+		map { $story_never_author{$_} = 0 } keys %$author_hr;
+		map { $story_never_author{$_} = 1 } split(/,/, $user->{story_never_author});
+
+		return slashDisplay(
+			'prefs_fhexclusions', {
+				aid_order	   => \@aid_order,
+				author_hr	   => $author_hr,
+				story_never_author => \%story_never_author,
+				tabbed		   => $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
+	} elsif ($form->{'section'} =~ /^fhview/) {
+		my($name) = $form->{section} =~ /^fhview(.*)/;
+		my $fh = getObject("Slash::FireHose");
+		my $view = "";
+		if ($name) {
+			$view = $fh->getUserViewByName($name);
+		}
+		use Data::Dumper;
+		my $vdump = Dumper($view);
+		
+		slashDisplay(
+			"prefs_fhview", {
+				tabbed 	=> $form->{tabbed},
+				view	=> $view,
+				vdump	=> $vdump
+			},
+			{ Return => 1}
+		);
+
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
 
@@ -1571,14 +1603,14 @@ sub saveModalPrefs {
 
 	}
 
-	if ($params{'formname'} eq "authors") {
+	if ($params{'formname'} eq "authors" || $params{'formname'} eq 'fhexclusions') {
 		my $author_hr = $slashdb->getDescriptions('authors');
 		my ($story_author_all, @story_never_author);
 
 		for my $aid (sort { $a <=> $b } keys %$author_hr) {
 			my $key = "aid$aid";
 			$story_author_all++;
-			push(@story_never_author, $aid) if (!$params{$key});
+			push(@story_never_author, $aid) if ($params{'formname'} eq 'authors' ? !$params{$key} : $params{$key});
 		}
 
 		$#story_never_author = 299 if $#story_never_author  > 299;

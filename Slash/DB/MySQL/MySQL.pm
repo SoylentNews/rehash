@@ -182,7 +182,8 @@ my %descriptions = (
 
 	'authors'
 		=> sub { $_[0]->sqlSelectMany('uid,nickname', 'authors_cache', "author = 1") },
-
+	'authors_recent'
+		=> sub { $_[0]->sqlSelectMany('authors_cache.uid,authors_cache.nickname', 'authors_cache,stories','author=1 and authors_cache.uid=stories.uid AND stories.time >= DATE_SUB(NOW(), INTERVAL 6 MONTH)','GROUP BY authors_cache.uid') },
 	'all-authors'
 		=> sub { $_[0]->sqlSelectMany('uid,nickname', 'authors_cache') },
 
