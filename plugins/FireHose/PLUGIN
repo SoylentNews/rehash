@@ -20,6 +20,7 @@ template=templates/daybreak;firehose;default
 template=templates/dispFireHose;firehose;default
 template=templates/dispTopicFireHose;misc;default
 template=templates/fhadvprefpane;misc;default
+template=templates/fhcolor_picker;misc;default
 template=templates/fhviewprefs;misc;default
 template=templates/fhviewprefs;misc;default
 template=templates/fireHoseForm;misc;default

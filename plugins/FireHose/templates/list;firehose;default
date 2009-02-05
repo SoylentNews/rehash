@@ -250,9 +250,6 @@ cmdrtaco dot net but be forgiving of beta code!
 [% END %]
 
 fh_ticksize = 15;
-[% IF !user.is_anon %]
-firehose_slider_init();
-[% END %]
 $(function(){
 	$('#firehose-filter').
 		focus(function(event){

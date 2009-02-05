@@ -1,0 +1,138 @@
+
+__section__
+default
+__description__
+A vertical menu with animation for selecting the color threshold in the Firehose.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+fhcolor_picker
+__seclev__
+10000
+__template__
+[% IF !user.is_anon %]
+<style type="text/css">
+#fhcolor-picker {
+	position: absolute;
+	top: 2px;
+	left: -87px;
+}
+#fhcolor-picker .menu,
+#fhcolor-picker .menu li,
+#fhcolor-picker .trigger-swatch {
+	display: block;
+	width: 80px;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	cursor: pointer;
+	list-style: none;
+}
+#fhcolor-picker .trigger-swatch,
+#fhcolor-picker li {
+	height: 18px;
+}
+#fhcolor-picker span {
+	display: none;
+	padding-top: 3px;
+	font-size: 93%;
+	font-family: sans-serif;
+}
+#fhcolor-picker .red span,
+#fhcolor-picker .black span,
+#fhcolor-picker li.slash-hover span,
+#fhcolor-picker .trigger-swatch span {
+	display: block;
+}
+#fhcolor-picker .red	{ background-color: #990000;	color: white; }
+#fhcolor-picker .orange	{ background-color: #ff9933; }
+#fhcolor-picker .yellow	{ background-color: #ffff66; }
+#fhcolor-picker .green	{ background-color: #66cc33; }
+#fhcolor-picker .blue	{ background-color: #3366ff;	color: white; }
+#fhcolor-picker .indigo	{ background-color: #660099;	color: white; }
+#fhcolor-picker .violet	{ background-color: #330066;	color: white; }
+#fhcolor-picker .black	{ background-color: #000000;	color: white; }
+</style>
+
+<div id="fhcolor-picker">
+<div class="trigger-swatch" style="display: none;"><span></span></div>
+<ul class="menu" style="display: none">
+	<li class="red"><span>red (best)</span></li>
+	<li class="orange"><span>orange</span></li>
+	<li class="yellow"><span>yellow</span></li>
+	<li class="green"><span>green</span></li>
+	<li class="blue"><span>blue</span></li>
+	<li class="indigo"><span>indigo</span></li>
+	<li class="violet"><span>violet</span></li>
+	<li class="black"><span>black (all)</span></li>
+</ul>
+</div>
+<script type="text/javascript">
+$(function(){
+	var	$fhcolor_picker	= $('#fhcolor-picker'),
+		$trigger_swatch	= $fhcolor_picker.find('div.trigger-swatch'),
+		$menu		= $fhcolor_picker.find('ul.menu'),
+		all_colors	= 'red orange yellow green blue indigo violet black',
+		all_colors_hash = {};
+
+	$.each(all_colors.split(' '), function(){
+		all_colors_hash[this] = true;
+	});
+
+	function item_color( $item ){
+		var answer;
+		$.each(($item && $item.attr('className') || '').split(/\s+/), function(){
+			if ( all_colors_hash[this] ) {
+				answer = this;
+				return false;
+			}
+		});
+		return answer;
+	}
+
+
+	function swatch_color( s ){
+		if ( s !== undefined ) {
+			$trigger_swatch.
+				removeClass(all_colors).
+				addClass(s).
+				find('span').
+					text( $menu.find('li.'+s).text() ).
+				end().
+				show();
+		} else {
+			return item_color($trigger_swatch);
+		}
+	}
+	$fhcolor_picker[0]._swatch_color = swatch_color;
+
+	var original_color;
+	$menu.menu({
+		trigger:	'#fhcolor-picker div.trigger-swatch',
+		cssNamespace:	'slash',
+		start:	function( event ){
+			original_color = swatch_color();
+			$menu.show();
+		},
+		over:	function( event, ui ){
+			swatch_color(item_color($(ui.over)));
+		},
+		select:	function( event, ui ){
+			firehose_set_options('color', item_color($(ui.select)));
+		},
+		out:	function( event, ui ){
+			if ( !ui.over ) swatch_color(original_color);
+		},
+		stop:	function( event, ui ){
+			$menu.hide();
+		}
+	});
+
+	swatch_color(firehose_settings.color);
+});
+</script>
+[% END %]

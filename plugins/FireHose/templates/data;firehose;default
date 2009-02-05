@@ -133,7 +133,7 @@ __template__
 				new_color   = fh_array.$fh_num;
 				IF new_color;
 					label = "More $new_color &raquo;";
-					extra_onclick = "firehose_slider_set_color('" _ new_color _ "');";
+					extra_onclick = "firehose_swatch_color('" _ new_color _ "');";
 				END;
 			END;
 		   END;

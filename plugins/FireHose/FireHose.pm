@@ -1773,7 +1773,7 @@ sub genSetOptionsReturn {
 
 	$data->{value}->{'firehose-filter'} = $opts->{fhfilter};
 	if (($form->{view} && $form->{viewchanged}) || ($form->{section} && $form->{sectionchanged})) {
-		$data->{eval_last} = "firehose_slider_set_color('$opts->{color}');";
+		$data->{eval_last} = "firehose_swatch_color('$opts->{color}');";
 	}
 
 	my $eval_first = "";

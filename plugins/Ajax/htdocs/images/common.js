@@ -4,8 +4,8 @@
 /*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody attachCompleter createTag
 	firehose_remove_all_items firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
 	json_update firehose_reorder firehose_get_next_updates getFirehoseUpdateInterval run_before_update
-	firehose_play firehose_add_update_timerid firehose_collapse_entry firehose_slider_end
-	firehose_slider_set_color vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
+	firehose_play firehose_add_update_timerid firehose_collapse_entry
+	 vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
 	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
 	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen firehose_style_switch
 	firehose_style_switch_handler */
@@ -64,13 +64,11 @@ var fh_is_updating = 0;
 var fh_update_timerids = [];
 var fh_is_admin = 0;
 var console_updating = 0;
-var fh_colorslider;
 var fh_ticksize;
 var fh_colors = [];
 var fh_idle_skin = 0;
 var vendor_popup_timerids = [];
 var vendor_popup_id = 0;
-var fh_slider_init_set = 0;
 var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
 
@@ -1437,33 +1435,15 @@ function firehose_calendar_init( widget ) {
 	widget.changeEvent.subscribe(firehose_cal_select_handler, widget, true);
 }
 
-function firehose_slider_init() {
-	if (!fh_slider_init_set) {
-		fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 105, fh_ticksize);
-		var fh_set_val_return = fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
-		var fh_get_val_return = fh_colorslider.getValue();
-		fh_colorslider.subscribe("slideEnd", firehose_slider_end);
-	}
-}
+function firehose_swatch_color( color ){
+	// set or get the color displayed by the color picker trigger-swatch
 
-function firehose_slider_end(offsetFromStart) {
-	var newVal = Math.round(fh_colorslider.getValue());
-	if (newVal) {
-		fh_slider_init_set = 1;
-	}
-	var color = fh_colors[ newVal / fh_ticksize ];
-	if (color !== undefined) {
-		$dom('fh_slider_img').title = "Firehose filtered to " + color;
-		if (fh_slider_init_set) {
-			firehose_set_options("color", color);
-		}
-	} else if (firehohse_settings.color !== undefined) {
-		firehose_slider_set_color(firehose_settings.color);
-	}
-}
-
-function firehose_slider_set_color(color) {
-	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[color] , 1);
+	var swatch_color;
+	$('#fhcolor-picker').each(function(){
+		swatch_color = this._swatch_color(color);
+		return false;
+	});
+	return swatch_color;
 }
 
 function firehose_change_section_anon(section) {
@@ -1696,23 +1676,7 @@ function displayModalPrefHelp(id) {
 }
 
 function toggle_filter_prefs() {
-	var fps = $dom('filter_play_status');
-	var fp  = $dom('filter_prefs');
-	if (fps) {
-		if (fps.className === "") {
-			fps.className = "hide";
-			if (fp) {
-				fp.className = "";
-				setTimeout(firehose_slider_init,500);
-			}
-		} else if (fps.className == "hide") {
-			fps.className = "";
-			if (fp) {
-				fp.className = "hide";
-			}
-		}
-	}
-
+	$('#filter_play_status, #filter_prefs').toggleClass('hide');
 }
 
 function scrollWindowToFirehose(fhid) {
