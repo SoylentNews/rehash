@@ -389,7 +389,7 @@ function firehose_set_options(name, value, context) {
 		params[name] = value;
 	}
 
-	if (name == "firehose_sphinx" || name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode" || name == "nocommentcnt" || name == "nomarquee" || name == "noslashboxes") {
+	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode" || name == "nocommentcnt" || name == "nomarquee" || name == "noslashboxes") {
 		value = value ? 1 : 0;
 		params[name] = value;
 		params.setfield = 1;
@@ -457,7 +457,7 @@ function firehose_set_options(name, value, context) {
 			}
 		}
 	}
-	if (name == "firehose_sphinx" || name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;

@@ -796,7 +796,7 @@ sub getFireHoseEssentials {
 	my $colors = $self->getFireHoseColors();
 
 	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
-	$sphinx = 3 if $options->{sphinx} && $user->{is_admin};
+	$sphinx = 3; # SSS testing! # if $options->{firehose_sphinx} && $user->{is_admin};
 
 	if ($sphinx) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
@@ -2925,8 +2925,6 @@ sub getAndSetOptions {
 
 	my $global_opts = $self->getAndSetGlobalOptions();
 	my $options = {};
-
-	$options->{firehose_sphinx} if $opts->{firehose_sphinx};
 
 	# Beginning of initial pageload handling
 	if ($opts->{initial}) {
