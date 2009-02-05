@@ -813,6 +813,14 @@ sub getModalPrefs {
 
 		return slashDisplay('fhviewprefs', { name => $name, id => $form->{id}, filter => $filter, views => $views_hr, fh_section => $fh_section, default_view => $viewid, display => $display }, { Return => 1} );
 
+	} elsif ($form->{section} eq 'fhlayout') {
+		return slashDisplay('prefs_fhlayout', {
+                        tabbed                  => $form->{'tabbed'},
+		}, { Return => 1});
+	} elsif ($form->{section} eq 'fhexclusions') {
+		return slashDisplay('prefs_fhexclusions', {
+                        tabbed                  => $form->{'tabbed'},
+		}, { Return => 1});
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
 
@@ -1489,6 +1497,26 @@ sub saveModalPrefs {
 		if (!isAnon($params{uid}) && !$params{willing}) {
 			$slashdb->setUser($params{uid}, { points => 0 });
 		}
+	}
+	
+	if ($params{'formname'} eq "fhlayout") {
+		$user_edits_table = {
+			noicons			=> ($params{showicons} ? undef : 1),
+			tags_turnedoff		=> ($params{showtags} ? undef : 1),
+			firehose_nocolors	=> ($params{showcolors} ? undef: 1),
+			firehose_nobylines	=> ($params{showbylines} ? undef: 1),
+			firehose_nodates	=> ($params{showdates} ? undef: 1),
+			firehose_pause		=> ($params{paused} ? 1: undef),
+			firehose_advanced	=> ($params{advanced} ? 1 : undef),
+			firehose_sphinx		=> ($params{sphinx} ? 1 : undef)
+		};
+
+		if (defined $params{tzcode} && defined $params{tzformat}) {
+			$user_edits_table->{tzcode} = $params{tzcode};
+			$user_edits_table->{dfid}   = $params{tzformat};
+			$user_edits_table->{dst}    = $params{dst};
+		}
+
 	}
 
 	if ($params{'formname'} eq "slashboxes") {

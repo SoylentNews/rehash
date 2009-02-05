@@ -3361,6 +3361,7 @@ sub getAndSetOptions {
 
 	$options->{smalldevices} = 1 if $self->shouldForceSmall();
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
+	$options->{firehose_sphinx} = $user->{firehose_sphinx} ? 1 : 0;
 
 #use Data::Dumper;
 #print STDERR Dumper($options);

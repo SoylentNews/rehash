@@ -1,0 +1,201 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+prefs_fhlayout
+__template__
+
+<form id ="modal_prefs" method="post">
+
+<input type="hidden" name="formname" value="fhlayout">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
+
+                [% IF tabbed == 1 %]
+                <div style="margin-top: 1em; text-align: center;">
+                &nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Layout</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Customize Slashdot Home Page', 1); return false;">Exclusions</a>
+                </div>
+                [% END %]
+
+                <label>Date/Time Format</label>
+                [%
+                formats = Slash.db.getDescriptions('dateformats');
+                Slash.createSelect('tzformat', formats, user.dfid, 1);
+                %]
+
+                <br>
+
+                <label>
+                        Time Zone / Daylight Savings Time
+                </label>
+                [%
+                USE this_format = format('%+0.4d %s');
+                this_tzdescs = Slash.db.getDescriptions('tzdescription');
+                this_tzcodes = Slash.db.getDescriptions('tzcodes');
+                these_tzdescs = {};
+                FOREACH tz = this_tzcodes.keys;
+                        this_num = this_tzcodes.$tz / 36;
+                        this_num = this_num.replace('50$', '30');
+                        these_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
+                END;
+
+                this_tzcode = user.tzcode_orig || user.tzcode;
+                Slash.createSelect('tzcode',
+                        these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
+                );
+
+                Slash.createSelect('dst', {
+                        ''      => 'Automatic',
+                        'on'    => 'Manual (On)',
+                        'off'   => 'Manual (Off)'
+                }, user.dst, 1);
+                %]
+
+                <br><br>
+
+                [% sd_check = '';
+                IF user.simpledesign;
+                        sd_check = constants.markup_checked_attribute;
+                END
+                %]
+<!--
+                <label><input type="checkbox" name="simpledesign"[% sd_check %]> <b>Simple Design</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_simpledesign');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_simpledesign" class="modalprefhelp" style="display: none;">
+                        Simplifies the design of [% constants.sitename %] to strip away some of the excesses of the UI.
+                </div>
+
+                <br>
+
+                [% lb_check = '';
+                IF user.lowbandwidth;
+                        lb_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="lowbandwidth"[% lb_check %]> <b>Low Bandwidth</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_lowbandwidth');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_lowbandwidth" class="modalprefhelp" style="display: none;">
+                        Reduces the size of pages for people with slower network connections
+                </div>
+
+                <br>
+
+-->
+
+                [% i_check = '';
+                IF !user.noicons;
+                        i_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="showicons"[% i_check %]> <b>Show Icons</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showicons');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_showicons" class="modalprefhelp" style="display: none;">
+                        Turn this off to hide topic icons on stories
+                </div>
+
+                [% tag_check = '';
+                IF !user.tags_turnedoff;
+                        tag_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="showtags"[%tag_check %]> <b>Show Tags</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_showtags" class="modalprefhelp" style="display: none;">
+                        Turn this off to ignore all tags.
+                </div>
+                
+		[% colors_check = '';
+                IF !user.firehose_nocolors;
+                        colors_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="showcolors"[%tag_check %]> <b>Show Colors</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showcolors');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_showcolors" class="modalprefhelp" style="display: none;">
+                        Turn this off to hide color swatches on items.
+                </div>
+
+		[% bylines_check = '';
+                IF !user.firehose_nobylines;
+                        bylines_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="showbylines"[% bylines_check %]> <b>Show Bylines</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showbylines');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_showbylines" class="modalprefhelp" style="display: none;">
+                        Turn this off to hide user bylines on items.
+                </div>
+		
+		[% dates_check = '';
+                IF !user.firehose_nobdates;
+                        dateses_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="showdates"[% dates_check %]> <b>Show Dates</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_showdates" class="modalprefhelp" style="display: none;">
+                        Turn this off to hide dates on abbreviated items
+                </div>
+
+		Page Size<br><br>
+		
+		[% pause_check = '';
+                IF user.firehose_pause;
+                        pause_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="paused"[% pause_check %]> <b>Paused</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
+                        Pause updates, don't auto-update view
+                </div>
+		
+		[% advanced_check = '';
+                IF user.firehose_advanced;
+                        advanced_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="advanced"[% advanced_check %]> <b>Advanced</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
+                        Enable advanced user controls
+                </div>
+		
+		[% IF user.is_admin %]
+		[% sphinx_check = '';
+                IF user.firehose_sphinx;
+                        sphinx_check = constants.markup_checked_attribute;
+                END
+                %]
+
+                <label><input type="checkbox" name="sphinx"[% sphinx_check %]> <b>Sphinx</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sphinx');" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_sphinx" class="modalprefhelp" style="display: none;">
+                        Use Sphinx for Queries
+                </div>
+		[% END %]
+
+                <br>
+                <input type="button" value="Save" onclick="saveModalPrefs()">
+</form>
+__seclev__
+500
+__version__
+$Id$
