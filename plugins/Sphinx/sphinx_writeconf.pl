@@ -86,6 +86,164 @@ $filedata = <<'EOF';
 # To be run on __SPHINX_01_HOSTNAME__.
 #
 
+#
+# Sphinx configuration
+# --------------------
+#
+# The place to start reading if you haven't already is
+# <http://sphinxsearch.com/docs/current.html>.
+#
+# This configuration file currently (2009-01-06) describes a Sphinx
+# setup for sd-db-4 in which there are 3 indexes and a distributed
+# searchd.  The indexes are "main", "delta1" and "delta2".  The "main"
+# index, when run, indexes the entire firehose;  "delta1" indexes
+# everything since the "main" index was last run, and "delta2"
+# everything since "delta1".  The reason for using two deltas is that
+# by decreasing the amount of new data to index, the index time is
+# made smaller (under 1 second), which allows for frequent reindexing
+# (on the order of every 10 seconds;  I actually hope and expect we
+# can reindex every 5 seconds on the live site).
+#
+# To be clear, we are doing incremental indexing -- but not by document
+# creation time or creation ID, rather by document update time.  Since
+# the same document can only be created once, but can be updated
+# repeatedly, this is somewhat different than described in the docs
+# at <http://sphinxsearch.com/docs/current.html#live-updates>.  Sphinx
+# is flexible enough to support this, but we had to figure it out on
+# our own since nobody else seems to have written about doing this yet.
+#
+# Sphinx allows an index to have multiple data sources;  for simplicity,
+# I'm giving each index one data source (e.g. idx_firehose_main uses
+# src_firehose_main) with the exception that idx_firehose_dist not
+# only uses src_firehose_delta2 but also returns distributed answers
+# by consulting the other two indexes.
+#
+# The table sphinx_counter coordinates which indexes have run and
+# stores the data each index run requires.  Sphinx provides config
+# options to issue an SQL query before and after each index run --
+# but as far as I can tell, only one query, so the sql_query_pre and
+# sql_query_post_index have to be a little clever to ensure data in
+# the table is always valid (even if an index run exits unexpectedly
+# at any point).
+#
+# The src-completion key
+# ----------------------
+#
+# The main trick with sphinx_counter is that the column pair
+# (src,completion) is UNIQUE, so a REPLACE INTO will atomically delete
+# and rewrite a row.  Its src column segregates the different indexes'
+# data (src=0 is idx_firehose_main, src=1 is idx_firehose_delta1, and
+# if we decide to index data other than firehose, each of those indexes
+# can have a src value of its own too).  The completion column indicates
+# completion order, with lower numbers for the most recent runs.  The
+# two special completion values are completion=0, which indicates a
+# run in progress (or at least a run which was started and has not
+# yet finished) and completion=1 which is the most recently completed
+# index run.  Multiple rows are stored partly because a log is nice to
+# have and partly because a one-row-per-index solution is probably
+# doable but arguably not as elegant.
+#
+# Thus the query to indicate a run is beginning (sql_query_pre) is
+#
+#	REPLACE INTO sphinx_counter
+#		(src, completion, last_seen, started, elapsed)
+#		SELECT $i, 0, MAX(last_update), NOW(), NULL
+#			FROM firehose
+#
+# which creates (or, if the previous attempt failed, rewrites) the
+# completion=0 row for index $i to indicate an index is ongoing.  By
+# storing the max last_update value from the firehose just before the
+# actual indexing starts, a starting value for the _next_ delta index
+# is available which guarantees that all changes not included in index
+# $i will be included in the next delta.  We'll see that referenced in
+# the WHERE clause of the deltas' sql_query below.
+#
+# On index completion, the query to indicate the end of the run
+# (sql_query_post_index) updates the src=$i, completion=0 row, setting
+# completion to 1, and (for informational purposes) storing the elapsed
+# time in the elapsed column.  We can't delete the older columns
+# because we only have one query to run at this time, so instead we
+# increment all the older columns' completion values, bumping the old
+# "1" last-completed row out of the way to make room for the "0" that
+# becomes the new "1", and bumping everything above it higher as well.
+#
+# To make things complicated, the column pair (src,completion) has
+# to be declared UNIQUE to make the REPLACE INTO work.  But if a delta
+# has 100K rows logged whose completion value need incrementing, this
+# can be slow.  So completion is declared as possibly NULL -- any
+# number of NULLs are allowed in a UNIQUE key.  Completion values
+# above a certain number are simply made NULL, and already-NULL
+# completions are not updated, so the UPDATE runs very quickly even
+# if the table gets very large.
+#
+# Depending on how useful old logs would be, we will probably want a
+# task that goes through and DELETEs old rows WHERE completion IS NULL.
+#
+# The UPDATE is performed in order "completion DESC" because otherwise
+# collisions will result.
+#
+# Again, the point of this is to allow delta $i to have a WHERE clause
+# in its sql_query, sql_query_killlist, and sql_attr_multi reading:
+#
+#	AND firehose.last_update >=
+#		(SELECT MIN(last_seen) FROM sphinx_counter
+#		WHERE src=${i-1} AND completion <= 1)
+#
+# By picking up both the previously completed index and any index
+# that may be in progress, this guarantees that each delta will index
+# only as much of the firehose as necessary, and no less than sufficient
+# -- and that it will also have accurate knowledge of which of its
+# documents supercede its previous indexes -- regardless of whether
+# any other indexing attempts have failed, and regardless of in which
+# order the various indexing actions are begun or completed.
+#
+# The above query will not behave as expected if the previous index
+# has never even been started once.  It does technically work if the
+# previous index is currently in progress for its first run ever, but
+# will be inefficient in that case.  For best results, when first
+# starting up this behavior, run main once to completion, then each
+# delta sequentially.  After that, running any indexes at any time,
+# even overlapping, will produce valid (though not necessarily maximally
+# efficient) results.
+#
+# The sql_query
+# -------------
+#
+# The sql_query configuration option looks much the same in the main
+# and the deltas.  The main (ha) difference is that main indexes all
+# globjs, so it gets that list by checking MIN() and MAX() and then
+# iterating through that range in chunks, while the deltas want
+# precisely those globjs which have been updated since the parent's
+# last run, so they get their list by checking firehose.last_update.
+#
+# The config option looks intimidating because, while most of each
+# data source's config is inherited from the previous source, the
+# sql_query can't be "edited" from one to the next so the whole thing
+# appears in slightly different form three times.  But it's really
+# not that hard to understand.  And despite all its LEFT JOINs,
+# because all the joins are on primary keys, it runs lightning-fast.
+#
+# The structure of the sql_query's is:
+#
+#	SELECT (detail parts here)
+#
+# The sql_attr_multi is used to obtain firehose_topics_rendered.
+#
+# Killlists
+# ---------
+#
+# short section, but it should be here because kill lists are confusing
+#
+# Distributed search
+# ------------------
+#
+# short section, but it should be here because distributed search is confusing
+#
+# a short note that we could distribute this out to multiple machines --
+# comment on how (separate slave on each physical machine) and note that
+# I don't know how to rotate/SIGHUP on multiple machines with shared disk
+# but apparently there is a way
+
 source src_firehose_main
 {
 	type			= mysql
@@ -105,7 +263,7 @@ source src_firehose_main
 					SET elapsed=IF(elapsed IS NULL,				\
 						UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(started),	\
 						elapsed),					\
-					completion=IF(completion<1000,completion+1,NULL)	\
+					completion=IF(completion<100,completion+1,NULL)		\
 					WHERE src=0 AND completion IS NOT NULL			\
 					ORDER BY completion DESC
 	sql_query_range		= SELECT MIN(globjid), MAX(globjid) FROM firehose
@@ -116,6 +274,7 @@ source src_firehose_main
 			firehose_ogaspt.pubtime,						\
 			firehose.createtime)) AS createtime_ut,					\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
+		globjs.globjid AS globjid,							\
 		IF(     gtid= 1, CONCAT(story_text.title,					\
 				' ', firehose.toptags,						\
 				' ', story_text.introtext,					\
@@ -156,6 +315,7 @@ source src_firehose_main
 		)))))))))) AS type,								\
 		FLOOR(popularity + 1000000) AS popularity,					\
 		FLOOR(editorpop + 1000000) AS editorpop,					\
+		FLOOR(neediness + 1000000) AS neediness,					\
 		IF(public='yes',1,0) AS public,							\
 		IF(accepted='yes',1,0) AS accepted,						\
 		IF(rejected='yes',1,0) AS rejected,						\
@@ -191,10 +351,12 @@ source src_firehose_main
 
 	sql_attr_timestamp	= createtime_ut
 	sql_attr_timestamp	= last_update_ut
+	sql_attr_uint		= globjid
 	sql_attr_uint		= gtid
 	sql_attr_uint		= type
 	sql_attr_uint		= popularity
 	sql_attr_uint		= editorpop
+	sql_attr_uint		= neediness
 	sql_attr_uint		= public
 	sql_attr_uint		= accepted
 	sql_attr_uint		= rejected
@@ -233,7 +395,7 @@ source src_firehose_delta1 : src_firehose_main
 					SET elapsed=IF(elapsed IS NULL,				\
 						UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(started),	\
 						elapsed),					\
-					completion=IF(completion<1000,completion+1,NULL)	\
+					completion=IF(completion<100,completion+1,NULL)		\
 					WHERE src=1 AND completion IS NOT NULL			\
 					ORDER BY completion DESC
 	sql_query_range		=
@@ -243,6 +405,7 @@ source src_firehose_delta1 : src_firehose_main
 			firehose_ogaspt.pubtime,						\
 			firehose.createtime))  AS createtime_ut,				\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
+		globjs.globjid AS globjid,							\
 		IF(     gtid= 1, CONCAT(story_text.title,					\
 				' ', firehose.toptags,						\
 				' ', story_text.introtext,					\
@@ -283,6 +446,7 @@ source src_firehose_delta1 : src_firehose_main
 		)))))))))) AS type,								\
 		FLOOR(popularity + 1000000) AS popularity,					\
 		FLOOR(editorpop + 1000000) AS editorpop,					\
+		FLOOR(neediness + 1000000) AS neediness,					\
 		IF(public='yes',1,0) AS public,							\
 		IF(accepted='yes',1,0) AS accepted,						\
 		IF(rejected='yes',1,0) AS rejected,						\
@@ -345,7 +509,7 @@ source src_firehose_delta2 : src_firehose_main
 					SET elapsed=IF(elapsed IS NULL,				\
 						UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(started),	\
 						elapsed),					\
-					completion=IF(completion<1000,completion+1,NULL)	\
+					completion=IF(completion<100,completion+1,NULL)		\
 					WHERE src=2 AND completion IS NOT NULL			\
 					ORDER BY completion DESC
 	sql_query_range		=
@@ -355,6 +519,7 @@ source src_firehose_delta2 : src_firehose_main
 			firehose_ogaspt.pubtime,						\
 			firehose.createtime))  AS createtime_ut,				\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
+		globjs.globjid AS globjid,							\
 		IF(     gtid= 1, CONCAT(story_text.title,					\
 				' ', firehose.toptags,						\
 				' ', story_text.introtext,					\
@@ -395,6 +560,7 @@ source src_firehose_delta2 : src_firehose_main
 		)))))))))) AS type,								\
 		FLOOR(popularity + 1000000) AS popularity,					\
 		FLOOR(editorpop + 1000000) AS editorpop,					\
+		FLOOR(neediness + 1000000) AS neediness,					\
 		IF(public='yes',1,0) AS public,							\
 		IF(accepted='yes',1,0) AS accepted,						\
 		IF(rejected='yes',1,0) AS rejected,						\
