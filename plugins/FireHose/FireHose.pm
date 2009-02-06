@@ -1199,7 +1199,7 @@ sub getFireHoseEssentials {
 
 		if ($sphinx) {
 			my @globjids = map { $_->{globjid} } values %{ $self->getFireHoseMulti($options->{ids}) };
-			push @sphinx_opts, 'filter=globjid,' . join(',', @globjids) if @globjids;
+			push @sphinx_opts, 'filter=globjidattr,' . join(',', @globjids) if @globjids;
 		}
 	}
 
@@ -1208,7 +1208,7 @@ sub getFireHoseEssentials {
 
 		if ($sphinx) {
 			my $globjid = $self->getFireHose($options->{not_id})->{globjid};
-			push @sphinx_opts, "!filter=globjid,$globjid";
+			push @sphinx_opts, "!filter=globjidattr,$globjid";
 		}
 	}
 
