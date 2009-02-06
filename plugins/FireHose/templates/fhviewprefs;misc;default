@@ -80,11 +80,24 @@ END %]
 				$content.css('overflow', '');
 				$edit_field.focus();
 			});
+
+		// a mouse click outside the dialog must hide it
+		$(document).bind('mousedown.fhviewprefs', function( event ){
+			var p = event.originalEvent.target;
+			while ( p ) {
+				if ( p === dialog_elem ) {
+					return true;
+				}
+				p = p.parentNode;
+			}
+			hide_modal_box();
+		});
 	};
 
 	dialog_elem._custom_hide_fn = function(){
 		// allow the menu item to shrink back down to normal height
 		$li.removeAttr('style');
+		$(document).unbind('mousedown.fhviewprefs');
 	};
 
 
