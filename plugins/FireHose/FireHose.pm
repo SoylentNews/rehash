@@ -2176,12 +2176,26 @@ sub ajaxFireHoseGetUpdates {
 	$update_time = $recent if $recent gt $update_time;
 	my $values = {};
 
+	my $update_event = {
+		event		=> 'update.firehose',
+		target		=> '#firehose',
+		data		=> {
+			color		=> strip_literal($opts->{color}),
+			filter		=> strip_literal($opts->{fhfilter}),
+			view		=> strip_literal($opts->{view}),
+			local_time	=> timeCalc($slashdb->getTime(), "%H:%M"),
+			gmt_time	=> timeCalc($slashdb->getTime(), "%H:%M", 0),
+		},
+	};
+	my $events = [ $update_event ];
+
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{filter_text} = "Filtered to ".strip_literal($opts->{color})." '".strip_literal($opts->{fhfilter})."'";
 	$values->{searchquery} = $opts->{fhfilter};
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", { options => $opts }, 'firehose') : "";
 #	$html->{firehose_more} = getData("firehose_more_link", { options => $opts, future_count => $future_count, contentsonly => 1, day_label => $day_label, day_count => $day_count }, 'firehose');
+
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -2191,6 +2205,7 @@ sub ajaxFireHoseGetUpdates {
 		ordered		=> $ordered,
 		future		=> $future,
 		value 		=> $values,
+		events		=> $events,
 	});
 	my $reskey_dump = "";
 	my $update_time_dump;
