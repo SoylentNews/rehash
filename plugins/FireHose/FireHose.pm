@@ -2774,6 +2774,7 @@ sub applyUserSectionPrefs {
 sub applyViewOptions {
 	my($self, $view, $options, $second) = @_;
 	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
 
 	$options->{view} = $view->{viewname};
 	$options->{viewref} = $view;
@@ -3392,7 +3393,11 @@ sub getAndSetOptions {
 	
 
 	if ($v_change) {
-		$self->applyViewOptions($options->{viewref}, $options)
+		$options->{section} = $form->{section};
+		if ($form->{section}) {
+			$options->{sectionref} = $self->getFireHoseSection($form->{section});
+		}
+		$self->applyViewOptions($options->{viewref}, $options);
 	}
 	
 	if ($form->{index}) {
