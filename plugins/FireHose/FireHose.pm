@@ -797,7 +797,7 @@ sub getFireHoseEssentials {
 
 	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
 	my @sphinx_tables = ('sphinx_search');
-	$sphinx = 3; # SSS testing! # if $options->{firehose_sphinx} && $user->{is_admin};
+	$sphinx = 3 if $options->{firehose_sphinx} && $user->{is_admin};
 
 	if ($sphinx) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
@@ -1152,7 +1152,6 @@ sub getFireHoseEssentials {
 				push @where, "signoffs LIKE '%$signoff_label%'";
 				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
 			}
-
 		}
 
 	# check these again, just in case, as they are more time-sensitive
