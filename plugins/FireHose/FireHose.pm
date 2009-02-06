@@ -801,7 +801,7 @@ sub getFireHoseEssentials {
 
 	if ($sphinx) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
-		print STDERR Dumper $options; print STDERR "\n";
+		print STDERR "sphinx/gFHE option dump: ", Dumper($options), "\n";
 	}
 
 	$options ||= {};
@@ -1254,6 +1254,8 @@ sub getFireHoseEssentials {
 
 	# SSS: mode?
 	my($hr_ar, $sphinx_ar, $sphinx_stats) = ([], []);
+	my($sdebug_new, $sdebug_orig) = ('', '');
+	my($sdebug_idset_elapsed, $sdebug_get_elapsed, $sdebug_orig_elapsed, $sdebug_count_elapsed) = (0, 0, 0, 0);
 	if ($sphinx) {
 		my $stables = join ',', @sphinx_tables;
 
@@ -1261,13 +1263,14 @@ sub getFireHoseEssentials {
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
 
-		print STDERR "sphinx:new sphinxse: SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;\n";
-		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
+		$sdebug_new = "SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;";
 
 		$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+		$sdebug_idset_elapsed = Time::HiRes::time;
 		$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
 			$stables, "query=$query$swhere", $sphinx_other);
 		$sphinx_stats = $sphinxdb->getSphinxStats;
+		$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
 	}
 
 
@@ -1277,15 +1280,20 @@ sub getFireHoseEssentials {
 	# the DB.  It also eliminates the getGlobjAdminnotes call below.
 	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
+	$sdebug_orig = "SELECT $columns FROM $tables WHERE $where $other;";
 	if ($sphinx) {
 		$user->{state}{fh_sphinxtest} = 1;
+		$sdebug_get_elapsed = Time::HiRes::time;
 		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
 		$hr_ar = [ ];
 		for my $globjid (@$sphinx_ar) {
 			push @$hr_ar, $hr_hr->{$globjid};
 		}
+		$sdebug_get_elapsed = Time::HiRes::time - $sdebug_get_elapsed;
 	} else {
+		$sdebug_orig_elapsed = Time::HiRes::time;
 		$hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+		$sdebug_orig_elapsed = Time::HiRes::time - $sdebug_orig_elapsed;
 	}
 
 	# SSS: does this change for Sphinx?
@@ -1302,6 +1310,7 @@ sub getFireHoseEssentials {
 	if (0 && $sphinx) {
 		$count ||= $sphinx_stats->{'total found'};
 	} else {
+		$sdebug_count_elapsed = Time::HiRes::time;
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
 		my $row_num = @$rows;
 
@@ -1309,6 +1318,7 @@ sub getFireHoseEssentials {
 		if ($row_num == 1 && !$count_other) {
 			$count = $rows->[0]{c};
 		}
+		$sdebug_count_elapsed = Time::HiRes::time - $sdebug_count_elapsed;
 	}
 
 	my $page_size = $ps || 1;
@@ -1327,7 +1337,7 @@ sub getFireHoseEssentials {
 		$items = \@tmp_items;
 
 	# Add globj admin notes to the firehose hashrefs.
-	} else {
+	} elsif (!$sphinx) { # not needed for sphinx, which uses getFireHose*Multi
 		my $globjids = [ map { $_->{globjid} } @$hr_ar ];
 		my $note_hr = $self->getGlobjAdminnotes($globjids);
 		for my $hr (@$hr_ar) {
@@ -1336,6 +1346,20 @@ sub getFireHoseEssentials {
 
 		$items = $hr_ar;
 	}
+
+	if ($sdebug_new) {
+		print STDERR sprintf("%s sphinx:new sphinxse: idset=%.6f get=%.6f count=%.6f %s\n",
+			scalar(gmtime),
+			$sdebug_idset_elapsed, $sdebug_get_elapsed, $sdebug_count_elapsed,
+			$sdebug_new);
+	}
+	if ($sdebug_orig) {
+		print STDERR sprintf("%s sphinx:original sql: orig=%.6f count=%.6f %s\n",
+			scalar(gmtime),
+			$sdebug_orig_elapsed, $sdebug_count_elapsed,
+			$sdebug_orig);
+	}
+
 	return($items, $results, $count, $future_count, $day_num, $day_label, $day_count);
 }
 
