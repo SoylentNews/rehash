@@ -795,9 +795,9 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (0);
 	my @sphinx_tables = ('sphinx_search');
-	$sphinx = 3 if $options->{firehose_sphinx} && $user->{is_admin};
+	$sphinx = 1 if $options->{firehose_sphinx} && $user->{is_admin};
 
 	if ($sphinx) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
@@ -825,7 +825,7 @@ sub getFireHoseEssentials {
 
 	my($items, $results, $doublecheck) = ([], {}, 0);
 	# for now, only bother to try searchtoo if there is a qfilter value to search on
-	if ($sphinx < 3 && !$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
+	if (!$sphinx && !$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
@@ -1147,10 +1147,10 @@ sub getFireHoseEssentials {
 
 			if ($options->{unsigned}) {
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
-				push @sphinx_opts, "filter=signoff,$user->{uid}" if $sphinx;
+				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
-				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
+				push @sphinx_opts, "filter=signoff,$user->{uid}" if $sphinx;
 			}
 		}
 
@@ -1168,7 +1168,7 @@ sub getFireHoseEssentials {
 		push @where, 'accepted = ' . $self->sqlQuote($options->{accepted});
 
 		if ($sphinx) {
-			push @sphinx_opts, "filter=accepted," . ($options->{attention_needed} eq 'yes' ? 1 : 0);
+			push @sphinx_opts, "filter=accepted," . ($options->{accepted} eq 'yes' ? 1 : 0);
 		}
 	}
 
@@ -1186,7 +1186,9 @@ sub getFireHoseEssentials {
 
 		if ($sphinx) {
 			my %types = ('', 0, 'Back', 1, 'Hold', 2, 'Quik', 3);
-			push @sphinx_opts, "filter=category," . ($types{$options->{category}} || 9999);
+			my $val = $types{$options->{category}};
+			$val = 9999 unless defined $val;
+			push @sphinx_opts, "filter=category,$val";
 		}
 	}
 
@@ -1262,12 +1264,10 @@ sub getFireHoseEssentials {
 		print STDERR "sphinx:new sphinxse: SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;\n";
 		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
 
-		if ($sphinx > 1) {
-			$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
-			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
-				$stables, "query=$query$swhere", $sphinx_other);
-			$sphinx_stats = $sphinxdb->getSphinxStats;
-		}
+		$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+		$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
+			$stables, "query=$query$swhere", $sphinx_other);
+		$sphinx_stats = $sphinxdb->getSphinxStats;
 	}
 
 
@@ -1277,7 +1277,7 @@ sub getFireHoseEssentials {
 	# the DB.  It also eliminates the getGlobjAdminnotes call below.
 	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
-	if ($sphinx > 2) {
+	if ($sphinx) {
 		$user->{state}{fh_sphinxtest} = 1;
 		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
 		$hr_ar = [ ];
@@ -1299,7 +1299,7 @@ sub getFireHoseEssentials {
 	my $count = 0;
 
 	# SSS: unreliable
-	if (0 && $sphinx > 2) {
+	if (0 && $sphinx) {
 		$count ||= $sphinx_stats->{'total found'};
 	} else {
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
