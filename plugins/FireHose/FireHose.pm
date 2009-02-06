@@ -1337,11 +1337,13 @@ sub getFireHoseEssentials {
 		$items = \@tmp_items;
 
 	# Add globj admin notes to the firehose hashrefs.
-	} elsif (!$sphinx) { # not needed for sphinx, which uses getFireHose*Multi
-		my $globjids = [ map { $_->{globjid} } @$hr_ar ];
-		my $note_hr = $self->getGlobjAdminnotes($globjids);
-		for my $hr (@$hr_ar) {
-			$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
+	} else {
+		if (!$sphinx) { # not needed for sphinx, which uses getFireHose*Multi
+			my $globjids = [ map { $_->{globjid} } @$hr_ar ];
+			my $note_hr = $self->getGlobjAdminnotes($globjids);
+			for my $hr (@$hr_ar) {
+				$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
+			}
 		}
 
 		$items = $hr_ar;
