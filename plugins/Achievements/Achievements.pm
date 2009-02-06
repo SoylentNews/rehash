@@ -172,6 +172,35 @@ sub getAchievementItemCount {
         return $count;
 }
 
+sub getScore5Comments {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+
+	my $comments = $self->sqlSelectAllHashref(
+		'cid',
+		'cid, sid, uid',
+		'comments',
+		'points = 5 AND uid != ' . $constants->{anonymous_coward_uid}
+	);
+
+	my $score5comments_archived;
+	foreach my $cid (keys %$comments) {
+		my $type = $self->sqlSelect('type', 'discussions', "id = " . $comments->{$cid}{sid});
+		if ($type eq 'archived') {
+			push(@{$score5comments_archived->{$comments->{$cid}{uid}}}, $cid);
+		}
+	}
+
+	my $score5_achievement = $self->getAchievement('score5_comment');
+	my $aid = $score5_achievement->{score5_comment}{aid};
+
+	foreach my $uid (keys %$score5comments_archived) {
+		my $comment_count = scalar(@{$score5comments_archived->{$uid}});
+		$self->setUserAchievement('score5_comment', $uid, { ignore_lookup => 1, exponent => $comment_count });
+        }
+}
+
+
 sub DESTROY {
         my($self) = @_;
         $self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
