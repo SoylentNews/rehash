@@ -1,13 +1,13 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 ; // $Id$
 
-/*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody attachCompleter createTag
+/*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody
 	firehose_remove_all_items firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
 	json_update firehose_reorder firehose_get_next_updates getFirehoseUpdateInterval run_before_update
 	firehose_play firehose_add_update_timerid firehose_collapse_entry
 	 vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
 	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
-	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen firehose_style_switch
+	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_style_switch
 	firehose_style_switch_handler */
 
 YAHOO.namespace('slashdot');
@@ -1807,12 +1807,6 @@ function firehose_more() {
 	}
 
 	inlineAdFirehose();
-}
-
-function firehose_get_onscreen() {
-	var onscreen = [];
-	$('#firehoselist').children().each(function() { if(isInWindow(this)){ onscreen.push(this.id);} });
-	return onscreen;
 }
 
 function firehose_new_section_name() {
