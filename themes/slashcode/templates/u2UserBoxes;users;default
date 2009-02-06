@@ -25,7 +25,7 @@ __template__
 </div>
 [% END %]
 
-[% IF achievements.size != 0 %]
+[% IF is_admin && achievements.size != 0 %]
 <div class="block" id="achievements">
         <div class="title" id="achievements_title">
                 <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/achievements">Achievements</a></h4>

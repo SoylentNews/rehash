@@ -16,33 +16,21 @@ our $VERSION = $Slash::Constants::VERSION;
 sub setUserAchievement {
         my($self, $ach_name, $uid, $options) = @_;
 
+	my $constants = getCurrentStatic();
+	return if ($uid == $constants->{anonymous_coward_uid});
+
         my $slashdb = getCurrentDB();
         #my $uid_q = $self->sqlQuote($uid);
 
-        my $ach_item_count = {
-                'story_posted' => {
-                        "table" => "stories",
-                        "where" => "uid = $uid",
-                },
-                'comment_posted' => {
-                        "table" => "comments",
-                        "where" => "uid = $uid",
-                },
-                'journal_posted' => {
-                        "table" => "journals",
-                        "where" => "uid = $uid",
-                },
-        };
-
 	# Count the current numnber of items eligible for this achievement
 	my $count = 0;
-        $count = $slashdb->sqlCount($ach_item_count->{$ach_name}{table}, $ach_item_count->{$ach_name}{where}) unless $options->{ignore_lookup};
+	$count = $self->getAchievementItemCount($ach_name, $uid, $slashdb) unless $options->{ignore_lookup};
 
 	# Convert to our desred format. Truncate as int so we don't get
 	# exponents like 2.xxx.
 	my $achievement = $self->getAchievement($ach_name);
         my $increment = $achievement->{$ach_name}{increment};
-        my $new_exponent = 0;
+	my $new_exponent = $options->{exponent} || 0;
         if ($increment > 1 && $count != 0) {
                 $new_exponent = int(log($count) / log($increment));
         }
@@ -130,7 +118,7 @@ sub getUserAchievements {
 		$achievements->{$achievement}{name} = $name;
 		$achievements->{$achievement}{description} = $description;
 
-		if ($achievements->{$achievement}{name} eq 'achievement_obtained') {
+		if ($achievements->{$achievement}{repeatable} eq 'yes' && $achievements->{$achievement}{increment} == 1) {
 			$achievements->{$achievement}{increment} = $achievements->{$achievement}{exponent};
 			$achievements->{$achievement}{exponent} = $increment;
 		} else {
@@ -153,6 +141,35 @@ sub getAchievement {
                 "aid, name, description, repeatable, increment",
                 'achievements',
                 "name = '$ach_name'");
+}
+
+sub getAchievementItemCount {
+        my($self, $ach_name, $uid, $slashdb) = @_;
+
+        my $ach_item_count = {
+                'story_posted' => {
+                        "table" => "stories",
+                        "where" => "uid = $uid",
+                },
+                'comment_posted' => {
+                        "table" => "comments",
+                        "where" => "uid = $uid",
+                },
+                'journal_posted' => {
+                        "table" => "journals",
+                        "where" => "uid = $uid",
+                },
+        };
+
+        my $count;
+        if ($ach_name eq 'story_accepted') {
+                my $submissions = $slashdb->getSubmissionsByUID($uid, '', { accepted_only => 1});
+                $count = scalar @$submissions;
+        } else {
+                $count = $slashdb->sqlCount($ach_item_count->{$ach_name}{table}, $ach_item_count->{$ach_name}{where});
+        }
+
+        return $count;
 }
 
 sub DESTROY {

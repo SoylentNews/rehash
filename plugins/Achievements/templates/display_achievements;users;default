@@ -18,7 +18,7 @@ onecol = 1;
  END %]
 
 <div class="achievements user [% IF onecol == 1 %] onecol [% END %]">
-	[% IF onecol != 1 %]<h4>[% requested_user.uid %]'s achievements</h4>[% END %]
+	[% IF onecol != 1 %]<h4>[% requested_user.nickname | strip_literal %]'s achievements</h4>[% END %]
 	<ul>
 	[% FOREACH aid = common_achievements.keys.sort %]
 			<li class=" [% requested_user_achievements.$aid.name %] ">
@@ -47,7 +47,7 @@ onecol = 1;
 
 [% IF user_achievements.size %]
 <div class="achievements common">
-	[% IF onecol != 1 %]<h4>[% user.uid %]'s achievements</h4>[% END %]
+	[% IF onecol != 1 %]<h4>[% user.nickname | strip_literal %]'s achievements</h4>[% END %]
 	<ul>
 	[% FOREACH aid = common_achievements.keys.sort %]
 			<li class=" [% user_achievements.$aid.name %] ">

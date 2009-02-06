@@ -1,3 +1,6 @@
 name=Achievements
 description="Achievements"
+mysql_schema=mysql_schema.sql
+mysql_dump=mysql_dump.sql
+task=achievements.pl
 template=templates/display_achievements;users;default
