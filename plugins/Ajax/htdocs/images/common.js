@@ -342,7 +342,7 @@ function firehose_style_switch_handler(transport) {
 	var response = eval_response(transport);
 
 	if (response.skin_name) {
-		if ($('html head link[@title=' + response.skin_name + ']').length == 0 ) {
+		if ($('html head link[title=' + response.skin_name + ']').length == 0 ) {
                       $('html head link:last').after(response.css_includes);
 		}
 
