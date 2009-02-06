@@ -795,7 +795,7 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
 	my @sphinx_tables = ('sphinx_search');
 	$sphinx = 3; # SSS testing! # if $options->{firehose_sphinx} && $user->{is_admin};
 
@@ -892,7 +892,7 @@ sub getFireHoseEssentials {
 	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
 	my $cur_time;
 	if ($sphinx) {
-		$cur_time = $slashdb->getTime({ unix_format => 1 });
+		$cur_time = $self->getTime({ unix_format => 1 });
 		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
 		$tagged_by_uid =~ s/\D+//g;
 		if ($need_tagged == 1) {
@@ -1221,9 +1221,9 @@ sub getFireHoseEssentials {
 	my $offset;
 
 	if (1 || !$doublecheck) { # do always for now
-		$offset = defined $options->{offset} ? $options->{offset} : '';
-		$offset = '' if $offset !~ /^\d+$/;
-		$offset = "$offset, " if length $offset;
+		my $offset_num = defined $options->{offset} ? $options->{offset} : '';
+		$offset_num = '' if $offset_num !~ /^\d+$/;
+		$offset = "$offset_num, " if length $offset_num;
 		$limit_str = "LIMIT $offset $fetch_size" unless $options->{nolimit};
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 
@@ -1235,25 +1235,32 @@ sub getFireHoseEssentials {
 				neediness  => 'neediness'
 			);
 			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
-			push @sphinx_opts, "offset=$offset" if length $offset;
-			push @sphinx_opts, "limit=$fetch_size" unless $options->{nolimit};
+			if (@sphinx_tables > 1) {
+				push @sphinx_opts, "limit=10000"; # SSS use the var
+				$sphinx_other = $limit_str;
+			} else {
+				push @sphinx_opts, "offset=$offset_num" if length $offset_num;
+				push @sphinx_opts, "limit=$fetch_size" unless $options->{nolimit};
+			}
 		}
 	}
 
 	# SSS: mode?
-	my($hr_ar, $sphinx_ar, $sphinx_stats);
+	my($hr_ar, $sphinx_ar, $sphinx_stats) = ([], []);
 	if ($sphinx) {
 		my $stables = join ',', @sphinx_tables;
+
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
-		print STDERR "sphinx:new sphinxse: SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere;\n";
+
+		print STDERR "sphinx:new sphinxse: SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;\n";
 		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
 
 		if ($sphinx > 1) {
 			$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
-				$stables, "query=$query$swhere");
+				$stables, "query=$query$swhere", $sphinx_other);
 			$sphinx_stats = $sphinxdb->getSphinxStats;
 		}
 	}
@@ -1268,6 +1275,7 @@ sub getFireHoseEssentials {
 	if ($sphinx > 2) {
 		$user->{state}{fh_sphinxtest} = 1;
 		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
+		$hr_ar = [ ];
 		for my $globjid (@$sphinx_ar) {
 			push @$hr_ar, $hr_hr->{$globjid};
 		}

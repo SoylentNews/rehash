@@ -684,7 +684,7 @@ searchd
 	query_log		= __SPHINX_01_VARDIR__/log/query.log
 	max_children		= 100
 	pid_file		= __SPHINX_01_VARDIR__/log/searchd.pid
-	max_matches		= 100000
+	max_matches		= 10000
 }
 EOF
 
