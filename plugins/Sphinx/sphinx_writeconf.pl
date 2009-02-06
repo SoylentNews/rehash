@@ -415,7 +415,7 @@ source src_firehose_delta1 : src_firehose_main
 			firehose_ogaspt.pubtime,						\
 			firehose.createtime))  AS createtime_ut,				\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
-		globjs.globjid AS globjid,							\
+		globjs.globjid AS globjidattr,							\
 		IF(     gtid= 1, CONCAT(story_text.title,					\
 				' ', firehose.toptags,						\
 				' ', story_text.introtext,					\
@@ -539,7 +539,7 @@ source src_firehose_delta2 : src_firehose_main
 			firehose_ogaspt.pubtime,						\
 			firehose.createtime))  AS createtime_ut,				\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
-		globjs.globjid AS globjid,							\
+		globjs.globjid AS globjidattr,							\
 		IF(     gtid= 1, CONCAT(story_text.title,					\
 				' ', firehose.toptags,						\
 				' ', story_text.introtext,					\
