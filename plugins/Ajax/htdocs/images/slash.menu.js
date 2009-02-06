@@ -69,6 +69,9 @@ $.widget("slash.menu", $.extend({}, $.ui.mouse, {
 		this._menuStarted = true;
 		this._hoverStarted = false;
 
+		// TODO: decide if we need to check that geometry has changed, or if we rely on the client
+		this.recalculatePositions();
+
 		// check immediately: are we over an item
 		this._menuMove(event);
 		return true;
