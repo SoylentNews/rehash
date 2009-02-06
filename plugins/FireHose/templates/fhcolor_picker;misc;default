@@ -18,7 +18,7 @@ __template__
 <style type="text/css">
 #fhcolor-picker {
 	position: absolute;
-	top: 2px;
+	top: 0;
 	left: -87px;
 }
 #fhcolor-picker .menu,
