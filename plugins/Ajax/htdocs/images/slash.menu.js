@@ -20,7 +20,15 @@ function union_bounds(b1, b2){
 }
 
 function point_in_bounds( pt, r ){
-	return	r && (r.left <= pt.x) && (pt.x <= r.right) && (r.top <= pt.y) && (pt.y <= r.bottom);
+	// true		=> the pt _is_ in the rect
+	// undefined	=> we don't know (returned when !r)
+	// false	=> the pt is _not_ in the rect
+
+	return	(r||undefined) &&
+		(r.left <= pt.x) &&
+		(pt.x <= r.right) &&
+		(r.top <= pt.y) &&
+		(pt.y <= r.bottom);
 }
 
 $.widget("slash.menu", $.extend({}, $.ui.mouse, {
@@ -79,7 +87,7 @@ $.widget("slash.menu", $.extend({}, $.ui.mouse, {
 
 	recalculatePositions: function(){
 		// discard cached bounds; clients call this after they've moved the menu or its items
-		this.sumItemBounds = this.overBounds = false;
+		this.sumItemBounds = this.overBounds = undefined;
 	},
 
 	_over: function( event, force ){
