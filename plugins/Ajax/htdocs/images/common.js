@@ -931,55 +931,50 @@ function json_update(response) {
 		}
 	}
 
-	if (response.html) {
-		var new_content = response.html;
-		for (id in new_content) {
-			if ( new_content.hasOwnProperty(id) ) {
-				$('#'+id).html(new_content[id]);
-			}
-		}
+	// Server says:
 
-	}
+	// ...replace the content of these elements
+	$.each(response.html||[], function(elem_id, new_html){
+		$('#'+elem_id).
+			html(new_html);
+	});
 
-	if (response.value) {
-		var new_value = response.value;
-		for (id in new_value) {
-			if ( new_value.hasOwnProperty(id) ) {
-				var elem = $dom(id);
-				if ( elem !== gFocusedText ) {
-					$(elem).val(new_value[id]);
+	// ...set new values in these elements
+	$.each(response.value||[], function(elem_id, new_value){
+		$('#'+elem_id).
+			each(function(){
+				if ( this !== gFocusedText ) {
+					$(this).val(new_value);
 				}
-			}
-		}
-	}
+			});
+	});
 
-	if (response.html_append) {
-		new_content = response.html_append;
-		for (id in new_content) {
-			if ( new_content.hasOwnProperty(id) ) {
-				$('#'+id).each(function(){
-					this.innerHTML += new_content[id];
-				});
-			}
-		}
-	}
+	// ...append content to these elements
+	$.each(response.html_append||[], function(elem_id, new_html){
+		$('#'+elem_id).
+			append(new_html);
+	});
 
-	if (response.html_append_substr) {
-		new_content = response.html_append_substr;
-		for (id in new_content) {
-			if ( new_content.hasOwnProperty(id) ) {
-				var $found = $('#'+id);
-				if ($found.size()) {
-					var existing_content = $found.html();
-					var pos = existing_content.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
-					if ( pos != -1 ) {
-						existing_content = existing_content.substr(0, pos);
-					}
-					$found.html(existing_content + new_content[id]);
+	// ...replace the specially marked "tail-end" (or else append) content of these elements
+	$.each(response.html_append_substr||[], function(elem_id, new_html){
+		$('#'+elem_id).
+			each(function(){
+				var	$this		= $(this),
+					old_html	= $this.html(),
+					truncate_at	= old_html.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
+				if ( truncate_at != -1 ) {
+					old_html = old_html.substr(0, truncate_at);
 				}
-			}
+				$this.html(old_html + new_html);
+			});
+	});
+
+	// ...trigger events on these elements (do this last to include any content added above)
+	$.each(response.events||[], function(){
+		if ( this.event ) {
+			$(this.target||document).trigger(this.event, this.data);
 		}
-	}
+	});
 
 	if (response.eval_last) {
 		try {
