@@ -22,22 +22,32 @@ onecol = 1;
 	<ul>
 	[% FOREACH aid = common_achievements.keys.sort %]
 			<li class=" [% requested_user_achievements.$aid.name %] ">
-			[% requested_user_achievements.$aid.description %]
-			[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
-					<span class="math">[% requested_user_achievements.$aid.increment %]<sup>[% requested_user_achievements.$aid.exponent%]</sup></span>
-			[% END %]
-			[% requested_user_achievements.$aid.createtime %]
+				<h5>
+				</h5>
+				<div class="body">
+					[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
+							<span class="math">[% requested_user_achievements.$aid.increment %]<sup>[% requested_user_achievements.$aid.exponent%]</sup></span>
+					[% END %]
+					<span>[% requested_user_achievements.$aid.description %]
+					<small>[% requested_user_achievements.$aid.createtime %]</small>
+					</span>
+				</div>
 			</li>
 	[% END %]
 
 	[% FOREACH aid = requested_user_achievements.keys.sort %]
 			[% NEXT IF common_achievements.$aid %]
 			<li class=" [% requested_user_achievements.$aid.name %] ">
-			[% requested_user_achievements.$aid.description %]
-			[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
-					<span class="math">[% requested_user_achievements.$aid.increment %]<sup>[% requested_user_achievements.$aid.exponent%]</sup></span>
-			[% END %]
-			[% requested_user_achievements.$aid.createtime %]
+				<h5>
+				</h5>
+				<div class="body">
+					[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
+							<span class="math">[% requested_user_achievements.$aid.increment %]<sup>[% requested_user_achievements.$aid.exponent%]</sup></span>
+					[% END %]
+					<span>[% requested_user_achievements.$aid.description %]
+					<small>[% requested_user_achievements.$aid.createtime %]</small>
+					</span>
+				</div>
 			</li>
 	[% END %]
 	</ul>
@@ -51,22 +61,32 @@ onecol = 1;
 	<ul>
 	[% FOREACH aid = common_achievements.keys.sort %]
 			<li class=" [% user_achievements.$aid.name %] ">
-			[% user_achievements.$aid.description %]
-			[% IF user_achievements.$aid.repeatable == 'yes' %]
-					<span class="math">[% user_achievements.$aid.increment %]<sup>[% user_achievements.$aid.exponent%]</sup></span>
-			[% END %]
-			[% user_achievements.$aid.createtime %]
+				<h5>
+				</h5>
+				<div class="body">
+					[% IF user_achievements.$aid.repeatable == 'yes' %]
+							<span class="math">[% user_achievements.$aid.increment %]<sup>[% user_achievements.$aid.exponent%]</sup></span>
+					[% END %]
+					<span>[% user_achievements.$aid.description %]
+					<small>[% user_achievements.$aid.createtime %]</small>
+					</span>
+				</div>
 			</li>
 	[% END %]
 
 	[% FOREACH aid = user_achievements.keys.sort %]
 			[% NEXT IF common_achievements.$aid %]
 			<li class=" [% user_achievements.$aid.name %] ">
-			[% user_achievements.$aid.description %]
-			[% IF user_achievements.$aid.repeatable == 'yes' %]
-					<span class="math">[% user_achievements.$aid.increment %]<sup>[% user_achievements.$aid.exponent%]</sup></span>
-			[% END %]
-			[% user_achievements.$aid.createtime %]
+				<h5>
+				</h5>
+				<div class="body">
+					[% IF user_achievements.$aid.repeatable == 'yes' %]
+							<span class="math">[% user_achievements.$aid.increment %]<sup>[% user_achievements.$aid.exponent%]</sup></span>
+					[% END %]
+					<span>[% user_achievements.$aid.description %]
+					<small>[% user_achievements.$aid.createtime %]</small>
+					</span>
+				</div>
 			</li>
 	[% END %]
 	</ul>
