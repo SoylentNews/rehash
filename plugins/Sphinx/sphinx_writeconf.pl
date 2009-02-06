@@ -274,7 +274,7 @@ source src_firehose_main
 			firehose_ogaspt.pubtime,						\
 			firehose.createtime)) AS createtime_ut,					\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
-		globjs.globjid AS globjid,							\
+		globjs.globjid AS globjidattr,							\
 		IF(     gtid= 1, CONCAT(story_text.title,					\
 				' ', firehose.toptags,						\
 				' ', story_text.introtext,					\
@@ -351,7 +351,7 @@ source src_firehose_main
 
 	sql_attr_timestamp	= createtime_ut
 	sql_attr_timestamp	= last_update_ut
-	sql_attr_uint		= globjid
+	sql_attr_uint		= globjidattr
 	sql_attr_uint		= gtid
 	sql_attr_uint		= type
 	sql_attr_uint		= popularity
