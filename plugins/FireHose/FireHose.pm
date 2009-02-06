@@ -890,9 +890,8 @@ sub getFireHoseEssentials {
 	my $need_tagged = 0;
 	$need_tagged = 1 if $options->{tagged_by_uid} && $options->{tagged_as};
 	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
-	my $cur_time;
+	my $cur_time = $self->getTime({ unix_format => 1 });
 	if ($sphinx) {
-		$cur_time = $self->getTime({ unix_format => 1 });
 		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
 		$tagged_by_uid =~ s/\D+//g;
 		if ($need_tagged == 1) {
@@ -908,6 +907,7 @@ sub getFireHoseEssentials {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
 			# any "tagged for hose" tags, e.g. /~foo/firehose
+			# SSS make this an MVA
 			push @sphinx_tables, 'firehose_tfh';
 			push @sphinx_where, 'firehose_tfh.globjid = sphinx_search.globjid';
 			push @sphinx_where, "firehose_tfh.uid = $tagged_by_uid";
@@ -1237,11 +1237,17 @@ sub getFireHoseEssentials {
 			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
 			if (@sphinx_tables > 1) {
 				push @sphinx_opts, "limit=10000"; # SSS use the var
+				push @sphinx_opts, "maxmatches=10000"; # SSS use the var
 				$sphinx_other = $limit_str;
 			} else {
 				push @sphinx_opts, "offset=$offset_num" if length $offset_num;
-				push @sphinx_opts, "limit=$fetch_size" unless $options->{nolimit};
-			}
+				if ($options->{nolimit}) {
+					push @sphinx_opts, "limit=$fetch_size";
+					push @sphinx_opts, "maxmatches=$fetch_size"
+						if $fetch_size > 1000; # SSS use the var
+				}
+
+		 	}
 		}
 	}
 
