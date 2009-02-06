@@ -1,0 +1,121 @@
+These are the steps to get Sphinx installed for a Slash site, either
+on Slashdot.org or on a sandbox, to the point where the Slash code
+can use it properly.  I'll be doing these steps on Slashdot.org,
+and I don't need details, so the commentary will be all about how
+to get the installation finished on a sandbox.  The items marked
+DONE are those which we don't have to worry about any more.
+
+
+1. DONE install SphinxSE on at least one database (preferably reader,
+   but writer will work)
+
+2. DONE add a 'sphinx01' virtual user to DBIx/Password.pm, pointing to
+   that database
+
+3. DONE install Sphinx itself on the machine 'sphinx01' at least
+
+4. install-plugin (for this plugin, naturally)
+
+This will be done on slashdot.org on Thursday night 2/5, which means
+it will automatically come in the sandbox git repos, and thus in
+newly-created sandboxes, starting Saturday morning 2/7.  So I
+recommend SOG not do anything regarding this step.
+
+5. DONE set vars if desired (see mysql_dump.sql)
+   (for sandboxes, lower max_children, max_iops, mem_limit)
+
+6. At sandbox creation time:
+	mkdir -p /srv/sphinx/var
+	mkdir /srv/sphinx/var/log
+	mkdir /srv/sphinx/var/data
+	chown slashdot /srv/sphinx/var/data
+
+7. Trigger the sphinx_writeconf task to write out the stopwords and
+   sphinx01.conf files.
+
+This will be done on Slashdot.org at code-refresh time Thursday night,
+and once step 4 propagates to sandboxes Saturday morning it will be
+done automatically at sandbox creation time.
+
+However, it will not happen until a few seconds or possibly minutes
+after slashd is started, so in order to get it done at a predictable
+time before step 8, it is probably best to run this on a sandbox:
+
+	/usr/local/slash/bin/runtask -u slashdot sphinx_writeconf
+
+8. Run indexer once to generate all indexes (takes about 30 sec on
+   sandbox)
+
+	/usr/local/sphinx/bin/indexer --config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf --all
+
+9. Start searchd running.
+
+We don't have an init script for this because on Slashdot.org, if
+the machine reboots without us around, that's a serious problem and
+we don't start mysqld up automatically (thus, starting searchd would
+do no good anyway).  We weren't planning on writing an init script.
+
+But sandboxes need to bounce this as part of Restart Services, and
+bring it up at creation time.  If SOG wants to write an init script
+wrapper that'd be cool.  The start command is:
+
+	/usr/local/sphinx/bin/searchd --config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf --iostats
+
+and the stop command is:
+
+	kill `cat /srv/sphinx/var/log/searchd.pid`
+
+10. Start do_index running
+
+do_index is a super kludgy script that will hopefully be replaced
+by something better in the near future, obviating the need for SOG
+to do anything for this step.  However, for now, we do need it
+started up.  It emits a ton of useless info, so what I've done on
+Slashdot.org is run it inside a `screen`.  SOG probably wants to
+do something like start it as
+
+	/usr/local/src/slash/plugins/Sphinx/do_index > /dev/null
+
+and stop it with
+
+	killall do_index
+
+but I leave that up to SOG.
+
+11. An ALTER TABLE on the database to point its SphinxSE connection
+    back to the searchd that was started in step 9.
+
+We experimented with the hostname and "sb-sfnet-1xx" seems to be
+the correct format.  Thus:
+
+	echo 'ALTER TABLE sphinx_search CONNECTION="sphinx://sb-sfnet-1xx:3312/*"' | mysql
+
+should do the trick, assuming it's run in an ENV that picks up
+~/.my.cnf for mysql's defaults.
+
+12. Set the 'sphinx' var to 1.
+
+This will be done at the same time as step 4, on Thursday night.
+
+
+
+
+
+To test for a proper installation, try this command line:
+
+	perl -MSlash::Test=slashdot -le '$s = getObject("Slash::Sphinx", { db_type => "sphinx" }); print Dumper $s->sqlSelectColArrayref("globjid", "sphinx_search", q{query="google;range=createtime_ut,0,1233583444;filter=public,1;limit=5;mode=all"})'
+
+That should emit 5 id's which look, on a sandbox, something like
+this (not guaranteed to be exactly these numbers, since sometimes
+sandbox data does change from one day's data set to the next):
+
+	$VAR1 = [
+		  '27671',
+		  '29713',
+		  '104448',
+		  '282962',
+		  '539251'
+		];
+
+Any other output indicates an error of some kind.
+

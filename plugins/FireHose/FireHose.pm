@@ -791,12 +791,18 @@ sub getFireHoseCount {
 
 sub getFireHoseEssentials {
 	my($self, $options) = @_;
-
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, @sphinx_opts, @sphinx_terms, @sphinx_where) = (1);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
+	my @sphinx_tables = ('sphinx_search');
+	$sphinx = 3; # SSS testing! # if $options->{firehose_sphinx} && $user->{is_admin};
+
+	if ($sphinx) {
+		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
+		print STDERR Dumper $options; print STDERR "\n";
+	}
 
 	$options ||= {};
 	$options->{limit} ||= 50;
@@ -819,7 +825,7 @@ sub getFireHoseEssentials {
 
 	my($items, $results, $doublecheck) = ([], {}, 0);
 	# for now, only bother to try searchtoo if there is a qfilter value to search on
-	if (!$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
+	if ($sphinx < 3 && !$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
@@ -881,6 +887,32 @@ sub getFireHoseEssentials {
 	my $tags = getObject('Slash::Tags');
 
 	# SSS: not sure what to do with tag stuff yet
+	my $need_tagged = 0;
+	$need_tagged = 1 if $options->{tagged_by_uid} && $options->{tagged_as};
+	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
+	my $cur_time = $self->getTime({ unix_format => 1 });
+	if ($sphinx) {
+		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
+		$tagged_by_uid =~ s/\D+//g;
+		if ($need_tagged == 1) {
+			# This combination of options means to restrict to only
+			# those hose entries tagged by one particular user with
+			# one particular tag, e.g. /~foo/tags/bar
+			push @sphinx_tables, 'tags';
+			push @sphinx_where, 'tags.globjid = sphinx_search.globjid';
+			my $tag_id = $tags->getTagnameidFromNameIfExists($options->{tagged_as}) || 0;
+			push @sphinx_where, "tags.tagnameid = $tag_id";
+			push @sphinx_where, "tags.uid = $tagged_by_uid";
+		} elsif ($need_tagged == 2) {
+			# This combination of options means to restrict to only
+			# those hose entries tagged by one particular user with
+			# any "tagged for hose" tags, e.g. /~foo/firehose
+			# SSS make this an MVA
+			push @sphinx_tables, 'firehose_tfh';
+			push @sphinx_where, 'firehose_tfh.globjid = sphinx_search.globjid';
+			push @sphinx_where, "firehose_tfh.uid = $tagged_by_uid";
+		}
+	}
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
 		$tables .= ', tags';
 		push @where, 'tags.globjid=firehose.globjid';
@@ -925,8 +957,7 @@ sub getFireHoseEssentials {
 		push @where, 'createtime <= NOW()';
 
 		if ($sphinx) {
-			my $time = $self->getTime({ unix_format => 1 });
-			push @sphinx_opts, "range=createtime_ut,0,$time";
+			push @sphinx_opts, "range=createtime_ut,0,$cur_time";
 		}
 	}
 
@@ -935,8 +966,8 @@ sub getFireHoseEssentials {
 		push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
 
 		if ($sphinx) {
-			my $time = $self->getTime({ unix_format => 1 }) + $future_secs;
-			push @sphinx_opts, "range=createtime_ut,0,$time";
+			my $future_time = $cur_time + $future_secs;
+			push @sphinx_opts, "range=createtime_ut,0,$future_time";
 		}
 	}
 
@@ -1012,8 +1043,8 @@ sub getFireHoseEssentials {
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 
 			if ($sphinx) {
-				my $time = ($self->getTime({ unix_format => 1 }) - $dur_sphinx) - 1;
-				push @sphinx_opts, "!range=createtime_ut,0,$time";
+				my $dur_time = ($cur_time - $dur_sphinx) - 1;
+				push @sphinx_opts, "!range=createtime_ut,0,$dur_time";
 			}
 		}
 
@@ -1116,9 +1147,12 @@ sub getFireHoseEssentials {
 
 			if ($options->{unsigned}) {
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
+				push @sphinx_opts, "filter=signoff,$user->{uid}" if $sphinx;
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
+				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
 			}
+
 		}
 
 	# check these again, just in case, as they are more time-sensitive
@@ -1163,8 +1197,8 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id IN ($id_str)";
 
 		if ($sphinx) {
-			my @globjids = map { $_->{globjid} } $self->getFireHoseMulti($options->{ids});
-			push @sphinx_opts, 'filter=globjid,' . join(',', @globjids);
+			my @globjids = map { $_->{globjid} } values %{ $self->getFireHoseMulti($options->{ids}) };
+			push @sphinx_opts, 'filter=globjid,' . join(',', @globjids) if @globjids;
 		}
 	}
 
@@ -1172,7 +1206,7 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id != " . $self->sqlQuote($options->{not_id});
 
 		if ($sphinx) {
-			my $globjid = $self->getFireHoseMulti($options->{not_id})->{globjid};
+			my $globjid = $self->getFireHose($options->{not_id})->{globjid};
 			push @sphinx_opts, "!filter=globjid,$globjid";
 		}
 	}
@@ -1187,9 +1221,9 @@ sub getFireHoseEssentials {
 	my $offset;
 
 	if (1 || !$doublecheck) { # do always for now
-		$offset = defined $options->{offset} ? $options->{offset} : '';
-		$offset = '' if $offset !~ /^\d+$/;
-		$offset = "$offset, " if length $offset;
+		my $offset_num = defined $options->{offset} ? $options->{offset} : '';
+		$offset_num = '' if $offset_num !~ /^\d+$/;
+		$offset = "$offset_num, " if length $offset_num;
 		$limit_str = "LIMIT $offset $fetch_size" unless $options->{nolimit};
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 
@@ -1201,19 +1235,42 @@ sub getFireHoseEssentials {
 				neediness  => 'neediness'
 			);
 			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
-			push @sphinx_opts, "offset=$offset" if length $offset;
-			push @sphinx_opts, "limit=$fetch_size" unless $options->{nolimit};
+			if (@sphinx_tables > 1) {
+				push @sphinx_opts, "limit=10000"; # SSS use the var
+				push @sphinx_opts, "maxmatches=10000"; # SSS use the var
+				$sphinx_other = $limit_str;
+			} else {
+				push @sphinx_opts, "offset=$offset_num" if length $offset_num;
+				if ($options->{nolimit}) {
+					push @sphinx_opts, "limit=$fetch_size";
+					push @sphinx_opts, "maxmatches=$fetch_size"
+						if $fetch_size > 1000; # SSS use the var
+				}
+
+		 	}
 		}
 	}
 
-	# SSS: mode?  index?
+	# SSS: mode?
+	my($hr_ar, $sphinx_ar, $sphinx_stats) = ([], []);
 	if ($sphinx) {
+		my $stables = join ',', @sphinx_tables;
+
 		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
-		print STDERR "sphinx:new sphinxse: SELECT globjid FROM sphinx_search WHERE query=$query$swhere;\n";
+
+		print STDERR "sphinx:new sphinxse: SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;\n";
 		print STDERR "sphinx:original sql: SELECT $columns FROM $tables WHERE $where $other;\n";
+
+		if ($sphinx > 1) {
+			$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
+				$stables, "query=$query$swhere", $sphinx_other);
+			$sphinx_stats = $sphinxdb->getSphinxStats;
+		}
 	}
+
 
 	# XXX I would like to change this, as soon as possible, to have
 	# the only column retrieved be 'id', and to pipe the resulting
@@ -1221,9 +1278,18 @@ sub getFireHoseEssentials {
 	# the DB.  It also eliminates the getGlobjAdminnotes call below.
 	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
-	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+	if ($sphinx > 2) {
+		$user->{state}{fh_sphinxtest} = 1;
+		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
+		$hr_ar = [ ];
+		for my $globjid (@$sphinx_ar) {
+			push @$hr_ar, $hr_hr->{$globjid};
+		}
+	} else {
+		$hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+	}
 
-	# SSS: ?
+	# SSS: does this change for Sphinx?
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
@@ -1233,9 +1299,9 @@ sub getFireHoseEssentials {
 
 	my $count = 0;
 
-	if ($sphinx > 1) {
-		# SSS
-		# 'SHOW STATUS LIKE 'sphinx_%'
+	# SSS: unreliable
+	if (0 && $sphinx > 2) {
+		$count ||= $sphinx_stats->{'total found'};
 	} else {
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
 		my $row_num = @$rows;
@@ -1981,6 +2047,7 @@ sub ajaxFireHoseGetUpdates {
 			} else {
 				$update_data->{new}++;
 				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
+				$item->{title} .= ' [SPHINX]' if $user->{state}{fh_sphinxtest};
 				my $data = {
 					mode => $curmode,
 					item => $item,
@@ -2570,7 +2637,6 @@ sub getGlobalOptionDefaults {
 		nocommentcnt	=> 0,
 		noslashboxes 	=> 0,
 		nomarquee	=> 0,
-		mixedmode	=> 0,
 		pagesize	=> "small",
 		usermode	=> 0,
 	};
@@ -2789,16 +2855,15 @@ sub genUntitledTab {
 my $stopwords;
 sub sphinxFilterQuery {
 	my($query) = @_;
-	if (!$stopwords) {
-		open my $fh, '/srv/sphinx/var/data/stopwords.txt';
-		if ($fh) {
-			my @stopwords;
-			while (<$fh>) {
-				chomp;
-				push @stopwords, $_;
-			}
+	# query size is limited, so strip out stopwords
+	unless (defined $stopwords) {
+		my $sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+		my @stopwords = $sphinxdb->getSphinxStopwords;
+		if (@stopwords) {
 			$stopwords = join '|', @stopwords;
 			$stopwords = qr{\b(?:$stopwords)\b};
+		} else {
+			$stopwords = 0;
 		}
 	}
 
@@ -2813,6 +2878,8 @@ sub sphinxFilterQuery {
 	$query =~ s/ +/ /g; $query =~ s/^ //g; $query =~ s/ $//g;
 
 	$query =~ s/$stopwords//gio if $stopwords;
+
+	return $query;
 }
 }
 
@@ -3662,6 +3729,7 @@ sub listView {
 		} else {
 	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 			slashProf("firehosedisp");
+			$item->{title} .= ' [SPHINX]' if $user->{state}{fh_sphinxtest};
 			$itemstext .= $self->dispFireHose($item, {
 				mode			=> $curmode,
 				tags_top		=> $tags_top,		# old-style

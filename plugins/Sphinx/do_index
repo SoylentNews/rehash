@@ -1,0 +1,65 @@
+#!/usr/local/bin/perl
+
+# This script runs `indexer` over and over, picking up new changes.
+# It does delta2 most often, delta1 occasionally, and main every
+# night, thus ensuring moderately efficient behavior.
+
+# This is a VERY KLUDGY script that needs to be much-improved before
+# incorporation into a real install.  It does _work_ on both sandbox
+# and real site but the way it works is to be run from the command
+# line inside `screen` which is not amenable to error reporting or
+# any logging.
+#
+# The reason this isn't just a task (it would seem to be ideally
+# suited for a task) is that slashd does not yet have a way to
+# be run on multiple machines with its tasks segregated onto those
+# machines.  Which is probably for the best considering the klutzy
+# way it appends to its logfiles.  Anyway, to run it as a slashd
+# task on sd-daemon-1 would mean it would have to ssh to whichever
+# machine hosted the indexes and invoke indexer over ssh, since
+# indexer needs to SIGHUP searchd.
+
+use warnings;
+use strict;
+use Time::HiRes;
+
+my %prev = (
+	main =>         1229982043,
+	delta1 =>       1230042653,
+	delta2 =>       0,
+);
+my %freq = (
+	main =>         86400,
+	delta1 =>       900,
+	delta2 =>       5,
+);
+my @order = qw( main delta1 delta2 );
+
+while (1) {
+	my $do_the_rest = 0;
+	my $next = 2**32-1;
+	for my $index (@order) {
+		my $time = Time::HiRes::time();
+		if ($do_the_rest
+		 || $prev{$index} + $freq{$index} < $time
+		) {
+			$prev{$index} = $time;
+			print scalar(gmtime), "\n";
+			system(join(' ',
+				"/usr/local/sphinx/bin/indexer",
+				"--config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf",
+				"--rotate",
+				"idx_firehose_$index"));
+			Time::HiRes::sleep(0.1);
+			$do_the_rest = 1;
+		}
+		my $this_next = $prev{$index} + $freq{$index};
+		$next = $this_next if $next > $this_next;
+	}
+	my $sleep_time = ($next - Time::HiRes::time) - 0.1;
+	$sleep_time = 0.1 if $sleep_time < 0.1;
+	$sleep_time = 60 if $sleep_time > 60;
+	printf("%s sleeping %.3f\n", scalar(gmtime), $sleep_time);
+	Time::HiRes::sleep($sleep_time);
+}
+
