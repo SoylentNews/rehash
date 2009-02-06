@@ -88,6 +88,18 @@ END %]
 	};
 
 
+
+	function dialog_values(){
+		return {
+			name:	$edit_field.val(),
+			filter:	$dialog.find('input[name=section_filter]').val(),
+			view:	$dialog.find('select').val()
+		};
+	}
+
+
+	var saved = dialog_values();
+
 	// button behavior
 	var $save_button = $dialog.
 		find('input[type=button], a.close').
@@ -105,9 +117,20 @@ END %]
 			end().
 			filter('[value=save]').
 				click(function(){
-					$li.find('a[id^=fhsectiontitle-]').text($edit_field.val());
-					saveModalPrefs();
-					[% IF id %]firehose_set_options('section', [% id %]);[% END %]
+					var	requested	= dialog_values(),
+						name_changed	= saved.name != requested.name,
+						query_changed	= (saved.filter != requested.filter) || (saved.view != requested.view);
+					if ( name_changed ) {
+						$li.find('a[id^=fhsectiontitle-]').text($edit_field.val());
+					}
+					if ( name_changed || query_changed ) {
+						saveModalPrefs();
+					}
+					[% IF id %]
+					if ( query_changed ) {
+						firehose_set_options('section', [% id %]);
+					}
+					[% END %]
 				});
 
 	// keep the save button in sync with the name field... that is: disabled for invalid names
