@@ -993,9 +993,9 @@ function json_update(response) {
 
 function firehose_handle_update() {
 	var saved_selection = new $.TextSelection(gFocusedText);
-	var $menu = $('.ac_results:visible');
+	var $menu = $('div.ac_results:visible');
 
-	var add_behind_scenes = $("#firehoselist .loading_msg").length;
+	var add_behind_scenes = $("#firehoselist h1.loading_msg").length;
 	if (add_behind_scenes) { firehose_busy(); }
 
 	if (firehose_updates.length > 0) {
@@ -1139,7 +1139,7 @@ function firehose_handle_update() {
 	} else {
 		firehose_reorder();
 		if (add_behind_scenes) {
-			$('#firehoselist .loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
+			$('#firehoselist h1.loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
 			$('.paginate').show();
 			if (elem && elem.parentNode) {
 				elem.parentNode.removeChild(elem);
@@ -1299,9 +1299,9 @@ function firehose_get_updates_handler(transport) {
 		firehose_updates_size = firehose_updates.length;
 		firehose_removed_first = 0;
 		processed = processed + 1;
-		if ($('#firehoselist .loading_msg').length) {
+		if ($('#firehoselist h1.loading_msg').length) {
 			$('#firehoselist').hide();
-			$('#firehoselist .loading_msg').show();
+			$('#firehoselist h1.loading_msg').show();
 		}
 		firehose_handle_update();
 	}
@@ -1990,7 +1990,7 @@ function inlineAdInsertId(id) {
 
 
 function inlineAdVisibles() {
-	var $visible_ads = $('.inlinead').filter(function(){ if ( isInWindow(this) ) return this; });
+	var $visible_ads = $('li.inlinead').filter(function(){ if ( isInWindow(this) ) return this; });
 	return $visible_ads.length;
 }
 
