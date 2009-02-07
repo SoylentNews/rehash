@@ -662,12 +662,18 @@ index idx_firehose_delta2 : idx_firehose_main
 	path			= __SPHINX_01_VARDIR__/data/firehose_delta2
 }
 
+# "Kill-list for a given index suppresses results from other indexes,
+# depending on index order in the query.  ... We now reindex delta
+# and then search through both these indexes in proper (least to
+# most recent) order"
+# http://sphinxsearch.com/docs/current.html#conf-sql-query-killlist
+
 index idx_firehose_dist
 {
 	type                    = distributed
-	local                   = idx_firehose_delta2
-	agent                   = localhost:3312:idx_firehose_delta1
 	agent                   = localhost:3312:idx_firehose_main
+	agent                   = localhost:3312:idx_firehose_delta1
+	local                   = idx_firehose_delta2
 }
 
 indexer
