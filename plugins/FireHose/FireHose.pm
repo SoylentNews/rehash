@@ -1268,7 +1268,8 @@ sub getFireHoseEssentials {
 		$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 		$sdebug_idset_elapsed = Time::HiRes::time;
 		$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
-			$stables, "query=$query$swhere", $sphinx_other);
+			$stables, "query=$query$swhere", $sphinx_other,
+			{ sql_no_cache => 1 });
 		$sphinx_stats = $sphinxdb->getSphinxStats;
 		$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
 	}

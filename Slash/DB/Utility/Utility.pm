@@ -647,8 +647,9 @@ sub sqlSelectColArrayref {
 	my($self, $select, $from, $where, $other, $options) = @_;
 	$self->_refCheck($where);
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
+	my $sql_no_cache = ($options && $options->{sql_no_cache}) ? " SQL_NO_CACHE" : "";
 
-	my $sql = "SELECT $distinct $select ";
+	my $sql = "SELECT $distinct$sql_no_cache $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
