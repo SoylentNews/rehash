@@ -387,19 +387,15 @@ function firehose_set_options(name, value, context) {
 		value = value ? 1 : 0;
 		params[name] = value;
 		params.setfield = 1;
-		var classname;
-		if (name == "nodates") {
-			classname = "date";
-		} else if (name == "nobylines") {
-			classname = "nickname";
-		}
 
-		if (classname) {
-			if (value) {
-				$('#firehoselist .'+classname).addClass('hide');
-			} else {
-				$('#firehoselist .'+classname).removeClass('hide').css('display','inline');
-			}
+		var selector = {
+			nodates:	'#firehoselist span.date',
+			nobylines:	'#firehoselist span.nickname'
+		}[name];
+
+		if ( selector ){
+			var $to_be_toggled = $(selector).toggleClass('hide', !!value);
+			value || $to_be_toggled.css({ display: 'inline' });
 		}
 	}
 
@@ -1287,10 +1283,8 @@ function firehose_get_updates_handler(transport) {
 		firehose_updates_size = firehose_updates.length;
 		firehose_removed_first = 0;
 		processed = processed + 1;
-		if ($('#firehoselist h1.loading_msg').length) {
-			$('#firehoselist').hide();
-			$('#firehoselist h1.loading_msg').show();
-		}
+		var $fh = $('#firehoselist');
+		$fh.find('h1.loading_msg').show().length && $fh.hide();
 		firehose_handle_update();
 	}
 }
