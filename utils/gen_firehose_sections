@@ -4,6 +4,9 @@ my $skins = $slashdb->getSkins();
 
 foreach my $skid (keys %$skins) {
 	my $skin = $slashdb->getSkin($skid);
+	my $filter = ""
+	$filter = $skin->{name} if $skin->{skid} != $constants->{mainpage_skid};
+
 	my $data = {
 		section_name 	=> $skin->{title},
 		section_filter 	=> $skin->{name},
