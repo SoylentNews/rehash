@@ -1,0 +1,246 @@
+<html>
+<head>
+<title>Menu Test</title>
+
+<script type="text/javascript" src="../jquery/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="../jquery/ui.core.js"></script>
+<script type="text/javascript" src="../slash.menu.js"></script>
+
+
+<style type="text/css">
+body { margin: 2in }
+
+#fhcolor-picker,
+#fhcolor-picker .menu,
+#fhcolor-picker .menu li,
+#fhcolor-picker .trigger-swatch {
+	position: relative;
+	display: block;
+	width: 80px;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	cursor: pointer;
+	list-style: none;
+}
+#fhcolor-picker .trigger-swatch,
+#fhcolor-picker li {
+	height: 20px;
+}
+#fhcolor-picker span {
+	display: none;
+	padding-top: 4px;
+	font: 80% sans-serif;
+}
+#fhcolor-picker .red span,
+#fhcolor-picker .black span,
+#fhcolor-picker li.slash-hover span,
+#fhcolor-picker .trigger-swatch span,
+#fhcolor-picker .indicator span {
+	display: block;
+}
+#fhcolor-picker .red	{ background-color: #990000;	color: white; }
+#fhcolor-picker .orange	{ background-color: #ff9933; }
+#fhcolor-picker .yellow	{ background-color: #ffff66; }
+#fhcolor-picker .green	{ background-color: #66cc33; }
+#fhcolor-picker .blue	{ background-color: #3366ff;	color: white; }
+#fhcolor-picker .indigo	{ background-color: #660099;	color: white; }
+#fhcolor-picker .violet	{ background-color: #330066;	color: white; }
+#fhcolor-picker .black	{ background-color: #000000;	color: white; }
+</style>
+
+</head>
+<body>
+<div id="fhcolor-picker">
+<div class="indicator" style="display: none"><span></span></div>
+<div class="trigger-swatch" style="display: none;"><span></span></div>
+<ul class="menu" style="display: none">
+	<li class="red"><span>red (best)</span></li>
+	<li class="orange"><span>orange</span></li>
+	<li class="yellow"><span>yellow</span></li>
+	<li class="green"><span>green</span></li>
+	<li class="blue"><span>blue</span></li>
+	<li class="indigo"><span>indigo</span></li>
+	<li class="violet"><span>violet</span></li>
+	<li class="black"><span>black (all)</span></li>
+</ul>
+</div>
+<script type="text/javascript">
+function firehose_set_options(unused, color) {
+	alert('Setting Firehose color to ' + color);
+};
+
+$(function(){
+	var	$fhcolor_picker	= $('#fhcolor-picker'),
+		$trigger_swatch	= $fhcolor_picker.find('div.trigger-swatch'),
+		$menu		= $fhcolor_picker.find('ul.menu'),
+		all_colors	= 'red orange yellow green blue indigo violet black',
+		all_colors_hash = {};
+
+	$.each(all_colors.split(' '), function(){
+		all_colors_hash[this] = true;
+	});
+
+	function item_to_color( $item ){
+		var answer;
+		$.each(($item && $item.attr('className') || '').split(/\s+/), function(){
+			if ( all_colors_hash[this] ) {
+				answer = this;
+				return false;
+			}
+		});
+		return answer;
+	}
+
+	function color_to_item( color ){
+		return $menu.find('li.'+color);
+	}
+
+	function inject_color( color, $elem ){
+		if ( all_colors_hash[color] ) {
+			$elem.
+				removeClass(all_colors).
+				addClass(color).
+				find('span').
+					text( color_to_item(color).text() ).
+				end();
+		}
+		return $elem;
+	}
+
+
+	function swatch_color( color ){
+		if ( !color ) {
+			return item_to_color($trigger_swatch);
+		}
+		inject_color(color, $trigger_swatch);
+	}
+	$fhcolor_picker[0]._swatch_color = swatch_color;
+
+
+
+	function superposition_menu( final_opacity, duration, callback, $item ){
+		if ( !$menu.is(':visible') ) {
+			$menu.css({
+				display:	'block',
+				opacity:	0
+			});
+		}
+
+		var	closing		= !$item,
+			swatch_pos	= $trigger_swatch.offset();
+
+		if ( closing ) {
+			$item = color_to_item(swatch_color());
+		} else {
+			swatch_pos.top += $trigger_swatch.outerHeight();
+		}
+
+		var	item_pos	= $item.offset(),
+			dx		= swatch_pos.left - item_pos.left,
+			dy		= swatch_pos.top - item_pos.top,
+			$indicator	= $fhcolor_picker.find('div.indicator');
+
+		if ( closing ) {
+			$indicator.css({ left: 0, borderWidth: 0 });
+		} else {
+
+		}
+
+		$indicator.css({
+				zIndex:		100
+			}).animate({
+				top:		'+='+dy,
+				left:		'+='+dx
+			}, duration||0);
+
+		return $menu.animate({
+			top:		'+='+dy,
+			left:		'+='+dx,
+			opacity:	final_opacity||0
+		}, duration||0, callback);
+	}
+
+	function indicate( $elem, duration ){
+		var $indicator = $fhcolor_picker.find('div.indicator').css({
+			position:	'absolute',
+			border:		'solid #666',
+			borderWidth:	'0 4px',
+			zIndex:		''
+		});
+
+		if ( ! $elem ) {
+			return $indicator.hide();
+		}
+
+		$indicator.css({
+			display:	'block',
+			height:		$elem.outerHeight()+'px',
+			width:		$elem.outerWidth()+'px',
+			opacity:	1.0
+		});
+		inject_color(item_to_color($elem), $indicator);
+
+		var	elem_pos	= $elem.offset(),
+			indicator_pos	= $indicator.offset();
+
+		return $indicator.animate({
+			top:	'+=' + (elem_pos.top - indicator_pos.top) + 'px',
+			left:	'+=' + (elem_pos.left - indicator_pos.left - 4) + 'px'
+		}, duration||0);
+	}
+
+
+
+
+	var original_color;
+	$menu.menu({
+		triggers:	'#fhcolor-picker div.trigger-swatch',
+		cssNamespace:	'slash',
+		clickToHover:	true,
+
+		start:	function( event ){
+			//$menu.menu('tracking', 'disable');
+
+			original_color = swatch_color();
+			indicate($trigger_swatch);
+			$menu.show();
+			//superposition_menu(1.0, 300, function(){ $menu.menu('tracking', 'enable'); }, $menu.children().eq(0));
+			//$trigger_swatch.css({opacity: 0});
+		},
+		over:	function( event, ui ){
+			var $over = $(ui.over);
+			indicate($over);
+			swatch_color(item_to_color($over));
+		},
+		select:	function( event, ui ){
+			//firehose_set_options('color', item_to_color($(ui.select)));
+		},
+		out:	function( event, ui ){
+			if ( !ui.over ) {
+				indicate($trigger_swatch);
+				(ui.select || swatch_color(original_color));
+			}
+		},
+		stop:	function( event, ui ){
+			indicate(null);
+			$menu.hide();
+// 			$trigger_swatch.css({opacity: 0});
+// 			superposition_menu(0, 400, function(){
+// 				swatch_color(item_to_color($(ui.select)));
+// 				$trigger_swatch.css({opacity: 1});
+// 				$menu.hide();
+// 				indicate(null);
+// 			});
+		}
+	});
+
+	swatch_color('blue');
+	$trigger_swatch.show();
+	//superposition_menu();
+});
+</script>
+
+
+</body>
+</html>
