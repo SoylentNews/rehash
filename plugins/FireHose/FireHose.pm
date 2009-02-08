@@ -3300,10 +3300,7 @@ sub getAndSetOptions {
 		} elsif ($user->{is_admin} && $validator->{categories}{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
 		} elsif ($skin_nexus{$_}) {
-				if (!$not && $skin_nexus{$_} == $constants->{mainpage_nexus_tid}) {
-					$mainpage = 1;
-				}
-				push @{$fh_options->{$not."nexus"}}, $skin_nexus{$_};
+			push @{$fh_options->{$not."nexus"}}, $skin_nexus{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
 			$fh_options->{rejected} = "yes";
 		} elsif ($_ eq "accepted") {
@@ -3359,12 +3356,14 @@ sub getAndSetOptions {
 	}
 
 	# push all necessary nexuses on if we want stories show as brief
-	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} && $mainpage) {
-		my $nexus_children = $self->getMainpageDisplayableNexuses();
-		push @{$fh_options->{nexus}}, @$nexus_children;
+	if ($constants->{brief_sectional_mainpage} && $options->{viewref}{viewname} eq 'stories') {
+		if (!$fh_options->{nexus}) {
+			my $nexus_children = $self->getMainpageDisplayableNexuses();
+			push @{$fh_options->{nexus}}, @$nexus_children, $constants->{mainpage_nexus_tid};
 
-		push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus}) if $user->{story_never_nexus};
-		$fh_options->{offmainpage} = "no";
+			push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus}) if $user->{story_never_nexus};
+			$fh_options->{offmainpage} = "no";
+		}
 	}
 	# Pull out any excluded nexuses we're explicitly asking for
 
