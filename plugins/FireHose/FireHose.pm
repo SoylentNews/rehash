@@ -795,11 +795,11 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (0);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
 	my @sphinx_tables = ('sphinx_search');
-	$sphinx = 1 if $options->{firehose_sphinx} && $user->{is_admin};
+	$sphinx = 2 if $options->{firehose_sphinx} && $user->{is_admin};
 
-	if ($sphinx) {
+	if ($sphinx > 1) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
 		print STDERR "sphinx/gFHE option dump: ", Dumper($options), "\n";
 	}
@@ -825,7 +825,7 @@ sub getFireHoseEssentials {
 
 	my($items, $results, $doublecheck) = ([], {}, 0);
 	# for now, only bother to try searchtoo if there is a qfilter value to search on
-	if (!$sphinx && !$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
+	if ($sphinx < 2 && !$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
@@ -1282,7 +1282,7 @@ sub getFireHoseEssentials {
 	# - Jamie 2009-01-14
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	$sdebug_orig = "SELECT $columns FROM $tables WHERE $where $other;";
-	if ($sphinx) {
+	if ($sphinx > 1) {
 		$user->{state}{fh_sphinxtest} = 1;
 		$sdebug_get_elapsed = Time::HiRes::time;
 		my $hr_hr = $self->getFireHoseByGlobjidMulti($sphinx_ar);
