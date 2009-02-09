@@ -137,8 +137,8 @@ CREATE TABLE firehose_view(
 	duration ENUM("7","-1","") DEFAULT '',
 	mode ENUM ("full","fulltitle", "") DEFAULT "",
 	mixedmode ENUM("1","0","") DEFAULT "",
-	pause ENUM("1","0","") DEFAULT "";
-
+	pause ENUM("1","0","") DEFAULT "",
+	searchbutton ENUM("no","yes"),
 	PRIMARY KEY (id),
 	UNIQUE id_viewname(id,viewname)
 );

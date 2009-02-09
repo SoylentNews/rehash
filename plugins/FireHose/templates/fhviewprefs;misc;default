@@ -47,7 +47,7 @@ END %]
 <script type="text/javascript">
 // dialog not yet shown; move to tie it to the menu item
 (function(){
-	var	$li		= $('#fhsection-[% id %]'),
+	var	$li		= $('#fhsection-[% id %], #fhsection-unsaved').eq(0),
 		li_offset	= $li.offset(),
 		$dialog		= get_modal_parts('#modal_box')
 		$edit_field	= $dialog.find('input#fhsectionname'),
@@ -80,6 +80,12 @@ END %]
 				$content.css('overflow', '');
 				$edit_field.focus();
 			});
+
+		var v = dialog_values();
+		if ( !v.name && !v.filter ) {
+			$dialog.find('input[name=section_filter]').val( $li.data('section_filter') );
+			$edit_field.keyup();
+		}
 
 		// a mouse click outside the dialog must hide it
 		$(document).bind('mousedown.fhviewprefs', function( event ){
@@ -117,6 +123,7 @@ END %]
 	var $save_button = $dialog.
 		find('input[type=button], a.close').
 			click(hide_modal_box).
+			[% IF id %]
 			filter('[value$=hide], [value=delete]').
 				click(function(){
 					var action = $(this).val();
@@ -128,13 +135,14 @@ END %]
 					firehose_delete_section([% id %], {unhide:'undo'}[action]);
 				}).
 			end().
+			[% END %]
 			filter('[value=save]').
 				click(function(){
 					var	requested	= dialog_values(),
 						name_changed	= saved.name != requested.name,
 						query_changed	= (saved.filter != requested.filter) || (saved.view != requested.view);
 					if ( name_changed ) {
-						$li.find('a[id^=fhsectiontitle-]').text($edit_field.val());
+						$li.find('a:first').text($edit_field.val());
 					}
 					if ( name_changed || query_changed ) {
 						saveModalPrefs();
@@ -142,6 +150,13 @@ END %]
 					[% IF id %]
 					if ( query_changed ) {
 						firehose_set_options('section', [% id %]);
+					}
+					if ( $li.is('#fhsection-unsaved') ) {
+						$li.attr('id', 'fhsection-'+[% id %]);
+					}
+					[% ELSE %]
+					if ( $li.is('#fhsection-unsaved') ) {
+						$li.removeAttr('id');
 					}
 					[% END %]
 				});

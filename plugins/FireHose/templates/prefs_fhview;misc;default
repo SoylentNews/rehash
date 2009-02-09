@@ -30,6 +30,8 @@ __template__
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == "daddypants" %]color:#ccc;[% END %]" [% IF view.viewname !="daddypants" %]onclick="getModalPrefs('fhviewdaddypants', 'Customize Daddypants View', 1); return false;"[% END %]>Daddypants</a>
 		[% END %]
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false;">Search</a>
                 </div>
                 [% END %]
 <div style="color:#666">

@@ -33,6 +33,8 @@ __template__
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewdaddypants', 'Customize Daddypants View', 1); return false;">Daddypants</a>
 		[% END %]
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false;">Search</a>
                 </div>
                 [% END %]
 
