@@ -5864,3 +5864,10 @@ UPDATE vars SET value = 'T_2_5_0_241' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('score5_comment', 'Got a Score:5 Comment', 'yes', 1);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('story_accepted', 'Submitted a Story That Was Posted', 'yes', 2);
 
+
+
+# For plugins/FireHose
+
+ALTER TABLE firehose_view ADD COLUMN viewtitle VARCHAR(24) NOT NULL DEFAULT '' AFTER viewname;
+ALTER TABLE firehose_view ADD COLUMN searchbutton ENUM("no","yes") DEFAULT "yes";
+

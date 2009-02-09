@@ -1873,7 +1873,7 @@ sub genSetOptionsReturn {
 	if (($form->{view} && $form->{viewchanged}) || ($form->{section} && $form->{sectionchanged})) {
 		$data->{eval_last} = "firehose_swatch_color('$opts->{color}');";
 	}
-
+	
 	my $eval_first = "";
 	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view fhfilter base_filter)) {
 		my $value = $opts->{$o};
@@ -1888,6 +1888,15 @@ sub genSetOptionsReturn {
 		}
 		$data->{eval_first} .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
 	}
+	if ($opts->{viewref}) {
+		$data->{eval_first} .= "\$('#viewsearch').val('Search '+" . Data::JavaScript::Anon->anon_dump($opts->{viewref}{viewtitle}). ");";
+		if ($opts->{viewref}{searchbutton} eq 'no') {
+			$data->{eval_first} .= "\$('#viewsearch').hide();";
+		} else {
+			$data->{eval_first} .= "\$('#viewsearch').show();";
+		}
+	}
+
 	return $data;
 }
 
@@ -2819,13 +2828,8 @@ sub applyViewOptions {
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
 	} else {
-		# Set skin as base filter
-		if ($options->{section} && $options->{sectionref}) {
-			$options->{fhfilter} = $options->{sectionref}{section_filter};
-		}
-		
-		$options->{base_filter} = $options->{fhfilter};
-		$options->{fhfilter} = "$options->{fhfilter} $view->{filter}";
+		$options->{fhfilter} = "$options->{base_filter}";
+		$options->{view_filter} = "$view->{filter}";
 	}
 
 	foreach (qw(mode mixedmode pause color duration orderby orderdir)) {
@@ -2994,10 +2998,10 @@ sub getAndSetOptions {
 
 	my $mainpage = 0;
 
-	my ($f_change, $v_change, $t_change, $s_change);
+	my ($f_change, $v_change, $t_change, $s_change, $search_trigger);
 
 	if (!$opts->{initial}) {
-		($f_change, $v_change, $t_change, $s_change) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged}, $form->{sectionchanged});
+		($f_change, $v_change, $t_change, $s_change, $search_trigger) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged}, $form->{sectionchanged}, $form->{searchtriggered});
 	}
 	
 	my $validator = $self->getOptionsValidator();
@@ -3022,27 +3026,24 @@ sub getAndSetOptions {
 			$opts->{view} = '';
 			$form->{view} = '';
 			
-		}
+		} else {
 		
-		my $tab; 
-
-		# XXX Don't do if fhfilter specified?
-		print STDERR "FireHose.pm '$form->{section}'\n";
-		my $section = $self->determineCurrentSection();
-		print STDERR "FireHose.pm '$form->{section}'\n";
-		if ($section && $section->{fsid}) {
-			$options->{sectionref} = $section;
-			$options->{section} = $section->{fsid};
-			$options->{base_filter} = $section->{section_filter};
-		}
+			my $section = $self->determineCurrentSection();
+		
+			if ($section && $section->{fsid}) {
+				$options->{sectionref} = $section;
+				$options->{section} = $section->{fsid};
+				$options->{base_filter} = $section->{section_filter};
+			}
 
 		
-		# Jump to default view as necessary
-
-		if (!$tab && !defined $options->{fhfilter} && !$opts->{view} && !$form->{view}) {
-			if ($options->{sectionref}) {
-
-				my $view = $self->getUserViewById($section->{view_id});
+			# Jump to default view as necessary
+	
+			if (!$opts->{view} && !$form->{view}) {
+				my $view;
+				if ($section) {
+					$view = $self->getUserViewById($section->{view_id});
+				}
 
 				if ($view && $view->{id}) {
 					$opts->{view} = $view->{viewname};
@@ -3053,7 +3054,6 @@ sub getAndSetOptions {
 		}
 		
 		my $view;
-		
 
 		if ($opts->{view} || $form->{view}) {
 			my $viewname = $opts->{view} || $form->{view};
@@ -3064,27 +3064,29 @@ sub getAndSetOptions {
 			$options = $self->applyViewOptions($view, $options);
 		}
 
+
+
+
+
 	} else {
+		my $view_applied = 0;
 		# set only global options
 		$options->{$_} = $global_opts->{$_} foreach qw(nocommentcnt nobylines nodates nothumbs nomarquee nocolors noslashboxes mixedmode);
 
 		# handle non-initial pageload
 		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
+		$options->{base_filter} = $form->{fhfilter} if defined $form->{fhfilter};
 		
-		if ($f_change && defined $form->{fhfilter}) {
+		if (($f_change || $search_trigger) && defined $form->{fhfilter}) {
 			my $fhfilter = $form->{fhfilter};
 
 			$options->{fhfilter} = $fhfilter;
 			$options->{base_filter} = $fhfilter;
+			
+			if ($search_trigger) {
+				$form->{view} = 'search';
+			}
 
-			#if (defined $user_tab_filters{$fhfilter}) {
-			#	$form->{tab} = $user_tab_filters{$fhfilter};
-			#} else {
-				$form->{tab} = '';
-			#} 
-			$opts->{tab} = '';
-			$opts->{view} = '';
-			$form->{view} = '';
 		}
 
 		if ($s_change && defined $form->{section}) {
@@ -3092,7 +3094,7 @@ sub getAndSetOptions {
 			if ($section && $section->{fsid}) {
 				$options->{section} = $section->{fsid};
 				$options->{sectionref} = $section;
-
+				$options->{base_filter} = $section->{section_filter};
 
 				my $view = $self->getUserViewById($section->{view_id});
 
@@ -3104,7 +3106,8 @@ sub getAndSetOptions {
 				
 				$options->{viewref} = $self->getUserViewByName($opts->{view});
 
-				$options = $self->applyViewOptions($options->{viewref}, $options)
+				$options = $self->applyViewOptions($options->{viewref}, $options);
+				$view_applied = 1;
 			}
 		} elsif ($form->{view}) {
 			my $view = $self->getUserViewByName($form->{view});
@@ -3112,15 +3115,18 @@ sub getAndSetOptions {
 				$options->{view} = $form->{view};
 				$options->{viewref} = $view;
 			} 
-		}	
+		}
+		$options = $self->applyViewOptions($options->{viewref}, $options) if !$view_applied && $options->{viewref};
 		$options->{tab} = $form->{tab} if $form->{tab} && !$t_change;
 	}
 
 	$options->{global} = $global_opts;
 
 	$options->{mixedmode} = $options->{viewref}{mixedmode} if $options->{viewref};
+	
+	$options->{fhfilter} = $options->{base_filter};
 
-	my $fhfilter = $options->{fhfilter};
+	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
 
 	my $no_saved = $form->{no_saved};
 	$opts->{no_set} ||= $no_saved;
@@ -3354,6 +3360,9 @@ sub getAndSetOptions {
 
 			push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus}) if $user->{story_never_nexus};
 			$fh_options->{offmainpage} = "no";
+			$fh_options->{stories_mainpage} = 1;
+		} else {
+			$fh_options->{stories_sectional} = 1;
 		}
 	}
 	# Pull out any excluded nexuses we're explicitly asking for
@@ -3390,7 +3399,7 @@ sub getAndSetOptions {
 
 	$options->{public} = "yes";
 
-	if ($options->{view} && $options->{view} eq "daddypants" || $form->{admin_filters}) {
+	if ($options->{view} && $options->{view} eq "daddypants") {
 		$options->{admin_filters} = 1;
 	}
 
@@ -3445,7 +3454,6 @@ sub getAndSetOptions {
 			$options->{startdate} = '';
 		}
 		
-		$options->{color} = 'black';
 		if ($the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
 			$options->{mixedmode} = 1;
 			$options->{mode} = 'fulltitle';
@@ -3471,6 +3479,7 @@ sub getAndSetOptions {
 
 #use Data::Dumper;
 #print STDERR Dumper($options);
+#print STDERR "TEST: BASE_FILTER $options->{base_filter}   FHFILTER: $options->{fhfilter} VIEW $options->{view} VFILTER: $options->{view_filter} TYPE: " . Dumper($options->{type}). "\n";
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 	return $options;
 }

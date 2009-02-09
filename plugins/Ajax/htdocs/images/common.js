@@ -418,11 +418,15 @@ function firehose_set_options(name, value, context) {
 		params.filterchanged = 1;
 	}
 
-	if (name == "setfhfilter") {
+	if (name == "setfhfilter" || name == "setsearchfilter") {
 		firehose_settings.fhfilter = value;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
-		params.filterchanged = 1;
+		if (name == "setfhfilter") {
+			params.filterchanged = 1;
+		} else {
+			params.searchtriggered = 1;
+		}
 	}
 
 	if (name == "view") {
@@ -1846,6 +1850,12 @@ function firehose_submit_filter() {
 	}
 }
 
+function firehose_submit_search() {
+	if ($('#searchquery').length > 0) {
+		firehose_set_options('setsearchfilter', $('#searchquery').val());
+	}
+}
+
 function firehose_new_section() {
 	var name = firehose_new_section_name();
 	ajax_update({
@@ -1871,7 +1881,6 @@ function firehose_new_section_handler(transport) {
 function getSeconds () {
 	return new Date().getTime()/1000;
 }
-
 
 
 // ads!  ads!  ads!
