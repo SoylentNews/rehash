@@ -1308,6 +1308,10 @@ sub getFireHoseEssentials {
 	my $count = 0;
 
 	# SSS: unreliable
+	my $sphinx_stats_tf = '';
+	if ($sphinx) {
+		$sphinx_stats_tf = $sphinx_stats->{'total found'};
+	}
 	if (0 && $sphinx) {
 		$count ||= $sphinx_stats->{'total found'};
 	} else {
@@ -1351,15 +1355,17 @@ sub getFireHoseEssentials {
 	}
 
 	if ($sdebug_new) {
-		print STDERR sprintf("%s sphinx:new sphinxse: idset=%.6f get=%.6f count=%.6f %s\n",
+		print STDERR sprintf("%s sphinx:new sphinxse: idset=%.6f get=%.6f count=%.6f sc=%d c=%d %s\n",
 			scalar(gmtime),
 			$sdebug_idset_elapsed, $sdebug_get_elapsed, $sdebug_count_elapsed,
+			$sphinx_stats_tf, $count,
 			$sdebug_new);
 	}
 	if ($sdebug_orig) {
-		print STDERR sprintf("%s sphinx:original sql: orig=%.6f count=%.6f %s\n",
+		print STDERR sprintf("%s sphinx:original sql: orig=%.6f count=%.6f c=%d %s\n",
 			scalar(gmtime),
 			$sdebug_orig_elapsed, $sdebug_count_elapsed,
+			$count,
 			$sdebug_orig);
 	}
 
