@@ -795,8 +795,10 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (0);
 	my @sphinx_tables = ('sphinx_search');
+	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+	$sphinx = 1 if $sphinxdb;
 	$sphinx = 2 if $options->{firehose_sphinx} && $user->{is_admin};
 
 	if ($sphinx > 1) {
@@ -1265,7 +1267,6 @@ sub getFireHoseEssentials {
 
 		$sdebug_new = "SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;";
 
-		$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 		$sdebug_idset_elapsed = Time::HiRes::time;
 		$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
 			$stables, "query=$query$swhere", $sphinx_other,
