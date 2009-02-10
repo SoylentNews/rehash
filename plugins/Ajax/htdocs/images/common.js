@@ -1435,16 +1435,7 @@ function firehose_calendar_init( widget ) {
 	widget.changeEvent.subscribe(firehose_cal_select_handler, widget, true);
 }
 
-function firehose_swatch_color( color ){
-	// set or get the color displayed by the color picker trigger-swatch
-
-	var swatch_color;
-	$('#fhcolor-picker').each(function(){
-		swatch_color = this._swatch_color(color);
-		return false;
-	});
-	return swatch_color;
-}
+function firehose_swatch_color(){} // does not exist until firehose-color-picker makes it available
 
 function firehose_change_section_anon(section) {
 	window.location.href= window.location.protocol + "//" + window.location.host + "/firehose.pl?section=" + encodeURIComponent(section) + "&tabtype=tabsection";

@@ -14,51 +14,7 @@ fhcolor_picker
 __seclev__
 10000
 __template__
-[% IF !user.is_anon %]
-<style type="text/css">
-#fhcolor-picker {
-	position: absolute;
-	top: 0;
-	left: -87px;
-}
-#fhcolor-picker .menu,
-#fhcolor-picker .menu li,
-#fhcolor-picker .trigger-swatch {
-	display: block;
-	width: 80px;
-	margin: 0;
-	padding: 0;
-	text-align: center;
-	cursor: pointer;
-	list-style: none;
-}
-#fhcolor-picker .trigger-swatch,
-#fhcolor-picker li {
-	height: 18px;
-}
-#fhcolor-picker span {
-	display: none;
-	padding-top: 3px;
-	font-size: 93%;
-	font-family: sans-serif;
-}
-#fhcolor-picker .red span,
-#fhcolor-picker .black span,
-#fhcolor-picker li.slash-hover span,
-#fhcolor-picker .trigger-swatch span {
-	display: block;
-}
-#fhcolor-picker .red	{ background-color: #990000;	color: white; }
-#fhcolor-picker .orange	{ background-color: #ff9933; }
-#fhcolor-picker .yellow	{ background-color: #ffff66; }
-#fhcolor-picker .green	{ background-color: #66cc33; }
-#fhcolor-picker .blue	{ background-color: #3366ff;	color: white; }
-#fhcolor-picker .indigo	{ background-color: #660099;	color: white; }
-#fhcolor-picker .violet	{ background-color: #330066;	color: white; }
-#fhcolor-picker .black	{ background-color: #000000;	color: white; }
-</style>
-
-<div id="fhcolor-picker">
+<div id="[% id %]" class="fhcolor-picker">
 <div class="trigger-swatch" style="display: none;"><span></span></div>
 <ul class="menu" style="display: none">
 	<li class="red"><span>red (best)</span></li>
@@ -73,66 +29,52 @@ __template__
 </div>
 <script type="text/javascript">
 $(function(){
-	var	$fhcolor_picker	= $('#fhcolor-picker'),
-		$trigger_swatch	= $fhcolor_picker.find('div.trigger-swatch'),
-		$menu		= $fhcolor_picker.find('ul.menu'),
-		all_colors	= 'red orange yellow green blue indigo violet black',
-		all_colors_hash = {};
+var	$picker = $('#[% id %]'),
+	$swatch	= $picker.find('div.trigger-swatch'),
+	$menu	= $picker.find('ul.menu');
 
-	$.each(all_colors.split(' '), function(){
-		all_colors_hash[this] = true;
-	});
+function color( expr, new_color ){
+	return expr && (expr.jQuery ? expr : $(expr)).data('color', new_color);
+}
+function show_color( new_color ){
+	$swatch.removeClass(color($swatch)||'red orange yellow green blue indigo violet black').
+		data('color', new_color).
+		addClass(new_color).
+		show().
+		find('span').
+			text($menu.find('li.'+new_color).text());
+}
+function save_color( new_color ){
+	(new_color && show_color(new_color));
+	return color($picker, new_color);
+}
+$picker.data('color_fn', save_color);
 
-	function item_color( $item ){
-		var answer;
-		$.each(($item && $item.attr('className') || '').split(/\s+/), function(){
-			if ( all_colors_hash[this] ) {
-				answer = this;
-				return false;
-			}
-		});
-		return answer;
-	}
+$menu.menu({
+	trigger:	'#[% id %] div.trigger-swatch',
+	cssNamespace:	'slash',
 
-
-	function swatch_color( s ){
-		if ( s !== undefined ) {
-			$trigger_swatch.
-				removeClass(all_colors).
-				addClass(s).
-				find('span').
-					text( $menu.find('li.'+s).text() ).
-				end().
-				show();
-		} else {
-			return item_color($trigger_swatch);
+	start: function(){
+		$menu.show();
+	},
+	over: function( e, ui ){
+		show_color(color(ui.over));
+	},
+	select: function( e, ui ){
+		var new_color = color(ui.select);
+		if ( new_color !== color($picker) ) {
+			save_color(new_color);
+			$picker.trigger('change', new_color);
 		}
+	},
+	out: function( e, ui ){
+		(!ui.over && !ui.select && show_color(color($picker)));
+	},
+	stop: function(){
+		$menu.hide();
 	}
-	$fhcolor_picker[0]._swatch_color = swatch_color;
-
-	var original_color;
-	$menu.menu({
-		trigger:	'#fhcolor-picker div.trigger-swatch',
-		cssNamespace:	'slash',
-		start:	function( event ){
-			original_color = swatch_color();
-			$menu.show();
-		},
-		over:	function( event, ui ){
-			swatch_color(item_color($(ui.over)));
-		},
-		select:	function( event, ui ){
-			firehose_set_options('color', item_color($(ui.select)));
-		},
-		out:	function( event, ui ){
-			if ( !ui.over ) swatch_color(original_color);
-		},
-		stop:	function( event, ui ){
-			$menu.hide();
-		}
-	});
-
-	swatch_color(firehose_settings.color);
+}).children().each(function(){
+	color(this, this.className);
+});
 });
 </script>
-[% END %]
