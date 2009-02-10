@@ -1022,7 +1022,7 @@ sub getFireHoseEssentials {
 				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
 
 				if ($sphinx) {
-					push @sphinx_opts, "range=createtime_ut,$st_sphinx," . $st_sphinx+$dur_sphinx;
+					push @sphinx_opts, "range=createtime_ut,$st_sphinx," . ($st_sphinx+$dur_sphinx);
 				}
 			} elsif ($options->{duration} == -1) {
 				if ($options->{orderdir} eq "ASC") {
@@ -1227,6 +1227,7 @@ sub getFireHoseEssentials {
 		my $offset_num = defined $options->{offset} ? $options->{offset} : '';
 		$offset_num = '' if $offset_num !~ /^\d+$/;
 		$offset = "$offset_num, " if length $offset_num;
+		# nolimit is only used as part of the SearchToo / KinoSearch hack - pudge 
 		$limit_str = "LIMIT $offset $fetch_size" unless $options->{nolimit};
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 
@@ -1244,12 +1245,9 @@ sub getFireHoseEssentials {
 				$sphinx_other = $limit_str;
 			} else {
 				push @sphinx_opts, "offset=$offset_num" if length $offset_num;
-				if ($options->{nolimit}) {
-					push @sphinx_opts, "limit=$fetch_size";
-					push @sphinx_opts, "maxmatches=$fetch_size"
-						if $fetch_size > 1000; # SSS use the var
-				}
-
+				push @sphinx_opts, "limit=$fetch_size";
+				push @sphinx_opts, "maxmatches=$fetch_size"
+					if $fetch_size > 1000; # SSS use the var
 		 	}
 		}
 	}
@@ -1308,13 +1306,10 @@ sub getFireHoseEssentials {
 
 	my $count = 0;
 
-	# SSS: unreliable
 	my $sphinx_stats_tf = '';
 	if ($sphinx) {
-		$sphinx_stats_tf = $sphinx_stats->{'total found'};
-	}
-	if (0 && $sphinx) {
 		$count ||= $sphinx_stats->{'total found'};
+		$sphinx_stats_tf = $sphinx_stats->{'total found'};
 	} else {
 		$sdebug_count_elapsed = Time::HiRes::time;
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
@@ -1874,7 +1869,7 @@ sub genSetOptionsReturn {
 	if (($form->{view} && $form->{viewchanged}) || ($form->{section} && $form->{sectionchanged})) {
 		$data->{eval_last} = "firehose_swatch_color('$opts->{color}');";
 	}
-	
+
 	my $eval_first = "";
 	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view fhfilter base_filter)) {
 		my $value = $opts->{$o};
