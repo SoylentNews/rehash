@@ -343,7 +343,7 @@ sub make_werds {
 		http://www.google.com/search?q=cache:h58W7o4qU-w:www.space.com/sciencefiction/tv/futurama_gore_000516_wg.html+Futurama+Fry&hl=en
 		http://dmoz.org/Regional/Europe/United_Kingdom/Wales/Isle_of_Anglesey/Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch/
 		www.google.com                  bad_link b.a.d l.i.n.k . .. ... ....
-		mailto:jamie@slashdot.org       mailto:pater@slashdot.org
+		mailto:jamie@slashdot.org
 	);
 	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
 	my $comment;
