@@ -16,7 +16,7 @@ CREATE TABLE `sphinx_counter_archived` (
   UNIQUE KEY `src_completion` (`src`,`completion`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `sphinx_search` (
+CREATE TABLE IF NOT EXISTS `sphinx_search` (
   `globjid` int(11) NOT NULL,
   `weight` int(11) NOT NULL,
   `query` varchar(3072) NOT NULL,
@@ -37,5 +37,5 @@ CREATE TABLE `sphinx_search` (
   `primaryskid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
   KEY `query` (`query`)
-) ENGINE=SPHINX;
+) ENGINE=InnoDB;
 
