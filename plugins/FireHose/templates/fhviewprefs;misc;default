@@ -173,11 +173,15 @@ END %]
 	invalid_name[''] = true;	// ...nor without a name at all
 
 	// test and enable/disable (as needed) on keyup
-	$edit_field.keyup(function(){
+	$edit_field.keyup(function( e ){
 		var next_disabled = invalid_name[$.trim($(this).val()).toLowerCase()];
 		if ( next_disabled != prev_disabled ) {
 			$save_button.attr('disabled', (next_disabled ? 'disabled' : ''));
 			prev_disabled = next_disabled;
+		}
+		if ( e.which == $.keyCode.ENTER ) {
+			$save_button.click();
+			return false;
 		}
 	});
 })();
