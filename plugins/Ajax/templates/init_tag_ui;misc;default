@@ -29,6 +29,7 @@ var suggestions_for_context = {
 	story: 'neverdisplay',
 	'default': 'hold quik back typo dupe',
 [% END %]
+	feedback: 'typo dupe error',
 	metanod: 'insightful interesting informative funny underrated',
 	metanix: 'offtopic flamebait troll redundant overrated'
 };

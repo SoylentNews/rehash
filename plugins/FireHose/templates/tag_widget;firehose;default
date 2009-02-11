@@ -72,6 +72,7 @@ END %]</div>
 			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
 			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="menu:false">unsigned</div>
 		[%- END -%]
+		[% IF future %]<div class="tag-display-stub" context="feedback" init="menu:false">feedback</div>[% END %]
 		<div class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</div>
 		[%# the suggestions bar %]
 		<div class="related">

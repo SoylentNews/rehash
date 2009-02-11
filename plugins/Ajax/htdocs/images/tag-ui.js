@@ -1024,6 +1024,7 @@ YAHOO.slashdot.topicTags = ["keyword",
 	];
 
 	context_triggers = map_list_to_set(data_types);
+	context_triggers['feedback']=true;
 
 
 	well_known_tags = {};
