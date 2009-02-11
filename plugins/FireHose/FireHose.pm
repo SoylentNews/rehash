@@ -896,6 +896,9 @@ sub getFireHoseEssentials {
 	if ($sphinx) {
 		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
 		$tagged_by_uid =~ s/\D+//g;
+		# In both cases, only hose items "tagged for hose" by the
+		# user in question are returned.
+		push @sphinx_opts, "filter=tfh," . $tagged_by_uid;
 		if ($need_tagged == 1) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
@@ -908,11 +911,8 @@ sub getFireHoseEssentials {
 		} elsif ($need_tagged == 2) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
-			# any "tagged for hose" tags, e.g. /~foo/firehose
-			# SSS make this an MVA
-			push @sphinx_tables, 'firehose_tfh';
-			push @sphinx_where, 'firehose_tfh.globjid = sphinx_search.globjid';
-			push @sphinx_where, "firehose_tfh.uid = $tagged_by_uid";
+			# any "tagged for hose" tags, e.g. /~foo/firehose.
+			# This was already accomplished by the filter=tfh above.
 		}
 	}
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
