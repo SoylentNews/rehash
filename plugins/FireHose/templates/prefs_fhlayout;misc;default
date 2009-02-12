@@ -164,15 +164,16 @@ __template__
                         Turn this off to hide dates on abbreviated items
                 </div>
 
-		Page Size<br><br>
-		
+		[% default = user.firehose_pagesize || "small" %]
+		<label>Page size</label> [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'Large'}, { default => default, return => 1} ) %]<br>
 		[% pause_check = '';
                 IF user.firehose_pause;
                         pause_check = constants.markup_checked_attribute;
                 END
                 %]
 
-                <label><input type="checkbox" name="paused"[% pause_check %]> <b>Paused</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');" class="help">?</a>
+                <label><input type="checkbox" name="paused"[% pause_check %]>
+		Paused</label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
                         Pause updates, don't auto-update view

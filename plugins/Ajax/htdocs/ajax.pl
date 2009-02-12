@@ -1555,7 +1555,8 @@ sub saveModalPrefs {
 			firehose_nodates	=> ($params{showdates} ? undef: 1),
 			firehose_pause		=> ($params{paused} ? 1: undef),
 			firehose_advanced	=> ($params{advanced} ? 1 : undef),
-			firehose_sphinx		=> ($params{sphinx} ? 1 : undef)
+			firehose_sphinx		=> ($params{sphinx} ? 1 : undef),
+			firehose_pagesize	=> ($params{pagesize} ? $params{pagesize} : "small")
 		};
 
 		if (defined $params{tzcode} && defined $params{tzformat}) {

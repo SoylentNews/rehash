@@ -3161,7 +3161,7 @@ sub getAndSetOptions {
 	} else {
 		my $view_applied = 0;
 		# set only global options
-		$options->{$_} = $global_opts->{$_} foreach qw(nocommentcnt nobylines nodates nothumbs nomarquee nocolors noslashboxes mixedmode);
+		$options->{$_} = $global_opts->{$_} foreach qw(nocommentcnt nobylines nodates nothumbs nomarquee nocolors noslashboxes mixedmode pagesize);
 
 		# handle non-initial pageload
 		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
