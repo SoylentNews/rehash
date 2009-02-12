@@ -2787,7 +2787,6 @@ sub getAndSetGlobalOptions {
 			$self->setUser($user->{uid}, $set_options);
 		}
 	}
-
 	return $options;
 }
 
@@ -2918,9 +2917,16 @@ sub applyViewOptions {
 		$options->{view_filter} = $viewfilter;
 	}
 
-	foreach (qw(mode pause color duration orderby orderdir datafilter)) {
+	foreach (qw(mode color duration orderby orderdir datafilter)) {
 		$options->{$_} = $view->{$_} if $view->{$_} ne "";
 	}
+
+	if (!$second) {
+		foreach (qw(pause)) {
+			$options->{$_} = $view->{$_} if $view->{$_} ne "";
+		}
+	}
+
 	$options->{usermode} = 1;
 
 	if ($user->{is_admin}) {
@@ -3196,7 +3202,7 @@ sub getAndSetOptions {
 				
 				$options->{viewref} = $self->getUserViewByName($opts->{view});
 
-				$options = $self->applyViewOptions($options->{viewref}, $options);
+				$options = $self->applyViewOptions($options->{viewref}, $options, 1);
 				$view_applied = 1;
 			}
 		} elsif ($form->{view}) {
@@ -3206,7 +3212,7 @@ sub getAndSetOptions {
 				$options->{viewref} = $view;
 			} 
 		}
-		$options = $self->applyViewOptions($options->{viewref}, $options) if !$view_applied && $options->{viewref};
+		$options = $self->applyViewOptions($options->{viewref}, $options, 1) if !$view_applied && $options->{viewref};
 		$options->{tab} = $form->{tab} if $form->{tab} && !$t_change;
 	}
 
@@ -3237,14 +3243,10 @@ sub getAndSetOptions {
 
 	$options->{mode} = $s_change ? $options->{mode} : $mode;
 
-	$options->{pause} = defined $options->{pause} ? $options->{pause} : 1;
 	$form->{pause} = 1 if $no_saved;
 
 	my $firehose_page = $user->{state}{firehose_page} || '';
 
-	if (defined $form->{pause}) {
-		$options->{pause} = $form->{pause} ? 1 : 0;
-	}
 	if (defined $form->{duration}) {
 		if ($form->{duration} =~ /^-?\d+$/) {
 			$options->{duration} = $form->{duration};
@@ -3517,12 +3519,11 @@ sub getAndSetOptions {
 		if ($form->{section}) {
 			$options->{sectionref} = $self->getFireHoseSection($form->{section});
 		}
-		$self->applyViewOptions($options->{viewref}, $options);
+		$self->applyViewOptions($options->{viewref}, $options, 1);
 	}
 	
 	if ($form->{index}) {
 		$options->{index} = 1;
-		$options->{pause} = 1;
 		$options->{skipmenu} = 1;
 
 		if ($options->{stories_mainpage}) {
@@ -3561,7 +3562,7 @@ sub getAndSetOptions {
 #print STDERR Dumper($options);
 #print STDERR "TEST: BASE_FILTER $options->{base_filter}   FHFILTER: $options->{fhfilter} VIEW $options->{view} VFILTER: $options->{view_filter} TYPE: " . Dumper($options->{type}). "\n";
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
-#print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned}\n";
+#print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned} PAUSE $options->{pause} FPAUSE: |$form->{pause}|\n";
 	return $options;
 }
 
