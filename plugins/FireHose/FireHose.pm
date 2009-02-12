@@ -799,7 +799,7 @@ sub getFireHoseEssentials {
 	my @sphinx_tables = ('sphinx_search');
 	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 	$sphinx = 1 if $sphinxdb;
-	$sphinx = 2 if $options->{firehose_sphinx} && $user->{is_admin};
+	$sphinx = 2 if $sphinx && $options->{firehose_sphinx} && $user->{is_admin};
 
 	if ($sphinx > 1) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
