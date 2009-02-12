@@ -34,6 +34,20 @@ END %]
 [% UNLESS nodiv %]
 	[% IF !user.is_anon && gSkin.name != 'idle' %]
 		<a id="toggleleftmenu" onclick="return false" class="[% IF user.firehose_hide_section_menu && (user.firehose_hide_section_menu != 'false') %]collapsed[% ELSE %]expanded[% END %]" href="#" title="Toggle left menu">Toggle left menu</a>
+		<script type="text/javascript">
+		$(function(){
+			$("#toggleleftmenu").click(function(){
+				var hide = $(this).toggleClasses('expanded', 'collapsed').is('.collapsed') ? 1 : 0;
+				$('div#yui-main div.yui-b').toggleClassTo('hideleftmenu', hide);
+				ajax_update({
+					op:			'firehose_save_section_menu_visible',
+					reskey:			reskey_static,
+					hide_section_menu:	hide
+				});
+				return false;
+			});
+		});
+		</script>
 	[% END %]
 <ul class="menu" id="fhtablist">[% END %]
 
