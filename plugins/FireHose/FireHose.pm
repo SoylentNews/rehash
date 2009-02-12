@@ -3524,22 +3524,23 @@ sub getAndSetOptions {
 		$options->{index} = 1;
 		$options->{pause} = 1;
 		$options->{skipmenu} = 1;
-		if (!$form->{issue} && getCurrentSkin()->{nexus} != $constants->{mainpage_nexus_tid}) {
+
+		if ($options->{stories_mainpage}) {
+			if(!$form->{issue}) {
+				$options->{duration} = 7;
+				$options->{startdate} = '';
+				$options->{mixedmode} = 1;
+				$options->{mode} = 'fulltitle';
+			}
+		}
+
+		if ($options->{stories_sectional}) {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
-		}
-		if (!$form->{issue} && getCurrentSkin()->{nexus} == $constants->{mainpage_nexus_tid}) {
-			$options->{duration} = 7;
-			$options->{startdate} = '';
-		}
-		
-		if ($the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
-			$options->{mixedmode} = 1;
-			$options->{mode} = 'fulltitle';
-		} else {
 			$options->{mode} = 'full';
 			$options->{mixedmode} = 0;
 		}
+		
 	}
 
 	if ($form->{more_num} && $form->{more_num} =~ /^\d+$/) {
