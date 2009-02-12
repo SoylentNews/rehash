@@ -135,13 +135,29 @@ CREATE TABLE firehose_view(
 	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
 	color VARCHAR(16) NOT NULL DEFAULT '',
 	duration ENUM("7","-1","") DEFAULT '',
-	mode ENUM ("full","fulltitle", "") DEFAULT "",
-	mixedmode ENUM("1","0","") DEFAULT "",
+	mode ENUM ("full","fulltitle", "mixed","") DEFAULT "",
 	pause ENUM("1","0","") DEFAULT "",
 	searchbutton ENUM("no","yes"),
 	PRIMARY KEY (id),
 	UNIQUE id_viewname(id,viewname)
 );
+
+DROP TABLE IF EXISTS firehose_view_settings;
+CREATE TABLE firehose_view_settings(
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
+	mode ENUM ("full","fulltitle", "mixed","") DEFAULT "",
+	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
+	admin_unsigned ENUM("no","yes") DEFAULT 'no',
+	usermode ENUM("no","yes") DEFAULT "yes",
+	PRIMARY KEY (uid,id),
+	UNIQUE uid_id(uid,id)
+);
+
+
 
 
 DROP TABLE IF EXISTS firehose_update_log;
