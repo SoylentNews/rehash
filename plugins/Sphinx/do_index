@@ -44,7 +44,6 @@ while (1) {
 		 || $prev{$index} + $freq{$index} < $time
 		) {
 			$prev{$index} = $time;
-			print scalar(gmtime), "\n";
 			system(join(' ',
 				"/usr/local/sphinx/bin/indexer",
 				"--config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf",
@@ -60,7 +59,7 @@ while (1) {
 	my $sleep_time = ($next - Time::HiRes::time) - 0.1;
 	$sleep_time = 0.1 if $sleep_time < 0.1;
 	$sleep_time = 60 if $sleep_time > 60;
-	printf("%s sleeping %.3f\n", scalar(gmtime), $sleep_time);
+	printf("%s sleeping %.3f\n", scalar(gmtime), $sleep_time) if $sleep_time >= 1;
 	Time::HiRes::sleep($sleep_time);
 }
 
