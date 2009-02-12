@@ -1582,9 +1582,6 @@ function check_logged_in(){ return logged_in || (show_login_box(), 0); }
 
 
 function getModalPrefs(section, title, tabbed, params){
-	// if the modal_box is already in use: close it nicely (cleaning up anything custom)
-	get_modal_parts('#modal_box:visible').each(hide_modal_box);
-
 	if ( !reskey_static ) {
 		return show_login_box();
 	}
