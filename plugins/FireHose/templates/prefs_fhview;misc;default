@@ -13,7 +13,12 @@ prefs_fhview
 __seclev__
 10000
 __template__
-<form>
+<form id ="modal_prefs" method="post">
+<input type="hidden" name="formname" value="fhview">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
+
+
                 [% IF tabbed == 1 %]
                 <div style="margin-top: 1em; text-align: center;">
                 &nbsp;
@@ -31,57 +36,52 @@ __template__
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == "daddypants" %]color:#ccc;[% END %]" [% IF view.viewname !="daddypants" %]onclick="getModalPrefs('fhviewdaddypants', 'Customize Daddypants View', 1); return false;"[% END %]>Daddypants</a>
 		[% END %]
                 &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false;">Search</a>
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == "search" %]color:#ccc;[% END %]" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false;">Search</a>
                 </div>
                 [% END %]
-<div style="color:#666">
-Filter [% view.filter %]
-</div>
-<br>
 <label>
 Color
 </label>
 [% view.color %]
-<br><br>
-[% mode = view.mode;
-   IF view.mixedmode;
-   	mode = "mixed";
-   END;
-%]
-<input type="radio" name="mode" value="fulltitle"[% constants.markup_checked_attribute IF mode == 'fulltitle' %]> Headlines
-<input type="radio" name="mode" value="full"[% constants.markup_checked_attribute IF mode == 'full' %]>Full Text 
-<input type="radio" name="mode" value="mixed"[% constants.markup_checked_attribute IF mode == 'mixed' %]>Mixed
+<input type="hidden" name="color" id="colorfield" value="[% view.color %]">
 <br>
-
+<br>
 [% asc_check = '';
    IF view.orderdir == 'ASC';
 	asc_check = constants.markup_checked_attribute;
    END;
 
 %]
-<input type="checkbox" name="sortasc"[% asc_check %]> <label>Sort ascending</label><br>
-<label>Sort By</label> 
+<b>Sort</b> <input type="checkbox" name="sortasc"[% asc_check %]> Ascending
+<br><b>By</b> 
 Score <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'popularity' %] value="popularity">
 Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' %] value="createtime"><br>
 <br>
-<div style="color:#666">
-<input type="radio" name="content" value="stories"> Only Stories <input type="radio" name="content" value="nostories"> No Stories <input type="radio" name="content" value="all"> All[% IF user.is_admin %]<input type="radio" name="content" value="unsigned"> Unsigned[% END %]
-</div>
+<label>Show</label><br>
+<input type="checkbox" name="story_check"[% constants.markup_checked_attribute IF story_check %]> Stories 
+[% IF user.is_admin %]
+<input type="checkbox" name="admin_unsigned"[% constants.markup_checked_attribute IF view.admin_unsigned == "yes" %]> Hide Signed Stories
+[% END %]
+<br>
+<input type="checkbox" name="other_check"[% constants.markup_checked_attribute IF other_check %]> Other Content<br> 
+<input type="radio" name="mode" value="fulltitle"[% constants.markup_checked_attribute IF view.mode == 'fulltitle' %]> Headlines
+<input type="radio" name="mode" value="full"[% constants.markup_checked_attribute IF view.mode == 'full' %]> Full Text 
+<input type="radio" name="mode" value="mixed"[% constants.markup_checked_attribute IF view.mode == 'mixed' %]> Mixed
+<br>
 <br>
 [% IF user.is_admin %]
 [% usermode_check = '';
-   IF user.firehose_usermode;
+   IF view.usermode == "yes";
 	usermode_check = constants.markup_checked_attribute;
    END;
 
 %]
 <input type="checkbox" name="usermode"[% usermode_check %]> <label>User Mode</label><br>
 [% END %]
-<br>
-<div style="color:#666">
-<input type="checkbox"> Stories Expand <input type="radio" name="storiesmode" value="full"> All <input type="radio" name="storiesmode" value="mixed"> Some <input type="radio" name="storiesmode" value="fulltitle">None<br>
-<input type="checkbox"> Other Content Expand <input type="radio" name="othermode" value="full"> All <input type="radio" name="othermode" value="mixed"> Some <input type="radio" name="othermode" value="fulltitle">None<br>
-</div>
 <p>
 <p>
+<input name="viewid" value="[% view.id %]" type="hidden">
+<input type="button" value="Save" onclick="saveModalPrefs()">
+<input type="button" value="Cancel" onclick="hide_modal_box()">
+
 </form>

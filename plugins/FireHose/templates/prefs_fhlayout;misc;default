@@ -206,6 +206,7 @@ __template__
 
                 <br>
                 <input type="button" value="Save" onclick="saveModalPrefs()">
+		<input type="button" value="Cancel" onclick="hide_modal_box()">
 </form>
 __seclev__
 500
