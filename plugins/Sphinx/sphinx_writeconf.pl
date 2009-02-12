@@ -367,25 +367,37 @@ source src_firehose_main
 	sql_attr_uint		= primaryskid
 	sql_attr_uint		= uid
 
-	sql_attr_multi		= uint signoff from ranged-query		;		\
+	sql_attr_multi		= uint signoff from ranged-query				\
+		;										\
 		SELECT firehose.globjid, signoff.uid						\
 			FROM firehose, globjs, signoff						\
 			WHERE firehose.globjid BETWEEN $start AND $end				\
 			AND firehose.globjid=globjs.globjid					\
 			AND gtid=1								\
-			AND globjs.target_id=signoff.stoid;					\
+			AND globjs.target_id=signoff.stoid					\
+		;										\
 		SELECT MIN(firehose.globjid), MAX(firehose.globjid) FROM firehose, globjs	\
 			WHERE firehose.globjid=globjs.globjid AND gtid = 1
 
-	sql_attr_multi		= uint tid from ranged-query			;		\
+	sql_attr_multi		= uint tid from ranged-query					\
+		;										\
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
 			WHERE firehose.globjid BETWEEN $start AND $end				\
 			AND firehose.globjid=globjs.globjid					\
 			AND gtid IN (1,3,4,5,7,11)						\
-			AND firehose.id=firehose_topics_rendered.id		;		\
+			AND firehose.id=firehose_topics_rendered.id				\
+		;										\
 		SELECT MIN(firehose.globjid), MAX(firehose.globjid) FROM firehose, globjs	\
 			WHERE firehose.globjid=globjs.globjid AND gtid IN (1,3,4,5,7,11)
+
+	sql_attr_multi		= uint tfh from ranged-query					\
+		;										\
+		SELECT globjid, uid								\
+			FROM firehose_tfh							\
+			WHERE globjid BETWEEN $start AND $end					\
+		;										\
+		SELECT MIN(globjid), MAX(globjid) FROM firehose_tfh
 
 	sql_ranged_throttle	= 10
 }
@@ -492,7 +504,8 @@ source src_firehose_delta1 : src_firehose_main
 			(SELECT MIN(last_seen) FROM sphinx_counter				\
 			WHERE src=0 AND completion <= 1)
 
-	sql_attr_multi		= uint signoff from query			;		\
+	sql_attr_multi		= uint signoff from query					\
+		;										\
 		SELECT firehose.globjid, signoff.uid						\
 			FROM firehose, globjs, signoff						\
 			WHERE firehose.globjid=globjs.globjid					\
@@ -502,12 +515,22 @@ source src_firehose_delta1 : src_firehose_main
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
 				WHERE src=0 AND completion <= 1)
 
-	sql_attr_multi		= uint tid from query				;		\
+	sql_attr_multi		= uint tid from query						\
+		;										\
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
 			WHERE firehose.globjid=globjs.globjid					\
 			AND gtid IN (1,3,4,5,7,11)						\
 			AND firehose.id=firehose_topics_rendered.id				\
+			AND firehose.last_update >=						\
+				(SELECT MIN(last_seen) FROM sphinx_counter			\
+				WHERE src=0 AND completion <= 1)
+
+	sql_attr_multi		= uint tfh from query						\
+		;										\
+		SELECT firehose.globjid, firehose_tfh.uid					\
+			FROM firehose, firehose_tfh						\
+			WHERE firehose.globjid=firehose_tfh.globjid				\
 			AND firehose.last_update >=						\
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
 				WHERE src=0 AND completion <= 1)
@@ -616,7 +639,8 @@ source src_firehose_delta2 : src_firehose_main
 			(SELECT MIN(last_seen) FROM sphinx_counter				\
 			WHERE src=1 AND completion <= 1)
 
-	sql_attr_multi		= uint signoff from query			;		\
+	sql_attr_multi		= uint signoff from query					\
+		;										\
 		SELECT firehose.globjid, signoff.uid						\
 			FROM firehose, globjs, signoff						\
 			WHERE firehose.globjid=globjs.globjid					\
@@ -626,12 +650,22 @@ source src_firehose_delta2 : src_firehose_main
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
 				WHERE src=1 AND completion <= 1)
 
-	sql_attr_multi		= uint tid from query				;		\
+	sql_attr_multi		= uint tid from query						\
+		;										\
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
 			WHERE firehose.globjid=globjs.globjid					\
 			AND gtid IN (1,3,4,5,7,11)						\
 			AND firehose.id=firehose_topics_rendered.id				\
+			AND firehose.last_update >=						\
+				(SELECT MIN(last_seen) FROM sphinx_counter			\
+				WHERE src=1 AND completion <= 1)
+
+	sql_attr_multi		= uint tfh from query						\
+		;										\
+		SELECT firehose.globjid, firehose_tfh.uid					\
+			FROM firehose, firehose_tfh						\
+			WHERE firehose.globjid=firehose_tfh.globjid				\
 			AND firehose.last_update >=						\
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
 				WHERE src=1 AND completion <= 1)
