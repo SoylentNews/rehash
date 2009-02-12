@@ -2346,8 +2346,9 @@ sub getObject {
 				$objects->{$class, $vuser} = $object if !$data->{nocache};
 				return $object;
 			}
-			$@ ||= 'unknown';
-			errorLog("Class $class is installed for '$vuser' but returned false for new(): $@");
+			my $err = $@ || 'unknown';
+			$err =~ s/timeout/timeout($timeout)/;
+			errorLog("Class $class is installed for '$vuser' but returned false for new(): $err");
 		}
 	} else {
 		if ($@) {
