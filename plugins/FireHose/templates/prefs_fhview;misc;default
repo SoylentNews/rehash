@@ -23,8 +23,10 @@ __template__
                 <div style="margin-top: 1em; text-align: center;">
                 &nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a>
+		[% IF 0 %]
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+		[% END %]
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px; [% IF view.viewname == "stories" %]color:#ccc;[% END %]" [% IF view.viewname !="stories" %]onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false;"[% END %]>Stories</a>
                 &nbsp;|&nbsp;

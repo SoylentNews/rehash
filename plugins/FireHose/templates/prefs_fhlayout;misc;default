@@ -21,8 +21,10 @@ __template__
                 <div style="margin-top: 1em; text-align: center;">
                 &nbsp;
                 <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Layout</span>
+		[% IF 0 %]
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+		[% END %]
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false;">Stories</a>
                 &nbsp;|&nbsp;
