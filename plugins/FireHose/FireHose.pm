@@ -175,6 +175,28 @@ sub setFireHoseSectionPrefs {
 	
 }
 
+sub setFireHoseViewPrefs {
+	my($self, $id, $data) = @_;
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+
+	return if $user->{is_anon};
+	my $uid_q = $self->sqlQuote($user->{uid});
+
+	my $cur_view = $self->getUserViewById($id);
+
+	if ($cur_view) {
+		my $cur_prefs = $self->getViewUserPrefs($cur_view->{id});
+		if ($cur_prefs) {
+			$self->sqlUpdate("firehose_view_settings", $data, "id=$cur_prefs->{id} AND uid=$uid_q");
+		} else {
+			$data->{uid} = $user->{uid};
+			$data->{id} = $cur_view->{id};
+			$self->sqlInsert("firehose_view_settings", $data);
+		}
+	}
+}
+
 sub getFireHoseSectionsMenu {
 	my($self) = @_;
 	my $user = getCurrentUser();
@@ -326,6 +348,16 @@ sub getSectionUserPrefs {
 	my $fsid_q = $self->sqlQuote($fsid);
 	my $uid_q = $self->sqlQuote($user->{uid});
 	return $self->sqlSelectHashref("*", "firehose_section_settings", "uid=$uid_q AND fsid=$fsid_q");
+}
+
+sub getViewUserPrefs {
+	my($self, $id) = @_;
+	my $user = getCurrentUser();
+	return if $user->{is_anon};
+	my $id_q = $self->sqlQuote($id);
+	my $uid_q = $self->sqlQuote($user->{uid});
+	return $self->sqlSelectHashref("*", "firehose_view_settings", "uid=$uid_q AND id=$id_q");
+	
 }
 
 sub getFireHoseColors {
@@ -2787,7 +2819,7 @@ sub getUserViewById {
 	my $uid_q = $self->sqlQuote($user->{uid});
 	my $id_q = $self->sqlQuote($id);
 
-	return $self->sqlSelectHashref("*", "firehose_view", "uid in (0,$uid_q) && id = $id_q");
+	return $self->sqlSelectHashref("*", "firehose_view", "uid in (0,$uid_q) && id = $id_q and seclev<=$user->{seclev}");
 }
 
 sub getUserViewByName {
@@ -2831,6 +2863,18 @@ sub determineCurrentSection {
 
 	$section = $self->applyUserSectionPrefs($section);
 	return $section;
+}
+
+sub applyUserViewPrefs {
+	my($self, $view) = @_;
+	my $constants = getCurrentStatic();
+	my $user_prefs = $self->getViewUserPrefs($view->{id});
+	if ($user_prefs) {
+		foreach (qw(datafilter usermode admin_unsigned orderby orderdir)) {
+			$view->{$_} = $user_prefs->{$_}
+		}
+	}
+	return $view;
 }
 
 sub applyUserSectionPrefs {
@@ -3514,6 +3558,7 @@ sub getAndSetOptions {
 #print STDERR Dumper($options);
 #print STDERR "TEST: BASE_FILTER $options->{base_filter}   FHFILTER: $options->{fhfilter} VIEW $options->{view} VFILTER: $options->{view_filter} TYPE: " . Dumper($options->{type}). "\n";
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
+#print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned}\n";
 	return $options;
 }
 

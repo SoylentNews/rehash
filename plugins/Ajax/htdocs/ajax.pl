@@ -841,14 +841,29 @@ sub getModalPrefs {
 		if ($name) {
 			$view = $fh->getUserViewByName($name);
 		}
-		use Data::Dumper;
-		my $vdump = Dumper($view);
+		$view = $fh->applyUserViewPrefs($view);
+
+		my $story_check = 0;
+		my $other_check = 0;
+
+		if ($view) {
+			if ($view->{datafilter} =~ /story/ && $view->{datafilter} !~/-story/) {
+				$story_check = 1;
+			} elsif ($view->{datafilter} =~/\-story/) {
+				$other_check = 1;
+				$story_check = 0;
+			} else {
+				$story_check = 1;
+				$other_check = 1;
+			}
+		}
 		
 		slashDisplay(
 			"prefs_fhview", {
-				tabbed 	=> $form->{tabbed},
-				view	=> $view,
-				vdump	=> $vdump
+				tabbed 		=> $form->{tabbed},
+				view		=> $view,
+				story_check 	=> $story_check,
+				other_check 	=> $other_check,
 			},
 			{ Return => 1}
 		);
@@ -1549,6 +1564,35 @@ sub saveModalPrefs {
 			$user_edits_table->{dst}    = $params{dst};
 		}
 
+	}
+
+	if ($params{'formname'} eq "fhview" ) {
+		if ($params{viewid}) {
+			my $fh = getObject("Slash::FireHose");
+			my $view = $fh->getUserViewById($params{viewid});
+			my $data = {};
+			if ($view) {
+				foreach (qw(mode orderby orderdir color)) {
+					$data->{$_} = defined $params{$_} ? $params{$_} : $view->{$_};
+				}
+				if ($user->{is_admin}) {
+					foreach (qw(admin_unsigned usermode)) {
+						$data->{$_} = $params{$_} ? "yes" : "no";
+					}
+				} else {
+					$data->{usermode} = "yes";
+					$data->{admin_unsigned} = "no"
+				}
+				if ($params{story_check} && $params{other_check}) {
+					$data->{datafilter} = '';
+				} elsif ($params{other_check} && !$params{story_check})  {
+					$data->{datafilter} = "-story";
+				} elsif ($params{story_check}) {
+					$data->{datafilter} = "story";
+				}
+			}
+			$fh->setFireHoseViewPrefs($params{viewid}, $data);
+		}
 	}
 
 	if ($params{'formname'} eq "slashboxes") {
