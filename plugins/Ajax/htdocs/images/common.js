@@ -506,7 +506,7 @@ function firehose_set_options(name, value, context) {
 			var issuedate = firehose_settings.issue.substr(5,2) + "/" + firehose_settings.issue.substr(8,2) + "/" + firehose_settings.issue.substr(10,2);
 
 			$('#fhcalendar, #fhcalendar_pag').each(function(){
-				this._widget.setDate(issuedate, "day");
+			//	this._widget.setDate(issuedate, "day");
 			});
 		}
 		if (name == "color") {
