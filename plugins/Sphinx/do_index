@@ -49,6 +49,7 @@ while (1) {
 				"/usr/local/sphinx/bin/indexer",
 				"--config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf",
 				"--rotate",
+				"--quiet",
 				"idx_firehose_$index"));
 			Time::HiRes::sleep(0.1);
 			$do_the_rest = 1;
