@@ -18,6 +18,8 @@ $task{$me}{code} = sub {
 
 	my $achievements = getObject('Slash::Achievements');
 	return 'Achievements not installed, aborting' unless $achievements;
+
+	# Generate archived Score 5 comments
 	$achievements->getScore5Comments();
 
 	return;

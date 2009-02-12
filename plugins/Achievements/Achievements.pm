@@ -163,7 +163,7 @@ sub getAchievementItemCount {
 
         my $count;
         if ($ach_name eq 'story_accepted') {
-                my $submissions = $slashdb->getSubmissionsByUID($uid, '', { accepted_only => 1});
+                my $submissions = $slashdb->getSubmissionsByUID($uid, '', { accepted_only => 1 });
                 $count = scalar @$submissions;
         } else {
                 $count = $slashdb->sqlCount($ach_item_count->{$ach_name}{table}, $ach_item_count->{$ach_name}{where});
@@ -178,28 +178,27 @@ sub getScore5Comments {
 
 	my $comments = $self->sqlSelectAllHashref(
 		'cid',
-		'cid, sid, uid',
-		'comments',
-		'points = 5 AND uid != ' . $constants->{anonymous_coward_uid}
+		"comments.cid, comments.uid",
+		'comments, discussions',
+		'comments.points = 5' .
+		' and comments.uid != ' . $constants->{anonymous_coward_uid} .
+		' and comments.sid = discussions.id' .
+		" and discussions.type = 'archived'"
 	);
 
 	my $score5comments_archived;
 	foreach my $cid (keys %$comments) {
-		my $type = $self->sqlSelect('type', 'discussions', "id = " . $comments->{$cid}{sid});
-		if ($type eq 'archived') {
-			push(@{$score5comments_archived->{$comments->{$cid}{uid}}}, $cid);
-		}
+		push(@{$score5comments_archived->{$comments->{$cid}{uid}}}, $cid);
 	}
 
-	my $score5_achievement = $self->getAchievement('score5_comment');
-	my $aid = $score5_achievement->{score5_comment}{aid};
-
 	foreach my $uid (keys %$score5comments_archived) {
-		my $comment_count = scalar(@{$score5comments_archived->{$uid}});
-		$self->setUserAchievement('score5_comment', $uid, { ignore_lookup => 1, exponent => $comment_count });
-        }
-}
+		$self->setUserAchievement('score5_comment', $uid, { ignore_lookup => 1, exponent => scalar(@{$score5comments_archived->{$uid}}) });
 
+		# If they've posted a Score:5 comment, they've clearly obtained this.
+		# Deprecate this when retroactive achievements are added?
+		$self->setUserAchievement('comment_posted', $uid, { ignore_lookup => 1, exponent => 0 });
+	}
+}
 
 sub DESTROY {
         my($self) = @_;
