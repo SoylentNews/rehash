@@ -2896,24 +2896,37 @@ sub applyViewOptions {
 	my($self, $view, $options, $second) = @_;
 	my $gSkin = getCurrentSkin();
 	my $form = getCurrentForm();
+	my $user = getCurrentUser();
 
+	$view = $self->applyUserViewPrefs($view);
 	$options->{view} = $view->{viewname};
 	$options->{viewref} = $view;
 
+	my $viewfilter = "$view->{filter}";
+	$viewfilter .= " $view->{datafilter}" if $view->{datafilter};
+	$viewfilter .= " unsigned" if $user->{is_admin} && $view->{admin_unsigned} eq "yes";
+
 
 	if ($view->{useparentfilter} eq "no") {
-		$options->{fhfilter} = "$view->{filter}";
-		$options->{view_filter} = "$view->{filter}";
+		$options->{fhfilter} = $viewfilter;
+		$options->{view_filter} = $viewfilter;
 		$options->{basefilter} = "";
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
 	} else {
 		$options->{fhfilter} = "$options->{base_filter}";
-		$options->{view_filter} = "$view->{filter}";
+		$options->{view_filter} = $viewfilter;
 	}
 
-	foreach (qw(mode mixedmode pause color duration orderby orderdir)) {
+	foreach (qw(mode pause color duration orderby orderdir datafilter)) {
 		$options->{$_} = $view->{$_} if $view->{$_} ne "";
+	}
+	$options->{usermode} = 1;
+
+	if ($user->{is_admin}) {
+		foreach (qw(usermode admin_unsigned)) {
+			$options->{$_} = $view->{$_} eq "yes" ? 1 : 0;
+		}		
 	}
 
 	return $options;
