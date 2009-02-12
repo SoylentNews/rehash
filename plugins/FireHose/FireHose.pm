@@ -27,6 +27,7 @@ use strict;
 use Data::Dumper;
 use Data::JavaScript::Anon;
 use Date::Calc qw(Days_in_Month Add_Delta_YMD);
+use Digest::MD5 'md5_hex';
 use POSIX qw(ceil);
 use LWP::UserAgent;
 use URI;
@@ -795,11 +796,15 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (1);
+	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (0);
 	my @sphinx_tables = ('sphinx_search');
 	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 	$sphinx = 1 if $sphinxdb;
 	$sphinx = 2 if $options->{firehose_sphinx} && $user->{is_admin};
+	# admins turn it on or off manually
+	#if ($sphinx == 1 && !$user->{is_admin}) { $sphinx == 2 if rand(20) <= 1 }  # 5 percent
+
+	my $no_mcd = $user->{is_admin} && !$user->{firehose_usermode} ? 1 : 0;
 
 	if ($sphinx > 1) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
@@ -888,7 +893,6 @@ sub getFireHoseEssentials {
 	my $tables = 'firehose';
 	my $tags = getObject('Slash::Tags');
 
-	# SSS: not sure what to do with tag stuff yet
 	my $need_tagged = 0;
 	$need_tagged = 1 if $options->{tagged_by_uid} && $options->{tagged_as};
 	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
@@ -1143,9 +1147,9 @@ sub getFireHoseEssentials {
 			}
 		}
 
-		# SSS
 		if ($user->{is_admin} || $user->{acl}{signoff_allowed}) {
 			my $signoff_label = 'sign' . $user->{uid} . 'ed';
+			$no_mcd = 1;
 
 			if ($options->{unsigned}) {
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
@@ -1253,7 +1257,7 @@ sub getFireHoseEssentials {
 	}
 
 	# SSS: mode?
-	my($hr_ar, $sphinx_ar, $sphinx_stats) = ([], []);
+	my($hr_ar, $sphinx_ar, $sphinx_stats) = ([], [], {});
 	my($sdebug_new, $sdebug_orig) = ('', '');
 	my($sdebug_idset_elapsed, $sdebug_get_elapsed, $sdebug_orig_elapsed, $sdebug_count_elapsed) = (0, 0, 0, 0);
 	if ($sphinx) {
@@ -1265,12 +1269,34 @@ sub getFireHoseEssentials {
 
 		$sdebug_new = "SELECT sphinx_search.globjid FROM $stables WHERE query=$query$swhere $sphinx_other;";
 
-		$sdebug_idset_elapsed = Time::HiRes::time;
-		$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
-			$stables, "query=$query$swhere", $sphinx_other,
-			{ sql_no_cache => 1 });
-		$sphinx_stats = $sphinxdb->getSphinxStats;
-		$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
+		my $mcd = $self->getMCD;
+		my($mcdkey_data, $mcdkey_stats);
+		# ignore memcached if admin, or if usermode is on
+		if ($mcd && !$no_mcd) {
+			my $id = md5_hex($self->serializeOptions($options, $user));
+
+			$mcdkey_data  = "$self->{_mcd_keyprefix}:gfhe_sphinx:$id";
+			$mcdkey_stats = "$self->{_mcd_keyprefix}:gfhe_sphinxstats:$id";
+			$sphinx_ar = $mcd->get($mcdkey_data) || [];
+			$sphinx_stats = $mcd->get($mcdkey_stats) || {};
+		}
+
+		if (!@$sphinx_ar) {
+			$sdebug_idset_elapsed = Time::HiRes::time;
+			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
+				$stables, "query=$query$swhere", $sphinx_other,
+				{ sql_no_cache => 1 });
+			$sphinx_stats = $sphinxdb->getSphinxStats;
+			$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
+
+			if ($mcdkey_data) {
+				# keep this 45 seconds the same as cache
+				# in common.js:getFirehoseUpdateInterval
+				my $exptime = 45;
+				$mcd->set($mcdkey_data, $sphinx_ar, $exptime);
+				$mcd->set($mcdkey_stats, $sphinx_stats, $exptime);
+			}
+		}
 	}
 
 
@@ -1296,7 +1322,6 @@ sub getFireHoseEssentials {
 		$sdebug_orig_elapsed = Time::HiRes::time - $sdebug_orig_elapsed;
 	}
 
-	# SSS: does this change for Sphinx?
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
@@ -2084,7 +2109,6 @@ sub ajaxFireHoseGetUpdates {
 			} else {
 				$update_data->{new}++;
 				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
-				$item->{title} .= ' [SPHINX]' if $user->{state}{fh_sphinxtest};
 				my $data = {
 					mode => $curmode,
 					item => $item,
@@ -2939,7 +2963,7 @@ sub sphinxFilterQuery {
 my @options = (
 	# meta search parameters
 	qw(
-		limit nolimit more_num orderby orderdir offset
+		limit more_num orderby orderdir offset
 		startdate duration fetch_text admin_filters
 	),
 	# other search parameters
@@ -2949,22 +2973,19 @@ my @options = (
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
 		tagged_by_uid tagged_as offmainpage smalldevices
 		createtime_no_future createtime_subscriber_future
+		tagged_non_negative uid ids
 	)
 );
 
 # from the user
 my @prefs = qw(
-	is_admin firehose_usermode
+	off_set
 );
 
 # some things can be arrays; sort numerically unless listed here
 my %stringsort = (map { $_ => 1 } qw(
 	type not_type
 ));
-
-# XXX still need to figure these out ...
-# ids uid qfilter carryover no_search
-# ignore_nix tagged_positive tagged_negative tagged_non_negative
 
 sub serializeOptions {
 	my($self, $options, $prefs) = @_;
@@ -3786,7 +3807,6 @@ sub listView {
 		} else {
 	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 			slashProf("firehosedisp");
-			$item->{title} .= ' [SPHINX]' if $user->{state}{fh_sphinxtest};
 			$itemstext .= $self->dispFireHose($item, {
 				mode			=> $curmode,
 				tags_top		=> $tags_top,		# old-style

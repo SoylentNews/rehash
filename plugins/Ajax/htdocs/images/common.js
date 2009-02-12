@@ -1340,6 +1340,7 @@ function getSecsSinceLastFirehoseAction() {
 }
 
 function getFirehoseUpdateInterval() {
+	// keep this 45 seconds the same as cache in getFireHoseEssentials
 	var interval = 45000;
 	if (updateIntervalType == 1) {
 		interval = 30000;
