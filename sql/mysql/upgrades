@@ -5871,3 +5871,5 @@ INSERT INTO achievements (name, description, repeatable, increment) VALUES ('sto
 ALTER TABLE firehose_view ADD COLUMN viewtitle VARCHAR(24) NOT NULL DEFAULT '' AFTER viewname;
 ALTER TABLE firehose_view ADD COLUMN searchbutton ENUM("no","yes") DEFAULT "yes";
 
+# For plugins/Achievements (important!)
+ALTER TABLE user_achievements MODIFY COLUMN exponent smallint unsigned NOT NULL default '0';
