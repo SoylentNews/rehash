@@ -2244,6 +2244,10 @@ DB at random that is of that type.
 Boolean.  Get a new object, not a cached one.  Also won't cache the resulting object
 for future calls.
 
+=item timeout
+
+Boolean.  Will time out after ''timeout'' seconds in trying to get the object.
+
 =back
 
 
@@ -2265,6 +2269,8 @@ sub getObject {
 	my($class, $data, @args) = @_;
 	my($vuser, $cfg, $objects);
 	my $user = getCurrentUser();
+
+	my $timeout = defined $data->{timeout} ? $data->{timeout} : 5;
 
 	# clean up dangerous characters
 	$class =~ s/[^\w:]+//g;
@@ -2329,12 +2335,19 @@ sub getObject {
 	# asked not to use the cache.
 	if (loadClass($class)) { # 'require' the class
 		if ($class->isInstalled($vuser) && $class->can('new')) {
-			my $object = $class->new($vuser, @args);
+			my $object;
+			eval {
+				local $SIG{ALRM} = sub { die "timeout" } if $timeout;
+				alarm($timeout) if $timeout;
+				$object = $class->new($vuser, @args);
+				alarm(0);
+			};
 			if ($object) {
 				$objects->{$class, $vuser} = $object if !$data->{nocache};
 				return $object;
 			}
-			errorLog("Class $class is installed for '$vuser' but returned false for new()");
+			$@ ||= 'unknown';
+			errorLog("Class $class is installed for '$vuser' but returned false for new(): $@");
 		}
 	} else {
 		if ($@) {
@@ -2381,7 +2394,7 @@ sub loadClass {
 	# other part of the code, we can avoid an eval here.
 	(my $file = $class) =~ s|::|/|g;
 	eval "require $class" unless exists $INC{"$file.pm"};
-	
+
 	if ($@) {
 		# Our attempt to load the class failed.  Return false,
 		# and in this case, $@ tells what the error was.
