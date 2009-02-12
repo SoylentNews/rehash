@@ -48,12 +48,10 @@ __template__
 	END;
     IF user.is_admin;
 	adminmode = 1;
-	IF options.firehose_usermode.defined;
-		IF options.firehose_usermode;
+	IF options.usermode;
+		IF options.usermode;
 			adminmode = 0;
 		END;
-	ELSIF user.firehose_usermode;
-		adminmode = 0;
 	END;
     END;
 
@@ -183,7 +181,7 @@ END %]
 									</p>
 									[% END %]
 
-									[% IF user.is_admin && !user.firehose_usermode %]
+									[% IF user.is_admin && !options.usermode %]
 									<div class="tagshide" id="toggletags-body-[% id %]">
 										<div id="admin-extras-[% item.id %]" class="tagadminextra"></div>
 									</div>

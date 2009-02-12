@@ -17,7 +17,7 @@ __template__
 	<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
 [% END %]
 [% PROCESS formatHoseIntro introtext = item.introtext forform = 1 %]
-				[% IF user.is_admin && !user.firehose_usermode %]
+				[% IF user.is_admin  %]
 				[% IF item.type == "journal" %]
 					<input type="hidden" name="journal_id" value="[% item.srcid | strip_attribute %]">
 				[% END %]
