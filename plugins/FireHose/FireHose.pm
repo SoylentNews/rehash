@@ -1164,7 +1164,7 @@ sub getFireHoseEssentials {
 
 		if ($pop) {
 			my $pop_q = $self->sqlQuote($pop);
-			if ($user->{is_admin} && !$user->{firehose_usermode}) {
+			if ($user->{is_admin} && !$options->{usermode}) {
 				push @where, "editorpop >= $pop_q";
 
 				if ($sphinx) { # in sphinx index, popularity has 1000000 added to it
@@ -2079,7 +2079,7 @@ sub ajaxFireHoseGetUpdates {
 	my $updates = [];
 
 	my $adminmode = $user->{is_admin};
-	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
+	$adminmode = 0 if $user->{is_admin} && $opts->{usermode};
 	my $ordered = [];
 	my $now = $slashdb->getTime();
 	my $added = {};
@@ -3017,7 +3017,7 @@ my @options = (
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
 		tagged_by_uid tagged_as offmainpage smalldevices
 		createtime_no_future createtime_subscriber_future
-		tagged_non_negative uid ids
+		tagged_non_negative uid ids usermode
 	)
 );
 
@@ -3269,7 +3269,7 @@ sub getAndSetOptions {
 
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
-			if ($user->{is_admin} && !$user->{firehose_usermode}) {
+			if ($user->{is_admin} && !$options->{usermode}) {
 				$options->{orderby} = 'editorpop';
 			} else {
 				$options->{orderby} = 'popularity';
@@ -3311,10 +3311,6 @@ sub getAndSetOptions {
 	
 	#$user_tabs = $self->genUntitledTab($user_tabs, $options);	
 
-
-	if ($user->{is_admin} && $form->{setusermode}) {
-		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "0" });
-	}
 
 	foreach (qw(nodates nobylines nothumbs nocolors noslashboxes nomarquee)) {
 		if ($form->{setfield}) {
@@ -3460,23 +3456,17 @@ sub getAndSetOptions {
 		$options->{$_} = $fh_options->{$_};
 	}
 
-	if ($user->{is_admin} && $form->{setusermode}) {
-		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
-	}
-
 	my $adminmode = 0;
 	$adminmode = 1 if $user->{is_admin};
 	if ($no_saved) {
 		$adminmode = 0;
-	} elsif (defined $options->{firehose_usermode}) {
-		$adminmode = 0 if $options->{firehose_usermode};
-	} else {
-		$adminmode = 0 if $user->{firehose_usermode};
-	}
+	} elsif (defined $options->{usermode}) {
+		$adminmode = 0 if $options->{usermode};
+	} 
 
 	$options->{public} = "yes";
 
-	if ($options->{view} && $options->{view} eq "daddypants") {
+	if (!$options->{usermode}) {
 		$options->{admin_filters} = 1;
 	}
 
