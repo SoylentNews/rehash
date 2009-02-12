@@ -30,18 +30,36 @@ __template__
 [% ELSE %]
 <div class="section_name">[% name | strip_literal %]</div>
 [% END %]
-<div class="section_filter">Filter: <input type="text" name="section_filter" class="section_filter" value="[% filter | strip_attribute %]"></div>
-<div class="section_initialview">Initial View: [% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]</div>
+<div class="yui-gd section_filter">
+    <div class="yui-u first">
+		Filter:
+    </div>
+    <div class="yui-u">
+		<input type="text" name="section_filter" class="section_filter" value="[% filter | strip_attribute %]">
+	</div>
+</div>
+
+<div class="yui-gd section_initialview">
+    <div class="yui-u first">
+		Initial View:
+    </div>
+    <div class="yui-u">
+		[% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]
+	</div>
+</div>
 
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
+<span class="actions">
 <input type="button" value="save">
 <!--<input type="button" value="cancel">-->
 [% hide_available = 1 %]
 [% IF fh_section && fh_section.uid == 0 && fh_section.skid == constants.mainpage_skid;
 	hide_available = 0;
 END %]
+
 [% IF id && hide_available %]<input type="button" value="[% IF fh_section && fh_section.uid == 0 %][% IF display=="no" %]un[% END %]hide[% ELSE %]delete[% END %]">[% END %]
+</span>
 
 </form>
 <script type="text/javascript">
