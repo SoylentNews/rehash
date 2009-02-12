@@ -129,7 +129,6 @@ CREATE TABLE firehose_view(
 	admin_maxitems tinyint NOT NULL DEFAULT -1,
 	maxitems tinyint NOT NULL DEFAULT -1,
 	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
-
 	filter VARCHAR(255) NOT NULL DEFAULT '',
 	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
 	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
@@ -138,6 +137,9 @@ CREATE TABLE firehose_view(
 	mode ENUM ("full","fulltitle", "mixed","") DEFAULT "",
 	pause ENUM("1","0","") DEFAULT "",
 	searchbutton ENUM("no","yes"),
+	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
+	admin_unsigned ENUM("no","yes") DEFAULT 'no', 
+	usermode ENUM("no","yes") DEFAULT "yes",
 	PRIMARY KEY (id),
 	UNIQUE id_viewname(id,viewname)
 );

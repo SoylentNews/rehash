@@ -5873,3 +5873,33 @@ ALTER TABLE firehose_view ADD COLUMN searchbutton ENUM("no","yes") DEFAULT "yes"
 
 # For plugins/Achievements (important!)
 ALTER TABLE user_achievements MODIFY COLUMN exponent smallint unsigned NOT NULL default '0';
+
+# For plugins/FireHose
+CREATE TABLE firehose_view_settings(
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
+	mode ENUM ("full","fulltitle", "mixed","") DEFAULT "",
+	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
+	admin_unsigned ENUM("no","yes") DEFAULT 'no',
+	usermode ENUM("no","yes") DEFAULT "yes",
+	PRIMARY KEY (uid,id),
+	UNIQUE uid_id(uid,id)
+);
+
+ALTER TABLE firehose_view ADD COLUMN datafilter VARCHAR(128) NOT NULL DEFAULT '', ADD COLUMN admin_unsigned ENUM("no","yes") DEFAULT 'no', ADD COLUMN usermode ENUM("no","yes") DEFAULT "yes";
+
+ALTER TABLE MODIFY firehose_view COLUMN mode ENUM ("full","fulltitle", "mixed", "") DEFAULT "";
+UPDATE firehose_view set mode="mixed" where mixedmode=1;
+ALTER TABLE firehose_view DROP COLUMN mixedmode;
+
+UPDATE firehose_view SET usermode="yes",admin_unsigned="no";
+UPDATE firehose_view SET datafilter="story",filter="" WHERE filter="story";
+UPDATE firehose_view SET datafilter="-story",filter="" WHERE filter="-story";
+UPDATE firehose_view SET admin_unsigned="yes",filter="" WHERE filter="unsigned";
+UPDATE firehose_view SET admin_unsigned="yes", usermode="no" WHERE viewname="daddypants";
+
+UPDATE firehose_view SET mode="mixed" WHERE viewname IN ("stories","popular","daddypants");
+
