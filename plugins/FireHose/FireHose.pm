@@ -2096,7 +2096,7 @@ sub ajaxFireHoseGetUpdates {
 
 
 	foreach (@$items) {
-		if ($opts->{mixedmode}) {
+		if ($opts->{mode} eq "mixed") {
 			$curmode = "full";
 			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
 
@@ -2717,7 +2717,7 @@ sub getOptionsValidator {
 	);
 
 	my $valid = {
-		mode 		=> { full => 1, fulltitle => 1 },
+		mode 		=> { full => 1, fulltitle => 1, mixed => 1 },
 		type 		=> { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1, project => 1 },
 		orderdir 	=> { ASC => 1, DESC => 1},
 		orderby 	=> { createtime => 1, popularity => 1, editorpop => 1, neediness => 1 },
@@ -3218,7 +3218,6 @@ sub getAndSetOptions {
 	} 
 	
 	my $mode = $form->{mode} || $options->{mode} || '';
-	$mode = "fulltitle" if $mode eq "mixed";
 
 	my $pagesize = $form->{pagesize} && $validator->{pagesize}{$form->{pagesize}};
 	$options->{pagesize} = $pagesize || $options->{pagesize}  || "small";
