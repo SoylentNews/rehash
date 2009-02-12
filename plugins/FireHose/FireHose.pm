@@ -800,7 +800,7 @@ sub getFireHoseEssentials {
 	my @sphinx_tables = ('sphinx_search');
 	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
 	$sphinx = 1 if $sphinxdb;
-	$sphinx = 2 if $options->{firehose_sphinx} && $user->{is_admin};
+	$sphinx = 2 if $sphinx && $options->{firehose_sphinx} && $user->{is_admin};
 	# admins turn it on or off manually
 	#if ($sphinx == 1 && !$user->{is_admin}) { $sphinx == 2 if rand(20) <= 1 }  # 5 percent
 
