@@ -179,7 +179,7 @@ END %]
 			$save_button.attr('disabled', (next_disabled ? 'disabled' : ''));
 			prev_disabled = next_disabled;
 		}
-		if ( e.which == $.keyCode.ENTER ) {
+		if ( e.which == $.ui.keyCode.ENTER ) {
 			$save_button.click();
 			return false;
 		}
