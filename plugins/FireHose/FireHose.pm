@@ -3531,8 +3531,7 @@ sub getAndSetOptions {
 			if(!$form->{issue}) {
 				$options->{duration} = 7;
 				$options->{startdate} = '';
-				$options->{mixedmode} = 1;
-				$options->{mode} = 'fulltitle';
+				$options->{mode} = "mixed";
 			}
 		}
 
@@ -3540,7 +3539,6 @@ sub getAndSetOptions {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
 			$options->{mode} = 'full';
-			$options->{mixedmode} = 0;
 		}
 		
 	}
