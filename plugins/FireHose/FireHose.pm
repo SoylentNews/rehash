@@ -3841,7 +3841,7 @@ sub listView {
 	my $constants = getCurrentStatic();
 
 	foreach (@$items) {
-		if ($options->{mixedmode}) {
+		if ($options->{mode} eq "mixed") {
 			$curmode = "full";
 			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
 
