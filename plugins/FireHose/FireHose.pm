@@ -2933,7 +2933,6 @@ sub applyViewOptions {
 			$options->{$_} = $view->{$_} eq "yes" ? 1 : 0;
 		}		
 	}
-
 	return $options;
 }
 
@@ -3248,31 +3247,33 @@ sub getAndSetOptions {
 
 	my $firehose_page = $user->{state}{firehose_page} || '';
 
-	if (defined $form->{duration}) {
-		if ($form->{duration} =~ /^-?\d+$/) {
-			$options->{duration} = $form->{duration};
-		}
-	}
-	$options->{duration} = "7" if !$options->{duration};
-
-	if (defined $form->{startdate}) {
-		if ($form->{startdate} =~ /^\d{8}$/) {
-			my ($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
-			if ($y) {
-				$options->{startdate} = "$y-$m-$d";
+	if (!$v_change && !$s_change && !$search_trigger) {
+		if (defined $form->{duration}) {
+			if ($form->{duration} =~ /^-?\d+$/) {
+				$options->{duration} = $form->{duration};
 			}
 		}
-	}
-	$options->{startdate} = "" if !$options->{startdate};
-	if ($form->{issue}) {
-		if ($form->{issue} =~ /^\d{8}$/) {
-			my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
-			$options->{startdate} = "$y-$m-$d";
-			$options->{issue} = $form->{issue};
-			$options->{duration} = 1;
+		$options->{duration} = "7" if !$options->{duration};
 
-		} else {
-			$form->{issue} = "";
+		if (defined $form->{startdate}) {
+			if ($form->{startdate} =~ /^\d{8}$/) {
+				my ($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
+				if ($y) {
+					$options->{startdate} = "$y-$m-$d";
+				}
+			}
+		}
+		$options->{startdate} = "" if !$options->{startdate};
+		if ($form->{issue}) {
+			if ($form->{issue} =~ /^\d{8}$/) {
+				my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
+				$options->{startdate} = "$y-$m-$d";
+				$options->{issue} = $form->{issue};
+				$options->{duration} = 1;
+
+			} else {
+				$form->{issue} = "";
+			}
 		}
 	}
 
@@ -3562,6 +3563,7 @@ sub getAndSetOptions {
 #print STDERR "TEST: BASE_FILTER $options->{base_filter}   FHFILTER: $options->{fhfilter} VIEW $options->{view} VFILTER: $options->{view_filter} TYPE: " . Dumper($options->{type}). "\n";
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 #print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned} PAUSE $options->{pause} FPAUSE: |$form->{pause}|\n";
+#print STDERR "DURATION $options->{duration} STARTDATE: $options->{startdate}\n";
 	return $options;
 }
 
