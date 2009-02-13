@@ -836,7 +836,7 @@ sub getFireHoseEssentials {
 	# admins turn it on or off manually
 	#if ($sphinx == 1 && !$user->{is_admin}) { $sphinx == 2 if rand(20) <= 1 }  # 5 percent
 
-	my $no_mcd = $user->{is_admin} && !$user->{firehose_usermode} ? 1 : 0;
+	my $no_mcd = $user->{is_admin} && !$options->{usermode} ? 1 : 0;
 
 	if ($sphinx > 1) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
