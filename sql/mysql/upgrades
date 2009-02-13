@@ -5831,7 +5831,6 @@ CREATE TABLE achievements (
         increment tinyint(1) unsigned NOT NULL default '0',
         PRIMARY KEY (aid)
 ) TYPE=InnoDB;
-
 CREATE TABLE user_achievements (
         id mediumint(8) unsigned NOT NULL auto_increment,
         uid mediumint(8) unsigned NOT NULL default '0',
@@ -5841,7 +5840,6 @@ CREATE TABLE user_achievements (
         PRIMARY KEY  (id),
         UNIQUE KEY achievement (uid,aid)
 ) TYPE=InnoDB;
-
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('story_posted', 'Has Posted a Story', 'yes', 2);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comment_posted', 'Has Posted a Comment', 'no', 0);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('journal_posted', 'Has Posted a Journal Entry', 'no', 0);
@@ -5864,10 +5862,7 @@ UPDATE vars SET value = 'T_2_5_0_241' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('score5_comment', 'Got a Score:5 Comment', 'yes', 1);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('story_accepted', 'Submitted a Story That Was Posted', 'yes', 2);
 
-
-
 # For plugins/FireHose
-
 ALTER TABLE firehose_view ADD COLUMN viewtitle VARCHAR(24) NOT NULL DEFAULT '' AFTER viewname;
 ALTER TABLE firehose_view ADD COLUMN searchbutton ENUM("no","yes") DEFAULT "yes";
 
@@ -5875,9 +5870,9 @@ ALTER TABLE firehose_view ADD COLUMN searchbutton ENUM("no","yes") DEFAULT "yes"
 ALTER TABLE user_achievements MODIFY COLUMN exponent smallint unsigned NOT NULL default '0';
 
 # For plugins/FireHose
-CREATE TABLE firehose_view_settings(
+CREATE TABLE firehose_view_settings (
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	id mediumint(8) unsigned NOT NULL auto_increment,
+	id mediumint(8) unsigned NOT NULL,
 	color VARCHAR(16) NOT NULL DEFAULT '',
 	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
 	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
@@ -5885,21 +5880,16 @@ CREATE TABLE firehose_view_settings(
 	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
 	admin_unsigned ENUM("no","yes") DEFAULT 'no',
 	usermode ENUM("no","yes") DEFAULT "yes",
-	PRIMARY KEY (uid,id),
-	UNIQUE uid_id(uid,id)
-);
-
+	PRIMARY KEY (uid,id)
+) ENGINE=InnoDB;
 ALTER TABLE firehose_view ADD COLUMN datafilter VARCHAR(128) NOT NULL DEFAULT '', ADD COLUMN admin_unsigned ENUM("no","yes") DEFAULT 'no', ADD COLUMN usermode ENUM("no","yes") DEFAULT "yes";
-
 ALTER TABLE MODIFY firehose_view COLUMN mode ENUM ("full","fulltitle", "mixed", "") DEFAULT "";
 UPDATE firehose_view set mode="mixed" where mixedmode=1;
 ALTER TABLE firehose_view DROP COLUMN mixedmode;
-
 UPDATE firehose_view SET usermode="yes",admin_unsigned="no";
 UPDATE firehose_view SET datafilter="story",filter="" WHERE filter="story";
 UPDATE firehose_view SET datafilter="-story",filter="" WHERE filter="-story";
 UPDATE firehose_view SET admin_unsigned="yes",filter="" WHERE filter="unsigned";
 UPDATE firehose_view SET admin_unsigned="yes", usermode="no" WHERE viewname="daddypants";
-
 UPDATE firehose_view SET mode="mixed" WHERE viewname IN ("stories","popular","daddypants");
 
