@@ -459,7 +459,7 @@ function firehose_set_options(name, value, context) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section" || name == "setsearchfilter") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -485,7 +485,7 @@ function firehose_set_options(name, value, context) {
 	}
 	}
 
-	if (name == "view" || name == "tab" || name == "section") {
+	if (name == "view" || name == "tab" || name == "section" || name == "setsearchfilter") {
 		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
 	}
 

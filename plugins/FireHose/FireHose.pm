@@ -3218,8 +3218,6 @@ sub getAndSetOptions {
 
 	$options->{global} = $global_opts;
 
-	$options->{mixedmode} = $options->{viewref}{mixedmode} if $options->{viewref};
-	
 	$options->{fhfilter} = $options->{base_filter};
 
 	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
@@ -3228,20 +3226,22 @@ sub getAndSetOptions {
 	$opts->{no_set} ||= $no_saved;
 	$opts->{initial} ||= 0;
 
-	if (defined $form->{mixedmode} && $form->{setfield}) {
-		$options->{mixedmode} = $form->{mixedmode} ? 1 : 0;
-	}
-
 	if (defined $form->{nocommentcnt} && $form->{setfield}) {
 		$options->{nocommentcnt} = $form->{nocommentcnt} ? 1 : 0;
 	} 
 	
-	my $mode = $form->{mode} || $options->{mode} || '';
+	my $mode = $options->{mode};
+
+	if (!$s_change && !$v_change && !$search_trigger) {
+		$mode = $form->{mode} || $options->{mode} || '';
+	}
 
 	my $pagesize = $form->{pagesize} && $validator->{pagesize}{$form->{pagesize}};
 	$options->{pagesize} = $pagesize || $options->{pagesize}  || "small";
 
-	$options->{mode} = $s_change ? $options->{mode} : $mode;
+	if (!$s_change && !$v_change && !$search_trigger) {
+		$options->{mode} = $s_change ? $options->{mode} : $mode;
+	}
 
 	$form->{pause} = 1 if $no_saved;
 
