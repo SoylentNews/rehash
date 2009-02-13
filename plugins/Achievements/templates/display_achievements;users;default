@@ -41,7 +41,7 @@ onecol = 1;
 				</span>
 			</div>
 			<div class="yui-u">
-				<span>[% requested_user_achievements.$aid.description %]<small>[% requested_user_achievements.$aid.createtime %]</small></span>
+				<p><span>[% requested_user_achievements.$aid.description %] <small>[% requested_user_achievements.$aid.createtime %]</small></span></p>
 			</div>
 		</div>
 		</li>
@@ -69,7 +69,7 @@ onecol = 1;
 				</span>
 			</div>
 			<div class="yui-u">
-				<span>[% requested_user_achievements.$aid.description %]<small>[% requested_user_achievements.$aid.createtime %]</small></span>
+				<p><span>[% requested_user_achievements.$aid.description %] <small>[% requested_user_achievements.$aid.createtime %]</small></span></p>
 			</div>
 		</div>
 		</li>
@@ -79,6 +79,7 @@ onecol = 1;
 		[% NEXT IF common_achievements.$aid %]
 		<li><div class="yui-gf body">&nbsp;</div></li>
 	[% END %]
+
 	</ul>
 </div>
 
@@ -107,7 +108,7 @@ onecol = 1;
 				</span>
 			</div>
 			<div class="yui-u">
-				<span>[% user_achievements.$aid.description %]<small>[% user_achievements.$aid.createtime %]</small></span>
+				<p><span>[% user_achievements.$aid.description %] <small>[% user_achievements.$aid.createtime %]</small></span></p>
 			</div>
 		</div>
 		</li>
@@ -140,10 +141,11 @@ onecol = 1;
 				</span>
 			</div>
 			<div class="yui-u">
-				<span>[% user_achievements.$aid.description %]<small>[% user_achievements.$aid.createtime %]</small></span>
+				<p><span>[% user_achievements.$aid.description %] <small>[% user_achievements.$aid.createtime %]</small></span></p>
 			</div>
 		</div>
 		</li>
+
 	[% END %]
 	</ul>
 </div>
