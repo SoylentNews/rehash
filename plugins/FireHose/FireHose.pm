@@ -2868,7 +2868,7 @@ sub applyUserViewPrefs {
 	my $constants = getCurrentStatic();
 	my $user_prefs = $self->getViewUserPrefs($view->{id});
 	if ($user_prefs) {
-		foreach (qw(datafilter usermode admin_unsigned orderby orderdir)) {
+		foreach (qw(color mode datafilter usermode admin_unsigned orderby orderdir)) {
 			$view->{$_} = $user_prefs->{$_}
 		}
 	}
