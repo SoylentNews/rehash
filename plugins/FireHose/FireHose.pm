@@ -929,7 +929,7 @@ sub getFireHoseEssentials {
 	$need_tagged = 1 if $options->{tagged_by_uid} && $options->{tagged_as};
 	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
 	my $cur_time = $self->getTime({ unix_format => 1 });
-	if ($sphinx) {
+	if ($sphinx && $need_tagged) {
 		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
 		$tagged_by_uid =~ s/\D+//g;
 		# In both cases, only hose items "tagged for hose" by the
