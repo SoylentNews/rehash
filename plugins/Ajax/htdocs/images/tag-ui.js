@@ -1037,7 +1037,7 @@ YAHOO.slashdot.topicTags = ["keyword",
 
 	if ( tag_admin ) {
 		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);
-		update_class_map(well_known_tags, 'd', ['unknown']);	// Tags.pm debugging
+		update_class_map(well_known_tags, 'd w', ['unknown']);	// Tags.pm debugging
 	} else {
 		update_class_map(well_known_tags, 'd p', ['unknown']);	// Tags.pm debugging, non-admins don't get to see
 	}
