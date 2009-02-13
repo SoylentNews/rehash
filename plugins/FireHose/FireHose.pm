@@ -3030,17 +3030,19 @@ my @options = (
 		startdate duration fetch_text admin_filters
 	),
 	# other search parameters
+	# don't need usermode, since !usermode == no cache
 	qw(
 		filter color category not_id not_uid public not_public
 		accepted not_accepted rejected not_rejected type not_type
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
 		tagged_by_uid tagged_as offmainpage smalldevices
 		createtime_no_future createtime_subscriber_future
-		tagged_non_negative uid ids usermode
+		tagged_non_negative uid ids
 	)
 );
 
-# from the user
+# from the user; ideally, we would calculate startdate etc.
+# and not use off_set, but in practice not much difference
 my @prefs = qw(
 	off_set
 );

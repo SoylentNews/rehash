@@ -233,7 +233,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% IF form.embed || form.tabtype == "1" %]
 	firehose_settings.is_embedded = 1; // defined in common.js
 	[% END %]
-	fh_is_admin = [% IF user.is_admin && !options._usermode %]1[% ELSE %]0[% END %];
+	fh_is_admin = [% IF user.is_admin && !options.usermode %]1[% ELSE %]0[% END %];
 	var updateIntervalType = [% IF user.is_admin && !options.usermode %]1[% ELSE %]2[% END %];
 	var inactivity_timeout = [% IF user.is_admin && !options.usermode %]10800[% ELSE %]3600[% END %];
 	setFirehoseAction();
