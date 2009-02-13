@@ -531,7 +531,7 @@ a.edit-toggle {
 
 
 div.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
-border-top:1px solid transparnt !important;
+border-top:1px solid transparent !important;
 }
 
 
