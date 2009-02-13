@@ -83,8 +83,12 @@ END %]
 
 		var v = dialog_values();
 		if ( !v.name && !v.filter ) {
-			$dialog.find('input[name=section_filter]').val( $li.data('section_filter') );
+			$dialog.find('input[name=section_filter]').val( $li.data('fhfilter') );
 			$edit_field.keyup();
+
+			var	$select	= $dialog.find('select'),
+				view_id	= $select.find(':contains(' + $li.data('viewname').substr(1) + ')').val();
+			$select.val(view_id);
 		}
 
 		// a mouse click outside the dialog must hide it
@@ -141,24 +145,17 @@ END %]
 					var	requested	= dialog_values(),
 						name_changed	= saved.name != requested.name,
 						query_changed	= (saved.filter != requested.filter) || (saved.view != requested.view);
-					if ( name_changed ) {
-						$li.find('a:first').text($edit_field.val());
-					}
-					if ( name_changed || query_changed ) {
-						saveModalPrefs();
-					}
-					[% IF id %]
-					if ( query_changed ) {
-						firehose_set_options('section', [% id %]);
-					}
+
 					if ( $li.is('#fhsection-unsaved') ) {
-						$li.attr('id', 'fhsection-'+[% id %]);
+						save_the_unsaved_section(requested, function( id ){
+							(query_changed && firehose_set_options('section', id));
+						});
+					} else {
+						(name_changed && $li.find('a:first').text($edit_field.val()));
+						((name_changed||query_changed) && saveModalPrefs());
+						[% IF id %](query_changed && firehose_set_options('section', [% id %]));[% END %]
 					}
-					[% ELSE %]
-					if ( $li.is('#fhsection-unsaved') ) {
-						$li.removeAttr('id');
-					}
-					[% END %]
+					return false;
 				});
 
 	// keep the save button in sync with the name field... that is: disabled for invalid names
@@ -174,14 +171,14 @@ END %]
 
 	// test and enable/disable (as needed) on keyup
 	$edit_field.keyup(function( e ){
+		if ( e.which == $.ui.keyCode.ENTER ) {
+			$save_button.click();
+			return false;
+		}
 		var next_disabled = invalid_name[$.trim($(this).val()).toLowerCase()];
 		if ( next_disabled != prev_disabled ) {
 			$save_button.attr('disabled', (next_disabled ? 'disabled' : ''));
 			prev_disabled = next_disabled;
-		}
-		if ( e.which == $.ui.keyCode.ENTER ) {
-			$save_button.click();
-			return false;
 		}
 	});
 })();

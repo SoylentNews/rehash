@@ -17,7 +17,10 @@ function saveFirehoseSectionMenu(){
 		reskey:	reskey_static,
 		fsids:	$('#firehose-sections > li').
 				map(function(){
-					return this.id.slice(10);	// slice off leading 'fhsection-'
+					var id = this.id.slice(10);	// slice off leading 'fhsection-'
+					if ( id !== 'unsaved' ) {
+						return id;
+					}
 				}).
 				get().
 				join(',')

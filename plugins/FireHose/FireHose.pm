@@ -261,10 +261,10 @@ sub ajaxNewFireHoseSection {
 	my $fh = getObject("Slash::FireHose");
 	return if $user->{is_anon};
 	my $data = {
-		section_name => $form->{name},
-		section_filter => $form->{fhfilter},
-		uid => $user->{uid},
-		view_id => 0
+		section_name	=> $form->{name},
+		section_filter	=> $form->{fhfilter},
+		uid		=> $user->{uid},
+		view_id		=> $form->{view_id}||0
 	};
 
 	my $id = $fh->createFireHoseSection($data);
@@ -2230,7 +2230,6 @@ sub ajaxFireHoseGetUpdates {
 
 	my $update_event = {
 		event		=> 'update.firehose',
-		target		=> '#firehose',
 		data		=> {
 			color		=> strip_literal($opts->{color}),
 			filter		=> strip_literal($opts->{fhfilter}),

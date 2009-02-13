@@ -543,8 +543,7 @@ function firehose_set_options(name, value, context) {
 		firehose_settings.section = value;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
-		$('#firehose-sections li').removeClass('active');
-		$('#firehose-sections #fhsection-' + value).addClass('active');
+		firehose_highlight_section($('#fhsection-'+value));
 		firehose_style_switch(value);
 	}
 	
@@ -1797,92 +1796,85 @@ function firehose_more() {
 	inlineAdFirehose();
 }
 
-function firehose_new_section_name() {
-	var used_name   = Slash.Util.qw.as_set(
-			$('#firehose-sections li a[id^=fhsectiontitle-]').
-				map(function(){
-					return $.trim($(this).text()).toLowerCase();
-				}).get()
-			);
-		$('#fhsectionname').each(function(){
-			used_name[$.trim($(this).val()).toLowerCase()];
-		}); 
-	if (!used_name["untitled"]) {
-		return "Untitled";
-	} else {
-		var i = 2;
-                var name;
-                while(1) {
-			name="Untitled "+i;
-			if(!used_name[name.toLowerCase()]) {
-				return name;
-			}
-			i++;
-		}
-	}
+function firehose_highlight_section( $section ){
+	$section.addClass('active').siblings().removeClass('active');
 }
+
+function the_unsaved_section( dont_create ){
+	var	$section_menu	= $('#firehose-sections'),
+		$unsaved_item	= $section_menu.find('> #fhsection-unsaved');
+
+	if ( !$unsaved_item.length && !dont_create ) {
+		var	$title	= $('<a href="#"><i>unsaved</i> <span></span></a>').
+					click(function(){
+						firehose_set_options('setfhfilter', $unsaved_item.data('fhfilter'));
+						firehose_highlight_section($unsaved_item);
+						return false;
+					}),
+			$edit	= $('<a id="links-sections-edit" href="#">[e]</a>').
+					click(function(){
+						edit_the_unsaved_section();
+						return false;
+					});
+		$section_menu.prepend(
+			$unsaved_item = $('<li id="fhsection-unsaved" />').append($title).append($edit)
+		);
+	}
+
+	return $unsaved_item;
+}
+
+function edit_the_unsaved_section(){
+	the_unsaved_section('dont-create').each(function(){
+		getModalPrefs('firehoseview', 'Save Custom Section', 0, { id: undefined });
+	});
+}
+
+function save_the_unsaved_section( requested, fn ){
+	the_unsaved_section('dont-create').each(function(){
+		var $unsaved = $(this);
+		$unsaved.find('a:first').text(requested.name);
+
+		ajax_update({	op:		'firehose_new_section',
+				reskey:		reskey_static,
+
+				name:		requested.name,
+				fhfilter:	requested.filter,
+				view_id:	requested.view
+
+			}, '', { onComplete: function( transport ){
+				var response = eval_response(transport);
+				if ( response.li ) {
+					var	was_active	= $unsaved.is('.active'),
+						$saved		= $(response.li);
+					$unsaved.before($saved).remove();
+					(was_active && firehose_highlight_section($saved));
+					saveFirehoseSectionMenu();
+					(fn && fn(response.id));
+				}
+			}
+		});
+	});
+}
+
 
 function firehose_submit_filter() {
 	$('#searchquery').each(function(){
-		var	$section_menu	= $('#firehose-sections'),
-			$unsaved	= $section_menu.find('>#fhsection-unsaved'),
-			$unsaved_link	= $unsaved.find('>a:first');
-
-		if ( !$unsaved.length ) {
-			$unsaved = $section_menu.prepend(
-					'<li id="fhsection-unsaved"><a href="#">unsaved <span></span></a><a id="links-sections-edit" href="#">[e]</a></li>'
-				).
-				find('>#fhsection-unsaved');
-
-			$unsaved_link = $unsaved.
-				find('>a:first').
-					click(function(){
-						firehose_set_options('setfhfilter', $unsaved.data('section_filter'));
-						$section_menu.find('>li.active:not(#fhsection-unsaved)').removeClass('active');
-						$unsaved.addClass('active');
-						return false;
-					});
-			$unsaved_link.
-					next().
-						click(function(){
-							getModalPrefs('firehoseview', 'Save Custom Section', 0, { id: undefined });
-							return false;
-						});
-		}
-		$unsaved.data('section_filter', $(this).val());
-		// for the coming update, capture the time-stamp for my title
-		$('#firehose').
-			one('update.firehose', function( event, data ){
-				$unsaved.find('a span').text(data.local_time);
-			});
-		$unsaved_link.click();
+		$(document).one('update.firehose', function( event, updated ){
+			var $us = the_unsaved_section().
+				data('fhfilter', updated.filter).
+				data('viewname', updated.view).
+				data('color', updated.color);
+			$us.find('a span').text(updated.local_time);
+			firehose_highlight_section($us);
+		});
+		firehose_set_options('setfhfilter', $(this).val());
 	});
 }
 
 function firehose_submit_search() {
 	if ($('#searchquery').length > 0) {
 		firehose_set_options('setsearchfilter', $('#searchquery').val());
-	}
-}
-
-function firehose_new_section() {
-	var name = firehose_new_section_name();
-	ajax_update({
-		name:		name,
-		op:		'firehose_new_section',
-		fhfilter:		$('#searchquery').val(),
-		reskey:		reskey_static
-	}, '', { onComplete: firehose_new_section_handler });
-}
-
-function firehose_new_section_handler(transport) {
-	var response = eval_response(transport);
-	if (response.id) {
-		firehose_set_options('section', response.id);
-		if (response.li) {
-			$('#firehose-sections li:last').after(response.li);
-		}
-		getModalPrefs('firehoseview','Save Custom Section', 0, { id: response.id });
 	}
 }
 
