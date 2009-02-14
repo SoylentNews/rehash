@@ -834,7 +834,7 @@ sub getFireHoseEssentials {
 	$sphinx = 1 if $sphinxdb;
 	$sphinx = 2 if $sphinx && $options->{firehose_sphinx} && $user->{is_admin};
 	# admins turn it on or off manually
-	if ($sphinx == 1 && !$user->{is_admin}) { $sphinx = 2 if rand(20) <= 1 }  # 5 percent
+	if ($sphinx == 1 && !$user->{is_admin}) { $sphinx = 2 if rand(1) < 0.00 } # 0 percent
 
 	my $no_mcd = $user->{is_admin} && !$options->{usermode} ? 1 : 0;
 
