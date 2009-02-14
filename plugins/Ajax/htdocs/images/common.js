@@ -2193,7 +2193,7 @@ function fix_ad_position(){
 			pinned_top	= pin(min_top, nearest_article_edge(), max_top),
 
 			prev_top	= $ad_position.offset().top,
-			prev_class	= $ad_position.attr('className'),
+			prev_class	= $ad_position.getClass(),
 			prev_pinned	= prev_class !== 'No',
 
 			next_top	= pinned_top.value,

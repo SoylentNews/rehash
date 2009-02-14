@@ -456,6 +456,20 @@ Package({ named: 'Slash.Util.Algorithm',
 });
 
 // Yes, I could phrase this as a Package; but I don't need to, here.
+
+$.fn.extend({
+	getClass: function(){ return this.attr('className'); },
+	setClass: function( expr ){
+		if ( !expr || !expr.call ) {
+			return this.attr('className', '');
+		} else {
+			return this.each(function(){
+				this.className = qw_as_string(expr.call(this, qw_as_set(this.className)));
+			});
+		}
+	}
+});
+
 $.fn.extend({
 	find_nearest: function( selector ){
 		var args = arguments, N = Math.min(5, args.length);
@@ -496,14 +510,6 @@ $.fn.extend({
 	},
 	nearest_parent: function( selector ){
 		return this.find_nearest(selector, 'self', 'up');
-	},
-	setClass: function( cn ) {
-		var fn = $.isFunction(cn) ? cn : function(){ return cn; };
-		return this.each(function(){
-			if ( ! (this.className = qw_as_string(fn.apply(this, [ qw_as_set(this.className) ]))) ) {
-				this.removeAttribute('className');
-			}
-		});
 	},
 	toggleClassTo: function( cn, expr ){
 		if ( ! cn ) { return this; }
