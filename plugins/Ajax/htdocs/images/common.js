@@ -567,7 +567,7 @@ function firehose_fix_up_down( id, new_state ){
 }
 
 function firehose_click_nodnix_reason( event ) {
-	var $entry = $(event.target).nearest_parent('[tag-server]');
+	var $entry = $(event.target).closest('[tag-server]');
 	var id = $entry.attr('tag-server');
 
 	if ( (fh_is_admin || firehose_settings.metamod) && ($('#updown-'+id).hasClass('voteddown') || $entry.is('[type=comment]')) ) {
@@ -599,7 +599,7 @@ var $related_trigger = $().filter();
 var kExpanded=true, kCollapsed=false;
 
 function firehose_toggle_tag_ui_to( if_expanded, selector ){
-	var	$server = $(selector).nearest_parent('[tag-server]'),
+	var	$server = $(selector).closest('[tag-server]'),
 		id	= $server.attr('tag-server'),
 		$widget = $server.find('.tag-widget.body-widget'),
 		toggle	= if_expanded != $widget.hasClass('expanded');
@@ -633,7 +633,7 @@ function firehose_click_tag( event ) {
 	var $target = $(event.target), command = '', $menu;
 
 	// skip for non-JS hrefs
-	if (! $target.find_nearest('a[href]:not([href=#])', 'self', 'up').length) {
+	if (! $target.closest('a[href]:not([href=#])').length) {
 		// _any_ click can trigger, but click-specific ad will win
 		setTimeout(function(){ inlineAdFirehose(); }, 0);
 	}
@@ -646,9 +646,9 @@ function firehose_click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
-	} else if ( ($menu = $target.nearest_parent('.tmenu')).length ) {
+	} else if ( ($menu = $target.closest('.tmenu')).length ) {
 		var op = $target.text();
-		var $tag = $target.nearest_parent(':has(span.tag)').find('.tag');
+		var $tag = $target.closest(':has(span.tag)').find('.tag');
 		$related_trigger = $tag;
 
 		var tag = $tag.text();
@@ -663,7 +663,7 @@ function firehose_click_tag( event ) {
 			return false;
 		}
 
-		var $server = $target.nearest_parent('[tag-server]');
+		var $server = $target.closest('[tag-server]');
 
 		// Make sure the user sees some feedback...
 		if ( $menu || event.shiftKey ) {

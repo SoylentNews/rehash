@@ -193,7 +193,7 @@ function markup_tag( t ) {
 function form_submit_tags( form, options ){
 	var $input = $('.tag-entry:input', form);
 	$related_trigger = $input;
-	$(form).nearest_parent('[tag-server]').
+	$(form).closest('[tag-server]').
 		each(function(){
 			var tag_cmds = $input.val();
 			$input.val('');
@@ -726,7 +726,7 @@ var tag_widget_fns = {
 
 		if ( $tag_widget.is('.expanded') ) {
 			$tag_widget.
-				nearest_parent('[tag-server]').
+				closest('[tag-server]').
 					each(function(){
 						this.fetch_tags();
 					});

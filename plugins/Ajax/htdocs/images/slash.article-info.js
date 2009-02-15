@@ -76,14 +76,20 @@ function find_key( elem ){
 
 function $find_info_blocks( $list ){
 	return $list.map(function(){
-		return $(this).find_nearest(select_info_blocks, 'self', 'down', 'up>').get();
+		var $this=$(this);
+		var $info_blocks = $this.filter(select_info_blocks);
+		$info_blocks.length || ($info_blocks = $this.find(select_info_blocks));
+		$info_blocks.length || ($info_blocks = $this.closest(select_info_blocks + ', :has(>' + select_info_blocks + ')'));
+		if ( $info_blocks.length ) {
+			return $info_blocks.get();
+		}
 	});
 }
 
 function $find_articles( $list ){
 	return $find_info_blocks($list).map(function(){
 		var $this = $(this);
-		return $this.nearest_parent($this.find('span.scope').text() || 'div')[0];
+		return $this.closest($this.find('span.scope').text() || 'div')[0];
 	});
 }
 

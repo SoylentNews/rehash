@@ -25,15 +25,15 @@ function handle_tag_click( event ){
 
 	if ( $target.is('.tag') ) {
 		command = $target.text();
-	} else if ( ($menu = $target.nearest_parent('[class*=tag-menu]')).length ) {
+	} else if ( ($menu = $target.closest('[class*=tag-menu]')).length ) {
 		var op = $target.text();
-		var $tag = $target.nearest_parent(':has(span.tag)').find('span.tag');
+		var $tag = $target.closest(':has(span.tag)').find('span.tag');
 		var tag = $tag.text();
 		command = normalize_tag_menu_command(tag, op);
 	}
 
 	if ( command ) {
-		$target.nearest_parent('.tag-server').
+		$target.closest('.tag-server').
 			tag_ui_server__submit_tags(command);
 		return false;
 	}
@@ -44,7 +44,7 @@ function handle_tag_click( event ){
 function handle_toggle_click( event ){
 	this.blur();
 
-	var	$target	= $(event.target).nearest_parent('a'),
+	var	$target	= $(event.target).closest('a'),
 		$twisty	= $target.children(),
 		$form	= $target.next();
 
@@ -143,7 +143,7 @@ function install_tag_ui( $roots, if_authenticated ){
 						commands = $input.val();
 					$input.val('');
 					$this.
-						nearest_parent('.tag-server').
+						closest('.tag-server').
 							tag_ui_server__submit_tags(commands);
 				}).
 			end().

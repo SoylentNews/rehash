@@ -109,7 +109,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
    Any code can submit new tags or tag-commands by finding the tag_ui_server and calling its methods
    directly, e.g.,
 
-	$(this).nearest_parent('.tag-server').tag_ui_server__submit_tags('slownewsday');
+	$(this).closest('.tag-server').tag_ui_server__submit_tags('slownewsday');
 
    Typically, you will do this from a custom click handler (see Slash.Firehose.TagUI.click_handler).
    You might also do it from a form or text input.
@@ -181,7 +181,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
    The tag_ui components that are actually attached to elements automatically benefit from the loose
    coupling afforded by the DOM.  A single server serves only those elements beneath it.  Any
-   element can just "look up" (with nearest_parent('.tag-server')) to find its server.  Responders
+   element can just "look up" (with closest('.tag-server')) to find its server.  Responders
    (for instance, displays) can be added or removed at any time.  All such components support
    specifying most of their behavior right in the HTML.  Slash.Util.Package ensures that actual
    attachments have a minimal footprint, both in the namespace and code size---adapting a single
@@ -625,7 +625,7 @@ new Package({ named: 'Slash.TagUI.Markup',
 					tag_ui_responder({
 						signals: 'ajaxSuccess',
 						fn: function(){
-							$(this).nearest_parent('.tag-server').tag_ui_markup__refresh_styles();
+							$(this).closest('.tag-server').tag_ui_markup__refresh_styles();
 						}
 					});
 				return this;
@@ -1144,7 +1144,7 @@ function $position_context_display( $display ){
 
 	var RIGHT_PADDING = 18;
 
-	var $entry = $display.nearest_parent('.tag-server');
+	var $entry = $display.closest('.tag-server');
 	var left_edge = $entry.offset().left;
 	var right_edge = left_edge + $entry.width() - RIGHT_PADDING;
 
@@ -1152,7 +1152,7 @@ function $position_context_display( $display ){
 	global_align = Math.max(left_edge, global_align);
 
 	var need_minimal_fix = true;
-	if ( $display.nearest_parent(':hidden').length===0 ) {
+	if ( $display.closest(':hidden').length===0 ) {
 		try {
 			var display_width = $display.children('ul:first').width();
 			$display.css({
