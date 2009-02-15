@@ -72,7 +72,9 @@ END;
 title_href=link_url;
 
 IF form.index || featured || view_mode;
-	onclick="";
+	IF (!(form.index && !user.is_anon));
+		onclick="";
+	END;
 	IF item.type == "story";
 		story = Slash.db.getStory(item.srcid);
 		link = Slash.linkStory({

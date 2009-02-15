@@ -830,11 +830,11 @@ sub getFireHoseEssentials {
 
 	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (0);
 	my @sphinx_tables = ('sphinx_search');
-	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
+	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx', timeout => 2 });
 	$sphinx = 1 if $sphinxdb;
 	$sphinx = 2 if $sphinx && $options->{firehose_sphinx} && $user->{is_admin};
 	# admins turn it on or off manually
-	#if ($sphinx == 1 && !$user->{is_admin}) { $sphinx == 2 if rand(20) <= 1 }  # 5 percent
+	if ($sphinx == 1 && !$user->{is_admin}) { $sphinx = 2 if rand(1) < 0.00 } # 0 percent
 
 	my $no_mcd = $user->{is_admin} && !$options->{usermode} ? 1 : 0;
 
@@ -2933,7 +2933,6 @@ sub applyViewOptions {
 			$options->{$_} = $view->{$_} eq "yes" ? 1 : 0;
 		}		
 	}
-
 	return $options;
 }
 
@@ -3219,8 +3218,6 @@ sub getAndSetOptions {
 
 	$options->{global} = $global_opts;
 
-	$options->{mixedmode} = $options->{viewref}{mixedmode} if $options->{viewref};
-	
 	$options->{fhfilter} = $options->{base_filter};
 
 	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
@@ -3229,50 +3226,54 @@ sub getAndSetOptions {
 	$opts->{no_set} ||= $no_saved;
 	$opts->{initial} ||= 0;
 
-	if (defined $form->{mixedmode} && $form->{setfield}) {
-		$options->{mixedmode} = $form->{mixedmode} ? 1 : 0;
-	}
-
 	if (defined $form->{nocommentcnt} && $form->{setfield}) {
 		$options->{nocommentcnt} = $form->{nocommentcnt} ? 1 : 0;
 	} 
 	
-	my $mode = $form->{mode} || $options->{mode} || '';
+	my $mode = $options->{mode};
+
+	if (!$s_change && !$v_change && !$search_trigger) {
+		$mode = $form->{mode} || $options->{mode} || '';
+	}
 
 	my $pagesize = $form->{pagesize} && $validator->{pagesize}{$form->{pagesize}};
 	$options->{pagesize} = $pagesize || $options->{pagesize}  || "small";
 
-	$options->{mode} = $s_change ? $options->{mode} : $mode;
+	if (!$s_change && !$v_change && !$search_trigger) {
+		$options->{mode} = $s_change ? $options->{mode} : $mode;
+	}
 
 	$form->{pause} = 1 if $no_saved;
 
 	my $firehose_page = $user->{state}{firehose_page} || '';
 
-	if (defined $form->{duration}) {
-		if ($form->{duration} =~ /^-?\d+$/) {
-			$options->{duration} = $form->{duration};
-		}
-	}
-	$options->{duration} = "7" if !$options->{duration};
-
-	if (defined $form->{startdate}) {
-		if ($form->{startdate} =~ /^\d{8}$/) {
-			my ($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
-			if ($y) {
-				$options->{startdate} = "$y-$m-$d";
+	if (!$v_change && !$s_change && !$search_trigger) {
+		if (defined $form->{duration}) {
+			if ($form->{duration} =~ /^-?\d+$/) {
+				$options->{duration} = $form->{duration};
 			}
 		}
-	}
-	$options->{startdate} = "" if !$options->{startdate};
-	if ($form->{issue}) {
-		if ($form->{issue} =~ /^\d{8}$/) {
-			my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
-			$options->{startdate} = "$y-$m-$d";
-			$options->{issue} = $form->{issue};
-			$options->{duration} = 1;
+		$options->{duration} = "7" if !$options->{duration};
 
-		} else {
-			$form->{issue} = "";
+		if (defined $form->{startdate}) {
+			if ($form->{startdate} =~ /^\d{8}$/) {
+				my ($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
+				if ($y) {
+					$options->{startdate} = "$y-$m-$d";
+				}
+			}
+		}
+		$options->{startdate} = "" if !$options->{startdate};
+		if ($form->{issue}) {
+			if ($form->{issue} =~ /^\d{8}$/) {
+				my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
+				$options->{startdate} = "$y-$m-$d";
+				$options->{issue} = $form->{issue};
+				$options->{duration} = 1;
+
+			} else {
+				$form->{issue} = "";
+			}
 		}
 	}
 
@@ -3531,8 +3532,7 @@ sub getAndSetOptions {
 			if(!$form->{issue}) {
 				$options->{duration} = 7;
 				$options->{startdate} = '';
-				$options->{mixedmode} = 1;
-				$options->{mode} = 'fulltitle';
+				$options->{mode} = "mixed";
 			}
 		}
 
@@ -3540,7 +3540,6 @@ sub getAndSetOptions {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
 			$options->{mode} = 'full';
-			$options->{mixedmode} = 0;
 		}
 		
 	}
@@ -3564,6 +3563,7 @@ sub getAndSetOptions {
 #print STDERR "TEST: BASE_FILTER $options->{base_filter}   FHFILTER: $options->{fhfilter} VIEW $options->{view} VFILTER: $options->{view_filter} TYPE: " . Dumper($options->{type}). "\n";
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 #print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned} PAUSE $options->{pause} FPAUSE: |$form->{pause}|\n";
+#print STDERR "DURATION $options->{duration} STARTDATE: $options->{startdate}\n";
 	return $options;
 }
 
