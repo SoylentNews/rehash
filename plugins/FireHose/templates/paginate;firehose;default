@@ -51,7 +51,7 @@ __template__
 		[% END %]
 	</span>
 	[% IF options.orderby == "createtime";
-		 max_days_ahead = options.smalldevices ? 1 : 2;
+		max_days_ahead = options.smalldevices ? 1 : 2;
 		days = Slash.getOlderDaysFromDay(last_day, -1, max_days_ahead, { skip_add_today => 1, skip_future => 1 }); 
 	   ELSE;
 		max_days_ahead = options.smalldevices ? 2 : 3;

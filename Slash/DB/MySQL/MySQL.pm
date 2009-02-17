@@ -9,7 +9,7 @@ use strict;
 use Socket;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
-use Time::Local;
+use Date::Calc qw(Add_Delta_Days Add_Delta_DHMS Add_Delta_YM);
 use Date::Format qw(time2str);
 use Data::Dumper;
 use Storable qw(thaw nfreeze);
@@ -8674,26 +8674,43 @@ sub getTimeAgo {
 # this will be consistently off by hours, so we shouldn't spend an SQL
 # query to worry about minutes or seconds - Jamie
 sub getDay {
-	my($self, $days_back) = @_;
+	my($self, $days_back, $options) = @_;
 	$days_back ||= 0;
-	my $day = timeCalc(scalar(localtime(time-86400*$days_back)), '%Y%m%d'); # epoch time, %Q
+
+	my($db_levels, $db_order) = getDayBreakLevels();
+
+	my $level = 'day';
+	$level = parseDayBreakLevel($options->{orig_day}) || $level
+		if $options->{orig_day};
+	my $fmt = $db_levels->{$level}{fmt};
+
+	my $day = $self->getDayFromDay(timeCalc(scalar(localtime), $fmt), $days_back);
+
 	return $day;
 }
 
 sub getDayFromDay {
 	my($self, $day, $days_back) = @_;
 	$day =~ s/-//g;
-	my($y, $m, $d) = $day =~ /(\d{4})(\d{2})(\d{2})/;
+
+	my($db_levels, $db_order) = getDayBreakLevels();
+
 	my $return_day;
-	if ($y) {
-		$return_day = timeCalc(
-			scalar localtime(
-				timelocal(0, 0, 0, $d, $m - 1, $y - 1900) - 86400 * $days_back
-			), "%Y%m%d"
-		, 0);
+	if ($day =~ $db_levels->{hour}{re}) {
+		$return_day = sprintf "%04d%02d%02d%02d", Add_Delta_DHMS($1, $2, $3, $4, 0, 0, 0, -$days_back, 0, 0);
+
+	} elsif ($day =~ $db_levels->{day}{re}) {
+		$return_day = sprintf "%04d%02d%02d", Add_Delta_Days($1, $2, $3, -$days_back);
+
+	} elsif ($day =~ $db_levels->{month}{re}) {
+		$return_day = sprintf "%04d%02d", Add_Delta_YM($1, $2, 1, 0, -$days_back);
+
+	} elsif ($day =~ $db_levels->{year}{re}) {
+		$return_day = sprintf "%04d", Add_Delta_YM($1, 1, 1, -$days_back, 0);
 	} else {
-		$return_day = $self->getDay(0) if !$y;
+		errorLog("No format found for $day");
 	}
+
 	return $return_day;
 }
 

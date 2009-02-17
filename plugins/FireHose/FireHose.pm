@@ -4028,32 +4028,51 @@ sub splitOpsFromString {
 	return \@fh_ops;
 }
 
+{
+my %last_levels;
 sub addDayBreaks {
-	my($self, $items, $offset) = @_;
-	my @retitems;
-	my $last_day = "00000000";
-	my $days_processed = 0;
-	my $last_days_processed = 0;
+	my($self, $items, $offset, $options) = @_;
+	my $retitems = [];
+	my $breaks = 0;
+
+	my $level = $options->{level} || 0;
+	my $count = @$items;
+	my $break_ratio = 5;
+
+	my($db_levels, $db_order) = getDayBreakLevels();
+	my $fmt = $db_levels->{ $db_order->[$level] }{fmt};
+
+	my $last_level = $last_levels{$level} ||= timeCalc('1970-01-01 00:00:00', $fmt, 0);
+
 	foreach (@$items) {
-		my $cur_day = $_->{createtime};
-		$cur_day =  timeCalc($cur_day, "%Y%m%d", $offset);
-		if ($cur_day ne $last_day) {
-			if ($last_days_processed >= 5) {
-				push @retitems, { id => "day-$cur_day", day => $cur_day, last_day => $last_day };
+		my $cur_level = timeCalc($_->{createtime}, $fmt, $offset);
+		if ($cur_level ne $last_level) {
+			if ($last_level ne $last_levels{$level}) {
+				push @$retitems, { id => "day-$cur_level", day => $cur_level, last_day => $last_level };
+				$breaks++;
 			}
-			$last_days_processed = 0;
-		} else {
-			$last_days_processed++;
 		}
 
-		push @retitems, $_;
-		$last_day = $cur_day;
-		$days_processed++;
+		push @$retitems, $_;
+		$last_level = $cur_level;
 	}
 
-	return \@retitems;
-}
+	if ($level < $#{$db_order}) {
+		my $newitems = addDayBreaks($self, $items, $offset,
+			{ level => $level+1 }
+		);
+		$retitems = $newitems if (
+			$breaks > int($count / $break_ratio)
+				||
+			@$newitems >= @$retitems
+		);
 
+	}
+
+	return $retitems;
+}}
+
+# deprecated, i think -- pudge 2009-02-17
 sub getOlderMonthsFromDay {
 	my($self, $day, $start, $end) = @_;
 	$day =~ s/-//g;
