@@ -1557,14 +1557,20 @@ function custom_modal_box( action_name ){
 	delete dialog_elem[custom_fn_name];
 	return $all_parts;
 }
-function show_modal_box(){ return custom_modal_box('show'); }
+function show_modal_box(){
+	return custom_modal_box('show').
+		keyup(function( e ){
+			e.which == $.ui.keyCode.ESCAPE && hide_modal_box();
+		});
+}
 function hide_modal_box(){
 	// clients may have customized; restore defaults before next use
-	custom_modal_box('hide').
+	return custom_modal_box('hide').
 		hide().
 		attr('style', 'display: none;').
 		removeClass().
-		removeData('tabbed');
+		removeData('tabbed').
+		unbind();
 }
 
 function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
