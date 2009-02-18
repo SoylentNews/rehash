@@ -1557,13 +1557,14 @@ function custom_modal_box( action_name ){
 	delete dialog_elem[custom_fn_name];
 	return $all_parts;
 }
-function show_modal_box(){ custom_modal_box('show'); }
+function show_modal_box(){ return custom_modal_box('show'); }
 function hide_modal_box(){
 	// clients may have customized; restore defaults before next use
 	custom_modal_box('hide').
 		hide().
 		attr('style', 'display: none;').
-		removeClass();
+		removeClass().
+		removeData('tabbed');
 }
 
 function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
@@ -1575,6 +1576,9 @@ function check_logged_in(){ return logged_in || (show_login_box(), 0); }
 
 
 function getModalPrefs(section, title, tabbed, params){
+	var $still_open = get_modal_parts('#modal_box:visible');
+	$still_open.length && $still_open.data('tabbed')!=tabbed && hide_modal_box();
+
 	if ( !reskey_static ) {
 		return show_login_box();
 	}
@@ -1590,7 +1594,7 @@ function getModalPrefs(section, title, tabbed, params){
 		}, params||{}),
 		function(){
 			$('#preference_title').html(title);
-			show_modal_box();
+			show_modal_box().data('tabbed', tabbed);
 		}
 	);
 }
