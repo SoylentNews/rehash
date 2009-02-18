@@ -79,6 +79,7 @@ our @EXPORT  = qw(
 	comparePassword
 	countTotalVisibleKids
 	countWords
+	createLogToken
 	createSid
 	decode_entities
 	ellipsify
@@ -94,9 +95,10 @@ our @EXPORT  = qw(
 	fullhost_to_domain
 	formatDate
 	getArmoredEmail
+	getDayBreakLevels
+	getFormatFromDays
 	getRandomWordFromDictFile
 	getUrlsFromText
-	createLogToken
 	grepn
 	html2text
 	issueAge
@@ -105,6 +107,7 @@ our @EXPORT  = qw(
 	noFollow
 	regexSid
 	revertQuote
+	parseDayBreakLevel
 	prepareQuoteReply
 	root2abs
 	roundrand
@@ -709,6 +712,96 @@ sub timeCalc {
 
 	# return the new pretty date
 	return $date;
+}
+
+sub getFormatFromDays {
+	my($days, $options) = @_;
+	my $ret_array = [];
+	return $ret_array unless $days && ref($days) eq 'ARRAY';
+
+	my $label;
+	my $which_day;
+	my $orig_day = $options->{orig_day} || $days->[0];
+	my($db_levels, $db_order) = getDayBreakLevels();
+
+	if ($orig_day =~ $db_levels->{hour}{re}) {
+		$which_day = 'hour';
+		for my $day (@$days) {
+			push @$ret_array, [ $day, timeCalc($day . '00', '%B %e, %Y %T', 0) ];
+		}
+
+	} elsif ($orig_day =~ $db_levels->{day}{re}) {
+		$which_day = 'day';
+
+		my $slashdb = getCurrentDB();
+		my $today = $slashdb->getDay(0);
+		my $yesterday = $slashdb->getDay(1);
+		my $weekago = $slashdb->getDay(7);
+		my($ty, $tm, $td) = $today =~ $db_levels->{day}{re};
+
+		for my $day (@$days) {
+			my @arr = $day =~ $db_levels->{day}{re};
+			if ($day eq $today) {
+				$label = 'Today';
+			} elsif ($day eq $yesterday) {
+				$label = 'Yesterday';
+			} elsif ($day <= $today && $day >= $weekago) {
+				$label = timeCalc($day, '%A', 0);
+			} elsif ($ty == $arr[0]) {
+				$label = timeCalc($day, '%B %e', 0);
+			} else {
+				$label = timeCalc($day, '%b. %e, %Y', 0);
+
+				# strip out dot when not necessary
+				my $test = timeCalc($day, '%B. %e, %Y', 0);
+				$label =~ s/\.// if $test eq $label;
+			}
+			push @$ret_array, [ $day, $label ];
+		}
+
+	} elsif ($orig_day =~ $db_levels->{month}{re}) {
+		$which_day = 'month';
+		for my $day (@$days) {
+			push @$ret_array, [ $day, timeCalc($day . '01', '%B %Y', 0) ];
+		}
+
+	} elsif ($orig_day =~ $db_levels->{year}{re}) {
+		$which_day = 'year';
+		for my $day (@$days) {
+			push @$ret_array, [ $day, timeCalc($day . '0101', '%Y', 0) ];
+		}
+
+	} else {
+		errorLog("No format found for $orig_day");
+	}
+
+	# re-format elements if necessary
+	$_->[0] = sprintf($db_levels->{$which_day}{refmt}, $_->[0]) for @$ret_array;
+
+	return $ret_array;
+}
+
+sub getDayBreakLevels {
+	my @db_levels = (
+		hour    => { fmt => '%Y%m%d%H', refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})(\d{2})$} },
+		day     => { fmt => '%Y%m%d',   refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})$} },
+		week    => { fmt => '%Y%Uw',    refmt => '%sw', re => qr{^(\d{4})(\d{2})w$} },
+		month   => { fmt => '%Y%mm',    refmt => '%sm', re => qr{^(\d{4})(\d{2})m$} }, 
+		year    => { fmt => '%Y',       refmt => '%s',  re => qr{^(\d{4})$} }
+	);
+	my %db_levels = @db_levels;
+	my $i = 0;
+	my @db_order = grep { ++$i % 2 } @db_levels;
+	return(\%db_levels, \@db_order);
+}
+
+sub parseDayBreakLevel {
+	my($day) = @_;
+	my($db_levels, $db_order) = getDayBreakLevels();
+	for my $level (@$db_order) {
+		return $level if $day =~ $db_levels->{$level}{re};
+	}
+	return;
 }
 
 #========================================================================

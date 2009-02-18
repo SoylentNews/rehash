@@ -5893,3 +5893,8 @@ UPDATE firehose_view SET admin_unsigned="yes",filter="" WHERE filter="unsigned";
 UPDATE firehose_view SET admin_unsigned="yes", usermode="no" WHERE viewname="daddypants";
 UPDATE firehose_view SET mode="mixed" WHERE viewname IN ("stories","popular","daddypants");
 
+# 2009-02-12
+UPDATE vars SET value = 'T_2_5_0_242' WHERE name = 'cvs_tag_currentcode';
+
+# this is wrong but i don't know what is right -- pudge
+#UPDATE firehose_view SET duration = -1;
