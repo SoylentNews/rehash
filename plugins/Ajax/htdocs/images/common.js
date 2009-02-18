@@ -1845,6 +1845,10 @@ function edit_the_unsaved_section(){
 
 function save_the_unsaved_section( requested, fn ){
 	the_unsaved_section('dont-create').each(function(){
+		if ( !requested.name ) {
+			return;
+		}
+
 		var $unsaved = $(this);
 		$unsaved.find('a:first').text(requested.name);
 
