@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 DROP TABLE IF EXISTS firehose;
 CREATE TABLE firehose (
 	id mediumint(8) unsigned NOT NULL auto_increment,
@@ -66,7 +63,7 @@ CREATE TABLE firehose_topics_rendered (
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_text;
-CREATE TABLE firehose_text(
+CREATE TABLE firehose_text (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	title VARCHAR(80),
 	introtext text,
@@ -76,7 +73,7 @@ CREATE TABLE firehose_text(
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_section;
-CREATE TABLE firehose_section(
+CREATE TABLE firehose_section (
 	fsid mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	section_name VARCHAR(32) NOT NULL DEFAULT 'unnamed',
@@ -86,11 +83,10 @@ CREATE TABLE firehose_section(
 	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
 	ordernum tinyint DEFAULT '0',
 	PRIMARY KEY (fsid)
-	
-);
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_section_settings;
-CREATE TABLE firehose_section_settings(
+CREATE TABLE firehose_section_settings (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	fsid mediumint(8) unsigned NOT NULL,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
@@ -99,13 +95,11 @@ CREATE TABLE firehose_section_settings(
 	display ENUM("yes","no") DEFAULT 'yes',
 	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
-	UNIQUE uid_fsid(uid,fsid)
-	
-);
-
+	UNIQUE uid_fsid (uid,fsid)
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_tab;
-CREATE TABLE firehose_tab(
+CREATE TABLE firehose_tab (
 	tabid mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	tabname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
@@ -115,11 +109,11 @@ CREATE TABLE firehose_tab(
 	color VARCHAR(16) NOT NULL DEFAULT '',
 	mode ENUM("full", "fulltitle") DEFAULT "fulltitle",
 	PRIMARY KEY (tabid),
-	UNIQUE uid_tabname(uid,tabname)
+	UNIQUE uid_tabname (uid,tabname)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_view;
-CREATE TABLE firehose_view(
+CREATE TABLE firehose_view (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	viewname VARCHAR(24) NOT NULL DEFAULT 'unnamed',
@@ -140,14 +134,13 @@ CREATE TABLE firehose_view(
 	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
 	admin_unsigned ENUM("no","yes") DEFAULT 'no', 
 	usermode ENUM("no","yes") DEFAULT "yes",
-	PRIMARY KEY (id),
-	UNIQUE id_viewname(id,viewname)
-);
+	PRIMARY KEY (id)
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_view_settings;
-CREATE TABLE firehose_view_settings(
+CREATE TABLE firehose_view_settings (
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	id mediumint(8) unsigned NOT NULL auto_increment,
+	id mediumint(8) unsigned NOT NULL,
 	color VARCHAR(16) NOT NULL DEFAULT '',
 	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
 	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
@@ -155,15 +148,11 @@ CREATE TABLE firehose_view_settings(
 	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
 	admin_unsigned ENUM("no","yes") DEFAULT 'no',
 	usermode ENUM("no","yes") DEFAULT "yes",
-	PRIMARY KEY (uid,id),
-	UNIQUE uid_id(uid,id)
-);
-
-
-
+	PRIMARY KEY (uid,id)
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_update_log;
-CREATE TABLE firehose_update_log(
+CREATE TABLE firehose_update_log (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	new_count SMALLINT UNSIGNED NOT NULL DEFAULT '0', 
@@ -177,19 +166,20 @@ CREATE TABLE firehose_update_log(
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_setting_log;
-CREATE TABLE firehose_setting_log(
+CREATE TABLE firehose_setting_log (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	name VARCHAR(32) NOT NULL DEFAULT '',
 	value VARCHAR(64) NOT NULL DEFAULT '',
 	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	PRIMARY KEY (id)
-);
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_skin_volume;
-CREATE TABLE firehose_skin_volume(
+CREATE TABLE firehose_skin_volume (
 	skid SMALLINT UNSIGNED NOT NULL,
 	story_vol MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
 	other_vol MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
 	PRIMARY KEY (skid)
-);
+) ENGINE=InnoDB;
+
