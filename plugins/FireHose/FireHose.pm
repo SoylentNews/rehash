@@ -202,11 +202,23 @@ sub getFireHoseSectionsMenu {
 	my $user = getCurrentUser();
 	my($uid_q) = $self->sqlQuote($user->{uid});
 	my $sections = $self->sqlSelectAllHashrefArray(
-		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name", 
+		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name, firehose_section_settings.section_filter AS user_section_filter, firehose_section_settings.view_id AS user_view_id", 
 		"firehose_section LEFT JOIN firehose_section_settings on firehose_section.fsid=firehose_section_settings.fsid AND firehose_section_settings.uid=$uid_q", 
 		"firehose_section.uid in (0,$uid_q)", 
 		"ORDER BY uid, ordernum, section_name"
 	);
+
+	foreach (@$sections) {
+		$_->{data}{id} 		= $_->{fsid};
+		$_->{data}{name} 	= $_->{user_section_name} ? $_->{user_section_name} : $_->{section_name};
+		$_->{data}{filter}	= $_->{user_section_filter} ? $_->{user_section_filter} : $_->{section_filter};
+		my $viewid  		= $_->{user_view_id} ? $_->{user_view_id} : $_->{view_id};
+
+		my $view = $self->getUserViewById($viewid);
+		my $viewname = $view->{viewname} || "stories";
+
+		$_->{data}{viewname} 	= $viewname;
+	}
 
 	if (!$user->{firehose_section_order}) {
 		return $sections;
