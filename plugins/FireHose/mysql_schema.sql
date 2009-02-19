@@ -134,6 +134,7 @@ CREATE TABLE firehose_view (
 	datafilter VARCHAR(128) NOT NULL DEFAULT '', 
 	admin_unsigned ENUM("no","yes") DEFAULT 'no', 
 	usermode ENUM("no","yes") DEFAULT "yes",
+	use_exclusions ENUM("no", "yes") DEFAULT "yes",
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 

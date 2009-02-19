@@ -5903,6 +5903,7 @@ ALTER TABLE firehose_view_settings CHANGE COLUMN id id mediumint(8) unsigned NOT
 # For plugins/Achievements
 UPDATE achievements SET exponent = 2 WHERE name = 'score5_comment';
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_read', 'Days Read in a Row', 'yes', 2);
+
 CREATE TABLE user_achievement_streaks (
         id mediumint(8) unsigned NOT NULL auto_increment,
         uid mediumint(8) unsigned NOT NULL default '0',
@@ -5919,3 +5920,6 @@ INSERT INTO vars (name, value, description) VALUES ('sphinx_01_hostname_searchd'
 e: searchd');
 UPDATE vars SET name='sphinx_01_hostname_sphinxse', description='Hostname for the sphinx01 instance: SphinxSE on mysqld' WHERE name='sphinx_01_hostname';
 
+# For plugins/FireHose
+ALTER TABLE firehose_view ADD COLUMN use_exclusions ENUM("no","yes") DEFAULT "yes";
+UPDATE firehose_view SET use_exclusions="no" WHERE viewname like 'user%' OR viewname IN ("search","daddypants","metamod");
