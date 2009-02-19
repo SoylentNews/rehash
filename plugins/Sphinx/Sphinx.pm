@@ -34,6 +34,8 @@ sub getNum {
 sub getSphinxStats {
 	my($self) = @_;
 
+	# "total: 25, total found: 25, time: 126, words: 2"
+
 	my $sql = 'SHOW ENGINE SPHINX STATUS';
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {

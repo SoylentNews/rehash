@@ -5900,3 +5900,6 @@ UPDATE vars SET value = 'T_2_5_0_242' WHERE name = 'cvs_tag_currentcode';
 ALTER TABLE firehose_view DROP INDEX id_viewname;
 ALTER TABLE firehose_view_settings CHANGE COLUMN id id mediumint(8) unsigned NOT NULL;
 
+# for plugins/Sphinx
+INSERT INTO vars (name, value, description) VALUES ('sphinx_se', '0', 'Use SphinxSE instead of the API directly?');
+
