@@ -1213,14 +1213,36 @@ function firehose_get_next_updates() {
 	firehose_add_update_timerid(setTimeout(firehose_get_updates, interval));
 }
 
+(function(){
+var depth={};
+Slash.markBusy = function( k, state ){
+	arguments.length<2 && (state=depth[k]>0);
+	$('body').toggleClass('busy-'+k, !!state);
+};
+
+Slash.busy = function( k, state ){
+	var N=depth[k]||0, was_busy=N>0;
+	if ( arguments.length > 1 ){
+		depth[k] = N+=(state ? 1 : -1);
+		var now_busy = N>0;
+		now_busy != was_busy && Slash.markBusy(k, now_busy);
+	}
+	return was_busy;
+};
+})();
+
+$(function(){
+	$(document).
+		ajaxStart(function(){ Slash.markBusy('ajax', true); }).
+		ajaxStop(function(){ Slash.markBusy('ajax', false); });
+});
+
 function firehose_busy() {
-	$('.busy').show();
-	$('#local_last_update_time, #gmt_update_time').hide();
+	Slash.busy('firehose', true);
 }
 
 function firehose_busy_done() {
-	$('.busy').hide();
-	$('#local_last_update_time, #gmt_update_time').show();
+	Slash.busy('firehose', false);
 }
 
 function firehose_get_updates_handler(transport) {

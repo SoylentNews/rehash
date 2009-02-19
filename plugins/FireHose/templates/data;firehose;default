@@ -142,7 +142,7 @@ __template__
 		   END;
 		%]
 		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
-		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner2.gif"></span>
+		<span class="busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 		[% IF !contentsonly %]
 		</span>
 		[% END %]
