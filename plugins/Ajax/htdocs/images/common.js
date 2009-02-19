@@ -459,7 +459,7 @@ function firehose_set_options(name, value, context) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section" || name == "setsearchfilter") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section" || name == "setsearchfilter" || name == "setfhfilter" ) {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -485,8 +485,9 @@ function firehose_set_options(name, value, context) {
 	}
 	}
 
-	if (name == "view" || name == "tab" || name == "section" || name == "setsearchfilter") {
+	if (name == "view" || name == "tab" || name == "section" || name == "setsearchfilter" || name == "setfhfilter") {
 		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
+		$('.paginate').hide();
 	}
 
 	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") {
@@ -1139,6 +1140,7 @@ function firehose_handle_update() {
 		firehose_reorder();
 		if (add_behind_scenes) {
 			$('#firehoselist .loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
+			$('.paginate').show();
 			if (elem && elem.parentNode) {
 				elem.parentNode.removeChild(elem);
 			}
