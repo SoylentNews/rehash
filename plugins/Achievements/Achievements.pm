@@ -77,7 +77,7 @@ sub setUserAchievement {
 }
 
 sub setUserAchievementObtained {
-        my($self, $uid) = @_;
+        my($self, $uid, $options) = @_;
 
         my $slashdb = getCurrentDB();
 
