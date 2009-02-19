@@ -23,22 +23,16 @@ __template__
                 <div style="margin-top: 1em; text-align: center;">
                 &nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a>
-		[% IF 0 %]
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+		[% fh = Slash.getObject("Slash::FireHose");
+		   views = fh.getUserViews({ tab_display => "yes" });
+		%]
+		[% FOREACH the_view = views %]
+                	&nbsp;|&nbsp;
+                	<a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == the_view.viewname  %]color:#ccc;[% END %]" onclick="getModalPrefs('fhview[% the_view.viewname %]', 'Customize [% the_view.viewtitle %] View', 1); return false;">[% the_view.viewtitle %]</a>
 		[% END %]
                 &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px; [% IF view.viewname == "stories" %]color:#ccc;[% END %]" [% IF view.viewname !="stories" %]onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false;"[% END %]>Stories</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px; [% IF view.viewname == "popular" %]color:#ccc;[% END %]" [% IF view.viewname !="popular" %]onclick="getModalPrefs('fhviewpopular', 'Customize Popular View', 1); return false;"[% END %]>Popular</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px; [% IF view.viewname == "recent" %]color:#ccc;[% END %]" [% IF view.viewname !="recent" %]onclick="getModalPrefs('fhviewrecent', 'Customize Recent View', 1); return false;"[% END %]>Recent</a>
-		[% IF user.is_admin %]
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == "daddypants" %]color:#ccc;[% END %]" [% IF view.viewname !="daddypants" %]onclick="getModalPrefs('fhviewdaddypants', 'Customize Daddypants View', 1); return false;"[% END %]>Daddypants</a>
-		[% END %]
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == "search" %]color:#ccc;[% END %]" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false;">Search</a>
                 </div>
                 [% END %]
 <label>
@@ -102,5 +96,6 @@ Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF 
 <input name="viewid" value="[% view.id %]" type="hidden">
 <input type="button" value="Save" onclick="saveModalPrefs()">
 <input type="button" value="Cancel" onclick="hide_modal_box()">
+<input type="button" value="Reset" onclick="resetModalPrefs()">
 
 </form>

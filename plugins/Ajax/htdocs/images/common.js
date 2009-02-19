@@ -1677,7 +1677,28 @@ function serialize_multiple( $form ){
 	);
 }
 
+function resetModalPrefs(extra_param) {
+	var params = {
+		op:	'saveModalPrefs',
+		data: 	serialize_multiple($('#modal_prefs')),
+		reset:  1,
+		reskey:	reskey_static
+	};
+
+	if (extra_param) {
+		params[extra_param] = 1;
+	}
+
+	ajax_update(params, '', {
+		onComplete: function() {
+			hide_modal_box();
+			document.location=document.URL;
+		}
+	});
+}
+
 function saveModalPrefs() {
+
 	ajax_update({
 		op:	'saveModalPrefs',
 		data:	serialize_multiple($('#modal_prefs')),
@@ -1816,8 +1837,10 @@ function firehose_go_prev() {
 
 }
 
-function firehose_more() {
-	firehose_settings.more_num = firehose_settings.more_num + firehose_more_increment;
+function firehose_more(noinc) {
+	if (!noinc) {
+		firehose_settings.more_num = firehose_settings.more_num + firehose_more_increment;
+	}
 
 	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();

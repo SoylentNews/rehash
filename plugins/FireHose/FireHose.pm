@@ -198,6 +198,28 @@ sub setFireHoseViewPrefs {
 	}
 }
 
+sub removeUserPrefsForView {
+	my ($self, $id) = @_;
+	my $user = getCurrentUser();
+	return if $user->{is_anon};
+
+	my $id_q = $self->sqlQuote($id);
+	my $uid_q = $self->sqlQuote($user->{uid});
+
+	$self->sqlDelete("firehose_view_settings", "id=$id_q and uid=$uid_q");
+}
+
+sub removeUserSections {
+	my ($self, $id) = @_;
+	my $user = getCurrentUser();
+	return if $user->{is_anon};
+	
+	my $uid_q = $self->sqlQuote($user->{uid});
+	$self->sqlDelete("firehose_section_settings", "uid=$uid_q");
+	$self->sqlDelete("firehose_section", "uid=$uid_q");
+	
+}
+
 sub getFireHoseSectionsMenu {
 	my($self) = @_;
 	my $user = getCurrentUser();
@@ -3024,6 +3046,39 @@ sub applyViewOptions {
 	my $viewfilter = "$view->{filter}";
 	$viewfilter .= " $view->{datafilter}" if $view->{datafilter};
 	$viewfilter .= " unsigned" if $user->{is_admin} && $view->{admin_unsigned} eq "yes";
+
+	my $validator = $self->getOptionsValidator();
+
+	if ($view->{use_exclusions} eq "yes") {
+		if ($user->{story_never_author}) {
+			my $author_exclusions;
+			foreach (split /,/, $user->{story_never_author}) {
+				my $nick = $self->getUser($_, 'nickname');
+				$author_exclusions .= " \"-author:$nick\" " if $nick;
+			}
+			$viewfilter .= $author_exclusions if $author_exclusions;
+		}
+		if ($user->{firehose_exclusions}) {
+			my $ops = $self->splitOpsFromString($user->{firehose_exclusions});
+			my @fh_exclusions; 
+			
+			my $skins = $self->getSkins();
+			my %skin_nexus = map { $skins->{$_}{name} => $skins->{$_}{nexus} } keys %$skins;
+
+			foreach (@$ops) {
+				if ($validator->{type}{$_}) {
+					push @fh_exclusions, "-$_";
+				} elsif ($skin_nexus{$_}) {
+					push @fh_exclusions, "-$_";
+				}
+			}
+			if (@fh_exclusions) {
+				$viewfilter .= " ". (join ' ', @fh_exclusions)
+			}
+			print STDERR "FH EXCLUSIONS $user->{firehose_exclusions}\n";
+		}
+		print STDERR "FINAL view filter: $viewfilter\n";
+	}
 
 
 	if ($view->{useparentfilter} eq "no") {
