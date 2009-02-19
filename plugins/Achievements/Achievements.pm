@@ -8,29 +8,41 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Time::Local;
 
 use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
+# Set an achievement for a user. Does nothing if the achievement is not
+# repeatable or if the new data doesn't warrant an achievement upgrade.
+#
+# $ach_name: Name of the achievement we're setting.
+# $uid: UID of the user.
+# $options->{ignore_lookup}: Don't call getAchievementItemCount(). Assumes exponent is set.
+# $options->{exponent}: The number of items we're setting for this achievement. Assumes ignore_lookup is set.
+# $options->{force_convert}: Take the log() of $options->{exponent}.
 sub setUserAchievement {
         my($self, $ach_name, $uid, $options) = @_;
 
 	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
+
 	return if ($uid == $constants->{anonymous_coward_uid});
 
-        my $slashdb = getCurrentDB();
         #my $uid_q = $self->sqlQuote($uid);
 
 	# Count the current numnber of items eligible for this achievement
 	my $count = 0;
+	my $new_exponent = 0;
 	$count = $self->getAchievementItemCount($ach_name, $uid, $slashdb) unless $options->{ignore_lookup};
+	$count = $options->{exponent} if ($options->{ignore_lookup} && $options->{force_convert});
+	$new_exponent = $options->{exponent} if ($options->{exponent} && !$options->{force_convert});
 
 	# Convert to our desred format. Truncate as int so we don't get
 	# exponents like 2.xxx.
 	my $achievement = $self->getAchievement($ach_name);
         my $increment = $achievement->{$ach_name}{increment};
-	my $new_exponent = $options->{exponent} || 0;
         if ($increment > 1 && $count != 0) {
                 $new_exponent = int(log($count) / log($increment));
         }
@@ -50,7 +62,7 @@ sub setUserAchievement {
                         "-createtime" => 'NOW()',
                 };
 		$slashdb->sqlInsert('user_achievements', $data);
-		$self->setUserAchievementObtained($uid);
+		$self->setUserAchievementObtained($uid, { exponent => $new_exponent });
 	} elsif ($achievement->{$ach_name}{repeatable} eq 'yes' && ($new_exponent > $old_exponent)) {
 		# The user has the inferior version of the achievement. Upgrade them.
 		$data = {
@@ -72,7 +84,11 @@ sub setUserAchievementObtained {
         my $achievement = $self->getAchievement('achievement_obtained');
         my $aid = $achievement->{'achievement_obtained'}{aid};
         my $user_achievement = $self->getUserAchievements($uid, { aid => $aid });
-        my $total_achievements = $slashdb->sqlCount('user_achievements', "uid = $uid && aid != $aid");
+
+	my $total_achievements = 0;
+        $total_achievements = $user_achievement->{$aid}{exponent};
+        $total_achievements += $options->{exponent};
+        ++$total_achievements;
 
         my $data;
         if (!$user_achievement->{$aid}{id}) {
@@ -112,20 +128,15 @@ sub getUserAchievements {
                 $where_string);
 
         foreach my $achievement (keys %$achievements) {
-                my ($name, $description, $increment, $repeatable) =
-                        $slashdb->sqlSelect("name, description, increment, repeatable", "achievements", "aid = " . $achievements->{$achievement}{aid});
- 
-		$achievements->{$achievement}{name} = $name;
-		$achievements->{$achievement}{description} = $description;
+		($achievements->{$achievement}{name},
+		 $achievements->{$achievement}{description},
+		 $achievements->{$achievement}{increment},
+		 $achievements->{$achievement}{repeatable}) =
+			$slashdb->sqlSelect("name, description, increment, repeatable",
+					    "achievements",
+					    "aid = " . $achievements->{$achievement}{aid}
+			);
 
-		if ($achievements->{$achievement}{repeatable} eq 'yes' && $achievements->{$achievement}{increment} == 1) {
-			$achievements->{$achievement}{increment} = $achievements->{$achievement}{exponent};
-			$achievements->{$achievement}{exponent} = $increment;
-		} else {
-			$achievements->{$achievement}{increment} = $increment;
-		}
-
-		$achievements->{$achievement}{repeatable} = $repeatable;
 		$achievements->{$achievement}{createtime} = (split(/\s/, $achievements->{$achievement}{createtime}))[0];
 	}
 
@@ -174,6 +185,7 @@ sub getAchievementItemCount {
 
 sub getScore5Comments {
 	my($self) = @_;
+
 	my $constants = getCurrentStatic();
 
 	my $comments = $self->sqlSelectAllHashref(
@@ -192,12 +204,63 @@ sub getScore5Comments {
 	}
 
 	foreach my $uid (keys %$score5comments_archived) {
-		$self->setUserAchievement('score5_comment', $uid, { ignore_lookup => 1, exponent => scalar(@{$score5comments_archived->{$uid}}) });
+		$self->setUserAchievement('score5_comment', $uid, { ignore_lookup => 1, force_convert => 1, exponent => scalar(@{$score5comments_archived->{$uid}}) });
 
 		# If they've posted a Score:5 comment, they've clearly obtained this.
 		# Deprecate this when retroactive achievements are added?
 		$self->setUserAchievement('comment_posted', $uid, { ignore_lookup => 1, exponent => 0 });
 	}
+}
+
+sub getConsecutiveDaysRead {
+        my ($self) = @_;
+
+        my $constants = getCurrentStatic();
+        my $logdb = getObject('Slash::DB', { db_type => "log_slave" });
+
+        my $users = $logdb->sqlSelectColArrayref('uid', 'accesslog', 'uid != ' . $constants->{anonymous_coward_uid}, '', { distinct => 1});
+        my $min_ts = $logdb->sqlSelect("MIN(ts)", "accesslog");
+        my $max_ts = $logdb->sqlSelect("NOW()", "accesslog");
+
+        foreach my $uid (@$users) {
+                my $days_read = $logdb->sqlSelectAllHashref(
+                        'id',
+                        'id, ts',
+                        'accesslog',
+                        "uid = $uid and ts >= '$min_ts' and ts <= '$max_ts'"
+                );
+
+                my $unique_days_read;
+                foreach my $id (keys %$days_read) {
+                        my $ts = (split(/\s/, $days_read->{$id}{ts}))[0];
+                        my ($year, $month, $day) = split(/-/, $ts);
+                        $unique_days_read->{$ts} = timelocal(0, 0, 0, $day, $month - 1, $year);
+                }
+
+                my $streak = 0;
+                my $total_days = 0;
+                foreach my $day_read (sort keys %$unique_days_read) {
+                        $streak = 1;
+                        $streak = $self->countDailyAchievementStreak($streak, $day_read, $unique_days_read);
+                        $total_days = $streak if ($streak > $total_days);
+                }
+
+                $self->setUserAchievement('consecutive_days_read', $uid, { ignore_lookup => 1, force_convert => 1, exponent => $total_days });
+	}
+}
+
+sub countDailyAchievementStreak {
+        my ($self, $streak, $curr_day, $unique_days) = @_;
+
+        my ($sec, $min, $hour, $mday, $mon, $year) = localtime($unique_days->{$curr_day} + 86400);
+        my $next_day = sprintf("%4d-%02d-%02d", $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
+
+        if (exists $unique_days->{$next_day}) {
+                ++$streak;
+                $streak = $self->countDailyAchievementStreak($streak, $next_day, $unique_days);
+        }
+
+        return $streak;
 }
 
 sub DESTROY {

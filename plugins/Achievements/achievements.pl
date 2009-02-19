@@ -22,6 +22,9 @@ $task{$me}{code} = sub {
 	# Generate archived Score 5 comments
 	$achievements->getScore5Comments();
 
+	# Generate number of days read in a row
+	$achievements->getConsecutiveDaysRead();
+
 	return;
 };
 
