@@ -1194,16 +1194,23 @@ function firehose_reorder() {
 				}
 			}
 			if ( moved ) after_article_moved();
-			var newtitle = document.title;
-			if (/\(\d+\)/.test(newtitle)) {
-				newtitle = newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
-			} else {
-				newtitle = newtitle + " (" + firehose_item_count + ")";
-			}
-			document.title = newtitle;
+			firehose_update_title_count(firehose_item_count);
 		}
 	}
 
+}
+
+function firehose_update_title_count(num) {
+	var newtitle = document.title;
+	if (!num) {
+		num = $('#firehoselist>div[class!=daybreak]').length;
+	}
+	if (/\(\d+\)/.test(newtitle)) {
+		newtitle = newtitle.replace(/(\(\d+\))/,"(" + num + ")");
+	} else {
+		newtitle = newtitle + " (" + num + ")";
+	}
+	document.title = newtitle;
 }
 
 function firehose_get_next_updates() {

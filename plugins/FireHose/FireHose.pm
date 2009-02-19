@@ -4095,6 +4095,7 @@ sub listView {
 		section			=> $section,
 		firehose_more_data 	=> $firehose_more_data,
 		views			=> $views,
+		theupdatetime		=> timeCalc($slashdb->getTime(), "%H:%M"),
 	}, { Page => "firehose", Return => 1 });
 }
 
