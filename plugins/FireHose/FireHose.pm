@@ -1934,10 +1934,23 @@ sub genSetOptionsReturn {
 	$data->{html}->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
 	$data->{html}->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
+	my $event_data = {
+		section	=> $form->{section},
+		color	=> strip_literal($opts->{color}),
+		filter	=> strip_literal($opts->{fhfilter}),
+		view	=> $form->{view},
+	};
+
 	$data->{value}->{'firehose-filter'} = $opts->{fhfilter};
-	if (($form->{view} && $form->{viewchanged}) || ($form->{section} && $form->{sectionchanged})) {
+	my $section_changed = $form->{section} && $form->{sectionchanged};
+	if (($form->{view} && $form->{viewchanged}) || $section_changed) {
 		$data->{eval_last} = "firehose_swatch_color('$opts->{color}');";
+		$event_data->{'select_section'} = $section_changed;
 	}
+	$data->{events} = [{
+		event	=> 'set-options.firehose',
+		data	=> $event_data,
+	}];
 
 	my $eval_first = "";
 	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view fhfilter base_filter)) {

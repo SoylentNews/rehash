@@ -1835,6 +1835,24 @@ function firehose_highlight_section( $section ){
 	$section.addClass('active').siblings().removeClass('active');
 }
 
+function on_firehose_select_section( event, data ){
+	// $(data.section).addClass('active').siblings().removeClass('active')
+	console.log(event.type, data);
+	$('#viewsearch').parent().toggleClass('mode-filter', data.section!=='unsaved');
+}
+
+function on_firehose_set_options( event, data ){
+	if ( !data.select_section ) {
+		console.log("create/update unsaved");
+		// data.section = 'unsaved'
+	}
+	on_firehose_select_section(event, data);
+}
+
+$(function(){
+	$(document).bind('set-options.firehose', on_firehose_set_options);
+});
+
 function the_unsaved_section( dont_create ){
 	var	$section_menu	= $('#firehose-sections'),
 		$unsaved_item	= $section_menu.find('> #fhsection-unsaved');
