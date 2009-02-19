@@ -5903,3 +5903,12 @@ ALTER TABLE firehose_view_settings CHANGE COLUMN id id mediumint(8) unsigned NOT
 # For plugins/Achievements
 UPDATE achievements SET exponent = 2 WHERE name = 'score5_comment';
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_read', 'Days Read in a Row', 'yes', 2);
+CREATE TABLE user_achievement_streaks (
+        id mediumint(8) unsigned NOT NULL auto_increment,
+        uid mediumint(8) unsigned NOT NULL default '0',
+        aid mediumint(8) unsigned NOT NULL default '0',
+        streak mediumint(8) unsigned NOT NULL default '0',
+        last_hit datetime NOT NULL default '0000-00-00 00:00:00',
+        PRIMARY KEY (id),
+        UNIQUE KEY achievement (uid,aid)
+) TYPE=InnoDB;

@@ -216,51 +216,45 @@ sub getConsecutiveDaysRead {
         my ($self) = @_;
 
         my $constants = getCurrentStatic();
-        my $logdb = getObject('Slash::DB', { db_type => "log_slave" });
+        my $slashdb = getCurrentDB();
 
-        my $users = $logdb->sqlSelectColArrayref('uid', 'accesslog', 'uid != ' . $constants->{anonymous_coward_uid}, '', { distinct => 1});
-        my $min_ts = $logdb->sqlSelect("MIN(ts)", "accesslog");
-        my $max_ts = $logdb->sqlSelect("NOW()", "accesslog");
+        my $achievement = $self->getAchievement('consecutive_days_read');
+        my $cdr_aid = $achievement->{'consecutive_days_read'}{aid};
+	# Add another hour to account for possible latency in running the task.
+	my $yesterday = time() - 86760;
 
-        foreach my $uid (@$users) {
-                my $days_read = $logdb->sqlSelectAllHashref(
-                        'id',
-                        'id, ts',
-                        'accesslog',
-                        "uid = $uid and ts >= '$min_ts' and ts <= '$max_ts'"
-                );
+	my $users = $slashdb->sqlSelectColArrayref(
+                'uid',
+                'users_hits',
+                'uid != ' . $constants->{anonymous_coward_uid} .
+                ' and lastclick >= DATE_SUB(NOW(), INTERVAL 24 HOUR)'
+        );
 
-                my $unique_days_read;
-                foreach my $id (keys %$days_read) {
-                        my $ts = (split(/\s/, $days_read->{$id}{ts}))[0];
-                        my ($year, $month, $day) = split(/-/, $ts);
-                        $unique_days_read->{$ts} = timelocal(0, 0, 0, $day, $month - 1, $year);
+        foreach my $userhit_uid (@$users) {
+                my $data;
+                my ($id, $uid, $streak, $last_hit) =
+                        $slashdb->sqlSelect('id, uid, streak, UNIX_TIMESTAMP(last_hit)', 'user_achievement_streaks', "aid = $cdr_aid and uid = $userhit_uid");
+                if (!$id) {
+			$streak = 1;
+                        $data = {
+                                "uid"       => $userhit_uid,
+                                "aid"       => $cdr_aid,
+                                "streak"    => $streak,
+                                "-last_hit" => 'NOW()',
+                        };
+                        $slashdb->sqlInsert('user_achievement_streaks', $data);
+                } else {
+			# Reset streak to 1 if the user missed a day.
+			$streak = ($last_hit <= $yesterday) ? 1 : $streak + 1;
+                        $data = {
+                                "streak"    => $streak,
+                                "-last_hit" => 'NOW()',
+                        };
+                        $slashdb->sqlUpdate('user_achievement_streaks', $data, "id = $id");
                 }
 
-                my $streak = 0;
-                my $total_days = 0;
-                foreach my $day_read (sort keys %$unique_days_read) {
-                        $streak = 1;
-                        $streak = $self->countDailyAchievementStreak($streak, $day_read, $unique_days_read);
-                        $total_days = $streak if ($streak > $total_days);
-                }
-
-                $self->setUserAchievement('consecutive_days_read', $uid, { ignore_lookup => 1, force_convert => 1, exponent => $total_days });
-	}
-}
-
-sub countDailyAchievementStreak {
-        my ($self, $streak, $curr_day, $unique_days) = @_;
-
-        my ($sec, $min, $hour, $mday, $mon, $year) = localtime($unique_days->{$curr_day} + 86400);
-        my $next_day = sprintf("%4d-%02d-%02d", $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
-
-        if (exists $unique_days->{$next_day}) {
-                ++$streak;
-                $streak = $self->countDailyAchievementStreak($streak, $next_day, $unique_days);
+                $self->setUserAchievement('consecutive_days_read', $userhit_uid, { ignore_lookup => 1, force_convert => 1, exponent => $streak });
         }
-
-        return $streak;
 }
 
 sub DESTROY {

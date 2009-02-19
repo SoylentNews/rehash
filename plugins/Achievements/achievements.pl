@@ -23,7 +23,7 @@ $task{$me}{code} = sub {
 	$achievements->getScore5Comments();
 
 	# Generate number of days read in a row
-	$achievements->getConsecutiveDaysRead();
+	#$achievements->getConsecutiveDaysRead();
 
 	return;
 };
