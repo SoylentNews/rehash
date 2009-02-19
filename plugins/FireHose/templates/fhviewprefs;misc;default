@@ -110,11 +110,11 @@ END %]
 
 		var v = dialog_values();
 		if ( !v.name && !v.filter ) {
-			$dialog.find('input[name=section_filter]').val( $li.data('fhfilter') );
+			$dialog.find('input[name=section_filter]').val( $li.metadata().filter );
 			$edit_field.keyup();
 
 			var	$select	= $dialog.find('select'),
-				view_id	= $select.find(':contains(' + $li.data('viewname').substr(1) + ')').val();
+				view_id	= $select.find(':contains(' + $li.metadata().viewname.substr(1) + ')').val();
 			$select.val(view_id);
 		}
 

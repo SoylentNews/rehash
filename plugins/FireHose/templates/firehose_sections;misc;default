@@ -39,11 +39,42 @@ __template__
 				link_loc = the_skin.rootdir;
 			   END %]
 		[% END %]
-		<li [% IF is_active %] class="active"[% ELSIF hide %] class="hide"[% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !user.is_anon; %] onclick="firehose_set_options('section','[% fh_section.fsid %]'); return false;" [% END %]>[% fh_section.section_name %]</a>[% IF !user.is_anon %] <a onclick="getModalPrefs('firehoseview','Update section filter', 0, { id: [% fh_section.fsid %]});return false;" href="#" id="links-sections-edit">[e]</a>[% END %]
-		<script type="data"> [% fh.js_anon_dump(fh_section.data); %] </script>
+		<li [% IF is_active %] class="active"[% ELSIF hide %] class="hide"[% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]">[% fh_section.section_name %]</a>[% IF !user.is_anon %] <a class="links-sections-edit">[e]</a>[% END %]
+		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
 	[% END %]
 </ul>
+[% IF !user.is_anon; %]<script type="text/javascript">
+$(function(){
+$.metadata.setType('elem', 'script');
+$('#firehose-sections').
+		click(function( event ){
+			var	$target		= $(event.originalTarget),
+				$li		= $target.closest('li[id^=fhsection-]'),
+				section_id	= $li.metadata().id,
+				is_unsaved	= section_id === 'unsaved',
+				is_edit		= $target.closest('a.links-sections-edit').length;
+
+			if ( is_edit && is_unsaved ) {
+				edit_the_unsaved_section();
+			} else if ( is_edit ) {
+				getModalPrefs('firehoseview','Save Custom Section', 0, { id: section_id });
+			} else if ( is_unsaved ) {
+				firehose_set_options('setfhfilter', $li.metadata().filter);
+				firehose_set_options('view', $li.metadata().viewname);
+			} else {
+				firehose_set_options('section', section_id);
+			}
+			return false;
+		}).
+		find('>li').
+			each(function(){
+				var md = $(this).metadata();
+			}).
+			find('a').
+				removeAttr('href');
+});
+</script>[% END %]
 __seclev__
 1000
 __version__

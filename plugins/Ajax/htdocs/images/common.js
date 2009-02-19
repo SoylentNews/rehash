@@ -1238,11 +1238,11 @@ $(function(){
 });
 
 function firehose_busy() {
-	Slash.busy('firehose', true);
+	Slash.markBusy('firehose', true);
 }
 
 function firehose_busy_done() {
-	Slash.busy('firehose', false);
+	Slash.markBusy('firehose', false);
 }
 
 function firehose_get_updates_handler(transport) {
@@ -1858,13 +1858,13 @@ function the_unsaved_section( dont_create ){
 		$unsaved_item	= $section_menu.find('> #fhsection-unsaved');
 
 	if ( !$unsaved_item.length && !dont_create ) {
-		var	$title	= $('<a href="#"><i>unsaved</i> <span></span></a>').
+		var	$title	= $('<a><i>unsaved</i> <span></span></a>').
 					click(function(){
-						firehose_set_options('setfhfilter', $unsaved_item.data('fhfilter'));
+						firehose_set_options('setfhfilter', $unsaved_item.metadata().filter);
 						firehose_highlight_section($unsaved_item);
 						return false;
 					}),
-			$edit	= $('<a id="links-sections-edit" href="#">[e]</a>').
+			$edit	= $('<a class="links-sections-edit">[e]</a>').
 					click(function(){
 						edit_the_unsaved_section();
 						return false;
