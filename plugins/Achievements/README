@@ -1,0 +1,9 @@
+Please run createachievements.pl after installing the Achievements plugin
+if you want to use real site data immediately (rather than waiting for
+achievements to propagate).
+
+You can also re-run createachievements.pl at any time, but you should
+probably do a hard reset of your achievements table (drop it and recreate,
+or delete all DB rows).
+
+achievements.pl should not be manually run at this time.
