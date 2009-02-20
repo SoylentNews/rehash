@@ -1836,18 +1836,33 @@ function firehose_highlight_section( $section ){
 }
 
 function on_firehose_select_section( event, data ){
-	firehose_highlight_section($('#firehose-sections #fhsection-'+data.section));
-	$('#viewsearch').parent().toggleClass('mode-filter', data.section!=='unsaved');
+	firehose_highlight_section($('#firehose-sections #fhsection-'+data.id));
+	$('#viewsearch').parent().toggleClass('mode-filter', data.id!=='unsaved');
 }
 
 function on_firehose_set_options( event, data ){
 	if ( !data.select_section ) {
-		var $us = the_unsaved_section();
-		data = $.extend($us.metadata(), data, { id: 'unsaved' });
-		$(document).
-			one('update.firehose', function( event, updated ){
-				$us.find('a span').text(updated.local_time);
-			});
+		delete data.id;
+
+		var $next_section;
+		$('#firehose-sections li').each(function(){
+			var $this=$(this), section=$this.metadata();
+			if ( section.filter == data.filter && section.viewname == data.viewname ) {
+				$next_section = $this;
+				data.id = section.id;
+				return false;
+			}
+		});
+
+		if ( !$next_section ) {
+			$next_section = the_unsaved_section();
+			data = $.extend($next_section.metadata(), data);
+			$(document).
+				one('update.firehose', function( event, updated ){
+					$next_section.find('a span').text(updated.local_time);
+				});
+		}
+
 	}
 	on_firehose_select_section(event, data);
 }
