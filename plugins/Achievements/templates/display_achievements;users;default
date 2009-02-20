@@ -49,7 +49,7 @@ ach_obtained_aid = ach_obtained.$ach_key.aid;
 		<li class=" [% requested_user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF requested_user_achievements.$aid.increment > 1 %]sup[% END %]  ">
 				[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
 					[% IF requested_user_achievements.$aid.increment == 1 %]
 						[% IF requested_user_achievements.$aid.exponent > 1 %]
@@ -78,7 +78,7 @@ ach_obtained_aid = ach_obtained.$ach_key.aid;
 		<li class=" [% requested_user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF requested_user_achievements.$aid.increment > 1 %]sup[% END %]  ">
 				[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
 					[% IF requested_user_achievements.$aid.increment == 1 %]
 						[% IF requested_user_achievements.$aid.exponent > 1 %]
@@ -135,7 +135,7 @@ ach_obtained_aid = ach_obtained.$ach_key.aid;
 		<li class=" [% user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF user_achievements.$aid.increment > 1 %]sup[% END %]">
 				[% IF user_achievements.$aid.repeatable == 'yes' %]
 					[% IF user_achievements.$aid.increment == 1 %]
 						[% IF user_achievements.$aid.exponent > 1 %]
@@ -169,7 +169,7 @@ ach_obtained_aid = ach_obtained.$ach_key.aid;
 		<li class=" [% user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF user_achievements.$aid.increment > 1 %]sup[% END %]">
 				[% IF user_achievements.$aid.repeatable == 'yes' %]
 					[% IF user_achievements.$aid.increment == 1 %]
 						[% IF user_achievements.$aid.exponent > 1 %]
