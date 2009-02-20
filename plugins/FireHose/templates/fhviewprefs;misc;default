@@ -27,7 +27,9 @@ __template__
 [% END %]
 [% IF (fh_section.skid != constants.mainpage_skid) %]
 <div class="section_name"><input type="text" name="section_name" value="[% name | strip_attribute %]" class="section_name" id="fhsectionname"></div>
-
+[% ELSE %]
+<div class="section_name">[% name | strip_literal %]</div>
+[% END %]
 <div class="yui-gd section_filter">
     <div class="yui-u first">
 		Filter:
@@ -45,9 +47,6 @@ __template__
 		[% Slash.createSelect('viewid', views, { return => 1, default => default_view }) %]
 	</div>
 </div>
-[% ELSE %]
-<div class="section_name">[% name | strip_literal %]</div>
-[% END %]
 
 <div class="yui-gd section_default" style="display: none;">
     <div class="yui-u first">
