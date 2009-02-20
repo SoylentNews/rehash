@@ -1935,10 +1935,10 @@ sub genSetOptionsReturn {
 	$data->{html}->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
 	my $event_data = {
-		section	=> $form->{section},
-		color	=> strip_literal($opts->{color}),
-		filter	=> strip_literal($opts->{fhfilter}),
-		view	=> $form->{view},
+		id		=> $form->{section},
+		filter		=> strip_literal($opts->{fhfilter}),
+		viewname	=> $form->{view},
+		color		=> strip_literal($opts->{color}),
 	};
 
 	$data->{value}->{'firehose-filter'} = $opts->{fhfilter};

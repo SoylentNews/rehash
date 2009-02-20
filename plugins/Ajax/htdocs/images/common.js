@@ -1836,15 +1836,18 @@ function firehose_highlight_section( $section ){
 }
 
 function on_firehose_select_section( event, data ){
-	// $(data.section).addClass('active').siblings().removeClass('active')
-	console.log(event.type, data);
+	firehose_highlight_section($('#firehose-sections #fhsection-'+data.section));
 	$('#viewsearch').parent().toggleClass('mode-filter', data.section!=='unsaved');
 }
 
 function on_firehose_set_options( event, data ){
 	if ( !data.select_section ) {
-		console.log("create/update unsaved");
-		// data.section = 'unsaved'
+		var $us = the_unsaved_section();
+		data = $.extend($us.metadata(), data, { id: 'unsaved' });
+		$(document).
+			one('update.firehose', function( event, updated ){
+				$us.find('a span').text(updated.local_time);
+			});
 	}
 	on_firehose_select_section(event, data);
 }
@@ -1858,20 +1861,12 @@ function the_unsaved_section( dont_create ){
 		$unsaved_item	= $section_menu.find('> #fhsection-unsaved');
 
 	if ( !$unsaved_item.length && !dont_create ) {
-		var	$title	= $('<a><i>unsaved</i> <span></span></a>').
-					click(function(){
-						firehose_set_options('setfhfilter', $unsaved_item.metadata().filter);
-						firehose_highlight_section($unsaved_item);
-						return false;
-					}),
-			$edit	= $('<a class="links-sections-edit">[e]</a>').
-					click(function(){
-						edit_the_unsaved_section();
-						return false;
-					});
+		var	$title	= $('<a><i>unsaved</i> <span></span></a>'),
+			$edit	= $('<a class="links-sections-edit">[e]</a>');
 		$section_menu.prepend(
 			$unsaved_item = $('<li id="fhsection-unsaved" />').append($title).append($edit)
 		);
+		$unsaved_item.metadata().id = 'unsaved';
 	}
 
 	return $unsaved_item;
@@ -1917,14 +1912,6 @@ function save_the_unsaved_section( requested, fn ){
 
 function firehose_submit_filter() {
 	$('#searchquery').each(function(){
-		$(document).one('update.firehose', function( event, updated ){
-			var $us = the_unsaved_section().
-				data('fhfilter', updated.filter).
-				data('viewname', updated.view).
-				data('color', updated.color);
-			$us.find('a span').text(updated.local_time);
-			firehose_highlight_section($us);
-		});
 		firehose_set_options('setfhfilter', $(this).val());
 	});
 }
