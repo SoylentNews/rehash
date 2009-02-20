@@ -1361,7 +1361,7 @@ sub getFireHoseEssentials {
 				} else {
 					$sph->SetLimits($offset_num || 0, $fetch_size);
 				}
-		 	}
+			}
 		}
 	}
 
@@ -1707,7 +1707,7 @@ sub getFireHoseMulti {
 		# never be undef, they are the empty string instead.
 		# Add a note field to each hose item hashref.
 		my @globjids = ( map { $more_hr->{$_}{globjid} } @id_chunk );
-                my $note_hr = $self->getGlobjAdminnotes(\@globjids);
+		my $note_hr = $self->getGlobjAdminnotes(\@globjids);
 		for my $id (@id_chunk) {
 			$more_hr->{$id}{note} = $note_hr->{ $more_hr->{$id}{globjid} } || '';
 		}
