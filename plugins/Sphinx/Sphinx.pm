@@ -34,7 +34,13 @@ sub getNum {
 sub getSphinxStats {
 	my($self) = @_;
 
-	my $sql = 'SHOW ENGINE SPHINX STATUS';
+	# requires SUPER privs, so don't use this if we can help it
+	# reports "total: 25, total found: 25, time: 126, words: 2"
+# 	my $sql = 'SHOW ENGINE SPHINX STATUS';
+
+	# returns variables named: sphinx_total, sphinx_total_found,
+	# sphinx_time, sphinx_word_count, sphinx_words
+	my $sql = 'SHOW STATUS LIKE "sphinx_%"';
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		$self->sqlErrorLog($sql);
@@ -42,14 +48,25 @@ sub getSphinxStats {
 		return undef;
 	}
 
-	my @data = $sth->fetchrow;
-	$sth->finish;
-
-	return undef unless $data[2] && $data[2] =~ /:/;
-
 	my %stats;
-	while ($data[2] =~ /(\w[\w\s]+): (\d+)/g) {
-		$stats{$1} = $2;
+
+	if ($sql =~ /SHOW ENGINE/) {
+		my @data = $sth->fetchrow;
+		$sth->finish;
+
+		return undef unless $data[2] && $data[2] =~ /:/;
+
+		while ($data[2] =~ /(\w[\w\s]+): (\d+)/g) {
+			$stats{$1} = $2;
+		}
+	} else {
+		while (my $data = $sth->fetchrow_arrayref) {
+			next if $data->[1] =~ /\D/;
+			(my $name = $data->[0]) =~ s/^sphinx_//;
+			$name =~ s/_/ /g;
+			my $num = $data->[1] & 2**31-1;
+			$stats{$name} = $num;
+		}
 	}
 
 	return \%stats;

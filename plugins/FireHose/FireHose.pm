@@ -38,6 +38,7 @@ use Slash::Display;
 use Slash::Utility;
 use Slash::Slashboxes;
 use Slash::Tags;
+use Sphinx::Search 0.14;
 
 use base 'Slash::Plugin';
 
@@ -840,7 +841,9 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
-	my($sphinx, $sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other) = (0);
+	my $sphinx = 0;
+	my($sph, $sph_query, $sph_check_sql) = (undef, '', 0);
+	my($sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other);
 	my @sphinx_tables = ('sphinx_search');
 	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx', timeout => 2 });
 	$sphinx = 1 if $sphinxdb;
@@ -850,6 +853,14 @@ sub getFireHoseEssentials {
 
 	my $no_mcd = $user->{is_admin} && !$options->{usermode} ? 1 : 0;
 
+	if ($sphinx) {
+		$sph = Sphinx::Search->new();
+		my $vu = DBIx::Password::getVirtualUser( $sphinxdb->{virtual_user} );
+		my $host = $constants->{sphinx_01_hostname_searchd} || $vu->{host};
+		my $port = $constants->{sphinx_01_port} || 3312;
+		$sph->SetServer($host, $port);
+		$sph->SetConnectTimeout(5);
+	}
 	if ($sphinx > 1) {
 		use Data::Dumper; $Data::Dumper::Indent = 0; $Data::Dumper::Sortkeys = 1;
 		print STDERR "sphinx/gFHE option dump: ", Dumper($options), "\n";
@@ -947,15 +958,18 @@ sub getFireHoseEssentials {
 		# In both cases, only hose items "tagged for hose" by the
 		# user in question are returned.
 		push @sphinx_opts, "filter=tfh," . $tagged_by_uid;
+		$sph->SetFilter('tfh', [ $tagged_by_uid ]);
 		if ($need_tagged == 1) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
 			# one particular tag, e.g. /~foo/tags/bar
 			push @sphinx_tables, 'tags';
+			# note: see below, where this clause can be manipulated for $sph
 			push @sphinx_where, 'tags.globjid = sphinx_search.globjid';
 			my $tag_id = $tags->getTagnameidFromNameIfExists($options->{tagged_as}) || 0;
 			push @sphinx_where, "tags.tagnameid = $tag_id";
 			push @sphinx_where, "tags.uid = $tagged_by_uid";
+			$sph_check_sql = 1;
 		} elsif ($need_tagged == 2) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
@@ -1008,6 +1022,7 @@ sub getFireHoseEssentials {
 
 		if ($sphinx) {
 			push @sphinx_opts, "range=createtime_ut,0,$cur_time";
+			$sph->SetFilterRange('createtime_ut', 0, $cur_time);
 		}
 	}
 
@@ -1018,6 +1033,7 @@ sub getFireHoseEssentials {
 		if ($sphinx) {
 			my $future_time = $cur_time + $future_secs;
 			push @sphinx_opts, "range=createtime_ut,0,$future_time";
+			$sph->SetFilterRange('createtime_ut', 0, $future_time);
 		}
 	}
 
@@ -1025,7 +1041,9 @@ sub getFireHoseEssentials {
 		push @where, 'offmainpage=' . $self->sqlQuote($options->{offmainpage});
 
 		if ($sphinx) {
-			push @sphinx_opts, "filter=offmainpage," . ($options->{offmainpage} eq 'yes' ? 1 : 0);
+			my $off = $options->{offmainpage} eq 'yes' ? 1 : 0;
+			push @sphinx_opts, "filter=offmainpage,$off";
+			$sph->SetFilter('offmainpage', [ $off ]);
 		}
 	}
 
@@ -1035,13 +1053,17 @@ sub getFireHoseEssentials {
 			push @where, 'public = ' . $self->sqlQuote($options->{public});
 
 			if ($sphinx) {
-				push @sphinx_opts, "filter=public," . ($options->{public} eq 'yes' ? 1 : 0);
+				my $pub = $options->{public} eq 'yes' ? 1 : 0;
+				push @sphinx_opts, "filter=public,$pub";
+				$sph->SetFilter('public', [ $pub ]);
 			}
 		}
 
 		if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
 			if ($sphinx && $options->{filter}) {
-				push @sphinx_terms, sphinxFilterQuery($options->{filter});
+				my $query = sphinxFilterQuery($options->{filter});
+				push @sphinx_terms, $query;
+				$sph_query = $query;
 			}
 
 			$tables .= ',firehose_text';
@@ -1070,7 +1092,9 @@ sub getFireHoseEssentials {
 				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
 
 				if ($sphinx) {
-					push @sphinx_opts, "range=createtime_ut,$st_sphinx," . ($st_sphinx+$dur_sphinx);
+					my $end_sphinx = $st_sphinx+$dur_sphinx;
+					push @sphinx_opts, "range=createtime_ut,$st_sphinx,$end_sphinx";
+					$sph->SetFilterRange('createtime_ut', $st_sphinx, $end_sphinx);
 				}
 			} elsif ($options->{duration} == -1) {
 				if ($options->{orderdir} eq "ASC") {
@@ -1078,6 +1102,7 @@ sub getFireHoseEssentials {
 
 					if ($sphinx) { # ! is for negating, since this is >, not <
 						push @sphinx_opts, "!range=createtime_ut,0," . ($st_sphinx-1);
+						$sph->SetFilterRange('createtime_ut', 0, $st_sphinx-1, 1);
 					}
 				} else {
 					my $end_q = $self->sqlQuote(timeCalc("$options->{startdate} 23:59:59", '%Y-%m-%d %T', -$user->{off_set}));
@@ -1086,6 +1111,7 @@ sub getFireHoseEssentials {
 					if ($sphinx) {
 						my $end_sphinx = timeCalc("$options->{startdate} 23:59:59", '%s', -$user->{off_set});
 						push @sphinx_opts, "range=createtime_ut,0,$end_sphinx";
+						$sph->SetFilterRange('createtime_ut', 0, $end_sphinx);
 					}
 				}
 			}
@@ -1095,6 +1121,7 @@ sub getFireHoseEssentials {
 			if ($sphinx) {
 				my $dur_time = ($cur_time - $dur_sphinx) - 1;
 				push @sphinx_opts, "!range=createtime_ut,0,$dur_time";
+				$sph->SetFilterRange('createtime_ut', 0, $dur_time, 1);
 			}
 		}
 
@@ -1139,6 +1166,7 @@ sub getFireHoseEssentials {
 						}
 						$notlab = $not ? "!" : "";
 						push @sphinx_opts, "${notlab}filter=$newbase," . join(',', @new_opt);
+						$sph->SetFilter($newbase, \@new_opt, $notlab ? 1 : 0);
 					}
 				}
 			}
@@ -1157,6 +1185,7 @@ sub getFireHoseEssentials {
 
 			if ($sphinx) {
 				push @sphinx_opts, "filter=tid," . join(',', @$cur_opt);
+				$sph->SetFilter('tid', $cur_opt);
 			}
 		}
 
@@ -1169,6 +1198,7 @@ sub getFireHoseEssentials {
 
 			if ($sphinx) {
 				push @sphinx_opts, "!filter=tid," . join(',', @$cur_opt);
+				$sph->SetFilter('tid', $cur_opt, 1);
 			}
 		}
 
@@ -1176,18 +1206,12 @@ sub getFireHoseEssentials {
 
 		if ($pop) {
 			my $pop_q = $self->sqlQuote($pop);
-			if ($user->{is_admin} && !$options->{usermode}) {
-				push @where, "editorpop >= $pop_q";
-
-				if ($sphinx) { # in sphinx index, popularity has 1000000 added to it
-					push @sphinx_opts, "!range=editorpop,0," . ( (int($pop)+1_000_000) - 1 );
-				}
-			} else {
-				push @where, "popularity >= $pop_q";
-
-				if ($sphinx) {
-					push @sphinx_opts, "!range=popularity,0," . ( (int($pop)+1_000_000) - 1 );
-				}
+			my $field = $user->{is_admin} && !$options->{usermode} ? 'editorpop' : 'popularity';
+			push @where, "$field >= $pop_q";
+			if ($sphinx) { # in sphinx index, popularity has 1000000 added to it
+				my $max = int($pop)+1_000_000 - 1;
+				push @sphinx_opts, "!range=$field,0,$max";
+				$sph->SetFilterRange($field, 0, $max, 1);
 			}
 		}
 
@@ -1198,9 +1222,11 @@ sub getFireHoseEssentials {
 			if ($options->{unsigned}) {
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
 				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
+				$sph->SetFilter('signoff', [ $user->{uid} ], 1) if $sphinx;
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
 				push @sphinx_opts, "filter=signoff,$user->{uid}" if $sphinx;
+				$sph->SetFilter('signoff', [ $user->{uid} ]) if $sphinx;
 			}
 		}
 
@@ -1210,7 +1236,9 @@ sub getFireHoseEssentials {
 		push @where, 'attention_needed = ' . $self->sqlQuote($options->{attention_needed});
 
 		if ($sphinx) {
-			push @sphinx_opts, "filter=attention_needed," . ($options->{attention_needed} eq 'yes' ? 1 : 0);
+			my $needed = $options->{attention_needed} eq 'yes' ? 1 : 0;
+			push @sphinx_opts, "filter=attention_needed,$needed";
+			$sph->SetFilter('attention_needed', [ $needed ]);
 		}
 	}
 
@@ -1218,7 +1246,9 @@ sub getFireHoseEssentials {
 		push @where, 'accepted = ' . $self->sqlQuote($options->{accepted});
 
 		if ($sphinx) {
-			push @sphinx_opts, "filter=accepted," . ($options->{accepted} eq 'yes' ? 1 : 0);
+			my $accepted = $options->{accepted} eq 'yes' ? 1 : 0;
+			push @sphinx_opts, "filter=accepted,$accepted";
+			$sph->SetFilter('accepted', [ $accepted ]);
 		}
 	}
 
@@ -1226,7 +1256,9 @@ sub getFireHoseEssentials {
 		push @where, 'rejected = ' . $self->sqlQuote($options->{rejected});
 
 		if ($sphinx) {
-			push @sphinx_opts, "filter=rejected," . ($options->{rejected} eq 'yes' ? 1 : 0);
+			my $rejected = $options->{rejected} eq 'yes' ? 1 : 0;
+			push @sphinx_opts, "filter=rejected,$rejected";
+			$sph->SetFilter('rejected', [ $rejected ]);
 		}
 	}
 
@@ -1239,6 +1271,7 @@ sub getFireHoseEssentials {
 			my $val = $types{$options->{category}};
 			$val = 9999 unless defined $val;
 			push @sphinx_opts, "filter=category,$val";
+			$sph->SetFilter('category', [ $val ]);
 		}
 	}
 
@@ -1250,6 +1283,7 @@ sub getFireHoseEssentials {
 		if ($sphinx) {
 			my @globjids = map { $_->{globjid} } values %{ $self->getFireHoseMulti($options->{ids}) };
 			push @sphinx_opts, 'filter=globjidattr,' . join(',', @globjids) if @globjids;
+			$sph->SetFilter('globjidattr', \@globjids) if @globjids;
 		}
 	}
 
@@ -1259,6 +1293,7 @@ sub getFireHoseEssentials {
 		if ($sphinx) {
 			my $globjid = $self->getFireHose($options->{not_id})->{globjid};
 			push @sphinx_opts, "!filter=globjidattr,$globjid";
+			$sph->SetFilter('globjidattr', [ $globjid ], 1);
 		}
 	}
 
@@ -1288,14 +1323,21 @@ sub getFireHoseEssentials {
 			);
 			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
 			if (@sphinx_tables > 1) {
-				push @sphinx_opts, "limit=10000"; # SSS use the var
-				push @sphinx_opts, "maxmatches=10000"; # SSS use the var
+				my $maxmatches = $constants->{sphinx_01_max_matches} || 10000;
+				push @sphinx_opts, "limit=$maxmatches";
+				push @sphinx_opts, "maxmatches=$maxmatches";
 				$sphinx_other = $limit_str;
+				$sph->SetLimits(0, $maxmatches, $maxmatches);
 			} else {
+				my $maxmatches = $fetch_size > 1000 ? $fetch_size : undef; # SSS make 1000 a var?
 				push @sphinx_opts, "offset=$offset_num" if length $offset_num;
 				push @sphinx_opts, "limit=$fetch_size";
-				push @sphinx_opts, "maxmatches=$fetch_size"
-					if $fetch_size > 1000; # SSS use the var
+				push @sphinx_opts, "maxmatches=$maxmatches" if defined $maxmatches;
+				if (defined $maxmatches) {
+					$sph->SetLimits($offset_num || 0, $fetch_size, $maxmatches);
+				} else {
+					$sph->SetLimits($offset_num || 0, $fetch_size);
+				}
 		 	}
 		}
 	}
@@ -1327,10 +1369,64 @@ sub getFireHoseEssentials {
 
 		if (!@$sphinx_ar) {
 			$sdebug_idset_elapsed = Time::HiRes::time;
-			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('sphinx_search.globjid',
-				$stables, "query=$query$swhere", $sphinx_other,
-				{ sql_no_cache => 1 });
-			$sphinx_stats = $sphinxdb->getSphinxStats;
+			if ($constants->{sphinx_se}) {
+				$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
+					'sphinx_search.globjid',
+					$stables, "query=$query$swhere", $sphinx_other,
+					{ sql_no_cache => 1 });
+				$sphinx_stats = $sphinxdb->getSphinxStats;
+			} else {
+				my $results = $sph->Query(join(' ', @sphinx_terms));
+				if (!defined $results) {
+					my $err = $sph->GetLastError() || '';
+					print STDERR scalar(gmtime) . " $$ gFHE sph err: '$err'\n";
+					# return empty results
+					$results = {
+						matches => [ ],
+						total => 0,
+						total_found => 0,
+						'time' => 0,
+						words => 0,
+					};
+				}
+				$sphinx_ar = [ map { $_->{doc} } @{ $results->{matches} } ];
+				$sphinx_stats = {
+					total         => $results->{total},
+					'total found' => $results->{total_found},
+					'time'        => $results->{time},
+					words         => $results->{words},
+				};
+
+				# If $sph_check_sql was set, it means there are further
+				# restrictions that must be checked in MySQL.  What we
+				# got back is a potentially quite large list of globjids
+				# (up to 10,000) which now need to be filtered in MySQL.
+				# For now we do this a not-very-smart way (check the
+				# whole list at once instead of repeated splices, and
+				# if we end up with not enough, don't repeat the Sphinx
+				# query with SetLimits(offset)).
+
+				if ($sph_check_sql && @$sphinx_ar) {
+					my $in = 'IN (' . join(',', @$sphinx_ar) . ')';
+					my @sph_tables = grep { $_ != 'sphinx_search' } @sphinx_tables;
+					my $sphtables = join ',', @sph_tables;
+					# note: see above, where this clause is added:
+					# 'tags.globjid = sphinx_search.globjid'
+					my @sph_where =
+						map { s/\s*=\s*sphinx_search\.globjid/ $in/ }
+						@sphinx_where;
+					my $sphwhere = join ' AND ', @sph_where;
+					$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
+						'sphinx_search.globjid',
+						$sphtables, "query=$query$sphwhere", $sphinx_other,
+						{ sql_no_cache => 1 });
+					$sphinx_stats = $sphinxdb->getSphinxStats;
+					print STDERR sprintf("%s sphinx:sph_check_sql: %d char where found %d\n",
+						scalar(gmtime),
+						length($sphwhere),
+						scalar(@$sphinx_ar));
+				}
+			}
 			$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
 
 			if ($mcdkey_data) {
