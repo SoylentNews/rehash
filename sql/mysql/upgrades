@@ -5902,4 +5902,7 @@ ALTER TABLE firehose_view_settings CHANGE COLUMN id id mediumint(8) unsigned NOT
 
 # for plugins/Sphinx
 INSERT INTO vars (name, value, description) VALUES ('sphinx_se', '0', 'Use SphinxSE instead of the API directly?');
+INSERT INTO vars (name, value, description) VALUES ('sphinx_01_hostname_searchd', '', 'Hostname for the sphinx01 instanc
+e: searchd');
+UPDATE vars SET name='sphinx_01_hostname_sphinxse', description='Hostname for the sphinx01 instance: SphinxSE on mysqld' WHERE name='sphinx_01_hostname';
 

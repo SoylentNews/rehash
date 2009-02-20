@@ -32,7 +32,7 @@ $task{$me}{code} = sub {
 
 	my $vu = DBIx::Password::getVirtualUser( $sphinxdb->{virtual_user} );
 	return 'no sphinx vu!?' unless $vu;
-	my $hostname = $constants->{sphinx_01_hostname} || $vu->{host} || '';
+	my $hostname = $constants->{sphinx_01_hostname_searchd} || $vu->{host} || '';
 	return 'no hostname defined' unless $hostname;
 	my $sphinx_port = $constants->{sphinx_01_port} || 3312;
 	my $sql_port = $vu->{port} || 3306;

@@ -844,7 +844,7 @@ sub getFireHoseEssentials {
 	if ($sphinx) {
 		$sph = Sphinx::Search->new();
 		my $vu = DBIx::Password::getVirtualUser( $sphinxdb->{virtual_user} );
-		my $host = $constants->{sphinx_01_hostname} || $vu->{host};
+		my $host = $constants->{sphinx_01_hostname_searchd} || $vu->{host};
 		my $port = $constants->{sphinx_01_port} || 3312;
 		$sph->SetServer($host, $port);
 		$sph->SetConnectTimeout(5);
@@ -1377,7 +1377,7 @@ sub getFireHoseEssentials {
 						words => 0,
 					};
 				}
-				$sphinx_ar = map { $_->{doc} } @{ $results->{matches} };
+				$sphinx_ar = [ map { $_->{doc} } @{ $results->{matches} } ];
 				$sphinx_stats = {
 					total         => $results->{total},
 					'total found' => $results->{total_found},
