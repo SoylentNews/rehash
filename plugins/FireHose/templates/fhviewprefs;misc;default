@@ -65,7 +65,7 @@ END %]
 <script type="text/javascript">
 // dialog not yet shown; move to tie it to the menu item
 (function(){
-	var	$li		= $('#fhsection-[% id %], #fhsection-unsaved').eq(0),
+	var	$li		= $('#fhsection-[% IF id; id; ELSE %]unsaved[% END %]'),
 		li_offset	= $li.offset(),
 		$dialog		= get_modal_parts('#modal_box')
 		$edit_field	= $dialog.find('input#fhsectionname'),
