@@ -1894,7 +1894,6 @@ function on_firehose_set_options( event, data ){
 					$next_section.find('a span').text(updated.local_time);
 				});
 		}
-
 	}
 	on_firehose_select_section(event, data);
 }
@@ -1954,19 +1953,6 @@ function save_the_unsaved_section( requested, fn ){
 			}
 		});
 	});
-}
-
-
-function firehose_submit_filter() {
-	$('#searchquery').each(function(){
-		firehose_set_options('setfhfilter', $(this).val());
-	});
-}
-
-function firehose_submit_search() {
-	if ($('#searchquery').length > 0) {
-		firehose_set_options('setsearchfilter', $('#searchquery').val());
-	}
 }
 
 
