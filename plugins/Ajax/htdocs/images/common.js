@@ -341,7 +341,7 @@ function firehose_style_switch(section) {
 function firehose_style_switch_handler(transport) {
 	var response = eval_response(transport);
 
-	if (response.skin_name) {
+	if (response && response.skin_name) {
 		if ($('html head link[title=' + response.skin_name + ']').length == 0 ) {
                       $('html head link:last').after(response.css_includes);
 		}
@@ -915,7 +915,7 @@ function eval_response(transport) {
 
 function json_handler(transport) {
 	var response = eval_response(transport);
-	json_update(response);
+	response && json_update(response);
 	return response;
 }
 
@@ -1226,6 +1226,9 @@ function firehose_busy_done() {
 function firehose_get_updates_handler(transport) {
 	firehose_busy_done();
 	var response = eval_response(transport);
+	if ( !response ){
+		return;
+	}
 
 	var updated_tags = response.update_data.updated_tags;
 	if ( updated_tags ) {
@@ -1844,7 +1847,7 @@ function save_the_unsaved_section( requested, fn ){
 
 			}, '', { onComplete: function( transport ){
 				var response = eval_response(transport);
-				if ( response.li ) {
+				if ( response && response.li ) {
 					var	was_active	= $unsaved.is('.active'),
 						$saved		= $(response.li);
 					$unsaved.before($saved).remove();
