@@ -48,6 +48,15 @@ __template__
 	</div>
 </div>
 
+<div class="yui-gd section_default" style="display: none;">
+    <div class="yui-u first">
+		Default Section:
+    </div>
+    <div class="yui-u">
+		<input type="checkbox" name="section_default" class="section_default" value="" disabled="disabled">
+	</div>
+</div>
+
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
 <span class="actions">
