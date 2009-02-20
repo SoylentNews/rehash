@@ -1344,6 +1344,7 @@ sub getFireHoseEssentials {
 				neediness  => 'neediness'
 			);
 			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
+			$sph->SetSortMode(SPH_SORT_ATTR_DESC, $orderby_sphinx{$options->{orderby}} || 'createtime_ut');
 			if (@sphinx_tables > 1) {
 				my $maxmatches = $constants->{sphinx_01_max_matches} || 10000;
 				push @sphinx_opts, "limit=$maxmatches";
