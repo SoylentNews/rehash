@@ -1034,13 +1034,14 @@ YAHOO.slashdot.topicTags = ["keyword",
 	update_class_map(well_known_tags, 'x p', ['nix', 'metanix']);
 	update_class_map(well_known_tags, 'p', ['mainpage']);	// Rob requests 'mainpage' never show its face
 	update_class_map(well_known_tags, 'd p', data_types);
-	update_class_map(well_known_tags, 'w', ['feedback']);
 
 	if ( tag_admin ) {
 		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);
 		update_class_map(well_known_tags, 'd w', ['unknown']);	// Tags.pm debugging
+		update_class_map(well_known_tags, 'p', ['feedback']);
 	} else {
 		update_class_map(well_known_tags, 'd p', ['unknown']);	// Tags.pm debugging, non-admins don't get to see
+		update_class_map(well_known_tags, 'w', ['feedback']);
 	}
 });
 
