@@ -1,5 +1,13 @@
 ; // tag-ui.js
 
+var keys, values, qw;
+(function(){
+	var U=Slash.Util, A=U.Algorithm;
+	keys	= A.keys;
+	values	= A.values;
+	qw	= U.qw;
+})();
+
 var context_triggers, well_known_tags;
 
 function animate_wiggle( $selector ){
@@ -77,7 +85,7 @@ var tag_server_fns = {
 
 		if ( tag_cmds ) {
 			tag_cmds = normalize_tag_commands(
-				this.preprocess_commands(list_as_array(tag_cmds), options),
+				this.preprocess_commands(qw(tag_cmds), options),
 				this );
 
 			// if caller wanted to execute some commands,
@@ -100,7 +108,7 @@ var tag_server_fns = {
 				animate_wiggle($user_displays.find('.'+options.classes + ':not(:contains("-"))'));
 			}
 
-			server_params.tags = list_as_string(tag_cmds);
+			server_params.tags = qw.as_string(tag_cmds);
 			// console.log('SENDING: '+server_params.tags);
 		}
 
@@ -220,7 +228,7 @@ var tag_display_fns = {
 		} else {
 			// how must be a list
 			//  return a set that is the intersection of how and the tags I actually have
-			var allowed_tags = map_list_to_set(how, bare_tag);
+			var allowed_tags = qw.as_set(how, bare_tag);
 			map_fn = function(bt){return bt in allowed_tags;};
 		}
 
@@ -254,32 +262,27 @@ var tag_display_fns = {
 		// no other call adds tags (except by calling _me_)
 
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
-		var update_map = this.map_tags(tags = list_as_array(tags))[0];
+		var update_map = this.map_tags(tags = qw(tags))[0];
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags_seen = {};
-		var new_tags = $.map(tags, function(t){
+		var $new_elems = $($.map(tags, function(t){
 			var bt = bare_tag(t);
 			var mt = markup_tag(t);
 			if ( bt in update_map ) {
 				$(update_map[bt]).html(mt);
 			} else if ( !(bt in new_tags_seen) ) {
 				new_tags_seen[bt] = true;
-				return mt;
+				return $('<li class="p"><span class="tag">'+mt+'</span></li>').get();
 			}
-		});
+		}));
 
 		// a $ list of the actual .tag elements we updated in-place
 		var $changed_tags = $(values(update_map));
 
-		if ( new_tags.length ) {
+		if ( $new_elems.length ) {
 			// construct all the completely new tag entries and associated machinery
-			var $new_elems = $(join_wrap(
-					new_tags,
-					'<li class="p"><span class="tag">',
-					'</span></li>')).
-				append(this.tag_display_data.menu_template);
-
+			$new_elems.append(this.tag_display_data.menu_template);
 			this.tag_display_data.$list_el[options.order]($new_elems);
 
 			// add in a list of the actual .tag elements we created from scratch
@@ -340,7 +343,7 @@ var tag_display_fns = {
 
 	// like remove_tags() followed by update_tags(tags) except order preserving for existing tags
 	set_tags: function( tags, options ){
-		var allowed_tags = map_list_to_set(tags = list_as_array(tags), bare_tag);
+		var allowed_tags = qw.as_set(tags = qw(tags), bare_tag);
 		var removed_tags = this.map_tags(function(bt){
 			return !(bt in allowed_tags);
 		})[0];
@@ -407,7 +410,7 @@ function $init_tag_displays( $stubs, options ){
 
 			var menu_template = menu_items ? (
 					'<ul class="tmenu">' +
-					$.map(list_as_array(menu_items), function(label){
+					$.map(qw(menu_items), function(label){
 						return markup_menu(label);
 					}).join('') +
 					'</ul>' ) : '';
@@ -500,7 +503,7 @@ function normalize_nodnix( commands ){
 function normalize_tag_commands( commands, excludes ){
 
 	// want to iterate over commands, so ensure it is an array
-	commands = list_as_array(commands);
+	commands = qw(commands);
 	if ( !commands.length ) {
 		return [];
 	}
@@ -530,7 +533,7 @@ function normalize_tag_commands( commands, excludes ){
 
 			// if excludes is a list (string or array)...
 			if ( excludes.length !== undefined ) {
-				excludes = map_list_to_set(excludes);
+				excludes = qw.as_set(excludes);
 			}
 
 			// excludes should already be a set, let's make sure it's not empty
@@ -649,7 +652,7 @@ var tag_widget_fns = {
 		if ( new_context || new_trigger ) {
 			var context_tags = [];
 			if ( context && context in suggestions_for_context ) {
-				context_tags = list_as_array(suggestions_for_context[context]);
+				context_tags = qw(suggestions_for_context[context]);
 			}
 
 			$('.ready[context=related]', this)
@@ -1023,7 +1026,7 @@ YAHOO.slashdot.topicTags = ["keyword",
 		'project'
 	];
 
-	context_triggers = map_list_to_set(data_types);
+	context_triggers = qw.as_set(data_types);
 	context_triggers['feedback']=true;
 
 

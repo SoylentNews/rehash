@@ -790,28 +790,23 @@ new Package({ named: 'Slash.TagUI.Display',
 
 			// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 			var new_tags_seen = {};
-			var new_tags = $.map(tags, function(t){
+			var $new_elems = $($.map(tags, function(t){
 				var bt = bare_tag(t);
 				var mt = Markup.markup_tag(t);
 				if ( bt in update_map ) {
 					$(update_map[bt]).html(mt);
 				} else if ( !(bt in new_tags_seen) ) {
 					new_tags_seen[bt] = true;
-					return mt;
+					return $('<li class="p"><span class="tag">'+mt+'</span></li>').get();
 				}
-			});
+			}));
 
 			// a $ list of the actual .tag elements we updated in-place
 			var $changed_tags = $(values(update_map));
 
-			if ( new_tags.length ) {
+			if ( $new_elems.length ) {
 				// construct all the completely new tag entries and associated machinery
-				var $new_elems = $(join_wrap(
-						new_tags,
-						'<li class="p"><span class="tag">',
-						'</span></li>')).
-					append(d_elem.tag_ui_display._menu_template);
-
+				$new_elems.append(d_elem.tag_ui_display._menu_template);
 				d_elem.tag_ui_display._$list_el[options.order]($new_elems);
 
 				// add in a list of the actual .tag elements we created from scratch
@@ -958,21 +953,6 @@ function $mark_empty( d_elem, if_empty ){
 		if_empty = ! $d_elem.is(':has(span.tag)');
 	}
 	return $d_elem.toggleClass('no-tags', !!if_empty);
-}
-
-function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
-	// always returns a string, even if it's the empty string, ''
-	var result = '';
-	a = qw(a);
-	if ( a && a.length ) {
-		var ep = elem_prefix || '';
-		var es = elem_suffix || '';
-							// Example:
-		result = (list_prefix || '') + ep +	// '<ul><li>'
-			a.join(es+ep) +			// .join('</li><li>')
-			es + (list_suffix || '');	// '</li></ul>
-	}
-	return result;
 }
 
 })();
