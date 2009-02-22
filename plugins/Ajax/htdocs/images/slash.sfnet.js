@@ -3,11 +3,6 @@
 Slash.Util.ensure_namespace('SFX');
 SFX.jQuery = jQuery /* .noConflict(true) */;
 
-function $dom( id ) {
-	return document.getElementById(id);
-}
-
-
 
 (function($){
 

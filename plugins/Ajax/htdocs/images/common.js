@@ -1425,23 +1425,10 @@ function firehose_collapse_entry(id) {
 }
 
 function firehose_remove_entry(id) {
-	var fh = $dom('firehose-' + id);
-	if (fh) {
-		var attributes = {
-			height: { to: 0 }
-		};
-		if (!is_ie) {
-			attributes.opacity = { to: 0 };
-		}
-		var myAnim = new YAHOO.util.Anim(fh, attributes);
-		myAnim.duration = 0.5;
-		myAnim.onComplete.subscribe(function() {
-			var el = this.getEl();
-			after_article_moved(el);
-			el.parentNode.removeChild(el);
-		});
-		myAnim.animate();
-	}
+	$('#firehose-'+id).animate({ height: 0, opacity: 0 }, 500, function(){
+		after_article_moved(this);
+		this.remove();
+	});
 }
 
 var firehose_cal_select_handler = function(type,args,obj) {
@@ -1523,7 +1510,7 @@ function logToDiv(id, message) {
 
 function firehose_open_tab(id) {
 	$('#tab-form-'+id).removeClass();
-	$dom('tab-input-'+id).focus();
+	$('#tab-input-'+id).focus();
 	$('#tab-text-'+id).setClass('hide');
 }
 

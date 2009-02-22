@@ -519,6 +519,8 @@ $.fn.extend({
 
 // not exactly sure what to do with these yet
 
+function $dom( id ) { return document.getElementById(id); }
+
 function sign( o ){ return $.TypeOf(o, 'number') && o<0 && -1 || (o ? 1 : 0); }
 
 // Use in setClass, maybe elsewhere.
