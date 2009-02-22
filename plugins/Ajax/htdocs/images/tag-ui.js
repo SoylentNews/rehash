@@ -356,12 +356,12 @@ var tag_display_fns = {
 		if ( if_empty === undefined ) {
 			if_empty = ! $this.is(':has(span.tag)');
 		}
-		return $this.toggleClassTo('no-tags', if_empty);
+		return $this.toggleClass('no-tags', !!if_empty);
 	},
 
 
 	$mark_dirty: function( if_dirty ){
-		return $(this).toggleClassTo('dirty', if_dirty);
+		return $(this).toggleClass('dirty', !!if_dirty);
 	},
 
 
@@ -1147,7 +1147,7 @@ function recompute_css_classes( root ){
 		filter('[context=user]').
 			each(function(){ // for each display of user tags
 				var $this = $(this);
-				$this.toggleClassTo(
+				$this.toggleClass(
 					'no-visible-tags',
 					! $this.is(':has(li.u:not(.t,.s,.p,.minus))') );
 			});

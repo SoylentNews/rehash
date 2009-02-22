@@ -511,11 +511,6 @@ $.fn.extend({
 	nearest_parent: function( selector ){
 		return this.find_nearest(selector, 'self', 'up');
 	},
-	toggleClassTo: function( cn, expr ){
-		if ( ! cn ) { return this; }
-		var fn = if_inherits_string_like(expr) ? function(e){ return $(e).is(expr); } : function(){ return expr; };
-		return this.setClass(function(cn_set){ cn_set[cn] = fn.apply(this); return cn_set; });
-	},
 	mapClasses: function( map ){
 		var Map = accumulate({}, function(k, v){ this[k]=qw_as_set(v); }, map);
 		var for_unknown=Map['*'] || {}, for_all=Map['+'] || {}, for_missing=Map['?'] || {};

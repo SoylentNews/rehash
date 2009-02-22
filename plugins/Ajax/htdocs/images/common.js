@@ -612,7 +612,7 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 		setFirehoseAction();
 		$server.find('.tag-widget').each(function(){ this.set_context(); });
 
-		$widget.toggleClassTo('expanded', if_expanded);
+		$widget.toggleClass('expanded', !!if_expanded);
 
 		var toggle_button={}, toggle_div={};
 		if ( if_expanded ){

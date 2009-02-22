@@ -158,7 +158,7 @@ END %]
 						$li.remove();
 						$li = $([]);
 					}
-					$li.toggleClassTo('hide', action=='hide');
+					$li.toggleClass('hide', action=='hide');
 					firehose_delete_section([% id %], {unhide:'undo'}[action]);
 				}).
 			end().

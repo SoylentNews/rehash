@@ -341,7 +341,7 @@ function firehose_save_note(id) {
 
 	var note_text = $.trim($entry.find('#note-input-'+id).val());
 	$entry.find('.note-flag, .note-wrapper').
-		toggleClassTo('no-note', !note_text).
+		toggleClass('no-note', !note_text).
 		filter('.note-flag').
 			attr('title', note_text);
 

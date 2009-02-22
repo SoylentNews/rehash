@@ -303,7 +303,7 @@ new Package({ named: 'Slash.TagUI.Responder',
 			if ( if_ready === undefined ) {
 				return $(r_elem).hasClass(ready_class);
 			}
-			$(r_elem).toggleClassTo(ready_class, if_ready);
+			$(r_elem).toggleClass(ready_class, !!if_ready);
 			return r_elem;
 		},
 		bind: function( r_elem, fn, _signals ){
@@ -741,7 +741,7 @@ function refresh_tag_styles_in_entry( entry ){
 
 	$displays.filter('.respond-user').each(function(){
 		var $this=$(this);
-		$this.toggleClassTo('no-visible-tags', ! $this.is(':has(li.u:not(.t,.s,.p,.minus))'));
+		$this.toggleClass('no-visible-tags', ! $this.is(':has(li.u:not(.t,.s,.p,.minus))'));
 	});
 }
 
@@ -957,7 +957,7 @@ function $mark_empty( d_elem, if_empty ){
 	if ( if_empty === undefined ) {
 		if_empty = ! $d_elem.is(':has(span.tag)');
 	}
-	return $d_elem.toggleClassTo('no-tags', if_empty);
+	return $d_elem.toggleClass('no-tags', !!if_empty);
 }
 
 function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
