@@ -510,32 +510,46 @@ $.fn.extend({
 	},
 	nearest_parent: function( selector ){
 		return this.find_nearest(selector, 'self', 'up');
-	},
-	mapClasses: function( map ){
-		var Map = accumulate({}, function(k, v){ this[k]=qw_as_set(v); }, map);
-		var for_unknown=Map['*'] || {}, for_all=Map['+'] || {}, for_missing=Map['?'] || {};
-		return this.setClass(function(cn_set){
-			var if_missing = true;
-			var answer = accumulate(
-				{},
-				function(cn){
-					if ( cn in Map ) {
-						if_missing = false;
-						$.extend(this, Map[cn]);
-					} else if ( for_unknown ) {
-						$.extend(this, for_unknown);
-					} else {
-						this[cn] = true;
-					}
-				},
-				cn_set
-			);
-			return $.extend(answer, for_all, if_missing ? for_missing : {});
-		});
-	},
-	toggleClasses: function( list ){
-		return this.mapClasses( map_toggle(arguments.length==1 ? list : arguments) );
 	}
 });
 
 })(jQuery);
+
+
+
+// not exactly sure what to do with these yet
+
+function sign( o ){ return $.TypeOf(o, 'number') && o<0 && -1 || (o ? 1 : 0); }
+
+// Use in setClass, maybe elsewhere.
+// map: name=>state, state<0 means toggle, !state means remove, otherwise add
+// Loops over the map (not the existing names).  Preserves unmapped names.
+function applyToggle( map ){
+	return function( names ){
+		$.each(map, function( k, v ){ names[k] = (v=sign(v))<0 ? !names[k] : v; });
+		return names;
+	};
+}
+
+// Use in setClass, maybe elsewhere.
+// map: { oldName0:newName0, oldName1:newName1, ... }
+// Loops over the existing names (not the map); only mappings for those names apply.
+// If that seems wrong to you, you probably wanted applyToggle instead.
+// applyMap( 'str0', 'str1', 'str2', ... 'strN' ) is equivalent to applyMap({'str0':'str1', 'str1':'str2', ... 'strN-1':'strN', 'strN':'str0'})
+function applyMap( map ){
+
+	// I expect a hash; but I can settle for a list of strings.
+	var N = arguments.length;
+	if ( N > 1 ) {
+		map = {};
+		$.each(arguments, function( k, v ){
+			map[v] = arguments[ (v+1)%N ];
+		});
+	}
+
+	return function( old_names ){
+		var new_names={};
+		$.each(old_names, function( k, v ){ new_names[ map[k]||k ] = v; });
+		return new_names;
+	};
+}

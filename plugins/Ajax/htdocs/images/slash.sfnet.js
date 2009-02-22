@@ -48,7 +48,7 @@ function handle_toggle_click( event ){
 		$twisty	= $target.children(),
 		$form	= $target.next();
 
-	$twisty.toggleClasses('collapse', 'expand');
+	$twisty.setClass(applyMap('collapse', 'expand'));
 	$form[ $twisty.is('.expand') ? 'show' : 'hide' ]();
 	return false;
 }

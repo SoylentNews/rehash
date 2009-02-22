@@ -216,14 +216,10 @@ function firehose_open_prefs() {
 	$('#fh_advprefs').removeClass();
 }
 
-function toggleId(id, c1, c2) {
-	$('#'+id).toggleClasses(c1, c2, c1);
-}
-
 function toggleIntro(id, toggleid) {
 	var new_class = 'condensed';
 	var new_html = '[+]';
-	if ( $('#'+id).toggleClasses('introhide', 'intro').hasClass('intro') ) {
+	if ( $('#'+id).setClass(applyMap('introhide', 'intro')).hasClass('intro') ) {
 		new_class = 'expanded';
 		new_html = '[-]';
 	}
@@ -324,7 +320,7 @@ function toggle_firehose_body( id, is_admin ) {
 }
 
 function toggleFirehoseTagbox(id) {
-	$('#fhtagbox-'+id).toggleClasses('tagbox', 'hide');
+	$('#fhtagbox-'+id).setClass(applyMap('tagbox', 'hide'));
 	after_article_moved($('#firehose-'+id)[0]);
 }
 
@@ -617,20 +613,12 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 		var toggle_button={}, toggle_div={};
 		if ( if_expanded ){
 			$server.each(function(){ this.fetch_tags(); });
-			if ( fh_is_admin ) {
-				firehose_get_admin_extras(id);
-			}
+			fh_is_admin && firehose_get_admin_extras(id);
 			$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
-
-			toggle_button['+'] = (toggle_button.collapse = 'expand');
-			toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
-		} else {
-			toggle_button['+'] = (toggle_button.expand = 'collapse');
-			toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
 		}
 
-		$widget.find('a.edit-toggle .button').mapClass(toggle_button);
-		$server.find('#toggletags-body-'+id).mapClass(toggle_div);
+		$widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
+		$server.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
 		after_article_moved($server[0]);
 	}
 

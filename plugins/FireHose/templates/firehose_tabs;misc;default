@@ -37,7 +37,7 @@ END %]
 		<script type="text/javascript">
 		$(function(){
 			$("#toggleleftmenu").click(function(){
-				var hide = $(this).toggleClasses('expanded', 'collapsed').is('.collapsed');
+				var hide = $(this).setClass(applyMap('expanded', 'collapsed')).is('.collapsed');
 				$('div#yui-main div.yui-b').toggleClass('hideleftmenu', hide);
 				ajax_update({
 					op:			'firehose_save_section_menu_visible',

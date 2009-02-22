@@ -428,9 +428,9 @@ function $init_tag_displays( $stubs, options ){
 				},
 				options );
 
-			$this.mapClass({
+			$this.setClass(applyMap({
 				'tag-display-stub': 'tag-display ready no-tags dirty'
-			});
+			}));
 
 			if ( tags ) {
 				this.set_tags(tags);
@@ -720,7 +720,7 @@ var tag_widget_fns = {
 	toggle_widget: function( twisty ){
 		var $tag_widget = $(twisty).
 			find('.button').
-				toggleClasses('expand', 'collapse').
+				setClass(applyMap('expand', 'collapse')).
 				nearest_parent('.tag-widget').
 					toggleClass('expanded');
 
@@ -757,7 +757,7 @@ function $init_tag_widgets( $stubs, options ){
 				options ).
 				init();
 		}).
-		mapClass({'tag-widget-stub': 'tag-widget'});
+		setClass(applyMap({'tag-widget-stub': 'tag-widget'}));
 
 	return $stubs;
 }

@@ -46,23 +46,14 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 
 	$widget.toggleClass('expanded', !!if_expanded);
 
-	var toggle_button={}, toggle_div={};
 	if ( if_expanded ){
 		$entry.each(function(){ this.tag_server.fetch_tags(); });
-		if ( fh_is_admin ) {
-			firehose_get_admin_extras(id);
-		}
+		fh_is_admin && firehose_get_admin_extras(id);
 		$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
-
-		toggle_button['+'] = (toggle_button.collapse = 'expand');
-		toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
-	} else {
-		toggle_button['+'] = (toggle_button.expand = 'collapse');
-		toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
 	}
 
-	$widget.find('a.edit-toggle .button').mapClass(toggle_button);
-	$entry.find('#toggletags-body-'+id).mapClass(toggle_div);
+	$widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
+	$entry.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
 }
 
 function firehose_toggle_tag_ui( toggle ) {
