@@ -461,7 +461,7 @@ $.fn.extend({
 	getClass: function(){ return this.attr('className'); },
 	setClass: function( expr ){
 		if ( !expr || !expr.call ) {
-			return this.attr('className', '');
+			return this.attr('className', expr);
 		} else {
 			return this.each(function(){
 				this.className = qw_as_string(expr.call(this, qw_as_set(this.className)));

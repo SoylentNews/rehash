@@ -33,12 +33,6 @@ jQuery.fn.extend({
 		});
 	},
 
-	setClass: function( c1 ) {
-		return this.each(function() {
-			this.className = c1
-		});
-	},
-
 	toggleClasses: function( c1, c2, force ) {
 		var map = { '?': force };
 		map[c1]=c2;
