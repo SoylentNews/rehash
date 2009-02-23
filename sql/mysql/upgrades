@@ -5901,7 +5901,7 @@ ALTER TABLE firehose_view DROP INDEX id_viewname;
 ALTER TABLE firehose_view_settings CHANGE COLUMN id id mediumint(8) unsigned NOT NULL;
 
 # For plugins/Achievements
-UPDATE achievements SET exponent = 2 WHERE name = 'score5_comment';
+UPDATE achievements SET increment = 2 WHERE name = 'score5_comment';
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_read', 'Days Read in a Row', 'yes', 2);
 
 CREATE TABLE user_achievement_streaks (
@@ -5929,3 +5929,9 @@ UPDATE vars SET value = 'T_2_5_0_243' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_maxruntime', '28800', 'Restart tagbox.pl after running this long, to mitigate any memory leaks, 0 for never');
 
+# for plugins/Achievements
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_metamod', 'Days Metamoderated in a Row', 'yes', 2);
+UPDATE achievements SET description = 'Posted a Story' where name = 'story_posted';
+UPDATE achievements SET description = 'Posted a Comment' where name = 'comment_posted';
+UPDATE achievements SET description = 'Posted a Journal Entry' where name = 'journal_posted';
+UPDATE achievements SET description = 'Achievements' where name = 'achievement_obtained';
