@@ -871,7 +871,7 @@ sub getFireHoseEssentials {
 	$sphinx = 1 if $sphinxdb;
 	$sphinx = 2 if $sphinx && $options->{firehose_sphinx} && $user->{is_admin};
 	# admins turn it on or off manually
-	if ($sphinx == 1 && !$user->{is_admin}) { $sphinx = 2 if rand(1) < 0.00 } # 0 percent
+	if ($sphinx == 1 && !$user->{is_admin}) { $sphinx = 2 if rand(1) < 1.00 } # 100 percent
 
 	my $no_mcd = $user->{is_admin} && !$options->{usermode} ? 1 : 0;
 
@@ -1382,12 +1382,18 @@ sub getFireHoseEssentials {
 		my($mcdkey_data, $mcdkey_stats);
 		# ignore memcached if admin, or if usermode is on
 		if ($mcd && !$no_mcd) {
-			my $id = md5_hex($self->serializeOptions($options, $user));
+			my $serial = $self->serializeOptions($options, $user);
+			my $id = md5_hex($serial);
 
 			$mcdkey_data  = "$self->{_mcd_keyprefix}:gfhe_sphinx:$id";
 			$mcdkey_stats = "$self->{_mcd_keyprefix}:gfhe_sphinxstats:$id";
-			$sphinx_ar = $mcd->get($mcdkey_data) || [];
-			$sphinx_stats = $mcd->get($mcdkey_stats) || {};
+			$sphinx_ar = $mcd->get($mcdkey_data);
+			$sphinx_stats = $mcd->get($mcdkey_stats);
+my $arhit = defined($sphinx_ar) ? 'HIT' : ''; my $sthit = defined($sphinx_stats) ? 'HIT' : ''; my $scnt = scalar(@$sphinx_ar);
+print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
+			$sphinx_ar ||= [ ];
+			$sphinx_stats ||= { };
+
 		}
 
 		if (!@$sphinx_ar) {
