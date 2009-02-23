@@ -28,6 +28,7 @@ BEGIN {
 }
 
 use strict;
+use Date::Calc qw(Monday_of_Week);
 use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
@@ -728,6 +729,7 @@ sub getFormatFromDays {
 		$which_day = 'hour';
 		for my $day (@$days) {
 			push @$ret_array, [ $day, timeCalc($day . '00', '%B %e, %Y %T', 0) ];
+#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{day}{re}) {
@@ -737,10 +739,10 @@ sub getFormatFromDays {
 		my $today = $slashdb->getDay(0);
 		my $yesterday = $slashdb->getDay(1);
 		my $weekago = $slashdb->getDay(7);
-		my($ty, $tm, $td) = $today =~ $db_levels->{day}{re};
+		my($ty, $tm, $td) = $today =~ $db_levels->{$which_day}{re};
 
 		for my $day (@$days) {
-			my @arr = $day =~ $db_levels->{day}{re};
+			my @arr = $day =~ $db_levels->{$which_day}{re};
 			if ($day eq $today) {
 				$label = 'Today';
 			} elsif ($day eq $yesterday) {
@@ -757,23 +759,38 @@ sub getFormatFromDays {
 				$label =~ s/\.// if $test eq $label;
 			}
 			push @$ret_array, [ $day, $label ];
+#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
+		}
+
+	} elsif ($orig_day =~ $db_levels->{week}{re}) {
+		$which_day = 'week';
+
+		for my $day (@$days) {
+			my @arr = $day =~ $db_levels->{$which_day}{re};
+			my($y, $m, $d) = Monday_of_Week($arr[1], $arr[0]);
+			my $tmpday = sprintf($db_levels->{day}{sfmt}, $y, $m, $d);
+			push @$ret_array, [ $tmpday, timeCalc($tmpday, 'Week of %B %e, %Y', 0) ];
+#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{month}{re}) {
 		$which_day = 'month';
 		for my $day (@$days) {
-			push @$ret_array, [ $day, timeCalc($day . '01', '%B %Y', 0) ];
+			(my $tmpday = $day) =~ s/m$//;
+			push @$ret_array, [ $day, timeCalc($tmpday . '01', '%B %Y', 0) ];
+#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{year}{re}) {
 		$which_day = 'year';
 		for my $day (@$days) {
 			push @$ret_array, [ $day, timeCalc($day . '0101', '%Y', 0) ];
+#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
-
-	} else {
-		errorLog("No format found for $orig_day");
 	}
+
+
+	errorLog("No format found for $orig_day") unless $which_day;
 
 	# re-format elements if necessary
 	$_->[0] = sprintf($db_levels->{$which_day}{refmt}, $_->[0]) for @$ret_array;
@@ -783,11 +800,11 @@ sub getFormatFromDays {
 
 sub getDayBreakLevels {
 	my @db_levels = (
-		hour    => { fmt => '%Y%m%d%H', refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})(\d{2})$} },
-		day     => { fmt => '%Y%m%d',   refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})$} },
-		week    => { fmt => '%Y%Uw',    refmt => '%sw', re => qr{^(\d{4})(\d{2})w$} },
-		month   => { fmt => '%Y%mm',    refmt => '%sm', re => qr{^(\d{4})(\d{2})m$} }, 
-		year    => { fmt => '%Y',       refmt => '%s',  re => qr{^(\d{4})$} }
+		hour    => { fmt => '%Y%m%d%H', sfmt => '%04d%02d%02d%02d', refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})(\d{2})$} },
+		day     => { fmt => '%Y%m%d',   sfmt => '%04d%02d%02d',     refmt => '%s',  re => qr{^(\d{4})-?(\d{2})-?(\d{2})$} },
+		week    => { fmt => '%Y%Ww',    sfmt => '%04d%dw',          refmt => '%sw', re => qr{^(\d{4})(\d{1,2})w$} },
+		month   => { fmt => '%Y%mm',    sfmt => '%04d%02dm',        refmt => '%sm', re => qr{^(\d{4})(\d{2})m$} }, 
+		year    => { fmt => '%Y',       sfmt => '%04d',             refmt => '%s',  re => qr{^(\d{4})$} }
 	);
 	my %db_levels = @db_levels;
 	my $i = 0;

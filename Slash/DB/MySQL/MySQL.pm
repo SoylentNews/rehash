@@ -9,7 +9,7 @@ use strict;
 use Socket;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
-use Date::Calc qw(Add_Delta_Days Add_Delta_DHMS Add_Delta_YM);
+use Date::Calc qw(Add_Delta_Days Add_Delta_DHMS Add_Delta_YM Monday_of_Week Week_of_Year);
 use Date::Format qw(time2str);
 use Data::Dumper;
 use Storable qw(thaw nfreeze);
@@ -8697,16 +8697,23 @@ sub getDayFromDay {
 
 	my $return_day;
 	if ($day =~ $db_levels->{hour}{re}) {
-		$return_day = sprintf "%04d%02d%02d%02d", Add_Delta_DHMS($1, $2, $3, $4, 0, 0, 0, -$days_back, 0, 0);
+		$return_day = sprintf $db_levels->{hour}{sfmt}, Add_Delta_DHMS($1, $2, $3, $4, 0, 0, 0, -$days_back, 0, 0);
 
 	} elsif ($day =~ $db_levels->{day}{re}) {
-		$return_day = sprintf "%04d%02d%02d", Add_Delta_Days($1, $2, $3, -$days_back);
+		$return_day = sprintf $db_levels->{day}{sfmt}, Add_Delta_Days($1, $2, $3, -$days_back);
+
+	} elsif ($day =~ $db_levels->{week}{re}) {
+		my($y, $m, $d) = Monday_of_Week($2, $1);
+		my($week, $year) = Week_of_Year(
+			Add_Delta_Days($y, $m, $d, -($days_back*7))
+		);
+		$return_day = sprintf $db_levels->{week}{sfmt}, $year, $week;
 
 	} elsif ($day =~ $db_levels->{month}{re}) {
-		$return_day = sprintf "%04d%02d", Add_Delta_YM($1, $2, 1, 0, -$days_back);
+		$return_day = sprintf $db_levels->{month}{sfmt}, Add_Delta_YM($1, $2, 1, 0, -$days_back);
 
 	} elsif ($day =~ $db_levels->{year}{re}) {
-		$return_day = sprintf "%04d", Add_Delta_YM($1, 1, 1, -$days_back, 0);
+		$return_day = sprintf $db_levels->{year}{sfmt}, Add_Delta_YM($1, 1, 1, -$days_back, 0);
 	} else {
 		errorLog("No format found for $day");
 	}

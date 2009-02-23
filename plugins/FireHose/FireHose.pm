@@ -2044,7 +2044,7 @@ sub ajaxFireHoseGetUpdates {
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $id_str = $form->{ids};
 	my $update_time = $form->{updatetime};
-	my @ids = grep {/^(\d+|day-\d+)$/} split (/,/, $id_str);
+	my @ids = grep {/^(\d+|day-\d+\w?)$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
 	my %ids_orig = ( %ids ) ;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
@@ -3253,7 +3253,7 @@ sub getAndSetOptions {
 				$options->{duration} = $form->{duration};
 			}
 		}
-		$options->{duration} = "7" if !$options->{duration};
+		$options->{duration} = "-1" if !$options->{duration};
 
 		if (defined $form->{startdate}) {
 			if ($form->{startdate} =~ /^\d{8}$/) {
@@ -3530,14 +3530,14 @@ sub getAndSetOptions {
 
 		if ($options->{stories_mainpage}) {
 			if(!$form->{issue}) {
-				$options->{duration} = 7;
+				$options->{duration} = "-1";
 				$options->{startdate} = '';
 				$options->{mode} = "mixed";
 			}
 		}
 
 		if ($options->{stories_sectional}) {
-			$options->{duration} = -1;
+			$options->{duration} = "-1";
 			$options->{startdate} = '';
 			$options->{mode} = 'full';
 		}
@@ -4038,6 +4038,7 @@ sub addDayBreaks {
 	my $level = $options->{level} || 0;
 	my $count = @$items;
 	my $break_ratio = 5;
+	my $max_breaks = ceil($count / $break_ratio);
 
 	my($db_levels, $db_order) = getDayBreakLevels();
 	my $fmt = $db_levels->{ $db_order->[$level] }{fmt};
@@ -4061,10 +4062,14 @@ sub addDayBreaks {
 		my $newitems = addDayBreaks($self, $items, $offset,
 			{ level => $level+1 }
 		);
+#printf STDERR "daybreak levels: %s, breaks: %s, count: %s, maxbreaks: %s, existing: %s, new: %s\n",
+#	$db_order->[$level], $breaks, $count, $max_breaks,
+#	scalar(@$newitems), scalar(@$retitems);
+
 		$retitems = $newitems if (
-			$breaks > int($count / $break_ratio)
+			$breaks > $max_breaks
 				||
-			@$newitems >= @$retitems
+			@$newitems > @$retitems
 		);
 
 	}
