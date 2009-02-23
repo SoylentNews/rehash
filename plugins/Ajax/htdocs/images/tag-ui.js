@@ -724,7 +724,7 @@ var tag_widget_fns = {
 		var $tag_widget = $(twisty).
 			find('.button').
 				setClass(applyMap('expand', 'collapse')).
-				nearest_parent('.tag-widget').
+				closest('.tag-widget').
 					toggleClass('expanded');
 
 		if ( $tag_widget.is('.expanded') ) {
