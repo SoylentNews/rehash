@@ -25,6 +25,9 @@ $task{$me}{code} = sub {
 	# Generate number of days read in a row
 	$achievements->getConsecutiveDaysRead();
 
+	# Generate number of days metamodded in a row
+	$achievements->getConsecutiveDaysMetaModded();
+
 	return;
 };
 

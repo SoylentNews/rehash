@@ -221,7 +221,7 @@ sub getConsecutiveDaysRead {
         my $achievement = $self->getAchievement('consecutive_days_read');
         my $cdr_aid = $achievement->{'consecutive_days_read'}{aid};
 	# Add another hour to account for possible latency in running the task.
-	my $yesterday = time() - 86760;
+	my $yesterday = (time() - 90000);
 
 	my $users = $slashdb->sqlSelectColArrayref(
                 'uid',
@@ -254,6 +254,52 @@ sub getConsecutiveDaysRead {
                 }
 
                 $self->setUserAchievement('consecutive_days_read', $userhit_uid, { ignore_lookup => 1, force_convert => 1, exponent => $streak });
+        }
+}
+
+sub getConsecutiveDaysMetaModded {
+        my ($self) = @_;
+
+        my $constants = getCurrentStatic();
+        my $slashdb = getCurrentDB();
+
+        my $achievement = $self->getAchievement('consecutive_days_metamod');
+        my $aid = $achievement->{'consecutive_days_metamod'}{aid};
+        my $yesterday_secs = (time() - 90000);
+
+        my $users = $slashdb->sqlSelectColArrayref(
+                'distinct uid',
+                'tags, globjs',
+                'tags.globjid = globjs.globjid' .
+                ' and gtid = 5' .
+                ' and tagnameid in (378141, 378199)' .
+                ' and inactivated IS NULL ' .
+                " and created_at between DATE_SUB(NOW(), INTERVAL 24 HOUR) and NOW()"
+        );
+
+        foreach my $userhit_uid (@$users) {
+                my $data;
+                my ($id, $uid, $streak, $last_hit) =
+                        $slashdb->sqlSelect('id, uid, streak, UNIX_TIMESTAMP(last_hit)', 'user_achievement_streaks', "aid = $aid and uid = $userhit_uid");
+                if (!$id) {
+                        $streak = 1;
+                        $data = {
+                                "uid"       => $userhit_uid,
+                                "aid"       => $aid,
+                                "streak"    => $streak,
+                                "-last_hit" => 'NOW()',
+                        };
+                        $slashdb->sqlInsert('user_achievement_streaks', $data);
+                } else {
+                        $streak = ($last_hit <= $yesterday_secs) ? 1 : $streak + 1;
+                        $data = {
+                                "streak"    => $streak,
+                                "-last_hit" => 'NOW()',
+                        };
+                        $slashdb->sqlUpdate('user_achievement_streaks', $data, "id = $id");
+                }
+
+                $self->setUserAchievement('consecutive_days_metamod', $userhit_uid, { ignore_lookup => 1, force_convert => 1, exponent => $streak });
         }
 }
 
