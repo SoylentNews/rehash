@@ -144,6 +144,15 @@ $['TypeOf'] = $.extend(_typeOf, {
 	},
 	inheritedFn: function(o, fname){ return _typeOfInherited(o, fname)==='function' && 'function'; },
 
+
+	// All the tests above return the typename for success.
+	// objIf returns the object for success, e.g., objIf('string', "Hello, World!") => "Hello, World!"
+	objIf: function( tn, o ){
+		if ( _typeOf(tn, 'string') && _typeOf(o, tn) ) {
+			return o || !o;
+		}
+	},
+
 	// ...and now you can play along at home!
 	makeTest: makeTest
 });

@@ -9,78 +9,32 @@ $.ajaxSetup({
 });
 
 
+var T=$.TypeOf;
+
 // code to be exported
 
-function if_defined( expr ){
-	return expr !== undefined;
-}
-
-function if_undefined( expr ){
-	return expr === undefined;
-}
-
-function if_defined_false( expr ){
-	return !if_undefined(expr) && !expr;
-}
-
-function if_object( expr ){
-	return (typeof expr === 'object') && expr;
-}
-
-function if_fn( expr ){
-	return $.isFunction(expr) && expr;
-}
-
-function if_inherits_property(obj, property_name){
-/*jslint evil: true */
-	return if_defined(eval('obj.'+property_name)) &&
-/*jslint evil: false */
-		!obj.propertyIsEnumerable(property_name);
-}
-
-function if_inherits_method(obj, method_name){
-	return if_inherits_property(obj, method_name) &&
-		if_fn(obj[method_name]);
-}
-
-function if_inherits_jquery(obj){
-	return if_inherits_property(obj, 'jquery');
-}
-
-function if_inherits_string_like(obj){
-	return if_inherits_method(obj, 'split') && ! if_inherits_jquery(obj);
-}
-
-function if_inherits_array_iteration(obj){
-	return if_inherits_property(obj, 'length');
-}
-
-
-function each( obj, fn ){
-	var N = obj.length;
-	if ( if_undefined(N) || if_fn(obj) ) {
-		for ( var k in obj ) {
-			if ( if_defined_false(fn.call(obj[k], k, obj[k])) ) {
-				break;
-			}
-		}
-	} else {
-		var i = 0;
-		for ( var value=obj[i]; i<N; value=obj[++i] ) {
-			if ( if_defined_false(fn.call(value, i, value)) ) {
+function each( o, fn ){
+	var non_empty = T.nonEmpty(o);
+	if ( T.list(o, non_empty) ) {
+		for ( var i=0, N=o.length, v=o[i]; i<N && !T.defNo(fn.call(v, i, v)); v=o[++i] ) {  }
+	} else if ( non_empty ) {
+		for ( var k in o ) {
+			if ( T.defNo(fn.call(o[k], k, o[k])) ) {
 				break;
 			}
 		}
 	}
 }
+
 
 function clone( o ){
-	var is_fn, o2;
-	if ( !o || !(if_object(o) || (is_fn = if_fn(o))) ) {
-		return o;
-	}
+	if ( o===undefined || o===null ) { return o; }
 
-	if ( is_fn ) {
+	var tn = T(o);
+	if ( T.scalar(o, tn) ) { return o.valueOf(); };
+
+	var o2;
+	if ( tn==='function' ) {
 		// if it's a function, I'll have to cheat...
 		// extract the source code for the function
 		var S = o.toString();
@@ -95,11 +49,13 @@ function clone( o ){
 		o2 = new o.constructor();
 	}
 
-	// ...as long as we're willing to copy all the properties (even works on arrays)
-	// and key that we do this for functions as well... they can have properties
-	each(o, function(k, v){
-		o2[k] = clone(v);
-	});
+	if ( T.nonEmpty(o, tn) ) {
+		// ...as long as we're willing to copy all the properties (even works on arrays)
+		// and key that we do this for functions as well... they can have properties
+		each(o, function(k, v){
+			o2[k] = clone(v);
+		});
+	}
 	return o2;
 }
 
@@ -128,24 +84,13 @@ function values(obj){
 	return accumulate([], function(k, v){ this.push(v); }, obj);
 }
 
-function rotate_list(list, n){
-	if ( list.length > 1 ) {
-		var N = list.length;
-		n = ((n===undefined ? 1 : n) % N + N) % N;
-		var	prefix = Array.prototype.slice.call(list, n),
-			suffix = Array.prototype.slice.call(list, 0, n);
-		return prefix.concat(suffix);
-	}
-	return list;
-}
-
 function qw_as_array( qw ){
 	if ( ! qw ) { return []; }
 
-	if ( if_inherits_string_like(qw) ) {
+	if ( T(qw, 'string') ) {
 		qw = $.map(qw.split(/\s+/), function(w){if(w)return w;});
 	}
-	if ( ! if_inherits_array_iteration(qw) ) {
+	if ( ! T.list(qw) ) {
 		qw = accumulate([], function(k, v){if(v){this.push(k);}}, qw);
 	}
 	// else: qw already _is_ an array
@@ -156,10 +101,10 @@ function qw_as_array( qw ){
 function qw_as_set( qw ){
 	if ( ! qw ) { return {}; }
 
-	if ( if_inherits_jquery(qw) || if_inherits_string_like(qw) ) {
+	if ( T(qw, 'jquery') || T(qw, 'string') ) {
 		qw = qw_as_array(qw);
 	}
-	if ( if_inherits_array_iteration(qw) ) {
+	if ( T.list(qw) ) {
 		qw = accumulate({}, function(k,v){this[v]=true;}, qw);
 	}
 	// else qw already _is_ a set
@@ -170,7 +115,7 @@ function qw_as_set( qw ){
 function qw_as_string( qw ){
 	if ( !qw ) { return ''; }
 
-	if ( if_inherits_string_like(qw) ) {
+	if ( T(qw, 'string') ) {
 		return /\S/.test(qw) ? qw : '';
 	}
 	// else turn it _into_ a string
@@ -189,23 +134,16 @@ function qw_concat_strings(){
 function qw_each( qw, fn ){
 	if ( ! qw ) { return; }
 
-	if ( if_inherits_jquery(qw) || if_inherits_string_like(qw) ) {
+	if ( T(qw, 'jquery') || T(qw, 'string') ) {
 		qw = qw_as_array(qw);
 	}
 
-	var use_key = ! if_inherits_array_iteration(qw);
+	var use_key = ! T.list(qw);
 	each(qw, function(k, v){
-		if ( ! if_defined_false(v) ) {
+		if ( ! T.defNo(v) ) {
 			return fn.call(use_key ? k : v);
 		}
 	});
-}
-
-function map_toggle( list ){
-	var keys = qw_as_array(list);
-	if ( keys.length > 1 ) {
-		return accumulate({}, function(i, k, v){ this[k]=v; }, keys, rotate_list(keys));
-	}
 }
 
 function splice_string( s, offset, length, replacement ){
@@ -255,14 +193,16 @@ function Package( o ){
 	// e_api implies stem_name
 
 	function inject_free_api( stem_obj, extra ){
-		if ( ! if_defined_false(o.exports) ) {
+		if ( ! T.defNo(o.exports) ) {
 			stem_obj.__api__ = stem_obj.__api__ && [].concat(stem_obj.__api__, o) || o;
 		}
 		// roll in the element_api first, so the free api can override same-named
 		return $.extend(stem_obj, e_api||{}, o.api||{}, extra||{});
 	}
 
-	var defn_stem_fn = e_api && if_fn(o.element_constructor) || if_fn(o.stem_function);
+	var defn_stem_fn =
+		e_api && T.objIf('fn', o.element_constructor) || T.objIf('fn', o.stem_function);
+
 	function e_ctor_fn( stem_name ){
 		return function( e ){
 			return $.extend(
@@ -288,23 +228,23 @@ function Package( o ){
 		var jstem_name = oj.named || estem_name;
 
 		// $.jstem_name
-		if ( ! if_defined_false(oj.api) ) {
-			$[jstem_name] = if_object(oj.api) ?
+		if ( ! T.defNo(oj.api) ) {
+			$[jstem_name] = T.nonEmpty(oj.api) ?
 				inject_free_api(e_api && e_ctor_fn(jstem_name) || {}, oj.api) :
 				stem_obj;
 		}
 		// $(expr).jstem_name()
 		var je_api = oj.element_api;
-		var defn_jstem_fn = if_fn(oj.element_constructor) || if_fn(oj.stem_function);
-		var je_ctor = if_fn(defn_jstem_fn) || e_ctor && jproxy_free_fn(e_ctor);
+		var defn_jstem_fn = T.objIf('fn', oj.element_constructor) || T.objIf('fn', oj.stem_function);
+		var je_ctor = T.objIf('fn', defn_jstem_fn) || e_ctor && jproxy_free_fn(e_ctor);
 		if ( je_ctor ) {
 			$.fn[jstem_name] = je_ctor;
 		}
 		// $(expr).jstem_name__fn_name()
-		if ( ! if_defined_false(je_api) ) {
+		if ( ! T.defNo(je_api) ) {
 			var j_prefix = jstem_name + '__';
-			if ( if_object(e_api) ) {
-				each(e_api, function( fn_name, fn ){ if ( if_fn(fn) ) {
+			if ( T.nonEmpty(e_api) ) {
+				each(e_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
 					$.fn[j_prefix + fn_name] = je_ctor ?
 						function(){
 							var args = arguments;
@@ -318,8 +258,8 @@ function Package( o ){
 						jproxy_free_fn(fn);
 				}});
 			}
-			if ( if_object(je_api) ) {
-				each(je_api, function( fn_name, fn ){ if ( if_fn(fn) ) {
+			if ( T.nonEmpty(je_api) ) {
+				each(je_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
 					$.fn[j_prefix + fn_name] = fn;
 				}});
 			}
@@ -362,7 +302,7 @@ function jproxy_free_fn( fn ){
 function inject_element_api(elem, api_defn, obj){
 	obj = obj || elem;
 	each(api_defn, function(fn_name, fn){
-		if ( if_fn(fn) ) {
+		if ( T.fn(fn) ) {
 			obj[fn_name] = proxy_fn(elem, fn);
 		}
 	});
@@ -406,14 +346,6 @@ Package({ named: 'Slash.Util.Package',
 	stem_function: Package
 });
 
-Package({ named: 'Slash.Util.if_inherits',
-	api: {
-		property:		if_inherits_property,
-		method:			if_inherits_method,
-		jquery:			if_inherits_jquery
-	}
-});
-
 Package({ named: 'Slash.Util.qw',
 	api: {
 		as_array:		qw_as_array,
@@ -427,21 +359,11 @@ Package({ named: 'Slash.Util.qw',
 
 Package({ named: 'Slash.Util',
 	api: {
-		if_defined:		if_defined,
-		if_undefined:		if_undefined,
-		if_defined_false:	if_defined_false,
-		if_object:		if_object,
-		if_fn:			if_fn,
-		if_string_like:		if_inherits_string_like,
-	     // if_array_like:		if_inherits_array_iteration,
 		clone:			clone,
-		splice_string:		splice_string,
 		ensure_namespace:	ensure_namespace
 	},
-	exports: 'if_defined if_undefined if_defined_false if_object if_fn ' +
-		 'if_string_like ' +
-		 'clone splice_string ' +
-		 'Package if_inherits qw'
+	exports: 'clone ' +
+		 'Package qw'
 });
 
 Package({ named: 'Slash.Util.Algorithm',
@@ -449,10 +371,9 @@ Package({ named: 'Slash.Util.Algorithm',
 		each:			each,
 		accumulate:		accumulate,
 		keys:			keys,
-		values:			values,
-		rotate_list:		rotate_list
+		values:			values
 	},
-	exports: 'each accumulate keys values rotate_list'
+	exports: 'each accumulate keys values'
 });
 
 // Yes, I could phrase this as a Package; but I don't need to, here.
@@ -470,57 +391,11 @@ $.fn.extend({
 	}
 });
 
-$.fn.extend({
-	find_nearest: function( selector ){
-		var args = arguments, N = Math.min(5, args.length);
-		var answer = this.map(function(){
-			var $this = $(this), match, $matches;
-			for ( var i=1; i<N && !match; ++i ) {
-				var up_selector = selector;
-				switch ( args[i] ) {
-					case 'self':
-						if ( $this.is(selector) ) {
-							return this;
-						}
-						break;
-					case 'up>':
-						up_selector += ', :has(>' + selector + ')';
-					case 'up':
-						$this.parents().each(function(){
-							var $this = $(this);
-							if ( $this.is(up_selector) ) {
-								match = $this.is(selector) ?
-									this :
-									$('> '+selector, this)[0];
-								return false;
-							}
-						});
-						break;
-					case 'down':
-						$matches = $this.find(selector);
-						if ( $matches.length ) {
-							match = $matches.get()
-						}
-						break;
-				}
-			}
-			return match;
-		});
-		return this.pushStack($.unique(answer))
-	},
-	nearest_parent: function( selector ){
-		return this.find_nearest(selector, 'self', 'up');
-	}
-});
-
 })(jQuery);
-
-
 
 // not exactly sure what to do with these yet
 
 function $dom( id ) { return document.getElementById(id); }
-
 function sign( o ){ return $.TypeOf(o, 'number') && o<0 && -1 || (o ? 1 : 0); }
 
 // Use in setClass, maybe elsewhere.

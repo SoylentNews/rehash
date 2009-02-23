@@ -4,6 +4,8 @@
 eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 /*jslint evil:false */
 
+var T = $.TypeOf;
+
 /* Note: If you're reading this in BBEdit or any other browser that supports "folds", you may want
    to start by collapsing all folds so you just see the eight top-level components.
 
@@ -322,7 +324,7 @@ new Package({ named: 'Slash.TagUI.Responder',
 	stem_function: function( r_elem, o ){
 		r_elem.
 			tag_ui_responder.bind(o.fn, o.signals).
-			tag_ui_responder.ready(!if_defined_false(o.if_ready));
+			tag_ui_responder.ready(!$.TypeOf.defNo(o.if_ready));
 		return o.defaults ? { defaults: o.defaults } : undefined;
 	},
 	jquery: true
@@ -370,7 +372,7 @@ function add_signals( r_elem, signals ){
 function signals( r_elem ){
 	var more_new_signals = Array.prototype.slice.call(arguments, 1);
 	var new_signals = [], first_new_signal = more_new_signals.shift();
-	if ( if_defined(first_new_signal) ) {
+	if ( T.def(first_new_signal) ) {
 		new_signals = new_signals.concat(qw(first_new_signal)).concat(more_new_signals);
 	}
 
@@ -476,7 +478,7 @@ new Package({ named: 'Slash.TagUI.Server',
 		var ext = {};
 		if ( options.command_pipeline ) { ext.command_pipeline = options.command_pipeline; }
 		if ( options.defaults ) { ext.defaults = options.defaults; }
-		if ( if_defined(key_tuple) ) {
+		if ( T.def(key_tuple) ) {
 			if ( ! ext.defaults ) ext.defaults = { };
 			if ( ! ext.defaults.request_data ) ext.defaults.request_data = { };
 			ext.key = (ext.defaults.request_data.key = key_tuple.key);
@@ -497,7 +499,7 @@ new Package({ named: 'Slash.TagUI.Server',
 					clean_options.command_pipeline = options.command_pipeline.slice(0);
 				}
 				if ( options.defaults ) {
-					clean_options.defaults = $.clone(options.defaults);
+					clean_options.defaults = $.extend({}, options.defaults);
 				}
 
 				Server(this, clean_options);
@@ -583,7 +585,7 @@ function resolve_callback( s_elem, caller_opts, callback_name ){
 	var elem_ajax = s_elem.tag_ui_server && s_elem.tag_ui_server.defaults && s_elem.tag_ui_server.defaults.ajax || {};
 	var caller_ajax = caller_opts && caller_opts.ajax || {};
 
-	return if_fn(caller_ajax[callback_name]) || if_fn(elem_ajax[callback_name]);
+	return T.objIf('fn', caller_ajax[callback_name]) || T.objIf('fn', elem_ajax[callback_name]);
 }
 
 if ( simple_host() != 'slashdot.org' ) {
