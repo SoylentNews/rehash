@@ -864,7 +864,7 @@ sub getFireHoseEssentials {
 	my $colors = $self->getFireHoseColors();
 
 	my $sphinx = 0;
-	my($sph, $sph_query, $sph_check_sql) = (undef, '', 0);
+	my($sph, $sph_check_sql, $sph_mode) = (undef, '', 0);
 	my($sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other);
 	my @sphinx_tables = ('sphinx_search');
 	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx', timeout => 2 });
@@ -1083,9 +1083,10 @@ sub getFireHoseEssentials {
 
 		if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
 			if ($sphinx && $options->{filter}) {
-				my $query = sphinxFilterQuery($options->{filter});
+				my $query;
+				$sph_mode = $constants->{sphinx_match_mode} || 'boolean';
+				($query, $sph_mode) = sphinxFilterQuery($options->{filter}, $sph_mode);
 				push @sphinx_terms, $query;
-				$sph_query = $query;
 			}
 
 			$tables .= ',firehose_text';
@@ -1123,8 +1124,9 @@ sub getFireHoseEssentials {
 					push @where, "createtime >= $st_q";
 
 					if ($sphinx) { # ! is for negating, since this is >, not <
-						push @sphinx_opts, "!range=createtime_ut,0," . ($st_sphinx-1);
-						$sph->SetFilterRange('createtime_ut', 0, $st_sphinx-1, 1);
+						my $time = $st_sphinx-1;
+						push @sphinx_opts, "!range=createtime_ut,0,$time";
+						$sph->SetFilterRange('createtime_ut', 0, $time, 1);
 					}
 				} else {
 					my $end_q = $self->sqlQuote(timeCalc("$options->{startdate} 23:59:59", '%Y-%m-%d %T', -$user->{off_set}));
@@ -1343,8 +1345,15 @@ sub getFireHoseEssentials {
 				editorpop  => 'editorpop',
 				neediness  => 'neediness'
 			);
-			push @sphinx_opts, "sort=attr_desc:" . ($orderby_sphinx{$options->{orderby}} || 'createtime_ut');
-			$sph->SetSortMode(SPH_SORT_ATTR_DESC, $orderby_sphinx{$options->{orderby}} || 'createtime_ut');
+			my $orderby = $orderby_sphinx{$options->{orderby}} || 'createtime_ut';
+
+			# SPH_SORT_RELEVANCE ATTR_DESC ATTR_ASC TIME_SEGMENTS EXTENDED EXPR 
+			my $orderdir = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
+			push @sphinx_opts, "sort=$orderdir:$orderby";
+
+			$orderdir = $options->{orderdir} eq 'ASC' ? SPH_SORT_ATTR_ASC : SPH_SORT_ATTR_DESC;
+			$sph->SetSortMode($orderdir, $orderby);
+
 			if (@sphinx_tables > 1) {
 				my $maxmatches = $constants->{sphinx_01_max_matches} || 10000;
 				push @sphinx_opts, "limit=$maxmatches";
@@ -1365,14 +1374,24 @@ sub getFireHoseEssentials {
 		}
 	}
 
-	# SSS: mode?
 	my($hr_ar, $sphinx_ar, $sphinx_stats) = ([], [], {});
 	my($sdebug_new, $sdebug_orig) = ('', '');
 	my($sdebug_idset_elapsed, $sdebug_get_elapsed, $sdebug_orig_elapsed, $sdebug_count_elapsed) = (0, 0, 0, 0);
 	if ($sphinx) {
 		my $stables = join ',', @sphinx_tables;
 
-		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts, 'mode=all');
+		# SPH_MATCH_ALL ANY PHRASE BOOLEAN EXTENDED2
+		if ($sph_mode) {
+			push @sphinx_opts, "mode=$sph_mode";
+			$sph->SetMatchMode(
+				$sph_mode eq 'all' ? SPH_MATCH_ALL :
+				$sph_mode eq 'any' ? SPH_MATCH_ANY :
+				$sph_mode eq 'boolean' ? SPH_MATCH_BOOLEAN :
+				$sph_mode eq 'extended2' ? SPH_MATCH_EXTENDED2 :
+				'all'
+			);
+		}
+		my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts);
 		my $swhere = join ' AND ', @sphinx_where;
 		$swhere = " AND $swhere" if $swhere;
 
@@ -3165,7 +3184,7 @@ sub genUntitledTab {
 {
 my $stopwords;
 sub sphinxFilterQuery {
-	my($query) = @_;
+	my($query, $mode) = @_;
 	# query size is limited, so strip out stopwords
 	unless (defined $stopwords) {
 		my $sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx' });
@@ -3178,19 +3197,38 @@ sub sphinxFilterQuery {
 		}
 	}
 
+	$mode ||= 'all';
+	$mode = 'extended2' if $mode eq 'extended';
+
 	my $basic = 'a-zA-Z0-9_';
+
+	# SSS what about hyphenated words?
 	my $extra = ':\'';  # : and ' are sometimes useful in plain text, like for Perl modules and contractions
-	my $bool  = '()&|!\-';      # boolean Sphinx syntax
-	my $ext   = '@\[\],*"~/=';  # extended Sphinx syntax (also include $bool)
+
+	my $boolb = '()&|'; # base boolean syntax
+	my $booln = '!\-';  # boolean negation
+	my $bool  = $boolb . $booln; # full boolean syntax
+
+	my $extb  = '@\[\],*"~/=';   # base extended syntax
+	my $ext   = $bool . $extb;   # full extended syntax
+
+	my $chars = $basic;  # . $extra;  # not until we figure out indexer behavior -- pudge
+# SSS: when we do syntax checking later, we may allow those characters
+# to pass through -- pudge
+#	$chars .= $boolb if $mode eq 'boolean';
+	$chars .= $booln if $mode eq 'boolean';
+#	$chars .= $ext   if $mode eq 'extended2';
 
 	# keep only these characters
-	$query =~ s/[^$basic]+/ /go;
+	$query =~ s/[^$chars]+/ /g;
+
 	# clean up spaces
 	$query =~ s/ +/ /g; $query =~ s/^ //g; $query =~ s/ $//g;
 
 	$query =~ s/$stopwords//gio if $stopwords;
 
-	return $query;
+	# we may want to adjust the mode before returning it
+	return($query, $mode);
 }
 }
 
