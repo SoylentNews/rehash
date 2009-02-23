@@ -1208,19 +1208,39 @@ function firehose_get_next_updates() {
 
 (function(){
 var depth={};
-Slash.markBusy = function( k, state ){
-	arguments.length<2 && (state=depth[k]>0);
-	$('body').toggleClass('busy-'+k, !!state);
+
+//
+// Slash.busy --- mark <body> with a class, e.g., 'busy-x', within the range you
+//	declare x "busy": busy('x', true)...busy('x', false).  Ranges nest;
+//	Slash.busy maintains a logical "busy-depth" per key.
+//
+Slash.busy = function( k, more ){
+	var N=depth[k]||0, was_busy=N>0; // N guards against depth[k]===undefined.
+
+	// busy(k) is a "getter"
+	if ( arguments.length > 1 ) {
+		// busy(k, expr) is a (relative) "setter".  Let's deduce the delta...
+		if ( $.TypeOf(more)==='number' ) {	// busy(k, number) means depth[k]+=number, except...
+			more===0 && (more = -N);	// ...busy(k, 0) means "reset"
+		} else {				// For non-numbers (including 'number.Nan', 'number.Infinity' --- thank you, $.TypeOf)
+			more = sign(more) || -1;	// busy(k, expr) means ++depth[k] or --depth[k]
+		}
+		(N+=more) ? depth[k]=N : delete depth[k];
+		Slash.markBusy(k, N>0);	// Physical state may differ from logical, so let markBusy decide.
+	}
+	return was_busy; // Return previous "logical" state: old depth[k] > 0.
 };
 
-Slash.busy = function( k, state ){
-	var N=depth[k]||0, was_busy=N>0;
-	if ( arguments.length > 1 ){
-		depth[k] = N+=(state ? 1 : -1);
-		var now_busy = N>0;
-		now_busy != was_busy && Slash.markBusy(k, now_busy);
-	}
-	return was_busy;
+//
+// Slash.markBusy --- ignore the logical depth maintained by Slash.busy, e.g.,
+//	when you're calls to busy(..., true) and busy(..., false) don't balance.
+//
+Slash.markBusy = function( k, state ){
+	var	$body = $('body'),
+		was_busy = $body.is('.busy-'+k),
+		now_busy = state || arguments.length<2 && depth[k]>0; // markBusy(k) resets to depth[k]>0.
+	now_busy != was_busy && $body.toggleClass('busy-'+k);
+	return was_busy; // Return previous "physical" state: body had class "busy-"+k.
 };
 })();
 
@@ -1231,11 +1251,11 @@ $(function(){
 });
 
 function firehose_busy() {
-	Slash.markBusy('firehose', true);
+	return Slash.markBusy('firehose', true);
 }
 
 function firehose_busy_done() {
-	Slash.markBusy('firehose', false);
+	return Slash.markBusy('firehose', false);
 }
 
 function firehose_get_updates_handler(transport) {
