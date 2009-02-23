@@ -1422,16 +1422,6 @@ function finishLoading() {
 	//setTimeout('ajaxFetchComments()', 10*1000);
 }
 
-function cloneObject(what) {
-	for (i in what) {
-		if (typeof what[i] == 'object') {
-			this[i] = new cloneObject(what[i]);
-		} else {
-			this[i] = what[i];
-		}
-	}
-}
-
 
 /****************/
 /* UI functions */

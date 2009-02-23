@@ -34,8 +34,12 @@ sub getNum {
 sub getSphinxStats {
 	my($self) = @_;
 
-	# requires SUPER privs
+	# requires SUPER privs, so don't use this if we can help it
+	# reports "total: 25, total found: 25, time: 126, words: 2"
 # 	my $sql = 'SHOW ENGINE SPHINX STATUS';
+
+	# returns variables named: sphinx_total, sphinx_total_found,
+	# sphinx_time, sphinx_word_count, sphinx_words
 	my $sql = 'SHOW STATUS LIKE "sphinx_%"';
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
@@ -46,7 +50,7 @@ sub getSphinxStats {
 
 	my %stats;
 
-	if ($sql =~ /SPHINX/) {
+	if ($sql =~ /SHOW ENGINE/) {
 		my @data = $sth->fetchrow;
 		$sth->finish;
 

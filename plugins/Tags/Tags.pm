@@ -1817,8 +1817,10 @@ sub listTagnamesRecent {
 
 	# Get the tagnames for those id's.
 	my $tagnameids_str = join(',', sort { $a <=> $b } @$tagnameids_ar);
-	my $recent_ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
-		"tagnameid IN ($tagnameids_str)");
+	my $recent_ar = $tagnameids_str
+		? $self->sqlSelectColArrayref('tagname', 'tagnames',
+			"tagnameid IN ($tagnameids_str)")
+		: [ ];
 	@$recent_ar = sort tagnameorder @$recent_ar;
 	return $recent_ar;
 }

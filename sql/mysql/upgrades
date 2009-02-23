@@ -5893,8 +5893,42 @@ UPDATE firehose_view SET admin_unsigned="yes",filter="" WHERE filter="unsigned";
 UPDATE firehose_view SET admin_unsigned="yes", usermode="no" WHERE viewname="daddypants";
 UPDATE firehose_view SET mode="mixed" WHERE viewname IN ("stories","popular","daddypants");
 
-# 2009-02-12
+# 2009-02-13
 UPDATE vars SET value = 'T_2_5_0_242' WHERE name = 'cvs_tag_currentcode';
+
+# For plugins/FireHose
+ALTER TABLE firehose_view DROP INDEX id_viewname;
+ALTER TABLE firehose_view_settings CHANGE COLUMN id id mediumint(8) unsigned NOT NULL;
+
+# For plugins/Achievements
+UPDATE achievements SET exponent = 2 WHERE name = 'score5_comment';
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_read', 'Days Read in a Row', 'yes', 2);
+
+CREATE TABLE user_achievement_streaks (
+        id mediumint(8) unsigned NOT NULL auto_increment,
+        uid mediumint(8) unsigned NOT NULL default '0',
+        aid mediumint(8) unsigned NOT NULL default '0',
+        streak mediumint(8) unsigned NOT NULL default '0',
+        last_hit datetime NOT NULL default '0000-00-00 00:00:00',
+        PRIMARY KEY (id),
+        UNIQUE KEY achievement (uid,aid)
+) TYPE=InnoDB;
+
+# for plugins/Sphinx
+INSERT INTO vars (name, value, description) VALUES ('sphinx_se', '0', 'Use SphinxSE instead of the API directly?');
+INSERT INTO vars (name, value, description) VALUES ('sphinx_01_hostname_searchd', '', 'Hostname for the sphinx01 instance: searchd');
+UPDATE vars SET name='sphinx_01_hostname_sphinxse', description='Hostname for the sphinx01 instance: SphinxSE on mysqld' WHERE name='sphinx_01_hostname';
+
+# For plugins/FireHose
+ALTER TABLE firehose_view ADD COLUMN use_exclusions ENUM("no","yes") DEFAULT "yes";
+UPDATE firehose_view SET use_exclusions="no" WHERE viewname like 'user%' OR viewname IN ("search","daddypants","metamod");
+
+# 2009-02-20
+UPDATE vars SET value = 'T_2_5_0_243' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_maxruntime', '28800', 'Restart tagbox.pl after running this long, to mitigate any memory leaks, 0 for never');
 
 # this is wrong but i don't know what is right -- pudge
 #UPDATE firehose_view SET duration = "-1";
+

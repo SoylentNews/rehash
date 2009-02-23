@@ -37,12 +37,12 @@ END %]
 		<script type="text/javascript">
 		$(function(){
 			$("#toggleleftmenu").click(function(){
-				var hide = $(this).toggleClasses('expanded', 'collapsed').is('.collapsed') ? 1 : 0;
-				$('div#yui-main div.yui-b').toggleClassTo('hideleftmenu', hide);
+				var hide = $(this).setClass(applyMap('expanded', 'collapsed')).is('.collapsed');
+				$('div#yui-main div.yui-b').toggleClass('hideleftmenu', hide);
 				ajax_update({
 					op:			'firehose_save_section_menu_visible',
 					reskey:			reskey_static,
-					hide_section_menu:	hide
+					hide_section_menu:	hide ? 1 : 0
 				});
 				return false;
 			});

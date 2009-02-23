@@ -329,7 +329,7 @@ sub previewReply {
 		error => $error_message,
 	);
 	$to_dump{html} = { "replyto_preview_$pid" => $html } if $html;
-	$to_dump{eval_first} = "\$dom('gotmodwarning_$pid').value = 1;"
+	$to_dump{eval_first} = "\$('#gotmodwarning_$pid').val(1);"
 		if $form->{gotmodwarning} || ($error_message && $error_message eq
 			Slash::Utility::Comments::getError("moderations to be lost")
 		);
@@ -1547,22 +1547,41 @@ sub saveModalPrefs {
 	}
 	
 	if ($params{'formname'} eq "fhlayout") {
-		$user_edits_table = {
-			noicons			=> ($params{showicons} ? undef : 1),
-			tags_turnedoff		=> ($params{showtags} ? undef : 1),
-			firehose_nocolors	=> ($params{showcolors} ? undef: 1),
-			firehose_nobylines	=> ($params{showbylines} ? undef: 1),
-			firehose_nodates	=> ($params{showdates} ? undef: 1),
-			firehose_pause		=> ($params{paused} ? 1: 0),
-			firehose_advanced	=> ($params{advanced} ? 1 : undef),
-			firehose_sphinx		=> ($params{sphinx} ? 1 : undef),
-			firehose_pagesize	=> ($params{pagesize} ? $params{pagesize} : "small")
-		};
 
-		if (defined $params{tzcode} && defined $params{tzformat}) {
-			$user_edits_table->{tzcode} = $params{tzcode};
-			$user_edits_table->{dfid}   = $params{tzformat};
-			$user_edits_table->{dst}    = $params{dst};
+		if ($form->{reset}) {
+			if ($form->{resetsectionmenu}) {
+				my $fh = getObject("Slash::FireHose");
+				$fh->removeUserSections();
+			} else {
+				$user_edits_table = {};
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_sphinx firehose_pagesize index_beta)) {
+					$user_edits_table->{$_} = undef;
+				}
+				foreach (qw(noicons dst dfid)) {
+					$user_edits_table->{$_} = 0;
+				}
+				$user_edits_table->{tzcode} = "EST";
+			}
+
+		} else {
+			$user_edits_table = {
+				noicons			=> ($params{showicons} ? undef : 1),
+				tags_turnedoff		=> ($params{showtags} ? undef : 1),
+				firehose_nocolors	=> ($params{showcolors} ? undef: 1),
+				firehose_nobylines	=> ($params{showbylines} ? undef: 1),
+				firehose_nodates	=> ($params{showdates} ? undef: 1),
+				firehose_pause		=> ($params{paused} ? 1: 0),
+				firehose_advanced	=> ($params{advanced} ? 1 : undef),
+				firehose_sphinx		=> ($params{sphinx} ? 1 : undef),
+				firehose_pagesize	=> ($params{pagesize} ? $params{pagesize} : "small"),
+				index_beta		=> ($params{index_beta} ? 1 : 0 ),
+			};
+
+			if (defined $params{tzcode} && defined $params{tzformat}) {
+				$user_edits_table->{tzcode} = $params{tzcode};
+				$user_edits_table->{dfid}   = $params{tzformat};
+				$user_edits_table->{dst}    = $params{dst};
+			}
 		}
 
 	}
@@ -1592,7 +1611,11 @@ sub saveModalPrefs {
 					$data->{datafilter} = "story";
 				}
 			}
-			$fh->setFireHoseViewPrefs($params{viewid}, $data);
+			if ($form->{reset}) {
+				$fh->removeUserPrefsForView($params{viewid});
+			} else {
+				$fh->setFireHoseViewPrefs($params{viewid}, $data);
+			}
 		}
 	}
 
@@ -1672,10 +1695,18 @@ sub saveModalPrefs {
 		} elsif (length($story_never_author) < 1) {
 			$story_never_author = '';
 		}
-
-		$user_edits_table = {
-			story_never_author => $story_never_author,
-		};
+		if ($form->{reset}) {
+			$user_edits_table = {
+				story_never_author => '',
+				firehose_exclusions => undef
+			};
+		} else {
+			$user_edits_table = {
+				story_never_author => $story_never_author,
+				firehose_exclusions => $params{'firehose_exclusions'}
+			};
+		}
+		
 
 	}
 

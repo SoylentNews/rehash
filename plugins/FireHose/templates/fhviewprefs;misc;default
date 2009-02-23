@@ -48,6 +48,15 @@ __template__
 	</div>
 </div>
 
+<div class="yui-gd section_default" style="display: none;">
+    <div class="yui-u first">
+		Default Section:
+    </div>
+    <div class="yui-u">
+		<input type="checkbox" name="section_default" class="section_default" value="" disabled="disabled">
+	</div>
+</div>
+
 [% IF id %]<input type="hidden" name="id" value="[% id %]">[% END %]
 
 <span class="actions">
@@ -65,7 +74,7 @@ END %]
 <script type="text/javascript">
 // dialog not yet shown; move to tie it to the menu item
 (function(){
-	var	$li		= $('#fhsection-[% id %], #fhsection-unsaved').eq(0),
+	var	$li		= $('#fhsection-[% IF id; id; ELSE %]unsaved[% END %]'),
 		li_offset	= $li.offset(),
 		$dialog		= get_modal_parts('#modal_box')
 		$edit_field	= $dialog.find('input#fhsectionname'),
@@ -101,31 +110,27 @@ END %]
 
 		var v = dialog_values();
 		if ( !v.name && !v.filter ) {
-			$dialog.find('input[name=section_filter]').val( $li.data('fhfilter') );
+			$dialog.find('input[name=section_filter]').val( $li.metadata().filter );
 			$edit_field.keyup();
 
 			var	$select	= $dialog.find('select'),
-				view_id	= $select.find(':contains(' + $li.data('viewname').substr(1) + ')').val();
+				view_id	= $select.find(':contains(' + $li.metadata().viewname.substr(1) + ')').val();
 			$select.val(view_id);
 		}
 
-		// a mouse click outside the dialog must hide it
-		$(document).bind('mousedown.fhviewprefs', function( event ){
-			var p = event.originalEvent.target;
-			while ( p ) {
-				if ( p === dialog_elem ) {
-					return true;
-				}
-				p = p.parentNode;
-			}
-			hide_modal_box();
+		// a click that gets to the document closes me
+		$(document).bind('mousedown.fhviewprefs', hide_modal_box);
+		// ...and stop any click inside me from getting to the document
+		$dialog.bind('mousedown.fhviewprefs', function( event ){
+			event.stopPropagation();
+			return false;
 		});
 	};
 
 	dialog_elem._custom_hide_fn = function(){
 		// allow the menu item to shrink back down to normal height
 		$li.removeAttr('style');
-		$(document).unbind('mousedown.fhviewprefs');
+		$dialog.add(document).unbind('mousedown.fhviewprefs');
 	};
 
 
@@ -153,7 +158,7 @@ END %]
 						$li.remove();
 						$li = $([]);
 					}
-					$li.toggleClassTo('hide', action=='hide');
+					$li.toggleClass('hide', action=='hide');
 					firehose_delete_section([% id %], {unhide:'undo'}[action]);
 				}).
 			end().
@@ -187,12 +192,15 @@ END %]
 				);
 	invalid_name[''] = true;	// ...nor without a name at all
 
-	// test and enable/disable (as needed) on keyup
-	$edit_field.keyup(function( e ){
+	$dialog.keyup(function( e ){
 		if ( e.which == $.ui.keyCode.ENTER ) {
 			$save_button.click();
 			return false;
 		}
+	});
+
+	// test and enable/disable (as needed) on keyup
+	$edit_field.keyup(function( e ){
 		var next_disabled = invalid_name[$.trim($(this).val()).toLowerCase()];
 		if ( next_disabled != prev_disabled ) {
 			$save_button.attr('disabled', (next_disabled ? 'disabled' : ''));

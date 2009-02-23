@@ -70,37 +70,22 @@ function postSectionPrefChanges(el) {
 	params['op'] = 'setSectionNexusPrefs';
 	params[el.name] = el.value;
 	
-	var sec_pref_msg = $dom("sectionprefs-message");
-	sec_pref_msg.innerHTML = "Saving...";
+	$('#sectionprefs-message').text('Saving...');
 	var url = 'ajax.pl';
 	ajax_update(params, 'sectionprefs-message'); 
 }
 
 function swapClassColors(class_name_active, class_name_deactive) {
-	for (i=0; i <document.getElementsByTagName("tr").length; i++) {
-		if (document.getElementsByTagName("tr").item(i).className == class_name_active){
-			document.getElementsByTagName("tr").item(i).style.color = "#000";
-			document.getElementsByTagName("tr").item(i).style.background = "#fff";
-		} else if (document.getElementsByTagName("tr").item(i).className == class_name_deactive){
-			document.getElementsByTagName("tr").item(i).style.color = "#999";
-			document.getElementsByTagName("tr").item(i).style.background = "#ccc";
-		}
-	}
+	$('tr').filter('.'+class_name_active).css({color:'#000', background:'#fff'}).
+		end().
+		filter('.'+class_name_deactive).css({color:'#999', background:'#ccc'});
 }
 
 function updateNexusAllTidPrefs(el) {
-	//theForm = document.forms["sectionprefs"];
-	theForm = document.forms["modal_prefs"];
-	for(i=0; i<theForm.elements.length; i++){
-		var regex = /^nexustid\d+$/;
-		if (regex.test(theForm.elements[i].name)) {
-			if (theForm.elements[i].value == el.value) {
-				theForm.elements[i].checked = true;
-			} else {
-				theForm.elements[i].checked = false;
-			}
-		}
-	}
+	var v = el.value;
+	$('form#modal_prefs [name^=nexustid]').each(function(){
+		this.checked = (this.value==v);
+	});
 }
 
 function reportError(request) {

@@ -2270,8 +2270,6 @@ sub getObject {
 	my($vuser, $cfg, $objects);
 	my $user = getCurrentUser();
 
-	my $timeout = defined $data->{timeout} ? $data->{timeout} : 5;
-
 	# clean up dangerous characters
 	$class =~ s/[^\w:]+//g;
 
@@ -2335,6 +2333,7 @@ sub getObject {
 	# asked not to use the cache.
 	if (loadClass($class)) { # 'require' the class
 		if ($class->isInstalled($vuser) && $class->can('new')) {
+			my $timeout = defined $data->{timeout} ? $data->{timeout} : 5;
 			my $object;
 			eval {
 				local $SIG{ALRM} = sub { die "timeout" } if $timeout;

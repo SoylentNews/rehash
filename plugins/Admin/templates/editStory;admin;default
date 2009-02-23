@@ -297,11 +297,11 @@ __template__
 				<input type="file" name="bodytext_file">
 				<a name="bodytext"></a>
 				<label>
-					<a href="#" onclick="toggleId('admin-bodytext','hide','show'); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
+					<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 				</label>
 				<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_literal %]</textarea>
 				<label>
-					<a href="#" onclick="toggleId('admin-media','hide','show'); return false">Media</a>
+					<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
 				</label>
 				<a name="media"></a>
 				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>

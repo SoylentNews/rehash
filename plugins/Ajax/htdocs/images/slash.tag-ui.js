@@ -4,6 +4,8 @@
 eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 /*jslint evil:false */
 
+var T = $.TypeOf;
+
 /* Note: If you're reading this in BBEdit or any other browser that supports "folds", you may want
    to start by collapsing all folds so you just see the eight top-level components.
 
@@ -109,7 +111,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
    Any code can submit new tags or tag-commands by finding the tag_ui_server and calling its methods
    directly, e.g.,
 
-	$(this).nearest_parent('.tag-server').tag_ui_server__submit_tags('slownewsday');
+	$(this).closest('.tag-server').tag_ui_server__submit_tags('slownewsday');
 
    Typically, you will do this from a custom click handler (see Slash.Firehose.TagUI.click_handler).
    You might also do it from a form or text input.
@@ -181,7 +183,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
    The tag_ui components that are actually attached to elements automatically benefit from the loose
    coupling afforded by the DOM.  A single server serves only those elements beneath it.  Any
-   element can just "look up" (with nearest_parent('.tag-server')) to find its server.  Responders
+   element can just "look up" (with closest('.tag-server')) to find its server.  Responders
    (for instance, displays) can be added or removed at any time.  All such components support
    specifying most of their behavior right in the HTML.  Slash.Util.Package ensures that actual
    attachments have a minimal footprint, both in the namespace and code size---adapting a single
@@ -303,7 +305,7 @@ new Package({ named: 'Slash.TagUI.Responder',
 			if ( if_ready === undefined ) {
 				return $(r_elem).hasClass(ready_class);
 			}
-			$(r_elem).toggleClassTo(ready_class, if_ready);
+			$(r_elem).toggleClass(ready_class, !!if_ready);
 			return r_elem;
 		},
 		bind: function( r_elem, fn, _signals ){
@@ -322,7 +324,7 @@ new Package({ named: 'Slash.TagUI.Responder',
 	stem_function: function( r_elem, o ){
 		r_elem.
 			tag_ui_responder.bind(o.fn, o.signals).
-			tag_ui_responder.ready(!if_defined_false(o.if_ready));
+			tag_ui_responder.ready(!$.TypeOf.defNo(o.if_ready));
 		return o.defaults ? { defaults: o.defaults } : undefined;
 	},
 	jquery: true
@@ -370,7 +372,7 @@ function add_signals( r_elem, signals ){
 function signals( r_elem ){
 	var more_new_signals = Array.prototype.slice.call(arguments, 1);
 	var new_signals = [], first_new_signal = more_new_signals.shift();
-	if ( if_defined(first_new_signal) ) {
+	if ( T.def(first_new_signal) ) {
 		new_signals = new_signals.concat(qw(first_new_signal)).concat(more_new_signals);
 	}
 
@@ -476,7 +478,7 @@ new Package({ named: 'Slash.TagUI.Server',
 		var ext = {};
 		if ( options.command_pipeline ) { ext.command_pipeline = options.command_pipeline; }
 		if ( options.defaults ) { ext.defaults = options.defaults; }
-		if ( if_defined(key_tuple) ) {
+		if ( T.def(key_tuple) ) {
 			if ( ! ext.defaults ) ext.defaults = { };
 			if ( ! ext.defaults.request_data ) ext.defaults.request_data = { };
 			ext.key = (ext.defaults.request_data.key = key_tuple.key);
@@ -497,7 +499,7 @@ new Package({ named: 'Slash.TagUI.Server',
 					clean_options.command_pipeline = options.command_pipeline.slice(0);
 				}
 				if ( options.defaults ) {
-					clean_options.defaults = $.clone(options.defaults);
+					clean_options.defaults = $.extend({}, options.defaults);
 				}
 
 				Server(this, clean_options);
@@ -583,7 +585,7 @@ function resolve_callback( s_elem, caller_opts, callback_name ){
 	var elem_ajax = s_elem.tag_ui_server && s_elem.tag_ui_server.defaults && s_elem.tag_ui_server.defaults.ajax || {};
 	var caller_ajax = caller_opts && caller_opts.ajax || {};
 
-	return if_fn(caller_ajax[callback_name]) || if_fn(elem_ajax[callback_name]);
+	return T.objIf('fn', caller_ajax[callback_name]) || T.objIf('fn', elem_ajax[callback_name]);
 }
 
 if ( simple_host() != 'slashdot.org' ) {
@@ -625,7 +627,7 @@ new Package({ named: 'Slash.TagUI.Markup',
 					tag_ui_responder({
 						signals: 'ajaxSuccess',
 						fn: function(){
-							$(this).nearest_parent('.tag-server').tag_ui_markup__refresh_styles();
+							$(this).closest('.tag-server').tag_ui_markup__refresh_styles();
 						}
 					});
 				return this;
@@ -741,7 +743,7 @@ function refresh_tag_styles_in_entry( entry ){
 
 	$displays.filter('.respond-user').each(function(){
 		var $this=$(this);
-		$this.toggleClassTo('no-visible-tags', ! $this.is(':has(li.u:not(.t,.s,.p,.minus))'));
+		$this.toggleClass('no-visible-tags', ! $this.is(':has(li.u:not(.t,.s,.p,.minus))'));
 	});
 }
 
@@ -790,28 +792,23 @@ new Package({ named: 'Slash.TagUI.Display',
 
 			// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 			var new_tags_seen = {};
-			var new_tags = $.map(tags, function(t){
+			var $new_elems = $($.map(tags, function(t){
 				var bt = bare_tag(t);
 				var mt = Markup.markup_tag(t);
 				if ( bt in update_map ) {
 					$(update_map[bt]).html(mt);
 				} else if ( !(bt in new_tags_seen) ) {
 					new_tags_seen[bt] = true;
-					return mt;
+					return $('<li class="p"><span class="tag">'+mt+'</span></li>').get();
 				}
-			});
+			}));
 
 			// a $ list of the actual .tag elements we updated in-place
 			var $changed_tags = $(values(update_map));
 
-			if ( new_tags.length ) {
+			if ( $new_elems.length ) {
 				// construct all the completely new tag entries and associated machinery
-				var $new_elems = $(join_wrap(
-						new_tags,
-						'<li class="p"><span class="tag">',
-						'</span></li>')).
-					append(d_elem.tag_ui_display._menu_template);
-
+				$new_elems.append(d_elem.tag_ui_display._menu_template);
 				d_elem.tag_ui_display._$list_el[options.order]($new_elems);
 
 				// add in a list of the actual .tag elements we created from scratch
@@ -957,22 +954,7 @@ function $mark_empty( d_elem, if_empty ){
 	if ( if_empty === undefined ) {
 		if_empty = ! $d_elem.is(':has(span.tag)');
 	}
-	return $d_elem.toggleClassTo('no-tags', if_empty);
-}
-
-function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
-	// always returns a string, even if it's the empty string, ''
-	var result = '';
-	a = qw(a);
-	if ( a && a.length ) {
-		var ep = elem_prefix || '';
-		var es = elem_suffix || '';
-							// Example:
-		result = (list_prefix || '') + ep +	// '<ul><li>'
-			a.join(es+ep) +			// .join('</li><li>')
-			es + (list_suffix || '');	// '</li></ul>
-	}
-	return result;
+	return $d_elem.toggleClass('no-tags', !!if_empty);
 }
 
 })();
@@ -1144,7 +1126,7 @@ function $position_context_display( $display ){
 
 	var RIGHT_PADDING = 18;
 
-	var $entry = $display.nearest_parent('.tag-server');
+	var $entry = $display.closest('.tag-server');
 	var left_edge = $entry.offset().left;
 	var right_edge = left_edge + $entry.width() - RIGHT_PADDING;
 
@@ -1152,7 +1134,7 @@ function $position_context_display( $display ){
 	global_align = Math.max(left_edge, global_align);
 
 	var need_minimal_fix = true;
-	if ( $display.nearest_parent(':hidden').length===0 ) {
+	if ( $display.closest(':hidden').length===0 ) {
 		try {
 			var display_width = $display.children('ul:first').width();
 			$display.css({

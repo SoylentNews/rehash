@@ -37,32 +37,23 @@ function after_update( $new_entries, state ){
 // Slash.Firehose.TagUI private implementation details
 
 function firehose_toggle_tag_ui_to( if_expanded, selector ){
-	var	$entry	= $(selector).nearest_parent('.tag-server'),
+	var	$entry	= $(selector).closest('.tag-server'),
 		$widget = $entry.find('.tag-widget.body-widget'),
 		id	= $entry.attr('tag-server');
 
 	Firehose.set_action();
 	$entry.find('.tag-widget').each(function(){ this.set_context(); });
 
-	$widget.toggleClassTo('expanded', if_expanded);
+	$widget.toggleClass('expanded', !!if_expanded);
 
-	var toggle_button={}, toggle_div={};
 	if ( if_expanded ){
 		$entry.each(function(){ this.tag_server.fetch_tags(); });
-		if ( fh_is_admin ) {
-			firehose_get_admin_extras(id);
-		}
+		fh_is_admin && firehose_get_admin_extras(id);
 		$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
-
-		toggle_button['+'] = (toggle_button.collapse = 'expand');
-		toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
-	} else {
-		toggle_button['+'] = (toggle_button.expand = 'collapse');
-		toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
 	}
 
-	$widget.find('a.edit-toggle .button').mapClass(toggle_button);
-	$entry.find('#toggletags-body-'+id).mapClass(toggle_div);
+	$widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
+	$entry.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
 }
 
 function firehose_toggle_tag_ui( toggle ) {
@@ -74,7 +65,7 @@ var $related_trigger = $().filter();
 function form_submit_tags( form, options ){
 	var $input = $('.tag-entry:input', form);
 	$related_trigger = $input;
-	$(form).nearest_parent('.tag-server').
+	$(form).closest('.tag-server').
 		each(function(){
 			var tag_cmds = $input.val();
 			$input.val('');
@@ -93,9 +84,9 @@ function firehose_click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
-	} else if ( $target.nearest_parent('.tmenu').length ) {
+	} else if ( $target.closest('.tmenu').length ) {
 		var op = $target.text();
-		var $tag = $target.nearest_parent(':has(span.tag)').find('.tag');
+		var $tag = $target.closest(':has(span.tag)').find('.tag');
 		$related_trigger = $tag;
 
 		var tag = $tag.text();
@@ -112,7 +103,7 @@ function firehose_click_tag( event ) {
 		}
 
 		Firehose.set_action();
-		var $s_elem = $target.nearest_parent('.tag-server');
+		var $s_elem = $target.closest('.tag-server');
 
 		// Make sure the user sees some feedback...
 		if ( $menu || event.shiftKey ) {
@@ -236,7 +227,7 @@ function firehose_tag_feedback( signal, data ){
 	function if_have( k ){ return k in tags || 'meta'+k in tags; }
 	function if_busy( depth ){ return depth>0; }
 
-	var $entry = tr._$entry || (tr._$entry = $(this).nearest_parent('.tag-server'));
+	var $entry = tr._$entry || (tr._$entry = $(this).closest('.tag-server'));
 
 	var depth, was_busy=if_busy(depth = tr._busy_depth || 0);
 	switch ( signal ) {
@@ -268,7 +259,7 @@ function firehose_tag_feedback( signal, data ){
 
 function firehose_click_nodnix_reason( event ) {
 	Firehose.set_action();
-	var $entry = $(event.target).nearest_parent('.tag-server');
+	var $entry = $(event.target).closest('.tag-server');
 	var id = $entry.attr('tag-server');
 
 	if ( (fh_is_admin || firehose_settings.metamod) && ($('#updown-'+id).hasClass('voteddown') || $entry.is('[type=comment]')) ) {

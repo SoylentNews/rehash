@@ -140,20 +140,18 @@ function admin_submit_memory(fhid) {
 }
 
 function remarks_create() {
-	var reskey = $dom('remarks_reskey');
-	var remark = $dom('remarks_new');
-	if (!remark || !remark.value || !reskey || !reskey.value) {
-		return false;
+	var params = {
+		op:	'remarks_create',
+		reskey:	$('#remarks_reskey').val(),
+		remark:	$('#remarks_new').val()
+	};
+
+	if ( !params.remark || !params.reskey ) {
+		return;
 	}
 
-	var params = {};
-	params.op     = 'remarks_create';
-	params.remark = remark.value;
-	params.reskey = reskey.value;
-	remarks_max = $dom('remarks_max');
-	if (remarks_max && remarks_max.value) {
-		params.limit = remarks_max.value;
-	}
+	var limit = $('#remarks_max').val();
+	limit && (params.limit=limit);
 	ajax_update(params, 'remarks_whole');
 }
 
@@ -177,28 +175,22 @@ function remarks_popup() {
 }
 
 function remarks_config_save() {
-	var params = {};
-	var reskey = $dom('remarks_reskey');
-	var min_priority = $dom('remarks_min_priority');
-	var limit = $dom('remarks_limit');
-	var filter = $dom('remarks_filter');
-	params.op = 'remarks_config_save';
-	if (!reskey && !reskey.value) {
-		return false;
-	} 
-	if (min_priority) {
-		params.min_priority = min_priority.value;
+	var params = {
+		op:	'remarks_config_save',
+		reskey:	$('#remarks_reskey').val(),
+	};
+	if ( !params.reskey ) {
+		return;
 	}
-	if (limit) {
-		params.limit = limit.value;
+
+	var optional_params = {
+		min_priority:	$('#remarks_min_priority').val(),
+		limit:		$('#remarks_limit').val(),
+		filter:		$('#remarks_filter').val(),
 	}
-	if (filter) {
-		params.filter = filter.value;
-	}
-	var message = $dom('remarksconfig-message');
-	if (message) {
-		message.innerHTML = "Saving...";
-	}
+	$.each(optional_params, function(k, v){ v && (params[k]=v); });
+
+	$('#remarksconfig-message').text('Saving...');
 	ajax_update(params, 'remarksconfig-message');
 }
 
@@ -341,7 +333,7 @@ function firehose_save_note(id) {
 
 	var note_text = $.trim($entry.find('#note-input-'+id).val());
 	$entry.find('.note-flag, .note-wrapper').
-		toggleClassTo('no-note', !note_text).
+		toggleClass('no-note', !note_text).
 		filter('.note-flag').
 			attr('title', note_text);
 
@@ -376,7 +368,7 @@ function firehose_get_and_post(id) {
 		id:	id
 	}, 'postform-'+id, {
 		onComplete: function() {
-			$dom('postform-'+id).submit();
+			$('#postform-'+id).submit();
 		}
 	});
 }
@@ -389,11 +381,10 @@ function appendToBodytext(text) {
 }
 
 function appendToMedia(text) {
-	var obj = $dom('admin-media');
-	if (obj) {
-		obj.className = "show";
-		obj.value = obj.value  + text;
-	}
+	$('#admin-media').each(function(){
+		this.className = "show";
+		this.value += text;
+	});
 }
 
 $(function(){

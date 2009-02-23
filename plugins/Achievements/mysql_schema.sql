@@ -15,6 +15,17 @@ CREATE TABLE user_achievements (
         aid mediumint(8) unsigned NOT NULL default '0',
         exponent smallint unsigned NOT NULL default '0',
         createtime datetime NOT NULL default '0000-00-00 00:00:00',
-        PRIMARY KEY  (id),
+        PRIMARY KEY (id),
         UNIQUE KEY achievement (uid,aid)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS user_achievement_streaks;
+CREATE TABLE user_achievement_streaks (
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	uid mediumint(8) unsigned NOT NULL default '0',
+	aid mediumint(8) unsigned NOT NULL default '0',
+	streak mediumint(8) unsigned NOT NULL default '0',
+	last_hit datetime NOT NULL default '0000-00-00 00:00:00',
+	PRIMARY KEY (id),
+	UNIQUE KEY achievement (uid,aid)
 ) TYPE=InnoDB;

@@ -29,7 +29,7 @@ $('#slashboxes').
 		append('<span class="closebox">x</span>').
 		find('span.closebox').
 			click(function(){	// ...that close; save new state
-				$(this).nearest_parent('div.block').remove();
+				$(this).closest('div.block').remove();
 				save_slashboxes();
 			});
 

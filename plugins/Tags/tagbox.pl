@@ -74,12 +74,16 @@ $task{$me}{code} = sub {
 	}
 	tagboxLog('tagbox.pl starting');
 
+	my $maxruntime = defined($constants->{tags_tagbox_maxruntime})
+		? $constants->{tags_tagbox_maxruntime} : 28800;
 	my $sleeps_in_a_row = 0;
 	my $exclude_behind = 1;
 	my $max_activity_for_run = 10;
 	my $feederlog_largerows = $constants->{tags_feederlog_largerows} || 50_000;
 	my($feederlog_ok, $next_feederlog_check) = (1, 0);
 	while (!$task_exit_flag) {
+
+		last if $maxruntime && time() - $start_time > $maxruntime;
 
 		$exclude_behind = ! $exclude_behind;
 

@@ -21,24 +21,24 @@ __template__
                 <div style="margin-top: 1em; text-align: center;">
                 &nbsp;
                 <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Layout</span>
-		[% IF 0 %]
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+		[% fh = Slash.getObject("Slash::FireHose");
+		   views = fh.getUserViews({ tab_display => "yes" });
+		%]
+		[% FOREACH view = views %]
+                	&nbsp;|&nbsp;
+	                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %] View', 1); return false;">[% view.viewtitle %]</a>
 		[% END %]
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false;">Stories</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewpopular', 'Customize Popular View', 1); return false;">Popular</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewrecent', 'Customize Recent View', 1); return false;">Recent</a>
-		[% IF user.is_admin %]
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewdaddypants', 'Customize Daddypants View', 1); return false;">Daddypants</a>
-		[% END %]
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false;">Search</a>
                 </div>
                 [% END %]
+		[% 
+                IF user.index_beta;
+                        beta_check = constants.markup_checked_attribute;
+                END;
+		%]
+		<label>
+			<input type="checkbox" name="index_beta"[% beta_check %]> Use Beta Index<br>
 
                 <label>Date/Time Format</label>
                 [%
@@ -210,6 +210,10 @@ __template__
                 <br>
                 <input type="button" value="Save" onclick="saveModalPrefs()">
 		<input type="button" value="Cancel" onclick="hide_modal_box()">
+		<input type="button" value="Reset" onclick="resetModalPrefs()">
+		<br>
+		<br>
+		<input type="button" value="Reset Section Menu" onclick="resetModalPrefs('resetsectionmenu')">
 </form>
 __seclev__
 500

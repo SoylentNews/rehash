@@ -13,18 +13,43 @@ __name__
 display_achievements
 __template__
 
-[% IF !user_achievements.size;
-onecol = 1;
- END %]
+[%
+IF !user_achievements.size; onecol = 1; END;
+
+ach_reader = Slash.getObject("Slash::Achievements");
+ach_key = "achievement_obtained";
+ach_obtained = ach_reader.getAchievement(ach_key);
+ach_obtained_aid = ach_obtained.$ach_key.aid;
+%]
 
 <div class="achievements user [% IF onecol == 1 %] onecol [% END %]">
 	[% IF onecol != 1 %]<h4>[% requested_user.nickname | strip_literal %]</h4>[% END %]
 	<ul>
+	[% IF requested_user_achievements.$ach_obtained_aid %]
+                <li class=" [% requested_user_achievements.$ach_obtained_aid.name %] ">
+                <div class="yui-gf body">
+                        <div class="yui-u first">
+                                <span class="math">
+                                        [% IF requested_user_achievements.$ach_obtained_aid.exponent > 1 %]
+                                                [% requested_user_achievements.$ach_obtained_aid.exponent %]
+                                        [% END %]
+                                </span>
+                        </div>
+                        <div class="yui-u">
+                                <span>[% requested_user_achievements.$ach_obtained_aid.description %]
+                                        <small>[% requested_user_achievements.$aid.createtime %]</small>
+                                </span>
+                        </div>
+                </div>
+                </li>
+        [% END %]
+
 	[% FOREACH aid = common_achievements.keys.sort %]
+		[% NEXT IF aid == ach_obtained_aid %]
 		<li class=" [% requested_user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF requested_user_achievements.$aid.increment > 1 %]sup[% END %]  ">
 				[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
 					[% IF requested_user_achievements.$aid.increment == 1 %]
 						[% IF requested_user_achievements.$aid.exponent > 1 %]
@@ -49,10 +74,11 @@ onecol = 1;
 
 	[% FOREACH aid = requested_user_achievements.keys.sort %]
 		[% NEXT IF common_achievements.$aid %]
+		[% NEXT IF aid == ach_obtained_aid %]
 		<li class=" [% requested_user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF requested_user_achievements.$aid.increment > 1 %]sup[% END %]  ">
 				[% IF requested_user_achievements.$aid.repeatable == 'yes' %]
 					[% IF requested_user_achievements.$aid.increment == 1 %]
 						[% IF requested_user_achievements.$aid.exponent > 1 %]
@@ -87,11 +113,29 @@ onecol = 1;
 <div class="achievements common">
 	[% IF onecol != 1 %]<h4>[% user.nickname | strip_literal %]</h4>[% END %]
 	<ul>
+	<li class=" [% user_achievements.$ach_obtained_aid.name %] ">
+        <div class="yui-gf body">
+                <div class="yui-u first">
+                        <span class="math">
+                                [% IF user_achievements.$ach_obtained_aid.exponent > 1 %]
+                                        [% user_achievements.$ach_obtained_aid.exponent %]
+                                [% END %]
+                        </span>
+                </div>
+                <div class="yui-u">
+                        <span>[% user_achievements.$ach_obtained_aid.description %]
+                                <small>[% user_achievements.$aid.createtime %]</small>
+                        </span>
+                </div>
+        </div>
+        </li>
+
 	[% FOREACH aid = common_achievements.keys.sort %]
+		[% NEXT IF aid == ach_obtained_aid %]
 		<li class=" [% user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF user_achievements.$aid.increment > 1 %]sup[% END %]">
 				[% IF user_achievements.$aid.repeatable == 'yes' %]
 					[% IF user_achievements.$aid.increment == 1 %]
 						[% IF user_achievements.$aid.exponent > 1 %]
@@ -121,10 +165,11 @@ onecol = 1;
 
 	[% FOREACH aid = user_achievements.keys.sort %]
 		[% NEXT IF common_achievements.$aid %]
+		[% NEXT IF aid == ach_obtained_aid %]
 		<li class=" [% user_achievements.$aid.name %] ">
 		<div class="yui-gf body">
 			<div class="yui-u first">
-				<p><span class="math">
+				<p><span class="math [% IF user_achievements.$aid.increment > 1 %]sup[% END %]">
 				[% IF user_achievements.$aid.repeatable == 'yes' %]
 					[% IF user_achievements.$aid.increment == 1 %]
 						[% IF user_achievements.$aid.exponent > 1 %]
