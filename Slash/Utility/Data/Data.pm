@@ -729,7 +729,7 @@ sub getFormatFromDays {
 		$which_day = 'hour';
 		for my $day (@$days) {
 			push @$ret_array, [ $day, timeCalc($day . '00', '%B %e, %Y %T', 0) ];
-#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
+#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{day}{re}) {
@@ -759,7 +759,7 @@ sub getFormatFromDays {
 				$label =~ s/\.// if $test eq $label;
 			}
 			push @$ret_array, [ $day, $label ];
-#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
+#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{week}{re}) {
@@ -767,10 +767,10 @@ sub getFormatFromDays {
 
 		for my $day (@$days) {
 			my @arr = $day =~ $db_levels->{$which_day}{re};
-			my($y, $m, $d) = Monday_of_Week($arr[1], $arr[0]);
+			my($y, $m, $d) = Monday_of_Week($arr[1]+1, $arr[0]);
 			my $tmpday = sprintf($db_levels->{day}{sfmt}, $y, $m, $d);
-			push @$ret_array, [ $tmpday, timeCalc($tmpday, 'Week of %B %e, %Y', 0) ];
-#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
+			push @$ret_array, [ $day, timeCalc($tmpday, 'Week of %B %e, %Y', 0) ];
+#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{month}{re}) {
@@ -778,14 +778,14 @@ sub getFormatFromDays {
 		for my $day (@$days) {
 			(my $tmpday = $day) =~ s/m$//;
 			push @$ret_array, [ $day, timeCalc($tmpday . '01', '%B %Y', 0) ];
-#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
+#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{year}{re}) {
 		$which_day = 'year';
 		for my $day (@$days) {
 			push @$ret_array, [ $day, timeCalc($day . '0101', '%Y', 0) ];
-#print STDERR "week! : $which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
+#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
 	}
 
@@ -793,23 +793,23 @@ sub getFormatFromDays {
 	errorLog("No format found for $orig_day") unless $which_day;
 
 	# re-format elements if necessary
-	$_->[0] = sprintf($db_levels->{$which_day}{refmt}, $_->[0]) for @$ret_array;
+#	$_->[0] = sprintf($db_levels->{$which_day}{refmt}, $_->[0]) for @$ret_array;
 
 	return $ret_array;
 }
 
-sub getDayBreakLevels {
+{
 	my @db_levels = (
-		hour    => { fmt => '%Y%m%d%H', sfmt => '%04d%02d%02d%02d', refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})(\d{2})$} },
-		day     => { fmt => '%Y%m%d',   sfmt => '%04d%02d%02d',     refmt => '%s',  re => qr{^(\d{4})-?(\d{2})-?(\d{2})$} },
-		week    => { fmt => '%Y%Ww',    sfmt => '%04d%dw',          refmt => '%sw', re => qr{^(\d{4})(\d{1,2})w$} },
-		month   => { fmt => '%Y%mm',    sfmt => '%04d%02dm',        refmt => '%sm', re => qr{^(\d{4})(\d{2})m$} }, 
-		year    => { fmt => '%Y',       sfmt => '%04d',             refmt => '%s',  re => qr{^(\d{4})$} }
+		hour    => { fmt => '%Y%m%d%H', sfmt => '%04d%02d%02d%02d', refmt => '%s',  re => qr{^(\d{4})(\d{2})(\d{2})(\d{2})$}, timefmt => sub { "$_[0]-$_[1]-$_[2] $_[3]:00:00" } },
+		day     => { fmt => '%Y%m%d',   sfmt => '%04d%02d%02d',     refmt => '%s',  re => qr{^(\d{4})-?(\d{2})-?(\d{2})$},    timefmt => sub { "$_[0]-$_[1]-$_[2] 00:00:00" } },
+		week    => { fmt => '%Y%Ww',    sfmt => '%04d%02dw',        refmt => '%sw', re => qr{^(\d{4})(\d{1,2})w$},            timefmt => sub { sprintf "%04d-%02d-%02d 00:00:00", Monday_of_Week($_[1]+1,$_[0]) } },
+		month   => { fmt => '%Y%mm',    sfmt => '%04d%02dm',        refmt => '%sm', re => qr{^(\d{4})(\d{2})m$},              timefmt => sub { "$_[0]-$_[1]-01 00:00:00" } },
+		year    => { fmt => '%Y',       sfmt => '%04d',             refmt => '%s',  re => qr{^(\d{4})$},                      timefmt => sub { "$_[0]-01-01 00:00:00" } },
 	);
 	my %db_levels = @db_levels;
 	my $i = 0;
 	my @db_order = grep { ++$i % 2 } @db_levels;
-	return(\%db_levels, \@db_order);
+	sub getDayBreakLevels { return(\%db_levels, \@db_order) }
 }
 
 sub parseDayBreakLevel {

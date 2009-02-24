@@ -26,7 +26,7 @@ LONG DESCRIPTION.
 use strict;
 use Data::Dumper;
 use Data::JavaScript::Anon;
-use Date::Calc qw(Days_in_Month Add_Delta_YMD);
+use Date::Calc qw(Days_in_Month Add_Delta_YMD Add_Delta_DHMS);
 use Digest::MD5 'md5_hex';
 use POSIX qw(ceil);
 use LWP::UserAgent;
@@ -1103,19 +1103,28 @@ sub getFireHoseEssentials {
 			}
 		}
 
-		my $dur_q = $self->sqlQuote($options->{duration});
-		my $st_q  = $self->sqlQuote(timeCalc($options->{startdate}, '%Y-%m-%d %T', -$user->{off_set}));
-		my $dur_sphinx = $options->{duration} * 86400;
-		my $st_sphinx  = timeCalc($options->{startdate}, '%s', -$user->{off_set});
-
 		if ($options->{startdate}) {
+			my $startdate = $options->{startdate};
 
-			if ($options->{duration} && $options->{duration} >= 0 ) {
+			my($db_levels, $db_order) = getDayBreakLevels();
+			my $level = parseDayBreakLevel($startdate) || 'day';
+			my @arr = $startdate =~ $db_levels->{$level}{re};
+			$startdate = $db_levels->{$level}{timefmt}->(@arr);
+
+			my $st_q  = $self->sqlQuote(timeCalc($startdate, '%Y-%m-%d %T', -$user->{off_set}));
+			my $st_sphinx  = timeCalc($startdate, '%s', -$user->{off_set});
+
+			if (defined $options->{duration} && $options->{duration} >= 0) {
 				push @where, "createtime >= $st_q";
-				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
+				my $dur_q = $self->sqlQuote($options->{duration});
+				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q \U$level)";
 
 				if ($sphinx) {
-					my $end_sphinx = $st_sphinx+$dur_sphinx;
+					my $enddate = $self->getDayFromDay($options->{startdate}, -$options->{duration}); # add
+					my @arr = $enddate =~ $db_levels->{$level}{re};
+					$enddate = $db_levels->{$level}{timefmt}->(@arr);
+					my $end_sphinx  = timeCalc($enddate, '%s', -$user->{off_set});
+
 					push @sphinx_opts, "range=createtime_ut,$st_sphinx,$end_sphinx";
 					$sph->SetFilterRange('createtime_ut', $st_sphinx, $end_sphinx);
 				}
@@ -1129,20 +1138,28 @@ sub getFireHoseEssentials {
 						$sph->SetFilterRange('createtime_ut', 0, $time, 1);
 					}
 				} else {
-					my $end_q = $self->sqlQuote(timeCalc("$options->{startdate} 23:59:59", '%Y-%m-%d %T', -$user->{off_set}));
+					my $enddate = $self->getDayFromDay($options->{startdate}, -1); # add one
+					my @arr = $enddate =~ $db_levels->{$level}{re};
+					$enddate = $db_levels->{$level}{timefmt}->(@arr);
+					@arr = $enddate =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+					$enddate = sprintf "%04d-%02d-%02d %02d:%02d:%02d", Add_Delta_DHMS(@arr, 0, 0, 0, -1);
+
+					my $end_q = $self->sqlQuote(timeCalc($enddate, '%Y-%m-%d %T', -$user->{off_set}));
 					push @where, "createtime <= $end_q";
 
 					if ($sphinx) {
-						my $end_sphinx = timeCalc("$options->{startdate} 23:59:59", '%s', -$user->{off_set});
+						my $end_sphinx = timeCalc($enddate, '%s', -$user->{off_set});
 						push @sphinx_opts, "range=createtime_ut,0,$end_sphinx";
 						$sph->SetFilterRange('createtime_ut', 0, $end_sphinx);
 					}
 				}
 			}
 		} elsif (defined $options->{duration} && $options->{duration} >= 0) {
+			my $dur_q = $self->sqlQuote($options->{duration});
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 
 			if ($sphinx) {
+				my $dur_sphinx = $options->{duration} * 86400;
 				my $dur_time = ($cur_time - $dur_sphinx) - 1;
 				push @sphinx_opts, "!range=createtime_ut,0,$dur_time";
 				$sph->SetFilterRange('createtime_ut', 0, $dur_time, 1);
@@ -2371,26 +2388,27 @@ sub ajaxFireHoseGetUpdates {
 
 
 	$html->{'fh-paginate'} = slashDisplay("paginate", {
-		contentsonly	=> 1,
-		day		=> $last_day,
-		last_day	=> $last_day,
-		page		=> $form->{page},
-		options		=> $opts,
-		ulid		=> "fh-paginate",
-		divid		=> "fh-pag-div",
-		num_items	=> $num_items,
-		fh_page		=> $base_page,
+		items              => $items,
+		contentsonly       => 1,
+		day                => $last_day,
+		last_day           => $last_day,
+		page               => $form->{page},
+		options            => $opts,
+		ulid               => "fh-paginate",
+		divid              => "fh-pag-div",
+		num_items          => $num_items,
+		fh_page            => $base_page,
 		firehose_more_data => $firehose_more_data,
-		split_refresh	=> 1
+		split_refresh	   => 1
 	}, { Return => 1, Page => "firehose" });
 
 	$html->{firehose_pages} = slashDisplay("firehose_pages", {
-		page		=> $form->{page},
-		num_items	=> $num_items,
-		fh_page		=> $base_page,
-		options		=> $opts,
-		contentsonly	=> 1,
-		search_results	=> $results
+		page            => $form->{page},
+		num_items       => $num_items,
+		fh_page         => $base_page,
+		options         => $opts,
+		contentsonly    => 1,
+		search_results  => $results
 	}, { Return => 1 });
 
 	my $recent = $slashdb->getTime({ add_secs => "-300"});
@@ -3482,6 +3500,8 @@ sub getAndSetOptions {
 				if ($y) {
 					$options->{startdate} = "$y-$m-$d";
 				}
+			} else {
+				$options->{startdate} = $form->{startdate};
 			}
 		}
 		$options->{startdate} = "" if !$options->{startdate};
@@ -4291,7 +4311,7 @@ sub addDayBreaks {
 		$retitems = $newitems if (
 			$breaks > $max_breaks
 				||
-			@$newitems > @$retitems
+			@$newitems >= @$retitems
 		);
 
 	}

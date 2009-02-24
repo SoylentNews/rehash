@@ -8703,10 +8703,11 @@ sub getDayFromDay {
 		$return_day = sprintf $db_levels->{day}{sfmt}, Add_Delta_Days($1, $2, $3, -$days_back);
 
 	} elsif ($day =~ $db_levels->{week}{re}) {
-		my($y, $m, $d) = Monday_of_Week($2, $1);
+		my($y, $m, $d) = Monday_of_Week($2+1, $1);
 		my($week, $year) = Week_of_Year(
 			Add_Delta_Days($y, $m, $d, -($days_back*7))
 		);
+		$week--; # Date::Format starts at 0, Date::Calc at 1
 		$return_day = sprintf $db_levels->{week}{sfmt}, $year, $week;
 
 	} elsif ($day =~ $db_levels->{month}{re}) {

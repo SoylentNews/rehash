@@ -468,14 +468,14 @@ sub getOlderDaysFromDay {
 
 	for ($start..$end) {
 		my $the_day = $slashdb->getDayFromDay($day, $_, $options);
-		next if $the_day == $today && $options->{skip_add_today} && !$options->{force};
+		next if $the_day eq $today && $options->{skip_add_today} && !$options->{force};
 
-		if (($the_day < $today) || $options->{show_future_days}) {
+		if (($the_day lt $today) || $options->{show_future_days}) {
 			push @$days, $the_day; 
 		}
 	}
 
-	if (@$days && $today > $days->[0] && !$options->{skip_add_today}) {
+	if (@$days && $today gt $days->[0] && !$options->{skip_add_today}) {
 		unshift @$days, "$today";
 	}
 
