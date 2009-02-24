@@ -346,7 +346,7 @@ source src_firehose_main
 			LEFT JOIN projects	ON (gtid=11 AND target_id=projects.id)		\
 	WHERE firehose.globjid=globjs.globjid							\
 		AND firehose.id=firehose_text.id						\
-		AND gtid IN (1,3,4,5,7,11)							\
+		AND gtid IN (1,2,3,4,5,7,11)							\
 		AND firehose.globjid BETWEEN $start AND $end
 
 	sql_attr_timestamp	= createtime_ut
@@ -385,11 +385,11 @@ source src_firehose_main
 			FROM firehose, globjs, firehose_topics_rendered				\
 			WHERE firehose.globjid BETWEEN $start AND $end				\
 			AND firehose.globjid=globjs.globjid					\
-			AND gtid IN (1,3,4,5,7,11)						\
+			AND gtid IN (1,2,3,4,5,7,11)						\
 			AND firehose.id=firehose_topics_rendered.id				\
 		;										\
 		SELECT MIN(firehose.globjid), MAX(firehose.globjid) FROM firehose, globjs	\
-			WHERE firehose.globjid=globjs.globjid AND gtid IN (1,3,4,5,7,11)
+			WHERE firehose.globjid=globjs.globjid AND gtid IN (1,2,3,4,5,7,11)
 
 	sql_attr_multi		= uint tfh from ranged-query					\
 		;										\
@@ -499,7 +499,7 @@ source src_firehose_delta1 : src_firehose_main
 			LEFT JOIN projects	ON (gtid=11 AND target_id=projects.id)		\
 	WHERE firehose.globjid=globjs.globjid							\
 		AND firehose.id=firehose_text.id						\
-		AND gtid IN (1,3,4,5,7,11)							\
+		AND gtid IN (1,2,3,4,5,7,11)							\
 		AND firehose.last_update >=							\
 			(SELECT MIN(last_seen) FROM sphinx_counter				\
 			WHERE src=0 AND completion <= 1)
@@ -520,7 +520,7 @@ source src_firehose_delta1 : src_firehose_main
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
 			WHERE firehose.globjid=globjs.globjid					\
-			AND gtid IN (1,3,4,5,7,11)						\
+			AND gtid IN (1,2,3,4,5,7,11)						\
 			AND firehose.id=firehose_topics_rendered.id				\
 			AND firehose.last_update >=						\
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
@@ -634,7 +634,7 @@ source src_firehose_delta2 : src_firehose_main
 			LEFT JOIN projects	ON (gtid=11 AND target_id=projects.id)		\
 	WHERE firehose.globjid=globjs.globjid							\
 		AND firehose.id=firehose_text.id						\
-		AND gtid IN (1,3,4,5,7,11)							\
+		AND gtid IN (1,2,3,4,5,7,11)							\
 		AND firehose.last_update >=							\
 			(SELECT MIN(last_seen) FROM sphinx_counter				\
 			WHERE src=1 AND completion <= 1)
@@ -655,7 +655,7 @@ source src_firehose_delta2 : src_firehose_main
 		SELECT firehose.globjid, firehose_topics_rendered.tid				\
 			FROM firehose, globjs, firehose_topics_rendered				\
 			WHERE firehose.globjid=globjs.globjid					\
-			AND gtid IN (1,3,4,5,7,11)						\
+			AND gtid IN (1,2,3,4,5,7,11)						\
 			AND firehose.id=firehose_topics_rendered.id				\
 			AND firehose.last_update >=						\
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
