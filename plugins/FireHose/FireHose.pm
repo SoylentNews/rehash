@@ -1328,7 +1328,7 @@ sub getFireHoseEssentials {
 	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid} || $options->{tagged_as} || $options->{nexus};
 
 	my $count_other = $other;
-	my $offset;
+	my $offset = '';
 
 	if (1 || !$doublecheck) { # do always for now
 		my $offset_num = defined $options->{offset} ? $options->{offset} : '';
@@ -1456,12 +1456,12 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 
 				if ($sph_check_sql && @$sphinx_ar) {
 					my $in = 'IN (' . join(',', @$sphinx_ar) . ')';
-					my @sph_tables = grep { $_ != 'sphinx_search' } @sphinx_tables;
+					my @sph_tables = grep { $_ ne 'sphinx_search' } @sphinx_tables;
 					my $sphtables = join ',', @sph_tables;
 					# note: see above, where this clause is added:
 					# 'tags.globjid = sphinx_search.globjid'
 					my @sph_where =
-						map { s/\s*=\s*sphinx_search\.globjid/ $in/ }
+						map { s/\s*=\s*sphinx_search\.globjid/ $in/; $_ }
 						@sphinx_where;
 					my $sphwhere = join ' AND ', @sph_where;
 					$sphinx_ar = $sphinxdb->sqlSelectColArrayref(

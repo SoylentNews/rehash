@@ -149,7 +149,7 @@ $['TypeOf'] = $.extend(_typeOf, {
 	// objIf returns the object for success, e.g., objIf('string', "Hello, World!") => "Hello, World!"
 	objIf: function( tn, o ){
 		if ( _typeOf(tn, 'string') && _typeOf(o, tn) ) {
-			return o || !o;
+			return o;
 		}
 	},
 
