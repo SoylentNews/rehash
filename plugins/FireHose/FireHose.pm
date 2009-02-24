@@ -1408,7 +1408,7 @@ sub getFireHoseEssentials {
 			$mcdkey_stats = "$self->{_mcd_keyprefix}:gfhe_sphinxstats:$id";
 			$sphinx_ar = $mcd->get($mcdkey_data);
 			$sphinx_stats = $mcd->get($mcdkey_stats);
-my $arhit = defined($sphinx_ar) ? 'HIT' : ''; my $sthit = defined($sphinx_stats) ? 'HIT' : ''; my $scnt = scalar(@$sphinx_ar);
+my $arhit = defined($sphinx_ar) ? 'HIT' : ''; my $sthit = defined($sphinx_stats) ? 'HIT' : ''; my $scnt = defined($sphinx_ar) ? scalar(@$sphinx_ar) : 0;
 print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 			$sphinx_ar ||= [ ];
 			$sphinx_stats ||= { };
