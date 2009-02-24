@@ -90,7 +90,7 @@ function _typeOf( o, unadorned ){
 
 function makeTest( fn ){
 	return function( o, tn ){
-		return fn(o, tn||(tn=_typeOf(o))) && tn;
+		return !!fn(o, tn||(tn=_typeOf(o))) && tn;
 	}
 }
 function makeCategoryTest( tlist ){
@@ -148,13 +148,18 @@ $['TypeOf'] = $.extend(_typeOf, {
 	// All the tests above return the typename for success.
 	// objIf returns the object for success, e.g., objIf('string', "Hello, World!") => "Hello, World!"
 	objIf: function( tn, o ){
-		if ( _typeOf(tn, 'string') && _typeOf(o, tn) ) {
+		if ( typeof(tn)==='string' && _typeOf(o, tn) ) {
 			return o;
 		}
 	},
 
 	// ...and now you can play along at home!
-	makeTest: makeTest
+	makeTest: function( fn ){
+		return function( o, tn ){
+			var answer = fn(o, tn||(tn=_typeOf(o)));
+			return !!answer && (typeof(answer)==='string' ? answer : tn);
+		};
+	}
 });
 
 })($);
