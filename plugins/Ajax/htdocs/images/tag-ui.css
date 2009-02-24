@@ -66,6 +66,7 @@ div.tag-display ul, div.tag-display li {
 }
 
 /* your personal tags hidden if that tag already in top|system... */
+.tag-display[context=feedback] li.p,
 .tag-display[context=user] li.p,
 .tag-display[context=top] li.p,
 .tag-display[context=system] li.p,
