@@ -13,31 +13,27 @@ prefs_fhview
 __seclev__
 10000
 __template__
-<form id ="modal_prefs" method="post">
+<form id ="modal_prefs" class="fh" method="post">
 <input type="hidden" name="formname" value="fhview">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">
 
 
                 [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+                <div class="pref">
+                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a></span>
+                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a></span>
 		[% fh = Slash.getObject("Slash::FireHose");
 		   views = fh.getUserViews({ tab_display => "yes" });
 		%]
 		[% FOREACH the_view = views %]
-                	&nbsp;|&nbsp;
-                	<a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;[% IF view.viewname == the_view.viewname  %]color:#ccc;[% END %]" onclick="getModalPrefs('fhview[% the_view.viewname %]', 'Customize [% the_view.viewtitle %] View', 1); return false;">[% the_view.viewtitle %]</a>
+                	<span class="preftab [% IF view.viewname == the_view.viewname  %]active[% END %]"><a href="javascript:return false;" onclick="getModalPrefs('fhview[% the_view.viewname %]', 'Customize [% the_view.viewtitle %] View', 1); return false;">[% the_view.viewtitle %]</a></span>
 		[% END %]
-                &nbsp;|&nbsp;
+				<span class="close"><a onclick="hide_modal_box(); return false" >x</a></span>
                 </div>
                 [% END %]
-<label>
-Color
-</label>
+<p><label>
+<strong>Color</strong>
 [% IF !user.is_anon; PROCESS fhcolor_picker id='firehose-prefs-color-picker' %]
 <script type="text/javascript">
 	$(function(){
@@ -57,8 +53,8 @@ Color
 
 [% END %]
 <input type="hidden" name="color" id="colorfield" value="[% view.color %]">
-<br>
-<br>
+</label>
+
 [% asc_check = '';
    IF view.orderdir == 'ASC';
 	asc_check = constants.markup_checked_attribute;
@@ -66,26 +62,37 @@ Color
 
 %]
 
+
+
+
+
+
 [% UNLESS view.viewname == "search" %]
-	<b>Sort</b> <input type="checkbox" name="sortasc"[% asc_check %] [% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %]> Ascending
-	<br><b>By</b> 
+	</p>
+	<p><strong>Sort</strong> <input type="checkbox" name="sortasc"[% asc_check %] [% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %]> Ascending,
+	<strong>By</strong> 
 	Score <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'popularity' || view.viewname == "popular" %][% IF view.viewname == "popular" %] disabled="true"[% END %] value="popularity">
 	Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' || view.viewname == "recent" %][% IF view.viewname == "recent" %] disabled="true" [% END %] value="createtime"><br>
 	<br>
 [% END %]
 
-<label>Show</label><br>
-<input type="checkbox" name="story_check"[% constants.markup_checked_attribute IF story_check || view.viewname == "stories" %][% IF view.viewname == "stories" %] disabled="true"[% END %]> Stories 
+<strong>Show</strong><br>
+<label><input type="checkbox" name="story_check"[% constants.markup_checked_attribute IF story_check || view.viewname == "stories" %][% IF view.viewname == "stories" %] disabled="true"[% END %]> Stories</label>
+
+
+
+
+
 [% IF user.is_admin %]
-<input type="checkbox" name="admin_unsigned"[% constants.markup_checked_attribute IF view.admin_unsigned == "yes" %]> Hide Signed Stories
+<label><input type="checkbox" name="admin_unsigned"[% constants.markup_checked_attribute IF view.admin_unsigned == "yes" %]> Hide Signed Stories</label>
 [% END %]
 <br>
 <input type="checkbox" name="other_check"[% constants.markup_checked_attribute IF other_check || view.viewname == "recent"%] [% IF view.viewname == "recent" %] disabled="true"[% END %]> Other Content<br> 
 <input type="radio" name="mode" value="fulltitle"[% constants.markup_checked_attribute IF view.mode == 'fulltitle' %]> Headlines
 <input type="radio" name="mode" value="full"[% constants.markup_checked_attribute IF view.mode == 'full' %]> Full Text 
 <input type="radio" name="mode" value="mixed"[% constants.markup_checked_attribute IF view.mode == 'mixed' %]> Mixed
-<br>
-<br>
+</p>
+
 [% IF user.is_admin %]
 [% usermode_check = '';
    IF view.usermode == "yes";
@@ -93,13 +100,16 @@ Color
    END;
 
 %]
-<input type="checkbox" name="usermode"[% usermode_check %]> <label>User Mode</label><br>
+
+<p>
+<label><input type="checkbox" name="usermode"[% usermode_check %]> User Mode</label></p>
 [% END %]
 <p>
-<p>
+<p class="buttons">
+
 <input name="viewid" value="[% view.id %]" type="hidden">
 <input type="button" value="Save" onclick="saveModalPrefs()">
 <input type="button" value="Cancel" onclick="hide_modal_box()">
 <input type="button" value="Reset" onclick="resetModalPrefs()">
-
+</p>
 </form>

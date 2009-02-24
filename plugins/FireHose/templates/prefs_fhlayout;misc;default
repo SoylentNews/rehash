@@ -11,25 +11,23 @@ __name__
 prefs_fhlayout
 __template__
 
-<form id ="modal_prefs" method="post">
+<form id ="modal_prefs" class="fh" method="post">
 
 <input type="hidden" name="formname" value="fhlayout">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">
 
                 [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Layout</span>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a>
+                <div class="pref">
+                <span class="preftab active">Layout</span>
+                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a></span>
 		[% fh = Slash.getObject("Slash::FireHose");
 		   views = fh.getUserViews({ tab_display => "yes" });
 		%]
 		[% FOREACH view = views %]
-                	&nbsp;|&nbsp;
-	                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %] View', 1); return false;">[% view.viewtitle %]</a>
+	                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %] View', 1); return false;">[% view.viewtitle %]</a></span>
 		[% END %]
+				<span class="close"><a onclick="hide_modal_box(); return false" >x</a></span>
                 </div>
                 [% END %]
 		[% 
@@ -37,20 +35,17 @@ __template__
                         beta_check = constants.markup_checked_attribute;
                 END;
 		%]
-		<label>
-			<input type="checkbox" name="index_beta"[% beta_check %]> Use Beta Index<br>
-
-                <label>Date/Time Format</label>
+				<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="index_beta"[% beta_check %]> Use Beta Index</label></p>
+				<p>
+                <label>Date/Time Format
                 [%
                 formats = Slash.db.getDescriptions('dateformats');
                 Slash.createSelect('tzformat', formats, user.dfid, 1);
                 %]
-
-                <br>
-
+                </label></p>
+                <p>
                 <label>
-                        Time Zone / Daylight Savings Time
-                </label>
+				Time Zone / Daylight Savings Time
                 [%
                 USE this_format = format('%+0.4d %s');
                 this_tzdescs = Slash.db.getDescriptions('tzdescription');
@@ -66,7 +61,7 @@ __template__
                 Slash.createSelect('tzcode',
                         these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
                 );
-
+				%]</label>[%
                 Slash.createSelect('dst', {
                         ''      => 'Automatic',
                         'on'    => 'Manual (On)',
@@ -74,7 +69,7 @@ __template__
                 }, user.dst, 1);
                 %]
 
-                <br><br>
+                </p>
 
                 [% sd_check = '';
                 IF user.simpledesign;
@@ -105,14 +100,13 @@ __template__
                 <br>
 
 -->
-
                 [% i_check = '';
                 IF !user.noicons;
                         i_check = constants.markup_checked_attribute;
                 END
                 %]
 
-                <label><input type="checkbox" name="showicons"[% i_check %]> <b>Show Icons</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showicons');" class="help">?</a>
+                <label><input type="checkbox" name="showicons"[% i_check %]> Show Icons</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showicons');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_showicons" class="modalprefhelp" style="display: none;">
                         Turn this off to hide topic icons on stories
@@ -124,19 +118,19 @@ __template__
                 END
                 %]
 
-                <label><input type="checkbox" name="showtags"[%tag_check %]> <b>Show Tags</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');" class="help">?</a>
+                <label><input type="checkbox" name="showtags"[%tag_check %]> Show Tags</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_showtags" class="modalprefhelp" style="display: none;">
                         Turn this off to ignore all tags.
                 </div>
                 
-		[% colors_check = '';
+				[% colors_check = '';
                 IF !user.firehose_nocolors;
                         colors_check = constants.markup_checked_attribute;
                 END
                 %]
 
-                <label><input type="checkbox" name="showcolors"[%tag_check %]> <b>Show Colors</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showcolors');" class="help">?</a>
+                <label><input type="checkbox" name="showcolors"[%tag_check %]> Show Colors</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showcolors');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_showcolors" class="modalprefhelp" style="display: none;">
                         Turn this off to hide color swatches on items.
@@ -148,7 +142,7 @@ __template__
                 END
                 %]
 
-                <label><input type="checkbox" name="showbylines"[% bylines_check %]> <b>Show Bylines</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showbylines');" class="help">?</a>
+                <label><input type="checkbox" name="showbylines"[% bylines_check %]> Show Bylines</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showbylines');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_showbylines" class="modalprefhelp" style="display: none;">
                         Turn this off to hide user bylines on items.
@@ -160,7 +154,7 @@ __template__
                 END
                 %]
 
-                <label><input type="checkbox" name="showdates"[% dates_check %]> <b>Show Dates</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');" class="help">?</a>
+                <label><input type="checkbox" name="showdates"[% dates_check %]> Show Dates</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_showdates" class="modalprefhelp" style="display: none;">
                         Turn this off to hide dates on abbreviated items
@@ -175,7 +169,7 @@ __template__
                 %]
 
                 <label><input type="checkbox" name="paused"[% pause_check %]>
-		Paused</label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');" class="help">?</a>
+		Paused</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
                         Pause updates, don't auto-update view
@@ -187,7 +181,7 @@ __template__
                 END
                 %]
 
-                <label><input type="checkbox" name="advanced"[% advanced_check %]> <b>Advanced</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');" class="help">?</a>
+                <label><input type="checkbox" name="advanced"[% advanced_check %]> Advanced</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
                         Enable advanced user controls
@@ -200,20 +194,20 @@ __template__
                 END
                 %]
 
-                <label><input type="checkbox" name="sphinx"[% sphinx_check %]> <b>Sphinx</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sphinx');" class="help">?</a>
+                <label><input type="checkbox" name="sphinx"[% sphinx_check %]> Sphinx</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_sphinx');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_sphinx" class="modalprefhelp" style="display: none;">
                         Use Sphinx for Queries
                 </div>
 		[% END %]
 
-                <br>
-                <input type="button" value="Save" onclick="saveModalPrefs()">
+
+		<p class="buttons">
+        <input type="button" value="Save" onclick="saveModalPrefs()">
 		<input type="button" value="Cancel" onclick="hide_modal_box()">
 		<input type="button" value="Reset Layout" onclick="resetModalPrefs()">
-		<br>
-		<br>
 		<input type="button" value="Reset Section Menu" onclick="resetModalPrefs('resetsectionmenu')">
+		</p>
 </form>
 __seclev__
 500

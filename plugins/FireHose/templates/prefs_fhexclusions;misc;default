@@ -13,30 +13,27 @@ prefs_fhexclusions
 __seclev__
 10000
 __template__
-<form id ="modal_prefs" method="post">
+<form id ="modal_prefs" class="fh" method="post">
 
 <input type="hidden" name="formname" value="fhexclusions">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">
 
                 [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a>
-                &nbsp;|&nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Exclusions</span>
-                &nbsp;|&nbsp;
+                <div class="pref">
+                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a></span>
+                <span class="preftab active">Exclusions</span>
 		[% fh = Slash.getObject("Slash::FireHose");
 		   views = fh.getUserViews({ tab_display => "yes" });
 		%]
 		[% FOREACH view = views %]
-                	&nbsp;|&nbsp;
-	                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %] View', 1); return false;">[% view.viewtitle %]</a>
+	                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %] View', 1); return false;">[% view.viewtitle %]</a></span>
 		[% END %]
-
+		<span class="close"><a onclick="hide_modal_box(); return false" >x</a></span>
 		</div>
                 [% END %]
 
-                <br>
+                
                 <table width="100%" border="0" cellpadding="0" cellspacing="0">
                 [% FOR aid = aid_order %]
                         [% IF loop.index % 3 == 0 %]
@@ -54,20 +51,22 @@ __template__
                 [% remaining_cells = 2 - (box_order.max % 3);
                 WHILE remaining_cells;
                         remaining_cells = remaining_cells - 1; %]
-                        <td>&nbsp;</td>
+                        <td> </td>
                 [% END %]
                 </tr>
                 </table>
 
-                <br>
+
+<p>
 		<label>Other Terms to Exclude</label>
 		<br>
 		<input type="text" name="firehose_exclusions" value="[% user.firehose_exclusions | strip_attribute %]">
-		<br>
-		<br>
+</p>
+<p class="buttons">
                 <input type="button" value="Save" onclick="saveModalPrefs()">
 		<input type="button" value="Cancel" onclick="hide_modal_box()">
 		<input type="button" value="Reset" onclick="resetModalPrefs()">
+</p>
 </form>
 __version__
 $Id$
