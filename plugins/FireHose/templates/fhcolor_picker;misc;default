@@ -14,8 +14,8 @@ fhcolor_picker
 __seclev__
 10000
 __template__
-<div id="[% id %]" class="fhcolor-picker">
-<div class="trigger-swatch" style="display: none;"><span></span></div>
+<span id="[% id %]" class="fhcolor-picker">
+<span class="trigger-swatch" style="display: none;"><span></span></span>
 <ul class="menu" style="display: none">
 	<li class="red"><span>red (best)</span></li>
 	<li class="orange"><span>orange</span></li>
@@ -26,11 +26,11 @@ __template__
 	<li class="violet"><span>violet</span></li>
 	<li class="black"><span>black (all)</span></li>
 </ul>
-</div>
+</span>
 <script type="text/javascript">
 $(function(){
 var	$picker = $('#[% id %]'),
-	$swatch	= $picker.find('div.trigger-swatch'),
+	$swatch	= $picker.find('span.trigger-swatch'),
 	$menu	= $picker.find('ul.menu');
 
 function color( expr, new_color ){
@@ -51,7 +51,7 @@ function save_color( new_color ){
 $picker.data('color_fn', save_color);
 
 $menu.menu({
-	triggers:	'#[% id %] div.trigger-swatch',
+	triggers:	'#[% id %] span.trigger-swatch',
 	cssNamespace:	'slash',
 
 	start: function(){

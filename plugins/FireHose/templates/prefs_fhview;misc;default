@@ -54,6 +54,7 @@ __template__
 [% END %]
 <input type="hidden" name="color" id="colorfield" value="[% view.color %]">
 </label>
+</p>
 
 [% asc_check = '';
    IF view.orderdir == 'ASC';
@@ -61,6 +62,7 @@ __template__
    END;
 
 %]
+
 
 
 
