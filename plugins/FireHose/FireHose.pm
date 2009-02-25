@@ -2139,7 +2139,7 @@ sub genSetOptionsReturn {
 		$data->{eval_first} .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
 	}
 	if ($opts->{viewref}) {
-		$data->{eval_first} .= "\$('#viewsearch').val('Search '+" . Data::JavaScript::Anon->anon_dump($opts->{viewref}{viewtitle}). ");";
+		$data->{eval_first} .= "\$('#viewsearch').val(" . Data::JavaScript::Anon->anon_dump($opts->{viewref}{viewtitle}) . ");";
 		if ($opts->{viewref}{searchbutton} eq 'no') {
 			$data->{eval_first} .= "\$('#viewsearch').hide();";
 		} else {
@@ -3104,6 +3104,17 @@ sub applyViewOptions {
 
 	my $validator = $self->getOptionsValidator();
 
+	if ($view->{useparentfilter} eq "no") {
+		$options->{fhfilter} = $viewfilter;
+		$options->{view_filter} = $viewfilter;
+		$options->{basefilter} = "";
+		$options->{tab} = "";
+		$options->{tab_ref} = "";
+	} else {
+		$options->{fhfilter} = "$options->{base_filter}";
+		$options->{view_filter} = $viewfilter;
+	}
+	
 	if ($view->{use_exclusions} eq "yes") {
 		if ($user->{story_never_author}) {
 			my $author_exclusions;
@@ -3114,6 +3125,8 @@ sub applyViewOptions {
 			$viewfilter .= $author_exclusions if $author_exclusions;
 		}
 		if ($user->{firehose_exclusions}) {
+			my $base_ops = $self->splitOpsFromString($options->{base_filter});
+			my %base_ops = map { $_ => 1 } @$base_ops;
 			my $ops = $self->splitOpsFromString($user->{firehose_exclusions});
 			my @fh_exclusions; 
 			
@@ -3121,10 +3134,17 @@ sub applyViewOptions {
 			my %skin_nexus = map { $skins->{$_}{name} => $skins->{$_}{nexus} } keys %$skins;
 
 			foreach (@$ops) {
+				my($not, $op) = $_ =~/^(-?)(.*)$/;
+				print STDERR "CONSIDERING $op EXC\n";
+				next if $base_ops{$op};
+				print STDERR "APPLYING $op EXC\n";
+				
 				if ($validator->{type}{$_}) {
-					push @fh_exclusions, "-$_";
+					push @fh_exclusions, "-$op";
 				} elsif ($skin_nexus{$_}) {
-					push @fh_exclusions, "-$_";
+					push @fh_exclusions, "-$op";
+				} else {
+					push @fh_exclusions, "-$op";
 				}
 			}
 			if (@fh_exclusions) {
@@ -3133,18 +3153,6 @@ sub applyViewOptions {
 			print STDERR "FH EXCLUSIONS $user->{firehose_exclusions}\n";
 		}
 		print STDERR "FINAL view filter: $viewfilter\n";
-	}
-
-
-	if ($view->{useparentfilter} eq "no") {
-		$options->{fhfilter} = $viewfilter;
-		$options->{view_filter} = $viewfilter;
-		$options->{basefilter} = "";
-		$options->{tab} = "";
-		$options->{tab_ref} = "";
-	} else {
-		$options->{fhfilter} = "$options->{base_filter}";
-		$options->{view_filter} = $viewfilter;
 	}
 
 	foreach (qw(mode color duration orderby orderdir datafilter)) {
