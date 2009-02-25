@@ -229,6 +229,12 @@ $filedata = <<'EOF';
 #
 # The sql_attr_multi is used to obtain firehose_topics_rendered.
 #
+# Any globj with no index_text (including all-whitespace or all terms
+# which stopwords will remove) will not appear in the index, and thus
+# not be found by (attribute-only) searching.  Also, we use CONCAT_WS
+# instead of CONCAT to build the search string because a NULL
+# (e.g. in bodytext) will not null the whole string.
+#
 # Killlists
 # ---------
 #
@@ -275,30 +281,29 @@ source src_firehose_main
 			firehose.createtime)) AS createtime_ut,					\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
 		globjs.globjid AS globjidattr,							\
-		IF(     gtid= 1, CONCAT(story_text.title,					\
-				' ', firehose.toptags,						\
-				' ', story_text.introtext,					\
-				' ', story_text.bodytext),					\
-		  IF(   gtid= 3, CONCAT(submissions.subj,					\
-				' ', firehose.toptags,						\
-				' ', submissions.story),					\
-		  IF(   gtid= 4, CONCAT(journals.description,					\
-				' ', firehose.toptags,						\
-				' ', journals_text.article),					\
+		IF(     gtid= 1, CONCAT_WS(' ', story_text.title,				\
+				firehose.toptags,						\
+				story_text.introtext,						\
+				story_text.bodytext),						\
+		  IF(   gtid= 3, CONCAT_WS(' ', submissions.subj,				\
+				firehose.toptags,						\
+				submissions.story),						\
+		  IF(   gtid= 4, CONCAT_WS(' ', journals.description,				\
+				firehose.toptags,						\
+				journals_text.article),						\
 		  IF(   gtid= 5, IF(comments.subject_orig='yes',				\
-				CONCAT(comments.subject,					\
-				' ', comment_text.comment),					\
+				CONCAT_WS(' ', comments.subject, comment_text.comment),		\
 				comment_text.comment),						\
-		  IF(   gtid= 7, CONCAT(discussions.title,					\
-				' ', firehose.toptags),						\
-		  IF(   gtid=11, CONCAT(projects.unixname,					\
-				' ', projects.textname,						\
-				' ', firehose.toptags,						\
-				' ', projects.description),					\
-			CONCAT(firehose_text.title,						\
-				' ', firehose.toptags,						\
-				' ', firehose_text.introtext,					\
-				' ', firehose_text.bodytext)					\
+		  IF(   gtid= 7, CONCAT_WS(' ', discussions.title,				\
+				firehose.toptags),						\
+		  IF(   gtid=11, CONCAT_WS(' ', projects.unixname,				\
+				projects.textname,						\
+				firehose.toptags,						\
+				projects.description),						\
+			CONCAT_WS(' ', firehose_text.title,					\
+				firehose.toptags,						\
+				firehose_text.introtext,					\
+				firehose_text.bodytext)						\
 		)))))) AS index_text,								\
 		gtid,										\
 		IF(	firehose.type='story',       1,						\
@@ -428,30 +433,29 @@ source src_firehose_delta1 : src_firehose_main
 			firehose.createtime))  AS createtime_ut,				\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
 		globjs.globjid AS globjidattr,							\
-		IF(     gtid= 1, CONCAT(story_text.title,					\
-				' ', firehose.toptags,						\
-				' ', story_text.introtext,					\
-				' ', story_text.bodytext),					\
-		  IF(   gtid= 3, CONCAT(submissions.subj,					\
-				' ', firehose.toptags,						\
-				' ', submissions.story),					\
-		  IF(   gtid= 4, CONCAT(journals.description,					\
-				' ', firehose.toptags,						\
-				' ', journals_text.article),					\
+		IF(     gtid= 1, CONCAT_WS(' ', story_text.title,				\
+				firehose.toptags,						\
+				story_text.introtext,						\
+				story_text.bodytext),						\
+		  IF(   gtid= 3, CONCAT_WS(' ', submissions.subj,				\
+				firehose.toptags,						\
+				submissions.story),						\
+		  IF(   gtid= 4, CONCAT_WS(' ', journals.description,				\
+				firehose.toptags,						\
+				journals_text.article),						\
 		  IF(   gtid= 5, IF(comments.subject_orig='yes',				\
-				CONCAT(comments.subject,					\
-				' ', comment_text.comment),					\
+				CONCAT_WS(' ', comments.subject, comment_text.comment),		\
 				comment_text.comment),						\
-		  IF(   gtid= 7, CONCAT(discussions.title,					\
-				' ', firehose.toptags),						\
-		  IF(   gtid=11, CONCAT(projects.unixname,					\
-				' ', projects.textname,						\
-				' ', firehose.toptags,						\
-				' ', projects.description),					\
-			CONCAT(firehose_text.title,						\
-				' ', firehose.toptags,						\
-				' ', firehose_text.introtext,					\
-				' ', firehose_text.bodytext)					\
+		  IF(   gtid= 7, CONCAT_WS(' ', discussions.title,				\
+				firehose.toptags),						\
+		  IF(   gtid=11, CONCAT_WS(' ', projects.unixname,				\
+				projects.textname,						\
+				firehose.toptags,						\
+				projects.description),						\
+			CONCAT_WS(' ', firehose_text.title,					\
+				firehose.toptags,						\
+				firehose_text.introtext,					\
+				firehose_text.bodytext)						\
 		)))))) AS index_text,								\
 		gtid,										\
 		IF(	firehose.type='story',       1,						\
@@ -563,30 +567,29 @@ source src_firehose_delta2 : src_firehose_main
 			firehose.createtime))  AS createtime_ut,				\
 		UNIX_TIMESTAMP(firehose.last_update) AS last_update_ut,				\
 		globjs.globjid AS globjidattr,							\
-		IF(     gtid= 1, CONCAT(story_text.title,					\
-				' ', firehose.toptags,						\
-				' ', story_text.introtext,					\
-				' ', story_text.bodytext),					\
-		  IF(   gtid= 3, CONCAT(submissions.subj,					\
-				' ', firehose.toptags,						\
-				' ', submissions.story),					\
-		  IF(   gtid= 4, CONCAT(journals.description,					\
-				' ', firehose.toptags,						\
-				' ', journals_text.article),					\
+		IF(     gtid= 1, CONCAT_WS(' ', story_text.title,				\
+				firehose.toptags,						\
+				story_text.introtext,						\
+				story_text.bodytext),						\
+		  IF(   gtid= 3, CONCAT_WS(' ', submissions.subj,				\
+				firehose.toptags,						\
+				submissions.story),						\
+		  IF(   gtid= 4, CONCAT_WS(' ', journals.description,				\
+				firehose.toptags,						\
+				journals_text.article),						\
 		  IF(   gtid= 5, IF(comments.subject_orig='yes',				\
-				CONCAT(comments.subject,					\
-				' ', comment_text.comment),					\
+				CONCAT_WS(' ', comments.subject, comment_text.comment),		\
 				comment_text.comment),						\
-		  IF(   gtid= 7, CONCAT(discussions.title,					\
-				' ', firehose.toptags),						\
-		  IF(   gtid=11, CONCAT(projects.unixname,					\
-				' ', projects.textname,						\
-				' ', firehose.toptags,						\
-				' ', projects.description),					\
-			CONCAT(firehose_text.title,						\
-				' ', firehose.toptags,						\
-				' ', firehose_text.introtext,					\
-				' ', firehose_text.bodytext)					\
+		  IF(   gtid= 7, CONCAT_WS(' ', discussions.title,				\
+				firehose.toptags),						\
+		  IF(   gtid=11, CONCAT_WS(' ', projects.unixname,				\
+				projects.textname,						\
+				firehose.toptags,						\
+				projects.description),						\
+			CONCAT_WS(' ', firehose_text.title,					\
+				firehose.toptags,						\
+				firehose_text.introtext,					\
+				firehose_text.bodytext)						\
 		)))))) AS index_text,								\
 		gtid,										\
 		IF(	firehose.type='story',       1,						\
