@@ -22,6 +22,10 @@ __template__
    sections = fh.getFireHoseSectionsMenu;
 %]
 [% cur_section_id = 0 %]
+[% skip_edit = 0 %]
+[% UNLESS (user.currentPage == "firehose" || user.currentPage == "index2" || user.currentPage == "console" || user.currentPage == "index");
+	skip_edit = 0;
+END %]
 [% cur_section = fh.determineCurrentSection() %]
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
 <ul id="firehose-sections">
@@ -39,7 +43,7 @@ __template__
 				link_loc = the_skin.rootdir;
 			   END %]
 		[% END %]
-		<li [% IF is_active %] class="active"[% ELSIF hide %] class="hide"[% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]">[% fh_section.section_name %]</a>[% IF !user.is_anon %] <a class="links-sections-edit">[e]</a>[% END %]
+		<li [% IF is_active %] class="active"[% ELSIF hide %] class="hide"[% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]">[% fh_section.section_name %]</a>[% IF !user.is_anon && !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
 		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
 	[% END %]
