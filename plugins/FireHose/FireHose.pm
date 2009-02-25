@@ -1445,6 +1445,7 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 						map { s/\s*=\s*sphinx_search\.globjid/ $in/; $_ }
 						@sphinx_where;
 					my $sphwhere = join ' AND ', @sph_where;
+					$sphwhere = " AND $sphwhere" if $sphwhere;
 					$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
 						'sphinx_search.globjid',
 						$sphtables, "query=$query$sphwhere", $sphinx_other,
