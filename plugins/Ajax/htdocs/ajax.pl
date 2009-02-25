@@ -1592,9 +1592,26 @@ sub saveModalPrefs {
 			my $view = $fh->getUserViewById($params{viewid});
 			my $data = {};
 			if ($view) {
+				
+				# Enforce rules we've set
+				if ($view->{viewname} eq "stories") {
+					$params{story_check} = 1;
+				} elsif ($view->{viewname} eq "recent") {
+					$params{other_check} = 1;
+					$params{orderby} = "createtime";
+					$params{orderdir} = "DESC";
+				} elsif ($view->{viewname} eq "popular") {
+					$params{orderby} = "popularity";
+					$params{orderdir} = "DESC";
+				} elsif ($view->{viewname} eq "search") {
+					$params{orderby} = "createtime";
+					$params{orderdir} = "DESC";
+				}
+				
 				foreach (qw(mode orderby orderdir color)) {
 					$data->{$_} = defined $params{$_} ? $params{$_} : $view->{$_};
 				}
+
 				if ($user->{is_admin}) {
 					foreach (qw(admin_unsigned usermode)) {
 						$data->{$_} = $params{$_} ? "yes" : "no";

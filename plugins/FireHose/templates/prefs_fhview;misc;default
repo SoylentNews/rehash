@@ -65,18 +65,18 @@ Color
    END;
 
 %]
-<b>Sort</b> <input type="checkbox" name="sortasc"[% asc_check %]> Ascending
+<b>Sort</b> <input type="checkbox" name="sortasc"[% asc_check %] [% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %]> Ascending
 <br><b>By</b> 
-Score <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'popularity' %] value="popularity">
-Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' %] value="createtime"><br>
+Score <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'popularity' || view.viewname == "popular" %][% IF view.viewname == "popular" %] disabled="true"[% END %] value="popularity">
+Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' || view.viewname == "recent" %][% IF view.viewname == "recent" %] disabled="true" [% END %] value="createtime"><br>
 <br>
 <label>Show</label><br>
-<input type="checkbox" name="story_check"[% constants.markup_checked_attribute IF story_check %]> Stories 
+<input type="checkbox" name="story_check"[% constants.markup_checked_attribute IF story_check || view.viewname == "stories" %][% IF view.viewname == "stories" %] disabled="true"[% END %]> Stories 
 [% IF user.is_admin %]
 <input type="checkbox" name="admin_unsigned"[% constants.markup_checked_attribute IF view.admin_unsigned == "yes" %]> Hide Signed Stories
 [% END %]
 <br>
-<input type="checkbox" name="other_check"[% constants.markup_checked_attribute IF other_check %]> Other Content<br> 
+<input type="checkbox" name="other_check"[% constants.markup_checked_attribute IF other_check || view.viewname == "recent"%] [% IF view.viewname == "recent" %] disabled="true"[% END %]> Other Content<br> 
 <input type="radio" name="mode" value="fulltitle"[% constants.markup_checked_attribute IF view.mode == 'fulltitle' %]> Headlines
 <input type="radio" name="mode" value="full"[% constants.markup_checked_attribute IF view.mode == 'full' %]> Full Text 
 <input type="radio" name="mode" value="mixed"[% constants.markup_checked_attribute IF view.mode == 'mixed' %]> Mixed
