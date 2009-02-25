@@ -210,7 +210,7 @@ __template__
                 <br>
                 <input type="button" value="Save" onclick="saveModalPrefs()">
 		<input type="button" value="Cancel" onclick="hide_modal_box()">
-		<input type="button" value="Reset" onclick="resetModalPrefs()">
+		<input type="button" value="Reset Layout" onclick="resetModalPrefs()">
 		<br>
 		<br>
 		<input type="button" value="Reset Section Menu" onclick="resetModalPrefs('resetsectionmenu')">
