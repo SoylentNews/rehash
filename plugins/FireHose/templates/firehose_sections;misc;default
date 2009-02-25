@@ -24,7 +24,7 @@ __template__
 [% cur_section_id = 0 %]
 [% skip_edit = 0 %]
 [% UNLESS (user.currentPage == "firehose" || user.currentPage == "index2" || user.currentPage == "console" || user.currentPage == "index");
-	skip_edit = 0;
+	skip_edit = 1;
 END %]
 [% cur_section = fh.determineCurrentSection() %]
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
@@ -48,7 +48,7 @@ END %]
 		</li>
 	[% END %]
 </ul>
-[% IF !user.is_anon; %]<script type="text/javascript">
+[% IF !user.is_anon && (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" %]<script type="text/javascript">
 $(function(){
 $.metadata.setType('elem', 'script');
 $('#firehose-sections').
