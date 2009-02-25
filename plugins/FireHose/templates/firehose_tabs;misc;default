@@ -33,7 +33,9 @@ END %]
 [% active_set = 0; %]
 [% UNLESS nodiv %]
 	[% IF !user.is_anon && gSkin.name != 'idle' %]
+		[% IF !article_header %]
 		<a id="toggleleftmenu" onclick="return false" class="[% IF user.firehose_hide_section_menu && (user.firehose_hide_section_menu != 'false') %]collapsed[% ELSE %]expanded[% END %]" href="#" title="Toggle left menu">Toggle left menu</a>
+		[% END %]
 		<script type="text/javascript">
 		$(function(){
 			$("#toggleleftmenu").click(function(){
@@ -70,7 +72,7 @@ END %]
 				   END;
 				%]
 			[% END %]
-			<li [% IF active_view %]class="active"[% END %]><a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">[% view.viewname.ucfirst %]</a> [% IF active_view && rss_link %]<a href="[% rss_link %]" title="RSS for [% view.viewname %]"><img src="[% constants.imagedir %]/feed.png"></a>[% END %]</li>
+			<li [% IF active_view %]class="active"[% END %]><a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">[% view.viewname.ucfirst %]</a> [% IF active_view && rss_link %]<a href="[% rss_link %]" title="RSS for [% view.viewname %]"><img src="[% constants.imagedir %]/feed.png"></a><img src="[% constants.imagedir %]/sic_edit.png" alt="Edit" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;">[% END %]</li>
 		[% END %]
 
 
