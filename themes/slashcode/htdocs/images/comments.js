@@ -20,8 +20,8 @@ var comments_started = 0;
 var current_cid = 0;
 var more_comments_num;
 var behaviors = {
-	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
-	'focus': { ancestors: 'none', parent: 'none', children: 'prehidden', descendants: 'prehidden', siblings: 'none', sameauthor: 'none' }, 
+	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' },
+	'focus': { ancestors: 'none', parent: 'none', children: 'prehidden', descendants: 'prehidden', siblings: 'none', sameauthor: 'none' },
 	'collapse': { ancestors: 'none', parent: 'none', siblings: 'none', sameauthor: 'none', currentmessage: 'oneline', children: 'hidden', descendants: 'hidden'}
 };
 var displaymode = {};
@@ -199,10 +199,10 @@ function setFocusComment(cid, alone, no_ads) {
 // 			alt_down   = 1;
 // 		}
 // 	}
-// 
+//
 // 	if (shift_down && alt_down)
 // 		alone = 1;
-// 
+//
 // 	resetModifiers();
 
 	var was_hidden = 0;
@@ -344,7 +344,7 @@ function kidHiddens(cid, kidhiddens) {
 		} else {
 			kidstring += ' hidden comments</a>';
 		}
-		hiddens_cid.innerHTML = kidstring; 
+		hiddens_cid.innerHTML = kidstring;
 		hiddens_cid.className = 'show';
 	} else {
 		hiddens_cid.className = 'hide';
@@ -541,7 +541,7 @@ function addComment(cid, comment, html, front) {
 function refreshDisplayModes(cid) {
 	if (cid > 0) {
 		updateDisplayMode(cid, 'full', 1);
-		findAffected('focus', cid, 0); 
+		findAffected('focus', cid, 0);
 	} else {
 		cid = -1 * cid;
 		updateDisplayMode(cid, behaviors['collapse']['currentmessage'], 1);
@@ -559,7 +559,7 @@ function getDescendants(cids, first) {
 		var cid = cids[i];
 		var kids = comments[cid]['kids'];
 		if (kids.length)
-			descs = descs.concat(getDescendants(kids)); 
+			descs = descs.concat(getDescendants(kids));
 	}
 
 	return descs;
@@ -578,7 +578,7 @@ function faGetSetting(cid, ctype, relation, prevview, canbelower) {
 		return newview;
 	}
 
-	return prevview; 
+	return prevview;
 }
 
 function findAffected(type, cid, override) {
@@ -622,45 +622,16 @@ function updateDisplayMode(cid, mode, newdefault) {
 		prehiddendisplaymode[cid] = mode;
 }
 
-// don't want to actually use this -- pudge
-function calcTotals() {
-	var currentFull = 0;
-	var currentOneline = 0;
+function getSliderTotals(a) {
+	// ...called (only) by the D2 slider when it needs to update its integrated labels.
 
-	for (var mode in currents) {
-		if (currents[mode])
-			currents[mode] = 0;
-	}
+	// It's reasonable to let the slider set the calling conventions.
+	var thresh=a[1], hthresh=a[0];
 
-	for (var cid in comments) {
-		setDefaultDisplayMode(cid);
-		currents[displaymode[cid]]++;
-	}
-}
-
-function getSliderTotals(thresh, hthresh) {
-	// we are precalculating, so this code should never be used!
-	// here for testing -- pudge
-/*	if (!thresh_totals[thresh] || !thresh_totals[thresh][hthresh]) {
-		if (!thresh_totals[thresh])
-			thresh_totals[thresh]  = {};
-		thresh_totals[thresh][hthresh] = {};
-		thresh_totals[thresh][hthresh][ viewmodevalue['hidden']]  = 0;
-		thresh_totals[thresh][hthresh][ viewmodevalue['oneline']] = 0;
-		thresh_totals[thresh][hthresh][ viewmodevalue['full']]    = 0;
-
-		for (var cid in comments) {
-			var mode = determineMode(cid, thresh, hthresh);
-			thresh_totals[thresh][hthresh][ viewmodevalue[mode] ]++;
-		}
-	}
-*/
-
-	return [
-		thresh_totals[thresh][hthresh][viewmodevalue['hidden']],
-		thresh_totals[thresh][hthresh][viewmodevalue['oneline']],
-		thresh_totals[thresh][hthresh][viewmodevalue['full']]
-	];
+	// |thresh_totals| gives us an object: |{ 3:num_full, 2:num_abbreviated, 1:num_hidden }|.
+	// The slider wants an array: |[num_full, num_abbreviated, num_hidden]|.
+	// |map()| doesn't re-order; |reduce()| is the tool for this job.
+	return core.reduce(thresh_totals[thresh][hthresh], [], function( i, v ){ this[3-i]=v; });
 }
 
 function determineMode(cid, thresh, hthresh, lowestmode, skip_read) {
@@ -696,7 +667,7 @@ function finishCommentUpdates(thresh) {
 
 	ajaxFetchComments(fetch_comments, 0, thresh);
 
-	updateTotals();
+	D2.slider.update();
 	update_comments = {};
 	fetch_comments = [];
 	fetch_comments_pieces = {};
@@ -892,7 +863,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 					}
 				}
 				$('#titlecountnum').html(thresh_totals[6][6][1]); // total
-				updateTotals();
+				D2.slider.update();
 			}
 
 			updateHiddens(cids);
@@ -924,7 +895,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 //					user_threshold_save = 0;
 //					// if we are collapsing, then do not move HT too, so the comments stay closed
 //					changeT(-1, (highlight > 1));
-//					gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+//					D2.slider.setTHT(user_threshold, user_highlightthresh);
 //					next_cid = commTreeNextComm(0, 0, 1);
 //				}
 
@@ -1504,7 +1475,7 @@ function floatButtons () {
 function d2act () {
 	var gd = $dom('d2act');
 	if (gd) {
-		var targetTop = YAHOO.util.Dom.getY('commentwrap');
+		var targetTop = Position('commentwrap').top;
 		var vOffset = 0;
 		if ( typeof window.pageYOffset == 'number' )
 			vOffset = window.pageYOffset;
@@ -1512,7 +1483,7 @@ function d2act () {
 			vOffset = document.body.scrollTop;
 		else if ( document.documentElement && document.documentElement.scrollTop )
 			vOffset = document.documentElement.scrollTop;
-  
+
 		var oldpos = gd.style.position;
 
 		var mode = $dom('d2out').className;
@@ -1548,17 +1519,17 @@ function toggleDisplayOptions() {
 	// none -> ( vertical -> horizontal -> rooted )
 	if ( user_d2asp || d2out.className == 'vertical' ) { // vertical->horizontal
 		newMode = d2out.className = 'horizontal';
-		gCommentControlWidget.setOrientation('X');
+		D2.slider.setOrientation('x');
 	} else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
 		newMode = 'rooted';
 		d2out.className = 'horizontal rooted';
 	} else {
 		if (!low_bandwidth) { // (rooted, none)->vertical
 			newMode = d2out.className = 'vertical';
-			gCommentControlWidget.setOrientation('Y');
+			D2.slider.setOrientation('y');
 		} else { // vertical not happy in low-bandwidth
 			newMode = d2out.className = 'horizontal';
-			gCommentControlWidget.setOrientation('X');
+			D2.slider.setOrientation('x');
 		}
 	}
 
@@ -1576,12 +1547,6 @@ function toggleDisplayOptions() {
 	return false;
 }
 
-
-function updateTotals() {
-	$dom('currentHidden' ).innerHTML = currents['hidden'];
-	$dom('currentFull'   ).innerHTML = currents['full'];
-	$dom('currentOneline').innerHTML = currents['oneline'];
-}
 
 function updateMoreNum(num) { // should be an integer, or empty string
 	if (num == 0)
@@ -1625,46 +1590,6 @@ function commentIsInWindow(cid, just_head) {
 		in_window	= Bounds.contain(w, Position(fetchEl('comment_'+cid))),
 		sub		= fetchEl('comment_sub_'+cid);
 	return in_window && !just_head && sub ? Bounds.contain(w, Position(sub)) : in_window;
-}
-
-
-/* code for the draggable threshold widget */
-
-function partitionedRange( range, partitions ) {
-	return [].concat(range[0], partitions, range[1]);
-}
-
-function pinToRange( range, partitions ) {
-	var result = partitions.slice();
-	var hi = range[0], lo = range[1];
-
-	function pin( x ) {
-		return hi = Math.min(Math.max(x, lo), hi);
-	}
-
-	for ( var i=0; i<partitions.length; ++i )
-		result[i] = pin(partitions[i]);
-
-	return result;
-}
-
-function boundsToDimensions( bounds, scaleFactor ) {
-	if ( scaleFactor === undefined )
-		scaleFactor = 1;
-
-	var sizes = new Array(bounds.length-1);
-	for ( var i=0; i<sizes.length; ++i )
-		sizes[i] = { size: Math.abs(bounds[i+1]-bounds[i]) * scaleFactor };
-
-	var left = 0;
-	var right = 0;
-
-	for ( var L=0, R=sizes.length-1; R>=0; ++L, --R ) {
-		sizes[L].start = left; left += sizes[L].size;
-		sizes[R].stop = right; right += sizes[R].size;
-	}
-
-	return sizes;
 }
 
 
@@ -1775,8 +1700,8 @@ var validkeys = {
 	X: { current : 1, history : 1, hide : 1 },
 
 	G: { nav: 1, more : 1 },
-	T: { nav: 1, skip : 1, top    : 1 }, 
-	V: { nav: 1, skip : 1, bottom : 1 }, 
+	T: { nav: 1, skip : 1, top    : 1 },
+	V: { nav: 1, skip : 1, bottom : 1 },
 
 	219 : { chr: '[', thresh : 1, top    : 1, down: 1 },
 	221 : { chr: ']', thresh : 1, top    : 1, up  : 1 },
@@ -1882,7 +1807,7 @@ function keyHandler(e, k) {
 						changeHT(keyo['up'] ? 1 : -1);
 					if (keyo['bottom'])
 						changeT((keyo['up'] ? 1 : -1), 1);
-					gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+					D2.slider.setTHT(user_threshold, user_highlightthresh);
 
 
 				// forward and back between comments, in order of how they were loaded
@@ -1939,10 +1864,10 @@ function keyHandler(e, k) {
 								next_cid = commTreeNextComm(comments[current_cid].pid, current_cid, getNextUnread);
 						}
 					}
-	
+
 					else if (keyo['prev'] && keyo['comment'])
 						next_cid = commTreePrevComm(current_cid);
-	
+
 					else if (keyo['prev'])
 						next_cid = commTreePrevComm(current_cid, 1);
 				}
@@ -2072,7 +1997,7 @@ function commTreePrevComm (cid, to_parent) {
 				return pid;
 			else if (to_parent)
 				return kids[i - 1];
-			else 
+			else
 				return getLastChild(kids[i - 1]);
 		}
 	}
@@ -2174,7 +2099,7 @@ function reduceThreshold(highlight, no_save) {
 
 	// if we are collapsing, then do not move HT too, so the comments stay closed
 	changeT(-1, (highlight > 1), 'hidden');
-	gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+	D2.slider.setTHT(user_threshold, user_highlightthresh);
 	async_off = 0;
 
 	var next_cid = commTreeNextComm(0, 0, 1);
@@ -2237,14 +2162,9 @@ var packageObj = {
 	submitReply:            submitReply,
 	toggleDisplayOptions:   toggleDisplayOptions,
 	updateMoreNum:          updateMoreNum,
-	updateTotals:           updateTotals,
 
-	// YAHOO widget
-	boundsToDimensions:     boundsToDimensions,
 	changeTHT:              changeTHT,
-	getSliderTotals:        getSliderTotals,
-	partitionedRange:       partitionedRange,
-	pinToRange:             pinToRange
+	getSliderTotals:        getSliderTotals
 };
 
 Slash.Util.qw.each('\
@@ -2289,267 +2209,273 @@ Slash.Util.Package({
 })(Slash.jQuery); // (function($){
 
 
-var D2 = Slash.Discussion;
+// Globals
+var D2=Slash.Discussion;
 
 
-// yahoo begin
-Y_UNITS_IN_PIXELS = 20;
+(function(){
+// The D2 slider.
 
-ABBR_BAR = 0;
-HIDE_BAR = 1;
+// We use a lot of "absolute" selectors; if you ever wanted more than one D2 slider
+// that would have to change.
 
+	// "constants"
+var	MAX_SCORE		= 6,
+	MIN_SCORE		= -1,
+	SCORE_RANGE		= [ MAX_SCORE, MIN_SCORE ],
 
-YAHOO.namespace("slashdot");
+	BUCKET_NAMES	= [ 'full', 'abbr', 'hide' ],
+	LAST_BUCKET		= BUCKET_NAMES.length-1,
 
-YAHOO.slashdot.ThresholdWidget = function( initialOrientation ) {
-	this.PANEL_KINDS = [ "full", "abbr", "hide" ];
-	this.displayRange = [6, -1];
-	this.constraintRange = [6, -1];
-	this.getEl_cache = new Object();
+	T_THUMB			= 1,
+	HT_THUMB		= 0,
 
-	this.orientations = new Object();
-	this.orientations["Y"] = { axis:"Y", startPos:"top", endPos:"bottom", getPos:YAHOO.util.Dom.getY, units:"px", scale:Y_UNITS_IN_PIXELS };
-	this.orientations["X"] = { axis:"X", startPos:"left", endPos:"right", getPos:YAHOO.util.Dom.getX, units:"%", scale:(100.0 / (this.displayRange[0]-this.displayRange[1])) };
-	this.orientations["X"].other = this.orientations["Y"];
-	this.orientations["Y"].other = this.orientations["X"];
+	Y_MODE_SLICE_HEIGHT	= 20,
+	AXES			= {
+		y: {
+			name:		'y',
+			i:			1,
+			startEdge:	'top',
+			endEdge:	'bottom',
+			units:		'px',
+			scale:		Y_MODE_SLICE_HEIGHT
+		},
 
-	if ( initialOrientation === undefined )
-		initialOrientation = "Y";
-	this.orient = this.orientations[initialOrientation];
-
-	function initBar( id, whichBar, parentWidget ) {
-		id = "ccw-"+id+"-bar";
-
-		var el = YAHOO.util.Dom.get(id+"-pos");
-
-		var dd = new YAHOO.slashdot.ThresholdBar(el, "ccw", {scroll:false});
-		dd.setOuterHandleElId(id+"-tab");
-		dd.setHandleElId(id);
-		dd.whichBar = whichBar;
-		dd.parentWidget = parentWidget;
-
-		return dd;
-	}
-
-	var abbrBar = initBar("abbr", ABBR_BAR, this);
-	var hideBar = initBar("hide", HIDE_BAR, this);
-
-	this.dragBars = [ abbrBar, hideBar ];
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype = new Object();
-
-YAHOO.slashdot.ThresholdWidget.prototype._getEl = function( id ) {
-	var el = this.getEl_cache[id];
-	if ( el === undefined )
-		el = this.getEl_cache[id] = YAHOO.util.Dom.get(id);
-	return el;
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.setTHT = function( T, HT ) {
-	this._setTs(D2.pinToRange(this.constraintRange, [HT, T]));
-	D2.updateTotals();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.getTHT = function() {
-	return this.displayedTs.slice().reverse();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.stepTHT = function( threshold, step ) {
-	var ts = this.displayedTs.slice();
-	ts[threshold] += step;
-	this._setTs(D2.pinToRange(this.constraintRange, ts));
-	D2.updateTotals();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.setCounts = function( counts ) {
-	// counts is an array: [ num-hidden, num-abbreviated, num-full ]
-	if ( counts === undefined )
-		counts = this._requestCounts();
-
-	this._getEl("currentHidden").innerHTML = counts[0];
-	this._getEl("currentOneline").innerHTML = counts[1];
-	this._getEl("currentFull").innerHTML = counts[2];
-}
-
-
-YAHOO.slashdot.ThresholdWidget.prototype._requestCounts = function() {
-	return D2.getSliderTotals(this.displayedTs[HIDE_BAR], this.displayedTs[ABBR_BAR]);
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._onBarStartDrag = function( whichBar ) {
-	YAHOO.util.Dom.addClass(this._getEl("ccw-control"), "ccw-active");
-	this.preDragTs = this.displayedTs.slice();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._onBarEndDrag = function( whichBar ) {
-	YAHOO.util.Dom.removeClass(this._getEl("ccw-control"), "ccw-active");
-
-	var deltas = this.displayedTs.slice();
-	for ( var i=0; i<deltas.length; ++i )
-		deltas[i] -= this.preDragTs[i];
-
-	D2.changeTHT(deltas[HIDE_BAR], deltas[ABBR_BAR]);
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.setOrientation = function( newAxis ) {
-	if ( newAxis != this.orient.axis ) {
-		var o = this.orient = this.orientations[newAxis];
-		for ( var i=0; i<this.PANEL_KINDS.length; ++i ) {
-			var prefix = "ccw-"+this.PANEL_KINDS[i];
-			var panel = this._getEl(prefix+"-panel").style;
-			if ( i != 0 ) panel[ o.other.startPos ] = 0;
-			if ( i != this.PANEL_KINDS.length-1 ) panel[ o.other.endPos ] = 0;
-
-			this._getEl(prefix+"-phrase").style.display = "inline";
-			this._getEl(prefix+"-count-pos").style.top = 0;
+		x: {
+			name:		'x',
+			i:			0,
+			startEdge:	'left',
+			endEdge:	'right',
+			units:		'%',
+			scale:		100.0 / (MAX_SCORE-MIN_SCORE)
 		}
-		this._setTs();
-		// setOrientation can rewrite our totals for us, even if they
-		// are different from defaults, so let's set them again
-		// sure they are correct
-		D2.updateTotals();
+	},
+
+	// "globals" at least within this block; this would also have to change for multiple sliders.
+	cur_axis		= AXES.y, // vertical by default
+	$control, before, current;
+
+
+function getStart( o ){
+	return Position(o)[cur_axis.startEdge];
+}
+
+function grid( $thumb ){
+	var g = [
+		AXES.x.scale * $control.width() / 100.0,
+		AXES.y.scale
+	];
+	return arguments.length ? $thumb.draggable('option', 'grid', g) : g;
+}
+
+function thumb_value( expr, new_value ){
+	// Get or set the value of a thumb; setting implies positioning the thumb physically as well.
+
+	var	have_thumb	= typeof(expr)!=='number',
+		$thumb		= $(expr),
+		value		= have_thumb
+						? $thumb.data('thumb-value')
+						: MAX_SCORE - Math.round((expr - getStart($control)) / grid()[cur_axis.i]);
+
+	// thumb_value(thumb) => return current value of |thumb|
+	// thumb_value(number) => return the value as if from a |thumb| positioned at |number| pixels from the widget start
+	if ( new_value===undefined || new_value===null || !have_thumb ) {
+		return value;
 	}
-}
 
-YAHOO.slashdot.ThresholdWidget.prototype._scaleToPixels = function() {
-	return this._getEl("ccw-control").scrollWidth / 100.0;
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
-	var w = this;
-	var o = w.orient;
-
-	function fixPanel( id, newDims ) {
-		var prefix = "ccw-"+id;
-		var countText = w._getEl(prefix+"-count-text").style;
-		if ( newDims.size == 0 )
-			countText.display = "none";
-		else {
-			countText.display = "block";
-			if ( o.axis == "Y" )
-				w._getEl(prefix+"-count-pos").style.top = (newDims.size/2) + o.units;
-			else
-				w._getEl(prefix+"-phrase").style.display = (newDims.size>o.scale) ? "inline" : "none";
+	if ( new_value != value ) {
+		if ( typeof(new_value)==='number' ) {
+			// thumb_value(el, 3) => set a value in |thumb|, moving it accordingly
+			$thumb.data('thumb-value', new_value=pin_between(MIN_SCORE, new_value, MAX_SCORE));
+		} else {
+			// thumb_value(el, 'x') => re-orient |thumb|
+			if ( new_value==='x' || new_value==='y' ) {
+				$thumb.draggable('option', 'axis', new_value);
+			}
+			new_value = value;
 		}
 
-		var panel = w._getEl(prefix+"-panel").style;
-		if ( newDims.start !== undefined ) panel[ o.startPos ] = newDims.start + o.units;
-		if ( newDims.stop !== undefined ) panel[ o.endPos ] = newDims.stop + o.units;
+		// Reposition |$thumb|.
+		var new_css={
+			display: 'block',
+			top: 0,
+			left: 0
+		};
+		// ...overriding one of the above.
+		new_css[cur_axis.startEdge] = (MAX_SCORE-new_value) * cur_axis.scale + cur_axis.units;
+		$thumb.css(new_css);
 	}
 
-	if ( newTs === undefined )
-		newTs = this.displayedTs;
+	return $thumb;
+}
 
-	if ( draggingBar !== undefined ) {
-		var pin = draggingBar==ABBR_BAR ? Math.min : Math.max;
-		var other = 1-draggingBar;
-		newTs[other] = pin(newTs[draggingBar], this.preDragTs[other]);
+
+function init_thumb( id_fragment, key, getter, setter ){
+	var $thumb = $(id_fragment+'-pos');
+
+	return $thumb.
+		draggable({
+			handle:			id_fragment + ',' + id_fragment + '-tab',
+			axis:			cur_axis.name,
+			containment:	$control.parent()[0],
+
+			start:			function( event, ui ){
+								before=(current=getter()).slice();
+								grid($thumb);
+
+								$control.addClass('ccw-active');
+							},
+
+			drag:			function( event, ui ){
+								var	v = thumb_value(getStart($thumb));
+								if ( v != current[key] ) {
+									$thumb.data('thumb-value', current[key]=v);
+									setter(current);
+								}
+							},
+
+			stop:			function( event, ui ){
+								$control.removeClass('ccw-active');
+
+								D2.changeTHT(
+									current[T_THUMB]-before[T_THUMB],
+									current[HT_THUMB]-before[HT_THUMB]
+								);
+							}
+		});
+}
+
+
+
+function D2Slider( T, HT, axis ) {
+	$control = $any('ccw-control');
+	cur_axis = AXES[ axis || 'y' ];
+
+	var slider=this;
+	function getter(){
+		return slider.thresholds();
 	}
-	this.displayedTs = newTs;
 
-	for ( i=ABBR_BAR; i<=HIDE_BAR; ++i )
-		if ( i != draggingBar )
-			this.dragBars[i].setPosFromT(newTs[i]);
+	this.thumbs = core.map(['abbr', 'hide'], function( i ){
+		return init_thumb('#ccw-'+this+'-bar', i, getter, function( a ){ slider._setTs(a, i); });
+	});
 
-	var dims = D2.boundsToDimensions(D2.partitionedRange(this.displayRange, newTs), o.scale);
-	delete dims[0].start;
-	delete dims[ dims.length-1 ].stop;
-
-	for ( var i=0; i<this.PANEL_KINDS.length; ++i )
-		fixPanel(this.PANEL_KINDS[i], dims[i]);
-
-	this.setCounts(this._requestCounts());
-	return newTs;
+	return this.setTHT(T, HT);
 }
+Slash.Discussion.Slider = D2Slider;
+
+D2Slider.prototype = {
+
+	thresholds: function(){
+		return core.map(this.thumbs, function(){
+			return thumb_value(this);
+		});
+	},
+
+	setTHT: function( T, HT ) {
+		return this._setTs([HT, T]);
+	},
+
+	stepTHT: function( which, delta ) {
+		var newTs = this.thresholds();
+		newTs[which] += delta;
+
+		return this._setTs(newTs);
+	},
+
+	setOrientation: function( new_axis_name ) {
+		var old_axis = cur_axis;
+
+		if ( new_axis_name in AXES && new_axis_name!==old_axis.name ) {
+			cur_axis = AXES[new_axis_name];
+
+			core.each(BUCKET_NAMES, function( i, bucket_name ){
+				function $part( id_fragment ){ return $any('ccw-'+bucket_name+'-'+id_fragment); }
+
+				// The edges that moved along |old_axis| now "lock" to the slider bounds.
+				var new_css={};
+				i &&				(new_css[old_axis.startEdge] = 0);
+				i!=LAST_BUCKET &&	(new_css[old_axis.endEdge] = 0);
+				$part('panel').css(new_css);
+
+				$part('phrase').css({ display: 'inline' });
+				$part('count-pos').css({ top: 0 });
+			});
+
+			// Thumbs fix themselves.
+			core.each(this.thumbs, function(){
+				thumb_value(this, new_axis_name);
+			});
+
+			// Fix the edges perpendicular the new |cur_axis|.
+			this._setTs();
+		}
+		return this;
+	},
+
+	update: function(){
+		return this._setTs();
+	},
+
+	_setTs: function( newTs, dragged_thumb ) {
+		// Update the widget display to reflect new orientation or thresholds.
+
+		switch ( arguments.length ){
+			default:	// We are updating the thresholds, live, during a thumb-drag.
+				// Move the other thumb aside if needed to make room for the dragged_thumb.
+				var pin_fn	= dragged_thumb ? Math.max : Math.min,
+					other	= 1 - dragged_thumb;
+
+				newTs[other]	= pin_fn(newTs[dragged_thumb], before[other]);
+				// fall through
+
+			case 1:		// We are updating the thresholds; move the thumbs accordingly.
+				core.each(this.thumbs, function( i, $thumb ){
+					// The dragged_thumb is positioned correctly by definition.
+					i===dragged_thumb || thumb_value($thumb, newTs[i]);
+				});
+				// fall through
+
+			case 0:		// The thumbs have the correct (possibly pinned) thresholds.
+				newTs = this.thresholds();
+		}
 
 
+		// Fix-up the layout of the labels.
+		// This code fixes drag-related edges (perpendicular to |cur_axis|).  See
+		// setOrientation for the rest of the story.
 
+		var	comment_count	= D2.getSliderTotals(newTs),
+			end_offset		= (MAX_SCORE-MIN_SCORE)*cur_axis.scale;
 
-YAHOO.slashdot.ThresholdBar = function( barElId, sGroup, config ) {
-	if ( barElId )
-		this.init(barElId, sGroup, config);
-}
+		core.reduce(newTs.concat(MIN_SCORE), 0, function( i, v, prev_offset ){
+			function $part( x ){ return $any('ccw-'+BUCKET_NAMES[i]+'-'+x); }
 
-YAHOO.extend(YAHOO.slashdot.ThresholdBar, YAHOO.util.DD);
+			var	offset	= (MAX_SCORE-v)*cur_axis.scale,
+				length	= offset - prev_offset,
+				hide	= !length;
 
-YAHOO.slashdot.ThresholdBar.prototype.posToT = function( pos ) {
-	var el = this.getEl();
-	if ( el.style.display != "block" )
-		return null;
+			// The "panels" are the three space-filling divs visually representing ranges defined by the thumbs.
+			// Here we snap their ends to the thumb positions, or to the slider-ends as appropriate.
+			var new_css={};
+			i &&				(new_css[cur_axis.startEdge]	= prev_offset + cur_axis.units);
+			i!=LAST_BUCKET &&	(new_css[cur_axis.endEdge]	= (end_offset-offset) + cur_axis.units);
+			$part('panel').css(new_css);
 
-	var w = this.parentWidget;
-	var o = w.orient;
-	var widgetStart = o.getPos(w._getEl("ccw-control"));
+			// Each has a label showing the number of comments in that "bucket".
+			$part('count-text').css({ display: hide ? 'none' : 'block' }).	// Hide the label within a zero-width panel.
+				children('span:first').html(comment_count[i]);				// Set the new comment total.
+			switch ( hide || cur_axis.name ) {
+				// These parts are inside the count-text; if that's hidden, there's nothing to do.
+				case 'x': $part('phrase').css({ display: length>cur_axis.scale ? 'inline' : 'none' }); break;
+				case 'y': $part('count-pos').css({ top: (length/2) + cur_axis.units }); break;
+			}
 
-	if ( pos === undefined )
-	  pos = o.getPos(el);
-
-	var scale = o.scale;
-	if ( o.units != "px" )
-		scale *= w._scaleToPixels();
-	return w.displayRange[0] - Math.round((pos - widgetStart) / scale);
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.setPosFromT = function( x ) {
-	if ( this.posToT() != x ) {
-		var w = this.parentWidget;
-		var o = w.orient;
-		var elStyle = this.getEl().style;
-		elStyle[ o.startPos ] = ((w.displayRange[0]-x) * o.scale) + o.units;
-		elStyle[ o.other.startPos ] = 0;
-		elStyle.display = "block";
+			return offset; // ...given back to us as prev_offset on the next pass.
+		});
+		return this;
 	}
-}
 
-YAHOO.slashdot.ThresholdBar.prototype.fixConstraints = function() {
-	var w = this.parentWidget;
-	var o = w.orient;
+};
 
-	var scale = o.scale;
-	if ( o.units != "px" )
-		scale *= w._scaleToPixels();
-
-	this.resetConstraints();
-	this[ "set" + o.other.axis + "Constraint" ](0, 0);
-
-	var thisT = this.draggingTs[this.whichBar];
-	var availableSpace = D2.boundsToDimensions(D2.partitionedRange(w.constraintRange, [thisT]), scale);
-	this[ "set" + o.axis + "Constraint" ](availableSpace[0].size+1, availableSpace[1].size+1, scale);
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.startDrag = function( x, y ) {
-	var w = this.parentWidget;
-	w._onBarStartDrag(this.whichBar);
-	this.draggingTs = w.displayedTs.slice();
-	this.fixConstraints();
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.onDrag = function( e ) {
-	var newT = this.posToT();
-	if ( this.draggingTs[this.whichBar] != newT ) {
-		this.draggingTs[this.whichBar] = newT;
-		this.draggingTs = this.parentWidget._setTs(this.draggingTs, this.whichBar);
-	}
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.endDrag = function( e ) {
-	this.parentWidget._onBarEndDrag(this.whichBar);
-	D2.updateTotals();
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, iPageY ) {
-	var w = this.parentWidget;
-	var o = w.orient;
-
-	var oCoord = this.getTargetCoord(iPageX, iPageY);
-	var newThreshold = this.posToT( oCoord[ o.axis.toLowerCase() ] );
-	this.setPosFromT(newThreshold);
-
-	var newPos = YAHOO.util.Dom.getXY(el);
-	oCoord = { x:newPos[0], y:newPos[1] };
-
-	this.cachePosition(oCoord.x, oCoord.y);
-	this.autoScroll(oCoord.x, oCoord.y, el.offsetHeight, el.offsetWidth);
-}
-// yahoo end
+})();

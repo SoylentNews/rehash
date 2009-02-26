@@ -3849,9 +3849,6 @@ sub getFireHoseTagsTop {
 	my $form = getCurrentForm();
 	my $tags_top	 = [];
 
-	# The meaning of the number after the colon is referenced in
-	# firehose_tags_top;misc;default and (if nonzero) is passed to
-	# YAHOO.slashdot.gCompleterWidget.attach().
 	if ($user->{is_admin}) {
 		if ($item->{type} eq "story") {
 			# 5 = add completer_handleNeverDisplay

@@ -159,19 +159,13 @@ __template__
 			</div>
 		</div>
 <script type="text/javascript">
-gCommentControlWidget = null;
-
-YAHOO.slashdot.ThresholdApp = function() {
-  return {
-    init: function() {
-      gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget([% "'X'" IF horiz %]);
-      gCommentControlWidget.setTHT(D2.user_threshold(), D2.user_highlightthresh());
-      D2.updateTotals();
-    }
-  };
-}();
-
-YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
+$(function(){
+	D2.slider = new D2.Slider(
+		D2.user_threshold(),
+		D2.user_highlightthresh()[% IF horiz %],
+		'x'[% END %]
+	);
+});
 </script>
 		<div id="bones">
       <div id="ccw">
@@ -180,18 +174,18 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
             <div id="ccw-full-panel" class="ccw-panel">
               <div class="ccw-panel-border"></div>
               <div id="ccw-full-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><span id="ccw-full-phrase">&nbsp;Full</span></span>
+                <span id="ccw-full-count-text" class="ccw-count-text"><span></span><span id="ccw-full-phrase">&nbsp;Full</span></span>
               </div>
             </div>
             <div id="ccw-abbr-panel" class="ccw-panel">
               <div class="ccw-panel-border"></div>
               <div id="ccw-abbr-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><span id="ccw-abbr-phrase">&nbsp;Abbreviated</span></span>
+                <span id="ccw-abbr-count-text" class="ccw-count-text"><span></span><span id="ccw-abbr-phrase">&nbsp;Abbreviated</span></span>
               </div>
             </div>
             <div id="ccw-hide-panel" class="ccw-panel">
               <div id="ccw-hide-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><span id="ccw-hide-phrase">&nbsp;Hidden</span></span>
+                <span id="ccw-hide-count-text" class="ccw-count-text"><span></span><span id="ccw-hide-phrase">&nbsp;Hidden</span></span>
               </div>
             </div>
           </div>
@@ -201,15 +195,15 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
               <div id="ccw-hide-bar-pos" class="ccw-core-pos">
                 <div id="ccw-hide-bar" class="ccw-bar">
                   <div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div>
-                  <div id="ccw-hide-bar-upzone" class="ccw-upzone" onclick="gCommentControlWidget.stepTHT(HIDE_BAR, +1)"></div>
-                  <div id="ccw-hide-bar-downzone" class="ccw-downzone" onclick="gCommentControlWidget.stepTHT(HIDE_BAR, -1)"></div>
+                  <div id="ccw-hide-bar-upzone" class="ccw-upzone" onclick="D2.slider.stepTHT(HIDE_BAR, +1)"></div>
+                  <div id="ccw-hide-bar-downzone" class="ccw-downzone" onclick="D2.slider.stepTHT(HIDE_BAR, -1)"></div>
                 </div>
               </div>
               <div id="ccw-abbr-bar-pos" class="ccw-core-pos">
                 <div id="ccw-abbr-bar" class="ccw-bar">
                   <div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div>
-                  <div id="ccw-abbr-bar-upzone" class="ccw-upzone" onclick="gCommentControlWidget.stepTHT(ABBR_BAR, +1)"></div>
-                  <div id="ccw-abbr-bar-downzone" class="ccw-downzone" onclick="gCommentControlWidget.stepTHT(ABBR_BAR, -1)"></div>
+                  <div id="ccw-abbr-bar-upzone" class="ccw-upzone" onclick="D2.slider.stepTHT(ABBR_BAR, +1)"></div>
+                  <div id="ccw-abbr-bar-downzone" class="ccw-downzone" onclick="D2.slider.stepTHT(ABBR_BAR, -1)"></div>
                 </div>
               </div>
             </div>

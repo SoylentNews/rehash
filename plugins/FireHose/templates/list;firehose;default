@@ -141,9 +141,6 @@ __template__
      END;
   %]
 <label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" id="firehose-filter"></label>
-<div id="colorsliderbg">
-        <div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.png" alt="Filter firehose to" id="fh_slider_img" title="Filter firehose to"></div>
-</div>
                         <input type="submit" value="Filter" onclick="firehose_set_options('fhfilter'); return false;">
                 </fieldset>
         </form>

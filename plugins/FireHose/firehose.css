@@ -39,18 +39,8 @@ div #slashboxes {
 #full, #abbrev { left: 60px  }
 #time, #popularity {left: 90px }
 
-#colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
-
 #fh_adv_pref_toggle { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1195px; padding: 11px 20px 11px 0; color: #fff; position: absolute; top: 0; right: 0; cursor: pointer;}
 
-#colorsliderbg
-{
-        display: inline;
-        padding: 4px 108px 3px 0;
-}
-
-#colorsliderthumb { display: inline; }
-#colorsliderthumb img { margin: 0 0 -5px 0px; }
 #fhtablist li { font-size: 130%; }
 
 .paginate li, .paginate a, #fhtablist li, #fhtablist a

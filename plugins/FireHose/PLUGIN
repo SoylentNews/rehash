@@ -45,5 +45,3 @@ task=firehose_track_volume.pl
 task=firehose_backend.pl
 task=firehose_get_thumbnails.pl
 task=firehose_track_volume.pl
-image=images/colorscale.png
-image=images/slidethumb.png
