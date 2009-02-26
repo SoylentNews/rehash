@@ -430,8 +430,12 @@ $task{$me}{code} = sub {
 	# rewrite .shtml files for other skins' indexes
 	############################################################
 	if ($do_all) {
-		for my $key (sort { $a <=> $b } keys %dirty_skins) {
+		SKINS_RENDER: for my $key (sort { $a <=> $b } keys %dirty_skins) {
 			next unless $key;
+			if ($task_exit_flag) {
+				slashdLog("Aborting skin pages, got SIGUSR1");
+				last SKINS_RENDER;
+			}
 			my $skin = $slashdb->getSkin($key);
 			createCurrentHostname($skin->{hostname});
 			my $index_handler = $skin->{index_handler}
