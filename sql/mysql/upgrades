@@ -5813,10 +5813,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_section_css', 'Slash::FireHose', 'a
 # 2009-01-22
 UPDATE vars SET value = 'T_2_5_0_239' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
-# PUDGE LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('postedout_end_secs','21600','Window to count posted-out stories closes this many seconds in the future');
 INSERT INTO vars (name, value, description) VALUES ('postedout_start_secs','300','Window to count posted-out stories opens this many seconds in the future');
 INSERT INTO vars (name, value, description) VALUES ('postedout_thisnexusonly','0','If nonzero, only count posted-out stories that are rendered in this nexus, otherwise count all');
@@ -5926,6 +5922,8 @@ UPDATE firehose_view SET use_exclusions="no" WHERE viewname like 'user%' OR view
 # 2009-02-20
 UPDATE vars SET value = 'T_2_5_0_243' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHDOT LAST UPDATED HERE?
+
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_maxruntime', '28800', 'Restart tagbox.pl after running this long, to mitigate any memory leaks, 0 for never');
 
@@ -5936,8 +5934,10 @@ UPDATE achievements SET description = 'Posted a Comment' where name = 'comment_p
 UPDATE achievements SET description = 'Posted a Journal Entry' where name = 'journal_posted';
 UPDATE achievements SET description = 'Achievements' where name = 'achievement_obtained';
 
-# this is wrong but i don't know what is right -- pudge
-#UPDATE firehose_view SET duration = "-1";
+# for plugins/FireHose
+UPDATE firehose_view SET duration = "-1" WHERE viewname NOT IN ("metamod", "popular");
+
+# PUDGE LAST UPDATED HERE
 
 # for plugins/Messages and plugins/Achievements
 INSERT INTO message_codes (code, type, seclev, modes, delivery_bvalue) VALUES (22, 'Achievement', 100, '', 3);
