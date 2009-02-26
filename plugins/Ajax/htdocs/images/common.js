@@ -2120,71 +2120,50 @@ function insert_ad( $article, ad ){
 	$ad_position.fadeIn('fast');
 }
 
-function nearest_article_edge(){
-	// Why not just ask for the offset of $ad_position?
-	// ...because $ad_position may be absolutely positioned already
-
-	var $article = $ad_position.next();
-	var pos = $article.offset();
-	if ( pos !== undefined ) {
-		return pos.top;
-	}
-
-	$article = $ad_position.prev();
-	pos = $other.offset();
-	if ( pos !== undefined ) {
-		return pos.top + $article.height();
-	}
-
-	return 0;
+function topBottomAdSpace(){
+	return { top:topBottomAny($slashboxes).bottom, bottom:topAny($footer) };
 }
 
-function pin( lo, n, hi ){
-	// return n', the nearest value to n such that lo<=n'<=hi
+var pinClasses = {};
+pinClasses[-1]		= 'Top';	// pinned to the top of the available space, though the natural top is higher
+pinClasses[0]		= 'No';		// not pinned
+pinClasses[1]		= 'Bottom';	// pinned to the bottom of the available space, though the natural top would be lower
+pinClasses[undefined]	= 'Empty';	// not enough room to hold an ad
 
-	if ( hi < lo ) return { value: undefined, description: 'Empty' };	// pin-range is empty, there is no n' such that lo<=n'<=hi
-	if ( n <= lo ) return { value: lo, description: 'Min' };
-	if ( n <= hi ) return { value: n, description: 'No' };
-	return { value: hi, description: 'Max' };
-}
 
 function fix_ad_position(){
 	if ( $ad_position.length ) {
-		var	footer		= $footer.offset(),
-			slashboxes	= $slashboxes.offset();
+		var space = topBottomAdSpace();
+		if ( space.top===undefined || space.bottom===undefined ) {
+			return;
+		}
+		space.bottom-=AD_HEIGHT;
 
-		if ( ! footer || ! slashboxes ) {
+		// the "natural" ad position is top-aligned with the following article
+		var natural_top = topAny($ad_position.next());
+		if ( natural_top===undefined ) {
+			// ...or else top-aligned to the previous bottom, I guess... but wouldn't this mean you're at the end the page?
+			natural_top = topBottomAny($ad_position.prev()).bottom;
+		}
+
+		var	pinning		= between(space.top, natural_top, space.bottom),
+			now_pinned	= pinning !== 0,
+			now_empty	= pinning === undefined,
+			was_pinned	= $ad_position.is('.Top, .Bottom, .Empty'),
+			was_empty	= $ad_position.is('.Empty');
+
+		if ( !was_pinned && !now_pinned || was_empty && now_empty ) {
 			return;
 		}
 
-		var	min_top		= slashboxes.top + $slashboxes.height(),
-			max_top		= footer.top - AD_HEIGHT,
-			pinned_top	= pin(min_top, nearest_article_edge(), max_top),
-
-			prev_top	= $ad_position.offset().top,
-			prev_class	= $ad_position.getClass(),
-			prev_pinned	= prev_class !== 'No',
-
-			next_top	= pinned_top.value,
-			next_class	= pinned_top.description,
-			next_pinned	= next_class !== 'No',
-			next_css	= {};
-
-		if ( prev_pinned > next_pinned ) {
-			// if we're un-pinning the ad, clear our explicit 'top' setting
-			next_css.top = '';
-		} else if ( next_pinned && (!prev_pinned || prev_top!=next_top) ) {
-			// else if we're becoming pinned or are already pinned, but need a different top
-			next_css.top = '' + (next_top - $ad_offset_parent.offset().top) + 'px';
+		var new_top = '';
+		if ( now_pinned && !now_empty ) {
+			new_top = pin_between(space.top, natural_top, space.bottom) - topAny($ad_offset_parent);
 		}
 
-		if ( next_css.top !== undefined ) {
-			$ad_position.css(next_css);
-		}
-
-		if ( prev_class != next_class ) {
-			$ad_position.setClass(next_class);
-		}
+		$ad_position.
+			setClass(pinClasses[pinning]).
+			css('top', new_top);
 	}
 }
 
@@ -2198,8 +2177,7 @@ Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 });
 
 Slash.Firehose.articles_on_screen = function(){
-	var	window_top = window.pageYOffset,
-		window_bottom = window_top + window.innerHeight,
+	var	visible = topBottomAny(window),
 		lo,	// index within the jQuery selection of the first article visible on the screen
 		hi=0;	// index one beyond the last article visible on the screen
 
@@ -2211,7 +2189,7 @@ Slash.Firehose.articles_on_screen = function(){
 					var $this=$(this), this_top=$this.offset().top;
 					// hi is the index of this article
 
-					if ( this_top >= window_bottom ) {
+					if ( this_top >= visible.bottom ) {
 						// ...then this article, and all that follow must be entirely below the screen
 						// the last article on screen (if any) must be the previous one (at hi-1)
 						return false;
@@ -2221,13 +2199,13 @@ Slash.Firehose.articles_on_screen = function(){
 					if ( lo === undefined ) {
 						var this_bottom = this_top + $this.height();
 
-						// we know this_top is above window_bottom, so...
-						if ( this_bottom > window_top ) {
+						// we know this_top is above visible.bottom, so...
+						if ( this_bottom > visible.top ) {
 							// ...then _this_ article must be (the first) on screen
 							lo = hi;
 						}
 
-						if ( this_bottom >= window_bottom ) {
+						if ( this_bottom >= visible.bottom ) {
 							// ...then we must be the _only_ article on screen
 							++hi; // starting one past this article, everything is below the screen
 							return false;
@@ -2251,9 +2229,12 @@ Slash.Firehose.ready_ad_space = function( $articles ){
 	var $result = $([]);
 	try {
 		if ( !is_ad_locked ) {
-			var min_top = Math.max(window.pageYOffset, $slashboxes.offset().top + $slashboxes.height());
+			var y=topBottomAdSpace(), w=topBottomAny(window);
+			y.top = Math.max(y.top, w.top);
+			y.bottom = Math.min(y.bottom, w.bottom)-AD_HEIGHT;
+
 			$result = $articles.filter(function(){
-				return $(this).offset().top >= min_top;
+				return between(y.top, topAny(this), y.bottom)==0;
 			});
 		}
 	} catch ( e ) {
