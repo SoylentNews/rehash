@@ -52,6 +52,8 @@ sub setUserAchievement {
         my $user_achievement = $self->getUserAchievements($uid, { aid => $aid });
         my $old_exponent = $user_achievement->{$aid}{exponent};
 
+	# If we're creating or updating an achievement, set it,
+	# increment their Achievements achievement, and send a message.
 	my $data;
         if (!$user_achievement->{$aid}{id}) {
 		# The user has never had this type of achievement.
@@ -63,6 +65,7 @@ sub setUserAchievement {
                 };
 		$slashdb->sqlInsert('user_achievements', $data);
 		$self->setUserAchievementObtained($uid, { exponent => $new_exponent });
+		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} });
 	} elsif ($achievement->{$ach_name}{repeatable} eq 'yes' && ($new_exponent > $old_exponent)) {
 		# The user has the inferior version of the achievement. Upgrade them.
 		$data = {
@@ -71,6 +74,7 @@ sub setUserAchievement {
                 };
 		$slashdb->sqlUpdate('user_achievements', $data, "id = " . $user_achievement->{$aid}{id});
 		$self->setUserAchievementObtained($uid);
+		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} });
 	} else {
 		# The user already has an achievement that is non-repeatable. Do nothing.
 	}
@@ -141,6 +145,25 @@ sub getUserAchievements {
 	}
 
         return $achievements;
+}
+
+sub getUserAchievementStreak {
+        my($self, $uid, $aid) = @_;
+
+        return if(!$uid || !$aid);
+
+        my $slashdb = getCurrentDB();
+        my $streak;
+        ($streak->{id},
+         $streak->{uid},
+         $streak->{streak},
+         $streak->{last_hit},
+         $streak->{last_hit_ds}) =
+                $slashdb->sqlSelect('id, uid, streak, UNIX_TIMESTAMP(last_hit), last_hit as last_hit_ds',
+                                    'user_achievement_streaks',
+                                    "aid = $aid and uid = $uid");
+
+        return $streak;
 }
 
 sub getAchievement {
@@ -300,6 +323,94 @@ sub getConsecutiveDaysMetaModded {
                 }
 
                 $self->setUserAchievement('consecutive_days_metamod', $userhit_uid, { ignore_lookup => 1, force_convert => 1, exponent => $streak });
+        }
+}
+
+sub getConsecutiveDailyAchievement {
+        my ($self, $ach_name) = @_;
+
+        return if !$ach_name;
+
+        my $constants = getCurrentStatic(); 
+        my $slashdb = getCurrentDB();
+
+        my $achievement = $self->getAchievement($ach_name);
+        my $aid = $achievement->{$ach_name}{aid};
+        my $yesterday_secs = (time() - 90000);
+
+        my $queries = {
+                'consecutive_days_read' => {
+                        'field' => 'uid',
+                        'from'  => 'users_hits',
+                        'where' => 'uid != ' . $constants->{anonymous_coward_uid} .
+                                   ' and lastclick >= DATE_SUB(NOW(), INTERVAL 24 HOUR)',
+                },
+
+                'consecutive_days_metamod' => {
+                        'field' => 'distinct uid',
+                        'from'  => 'tags, globjs',
+                        'where' => 'tags.globjid = globjs.globjid' .
+                                   ' and gtid = 5' .
+                                   ' and tagnameid in (378141, 378199)' .
+                                   ' and inactivated IS NULL' .
+                                   ' and created_at between DATE_SUB(NOW(), INTERVAL 24 HOUR) and NOW()',
+                },
+        };
+
+        my $users = $slashdb->sqlSelectColArrayref($queries->{$ach_name}{field}, $queries->{$ach_name}{from}, $queries->{$ach_name}{where});
+
+	foreach my $userhit_uid (@$users) {
+                my $data;
+                my $achievement_streak = $self->getUserAchievementStreak($userhit_uid, $aid);
+
+                if (!$achievement_streak->{id}) {
+                        $achievement_streak->{streak} = 1;
+                        $data = {
+                                "uid"       => $userhit_uid,
+                                "aid"       => $aid,
+                                "streak"    => $achievement_streak->{streak},
+                                "-last_hit" => 'NOW()',
+                        };
+                        $slashdb->sqlInsert('user_achievement_streaks', $data);
+                } else {
+                        $achievement_streak->{streak} = ($achievement_streak->{last_hit} <= $yesterday_secs) ? 1 : $achievement_streak->{streak} + 1;
+                        $data = {
+                                "streak"    => $achievement_streak->{streak},
+                                "-last_hit" => 'NOW()',
+                        };
+                        $slashdb->sqlUpdate('user_achievement_streaks', $data, 'id = ' . $achievement_streak->{id});
+                }
+
+                $self->setUserAchievement($ach_name, $userhit_uid, { ignore_lookup => 1, force_convert => 1, exponent => $achievement_streak->{streak} });
+        }
+}
+
+sub setAchievementMessage {
+        my($self, $uid, $achievement) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $user = $slashdb->getUser($uid);
+
+	# Temp. check for admin
+	return if ($user->{seclev} < 1000);
+
+	my $ach_message_code = $slashdb->sqlSelect('code', 'message_codes', "type = 'Achievement'");
+        my $messages = getObject('Slash::Messages');
+        if ($messages && $ach_message_code) {
+                my $users = $messages->checkMessageCodes($ach_message_code, [$uid]);
+                if (scalar @$users) {
+                        my $data  = {
+                                template_name   => 'achievement_msg',
+                                template_page   => 'achievements',
+                                subject         => {
+                                        template_name => 'achievement_msg_subj',
+                                        template_page => 'achievements',
+                                },
+                                achievement     => $achievement,
+                                useredit        => $user,
+                        };
+                        $messages->create($uid, $ach_message_code, $data);
+                }
         }
 }
 

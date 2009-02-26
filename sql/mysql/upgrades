@@ -5939,3 +5939,5 @@ UPDATE achievements SET description = 'Achievements' where name = 'achievement_o
 # this is wrong but i don't know what is right -- pudge
 #UPDATE firehose_view SET duration = "-1";
 
+# for plugins/Messages and plugins/Achievements
+INSERT INTO message_codes (code, type, seclev, modes, delivery_bvalue) VALUES (22, 'Achievement', 100, '', 3);
