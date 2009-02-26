@@ -36,7 +36,7 @@ sub set {
 	}
 
 	$j2{article}   = delete $j1{article};
-	$j2{introtext} = $self->getIntrotext($id, $j2{article}) if $j2{article};
+	$j2{introtext} = $self->getIntrotext($id, $j2{article}, 0, $uid) if $j2{article};
 	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
@@ -201,7 +201,7 @@ sub create {
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
 	return unless $id;
 
-	my $introtext = $self->getIntrotext(0, $article, $posttype) || '';
+	my $introtext = $self->getIntrotext(0, $article, $posttype, $user->{uid}) || '';
 	$self->sqlInsert("journals_text", {
 		id        => $id,
 		article   => $article,
@@ -439,7 +439,7 @@ sub updateStoryFromJournal {
 
 	my $data = {};
 	$data->{title} = $src_journal->{description};
-	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	my $text = $self->fixJournalText($src_journal->{article}, $src_journal->{posttype}, $src_journal->{uid});
 	($data->{introtext}, $data->{bodytext}) = $self->splitJournalTextForStory($text);
 
 	$data->{topics_chosen} = $options->{topics_chosen} if $options->{topics_chosen};
@@ -459,7 +459,7 @@ sub createSubmissionFromJournal {
 	$story =~ s/^$Slash::Utility::Data::WS_RE+//io;
 	$story =~ s/$Slash::Utility::Data::WS_RE+$//io;
 	
-	$story = balanceTags(strip_mode($story, $src_journal->{posttype}));
+	$story = $self->fixJournalText($story, $src_journal->{posttype}, $src_journal->{uid});
 	#perhaps need more string cleanup from submit.pl's findStory here
 
 	my $primaryskid = $constants->{journal2submit_skid} || $constants->{mainpage_skid};
@@ -508,7 +508,7 @@ sub createStoryFromJournal {
 
 	my $journal_user = $slashdb->getUser($src_journal->{uid});
 
-	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	my $text = $self->fixJournalText($src_journal->{article}, $src_journal->{posttype}, $src_journal->{uid});
 	my($intro, $body) = $self->splitJournalTextForStory($text);
 
 	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
@@ -710,7 +710,7 @@ my $min_chars = 50;
 my $max_chars = 500;
 
 sub getIntrotext {
-	my($self, $id, $bodytext, $posttype) = @_;
+	my($self, $id, $bodytext, $posttype, $uid) = @_;
 	return unless $id || $bodytext;
 
 	if ($id && (!$bodytext || !$posttype)) {
@@ -720,10 +720,7 @@ sub getIntrotext {
 	}
 	return unless $bodytext && $posttype;
 
-	my $strip_art = balanceTags(
-		strip_mode($bodytext, $posttype),
-		{ deep_nesting => 1 }
-	);
+	my $strip_art = $self->fixJournalText($bodytext, $posttype, $uid);
 
 	my $intro;
 	if (length($strip_art) < $min_chars) {
@@ -741,6 +738,40 @@ sub getIntrotext {
 	return $intro;
 } }
 
+
+sub fixJournalText {
+	my($self, $text, $mode, $user) = @_;
+	return unless $text && $mode;
+
+	$user ||= getCurrentUser();
+	unless (ref $user) {
+		if ($user eq '-1') { # force admin
+			$user = { seclev => 100 };
+		} else {
+			$user = $self->getUser($user);
+		}
+	}
+
+	my $admin = 0;
+	# 77 = "full" HTML, 2 = normal HTML
+	if ($mode == 77) {
+		if (isAdmin($user) || $user->{acl}{journal_admin_tags}) {
+			$admin = 1;
+		}
+		$mode = 2;
+	}
+
+	local $Slash::Utility::Data::approveTag::admin = 1
+		if $admin;
+	my $stripped = strip_mode($text, $mode);
+
+	my $balanced = balanceTags($stripped, {
+		deep_nesting => 1,
+		admin        => ($admin ? 1 : 0)
+	});
+
+	return $balanced;
+}
 
 
 sub DESTROY {

@@ -243,7 +243,7 @@ sub displayRSS {
 				tid		=> $article->[5],
 			},
 			title		=> $article->[2],
-			description	=> balanceTags(strip_mode($article->[1], $article->[4]), { deep_nesting => 1 }),
+			description	=> $journal_reader->fixJournalText($article->[1], $article->[4], $juser),
 			'link'		=> root2abs() . '/~' . fixparam($nickname) . "/journal/$article->[3]",
 		};
 	}
@@ -380,7 +380,7 @@ sub displayArticleFriends {
 
 		# should get comment count, too -- pudge
 		push @collection, {
-			article		=> balanceTags(strip_mode($article->[1], $article->[4]), { deep_nesting => 1 }),
+			article		=> $journal_reader->fixJournalText($article->[1], $article->[4], $article->[7]),
 			date		=> $article->[0],
 			description	=> strip_notags($article->[2]),
 			topic		=> $topics->{$article->[5]},
@@ -497,7 +497,7 @@ sub displayArticle {
 				: 0;
 		}
 
-		my $stripped_article = balanceTags(strip_mode($article->[1], $article->[4]), { deep_nesting => 1 });
+		my $stripped_article = $journal_reader->fixJournalText($article->[1], $article->[4], $uid);
 		$stripped_article = noFollow($stripped_article)
 			unless $karma > $constants->{goodkarma};
 
@@ -676,7 +676,7 @@ sub doSaveArticle {
 	if ($constants->{validate_html}) {
 		my $validator = getObject('Slash::Validator');
 		my $article = $journal_reader->get($form->{id});
-		my $strip_art = balanceTags(strip_mode($article->{article}, $article->{posttype}), { deep_nesting => 1 });
+		my $strip_art = $journal_reader->fixJournalText($article->{article}, $article->{posttype}, $user);
 		$validator->isValid($strip_art, {
 			data_type	=> 'journal',
 			data_id		=> $form->{id},
@@ -724,7 +724,7 @@ sub doEditArticle {
 	$posttype ||= $user->{'posttype'};
 
 	if ($article->{article}) {
-		my $strip_art = balanceTags(strip_mode($article->{article}, $posttype), { deep_nesting => 1 });
+		my $strip_art = $journal_reader->fixJournalText($article->{article}, $posttype, $user);
 		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}
@@ -754,6 +754,10 @@ sub doEditArticle {
 	}
 
 	my $formats = $journal_reader->getDescriptions('postmodes');
+	if ($user->{is_admin} || $user->{acl}{journal_admin_tags}) {
+		$formats->{77} = 'Full HTML Mode';
+	}
+
 	my $format_select = createSelect('posttype', $formats, $posttype, 1);
 
 	slashDisplay('journaledit', {
