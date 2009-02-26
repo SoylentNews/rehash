@@ -113,17 +113,17 @@ __template__
 			IF need_day_label;
 				label = $day_label _ " ";
 			ELSE;
-				label = label _ day_count _ " more &rsaquo;";
+				label = label _ day_count _ " more &raquo;";
 			END;
 		   ELSIF future_count > 0 ;
 		   	IF options.duration == -1;
-			        label = future_count _ " more &rsaquo;";
+			        label = future_count _ " more &raquo;";
 			ELSE;
-			        label = future_count _ " more &rsaquo;";
+			        label = future_count _ " more &raquo;";
 			END;
 		   ELSIF future_count <= 0 ;
 			IF options.duration != -1 && options.orderby == "createtime";
-				label = "more &rsaquo;";
+				label = "more &raquo;";
 				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
 			ELSIF options.orderby != "createtime";
 				fh = Slash.getObject("Slash::FireHose") 

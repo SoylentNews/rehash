@@ -898,7 +898,7 @@ sub getFireHoseEssentials {
 	$options->{limit} += $options->{more_num} if $options->{more_num};
 
 	my $fetch_size = $options->{limit};
-	if ($options->{orderby} && $options->{orderby} eq "createtime") {
+	if ($options->{orderby} && $options->{orderby} eq "createtime" && $options->{duration} != -1) {
 		$fetch_extra = 1;
 		$fetch_size++;
 	}
@@ -1117,6 +1117,7 @@ sub getFireHoseEssentials {
 			if (defined $options->{duration} && $options->{duration} >= 0) {
 				push @where, "createtime >= $st_q";
 				my $dur_q = $self->sqlQuote($options->{duration});
+				# XXX only works if $level is same as MySQL interval ... could change
 				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q \U$level)";
 
 				if ($sphinx) {
@@ -1261,9 +1262,18 @@ sub getFireHoseEssentials {
 			$no_mcd = 1;
 
 			if ($options->{unsigned}) {
+				my $days_relevant = 30;
+
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
+				push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $days_relevant DAY)";
+
+				my $time_back = $cur_time - (86400 * $days_relevant);
 				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
+				push @sphinx_opts, "!range=createtime_ut,0,$time_back";
+				
 				$sph->SetFilter('signoff', [ $user->{uid} ], 1) if $sphinx;
+				$sph->SetFilterRange('createtime_ut', 0, $time_back, 1);
+
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
 				push @sphinx_opts, "filter=signoff,$user->{uid}" if $sphinx;
@@ -1308,8 +1318,8 @@ sub getFireHoseEssentials {
 		push @where, 'category = ' . $self->sqlQuote($options->{category});
 
 		if ($sphinx) {
-			my %types = ('', 0, 'Back', 1, 'Hold', 2, 'Quik', 3);
-			my $val = $types{$options->{category}};
+			my %types = ('', 0, 'back', 1, 'hold', 2, 'quik', 3);
+			my $val = $types{lc $options->{category}};
 			$val = 9999 unless defined $val;
 			push @sphinx_opts, "filter=category,$val";
 			$sph->SetFilter('category', [ $val ]);
@@ -1628,7 +1638,7 @@ sub getNextDayAndCount {
 
 	my $day_labels = getOlderDaysFromDay($item_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 });
 
-	return($day_labels->[0]->[0], $day_labels->[0]->[1], $day_count);
+	return($day_labels->[0][0], $day_labels->[0][1], $day_count);
 }
 
 # A single-globjid wrapper around getUserFireHoseVotesForGlobjs.

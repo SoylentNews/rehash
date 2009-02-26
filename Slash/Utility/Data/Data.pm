@@ -725,20 +725,33 @@ sub getFormatFromDays {
 	my $orig_day = $options->{orig_day} || $days->[0];
 	my($db_levels, $db_order) = getDayBreakLevels();
 
+	my $slashdb = getCurrentDB();
+	my $today = $slashdb->getDay(0, { orig_day => $orig_day });
+	my $yesterday = $slashdb->getDay(1, { orig_day => $orig_day });
+
 	if ($orig_day =~ $db_levels->{hour}{re}) {
 		$which_day = 'hour';
+		my $yesterday = $slashdb->getDay(1);
+
 		for my $day (@$days) {
-			push @$ret_array, [ $day, timeCalc($day . '00', '%B %e, %Y %T', 0) ];
-#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
+			my @arr  = $day   =~ $db_levels->{$which_day}{re};
+			my $fmt = '%l:00%P'; # 2:00 p.m.
+
+			if ($yesterday =~ /^$arr[0]$arr[1]$arr[2]/) {
+				$fmt = "Yesterday, $fmt";
+			} elsif ($today !~ /^$arr[0]/) {
+				$fmt = "%b. %e, %Y $fmt";
+			} elsif ($today !~ /^$arr[0]$arr[1]$arr[2]/) {
+				$fmt = "%B %e, $fmt";
+			}
+
+			push @$ret_array, [ $day, timeCalc($day . '00', $fmt, 0) ];
 		}
 
 	} elsif ($orig_day =~ $db_levels->{day}{re}) {
 		$which_day = 'day';
 
-		my $slashdb = getCurrentDB();
-		my $today = $slashdb->getDay(0);
-		my $yesterday = $slashdb->getDay(1);
-		my $weekago = $slashdb->getDay(7);
+		my $weekago = $slashdb->getDay(7, { orig_day => $orig_day });
 		my($ty, $tm, $td) = $today =~ $db_levels->{$which_day}{re};
 
 		for my $day (@$days) {
@@ -753,13 +766,8 @@ sub getFormatFromDays {
 				$label = timeCalc($day, '%B %e', 0);
 			} else {
 				$label = timeCalc($day, '%b. %e, %Y', 0);
-
-				# strip out dot when not necessary
-				my $test = timeCalc($day, '%B. %e, %Y', 0);
-				$label =~ s/\.// if $test eq $label;
 			}
 			push @$ret_array, [ $day, $label ];
-#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
 		}
 
 	} elsif ($orig_day =~ $db_levels->{week}{re}) {
@@ -767,30 +775,47 @@ sub getFormatFromDays {
 
 		for my $day (@$days) {
 			my @arr = $day =~ $db_levels->{$which_day}{re};
-			my($y, $m, $d) = Monday_of_Week($arr[1]+1, $arr[0]);
-			my $tmpday = sprintf($db_levels->{day}{sfmt}, $y, $m, $d);
-			push @$ret_array, [ $day, timeCalc($tmpday, 'Week of %B %e, %Y', 0) ];
-#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1] (@arr)\n";
+
+			if ($day eq $today) {
+				$label = 'This Week';
+			} elsif ($day eq $yesterday) {
+				$label = 'Last Week';
+			} else {
+				my($y, $m, $d) = Monday_of_Week($arr[1]+1, $arr[0]);
+				my $tmpday = sprintf($db_levels->{day}{sfmt}, $y, $m, $d);
+				my $fmt = 'Week of %B %e';
+				if ($today !~ /^$y/) {
+					$fmt .= ', %Y';
+				}
+				$label = timeCalc($tmpday, $fmt, 0);
+			}
+
+			push @$ret_array, [ $day, $label ];
 		}
 
 	} elsif ($orig_day =~ $db_levels->{month}{re}) {
 		$which_day = 'month';
 		for my $day (@$days) {
 			(my $tmpday = $day) =~ s/m$//;
-			push @$ret_array, [ $day, timeCalc($tmpday . '01', '%B %Y', 0) ];
-#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
+			my $fmt = '%B';
+			(my $y = $tmpday) =~ s/\d\d$//;
+			if ($today !~ /^$y/) {
+				$fmt .= ' %Y';
+			}
+			push @$ret_array, [ $day, timeCalc($tmpday . '01', $fmt, 0) ];
 		}
 
 	} elsif ($orig_day =~ $db_levels->{year}{re}) {
 		$which_day = 'year';
 		for my $day (@$days) {
 			push @$ret_array, [ $day, timeCalc($day . '0101', '%Y', 0) ];
-#print STDERR "$which_day : $orig_day : $day : $ret_array->[-1][0] $ret_array->[-1][1]\n";
 		}
 	}
 
 
 	errorLog("No format found for $orig_day") unless $which_day;
+
+	$_->[1] =~ s/May\./May/ for @$ret_array;
 
 	# re-format elements if necessary
 #	$_->[0] = sprintf($db_levels->{$which_day}{refmt}, $_->[0]) for @$ret_array;
