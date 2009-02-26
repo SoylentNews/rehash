@@ -3707,7 +3707,10 @@ sub getAndSetOptions {
 			my $nexus_children = $self->getMainpageDisplayableNexuses();
 			push @{$fh_options->{nexus}}, @$nexus_children, $constants->{mainpage_nexus_tid};
 
-			push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus}) if $user->{story_never_nexus};
+			if (!$user->{index_beta}) {
+				push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus}) if $user->{story_never_nexus};
+			}
+			
 			$fh_options->{offmainpage} = "no";
 			$fh_options->{stories_mainpage} = 1;
 		} else {
