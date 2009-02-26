@@ -3044,6 +3044,7 @@ sub determineCurrentSection {
 	my ($self) = @_;
 	my $gSkin = getCurrentSkin();
 	my $form = getCurrentForm();
+	my $user = getCurrentUser();
 
 	my $section;
 
