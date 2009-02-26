@@ -3378,7 +3378,7 @@ sub getAndSetOptions {
 
 			$form->{tab} = '';
 			$opts->{view} = '';
-			$form->{view} = '';
+			$form->{view} ||= 'search';
 			
 		} else {
 		
