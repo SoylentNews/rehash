@@ -424,6 +424,7 @@ function firehose_set_options(name, value, context) {
 	if (name == "view") {
 		firehose_settings.view = value;	
 		params.viewchanged = 1;
+		$('#searchquery').each( function() { firehose_settings.fhfilter = $(this).val(); } );
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
 	}
