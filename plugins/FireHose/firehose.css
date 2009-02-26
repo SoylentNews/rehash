@@ -67,7 +67,6 @@ div #slashboxes {
 #firehose_pages a:hover, #firehose_more a { color: #ccc; border: 1px solid #666; background: #555;}
 #firehose_pages a.fh_cur_page, #firehose_more a { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
 #firehose_pages a b {color: #888; font-size: 130%; font-family: georgia, sans-serif}
-#fhcalendar_pag {float: left !important;}
 
 
 .options a
@@ -144,7 +143,6 @@ ul.menu#fhtablist li.active a, .paginate .active a
 }
 
 ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
-.paginate .calendar-pane {margin: 0;} 
 
 /* Pagination */
 .daybreak,
@@ -312,26 +310,6 @@ div.briefarticle[type=comment] .title a span { background: transparent !importan
 .daybreak a, #fhlogin a { color: #fff; }
 
 
-/* Date Widget */
-.calendar-pane {
-background:#FFFFFF none repeat scroll 0%;
-border:2px solid #333333;
-position:absolute;
-z-index:1000;
-margin: 2em 0;
-}
-.calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
-.calendar-pane td a {color: #066 !important; padding: .3em .5em .3em .1em; margin: 0;}
-.calendar-pane th { color: #fff; font-size: 90%;background: #555; border-bottom: 1px solid #aaa;}
-.calendar-pane td.today {background:#666 url('//images.slashdot.org/block-title-bg.png') repeat-x scroll 0%;}
-.calendar-pane td.today, .calendar-pane td.selected {font-weight: bold}
-.calendar-pane td.today a, .calendar-pane td.selected a {color: #fff !important; text-decoration: none}
-.calendar-pane td.selected, .calendar-pane td.today.selected {background: #066; font-weight: bold}
-.calheader {color: #fff; background:#004444 url('//images.slashdot.org/article-title-bg.png') repeat-x scroll left top;}
-.calheader a {padding:1px 4px 0pt; background-repeat: no-repeat;}
-.calheader .calnavright {background-image: url('//images.slashdot.org/arrows.png') !important}
-.calheader .calnavleft {background-image: url('//images.slashdot.org/arrows.png') !important; background-position: 0 -200px}
-.calendar-pane td.oom {background: #999}
 span.date-tab { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -995px; color: #fff; padding: 20px 0 0 20px; position: absolute; top: -6px; right: 6px; cursor: pointer;} 
 .firemenu span.date-tab { padding: 20px 0 0 20px; top: 0; right: 0;}
 .day.date-tab.active {background: transparent url('//images.slashdot.org/sic_close.png') no-repeat scroll 0px 3px; float: none; border: none; padding: 10px 21px 10px 0 !important;}
@@ -339,7 +317,6 @@ span.date-tab { background:transparent url('//images.slashdot.org/sic_icons.png'
 
 span.date-tab.active div.tab-button { background: #066; }
 .date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
-.firemenu #fhcalendar-calendar-pane {right: 1em}
 #fh_change_range { font-size: 80% }
 .firemenu .date-tab-bar {float: right; padding: 0 15px .5em 0; margin-right: .6em}
 .date-tab-bar {position: relative; padding-right: 25px;}

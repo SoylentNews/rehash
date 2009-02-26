@@ -70,17 +70,6 @@ are a casual reader.  The lower you pull the slider, the more content you will s
 		Last Modified: 08/02/2007
 	</small></em></p>
 	
-<h2><a name="fh400">How does the calendar widget work?</a></h2>
-	<p>The Firehose is usable in 3 "Modes".  In "latest content" mode you are looking at the last few days of Slashdot
-content.  Display is optimized for you to easily navigate within this small bit of time.  In 'Day Of' mode you will
-see content only from (surprise) any day you specify in the calender.  Finally in 'Search Archive' mode you will
-search the entire database.  For now, this goes back only perhaps 6 months but eventually we think this can
-replace our existing search infrastructure.</p>
-	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 08/02/2007
-	</small></em></p>
-	
 <h2><a name="fh500">What can I do with the Firehose tabs?</a></h2>
 	<p>We've found that we like to use the firehose in a number of different ways.  Sometimes I want a casual view of
 Slashdot, and other times i want to see more stories.  Sometimes I want to see only the stories I've tagged.  Other

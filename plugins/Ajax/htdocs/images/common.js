@@ -1590,10 +1590,6 @@ var firehose_cal_select_handler = function(type,args,obj) {
 };
 
 
-function firehose_calendar_init( widget ) {
-	widget.changeEvent.subscribe(firehose_cal_select_handler, widget, true);
-}
-
 function firehose_swatch_color(){} // does not exist until firehose-color-picker makes it available
 
 function firehose_change_section_anon(section) {
