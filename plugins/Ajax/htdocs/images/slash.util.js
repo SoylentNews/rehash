@@ -395,8 +395,15 @@ $.fn.extend({
 
 // not exactly sure what to do with these yet
 
-function $dom( id ) { return document.getElementById(id); }
 function sign( o ){ return $.TypeOf(o, 'number') && o<0 && -1 || (o ? 1 : 0); }
+
+function between( lo, o, hi ){ if ( lo<=hi ) { return o<lo && -1 || o>hi && 1 || 0; } }
+function pin_between( lo, o, hi ){
+	var b = between(lo, o, hi);
+	if ( b !== undefined ) {
+		return arguments[ 1 + between(lo, o, hi) ];
+	}
+}
 
 // Use in setClass, maybe elsewhere.
 // map: name=>state, state<0 means toggle, !state means remove, otherwise add
@@ -430,3 +437,92 @@ function applyMap( map ){
 		return new_names;
 	};
 }
+
+
+// $any(expr) is a compatibility routine.  Use it where you need a jQuery selection, but
+// you may have been called with a DOM element, an unadorned element id (string), or a
+// a jQuery selection, e.g., where you're fixing an old function and adding new callers,
+// but aren't yet ready to change all the old callers, too.
+
+// A side benefit: $(document.getElementById(id)) is faster than $('#'+id) and always
+// will be (at least while jQuery isn't actually built in to the browser).
+function $any( expr ){
+	var el;
+	return !expr && $([]) || typeof(expr)==='string' && (el=document.getElementById(expr)) && $(el) || $(expr);
+}
+function elemAny( expr ){ return $any(expr)[0]; }
+var $dom = elemAny;
+
+function topLeftAny( expr ){
+	var top, left;
+
+	if ( typeof(expr) === 'number' ) {
+		top = expr;
+		typeof(arguments[1])==='number' && (left=arguments[1]);
+	} else if ( expr ) {
+		var $expr=$any(expr), offset;
+		if ( $expr.length ) {
+			if ( $expr[0] === window ) {
+				top = $expr.scrollTop();
+				left = $expr.scrollLeft();
+			} else if ( $expr[0] === document ) {
+				top = left = 0;
+			} else if ( offset=$expr.offset() ) {
+				return offset;
+			}
+		}
+	}
+
+	// always return a point, though the values for top/left may be undefined
+	return { top:top, left:left };
+}
+function topAny( expr ){ return topLeftAny(expr).top; }
+function leftAny( expr ){ return topLeftAny(expr).left; }
+
+function _axisAny( name_for ){
+	return function( expr ){
+		var start, stop;
+		if ( typeof(expr) === 'number' ) {
+			start = expr;
+			if ( arguments.length==1 ) {
+				stop = start;
+			} else if ( typeof(argument[1])==='number' ) {
+				stop = arguments[1];
+			}
+		} else if ( expr ) {
+			var $expr=$any(expr), offset=topLeftAny($expr), span=$expr[name_for.op]();
+			if ( offset ) {
+				start = offset[name_for.start];
+				span !== undefined && (stop = start+span);
+			}
+		}
+
+		// always return a range, though the inner values may be undefined
+		var result = {};
+		result[name_for.start]=start;
+		result[name_for.stop]=stop;
+		return result;
+	};
+}
+
+var topBottomAny = _axisAny({ start:'top', stop:'bottom', op:'height' });
+//var leftRightAny = _axisAny({ start:'left', stop:'right', op:'width' });
+
+
+function inWindowAny( expr ){
+	var	y	= $.TypeOf(expr)==='number' ? expr : topAny(expr),
+		w	= topBottomAny(window);
+	return sign(between(w.top, y, w.bottom)==0);
+}
+
+function vScrollToAny( expr, when ){
+	var y = topAny(expr);
+	if ( when=sign(when) ) {
+		when += (inWindowAny(y)||-1);
+	}
+	when || scroll(leftAny(window), y);
+}
+vScrollToAny.IF_VISIBLE = -1;
+vScrollToAny.ALWAYS = 0;
+vScrollToAny.IF_NOT_VISIBLE = 1;
+// ...are the opposites of (inWindowAny(expr)||-1)
