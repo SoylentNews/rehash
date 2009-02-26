@@ -3054,7 +3054,11 @@ sub determineCurrentSection {
 	}
 	
 	if (!$section && !$section->{fsid}) {
-		$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
+		if ($user->{firehose_default_section}) {
+			$section = $self->getFireHoseSection($user->{firehose_default_section});
+		} else {
+			$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
+		}
 	}
 
 	$section = $self->applyUserSectionPrefs($section);
