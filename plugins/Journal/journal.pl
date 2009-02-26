@@ -28,7 +28,7 @@ sub main {
 		if ($r->header_in('SOAPAction')) {
 			require SOAP::Transport::HTTP;
 			# security problem previous to 0.55
-			if (SOAP::Lite->VERSION >= 0.55) {
+			if (SOAP::Lite->VERSION gt 0.55) {
 				if ($user->{state}{post}) {
 					$r->method('POST');
 				}
@@ -994,7 +994,8 @@ sub add_entry {
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
+	$rkey->create;
+	return if $rkey->failure;
 
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
@@ -1052,6 +1053,7 @@ sub get_entry {
 	my $gSkin     = getCurrentSkin();
 
 	$id =~ s/\D+//g;
+	return unless $id;
 
 	my $entry = $journal_reader->get($id);
 	return unless $entry->{id};
