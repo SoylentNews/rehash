@@ -81,7 +81,7 @@ sub run_process {
 
 	# We start by building the list of uid's who have tagged this globj.
 	my %uids_tfh = ( map { ( $_->{uid}, 1 ) } @$tags_ar );
-	my @uids = sort { $a <=> $b } keys %uids;
+	my @uids = sort { $a <=> $b } keys %uids_tfh;
 
 	# Now calculate which users have tagged_for_homepage this globj.
 	# This is (currently) very simple:  it's on their homepage iff they
