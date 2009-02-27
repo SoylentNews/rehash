@@ -860,6 +860,12 @@ CREATE TABLE sessions (
 	PRIMARY KEY (session)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS shill_ids;
+CREATE TABLE shill_ids (
+	shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL PRIMARY KEY,
+	user varchar(16) NOT NULL default ''
+) ENGINE=InnoDB;
+
 DROP TABLE IF EXISTS signoff;
 CREATE TABLE signoff (
         soid 	MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1345,6 +1351,7 @@ CREATE TABLE users (
 	newpasswd varchar(8),
 	journal_last_entry_date datetime,
 	author tinyint DEFAULT 0 NOT NULL,
+	shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (uid),
 	KEY login (nickname,uid,passwd),
 	KEY chk4user (realemail,nickname),
