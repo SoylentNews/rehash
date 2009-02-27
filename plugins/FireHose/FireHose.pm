@@ -865,7 +865,8 @@ sub getFireHoseEssentials {
 
 	my $sphinx = 0;
 	my($sph, $sph_check_sql, $sph_mode) = (undef, '', 0);
-	my($sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where, $sphinx_other);
+	my($sphinxdb, @sphinx_opts, @sphinx_terms, @sphinx_where);
+	my $sphinx_other = '';
 	my @sphinx_tables = ('sphinx_search');
 	$sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx', timeout => 2 });
 	$sphinx = 1 if $sphinxdb;
@@ -2732,11 +2733,7 @@ sub setFireHose {
 		}
 	}
 
-	if ($mcd) {
-		$mcd->delete("$mcdkey:$id", 3);
-		my $keys = $self->genFireHoseMCDAllKeys($id);
-		$mcd->delete($_, 3) for @$keys;
-	}
+	$self->deleteFireHoseCaches([ $id ], 1);
 
 	my $searchtoo = getObject('Slash::SearchToo');
 	if ($searchtoo) {
@@ -2747,6 +2744,25 @@ sub setFireHose {
 	}
 
 	return $rows;
+}
+
+sub deleteFireHoseCaches {
+	my($self, $id_ar, $all) = @_;
+	my $mcd = $self->getMCD();
+	return if !$mcd;
+
+	my $mcdkey = "$self->{_mcd_keyprefix}:firehose";
+	my %cache_key = ( );
+	for my $id (@$id_ar) {
+		$cache_key{"$mcdkey:$id"} = 1;
+		next if !$all;
+		my $keys = $self->genFireHoseMCDAllKeys($id);
+		for my $k (@$keys) { $cache_key{$k} = 1 }
+	}
+
+	for my $k (keys %cache_key) {
+		$mcd->delete($k, 3);
+	}
 }
 
 

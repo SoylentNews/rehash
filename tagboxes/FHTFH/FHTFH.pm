@@ -164,9 +164,8 @@ sub run_process {
 
 	# Update the firehose changed timestmap if any changes were made.
 	my $firehosedb = getObject('Slash::FireHose');
-	my $fh_hr = $firehosedb->getFireHoseByGlobjid($affected_id, { id_only => 1 });
-	my $fhid = $fh_hr ? $fh_hr->{id} : 0;
-	$firehosedb->setFireHose($fhid, { -last_update => 'NOW()' }) if $fhid;
+	my $fhid = $firehosedb->getFireHoseByGlobjid($affected_id, { id_only => 1 });
+	$firehosedb->deleteFireHoseCaches([ $fhid ], 1) if $fhid;
 
 	$self->info_log("globjid %d is tagged_for_hose by %d users, tagged_for_homepage by %d, change=%d",
 		$affected_id, scalar(@uids_tfh), scalar(@uids_tfhp), $change);
