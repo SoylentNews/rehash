@@ -260,6 +260,8 @@ INSERT INTO globj_types VALUES (NULL, 'projects');
 # Dumping data for table 'sessions'
 #
 
+INSERT INTO shill_ids VALUES (1, 'Admin');
+INSERT INTO shill_ids VALUES (2, 'ThinkGeek');
 
 #
 # Dumping data for table 'site_info'
