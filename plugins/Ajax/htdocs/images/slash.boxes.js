@@ -31,6 +31,7 @@ $('#slashboxes').
 			click(function(){	// ...that close; save new state
 				$(this).closest('div.block').remove();
 				save_slashboxes();
+				after_article_moved();
 			});
 
 });
