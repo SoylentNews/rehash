@@ -3635,7 +3635,7 @@ sub getAndSetOptions {
 	if ($fhfilter =~ /\{nickname\}/) {
 		if (!$opts->{user_view}) {
 			if ($form->{user_view_uid}) {
-				$opts->{user_view} = $self->getUser($form->{user_view_id}) || $user;
+				$opts->{user_view} = $self->getUser($form->{user_view_uid}) || $user;
 			}
 		}
 		my $the_nickname = $opts->{user_view}{nickname};
