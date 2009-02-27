@@ -5950,3 +5950,5 @@ CREATE TABLE firehose_tfhp (
 	INDEX globjid (globjid)
 ) ENGINE=InnoDB;
 
+# 2009-02-26
+UPDATE vars SET value = 'T_2_5_0_244' WHERE name = 'cvs_tag_currentcode';
