@@ -737,7 +737,9 @@ sub getFormatFromDays {
 			my @arr  = $day   =~ $db_levels->{$which_day}{re};
 			my $fmt = '%l:00%P'; # 2:00 p.m.
 
-			if ($yesterday =~ /^$arr[0]$arr[1]$arr[2]/) {
+			if ($today =~ /^$arr[0]$arr[1]$arr[2]$arr[3]/) {
+				$fmt = 'Now';
+			} elsif ($yesterday =~ /^$arr[0]$arr[1]$arr[2]/) {
 				$fmt = "Yesterday, $fmt";
 			} elsif ($today !~ /^$arr[0]/) {
 				$fmt = "%b. %e, %Y $fmt";
