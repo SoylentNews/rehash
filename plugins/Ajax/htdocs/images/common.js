@@ -34,6 +34,7 @@ var firehose_settings = {};
   firehose_settings.tab = '';
   firehose_settings.fhfilter  = '';
   firehose_settings.base_filter = '';
+  firehose_settings.user_view_uid = '';
 
   firehose_settings.issue = '';
   firehose_settings.is_embedded = 0;
