@@ -404,6 +404,14 @@ source src_firehose_main
 		;										\
 		SELECT MIN(globjid), MAX(globjid) FROM firehose_tfh
 
+	sql_attr_multi		= uint tfhp from ranged-query					\
+		;										\
+		SELECT globjid, uid								\
+			FROM firehose_tfhp							\
+			WHERE globjid BETWEEN $start AND $end					\
+		;										\
+		SELECT MIN(globjid), MAX(globjid) FROM firehose_tfhp
+
 	sql_ranged_throttle	= 10
 }
 
@@ -539,6 +547,15 @@ source src_firehose_delta1 : src_firehose_main
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
 				WHERE src=0 AND completion <= 1)
 
+	sql_attr_multi		= uint tfhp from query						\
+		;										\
+		SELECT firehose.globjid, firehose_tfhp.uid					\
+			FROM firehose, firehose_tfhp						\
+			WHERE firehose.globjid=firehose_tfhp.globjid				\
+			AND firehose.last_update >=						\
+				(SELECT MIN(last_seen) FROM sphinx_counter			\
+				WHERE src=0 AND completion <= 1)
+
 }
 
 source src_firehose_delta2 : src_firehose_main
@@ -669,6 +686,15 @@ source src_firehose_delta2 : src_firehose_main
 		SELECT firehose.globjid, firehose_tfh.uid					\
 			FROM firehose, firehose_tfh						\
 			WHERE firehose.globjid=firehose_tfh.globjid				\
+			AND firehose.last_update >=						\
+				(SELECT MIN(last_seen) FROM sphinx_counter			\
+				WHERE src=1 AND completion <= 1)
+
+	sql_attr_multi		= uint tfhp from query						\
+		;										\
+		SELECT firehose.globjid, firehose_tfhp.uid					\
+			FROM firehose, firehose_tfhp						\
+			WHERE firehose.globjid=firehose_tfhp.globjid				\
 			AND firehose.last_update >=						\
 				(SELECT MIN(last_seen) FROM sphinx_counter			\
 				WHERE src=1 AND completion <= 1)

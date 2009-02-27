@@ -973,14 +973,11 @@ sub getFireHoseEssentials {
 	my $need_tagged = 0;
 	$need_tagged = 1 if $options->{tagged_by_uid} && $options->{tagged_as};
 	$need_tagged = 2 if $options->{tagged_by_uid} && $options->{tagged_non_negative};
+	$need_tagged = 3 if $options->{tagged_by_uid} && $options->{tagged_for_homepage};
 	my $cur_time = $self->getTime({ unix_format => 1 });
 	if ($sphinx && $need_tagged) {
 		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
 		$tagged_by_uid =~ s/\D+//g;
-		# In both cases, only hose items "tagged for hose" by the
-		# user in question are returned.
-		push @sphinx_opts, "filter=tfh," . $tagged_by_uid;
-		$sph->SetFilter('tfh', [ $tagged_by_uid ]);
 		if ($need_tagged == 1) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
@@ -992,11 +989,20 @@ sub getFireHoseEssentials {
 			push @sphinx_where, "tags.tagnameid = $tag_id";
 			push @sphinx_where, "tags.uid = $tagged_by_uid";
 			$sph_check_sql = 1;
+			push @sphinx_opts, "filter=tfh," . $tagged_by_uid;
+			$sph->SetFilter('tfh', [ $tagged_by_uid ]);
 		} elsif ($need_tagged == 2) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
-			# any "tagged for hose" tags, e.g. /~foo/firehose.
-			# This was already accomplished by the filter=tfh above.
+			# any "tagged for hose" tags (/~foo/firehose).
+			push @sphinx_opts, "filter=tfh," . $tagged_by_uid;
+			$sph->SetFilter('tfh', [ $tagged_by_uid ]);
+		} elsif ($need_tagged == 3) {
+			# This combination of options means to restrict to only
+			# those hose entries tagged by one particular user with
+			# any "tagged for homepage" tags (/~foo).
+			push @sphinx_opts, "filter=tfhp," . $tagged_by_uid;
+			$sph->SetFilter('tfhp', [ $tagged_by_uid ]);
 		}
 	}
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {

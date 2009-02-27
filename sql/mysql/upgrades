@@ -5939,5 +5939,14 @@ UPDATE firehose_view SET duration = "-1" WHERE viewname NOT IN ("metamod", "popu
 
 # PUDGE LAST UPDATED HERE
 
-# for plugins/Messages and plugins/Achievements
+# for plugins/Messages
 INSERT INTO message_codes (code, type, seclev, modes, delivery_bvalue) VALUES (22, 'Achievement', 100, '', 3);
+
+# for tagboxes/FHTFH
+CREATE TABLE firehose_tfhp (
+	uid             mediumint UNSIGNED NOT NULL,
+	globjid         int UNSIGNED NOT NULL,
+	UNIQUE uid_globjid (uid, globjid),
+	INDEX globjid (globjid)
+) ENGINE=InnoDB;
+

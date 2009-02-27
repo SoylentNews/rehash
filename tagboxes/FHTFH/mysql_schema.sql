@@ -5,3 +5,10 @@ CREATE TABLE firehose_tfh (
 	INDEX globjid (globjid)
 ) ENGINE=InnoDB;
 
+CREATE TABLE firehose_tfhp (
+	uid		mediumint UNSIGNED NOT NULL,
+	globjid		int UNSIGNED NOT NULL,
+	UNIQUE uid_globjid (uid, globjid),
+	INDEX globjid (globjid)
+) ENGINE=InnoDB;
+
