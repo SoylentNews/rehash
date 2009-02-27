@@ -72,7 +72,14 @@ $task{$me}{code} = sub {
 					if ($constants->{plugin}{FireHose}) {
 						my $firehose = getObject("Slash::FireHose");
 						my $the_bookmark = $bookmark->getBookmark($bookmark_id);
-						$firehose->createUpdateItemFromBookmark($bookmark_id, { type => "feed", introtext => $text });
+						# If this is an attended feed, then the hose items
+						# it creates do not automatically get nodded (and it
+						# is assumed whoever attends it will nod the desired
+						# items).  If it is unattended, they all get nods.
+						my $no_nod = $feed->{attended} eq 'yes' ? 1 : 0;
+						$firehose->createUpdateItemFromBookmark($bookmark_id,
+							{ type => "feed", introtext => $text,
+							  no_nod => $no_nod });
 					}
 					
 					my $tags = getObject('Slash::Tags');

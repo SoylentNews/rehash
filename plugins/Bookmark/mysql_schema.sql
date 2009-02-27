@@ -20,6 +20,7 @@ CREATE TABLE bookmark_feeds (
 	feed VARCHAR(255),
 	tags VARCHAR(255),
 	feedname VARCHAR(64),
-        nofilter TINYINT UNSIGNED NOT NULL DEFAULT 0,
+	nofilter TINYINT UNSIGNED NOT NULL DEFAULT 0,
+	attended ENUM('no', 'yes') NOT NULL DEFAULT 'no',
 	PRIMARY KEY(id)
 ) TYPE=InnoDB;

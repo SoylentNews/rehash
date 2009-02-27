@@ -608,7 +608,7 @@ sub createUpdateItemFromBookmark {
 			}
 		}
 
-		if (!isAnon($bookmark->{uid})) {
+		if (!isAnon($bookmark->{uid}) && !$options->{no_nod}) {
 			my $constants = getCurrentStatic();
 			my $tags = getObject('Slash::Tags');
 			$tags->createTag({

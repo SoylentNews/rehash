@@ -5955,3 +5955,7 @@ UPDATE vars SET value = 'T_2_5_0_244' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE shill_ids ENGINE=InnoDB;
 
+# for plugins/Bookmark
+ALTER TABLE bookmark_feeds ADD COLUMN attended ENUM('no', 'yes') NOT NULL DEFAULT 'no';
+UPDATE bookmark_feeds SET attended='yes' WHERE feedname='ThinkGeek';
+
