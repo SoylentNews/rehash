@@ -1,32 +1,18 @@
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2009 by Open Source Technology Group. See README
+# and COPYING for more information, or see http://slashcode.com/.
+
 package Slash::Users2;
 
 use strict;
-use DBIx::Password;
 use Slash;
 use Slash::Constants qw(:messages);
 use Slash::Display;
 use Slash::Utility;
 
-use vars qw($VERSION);
-use base 'Exporter';
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
-($VERSION) = ' $Revision: 1.1 $ ' =~ /\$Revision:\s+([^\s]+)/;
-
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Users2'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
+our $VERSION = $Slash::Constants::VERSION;
 
 sub getLatestComments {
         my($self, $uid) = @_;
@@ -410,12 +396,6 @@ sub getRSS {
 
         return($rss_block);
 }
-
-sub DESTROY {
-	my($self) = @_;
-	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
-}
-
 
 1;
 
