@@ -420,15 +420,16 @@ function applyToggle( map ){
 // Loops over the existing names (not the map); only mappings for those names apply.
 // If that seems wrong to you, you probably wanted applyToggle instead.
 // applyMap( 'str0', 'str1', 'str2', ... 'strN' ) is equivalent to applyMap({'str0':'str1', 'str1':'str2', ... 'strN-1':'strN', 'strN':'str0'})
-function applyMap( map ){
+function applyMap(){
 
 	// I expect a hash; but I can settle for a list of strings.
-	var N = arguments.length;
+	var map={}, N=arguments.length;
 	if ( N > 1 ) {
-		map = {};
-		$.each(arguments, function( k, v ){
-			map[v] = arguments[ (v+1)%N ];
-		});
+		for ( var i=0; i<N; ++i ){
+			map[ arguments[i] ] = arguments[ (i+1)%N ];
+		}
+	} else {
+		map = arguments[0];
 	}
 
 	return function( old_names ){
