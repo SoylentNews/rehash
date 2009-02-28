@@ -1123,7 +1123,7 @@ function firehose_handle_update() {
 		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
-		firehose_reorder(firehose_ordered);
+		firehose_after_update();
 		if (add_behind_scenes) {
 			$('#firehoselist h1.loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
 			$('.paginate').show();
@@ -1160,88 +1160,72 @@ function firehose_adjust_window(onscreen) {
 	}
 }
 
+
+function firehose_after_update(){
+	firehose_reorder(firehose_ordered);
+	firehose_update_title_count(
+		firehose_storyfuture(firehose_future).length
+	);
+}
+
+function firehose_storyfuture( future ){
+	// Select all articles in #firehoselist.  Update .story|.future as needed.  Return the complete list.
+
+	var if_not=['h3.future', 'h3.story'], class_if=['story', 'future'];
+	return $any('firehoselist').article_info__find_articles().
+		each(function(){
+			var is_future = sign(future[this.id.substr(9)]);
+			$(this).find(if_not[is_future]).attr('className', class_if[is_future]);
+		});
+}
+
 function firehose_reorder( required_order ){
-	// required_order is an ordered list of all firehose items.  It _does_ include
-	// day-breaks. It does _not_ include the i2 ad (and that of course is the problem).
-	// The document order of these elements might not match the order we want (as
-	// expressed by required_order). We're going to fix that, and we're going to do
-	// it without getting sued.
-	var $fhl, num_stories=0, story_class={}, order={}, prev=0;
-	if ( !required_order || !required_order.length || !($fhl=$any('firehoselist')).length ) {
-		return;
+	// Reorder items in the firehose; complicated by the i2 ad.
+
+	var $fhl = $any('firehoselist');
+	if ( !required_order || !required_order.length || !$fhl.length ) {
+		return $fhl;
 	}
 
-	// Select the firehose items (in document order) mentioned in required_order.
-	var $fhl_items=$fhl.find(
-		// Build a selector like '>#firehose-27,>#firehose-342,>#firehose-2,...'.
-		// Since 1.3.2, jQuery is defined to return such a selection in document order.
-		$.map(required_order, function( fhid ){ // Looping over fhids in the _expected_ order.
-			var elid = 'firehose-'+fhid;
-			if ( /^\d+$/.test(fhid) ) {
-				++num_stories;
-				story_class[elid] = firehose_future[fhid] ? 'future' : 'story';
-			}
-			order[elid] = prev; // ...using prev==0 for the first item.  See $fhl_items.each, below.
-			prev = elid;
-			return '>#' + elid;
-		}).join(',')
+	// Build a selector for the elements corresponding to required_order.
+	var order={}, i2ad_pos=-1, prev=0, elid, select_required=['#floating-slashbox-ad'].concat(
+		$.map(required_order, function( fhid ){
+			order[elid='firehose-'+fhid] = prev;
+			return '#' + (prev=elid);
+		})
+	).join(',');
+
+	// Select the required elements into $fhl_items; jQuery>=1.3.2 returns it in
+	// document order.  select_required included the i2 ad so we could learn its
+	// relative position; but don't let it into $fhl_items.
+	var $fhl_items = $(
+		$fhl.children(select_required).map(function( i ){
+			if ( this.id !== 'floating-slashbox-ad' ) { return this; }
+			i2ad_pos = i;
+		})
 	);
 
-	if ( !$fhl_items.length ) {
-		return;
+	// Scan $fhl_items noting runs of already-ordered elements.  tails[] will include
+	// the run with the i2 ad; movable_runs[] won't.
+	var i=0, el=$fhl_items[0], movable_runs=[], tails=[];
+	while ( el ){
+		var run=[], tail;
+		do { run.push(tail=el); } while ( (el=$fhl_items[++i]) && order[el.id]==tail.id );
+		i>i2ad_pos ? i2ad_pos=$fhl_items.length : movable_runs.push($(run));
+		tails.push(tail);
 	}
 
-	var $i2_ad = $fhl.find('>#floating-slashbox-ad');
-	// The i2 ad is high-maintenance.  We must not re-insert it, as that would re-run
-	// its scripts: counting as a page-view, charging accounts, etc.  Nor can we move
-	// anything that would make the i2 ad jump inappropriately.  Nor _should_ we insert
-	// new items between the i2 ad and the following article (they may be related).
-
-	// To reorder the list with these restrictions, we will avoid moving elements
-	// one-by-one.  Instead, we'll group runs of already-ordered items; then move whole
-	// runs in single actions --- without moving the run that contains the i2 ad.  In
-	// effect, this is a pivoting insertion sort.  Expected case is 0 runs need moved
-	// (but we handle anything).
-	var current_run=[], runs=[], pivot_run=-1, pivot_el=$i2_ad.nextAll('div[id^=firehose-]:first')[0];
-
-	// Fix element classes.  Accumulate runs.  Notice the run that contains the i2 ad.
-	$fhl_items.each(function( i ){ // Looping over elements in _document_ order.
-		story_class[this.id] && $(this).find('h3.story, h3.future').attr('className', story_class[this.id]);
-
-		// An item out-of-sequence starts a new run.
-		if ( current_run.length &&
-			order[this.id] != (i && $fhl_items[i-1].id)  ) {
-
-			runs.push($(current_run));
-			current_run=[];
+	// Re-insert movable runs after the tails they were intended to follow.
+	if ( tails.length > 1 ) {
+		var $tails = $(tails);
+		for ( var i=0; i < movable_runs.length; ++i ) {
+			var $run=movable_runs[i], prev=order[$run[0].id];
+			prev ? $tails.filter('#'+prev).after($run) : $fhl.prepend($run);
 		}
-		current_run.push(this);
-		this===pivot_el && (pivot_run=runs.length);
-	});
-	current_run.length && runs.push($(current_run));
-
-	// Re-order runs iff needed; earlier moves may obviate later ones.
-	if ( runs.length > 1 ) {
-		$.each(runs, function( i, $run ){
-			if ( i == pivot_run ) { return; }
-
-			var elid=$run[0].id, needed_prev=order[elid];
-			var $prev=$(elid).prevAll('div[id^=firehose-]:first'), prev=($prev.length && $prev[0].id);
-
-			if ( prev != needed_prev ) {
-				// To make this a more general-purpose reording tool, at this point expand $run to
-				// include _every_ child node of $fhl in sequence from the DOM element following
-				// (but not including) prev, up-to (and including) $run[ $run.length-1 ]. Don't
-				// need this now because the initial list already names every element (except the
-				// i2 ad).
-
-				needed_prev ? $any(needed_prev).after($run) : $fhl.prepend($run);
-			}
-		});
 		after_article_moved();
 	}
 
-	firehose_update_title_count(num_stories);
+	return $fhl;
 }
 
 function firehose_update_title_count(num) {
