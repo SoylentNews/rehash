@@ -1206,7 +1206,7 @@ function firehose_reorder( required_order ){
 
 	// Fix element classes.  Accumulate runs.  Notice the run that contains the i2 ad.
 	$fhl_items.each(function( i ){ // Looping over elements in _document_ order.
-		story_class[this.id] && $(this).find('h3').attr('className', story_class[this.id]);
+		story_class[this.id] && $(this).find('h3.story, h3.future').attr('className', story_class[this.id]);
 
 		// An item out-of-sequence starts a new run.
 		if ( current_run.length &&
