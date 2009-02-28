@@ -608,7 +608,7 @@ sub createUpdateItemFromBookmark {
 			}
 		}
 
-		if (!isAnon($bookmark->{uid})) {
+		if (!isAnon($bookmark->{uid}) && !$options->{no_nod}) {
 			my $constants = getCurrentStatic();
 			my $tags = getObject('Slash::Tags');
 			$tags->createTag({
@@ -1005,6 +1005,7 @@ sub getFireHoseEssentials {
 			push @sphinx_opts, "filter=tfhp," . $tagged_by_uid;
 			$sph->SetFilter('tfhp', [ $tagged_by_uid ]);
 		}
+		push @sphinx_where, 'inactivated IS NULL';
 	}
 	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
 		$tables .= ', tags';
@@ -1498,10 +1499,9 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 						map { s/\s*=\s*sphinx_search\.globjid/ $in/; $_ }
 						@sphinx_where;
 					my $sphwhere = join ' AND ', @sph_where;
-					$sphwhere = " AND $sphwhere" if $sphwhere;
 					$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
-						'sphinx_search.globjid',
-						$sphtables, "query=$query$sphwhere", $sphinx_other,
+						'globjid',
+						$sphtables, $sphwhere, $sphinx_other,
 						{ sql_no_cache => 1 });
 					$sphinx_stats = $sphinxdb->getSphinxStats;
 					print STDERR sprintf("%s sphinx:sph_check_sql: %d char where found %d\n",
@@ -3635,7 +3635,7 @@ sub getAndSetOptions {
 	if ($fhfilter =~ /\{nickname\}/) {
 		if (!$opts->{user_view}) {
 			if ($form->{user_view_uid}) {
-				$opts->{user_view} = $self->getUser($form->{user_view_id}) || $user;
+				$opts->{user_view} = $self->getUser($form->{user_view_uid}) || $user;
 			}
 		}
 		my $the_nickname = $opts->{user_view}{nickname};

@@ -194,7 +194,7 @@ cmdrtaco dot net but be forgiving of beta code!
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page last_day = last_day firehose_more_data = firehose_more_data %]
 <script type="text/javascript">
-	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color', 'view', 'tab', 'base_filter'] %]
+	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color', 'view', 'tab', 'base_filter', 'user_view_uid'] %]
 		[%- opt_value = options.$opt -%]
 		[% IF opt == 'startdate' %]
 			[% opt_value = opt_value.replace('-',''); %]
@@ -204,6 +204,13 @@ cmdrtaco dot net but be forgiving of beta code!
 	firehose_settings.issue = [% firehose.js_anon_dump(options.issue) %];
 	firehose_settings.section = [% firehose.js_anon_dump(section) %];
 	firehose_settings.metamod = [% form.metamod ? 1 : 0 %];
+	
+	[% IF featured && featured.id %]
+		firehose_settings.not_id = [% firehose.js_anon_dump(featured.id) %];
+	[% ELSIF options.not_id %]
+		firehose_settings.not_id = [% firehose.js_anon_dump(options.not_id) %];
+	[% END %]
+
 	[% IF fh_page == "console.pl" %]
 		firehose_settings.pageval = 1;
 	[% ELSIF fh_page == "users.pl" %]

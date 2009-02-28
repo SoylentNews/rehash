@@ -126,9 +126,9 @@ __template__
 	   level = Slash.parseDayBreakLevel(orig_day);
 	%]
 
-	[% IF level == 'day';
+	[% IF level == 'day' || level == 'hour';
 		max_days_ahead = options.smalldevices ? 1 : 2;
-		days = Slash.getOlderDaysFromDay(orig_day, -1, max_days_ahead); %]
+		days = Slash.getOlderDaysFromDay(orig_day, 0, max_days_ahead) %]
 		[% FOREACH cur_day = days %]
 	<span class="[% IF orig_day != cur_day.0; %]in[% END %]active">
 		<a [% IF !user.is_anon %]onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => -1 }); f; %]">[% cur_day.1 | strip_literal %]</a>

@@ -34,6 +34,7 @@ var firehose_settings = {};
   firehose_settings.tab = '';
   firehose_settings.fhfilter  = '';
   firehose_settings.base_filter = '';
+  firehose_settings.user_view_uid = '';
 
   firehose_settings.issue = '';
   firehose_settings.is_embedded = 0;
@@ -1122,7 +1123,7 @@ function firehose_handle_update() {
 		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
-		firehose_reorder();
+		firehose_reorder(firehose_ordered);
 		if (add_behind_scenes) {
 			$('#firehoselist h1.loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
 			$('.paginate').show();
@@ -1159,32 +1160,88 @@ function firehose_adjust_window(onscreen) {
 	}
 }
 
-function firehose_reorder() {
-	if (firehose_ordered) {
-		var fhlist = $('#firehoselist');
-		if (fhlist) {
-			firehose_item_count = firehose_ordered.length;
-			var moved = false;
-			for (i = 0; i < firehose_ordered.length; ++i) {
-				if (!/^\d+$/.test(firehose_ordered[i])) {
-					--firehose_item_count;
-				}
-				if ( $('#firehose-'+firehose_ordered[i]).appendTo(fhlist).length ) {
-					moved = true;
-				}
-				if ( firehose_future[firehose_ordered[i]] ) {
-					$('#ttype-'+firehose_ordered[i]).setClass('future');
-					$('#firehose-'+firehose_ordered[i] + " h3").setClass('future');
-				} else {
-					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
-					$('#firehose-'+firehose_ordered[i] + " h3.future").setClass('story');
-				}
-			}
-			if ( moved ) after_article_moved();
-			firehose_update_title_count(firehose_item_count);
-		}
+function firehose_reorder( required_order ){
+	// required_order is an ordered list of all firehose items.  It _does_ include
+	// day-breaks. It does _not_ include the i2 ad (and that of course is the problem).
+	// The document order of these elements might not match the order we want (as
+	// expressed by required_order). We're going to fix that, and we're going to do
+	// it without getting sued.
+	var $fhl, num_stories=0, story_class={}, order={}, prev=0;
+	if ( !required_order || !required_order.length || !($fhl=$any('firehoselist')).length ) {
+		return;
 	}
 
+	// Select the firehose items (in document order) mentioned in required_order.
+	var $fhl_items=$fhl.find(
+		// Build a selector like '>#firehose-27,>#firehose-342,>#firehose-2,...'.
+		// Since 1.3.2, jQuery is defined to return such a selection in document order.
+		$.map(required_order, function( fhid ){ // Looping over fhids in the _expected_ order.
+			var elid = 'firehose-'+fhid;
+			if ( /^\d+$/.test(fhid) ) {
+				++num_stories;
+				story_class[elid] = firehose_future[fhid] ? 'future' : 'story';
+			}
+			order[elid] = prev; // ...using prev==0 for the first item.  See $fhl_items.each, below.
+			prev = elid;
+			return '>#' + elid;
+		}).join(',')
+	);
+
+	if ( !$fhl_items.length ) {
+		return;
+	}
+
+	var $i2_ad = $fhl.find('>#floating-slashbox-ad');
+	// The i2 ad is high-maintenance.  We must not re-insert it, as that would re-run
+	// its scripts: counting as a page-view, charging accounts, etc.  Nor can we move
+	// anything that would make the i2 ad jump inappropriately.  Nor _should_ we insert
+	// new items between the i2 ad and the following article (they may be related).
+
+	// To reorder the list with these restrictions, we will avoid moving elements
+	// one-by-one.  Instead, we'll group runs of already-ordered items; then move whole
+	// runs in single actions --- without moving the run that contains the i2 ad.  In
+	// effect, this is a pivoting insertion sort.  Expected case is 0 runs need moved
+	// (but we handle anything).
+	var current_run=[], runs=[], pivot_run=-1, pivot_el=$i2_ad.nextAll('div[id^=firehose-]:first')[0];
+
+	// Fix element classes.  Accumulate runs.  Notice the run that contains the i2 ad.
+	$fhl_items.each(function( i ){ // Looping over elements in _document_ order.
+		story_class[this.id] && $(this).find('h3').attr('className', story_class[this.id]);
+
+		// An item out-of-sequence starts a new run.
+		if ( current_run.length &&
+			order[this.id] != (i && $fhl_items[i-1].id)  ) {
+
+			runs.push($(current_run));
+			current_run=[];
+		}
+		current_run.push(this);
+		this===pivot_el && (pivot_run=runs.length);
+	});
+	current_run.length && runs.push($(current_run));
+
+	// Re-order runs iff needed; earlier moves may obviate later ones.
+	if ( runs.length > 1 ) {
+		$.each(runs, function( i, $run ){
+			if ( i == pivot_run ) { return; }
+
+			var elid=$run[0].id, needed_prev=order[elid];
+			var $prev=$(elid).prevAll('div[id^=firehose-]:first'), prev=($prev.length && $prev[0].id);
+
+			if ( prev != needed_prev ) {
+				// To make this a more general-purpose reording tool, at this point expand $run to
+				// include _every_ child node of $fhl in sequence from the DOM element following
+				// (but not including) prev, up-to (and including) $run[ $run.length-1 ]. Don't
+				// need this now because the initial list already names every element (except the
+				// i2 ad).
+
+				needed_prev ? $any(needed_prev).after($run) : $fhl.prepend($run);
+			}
+		});
+		after_article_moved();
+	}
+
+	firehose_update_title_count(num_stories);
 }
 
 function firehose_update_title_count(num) {
