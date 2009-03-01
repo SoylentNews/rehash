@@ -2229,11 +2229,18 @@ function fix_ad_position(){
 	}
 }
 
+function is_ad_visible(){
+	if ( $ad_position.length ) {
+		var v=intersectBounds(topBottomAny($ad_position), topBottomAny(window));
+		return sign( v.bottom-v.top > 0 );
+	}
+	return 0;
+}
 
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 	api: {
-		is_visible:		function(){ return isInWindow($ad_position.children().get(0)); },
-		remove:			function(){ remove_ad() }
+		is_visible:		is_ad_visible,
+		remove:			remove_ad
 	},
 	stem_function: insert_ad
 });
@@ -2291,9 +2298,8 @@ Slash.Firehose.ready_ad_space = function( $articles ){
 	var $result = $([]);
 	try {
 		if ( !is_ad_locked ) {
-			var y=topBottomAdSpace(), w=topBottomAny(window);
-			y.top = Math.max(y.top, w.top);
-			y.bottom = Math.min(y.bottom, w.bottom)-AD_HEIGHT;
+			var y = intersectBounds(topBottomAdSpace(), topBottomAny(window));
+			y.bottom -= AD_HEIGHT;
 
 			$result = $articles.filter(function(){
 				return between(y.top, topAny(this), y.bottom)==0;

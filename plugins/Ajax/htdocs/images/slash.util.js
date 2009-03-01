@@ -457,10 +457,7 @@ var $dom = elemAny;
 function topLeftAny( expr ){
 	var top, left;
 
-	if ( typeof(expr) === 'number' ) {
-		top = expr;
-		typeof(arguments[1])==='number' && (left=arguments[1]);
-	} else if ( expr ) {
+	if ( expr ) {
 		var $expr=$any(expr), offset;
 		if ( $expr.length ) {
 			if ( $expr[0] === window ) {
@@ -480,34 +477,28 @@ function topLeftAny( expr ){
 function topAny( expr ){ return topLeftAny(expr).top; }
 function leftAny( expr ){ return topLeftAny(expr).left; }
 
-function _axisAny( name_for ){
-	return function( expr ){
-		var start, stop;
-		if ( typeof(expr) === 'number' ) {
-			start = expr;
-			if ( arguments.length==1 ) {
-				stop = start;
-			} else if ( typeof(argument[1])==='number' ) {
-				stop = arguments[1];
-			}
-		} else if ( expr ) {
-			var $expr=$any(expr), offset=topLeftAny($expr), span=$expr[name_for.op]();
-			if ( offset ) {
-				start = offset[name_for.start];
-				span !== undefined && (stop = start+span);
-			}
-		}
-
-		// always return a range, though the inner values may be undefined
-		var result = {};
-		result[name_for.start]=start;
-		result[name_for.stop]=stop;
-		return result;
-	};
+function boundsAny( expr ){
+	var $expr=$any(expr), topLeft=topLeftAny($expr), t=topLeft.top, l=topLeft.l, h, w;
+	if ( $expr.length ) {
+		h = $expr.height();
+		w = $expr.width();
+	}
+	return { top:t, left:l, bottom:h ? t+h : t, right:w ? l+w : l };
 }
 
-var topBottomAny = _axisAny({ start:'top', stop:'bottom', op:'height' });
-//var leftRightAny = _axisAny({ start:'left', stop:'right', op:'width' });
+var topBottomAny=boundsAny;
+
+function boundsOp( a, b ){
+	var answer = {};
+	$.each(this, function( k, v ){
+		k in a && k in b && (answer[k] = Math[v](a[k], b[k]));
+	});
+	return answer;
+}
+
+function intersectBounds( a, b ){
+	return boundsOp.apply( {top:'max', left:'max', bottom:'min', right:'min'}, arguments);
+}
 
 
 function inWindowAny( expr ){
