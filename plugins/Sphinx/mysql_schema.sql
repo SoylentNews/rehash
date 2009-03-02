@@ -1,6 +1,6 @@
 CREATE TABLE `sphinx_counter` (
   `src` smallint(5) unsigned NOT NULL,
-  `completion` int(10) unsigned NOT NULL,
+  `completion` int(10) unsigned default NULL,
   `last_seen` datetime NOT NULL,
   `started` datetime NOT NULL,
   `elapsed` int(10) unsigned default NULL,
