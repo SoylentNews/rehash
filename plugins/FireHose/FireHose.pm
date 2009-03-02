@@ -3169,9 +3169,7 @@ sub applyViewOptions {
 
 			foreach (@$ops) {
 				my($not, $op) = $_ =~/^(-?)(.*)$/;
-				print STDERR "CONSIDERING $op EXC\n";
 				next if $base_ops{$op};
-				print STDERR "APPLYING $op EXC\n";
 				
 				if ($validator->{type}{$_}) {
 					push @fh_exclusions, "-$op";
@@ -3184,9 +3182,8 @@ sub applyViewOptions {
 			if (@fh_exclusions) {
 				$viewfilter .= " ". (join ' ', @fh_exclusions)
 			}
-			print STDERR "FH EXCLUSIONS $user->{firehose_exclusions}\n";
 		}
-		print STDERR "FINAL view filter: $viewfilter\n";
+		$options->{view_filter} = $viewfilter;
 	}
 
 	foreach (qw(mode color duration orderby orderdir datafilter)) {
