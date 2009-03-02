@@ -31,13 +31,24 @@ __template__
 $(function(){
 var	$picker = $('#[% id %]'),
 	$swatch	= $picker.find('span.trigger-swatch'),
-	$menu	= $picker.find('ul.menu');
+	$menu	= $picker.find('ul.menu'),
+
+	colors		= 'red orange yellow green blue indigo violet black',
+	color_names	= colors.split(' '),
+	color_index	= {};
+
+$.each(color_names, function( i, name ){
+	color_index[name] = i;
+});
+function neighboring_color( cn, offset ){
+	return color_names[ pin_between(0, color_index[cn]+offset, color_names.length-1) ];
+}
 
 function color( expr, new_color ){
-	return expr && (expr.jQuery ? expr : $(expr)).data('color', new_color);
+	return expr && $any(expr).data('color', new_color);
 }
 function show_color( new_color ){
-	$swatch.removeClass(color($swatch)||'red orange yellow green blue indigo violet black').
+	$swatch.removeClass(color($swatch)||colors).
 		data('color', new_color).
 		addClass(new_color).
 		show().
@@ -45,7 +56,13 @@ function show_color( new_color ){
 			text($menu.find('li.'+new_color).text());
 }
 function save_color( new_color ){
-	(new_color && show_color(new_color));
+	var offset = arguments[arguments.length-1];
+	if ( typeof(offset)==='number' ) {
+		var start_color = arguments.length>1 ? new_color : color($picker);
+		new_color = neighboring_color(start_color, offset);
+	}
+
+	new_color && show_color(new_color);
 	return color($picker, new_color);
 }
 $picker.data('color_fn', save_color);
