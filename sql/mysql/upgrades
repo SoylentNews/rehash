@@ -5959,3 +5959,5 @@ ALTER TABLE shill_ids ENGINE=InnoDB;
 ALTER TABLE bookmark_feeds ADD COLUMN attended ENUM('no', 'yes') NOT NULL DEFAULT 'no';
 UPDATE bookmark_feeds SET attended='yes' WHERE feedname='ThinkGeek';
 
+INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions) VALUES (NULL, 0, "userhomepage", "User's Homepage", "no", '"home:{nickname}"', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "yes");
+

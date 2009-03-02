@@ -1043,6 +1043,9 @@ sub getFireHoseEssentials {
 				$tags->getTagnameidFromNameIfExists($_)
 			} @$labels;
 			push @where, "tags.tagnameid IN ($ids)";
+		} elsif ($options->{tagged_for_homepage}) {
+			$tables .= ',firehose_tfhp';
+			push @where, "firehose_tfhp.globjid=firehose.globjid AND firehose_tfhp.uid=$tag_by_uid_q";
 		}
 	}
 	my $columns = "firehose.*, firehose.popularity AS userpop";
@@ -3719,6 +3722,16 @@ sub getAndSetOptions {
 			$fh_options->{tagged_by_uid} = $uid;
 			$fh_options->{tagged_non_negative} = 1;
 #			$fh_options->{ignore_nix} = 1;
+		} elsif (/^home:/) {
+			my $nick = $_;
+			$nick =~ s/home://g;
+			my $uid;
+			if ($nick) {
+				$uid = $self->getUserUID($nick);
+			}
+			$uid ||= $user->{uid};
+			$fh_options->{tagged_by_uid} = $uid;
+			$fh_options->{tagged_for_homepage} = 1;
 		} elsif (/^tag:/) {
 			my $tag = $_;
 			$tag =~s/tag://g;
