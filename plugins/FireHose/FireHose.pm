@@ -1043,6 +1043,9 @@ sub getFireHoseEssentials {
 				$tags->getTagnameidFromNameIfExists($_)
 			} @$labels;
 			push @where, "tags.tagnameid IN ($ids)";
+		} elsif ($options->{tagged_for_homepage}) {
+			$tables .= ',firehose_tfhp';
+			push @where, "firehose_tfhp.globjid=firehose.globjid AND firehose_tfhp.uid=$tag_by_uid_q";
 		}
 	}
 	my $columns = "firehose.*, firehose.popularity AS userpop";
@@ -1287,7 +1290,7 @@ sub getFireHoseEssentials {
 				push @sphinx_opts, "!range=createtime_ut,0,$time_back";
 				
 				$sph->SetFilter('signoff', [ $user->{uid} ], 1) if $sphinx;
-				$sph->SetFilterRange('createtime_ut', 0, $time_back, 1);
+				$sph->SetFilterRange('createtime_ut', 0, $time_back, 1) if $sphinx;
 
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
@@ -2152,6 +2155,9 @@ sub genSetOptionsReturn {
 		}
 		$data->{eval_first} .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
 	}
+	my $fh_is_admin =  $user->{is_admin} && !$opts->{usermode} ? 1 : 0;
+
+	$data->{eval_first} .= "fh_is_admin = $fh_is_admin;";;
 	if ($opts->{viewref}) {
 		$data->{eval_first} .= "\$('#viewsearch').val(" . Data::JavaScript::Anon->anon_dump($opts->{viewref}{viewtitle}) . ");";
 		if ($opts->{viewref}{searchbutton} eq 'no') {
@@ -3716,6 +3722,16 @@ sub getAndSetOptions {
 			$fh_options->{tagged_by_uid} = $uid;
 			$fh_options->{tagged_non_negative} = 1;
 #			$fh_options->{ignore_nix} = 1;
+		} elsif (/^home:/) {
+			my $nick = $_;
+			$nick =~ s/home://g;
+			my $uid;
+			if ($nick) {
+				$uid = $self->getUserUID($nick);
+			}
+			$uid ||= $user->{uid};
+			$fh_options->{tagged_by_uid} = $uid;
+			$fh_options->{tagged_for_homepage} = 1;
 		} elsif (/^tag:/) {
 			my $tag = $_;
 			$tag =~s/tag://g;

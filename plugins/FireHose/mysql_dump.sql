@@ -61,6 +61,8 @@ INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter
 
 INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions) VALUES (NULL, 0, "userfirehose", "User's FireHose", "no", '"user:{nickname}"', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "no");
 
+INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions) VALUES (NULL, 0, "userhomepage", "User's Homepage", "no", '"home:{nickname}"', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "yes");
+
 INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions) VALUES (NULL, 0, "stories", "Stories", "yes", 'story', "createtime", "DESC", "black", "-1", "mixed", "yes", "yes", 30, 30, 0,"","yes", "yes");
 
 INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions) VALUES (NULL, 0, "recent", "Recent","yes", '-story', "createtime", "DESC", "blue", "7", "fulltitle", "yes", "yes", 50, 30, 0,"","yes", "yes");

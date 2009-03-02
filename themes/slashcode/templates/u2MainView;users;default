@@ -234,8 +234,8 @@ __template__
 
         [% ELSIF data_pane == 'comments' %]
                 [% PROCESS u2ListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
-
-        [% ELSIF data_pane == 'firehose' || data_pane == '';
+	%]
+        [% ELSIF data_pane == 'firehose';
                 fh = Slash.getObject("Slash::FireHose");
 		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userfirehose', user_view => useredit, not_id => not_fhid });
                 fhbox;
@@ -243,6 +243,11 @@ __template__
         [% ELSIF data_pane == 'usertag';
                 fh = Slash.getObject("Slash::FireHose");
 		fhbox = fh.listView({ fh_page => 'users.pl', view => 'usertag', user_view => useredit, not_id => not_fhid, tag => form.tagname });
+                fhbox;
+	%]
+        [% ELSIF data_pane == 'homepage' || data_pane == '';
+                fh = Slash.getObject("Slash::FireHose");
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userhomepage', user_view => useredit, not_id => not_fhid });
                 fhbox;
         END %]
         </div>
