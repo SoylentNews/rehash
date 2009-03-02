@@ -1208,7 +1208,7 @@ sub showInfo {
 		my $not_fhid;
 		if ((!$form->{dp}) || ($form->{dp} eq 'admin' && !$user->{is_admin})) {
 			$main_view = 1;
-			$form->{dp} = 'firehose';
+			$form->{dp} = 'homepage';
 			# Marquee is the "latest thing"
 			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
 			$firehose_marquee = $users2->getFireHoseMarquee($requested_user->{uid}, $requested_user->{shill_static_marquee});

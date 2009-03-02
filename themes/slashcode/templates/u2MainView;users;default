@@ -245,7 +245,7 @@ __template__
 		fhbox = fh.listView({ fh_page => 'users.pl', view => 'usertag', user_view => useredit, not_id => not_fhid, tag => form.tagname });
                 fhbox;
 	%]
-        [% ELSE;
+        [% ELSIF data_pane == 'homepage' || data_pane == '';
                 fh = Slash.getObject("Slash::FireHose");
 		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userhomepage', user_view => useredit, not_id => not_fhid });
                 fhbox;
