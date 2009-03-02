@@ -1287,7 +1287,7 @@ sub getFireHoseEssentials {
 				push @sphinx_opts, "!range=createtime_ut,0,$time_back";
 				
 				$sph->SetFilter('signoff', [ $user->{uid} ], 1) if $sphinx;
-				$sph->SetFilterRange('createtime_ut', 0, $time_back, 1);
+				$sph->SetFilterRange('createtime_ut', 0, $time_back, 1) if $sphinx;
 
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
