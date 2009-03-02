@@ -2152,6 +2152,9 @@ sub genSetOptionsReturn {
 		}
 		$data->{eval_first} .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
 	}
+	my $fh_is_admin =  $user->{is_admin} && !$opts->{usermode} ? 1 : 0;
+
+	$data->{eval_first} .= "fh_is_admin = $fh_is_admin;";;
 	if ($opts->{viewref}) {
 		$data->{eval_first} .= "\$('#viewsearch').val(" . Data::JavaScript::Anon->anon_dump($opts->{viewref}{viewtitle}) . ");";
 		if ($opts->{viewref}{searchbutton} eq 'no') {
