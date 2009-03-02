@@ -3841,14 +3841,12 @@ sub getAndSetOptions {
 		if ($options->{stories_mainpage}) {
 			if(!$form->{issue}) {
 				$options->{duration} = "-1";
-				$options->{startdate} = '';
 				$options->{mode} = "mixed";
 			}
 		}
 
 		if ($options->{stories_sectional}) {
 			$options->{duration} = "-1";
-			$options->{startdate} = '';
 			$options->{mode} = 'full';
 		}
 		
