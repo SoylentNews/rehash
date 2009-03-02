@@ -1102,8 +1102,15 @@ sub getFireHoseEssentials {
 
 			if ($options->{filter}) {
 				# sanitize $options->{filter};
-				$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
-				push @where, "firehose_text.title LIKE '%$options->{filter}%'";
+				$options->{filter} =~ s/[^a-zA-Z0-9_ -]+//g;
+				$options->{filter} =~ s/^\s+|\s+$//g;
+
+				foreach my $filter (split(/\s+/, $options->{filter})) {
+					my $neg = "";
+					$neg = "NOT" if $filter =~/^-/;
+					$filter =~ s/^-//g;
+					push @where, "firehose_text.title $neg LIKE '%$filter%'";
+				}
 			}
 
 			if ($options->{fetch_text}) {
@@ -3717,11 +3724,11 @@ sub getAndSetOptions {
 			$tag =~s/tag://g;
 			$fh_options->{tagged_as} = $tag;
 		} else {
-			if (!defined $fh_options->{filter}) {
-				$fh_options->{filter} = $_;
-				$fh_options->{filter} =~ s/[^a-zA-Z0-9_-]+//g;
-				$fh_options->{filter} = "-" . $fh_options->{filter} if $not;
-			}
+			my $filter_word = $_;
+			$filter_word =~ s/[^a-zA-Z0-9_-]+//g;
+			$filter_word = "-" . $filter_word if $not;
+			$fh_options->{filter} .= "$filter_word ";
+			
 			# Don't filter this
 			$fh_options->{qfilter} .= $_ . ' ';
 			$fh_options->{qfilter} = '-' . $fh_options->{qfilter} if $not;
