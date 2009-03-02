@@ -115,6 +115,27 @@ __template__
 		END;
 	END %]
 
+[% ELSIF options.duration == -1 && sphinx && firehose_more_data && firehose_more_data.day_label && !firehose_more_data.future_count %]
+	<span class="inactive">
+		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', ''); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
+	</span>
+	<span class="active">
+		[% IF !user.is_anon; PROCESS fhcolor_picker id='footer-color-picker' %]
+		<script type="text/javascript">
+			$(function(){
+				var $picker = $any('footer-color-picker'),
+				swatch_color = $picker.data('color_fn'); // getter/setter
+				swatch_color(firehose_settings.color, +1); // start "deeper" by one color
+				$picker.bind('change', function( e, color ){
+					firehose_set_options('color', color); // action on picking a new color
+				}).
+					find('ul.menu').
+					menu('option', 'clickToHover', false); // act like a button, please
+			});
+		</script>
+		[% END %]
+	</span>
+
 [% ELSIF options.duration == -1  %]
 	[% orig_day = last_day; level = 'day';
 	   FOREACH item = items;

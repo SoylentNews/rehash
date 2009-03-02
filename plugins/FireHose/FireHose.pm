@@ -1566,9 +1566,11 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 
 	my $sphinx_stats_tf = '';
 	if ($sphinx) {
+		$results->{sphinx} = 1;
 		$count ||= $sphinx_stats->{'total found'};
 		$sphinx_stats_tf = $sphinx_stats->{'total found'};
 	} else {
+		$results->{sphinx} = 0;
 		$sdebug_count_elapsed = Time::HiRes::time;
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
 		my $row_num = @$rows;
@@ -2419,6 +2421,7 @@ sub ajaxFireHoseGetUpdates {
 
 
 	$html->{'fh-paginate'} = slashDisplay("paginate", {
+		sphinx             => $results->{sphinx},
 		items              => $items,
 		contentsonly       => 1,
 		day                => $last_day,
