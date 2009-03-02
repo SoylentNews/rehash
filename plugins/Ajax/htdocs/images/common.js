@@ -1188,7 +1188,8 @@ function firehose_reorder( required_order ){
 	}
 
 	// Build a selector for the elements corresponding to required_order.
-	var order={}, i2ad_pos=-1, prev=0, elid, select_required=['#floating-slashbox-ad'].concat(
+	var order={}, i2ad_pos=required_order.length, prev=0, elid;
+	var select_required = ['#floating-slashbox-ad'].concat(
 		$.map(required_order, function( fhid ){
 			order[elid='firehose-'+fhid] = prev;
 			return '#' + (prev=elid);
