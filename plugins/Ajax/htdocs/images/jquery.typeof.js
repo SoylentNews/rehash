@@ -61,6 +61,7 @@ function _typeOf( o, unadorned ){
 	var otn, itn, utn, tn =
 		typeOfUnique[ o ]
 		|| typeOfObject[ otn=toString.call(o) ]
+		|| typeof(o.__typeOf)==='function' && o.__typeOf(unadorned)
 		|| !(itn=typeOfIndexedObject[otn]) && _inheritsProperty(o, 'nodeType') && (typeOfNode[o.nodeType] || 'node');
 
 	if ( tn ) {
