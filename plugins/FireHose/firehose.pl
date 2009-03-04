@@ -40,7 +40,6 @@ sub main {
 	my $op = $form->{op} || "";
 	
 	my $rss = $op eq "rss" && $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
-
 	
 	if ($form->{logtoken} && !$rss) {
 		redirect($ENV{SCRIPT_NAME});
@@ -118,6 +117,7 @@ sub main {
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	slashProfInit();
+	$form->{view} ||= "recent" if !$form->{fhfilter} && !$form->{section} && !$form->{color};
 	my $firehose = getObject("Slash::FireHose");
 	print $firehose->listView();
 	slashProfEnd();
