@@ -4517,7 +4517,7 @@ sub linkFireHose {
 		my $the_user = $self->getUser($item->{uid});
 		my $rootdir = $constants->{real_rootdir};
 		if ($the_user->{shill_id}) {
-			my $shill = $reader->getShillInfo($the_user->{shill_id});
+			my $shill = $self->getShillInfo($the_user->{shill_id});
 			if ($shill->{skid}) {
 				my $shill_skin = $self->getSkin($shill->{skid});
 				$rootdir = $shill_skin->{rootdir};
