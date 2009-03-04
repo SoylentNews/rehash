@@ -26,13 +26,15 @@ $('#slashboxes').
 		update: save_slashboxes	// ...and save their new order
 	}).
 	find('> div.block > div.title > h4').	// add closeboxes...
-		append('<span class="closebox">x</span>').
-		find('span.closebox').
-			click(function(){	// ...that close; save new state
-				$(this).closest('div.block').remove();
-				save_slashboxes();
-				after_article_moved();
-			});
+		append('<span class="closebox">x</span>');
+
+// .live() requires a selector ... no context, and so no $(...).find()
+$('#slashboxes h4 span.closebox').
+	live('click', function(){
+		$(this).closest('div.block').remove();
+		save_slashboxes();
+		after_article_moved();
+	});
 
 });
 
