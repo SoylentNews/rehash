@@ -4515,7 +4515,16 @@ sub linkFireHose {
 		$link_url = $story_link_ar->[0];
 	} elsif ($item->{type} eq "journal") {
 		my $the_user = $self->getUser($item->{uid});
-		$link_url = $constants->{real_rootdir} . "/~" . fixparam($the_user->{nickname}) . "/journal/$item->{srcid}";
+		my $rootdir = $constants->{real_rootdir};
+		if ($the_user->{shill_id}) {
+			my $shill = $reader->getShillInfo($the_user->{shill_id});
+			if ($shill->{skid}) {
+				my $shill_skin = $self->getSkin($shill->{skid});
+				$rootdir = $shill_skin->{rootdir};
+			}
+		}
+		$link_url = $rootdir . "/~" . fixparam($the_user->{nickname}) . "/journal/$item->{srcid}";
+
 	} elsif ($item->{type} eq "comment") {
 		my $com = $self->getComment($item->{srcid});
 		$link_url = $gSkin->{rootdir} . "/comments.pl?sid=$com->{sid}&amp;cid=$com->{cid}";
