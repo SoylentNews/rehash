@@ -32,6 +32,7 @@ for my $d2_filename (@fh_delta2_files) {
 		# If a firehose_delta2.* file has been touched in
 		# the last minute, indexer is clearly being run, so
 		# we're done.
+		print "OK\n";
 		exit OK;
 	}
 	$last_touch = $age_secs if $age_secs < $last_touch;
@@ -43,6 +44,7 @@ for my $d2_filename (@fh_delta2_files) {
 my $t = new Proc::ProcessTable;
 for my $p (@{ $t->table }) {
 	if ($p->cmndline =~ m{/usr/local/sphinx/bin/indexer}) {
+		print "OK\n";
 		exit OK;
 	}
 }
