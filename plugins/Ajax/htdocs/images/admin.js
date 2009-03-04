@@ -19,20 +19,25 @@ function um_set_settings(behavior) {
 	}, 'links-vendors-content');
 }
 
-function tagsHistory(id, type) {
+function tagsHistory( selector_fragment, context ) {
+	var $entry =  $('[tag-server='+selector_fragment+']');
+	var type = $entry.article_info('type');
+	var id = $entry.id;
+
+
 	var params = {};
-	type = type || "stories";
+	(!type || type==='story') && (type = 'stories');
+
 	params.type = type;
 	params.op = 'tags_history';
 	if (type == "stories") {
-		params.sidenc = id;
+		params.id = $entry.article_info('stoid');
 	} else if (type == "urls" || type == "firehose") {
-		params.id = id;
+		params.id = selector_fragment;
 	}
 
 	var $positioners;
-	if ( type == 'firehose' ) {
-		var $entry = $('#firehose-'+id);
+	if ( context == 'firehose' ) {
 		var $widget = $entry.find('div.tag-widget.body-widget:first');
 
 		// hang the pop-up from the first available of:
@@ -40,7 +45,7 @@ function tagsHistory(id, type) {
 			$widget.find('.history-button').		// the history button
 				add($related_trigger).			// whatever you clicked
 				add($widget.find('.edit-toggle')).	// the disclosure triangle
-				add($entry.find('#updown-'+id));	// the nod/nix capsule
+				add($entry.find('#updown-'+selector_fragment));	// the nod/nix capsule
 	} else {
 		$positioners = $('#taghist-'+id);
 	}
