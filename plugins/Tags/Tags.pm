@@ -1204,13 +1204,8 @@ sub ajaxTagHistory {
 	my $globjid;
 	my $id;
 	my $table;
-	if ($form->{type} eq "stories") {
-		my $sidenc = $form->{sidenc};
-		my $sid = $sidenc; $sid =~ tr{-}{/};
-		$id = $slashdb->getStoidFromSid($sid);
-		$table = "stories"
-	} elsif ($form->{type} eq "urls") {
-		$table = "urls";	
+	if ($form->{type} =~ /^(stories|urls)$/) {
+		$table = $form->{type};
 	} elsif ($form->{type} eq "firehose") {
 		my $itemid = $form->{id};
 		my $firehose = getObject("Slash::FireHose");
