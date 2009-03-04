@@ -1603,7 +1603,7 @@ sub saveModalPrefs {
 				} elsif ($view->{viewname} eq "popular") {
 					$params{orderby} = "popularity";
 					$params{orderdir} = "DESC";
-				} elsif ($view->{viewname} eq "search") {
+				} elsif ($view->{viewname} eq "search" || $view->{viewname} eq "stories") {
 					$params{orderby} = "createtime";
 					$params{orderdir} = "DESC";
 				}

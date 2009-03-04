@@ -69,12 +69,13 @@ __template__
 
 
 
-[% UNLESS view.viewname == "search" %]
+[% UNLESS view.viewname == "search" || view.viewname == "stories" %]
 	<p [% IF view.viewname == "popular" || view.viewname == "recent" %]style="color:#aaa"[% END %]>
-	<strong>Sort</strong> <input type="checkbox" name="sortasc"[% asc_check %] [% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %]> Ascending,
+	<strong>Sort</strong> 
 	<strong>By</strong> 
 	Score <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'popularity' || view.viewname == "popular" %][% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %] value="popularity">
-	Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' || view.viewname == "recent" %][% IF view.viewname == "recent" || view.viewname == "popular" %] disabled="true" [% END %] value="createtime"><br>
+	Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' || view.viewname == "recent" %][% IF view.viewname == "recent" || view.viewname == "popular" %] disabled="true" [% END %] value="createtime">>
+	<input type="checkbox" name="sortasc"[% asc_check %] [% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %]> Ascending
 	</p>
 [% END %]
 
