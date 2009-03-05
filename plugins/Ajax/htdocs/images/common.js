@@ -612,7 +612,7 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 		if ( if_expanded ){
 			$server.each(function(){ this.fetch_tags(); });
 			fh_is_admin && firehose_get_admin_extras(id);
-			$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
+			$widget.find('.tag-entry:visible:first').focus();
 		}
 
 		$widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
@@ -1869,7 +1869,7 @@ function firehose_go_next() {
 	} else {
 	}
 	firehose_set_cur(firehose_ordered[pos]);
-	scrollWindowToFirehose(firehose_cur);
+	scrollWindowToFirehose(firehose_get_cur());
 }
 
 function firehose_go_prev() {
@@ -1879,7 +1879,7 @@ function firehose_go_prev() {
 		pos--;
 	}
 	firehose_set_cur(firehose_ordered[pos]);
-	scrollWindowToFirehose(firehose_cur);
+	scrollWindowToFirehose(firehose_get_cur());
 
 }
 
@@ -2352,3 +2352,71 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 }
 
 })(Slash.jQuery);
+
+$(function(){
+	// firehose only!
+	var validkeys = {};
+	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/) && fh_is_admin) {
+		validkeys = {
+			'X' : {           tags    : 1, signoff : 1 },
+			'Z' : {           tags    : 1, tag     : 1 },
+			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 }, // 61, 107
+			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 }, // 109
+
+//			219 : { chr: '[', color   : 1, down    : 1 },
+//			221 : { chr: ']', color   : 1, up      : 1 },
+
+//			'T' : {           top     : 1 },
+//			'V' : {           bottom  : 1 },
+			'G' : {           more    : 1 },
+			'Q' : {           toggle  : 1 },
+			'S' : {           next    : 1 },
+			'W' : {           prev    : 1 },
+
+			27  : { form: 1,  unfocus : 1 } // esc
+		};
+		validkeys['H'] = validkeys['A'] = validkeys['K'] = validkeys['W'];
+		validkeys['L'] = validkeys['D'] = validkeys['J'] = validkeys['S'];
+		validkeys[107] = validkeys[61] = validkeys[187];
+		validkeys[109] = validkeys[189];
+	}
+
+	$(document).keyup(function( e ) {
+		var c    = e.which;
+		var key  = validkeys[c] ? c : String.fromCharCode(c);
+		var keyo = validkeys[key];
+
+		if (!keyo)
+			return true;
+
+		// if keyo.form, only work on form elements; if not, then
+		// never work on form elements.
+		// "type" should handle all our cases here.
+		if (!keyo.form && e.target && e.target.type)
+			return true;
+		if (keyo.form && (!e.target || !e.target.type))
+			return true;
+
+		if (keyo.tags) {
+			var el = $dom('firehose-' + firehose_get_cur());
+
+			if (keyo.signoff) { el.submit_tags('signoff') }
+			if (keyo.nod)     { el.submit_tags('nod')     }
+			if (keyo.nix)     { el.submit_tags('nix')     }
+			if (keyo.tag)     {
+				firehose_toggle_tag_ui_to(true, el);
+				$('.tag-entry:visible:first', el).focus();
+			}
+
+		} else {
+			if (keyo.unfocus)  { $(e.target).blur() }
+			if (keyo.next)     { firehose_go_next() }
+			if (keyo.prev)     { firehose_go_prev() }
+			if (keyo.more)     { firehose_more()    }
+			if (keyo.toggle)   { toggle_firehose_body(firehose_get_cur(), 0) }
+		}
+
+		return false;
+	});
+});
+

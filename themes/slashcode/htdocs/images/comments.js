@@ -1754,8 +1754,8 @@ $(window).bind('beforeunload', updateReadComments);
 /* keys
 prev comment: A, H
 next comment: D, L
-prev thread: W, J
-next thread: S, K
+prev thread: W, K
+next thread: S, J
 prev comm chrono: Q
 next comm chrono: E
 next unread comm: F
@@ -1801,8 +1801,8 @@ var validkeys = {
 
 validkeys['H'] = validkeys['A'];
 validkeys['L'] = validkeys['D'];
-validkeys['J'] = validkeys['S'];
 validkeys['K'] = validkeys['W'];
+validkeys['J'] = validkeys['S'];
 
 //testing
 //validkeys['1'] = validkeys['['];

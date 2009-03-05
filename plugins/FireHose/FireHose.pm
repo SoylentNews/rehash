@@ -420,18 +420,38 @@ sub getViewUserPrefs {
 	
 }
 
+{
+my $color_str = 'red|orange|yellow|green|blue|indigo|violet|black';
+my $color_a = [ split(/\|/, $color_str) ];
+my $color_h = {};
+my $i = 0;
+$color_h->{$_} = ++$i for @$color_a;
+
 sub getFireHoseColors {
 	my($self, $array) = @_;
-	my $constants = getCurrentStatic();
-	my $color_str = $constants->{firehose_color_labels};
-	my @colors = split(/\|/, $color_str);
-	return \@colors if $array;
-	my $colors = {};
-	my $i=1;
-	foreach (@colors) {
-		$colors->{$_} = $i++;
+	return $color_a if $array;
+	return $color_h;
+}
+
+sub getFireHoseColor {
+	my($self, $color) = @_;
+	if ($color =~ /\D/) {
+		return $color_h->{$color} || scalar @$color_a;
+	} else {
+		my $i = $color-1;
+		$i = 0 if $i < 0;
+		return $color_a->[$i] || $color_a->[-1];
 	}
-	return $colors;
+}
+
+sub getFireHoseColorDelta {
+	my($self, $start, $delta) = @_;
+	my $color = $start =~ /\D/ ? $self->getFireHoseColor($start) : $start;
+
+	my $i = ($color-1) + $delta;
+	$i = 0 if $i < 0;
+	return $color_a->[$i] || $color_a->[-1];
+}
 }
 
 sub createUpdateItemFromComment {
@@ -1308,14 +1328,19 @@ sub getFireHoseEssentials {
 				my $days_relevant = 30;
 
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
-				push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $days_relevant DAY)";
+				push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $days_relevant DAY)"
+;#					if $options->{type} eq 'story';
 
-				my $time_back = $cur_time - (86400 * $days_relevant);
-				push @sphinx_opts, "!filter=signoff,$user->{uid}" if $sphinx;
-				push @sphinx_opts, "!range=createtime_ut,0,$time_back";
-				
-				$sph->SetFilter('signoff', [ $user->{uid} ], 1) if $sphinx;
-				$sph->SetFilterRange('createtime_ut', 0, $time_back, 1) if $sphinx;
+				if ($sphinx) {
+					push @sphinx_opts, "!filter=signoff,$user->{uid}";
+					$sph->SetFilter('signoff', [ $user->{uid} ], 1);
+
+#					if ($options->{type} eq 'story') {
+						my $time_back = $cur_time - (86400 * $days_relevant);
+						push @sphinx_opts, "!range=createtime_ut,0,$time_back";
+						$sph->SetFilterRange('createtime_ut', 0, $time_back, 1);
+#					}
+				}
 
 			} elsif ($options->{signed}) {
 				push @where, "signoffs LIKE '%$signoff_label%'";
@@ -1591,9 +1616,11 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 
 	my $sphinx_stats_tf = '';
 	if ($sphinx) {
+		$results->{sphinx} = 1;
 		$count ||= $sphinx_stats->{'total found'};
 		$sphinx_stats_tf = $sphinx_stats->{'total found'};
 	} else {
+		$results->{sphinx} = 0;
 		$sdebug_count_elapsed = Time::HiRes::time;
 		my $rows = $self->sqlSelectAllHashrefArray("COUNT(*) AS c", $tables, $where, $count_other);
 		my $row_num = @$rows;
@@ -2444,6 +2471,7 @@ sub ajaxFireHoseGetUpdates {
 
 
 	$html->{'fh-paginate'} = slashDisplay("paginate", {
+		sphinx             => $results->{sphinx},
 		items              => $items,
 		contentsonly       => 1,
 		day                => $last_day,
