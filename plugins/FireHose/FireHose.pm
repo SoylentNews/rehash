@@ -421,7 +421,8 @@ sub getViewUserPrefs {
 }
 
 {
-my $color_str = 'red|orange|yellow|green|blue|indigo|violet|black';
+my $constants = getCurrentStatic();
+my $color_str = $constants->{firehose_color_labels};
 my $color_a = [ split(/\|/, $color_str) ];
 my $color_h = {};
 my $i = 0;
