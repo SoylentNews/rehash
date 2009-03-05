@@ -81,6 +81,7 @@ CREATE TABLE firehose_section (
 	skid SMALLINT UNSIGNED NOT NULL DEFAULT 0,
 	display ENUM("yes","no") DEFAULT 'yes',
 	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
+	section_color VARCHAR(16) NOT NULL DEFAULT '',
 	ordernum tinyint DEFAULT '0',
 	PRIMARY KEY (fsid)
 ) ENGINE=InnoDB;
@@ -94,6 +95,7 @@ CREATE TABLE firehose_section_settings (
 	section_filter VARCHAR(255) NOT NULL DEFAULT '',
 	display ENUM("yes","no") DEFAULT 'yes',
 	view_id mediumint(8) unsigned NOT NULL DEFAULT 0,
+	section_color VARCHAR(16) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	UNIQUE uid_fsid (uid,fsid)
 ) ENGINE=InnoDB;

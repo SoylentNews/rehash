@@ -1974,14 +1974,18 @@ function save_the_unsaved_section( requested, fn ){
 				reskey:		reskey_static,
 
 				name:		requested.name,
+				color:		requested.color,
 				fhfilter:	requested.filter,
-				view_id:	requested.view
+				view_id:	requested.view,
+
+				as_default:	requested.as_default
 
 			}, '', { onComplete: function( transport ){
 				var response = eval_response(transport);
 				if ( response && response.li ) {
 					var	was_active	= $unsaved.is('.active'),
-						$saved		= $(response.li);
+						$saved		= $(response.li),
+						md		= $saved.metadata();
 					$unsaved.before($saved).remove();
 					(was_active && firehose_highlight_section($saved));
 					saveFirehoseSectionMenu();

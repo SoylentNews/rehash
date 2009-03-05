@@ -1827,7 +1827,7 @@ Hashref of cleaned-up data.
 		buymore cid clbig clsmall cm_offset
 		commentlimit commentsort commentspill
 		del displaystatus limit
-		filter_id hbtm height highlightthresh
+		filter_id firehose_default_section hbtm height highlightthresh
 		issue last maillist max
 		maxcommentsize maximum_length maxstories
 		min min_comment minimum_length minimum_match next

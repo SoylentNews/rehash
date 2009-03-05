@@ -1,13 +1,17 @@
 ; // $Id$
 
 $(function(){
-	$('#firehose-sections').
-		sortable({				// make sections sortable...
-			axis: 'y',
-			containment: '#links-sections',
-			opacity: 0.8,
-			update: saveFirehoseSectionMenu	// ...and save their new order
-		});
+var $fhs = $any('firehose-sections');
+
+$fhs.metadata({ type:'elem', name:'script' });	// force metadata initialization
+$fhs.children('script[type=data]').remove();	// and delete the element that delivered it to us
+
+$fhs.sortable({				// make sections sortable...
+		axis: 'y',
+		containment: '#links-sections',
+		opacity: 0.8,
+		update: saveFirehoseSectionMenu	// ...and save their new order
+	});
 });
 
 function saveFirehoseSectionMenu(){

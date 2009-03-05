@@ -28,13 +28,19 @@ __template__
 END %]
 [% cur_section = fh.determineCurrentSection() %]
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
+[% default_section_id = constants.mainpage_skid %]
+[% IF !user.is_anon && user.firehose_default_section; default_section_id = user.firehose_default_section; END %]
 <ul id="firehose-sections">
+	<script type="data">{ active_id:[% cur_section_id %], default_id:[% default_section_id %] }</script>
 	[% FOREACH fh_section= sections %]
 		[% hide = 0 %]
 		[% IF fh_section.user_display; fh_section.display = fh_section.user_display; END %]
 		[% IF fh_section.user_section_name; fh_section.section_name = fh_section.user_section_name; END %]
+		[% IF fh_section.user_section_color; fh_section.user_section_color = fh_section.user_section_color; END %]
 		[% is_active = 0 %]
 		[% IF fh_section.fsid == cur_section_id; is_active = 1; END %]
+		[% is_default = 0 %]
+		[% IF cur_section_id == default_section_id; is_default = 1; END %]
 		[% IF (fh_section.display == "no" && is_active == 0); hide=1; END %]
 		[% link_loc = gskin.rootdir _ "/index2.pl?section=" _ fh_section.fsid %]
 		[% IF fh_section.skid %]
@@ -43,40 +49,49 @@ END %]
 				link_loc = the_skin.rootdir;
 			   END %]
 		[% END %]
-		<li [% IF is_active %] class="active"[% ELSIF hide %] class="hide"[% END %] id="fhsection-[% fh_section.fsid %]"><a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]">[% fh_section.section_name %]</a>[% IF !user.is_anon && !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
+		<li class="[% IF is_active %]active[% ELSIF hide %]hide[% END %][% IF is_default %] default[% END %]" id="fhsection-[% fh_section.fsid %]">
+			<a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !user.is_anon %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
+			[% IF !user.is_anon && !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
 		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
 	[% END %]
 </ul>
 [% IF !user.is_anon && (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" %]<script type="text/javascript">
 $(function(){
-$.metadata.setType('elem', 'script');
-$('#firehose-sections').
-		click(function( event ){
-			var	$target		= $(event.originalTarget),
-				$li		= $target.closest('li[id^=fhsection-]'),
-				section_id	= $li.metadata().id,
-				is_unsaved	= section_id === 'unsaved',
-				is_edit		= $target.closest('a.links-sections-edit').length;
-
-			if ( is_edit && is_unsaved ) {
-				edit_the_unsaved_section();
-			} else if ( is_edit ) {
-				getModalPrefs('firehoseview','Save Custom Section', 0, { id: section_id });
-			} else if ( is_unsaved ) {
-				firehose_set_options('setfhfilter', $li.metadata().filter);
-				firehose_set_options('view', $li.metadata().viewname);
+$any('firehose-sections').mousedown(function( event ){
+		// select a section on mousedown
+		var $section = $(event.originalTarget).closest('li[id^=fhsection-]');
+		if ( !$section.is('.active') ) {
+			var section = $section.metadata();
+			if ( section.id === 'unsaved' ) {
+				firehose_set_options('setfhfilter', section.filter);
+				firehose_set_options('view', section.viewname);
+				section.color && firehose_set_options('color', section.color);
 			} else {
-				firehose_set_options('section', section_id);
+				firehose_set_options('section', section.id);
 			}
-			return false;
-		}).
-		find('>li').
-			each(function(){
-				var md = $(this).metadata();
-			}).
-			find('a').
-				removeAttr('href');
+		}
+		// allow other handlers to run
+	}).
+	click(function( event ){
+		// edit only for a click in the edit button
+		var $edit = $(event.originalTarget).closest('a.links-sections-edit');
+		if ( $edit.length ) {
+			var section = $edit.closest('li[id^=fhsection-]').metadata();
+			if ( section.id === 'unsaved' ) {
+				edit_the_unsaved_section();
+			} else {
+				getModalPrefs('firehoseview','Save Custom Section', 0, { id: section.id });
+			}
+		}
+		return false;
+	}).
+	find('>li').
+		each(function(){
+			var $this = $(this);
+			$this.metadata({type:'elem', name:'script'}); // force metadata initialization
+			$this.children('script[type=data]').remove(); // and get rid of the (now useless) elem that delivered it to us
+		});
 });
 </script>[% END %]
 __seclev__

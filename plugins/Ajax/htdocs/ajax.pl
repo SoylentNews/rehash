@@ -1747,6 +1747,7 @@ sub saveModalPrefs {
 		my $data = {
 			uid 	=> $user->{uid},
 			section_name => $params{'section_name'},
+			section_color => $params{'section_color'},
 			section_filter => $params{'section_filter'},
 			view_id	=> $params{'viewid'}
 		};

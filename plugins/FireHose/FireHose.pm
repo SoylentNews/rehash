@@ -156,6 +156,11 @@ sub setFireHoseSectionPrefs {
 	my $cur_section = $self->getFireHoseSection($id);
 	return if $user->{is_anon} || !$cur_section;
 
+	if ( $data->{section_default} ) {
+		my $slashdb = getCurrentDB();
+		$slashdb->setUser($user->{uid}, {firehose_default_section => $cur_section->{fsid}});
+	}
+
 	if ($cur_section->{uid} == $user->{uid}) {
 
 		$self->sqlUpdate("firehose_section", $data, "fsid = $cur_section->{fsid}");
@@ -217,17 +222,24 @@ sub removeUserSections {
 	my $uid_q = $self->sqlQuote($user->{uid});
 	$self->sqlDelete("firehose_section_settings", "uid=$uid_q");
 	$self->sqlDelete("firehose_section", "uid=$uid_q");
+	$self->setUser($user->{uid}, { firehose_default_section => undef });
 	
 }
 
 sub getFireHoseSectionsMenu {
-	my($self) = @_;
+	my($self, $fsid) = @_;
 	my $user = getCurrentUser();
 	my($uid_q) = $self->sqlQuote($user->{uid});
+
+	my $fsid_limit;
+	if ($fsid) {
+		my $fsid_q = $self->sqlQuote($fsid);
+		$fsid_limit = " AND firehose_section.fsid=$fsid_q ";
+	}
 	my $sections = $self->sqlSelectAllHashrefArray(
-		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name, firehose_section_settings.section_filter AS user_section_filter, firehose_section_settings.view_id AS user_view_id", 
+		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name, firehose_section_settings.section_filter AS user_section_filter, firehose_section_settings.view_id AS user_view_id, firehose_section_settings.section_color AS user_section_color",
 		"firehose_section LEFT JOIN firehose_section_settings on firehose_section.fsid=firehose_section_settings.fsid AND firehose_section_settings.uid=$uid_q", 
-		"firehose_section.uid in (0,$uid_q)", 
+		"firehose_section.uid in (0,$uid_q) $fsid_limit",
 		"ORDER BY uid, ordernum, section_name"
 	);
 
@@ -241,6 +253,7 @@ sub getFireHoseSectionsMenu {
 		my $viewname = $view->{viewname} || "stories";
 
 		$_->{data}{viewname} 	= $viewname;
+		$_->{data}{color}	= $_->{user_section_color} ? $_->{user_section_color} : $_->{section_color};
 	}
 
 	if (!$user->{firehose_section_order}) {
@@ -279,6 +292,11 @@ sub ajaxSaveHideSectionMenu {
 	$slashdb->setUser($user->{uid}, {firehose_hide_section_menu => $hide});
 }
 
+sub ajaxSetFireHoseDefaultSection {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$slashdb->setUser($user->{uid}, {firehose_default_section => $form->{default_section}});
+}
+
 sub ajaxDeleteFireHoseSection {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	my $fh = getObject("Slash::FireHose");
@@ -297,20 +315,27 @@ sub ajaxNewFireHoseSection {
 	return if $user->{is_anon};
 	my $data = {
 		section_name	=> $form->{name},
+		section_color	=> $form->{color},
 		section_filter	=> $form->{fhfilter},
 		uid		=> $user->{uid},
 		view_id		=> $form->{view_id}||0
 	};
 
-	my $id = $fh->createFireHoseSection($data);
+	my $fsid = $fh->createFireHoseSection($data);
 	
 	my $data_dump = {};
 
-	if ($id) {
-		$data_dump =  Data::JavaScript::Anon->anon_dump({
-			id 	=> $id,
-			li	=> getData('newsectionli', { id => $id, name => $form->{name} }, 'firehose')
+	if ($fsid) {
+		if ( $data->{as_default} ) {
+			$slashdb->setUser($user->{uid}, {firehose_default_section => $fsid});
+		}
 
+		my $res = $fh->getFireHoseSectionsMenu($fsid);
+		my $fh_section = $res->[0];
+
+		$data_dump =  Data::JavaScript::Anon->anon_dump({
+			id 	=> $fsid,
+			li	=> getData('newsectionli', { id => $fsid, name => $form->{name}, fh_section => $fh_section }, 'firehose')
 		});
 	}
 	return $data_dump;
@@ -3125,7 +3150,7 @@ sub applyUserSectionPrefs {
 	if ($section->{uid} == 0) {
 		my $user_prefs = $self->getSectionUserPrefs($section->{fsid});
 		if ($user_prefs) {
-			foreach (qw(section_name section_filter view_id display)) {
+			foreach (qw(section_name section_filter view_id section_color display)) {
 				next if $_ eq "section_name" && $section->{skid} == $constants->{mainpage_skid};
 				$section->{$_} = $user_prefs->{$_};
 			}
@@ -3199,6 +3224,7 @@ sub applyViewOptions {
 	}
 
 	foreach (qw(mode color duration orderby orderdir datafilter)) {
+		next if $_ eq "color" && $options->{color};
 		$options->{$_} = $view->{$_} if $view->{$_} ne "";
 	}
 
@@ -3433,6 +3459,10 @@ sub getAndSetOptions {
 				$options->{base_filter} = $section->{section_filter};
 			}
 
+			if (!$form->{view} && !$opts->{view}) {
+				$options->{color} = $section->{section_color};
+			}
+
 		
 			# Jump to default view as necessary
 	
@@ -3456,7 +3486,6 @@ sub getAndSetOptions {
 			my $viewname = $opts->{view} || $form->{view};
 			$view = $self->getUserViewByName($viewname);
 		}
-
 		if ($view) {
 			$options = $self->applyViewOptions($view, $options);
 		}
@@ -3488,6 +3517,7 @@ sub getAndSetOptions {
 
 		if ($s_change && defined $form->{section}) {
 			my $section = $self->determineCurrentSection();
+			$options->{color} = $section->{section_color};
 			if ($section && $section->{fsid}) {
 				$options->{section} = $section->{fsid};
 				$options->{sectionref} = $section;
@@ -3513,6 +3543,7 @@ sub getAndSetOptions {
 				$options->{viewref} = $view;
 			} 
 		}
+
 		$options = $self->applyViewOptions($options->{viewref}, $options, 1) if !$view_applied && $options->{viewref};
 		$options->{tab} = $form->{tab} if $form->{tab} && !$t_change;
 	}
@@ -3582,7 +3613,7 @@ sub getAndSetOptions {
 
 
 	my $colors = $self->getFireHoseColors();
-	if ($form->{color} && $validator->{colors}->{$form->{color}} && !$s_change) {
+	if ($form->{color} && $validator->{colors}->{$form->{color}} && !$s_change && !$v_change) {
 		$options->{color} = $form->{color};
 	}
 
@@ -3778,7 +3809,7 @@ sub getAndSetOptions {
 		delete $fh_options->{nexus} if @{$fh_options->{nexus}} == 0;
 	}
 	
-	my $color = (defined $form->{color} && !$s_change) && $validator->{colors}->{$form->{color}} ? $form->{color} : "";
+	my $color = (defined $form->{color} && !$s_change && !$v_change) && $validator->{colors}->{$form->{color}} ? $form->{color} : "";
 	$color = defined $options->{color} && $validator->{colors}->{$options->{color}} ? $options->{color} : "" if !$color;
 
 	$fh_options->{color} = $color;

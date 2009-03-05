@@ -55,14 +55,16 @@ function show_color( new_color ){
 		find('span').
 			text($menu.find('li.'+new_color).text());
 }
-function save_color( new_color ){
-	var offset = arguments[arguments.length-1];
-	if ( typeof(offset)==='number' ) {
+function save_color( new_color, expr ){
+	var t = typeof(expr);
+	if ( t==='number' ) {
 		var start_color = arguments.length>1 ? new_color : color($picker);
-		new_color = neighboring_color(start_color, offset);
+		new_color = neighboring_color(start_color, expr);
 	}
-
-	new_color && show_color(new_color);
+	if ( new_color ) {
+		show_color(new_color);
+		t==='boolean' && $picker.trigger('change', new_color);
+	}
 	return color($picker, new_color);
 }
 $picker.data('color_fn', save_color);
@@ -80,8 +82,7 @@ $menu.menu({
 	select: function( e, ui ){
 		var new_color = color(ui.select);
 		if ( new_color !== color($picker) ) {
-			save_color(new_color);
-			$picker.trigger('change', new_color);
+			save_color(new_color, true);
 		}
 	},
 	out: function( e, ui ){
