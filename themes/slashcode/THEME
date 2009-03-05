@@ -367,3 +367,4 @@ plugin=Stats
 plugin=Zoo
 plugin=Users2
 plugin=Achievements
+plugin=DynamicBlocks

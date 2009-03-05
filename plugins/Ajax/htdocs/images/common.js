@@ -1337,6 +1337,9 @@ function firehose_get_updates_handler(transport) {
 			firehose_after[firehose_ordered[i]] = firehose_ordered[i + 1];
 		}
 	}
+	if (response.dynamic_blocks) {
+		dynamic_blocks_update(response.dynamic_blocks);
+	}
 	if (response.html) {
 		json_update(response);
 		processed = processed + 1;
@@ -1379,6 +1382,8 @@ function firehose_get_updates(options) {
 		fh_pageval:	firehose_settings.pageval,
 		embed:		firehose_settings.is_embedded
 	};
+
+	params.dynamic_blocks = dynamic_blocks_list();
 
 	for (i in firehose_settings) {
 		if ( firehose_settings.hasOwnProperty(i) ) {
@@ -2236,6 +2241,30 @@ function is_ad_visible(){
 		return sign( v.bottom-v.top > 0 );
 	}
 	return 0;
+}
+
+function dynamic_blocks_list() {
+	var boxes = $('#slashboxes div.title').
+        	map(function(){
+                	return this.id.slice(0,-6);
+		}).
+		get().
+		join(',');
+
+		return boxes;
+}
+
+function dynamic_blocks_update(blocks) {
+	if ( !window['$any'] ) {
+		function $any( o ){ return $('#'+o); }
+	}
+
+	$.each(blocks, function( k, v ){
+        	var $h4=$any(k + '-title h4'), $a=$h4.find('a');
+		v.title && ($a.length ? $a.html(v.title) : $h4.html(v.title + '<span class="closebox">x</span>'));
+		v.url   && $a.attr('href', v.url); // url, therefor we must have an <a>
+		v.block && $any(k + '-content').html(v.block);
+	});
 }
 
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',

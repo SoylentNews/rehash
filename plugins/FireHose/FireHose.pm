@@ -2465,6 +2465,11 @@ sub ajaxFireHoseGetUpdates {
 	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", { options => $opts }, 'firehose') : "";
 #	$html->{firehose_more} = getData("firehose_more_link", { options => $opts, future_count => $future_count, contentsonly => 1, day_label => $day_label, day_count => $day_count }, 'firehose');
 
+	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
+        my $dynamic_blocks;
+        if ($dynamic_blocks_reader) {
+                $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time, is_admin => $user->{is_admin} });
+        }
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -2475,6 +2480,7 @@ sub ajaxFireHoseGetUpdates {
 		future		=> $future,
 		value 		=> $values,
 		events		=> $events,
+		dynamic_blocks  => $dynamic_blocks,
 	});
 	my $reskey_dump = "";
 	my $update_time_dump;
