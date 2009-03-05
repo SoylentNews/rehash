@@ -1884,9 +1884,14 @@ sub getFireHoseByGlobjidMulti {
 	my $mcd_hr = { };
 	my $mcd = $self->getMCD();
 	my $mcdkey;
-	if ($mcd) {
-		$mcdkey = "$self->{_mcd_keyprefix}:gl2id";
-		$mcd_hr = $mcd->get_multi(@$globjid_ar) unless $options->{memcached_no_read};
+	$mcdkey = "$self->{_mcd_keyprefix}:gl2id" if $mcd;
+	if ($mcd && !$options->{memcached_no_read}) {
+		my @keylist = ( map { "$mcdkey:$_" } @$globjid_ar );
+		my $mcdkey_hr = $mcd->get_multi(@keylist);
+		for my $k (keys %$mcdkey_hr) {
+			my($id) = $k =~ /^\Q$mcdkey:\E(\d+)$/;
+			$mcd_hr->{$id} = $mcdkey_hr->{$k};
+		}
 	}
 
 	my $answer_hr = { };
