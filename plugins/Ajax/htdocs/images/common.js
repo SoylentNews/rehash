@@ -2323,12 +2323,12 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 $(function(){
 	// firehose only!
 	var validkeys = {};
-	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
+	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/) && fh_is_admin) {
 		validkeys = {
 			'X' : {           tags    : 1, signoff : 1 },
 			'Z' : {           tags    : 1, tag     : 1 },
-			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 },
-			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 },
+			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 }, // 61, 107
+			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 }, // 109
 
 //			219 : { chr: '[', color   : 1, down    : 1 },
 //			221 : { chr: ']', color   : 1, up      : 1 },
@@ -2344,7 +2344,8 @@ $(function(){
 		};
 		validkeys['H'] = validkeys['A'] = validkeys['K'] = validkeys['W'];
 		validkeys['L'] = validkeys['D'] = validkeys['J'] = validkeys['S'];
-		validkeys['='] = validkeys['+'];
+		validkeys[107] = validkeys[61] = validkeys[187];
+		validkeys[109] = validkeys[189];
 	}
 
 	$(document).keyup(function( e ) {
