@@ -2761,8 +2761,6 @@ an Apache request, this is done by examining the URL, principally the
 hostname but perhaps also the path and the form.  If not, this is done
 by examining the form (which was passed on the command line).
 
-Just a placeholder for now, this will be written later.
-
 =over 4
 
 =item Parameters
@@ -2797,7 +2795,12 @@ sub determineCurrentSkin {
 			if (!$skin) {
 				errorLog("determineCurrentSkin called but no skin found (even default) for '$hostname'\n");
 			} else {
-				errorLog("determineCurrentSkin called but no skin found (so using default) for '$hostname'\n");
+				# This is a warning that might be worth mentioning,
+				# but in practice it just occurs all the time and
+				# it clutters up logs.  A good argument could be
+				# made for redirect()ing to the mainpage skin but
+				# that raises POST issues.  For now, just continue.
+				# errorLog("determineCurrentSkin called but no skin found (so using default) for '$hostname'\n");
 			}
 		}
 	} else {

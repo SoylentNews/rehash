@@ -248,11 +248,28 @@ sub main {
 		$form->{userfield} = $user->{uid};
 	}
 
-	# Figure out what the op really is.
 	if ($gSkin->{skid} == 36 && (! $form->{op} && ! ($form->{uid} || $form->{nick}))) {
 		# Default to ThinkGeek user if we're in the ThinkGeek skin
 		$form->{uid} = 1387321;
 	}
+
+	# If we're in the wrong skin for this user, redirect.
+	# Obviously this should be generalized and skin/uid's should be data in a
+	# table somewhere, and article.pl's redirect() should use the same logic.
+	# Let's fix that someday.
+	if ($gSkin->{skid} != 1 && $form->{uid} != 1387321) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $mp_skin = $reader->getSkin(1);
+		redirect("$mp_skin->{rootdir}$ENV{REQUEST_URI}");
+		return;
+	} elsif ($gSkin->{skid} != 36 && $form->{uid} == 1387321) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $tg_skin = $reader->getSkin(36);
+		redirect("$tg_skin->{rootdir}$ENV{REQUEST_URI}");
+		return;
+	}
+
+	# Figure out what the op really is.
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
 	if ($user->{is_anon} && ( ($ops->{$op}{seclev} > 0) || ($op =~ /^newuserform|mailpasswdform|displayform$/) )) {
