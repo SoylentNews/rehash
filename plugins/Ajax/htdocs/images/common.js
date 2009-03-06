@@ -1305,16 +1305,12 @@ function dynamic_blocks_list() {
 }
 
 function dynamic_blocks_update(blocks) {
-        if ( !window['$any'] ) {
-                function $any( o ){ return $('#'+o); }
-        }
-
-        $.each(blocks, function( k, v ){
-                var $h4=$any(k + '-title h4'), $a=$h4.find('a');
-                v.title && ($a.length ? $a.html(v.title) : $h4.html(v.title + '<span class="closebox">x</span>'));
-                v.url   && $a.attr('href', v.url); // url, therefor we must have an <a>
-                v.block && $any(k + '-content').html(v.block);
-        });
+	$.each(blocks, function( k, v ) {
+		$('#'+k+'-title h4').replaceWith(
+			'<h4>' + (v.url ? '<a href="'+v.url+'">'+v.title+'</a>' : v.title) + '<span class="closebox">x</span></h4>'
+		);
+		v.block && $any(k+'-content').html(v.block);
+	});
 }
 
 function firehose_busy() {
