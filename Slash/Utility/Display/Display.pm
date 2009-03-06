@@ -1276,6 +1276,7 @@ sub getImportantWords {
 ########################################################
 sub matchingStrings {
 	my($s1, $s2) = @_;
+	return if !defined($s1) || !defined($s2);
 	return '100' if $s1 eq $s2;
 	my @w1 = getImportantWords($s1);
 	my @w2 = getImportantWords($s2);
@@ -1297,9 +1298,10 @@ sub lockTest {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
-	my $msg;
+	my $msg = '';
 	my $locks = $slashdb->getSessions([qw|lasttitle uid|]);
 	for (values %$locks) {
+		next unless $_->{lasttitle};
 		if ($_->{uid} ne getCurrentUser('uid') && (my $pct = matchingStrings($_->{lasttitle}, $subj))) {
 			$msg .= slashDisplay('lockTest', {
 				percent		=> $pct,
