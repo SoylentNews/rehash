@@ -1,10 +1,12 @@
 ; // $Id$
 
 $(function(){
-var $fhs = $any('firehose-sections');
+var $fhs=$any('firehose-sections'), $md=$fhs.children('script[type=data]');
+if ( $md.length ) {
+	$fhs.metadata({ type:'elem', name:'script' });	// force metadata initialization
+	$md.remove();	// and delete the element that delivered it to us
+}
 
-$fhs.metadata({ type:'elem', name:'script' });	// force metadata initialization
-$fhs.children('script[type=data]').remove();	// and delete the element that delivered it to us
 
 $fhs.sortable({				// make sections sortable...
 		axis: 'y',
