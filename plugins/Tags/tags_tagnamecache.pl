@@ -104,10 +104,11 @@ sub getTagnameList {
 		$tagnameid_sum->{ $hr->{tagnameid} } += $hr->{total_clout};
 	}
 	my $ret_ar = [ ];
+	my $tagname_data = $tagsdb_reader->getTagnameDataFromIds($tagnameid_ar);
 	for my $tagnameid (@$tagnameid_ar) {
 		my $sum = $tagnameid_sum->{$tagnameid};
 		next unless $sum > 0;
-		my $tagname = $tagsdb_reader->getTagnameDataFromId($tagnameid)->{tagname};
+		my $tagname = $tagname_data->{$tagnameid}{tagname};
 		push @$ret_ar, {
 			tagnameid =>	$tagnameid,
 			tagname =>	$tagname,

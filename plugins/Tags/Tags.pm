@@ -570,6 +570,8 @@ sub getTagsByGlobjid {
 
 # Given a tagnameid, return what clid type should be used for it
 # (0 = unknown).
+# XXX Make a Multi version of this for performance gains in
+# addCloutsToTagArrayref.
 
 { # closure
 my($reason_names, $upvoteid, $downvoteid) = (undef, undef, undef);
@@ -703,7 +705,6 @@ sub addCloutsToTagArrayref {
 		my $user = $self->getUser($uid);
 		$user_clout_hr->{$uid} = $self->getUser($uid)->{clout} if $user;
 	}
-
 
 	my $clout_types = $self->getCloutTypes();
 	for my $tag_hr (@$ar) {
