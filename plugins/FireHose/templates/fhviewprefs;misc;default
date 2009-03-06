@@ -74,23 +74,52 @@ __template__
 		$dialog.find('input[name=section_default]').
 			attr({ checked: 'checked', disabled: 'disabled' });
 	}
+
+	$dialog.find('[value$=hide],[value=delete]').
+		click(function(){
+			var action = $(this).val();
+			if ( action == 'delete' ) {
+				$li.remove();
+				$li = $([]);
+			}
+			$li.toggleClass('hide', action=='hide');
+			firehose_delete_section([% section_id %], {unhide:'undo'}[action]);
+		});
+	function save_as_default(){
+		ajax_update({
+			op: 'firehose_set_default_section',
+			reskey: reskey_static,
+			default_section: [% section_id %]
+		});
+		$li.parent().metadata().default_id = [% section_id %];
+	}
+	function update_metadata( updated ){
+		var item_md = $li.metadata();
+		item_md.name = updated.name;
+		item_md.color = updated.color;
+		item_md.filter = updated.filter;
+		item_md.view = updated.view;
+
+		updated.as_default && ($li.parent().metadata().default_id = [% section_id %]);
+	}
 	[% END %]
 
 	// custom show/hide
 	var dialog_elem = $dialog[0];
 	dialog_elem._custom_show_fn = function(){
-		var	$content	= $dialog.find('#modal_box_content').css('overflow', 'hidden'),
-			to_height	= $dialog.height(),
+		var	to_height	= $dialog.height(),
 			to_width	= $dialog.width();
 
 		$li.animate({ height: $dialog.outerHeight()-6+'px' });
 		$dialog.height($li.height()).
 			width($li.width() - ($dialog.outerWidth()-to_width)).
+			css({ overflow: 'hidden' }).
 			animate({
 				height:	to_height,
 				width:	to_width
 			}, function(){
-				$content.css('overflow', '');
+				$dialog.css({ overflow:'visible' }).
+					find('#modal_box_content').css({ height:to_height });
 				$edit_field.focus().keyup();
 			});
 
@@ -103,7 +132,7 @@ __template__
 	dialog_elem._custom_hide_fn = function(){
 		// allow the menu item to shrink back down to normal height
 		$li.removeAttr('style');
-		// $dialog.add(document).unbind('mousedown.fhviewprefs');
+		$dialog.find('#modal_box_content').css({ height:'' });
 	};
 
 	$dialog.keyup(function( e ){
@@ -119,17 +148,22 @@ __template__
 	$save_button.
 		click(function(){
 			// save "is default"
+			$dialog.find('input[name=section_default]:enabled:checked').each(save_as_default);
 			return false;
 		});
 [% ELSE %]
-	var	$picker		= $any('section-prefs-color-picker').bind('change', function( event, color ){ $('input[name=section_color]').val(color); }),
-		color_fn	= $picker.data('color_fn');
-	color_fn($li.metadata().color || firehose_settings.color, true);
+	var	$picker		= $any('section-prefs-color-picker-trigger').
+					bind('change', function( event, color ){
+						$('input[name=section_color]').val(color);
+					}),
+		picker_color	= $picker.data('color_fn');
+
+	picker_color('color-saved', $li.metadata().color || firehose_settings.color);
 
 	function dialog_values(){
 		return {
 			name:		$edit_field.val(),
-			color:		color_fn(),
+			color:		picker_color(),
 			filter:		$dialog.find('input[name=section_filter]').val(),
 			view:		$dialog.find('select').val(),
 			as_default:	!!$dialog.find('input[name=section_default]').attr('checked')
@@ -173,37 +207,6 @@ __template__
 			[% END %]
 		}
 	});
-
-	// button behavior
-	[% IF section_id %]
-	$dialog.find('[value$=hide],[value=delete]').
-		click(function(){
-			var action = $(this).val();
-			if ( action == 'delete' ) {
-				$li.remove();
-				$li = $([]);
-			}
-			$li.toggleClass('hide', action=='hide');
-			firehose_delete_section([% section_id %], {unhide:'undo'}[action]);
-		});
-	function save_as_default(){
-		ajax_update({
-			op: 'firehose_set_default_section',
-			reskey: reskey_static,
-			default_section: [% section_id %]
-		});
-		$li.parent().metadata().default_id = [% section_id %];
-	}
-	function update_metadata( updated ){
-		var item_md = $li.metadata();
-		item_md.name = updated.name;
-		item_md.color = updated.color;
-		item_md.filter = updated.filter;
-		item_md.view = updated.view;
-
-		updated.as_default && ($li.parent().metadata().default_id = [% section_id %]);
-	}
-	[% END %]
 
 	$save_button.
 		click(function(){
