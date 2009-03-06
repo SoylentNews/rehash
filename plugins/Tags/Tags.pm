@@ -418,42 +418,85 @@ sub setTagname {
 
 sub getTagnameDataFromId {
 	my($self, $id) = @_;
+	my $hr = $self->getTagnameDataFromIds([ $id ]);
+	return $hr->{$id};
+}
+
+sub getTagnameDataFromIds {
+	my($self, $id_ar) = @_;
+	$id_ar ||= [ ];
+	$id_ar = [ grep { $_ && /^\d+$/ } @$id_ar ];
 	my $constants = getCurrentStatic();
 
+	# First, grab from local cache any ids it has.  We do cache locally
+	# (in addition to memcached) because some tagnames are very frequently
+	# accessed (e.g. nod, nix).
+	my $local_hr = ( );
 	my $table_cache         = "_tagname_cache";
 	my $table_cache_time    = "_tagname_cache_time";
 	$self->_genericCacheRefresh('tagname', $constants->{tags_cache_expire});
-	if ($self->{$table_cache_time} && $self->{$table_cache}{$id}) {
-		return $self->{$table_cache}{$id};
-	}
-
-	my $mcd = $self->getMCD();
-	my $mcdkey = "$self->{_mcd_keyprefix}:tagdata:" if $mcd;
-	if ($mcd) {
-		my $data = $mcd->get("$mcdkey$id");
-		if ($data) {
-			if ($self->{$table_cache_time}) {
-				$self->{$table_cache}{$id} = $data;
-			}
-			return $data;
+	if ($self->{$table_cache_time}) {
+		for my $id (@$id_ar) {
+			$local_hr->{$id} = $self->{$table_cache}{$id} if $self->{$table_cache}{$id};
 		}
 	}
-	my $id_q = $self->sqlQuote($id);
-	my $data = { };
-	$data->{tagname} = $self->sqlSelect('tagname', 'tagnames',
-		"tagnameid=$id_q");
-	return undef if !$data->{tagname};
-	my $params = $self->sqlSelectAllKeyValue('name, value', 'tagname_params',
-		"tagnameid=$id_q");
-	for my $key (keys %$params) {
-		next if $key =~ /^tagname(id)?$/; # don't get to override these
-		$data->{$key} = $params->{$key};
+	my @remaining_ids = grep { !$local_hr->{$_} } @$id_ar;
+
+	# Next, check memcached.
+
+	my $mcd_hr = { };
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	$mcdkey = "$self->{_mcd_keyprefix}:tagdata" if $mcd;
+	if ($mcd && @remaining_ids) {
+		my $mcdkey_qr = qr/^\Q$mcdkey:\E(\d+)$/;
+		my @keylist = ( map { "$mcdkey:$_" } @remaining_ids );
+		my $mcdkey_hr = $mcd->get_multi(@keylist);
+		for my $k (keys %$mcdkey_hr) {
+			my($id) = $k =~ $mcdkey_qr;
+			$mcd_hr->{$id} = $mcdkey_hr->{$k};
+			# Locally store any hits found.
+			$self->{$table_cache}{$id} = $mcd_hr->{$id};
+		}
 	}
-	if ($self->{$table_cache_time}) {
-		$self->{$table_cache}{$id} = $data;
+	@remaining_ids = grep { !$mcd_hr->{$_} } @remaining_ids;
+
+	# Finally, check MySQL.
+
+	my $mysql_hr = { };
+	my $splice_count = 2000;
+	while (@remaining_ids) {
+		my @id_chunk = splice @remaining_ids, 0, $splice_count;
+		my $id_in_str = join(',', @id_chunk);
+		my $ar_ar = $self->sqlSelectAll('tagnameid, tagname',
+			'tagnames',
+			"tagnameid IN ($id_in_str)");
+		for my $ar (@$ar_ar) {
+			$mysql_hr->{ $ar->[0] }{tagname} = $ar->[1];
+		}
+		$ar_ar = $self->sqlSelectAll('tagnameid, name, value',
+			'tagname_params',
+			"tagnameid IN ($id_in_str)");
+		for my $ar (@$ar_ar) {
+			next if $ar->[1] =~ /^tagname(id)?$/; # don't get to override these
+			$mysql_hr->{ $ar->[0] }{ $ar->[1] } = $ar->[2];
+		}
 	}
-	$mcd->set("$mcdkey$id", $data, $constants->{memcached_exptime_tags}) if $mcd;
-	return $data;
+	# Locally store this data.
+	for my $id (keys %$mysql_hr) {
+		$self->{$table_cache}{$id} = $mysql_hr->{$id};
+	}
+	$self->{$table_cache_time} ||= time;
+	# Store this data in memcached.
+	if ($mcd) {
+		for my $id (keys %$mysql_hr) {
+			$mcd->set("$mcdkey:$id", $mysql_hr->{$id}, $constants->{memcached_exptime_tags});
+		}
+	}
+
+	return {(
+		%$local_hr, %$mcd_hr, %$mysql_hr
+	)};
 }
 
 # getTagsByGlobjid is the main method, getTagsByNameAndIdArrayref
@@ -614,19 +657,28 @@ sub addCloutsToTagArrayref {
 
 	return if !$ar || !@$ar;
 	my $constants = getCurrentStatic();
+	my $splice_count = 2000;
 
 	# Pull values from tag params named 'tag_clout'
 	my @tagids = sort { $a <=> $b } map { $_->{tagid} } @$ar;
-	my $tagids_in_str = join(',', @tagids);
-	my $tag_clout_hr = $self->sqlSelectAllKeyValue(
-		'tagid, value', 'tag_params',
-		"tagid IN ($tagids_in_str) AND name='tag_clout'");
+	my $tag_clout_hr = { };
+	while (@tagids) {
+		my @tagid_chunk = splice @tagids, 0, $splice_count;
+		my $tagids_in_str = join(',', @tagid_chunk);
+		my $ar_ar = $self->sqlSelectAll(
+			'tagid, value', 'tag_params',
+			"tagid IN ($tagids_in_str) AND name='tag_clout'");
+		for my $ar (@$ar_ar) {
+			$tag_clout_hr->{ $ar->[0] } = $ar->[1];
+		}
+	}
 
 	# Pull values from tagname params named 'tagname_clout'
 	my $tagname_clout_hr = { };
 	my %tagnameid = map { ($_->{tagnameid}, 1) } @$ar;
+	my $tndata_hr = $self->getTagnameDataFromIds([ keys %tagnameid ]);
 	for my $tagnameid (keys %tagnameid) {
-		my $tn_data = $self->getTagnameDataFromId($tagnameid);
+		my $tn_data = $tndata_hr->{$tagnameid};
 		$tagname_clout_hr->{$tagnameid} = defined($tn_data->{tagname_clout}) ? $tn_data->{tagname_clout} : 1;
 	}
 
@@ -778,16 +830,10 @@ sub addTagnameDataToHashrefArray {
 		map { ( $_->{tagnameid}, 1 ) }
 		@$ar
 	);
-	# XXX This could/should be done more efficiently;  we need a
-	# getTagnameDataFromIds method to do this in bulk and take
-	# advantage of get_multi and put all the sqlSelects together.
-	my %tagdata = (
-		map { ( $_, $self->getTagnameDataFromId($_) ) }
-		keys %tagnameids
-	);
+	my $tagdata_hr = $self->getTagnameDataFromIds([ keys %tagnameids ]);
 	for my $hr (@$ar) {
 		my $id = $hr->{tagnameid};
-		my $d = $tagdata{$id};
+		my $d = $tagdata_hr->{$id};
 		for my $key (keys %$d) {
 			next if exists $hr->{$key};
 			$hr->{$key} = $d->{$key};
@@ -1597,7 +1643,8 @@ sub getOppositeTagnameids {
 	# entries as being the same, and opposites-of-opposites etc.
 	# Leave that for another day though.
 	# Type one:
-	my @tagnames =		map { $self->getTagnameDataFromId($_)->{tagname} }	@tagnameids;
+	my $tagnamedata_hr = $self->getTagnameDataFromIds([ @tagnameids ]);
+	my @tagnames =		map { $tagnamedata_hr->{$_}{tagname} }			@tagnameids;
 	my @opp_tagnames =	map { $self->getOppositeTagname($_) }			@tagnames;
 	my @opp_tagnameids_1 =	( );
 	if ($create) {
@@ -2192,7 +2239,8 @@ sub getTagnameidsByParam {
 sub getTagnamesByParam {
 	my($self, $name, $value) = @_;
 	my $tagnameids = $self->getTagnameidsByParam($name, $value);
-	return [ map { $self->getTagnameDataFromId($_)->{tagname} } @$tagnameids ];
+	my $tagname_hr = $self->getTagnameDataFromIds($tagnameids);
+	return [ map { $tagname_hr->{$_}{tagname} } keys %$tagname_hr ];
 }
 
 sub getPopupTags {

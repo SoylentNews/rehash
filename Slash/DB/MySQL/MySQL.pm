@@ -12157,9 +12157,8 @@ sub getGlobjidFromTargetIfExists {
 	my $globjid = $self->sqlSelect('globjid', 'globjs',
 		"gtid='$gtid' AND target_id=$target_id_q");
 	return 0 if !$globjid;
-	if ($self->{$table_cache_time}) {
-		$self->{$table_cache}{$gtid}{$target_id} = $globjid;
-	}
+	$self->{$table_cache}{$gtid}{$target_id} = $globjid;
+	$self->{$table_cache_time} ||= time;
 	$mcd->set("$mcdkey$gtid:$target_id", $globjid, $constants->{memcached_exptime_tags}) if $mcd;
 	return $globjid;
 }
