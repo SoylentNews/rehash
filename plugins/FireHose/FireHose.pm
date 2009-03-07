@@ -1329,17 +1329,17 @@ sub getFireHoseEssentials {
 				my $days_relevant = 30;
 
 				push @where, "signoffs NOT LIKE '%$signoff_label%'";
-#				push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $days_relevant DAY)"
-#					if $options->{type} eq 'story';
+				push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $days_relevant DAY)"
+;#					if $options->{type} eq 'story';
 
 				if ($sphinx) {
 					push @sphinx_opts, "!filter=signoff,$user->{uid}";
 					$sph->SetFilter('signoff', [ $user->{uid} ], 1);
 
 #					if ($options->{type} eq 'story') {
-#						my $time_back = $cur_time - (86400 * $days_relevant);
-#						push @sphinx_opts, "!range=createtime_ut,0,$time_back";
-#						$sph->SetFilterRange('createtime_ut', 0, $time_back, 1);
+						my $time_back = $cur_time - (86400 * $days_relevant);
+						push @sphinx_opts, "!range=createtime_ut,0,$time_back";
+						$sph->SetFilterRange('createtime_ut', 0, $time_back, 1);
 #					}
 				}
 
