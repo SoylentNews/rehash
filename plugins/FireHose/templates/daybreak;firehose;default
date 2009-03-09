@@ -20,11 +20,18 @@ __template__
 [% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
 [% IF form.index; day_page = "index2.pl"; END %]
 [% index_extra = form.index ? "&amp;index=1" : "" %]
-<div align="center" class="daybreak" id="[% id %]">
+<div align="center" class="yui-g daybreak" id="[% id %]">
 	[% last_days = Slash.getOlderDaysFromDay(last_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 }) %]
 	[% cur_days = Slash.getOlderDaysFromDay(cur_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 }) %]
-	<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', '[% last_day %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => last_day, duration => -1 }); f; %][% index_extra %]">[% last_days.0.1 %]</a><br>
-	<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', '[% cur_day %]');  return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day,  duration => -1 }); f; %][% index_extra %]">[% cur_days.0.1  %]</a><br>
+
+	<div class="yui-u first">
+		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', '[% last_day %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => last_day, duration => -1 }); f; %][% index_extra %]">[% last_days.0.1 %]</a>
+	</div>
+
+	<div class="yui-u">
+		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', '[% cur_day %]');  return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day,  duration => -1 }); f; %][% index_extra %]">[% cur_days.0.1  %]</a>
+	</div>
+
 </div>
 __version__
 $Id$
