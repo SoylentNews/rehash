@@ -26,11 +26,11 @@ function tagsHistory( selector_fragment, context ) {
 	var $where, $item=$('[tag-server='+selector_fragment+']');
 	if ( context == 'firehose' ) {
 		// hang the pop-up from the first available of:
-		var $W = $entry.find('div.tag-widget.body-widget:first');
+		var $W = $item.find('div.tag-widget.body-widget:first');
 		$where = $W.find('.history-button').		// the history button
 				add($related_trigger).		// whatever you clicked
 				add($W.find('.edit-toggle')).	// the disclosure triangle
-				add($entry.find('#updown-'+selector_fragment));	// the nod/nix capsule
+				add($item.find('#updown-'+selector_fragment));	// the nod/nix capsule
 	} else {
 		$where = $any('taghist-' + $item.id);
 	}
@@ -40,7 +40,7 @@ function tagsHistory( selector_fragment, context ) {
 	createPopup(
 		getXYForSelector($where),
 		'History ' + createPopupButtons(
-			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>"
+			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>'
 		),
 		popup_id
 	);

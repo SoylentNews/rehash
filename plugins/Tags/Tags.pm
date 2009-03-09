@@ -1103,37 +1103,47 @@ sub ajaxDeactivateTag {
 	});
 }
 
+sub ajaxKeyTypeToGlobjid {
+	my($key, $key_type) = @_;
+	return 0 unless $key;
+	return 0 unless $key =~ /^\d+$/
+		|| ($key =~ m{^[\d/]+$} && $key_type eq 'sid');
+	return 0 unless $key_type && $key_type =~ /^(firehose-id|stoid|url|sid)$/;
+
+	my $firehose = getObject('Slash::FireHose', { db_type => 'reader' });
+
+	# Two key_types that we support by converting to another type.
+	if ($key_type eq 'url') {
+		$key_type = 'firehose-id';
+		$key = $firehose->getFireHoseIdFromUrl($key);
+	} elsif ($key_type eq 'sid') {
+		$key_type = 'stoid';
+		$key = $firehose->getStoidFromSidOrStoid($key);
+	}
+
+	# Convert the key into a globjid.
+	my $globjid = 0;
+	if ($key_type eq 'firehose-id') {
+		my $firehose_item = $firehose->getFireHose($key);
+		$globjid = $firehose_item->{globjid};
+	} elsif ($key_type eq 'stoid') {
+		$globjid = $firehose->getGlobjidFromTargetIfExists('stories', $key);
+	}
+	return $globjid;
+}
+
 sub ajaxSetGetCombinedTags {
 	my($slashdb, $constants, $user, $form) = @_;
 
-	my $key = $form->{key};
-	my $key_type = $form->{key_type};
+	my $globjid = ajaxKeyTypeToGlobjid($form->{key}, $form->{key_type});
+	return getData('error', {}, 'tags') if !$globjid;
 
-	my $firehose = getObject('Slash::FireHose');
-	my ($globjid, $firehose_id, $firehose_item);
-
-	if ( $key_type eq 'url' ) {
-		$key = $firehose->getFireHoseIdFromUrl($key);
-		$key_type = 'firehose-id';
-	} elsif ( $key_type eq 'sid' ) {
-		$key = $slashdb->getStoidFromSidOrStoid($key);
-		$key_type = 'stoid';
-	}
-
-	if ( $key_type eq 'stoid' ) {
-		$globjid = $slashdb->getGlobjidFromTargetIfExists('stories', $key);
-		$firehose_id = $firehose->getFireHoseIdFromGlobjid($globjid);
-		$firehose_item = $firehose->getFireHose($firehose_id);
-	} elsif ( $key_type eq 'firehose-id' ) {
-		$firehose_item = $firehose->getFireHose($key);
-		$globjid = $firehose_item->{globjid} if $firehose_item;
-		$firehose_id = $key;
-	}
+	my $firehose_reader = getObject('Slash::FireHose', { db_type => 'reader' });
+	my $firehose_item = $firehose_reader->getFireHoseByGlobjid($globjid);
+	my $firehose_id = $firehose_item->{id};
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	if (!$globjid || $globjid !~ /^\d+$/ || !$tags_reader) {
-		return getData('error', {}, 'tags');
-	}
+	return getData('error', {}, 'tags') if !$tags_reader;
 	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
 
 	my $uid = $user && $user->{uid} || 0;
@@ -1154,11 +1164,13 @@ sub ajaxSetGetCombinedTags {
 				split /\s+/,
 				lc $form->{tags};
 
+			my $firehose = getObject('Slash::FireHose');
 			$firehose->setSectionTopicsFromTagstring($firehose_id , $added_tags);
 			$firehose_item = $firehose->getFireHose($firehose_id);
 		};
 	} elsif ( ! $form->{global_tags_only} ) {
-		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid, include_private => 1 });
+		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref(
+			$table, $item_id, { uid => $uid, include_private => 1 });
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
@@ -1170,14 +1182,14 @@ sub ajaxSetGetCombinedTags {
 		my $skid = $firehose_item->{primaryskid};
 		if ( $skid ) {
 			if ( $skid != $constants->{mainpage_skid} ) {
-				my $skin = $firehose->getSkin($skid);
+				my $skin = $firehose_reader->getSkin($skid);
 				$section_tag = $skin->{name};
 			}
 		}
 
 		my $tid = $firehose_item->{tid};
 		if ( $tid ) {
-			my $topic = $firehose->getTopic($tid);
+			my $topic = $firehose_reader->getTopic($tid);
 			$topic_tags = $topic->{keyword};
 		}
 	}
@@ -1248,34 +1260,16 @@ sub normalizeAndOppositeAdminCommands {
 
 sub ajaxTagHistory {
 	my($slashdb, $constants, $user, $form) = @_;
-	my $globjid;
-	my $id;
-	my $table;
-	if ($form->{type} =~ /^(stories|urls)$/) {
-		$table = $form->{type};
-	} elsif ($form->{type} eq "firehose") {
-		my $itemid = $form->{id};
-		my $firehose = getObject("Slash::FireHose");
-		my $item = $firehose->getFireHose($itemid);
-		if (!$item || !$item->{globjid}) {
-			use Data::Dumper;
-			my($i_d, $f_d) = (Dumper($item), Dumper($form));
-			$i_d =~ s/\s+/ /g; $f_d =~ s/\s+/ /g;
-			warn "ajaxTagHistory blank item or globjid: $i_d $f_d";
-		}
-		$globjid = $item->{globjid};
-		my $tags = getObject("Slash::Tags");
-		($table, $id) = $tags->getGlobjTarget($globjid);
-	}
-	$id ||= $form->{id};
-	
+
+        my $globjid = ajaxKeyTypeToGlobjid($form->{key}, $form->{key_type});
+        return getData('error', {}, 'tags') if !$globjid;
+
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	$globjid ||= $tags_reader->getGlobjidFromTargetIfExists($table, $id);
-	my $tags_ar = [];
-	if ($table && $id) {
-		$tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id,
-			{ include_inactive => 1, include_private => 1 });
-	}
+	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
+
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id,
+		{ include_inactive => 1, include_private => 1 })
+		|| [ ];
 
 	my $summ = { };
 
