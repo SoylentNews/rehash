@@ -5976,3 +5976,5 @@ ALTER TABLE firehose_section_settings ADD COLUMN section_color VARCHAR(16) NOT N
 # 2009-03-05
 UPDATE vars SET value = 'T_2_5_0_245' WHERE name = 'cvs_tag_currentcode';
 
+ALTER TABLE accesslog ADD COLUMN pagemark bigint UNSIGNED DEFAULT 0 NOT NULL AFTER duration;
+
