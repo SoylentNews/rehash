@@ -20,42 +20,39 @@ function um_set_settings(behavior) {
 }
 
 function tagsHistory( selector_fragment, context ) {
-	var $entry =  $('[tag-server='+selector_fragment+']');
-	var type = $entry.article_info('type');
-	var id = $entry.id;
+	// Pop-up, admin-only, the history of tags applied to this item.
 
-
-	var params = {};
-	(!type || type==='story') && (type = 'stories');
-
-	params.type = type;
-	params.op = 'tags_history';
-	if (type == "stories") {
-		params.id = $entry.article_info('stoid');
-	} else if (type == "urls" || type == "firehose") {
-		params.id = selector_fragment;
-	}
-
-	var $positioners;
+	// Where on the page shall we place the new pop-up?
+	var $where, $item=$('[tag-server='+selector_fragment+']');
 	if ( context == 'firehose' ) {
-		var $widget = $entry.find('div.tag-widget.body-widget:first');
-
 		// hang the pop-up from the first available of:
-		$positioners =
-			$widget.find('.history-button').		// the history button
-				add($related_trigger).			// whatever you clicked
-				add($widget.find('.edit-toggle')).	// the disclosure triangle
+		var $W = $entry.find('div.tag-widget.body-widget:first');
+		$where = $W.find('.history-button').		// the history button
+				add($related_trigger).		// whatever you clicked
+				add($W.find('.edit-toggle')).	// the disclosure triangle
 				add($entry.find('#updown-'+selector_fragment));	// the nod/nix capsule
 	} else {
-		$positioners = $('#taghist-'+id);
+		$where = $any('taghist-' + $item.id);
 	}
 
-	var popupid    = "taghistory-" + id;
-	var title      = "History ";
-	var buttons    = createPopupButtons("<a href=\"#\" onclick=\"return false\">[?]</a></span><span><a href=\"#\" onclick=\"closePopup('" + popupid + "-popup'); return false\">[X]</a>");
-	title = title + buttons;
-	createPopup(getXYForSelector($positioners), title, popupid);
-	ajax_update(params, "taghistory-" + id + "-contents");
+	// Instantiate the pop-up at that position.
+	var popup_id = "taghistory-" + $item.id;
+	createPopup(
+		getXYForSelector($where),
+		'History ' + createPopupButtons(
+			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>"
+		),
+		popup_id
+	);
+
+	// Ask the server to fill in the pop-up's content.
+	var item_key = $item.article_info__key();
+	ajax_update({
+		op:		'tags_history',
+		type:		$item.article_info('type'),
+		key:		item_key.key,
+		key_type:	item_key.key_type
+	}, popup_id + '-contents');
 }
 
 //
