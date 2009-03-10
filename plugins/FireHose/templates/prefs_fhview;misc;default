@@ -36,19 +36,11 @@ __template__
 <strong>Color</strong>
 [% IF !user.is_anon; PROCESS fhcolor_picker id='firehose-prefs-color-picker' %]
 <script type="text/javascript">
-	$(function(){
-	var color_fn =
-	$('#firehose-prefs-color-picker').
-		bind('change', function( e, new_color ){
-			$('#colorfield').val(new_color);
-		}).
-		data('color_fn');
-	if ( color_fn ) {
-		// make color_fn globally available as firehose_swatch_color()
-		window.firehose_swatch_color = color_fn;
-		firehose_swatch_color('[% view.color %]');
-	}
-	});
+$(function(){
+$any('firehose-prefs-color-picker-trigger').
+	bind('change', function( e, new_color ){ $('#colorfield').val(new_color); }).
+	data('color_fn')('[% view.color %]');
+});
 </script>
 
 [% END %]
@@ -74,7 +66,7 @@ __template__
 	<strong>Sort</strong> 
 	<strong>By</strong> 
 	Score <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'popularity' || view.viewname == "popular" %][% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %] value="popularity">
-	Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' || view.viewname == "recent" %][% IF view.viewname == "recent" || view.viewname == "popular" %] disabled="true" [% END %] value="createtime">>
+	Date <input type="radio" name="orderby"[% constants.markup_checked_attribute IF view.orderby == 'createtime' || view.viewname == "recent" %][% IF view.viewname == "recent" || view.viewname == "popular" %] disabled="true" [% END %] value="createtime">
 	<input type="checkbox" name="sortasc"[% asc_check %] [% IF view.viewname == "popular" || view.viewname == "recent" %] disabled="true"[% END %]> Ascending
 	</p>
 [% END %]

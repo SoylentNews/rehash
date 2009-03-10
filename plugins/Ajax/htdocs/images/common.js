@@ -506,6 +506,7 @@ function firehose_set_options(name, value, context) {
 		}
 		if (name == "color") {
 			firehose_settings.color = value;
+			firehose_swatch_color(value); // don't wait for the refresh to change the picker color
 		}
 		if (name == "pagesize") {
 			firehose_settings.page = 0;
@@ -1936,7 +1937,7 @@ function on_firehose_set_options( event, data ){
 		var $next_section;
 		$('#firehose-sections li').each(function(){
 			var $this=$(this), section=$this.metadata();
-			if ( section.filter == data.filter && section.viewname == data.viewname ) {
+			if ( section.filter == data.filter && section.viewname == data.viewname && section.color == data.color ) {
 				$next_section = $this;
 				data.id = section.id;
 				return false;

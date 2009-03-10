@@ -135,6 +135,11 @@ IF item.type == "journal";
 	END;
 END;
 	%]
+	[% IF adminmode;
+		title = title _ '<form id="postform-' _ item.id _ '" method="post" action="' _  gSkin.rootdir _ '/admin.pl" class="edit">';
+		title = title _ '<a href="' _ gSkin.rootdir _ '/firehose.pl?op=edit&amp;id=' _ item.id _ '" title="Preview the editable version of this">Edit</a>';
+		title = title _ '</form>';
+	END %]
 [% IF showtitle; title; END; %]
 __seclev__
 10000
