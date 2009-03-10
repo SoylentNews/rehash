@@ -431,7 +431,7 @@ sub getTagnameDataFromIds {
 	# First, grab from local cache any ids it has.  We do cache locally
 	# (in addition to memcached) because some tagnames are very frequently
 	# accessed (e.g. nod, nix).
-	my $local_hr = ( );
+	my $local_hr = { };
 	my $table_cache         = "_tagname_cache";
 	my $table_cache_time    = "_tagname_cache_time";
 	$self->_genericCacheRefresh('tagname', $constants->{tags_cache_expire});
