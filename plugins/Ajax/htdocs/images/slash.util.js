@@ -90,7 +90,7 @@ function qw_as_array( qw ){
 	if ( T(qw, 'string') ) {
 		qw = $.map(qw.split(/\s+/), function(w){if(w)return w;});
 	}
-	if ( ! T.list(qw) ) {
+	if ( T.not('list', qw) ) {
 		qw = accumulate([], function(k, v){if(v){this.push(k);}}, qw);
 	}
 	// else: qw already _is_ an array
@@ -138,9 +138,9 @@ function qw_each( qw, fn ){
 		qw = qw_as_array(qw);
 	}
 
-	var use_key = ! T.list(qw);
+	var use_key = T.not('list', qw);
 	each(qw, function(k, v){
-		if ( ! T.defNo(v) ) {
+		if ( T.not('defNo', v) ) {
 			return fn.call(use_key ? k : v);
 		}
 	});
@@ -193,7 +193,7 @@ function Package( o ){
 	// e_api implies stem_name
 
 	function inject_free_api( stem_obj, extra ){
-		if ( ! T.defNo(o.exports) ) {
+		if ( T.not('defNo', o.exports) ) {
 			stem_obj.__api__ = stem_obj.__api__ && [].concat(stem_obj.__api__, o) || o;
 		}
 		// roll in the element_api first, so the free api can override same-named
@@ -228,7 +228,7 @@ function Package( o ){
 		var jstem_name = oj.named || estem_name;
 
 		// $.jstem_name
-		if ( ! T.defNo(oj.api) ) {
+		if ( T.not('defNo', oj.api) ) {
 			$[jstem_name] = T.nonEmpty(oj.api) ?
 				inject_free_api(e_api && e_ctor_fn(jstem_name) || {}, oj.api) :
 				stem_obj;
@@ -241,7 +241,7 @@ function Package( o ){
 			$.fn[jstem_name] = je_ctor;
 		}
 		// $(expr).jstem_name__fn_name()
-		if ( ! T.defNo(je_api) ) {
+		if ( T.not('defNo', je_api) ) {
 			var j_prefix = jstem_name + '__';
 			if ( T.nonEmpty(e_api) ) {
 				each(e_api, function( fn_name, fn ){ if ( T.fn(fn) ) {

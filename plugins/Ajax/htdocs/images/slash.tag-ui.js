@@ -324,7 +324,7 @@ new Package({ named: 'Slash.TagUI.Responder',
 	stem_function: function( r_elem, o ){
 		r_elem.
 			tag_ui_responder.bind(o.fn, o.signals).
-			tag_ui_responder.ready(!$.TypeOf.defNo(o.if_ready));
+			tag_ui_responder.ready(T.not('defNo', o.if_ready));
 		return o.defaults ? { defaults: o.defaults } : undefined;
 	},
 	jquery: true

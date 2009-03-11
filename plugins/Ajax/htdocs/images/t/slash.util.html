@@ -378,22 +378,22 @@ test("handling of 'this'", function(){
 
 test('with_packages', function(){
 	ok(Slash.Util, 'API module makes or extends Slash.Util');
-	ok(Slash.Util.if_object, 'which contains the function "if_object"');
+	ok(Slash.Util.clone, 'which contains the function "clone"');
 
 	try {
-		ok(!if_object, 'good, no function "if_object" available"');
+		ok(!clone, 'good, no function "clone" available"');
 	} catch ( e0 ) {
-		ok(true, 'if_object is so not defined I had to catch an exception!');
+		ok(true, 'clone is so not defined I had to catch an exception!');
 	}
 	(function(){
 		ok(true, 'introducing a new scope');
 		eval(Slash.Util.Package.with_packages('Slash.Util'));
 		ok(true, 'survived with_packages eval');
-		ok(if_object!==undefined, 'good, now "if_object" is available directly');
-		ok(if_object({}), '...and it even works!');
+		ok(clone!==undefined, 'good, now "clone" is available directly');
+		ok(clone({}), '...and it might even work!');
 	})();
 	try {
-		ok(!if_object, 'good, it\'s gone now because it was only made available where I did it');
+		ok(!clone, 'good, it\'s gone now because it was only made available where I did it');
 	} catch ( e1 ) {
 		ok(true, 'exceptionally good, it\'s gone now because it was only made available where I did it');
 	}
