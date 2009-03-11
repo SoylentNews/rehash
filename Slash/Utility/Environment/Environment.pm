@@ -1696,6 +1696,14 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 
 	$user->{test_code} ||= $constants->{test_code};
 
+	# Set this to a string storing a decimal number with a random
+	# 63-bit value, to be stored in accesslog.pagemark.  This may
+	# seem clunky but a single rand() has issues (e.g.
+	# sprintf("%u", int(rand(10**18))) is always even) and I don't
+	# want to require Math::BigInt::Random.  `perldoc -f sprintf`
+	# has more on this.
+	$user->{state}{pagemark} = int(rand(999_999_999)+1) . int(rand(999_999_999)+1);
+
 	if ($constants->{plugin}{Tags}) {
 		my $max_uid;
 		my $write = $constants->{tags_stories_allowwrite} || 0;

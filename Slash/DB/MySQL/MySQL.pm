@@ -1379,6 +1379,7 @@ sub createAccessLog {
 		query_string	=> $self->truncateStringForCharColumn($query_string, 'accesslog', 'query_string'),
 		user_agent	=> $ENV{HTTP_USER_AGENT} ? $self->truncateStringForCharColumn($ENV{HTTP_USER_AGENT}, 'accesslog', 'user_agent') : 'undefined',
 		duration	=> $duration,
+		pagemark	=> $user->{state}{pagemark} || 0,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
 		secure		=> $user->{state}{ssl} || 0,
