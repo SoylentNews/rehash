@@ -941,6 +941,7 @@ CREATE TABLE skin_colors (
 DROP TABLE IF EXISTS slashd_status;
 CREATE TABLE slashd_status (
 	task VARCHAR(50) NOT NULL,
+	hostname VARCHAR(255) NOT NULL DEFAULT '',
 	next_begin DATETIME,
 	in_progress TINYINT NOT NULL DEFAULT '0',
 	last_completed DATETIME,

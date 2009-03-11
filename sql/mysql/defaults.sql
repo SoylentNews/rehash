@@ -1074,6 +1074,7 @@ INSERT INTO vars (name, value, description) VALUES ('slashbox_sections','0','All
 INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What\'s Playing" Slashbox.');
 INSERT INTO vars (name, value, description) VALUES ('slashboxes_maxnum','25','Maximum number of slashboxes to allow');
 INSERT INTO vars (name, value, description) VALUES ('slashd_errnote_lastrun','','Last time slashd_errnote ran');
+INSERT INTO vars (name, value, description) VALUES ('slashd_hostname_default','','Hostname of the machine that slashd tasks run on unless otherwise specified in slashd_status.hostname - blank means slashd runs normally anywhere');
 INSERT INTO vars (name, value, description) VALUES ('slashd_verbosity','2','How much information slashd (and runtask) should write to slashd.log: 0-3, 3 can be a lot');
 INSERT INTO vars (name, value, description) VALUES ('slashdir','/usr/local/slash','Directory where Slash was installed');
 INSERT INTO vars (name, value, description) VALUES ('slogan','Slash Site','Slogan of the site');

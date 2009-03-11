@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2005 by Open Source Technology Group. See README
+# Copyright 1997-2009 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
 ############################################################
@@ -45,6 +45,7 @@ use URI::Escape;
 use XML::Parser::Expat;
 use XML::RSS 0.95;
 use Schedule::Cron;
+use Sys::Hostname;
 
 use Slash;
 use Slash::Constants ':slashd';
@@ -57,10 +58,11 @@ use vars qw(
 	$event_ar
 	$cron
 	$task_exit_flag
-	$PROGNAME $virtual_user
+	$PROGNAME $virtual_user $hostname
 );
 
 $virtual_user = $ARGV[0];
+$hostname = $ENV{SF_SYSTEM_FUNC} || hostname();
 
 # Rename the binary in the process list, to make identification
 # with `ps` easier (see also do_child below).
@@ -315,6 +317,7 @@ sub process_tasks {
 	# "require" all the task files -- each will put its info into
 	# $task{"filename.pl"}
 	my %success = ( );
+	my %diffhost = ( );
 	my %failure = ( );
 	my $dir = catdir($constants->{datadir}, "tasks");
 	if (!-e $dir or !-d _ or !-r _) {
@@ -322,6 +325,9 @@ sub process_tasks {
 could not process task files in $dir, missing or not readable to $>
 EOT
 	}
+
+	my $task_hostname = $slashdb->sqlSelectAllKeyValue('task, hostname', 'slashd_status');
+	my $default_task_hostname = $constants->{slashd_hostname_default} || $hostname;
 
 	# Go through the files and require them all.  Each file will
 	# store its data and code in %task and execute any necessary
@@ -413,15 +419,19 @@ EOT
 			slashdLog("'$fullname' did not set code properly");
 			$ok = 0;
 		}
-		# This may be rethought later, but for those useful tasks we 
-		# MAY OR MAY NOT want to run on an automated AND/OR a manual
-		# type basis: this allows the user to decide.
 		if ($task{$file}{standalone}) {
 			slashdLog("'$fullname' only runs via runtask (this is not an error)");
 			$ok = 0;
 		}
 		if (!defined($task{$file}{timespec})) {
 			slashdLog("'$fullname' did not set timespec properly");
+			$ok = 0;
+		}
+		(my $tmppackage = $file) =~ s/\.pl$//;
+		$task{$file}{hostname} = $task_hostname->{$tmppackage} || $default_task_hostname;
+		if ($task{$file}{hostname} ne $hostname) {
+			slashdLog("'$fullname' runs only on $task{$file}{hostname}");
+			$diffhost{$file} = 1;
 			$ok = 0;
 		}
 		if ($ok) {
@@ -431,7 +441,7 @@ EOT
 			$task{$file}{fork} ||= SLASHD_NOWAIT;
 		} else {
 			delete $task{$file} if $task{$file};
-			$failure{$file} = 1;
+			$failure{$file} = 1 unless $diffhost{$file};
 		}
 	}
 
@@ -446,6 +456,13 @@ EOT
 		. (
 			(scalar keys %success)
 			?  " (" . join(" ", sort keys %success) . ")"
+			: ""
+		)
+		. "; "
+		. (scalar keys %diffhost) . " diffhost"
+		. (
+			(scalar keys %diffhost)
+			?  " (" . join(" ", sort keys %diffhost) . ")"
 			: ""
 		)
 		. "; "
