@@ -365,7 +365,8 @@ EOT
 		# we may be importing more than we need for coderefs, but
 		# i didn't feel like looking at each task individually.
 
-		(my $tmppackage = $file) =~ s/\.pl$//;
+		(my $filenopl = $file) =~ s/\.pl$//;
+		my $tmppackage = $filenopl;
 		$tmppackage =~ s/\W/_/g;
 		$tmppackage =~ s/^([^a-zA-Z])/a_$1/g;
 		$tmppackage = "Slash::Task::$tmppackage";
@@ -427,8 +428,7 @@ EOT
 			slashdLog("'$fullname' did not set timespec properly");
 			$ok = 0;
 		}
-		(my $tmppackage = $file) =~ s/\.pl$//;
-		$task{$file}{hostname} = $task_hostname->{$tmppackage} || $default_task_hostname;
+		$task{$file}{hostname} = $task_hostname->{$filenopl} || $default_task_hostname;
 		if ($task{$file}{hostname} ne $hostname) {
 			slashdLog("'$fullname' runs only on $task{$file}{hostname}");
 			$diffhost{$file} = 1;
@@ -819,11 +819,11 @@ sub main {
 	# Initialize logging and all the low-level stuff.
 
 	slashdLogInit();
-	slashdLog("Starting up Slashd (verbosity " . verbosity()
-		. ") with pid $$");
-	if ($ENV{TZ} ne 'GMT') {
+	slashdLog("Starting slashd on $hostname (verbosity " . verbosity() . ") with pid $$");
+	if (!$ENV{TZ} || $ENV{TZ} ne 'GMT') {
+		my $envtz = defined($ENV{TZ}) ? $ENV{TZ} : '(undef)';
 		slashdLog(join(" ",
-			"Note: \$ENV{TZ}='$ENV{TZ}' not GMT, this may cause",
+			"Note: \$ENV{TZ}='$envtz' not GMT, this may cause",
 			"'entry_time in the past' errors; did you not start",
 			"slashd with the init script?"
 		));
