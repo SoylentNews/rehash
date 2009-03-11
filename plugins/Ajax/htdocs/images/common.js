@@ -2,7 +2,7 @@
 ; // $Id$
 
 /*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody
-	firehose_remove_all_items firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
+	firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
 	json_update firehose_reorder firehose_get_next_updates getFirehoseUpdateInterval run_before_update
 	firehose_play firehose_add_update_timerid firehose_collapse_entry
 	 vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
@@ -365,203 +365,112 @@ function firehose_style_switch_handler(transport) {
 }
 
 
+var	qw = Slash.Util.qw,
+	uses_setfield	= $.extend(qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'), {
+				nobylines:	'#firehoselist span.nickname',
+				nodates:	'#firehoselist span.date'
+			}),
+	loads_new	= qw.as_set('section setfhfilter setsearchfilter tab view'),
+	removes_all	= $.extend(qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs'), loads_new),
+	sets_param	= $.extend(qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),
+	flags_param	= {	fhfilter:	'filterchanged',
+				more_num:	'ask_more',
+				section:	'sectionchanged',
+				setfhfilter:	'filterchanged',
+				setsearchfilter:'searchtriggered',
+				tab:		'tabchanged',
+				usermode:	'setusermode',
+				view:		'viewchanged'
+			},
+	sets_directly	= $.extend(qw.as_set('color duration issue mode orderby orderdir section setfhfilter setsearchfilter startdate tab tabsection view'), {
+				setfhfilter:	'fhfilter',
+				setsearchfilter:'fhfilter',
+				tabsection:	'section'
+			}),
+	resets_pagemore	= qw.as_set('fhfilter view tab issue pagesize section setfhfilter setsearchfilter'),
+	toggle_pairs	= {	orderby_createtime:	{ id:"popularity",	new_id:"time",		new_value:"popularity" },
+				orderby_popularity:	{ id:"time",		new_id:"popularity",	new_value:"createtime" },
+				orderdir_ASC:		{ id:"asc",		new_id:"desc",		new_value:"DESC" },
+				orderdir_DESC:		{ id:"desc",		new_id:"asc",		new_value:"ASC" },
+				mode_full:		{ id:"abbrev",		new_id:"full",		new_value:"fulltitle" },
+				mode_fulltitle:		{ id:"full",		new_id:"abbrev",	new_value:"full" }
+			},
+	update_handlers	= {	onComplete: function(transport) {
+					json_handler(transport);
+					firehose_get_updates({ oneupdate: 1 });
+				}
+			};
+
 function firehose_set_options(name, value, context) {
-	if (firehose_user_class === 0) {
-		return;
-	}
-	if (name == "color" && value === undefined) {
+	if ( !firehose_user_class || name==='color' && !value ) {
 		return;
 	}
 
-	var pairs = [
-		// name		value		curid		newid		newvalue 	title
-		["orderby", 	"createtime", 	"popularity",	"time",		"popularity"	],
-		["orderby", 	"popularity", 	"time",		"popularity",	"createtime"	],
-		["orderdir", 	"ASC", 		"asc",		"desc",		"DESC"],
-		["orderdir", 	"DESC", 	"desc",		"asc",		"ASC"],
-		["mode", 	"full", 	"abbrev",	"full",		"fulltitle"],
-		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"]
-	];
-	var params = {};
-	params.setting_name = name;
-	params.context = context;
-	params.op = 'firehose_set_options';
-	params.reskey = reskey_static;
-	var theForm = document.forms.firehoseform;
-	if (name == "usermode") {
-		value = value ? 1 : 0;
-		params.setusermode = 1;
-		params[name] = value;
-	}
+	typeof(value)==='boolean' && (value = sign(value));
 
-	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode" || name == "nocommentcnt" || name == "nomarquee" || name == "noslashboxes") {
-		value = value ? 1 : 0;
-		params[name] = value;
+	var params={};
+	sets_param[name]	&& (params[name] = value);
+	flags_param[name]	&& (params[flags_param[name]] = 1);
+	sets_directly[name]	&& (firehose_settings[ typeof(sets_directly[name])==='string' ? sets_directly[name] : name ]=value);
+	resets_pagemore[name]	&& (firehose_settings.page = firehose_settings.more_num = 0);
+
+	if ( name in uses_setfield ) {
 		params.setfield = 1;
-
-		var selector = {
-			nodates:	'#firehoselist span.date',
-			nobylines:	'#firehoselist span.nickname'
-		}[name];
-
-		if ( selector ){
-			var $to_be_toggled = $(selector).toggleClass('hide', !!value);
+		if ( typeof(uses_setfield[name])==='string' ){
+			var $to_be_toggled = $(uses_setfield[name]).toggleClass('hide', !!value);
 			value || $to_be_toggled.css({ display: 'inline' });
 		}
-	}
-
-	if (name == "fhfilter" && theForm) {
-		for (i=0; i< theForm.elements.length; i++) {
-			if (theForm.elements[i].name == "fhfilter") {
-				firehose_settings.fhfilter = theForm.elements[i].value;
-			}
+	} else if (name === "fhfilter") {
+		var $input = $('form[name=firehoseform] input[name=fhfilter]');
+		if ( $input.length ) {
+			firehose_setting.fhfilter = $input.val();
 		}
-		firehose_settings.page = 0;
-		firehose_settings.more_num = 0;
-		params.filterchanged = 1;
-	}
-
-	if (name == "setfhfilter" || name == "setsearchfilter") {
-		firehose_settings.fhfilter = value;
-		firehose_settings.page = 0;
-		firehose_settings.more_num = 0;
-		if (name == "setfhfilter") {
-			params.filterchanged = 1;
-		} else {
-			params.searchtriggered = 1;
-		}
-	}
-
-	if (name == "view") {
-		firehose_settings.view = value;	
-		params.viewchanged = 1;
+	} else if (name === "view") {
 		$('#searchquery').each( function() { firehose_settings.fhfilter = $(this).val(); } );
-		firehose_settings.page = 0;
-		firehose_settings.more_num = 0;
-	}
-	
-	if (name == "tab") {
-		firehose_settings.tab = value;	
-		params.tabchanged = 1;
-		firehose_settings.page = 0;
-		firehose_settings.more_num = 0;
+	} else if (name === "issue") {
+		firehose_settings.startdate = value;
+		firehose_settings.duration = 1;
+	} else if (name === 'tabsection') {
+		params.tabtype = 'tabsection';
+	} else if (name === 'mode') {
+		fh_view_mode = value;
 	}
 
-	if (name != "color") {
-	for (i=0; i< pairs.length; i++) {
-		var el = pairs[i];
-		if (name == el[0] && value == el[1]) {
-			firehose_settings[name] = value;
-			var $ctrl = $('#'+el[2]);
-			if ( $ctrl.length ) {
-				$ctrl.attr('id', el[3]);
-				var namenew = el[0], valuenew = el[4];
-				$ctrl.children().eq(0).click(function(){
-					firehose_set_options(namenew, valuenew);
-					return false;
-				});
-			}
-		}
-	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view" || name == "section" || name == "setsearchfilter" || name == "setfhfilter" ) {
+	var toggle = toggle_pairs[ name+'_'+value ];
+	toggle && $any(toggle.id).each(function(){
+		this.id = toggle.new_id;
+		$('>*:first', this).
+			unbind('click.option-toggle').
+			bind('click.option-toggle', function(){
+				firehose_set_options(name, toggle.new_value);
+				return false;
+			});
+	});
+
+	var $fhl = $any('firehoselist');
+	if ( name in removes_all ) {
 		// blur out then remove items
-		if (name == "mode") {
-			fh_view_mode = value;
-		}
-		if ($dom('firehoselist')) {
-			// set page
-			page = 0;
-
-			if (!is_ie) {
-				var attributes = {
-					opacity: { from: 1, to: 0 }
-				};
-				var myAnim = new YAHOO.util.Anim("firehoselist", attributes);
-				myAnim.duration = 1;
-				myAnim.onComplete.subscribe(function() {
-					$dom('firehoselist').style.opacity = "1";
-				});
-				myAnim.animate();
-			}
-			// remove elements
-			firehose_remove_all_items();
-		}
+		$fhl.fadeOut(function(){
+			$(this).empty().css({ opacity:1 });
+			after_article_moved();
+		});
 	}
-	}
-
-	if (name == "view" || name == "tab" || name == "section" || name == "setsearchfilter" || name == "setfhfilter") {
-		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
+	if ( name in loads_new ) {
+		$fhl.html("<h1 class='loading_msg'>Loading New Items</h1>");
 		$('.paginate').hide();
 	}
 
-	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") {
-		params[name] = value;
-		if (name == "startdate") {
-			firehose_settings.startdate = value;
-		}
-		if (name == "duration")  {
-			firehose_settings.duration = value;
-		}
-		if (name == "issue") {
-			firehose_settings.issue = value;
-			firehose_settings.startdate = value;
-			firehose_settings.duration = 1;
-			firehose_settings.page = 0;
-			firehose_settings.more_num = 0;
-			var issuedate = firehose_settings.issue.substr(5,2) + "/" + firehose_settings.issue.substr(8,2) + "/" + firehose_settings.issue.substr(10,2);
+	ajax_update($.extend({
+			op:		'firehose_set_options',
+			reskey:		reskey_static,
+			setting_name:	name,
+			context:	context,
+			section:	firehose_settings.section
+		}, params, firehose_settings),
+		'', update_handlers
+	);
 
-			$('#fhcalendar, #fhcalendar_pag').each(function(){
-			//	this._widget.setDate(issuedate, "day");
-			});
-		}
-		if (name == "color") {
-			firehose_settings.color = value;
-			firehose_swatch_color(value); // don't wait for the refresh to change the picker color
-		}
-		if (name == "pagesize") {
-			firehose_settings.page = 0;
-			firehose_settings.more_num = 0;
-		}
-	}
-
-	var handlers = {
-		onComplete: function(transport) {
-			json_handler(transport);
-			firehose_get_updates({ oneupdate: 1 });
-		}
-	};
-
-	if (name == 'tabsection') {
-		firehose_settings.section = value;
-		params.tabtype = 'tabsection';
-	}
-
-	if (name == 'tabtype') {
-		params.tabtype = value;
-	}
-
-	if (name == 'more_num') {
-		params.ask_more = 1;
-	}
-	
-	if (name == 'section') {
-		params.sectionchanged = 1;
-		firehose_settings.section = value;
-		firehose_settings.page = 0;
-		firehose_settings.more_num = 0;
-		firehose_highlight_section($('#fhsection-'+value));
-		firehose_style_switch(value);
-	}
-	
-	params.section = firehose_settings.section;
-
-	$.extend(params, firehose_settings);
-	ajax_update(params, '', handlers);
-}
-
-function firehose_remove_all_items() {
-	$('#firehoselist').empty();
-	after_article_moved();
+	$(document).trigger('firehose-setting-' + name, value);
 }
 
 
@@ -1487,7 +1396,7 @@ function firehose_inactivity_modal() {
 function firehose_play(context) {
 	fh_play = 1;
 	setFirehoseAction();
-	firehose_set_options('pause', '0', context);
+	firehose_set_options('pause', false, context);
 	$('#message_area').html('');
 	$('#pauseorplay').html('Updated');
 	$('#play').setClass('hide');
@@ -1503,7 +1412,7 @@ function firehose_pause(context) {
 	$('#pause').setClass('hide');
 	$('#play').setClass('show');
 	$('#pauseorplay').html('Paused');
-	firehose_set_options('pause', '1', context);
+	firehose_set_options('pause', true, context);
 }
 
 function firehose_add_update_timerid(timerid) {

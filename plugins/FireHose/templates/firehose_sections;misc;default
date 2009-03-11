@@ -95,6 +95,12 @@ $any('firehose-sections').mousedown(function( event ){
 			$this.metadata({type:'elem', name:'script'}); // force metadata initialization
 			$this.children('script[type=data]').remove(); // and get rid of the (now useless) elem that delivered it to us
 		});
+
+$(document).bind('firehose-setting-section', function( e, new_section ){
+	firehose_highlight_section($any('fhsection-' + new_section));
+	firehose_style_switch(new_section);
+});
+
 });
 </script>[% END %]
 __seclev__
