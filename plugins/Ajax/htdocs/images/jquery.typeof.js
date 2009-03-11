@@ -3,112 +3,141 @@
 ;(function( $ ){
 
 // I guess you could say the algorithm is table-driven :-)
-var	toString	= Object.prototype.toString,
-	typeOfObject	= {
+var	objToString = Object.prototype.toString,
+	objectTypes = {
 		'[object Date]':	'date',
 		'[object Function]':	'function',
 		'[object Number]':	'number',
 		'[object RegExp]':	'regexp',
 	},
-	typeOfIndexedObject = {
+	orderedObjectTypes = {
 		'[object Array]':	'array',
 		'[object String]':	'string'
 	},
-	typeOfNode = [
+	nodeTypes = [
 		undefined,
 		'node.element',
 		'node.attribute',
 		'node.text'
 	],
-	typeOfUnadorned = {
+	unqualifyTypes = {
 		'array.empty':		'array',
+		'array':		'array',
+		'boolean':		'boolean',
+		'document':		'document',
+		'element':		'element',
 		'jquery.empty':		'jquery',
+		'jquery':		'jquery',
 		'list.empty':		'list',
+		'list':			'list',
 		'node.attribute':	'node',
 		'node.document':	'document',
 		'node.element':		'element',
 		'node.text':		'node',
+		'node':			'node',
+		'null':			'null',
+		'number.-Infinity':	'number',
 		'number.Infinity':	'number',
 		'number.NaN':		'number',
+		'number':		'number',
 		'object.empty':		'object',
+		'object':		'object',
+		'screen':		'screen',
 		'string.char':		'string',
-		'string.empty':		'string'
+		'string.empty':		'string',
+		'string':		'string',
+		'undefined':		'undefined',
+		'window':		'window'
 	},
-	typeOfUnique	= {};
+	singletonTypes = {};
 
 // 'singletons': the very first thing to check in _typeOf
-typeOfUnique[document]	= 'node.document';
-typeOfUnique[false]	= 'boolean';
-typeOfUnique[Infinity]	= 'number.Infinity';
-typeOfUnique[NaN]	= 'number.NaN';
-typeOfUnique[null]	= 'null';
-typeOfUnique[true]	= 'boolean';
-typeOfUnique[undefined]	= 'undefined';
-typeOfUnique[window]	= 'window';
+singletonTypes[document]	= 'node.document';
+singletonTypes[false]		= 'boolean';
+singletonTypes[Infinity]	= 'number.Infinity';
+singletonTypes[-Infinity]	= 'number.-Infinity';
+singletonTypes[NaN]		= 'number.NaN';
+singletonTypes[null]		= 'null';
+singletonTypes[true]		= 'boolean';
+singletonTypes[undefined]	= 'undefined';
+singletonTypes[window]		= 'window';
+
+window.screen && (singletonTypes[window.screen] = 'screen');
 
 function _inheritsProperty( o, expr ){
-	return expr && expr in o && !o.propertyIsEnumerable(expr);
+	return expr && o && expr in o && !o.propertyIsEnumerable(expr);
 }
 
 // Here's the core function.
-function _typeOf( o, unadorned ){
+function _typeOf( o, unq ){
 	var cmp;
-	if ( unadorned ) {
-		if ( unadorned in _typeOf ) { return _typeOf[unadorned](o); }
-		unadorned!==true && (cmp=unadorned) && (unadorned=false);
+	if ( unq ) {
+		unq in _typeOf && (unq=_typeOf[unq]);
+		if ( typeof(unq)==='function' ) { return unq.call(_typeOf, o, arguments[2]); }
+		unq!==true && (cmp=unq) && (unq=false);
 	}
 
-	var otn, itn, utn, tn =
-		typeOfUnique[ o ]
-		|| typeOfObject[ otn=toString.call(o) ]
-		|| typeof(o.__typeOf)==='function' && o.__typeOf(unadorned)
-		|| !(itn=typeOfIndexedObject[otn]) && _inheritsProperty(o, 'nodeType') && (typeOfNode[o.nodeType] || 'node');
+	var ots, oot, ut, t =
+		singletonTypes[ o ]
+		|| objectTypes[ ots=objToString.call(o) ]
+		|| typeof(o.__typeOf)==='function' && o.__typeOf(unq)
+		|| !(oot=orderedObjectTypes[ots]) && _inheritsProperty(o, 'nodeType') && (nodeTypes[o.nodeType] || 'node');
 
-	if ( tn ) {
-		utn = typeOfUnadorned[tn] || tn;
-		return unadorned && utn || (!cmp || cmp===tn || cmp===utn) && tn;
+	if ( t ) {
+		ut = unqualifyTypes[t] || t;
+		return unq && ut || (!cmp || cmp===t || cmp===ut) && t;
 	}
 
-	utn = itn
+	ut = oot
 		|| o instanceof $ && 'jquery'
 		|| _inheritsProperty(o, 'length') && 'list';
-	if ( unadorned ) { return utn || 'object'; }
+	if ( unq ) { return ut || 'object'; }
 
-	if ( utn ) {
-		tn = !o.length && utn+'.empty'
-			|| (o.length>1 || utn!=='string') && utn
+	if ( ut ) {
+		t = !o.length && ut+'.empty'
+			|| (o.length>1 || ut!=='string') && ut
 			|| 'string.char';
 	} else {
-		utn = 'object';
-		tn = 'object.empty';
+		ut = 'object';
+		t = 'object.empty';
 		for ( k in o ){
-			tn = 'object';
+			t = 'object';
 			break;
 		}
 	}
-	return (!cmp || cmp===tn || cmp===utn) && tn;
+	return (!cmp || cmp===t || cmp===ut) && t;
 };
 
-function makeTest( fn ){
-	return function( o, tn ){
-		return !!fn(o, tn||(tn=_typeOf(o))) && tn;
+function makeTest( test ){
+	var type_list = test;
+	switch ( typeof(test) ) {
+		case 'function':
+			return function( o, t, unq ){
+				var success = test.call(_typeOf, o, t||(t=_typeOf(o)), unq);
+				return !!success && (typeof(success)==='string' ? success : t);
+			};
+		case 'string':
+			type_list = test.split(/[ ,|]/);
+		case 'array':
+			test={};
+			for ( var i=type_list.length-1, k=type_list[i]; (test[k]=true) && i; k=type_list[--i]) {  }
+		case 'object':
+			return function( o, t, unq ){
+				t || (t=_typeOf(o, unq));
+				return !!test[ unqualifyTypes[t] || t ] && t;
+			};
 	}
 }
-function makeCategoryTest( tlist ){
-	var tdict = {};
-	for ( var L=tlist.split(' '), i=L.length-1, k=L[i]; (tdict[k]=true) && i; k=L[--i]) {  }
 
-	return makeTest(function( o, tn ){
-		return tdict[ typeOfUnadorned[tn] || tn ];
-	});
-}
+var objToString_pattern = / (.+)]$/;
 
-var _typeOfScalar, _typeOfInherited;
+$.TypeOf = $.extend(_typeOf, {
+	qualified: function( o ){ return _typeOf(o, false); },
+	unqualified: function( o ){ return _typeOf(o, true); },
+	object: function( o ){ return objToString.call(o).match(objToString_pattern)[1] || false; },
+	// Consider, e.g., var _typeOf = $.TypeOf.unqualified; if it otherwise feels too heavy.
 
-$['TypeOf'] = $.extend(_typeOf, {
-	unadorned: function(o, tn){ return typeOfUnadorned[tn] || tn || _typeOf(o, true); },
-	implementation: function(o){ return toString.call(o).match(/ (.+)]$/)[1]; },
-	// Consider, e.g., var _typeOf = $.TypeOf.unadorned; if it otherwise feels too heavy.
+	unqualify: function( t ){ return unqualifyTypes[t] || arguments.length>1 && _typeOf(arguments[1], true) || t; },
 
 
 
@@ -116,51 +145,49 @@ $['TypeOf'] = $.extend(_typeOf, {
 	//	"Hello, World!"	=> .scalar, .def, and .yes return 'string'; all others false
 	//	0		=> .scalar, .def, .no, and .defNo return 'number'
 	//	undefined	=> .scalar, .undef, and .no return 'undefined'
-	//	{a:5, b:"bob"}	=> .nonScalar, .def, .yes, and .nonEmpty return 'object'
-	//	$([])		=> .nonScalar, .def, .yes, and .list return 'jquery.empty'
+	//	{a:5, b:"bob"}	=> .def, .yes, and .nonEmpty return 'object'
+	//	$([])		=> .def, .yes, and .list return 'jquery.empty'
 
 	// type-tests
-	scalar: _typeOfScalar=makeCategoryTest('boolean null number string undefined'),
-	nonScalar: makeTest(function(o, tn){ return !_typeOfScalar(o, tn); }),
-	list: makeCategoryTest('array jquery list'),
-	node: makeCategoryTest('document element node'),
-	fn: makeTest(function(o, tn){ return tn==='function'; }),
+	scalar: makeTest('boolean|null|number|string|undefined'),
+	list: makeTest('array|jquery|list'),
+	node: makeTest('document|element|node'),
+	fn: makeTest(function( o, t ){ return t==='function'; }),
 
 	// value-tests
-	undef: makeTest(function(o){ return o===undefined; }),
-	def: makeTest(function(o){ return o!==undefined; }),
-	yes: makeTest(function(o){ return o; }),
-	no: makeTest(function(o){ return !o; }),
-	defNo: makeTest(function(o){ return o!==undefined && !o; }),
-	nonEmpty: makeTest(function(o, tn){ return !_typeOfScalar(o, tn) && !(_typeOf(o) in typeOfUnadorned); }),
+	undef: makeTest(function( o ){ return o===undefined; }),
+	def: makeTest(function( o ){ return o!==undefined; }),
+	yes: makeTest(function( o ){ return !!o; }),
+	no: makeTest(function( o ){ return !o; }),
+	defNo: makeTest(function( o ){ return o!==undefined && !o; }),
+	nonEmpty: makeTest(function( o, t ){ return !_typeOf.scalar(o, t) && (t=_typeOf(o))===unqualifyTypes[t]; }),
 
 	// inheritance-tests
 	// $.TypeOf.inherited(o, 'length') asks "Does o inherit the property 'length'?", returns the _typeOf o.length for success
 	// $.TypeOf.inherited(o, Node) asks "Is o an instanceof Node?", returns the _typeOf o for success
-	inherited: _typeOfInherited=function( o, expr ){
+	inherited: function( o, expr ){
 		return (typeof(expr)==='string'
 			? (_inheritsProperty(o, expr) && (o=o[expr]))
 			: o instanceof expr
 		) && _typeOf(o);
 	},
-	inheritedFn: function(o, fname){ return _typeOfInherited(o, fname)==='function' && 'function'; },
+	inheritedFn: function( o, fname ){ return _typeOf.inherited(o, fname)==='function' && 'function'; },
 
+
+	// meta-tests, N.B.: typename is _first_, e.g., $.TypeOf.not('scalar', o)
+	// is: function( t, o, unq ){ return _typeOf(o, t, unq); },
+	not: function( t, o, unq ){ return !_typeOf(o, t) && _typeOf(o, unq); },
 
 	// All the tests above return the typename for success.
 	// objIf returns the object for success, e.g., objIf('string', "Hello, World!") => "Hello, World!"
-	objIf: function( tn, o ){
-		if ( typeof(tn)==='string' && _typeOf(o, tn) ) {
+	objIf: function( t, o ){
+		if ( typeof(t)==='string' && _typeOf(o, t) ) {
 			return o;
 		}
 	},
 
 	// ...and now you can play along at home!
-	makeTest: function( fn ){
-		return function( o, tn ){
-			var answer = fn(o, tn||(tn=_typeOf(o)));
-			return !!answer && (typeof(answer)==='string' ? answer : tn);
-		};
-	}
+	makeTest: makeTest
 });
 
 })($);

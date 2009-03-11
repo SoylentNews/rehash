@@ -68,7 +68,7 @@ var	T = $.TypeOf,
 function x(v){ v||(v=''); return '"'+v+'"'; }
 
 function invariants( o, msg ){
-	var tn = T(o), ptn = T.unadorned(o), jstn = typeof(o);
+	var tn = T(o), ptn = T(o, true), jstn = typeof(o);
 
 	var label = typeof(o)==='number' && isNaN(o) && 'NaN'
 		|| o===undefined && 'undefined'
@@ -78,15 +78,15 @@ function invariants( o, msg ){
 		|| Object.prototype.toString.call(o)
 		|| '*';
 
-	var header = label+': typeof=>'+typeof(o)+', T=>'+tn+', T.unadorned=>'+ptn;
+	var header = label+': typeof=>'+typeof(o)+', T=>'+tn+', T.unqualified=>'+ptn;
 	if ( msg ) {
 		header = 'given '+msg+', '+header;
 	}
 
 
 	ok(true, header);
-	ok(specificity[tn]>=specificity[ptn], '...| T:'+x(tn)+' >= T.unadorned:'+x(jstn));
-	ok(specificity[ptn]>=specificity[jstn], '...| T.unadorned'+x(ptn)+' >= typeof:'+x(jstn));
+	ok(specificity[tn]>=specificity[ptn], '...| T:'+x(tn)+' >= T.unqualified:'+x(jstn));
+	ok(specificity[ptn]>=specificity[jstn], '...| T.unqualified'+x(ptn)+' >= typeof:'+x(jstn));
 
 
 	ok(!!o == (T.yes(o)===tn), '...| '+label+'.yes <=> '+x(T.yes(o)));
@@ -106,7 +106,7 @@ function invariants( o, msg ){
 function variations( o, msg ){
 	invariants(o, msg);
 
-	switch ( T.unadorned(o) ) {
+	switch ( T.unqualified(o) ) {
 		case 'string':
 			invariants(Object(o), 'Object('+msg+')');
 			invariants(String(o), 'String('+msg+')');
@@ -137,7 +137,7 @@ module('definition');
 
 test('available', function(){
 	ok('TypeOf' in $ && typeof($.TypeOf)==='function', '$.TypeOf exists, is a function');
-	$.each('unadorned implementation scalar nonScalar list node fn undef def yes no defNo nonEmpty inherited inheritedFn makeTest'.split(/\s+/), function(){
+	$.each('qualified unqualified object unqualify scalar list node fn undef def yes no defNo nonEmpty inherited inheritedFn not objIf makeTest'.split(/\s+/), function(){
 		ok(this in $.TypeOf && typeof($.TypeOf[this])==='function', this+' exists, is a function');
 	});
 });
@@ -163,7 +163,7 @@ function scalar_tests( o, answer, label ){
 	ok(!T.list(o), '...| '+label+'.list <=> '+x(T.list(o)));
 	ok(!T.node(o), '...| '+label+'.node <=> '+x(T.node(o)));
 	ok(!T.fn(o), '...| '+label+'.fn <=> '+x(T.fn(o)));
-	ok(!T.nonScalar(o), '...| '+label+'.nonScalar <=> '+x(T.nonScalar(o)));
+	ok(!T.not('scalar', o), '...| '+label+'.not "scalar" <=> '+x(T.not('scalar', o)));
 	ok(!T.nonEmpty(o), '...| '+label+'.nonEmpty <=> '+x(T.nonEmpty(o)));
 
 	variations(o, label);
@@ -201,7 +201,7 @@ module('lists');
 function lists_tests( o, answer, label ){
 	ok(true, label+': list tests');
 	ok(T.list(o), '...| '+label+'.list <=> '+x(T.list(o)));
-	ok(T.nonScalar(o)===answer, '...| '+label+'.nonScalar <=> '+x(T.nonScalar(o)));
+	ok(T.not('scalar', o)===answer, '...| '+label+'.not "scalar"  <=> '+x(T.not('scalar', o)));
 
 	ok(!T.scalar(o), '...| '+label+'.scalar <=> '+x(T.scalar(o)));
 	ok(!T.node(o), '...| '+label+'.node <=> '+x(T.node(o)));
@@ -282,8 +282,8 @@ test('inheritedFn', function(){
 	ok('inheritedFn' in T, '$.TypeOf.inheritedFn');
 });
 
-test('implementation', function(){
-	ok('implementation' in T, '$.TypeOf.implementation');
+test('object', function(){
+	ok('object' in T, '$.TypeOf.object');
 	// ok(expr, 'description');
 });
 
@@ -302,8 +302,8 @@ $(function(){
 
 var	builtin		= function(o)typeof(o),
 	adorned		= $.TypeOf,
-	unadorned	= $.TypeOf.unadorned,
-	implementation	= $.TypeOf.implementation;
+	plain		= $.TypeOf.unqualified,
+	object		= $.TypeOf.object;
 
 var	$table = $('table');
 
@@ -312,9 +312,9 @@ function tr( expr, label ){
 
 	$row.	append($('<td>').text(label)).
 		append($('<td>').text(adorned(expr))).
-		append($('<td>').text(unadorned(expr))).
+		append($('<td>').text(plain(expr))).
 		append($('<td>').text(builtin(expr))).
-		append($('<td>').text(implementation(expr)));
+		append($('<td>').text(object(expr)));
 
 	$table.append($row);
 }
