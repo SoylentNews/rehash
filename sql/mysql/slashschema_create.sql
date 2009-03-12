@@ -190,6 +190,7 @@ CREATE TABLE badpasswords (
 
 DROP TABLE IF EXISTS blocks;
 CREATE TABLE blocks (
+	id mediumint(8) UNSIGNED NOT NULL auto_increment,
 	bid varchar(30) DEFAULT '' NOT NULL,
 	block text,
 	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
@@ -210,7 +211,8 @@ CREATE TABLE blocks (
 	all_skins tinyint NOT NULL DEFAULT '0',
 	shill enum('yes','no') NOT NULL default 'no',
   	shill_uid mediumint(8) unsigned NOT NULL default '0',
-	PRIMARY KEY (bid),
+	PRIMARY KEY (id),
+	UNIQUE KEY bid (bid),
 	KEY type (type),
 	KEY skin (skin)
 ) TYPE=InnoDB;

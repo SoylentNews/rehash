@@ -5982,3 +5982,44 @@ ALTER TABLE slashd_status ADD COLUMN hostname VARCHAR(255) NOT NULL DEFAULT '' A
 INSERT INTO vars (name, value, description) VALUES ('slashd_hostname_default','','Hostname of the machine that slashd tasks run on unless otherwise specified in slashd_status.hostname - blank means slashd runs normally anywhere');
 INSERT INTO vars (name, value, description) VALUES ('logdir_flock','1','flock(LOCK_EX) around appends to log files in logdir?');
 
+# for plugins/DynamicBlocks
+ALTER TABLE blocks DROP PRIMARY KEY;
+ALTER TABLE blocks ADD UNIQUE KEY bid (bid);
+ALTER TABLE blocks ADD COLUMN id mediumint(8) unsigned NOT NULL primary key auto_increment;
+
+CREATE TABLE dynamic_blocks (
+  type_id tinyint(1) unsigned NOT NULL default '0',
+  type enum('portal','admin','user') NOT NULL default 'user',
+  private enum('yes','no') NOT NULL default 'no',
+  PRIMARY KEY (type_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE dynamic_user_blocks (
+  id mediumint(8) unsigned NOT NULL auto_increment,
+  bid mediumint(8) unsigned NOT NULL default '0',
+  type_id tinyint(1) unsigned NOT NULL default '0',
+  uid mediumint(8) unsigned NOT NULL default '0',
+  title varchar(30) NOT NULL default '',
+  url varchar(128) NOT NULL default '',
+  name varchar(30) NOT NULL default '',
+  description varchar(64) NOT NULL default '',
+  block text,
+  seclev mediumint(8) unsigned NOT NULL default '0',
+  created datetime NOT NULL default '0000-00-00 00:00:00',
+  last_update datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (id),
+  UNIQUE KEY name (name),
+  UNIQUE KEY block (name, uid)
+) ENGINE=InnoDB;
+
+INSERT INTO dynamic_blocks VALUES (1, 'portal', 'no');
+INSERT INTO dynamic_blocks VALUES (2, 'portal', 'yes');
+INSERT INTO dynamic_blocks VALUES (3, 'admin', 'no');
+INSERT INTO dynamic_blocks VALUES (4, 'admin', 'yes');
+INSERT INTO dynamic_blocks VALUES (5, 'user', 'no');
+INSERT INTO dynamic_blocks VALUES (6, 'user', 'yes');
+INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (300, 3, 0, 'performancebox', 'Performance', 'Performance Stats', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (301, 3, 0, 'authoractivity', 'Authors', 'Author Activity', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (302, 3, 0, 'admintodo', 'Admin Todo', 'Admin Todo Items', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (303, 3, 0, 'recenttagnames', 'Recent Tagnames', 'Recent Tagnames', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (304, 3, 0, 'firehoseusage', 'Firehose Usage', 'Firehose Usage', 10000, NOW(), NOW());
