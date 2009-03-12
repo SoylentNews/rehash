@@ -712,6 +712,28 @@ $(function(){
 });
 
 
+
+function inject_reasons( expr, init ){
+	// expr is an element, selector, or $selection.
+	var $selection = $any(expr);
+	$selection.
+		find('>h3').
+			append(inject_reasons.template).
+			find('.tag-display-stub').
+				click(firehose_click_nodnix_reason);
+
+	// Unless caller _explicitly_ tells me _not_ to init, e.g., inject_reasons(..., false)...
+	if ( $.TypeOf.not('defNo', init) ) {
+		$init_tag_widgets($selection.find('.tag-widget-stub'));
+	}
+}
+inject_reasons.template = (
+'<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
+	'<div class="tag-display-stub" context="related" init="menu:false" />' +
+'</div>'
+);
+
+
 function firehose_init_tag_ui( $new_entries ){
 	var $firehoselist = $('#firehoselist');
 
@@ -744,13 +766,7 @@ function firehose_init_tag_ui( $new_entries ){
 					($this.attr('type') == 'comment') ?
 						firehose_handle_comment_nodnix :
 						firehose_handle_nodnix);
-				$this.
-					find('> h3').
-						append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-								'<div class="tag-display-stub" context="related" init="menu:false" />' +
-							'</div>').
-						find('.tag-display-stub').
-							click(firehose_click_nodnix_reason);
+				inject_reasons(this, false);
 			}
 		});
 
