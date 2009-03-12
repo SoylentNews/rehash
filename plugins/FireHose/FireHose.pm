@@ -2315,6 +2315,7 @@ sub ajaxFireHoseGetUpdates {
 	my $update_data = { removals => 0, items => 0, updates => 0, new => 0, updated_tags => {} };
 
 	$options->{content_type} = 'application/json';
+	my $title_js = '';
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $id_str = $form->{ids};
@@ -2394,7 +2395,9 @@ sub ajaxFireHoseGetUpdates {
 					my $atstorytime;
 					$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
 					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
-					$html->{"title-$_->{id}"} = $title;
+					
+					$title_js .= "\$('\#title-" . $_->{id} . "').html(" . Data::JavaScript::Anon->anon_dump($title) . ");\n";
+					$title_js .= "inject_reasons('#firehose-" . $_->{id} . "')";
 
 					my $introtext = $item->{introtext};
 					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
@@ -2531,6 +2534,7 @@ sub ajaxFireHoseGetUpdates {
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
+		eval_last	=> $title_js,
 		updates		=> $updates,
 		update_time	=> $update_time,
 		update_data	=> $update_data,
