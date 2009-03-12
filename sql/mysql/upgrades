@@ -5980,4 +5980,5 @@ ALTER TABLE accesslog ADD COLUMN pagemark bigint UNSIGNED DEFAULT 0 NOT NULL AFT
 
 ALTER TABLE slashd_status ADD COLUMN hostname VARCHAR(255) NOT NULL DEFAULT '' AFTER task;
 INSERT INTO vars (name, value, description) VALUES ('slashd_hostname_default','','Hostname of the machine that slashd tasks run on unless otherwise specified in slashd_status.hostname - blank means slashd runs normally anywhere');
+INSERT INTO vars (name, value, description) VALUES ('logdir_flock','1','flock(LOCK_EX) around appends to log files in logdir?');
 

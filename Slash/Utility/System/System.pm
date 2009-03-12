@@ -321,6 +321,7 @@ sub doLogExit {
 
 sub doLog {
 	my($fname, $msg, $stdout, $sname) = @_;
+	my $constants = getCurrentStatic();
 	my @msg;
 	if (ref($msg) && ref($msg) eq 'ARRAY') {
 		@msg = @$msg;
@@ -332,12 +333,12 @@ sub doLog {
 	$sname    ||= '';
 	$sname     .= ' ' if $sname;
 	my $fh      = gensym();
-	my $dir     = getCurrentStatic('logdir');
+	my $dir     = $constants->{logdir};
 	my $file    = catfile($dir, "$fname.log");
 	my $log_msg = scalar(localtime) . " $sname@msg\n";
 
 	open $fh, ">> $file\0" or die "Can't append to $file: $!\nmsg: @msg\n";
-	flock($fh, LOCK_EX);
+	flock($fh, LOCK_EX) if $constants->{logdir_flock};
 	seek($fh, 0, SEEK_END);
 	print $fh $log_msg;
 	print     $log_msg if $stdout;
