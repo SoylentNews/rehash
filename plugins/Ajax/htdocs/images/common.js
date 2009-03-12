@@ -56,8 +56,6 @@ var firehose_settings = {};
   firehose_future = null;
   firehose_more_increment = 10;
 
-  var firehose_cur = 0;
-
 // globals we haven't yet decided to move into |firehose_settings|
 var fh_play = 0;
 var fh_is_timed_out = 0;
@@ -319,6 +317,7 @@ function toggle_firehose_body( id, is_admin, /*optional:*/toggle_to ) {
 			each(function(){
 				after_article_moved(this);
 				inlineAdFirehose(toggle_to_show && $(this));
+				firehose_set_cur($(this));
 			});
 	return false;
 }
@@ -582,13 +581,16 @@ function firehose_click_tag( event ) {
 		$related_trigger = $().filter();
 	}
 
+	var $server = $target.closest('[tag-server]');
+	if ($server.length) {
+		firehose_set_cur($server);
+	}
+
 	if ( command ) {
 		// No!  You no hurt Dr. Jones!  You log-in first!
 		if ( ! check_logged_in() ) {
 			return false;
 		}
-
-		var $server = $target.closest('[tag-server]');
 
 		// Make sure the user sees some feedback...
 		if ( $menu || event.shiftKey ) {
@@ -709,6 +711,7 @@ function firehose_handle_comment_nodnix( commands ){
 $(function(){
 	firehose_init_tag_ui();
 	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
+	firehose_set_cur(firehose_get_cur());
 });
 
 
@@ -1106,6 +1109,7 @@ function firehose_adjust_window(onscreen) {
 
 function firehose_after_update(){
 	firehose_reorder(firehose_ordered);
+	firehose_set_cur(firehose_get_cur());
 	firehose_update_title_count(
 		firehose_storyfuture(firehose_future).length
 	);
@@ -1767,8 +1771,8 @@ function getOffsetTop (el) {
 	return ot;
 }
 
-function firehoseIsInWindow(fhid, just_head) {
-	var in_window = isInWindow($('firehose-' + fhid));
+function firehoseIsInWindow(fhid) {
+	var in_window = isInWindow($dom('firehose-' + fhid));
 	return in_window;
 }
 
@@ -1803,47 +1807,54 @@ function viewWindowBottom() {
 }
 
 function firehose_get_cur() {
-	if (!firehose_cur) {
-		firehose_cur = firehose_ordered[0];
-		firehose_set_cur(firehose_cur);
-	}
-	return firehose_cur;
+	var $current = $('#firehoselist > div.currfh');
+	return $current;
 }
 
-function firehose_set_cur(id) {
-	firehose_cur = id;
-}
-
-function firehose_get_pos_of_id(id) {
-	var ret;
-	for (var i=0; i< firehose_ordered.length; i++) {
-		if (firehose_ordered[i] == id) {
-			ret = i;
-		}
+function firehose_set_cur($article) {
+	var $current = firehose_get_cur();
+	if ($current.length) {
+		$current.removeClass('currfh');
 	}
-	return ret;
+
+	if (!$article || !$article.length) {
+		$article = $('#firehoselist > div[id^=firehose-]:not(.daybreak):first');
+	}
+
+	if ($article.length) {
+		$article.addClass('currfh');
+	}
+
+	return $article;
 }
 
 function firehose_go_next() {
-	var cur = firehose_get_cur();
-	var pos = firehose_get_pos_of_id(cur);
-	if (pos < (firehose_ordered.length - 1)) {
-		pos++;
-	} else {
+	var $current = firehose_get_cur();
+	var $next = $current.nextAll('div[id^=firehose-]:not(.daybreak):first');	
+
+	if ($next.length) {
+		firehose_set_cur($next);
+		firehose_go_scroll($next);
+		return $next;
 	}
-	firehose_set_cur(firehose_ordered[pos]);
-	scrollWindowToFirehose(firehose_get_cur());
 }
 
 function firehose_go_prev() {
-	var cur = firehose_get_cur();
-	var pos = firehose_get_pos_of_id(cur);
-	if (pos>0) {
-		pos--;
-	}
-	firehose_set_cur(firehose_ordered[pos]);
-	scrollWindowToFirehose(firehose_get_cur());
+	var $current = firehose_get_cur();
+	var $prev = $current.prevAll('div[id^=firehose-]:not(.daybreak):first');	
 
+	if ($prev.length) {
+		firehose_set_cur($prev);
+		firehose_go_scroll($prev);
+		return $prev;
+	}
+}
+
+function firehose_go_scroll($article) {
+	var id = $article[0].id.substr(9);
+ 	if (!firehoseIsInWindow(id)) {
+ 		scrollWindowToFirehose(id);
+ 	}
 }
 
 function firehose_more(noinc) {
@@ -2295,7 +2306,7 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 $(function(){
 	// firehose only!
 	var validkeys = {};
-	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/) && fh_is_admin) {
+	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
 		validkeys = {
 			'X' : {           tags    : 1, signoff : 1 },
 			'Z' : {           tags    : 1, tag     : 1 },
@@ -2336,23 +2347,25 @@ $(function(){
 		if (keyo.form && (!e.target || !e.target.type))
 			return true;
 
+		var el = firehose_get_cur()[0];
+		var id = el.id.substr(9);
 		if (keyo.tags) {
-			var el = $dom('firehose-' + firehose_get_cur());
-
 			if (keyo.signoff) { el.submit_tags('signoff') }
 			if (keyo.nod)     { el.submit_tags('nod')     }
 			if (keyo.nix)     { el.submit_tags('nix')     }
 			if (keyo.tag)     {
+				toggle_firehose_body(id, 0, true);
 				firehose_toggle_tag_ui_to(true, el);
 				$('.tag-entry:visible:first', el).focus();
 			}
+			firehose_set_cur($(el));
 
 		} else {
 			if (keyo.unfocus)  { $(e.target).blur() }
 			if (keyo.next)     { firehose_go_next() }
 			if (keyo.prev)     { firehose_go_prev() }
 			if (keyo.more)     { firehose_more()    }
-			if (keyo.toggle)   { toggle_firehose_body(firehose_get_cur(), 0) }
+			if (keyo.toggle)   { toggle_firehose_body(id, 0) }
 		}
 
 		return false;

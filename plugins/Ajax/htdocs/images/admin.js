@@ -358,7 +358,7 @@ function firehose_get_admin_extras(id) {
 		onComplete: function(transport) {
 			json_handler(transport);
 			if (firehoseIsInWindow(id)) {
-				scrollToWindowFirehose(id);
+				scrollWindowToFirehose(id);
 			}
 		}
 	});
