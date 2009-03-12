@@ -940,64 +940,14 @@ my %sphinx_mode = (
 	extended2  => SPH_MATCH_EXTENDED2
 );
 
-
-sub getFireHoseEssentials {
-	my($self, $options) = @_;
+sub getFireHoseEssentialsParams {
+	my($self, $options, $sphinx) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-
-
-	# SEARCH SETUP
-	my($sph_check_sql, $sphinx_debug, $sphinx_other, $sph_mode) = (0, 0, 0, '');
 	my(@sphinx_opts, @sphinx_terms, @sphinx_where);
 	my @sphinx_tables = ('sphinx_search');
-	my $no_mcd = $user->{is_admin} && !$options->{usermode} ? 1 : 0;
 
-	my $sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx', timeout => 2 });
-	my $sph = Sphinx::Search->new;
-	my $vu = DBIx::Password::getVirtualUser( $sphinxdb->{virtual_user} );
-	my $host = $constants->{sphinx_01_hostname_searchd} || $vu->{host};
-	my $port = $constants->{sphinx_01_port} || 3312;
-	$sph->SetServer($host, $port);
-	$sph->SetConnectTimeout(5);
-
-	if ($sphinx_debug) {
-		use Data::Dumper; local $Data::Dumper::Indent = 0; local $Data::Dumper::Sortkeys = 1;
-		print STDERR "sphinx/gFHE option dump: ", Dumper($options), "\n";
-	}
-
-
-
-	# SEARCH OPTION SETUP
-	my($items, $results) = ([], {});
-
-	my $colors = $self->getFireHoseColors();
-	$options ||= {};
-	$options->{limit} ||= 50;
-	my $page_size = $options->{limit} || 1;
-
-	my $fetch_extra = 0;
-	my($day_num, $day_label, $day_count);
-
-	$options->{limit} += $options->{more_num} if $options->{more_num};
-
-	my $fetch_size = $options->{limit};
-	if ($options->{orderby} && $options->{orderby} eq "createtime" && $options->{duration} != -1) {
-		$fetch_extra = 1;
-		$fetch_size++;
-	}
-
-	my $pop;
-	$pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
-		if $options->{color} && $colors->{$options->{color}};
-
-	$options->{orderby} ||= 'createtime';
-	$options->{orderdir} = uc($options->{orderdir}) eq 'ASC' ? 'ASC' : 'DESC';
-
-
-
-	# SEARCH PARAMETER SETUP
 	my $cur_time = $self->getTime({ unix_format => 1 });
 
 	my $tags = getObject('Slash::Tags');
@@ -1019,7 +969,7 @@ sub getFireHoseEssentials {
 			my $tag_id = $tags->getTagnameidFromNameIfExists($options->{tagged_as}) || 0;
 			push @sphinx_where, "tags.tagnameid = $tag_id";
 			push @sphinx_where, "tags.uid = $tagged_by_uid";
-			$sph_check_sql = 1;
+			$sphinx->{check_sql} = 1;
 			push @sphinx_opts, [ filter => tfh => [ $tagged_by_uid ] ];
 		} elsif ($need_tagged == 2) {
 			# This combination of options means to restrict to only
@@ -1079,12 +1029,12 @@ sub getFireHoseEssentials {
 	}
 
 	if ($user->{is_admin} || $user->{acl}{signoff_allowed}) {
-		$no_mcd = 1;
+		$sphinx->{no_mcd} = 1;
 
 		if ($options->{unsigned}) {
 			push @sphinx_opts, [ filter => signoff => [ $user->{uid} ], 1 ];
 
-			if ((!$options->{type} || $options->{type} eq 'story') && (!$options->{not_type} || $options->{not_type} ne 'story') {
+			if ((!$options->{type} || $options->{type} eq 'story') && (!$options->{not_type} || $options->{not_type} ne 'story')) {
 				my $days_relevant = 30;
 				my $time_back = $cur_time - (86400 * $days_relevant);
 				push @sphinx_opts, [ range => createtime_ut => 0, $time_back, 1 ];
@@ -1152,10 +1102,10 @@ sub getFireHoseEssentials {
 		push @sphinx_opts, [ filter => rejected => [ $rejected ] ];
 	}
 
-	if ($pop) {
+	if ($options->{'pop'}) {
 		my $field = $user->{is_admin} && !$options->{usermode} ? 'editorpop' : 'popularity';
 		# in sphinx index, popularity has 1000000 added to it
-		my $max = int($pop)+1_000_000 - 1;
+		my $max = int($options->{'pop'}) + 1_000_000 - 1;
 		push @sphinx_opts, [ range => $field => 0, $max, 1 ];
 	}
 
@@ -1187,7 +1137,7 @@ sub getFireHoseEssentials {
 
 
 	if ($options->{ids}) {
-		return($items, $results) if @{$options->{ids}} < 1; # XXX: do we really want to return? or just ignore this param?  -- pudge
+# SSS		return($items, $results) if @{$options->{ids}} < 1; # XXX: do we really want to return? or just ignore this param?  -- pudge
 		my @globjids = map { $_->{globjid} } values %{ $self->getFireHoseMulti($options->{ids}) };
 		push @sphinx_opts, [ filter => globjidattr => \@globjids ] if @globjids;
 	}
@@ -1200,11 +1150,74 @@ sub getFireHoseEssentials {
 	if ($options->{filter}) {
 		if ($options->{filter}) {
 			my $query;
-			$sph_mode = $constants->{sphinx_match_mode} || 'boolean';
-			($query, $sph_mode) = sphinxFilterQuery($options->{filter}, $sph_mode);
+			$sphinx->{mode} = $constants->{sphinx_match_mode} || 'boolean';
+			($query, $sphinx->{mode}) = sphinxFilterQuery($options->{filter}, $sphinx->{mode});
 			push @sphinx_terms, $query;
 		}
 	}
+}
+
+
+sub getFireHoseEssentials {
+	my($self, $options) = @_;
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+
+
+
+	# SEARCH SETUP
+	my($sphinx_debug, $sphinx_other) = (0, 0);
+	my $sphinx = {
+		no_mcd    => $user->{is_admin} && !$options->{usermode} ? 1 : 0,
+		check_sql => 0,
+		mode      => ''
+	};
+
+
+	my $sphinxdb = getObject('Slash::Sphinx', { db_type => 'sphinx', timeout => 2 });
+	my $sph = Sphinx::Search->new;
+	my $vu = DBIx::Password::getVirtualUser( $sphinxdb->{virtual_user} );
+	my $host = $constants->{sphinx_01_hostname_searchd} || $vu->{host};
+	my $port = $constants->{sphinx_01_port} || 3312;
+	$sph->SetServer($host, $port);
+	$sph->SetConnectTimeout(5);
+
+	if ($sphinx_debug) {
+		use Data::Dumper; local $Data::Dumper::Indent = 0; local $Data::Dumper::Sortkeys = 1;
+		print STDERR "sphinx/gFHE option dump: ", Dumper($options), "\n";
+	}
+
+
+
+	# SEARCH OPTION SETUP
+	my($items, $results) = ([], {});
+
+	my $colors = $self->getFireHoseColors();
+	$options ||= {};
+	$options->{limit} ||= 50;
+	my $page_size = $options->{limit} || 1;
+
+	my $fetch_extra = 0;
+	my($day_num, $day_label, $day_count);
+
+	$options->{limit} += $options->{more_num} if $options->{more_num};
+
+	my $fetch_size = $options->{limit};
+	if ($options->{orderby} && $options->{orderby} eq "createtime" && $options->{duration} != -1) {
+		$fetch_extra = 1;
+		$fetch_size++;
+	}
+
+	$options->{'pop'} = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
+		if $options->{color} && $colors->{$options->{color}};
+
+	$options->{orderby} ||= 'createtime';
+	$options->{orderdir} = uc($options->{orderdir}) eq 'ASC' ? 'ASC' : 'DESC';
+
+
+
+	# SEARCH PARAM SETUP
+	my($sphinx_opts, $sphinx_terms, $sphinx_where, $sphinx_tables) = $self->getFireHoseEssentialsParams($options, $sphinx);
 
 
 
@@ -1214,7 +1227,7 @@ sub getFireHoseEssentials {
 	my $mcd = $self->getMCD;
 	my($mcdkey_data, $mcdkey_stats);
 	# ignore memcached if admin, or if usermode is on
-	if ($mcd && !$no_mcd) {
+	if ($mcd && !$sphinx->{no_mcd}) {
 		my $serial = $self->serializeOptions($options, $user);
 		my $id = md5_hex($serial);
 
@@ -1241,10 +1254,10 @@ sub getFireHoseEssentials {
 	my $orderby  = $sphinx_orderby{$options->{orderby}}   || 'createtime_ut';
 	my $orderdir = $sphinx_orderdir{$options->{orderdir}} || SPH_SORT_ATTR_DESC;
 	$sph->SetSortMode($orderdir, $orderby);
-	$sph->SetMatchMode($sphinx_mode{$sph_mode} || SPH_MATCH_ALL) if $sph_mode;
+	$sph->SetMatchMode($sphinx_mode{$sphinx->{mode}} || SPH_MATCH_ALL) if $sphinx->{mode};
 
 	my $maxmatches = 0;
-	if (@sphinx_tables > 1) {
+	if (@$sphinx_tables > 1) {
 		my $offset = length $offset_num ? "$offset_num, " : '';
 		$sphinx_other = "LIMIT $offset$fetch_size";
 
@@ -1263,7 +1276,7 @@ sub getFireHoseEssentials {
 		$sdebug_idset_elapsed = Time::HiRes::time;
 		if ($constants->{sphinx_se}) {
 			my @sphinxse_opts;
-			for my $opt (@sphinx_opts) {
+			for my $opt (@$sphinx_opts) {
 				my $neg;
 				my $opt_str = "$opt->[0]=$opt->[1],";
 				if ($opt->[0] eq 'filter') {
@@ -1281,9 +1294,9 @@ sub getFireHoseEssentials {
 
 			$orderdir = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
 			push @sphinxse_opts, "sort=$orderdir:$orderby";
-			push @sphinxse_opts, "mode=$sph_mode" if $sph_mode;
+			push @sphinxse_opts, "mode=$sphinx->{mode}" if $sphinx->{mode};
 
-			if (@sphinx_tables > 1) {
+			if (@$sphinx_tables > 1) {
 				push @sphinxse_opts, "limit=$maxmatches";
 				push @sphinxse_opts, "maxmatches=$maxmatches";
 			} else {
@@ -1292,10 +1305,10 @@ sub getFireHoseEssentials {
 				push @sphinxse_opts, "maxmatches=$maxmatches" if defined $maxmatches;
 			}
 
-			my $query = $self->sqlQuote(join ';', @sphinx_terms, @sphinx_opts);
-			my $swhere = join ' AND ', @sphinx_where;
+			my $query = $self->sqlQuote(join ';', @$sphinx_terms, @$sphinx_opts);
+			my $swhere = join ' AND ', @$sphinx_where;
 			$swhere = " AND $swhere" if $swhere;
-			my $stables = join ',', @sphinx_tables;
+			my $stables = join ',', @$sphinx_tables;
 
 			$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
 				'sphinx_search.globjid',
@@ -1304,7 +1317,7 @@ sub getFireHoseEssentials {
 			$sphinx_stats = $sphinxdb->getSphinxStats;
 
 		} else {
-			for my $opt (@sphinx_opts) {
+			for my $opt (@$sphinx_opts) {
 				my $type = shift @$opt;
 				if ($type eq 'filter') {
 					$sph->SetFilter(@$opt);
@@ -1313,7 +1326,7 @@ sub getFireHoseEssentials {
 				}
 			}
 
-			my $sresults = $sph->Query(join(' ', @sphinx_terms));
+			my $sresults = $sph->Query(join(' ', @$sphinx_terms));
 			if (!defined $sresults) {
 				my $err = $sph->GetLastError() || '';
 				print STDERR scalar(gmtime) . " $$ gFHE sph err: '$err'\n";
@@ -1343,15 +1356,15 @@ sub getFireHoseEssentials {
 			# if we end up with not enough, don't repeat the Sphinx
 			# query with SetLimits(offset)).
 
-			if ($sph_check_sql && @$sphinx_ar) {
+			if ($sphinx->{check_sql} && @$sphinx_ar) {
 				my $in = 'IN (' . join(',', @$sphinx_ar) . ')';
-				my @sph_tables = grep { $_ ne 'sphinx_search' } @sphinx_tables;
+				my @sph_tables = grep { $_ ne 'sphinx_search' } @$sphinx_tables;
 				my $sphtables = join ',', @sph_tables;
 				# note: see above, where this clause is added:
 				# 'tags.globjid = sphinx_search.globjid'
 				my @sph_where =
 					map { s/\s*=\s*sphinx_search\.globjid/ $in/; $_ }
-					@sphinx_where;
+					@$sphinx_where;
 				my $sphwhere = join ' AND ', @sph_where;
 				$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
 					'globjid',
@@ -1408,7 +1421,7 @@ sub getFireHoseEssentials {
 			scalar(gmtime),
 			$sdebug_idset_elapsed, $sdebug_get_elapsed,
 			$sphinx_stats_tf, $count,
-			Dumper(\@sphinx_terms, \@sphinx_opts)
+			Dumper($sphinx_terms, $sphinx_opts)
 		);
 	}
 
