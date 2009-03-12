@@ -187,12 +187,13 @@ END %]
 									</div>
 									[% END %]
 
-									[% PROCESS tag_widget id = item.id  top_tags = top_tags system_tags = system_tags vote = vote options = options item = item skipvote = 1; %]
-
+									<div class="article-foot">
 									<span class="reader">
 									<a href="[% link_url %]" class="more">Read More</a>
 									<span class="commentcnt"> <a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]">[% disc.commentcount || 0 %]</a> comments</span>
 									</span>
+									[% PROCESS tag_widget id = item.id  top_tags = top_tags system_tags = system_tags vote = vote options = options item = item skipvote = 1; %]
+									</div>
 
 							</div>
 				[% IF item.discussion && !featured  && disc.commentcount;

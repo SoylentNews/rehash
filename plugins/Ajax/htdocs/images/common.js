@@ -709,7 +709,7 @@ function inject_reasons( expr, init ){
 }
 inject_reasons.template = (
 '<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-	'<div class="tag-display-stub" context="related" init="menu:false" />' +
+	'<span class="tag-display-stub" context="related" init="menu:false" />' +
 '</div>'
 );
 

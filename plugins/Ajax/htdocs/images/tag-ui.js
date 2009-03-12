@@ -284,6 +284,7 @@ var tag_display_fns = {
 			// construct all the completely new tag entries and associated machinery
 			$new_elems.append(this.tag_display_data.menu_template);
 			this.tag_display_data.$list_el[options.order]($new_elems);
+			$new_elems.after(' ');
 
 			// add in a list of the actual .tag elements we created from scratch
 			$changed_tags = $changed_tags.add( $new_elems.find('.tag') );
@@ -301,6 +302,8 @@ var tag_display_fns = {
 				removeClass().
 				addClass(static_css_classes_for($tag.text()) + ' ' + options.classes);
 		});
+
+		// $('span.tag', this).parent().after(' ');
 		return this;
 	},
 

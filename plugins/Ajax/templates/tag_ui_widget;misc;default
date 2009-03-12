@@ -49,22 +49,22 @@ __template__
 
 	[%# the tag 'bars' -%]
 	[% IF user.tags_canwrite_stories -%]
-	<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
+	<span class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></span>
 	[% END %]
-	<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tag_info.top %]</div>
-	<div class="tag-display-stub" context="system"">[% tag_info.system %]</div>
+	<span class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tag_info.top %]</span>
+	<span class="tag-display-stub" context="system"">[% tag_info.system %]</span>
 	[% IF tag_info.datatype == "story" &&
 		constants.signoff_use &&
 		((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
 		! Slash.db.hasUserSignedStory(tag_info.stoid, user.uid) -%]
-		<div class="tag-display-stub" context="signoff" init="menu:false">unsigned</div>
+		<span class="tag-display-stub" context="signoff" init="menu:false">unsigned</span>
 	[%- END -%]
-	[% IF future %]<div class="tag-display-stub" context="feedback" init="menu:false">feedback</div>[% END %]
-	<div class="tag-display-stub" context="datatype" init="menu:false">[% tag_info.datatype %]</div>
+	[% IF future %]<span class="tag-display-stub" context="feedback" init="menu:false">feedback</span>[% END %]
+	<span class="tag-display-stub" context="datatype" init="menu:false">[% tag_info.datatype %]</span>
 	[% IF user.tags_canwrite_stories -%]
 	[%# the suggestions bar -%]
 	<div class="related">
-		<div class="tag-display-stub" context="related" init="menu:false"></div>
+		<span class="tag-display-stub" context="related" init="menu:false"></span>
 	</div>
 	[% END %]
 </div>

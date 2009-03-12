@@ -55,9 +55,9 @@ __template__
 			<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% END %].gif"></span>
 		</form>
 		[%# the tag 'bars' %]
-		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
-		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
-		<div class="tag-display-stub" context="system">[% tags.system;
+		<span class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></span>
+		<span class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</span>
+		<span class="tag-display-stub" context="system">[% tags.system;
 IF options.view == "usersubmission";
 	this_submission = Slash.db.getSubmission(item.srcid);
 	SWITCH this_submission.del;
@@ -65,18 +65,18 @@ IF options.view == "usersubmission";
 		CASE 1; ' rejected';
 		CASE 2; ' accepted';
 	END;
-END %]</div>
+END %]</span>
 		[%- IF item.type == "story" &&
 			constants.signoff_use &&
 			((user.is_admin) || user.acl.signoff_allowed) &&
 			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
-			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="menu:false">unsigned</div>
+			<span class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="menu:false">unsigned</span>
 		[%- END -%]
-		[% IF future %]<div class="tag-display-stub" context="feedback" init="menu:false">feedback</div>[% END %]
-		<div class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</div>
+		[% IF future %]<span class="tag-display-stub" context="feedback" init="menu:false">feedback</span>[% END %]
+		<span class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</span>
 		[%# the suggestions bar %]
 		<div class="related">
-			<div class="tag-display-stub" context="related" init="menu:false"></div>
+			<span class="tag-display-stub" context="related" init="menu:false"></span>
 		</div>
 	</div>
 	[% ELSE %]
@@ -88,8 +88,8 @@ END %]</div>
 		[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 		[%- END %]><span class="button collapse"></span></a>
 		[%# the tag 'bars' %]
-		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
-		<div class="tag-display-stub" context="system">[% tags.system;
+		<span class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</span>
+		<span class="tag-display-stub" context="system">[% tags.system;
 IF options.view == "usersubmission";
 	this_submission = Slash.db.getSubmission(item.srcid);
 	SWITCH this_submission.del;
@@ -97,8 +97,8 @@ IF options.view == "usersubmission";
 		CASE 1; ' rejected';
 		CASE 2; ' accepted';
 	END;
-END %]</div>
-		<div class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</div>
+END %]</span>
+		<span class="tag-display-stub" context="datatype" init="menu:false">[% tags.datatype %]</span>
 	</div>
 	[% END %]
 [% END %]

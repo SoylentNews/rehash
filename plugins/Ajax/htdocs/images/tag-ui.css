@@ -27,6 +27,10 @@ span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
 	cursor: text !important;
 }
 
+div.body-widget div {
+	display: inline;
+}
+
 
 .tag-display span.tag,
 .tag-widget .admin-buttons {
@@ -60,7 +64,7 @@ div.head .tag-widget .admin-buttons {
 	font-weight: bold;
 }
 
-div.tag-display ul, div.tag-display li {
+span.tag-display ul, span.tag-display li {
 	display: inline;
 	list-style: none inherit none !important;
 }
@@ -76,29 +80,28 @@ div.tag-display ul, div.tag-display li {
 	display: none;
 }
 
-div.tag-display .tmenu li {
+span.tag-display .tmenu li {
 	text-align: center;
 	margin: 0 !important;
 }
 
 
-div.tag-display .tmenu li.minus,
-div.tag-display .tmenu li.ignore,
-div.tag-display .tmenu li.pound,
-div.tag-display .tmenu li.descriptive {
+span.tag-display .tmenu li.minus,
+span.tag-display .tmenu li.ignore,
+span.tag-display .tmenu li.pound,
+span.tag-display .tmenu li.descriptive {
 	display: none;
 }
 
-div.tag-display li.u > .tmenu li.minus,
-div.tag-display li.u > .tmenu li.descriptive,
-div.tag-display li.t > .tmenu li.pound,
-div.tag-display li.t > .tmenu li.ignore,
-div.tag-display li.t > .tmenu li.descriptive {
-	display: inline-block;
-/*text-decoration:none !important;*/
+span.tag-display li.u > .tmenu li.minus,
+span.tag-display li.u > .tmenu li.descriptive,
+span.tag-display li.t > .tmenu li.pound,
+span.tag-display li.t > .tmenu li.ignore,
+span.tag-display li.t > .tmenu li.descriptive {
+	display: inline;
 }
 
-div.tag-display li.u {
+span.tag-display li.u {
 text-decoration:none !important;
 }
 
@@ -144,9 +147,9 @@ text-decoration:none !important;
 	background-color: inherit !important;
 }
 
-div.tag-display,
-div.tag-display > h1.legend,
-div.tag-display > ul {
+span.tag-display,
+span.tag-display > h1.legend,
+span.tag-display > ul {
 	width: auto !important;
 }
 
@@ -162,22 +165,22 @@ div.tag-display > ul {
 }
 
 /* padding so hover highlighting is bigger than the contents */
-div.tag-display > ul,
-#contents div.tag-display > ul {
+span.tag-display > ul,
+#contents span.tag-display > ul {
 	padding: 0.1em 0.5em !important;
 	margin: -0.1em -0.5em !important;
 }
 
-div.tag-display span.tag,
-div.tag-display > h1.legend,
-#contents div.tag-display > h1.legend {
+span.tag-display span.tag,
+span.tag-display > h1.legend,
+#contents span.tag-display > h1.legend {
 	padding: 0.1em 0.3em !important;
 	margin: -0.1em -0.1em !important;
 	color:#333;
 }
 
-div.tag-display .tmenu li span,
-#contents div.tag-display .tmenu li span {
+span.tag-display .tmenu li span,
+#contents span.tag-display .tmenu li span {
 	text-align: center;
 }
 
@@ -206,13 +209,13 @@ div.tag-display .tmenu li span,
 }
 
 /*www.*/
-div.tag-display .tmenu
+span.tag-display .tmenu
 {
 padding-bottom:0.05em !important;
 }
 
 /*idle.*/
-div.yui-b div.tag-display .tmenu
+div.yui-b span.tag-display .tmenu
 {
 padding-bottom:0.5em !important;
 /*
@@ -223,8 +226,8 @@ padding-top:0.3em !important;
 
 
 /*www.*/
-div.tag-display .tmenu li span,
-#contents div.tag-display .tmenu li span
+span.tag-display .tmenu li span,
+#contents span.tag-display .tmenu li span
 {
 margin:-0.1em -0.25em !important;
 padding:0 0.55em 0.45em !important;
@@ -232,8 +235,8 @@ padding:0 0.55em 0.45em !important;
 
 
 /*idle.*/
-div.yui-b div.tag-display .tmenu li span,
-div.yui-b #contents div.tag-display .tmenu li span
+div.yui-b span.tag-display .tmenu li span,
+div.yui-b #contents span.tag-display .tmenu li span
 {
 margin:-0.1em -0.25em !important;
 padding:0 0.55em 0.45em !important;
@@ -261,13 +264,13 @@ padding:0 0.55em 0.45em !important;
 }
 
 /* separate tags, also menu items */
-div.tag-display > ul > li,
-div.tag-display .tmenu > li {
+span.tag-display > ul > li,
+span.tag-display .tmenu > li {
 	margin-left: 0 !important;
 }
 
-div.tag-display .tmenu > li + li,
-div.tag-display > ul > li + li {
+span.tag-display .tmenu > li + li,
+span.tag-display > ul > li + li {
 	margin-left: 0.25em !important;
 }
 
@@ -316,8 +319,8 @@ div.tag-display > ul > li + li {
 
 /* ...that's everything _in_ a tag-display... now let's do the display itself */
 
-div.tag-display-stub,
-div.tag-display {
+span.tag-display-stub,
+span.tag-display {
 	display: inline;
 	position: relative;
 	margin-left: 0 !important;
@@ -398,8 +401,6 @@ div.tag-display {
 
 div.tag-widget-stub,
 div.tag-widget {
-	display: block;
-	position: absolute;
 	background-color: transparent;
 }
 
@@ -407,38 +408,13 @@ div.tag-widget {
 
 div.head div.tag-widget-stub,
 {
-	display: block;
 	background-color: transparent;
-	margin-left:10em;
-	margin-top:2.8em;
 }
 
 
 /* firehose-specific [to the end of the file] */
 
-#firehose div.tag-widget-stub.body-widget,
-#firehose div.tag-widget.body-widget {
-	right: -0.5em;
-	bottom: 6px;
-	z-index: 10;
-	padding: 0 0.4em 0 0.8em;
-	text-align: right;
-	/*margin-left:15em;*/
-	left:10em;
-}
-
-
-
-
-
-
-#firehose div.tag-widget-stub.body-widget.expanded,
-#firehose div.tag-widget.body-widget.expanded {
-	right: 0;
-}
-
 .tag-widget .note-wrapper {
-	display: block;
 	font-style: italic;
 	padding-right: 0.4em;
 	margin: 0 1em 0.5em 0;
@@ -468,32 +444,12 @@ div.head div.tag-widget-stub,
 
 
 
-/*
-.tag-widget .admin-buttons a:before,
-.tag-widget .admin-buttons .note-wrapper.no-note a:before {
-	content: '[';
-}
-
-.tag-widget .admin-buttons a:after,
-.tag-widget .admin-buttons .note-wrapper.no-note a:after {
-	content: ']';
-}
-*/
-
 .tag-widget .admin-buttons .note-wrapper a:before,
 .tag-widget .admin-buttons .note-wrapper a:after,
 .tag-widget .admin-buttons .note-wrapper.no-note:before {
 	content: '';
 }
 
-
-.tag-widget div.tags {
-	display: inline;
-	position: relative;
-	right: 1em !important;
-	top: 0.8em;
-	margin-left: 1em;
-}
 
 .briefarticle .tag-widget-stub.body-widget,
 .briefarticle .tag-widget.body-widget {
@@ -533,21 +489,15 @@ a.edit-toggle {
 
 
 
-div.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
+span.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
 border-top:1px solid transparent !important;
 }
 
 
 
 
-/* trying to fix opera */ /*commented out because this breaks ff2*/
-/*
-div.tag-display ul, div.tag-display li {display: inline-block;}
-*/
-
-
 /*Opera tag bugs*/
-div.tag-widget.opera div.tag-display li {/*ensures the damn pop up things stay with its parents and don't "run away"*/
+div.tag-widget.opera span.tag-display li {/*ensures the damn pop up things stay with its parents and don't "run away"*/
 display: inline-block
 }
 
@@ -556,7 +506,7 @@ padding-top:18px;
 margin-top:-16px;
 }
 
-div.tag-widget.opera div.tag-display.ready.dirty h1.legend {
+div.tag-widget.opera span.tag-display.ready.dirty h1.legend {
 /*
 top:0px !important;
 left:0px !important;
@@ -569,7 +519,7 @@ display:none;
 
 
 
-div.tag-widget.safari div.tag-display {
+div.tag-widget.safari span.tag-display {
 	display:inline-block;
 	padding:20px 0 0;
 }
