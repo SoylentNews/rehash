@@ -73,7 +73,7 @@ __template__
 		[% IF !got_more_link %]
 		<span class="active">
 			[% IF options.orderby != "createtime" %]
-				<a href="#" onclick="firehose_swatch_color('[% options.color %]'); return false">[% options.color.ucfirst %]</a>
+				<a href="#" onclick="firehose_set_options('color', '[% options.color %]'); return false">[% options.color.ucfirst %]</a>
 			[% ELSIF firehose_more_data.future_count <=0  %]
 				Archive
 			[% ELSE %]
