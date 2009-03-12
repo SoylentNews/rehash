@@ -1,2 +1,4 @@
 name=DynamicBlocks
 description="Dynamic Slashboxes"
+mysql_schema=mysql_schema.sql
+mysql_dump=mysql_dump.sql
