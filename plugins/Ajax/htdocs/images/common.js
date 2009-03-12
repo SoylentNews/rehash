@@ -365,11 +365,10 @@ function firehose_style_switch_handler(transport) {
 }
 
 
+var firehose_set_options;
+(function(){
 var	qw = Slash.Util.qw,
-	uses_setfield	= $.extend(qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'), {
-				nobylines:	'#firehoselist span.nickname',
-				nodates:	'#firehoselist span.date'
-			}),
+	uses_setfield	= qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
 	loads_new	= qw.as_set('section setfhfilter setsearchfilter tab view'),
 	removes_all	= $.extend(qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs'), loads_new),
 	sets_param	= $.extend(qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),
@@ -382,11 +381,11 @@ var	qw = Slash.Util.qw,
 				usermode:	'setusermode',
 				view:		'viewchanged'
 			},
-	sets_directly	= $.extend(qw.as_set('color duration issue mode orderby orderdir section setfhfilter setsearchfilter startdate tab tabsection view'), {
-				setfhfilter:	'fhfilter',
+	sets_directly	= qw.as_set('color duration issue mode orderby orderdir section startdate tab view'),
+	sets_indirectly	= {	setfhfilter:	'fhfilter',
 				setsearchfilter:'fhfilter',
 				tabsection:	'section'
-			}),
+			},
 	resets_pagemore	= qw.as_set('fhfilter view tab issue pagesize section setfhfilter setsearchfilter'),
 	toggle_pairs	= {	orderby_createtime:	{ id:"popularity",	new_id:"time",		new_value:"popularity" },
 				orderby_popularity:	{ id:"time",		new_id:"popularity",	new_value:"createtime" },
@@ -401,41 +400,47 @@ var	qw = Slash.Util.qw,
 				}
 			};
 
-function firehose_set_options(name, value, context) {
+function set_fhfilter_from( expr ){
+	$(expr).each(function(){
+		firehose_settings.fhfilter = this.value;
+	});
+}
+function toggle_details( selector, hide ){
+	var $elem = $(selector).toggleClass('hide', !!hide);
+	hide || $elem.css({ display: 'inline' });
+}
+
+firehose_set_options = function(name, value, context) {
+	// Exit early for trouble.
 	if ( !firehose_user_class || name==='color' && !value ) {
 		return;
 	}
 
+	// Perl thinks true and false are strings, so never let booleans get to the server.
 	typeof(value)==='boolean' && (value = sign(value));
 
+
+	// Set values in params and firehose_settings; mostly table-driven...
 	var params={};
+	uses_setfield[name]	&& (params.setfield = 1);
 	sets_param[name]	&& (params[name] = value);
 	flags_param[name]	&& (params[flags_param[name]] = 1);
-	sets_directly[name]	&& (firehose_settings[ typeof(sets_directly[name])==='string' ? sets_directly[name] : name ]=value);
+	sets_directly[name]	&& (firehose_settings[name] = value);
+	sets_indirectly[name]	&& (firehose_settings[sets_indirectly[name]] = value);
 	resets_pagemore[name]	&& (firehose_settings.page = firehose_settings.more_num = 0);
-
-	if ( name in uses_setfield ) {
-		params.setfield = 1;
-		if ( typeof(uses_setfield[name])==='string' ){
-			var $to_be_toggled = $(uses_setfield[name]).toggleClass('hide', !!value);
-			value || $to_be_toggled.css({ display: 'inline' });
-		}
-	} else if (name === "fhfilter") {
-		var $input = $('form[name=firehoseform] input[name=fhfilter]');
-		if ( $input.length ) {
-			firehose_setting.fhfilter = $input.val();
-		}
-	} else if (name === "view") {
-		$('#searchquery').each( function() { firehose_settings.fhfilter = $(this).val(); } );
-	} else if (name === "issue") {
-		firehose_settings.startdate = value;
-		firehose_settings.duration = 1;
-	} else if (name === 'tabsection') {
-		params.tabtype = 'tabsection';
-	} else if (name === 'mode') {
-		fh_view_mode = value;
+	// ...and a few exceptions "by hand".
+	switch ( name ) {
+		case 'fhfilter':	set_fhfilter_from('form[name=firehoseform] input[name=fhfilter]'); break;
+		case 'issue':		firehose_settings.startdate=value; firehose_settings.duration=1; break;
+		case 'mode':		fh_view_mode=value; break;
+		case 'nobylines':	toggle_details('#firehoselist span.nickname', value); break;
+		case 'nodates':		toggle_details('#firehoselist span.date', value); break;
+		case 'tabsection':	params.tabtype='tabsection'; break;
+		case 'view':		set_fhfilter_from('#searchquery'); break;
 	}
 
+
+	// For "toggling" options, update the toggle-element's click-handler.
 	var toggle = toggle_pairs[ name+'_'+value ];
 	toggle && $any(toggle.id).each(function(){
 		this.id = toggle.new_id;
@@ -447,19 +452,18 @@ function firehose_set_options(name, value, context) {
 			});
 	});
 
-	var $fhl = $any('firehoselist');
-	if ( name in removes_all ) {
-		// blur out then remove items
-		$fhl.fadeOut(function(){
-			$(this).empty().css({ opacity:1 });
-			after_article_moved();
-		});
-	}
-	if ( name in loads_new ) {
-		$fhl.html("<h1 class='loading_msg'>Loading New Items</h1>");
-		$('.paginate').hide();
-	}
 
+	// If removing list items, fadeOut the list first...
+	removes_all[name] && $any('firehoselist').fadeOut(function(){
+		// ...then actually delete its contents, possibly with a loading message.
+		$(this).html(loads_new[name] ? '<h1 class="loading_msg">Loading New Items</h1>' : '').
+			css({ opacity:1 });
+	});
+	// div.paginate isn't in the list, so it wasn't handled above.
+	loads_new[name] && $('div.paginate').hide();
+
+
+	// Tell the server (asynchronously).
 	ajax_update($.extend({
 			op:		'firehose_set_options',
 			reskey:		reskey_static,
@@ -470,9 +474,10 @@ function firehose_set_options(name, value, context) {
 		'', update_handlers
 	);
 
+	// Tell the UI.
 	$(document).trigger('firehose-setting-' + name, value);
-}
-
+};
+})();
 
 function firehose_fix_up_down( id, new_state ){
 	// Find the (possibly) affected +/- capsule.

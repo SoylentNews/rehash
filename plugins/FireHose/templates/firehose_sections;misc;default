@@ -66,10 +66,7 @@ $any('firehose-sections').mousedown(function( event ){
 			if ( section.id === 'unsaved' ) {
 				firehose_set_options('setfhfilter', section.filter);
 				firehose_set_options('view', section.viewname);
-				if ( section.color ) {
-					firehose_set_options('color', section.color);
-					firehose_swatch_color(section.color);
-				}
+				section.color && firehose_set_options('color', section.color);
 			} else {
 				firehose_set_options('section', section.id);
 			}
@@ -96,9 +93,14 @@ $any('firehose-sections').mousedown(function( event ){
 			$this.children('script[type=data]').remove(); // and get rid of the (now useless) elem that delivered it to us
 		});
 
-$(document).bind('firehose-setting-section', function( e, new_section ){
-	firehose_highlight_section($any('fhsection-' + new_section));
-	firehose_style_switch(new_section);
+$(document).bind('firehose-setting-section', function( e, fhsid ){
+	var $section=$any('fhsection-' + fhsid), section=$section.metadata();
+	firehose_highlight_section($section);
+	$(document).
+		trigger('firehose-setting-setfhfilter', section.filter).
+		trigger('firehose-setting-view', section.viewname).
+		trigger('firehose-setting-color', section.color);
+	firehose_style_switch(fhsid);
 });
 
 });
