@@ -88,8 +88,8 @@ sub main {
 
 #	print STDERR "AJAX7 $$: $user->{uid}, $op ($retval)\n";
 
-	if ($retval) {
-		http_send($options);
+	http_send($options);
+	if ($retval && length $retval) {
 		print $retval;
 	}
 
