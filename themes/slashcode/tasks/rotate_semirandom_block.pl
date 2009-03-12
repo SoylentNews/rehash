@@ -40,6 +40,9 @@ $task{$me}{code} = sub {
         if ($choice eq 'idle_pics')  { $title = 'Idle Pics'; $url = "//idle.slashdot.org" }
 
         $slashdb->sqlUpdate("blocks",{ block=>$slashdb->getBlock($choice, 'block'), title=>$title, url=> $url }, "bid='srandblock'");
+
+	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
+        $dynamic_blocks->syncPortalBlocks('srandblock') if $dynamic_blocks;
         
 	return ;
 };

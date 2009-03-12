@@ -337,6 +337,11 @@ sub showAdminTodo {
 sub showStoryAdminBox {
 	my ($self, $storyref, $options) = @_;
 	my $user = getCurrentUser();
+	if (!$options->{uid})  {
+                $user = getCurrentUser();
+        } else {
+                $user->{uid} = $options->{uid};
+        }
 	my $constants = getCurrentStatic();
 	$options ||= {};
 	my $updater;

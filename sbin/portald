@@ -316,6 +316,10 @@ foreach (keys %savedBlocks) {
 # from 'portald-site'
 newSemiRandomOSTGBlock($slashdb) if defined &newSemiRandomOSTGBlock;
 
+# sync portal blocks with dynamic blocks
+my $dynamic_blocks = getObject("Slash::DynamicBlocks");
+$dynamic_blocks->syncPortalBlocks(undef, { all => 1 }) if $dynamic_blocks;
+
 portaldLog("Sucessfully Saved Portals");
 
 # Clean up
