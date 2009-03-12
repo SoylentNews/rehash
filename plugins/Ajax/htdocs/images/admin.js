@@ -179,7 +179,7 @@ function remarks_popup() {
 function remarks_config_save() {
 	var params = {
 		op:	'remarks_config_save',
-		reskey:	$('#remarks_reskey').val(),
+		reskey:	$('#remarks_reskey').val()
 	};
 	if ( !params.reskey ) {
 		return;

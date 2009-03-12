@@ -8,7 +8,7 @@ var	objToString = Object.prototype.toString,
 		'[object Date]':	'date',
 		'[object Function]':	'function',
 		'[object Number]':	'number',
-		'[object RegExp]':	'regexp',
+		'[object RegExp]':	'regexp'
 	},
 	orderedObjectTypes = {
 		'[object Array]':	'array',
