@@ -366,10 +366,10 @@ function firehose_style_switch_handler(transport) {
 
 var firehose_set_options;
 (function(){
-var	qw = Slash.Util.qw,
+var	qw		= Slash.Util.qw,
+	loading_msg	= '<h1 class="loading_msg">Loading New Items</h1>',
+	removes_all	= qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view'),
 	uses_setfield	= qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
-	loads_new	= qw.as_set('section setfhfilter setsearchfilter tab view'),
-	removes_all	= $.extend(qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs'), loads_new),
 	sets_param	= $.extend(qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),
 	flags_param	= {	fhfilter:	'filterchanged',
 				more_num:	'ask_more',
@@ -386,27 +386,20 @@ var	qw = Slash.Util.qw,
 				tabsection:	'section'
 			},
 	resets_pagemore	= qw.as_set('fhfilter view tab issue pagesize section setfhfilter setsearchfilter'),
-	toggle_pairs	= {	orderby_createtime:	{ id:"popularity",	new_id:"time",		new_value:"popularity" },
-				orderby_popularity:	{ id:"time",		new_id:"popularity",	new_value:"createtime" },
-				orderdir_ASC:		{ id:"asc",		new_id:"desc",		new_value:"DESC" },
-				orderdir_DESC:		{ id:"desc",		new_id:"asc",		new_value:"ASC" },
-				mode_full:		{ id:"abbrev",		new_id:"full",		new_value:"fulltitle" },
-				mode_fulltitle:		{ id:"full",		new_id:"abbrev",	new_value:"full" }
-			},
 	update_handlers	= {	onComplete: function(transport) {
 					json_handler(transport);
 					firehose_get_updates({ oneupdate: 1 });
 				}
 			};
 
+// Grab a reference to #firehoselist as soon as possible...
+var $fhl = $([]);	// ...but no sooner.
+$(function(){ $fhl = $any('firehoselist'); });
+
 function set_fhfilter_from( expr ){
 	$(expr).each(function(){
 		firehose_settings.fhfilter = this.value;
 	});
-}
-function toggle_details( selector, hide ){
-	var $elem = $(selector).toggleClass('hide', !!hide);
-	hide || $elem.css({ display: 'inline' });
 }
 
 firehose_set_options = function(name, value, context) {
@@ -432,34 +425,17 @@ firehose_set_options = function(name, value, context) {
 		case 'fhfilter':	set_fhfilter_from('form[name=firehoseform] input[name=fhfilter]'); break;
 		case 'issue':		firehose_settings.startdate=value; firehose_settings.duration=1; break;
 		case 'mode':		fh_view_mode=value; break;
-		case 'nobylines':	toggle_details('#firehoselist span.nickname', value); break;
-		case 'nodates':		toggle_details('#firehoselist span.date', value); break;
 		case 'tabsection':	params.tabtype='tabsection'; break;
 		case 'view':		set_fhfilter_from('#searchquery'); break;
 	}
 
 
-	// For "toggling" options, update the toggle-element's click-handler.
-	var toggle = toggle_pairs[ name+'_'+value ];
-	toggle && $any(toggle.id).each(function(){
-		this.id = toggle.new_id;
-		$('>*:first', this).
-			unbind('click.option-toggle').
-			bind('click.option-toggle', function(){
-				firehose_set_options(name, toggle.new_value);
-				return false;
-			});
-	});
-
-
-	// If removing list items, fadeOut the list first...
-	removes_all[name] && $any('firehoselist').fadeOut(function(){
-		// ...then actually delete its contents, possibly with a loading message.
-		$(this).html(loads_new[name] ? '<h1 class="loading_msg">Loading New Items</h1>' : '').
-			css({ opacity:1 });
-	});
-	// div.paginate isn't in the list, so it wasn't handled above.
-	loads_new[name] && $('div.paginate').hide();
+	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
+	if ( removes_all[name] ) {
+		$('div.paginate').hide();
+		// Fade the list; replace its contents with a single loading message; re-show it.
+		$fhl.fadeOut(function(){ $fhl.html(loading_msg).show(); });
+	}
 
 
 	// Tell the server (asynchronously).
@@ -475,6 +451,11 @@ firehose_set_options = function(name, value, context) {
 
 	// Tell the UI.
 	$(document).trigger('firehose-setting-' + name, value);
+
+	// Note: when setting a new section, we don't actually know the new color, filter,
+	// or view until we get the response.  The firehose_sections code, though, _does_
+	// That code can bind to firehose-setting-section to trigger the component
+	// firehose-setting-{color,view,setfhfilter} events that will update the UI.
 };
 })();
 
