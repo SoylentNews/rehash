@@ -27,18 +27,18 @@ $task{$me}{code} = sub {
         my $block_names = $slashdb->sqlSelectColArrayref('name', 'dynamic_user_blocks', 'type_id = ' . $admin_public_blocks_def->{type_id});
         my $block;
         foreach my $name (@$block_names) {
-                $block = $admin_db->showPerformanceBox({ contents_only => 1})    if ($name eq 'performancebox');
-                $block = $admin_db->showAuthorActivityBox({ contents_only => 1}) if ($name eq 'authoractivity');
+                $block = $admin_db->showPerformanceBox({ contents_only => 1})    if ($name eq 'performancebox-0');
+                $block = $admin_db->showAuthorActivityBox({ contents_only => 1}) if ($name eq 'authoractivity-0');
 
-                if ($name eq 'admintodo') {
+                if ($name eq 'admintodo-0') {
                         ($block) = $admin_db->showAdminTodo() =~ m{(<b><a href.+<hr>)};
                 }
 
-                if (($name eq 'recenttagnames') && (my $tagsdb = getObject('Slash::Tags'))) {
+                if (($name eq 'recenttagnames-0') && (my $tagsdb = getObject('Slash::Tags'))) {
                         $block = $tagsdb->showRecentTagnamesBox({ contents_only => 1 });
                 }
 
-                if (($name eq 'firehoseusage') && (my $fh_db = getObject('Slash::FireHose'))) {
+                if (($name eq 'firehoseusage-0') && (my $fh_db = getObject('Slash::FireHose'))) {
                         $block = $fh_db->ajaxFireHoseUsage();
                 }
 
