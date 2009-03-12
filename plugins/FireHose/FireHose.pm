@@ -3940,6 +3940,14 @@ sub getAndSetOptions {
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
 	$options->{firehose_sphinx} = $user->{firehose_sphinx} ? 1 : 0;
 
+	if ($options->{viewref} && $options->{viewref}{viewtitle}) {
+		if ($options->{viewref}{viewtitle} =~ /{nickname}/) {
+			my $nick_user = $options->{user_view_uid} || $user->{uid};
+			my $nick = $self->getUser($nick_user, 'nickname');
+			$options->{viewref}{viewtitle} =~ s/\{nickname\}/$nick/;
+		}		
+	}
+
 #use Data::Dumper;
 #print STDERR Dumper($options);
 #print STDERR "TEST: BASE_FILTER $options->{base_filter}   FHFILTER: $options->{fhfilter} VIEW $options->{view} VFILTER: $options->{view_filter} TYPE: " . Dumper($options->{type}). "\n";
