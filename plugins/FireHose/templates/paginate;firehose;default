@@ -115,7 +115,7 @@ __template__
 		END;
 	END %]
 
-[% ELSIF options.duration == -1 && sphinx && firehose_more_data && firehose_more_data.future_count.defined && firehose_more_data.future_count <= 0 %]
+[% ELSIF options.duration == -1 && firehose_more_data && firehose_more_data.future_count.defined && firehose_more_data.future_count <= 0 %]
 	<span class="inactive">
 		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', ''); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
 	</span>

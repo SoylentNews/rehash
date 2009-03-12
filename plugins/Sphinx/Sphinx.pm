@@ -51,13 +51,13 @@ sub getSphinxStats {
 		return undef unless $data[2] && $data[2] =~ /:/;
 
 		while ($data[2] =~ /(\w[\w\s]+): (\d+)/g) {
-			$stats{$1} = $2;
+			(my $name = $1) =~ s/ /_/g;
+			$stats{$name} = $2;
 		}
 	} else {
 		while (my $data = $sth->fetchrow_arrayref) {
 			next if $data->[1] =~ /\D/;
 			(my $name = $data->[0]) =~ s/^sphinx_//;
-			$name =~ s/_/ /g;
 			my $num = $data->[1] & 2**31-1;
 			$stats{$name} = $num;
 		}
