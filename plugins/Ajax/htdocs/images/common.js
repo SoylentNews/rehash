@@ -687,7 +687,7 @@ function firehose_handle_comment_nodnix( commands ){
 $(function(){
 	firehose_init_tag_ui();
 	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
-	firehose_set_cur(firehose_get_cur());
+	//firehose_set_cur(firehose_get_cur());
 });
 
 
@@ -1085,7 +1085,7 @@ function firehose_adjust_window(onscreen) {
 
 function firehose_after_update(){
 	firehose_reorder(firehose_ordered);
-	firehose_set_cur(firehose_get_cur());
+	//firehose_set_cur(firehose_get_cur());
 	firehose_update_title_count(
 		firehose_storyfuture(firehose_future).length
 	);
@@ -1804,8 +1804,13 @@ function firehose_set_cur($article) {
 	return $article;
 }
 
-function firehose_go_next() {
-	var $current = firehose_get_cur();
+function firehose_go_next($current) {
+	$current = $current || firehose_get_cur();
+	if (!$current.length) {
+		$current = firehose_set_cur();
+		return $current;
+	}
+
 	var $next = $current.nextAll('div[id^=firehose-]:not(.daybreak):first');	
 
 	if ($next.length) {
@@ -1815,8 +1820,13 @@ function firehose_go_next() {
 	}
 }
 
-function firehose_go_prev() {
-	var $current = firehose_get_cur();
+function firehose_go_prev($current) {
+	$current = $current || firehose_get_cur();
+	if (!$current.length) {
+		$current = firehose_set_cur();
+		return $current;
+	}
+
 	var $prev = $current.prevAll('div[id^=firehose-]:not(.daybreak):first');	
 
 	if ($prev.length) {
@@ -2284,6 +2294,7 @@ $(function(){
 	var validkeys = {};
 	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
 		validkeys = {
+			'X' : {           tags    : 1, signoff : 1 },
 			'Z' : {           tags    : 1, tag     : 1 },
 			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 }, // 61, 107
 			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 }, // 109
@@ -2300,14 +2311,17 @@ $(function(){
 
 			27  : { form: 1,  unfocus : 1 } // esc
 		};
-		tag_admin && (validkeys['X'] = { tags:1, signoff:1 });
 		validkeys['H'] = validkeys['A'] = validkeys['K'] = validkeys['W'];
 		validkeys['L'] = validkeys['D'] = validkeys['J'] = validkeys['S'];
 		validkeys[107] = validkeys[61] = validkeys[187];
 		validkeys[109] = validkeys[189];
 	}
 
-	$(document).keyup(function( e ) {
+	$(document).keydown(function( e ) {
+		// no modifiers, except maybe shift
+		if (e.ctrlKey || e.metaKey || e.altKey) 
+			return true;
+
 		var c    = e.which;
 		var key  = validkeys[c] ? c : String.fromCharCode(c);
 		var keyo = validkeys[key];
@@ -2323,26 +2337,33 @@ $(function(){
 		if (keyo.form && (!e.target || !e.target.type))
 			return true;
 
-		var el = firehose_get_cur()[0];
-		var id = el.id.substr(9);
-		if (keyo.tags) {
-			if (keyo.signoff && tag_admin) { el.submit_tags('signoff') }
-			if (keyo.nod)     { el.submit_tags('nod')     }
-			if (keyo.nix)     { el.submit_tags('nix')     }
-			if (keyo.tag)     {
-				toggle_firehose_body(id, 0, true);
-				firehose_toggle_tag_ui_to(true, el);
-				$('.tag-entry:visible:first', el).focus();
-			}
-			firehose_set_cur($(el));
-
-		} else {
-			if (keyo.unfocus)  { $(e.target).blur() }
-			if (keyo.next)     { firehose_go_next() }
-			if (keyo.prev)     { firehose_go_prev() }
-			if (keyo.more)     { firehose_more()    }
-			if (keyo.toggle)   { toggle_firehose_body(id, 0) }
+		var cur = firehose_get_cur();
+		var el; var id;
+		if (cur.length) {
+			el = cur[0];
+			id = el.id.substr(9);
 		}
+
+		if (keyo.tag && el) {
+			if (keyo.nod)     { el.submit_tags('nod') }
+			if (keyo.nix)     { el.submit_tags('nix') }
+
+			toggle_firehose_body(id, 0, true);
+			firehose_toggle_tag_ui_to(true, el);
+			$('.tag-entry:visible:first', el).focus();
+			firehose_set_cur($(el));
+		}
+
+		if (keyo.signoff && el && tag_admin) {
+			el.submit_tags('signoff');
+			firehose_go_next($(el));
+		}
+
+		if (keyo.unfocus)        { $(e.target).blur() }
+		if (keyo.next)           { firehose_go_next() }
+		if (keyo.prev)           { firehose_go_prev() }
+		if (keyo.more)           { firehose_more()    }
+		if (keyo.toggle && id)   { toggle_firehose_body(id, 0) }
 
 		return false;
 	});
