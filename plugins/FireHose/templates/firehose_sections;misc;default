@@ -25,7 +25,12 @@ __template__
 [% skip_edit = 0 %]
 [% UNLESS (user.currentPage == "firehose" || user.currentPage == "index2" || user.currentPage == "console" || user.currentPage == "index");
 	skip_edit = 1;
-END %]
+END;
+
+IF user.is_anon || form.op == "view";
+	skip_edit = 1;
+END;
+%]
 [% cur_section = fh.determineCurrentSection() %]
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
 [% default_section_id = constants.mainpage_skid %]
@@ -50,7 +55,7 @@ END %]
 			   END %]
 		[% END %]
 		<li class="[% IF is_active %]active[% ELSIF hide %]hide[% END %][% IF is_default %] default[% END %]" id="fhsection-[% fh_section.fsid %]">
-			<a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !user.is_anon %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
+			<a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !skip_edit %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
 			[% IF !user.is_anon && !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
 		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
