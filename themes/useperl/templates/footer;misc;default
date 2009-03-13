@@ -49,6 +49,7 @@ __template__
 		urchinTracker();
 	</script>
 
+[% PROCESS after_content %]
 </body>
 </html>
 

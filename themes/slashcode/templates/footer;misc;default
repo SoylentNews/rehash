@@ -67,6 +67,7 @@ __template__
 		[% END %]
 	</div>
 [% INCLUDE modal_footer %]
+[% PROCESS after_content %]
 </body>
 </html>
 

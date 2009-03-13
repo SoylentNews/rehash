@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+before_content
+__template__
+<script id="before-content" type="text/javascript">
+var pageload = {
+	pagemark: [% user.state.pagemark %],
+	before_content: (new Date).getTime()
+};
+function pageload_done( $, console, maybe ){
+		pageload.after_readycode	= (new Date).getTime();
+[%- IF user.is_admin %]
+		pageload.content_ready_time	= pageload.content_ready - pageload.before_content;
+		pageload.script_ready_time	= pageload.after_readycode - pageload.content_ready;
+		pageload.ready_time		= pageload.after_readycode - pageload.before_content;
+
+		var	ready_time	= '' + (pageload.ready_time/1000.0) + 's',
+			content_time	= '' + (pageload.content_ready_time/1000.0) + 's',
+			script_time	= '' + (pageload.script_ready_time/1000.0) + 's';
+		if ( console && !maybe ) {
+			console.log(ready_time+' from <head> until all $(document).ready complete ['+
+				content_time+' for content; '+
+				script_time+' for $(code)]'
+			);
+		}
+
+		pageload.script_ready_time && (ready_time += ' (content:'+content_time+', init:'+script_time+')');
+		$('#pageload-display').text(ready_time);
+[%- END %]
+}
+</script>
+__seclev__
+10000
+__version__
+$Id$
