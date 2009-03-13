@@ -2295,7 +2295,7 @@ $(function(){
 	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
 		validkeys = {
 			'X' : {           tags    : 1, signoff : 1 },
-			'Z' : {           tags    : 1, tag     : 1 },
+			'T' : {           tags    : 1, tag     : 1 },
 			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 }, // 61, 107
 			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 }, // 109
 
@@ -2311,8 +2311,11 @@ $(function(){
 
 			27  : { form: 1,  unfocus : 1 } // esc
 		};
-		validkeys['H'] = validkeys['A'] = validkeys['K'] = validkeys['W'];
-		validkeys['L'] = validkeys['D'] = validkeys['J'] = validkeys['S'];
+		validkeys['H'] = validkeys['A'] = validkeys['Q'];
+		validkeys['L'] = validkeys['D'] = validkeys['Q'];
+		validkeys['K'] = validkeys['W'];
+		validkeys['J'] = validkeys['S'];
+		validkeys['I'] = validkeys['T'];
 		validkeys[107] = validkeys[61] = validkeys[187];
 		validkeys[109] = validkeys[189];
 	}
@@ -2356,6 +2359,8 @@ $(function(){
 
 		if (keyo.signoff && el && tag_admin) {
 			el.submit_tags('signoff');
+			// we either call set_cur($(el)) as above,
+			// or just pass $(el) to go_next()
 			firehose_go_next($(el));
 		}
 
@@ -2363,7 +2368,11 @@ $(function(){
 		if (keyo.next)           { firehose_go_next() }
 		if (keyo.prev)           { firehose_go_prev() }
 		if (keyo.more)           { firehose_more()    }
-		if (keyo.toggle && id)   { toggle_firehose_body(id, 0) }
+		if (keyo.toggle && id)   {
+			toggle_firehose_body(id, 0);
+			if (cur.hasClass('briefarticle'))
+				firehose_go_next();
+		}
 
 		return false;
 	});
