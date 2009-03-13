@@ -2284,7 +2284,6 @@ $(function(){
 	var validkeys = {};
 	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
 		validkeys = {
-			'X' : {           tags    : 1, signoff : 1 },
 			'Z' : {           tags    : 1, tag     : 1 },
 			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 }, // 61, 107
 			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 }, // 109
@@ -2301,6 +2300,7 @@ $(function(){
 
 			27  : { form: 1,  unfocus : 1 } // esc
 		};
+		tag_admin && validkeys['X'] = { tags:1, signoff:1 };
 		validkeys['H'] = validkeys['A'] = validkeys['K'] = validkeys['W'];
 		validkeys['L'] = validkeys['D'] = validkeys['J'] = validkeys['S'];
 		validkeys[107] = validkeys[61] = validkeys[187];
