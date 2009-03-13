@@ -50,6 +50,7 @@ END -%]
 //-->
 </script>
 [% END -%]
+[% PROCESS after_content %]
 </body>
 </html>
 __version__

@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+after_jquery
+__template__
+<script id="after-jquery" type="text/javascript">
+(function( $, pageload, pageload_done ){
+$ && pageload && $(function(){
+	pageload.content_ready = (new Date).getTime();
+	pageload_done && $(function(){ pageload_done($, console, 'maybe'); });
+});
+})(window.jQuery, window.pageload, window.pageload_done);
+</script>
+__seclev__
+10000
+__version__
+$Id$

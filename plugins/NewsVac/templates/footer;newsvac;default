@@ -39,6 +39,7 @@ __template__
 	</tr>
 </table>
 
+[% PROCESS after_content %]
 </body>
 </html>
 
