@@ -1,7 +1,7 @@
 /*
- * jQuery UI Sortable 1.6rc6
+ * jQuery UI Sortable 1.7
  *
- * Copyright (c) 2009 AUTHORS.txt (http://ui.jquery.com/about)
+ * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * and GPL (GPL-LICENSE.txt) licenses.
  *
@@ -17,7 +17,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 		var o = this.options;
 		this.containerCache = {};
-		(this.options.cssNamespace && this.element.addClass(this.options.cssNamespace+"-sortable"));
+		this.element.addClass("ui-sortable");
 
 		//Get the items
 		this.refresh();
@@ -35,7 +35,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 	destroy: function() {
 		this.element
-			.removeClass(this.options.cssNamespace+"-sortable "+this.options.cssNamespace+"-sortable-disabled")
+			.removeClass("ui-sortable ui-sortable-disabled")
 			.removeData("sortable")
 			.unbind(".sortable");
 		this._mouseDestroy();
@@ -189,7 +189,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 		this.dragging = true;
 
-		this.helper.addClass(o.cssNamespace+'-sortable-helper');
+		this.helper.addClass("ui-sortable-helper");
 		this._mouseDrag(event); //Execute the drag once - this causes the helper not to be visible before getting its correct position
 		return true;
 
@@ -261,7 +261,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 				this.direction = intersection == 1 ? "down" : "up";
 
 				if (this.options.tolerance == "pointer" || this._intersectsWithSides(item)) {
-					this.options.sortIndicator.call(this, event, item);
+					this._rearrange(event, item);
 				} else {
 					break;
 				}
@@ -322,7 +322,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 			this._mouseUp();
 
 			if(this.options.helper == "original")
-				this.currentItem.css(this._storedCSS).removeClass(this.options.cssNamespace+"-sortable-helper");
+				this.currentItem.css(this._storedCSS).removeClass("ui-sortable-helper");
 			else
 				this.currentItem.show();
 
@@ -462,26 +462,33 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 		this.refreshPositions();
 	},
 
+	_connectWith: function() {
+		var options = this.options;
+		return options.connectWith.constructor == String
+			? [options.connectWith]
+			: options.connectWith;
+	},
+
 	_getItemsAsjQuery: function(connected) {
 
 		var self = this;
 		var items = [];
 		var queries = [];
+		var connectWith = this._connectWith();
 
-		if(this.options.connectWith && connected) {
-			var connectWith = this.options.connectWith.constructor == String ? [this.options.connectWith] : this.options.connectWith;
+		if(connectWith && connected) {
 			for (var i = connectWith.length - 1; i >= 0; i--){
 				var cur = $(connectWith[i]);
 				for (var j = cur.length - 1; j >= 0; j--){
 					var inst = $.data(cur[j], 'sortable');
 					if(inst && inst != this && !inst.options.disabled) {
-						queries.push([$.isFunction(inst.options.items) ? inst.options.items.call(inst.element) : $(inst.options.items, inst.element).not("."+inst.options.cssNamespace+"-sortable-helper"), inst]);
+						queries.push([$.isFunction(inst.options.items) ? inst.options.items.call(inst.element) : $(inst.options.items, inst.element).not(".ui-sortable-helper"), inst]);
 					}
 				};
 			};
 		}
 
-		queries.push([$.isFunction(this.options.items) ? this.options.items.call(this.element, null, { options: this.options, item: this.currentItem }) : $(this.options.items, this.element).not("."+this.options.cssNamespace+"-sortable-helper"), this]);
+		queries.push([$.isFunction(this.options.items) ? this.options.items.call(this.element, null, { options: this.options, item: this.currentItem }) : $(this.options.items, this.element).not(".ui-sortable-helper"), this]);
 
 		for (var i = queries.length - 1; i >= 0; i--){
 			queries[i][0].each(function() {
@@ -515,10 +522,11 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 		var items = this.items;
 		var self = this;
 		var queries = [[$.isFunction(this.options.items) ? this.options.items.call(this.element[0], event, { item: this.currentItem }) : $(this.options.items, this.element), this]];
+		var connectWith = this._connectWith();
 
-		if(this.options.connectWith) {
-			for (var i = this.options.connectWith.length - 1; i >= 0; i--){
-				var cur = $(this.options.connectWith[i]);
+		if(connectWith) {
+			for (var i = connectWith.length - 1; i >= 0; i--){
+				var cur = $(connectWith[i]);
 				for (var j = cur.length - 1; j >= 0; j--){
 					var inst = $.data(cur[j], 'sortable');
 					if(inst && inst != this && !inst.options.disabled) {
@@ -566,14 +574,8 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 			var t = this.options.toleranceElement ? $(this.options.toleranceElement, item.item) : item.item;
 
 			if (!fast) {
-				if (this.options.accurateIntersection) {
-					item.width = t.outerWidth();
-					item.height = t.outerHeight();
-				}
-				else {
-					item.width = t[0].offsetWidth;
-					item.height = t[0].offsetHeight;
-				}
+				item.width = t.outerWidth();
+				item.height = t.outerHeight();
 			}
 
 			var p = t.offset();
@@ -605,8 +607,8 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 				element: function() {
 
 					var el = $(document.createElement(self.currentItem[0].nodeName))
-						.addClass(className || self.currentItem[0].className+" "+self.options.cssNamespace+"-sortable-placeholder")
-						.removeClass(self.options.cssNamespace+'-sortable-helper')[0];
+						.addClass(className || self.currentItem[0].className+" ui-sortable-placeholder")
+						.removeClass("ui-sortable-helper")[0];
 
 					if(!className)
 						el.style.visibility = "hidden";
@@ -659,7 +661,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 							continue;
 
 						this.currentContainer = this.containers[i];
-						itemWithLeastDistance ? this.options.sortIndicator.call(this, event, itemWithLeastDistance, null, true) : this.options.sortIndicator.call(this, event, null, this.containers[i].element, true);
+						itemWithLeastDistance ? this._rearrange(event, itemWithLeastDistance, null, true) : this._rearrange(event, null, this.containers[i].element, true);
 						this._trigger("change", event, this._uiHash());
 						this.containers[i]._trigger("change", event, this._uiHash(this));
 
@@ -722,7 +724,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 			po.top += this.scrollParent.scrollTop();
 		}
 
-		if((this.offsetParent[0] == document.body && $.browser.mozilla)	//Ugly FF3 fix
+		if((this.offsetParent[0] == document.body) //This needs to be actually done for all browsers, since pageX/pageY includes this information
 		|| (this.offsetParent[0].tagName && this.offsetParent[0].tagName.toLowerCase() == 'html' && $.browser.msie)) //Ugly IE fix
 			po = { top: 0, left: 0 };
 
@@ -798,13 +800,13 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 				pos.top																	// The absolute mouse position
 				+ this.offset.relative.top * mod										// Only for relative positioned nodes: Relative offset from element to offset parent
 				+ this.offset.parent.top * mod											// The offsetParent's offset without borders (offset + border)
-				- ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ) * mod
+				- ($.browser.safari && this.cssPosition == 'fixed' ? 0 : ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ) * mod)
 			),
 			left: (
 				pos.left																// The absolute mouse position
 				+ this.offset.relative.left * mod										// Only for relative positioned nodes: Relative offset from element to offset parent
 				+ this.offset.parent.left * mod											// The offsetParent's offset without borders (offset + border)
-				- ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ) * mod
+				- ($.browser.safari && this.cssPosition == 'fixed' ? 0 : ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ) * mod)
 			)
 		};
 
@@ -855,14 +857,14 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 				- this.offset.click.top													// Click offset (relative to the element)
 				- this.offset.relative.top												// Only for relative positioned nodes: Relative offset from element to offset parent
 				- this.offset.parent.top												// The offsetParent's offset without borders (offset + border)
-				+ ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) )
+				+ ($.browser.safari && this.cssPosition == 'fixed' ? 0 : ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ))
 			),
 			left: (
 				pageX																// The absolute mouse position
 				- this.offset.click.left												// Click offset (relative to the element)
 				- this.offset.relative.left												// Only for relative positioned nodes: Relative offset from element to offset parent
 				- this.offset.parent.left												// The offsetParent's offset without borders (offset + border)
-				+ ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() )
+				+ ($.browser.safari && this.cssPosition == 'fixed' ? 0 : ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ))
 			)
 		};
 
@@ -893,21 +895,22 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 		// everything else normalized again
 		var delayedTriggers = [], self = this;
 
-		//We first have to update the dom position of the actual currentItem
-		if(!this._noFinalSort) this.placeholder.before(this.currentItem);
+		// We first have to update the dom position of the actual currentItem
+		// Note: don't do it if the current item is already removed (by a user), or it gets reappended (see #4088)
+		if(!this._noFinalSort && this.currentItem[0].parentNode) this.placeholder.before(this.currentItem);
 		this._noFinalSort = null;
 
 		if(this.helper[0] == this.currentItem[0]) {
 			for(var i in this._storedCSS) {
 				if(this._storedCSS[i] == 'auto' || this._storedCSS[i] == 'static') this._storedCSS[i] = '';
 			}
-			this.currentItem.css(this._storedCSS).removeClass(this.options.cssNamespace+"-sortable-helper");
+			this.currentItem.css(this._storedCSS).removeClass("ui-sortable-helper");
 		} else {
 			this.currentItem.show();
 		}
 
 		if(this.fromOutside && !noPropagation) delayedTriggers.push(function(event) { this._trigger("receive", event, this._uiHash(this.fromOutside)); });
-		if((this.fromOutside || this.domPosition.prev != this.currentItem.prev().not("."+this.options.cssNamespace+"-sortable-helper")[0] || this.domPosition.parent != this.currentItem.parent()[0]) && !noPropagation) delayedTriggers.push(function(event) { this._trigger("update", event, this._uiHash()); }); //Trigger update callback if the DOM position has changed
+		if((this.fromOutside || this.domPosition.prev != this.currentItem.prev().not(".ui-sortable-helper")[0] || this.domPosition.parent != this.currentItem.parent()[0]) && !noPropagation) delayedTriggers.push(function(event) { this._trigger("update", event, this._uiHash()); }); //Trigger update callback if the DOM position has changed
 		if(!$.ui.contains(this.element[0], this.currentItem[0])) { //Node was moved out of the current element
 			if(!noPropagation) delayedTriggers.push(function(event) { this._trigger("remove", event, this._uiHash()); });
 			for (var i = this.containers.length - 1; i >= 0; i--){
@@ -929,7 +932,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 		//Do what was originally in plugins
 		if(this._storedCursor) $('body').css("cursor", this._storedCursor); //Reset cursor
-		if(this._storedOpacity) this.helper.css("opacity", this._storedCursor); //Reset cursor
+		if(this._storedOpacity) this.helper.css("opacity", this._storedOpacity); //Reset cursor
 		if(this._storedZIndex) this.helper.css("zIndex", this._storedZIndex == 'auto' ? '' : this._storedZIndex); //Reset z-index
 
 		this.dragging = false;
@@ -982,27 +985,32 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 $.extend($.ui.sortable, {
 	getter: "serialize toArray",
-	version: "1.6rc6",
+	version: "1.7",
+	eventPrefix: "sort",
 	defaults: {
-		accurateIntersection: true,
 		appendTo: "parent",
+		axis: false,
 		cancel: ":input,option",
 		connectWith: false,
-		cssNamespace: 'ui',
+		containment: false,
+		cursor: 'auto',
+		cursorAt: false,
 		delay: 0,
 		distance: 1,
 		dropOnEmpty: true,
 		forcePlaceholderSize: false,
 		forceHelperSize: false,
+		grid: false,
 		handle: false,
 		helper: "original",
 		items: '> *',
+		opacity: false,
 		placeholder: false,
-		scope: "default",
+		revert: false,
 		scroll: true,
 		scrollSensitivity: 20,
 		scrollSpeed: 20,
-		sortIndicator: $.ui.sortable.prototype._rearrange,
+		scope: "default",
 		tolerance: "intersect",
 		zIndex: 1000
 	}
