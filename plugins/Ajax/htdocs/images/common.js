@@ -2319,7 +2319,7 @@ $(function(){
 
 	$(document).keydown(function( e ) {
 		// no modifiers, except maybe shift
-		if (e.ctrlKey || e.metaKey || e.altKey) 
+		if (e.ctrlKey || e.metaKey || e.altKey)
 			return true;
 
 		var c    = e.which;
