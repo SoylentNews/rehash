@@ -296,6 +296,10 @@ function toggle_firehose_body( id, is_admin, /*optional:*/toggle_to ) {
 	}
 
 
+	var	toggle_to_show	= toggle_to > 0,
+		op		= toggle_to_show ? 'show' : 'hide',
+		class_for	= toggle_firehose_body.class_for[op];
+
 	if ( body_is_empty ) {
 		var handlers = {};
 		is_admin && (handlers.onComplete = function(){
@@ -303,11 +307,9 @@ function toggle_firehose_body( id, is_admin, /*optional:*/toggle_to ) {
 			firehose_get_admin_extras(id);
 		});
 		ajax_update({ op:'firehose_fetch_text', id:id, reskey:reskey_static }, body_id, handlers);
+	} else if ( is_admin && toggle_to_show ) {
+		firehose_get_admin_extras(id);
 	}
-
-	var	toggle_to_show	= toggle_to > 0,
-		op		= toggle_to_show ? 'show' : 'hide',
-		class_for	= toggle_firehose_body.class_for[op];
 
 	$body.setClass(class_for.body).
 		closest('#firehose-' + id).
@@ -509,16 +511,10 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 
 	if ( toggle ) {
 		setFirehoseAction();
+		if_expanded && $server[0].fetch_tags();
+
 		$server.find('.tag-widget').each(function(){ this.set_context(); });
-
 		$widget.toggleClass('expanded', !!if_expanded);
-
-		var toggle_button={}, toggle_div={};
-		if ( if_expanded ){
-			$server[0].fetch_tags();
-			fh_is_admin && firehose_get_admin_extras(id);
-		}
-
 		$widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
 		$server.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
 		after_article_moved($server[0]);
@@ -526,7 +522,6 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 
 	// always focus for expand request, even if already expanded
 	if_expanded && $widget.find('.tag-entry:visible:first').focus();
-
 	return $widget;
 }
 
