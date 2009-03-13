@@ -6023,3 +6023,7 @@ INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, se
 INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (302, 3, 0, 'admintodo-0', 'Admin Todo', 'Admin Todo Items', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (303, 3, 0, 'recenttagnames-0', 'Recent Tagnames', 'Recent Tagnames', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (304, 3, 0, 'firehoseusage-0', 'Firehose Usage', 'Firehose Usage', 10000, NOW(), NOW());
+
+
+# 2009-03-12
+UPDATE vars SET value = 'T_2_5_0_246' WHERE name = 'cvs_tag_currentcode';
