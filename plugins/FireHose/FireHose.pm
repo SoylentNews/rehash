@@ -1564,7 +1564,6 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 						'globjid',
 						$sphtables, $sphwhere, $sphinx_other,
 						{ sql_no_cache => 1 });
-					$sphinx_stats = $sphinxdb->getSphinxStats;
 					print STDERR sprintf("%s sphinx:sph_check_sql: %d char where found %d\n",
 						scalar(gmtime),
 						length($sphwhere),
