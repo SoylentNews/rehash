@@ -2300,7 +2300,7 @@ $(function(){
 
 			27  : { form: 1,  unfocus : 1 } // esc
 		};
-		tag_admin && validkeys['X'] = { tags:1, signoff:1 };
+		tag_admin && (validkeys['X'] = { tags:1, signoff:1 });
 		validkeys['H'] = validkeys['A'] = validkeys['K'] = validkeys['W'];
 		validkeys['L'] = validkeys['D'] = validkeys['J'] = validkeys['S'];
 		validkeys[107] = validkeys[61] = validkeys[187];
@@ -2326,7 +2326,7 @@ $(function(){
 		var el = firehose_get_cur()[0];
 		var id = el.id.substr(9);
 		if (keyo.tags) {
-			if (keyo.signoff) { el.submit_tags('signoff') }
+			if (keyo.signoff && tag_admin) { el.submit_tags('signoff') }
 			if (keyo.nod)     { el.submit_tags('nod')     }
 			if (keyo.nix)     { el.submit_tags('nix')     }
 			if (keyo.tag)     {
