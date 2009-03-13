@@ -103,7 +103,7 @@ stories, and even those only abbreviated.  The break down is as follows:
 <li>"Nix" (vote down) current item: -
 <li>Open tagging box for current item: Z
 <li>Unfocus tag field: esc
-<li>Toggle (open/collapse): Q
+<li>Toggle (open/collapse): Q/A/D
 <li>Get more items: G
 </ul>
 
