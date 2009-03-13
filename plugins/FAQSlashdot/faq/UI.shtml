@@ -88,6 +88,52 @@ stories, and even those only abbreviated.  The break down is as follows:
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
                 Last Modified: 1/21/06 
         </small></em></p>
+        
+<h2><a name="ui600" id="ui600">How do I navigate Slashdot with keyboard shortcuts?</a></h2>
+
+<p>There are several places on Slashdot that have been designed to work with a set of keyboard shortcuts for fast navigation.  Mostly these have been designed for those of who spend every waking moment on the site, but occasionally we get questions from people who rolled their head around on the keyboard and wondered why their page did silly things.  There are two areas on the site that have their own set of keyboard shortcuts (with more to come soon), the firehose / index, and the discussion system.</p>
+
+<p>The keyboard shortcuts for the firehose are:</p>
+
+<ul>
+ 
+<li>Next firehose item: W/A/H/K
+<li>Previous firehose item: S/D/L/J
+<li>"Nod" (vote up) current item: +/=
+<li>"Nix" (vote down) current item: -
+<li>Open tagging box for current item: Z
+<li>Unfocus tag field: esc
+<li>Toggle (open/collapse): Q
+<li>Get more items: G
+</ul>
+
+<p>The keyboard shortcuts for the discussion system are:</p>
+
+<ul>
+
+<li>Previous/Next Comment (Following Threads) A/D
+<li>Previous/Next Comment Sibling W/S
+<li>Previous/Next Comment (Chronologically) Q/E
+<li>Next Unread Comment: F
+
+<li>Reply to Current Comment: R
+<li>Parent of Current Comment: P
+<li>Moderation Log of Current Comment: M (close with X)
+<li>Skip to End: V
+<li>Skip to Top: T
+<li>Get More Comments: G
+<li>Raise/Lower Abbreviation Threshold: [/]
+<li>Raise/Lower Hide Threshold: ,/.
+<li>Toggle D2 Floater Widget: /
+</ul>
+
+<p>Note that if you press a 'Next' key when you are at the end of a discussion will attempt to 'G'et more comments.  Also, holding down 'Shift' while using the navigation keys will hide the comment you just left.  So you can press 'shift-d' and leave the comments you have already read closed behind you as you read on.
+</p>
+
+<p><em><small>Answered by: <a href="mailto:scuttlemonkey@slashdot.org">Scuttlemonkey</a><br>
+
+Last Modified: 3/13/09</small></em></p>        
+
 
         <hr>
         <ul class="menu">
@@ -96,6 +142,8 @@ stories, and even those only abbreviated.  The break down is as follows:
                         <li><a href="com-mod.shtml">Next section</a></li>
                         <li><a href="index.shtml">Index</a></li>
                 </ul>
-        
+
+
+
 
 <!--#include virtual="/slashfoot.inc"-->
