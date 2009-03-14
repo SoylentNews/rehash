@@ -908,6 +908,8 @@ sub getFireHoseEssentials {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
+	
+	slashProf("fh_GFHE");
 
 	my $sphinx = 0;
 	my($sph, $sph_check_sql, $sph_mode) = (undef, '', 0);
@@ -1675,6 +1677,7 @@ print STDERR scalar(gmtime) . " gFHE mcd $0 '$arhit' '$sthit' $scnt $serial\n";
 			$sdebug_orig);
 	}
 
+	slashProf("", "fh_GFHE");
 	return($items, $results, $count, $future_count, $day_num, $day_label, $day_count);
 }
 
@@ -1781,16 +1784,19 @@ sub getFireHoseByTypeSrcid {
 
 sub getFireHose {
 	my($self, $id, $options) = @_;
+	slashProf("fh_getFH");
 	if ($id !~ /^\d+$/) {
 		print STDERR scalar(gmtime) . " getFireHose($id) caller=" . join(':', (caller(0))[1,2]) . "\n";
 		return undef;
 	}
 	my $hr = $self->getFireHoseMulti([$id], $options);
+	slashProf("","fh_getFH");
 	return $hr->{$id};
 }
 
 sub getFireHoseMulti {
 	my($self, $id_ar, $options) = @_;
+	slashProf("fh_getFHMulti");
 	my $constants = getCurrentStatic();
 	$id_ar = [ $id_ar ] if !ref $id_ar;
 	$id_ar = [( grep { /^\d+$/ } @$id_ar )];
@@ -1845,6 +1851,7 @@ sub getFireHoseMulti {
 	}
 
 	$ret_hr = {( %$mcd_hr, %$answer_hr )};
+	slashProf("", "fh_getFHMulti");
 	return $ret_hr;
 }
 
@@ -2310,6 +2317,7 @@ sub ajaxFireHoseGetUpdates {
 	my $start = Time::HiRes::time();
 
 	slashProfInit();
+	slashProf("fh_ajax_gup");
 
 	my $update_data = { removals => 0, items => 0, updates => 0, new => 0, updated_tags => {} };
 
@@ -2566,7 +2574,8 @@ sub ajaxFireHoseGetUpdates {
 		bytes 		=> length($retval)
 	};
 	$firehose->createUpdateLog($updatelog);
-	slashProfEnd();
+	slashProf("","fh_ajax_gup");
+	slashProfEnd("FHPROF_AJAXUP");
 
 	return $retval;
 
@@ -2896,6 +2905,7 @@ sub genFireHoseMCDAllKeys {
 
 sub dispFireHose {
 	my($self, $item, $options) = @_;
+	slashProf("fh_dispFireHose");
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	$options ||= {};
@@ -2939,6 +2949,7 @@ sub dispFireHose {
 	my $atstorytime;
 	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
 	$retval =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
+	slashProf("","fh_dispFireHose");
 
 	return $retval;
 }
@@ -3449,6 +3460,7 @@ sub serializeOptions {
 
 sub getAndSetOptions {
 	my($self, $opts) = @_;
+	slashProf("fh_gASO");
 
 	my $user 	= getCurrentUser();
 	my $constants 	= getCurrentStatic();
@@ -3953,6 +3965,7 @@ sub getAndSetOptions {
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 #print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned} PAUSE $options->{pause} FPAUSE: |$form->{pause}|\n";
 #print STDERR "DURATION $options->{duration} STARTDATE: $options->{startdate}\n";
+	slashProf("","fh_gASO");
 	return $options;
 }
 
@@ -4160,6 +4173,9 @@ sub getPopLevelForPopularity {
 sub listView {
 	my($self, $lv_opts) = @_;
 
+	slashProfInit();
+	slashProf("fh_listview");
+
 	$lv_opts ||= {};
 	$lv_opts->{initial} = 1;
 
@@ -4290,7 +4306,7 @@ sub listView {
 
 	my $views = $self->getUserViews({ tab_display => "yes"});
 
-	slashDisplay("list", {
+	my $ret = slashDisplay("list", {
 		itemstext		=> $itemstext,
 		itemnum			=> $itemnum,
 		page			=> $options->{page},
@@ -4310,6 +4326,11 @@ sub listView {
 		views			=> $views,
 		theupdatetime		=> timeCalc($slashdb->getTime(), "%H:%M"),
 	}, { Page => "firehose", Return => 1 });
+	
+	slashProf("","fh_listview");
+	slashProfEnd("FH_LISTVIEW");
+	return $ret;
+
 }
 
 sub setFireHoseSession {
