@@ -12,12 +12,12 @@ __name__
 after_jquery
 __template__
 <script id="after-jquery" type="text/javascript">
-(function( $, pageload, pageload_done ){
+(function( $, pageload, pageload_done, console ){
 $ && pageload && $(function(){
 	pageload.content_ready = (new Date).getTime();
 	pageload_done && $(function(){ pageload_done($, console, 'maybe'); });
 });
-})(window.jQuery, window.pageload, window.pageload_done);
+})(window.jQuery, window.pageload, window.pageload_done, window.console);
 </script>
 __seclev__
 10000
