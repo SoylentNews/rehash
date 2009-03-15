@@ -5,9 +5,8 @@
 	firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
 	json_update firehose_reorder firehose_get_next_updates getFirehoseUpdateInterval run_before_update
 	firehose_play firehose_add_update_timerid firehose_collapse_entry
-	 vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
-	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
-	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_style_switch
+	vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
+	firehose_set_cur firehose_style_switch
 	firehose_style_switch_handler */
 
 YAHOO.namespace('slashdot');
@@ -78,32 +77,48 @@ var fh_adTimerUrl       = '';
 //fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
 
 
-function createPopup(xy, titlebar, name, contents, message, onmouseout) {
-	var body = document.getElementsByTagName("body")[0];
-	var div = document.createElement("div");
-	div.id = name + "-popup";
-	div.style.position = "absolute";
 
-	if (onmouseout) {
-		div.onmouseout = onmouseout;
+function view( expr, how ){
+	// (minimally) scroll an element entirely into view; how='x' or how='y' to scroll only on that axis
+	var $elem=$any(expr), e;
+	if ( $elem.length!=1 || $.TypeOf.not('element', $elem[0]) || Bounds.empty(e=new Bounds($elem)) ) {
+		return;
 	}
 
-	var leftpos = xy[0] + "px";
-	var toppos  = xy[1] + "px";
+	how = how || { animate: true };
 
-	div.style.left = leftpos;
-	div.style.top = toppos;
-	div.style.zIndex = "100";
-	contents = contents || "";
-	message  = message || "";
+	var w=new Bounds(window), dx=0, dy=0;
+	if ( how.axis!='y' && !Bounds.contain(Bounds.x(w), e) ) {
+		dx = (e.left<=w.left || w.width<=e.width() ? e.left-w.left : e.right-w.right);
+	}
+	if ( how.axis!='x' && !Bounds.contain(Bounds.y(w), e) ) {
+		dy = (e.top<=w.top || w.height()<=e.height() ? e.top-w.top : e.bottom-w.bottom);
+	}
 
-	div.innerHTML = '<iframe></iframe><div id="' + name + '-title" class="popup-title">' + titlebar + '</div>' +
-                        '<div id="' + name + '-contents" class="popup-contents">' + contents + '</div>' +
-			'<div id="' + name + '-message" class="popup-message">' + message + '</div>';
+	if ( dx || dy ) {
+		$.TypeOf.defNo(how.animate)
+			? window.scrollBy(dx, dy)
+			: $('html').animate({ scrollTop:'+='+dy+'px', scrollLeft:'+='+dx+'px' });
+	}
+	return $elem;
+}
 
-	body.appendChild(div);
-	div.className = "popup";
-	return div;
+
+function createPopup(pos_selector, titlebar, name, contents, message, onmouseout) {
+	function div( kind, html ){
+		return $('<div id="'+name+'-'+kind+'" class="popup-'+kind+'">'+(html||'')+'</div>');
+	}
+
+	var	pos	= Position(pos_selector),
+		$popup	= $('<div id="'+name+'-popup" class="popup" style="position:absolute; top:'+pos.top+'px; left:'+pos.left+'px; z-index:100">').
+				appendTo('body').
+				append('<iframe>').
+				append(div('title', titlebar)).
+				append(div('contents', contents)).
+				append(div('message', message));
+
+	$.TypeOf.fn(onmouseout) && $popup.mouseleave(onmouseout);
+	return $popup[0];
 }
 
 function createPopupButtons() {
@@ -111,7 +126,7 @@ function createPopupButtons() {
 }
 
 function closePopup(id, refresh) {
-	$('#'+id).remove();
+	$any(id).remove();
 	if (refresh) {
 		window.location.reload();
 	}
@@ -131,35 +146,6 @@ function handleEnter(ev, func, arg) {
 	return false;
 }
 
-
-function moveByObjSize(div, addOffsetWidth, addOffsetHeight) {
-	if (addOffsetWidth) {
-		div.style.left = parseFloat(div.style.left || 0) + (addOffsetWidth * div.offsetWidth) + "px";
-	}
-	if (addOffsetHeight) {
-		div.style.top = parseFloat(div.style.top || 0) + (addOffsetHeight * div.offsetHeight) + "px";
-	}
-}
-
-function moveByXY(div, x, y) {
-	if (x) {
-		div.style.left = parseFloat(div.style.left || 0) + x + "px";
-	}
-	if (y) {
-		div.style.top = parseFloat(div.style.top || 0) + y + "px";
-	}
-}
-
-function getXYForSelector( selector, addWidth, addHeight ){
-	var $elem = $(selector);
-	var dX = addWidth ? $elem.attr('offsetWidth') : 0;
-	var dY = addHeight ? $elem.attr('offsetHeight') : 0;
-
-	var o = $elem.offset();
-	return [ o.left+dX, o.top+dY ];
-}
-
-// function getXYForId(id, addWidth, addHeight){ return getXYForSelector('#'+id, addWidth, addHeight); }
 
 function firehose_id_of( expr ) {
 	try {
@@ -242,7 +228,7 @@ function tagsHideBody(id) {
 	after_article_moved($('#firehose-'+id)[0]);
 }
 
-function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
+function tagsShowBody(id, unused, newtagspreloadtext, type) {
 
 	type = type || "stories";
 
@@ -261,9 +247,9 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	after_article_moved($('#firehose-'+id)[0]);
 }
 
-function tagsOpenAndEnter(id, tagname, is_admin, type) {
+function tagsOpenAndEnter(id, tagname, unused, type) {
 	// This does nothing if the body is already shown.
-	tagsShowBody(id, is_admin, tagname, type);
+	tagsShowBody(id, unused, tagname, type);
 }
 
 function reportError(request) {
@@ -272,7 +258,7 @@ function reportError(request) {
 }
 
 //Firehose functions begin
-function toggle_firehose_body( id, is_admin, /*optional:*/toggle_to ) {
+function toggle_firehose_body( id, unused, /*optional:*/toggle_to ) {
 	setFirehoseAction();
 
 	var	body_id		= 'fhbody-' + id,
@@ -302,12 +288,11 @@ function toggle_firehose_body( id, is_admin, /*optional:*/toggle_to ) {
 
 	if ( body_is_empty ) {
 		var handlers = {};
-		is_admin && (handlers.onComplete = function(){
-			vScrollToAny('firehose-'+id, vScrollToAny.IF_VISIBLE);
+		fh_is_admin && (handlers.onComplete = function(){
 			firehose_get_admin_extras(id);
 		});
 		ajax_update({ op:'firehose_fetch_text', id:id, reskey:reskey_static }, body_id, handlers);
-	} else if ( is_admin && toggle_to_show ) {
+	} else if ( fh_is_admin && toggle_to_show ) {
 		firehose_get_admin_extras(id);
 	}
 
@@ -687,7 +672,6 @@ function firehose_handle_comment_nodnix( commands ){
 $(function(){
 	firehose_init_tag_ui();
 	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
-	//firehose_set_cur(firehose_get_cur());
 });
 
 
@@ -903,6 +887,8 @@ function firehose_handle_update() {
 	var saved_selection = new $.TextSelection(gFocusedText);
 	var $menu = $('div.ac_results:visible');
 
+	var $fhl = $any('firehoselist');
+
 	var add_behind_scenes = $("#firehoselist h1.loading_msg").length;
 	if (add_behind_scenes) { firehose_busy(); }
 
@@ -916,30 +902,34 @@ function firehose_handle_update() {
 		var myAnim;
 
 		if(el[0] == "add") {
-			if (firehose_before[el[1]] && $('#firehose-' + firehose_before[el[1]]).size()) {
-				$('#firehose-' + firehose_before[el[1]]).after(el[2]);
-				if (!isInWindow($dom('title-'+ firehose_before[el[1]]))) {
+			var $before, $after, before_id=firehose_before[el[1]], after_id=firehose_after[el[1]];
+			before_id && ($before = $any('firehose-'+before_id));
+			after_id && ($after = $any('firehose-'+after_id));
+
+			if ( $before && $before.length ) {
+				$before.after(el[2]);
+				if ( !Bounds.intersect(window, 'title-'+ before_id) ) {
 					need_animate = 0;
 				}
-			} else if (firehose_after[el[1]] && $('#firehose-' + firehose_after[el[1]]).size()) {
+			} else if ( $after && $after.length ) {
 
 				// don't insert a new article between the floating slashbox ad and its article
-				var $landmark = $('#firehose-' + firehose_after[el[1]]), $prev = $landmark.prev();
+				var $landmark=$after, $prev=$landmark.prev();
 				if ( $prev.is('#floating-slashbox-ad') ) {
 					$landmark = $prev;
 				}
 
 				$landmark.before(el[2]);
-				if (!isInWindow($dom('title-'+ firehose_after[el[1]]))) {
+				if ( !Bounds.intersect(window, 'title-'+ after_id) ) {
 					need_animate = 0;
 				}
 			} else if (insert_new_at == "bottom") {
-				$('#firehoselist').append(el[2]);
-				if (!isInWindow($dom('fh-paginate'))) {
+				$fhl.append(el[2]);
+				if ( !Bounds.intersect(window, 'fh-paginate') ) {
 					need_animate = 0;
 				}
 			} else {
-				$('#firehoselist').prepend(el[2]);
+				$fhl.prepend(el[2]);
 			}
 
 			if (add_behind_scenes) {
@@ -1016,7 +1006,7 @@ function firehose_handle_update() {
 					}
 				}
 				firehose_removed_first = 1;
-				if (!isInWindow(fh_node)) {
+				if (!Bounds.intersect(window, fh_node)) {
 					need_animate = 0;
 				}
 
@@ -1052,7 +1042,7 @@ function firehose_handle_update() {
 			if (elem && elem.parentNode) {
 				elem.parentNode.removeChild(elem);
 			}
-			$('#firehoselist').fadeIn('slow');
+			$fhl.fadeIn('slow');
 			firehose_busy_done();
 		}
 		firehose_get_next_updates();
@@ -1066,26 +1056,8 @@ function firehose_handle_update() {
 	$menu.show();
 }
 
-function firehose_adjust_window(onscreen) {
-	var i=0;
-	var on = 0;
-	while(i < onscreen.length && on === 0) {
-		if(isInWindow($(onscreen[i]))) {
-			on = 1;
-		} else {
-			scrollWindowToId(onscreen[i]);
-			if(isInWindow($(onscreen[i]))) {
-				on = 1;
-			}
-		}
-		i++;
-	}
-}
-
-
 function firehose_after_update(){
 	firehose_reorder(firehose_ordered);
-	//firehose_set_cur(firehose_get_cur());
 	firehose_update_title_count(
 		firehose_storyfuture(firehose_future).length
 	);
@@ -1476,7 +1448,7 @@ function vendorStoryPopup() {
 			closePopup("vendorStory-26-popup");
 		}
 	};
-	createPopup(getXYForSelector('#sponsorlinks'), title, "vendorStory-" + id, "Loading", "", closepopup );
+	createPopup('sponsorlinks', title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = {};
 	params.op = 'getTopVendorStory';
 	params.skid = id;
@@ -1501,7 +1473,7 @@ function vendorStoryPopup2() {
 			closePopup("vendorStory-26-popup");
 		}
 	};
-	createPopup(getXYForSelector('#sponsorlinks'), title, "vendorStory-" + id, "Loading", "", closepopup );
+	createPopup('sponsorlinks', title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = {};
 	params.op = 'getTopVendorStory';
 	params.skid = id;
@@ -1711,136 +1683,33 @@ function toggle_filter_prefs() {
 	$('#filter_play_status, #filter_prefs').toggleClass('hide');
 }
 
-function scrollWindowToFirehose(fhid) {
-	scrollWindowToId('firehose-'+fhid);
-}
-
-function scrollWindowToId(id) {
-	var id_y = getOffsetTop($dom(id));
-	scroll(viewWindowLeft(), id_y);
-}
-
-function viewWindowLeft() {
-	if (self.pageXOffset) // all except Explorer
-	{
-		return self.pageXOffset;
-	}
-	else if (document.documentElement && document.documentElement.scrollTop)
-		// Explorer 6 Strict
-	{
-		return document.documentElement.scrollLeft;
-	}
-	else if (document.body) // all other Explorers
-	{
-		return document.body.scrollLeft;
-	}
-}
-
-function getOffsetTop (el) {
-	if (!el) {
-		return false;
-	}
-	var ot = el.offsetTop;
-	while((el = el.offsetParent)) {
-		ot += el.offsetTop;
-	}
-	return ot;
-}
-
-function firehoseIsInWindow(fhid) {
-	var in_window = isInWindow($dom('firehose-' + fhid));
-	return in_window;
-}
-
-function isInWindow(obj) {
-	var y = getOffsetTop(obj);
-
-	if (y > viewWindowTop() && y < viewWindowBottom()) {
-		return 1;
-	}
-	return 0;
-}
-
-function viewWindowTop() {
-	if (self.pageYOffset) // all except Explorer
-	{
-		return self.pageYOffset;
-	}
-	else if (document.documentElement && document.documentElement.scrollTop)
-		// Explorer 6 Strict
-	{
-		return document.documentElement.scrollTop;
-	}
-	else if (document.body) // all other Explorers
-	{
-		return document.body.scrollTop;
-	}
-	return;
-}
-
-function viewWindowBottom() {
-	return viewWindowTop() + (window.innerHeight || document.documentElement.clientHeight);
-}
 
 function firehose_get_cur() {
-	var $current = $('#firehoselist > div.currfh');
-	return $current;
+	return $('#firehoselist > div.currfh');
+}
+
+function firehose_get_first() {
+	return $('#firehoselist > div[id^=firehose-]:not(.daybreak):first');
 }
 
 function firehose_set_cur($article) {
-	var $current = firehose_get_cur();
-	if ($current.length) {
-		$current.removeClass('currfh');
-	}
-
-	if (!$article || !$article.length) {
-		$article = $('#firehoselist > div[id^=firehose-]:not(.daybreak):first');
-	}
-
-	if ($article.length) {
-		$article.addClass('currfh');
-	}
-
+	$article.
+		addClass('currfh').
+		siblings().
+			removeClass('currfh');
 	return $article;
 }
 
-function firehose_go_next($current) {
-	$current = $current || firehose_get_cur();
-	if (!$current.length) {
-		$current = firehose_set_cur();
-		return $current;
-	}
-
-	var $next = $current.nextAll('div[id^=firehose-]:not(.daybreak):first');	
-
-	if ($next.length) {
-		firehose_set_cur($next);
-		firehose_go_scroll($next);
-		return $next;
-	}
+function go( $to ){
+	return view(firehose_set_cur($to.length ? $to : firehose_get_first()));
 }
 
-function firehose_go_prev($current) {
-	$current = $current || firehose_get_cur();
-	if (!$current.length) {
-		$current = firehose_set_cur();
-		return $current;
-	}
-
-	var $prev = $current.prevAll('div[id^=firehose-]:not(.daybreak):first');	
-
-	if ($prev.length) {
-		firehose_set_cur($prev);
-		firehose_go_scroll($prev);
-		return $prev;
-	}
+function firehose_go_next() {
+	return go(firehose_get_cur().nextAll('div[id^=firehose-]:not(.daybreak):first'));
 }
 
-function firehose_go_scroll($article) {
-	var id = $article[0].id.substr(9);
- 	if (!firehoseIsInWindow(id)) {
- 		scrollWindowToFirehose(id);
- 	}
+function firehose_go_prev() {
+	return go(firehose_get_cur().prevAll('div[id^=firehose-]:not(.daybreak):first'));
 }
 
 function firehose_more(noinc) {
@@ -1991,7 +1860,10 @@ function inlineAdInsertId(id) {
 
 
 function inlineAdVisibles() {
-	var $visible_ads = $('li.inlinead').filter(function(){ if ( isInWindow(this) ) return this; });
+	var	visible		= new Bounds(window),
+		$visible_ads	= $('li.inlinead').filter(function(){
+					if ( Bounds.intersect(visible, this) ) return this;
+				});
 	return $visible_ads.length;
 }
 
@@ -2152,8 +2024,11 @@ function insert_ad( $article, ad ){
 	$ad_position.fadeIn('fast');
 }
 
-function topBottomAdSpace(){
-	return { top:topBottomAny($slashboxes).bottom, bottom:topAny($footer) };
+function verticalAdSpace(){
+	var bounds = Bounds.y($slashboxes);
+	bounds.top	= bounds.bottom;
+	bounds.bottom	= Position($footer).top;
+	return bounds;
 }
 
 var pinClasses = {};
@@ -2165,17 +2040,17 @@ pinClasses[undefined]	= 'Empty';	// not enough room to hold an ad
 
 function fix_ad_position(){
 	if ( $ad_position.length ) {
-		var space = topBottomAdSpace();
-		if ( space.top===undefined || space.bottom===undefined ) {
+		var space = verticalAdSpace();
+		if ( $.TypeOf(space.top)!=='number' ||  $.TypeOf(space.bottom)!=='number' ) {
 			return;
 		}
 		space.bottom-=AD_HEIGHT;
 
 		// the "natural" ad position is top-aligned with the following article
-		var natural_top = topAny($ad_position.next());
+		var natural_top = Position($ad_position.next()).top;
 		if ( natural_top===undefined ) {
 			// ...or else top-aligned to the previous bottom, I guess... but wouldn't this mean you're at the end the page?
-			natural_top = topBottomAny($ad_position.prev()).bottom;
+			natural_top = Bounds($ad_position.prev()).bottom;
 		}
 
 		var	pinning		= between(space.top, natural_top, space.bottom),
@@ -2190,7 +2065,7 @@ function fix_ad_position(){
 
 		var new_top = '';
 		if ( now_pinned && !now_empty ) {
-			new_top = pin_between(space.top, natural_top, space.bottom) - topAny($ad_offset_parent);
+			new_top = pin_between(space.top, natural_top, space.bottom) - Position($ad_offset_parent).top;
 		}
 
 		$ad_position.
@@ -2199,24 +2074,16 @@ function fix_ad_position(){
 	}
 }
 
-function is_ad_visible(){
-	if ( $ad_position.length ) {
-		var v=intersectBounds(topBottomAny($ad_position), topBottomAny(window));
-		return sign( v.bottom-v.top > 0 );
-	}
-	return 0;
-}
-
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 	api: {
-		is_visible:		is_ad_visible,
+		is_visible:		function(){ return Bounds.intersect(window, $ad_position); },
 		remove:			remove_ad
 	},
 	stem_function: insert_ad
 });
 
 Slash.Firehose.articles_on_screen = function(){
-	var	visible = topBottomAny(window),
+	var	visible = Bounds.y(window),
 		lo,	// index within the jQuery selection of the first article visible on the screen
 		hi=0;	// index one beyond the last article visible on the screen
 
@@ -2268,11 +2135,11 @@ Slash.Firehose.ready_ad_space = function( $articles ){
 	var $result = $([]);
 	try {
 		if ( !is_ad_locked ) {
-			var y = intersectBounds(topBottomAdSpace(), topBottomAny(window));
-			y.bottom -= AD_HEIGHT;
+			var visible = Bounds.intersection(Bounds.y(window), verticalAdSpace());
+			visible.bottom -= AD_HEIGHT;
 
 			$result = $articles.filter(function(){
-				return between(y.top, topAny(this), y.bottom)==0;
+				return Bounds.contain(visible, Position(this));
 			});
 		}
 	} catch ( e ) {
@@ -2341,7 +2208,7 @@ $(function(){
 			return true;
 
 		var cur = firehose_get_cur();
-		var el; var id;
+		var el, id;
 		if (cur.length) {
 			el = cur[0];
 			id = el.id.substr(9);
@@ -2353,7 +2220,6 @@ $(function(){
 
 			toggle_firehose_body(id, 0, true);
 			firehose_toggle_tag_ui_to(true, el);
-			$('.tag-entry:visible:first', el).focus();
 			firehose_set_cur($(el));
 		}
 

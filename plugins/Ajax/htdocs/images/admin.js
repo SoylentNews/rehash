@@ -38,7 +38,7 @@ function tagsHistory( selector_fragment, context ) {
 	// Instantiate the pop-up at that position.
 	var popup_id = "taghistory-" + $item.id;
 	createPopup(
-		getXYForSelector($where),
+		$where,
 		'History ' + createPopupButtons(
 			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>'
 		),
@@ -171,7 +171,7 @@ function remarks_popup() {
 	var title = "Remarks Config ";
 	var buttons = createPopupButtons('<a href="#" onclick="closePopup(\'remarksconfig-popup\', 1); return false">[X]</a>');
 	title = title + buttons;
-	createPopup(getXYForSelector('#remarks_table'), title + buttons, 'remarksconfig');
+	createPopup('remarks_table', title + buttons, 'remarksconfig');
 	ajax_update(params, 'remarksconfig-contents');
 	
 }
@@ -357,9 +357,7 @@ function firehose_get_admin_extras(id) {
 	}, '', {
 		onComplete: function(transport) {
 			json_handler(transport);
-			if (firehoseIsInWindow(id)) {
-				scrollWindowToFirehose(id);
-			}
+			view('firehose-' + id);
 		}
 	});
 }

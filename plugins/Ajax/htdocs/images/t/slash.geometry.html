@@ -1,0 +1,125 @@
+<html>
+<head>
+	<title>Testing Geometry</title>
+
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.js"></script>
+	<script type="text/javascript" src="../jquery.typeof.js"></script>
+	<script type="text/javascript" src="../slash.util.js"></script>
+	<script type="text/javascript" src="../slash.geometry.js"></script>
+
+<script type="text/javascript">
+function scrollWindowToId(id) { scroll(Position(window).left, Position(id).top); }
+function viewWindowLeft() { return Position(window).left; }
+function getOffsetTop (el) { return !!el && Position(el).top; }
+function isInWindow(obj) { return Bounds.contain(window, Position(obj)) ? 1 : 0; }
+function viewWindowTop() { return Position(window).top; }
+function viewWindowBottom() { return Bounds(window).bottom; }
+</script>
+
+<script type="text/javascript">
+$(function(){
+
+var	builtin		= function(o)typeof(o),
+	adorned		= $.TypeOf,
+	unadorned	= $.TypeOf.unqualified,
+	implementation	= $.TypeOf.object;
+
+var	$table = $('table');
+
+function tr( expr, label ){
+	var $row = $('<tr/>');
+
+	$row.	append($('<td>').text(label)).
+		append($('<td>').text(adorned(expr))).
+		append($('<td>').text(unadorned(expr))).
+		append($('<td>').text(builtin(expr))).
+		append($('<td>').text(implementation(expr)));
+
+	$table.append($row);
+}
+
+tr(["hello"], '["hello"]');
+tr([], '[]');
+tr(true, 'true');
+tr(new Date, 'new Date');
+tr(function(){}, 'function(){}');
+tr($(document), '$(document)');
+tr($([]), '$([])');
+tr(document.childNodes, 'document.childNodes');
+(function(){
+	tr(arguments, 'arguments');
+})();
+tr($("h1")[0], '$("h1")[0]');
+tr(document, 'document');
+tr(null, 'null');
+tr(Math.PI, 'Math.PI');
+tr(1/0, '1/0');
+tr(0/0, '0/0');
+tr({a:5}, '{a:5}');
+tr({}, '{}');
+tr(/xyz/, '/xyz/');
+tr("Hello, World!", '"Hello, World!"');
+tr("", '""');
+tr("c", '"c"');
+tr(undefined, 'undefined');
+tr(window, 'window');
+
+$table.find('tr').each(function(){
+	function fold($s)$.trim($s.text()).toLowerCase();
+
+	var $cells = $('td', this),
+		$best=$cells.eq(1), $plain=$cells.eq(2), $builtin=$cells.eq(3), $raw=$cells.eq(4),
+		best=fold($best), plain=fold($plain), builtin=fold($builtin), raw=fold($raw);
+
+	if ( !plain ) return true;
+
+	if ( best != builtin && best != raw ) {
+		$best.css({backgroundColor:'lightgreen'});
+	}
+
+	if ( plain != builtin && plain != raw ) {
+		$plain.css({backgroundColor:'lightgreen'});
+	}
+
+
+	if ( builtin=='object' && builtin!=plain && builtin!=raw ) {
+		$builtin.css({backgroundColor: 'red'});
+	}
+
+	if ( /html|node/.exec(raw) ){
+		$raw.css({backgroundColor: 'lightgreen'});
+	}
+
+	if ( raw=='window' && best!='window' ) {
+		$raw.css({backgroundColor: 'red'});
+	}
+});
+
+});
+</script>
+<style type="text/css">
+#chart {
+	margin: 1in;
+}
+</style>
+
+<script type="text/javascript">
+(function(){if ( typeof(fireunit)==='object' ) {
+fireunit.ok(Size, 'Size constructor exists');
+fireunit.ok(Position, 'Position constructor exists');
+fireunit.ok(Bounds, 'Bounds constructor exists');
+
+
+fireunit.testDone();
+}})();
+</script>
+</head>
+<body>
+	<h1 id="cool">Testing Geometry</h1>
+
+
+	<table id="chart">
+	<tr><td></td><td>$.TypeOf</td><td></td><td>typeof</td><td>raw</td></tr>
+	</table>
+</body>
+</html>

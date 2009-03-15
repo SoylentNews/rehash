@@ -1614,30 +1614,17 @@ function updateMoreNum(num) { // should be an integer, or empty string
 
 
 function scrollWindowTo(cid) {
-	var comment_y = getOffsetTop(fetchEl('comment_' + cid));
+	var comment_y = Position(fetchEl('comment_' + cid)).top;
 	if ($dom('d2out').className == 'horizontal')
 		comment_y -= 60;
-	scroll(viewWindowLeft(), comment_y);
-}
-
-function getOffsetLeft (el) {
-	if (!el)
-		return false;
-	var ol = el.offsetLeft;
-	while ((el = el.offsetParent) != null)
-		ol += el.offsetLeft;
-	return ol;
-}
-
-function viewWindowRight() {
-	return viewWindowLeft() + (window.innerWidth || document.documentElement.clientWidth);
+	scroll(Position(window).left, comment_y);
 }
 
 function commentIsInWindow(cid, just_head) {
-	var in_window = isInWindow(fetchEl('comment_' + cid));
-	if (in_window && !just_head && fetchEl('comment_sub_' + cid))
-		in_window = isInWindow(fetchEl('comment_sub_' + cid));
-	return in_window;
+	var	w		= new Bounds(window),
+		in_window	= Bounds.contain(w, Position(fetchEl('comment_'+cid))),
+		sub		= fetchEl('comment_sub_'+cid);
+	return in_window && !just_head && sub ? Bounds.contain(w, Position(sub)) : in_window;
 }
 
 
