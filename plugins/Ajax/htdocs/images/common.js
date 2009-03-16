@@ -84,8 +84,11 @@ function view( expr, how ){
 	if ( $elem.length!=1 || $.TypeOf.not('element', $elem[0]) || Bounds.empty(e=new Bounds($elem)) ) {
 		return;
 	}
-
 	how = how || { animate: true };
+
+	$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
+		e[edge] += scale*parseInt($elem.css('margin-'+edge));
+	});
 
 	var w=new Bounds(window), dx=0, dy=0;
 	if ( how.axis!='y' && !Bounds.contain(Bounds.x(w), e) ) {
