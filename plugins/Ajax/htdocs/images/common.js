@@ -308,7 +308,7 @@ function toggle_firehose_body( id, unused, /*optional:*/toggle_to ) {
 				after_article_moved(this);
 				var $this = $(this);
 				inlineAdFirehose(toggle_to_show && $this);
-				view(firehose_set_cur($this));
+				firehose_set_cur($this);
 			});
 	return false;
 }
@@ -1697,23 +1697,35 @@ function firehose_get_first() {
 }
 
 function firehose_set_cur($article) {
+	if (!$article || !$article.length)
+		$article = firehose_get_first();
+
+	if ($article.is('.currfh'))
+		return $article;
+
 	$article.
 		addClass('currfh').
-		siblings().
+		siblings('div[id^=firehose-]:not(.daybreak).currfh').
 			removeClass('currfh');
-	return $article;
-}
 
-function go( $to ){
-	return view(firehose_set_cur($to.length ? $to : firehose_get_first()));
+	return view($article);
 }
 
 function firehose_go_next() {
-	return go(firehose_get_cur().nextAll('div[id^=firehose-]:not(.daybreak):first'));
+	var $current = firehose_get_cur();
+	var $next = $current.nextAll('div[id^=firehose-]:not(.daybreak):first');
+	// if no current, pick top; if current but no next, do more
+	if ($next[0] || !$current[0]) {
+		return firehose_set_cur($next);
+	} else {
+		firehose_more();
+	}
 }
 
 function firehose_go_prev() {
-	return go(firehose_get_cur().prevAll('div[id^=firehose-]:not(.daybreak):first'));
+	return firehose_set_cur(
+		firehose_get_cur().prevAll('div[id^=firehose-]:not(.daybreak):first')
+	);
 }
 
 function firehose_more(noinc) {
@@ -2160,27 +2172,40 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 
 })(Slash.jQuery);
 
+// Create the new window
+function openInNewWindow(mylink) {
+	var newWindow = window.open(mylink, '_blank');
+	if (newWindow) {
+		if (newWindow.focus) {
+			newWindow.focus();
+		}
+		return false;
+	}
+	return true;
+}
+
 $(function(){
 	// firehose only!
 	var validkeys = {};
 	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
 		validkeys = {
-			'X' : {           tags    : 1, signoff : 1 },
-			'T' : {           tags    : 1, tag     : 1 },
-			187 : { chr: '+', tags    : 1, tag     : 1, nod    : 1 }, // 61, 107
-			189 : { chr: '-', tags    : 1, tag     : 1, nix    : 1 }, // 109
+			'X' : {           tags    : 1, signoff  : 1 },
+			'T' : {           tags    : 1, tag      : 1 },
+			187 : { chr: '+', tags    : 1, tag      : 1, nod    : 1 }, // 61, 107
+			189 : { chr: '-', tags    : 1, tag      : 1, nix    : 1 }, // 109
 
-//			219 : { chr: '[', color   : 1, down    : 1 },
-//			221 : { chr: ']', color   : 1, up      : 1 },
+			'O' : {           open    : 1, readmore : 1 },
+			'E' : {           open    : 1, edit     : 1 },
 
-//			'T' : {           top     : 1 },
-//			'V' : {           bottom  : 1 },
 			'G' : {           more    : 1 },
 			'Q' : {           toggle  : 1 },
 			'S' : {           next    : 1 },
 			'W' : {           prev    : 1 },
 
-			27  : { form: 1,  unfocus : 1 } // esc
+			'F' : {           search  : 1 },
+			191 : { chr: '/', slash   : 1 }, // 111
+
+			27  : {           form    : 1, unfocus : 1 } // esc
 		};
 		validkeys['H'] = validkeys['A'] = validkeys['Q'];
 		validkeys['L'] = validkeys['D'] = validkeys['Q'];
@@ -2189,7 +2214,13 @@ $(function(){
 		validkeys['I'] = validkeys['T'];
 		validkeys[107] = validkeys[61] = validkeys[187];
 		validkeys[109] = validkeys[189];
+		validkeys[111] = validkeys[191];
 	}
+
+// down arrow: 40
+// left arrow: 37
+// enter: 13
+
 
 	$(document).keydown(function( e ) {
 		// no modifiers, except maybe shift
@@ -2234,14 +2265,35 @@ $(function(){
 			firehose_go_next($(el));
 		}
 
-		if (keyo.unfocus)        { $(e.target).blur() }
-		if (keyo.next)           { firehose_go_next() }
-		if (keyo.prev)           { firehose_go_prev() }
-		if (keyo.more)           { firehose_more()    }
+		if (keyo.unfocus)        { $(e.target).blur()        }
+		if (keyo.next)           { firehose_go_next()        }
+		if (keyo.prev)           { firehose_go_prev()        }
+		if (keyo.more)           { firehose_more()           }
+		if (keyo.search)         { $('#searchquery').focus() }
 		if (keyo.toggle && id)   {
 			toggle_firehose_body(id, 0);
 			if (cur.hasClass('briefarticle'))
 				firehose_go_next();
+		}
+
+		if (keyo.open) {
+			var mylink = '';
+			var obj;
+			if (keyo.readmore) {
+				obj = cur.find('div.body > span.reader > a.more:first');
+			}
+			if (keyo.edit) {
+				obj = cur.find('form.edit > a:first');
+			}
+			if (!mylink.length && obj.length) {
+				mylink = obj[0].href;
+			}
+
+			if (mylink.length) {
+				return openInNewWindow(mylink);
+			} else {
+				return true;
+			}
 		}
 
 		return false;
