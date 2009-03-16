@@ -273,13 +273,6 @@ sub end_log {
 	return if verbosity() < 1;
 	my @log = ( );
 
-	# secs_until can be negative;  that just means we're
-	# behind and will execute the next task immediately to
-	# try to catch up.
-	my $secs_until = $event_ar->[0][1] - db_time();
-	my $next_task = basename($event_ar->[0][0]);
-	my $secs = verbosity() >= 2 ? 0 : -30;
-
 	if ($forktype == SLASHD_LOG_NEXT_TASK) {
 		push @log, "$basename forked";
 	} else {
@@ -294,15 +287,25 @@ sub end_log {
 		push @log, " (${duration}s";
 	}
 
+	# The child doesn't know what the next task is, if nowait.
 	if ($forktype != SLASHD_NOWAIT) {
-		# The child doesn't know what the next task is, if nowait
-		push @log, ($secs_until < $secs)
-			? "; $next_task "
-				. -$secs_until
-				. "s late"
-			: verbosity() >= 2
-				? "; $next_task in ${secs_until}s"
-				: ();
+		if (!@$event_ar) {
+			push @log, '; no next task';
+		} else {
+			# secs_until can be negative;  that just means we're
+			# behind and will execute the next task immediately to
+			# try to catch up.
+			my $secs_until = $event_ar->[0][1] - db_time();
+			my $next_task = basename($event_ar->[0][0]);
+			my $secs = verbosity() >= 2 ? 0 : -30;
+			push @log, ($secs_until < $secs)
+				? "; $next_task "
+					. -$secs_until
+					. "s late"
+				: verbosity() >= 2
+					? "; $next_task in ${secs_until}s"
+					: ();
+		}
 	}
 
 	if ($forktype != SLASHD_LOG_NEXT_TASK) {
