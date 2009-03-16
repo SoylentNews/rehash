@@ -303,8 +303,9 @@ function toggle_firehose_body( id, unused, /*optional:*/toggle_to ) {
 			find('h3 a img')[op]('fast').end().
 			each(function(){
 				after_article_moved(this);
-				inlineAdFirehose(toggle_to_show && $(this));
-				firehose_set_cur($(this));
+				var $this = $(this);
+				inlineAdFirehose(toggle_to_show && $this);
+				view(firehose_set_cur($this));
 			});
 	return false;
 }
