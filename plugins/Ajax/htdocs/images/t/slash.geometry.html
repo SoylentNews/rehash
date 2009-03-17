@@ -19,7 +19,7 @@ function viewWindowBottom() { return Bounds(window).bottom; }
 <script type="text/javascript">
 $(function(){
 
-var	builtin		= function(o)typeof(o),
+var	builtin		= function(o){ return typeof(o); },
 	adorned		= $.TypeOf,
 	unadorned	= $.TypeOf.unqualified,
 	implementation	= $.TypeOf.object;
@@ -65,7 +65,7 @@ tr(undefined, 'undefined');
 tr(window, 'window');
 
 $table.find('tr').each(function(){
-	function fold($s)$.trim($s.text()).toLowerCase();
+	function fold($s){ return $.trim($s.text()).toLowerCase(); }
 
 	var $cells = $('td', this),
 		$best=$cells.eq(1), $plain=$cells.eq(2), $builtin=$cells.eq(3), $raw=$cells.eq(4),

@@ -39,6 +39,9 @@ var specificity = {
 	'jquery':3,
 	'jquery.empty':4,
 
+	'nodelist':3,
+	'nodelist.empty':4,
+
 	'node':3,
 	'element':4,
 
@@ -59,11 +62,11 @@ var specificity = {
 };
 
 var	T = $.TypeOf,
-	typeOfUndefined	= T.makeTest(function(o)o===undefined),
-	typeOfNull	= T.makeTest(function(o)o===null),
-	typeOfInfinity	= T.makeTest(function(o)o===Infinity),
-	typeOfNaN	= T.makeTest(function(o)o===NaN),
-	typeOfEmpty	= T.makeTest(function(o, tn)/\.empty$/.test(tn));
+	typeOfUndefined	= T.makeTest(function(o){ return o===undefined; }),
+	typeOfNull	= T.makeTest(function(o){ return o===null; }),
+	typeOfInfinity	= T.makeTest(function(o){ return o===Infinity; }),
+	typeOfNaN	= T.makeTest(function(o){ return o===NaN; }),
+	typeOfEmpty	= T.makeTest(function(o, tn){ return /\.empty$/.test(tn); });
 
 function x(v){ v||(v=''); return '"'+v+'"'; }
 
@@ -247,10 +250,10 @@ test('array objects', function(){
 
 test('node lists', function(){
 	var tn;
-	equals(tn=T(document.childNodes), 'list', 'document.childNodes');
+	equals(tn=T(document.childNodes), 'nodelist', 'document.childNodes');
 	lists_tests(document.childNodes, tn, 'document.childNodes');
 
-	equals(tn=T($("#no-child-nodes")[0].childNodes), 'list.empty', '$("#no-child-nodes")[0].childNodes');
+	equals(tn=T($("#no-child-nodes")[0].childNodes), 'nodelist.empty', '$("#no-child-nodes")[0].childNodes');
 	lists_tests($("#no-child-nodes")[0].childNodes, tn, '$("#no-child-nodes")[0].childNodes');
 });
 /*
@@ -300,7 +303,7 @@ test('user-defined type tests', function(){
 <script type="text/javascript">
 $(function(){
 
-var	builtin		= function(o)typeof(o),
+var	builtin		= function(o){ return typeof(o); },
 	adorned		= $.TypeOf,
 	plain		= $.TypeOf.unqualified,
 	object		= $.TypeOf.object;
@@ -346,7 +349,7 @@ tr(undefined, 'undefined');
 tr(window, 'window');
 
 $table.find('tr').each(function(){
-	function fold($s)$.trim($s.text()).toLowerCase();
+	function fold($s){ return $.trim($s.text()).toLowerCase(); }
 
 	var $cells = $('td', this),
 		$best=$cells.eq(1), $plain=$cells.eq(2), $builtin=$cells.eq(3), $raw=$cells.eq(4),

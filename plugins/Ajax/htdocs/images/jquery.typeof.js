@@ -12,6 +12,7 @@ var	objToString = Object.prototype.toString,
 	},
 	orderedObjectTypes = {
 		'[object Array]':	'array',
+		'[object NodeList]':	'nodelist',
 		'[object String]':	'string'
 	},
 	nodeTypes = [
@@ -35,6 +36,8 @@ var	objToString = Object.prototype.toString,
 		'node.element':		'element',
 		'node.text':		'node',
 		'node':			'node',
+		'nodelist.empty':	'nodelist',
+		'nodelist':		'nodelist',
 		'null':			'null',
 		'number.-Infinity':	'number',
 		'number.Infinity':	'number',
@@ -81,7 +84,7 @@ function _typeOf( o, unq ){
 		singletonTypes[ o ]
 		|| objectTypes[ ots=objToString.call(o) ]
 		|| typeof(o.__typeOf)==='function' && o.__typeOf(unq)
-		|| !(oot=orderedObjectTypes[ots]) && _inheritsProperty(o, 'nodeType') && (nodeTypes[o.nodeType] || 'node');
+		|| !(oot=orderedObjectTypes[ots]) && o instanceof Node && (nodeTypes[o.nodeType] || 'node');
 
 	if ( t ) {
 		ut = unqualifyTypes[t] || t;
@@ -150,7 +153,7 @@ $.TypeOf = $.extend(_typeOf, {
 
 	// type-tests
 	scalar: makeTest('boolean|null|number|string|undefined'),
-	list: makeTest('array|jquery|list'),
+	list: makeTest('array|jquery|list|nodelist'),
 	node: makeTest('document|element|node'),
 	fn: makeTest(function( o, t ){ return t==='function'; }),
 

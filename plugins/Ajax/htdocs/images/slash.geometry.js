@@ -83,6 +83,9 @@ Size.prototype = {
 
 		this.height=o.height; this.width=o.width;
 		return this;
+	},
+	toString: function(){
+		return '{ top:'+this.top+', left:'+this.left+' }';
 	}
 };
 Size._expected = function( o ){ return _isSize(o) ? o : new Size(o); };
@@ -108,6 +111,9 @@ Position.prototype = {
 
 		this.top=o.top; this.left=o.left;
 		return this;
+	},
+	toString: function(){
+		return '{ height:'+this.height+', width:'+this.width+' }';
 	}
 };
 Position._expected = function( o ){ return _isPosition(o) ? o : new Position(o); };
@@ -137,6 +143,9 @@ Bounds.prototype = {
 			}
 		}
 		return this;
+	},
+	toString: function(){
+		return '{ top:'+this.top+', left:'+this.left+', bottom:'+this.bottom+', right:'+this.right+' }';
 	},
 	height: function(){ return this.bottom-this.top; },
 	width: function(){ return this.right-this.left; },
