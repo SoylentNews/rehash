@@ -23,6 +23,11 @@ __template__
        		<div class="yui-b">
 		<!-- block -->
 		</div>
+		 [% fh = Slash.getObject("Slash::FireHose");
+			views = fh.getUserViews({ tab_display => "yes"});
+		%]
+		[% PROCESS firehose_tabs views = views article_header = 1 %]
+
 		[% firehosetext %]
 	</div>
 </div>
