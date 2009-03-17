@@ -17,25 +17,36 @@ var pageload = {
 	before_content: (new Date).getTime()
 };
 function pageload_done( $, console, maybe ){
-		pageload.after_readycode	= (new Date).getTime();
+	pageload.after_readycode	= (new Date).getTime();
+	pageload.content_ready_time	= pageload.content_ready - pageload.before_content;
+	pageload.script_ready_time	= pageload.after_readycode - pageload.content_ready;
+	pageload.ready_time		= pageload.after_readycode - pageload.before_content;
 [%- IF user.is_admin %]
-		pageload.content_ready_time	= pageload.content_ready - pageload.before_content;
-		pageload.script_ready_time	= pageload.after_readycode - pageload.content_ready;
-		pageload.ready_time		= pageload.after_readycode - pageload.before_content;
+	var	ready_time	= '' + (pageload.ready_time/1000.0) + 's',
+		content_time	= '' + (pageload.content_ready_time/1000.0) + 's',
+		script_time	= '' + (pageload.script_ready_time/1000.0) + 's';
+	if ( console && !maybe ) {
+		console.log(ready_time+' from <head> until all $(document).ready complete ['+
+			content_time+' for content; '+
+			script_time+' for $(code)]'
+		);
+	}
+	pageload.script_ready_time && (ready_time += ' (content:'+content_time+', init:'+script_time+')');
 
-		var	ready_time	= '' + (pageload.ready_time/1000.0) + 's',
-			content_time	= '' + (pageload.content_ready_time/1000.0) + 's',
-			script_time	= '' + (pageload.script_ready_time/1000.0) + 's';
-		if ( console && !maybe ) {
-			console.log(ready_time+' from <head> until all $(document).ready complete ['+
-				content_time+' for content; '+
-				script_time+' for $(code)]'
-			);
-		}
+	function seconds(n){ return n*1000; }
+	function minutes(n){ return n*seconds(60); }
 
-		pageload.script_ready_time && (ready_time += ' (content:'+content_time+', init:'+script_time+')');
-		$('#pageload-display').text(ready_time);
+	var $display = $('#pageload-display').text(ready_time);
+	setTimeout(function(){
+		$display.fadeOut(seconds(10), function(){ $display.text(''); });
+	}, minutes(2));
 [%- END %]
+	maybe || $.ajax({ data: {
+		op: 'page-profile',
+		pagemark: pageload.pagemark,
+		dom: pageload.content_ready_time,
+		js: pageload.script_ready_time
+	} });
 }
 </script>
 __seclev__
