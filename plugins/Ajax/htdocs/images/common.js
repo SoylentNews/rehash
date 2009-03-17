@@ -985,7 +985,7 @@ function firehose_handle_update() {
 			if (need_animate) {
 				myAnim.animate();
 			}
-		} else if (el[0] == "remove") {
+		} else if ( el[0]==='remove' && !$any(fh).is('.currfh') ) {
 			var fh_node = $dom(fh);
 			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node && fh_node.className == "article" ) {
 				// Don't delete admin looking at this in expanded view
@@ -2183,12 +2183,16 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 })(Slash.jQuery);
 
 // Create the new window
-function openInNewWindow(mylink) {
-	var newWindow = window.open(mylink, '_blank');
-	if (newWindow) {
-		if (newWindow.focus) {
-			newWindow.focus();
-		}
+function openInWindow(mylink, newwin) {
+	if (newwin) {
+		var newWindow = window.open(mylink, '_blank');
+		if (newWindow) {
+			if (newWindow.focus) {
+				newWindow.focus();
+			}
+			return false;
+	} else {
+		window.location = mylink;
 		return false;
 	}
 	return true;
@@ -2204,8 +2208,9 @@ $(function(){
 			187 : { chr: '+', tags    : 1, tag      : 1, nod    : 1 }, // 61, 107
 			189 : { chr: '-', tags    : 1, tag      : 1, nix    : 1 }, // 109
 
-			'O' : {           open    : 1, readmore : 1 },
+			'R' : {           open    : 1, readmore : 1 },
 			'E' : {           open    : 1, edit     : 1 },
+			'O' : {           open    : 1, link     : 1 },
 
 			'G' : {           more    : 1 },
 			'Q' : {           toggle  : 1 },
@@ -2236,6 +2241,8 @@ $(function(){
 		// no modifiers, except maybe shift
 		if (e.ctrlKey || e.metaKey || e.altKey)
 			return true;
+
+		var shiftKey = e.shiftKey ? 1 : 0;
 
 		var c    = e.which;
 		var key  = validkeys[c] ? c : String.fromCharCode(c);
@@ -2289,18 +2296,23 @@ $(function(){
 		if (keyo.open) {
 			var mylink = '';
 			var obj;
+			//var doc_url = document.location.href.replace(/(\w\/).*$/, '$1');
+			if (keyo.link) {
+				obj = cur.find('span.external > a:first');
 			if (keyo.readmore) {
-				obj = cur.find('div.body > span.reader > a.more:first');
+				obj = cur.find('a.datitle:first');
+				//mylink = doc_url + 'firehose.pl?op=view&id=' + id;
 			}
-			if (keyo.edit) {
+			if (keyo.edit) { // && fh_is_admin) {
 				obj = cur.find('form.edit > a:first');
+				//mylink = doc_url + 'firehose.pl?op=edit&id=' + id;
 			}
 			if (!mylink.length && obj.length) {
 				mylink = obj[0].href;
 			}
 
 			if (mylink.length) {
-				return openInNewWindow(mylink);
+				return openInNewWindow(mylink, (shiftKey ? 0 : 1));
 			} else {
 				return true;
 			}
