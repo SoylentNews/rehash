@@ -2191,6 +2191,7 @@ function openInWindow(mylink, newwin) {
 				newWindow.focus();
 			}
 			return false;
+		}
 	} else {
 		window.location = mylink;
 		return false;
@@ -2299,6 +2300,7 @@ $(function(){
 			//var doc_url = document.location.href.replace(/(\w\/).*$/, '$1');
 			if (keyo.link) {
 				obj = cur.find('span.external > a:first');
+			}
 			if (keyo.readmore) {
 				obj = cur.find('a.datitle:first');
 				//mylink = doc_url + 'firehose.pl?op=view&id=' + id;
