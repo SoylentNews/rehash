@@ -16,17 +16,19 @@ __template__
 [% IF !user.is_anon;
 	filter_str = "";
 	IF name == "journal";
-		filter = '"author: ' _ useredit.nickname _ '" journal';
+		filter = '"author:' _ useredit.nickname _ '" journal';
 	ELSIF name == "journalfriends";
 		filter = '"authorfriend: ' _ useredit.nickname _ '" journal';
 	ELSIF name == "submissions";
-		filter = '"author: ' _ useredit.nickname _ '" submission';
+		filter = '"author:' _ useredit.nickname _ '" submission';
 	ELSIF name == "bookmarks";
-		filter = '"user: ' _ useredit.nickname _ '" bookmark';
+		filter = '"user:' _ useredit.nickname _ '" bookmark';
 	ELSIF name == "firehose";
-		filter = '"user: ' _ useredit.nickname _ '"';
+		filter = '"user:' _ useredit.nickname _ '"';
 	ELSIF name == "usertag";
-		filter = '"user: ' _ useredit.nickname _ '" "tag:' _ form.tagname _ '"';
+		filter = '"user:' _ useredit.nickname _ '" "tag:' _ form.tagname _ '"';
+	ELSE name == "firehose";
+		filter = '"home:' _ useredit.nickname _ '"';
 	END;
 
 	filter_str = "fhfilter=" _ Slash.strip_paramattr(filter);
