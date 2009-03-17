@@ -1696,19 +1696,29 @@ function firehose_get_first() {
 	return $('#firehoselist > div[id^=firehose-]:not(.daybreak):first');
 }
 
-function firehose_set_cur($article) {
-	if (!$article || !$article.length)
-		$article = firehose_get_first();
+function firehose_set_cur($new_current) {
+	if (!$new_current || !$new_current.length)
+		$new_current = firehose_get_first();
 
-	if ($article.is('.currfh'))
-		return $article;
+	$new_current = $new_current.eq(0); // only one article may be current at a time
+	if ($new_current.is('.currfh'))
+		return $new_current;
 
-	$article.
-		addClass('currfh').
-		siblings('div[id^=firehose-]:not(.daybreak).currfh').
-			removeClass('currfh');
+	var	$old_current	= $new_current.siblings('div[id^=firehose-]:not(.daybreak).currfh'),
+		event_data	= { blurring:$old_current, focusing:$new_current };
 
-	return view($article);
+	$old_current.each(function(){
+		// "blur" previous current article, if any (and correct if "multiple current")
+		$(this).trigger('blur-article', event_data).
+			removeClass('currfh'); // after event
+	});
+
+	return view(
+		// scroll to and "focus" new current article
+		$new_current.
+			addClass('currfh'). // before event
+			trigger('focus-article', event_data)
+	);
 }
 
 function firehose_go_next() {
