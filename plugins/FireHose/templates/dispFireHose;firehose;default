@@ -124,7 +124,7 @@ END %]
 
 							[% END %]
 							[% title %]
-							[% IF adminmode %]
+							[% IF user.is_admin %]
 								<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
 									<a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit</a>
 								</form>

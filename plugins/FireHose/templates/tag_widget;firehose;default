@@ -68,7 +68,7 @@ IF options.view == "usersubmission";
 END %]</div>
 		[%- IF item.type == "story" &&
 			constants.signoff_use &&
-			((user.is_admin && !options.usermode) || user.acl.signoff_allowed) &&
+			((user.is_admin) || user.acl.signoff_allowed) &&
 			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
 			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="menu:false">unsigned</div>
 		[%- END -%]
