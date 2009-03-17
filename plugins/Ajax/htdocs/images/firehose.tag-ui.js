@@ -287,7 +287,7 @@ function firehose_init_tag_ui( $new_entries ){
 	}
 
 	$new_entries.
-		tag_ui_server(firehose_id_of, pipeline, { request_data: { reskey: reskey_static } }).
+		tag_ui_server(fhid, pipeline, { request_data: { reskey: reskey_static } }).
 		each(function(){
 			this.tag_ui_server.command_pipeline.push(
 				($(this).attr('type') == 'comment') ?

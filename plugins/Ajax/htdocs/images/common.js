@@ -150,37 +150,28 @@ function handleEnter(ev, func, arg) {
 }
 
 
-function firehose_id_of( expr ) {
-	try {
-		// We accept a number, or...
-		if ( typeof expr === 'number' ) {
-			return expr;
-		}
 
-		// ...a dom element that is or is within a firehose entry, or...
-		else if ( typeof expr === 'object' && expr.parentNode ) {
-			if ( expr.id && expr.id.match(/-\d+$/) ) {
-				expr = expr.id;
-			} else {
-				expr = $(expr).parents('[id^=firehose-]').attr('id');
-			}
-		}
-
-		// ...a string that is a number or the id of
-		//	a dom element that is or is within a firehose entry.
-		var match = /(?:.+-)?(\d+)$/.exec(expr);
-
-		// We return an integer id.
-		if ( match ) {
-			return parseInt(match[1], 10);
-		}
+function fhitem( any ){
+	// Returns a jQuery selection of the firehose-item that is, contains, or is identified by any.
+	// Use fhitem() to present the "any" API from functions that work on firehose-items.
+	switch ( $.TypeOf.unqualified(any) ) {
+		case 'string':	if ( !/^\d+$/.test(any) ) { break; }
+		case 'number':	any = 'firehose-' + any;
 	}
-	catch ( e ) {
-		// If we can't deduce an integer id; we won't throw...
-	}
+	return $any(any).closest('#firehoselist>*');
+}
 
-	// ...but we won't return an answer, either.
-	return undefined;
+function fhid( any ){
+	// Returns the firehose-id associated with any, e.g., from 'firehose-12345', return 12345.
+	var M;
+	switch ( $.TypeOf.unqualified(any) ) {
+		case 'number':
+			return any;
+		case 'element': case 'string':
+			if ( M=/^(?:[-a-z]-)?(\d+)$/.exec(any.id||any) ) { return M[1]; }
+		default:
+			return (fhitem(any).attr('id') || '').substr(9); // chop off 'firehose-'
+	}
 }
 
 function after_article_moved( article ){
@@ -261,11 +252,12 @@ function reportError(request) {
 }
 
 //Firehose functions begin
-function toggle_firehose_body( id, unused, /*optional:*/toggle_to ) {
+function toggle_firehose_body( any, unused, /*optional:*/toggle_to ) {
 	setFirehoseAction();
 
-	var	body_id		= 'fhbody-' + id,
-		$body		= $any(body_id),
+	var	$fhitem		= fhitem(any),
+		id		= fhid($fhitem),
+		$body		= $fhitem.children('[id^=fhbody-]'),
 		body_is_empty	= $body.is('.empty'),
 		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
 
@@ -285,40 +277,32 @@ function toggle_firehose_body( id, unused, /*optional:*/toggle_to ) {
 	}
 
 
-	var	toggle_to_show	= toggle_to > 0,
-		op		= toggle_to_show ? 'show' : 'hide',
-		class_for	= toggle_firehose_body.class_for[op];
+	var showing = toggle_to>0;
 
 	if ( body_is_empty ) {
 		var handlers = {};
 		fh_is_admin && (handlers.onComplete = function(){
 			firehose_get_admin_extras(id);
 		});
-		ajax_update({ op:'firehose_fetch_text', id:id, reskey:reskey_static }, body_id, handlers);
-	} else if ( fh_is_admin && toggle_to_show ) {
+		ajax_update({ op:'firehose_fetch_text', id:id, reskey:reskey_static }, $body.attr('id'), handlers);
+	} else if ( fh_is_admin && showing ) {
 		firehose_get_admin_extras(id);
 	}
 
-	$body.setClass(class_for.body).
-		closest('#firehose-' + id).
-			setClass(class_for.article).
-			addClass(fh_is_admin ? 'adminmode' : 'usermode').
-			find('h3 a img')[op]('fast').end().
-			each(function(){
-				after_article_moved(this);
-				var $this = $(this);
-				inlineAdFirehose(toggle_to_show && $this);
-				firehose_set_cur($this);
-			});
+	$body.	removeClass('body empty hide').
+		addClass(showing ? 'body' : 'hide');
+
+	$fhitem.removeClass('article briefarticle adminmode usermode').
+		addClass((showing ? 'article ' : 'briefarticle ') + (fh_is_admin ? 'adminmode' : 'usermode')).
+		find('h3 a img')[ showing ? 'show' : 'hide' ]('fast');
+
+	after_article_moved($fhitem);
+	inlineAdFirehose(showing && $fhitem);
 	return false;
 }
 toggle_firehose_body.SHOW	= 1;
 toggle_firehose_body.TOGGLE	= 0;
 toggle_firehose_body.HIDE	= -1;
-toggle_firehose_body.class_for = {
-	show: { body:'body', article:'article' },
-	hide: { body:'hide', article:'briefarticle' }
-};
 
 function toggleFirehoseTagbox(id) {
 	$('#fhtagbox-'+id).setClass(applyMap('tagbox', 'hide'));
@@ -461,10 +445,9 @@ function firehose_fix_up_down( id, new_state ){
 }
 
 function firehose_click_nodnix_reason( event ) {
-	var $entry = $(event.target).closest('[tag-server]');
-	var id = $entry.attr('tag-server');
+	var $fhitem=fhitem(event.target), id=fhid($fhitem);
 
-	if ( (fh_is_admin || firehose_settings.metamod) && ($('#updown-'+id).hasClass('voteddown') || $entry.is('[type=comment]')) ) {
+	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+id).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
 		firehose_collapse_entry(id);
 	}
 
@@ -492,30 +475,36 @@ var $related_trigger = $().filter();
 
 var kExpanded=true, kCollapsed=false;
 
-function firehose_toggle_tag_ui_to( if_expanded, selector ){
-	var	$server = $(selector).closest('[tag-server]'), // assert($server.length)
-		id	= $server.attr('tag-server'),
-		$widget = $server.find('.tag-widget.body-widget'),
-		toggle	= $widget.length && $widget.hasClass('expanded') == !if_expanded; // force boolean conversion
+function tag_ui_in( $fhitem ){
+	var $W = $fhitem.find('.tag-widget.body-widget');
+	return { widget:$W, expanded:$W.is('.expanded') };
+}
+
+function firehose_toggle_tag_ui_to( if_expanded, any ){
+	var	$fhitem		= fhitem(any), // assert($fhitem.length)
+		id		= fhid($fhitem),
+		tag_ui		= tag_ui_in($fhitem),
+		toggle		= tag_ui.expanded == !if_expanded; // force boolean conversion
 
 	if ( toggle ) {
 		setFirehoseAction();
-		if_expanded && $server[0].fetch_tags();
+		if_expanded && $fhitem[0].fetch_tags();
 
-		$server.find('.tag-widget').each(function(){ this.set_context(); });
-		$widget.toggleClass('expanded', !!if_expanded);
-		$widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
-		$server.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
-		after_article_moved($server[0]);
+		$fhitem.find('.tag-widget').each(function(){ this.set_context(); });
+		tag_ui.widget.toggleClass('expanded', !!if_expanded);
+		tag_ui.widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
+		$fhitem.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
+		after_article_moved($fhitem[0]);
 	}
 
 	// always focus for expand request, even if already expanded
-	if_expanded && $widget.find('.tag-entry:visible:first').focus();
-	return $widget;
+	if_expanded && tag_ui.widget.find('.tag-entry:visible:first').focus();
+	return tag_ui.widget;
 }
 
-function firehose_toggle_tag_ui( toggle ) {
-	firehose_toggle_tag_ui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
+function firehose_toggle_tag_ui( any ) {
+	var $fhitem = fhitem(any);
+	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
 }
 
 function firehose_click_tag( event ) {
@@ -676,6 +665,26 @@ function firehose_handle_comment_nodnix( commands ){
 $(function(){
 	firehose_init_tag_ui();
 	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
+
+// .live() binds these handlers to all current _and_ future firehose items
+$('#firehoselist > div[id^=firehose-]:not(.daybreak)').
+	live('blur-article', function(){
+		var $fhitem = $(this);
+		if ( $fhitem.data('blur-closes-item') ) {		toggle_firehose_body($fhitem, 0, false);
+		} else if ( $fhitem.data('blur-closes-tags') ) {	firehose_toggle_tag_ui_to(false, $fhitem);
+		}
+		// optional, will focus before next blur
+		$fhitem.removeData('blur-closes-item').
+			removeData('blur-closes-tags').
+			find('.tag-widget').
+				each(function(){ this.set_context(); });
+	}).
+	live('focus-article', function(){
+		var $fhitem = $(this);
+		$fhitem.data('blur-closes-tags', !tag_ui_in($fhitem).expanded).
+			data('blur-closes-item', $fhitem.find('[id^=fhbody-]').is('.empty,.hide'));
+	});
+
 });
 
 
@@ -717,7 +726,7 @@ function firehose_init_tag_ui( $new_entries ){
 
 	$new_entries.
 		each(function(){
-			var $this = $(this), id = firehose_id_of(this);
+			var $this = $(this), id = fhid(this);
 
 			install_tag_server(this, id);
 
@@ -2273,7 +2282,6 @@ $(function(){
 
 			toggle_firehose_body(id, 0, true);
 			firehose_toggle_tag_ui_to(true, el);
-			firehose_set_cur($(el));
 		}
 
 		if (keyo.signoff && el && tag_admin) {

@@ -319,7 +319,7 @@ function firehose_open_note( expr ) {
 	}
 	return $(expr).
 		each(function(){
-			var $entry = $(this), id = firehose_id_of(this);
+			var $entry = $(this), id = fhid(this);
 			if ( $entry.is('[class^=brief]') ) {
 				toggle_firehose_body(id, true);
 			}
