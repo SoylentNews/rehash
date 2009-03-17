@@ -28,8 +28,7 @@ __template__
 <script type="text/javascript">
 $(function(){
 var	$swatch	= $any('[% id %]-trigger'),
-	$menu	= $any('[% id %]-menu'),
-	swatch	= $swatch[0];
+	$menu	= $any('[% id %]-menu');
 
 function swatch_color( key, new_color ){
 	if ( key!=='color-shown' && key!=='color-saved' ) {
@@ -76,8 +75,20 @@ $menu.menu({
 	cssNamespace:	'slash',
 
 	start: function(){
-		var tpos = $swatch.position();
-		$menu.css({ position:'absolute', top:tpos.top+$swatch.outerHeight(), left:tpos.left }).show();
+		var inset = {};
+		$.each(['left', 'right', 'bottom'], function(){
+			inset[this] = parseInt($swatch.css('padding-'+this)) + parseInt($swatch.css('margin-'+this));
+		});
+
+		var css	= $.extend({
+			position: 'absolute',
+			width: $swatch.outerWidth() - (inset.left + inset.right)
+		}, $swatch.position());
+
+		css.left += inset.left;
+		css.top += $swatch.outerHeight() - inset.bottom;
+
+		$menu.css(css).show();
 	},
 	over: function( e, ui ){
 		swatch_color('color-shown', $any(ui.over).data('color'));
