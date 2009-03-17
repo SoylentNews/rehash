@@ -2191,21 +2191,12 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 
 })(Slash.jQuery);
 
-// Create the new window
-function openInWindow(mylink, newwin) {
-	if (newwin) {
-		var newWindow = window.open(mylink, '_blank');
-		if (newWindow) {
-			if (newWindow.focus) {
-				newWindow.focus();
-			}
-			return false;
-		}
-	} else {
-		window.location = mylink;
+function openInWindow(mylink, samewin) {
+	if (!samewin && window.open(mylink, '_blank')) {
 		return false;
 	}
-	return true;
+	window.location = mylink;
+	return false;
 }
 
 $(function(){
@@ -2322,7 +2313,7 @@ $(function(){
 			}
 
 			if (mylink.length) {
-				return openInNewWindow(mylink, (shiftKey ? 0 : 1));
+				return openInWindow(mylink, (shiftKey ? 1 : 0));
 			} else {
 				return true;
 			}
