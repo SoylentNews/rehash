@@ -25,7 +25,7 @@ my $start_time = Time::HiRes::time;
 		$slashdb->setUser($user->{uid}, { index_beta => $index_beta });
 		$user->{index_beta} = $index_beta;
 	}
-	$script = "/index2.pl" if $user->{index_beta};
+	$script = "/index2.pl" if $user->{index_beta} && !$form->{content_type};
 
 	if ($form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
 			# Any login attempt, successful or not, gets
