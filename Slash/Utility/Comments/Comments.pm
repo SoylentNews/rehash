@@ -259,7 +259,8 @@ sub selectComments {
 
 		$comments->{$C->{cid}}{has_read} = $comments_read->{$C->{cid}};
 		$user->{state}{d2_defaultclass}{$C->{cid}} = 'oneline'
-			if $user->{d2_reverse_switch} && $comments_read->{$C->{cid}};
+			if $user->{d2_reverse_switch} && $comments_read->{$C->{cid}}
+			&& $C->{cid} != $cid;
 
 		# The comment pushes itself onto its parent's
 		# kids array.
