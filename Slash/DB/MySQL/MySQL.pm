@@ -1469,7 +1469,7 @@ sub ajaxPageProfile {
 	my $js = $form->{js} || 0;
 	$js = 0 if $js !~ /^[\d\.]+$/;
 	$js /= 1000; # convert ms to sec
-	$logdb->sqlInsert('pagemark_domjs', {
+	$logdb->sqlInsert('pagemark', {
 		pagemark => $pagemark,
 		dom => $dom,
 		js => $js,
