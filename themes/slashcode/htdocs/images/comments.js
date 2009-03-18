@@ -1489,9 +1489,9 @@ function boxStatus(bool) {
 
 function enableControls() {
 	boxStatus(0);
-	var morelink = $dom('more_comments_num_a');
-	if (morelink)
-		morelink.className = 'show';
+	var morelink = $('#more_comments_num_a');
+	morelink.removeClass('hide');
+	morelink.parents('span.nbutton:first').removeClass('hide');
 
 	d2act();
 	loaded = 1;

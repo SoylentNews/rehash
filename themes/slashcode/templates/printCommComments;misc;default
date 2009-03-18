@@ -113,7 +113,7 @@ __template__
 <div id="discussion_buttons">
 
 [% IF discussion2 %]
-<span class="nbutton"><p><b><a href="#" onclick="D2.ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
+<span class="nbutton hide"><p><b><a href="#" onclick="D2.ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
 [% END %]
 
 [% IF discussion2 && !user.state.discussion_archived && !user.state.discussion_future_nopost %]
