@@ -1471,6 +1471,7 @@ sub ajaxPageProfile {
 	$js /= 1000; # convert ms to sec
 	$logdb->sqlInsert('pagemark', {
 		pagemark => $pagemark,
+		-ts => 'NOW()',
 		dom => $dom,
 		js => $js,
 	}, { ignore => 1 });
