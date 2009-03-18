@@ -101,7 +101,7 @@ function view( expr, how ){
 	if ( dx || dy ) {
 		$.TypeOf.defNo(how.animate)
 			? window.scrollBy(dx, dy)
-			: $('html').animate({ scrollTop:'+='+dy+'px', scrollLeft:'+='+dx+'px' });
+			: $('html,body').animate({ scrollTop:'+='+dy+'px', scrollLeft:'+='+dx+'px' });
 	}
 	return $elem;
 }
