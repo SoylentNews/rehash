@@ -597,25 +597,25 @@ var tag_widget_fns = {
 					var $this = $(this);
 					var code = event.which || event.keyCode;
 					switch (code) {
-						case ESC:
-							$this.val('');
-							return true;
-						case LEFT_ARROW: case DOWN_ARROW:
-							if ($this.val() == '') {
-								$this.blur();
-								return false;
+						case ESC: case LEFT_ARROW: case DOWN_ARROW: case SPACE: case ENTER:
+							if (code == ESC) {
+								$this.val('');
 							}
-							return true;
-						case SPACE: case ENTER:
-							var $form = $this.parent();
-							setTimeout(function(){
-								$form.trigger("onsubmit");
-							}, 0);
-							if (code == ENTER) {
-								$this.blur();
-								return false;
+							if (code == LEFT_ARROW || code == DOWN_ARROW) {
+								if ($this.val() != '')
+									return true;
 							}
-							return true;
+							if (code == SPACE || code == ENTER) {
+								var $form = $this.parent();
+								setTimeout(function(){
+									$form.trigger("onsubmit");
+								}, 0);
+								if (code == SPACE)
+									return true;
+							}
+							$this.blur();
+							firehose_toggle_tag_ui_to(false, $this);
+							return false;
 						default:
 							return true;
 					}
