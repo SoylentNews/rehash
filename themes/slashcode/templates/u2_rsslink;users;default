@@ -27,7 +27,7 @@ __template__
 		filter = '"user:' _ useredit.nickname _ '"';
 	ELSIF name == "usertag";
 		filter = '"user:' _ useredit.nickname _ '" "tag:' _ form.tagname _ '"';
-	ELSE name == "firehose";
+	ELSE;
 		filter = '"home:' _ useredit.nickname _ '"';
 	END;
 
