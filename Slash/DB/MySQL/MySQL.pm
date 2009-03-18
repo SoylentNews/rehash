@@ -1457,6 +1457,7 @@ sub createAccessLogAdmin {
 
 sub ajaxPageProfile {
 	return '' if !dbAvailable('write_accesslog');
+	my $constants = getCurrentStatic();
 	my $logdb = getObject('Slash::DB', { virtual_user => $constants->{log_db_user} });
 	return '' if !$logdb;
 	my $form = getCurrentForm();
