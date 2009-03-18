@@ -13,7 +13,7 @@ before_content
 __template__
 <script id="before-content" type="text/javascript">
 var pageload = {
-	pagemark: [% user.state.pagemark %],
+	pagemark: '[% user.state.pagemark %]',
 	before_content: (new Date).getTime()
 };
 function pageload_done( $, console, maybe ){
