@@ -1355,6 +1355,8 @@ sub createAccessLog {
 	} else {
 		$duration = 0;
 	}
+	my $pagemark = $user->{state}{pagemark} || 0;
+	$pagemark = 0 if $op =~ /^ajax/;
 	my $local_addr = inet_ntoa(
 		( unpack_sockaddr_in($r->connection()->local_addr()) )[1]
 	);
@@ -1379,7 +1381,7 @@ sub createAccessLog {
 		query_string	=> $self->truncateStringForCharColumn($query_string, 'accesslog', 'query_string'),
 		user_agent	=> $ENV{HTTP_USER_AGENT} ? $self->truncateStringForCharColumn($ENV{HTTP_USER_AGENT}, 'accesslog', 'user_agent') : 'undefined',
 		duration	=> $duration,
-		pagemark	=> $user->{state}{pagemark} || 0,
+		pagemark	=> $pagemark,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
 		secure		=> $user->{state}{ssl} || 0,
@@ -1453,6 +1455,26 @@ sub createAccessLogAdmin {
 	}, { delayed => 1 });
 }
 
+sub ajaxPageProfile {
+	return '' if !dbAvailable('write_accesslog');
+	my $logdb = getObject('Slash::DB', { virtual_user => $constants->{log_db_user} });
+	return '' if !$logdb;
+	my $form = getCurrentForm();
+	my $pagemark = $form->{pagemark} || 0;
+	$pagemark = 0 if $pagemark !~ /^\d+$/;
+	my $dom = $form->{dom} || 0;
+	$dom = 0 if $dom !~ /^[\d\.]+$/;
+	$dom /= 1000; # convert ms to sec
+	my $js = $form->{js} || 0;
+	$js = 0 if $js !~ /^[\d\.]+$/;
+	$js /= 1000; # convert ms to sec
+	$logdb->sqlInsert('pagemark_domjs', {
+		pagemark => $pagemark,
+		dom => $dom,
+		js => $js,
+	}, { ignore => 1 });
+	return '';
+}
 
 ########################################################
 # pass in additional optional descriptions

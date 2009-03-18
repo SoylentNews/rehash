@@ -134,6 +134,7 @@ sub init {
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX referer (referer(4))");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX ts (ts)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX pagemark (pagemark)");
 
 		# Create the other accesslog_temp_* tables and add their indexes.
 		return undef unless $self->_do_insert_select(

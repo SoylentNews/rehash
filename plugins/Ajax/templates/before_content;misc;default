@@ -42,7 +42,7 @@ function pageload_done( $, console, maybe ){
 	}, minutes(2));
 [%- END %]
 	maybe || $.ajax({ data: {
-		op: 'page-profile',
+		op: 'page_profile',
 		pagemark: pageload.pagemark,
 		dom: pageload.content_ready_time,
 		js: pageload.script_ready_time

@@ -45,16 +45,16 @@ $task{$me}{code} = sub {
 	}
 
 	my $rows;
-	my $total = 0;
+	my $total_accesslog = 0;
 	my $limit = 100_000;
 
 	my $last_err = "";
 	my $done = 0;
 	MAINLOOP: while (!$done) {
 		while ($rows = $delete_db->sqlDelete("accesslog", "id < $id", $limit)) {
-			$total += $rows;
+			$total_accesslog += $rows;
 			last if $rows eq "0E0";
-			slashdLog("deleted so far $total of $limit rows");
+			slashdLog("deleted so far $total_accesslog of $limit accesslog rows");
 			sleep 10;
 		}
 		my $err = "";
@@ -66,7 +66,7 @@ $task{$me}{code} = sub {
 		} else {
 			# We had an error but we haven't reached our max
 			# number of failures yet;  keep trying.
-			$last_err = "sql error: '$err'";
+			$last_err = "accesslog sql error: '$err'";
 			slashdLog($last_err);
 			sleep 5;
 			$counter++;
@@ -77,9 +77,44 @@ $task{$me}{code} = sub {
 		my $err = "more than $failures errors occured, accesslog is probably locked, last_err '$last_err'";
 		slashdLog($err);
 		slashdErrnote($err);
-		return "failures, accesslog probably locked, $total rows deleted";
+		return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted";
 	}
-	return "success, $total rows deleted";
+
+	$id = $log_slave->sqlSelectNumericKeyAssumingMonotonic(
+		'pagemark', 'max', 'id',
+		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
+	if (!$id) {
+		slashdLog("no pagemark rows older than $hoursback hours");
+	}
+
+	my $total_pagemark = 0;
+
+	$last_err = "";
+	$done = 0;
+	MAINLOOP: while (!$done) {
+		while ($rows = $delete_db->sqlDelete("pagemark", "id < $id", $limit)) {
+			$total_pagemark += $rows;
+			last if $rows eq "0E0";
+			slashdLog("deleted so far $total_pagemark of $limit pagemark rows");
+			sleep 10;
+		}
+		my $err = "";
+		if ( $counter >= $failures || !($err = $delete_db->sqlError()) ) {
+			# If either we're giving up because there are too many
+			# failures, or the last attempt was successful, then
+			# break out of the loop, we're done.
+			$done = 1;
+		} else {
+			# We had an error but we haven't reached our max
+			# number of failures yet;  keep trying.
+			$last_err = "pagemark sql error: '$err'";
+			slashdLog($last_err);
+			sleep 5;
+			$counter++;
+		}
+	}
+
+	return "success, $total_accesslog accesslog rows deleted, $total_pagemark pagemark rows deleted";
 };
 
 1;

@@ -692,6 +692,22 @@ CREATE TABLE open_proxies (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'pagemark'
+#
+
+DROP TABLE IF EXISTS pagemark;
+CREATE TABLE pagemark (
+	id		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	pagemark	bigint UNSIGNED DEFAULT 0 NOT NULL,
+	ts		datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+	dom		float DEFAULT 0 NOT NULL,
+	js		float DEFAULT 0 NOT NULL,
+	PRIMARY KEY id (id),
+	UNIQUE pagemark (pagemark),
+	KEY ts (ts)
+) ENGINE=InnoDB;
+
+#
 # Table structure for table 'pollanswers'
 #
 

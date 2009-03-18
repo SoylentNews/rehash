@@ -6024,6 +6024,21 @@ INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, se
 INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (303, 3, 0, 'recenttagnames-0', 'Recent Tagnames', 'Recent Tagnames', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (bid, type_id, uid, name, title, description, seclev, created, last_update) VALUES (304, 3, 0, 'firehoseusage-0', 'Firehose Usage', 'Firehose Usage', 10000, NOW(), NOW());
 
-
 # 2009-03-12
 UPDATE vars SET value = 'T_2_5_0_246' WHERE name = 'cvs_tag_currentcode';
+
+DROP TABLE IF EXISTS pagemark;
+CREATE TABLE pagemark (
+	id              int UNSIGNED NOT NULL AUTO_INCREMENT,
+	pagemark        bigint UNSIGNED DEFAULT 0 NOT NULL,
+	ts              datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+	dom             float DEFAULT 0 NOT NULL,
+	js              float DEFAULT 0 NOT NULL,
+	PRIMARY KEY id (id),
+	UNIQUE pagemark (pagemark),
+	KEY ts (ts)
+) ENGINE=InnoDB;
+
+# for plugins/Ajax
+INSERT INTO ajax_ops VALUES (NULL, 'page_profile', 'Slash::DB::MySQL', 'ajaxPageProfile', 'ajax_base', 'createuse');
+
