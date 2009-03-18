@@ -19,14 +19,18 @@ __template__
 	   	PROCESS userlogin_cover
    		return_url = gSkin.rootdir _ '/firehose.pl?op=view&id=' _ this_fhid;
 	END %]
-	<div class="head">
-       		<div class="yui-b">
-		<!-- block -->
-		</div>
+
 		 [% fh = Slash.getObject("Slash::FireHose");
 			views = fh.getUserViews({ tab_display => "yes"});
 		%]
 		[% PROCESS firehose_tabs views = views article_header = 1 %]
+
+
+
+	<div class="head">
+		<div class="yui-b">
+		<!-- block -->
+		</div>
 
 		[% firehosetext %]
 	</div>
