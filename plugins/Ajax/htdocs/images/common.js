@@ -2219,7 +2219,7 @@ $(function(){
 			'W' : {           prev    : 1 },
 
 			'F' : {           search  : 1 },
-			191 : { chr: '/', slash   : 1 }, // 111
+			190 : { chr: '.', slash   : 1 }, // 110
 
 			27  : {           form    : 1, unfocus : 1 } // esc
 		};
@@ -2230,7 +2230,7 @@ $(function(){
 		validkeys['I'] = validkeys['T'];
 		validkeys[107] = validkeys[61] = validkeys[187];
 		validkeys[109] = validkeys[189];
-		validkeys[111] = validkeys[191];
+		validkeys[110] = validkeys[190];
 	}
 
 // down arrow: 40
@@ -2282,6 +2282,11 @@ $(function(){
 			firehose_go_next($(el));
 		}
 
+		if (keyo.slash)          {
+			// a bit silly
+			var fsid = $('#firehose-sections').find('li:not([id=fhsection-unsaved]):first')[0].id.substr(10);
+			firehose_set_options('section', fsid);
+		}
 		if (keyo.unfocus)        { $(e.target).blur()        }
 		if (keyo.next)           { firehose_go_next()        }
 		if (keyo.prev)           { firehose_go_prev()        }

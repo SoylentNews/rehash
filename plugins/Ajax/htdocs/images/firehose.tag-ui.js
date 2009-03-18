@@ -325,19 +325,30 @@ function firehose_init_tag_ui( $new_entries ){
 					gFocusedText = null;
 				}
 			}).
-			keypress(function(event){
-				var ESC=27, SPACE=32;
+			keydown(function(event){
+				var ESC=27, SPACE=32, ENTER=13, LEFT_ARROW=37, DOWN_ARROW=40;
 
 				var $this = $(this);
-				switch ( event.which || event.keyCode ) {
+				var code = event.which || event.keyCode;
+				switch (code) {
 					case ESC:
 						$this.val('');
-						return false;
-					case SPACE:
+						return true;
+					case LEFT_ARROW: case DOWN_ARROW:
+						if ($this.val() == '') {
+							$this.blur();
+							return false;
+						}
+						return true;
+					case SPACE: case ENTER:
 						var $form = $this.parent();
 						setTimeout(function(){
 							$form.trigger("onsubmit");
 						}, 0);
+						if (code == ENTER) {
+							$this.blur();
+							return false;
+						}
 						return true;
 					default:
 						return true;
