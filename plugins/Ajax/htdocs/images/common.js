@@ -99,9 +99,13 @@ function view( expr, how ){
 	}
 
 	if ( dx || dy ) {
-		$.TypeOf.defNo(how.animate)
-			? window.scrollBy(dx, dy)
-			: $('html,body').animate({ scrollTop:'+='+dy+'px', scrollLeft:'+='+dx+'px' });
+		var x=w.left+dx, y=w.top+dy;
+		if ( $.TypeOf.defNo(how.animate) ) {
+			window.scrollTo(x, y);
+			// dequeue this call
+		} else {
+			$('html,body').animate({ scrollLeft:x, scrollTop:y } /*, dequeue this call */);
+		}
 	}
 	return $elem;
 }
