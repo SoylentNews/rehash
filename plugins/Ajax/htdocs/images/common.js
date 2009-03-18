@@ -2290,6 +2290,7 @@ $(function(){
 			// a bit silly
 			var fsid = $('#firehose-sections').find('li:not([id=fhsection-unsaved]):first')[0].id.substr(10);
 			firehose_set_options('section', fsid);
+			window.scrollTo(0, 0);
 		}
 		if (keyo.unfocus)        { $(e.target).blur()        }
 		if (keyo.next)           { firehose_go_next()        }
