@@ -1932,9 +1932,11 @@ sub getFireHoseByGlobjidMulti {
 
 	my @ids = grep { $_ } map { $globjid_to_id_hr->{$_} } @$globjid_ar;
 	my $firehose_hr = $self->getFireHoseMulti(\@ids, $options);
+use Data::Dumper; print STDERR scalar(gmtime) . " $$ gFHM returned non-hashref from '@ids' options: " . Dumper($options) if ref($firehose_hr) ne 'HASH';
 
 	# Then convert the keys in the answer back to globjids.
 	for my $id (keys %$firehose_hr) {
+print STDERR scalar(gmtime) . " $$ gFHM returned non-hashref-hashref from '@ids' options: " . Dumper($options) if ref($firehose_hr->{$id}) ne 'HASH';
 		$ret_hr->{ $firehose_hr->{$id}{globjid} } = $firehose_hr->{$id};
 	}
 	return $ret_hr;
