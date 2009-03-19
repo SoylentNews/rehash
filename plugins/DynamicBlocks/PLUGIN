@@ -10,4 +10,5 @@ template=templates/createfriends;dynamicblocks;default
 template=templates/createjournals;dynamicblocks;default
 template=templates/createsubmissions;dynamicblocks;default
 template=templates/createtags;dynamicblocks;default
+template=templates/createmessages;dynamicblocks;default
 template=templates/displayblock;dynamicblocks;default

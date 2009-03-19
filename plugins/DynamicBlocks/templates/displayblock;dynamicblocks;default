@@ -12,15 +12,17 @@ en_US
 __name__
 displayblock
 __template__
+[% IF block.block %]
 <div class="block" id="[% block.name %]">
         <div class="title" id="[% block.name %]-title">
-                <h4><a href="[% gSkin.rootdir %]/[% block.url %]">[% block.title %]</a></h4>
+                <h4><a href="[% constants.real_rootdir %]/[% block.url %]">[% block.title %]</a></h4>
         </div>
 
         <div class="content" id="[% block.name %]-content">
                 [% block.block %]
         </div>
 </div>
+[% END %]
 __seclev__
 500
 __version__

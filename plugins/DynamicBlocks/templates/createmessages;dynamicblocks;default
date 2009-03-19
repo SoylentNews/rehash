@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+Create a messages block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+createmessages
+__template__
+
+<ul>
+[% FOREACH message = messages %]
+<li>
+<a href="[% constants.real_rootdir %]/messages.pl?op=display&id=[% message.id %]">[% message.subject %]</a>
+</li>
+[% END %]
+</ul>
+__seclev__
+500
+__version__
