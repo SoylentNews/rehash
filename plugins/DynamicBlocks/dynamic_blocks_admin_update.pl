@@ -76,6 +76,6 @@ $task{$me}{code} = sub {
         }
 
         return;
-}
+};
 
 1;
