@@ -1,0 +1,46 @@
+__section__
+default
+__description__
+Create a comment block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+createcomments
+__template__
+<ul>
+[% FOREACH comment = comments %]
+        [%
+                reason_num = '';
+                reason_text = '';
+                IF comment.points > 1;
+                        reason_num = comment.reason;
+                        reason_text = reasons.$reason_num.name;
+                END;
+        %]
+<li>
+<a href="[% constants.real_rootdir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]">[% comment.subject %]</a>
+[%
+reason_num = '';
+reason_text = '';
+IF comment.points > 1;
+        reason_num = comment.reason;
+        reason_text = reasons.$reason_num.name;
+
+'&nbsp;(Score:';comment.points;
+IF reason_text != 'Normal';
+        ',&nbsp;';reason_text;
+END;
+')';
+END;
+%]
+</li>
+[% END %]
+</ul>
+__seclev__
+500
+__version__

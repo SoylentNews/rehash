@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Display a comment block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+displayblock
+__template__
+<div class="block" id="[% block.name %]">
+        <div class="title" id="[% block.name %]-title">
+                <h4><a href="[% gSkin.rootdir %]/[% block.url %]">[% block.title %]</a></h4>
+        </div>
+
+        <div class="content" id="[% block.name %]-content">
+                [% block.block %]
+        </div>
+</div>
+__seclev__
+500
+__version__

@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+Create a bookmark block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+createbookmarks
+__template__
+
+<ul>
+[% FOREACH bookmark = bookmarks %]
+<li><a href="[% bookmark.url %]">[% bookmark.title %]</a></li>
+[% END %]
+</ul>
+__seclev__
+500
+__version__

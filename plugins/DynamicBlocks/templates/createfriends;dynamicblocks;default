@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Create a friends block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+createfriends
+__template__
+
+<ul>
+[% FOREACH friend = friends %]
+<li>
+<a href="[% constants.real_rootdir %]/~[% friend.nick %]">[% friend.nick %]</a>[% IF friend.bio; ':&nbsp;'; friend.bio; END; %]
+</li>
+[% END %]
+</ul>
+__seclev__
+500
+__version__
+

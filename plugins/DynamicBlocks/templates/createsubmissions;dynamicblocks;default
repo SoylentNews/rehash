@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+Create a submissions block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+createsubmissions
+__template__
+
+<ul>
+[% FOREACH submission = submissions %]
+<li>
+<a href="[% constants.real_rootdir %]/firehose.pl?op=view&id=[% submission.id %]">[% submission.title %]</a>
+</li>
+[% END %]
+</ul>
+__seclev__
+500
+__version__

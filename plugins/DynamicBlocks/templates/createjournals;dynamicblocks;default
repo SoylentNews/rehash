@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+Create a journals block
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+createjournals
+__template__
+
+<ul>
+[% FOREACH journal = journals %]
+<li>
+<a href="[% constants.real_rootdir %]/~[% nick | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a>
+</li>
+[% END %]
+</ul>
+__seclev__
+500
+__version__
