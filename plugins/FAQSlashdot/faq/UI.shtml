@@ -132,8 +132,18 @@ stories, and even those only abbreviated.  The break down is as follows:
 
 <p><em><small>Answered by: <a href="mailto:scuttlemonkey@slashdot.org">Scuttlemonkey</a><br>
 
-Last Modified: 3/13/09</small></em></p>        
+Last Modified: 3/13/09</small></em></p>
 
+<h2><a name="ui700" id="ui700">Why does "This Function Require JavaScript?"</a></h2>
+
+<p>Welcome to the now man!</p>
+
+<p>Some elements of Slashdot's UI require the use of Javascript. In most cases we've provided backwards compatibility for the more paranoid folks in our crowd that are fearful of executing unknown code within their browsers, but sometimes it's just not practical to maintain a second UI for this. Right now this includes the customizable section menus, tagging, and a great number of user interface customization options. We know it's a potential security hazard, but sometimes you just have to jump out of the airplane to get that adrenaline rush. Try it sometime. Pack your own chute tho. </p>
+
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 3/19/2009 
+        </small></em></p>
 
         <hr>
         <ul class="menu">
