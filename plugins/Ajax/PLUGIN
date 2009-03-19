@@ -33,6 +33,7 @@ htdoc=htdocs/images/slash.util.js
 htdoc=htdocs/images/slash.geometry.js
 htdoc=htdocs/images/jquery/jquery.textselection.js
 htdoc=htdocs/images/jquery/jquery.autocomplete.js
+htdoc=htdocs/images/jquery/jquery.lazyload.js
 htdoc=htdocs/images/jquery/ui.core.js
 htdoc=htdocs/images/jquery/ui.sortable.js
 htdoc=htdocs/images/slash.menu.js
