@@ -259,7 +259,7 @@ _itemOf: function( el ){
 
 	var item = undefined;
 	if ( el ) {
-		var	menu	= this.element[0];
+		var	menu	= this.element[0],
 			$el	= $(el),
 			$path	= $el.add( $el.parents() );
 
