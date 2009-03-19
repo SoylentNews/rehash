@@ -41,6 +41,8 @@
 
 use strict;
 
+use POSIX ':sys_wait_h';
+
 use Slash;
 use Slash::Constants ':slashd';
 use Slash::Display;
@@ -50,6 +52,7 @@ use Data::Dumper;
 use vars qw(
 	%task	$me	$task_exit_flag
 	$tagsdb	$tagboxdb	$tagboxes
+	$children_running
 );
 
 $task{$me}{timespec} = '* * * * *';
@@ -60,6 +63,7 @@ $task{$me}{code} = sub {
 	$tagsdb = getObject('Slash::Tags');
 	$tagboxdb = getObject('Slash::Tagbox');
 	$tagboxes = $tagboxdb->getTagboxes();
+	$children_running = 0;
 
 	my $start_time = time();
 
@@ -425,15 +429,23 @@ sub run_tagboxes_until {
 	my($run_until, $force_overnight) = @_;
 	my $constants = getCurrentStatic();
 	my $activity = 0;
+
+	# Update last_* fields in $tagboxes.  Why?  Not sure.
+	# Doesn't take long though.
 	$tagboxes = $tagboxdb->getTagboxes();
+
 	my $overnight_sum = defined($constants->{tags_overnight_minweightsum})
 		? $constants->{tags_overnight_minweightsum}
 		: 1;
 	my $overnight_starthour = $constants->{tags_overnight_starthour} ||  7;
 	my $overnight_stophour  = $constants->{tags_overnight_stophour}  || 10;
 
+	my $tagbox_obj = { };
+
+	my $num_children = $constants->{tags_tagbox_numchildren} || 1;
+	my $do_fork = ($num_children > 1);
 	while (time() < $run_until && !$task_exit_flag) {
-		my $cur_count = 10;
+		my $cur_count = 20;
 		my $cur_minweightsum = 1;
 		my $try_to_reduce_rowcount = 0;
 
@@ -452,6 +464,10 @@ sub run_tagboxes_until {
 			$try_to_reduce_rowcount = 1;
 		}
 
+		# If we're multiprocessing, grab more id's here because we're
+		# going to pass them out to multiple processes to do in parallel.
+		$cur_count *= $num_children if $do_fork;
+
 		my $affected_ar = $tagboxdb->getMostImportantTagboxAffectedIDs({
 			num			=> $cur_count,
 			min_weightsum		=> $cur_minweightsum,
@@ -459,22 +475,142 @@ sub run_tagboxes_until {
 		});
 		return $activity if !$affected_ar || !@$affected_ar;
 
-		# XXX We should really define a Slash::Tagbox::run_multi, and group the
-		# returned $affected_hr's by tbid and pass each group in at once.
+		# Since tagbox.pl tries to process all id's returned by the
+		# above method, claim them now.  (In future, if we ask for
+		# more id's than we really want, only claim the ones we're
+		# actually going to process.)  It's OK that this is not a
+		# transaction with the above, the only important thing
+		# (re making sure that id's that change really do get updated)
+		# is that claiming takes place before the tagbox run()s begin.
+		$tagboxdb->markClaimed($affected_ar);
 
 		$activity = 1;
-		for my $affected_hr (@$affected_ar) {
-			my $tagbox_obj = $tagboxdb->getTagboxObject($affected_hr->{tbid});
+		if ($do_fork) {
 
-			$tagbox_obj->run($affected_hr->{affected_id});
+			my $partitioned_ar = rtu_partition($affected_ar, $num_children);
+			rtu_dbs_disconnect();
+			rtu_run_forks($partitioned_ar);
+			# Parent returns from rtu_run_forks, children do not.
+			rtu_wait_for_children();
 
-			$tagboxdb->markTagboxRunComplete($affected_hr);
-			last if time() >= $run_until || $task_exit_flag;
+		} else {
+			# This code path is taken if tags_tagbox_numchildren <= 1.
+			for my $affected_hr (@$affected_ar) {
+				my $tagbox_obj = $tagboxdb->getTagboxObject($affected_hr->{tbid});
+
+				$tagbox_obj->run($affected_hr->{affected_id});
+
+				$tagboxdb->markTagboxRunComplete($affected_hr);
+				last if time() >= $run_until || $task_exit_flag;
+			}
 		}
 
 		Time::HiRes::sleep(0.01);
 	}
 	return $activity;
+}
+
+sub rtu_partition {
+	my($affected_ar, $num_children) = @_;
+	my $part_ar = [ ];
+	for (1..$num_children) { push @$part_ar, [ ] }
+
+	# Start by assigning each tagbox's id's to one child.  Generally,
+	# grouping a tagbox's id's together is desirable for performance.
+	my %tbids = ( map { ($_->{tbid}, 1) } @$affected_ar );
+	my @tbids = sort { $a <=> $b } keys %tbids;
+	my $i = 0;
+	for my $tbid (@tbids) {
+		push @{$part_ar->[$i]},
+			grep { $_->{tbid} == $tbid } @$affected_ar;
+		$i = ($i+1) % $num_children;
+	}
+
+	# Next, repeat for as long as max > 4*min:  split max in half,
+	# taking from its largest tbids first and giving them to min.
+	my $repeats = 0;
+	my($min, $max, $min_index, $max_index) = rtup_getminmax($part_ar);
+	while ($max > 8 && $max > 4 * $min
+		&& defined($min_index) && defined($max_index)) {
+		push @{$part_ar->[$min_index]},
+			splice @{$part_ar->[$max_index]}, int($max/2);
+		($min, $max, $min_index, $max_index) = rtup_getminmax($part_ar);
+		if (++$repeats > 100) { warn "too many repeats: " . Dumper($part_ar); last }
+	}
+
+	# Then eliminate any empty child arrays.
+	$part_ar = [ grep { @$_ } @$part_ar ];
+	return $part_ar;
+}
+
+sub rtup_getminmax {
+	my($part_ar) = @_;
+	my($min, $max, $min_index, $max_index) = (2**30, 0, undef, undef);
+	my @counts = map { scalar(@$_) } @$part_ar;
+	for my $i (0..$#counts) {
+		my $count = $counts[$i];
+		if ($count < $min) { $min = $count; $min_index = $i }
+		if ($count > $max) { $max = $count; $max_index = $i }
+	}
+	return($min, $max, $min_index, $max_index);
+}
+
+sub rtu_dbs_disconnect {
+	for my $tb (@$tagboxes) {
+		my $obj = $tb->{object};
+		next unless $obj->{_dbh};
+		$obj->{_dbh}->disconnect;
+		undef $obj->{_dbh};
+	}
+	$tagboxdb->{_dbh}->disconnect if $tagboxdb->{_dbh};
+	undef $tagboxdb->{_dbh};
+}
+
+sub rtu_run_forks {
+	my($part_ar) = @_;
+
+	local $SIG{CHLD} = sub { };
+	for my $affected_ar (@$part_ar) {
+		TB_FORK: {
+			my $pid = fork();
+			if ($pid) {
+				# Parent.
+				++$children_running;
+			} elsif (defined $pid) {
+				my %tbids = ( map { ($_->{tbid}, 1) } @$affected_ar );
+				my @tbids = sort { $a <=> $b } keys %tbids;
+				for my $tbid (@tbids) {
+					my $tb_affected_ar = [ grep { $_->{tbid} == $tbid } @$affected_ar ];
+					my $tagbox_obj = $tagboxdb->getTagboxObject($tbid);
+					$tagbox_obj->run_multi([ map { $_->{affected_id} } @$tb_affected_ar ]);
+					for my $affected_hr (@$tb_affected_ar) {
+						$tagboxdb->markTagboxRunComplete($affected_hr);
+					}
+				}
+				exit 0;
+			} else {
+				Time::HiRes::sleep(0.1);
+				redo TB_FORK;
+			}
+		}
+		Time::HiRes::sleep 0.02;
+	}
+}
+
+sub rtu_wait_for_children {
+	while ($children_running) {
+		TB_REAPER();
+		Time::HiRes::sleep(0.5);
+	}
+}
+
+sub TB_REAPER {
+	return if !$children_running;
+        while (my $pid = waitpid(-1, WNOHANG)) {
+		last if $pid < 1;
+		main::tagboxLog("REAPER in parent $$ found reaped pid $pid"); # XXX
+		--$children_running;
+	}
 }
 
 1;

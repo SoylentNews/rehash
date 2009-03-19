@@ -5986,14 +5986,12 @@ INSERT INTO vars (name, value, description) VALUES ('logdir_flock','1','flock(LO
 ALTER TABLE blocks DROP PRIMARY KEY;
 ALTER TABLE blocks ADD UNIQUE KEY bid (bid);
 ALTER TABLE blocks ADD COLUMN id mediumint(8) unsigned NOT NULL primary key auto_increment;
-
 CREATE TABLE dynamic_blocks (
   type_id tinyint(1) unsigned NOT NULL default '0',
   type enum('portal','admin','user') NOT NULL default 'user',
   private enum('yes','no') NOT NULL default 'no',
   PRIMARY KEY (type_id)
 ) ENGINE=InnoDB;
-
 CREATE TABLE dynamic_user_blocks (
   id mediumint(8) unsigned NOT NULL auto_increment,
   bid mediumint(8) unsigned NOT NULL default '0',
@@ -6011,7 +6009,6 @@ CREATE TABLE dynamic_user_blocks (
   UNIQUE KEY name (name),
   UNIQUE KEY block (name, uid)
 ) ENGINE=InnoDB;
-
 INSERT INTO dynamic_blocks VALUES (1, 'portal', 'no');
 INSERT INTO dynamic_blocks VALUES (2, 'portal', 'yes');
 INSERT INTO dynamic_blocks VALUES (3, 'admin', 'no');
@@ -6074,10 +6071,12 @@ CREATE TABLE dynamic_user_blocks (
   UNIQUE KEY name (name),
   UNIQUE KEY block (name, uid)
 ) ENGINE=InnoDB;
-
 INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'performancebox', 'Performance', 'Performance Stats', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'authoractivity', 'Authors', 'Author Activity', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'admintodo', 'Admin Todo', 'Admin Todo Items', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'recenttagnames', 'Recent Tagnames', 'Recent Tagnames', 10000, NOW(), NOW());
 INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'firehoseusage', 'Firehose Usage', 'Firehose Usage', 10000, NOW(), NOW());
+
+# for plugins/Tags
+ALTER TABLE tagboxlog_feeder ADD COLUMN claimed datetime DEFAULT NULL AFTER importance;
 

@@ -24,6 +24,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples_pre',
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples', '', 'Example tags for stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_lastscanned', '0', 'The last tagid scanned to update stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a story');
+INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_numchildren','0','Number of tagbox task children to fork, 0 or 1 to run sequentially');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_lastglobjid', '0', 'Last globjid that the tagbox scanned for possible insertion into feeder log');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_maxruntime', '28800', 'Restart tagbox.pl after running this long, to mitigate any memory leaks, 0 for never');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');

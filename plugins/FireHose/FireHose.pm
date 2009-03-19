@@ -1896,6 +1896,7 @@ sub getFireHoseByGlobjidMulti {
 		my $mcdkey_hr = $mcd->get_multi(@keylist);
 		for my $k (keys %$mcdkey_hr) {
 			my($id) = $k =~ /^\Q$mcdkey:\E(\d+)$/;
+			next unless $id;
 			$mcd_hr->{$id} = $mcdkey_hr->{$k};
 		}
 	}
