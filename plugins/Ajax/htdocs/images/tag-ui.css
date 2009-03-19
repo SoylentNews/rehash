@@ -369,7 +369,7 @@ span.tag-display {
 .tag-widget .tag-entry {
 	display: none;
 	margin-right: 0.4em;
-	width: 90px;
+	width: 7em;
 }
 
 .tag-widget.expanded .tag-entry {
