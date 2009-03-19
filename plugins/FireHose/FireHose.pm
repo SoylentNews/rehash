@@ -3049,7 +3049,6 @@ sub getGlobalOptionDefaults {
 		orderdir	=> 'DESC',
 		orderby		=> 'createtime',
 		mixedmode 	=> 0,
-		color 		=> 'blue',
 		nodates		=> 0,
 		nobylines	=> 0,
 		nothumbs	=> 0,
@@ -3273,7 +3272,7 @@ sub applyViewOptions {
 	}
 
 	foreach (qw(mode color duration orderby orderdir datafilter)) {
-		next if $_ eq "color" && $options->{color};
+		next if $_ eq "color" && $options->{color} && $view->{useparentfilter} eq "yes";
 		$options->{$_} = $view->{$_} if $view->{$_} ne "";
 	}
 
@@ -3967,6 +3966,7 @@ sub getAndSetOptions {
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 #print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned} PAUSE $options->{pause} FPAUSE: |$form->{pause}|\n";
 #print STDERR "DURATION $options->{duration} STARTDATE: $options->{startdate}\n";
+print STDERR "VIEW: $options->{view} COLOR: $options->{color}\n";
 	slashProf("","fh_gASO");
 	return $options;
 }
