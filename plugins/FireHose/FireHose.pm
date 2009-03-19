@@ -3019,6 +3019,7 @@ sub getSimilarForItem {
 sub getOptionsValidator {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	
 	my $colors = $self->getFireHoseColors();
 	my %categories = map { ($_, $_) } (qw(hold quik),
@@ -3037,6 +3038,10 @@ sub getOptionsValidator {
 		colors		=> $colors,
 		categories 	=> \%categories
 	};
+
+	if ($user->{is_admin}) {
+		$valid->{pagesizes}->{single} = 1;
+	}
 	return $valid;
 }
 
@@ -3616,10 +3621,10 @@ sub getAndSetOptions {
 	if (!$s_change && !$v_change && !$search_trigger) {
 		$mode = $form->{mode} || $options->{mode} || '';
 	}
-
-	my $pagesize = $form->{pagesize} && $validator->{pagesize}{$form->{pagesize}};
-	$options->{pagesize} = $pagesize || $options->{pagesize}  || "small";
-
+	
+	my $pagesize;
+	$pagesize = $options->{pagesize} = $validator->{pagesizes}{$options->{pagesize}} ? $options->{pagesize} : "small";
+	
 	if (!$s_change && !$v_change && !$search_trigger) {
 		$options->{mode} = $s_change ? $options->{mode} : $mode;
 	}
@@ -3966,7 +3971,7 @@ sub getAndSetOptions {
 #print STDERR "FHFILTER: $options->{fhfilter} NEXUS: " . Dumper($options->{nexus}) . "\n";
 #print STDERR "VIEW: $options->{view} MODE: $mode USERMODE: |$options->{usermode}  UNSIGNED: $options->{unsigned} PAUSE $options->{pause} FPAUSE: |$form->{pause}|\n";
 #print STDERR "DURATION $options->{duration} STARTDATE: $options->{startdate}\n";
-print STDERR "VIEW: $options->{view} COLOR: $options->{color}\n";
+#print STDERR "VIEW: $options->{view} COLOR: $options->{color}\n";
 	slashProf("","fh_gASO");
 	return $options;
 }
@@ -3986,10 +3991,19 @@ sub getFireHoseLimitSize {
 		} else {
 			$limit = $options->{viewref}{maxitems};
 		}
+		if ($pagesize eq "small") {
+			$limit = int($limit / 1.5);
+		}
+
 		if ($mode eq "full") {
 			$limit = int($limit / 2);
+		} elsif ($mode eq "mixed") {
+			$limit = int($limit / 1.5);
 		}
+		
 	}
+	my $mod = $limit % 5;
+	$limit += (5-$mod) if $mod;
 
 	if (!$limit) {
 		if ($mode eq "full") {
@@ -4005,6 +4019,7 @@ sub getFireHoseLimitSize {
 	}
 
 	$limit = 10 if $forcesmall || $form->{metamod};
+	$limit = 1 if $pagesize eq "single" && $user->{is_admin};
 	return $limit;
 }
 
