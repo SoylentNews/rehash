@@ -15,20 +15,388 @@ our $VERSION = $Slash::Constants::VERSION;
 
 # Update an existing block
 sub setBlock {
-        my ($self, $block) = @_;
+	my ($self, $block) = @_;
 
-        return if (!$block);
+        return 0 if (!$block->{name});
 
         my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+
+        return 0 if ($block->{uid} == $constants->{anonymous_coward_uid});
+
         my $data = {};
-        $data->{'block'} = $block->{block};
-        $data->{'-last_update'} = 'NOW()';
-        $slashdb->sqlUpdate('dynamic_user_blocks', $data, "name = " . $slashdb->sqlQuote($block->{'name'}));
+        my $block_name = $slashdb->sqlQuote($block->{'name'});
+
+	# Check if this block exists. Then create or update.
+	my $bid = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "name = $block_name");
+        if (!$bid) {
+                return 0 if (!$block->{type_id});
+                $data = {
+                        "type_id"      => $block->{type_id},
+                        "uid"          => $block->{uid},
+                        "title"        => $block->{title},
+                        "url"          => $block->{url},
+                        "-name"        => $block_name,
+                        "description"  => $block->{description},
+                        "block"        => $block->{block},
+                        "seclev"       => $block->{seclev},
+                        "-created"     => 'NOW()',
+                        "-last_update" => 'NOW()',
+                };
+                $slashdb->sqlInsert('dynamic_user_blocks', $data);
+        } else {
+                $data->{'block'} = $block->{block};
+                $data->{'-last_update'} = 'NOW()';
+                $slashdb->sqlUpdate('dynamic_user_blocks', $data, "bid = $bid and name = $block_name");
+        }
+}
+
+sub setUserBlock {
+        my ($self, $name, $uid, $options) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+        return 0 if ($uid == $constants->{anonymous_coward_uid});
+
+        my $user = $slashdb->getUser($uid);
+        my ($block, $data);
+
+        $block = $self->setUserCommentBlock($user)     if ($name eq 'comments');
+        $block = $self->setUserJournalBlock($user)     if ($name eq 'journal');
+        $block = $self->setUserAchievementBlock($user) if ($name eq 'achievements');
+        $block = $self->setUserBookmarksBlock($user)   if ($name eq 'bookmarks');
+        $block = $self->setUserTagsBlock($user)        if ($name eq 'tags');
+        $block = $self->setUserFriendsBlock($user)     if ($name eq 'friends');
+        $block = $self->setUserSubmissionsBlock($user) if ($name eq 'submissions');
+        $block = $self->setUserMessagesBlock($user)    if ($name eq 'messages');
+
+        if ($block) {
+                my $block_definition;
+                if ($options->{private}) {
+                        $block_definition = $self->getBlockDefinition('', { type => 'user', private => $options->{private} });
+                } else {
+                        $block_definition = $self->getBlockDefinition('', { type => 'user', private => 'no'});
+                }
+
+                my $id = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "name = '$name-$uid' and $uid = $uid");
+                if (!$id) {
+                        $data = {
+                                type_id        => $block_definition->{type_id},
+                                uid            => $uid,
+                                title          => $block->{title},
+                                url            => $block->{url},
+                                name           => "$name-$uid",
+                                description    => $block->{description},
+                                block          => $block->{block},
+                                seclev         => 0,
+                                "-created"     => 'NOW()',
+                                "-last_update" => 'NOW()',
+                        };
+                        $slashdb->sqlInsert('dynamic_user_blocks', $data);
+                } else {
+                        $data = {
+                                "block"        => $block->{block},
+                                "-last_update" => 'NOW()',
+                        };
+                        $slashdb->sqlUpdate('dynamic_user_blocks', $data, "bid = $id");
+                }
+	}
+}
+
+sub setUserCommentBlock {
+        my ($self, $user) = @_;
+
+        my $constants = getCurrentStatic();
+        my $slashdb = getCurrentDB();
+
+        my $comments =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'sid, cid, subject, date, points, reason',
+                        'comments',
+                        "uid = " . $user->{uid} . " order by date desc limit 5"
+                );
+
+        my $block;
+        if (scalar @$comments) {
+                my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+
+                my $comments_block =
+                        slashDisplay('createcomments', {
+                                reasons  => $mod_reader->getReasons(),
+                                comments => $comments,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $comments_block;
+                $block->{url} = "~$nick/comments";
+                $block->{title} = $nick . "'s Comments";
+                $block->{description} = 'Comments';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserJournalBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $journals =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'id, description, date',
+                        'journals',
+                        "uid = " . $user->{uid} . " and promotetype = 'publish' order by date desc limit 5"
+                );
+
+        my $block;
+        if (scalar @$journals) {
+                my $journals_block =
+                        slashDisplay('createjournals', {
+                                nick     => $user->{nickname},
+                                journals => $journals,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $journals_block;
+                $block->{url} = "~$nick/journal";
+                $block->{title} = $nick . "'s Journal Entries";
+                $block->{description} = 'Journal';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserAchievementBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $achievements_reader = getObject("Slash::Achievements");
+        my $ach_obtained = $achievements_reader->getAchievement('achievement_obtained');
+        my $obtained_aid = $ach_obtained->{'achievement_obtained'}{aid};
+
+        my $achievements =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'aid, createtime',
+                        'user_achievements',
+                        "uid = " . $user->{uid} . " and aid != " . $obtained_aid . " order by createtime desc limit 5"
+                );
+        foreach my $achievement (@$achievements) {
+                $achievement->{description} = $slashdb->sqlSelect('description', 'achievements', 'aid = ' . $achievement->{aid});
+        }
+
+        my $block;
+        if (scalar @$achievements) {
+                my $achievements_block =
+                        slashDisplay('createachievements', {
+                                achievements => $achievements,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $achievements_block;
+                $block->{url} = "~$nick/achievements";
+                $block->{title} = $nick . "'s Achievements";
+                $block->{description} = 'Achievements';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserBookmarksBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $bookmarks_reader = getObject('Slash::Bookmark');
+        return 0 if !$bookmarks_reader;
+
+        my $bookmarks = $bookmarks_reader->getRecentBookmarksByUid($user->{uid}, 5);
+
+        my $block;
+        if (scalar @$bookmarks) {
+                my $bookmarks_block =
+                        slashDisplay('createbookmarks', {
+                                bookmarks => $bookmarks,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $bookmarks_block;
+                $block->{url} = "~$nick/bookmarks";
+                $block->{title} = $nick . "'s Bookmarks";
+                $block->{description} = 'Bookmarks';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserTagsBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $tags = $slashdb->sqlSelectAllHashrefArray(
+                'tagid, tagnameid, globjid',
+                'tags',
+                "uid = " . $user->{uid} .
+                " and tagnameid != 78621 and private = 'no'" .
+                " and inactivated IS NULL order by created_at desc limit 100"
+        );
+
+        my $tags_reader = getObject("Slash::Tags");
+        return 0 if !$tags_reader;
+        my $globj_types = $tags_reader->getGlobjTypes();
+
+        my $unique_tags = [];
+        my %seen_tags;
+        my $count = 0;
+
+        foreach my $tag (@$tags) {
+                last if ($count == 5);
+                if (!$seen_tags{$tag->{tagnameid}}) {
+                        my $gtid = $slashdb->sqlSelect('gtid', 'globjs', 'globjid = ' . $tag->{globjid});
+                        $tag->{target} = $globj_types->{$gtid};
+                        $tag->{tagname} = $slashdb->sqlSelect('tagname', 'tagnames', 'tagnameid = ' . $tag->{tagnameid});
+                        push(@$unique_tags, $tag);
+                        $seen_tags{$tag->{tagnameid}} = 1;
+                        ++$count;
+                }
+        }
+
+        my $block;
+        if (scalar @$unique_tags) {
+                my $tags_block =
+                        slashDisplay('createtags', {
+                                nick => $user->{nickname},
+                                tags => $unique_tags,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $tags_block;
+                $block->{url} = "~$nick/tags";
+                $block->{title} = $nick . "'s Tags";
+                $block->{description} = 'Tags';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserFriendsBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $friends =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'id, person',
+                        'people',
+                        "uid = " . $user->{uid} .
+                        " and type = 'friend'" .
+                        " order by id desc limit 5"
+                );
+
+        foreach my $friend (@$friends) {
+                $friend->{nick} = $slashdb->sqlSelect('nickname', 'users', "uid = " . $friend->{person});
+                $friend->{nick} = strip_paramattr($friend->{nick});
+                $friend->{bio}  = $slashdb->sqlSelect('bio', 'users_info', "uid = " . $friend->{person}) if $user->{u2_friends_bios};
+        }
+
+        my $block;
+        if (scalar @$friends) {
+                my $friends_block =
+                        slashDisplay('createfriends', {
+                                friends => $friends,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $friends_block;
+                $block->{url} = "~$nick/friends";
+                $block->{title} = $nick . "'s Friends";
+                $block->{description} = 'Friends';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserSubmissionsBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $submissions =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'id',
+                        'firehose',
+                        "uid = " . $user->{uid} .
+                        " and (type = 'submission' or type = 'feed')",
+                        ' order by createtime desc limit 5'
+                );
+
+        foreach my $subid (@$submissions) {
+                $subid->{title} = $slashdb->sqlSelect('title', 'firehose_text', "id = " . $subid->{id});
+        }
+
+        my $block;
+        if (scalar @$submissions) {
+                my $submissions_block =
+                        slashDisplay('createsubmissions', {
+                                submissions => $submissions,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $submissions_block;
+                $block->{url} = "~$nick/submissions";
+                $block->{title} = $nick . "'s Submissions";
+                $block->{description} = 'Submissions';
+        }
+
+        return (keys %$block) ? $block : 0;
+}
+
+sub setUserMessagesBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $messages =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'id',
+                        'message_web',
+                        "user = " . $user->{uid} .
+                        ' order by date desc limit 5'
+                );
+
+        foreach my $message (@$messages) {
+                $message->{subject} = $slashdb->sqlSelect('subject', 'message_web_text', 'id = ' . $message->{id});
+        }
+
+        my $block;
+        if (scalar @$messages) {
+                my $messages_block =
+                        slashDisplay('createmessages', {
+                                messages => $messages,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                my $nick;
+                $nick = strip_paramattr($user->{nickname});
+                $block->{block} = $messages_block;
+                $block->{url} = 'my/messages';
+                $block->{title} = 'Messages';
+                $block->{description} = 'Messages';
+        }
+
+        return (keys %$block) ? $block : 0;
 }
 
 # Returns all portal blocks.
 sub getPortalBlocks {
-        my ($self, $keyed_on, $options) = @_;
+	my ($self, $keyed_on, $options) = @_;
 
         my $slashdb = getCurrentDB();
 
@@ -46,7 +414,7 @@ sub getPortalBlocks {
                 $blocks->{$block}{private} = $block_definition->{private};
 
                 ($blocks->{$block}{block}, $blocks->{$block}{title}, $blocks->{$block}{url}) =
-                        $self->getPortalBlockContent($blocks->{$block}{bid}, $slashdb);
+                        $self->getPortalBlockContent($blocks->{$block}{portal_id}, $slashdb);
         }
 
         return (keys %$blocks) ? $blocks : 0;
@@ -55,7 +423,9 @@ sub getPortalBlocks {
 # Returns a hash of a particular user's friends' blocks.
 # Does not return any admin blocks.
 sub getFriendBlocks {
-        my ($self, $keyed_on, $uid, $options) = @_;
+	my ($self, $keyed_on, $uid, $options) = @_;
+
+        return 0 if (!$keyed_on || !$uid);
 
         my $zoo = getObject("Slash::Zoo", { db_type => 'reader' });
         return 0 if !$zoo;
@@ -66,18 +436,20 @@ sub getFriendBlocks {
                 my $friend_blocks = $self->getUserBlocks($keyed_on, $friend->[0], { friend => 1 });
                 if ($friend_blocks) {
                         foreach my $friend_block (keys %$friend_blocks) {
-                                $blocks->{$friend_block} = %$friend_blocks->{$friend_block};
-                        }
-                }
-        }
+                                $blocks->{$friend_block} = $friend_blocks->{$friend_block};
+			}
+		}
+	}
 
-        return (keys %$blocks) ? $blocks : 0;
+	return (keys %$blocks) ? $blocks : 0;
 }
 
 # Returns a hash of a particular user's blocks.
 # Includes their public and private admin blocks if they are an admin.
 sub getUserBlocks {
-        my ($self, $keyed_on, $uid, $options) = @_;
+	my ($self, $keyed_on, $uid, $options) = @_;
+
+        return 0 if (!$keyed_on || !$uid);
 
         my $slashdb = getCurrentDB();
         my $blocks;
@@ -114,7 +486,7 @@ sub getUserBlocks {
 
                 if ($block_definition->{type} eq 'portal') {
                         ($user_blocks->{$user_block}{block}, $user_blocks->{$user_block}{title}, $user_blocks->{$user_block}{url}) =
-                                $self->getPortalBlockContent($user_blocks->{$user_block}{bid}, $slashdb);
+                                $self->getPortalBlockContent($user_blocks->{$user_block}{portal_id}, $slashdb);
                 }
 
                 $blocks->{$user_block} = $user_blocks->{$user_block};
@@ -125,7 +497,7 @@ sub getUserBlocks {
 
 # Returns the 3 main fields not normally mirrored in 'dynamic_user_blocks'
 sub getPortalBlockContent {
-        my ($self, $id, $slashdb) = @_;
+	my ($self, $id, $slashdb) = @_;
 
         my @block_data = $slashdb->sqlSelect('block, title, url', 'blocks', "id = $id");
         return @block_data;
@@ -138,7 +510,7 @@ sub getPortalBlockContent {
 # getBlockDefinition("", { type => "admin", private => "no" })
 # getBlockDefinition("", { type => "user", private => "yes" })
 sub getBlockDefinition {
-        my ($self, $id, $options) = @_;
+	my ($self, $id, $options) = @_;
 
         return 0 if !$id and !$options;
 
@@ -158,14 +530,13 @@ sub getBlockDefinition {
                 $slashdb->sqlSelect('type_id, type, private', 'dynamic_blocks', $where);
 
         return ($block_definition->{type_id}) ? $block_definition : 0;
-
 }
 
 # This is called periodically by certain tasks.
 # It syncs 'blocks' and 'dynamic_user_blocks, but does
 # not mirror certain fields (block, url, title).
 sub syncPortalBlocks {
-        my ($self, $name, $options) = @_;
+	my ($self, $name, $options) = @_;
 
         return if (!$name && !$options);
 
@@ -187,12 +558,12 @@ sub syncPortalBlocks {
                         $slashdb->sqlSelect('id, last_update, shill_uid, seclev', 'blocks', "bid = '$name'");
 
 		# Check if this block already exists in dynamic_user_blocks
-		my $dynb_id = $slashdb->sqlSelect('id', 'dynamic_user_blocks', "bid = " . $block_data->{id});
+		my $dynb_id = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "portal_id = " . $block_data->{id});
 
                 my $data;
                 if (!$dynb_id) {
                         $data = {
-                                "bid"         => $block_data->{id},
+                                "portal_id"         => $block_data->{id},
                                 "type_id"     => $portal_block_definition->{type_id},
                                 "uid"         => $block_data->{shill_uid},
                                 "name"        => $name,
@@ -205,7 +576,7 @@ sub syncPortalBlocks {
                         $data = {
                                 "last_update" => $block_data->{last_update}
                         };
-                        $slashdb->sqlUpdate('dynamic_user_blocks', $data, "id = " . $dynb_id);
+                        $slashdb->sqlUpdate('dynamic_user_blocks', $data, "bid = " . $dynb_id);
                 }
         }
 }
@@ -220,7 +591,7 @@ sub syncPortalBlocks {
 #
 # getBlocksEligibleForUpdate("foo,bar", { min_time => 'yyyy-mm-dd hh:mm:ss' });
 sub getBlocksEligibleForUpdate {
-        my ($self, $list, $options) = @_;
+	my ($self, $list, $options) = @_;
 
         my $constants = getCurrentStatic();
         return 0 if (!$constants->{dynamic_blocks} || !$options->{min_time} || !$options->{is_admin});
@@ -232,15 +603,20 @@ sub getBlocksEligibleForUpdate {
 		# Need better use of an exclusion list here.
 		next if ($block eq 'index_jobs');
 
-		my ($bid, $type_id) = $slashdb->sqlSelect('bid, type_id', 'dynamic_user_blocks', "name = '$block' and last_update BETWEEN '$min_time' and NOW()");
+		my ($bid, $portal_id, $type_id) =
+                        $slashdb->sqlSelect(
+                                'bid, portal_id, type_id',
+                                'dynamic_user_blocks',
+                                "name = '$block' and last_update BETWEEN '$min_time' and NOW()"
+                        );
                 if ($bid) {
                         my $block_definition = $self->getBlockDefinition($type_id);
 
                         my ($block_data, $block_title, $block_url);
                         if ($block_definition->{type} eq "portal") {
                                 ($block_data, $block_title, $block_url) =
-                                        $self->getPortalBlockContent($bid, $slashdb);
-                        } else {
+                                        $self->getPortalBlockContent($portal_id, $slashdb);
+			} else {
                                 ($block_data, $block_title, $block_url) =
                                         $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "bid = $bid");
                         }
@@ -254,6 +630,22 @@ sub getBlocksEligibleForUpdate {
         }
 
         return (keys %$dynamic_blocks) ? $dynamic_blocks : 0;
+}
+
+sub displayBlock {
+        my ($self, $name) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $block;
+        ($block->{block}, $block->{title}, $block->{url}) =
+                $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "name = '$name'");
+        $block->{name} = $name;
+
+        return
+                slashDisplay('displayblock', {
+                        block => $block,
+                }, { Page => 'dynamicblocks', Return => 1 });
 }
 
 sub DESTROY {
