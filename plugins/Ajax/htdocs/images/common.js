@@ -155,9 +155,9 @@ function handleEnter(ev, func, arg) {
 
 
 
-function fhitem( any ){
+function fhitem_of( any ){
 	// Returns a jQuery selection of the firehose-item that is, contains, or is identified by any.
-	// Use fhitem() to present the "any" API from functions that work on firehose-items.
+	// Use fhitem_of() to present the "any" API from functions that work on firehose-items.
 	switch ( $.TypeOf.unqualified(any) ) {
 		case 'string':	if ( !/^\d+$/.test(any) ) { break; }
 		case 'number':	any = 'firehose-' + any;
@@ -165,7 +165,7 @@ function fhitem( any ){
 	return $any(any).closest('#firehoselist>*');
 }
 
-function fhid( any ){
+function fhid_of( any ){
 	// Returns the firehose-id associated with any, e.g., from 'firehose-12345', return 12345.
 	var M;
 	switch ( $.TypeOf.unqualified(any) ) {
@@ -174,7 +174,7 @@ function fhid( any ){
 		case 'element': case 'string':
 			if ( M=/^(?:[-a-z]-)?(\d+)$/.exec(any.id||any) ) { return M[1]; }
 		default:
-			return (fhitem(any).attr('id') || '').substr(9); // chop off 'firehose-'
+			return (fhitem_of(any).attr('id') || '').substr(9); // chop off 'firehose-'
 	}
 }
 
@@ -259,8 +259,8 @@ function reportError(request) {
 function toggle_firehose_body( any, unused, /*optional:*/toggle_to ) {
 	setFirehoseAction();
 
-	var	$fhitem		= fhitem(any),
-		id		= fhid($fhitem),
+	var	$fhitem		= fhitem_of(any),
+		id		= fhid_of($fhitem),
 		$body		= $fhitem.children('[id^=fhbody-]'),
 		body_is_empty	= $body.is('.empty'),
 		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
@@ -449,7 +449,7 @@ function firehose_fix_up_down( id, new_state ){
 }
 
 function firehose_click_nodnix_reason( event ) {
-	var $fhitem=fhitem(event.target), id=fhid($fhitem);
+	var $fhitem=fhitem_of(event.target), id=fhid_of($fhitem);
 
 	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+id).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
 		firehose_collapse_entry(id);
@@ -485,8 +485,8 @@ function tag_ui_in( $fhitem ){
 }
 
 function firehose_toggle_tag_ui_to( if_expanded, any ){
-	var	$fhitem		= fhitem(any), // assert($fhitem.length)
-		id		= fhid($fhitem),
+	var	$fhitem		= fhitem_of(any), // assert($fhitem.length)
+		id		= fhid_of($fhitem),
 		tag_ui		= tag_ui_in($fhitem),
 		toggle		= tag_ui.expanded == !if_expanded; // force boolean conversion
 
@@ -507,7 +507,7 @@ function firehose_toggle_tag_ui_to( if_expanded, any ){
 }
 
 function firehose_toggle_tag_ui( any ) {
-	var $fhitem = fhitem(any);
+	var $fhitem = fhitem_of(any);
 	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
 }
 
@@ -730,7 +730,7 @@ function firehose_init_tag_ui( $new_entries ){
 
 	$new_entries.
 		each(function(){
-			var $this = $(this), id = fhid(this);
+			var $this = $(this), id = fhid_of(this);
 
 			install_tag_server(this, id);
 
