@@ -41,6 +41,8 @@
 
 use strict;
 
+use POSIX ':sys_wait_h';
+
 use Slash;
 use Slash::Constants ':slashd';
 use Slash::Display;
@@ -443,7 +445,7 @@ sub run_tagboxes_until {
 	my $num_children = $constants->{tags_tagbox_numchildren} || 1;
 	my $do_fork = ($num_children > 1);
 	while (time() < $run_until && !$task_exit_flag) {
-		my $cur_count = 10;
+		my $cur_count = 20;
 		my $cur_minweightsum = 1;
 		my $try_to_reduce_rowcount = 0;
 
@@ -457,7 +459,7 @@ sub run_tagboxes_until {
 			}
 		}
 		if ($is_overnight) {
-			$cur_count = 30;
+			$cur_count = 50;
 			$cur_minweightsum = $overnight_sum;
 			$try_to_reduce_rowcount = 1;
 		}
@@ -510,9 +512,8 @@ sub run_tagboxes_until {
 
 sub rtu_partition {
 	my($affected_ar, $num_children) = @_;
-	my $part_ar = [
-		( [ ] x $num_children )
-	];
+	my $part_ar = [ ];
+	for (1..$num_children) { push @$part_ar, [ ] }
 
 	# Start by assigning each tagbox's id's to one child.  Generally,
 	# grouping a tagbox's id's together is desirable for performance.
@@ -547,7 +548,7 @@ sub rtup_getminmax {
 	my($min, $max, $min_index, $max_index) = (2**30, 0, undef, undef);
 	my @counts = map { scalar(@$_) } @$part_ar;
 	for my $i (0..$#counts) {
-		$count = $counts[$i];
+		my $count = $counts[$i];
 		if ($count < $min) { $min = $count; $min_index = $i }
 		if ($count > $max) { $max = $count; $max_index = $i }
 	}
@@ -555,13 +556,14 @@ sub rtup_getminmax {
 }
 
 sub rtu_dbs_disconnect {
-	# do they share a dbh? relook at getObject
-	for my $tbid (keys %$tagboxes) {
-		my $obj = $tagboxes->{$tbid}{object};
+	for my $tb (@$tagboxes) {
+		my $obj = $tb->{object};
 		next unless $obj->{_dbh};
 		$obj->{_dbh}->disconnect;
 		undef $obj->{_dbh};
 	}
+	$tagboxdb->{_dbh}->disconnect if $tagboxdb->{_dbh};
+	undef $tagboxdb->{_dbh};
 }
 
 sub rtu_run_forks {
@@ -578,8 +580,9 @@ sub rtu_run_forks {
 				my %tbids = ( map { ($_->{tbid}, 1) } @$affected_ar );
 				my @tbids = sort { $a <=> $b } keys %tbids;
 				for my $tbid (@tbids) {
-					my $tb_affected_ar = [ grep { $_->{tbid} == $tbid } ];
-					$tagbox_obj->run_multi($tb_affected_ar);
+					my $tb_affected_ar = [ grep { $_->{tbid} == $tbid } @$affected_ar ];
+					my $tagbox_obj = $tagboxdb->getTagboxObject($tbid);
+					$tagbox_obj->run_multi([ map { $_->{affected_id} } @$tb_affected_ar ]);
 					for my $affected_hr (@$tb_affected_ar) {
 						$tagboxdb->markTagboxRunComplete($affected_hr);
 					}

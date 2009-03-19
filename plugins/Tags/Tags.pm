@@ -454,6 +454,7 @@ sub getTagnameDataFromIds {
 		my $mcdkey_hr = $mcd->get_multi(@keylist);
 		for my $k (keys %$mcdkey_hr) {
 			my($id) = $k =~ $mcdkey_qr;
+			next unless $id;
 			$mcd_hr->{$id} = $mcdkey_hr->{$k};
 			# Locally store any hits found.
 			$self->{$table_cache}{$id} = $mcd_hr->{$id};

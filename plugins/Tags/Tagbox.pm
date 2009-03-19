@@ -425,11 +425,15 @@ sub getMostImportantTagboxAffectedIDs {
 	my $num = $options->{num} || 10;
 	my $min_weightsum = $options->{min_weightsum} || 1;
 
-	my $sum_imp_weight = 'SUM(importance*weight)';
+	my $imp_weight = '(importance * weight
+		* IF(created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE), 1.1,
+			IF(created_at > DATE_SUB(NOW(), INTERVAL 2 WEEK), 1.0,
+			0.9))';
+	my $sum_imp_weight = "SUM($imp_weight)";
 	if ($options->{try_to_reduce_rowcount}) {
 		# Factor row count into the weight, because the main
 		# goal here is to eliminate as many rows as possible.
-		$sum_imp_weight = 'SUM(GREATEST(LEAST(importance*weight, 0.5), 2) + 1)';
+		$sum_imp_weight = 'SUM(GREATEST(LEAST($imp_weight, 0.5), 2) + 1)';
 	}
 	$sum_imp_weight .= ' AS sum_imp_weight';
 
@@ -448,7 +452,7 @@ sub getMostImportantTagboxAffectedIDs {
 		 $sum_imp_weight",
 		'tagboxes, tagboxlog_feeder',
 		"tagboxes.tbid=tagboxlog_feeder.tbid
-		 AND (claimed IS NULL OR claimed < DATE_SUB(NOW(), INTERVAL 3600 SECOND)
+		 AND (claimed IS NULL OR claimed < DATE_SUB(NOW(), INTERVAL 3600 SECOND))
 		 $mod_clause",
 		"GROUP BY tagboxes.tbid, affected_id
 		 HAVING sum_imp_weight >= $min_weightsum
@@ -456,7 +460,7 @@ sub getMostImportantTagboxAffectedIDs {
 }
 
 sub markClaimed {
-	my($claimed_ar) = @_;
+	my($self, $claimed_ar) = @_;
 	return unless $claimed_ar;
 
 	my @claims = ( );
@@ -576,7 +580,7 @@ sub markTagboxRunComplete {
 
 	my $delete_clause = "tbid=$affected_hr->{tbid}"
 		. " AND affected_id=$affected_hr->{affected_id}"
-		. ' AND claimed IS NOT NULL';
+		. ' AND claimed IS NOT NULL'
 		. " AND tfid <= $affected_hr->{max_tfid}";
 
 	$self->sqlDelete('tagboxlog_feeder', $delete_clause);
@@ -590,7 +594,7 @@ sub _generic_log {
 	my $caller_sub_full = (caller(2))[3];
 	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
 	my $class = ref($self);
-	my $msg = sprintf("%s %s $format", $class, $caller_sub, @args);
+	my $msg = sprintf("%d %s %s $format", $$, $class, $caller_sub, @args);
 	if (defined &main::tagboxLog) {
 		main::tagboxLog($msg);
 	} else {
