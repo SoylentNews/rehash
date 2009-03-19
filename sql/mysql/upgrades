@@ -6042,3 +6042,42 @@ CREATE TABLE pagemark (
 # for plugins/Ajax
 INSERT INTO ajax_ops VALUES (NULL, 'page_profile', 'Slash::DB::MySQL', 'ajaxPageProfile', 'ajax_base', 'createuse');
 
+# For plugins/Achievements
+DELETE FROM user_achievements WHERE aid = 23;
+DELETE FROM user_achievement_streaks WHERE aid = 23;
+DELETE FROM achievements WHERE aid = 23;
+ALTER TABLE achievements ADD UNIQUE KEY achievement (name);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_tagger', 'The Tagger', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_contradictor', 'The Contradictor', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('1_uid_club', 'Member of the 1 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('2_uid_club', 'Member of the 2 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('3_uid_club', 'Member of the 3 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('4_uid_club', 'Member of the 4 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('5_uid_club', 'Member of the 5 Digit UID Club', 'yes', 1);
+
+# For plugins/DynamicBlocks (new schema)
+DROP TABLE IF EXISTS dynamic_user_blocks;
+CREATE TABLE dynamic_user_blocks (
+  bid mediumint(8) unsigned NOT NULL auto_increment,
+  portal_id mediumint(8) unsigned NOT NULL default '0',
+  type_id tinyint(1) unsigned NOT NULL default '0',
+  uid mediumint(8) unsigned NOT NULL default '0',
+  title varchar(30) NOT NULL default '',
+  url varchar(128) NOT NULL default '',
+  name varchar(30) NOT NULL default '',
+  description varchar(64) NOT NULL default '',
+  block text,
+  seclev mediumint(8) unsigned NOT NULL default '0',
+  created datetime NOT NULL default '0000-00-00 00:00:00',
+  last_update datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (bid),
+  UNIQUE KEY name (name),
+  UNIQUE KEY block (name, uid)
+) ENGINE=InnoDB;
+
+INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'performancebox', 'Performance', 'Performance Stats', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'authoractivity', 'Authors', 'Author Activity', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'admintodo', 'Admin Todo', 'Admin Todo Items', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'recenttagnames', 'Recent Tagnames', 'Recent Tagnames', 10000, NOW(), NOW());
+INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev, created, last_update) VALUES (3, 0, 'firehoseusage', 'Firehose Usage', 'Firehose Usage', 10000, NOW(), NOW());
+

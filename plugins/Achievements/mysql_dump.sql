@@ -7,3 +7,10 @@ INSERT INTO achievements (name, description, repeatable, increment) VALUES ('sco
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('story_accepted', 'Submitted a Story That Was Posted', 'yes', 2);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_read', 'Days Read in a Row', 'yes', 2);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('consecutive_days_metamod', 'Days Metamoderated in a Row', 'yes', 2);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_tagger', 'The Tagger', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_contradictor', 'The Contradictor', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('1_uid_club', 'Member of the 1 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('2_uid_club', 'Member of the 2 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('3_uid_club', 'Member of the 3 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('4_uid_club', 'Member of the 4 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('5_uid_club', 'Member of the 5 Digit UID Club', 'yes', 1);

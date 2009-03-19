@@ -5,7 +5,8 @@ CREATE TABLE achievements (
         description varchar(128) NOT NULL default '',
         repeatable enum('yes','no') NOT NULL default 'no',
         increment tinyint(1) unsigned NOT NULL default '0',
-        PRIMARY KEY (aid)
+        PRIMARY KEY (aid),
+	UNIQUE KEY achievement (name)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS user_achievements;
