@@ -1095,7 +1095,6 @@ function firehose_storyfuture( future ){
 
 
 function pos_logger() {
-	console.log("calling pos logger");
 	var id = fhid(this);
 	var pos = 0;
 
@@ -1401,10 +1400,24 @@ function firehose_inactivity_modal() {
 	show_modal_box();
 }
 
+function start_up_hose() {
+	firehose_set_options('pause', false);
+}
+
 function firehose_play(context) {
 	fh_play = 1;
+	var wait = 0;
+	if (context && context == "init") {
+		wait = getFirehoseUpdateInterval();
+	}
+	
 	setFirehoseAction();
-	firehose_set_options('pause', false, context);
+	if (context && context == "init") {
+		setTimeout(start_up_hose, wait);
+	} else {
+		firehose_set_options('pause', false, context);
+	}
+
 	$('#message_area').html('');
 	$('#pauseorplay').html('Updated');
 	$('#play').setClass('hide');
