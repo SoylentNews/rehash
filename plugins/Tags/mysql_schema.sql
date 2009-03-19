@@ -97,6 +97,7 @@ CREATE TABLE tagboxlog_feeder (
 	tbid		smallint UNSIGNED NOT NULL,
 	affected_id	int UNSIGNED NOT NULL,
 	importance	FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
+	claimed		datetime DEFAULT NULL,
 	tagid		int UNSIGNED DEFAULT NULL,
 	tdid		int UNSIGNED DEFAULT NULL,
 	tuid		int UNSIGNED DEFAULT NULL,

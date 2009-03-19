@@ -84,7 +84,6 @@ sub run_process {
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose_db = getObject('Slash::FireHose');
-	my $slashdb = getCurrentDB();
 
 	# Get info about the firehose item that may have been tagged.
 	my $affected_id_q = $self->sqlQuote($affected_id);
@@ -99,10 +98,10 @@ sub run_process {
 	# We only track ipid for actual submissions, not journals/bookmarks.
 	my $submitter_uid = $fhitem->{uid};
 	my $submitter_ipid = '';
-	my $types = $slashdb->getGlobjTypes();
+	my $types = $self->getGlobjTypes();
 	my $submission_gtid = $types->{submissions};
 	if ($submission_gtid) {
-		$submitter_ipid = $slashdb->sqlSelect(
+		$submitter_ipid = $self->sqlSelect(
 			'ipid',
 			'globjs, submissions',
 			"globjid=$affected_id
@@ -116,7 +115,7 @@ sub run_process {
 	# an old binspam tag was deactivated).  Even one admin binspam tag
 	# is enough to mark the individual item as binspam.
 	# XXX these tags are going to be in $tags_ar, re-SELECTing is redundant
-	my $binspam_count_globjid = $slashdb->sqlCount(
+	my $binspam_count_globjid = $self->sqlCount(
 		'tags',
 		"globjid=$affected_id
 		 AND tagnameid=$self->{binspamid}
@@ -159,7 +158,7 @@ sub run_process {
 	my $binspam_tagid_globj_hr = { };
 	if ($check_type) {
 		# XXX these tags are going to be in $tags_ar, just SELECT the globjids in firehose, see all_globjid_ar below
-		$binspam_tagid_globj_hr = $slashdb->sqlSelectAllKeyValue(
+		$binspam_tagid_globj_hr = $self->sqlSelectAllKeyValue(
 			'tags.tagid, tags.globjid',
 			"tags, firehose$table_clause",
 			"tags.globjid = firehose.globjid
@@ -217,7 +216,7 @@ sub run_process {
 	# the only complicated part of this has already been done by
 	# setting $table_clause and $where_clause.
 	if ($mark_srcid && $check_type) {
-		my $all_globjid_ar = $slashdb->sqlSelectColArrayref(
+		my $all_globjid_ar = $self->sqlSelectColArrayref(
 			'firehose.globjid',
 			"firehose$table_clause",
 			$where_clause);
@@ -228,7 +227,7 @@ sub run_process {
 
 	# Convert that list of globjids to firehose ids.
 	my $globjid_in_str = join(',', sort { $a <=> $b } keys %globjids_mark_spam);
-	my $fhid_mark_spam_hr = $slashdb->sqlSelectAllKeyValue(
+	my $fhid_mark_spam_hr = $self->sqlSelectAllKeyValue(
 		'id, globjid',
 		'firehose',
 		"globjid IN ($globjid_in_str)");
@@ -287,7 +286,7 @@ sub run_process {
 			}
 		}
 		# XXX put 1183959 into a constant for goshsakes
-		$slashdb->setAL2($srcid, { spammer => 1 }, { adminuid => 1183959 });
+		$self->setAL2($srcid, { spammer => 1 }, { adminuid => 1183959 });
 	}
 }
 

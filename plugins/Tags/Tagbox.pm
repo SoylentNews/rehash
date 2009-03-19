@@ -56,6 +56,11 @@
 # I haven't attempted to segregate out a list of methods which could operate
 # on a reader database, so for now assume everything requires a writer.
 
+# I'm not sure if max_tfid is redundant now that the claimed column has
+# been introduced.  Claimed is the better way to handle a situation
+# where a child process may potentially exit without completion.
+# So it may be possible to eliminate max_tfid.
+
 package Slash::Tagbox;
 
 use strict;
@@ -428,16 +433,38 @@ sub getMostImportantTagboxAffectedIDs {
 	}
 	$sum_imp_weight .= ' AS sum_imp_weight';
 
+	my $mod_clause = '';
+	if ($options->{mod}) {
+		my $mod = $options->{mod};
+		my $remainder = $options->{remainder} || 0;
+		$mod_clause = " AND MOD(affected_id, $mod) = $remainder";
+	}
+
+	# see comment in markTagboxRunComplete
 	return $self->sqlSelectAllHashrefArray(
 		"tagboxes.tbid,
 		 affected_id,
 		 MAX(tfid) AS max_tfid,
 		 $sum_imp_weight",
 		'tagboxes, tagboxlog_feeder',
-		'tagboxes.tbid=tagboxlog_feeder.tbid',
+		"tagboxes.tbid=tagboxlog_feeder.tbid
+		 AND (claimed IS NULL OR claimed < DATE_SUB(NOW(), INTERVAL 3600 SECOND)
+		 $mod_clause",
 		"GROUP BY tagboxes.tbid, affected_id
 		 HAVING sum_imp_weight >= $min_weightsum
 		 ORDER BY sum_imp_weight DESC LIMIT $num");
+}
+
+sub markClaimed {
+	my($claimed_ar) = @_;
+	return unless $claimed_ar;
+
+	my @claims = ( );
+	for my $hr (@$claimed_ar) {
+		push @claims, "(tbid=$hr->{tbid} AND affected_id=$hr->{affected_id})";
+	}
+	my $claims_str = join ' OR ', @claims;
+	$self->sqlUpdate('tagboxlog_feeder', { -claimed => 'NOW()' }, $claims_str);
 }
 
 sub getTagboxTags {
@@ -523,6 +550,7 @@ sub forceFeederRecalc {
 		tbid =>		$self->{tbid},
 		affected_id =>	$affected_id,
 		importance =>	999999,
+		claimed =>	undef,
 		tagid =>	undef,
 		tdid =>		undef,
 		tuid =>		undef,
@@ -540,12 +568,16 @@ sub markTagboxRunComplete {
 
 	# markTagboxRunComplete() is not specific to any tagbox subclass,
 	# and so $self here might well be an object of the Slash::Tagbox
-	# base class.  The $affected_hr defines which tagbox id needs to
-	# have this operation performed, so we ignore $self's own tbid
+	# base class.
+
+	# The $affected_hr defines which tagbox id needs to have
+	# this operation performed, so we ignore $self's own tbid
 	# and take $affected_hr's as authoritative.
 
-	my $delete_clause = "tbid=$affected_hr->{tbid} AND affected_id=$affected_hr->{affected_id}";
-	$delete_clause .= " AND tfid <= $affected_hr->{max_tfid}";
+	my $delete_clause = "tbid=$affected_hr->{tbid}"
+		. " AND affected_id=$affected_hr->{affected_id}"
+		. ' AND claimed IS NOT NULL';
+		. " AND tfid <= $affected_hr->{max_tfid}";
 
 	$self->sqlDelete('tagboxlog_feeder', $delete_clause);
 	$self->sqlUpdate('tagboxes',
@@ -891,6 +923,14 @@ sub feed_userchanges_pre {
 #}
 
 #################################################################
+
+sub run_multi {
+	my($self, $affected_id_ar, $options) = @_;
+	# Default behavior is rather simple.
+	for my $id (@$affected_id_ar) {
+		$self->run($id, $options);
+	}
+}
 
 sub run {
 	my($self, $affected_id, $options) = @_;

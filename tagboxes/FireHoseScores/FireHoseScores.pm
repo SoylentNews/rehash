@@ -29,7 +29,6 @@ use base 'Slash::Tagbox';
 sub init {
 	my($self) = @_;
 	return 0 if ! $self->SUPER::init();
-	my $slashdb = getCurrentDB();
 	$self->{nodornixid}     = {(
 		$self->{nodid},         1,
 		$self->{nixid},         1,
@@ -37,7 +36,7 @@ sub init {
 	my $admins = $self->getAdmins();
 	$self->{admins} = {
 		map { ($_, 1) }
-		grep { $slashdb->getUser($_, 'seclev') >= 100 }
+		grep { $self->getUser($_, 'seclev') >= 100 }
 		keys %$admins
 	};
 
