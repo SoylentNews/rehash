@@ -1243,6 +1243,14 @@ sub showInfo {
 			$form->{skipmenu} = 1;
 		}
 
+		# Dynamic blocks
+		my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
+                my ($dyn_achievements, $dyn_messages);
+                if ($dynamic_blocks_reader and $user->{is_admin}) {
+                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid);
+                        $dyn_messages     = $dynamic_blocks_reader->displayBlock('messages-' . $uid);
+                }
+
 		slashDisplay('u2MainView', {
 			title			    => $title,
 			uid			    => $uid,
@@ -1280,6 +1288,8 @@ sub showInfo {
 			rss_block		    => $rss_block,
 			requested_user_achievements => $requested_user_achievements,
 			achievements_datapane	    => $achievements_datapane,
+			dyn_achievements            => $dyn_achievements,
+			dyn_messages                => $dyn_messages,
 		}, { Page => 'users', Skin => 'default'});
 	}
 

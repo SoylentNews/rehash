@@ -164,6 +164,14 @@ __template__
         </div>
 </div>
 [% END %]
+
+[% IF is_admin && dyn_achievements %]
+        [% dyn_achievements %]
+[% END %]
+
+[% IF is_admin && dyn_messages %]
+        [% dyn_messages %]
+[% END %]
 __seclev__
 500
 __version__

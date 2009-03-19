@@ -86,6 +86,8 @@ __template__
                 latest_friends=latest_friends
                 tagshist=tagshist
 		achievements=requested_user_achievements
+		dyn_achievements=dyn_achievements
+		dyn_messages=dyn_messages
                 is_admin=user.is_admin
         %]
 
