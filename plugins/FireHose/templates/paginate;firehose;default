@@ -138,8 +138,18 @@ __template__
 
 	[% IF level == 'day' || level == 'hour';
 		max_days_ahead = options.smalldevices ? 1 : 2;
-		days = Slash.getOlderDaysFromDay(orig_day, 0, max_days_ahead) %]
-		[% FOREACH cur_day = days %]
+		days = Slash.getOlderDaysFromDay(orig_day, 0, max_days_ahead);
+		last_day_str = '';
+		FOREACH cur_day = days;
+			IF level == 'hour';
+				last_day_str_matches = cur_day.1.match('^(.+), (.+)$');
+				IF last_day_str_matches.0;
+					IF last_day_str == last_day_str_matches.0;
+						cur_day.1 = last_day_str_matches.1;
+					END;
+					last_day_str = last_day_str_matches.0;
+				END;
+			END %]
 	<span class="[% IF orig_day != cur_day.0; %]in[% END %]active"><span class="i">
 		<a [% IF !user.is_anon %]onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => -1 }); f; %]">[% cur_day.1 | strip_literal %]</a>
 	</span></span>
