@@ -493,6 +493,10 @@ sub send {
 	} elsif ($mode == MSG_MODE_WEB) {
 		if ($self->create_web($msg)) {
 			$self->log($msg, MSG_MODE_WEB);
+			my $dynamic_blocks = getObject("Slash::DynamicBlocks");
+			if ($dynamic_blocks) {
+				$dynamic_blocks->setUserBlock('messages', $msg->{user}{uid}, { private => 'yes' });
+			}
 			return 1;
 		} else {
 			return 0;

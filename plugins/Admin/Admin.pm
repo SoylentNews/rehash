@@ -534,7 +534,7 @@ sub showAuthorActivityBox {
 			sid	=> $sid,
 			uid	=> $uid,
 			fhid	=> $fhid,
-			'time'	=> $time,
+			'time'	=> $time || '',
 			verb	=> $last_action
 		};
 	}
@@ -548,7 +548,7 @@ sub showAuthorActivityBox {
 			subid	 => "",
 			sid	 => $story->{sid},
 			uid	 => $signoff->{uid},
-			'time'   => $signoff->{signoff_time},
+			'time'   => $signoff->{signoff_time} || '',
 			verb	 => $signoff->{signoff_type},
 
 		}	
