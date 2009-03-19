@@ -27,8 +27,8 @@ sub main {
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
 	my %ops = (
-		list		=> [1,  \&list, 1, $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1, change => 1, section => 1  }],
-		default		=> [1,	\&list, 1,  $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1, change => 1, section => 1 }],
+		list		=> [0,  \&list, 1, $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1, change => 1, section => 1  }],
+		default		=> [0,	\&list, 1,  $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1, change => 1, section => 1 }],
 	);
 
 	my $op = $form->{op} || "";
@@ -38,7 +38,7 @@ sub main {
 	}
 
 	# If default or list op and not logged in force them to be using allowed params or math anonval param
-	if (($op eq 'default' || $op eq 'list') && $user->{seclev} <1) {
+	if (($op eq 'default' || $op eq 'list') && $user->{seclev} < $ops{$op}[0]) {
 
 		my $redirect = 0;
 		if ($ops{$op}[4] && ref($ops{$op}[4]) eq "HASH") {
