@@ -688,6 +688,8 @@ $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
 		$fhitem.data('blur-closes-tags', !tag_ui_in($fhitem).expanded).
 			data('blur-closes-item', $fhitem.find('[id^=fhbody-]').is('.empty,.hide'));
 	});
+	$('#firehoselist a.more').
+	live('mousedown', pos_logger);
 
 });
 
@@ -1089,6 +1091,22 @@ function firehose_storyfuture( future ){
 			var is_future = sign(future[this.id.substr(9)]);
 			$(this).find(if_not[is_future]).attr('className', class_if[is_future]);
 		});
+}
+
+
+function pos_logger() {
+	console.log("calling pos logger");
+	var id = fhid(this);
+	var pos = 0;
+
+	pos = $('#firehoselist > div[id^=firehose-]:not(.daybreak)').index(elemAny('firehose-' + id)) + 1;
+
+	if(this.href.match(/\?/)) {
+		this.href = this.href + "&art_pos=" + pos;
+	} else {
+		this.href= this.href + "?art_pos=" + pos;
+	}
+	return true;
 }
 
 function firehose_reorder( required_order ){
@@ -2332,4 +2350,5 @@ $(function(){
 		return false;
 	});
 });
+
 
