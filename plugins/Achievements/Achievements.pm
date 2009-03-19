@@ -54,6 +54,7 @@ sub setUserAchievement {
 
 	# If we're creating or updating an achievement, set it,
 	# increment their Achievements achievement, and send a message.
+	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
 	my $data;
         if (!$user_achievement->{$aid}{id}) {
 		# The user has never had this type of achievement.
@@ -64,8 +65,9 @@ sub setUserAchievement {
                         "-createtime" => 'NOW()',
                 };
 		$slashdb->sqlInsert('user_achievements', $data);
-		$self->setUserAchievementObtained($uid, { exponent => $new_exponent });
+		$self->setUserAchievementObtained($uid, { exponent => $new_exponent, ach_increment => $increment });
 		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} });
+		$dynamic_blocks->setUserBlock('achievements', $uid) if ($uid and $dynamic_blocks);
 	} elsif ($achievement->{$ach_name}{repeatable} eq 'yes' && ($new_exponent > $old_exponent)) {
 		# The user has the inferior version of the achievement. Upgrade them.
 		$data = {
@@ -75,6 +77,7 @@ sub setUserAchievement {
 		$slashdb->sqlUpdate('user_achievements', $data, "id = " . $user_achievement->{$aid}{id});
 		$self->setUserAchievementObtained($uid);
 		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} });
+		$dynamic_blocks->setUserBlock('achievements', $uid) if ($uid and $dynamic_blocks);
 	} else {
 		# The user already has an achievement that is non-repeatable. Do nothing.
 	}
@@ -91,8 +94,9 @@ sub setUserAchievementObtained {
 
 	my $total_achievements = 0;
         $total_achievements = $user_achievement->{$aid}{exponent};
+
         $total_achievements += $options->{exponent};
-        ++$total_achievements;
+        ++$total_achievements unless $options->{ach_increment} == 1;
 
         my $data;
         if (!$user_achievement->{$aid}{id}) {
