@@ -428,12 +428,12 @@ sub getMostImportantTagboxAffectedIDs {
 	my $imp_weight = '(importance * weight
 		* IF(created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE), 1.1,
 			IF(created_at > DATE_SUB(NOW(), INTERVAL 2 WEEK), 1.0,
-			0.9))';
+			0.9)))';
 	my $sum_imp_weight = "SUM($imp_weight)";
 	if ($options->{try_to_reduce_rowcount}) {
 		# Factor row count into the weight, because the main
 		# goal here is to eliminate as many rows as possible.
-		$sum_imp_weight = 'SUM(GREATEST(LEAST($imp_weight, 0.5), 2) + 1)';
+		$sum_imp_weight = "SUM(GREATEST(LEAST($imp_weight, 0.5), 2) + 1)";
 	}
 	$sum_imp_weight .= ' AS sum_imp_weight';
 
