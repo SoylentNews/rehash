@@ -271,7 +271,7 @@ span.tag-display .tmenu > li {
 
 span.tag-display .tmenu > li + li,
 span.tag-display > ul > li + li {
-	margin-left: 0.25em !important;
+	margin-left: 0.05em !important;
 }
 
 
