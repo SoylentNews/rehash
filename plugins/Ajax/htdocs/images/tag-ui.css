@@ -174,7 +174,7 @@ span.tag-display > ul,
 span.tag-display span.tag,
 span.tag-display > h1.legend,
 #contents span.tag-display > h1.legend {
-	padding: 0.1em 0.3em !important;
+	padding: 0.1em 0.15em !important;
 	margin: -0.1em -0.1em !important;
 	color:#333;
 }
