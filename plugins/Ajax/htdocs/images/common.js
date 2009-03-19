@@ -1095,7 +1095,7 @@ function firehose_storyfuture( future ){
 
 
 function pos_logger() {
-	var id = fhid(this);
+	var id = fhid_of(this);
 	var pos = 0;
 
 	pos = $('#firehoselist > div[id^=firehose-]:not(.daybreak)').index(elemAny('firehose-' + id)) + 1;
