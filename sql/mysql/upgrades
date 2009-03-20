@@ -6082,3 +6082,7 @@ ALTER TABLE tagboxlog_feeder ADD COLUMN claimed datetime DEFAULT NULL AFTER impo
 
 # 2009-03-19
 UPDATE vars SET value = 'T_2_5_0_247' WHERE name = 'cvs_tag_currentcode';
+
+DELETE FROM blocks WHERE bid = 'linuxcom';
+DELETE FROM dynamic_user_blocks WHERE name = 'linuxcom';
+

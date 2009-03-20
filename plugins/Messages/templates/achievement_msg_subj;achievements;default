@@ -11,7 +11,7 @@ en_US
 __name__
 achievement_msg_subj
 __template__
-You have obtained an achievement.
+Achievement: [% achievement.description %]
 __seclev__
 500
 __version__
