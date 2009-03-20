@@ -374,8 +374,8 @@ $(function(){
 	var add_style_triggers = Slash.TagUI.Markup.add_style_triggers;
 
 
-	add_style_triggers(YAHOO.slashdot.sectionTags, 's1');
-	add_style_triggers(YAHOO.slashdot.topicTags, 't2');
+	add_style_triggers(sectionTags, 's1');
+	add_style_triggers(topicTags, 't2');
 	add_style_triggers(['nod', 'metanod'], 'y p');
 	add_style_triggers(['nix', 'metanix'], 'x p', );
 	add_style_triggers(qw('submission journal bookmark feed story vendor misc comment discussion project'), 'd');

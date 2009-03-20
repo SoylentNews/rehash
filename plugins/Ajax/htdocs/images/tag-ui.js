@@ -827,7 +827,7 @@ function update_class_map( css_class_map, css_class, tags ){
 
 $(function(){
 
-YAHOO.slashdot.sectionTags = [ "apache",
+sectionTags = [ "apache",
 "apple",
 "askslashdot",
 "awards",
@@ -855,7 +855,7 @@ YAHOO.slashdot.sectionTags = [ "apache",
 "vendor_amd",
 "yro" ];
 
-YAHOO.slashdot.topicTags = ["keyword",
+topicTags = ["keyword",
 "mainpage",
 "apache",
 "apple",
@@ -1045,8 +1045,8 @@ YAHOO.slashdot.topicTags = ["keyword",
 
 
 	well_known_tags = {};
-	update_class_map(well_known_tags, 's1', YAHOO.slashdot.sectionTags);
-	update_class_map(well_known_tags, 't2', YAHOO.slashdot.topicTags);
+	update_class_map(well_known_tags, 's1', sectionTags);
+	update_class_map(well_known_tags, 't2', topicTags);
 	update_class_map(well_known_tags, 'y p', ['nod', 'metanod']);
 	update_class_map(well_known_tags, 'x p', ['nix', 'metanix']);
 	update_class_map(well_known_tags, 'p', ['mainpage']);	// Rob requests 'mainpage' never show its face
