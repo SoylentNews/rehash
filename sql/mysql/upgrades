@@ -6080,3 +6080,5 @@ INSERT INTO dynamic_user_blocks (type_id, uid, name, title, description, seclev,
 # for plugins/Tags
 ALTER TABLE tagboxlog_feeder ADD COLUMN claimed datetime DEFAULT NULL AFTER importance;
 
+# 2009-03-19
+UPDATE vars SET value = 'T_2_5_0_247' WHERE name = 'cvs_tag_currentcode';
