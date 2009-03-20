@@ -327,38 +327,38 @@ function fhid_of( any ){
 
 function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
-	$('#firehoselist').trigger('articlesMoved', data);
+	$any('firehoselist').trigger('articlesMoved', data);
 }
 
 function before_article_removed( article, if_also_trigger_moved ){
 	var next_article = article ? $(article).next(':visible')[0] : null;
-	$('#firehoselist').trigger('beforeArticleRemoved', article);
+	$any('firehoselist').trigger('beforeArticleRemoved', article);
 	if ( if_also_trigger_moved ) {
 		after_article_moved(next_article);
 	}
 }
 
 function firehose_toggle_advpref() {
-	$('#fh_advprefs').toggleClass('hide');
+	$any('fh_advprefs').toggleClass('hide');
 }
 
 function firehose_open_prefs() {
-	$('#fh_advprefs').removeClass();
+	$any('fh_advprefs').removeClass();
 }
 
 function toggleIntro(id, toggleid) {
 	var new_class = 'condensed';
 	var new_html = '[+]';
-	if ( $('#'+id).setClass(applyMap('introhide', 'intro')).hasClass('intro') ) {
+	if ( $any(id).setClass(applyMap('introhide', 'intro')).hasClass('intro') ) {
 		new_class = 'expanded';
 		new_html = '[-]';
 	}
-	$('#'+toggleid).setClass(new_class).html(new_html);
+	$any(toggleid).setClass(new_class).html(new_html);
 }
 
 
 function tagsToggleStoryDiv(id, is_admin, type) {
-	if ( $('#toggletags-body-'+id).hasClass('tagshide') ) {
+	if ( $any('toggletags-body-'+id).hasClass('tagshide') ) {
 		tagsShowBody(id, is_admin, '', type);
 	} else {
 		tagsHideBody(id);
@@ -366,11 +366,11 @@ function tagsToggleStoryDiv(id, is_admin, type) {
 }
 
 function tagsHideBody(id) {
-	$('#toggletags-body-'+id).setClass('tagshide');		// Make the body of the tagbox vanish
-	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
-	$('#tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
-	$('#toggletags-button-'+id).html('[+]');		// Toggle the button back.
-	after_article_moved($('#firehose-'+id)[0]);
+	$any('toggletags-body-'+id).setClass('tagshide');	// Make the body of the tagbox vanish
+	$any('tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
+	$any('tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
+	$any('toggletags-button-'+id).html('[+]');		// Toggle the button back.
+	after_article_moved(elemAny('firehose-'+id));
 }
 
 function tagsShowBody(id, unused, newtagspreloadtext, type) {
@@ -385,11 +385,11 @@ function tagsShowBody(id, unused, newtagspreloadtext, type) {
 	}
 
 	//alert("Tags show body / Type: " + type );
-	$('#toggletags-button-'+id).html("[-]");		// Toggle the button to show the click was received
-	$('#tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
-	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
-	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
-	after_article_moved($('#firehose-'+id)[0]);
+	$any('toggletags-button-'+id).html("[-]");		// Toggle the button to show the click was received
+	$any('tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
+	$any('tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
+	$any('toggletags-body-'+id).setClass("tagbody");	// Make the body of the tagbox visible
+	after_article_moved(elemAny('firehose-'+id));
 }
 
 function tagsOpenAndEnter(id, tagname, unused, type) {
@@ -459,8 +459,8 @@ toggle_firehose_body.TOGGLE	= 0;
 toggle_firehose_body.HIDE	= -1;
 
 function toggleFirehoseTagbox(id) {
-	$('#fhtagbox-'+id).setClass(applyMap('tagbox', 'hide'));
-	after_article_moved($('#firehose-'+id)[0]);
+	$any('fhtagbox-'+id).setClass(applyMap('tagbox', 'hide'));
+	after_article_moved(elemAny('firehose-'+id));
 }
 
 function firehose_style_switch(section) {
@@ -594,7 +594,7 @@ firehose_set_options = function(name, value, context) {
 
 function firehose_fix_up_down( id, new_state ){
 	// Find the (possibly) affected +/- capsule.
-	var $updown = $('#updown-'+id);
+	var $updown = $any('updown-'+id);
 
 	if ( $updown.length && ! $updown.hasClass(new_state) ) {
 		// We found the capsule, and it's state needs to be fixed.
@@ -834,8 +834,12 @@ function firehose_handle_comment_nodnix( commands ){
 
 
 $(function(){
-	firehose_init_tag_ui();
-	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
+//
+// Page initialization.
+//
+
+firehose_init_tag_ui();
+$any('firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
 
 // .live() binds these handlers to all current _and_ future firehose items
 $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
@@ -959,7 +963,7 @@ function ajax_update(request_params, id, handlers, options) {
 
 	if ( id ) {
 		opts.success = function(html){
-			$('#'+id).html(html);
+			$any(id).html(html);
 		};
 	}
 
@@ -1017,13 +1021,13 @@ function json_update(response) {
 
 	// ...replace the content of these elements
 	$.each(response.html||[], function(elem_id, new_html){
-		$('#'+elem_id).
+		$any(elem_id).
 			html(new_html);
 	});
 
 	// ...set new values in these elements
 	$.each(response.value||[], function(elem_id, new_value){
-		$('#'+elem_id).
+		$any(elem_id).
 			each(function(){
 				if ( this !== gFocusedText ) {
 					$(this).val(new_value);
@@ -1033,13 +1037,13 @@ function json_update(response) {
 
 	// ...append content to these elements
 	$.each(response.html_append||[], function(elem_id, new_html){
-		$('#'+elem_id).
+		$any(elem_id).
 			append(new_html);
 	});
 
 	// ...replace the specially marked "tail-end" (or else append) content of these elements
 	$.each(response.html_append_substr||[], function(elem_id, new_html){
-		$('#'+elem_id).
+		$any(elem_id).
 			each(function(){
 				var	$this		= $(this),
 					old_html	= $this.html(),
@@ -1465,7 +1469,7 @@ function firehose_get_updates_handler(transport) {
 		firehose_updates_size = firehose_updates.length;
 		firehose_removed_first = 0;
 		processed = processed + 1;
-		var $fh = $('#firehoselist');
+		var $fh = $any('firehoselist');
 		$fh.find('h1.loading_msg').show().length && $fh.hide();
 		firehose_handle_update();
 	}
@@ -1561,9 +1565,9 @@ function run_before_update() {
 }
 
 function firehose_inactivity_modal() {
-	$('#preference_title').html('Firehose Paused due to inactivity');
+	$any('preference_title').html('Firehose Paused due to inactivity');
 	show_modal_box();
-	$('#modal_box_content').html("<a href='#' onclick='setFirehoseAction();hide_modal_box()'>Click to unpause</a>");
+	$any('modal_box_content').html("<a href='#' onclick='setFirehoseAction();hide_modal_box()'>Click to unpause</a>");
 	show_modal_box();
 }
 
@@ -1585,10 +1589,10 @@ function firehose_play(context) {
 		firehose_set_options('pause', false, context);
 	}
 
-	$('#message_area').html('');
-	$('#pauseorplay').html('Updated');
-	$('#play').setClass('hide');
-	$('#pause').setClass('show');
+	$any('message_area').html('');
+	$any('pauseorplay').html('Updated');
+	$any('play').setClass('hide');
+	$any('pause').setClass('show');
 }
 
 function is_firehose_playing() {
@@ -1597,9 +1601,9 @@ function is_firehose_playing() {
 
 function firehose_pause(context) {
 	fh_play = 0;
-	$('#pause').setClass('hide');
-	$('#play').setClass('show');
-	$('#pauseorplay').html('Paused');
+	$any('pause').setClass('hide');
+	$any('play').setClass('show');
+	$any('pauseorplay').html('Paused');
 	firehose_set_options('pause', true, context);
 }
 
@@ -1698,18 +1702,18 @@ function vendorStoryPopup2() {
 }
 
 function logToDiv(id, message) {
-	$('#'+id).append(message + '<br>');
+	$any(id).append(message + '<br>');
 }
 
 
 function firehose_open_tab(id) {
-	$('#tab-form-'+id).removeClass();
-	$('#tab-input-'+id).focus();
-	$('#tab-text-'+id).setClass('hide');
+	$any('tab-form-'+id).removeClass();
+	$any('tab-input-'+id).focus();
+	$any('tab-text-'+id).setClass('hide');
 }
 
 function firehose_save_tab(id) {
-	var	$tab		= $('#fhtab-'+id),
+	var	$tab		= $any('fhtab-'+id),
 		new_name	= $tab.find('#tab-input-'+id).val(),
 		$title		= $tab.find('#tab-text-'+id),
 		$saved		= $title.children().remove(); // please ... think of the children
@@ -1790,7 +1794,7 @@ function getModalPrefs(section, title, tabbed, params){
 	}
 
 	// .load ensures we are fetching as HTML, and that <script> elements will be executed
-	$('#modal_box_content').load(
+	$any('modal_box_content').load(
 		'/ajax.pl',
 		$.extend({
 			op:		'getModalPrefs',
@@ -1799,16 +1803,16 @@ function getModalPrefs(section, title, tabbed, params){
 			tabbed:		tabbed
 		}, params||{}),
 		function(){
-			$('#preference_title').html(title);
+			$any('preference_title').html(title);
 			show_modal_box().data('tabbed', tabbed);
 		}
 	);
 }
 
 function firehose_get_media_popup(id) {
-	$('#preference_title').html('Media');
+	$any('preference_title').html('Media');
 	show_modal_box();
-	$('#modal_box_content').html("<h4>Loading...</h4><img src='/images/spinner_large.gif'>");
+	$any('modal_box_content').html("<h4>Loading...</h4><img src='/images/spinner_large.gif'>");
 	ajax_update({
 		op:	'firehose_get_media',
 		id:	id
@@ -1821,8 +1825,8 @@ function firehose_reinit_updates() {
 }
 
 function firehose_update_failed_modal() {
-	$('#preference_title').html('Firehose updates failed');
-	$('#modal_box_content').html('Update failed or timed out.  <a href="#" onclick="firehose_reinit_updates();hide_modal_box();">Click to retry</a>');
+	$any('preference_title').html('Firehose updates failed');
+	$any('modal_box_content').html('Update failed or timed out.  <a href="#" onclick="firehose_reinit_updates();hide_modal_box();">Click to retry</a>');
 	show_modal_box();
 }
 
@@ -1858,7 +1862,7 @@ function serialize_multiple( $form ){
 function resetModalPrefs(extra_param) {
 	var params = {
 		op:	'saveModalPrefs',
-		data: 	serialize_multiple($('#modal_prefs')),
+		data: 	serialize_multiple($any('modal_prefs')),
 		reset:  1,
 		reskey:	reskey_static
 	};
@@ -1879,7 +1883,7 @@ function saveModalPrefs() {
 
 	ajax_update({
 		op:	'saveModalPrefs',
-		data:	serialize_multiple($('#modal_prefs')),
+		data:	serialize_multiple($any('modal_prefs')),
 		reskey:	reskey_static
 	}, '', {
 		onComplete: function() {
@@ -1892,7 +1896,7 @@ function saveModalPrefs() {
 }
 
 function displayModalPrefHelp(id) {
-	var el = $('#'+id);
+	var el = $any(id);
 	el.css('display', el.css('display')!='none' ? 'none' : 'block');
 }
 
@@ -1959,7 +1963,7 @@ function firehose_more(noinc) {
 	}
 
 	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
-		$('#firehose_more').hide();
+		$any('firehose_more').hide();
 	}
 	if (firehose_user_class) {
 		firehose_set_options('more_num', firehose_settings.more_num);
@@ -1976,7 +1980,7 @@ function firehose_highlight_section( $section ){
 
 function on_firehose_select_section( event, data ){
 	firehose_highlight_section($('#firehose-sections #fhsection-'+data.id));
-	$('#viewsearch').parent().toggleClass('mode-filter', data.id!=='unsaved');
+	$any('viewsearch').parent().toggleClass('mode-filter', data.id!=='unsaved');
 }
 
 function on_firehose_set_options( event, data ){
@@ -2010,7 +2014,7 @@ $(function(){
 });
 
 function the_unsaved_section( dont_create ){
-	var	$section_menu	= $('#firehose-sections'),
+	var	$section_menu	= $any('firehose-sections'),
 		$unsaved_item	= $section_menu.find('> #fhsection-unsaved');
 
 	if ( !$unsaved_item.length && !dont_create ) {
@@ -2212,10 +2216,10 @@ $(function(){
 	$ad_position = $([]);
 	ad_target_article = null;
 
-	$footer = $('#ft');
+	$footer = $any('ft');
 	$slashboxes = $('#slashboxes, #userboxes').eq(0);
 
-	$('#firehoselist').
+	$any('firehoselist').
 		bind('articlesMoved', fix_ad_position).
 		bind('beforeArticleRemoved', notice_article_removed);
 });
