@@ -8,8 +8,8 @@ CREATE TABLE dynamic_blocks (
 
 DROP TABLE IF EXISTS dynamic_user_blocks;
 CREATE TABLE dynamic_user_blocks (
-  id mediumint(8) unsigned NOT NULL auto_increment,
-  bid mediumint(8) unsigned NOT NULL default '0',
+  bid mediumint(8) unsigned NOT NULL auto_increment,
+  portal_id mediumint(8) unsigned NOT NULL default '0',
   type_id tinyint(1) unsigned NOT NULL default '0',
   uid mediumint(8) unsigned NOT NULL default '0',
   title varchar(30) NOT NULL default '',
@@ -20,7 +20,7 @@ CREATE TABLE dynamic_user_blocks (
   seclev mediumint(8) unsigned NOT NULL default '0',
   created datetime NOT NULL default '0000-00-00 00:00:00',
   last_update datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (id),
+  PRIMARY KEY (bid),
   UNIQUE KEY name (name),
   UNIQUE KEY block (name, uid)
 ) ENGINE=InnoDB;
