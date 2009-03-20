@@ -37,7 +37,7 @@ my $start_time = Time::HiRes::time;
 		my $refer = $form->{returnto} || $script;
 		redirect($refer); return;
 	}
-	redirect($script) if $user->{index_beta};
+	redirect($script) if $user->{index_beta} && !$form->{content_type};
 
 	my($stories, $Stories); # could this be MORE confusing please? kthx
 
