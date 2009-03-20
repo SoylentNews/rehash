@@ -411,6 +411,7 @@ firehose_set_options = function(name, value, context) {
 
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
+		window.scrollTo(0, 0);
 		$('div.paginate').hide();
 		// Fade the list; replace its contents with a single loading message; re-show it.
 		$fhl.fadeOut(function(){ $fhl.html(loading_msg).show(); });
@@ -1445,7 +1446,9 @@ function firehose_collapse_entry(id) {
 		find('#fhbody-'+id+'.body').
 			setClass('hide').
 		end().
-		setClass('briefarticle');
+		removeClass('article').
+		addClass('briefarticle');
+
 	tagsHideBody(id);
 }
 
@@ -1765,20 +1768,22 @@ function firehose_set_cur($new_current) {
 	);
 }
 
-function firehose_go_next() {
-	var $current = firehose_get_cur();
+function firehose_go_next($current) {
+	$current = $current || firehose_get_cur();
 	var $next = $current.nextAll('div[id^=firehose-]:not(.daybreak):first');
 	// if no current, pick top; if current but no next, do more
 	if ($next[0] || !$current[0]) {
 		return firehose_set_cur($next);
 	} else {
+		view('div#fh-paginate');
 		firehose_more();
 	}
 }
 
-function firehose_go_prev() {
+function firehose_go_prev($current) {
+	$current = $current || firehose_get_cur();
 	return firehose_set_cur(
-		firehose_get_cur().prevAll('div[id^=firehose-]:not(.daybreak):first')
+		$current.prevAll('div[id^=firehose-]:not(.daybreak):first')
 	);
 }
 
