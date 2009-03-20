@@ -1053,154 +1053,91 @@ function json_update(response) {
 }
 
 function firehose_handle_update() {
-	var saved_selection = new $.TextSelection(gFocusedText);
-	var $menu = $('div.ac_results:visible');
 
-	var $fhl = $any('firehoselist');
+	var	saved_selection		= new $.TextSelection(gFocusedText),
+		$menu				= $('div.ac_results:visible'),
+		$fhl				= $any('firehoselist'),
+		add_behind_scenes	= $fhl.is(':has(h1.loading_msg)'),
+		wait_interval		= add_behind_scenes ? 0 : 800;
 
-	var add_behind_scenes = $("#firehoselist h1.loading_msg").length;
-	if (add_behind_scenes) { 
-	//	firehose_busy(); 
-	}
+	// if (add_behind_scenes) { firehose_busy(); }
 
 	if (firehose_updates.length > 0) {
-		var el = firehose_updates.pop();
-		var fh = 'firehose-' + el[1];
-		var wait_interval = 800;
-		var need_animate = 1;
+		var	next		= firehose_updates.pop(),
+			update		= {	op:		next[0],
+						fhid:		next[1],
+						id:		'firehose-' + next[1],
+						content:	next[2]
+					};
 
-		var attributes = {};
-		var myAnim;
+		if( update.op == "add" ) {
+			var	$other		= fhitem_of(firehose_before[update.fhid]),
+				insert_op	= 'insertAfter',
+				test_edge	= 'bottom';
 
-		if(el[0] == "add") {
-			var $before, $after, before_id=firehose_before[el[1]], after_id=firehose_after[el[1]];
-			before_id && ($before = $any('firehose-'+before_id));
-			after_id && ($after = $any('firehose-'+after_id));
-
-			if ( $before && $before.length ) {
-				$before.after(el[2]);
-				if ( !Bounds.intersect(window, 'title-'+ before_id) ) {
-					need_animate = 0;
-				}
-			} else if ( $after && $after.length ) {
-
-				// don't insert a new article between the floating slashbox ad and its article
-				var $landmark=$after, $prev=$landmark.prev();
-				if ( $prev.is('#floating-slashbox-ad') ) {
-					$landmark = $prev;
-				}
-
-				$landmark.before(el[2]);
-				if ( !Bounds.intersect(window, 'title-'+ after_id) ) {
-					need_animate = 0;
-				}
-			} else if (insert_new_at == "bottom") {
-				$fhl.append(el[2]);
-				if ( !Bounds.intersect(window, 'fh-paginate') ) {
-					need_animate = 0;
-				}
-			} else {
-				$fhl.prepend(el[2]);
+			if ( !$other.length ) {
+				$other = fhitem_of(firehose_after[update.fhid]).
+						prevAll('div[id^=firehose-]:not(.daybreak):first');
 			}
-
-			if (add_behind_scenes) {
-				need_animate = 0;
-			}
-
-			var toheight = 50;
-			if (fh_view_mode == "full") {
-				toheight = 200;
-			}
-
-			attributes = {
-				height: { from: 0, to: toheight }
-			};
-			if (!is_ie) {
-				attributes.opacity = { from: 0, to: 1 };
-			}
-			myAnim = new YAHOO.util.Anim(fh, attributes);
-			myAnim.duration = 0.7;
-
-			if (firehose_updates_size > 10) {
-				myAnim.duration = myAnim.duration / 2;
-				wait_interval = wait_interval / 2;
-			}
-			if (firehose_updates_size > 20) {
-				myAnim.duration = myAnim.duration / 2;
-				wait_interval = wait_interval / 2;
-
-			}
-			if (firehose_updates_size > 30) {
-				myAnim.duration = myAnim.duration / 1.5;
-				wait_interval = wait_interval / 2;
-			}
-
-			myAnim.onComplete.subscribe(function() {
-				var fh_node = $dom(fh);
-				if (fh_node) {
-					after_article_moved(fh_node);
-					fh_node.style.height = "";
-					if (fh_idle_skin) {
-						/* $("h3 a[class!='skin']", fh_node).click(function(){
-							var h3 = $(this).parent('h3');
-							h3.next('div.hid').and(h3.find('a img')).toggle("fast");
-							return false;
-						}); */
-					}
-				}
-			});
-			if (need_animate) {
-				myAnim.animate();
-			}
-		} else if ( el[0]==='remove' && !$any(fh).is('.currfh') ) {
-			var fh_node = $dom(fh);
-			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node && fh_node.className == "article" ) {
-				// Don't delete admin looking at this in expanded view
-			} else {
-				attributes = {
-					height: { to: 0 }
-				};
-
-				if (!is_ie) {
-					attributes.opacity = { to: 0};
-				}
-				myAnim = new YAHOO.util.Anim(fh, attributes);
-				myAnim.duration = 0.4;
-				wait_interval = 500;
-
-				if (firehose_updates_size > 10) {
-					myAnim.duration = myAnim.duration * 2;
-					if (!firehose_removed_first) {
-						wait_interval = wait_interval * 2;
-					} else {
-						wait_interval = 50;
-					}
-				}
-				firehose_removed_first = 1;
-				if (!Bounds.intersect(window, fh_node)) {
-					need_animate = 0;
-				}
-
-				if ((firehose_removals < 10 ) && !add_behind_scenes ) {
-					myAnim.onComplete.subscribe(function() {
-						var elem = this.getEl();
-						if (elem && elem.parentNode) {
-							before_article_removed(elem, true);
-							elem.parentNode.removeChild(elem);
-						}
-					});
-					myAnim.animate();
+			if ( !$other.length ) {
+				$other = $fhl;
+				if ( insert_new_at === 'bottom' ) {
+					insert_op = 'appendTo';
 				} else {
-					var elem = $dom(fh);
-					wait_interval = 25;
-					if (elem && elem.parentNode) {
-						elem.parentNode.removeChild(elem);
-					}
+					insert_op = 'prependTo';
+					test_edge = 'top';
 				}
 			}
-		}
-		if(!need_animate || add_behind_scenes) {
+			update.fhitem = $(update.content)[ insert_op ]($other);
+
+			update.bounds = new Bounds($other);
+			update.bounds.top = update.bounds[test_edge];
+			update.bounds.bottom = update.bounds.top + update.fhitem.height();
+
 			wait_interval = 0;
+			if ( !add_behind_scenes && Bounds.intersect(window, update.bounds) ) {
+
+				// times based on magnitude of the change
+				var t = [ { interval:800, duration:700 },
+					  { interval:400, duration:350 },
+					  { interval:200, duration:175 },
+					  { interval:100, duration:117 } ][
+					Math.max(3, Math.floor(firehose_updates_size/10))
+				];
+				wait_interval = t.interval;
+
+				update.fhitem.
+					css({ opacity: 0, height: 0 }).
+					animate(t.duration, {
+							opacity: 1,
+							height: fh_view_mode==='full' ? 200 : 50,
+						}, function(){
+							$(this).css({ opacity:'', height:'' });
+						});
+			}
+		} else if ( update.op==='remove' && !(update.fhitem=fhitem_of(update.fhid)).is('.currfh') ) {
+			var t = { interval:500, duration:400 };
+			if (firehose_updates_size > 10) {
+				t.duration *= 2;
+				t.interval = firehose_removed_first ? 50 : t.interval*2;
+			}
+			firehose_removed_first = 1;
+
+			wait_interval = 0;
+			if ( !add_behind_scenes && firehose_removals<10 && Bounds.intersect(window, update.fhitem) ) {
+				wait_interval = t.interval;
+				update.fhitem.
+					animate(t.duration, {
+						opacity: 0,
+						height: 0
+					}, function(){
+						before_article_removed(this, true);
+						$(this).remove();
+					});
+			} else {
+				wait_interval = 25;
+				update.fhitem.remove();
+			}
 		}
 
 		//console.log("Wait: " + wait_interval);
@@ -1208,13 +1145,12 @@ function firehose_handle_update() {
 	} else {
 		firehose_after_update();
 		if (add_behind_scenes) {
-			$('#firehoselist h1.loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
-			$('.paginate').show();
-			if (elem && elem.parentNode) {
-				elem.parentNode.removeChild(elem);
-			}
-			$fhl.fadeIn('slow');
 			//firehose_busy_done();
+			$fhl.find('h1.loading_msg').remove();
+			$('div.paginate').show();
+			$fhl.fadeIn('slow', function(){
+				$(this).css({ opacity:'' });
+			});
 		}
 		firehose_get_next_updates();
 	}

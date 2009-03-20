@@ -20,7 +20,6 @@ htdoc=htdocs/images/yui/yahoo.js
 htdoc=htdocs/images/yui/dom.js
 htdoc=htdocs/images/yui/event.js
 htdoc=htdocs/images/yui/dragdrop.js
-htdoc=htdocs/images/yui/animation.js
 htdoc=htdocs/images/common.js
 htdoc=htdocs/images/jquery/jquery-1.3.2.js
 htdoc=htdocs/images/jquery.typeof.js
