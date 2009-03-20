@@ -348,6 +348,7 @@ var firehose_set_options;
 var	qw		= Slash.Util.qw,
 	loading_msg	= '<h1 class="loading_msg">Loading New Items</h1>',
 	removes_all	= qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view'),
+	start_over	= $.extend(qw.as_set('startdate'), removes_all),
 	uses_setfield	= qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
 	sets_param	= $.extend(qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),
 	flags_param	= {	fhfilter:	'filterchanged',
@@ -408,10 +409,12 @@ firehose_set_options = function(name, value, context) {
 		case 'view':		set_fhfilter_from('#searchquery'); break;
 	}
 
+	if ( start_over[name] ) {
+		window.scrollTo(0, 0);
+	}
 
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
-		window.scrollTo(0, 0);
 		$('div.paginate').hide();
 		// Fade the list; replace its contents with a single loading message; re-show it.
 		$fhl.fadeOut(function(){ $fhl.html(loading_msg).show(); });
@@ -2326,7 +2329,6 @@ $(function(){
 			// a bit silly
 			var fsid = $('#firehose-sections').find('li:not([id=fhsection-unsaved]):first')[0].id.substr(10);
 			firehose_set_options('section', fsid);
-			window.scrollTo(0, 0);
 		}
 		if (keyo.unfocus)        { $(e.target).blur()        }
 		if (keyo.next)           { firehose_go_next()        }
