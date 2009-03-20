@@ -2542,9 +2542,12 @@ sub ajaxFireHoseGetUpdates {
                 $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time, is_admin => $user->{is_admin} });
         }
 
+	my $color_js = "\$('.currcolor').removeClass('red orange yellow green blue violet indigo black').addClass('$opts->{color}');"
+	my $eval_last = "$color_js $title_js";
+
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
-		eval_last	=> $title_js,
+		eval_last	=> $eval_last,
 		updates		=> $updates,
 		update_time	=> $update_time,
 		update_data	=> $update_data,
