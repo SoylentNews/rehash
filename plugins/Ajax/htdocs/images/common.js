@@ -464,32 +464,20 @@ function toggleFirehoseTagbox(id) {
 }
 
 function firehose_style_switch(section) {
-	var params = {};
-	params['op'] 	 	= 'firehose_section_css';
-	params['layout'] 	= 'yui';
-	params['reskey'] 	= reskey_static;
-	params['section'] 	= section;
-
-	ajax_update(params, '', { onComplete: firehose_style_switch_handler });
-}
-
-function firehose_style_switch_handler(transport) {
-	var response = eval_response(transport);
-
-	if (response && response.skin_name) {
-		if ($('html head link[title=' + response.skin_name + ']').length == 0 ) {
-                      $('html head link:last').after(response.css_includes);
+	ajax_update({
+		op: 'firehose_section_css',
+		reskey: reskey_static,
+		layout: 'yui',
+		section: section
+	}, '', {
+		onComplete: function( xhr ){
+			var json=eval_response(xhr), name=json&&json.skin_name, new_css=name&&json.css_includes;
+			$('head link[rel=alternate stylesheet]').each(function(){
+				(this.disabled = this.getAttribute('title')!==name) || (new_css=null);
+			});
+			new_css && $('head').append(new_css);
 		}
-
-		$("head link[title]").each(function(i) {
-			        this.disabled = true;
-				if (this.getAttribute('title') == response.skin_name) {
-					this.disabled = false;
-				}
-	        });
-	} else {
-		$("head link[title]").each(function(i) { this.disabled = true; });
-	}
+	});
 }
 
 
