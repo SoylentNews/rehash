@@ -1483,24 +1483,15 @@ function firehose_get_updates(options) {
 		while((id = fh_update_timerids.pop())) { clearTimeout(id); }
 	}
 	fh_is_updating = 1;
-	var params = {
+
+	ajax_update($.extend({
 		op:		'firehose_get_updates',
 		ids:		firehose_get_item_idstring(),
 		updatetime:	update_time,
 		fh_pageval:	firehose_settings.pageval,
-		embed:		firehose_settings.is_embedded
-	};
-
-	params.dynamic_blocks = dynamic_blocks_list();
-
-	for (i in firehose_settings) {
-		if ( firehose_settings.hasOwnProperty(i) ) {
-			params[i] = firehose_settings[i];
-		}
-	}
-
-	firehose_busy();
-	ajax_update(params, '', { onComplete: firehose_get_updates_handler, onError: firehose_updates_error_handler });
+		embed:		firehose_settings.is_embedded,
+		dynamic_blocks:	dynamic_blocks_list()
+	}, firehose_settings), '', { onComplete: firehose_get_updates_handler, onError: firehose_updates_error_handler });
 }
 
 function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
