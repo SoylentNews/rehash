@@ -21,11 +21,11 @@ __template__
 [% IF form.index; day_page = "index2.pl"; END %]
 [% submit_plug = "";
    IF options.view.match('^userjournal');
-	submit_plug = '<span class="submit"><span class="i"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit" >Write in Journal</a></span></span>';
+	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit" >Write in Journal</a></span>';
    ELSIF gSkin.name == "idle";
-	submit_plug = '<span class="submit"><span class="i"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" >Submit Idle Story</a></span></span>';
+	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" >Submit Idle Story</a></span>';
    ELSE; #ELSIF options.view == "usersubmission";
-	submit_plug = '<span class="submit"><span class="i"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" >Submit Story</a></span></span>';
+	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" >Submit Story</a></span>';
    END;
 
 %]
@@ -34,8 +34,7 @@ __template__
 <div class="paginate" [% IF divid %]id="[% divid %]"[% END %]>
 <div class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
 [% END %]
-<div class="currcolor [% options.color %] "><span class="i">[% options.color.substr(0, 1) %]
-</span></div>
+<div class="currcolor [% options.color %] ">&nbsp;</div>
 [% IF form.metamod %]
 	You are welcome to do <a href="#" onclick="firehose_more(); return false">more than 10</a> metamods per day but note that those votes will weigh less.
 [% ELSE %]
@@ -44,14 +43,14 @@ __template__
 	[% day = Slash.db.getDay(0);
 		got_more_link = 0;
 	%]
-	<span class="[% IF day!=last_day %]in[% END %]active"><span class="i">
+	<span class="[% IF day!=last_day %]in[% END %]active">
 		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7 }); f; %]">Today</a>
 		[% IF day == last_day;
 			got_more_link = 1;
 		%]
 			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 		[% END %]
-	</span></span>
+	</span>
 	[% IF options.orderby == "createtime";
 		max_days_ahead = options.smalldevices ? 1 : 2;
 		days = Slash.getOlderDaysFromDay(last_day, -1, max_days_ahead, { skip_add_today => 1, skip_future => 1 }); 
@@ -63,22 +62,22 @@ __template__
 		[%
 		FOREACH cur_day = days;
 		%]
-		<span class="[% IF (cur_day.0 != last_day || options.orderby != "createtime") || firehose_more_data.future_count <= 0 %]in[% END %]active"><span class="i">
+		<span class="[% IF (cur_day.0 != last_day || options.orderby != "createtime") || firehose_more_data.future_count <= 0 %]in[% END %]active">
 			<a [% IF !user.is_anon %]onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { issue => cur_day.0}); f; %]">[% cur_day.1 | strip_literal %]</a>
 				[% IF firehose_more_data.day_num == cur_day.0 && firehose_more_data.future_count >=0 %]
 					[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 					[% got_more_link = 1; %]
 				[% END %]
-		</span></span>
+		</span>
 		[% END %]
 		[% IF !got_more_link %]
 		<span class="active">
 			[% IF options.orderby != "createtime" %]
 				<!--<span class="i [% options.color %]"><a href="#" onclick="firehose_swatch_color('[% options.color %]'); return false">[% options.color.ucfirst %]</a></span>-->
 			[% ELSIF firehose_more_data.future_count <=0  %]
-				<span class="i">Archive</span>
+				Archive
 			[% ELSE %]
-				<span class="i">[% firehose_more_data.need_day_label = 1 %]</span>
+				[% firehose_more_data.need_day_label = 1 %]
 			[% END %]
 			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 		</span>
@@ -92,10 +91,10 @@ __template__
 	days = Slash.getOlderDaysFromDay(day, -1, max_days_ahead); %]
 
 	[% FOREACH cur_day = days %]
-		<span class="[% IF orig_day != cur_day.0; %]in[% END %]active"><span class="i">
+		<span class="[% IF orig_day != cur_day.0; %]in[% END %]active">
 			<a [% IF !user.is_anon %]onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => -1 }); f; %]">[% cur_day.1 | strip_literal %]</a>
 			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose') IF orig_day == cur_day.0 %]
-		</span></span>
+		</span>
 	[% END %]
 
 [% ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
@@ -104,26 +103,26 @@ __template__
 	FOREACH cur_day = days;
 		IF cur_day.3 == 1;
 		%]
-		<span class="active"><span class="i">
+		<span class="active">
 			<a href="[% gSkin.rootdir %]/[% day_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
 			[% PROCESS firehose_pages page = page num_items = num_items day_page = fh_page options=options %]
-		</span></span>
+		</span>
 		[% ELSE %]
-		<span class="inactive"><span class="i">
+		<span class="inactive">
 			<a href="[% gSkin.rootdir %]/[% day_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
-		</span></span>
+		</span>
 		[%
 		END;
 	END %]
 
 [% ELSIF options.duration == -1 && sphinx && firehose_more_data && firehose_more_data.future_count.defined && firehose_more_data.future_count <= 0 %]
-	<span class="inactive"><span class="i">
+	<span class="inactive">
 		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', ''); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
-	</span></span>
-	<span class="active"><span class="i">
+	</span>
+	<span class="active">
 		[% mycolor = fh.getFireHoseColorDelta(options.color, 1) %]
 		<a[% IF !user.is_anon %] onclick="firehose_set_options('color', '[% mycolor %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { color => mycolor }); f %]"><span class="trigger-swatch [% mycolor %]">[% mycolor %]</span></a>
-	</span></span>
+	</span>
 
 [% ELSIF options.duration == -1  %]
 	[% orig_day = last_day; level = 'day';
@@ -150,24 +149,24 @@ __template__
 					last_day_str = last_day_str_matches.0;
 				END;
 			END %]
-	<span class="[% IF orig_day != cur_day.0; %]in[% END %]active"><span class="i">
+	<span class="[% IF orig_day != cur_day.0; %]in[% END %]active">
 		<a [% IF !user.is_anon %]onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => -1 }); f; %]">[% cur_day.1 | strip_literal %]</a>
-	</span></span>
+	</span>
 		[% END %]
 	[% ELSE;
 		days = Slash.getOlderDaysFromDay(orig_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 });
 		IF days.0.1 != 'Today' %]
-	<span class="inactive"><span class="i">
+	<span class="inactive">
 		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', ''); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
-	</span></span>
+	</span>
 		[% END %]
-	<span class="active"><span class="i">
+	<span class="active">
 		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', '[% days.0.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => orig_day, duration => -1 }); f %]">[% days.0.1 %]</a>
-	</span></span>
+	</span>
 	[% END %]
-	<span class="inactive"><span class="i">
+	<span class="inactive">
 		[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
-	</span></span>
+	</span>
 
 [% ELSE %]
 	[% time_label = "";
@@ -182,10 +181,10 @@ __template__
 	   END;
 	%]
 	[% UNLESS nopages %]
-		<span class="active"><span class="i">
+		<span class="active">
 		[% time_label %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-		</span></span>
+		</span>
 
 	[% END %]
 [% END %]
