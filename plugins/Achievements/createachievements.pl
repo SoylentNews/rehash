@@ -11,8 +11,6 @@ use Slash::Utility;
 
 my $PROGNAME = basename($0);
 
-my $PROGNAME = basename($0);
-
 my %opts;
 getopts('hu:acjpsdt', \%opts);
 usage() if (!keys %opts || $opts{h});
