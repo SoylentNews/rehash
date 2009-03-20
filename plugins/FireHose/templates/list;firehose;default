@@ -115,7 +115,7 @@ __template__
 <div class="submenu">
 <div id="message_area">
 </div>
-	[% IF !form.ssi %]
+	[% IF !user.is_anon %]
 		[% PROCESS firehose_tabs tabs = options.tabs options = options section=section %]
                 <div class="advpref" align="right"><a href="#" id="fh_adv_pref_toggle" onclick="getModalPrefs('fh', 'Firehose'); return false" title="Firehose preferences"></a></div>
 	[% END %]
