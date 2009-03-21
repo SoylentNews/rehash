@@ -155,6 +155,75 @@ function handleEnter(ev, func, arg) {
 
 
 
+function fhitems(){
+	var	bare	= this.__isa !== fhitems,
+		self	= fhitems.fn.init.apply(bare?new fhitems:this, arguments);
+	return bare ? self.select() : self;
+}
+(function(){
+var	T=$.TypeOf, mt=T.makeTest,
+	isF=mt('boolean|function|string'),
+	isR=mt('element|jquery|null|undefined'),
+	isO=mt(function(o,t){ return t==='string'&&(o==='prev'||o==='next'); }),
+	ifS=function(o,x){ return typeof(o)==='string' && o || x || ''; },
+
+	// The idea is the entries in sx could be different on different pages.
+	sx={ root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
+	$root=$(sx.root);
+
+function filter( o ){
+	if ( o!==true && o!=='*' ) {
+		return typeof(o)==='string' && sx.items+o || o || o===false && ':not('+sx.items+')' || sx.items;
+	}
+}
+function selector( o ){
+	if ( o.op==='children' ) {
+		return (o.root.selector||o.root)+'>'+(o.filter||'*');
+	}
+}
+fhitems.fn = fhitems.prototype = {
+	__isa: fhitems,
+	__typeOf: function(){ return 'fhitems'; },
+	init: function( o ){
+		arguments.length || (o='');
+		if ( isO(o) ) {
+			o = { op: o } || o || {};
+		} else if ( isF(o) ) {	// Simple case: o is a filter.
+			this.root=$root; this.op='children'; this.filter=filter(o); this.selector=selector(this);
+			return this;
+		} else if ( isR(o) ) {	// Simple case: o is a root.
+			this.root=o; this.op='closest'; this.filter=sx.root+'>'+sx.items;
+			return this;
+		}
+
+		if ( 'root' in o ) {
+			this.op = o.op || 'closest'; this.root = o.root;
+		} else if ( o.op && o.op!=='children' ) {
+			this.op = o.op; this.root = sx.root + '>' + sx.items + sx.current;
+		} else {
+			this.op = 'children'; this.root = $root;
+		}
+
+		this.filter = filter(o.filter);
+		if ( this.op==='closest' ) {
+			this.filter = sx.root+'>'+ifS(this.filter, '*');
+		} else if ( this.op==='prev' || this.op==='next' ) {
+			this.op += 'All';
+			this.filter = ifS(this.filter)+':first';
+		}
+		this.selector = selector(this);
+
+		return this;
+	},
+	select: function(){
+		var $fhitems = $(this.root)[this.op](this.filter);
+		$fhitems.selector = selector(this)||$fhitems.selector;
+		return $fhitems;
+	}
+};
+})();
+
+
 function fhitem_of( any ){
 	// Returns a jQuery selection of the firehose-item that is, contains, or is identified by any.
 	// Use fhitem_of() to present the "any" API from functions that work on firehose-items.
@@ -1050,7 +1119,7 @@ function firehose_handle_update() {
 		if(!need_animate || add_behind_scenes) {
 			wait_interval = 0;
 		}
-		
+
 		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
@@ -1410,7 +1479,7 @@ function firehose_play(context) {
 	if (context && context == "init") {
 		wait = getFirehoseUpdateInterval();
 	}
-	
+
 	setFirehoseAction();
 	if (context && context == "init") {
 		setTimeout(start_up_hose, wait);
@@ -2031,7 +2100,7 @@ var	AD_HEIGHT = 300, AD_WIDTH = 300,
 	$ad_position,		// 300x300 div that holds the current (if any) ad
 	ad_target_article,	// the article to which that ad is attached
 	$ad_offset_parent,	// the container in which the ad _position_ floats (between articles)
-	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child) 
+	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child)
 	$footer,
 
 	is_ad_locked;		// ad must be shown for at least 30 seconds
