@@ -173,7 +173,7 @@ CREATE TABLE backup_blocks (
 
 DROP TABLE IF EXISTS badpasswords;
 CREATE TABLE badpasswords (
-	uid mediumint(8) NOT NULL DEFAULT 0,
+	uid mediumint(8) UNSIGNED NOT NULL DEFAULT 0,
 	ip varchar(15) NOT NULL DEFAULT '',
 	subnet varchar(15) NOT NULL DEFAULT '',
 	password varchar(20) NOT NULL DEFAULT '',

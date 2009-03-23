@@ -6082,3 +6082,6 @@ ALTER TABLE tagboxlog_feeder ADD COLUMN claimed datetime DEFAULT NULL AFTER impo
 
 # 2009-03-19
 UPDATE vars SET value = 'T_2_5_0_247' WHERE name = 'cvs_tag_currentcode';
+
+ALTER TABLE badpasswords CHANGE uid uid mediumint UNSIGNED NOT NULL DEFAULT 0;
+
