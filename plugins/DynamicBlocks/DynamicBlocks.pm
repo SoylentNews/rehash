@@ -54,12 +54,14 @@ sub setBlock {
 sub setUserBlock {
         my ($self, $name, $uid, $options) = @_;
 
+	return 0 if (!$name or !$uid);
+
         my $slashdb = getCurrentDB();
         my $constants = getCurrentStatic();
         return 0 if ($uid == $constants->{anonymous_coward_uid});
 
         my $user = $slashdb->getUser($uid);
-        my ($block, $data);
+        my ($block, $data, $id);
 
         $block = $self->setUserCommentBlock($user)     if ($name eq 'comments');
         $block = $self->setUserJournalBlock($user)     if ($name eq 'journal');
@@ -70,6 +72,7 @@ sub setUserBlock {
         $block = $self->setUserSubmissionsBlock($user) if ($name eq 'submissions');
         $block = $self->setUserMessagesBlock($user)    if ($name eq 'messages');
 
+	$id = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "name = '$name-$uid' and $uid = $uid");
         if ($block) {
                 my $block_definition;
                 if ($options->{private}) {
@@ -78,7 +81,6 @@ sub setUserBlock {
                         $block_definition = $self->getBlockDefinition('', { type => 'user', private => 'no'});
                 }
 
-                my $id = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "name = '$name-$uid' and $uid = $uid");
                 if (!$id) {
                         $data = {
                                 type_id        => $block_definition->{type_id},
@@ -100,11 +102,17 @@ sub setUserBlock {
                         };
                         $slashdb->sqlUpdate('dynamic_user_blocks', $data, "bid = $id");
                 }
+	} else {
+		# No data was returned for this box type, but id is set. Delete the box
+		# since it's stale.
+		$slashdb->sqlDelete('dynamic_user_blocks', "bid = $id and name = '$name-$uid' and $uid = $uid");
 	}
 }
 
 sub setUserCommentBlock {
         my ($self, $user) = @_;
+
+	return 0 if !$user->{uid};
 
         my $constants = getCurrentStatic();
         my $slashdb = getCurrentDB();
@@ -140,6 +148,8 @@ sub setUserCommentBlock {
 sub setUserJournalBlock {
         my ($self, $user) = @_;
 
+	return 0 if !$user->{uid};
+
         my $slashdb = getCurrentDB();
 
         my $journals =
@@ -170,6 +180,8 @@ sub setUserJournalBlock {
 
 sub setUserAchievementBlock {
         my ($self, $user) = @_;
+
+	return 0 if !$user->{uid};
 
         my $slashdb = getCurrentDB();
 
@@ -208,6 +220,8 @@ sub setUserAchievementBlock {
 sub setUserBookmarksBlock {
         my ($self, $user) = @_;
 
+	return 0 if !$user->{uid};
+
         my $slashdb = getCurrentDB();
 
         my $bookmarks_reader = getObject('Slash::Bookmark');
@@ -235,6 +249,8 @@ sub setUserBookmarksBlock {
 
 sub setUserTagsBlock {
         my ($self, $user) = @_;
+
+	return 0 if !$user->{uid};
 
         my $slashdb = getCurrentDB();
 
@@ -288,6 +304,8 @@ sub setUserTagsBlock {
 sub setUserFriendsBlock {
         my ($self, $user) = @_;
 
+	return 0 if !$user->{uid};
+
         my $slashdb = getCurrentDB();
 
         my $friends =
@@ -326,6 +344,8 @@ sub setUserFriendsBlock {
 sub setUserSubmissionsBlock {
         my ($self, $user) = @_;
 
+	return 0 if !$user->{uid};
+
         my $slashdb = getCurrentDB();
 
         my $submissions =
@@ -362,6 +382,8 @@ sub setUserSubmissionsBlock {
 sub setUserMessagesBlock {
         my ($self, $user) = @_;
 
+	return 0 if !$user->{uid};
+
         my $slashdb = getCurrentDB();
 
         my $messages =
@@ -394,9 +416,38 @@ sub setUserMessagesBlock {
         return (keys %$block) ? $block : 0;
 }
 
+sub setRemarkAsMessage {
+        my ($self) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $messages = getObject('Slash::Messages');
+        my $remarks_message_code = $slashdb->sqlSelect('code', 'message_codes', "type = 'Remarks'");
+        my $remarks_reader = getObject("Slash::Remarks");
+        return 0 if (!$messages or !$remarks_message_code or !$remarks_reader);
+
+        my $remarks = $remarks_reader->getRemarks( { max => 1 } );
+        foreach my $admin (@{$slashdb->currentAdmin()}) {
+                my $users = $messages->checkMessageCodes($remarks_message_code, [$admin->[5]]);
+                if (scalar @$users) {
+                        my $data = {
+                                template_name   => 'remarks_msg',
+                                template_page   => 'dynamicblocks',
+                                subject         => {
+                                        template_name => 'remarks_msg_subj',
+                                        template_page => 'dynamicblocks',
+                                },
+                                remark          => $remarks->[0],
+                        };
+                        $messages->create($admin->[5], $remarks_message_code, $data);
+                }
+        }
+}
+
 # Returns all portal blocks.
 sub getPortalBlocks {
 	my ($self, $keyed_on, $options) = @_;
+
+	return 0 if !$keyed_on;
 
         my $slashdb = getCurrentDB();
 
@@ -563,7 +614,7 @@ sub syncPortalBlocks {
                 my $data;
                 if (!$dynb_id) {
                         $data = {
-                                "portal_id"         => $block_data->{id},
+                                "portal_id"   => $block_data->{id},
                                 "type_id"     => $portal_block_definition->{type_id},
                                 "uid"         => $block_data->{shill_uid},
                                 "name"        => $name,

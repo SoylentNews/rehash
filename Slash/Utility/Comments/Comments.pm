@@ -1776,6 +1776,11 @@ sub saveComment {
 		$achievements->setUserAchievement('comment_posted', $user->{uid});
 	}
 
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	if ($dynamic_blocks) {
+		$dynamic_blocks->setUserBlock('comments', $user->{uid});
+	}
+
 	if ($constants->{validate_html}) {
 		my $validator = getObject('Slash::Validator');
 		my $test = parseDomainTags($comment->{comment});

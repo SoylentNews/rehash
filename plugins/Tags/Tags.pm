@@ -195,14 +195,21 @@ sub createTag {
 	# Return AUTOCOMMIT to its original state in any case.
 	$self->sqlDo('SET AUTOCOMMIT=1');
 
-	# Tagger/Contradictor achievement.
-	if ($rows and ($hr->{table} eq 'stories')) {
-		my $achievements = getObject('Slash::Achievements');
-		if ($achievements) {
-			$achievements->setUserAchievement('the_tagger', $tag->{uid}, { ignore_lookup => 1, exponent => 0 });
-			my $tagname = $self->getTagnameDataFromId($tag->{tagnameid});
-			if ($tagname->{tagname} =~ /^\!/) {
-				$achievements->setUserAchievement('the_contradictor', $tag->{uid}, { ignore_lookup => 1, exponent => 0 });
+	# Dynamic blocks and Tagger/Contradictor achievement.
+	if ($rows) {
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		if ($dynamic_blocks) {
+			$dynamic_blocks->setUserBlock('tags', $tag->{uid});
+		}
+
+		if ($hr->{table} eq 'stories') {
+			my $achievements = getObject('Slash::Achievements');
+			if ($achievements) {
+				$achievements->setUserAchievement('the_tagger', $tag->{uid}, { ignore_lookup => 1, exponent => 0 });
+				my $tagname = $self->getTagnameDataFromId($tag->{tagnameid});
+				if ($tagname->{tagname} =~ /^\!/) {
+					$achievements->setUserAchievement('the_contradictor', $tag->{uid}, { ignore_lookup => 1, exponent => 0 });
+				}
 			}
 		}
 	}

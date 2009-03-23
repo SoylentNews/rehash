@@ -219,6 +219,11 @@ sub create {
 		$achievements->setUserAchievement('journal_posted', $user->{uid});
 	}
 
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	if ($dynamic_blocks) {
+		$dynamic_blocks->setUserBlock('journal', $user->{uid});
+	}
+
 	return $id;
 }
 
@@ -275,6 +280,10 @@ sub remove {
 		);
 	}
 
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	if ($dynamic_blocks) {
+		$dynamic_blocks->setUserBlock('journal', $uid);
+	}
 
 	return $count;
 }
