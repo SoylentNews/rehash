@@ -335,7 +335,7 @@ function reportError(request) {
 }
 
 //Firehose functions begin
-function toggle_firehose_body( any, unused, /*optional:*/toggle_to ) {
+function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) {
 	setFirehoseAction();
 
 	var	$fhitem		= fhitem_of(any),
@@ -377,6 +377,10 @@ function toggle_firehose_body( any, unused, /*optional:*/toggle_to ) {
 
 	$fhitem.removeClass('article briefarticle adminmode usermode').
 		addClass((showing ? 'article ' : 'briefarticle ') + (fh_is_admin ? 'adminmode' : 'usermode'));
+
+	if (!dont_next && toggle_to < 0 && $fhitem.is('.currfh')) {
+		firehose_go_next();
+	}
 
 	after_article_moved($fhitem);
 	inlineAdFirehose(showing && $fhitem);
@@ -566,7 +570,7 @@ function tag_ui_in( $fhitem ){
 	return { widget:$W, expanded:$W.is('.expanded') };
 }
 
-function firehose_toggle_tag_ui_to( want_expanded, any ){
+function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 	var	$fhitem		= fhitem_of(any), // assert($fhitem.length)
 		id		= fhid_of($fhitem),
 		tag_ui		= tag_ui_in($fhitem),
@@ -574,7 +578,10 @@ function firehose_toggle_tag_ui_to( want_expanded, any ){
 
 	if ( toggle ) {
 		if (want_expanded) { // need to expand
-			$fhitem.data('tags-opened-body', $fhitem.find('div[id^=fhbody-]').is('.empty,.hide'));
+			if ($fhitem.find('div[id^=fhbody-]').is('.empty,.hide')) {
+				toggle_firehose_body($fhitem, 0, true, dont_next);
+				$fhitem.data('tags-opened-body', true);
+			}
 		}
 	
 		setFirehoseAction();
@@ -586,7 +593,7 @@ function firehose_toggle_tag_ui_to( want_expanded, any ){
 		$fhitem.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:want_expanded, tagshide:!want_expanded}));
 
 		if (!want_expanded && $fhitem.data('tags-opened-body')) { // is expanded, and parent was expanded by us
-			toggle_firehose_body($fhitem, -1);
+			toggle_firehose_body($fhitem, 0, false);
 			$fhitem.removeData('tags-opened-body');
 		}
 
@@ -766,8 +773,8 @@ $(function(){
 $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
 	live('blur-article', function(){
 		var $fhitem = $(this);
-		if ( $fhitem.data('blur-closes-item') ) {		toggle_firehose_body($fhitem, 0, false);
-		} else if ( $fhitem.data('blur-closes-tags') ) {	firehose_toggle_tag_ui_to(false, $fhitem);
+		if ( $fhitem.data('blur-closes-item') ) {		toggle_firehose_body($fhitem, 0, false, true);
+		} else if ( $fhitem.data('blur-closes-tags') ) {	firehose_toggle_tag_ui_to(false, $fhitem, true);
 		}
 		// optional, will focus before next blur
 		$fhitem.removeData('blur-closes-item').
@@ -2401,8 +2408,6 @@ $(function(){
 		if (keyo.tag && el) {
 			if (keyo.nod)     { el.submit_tags('nod') }
 			if (keyo.nix)     { el.submit_tags('nix') }
-
-			toggle_firehose_body(id, 0, true);
 			firehose_toggle_tag_ui_to(true, el);
 		}
 
@@ -2423,11 +2428,7 @@ $(function(){
 		if (keyo.prev)           { firehose_go_prev()        }
 		if (keyo.more)           { firehose_more()           }
 		if (keyo.search)         { $('#searchquery').focus() }
-		if (keyo.toggle && id)   {
-			toggle_firehose_body(id, 0);
-			if (cur.hasClass('briefarticle'))
-				firehose_go_next();
-		}
+		if (keyo.toggle && id)   { toggle_firehose_body(id)  }
 
 		if (keyo.open) {
 			var mylink = '';
