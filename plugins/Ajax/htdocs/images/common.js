@@ -161,7 +161,8 @@ function fhitems( o ){
 }
 (function(){
 var	sx = { root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
-	$root = $(sx.root);
+	$root = $([]);	// Don't cache sx.root until it actually exists...
+$(function(){ $root = $(sx.root); });
 fhitems.fn = fhitems.prototype = {
 	__typeOf: function(){ return 'fhitems'; },
 	init: function( o ){
