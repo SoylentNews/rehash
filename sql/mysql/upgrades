@@ -6087,3 +6087,6 @@ DELETE FROM blocks WHERE bid = 'linuxcom';
 DELETE FROM dynamic_user_blocks WHERE name = 'linuxcom';
 ALTER TABLE badpasswords CHANGE uid uid mediumint UNSIGNED NOT NULL DEFAULT 0;
 
+# for themes/slashdot
+REPLACE INTO topics (tid,keyword,textname,series,image,width,height,submittable,searchable,storypickable) VALUES (249, 'oracle', 'Oracle', 'no', 'topicoracle.png', 97, 19, 'yes', 'yes', 'yes');
+
