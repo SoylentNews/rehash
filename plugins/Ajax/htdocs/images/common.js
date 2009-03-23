@@ -155,72 +155,81 @@ function handleEnter(ev, func, arg) {
 
 
 
-function fhitems(){
-	var	bare	= this.__isa !== fhitems,
-		self	= fhitems.fn.init.apply(bare?new fhitems:this, arguments);
-	return bare ? self.select() : self;
+function fhitems( o ){
+	var	no_new	= $.TypeOf(this)!=='fhitems',
+		self	= fhitems.fn.init.apply(no_new ? new fhitems : this, arguments);
+	return no_new ? self.exec() : self;
 }
 (function(){
-var	T=$.TypeOf, mt=T.makeTest,
-	isF=mt('boolean|function|string'),
-	isR=mt('element|jquery|null|undefined'),
-	isO=mt(function(o,t){ return t==='string'&&(o==='prev'||o==='next'); }),
-	ifS=function(o,x){ return typeof(o)==='string' && o || x || ''; },
-
-	// The idea is the entries in sx could be different on different pages.
-	sx={ root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
-	$root=$(sx.root);
-
-function filter( o ){
-	if ( o!==true && o!=='*' ) {
-		return typeof(o)==='string' && sx.items+o || o || o===false && ':not('+sx.items+')' || sx.items;
-	}
-}
-function selector( o ){
-	if ( o.op==='children' ) {
-		return (o.root.selector||o.root)+'>'+(o.filter||'*');
-	}
-}
+var	sx = { root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
+	$root = $(sx.root);
 fhitems.fn = fhitems.prototype = {
-	__isa: fhitems,
 	__typeOf: function(){ return 'fhitems'; },
 	init: function( o ){
-		arguments.length || (o='');
-		if ( isO(o) ) {
-			o = { op: o } || o || {};
-		} else if ( isF(o) ) {	// Simple case: o is a filter.
-			this.root=$root; this.op='children'; this.filter=filter(o); this.selector=selector(this);
-			return this;
-		} else if ( isR(o) ) {	// Simple case: o is a root.
-			this.root=o; this.op='closest'; this.filter=sx.root+'>'+sx.items;
-			return this;
+		if ( arguments.length===1 && T(o)==='fhitems' ) {
+			return $.extend(this, o); // "copy-constructor"
 		}
+		o = normalize_options.apply(this, arguments);
+
+		var sxv = [ // ...will become this.filter.
+			sx.root+'>',
+			o.scope,
+			o.sx || relOps[o.op]&&sx.current || '',
+			o.op_sx
+		];
 
 		if ( 'root' in o ) {
-			this.op = o.op || 'closest'; this.root = o.root;
-		} else if ( o.op && o.op!=='children' ) {
-			this.op = o.op; this.root = sx.root + '>' + sx.items + sx.current;
+			this.root=o.root;
+		} else if ( o.op!=='children' || o.fn && o.sx ) {
+			this.root=sxv.slice(0,3).join(''); sxv[0]=sxv[2]='';
 		} else {
-			this.op = 'children'; this.root = $root;
+			this.root=$root; sxv[0]='';
 		}
-
-		this.filter = filter(o.filter);
-		if ( this.op==='closest' ) {
-			this.filter = sx.root+'>'+ifS(this.filter, '*');
-		} else if ( this.op==='prev' || this.op==='next' ) {
-			this.op += 'All';
-			this.filter = ifS(this.filter)+':first';
-		}
-		this.selector = selector(this);
-
+		this.op = o.op;
+		this.filter = o.fn || sxv.join('') || undefined;
 		return this;
 	},
-	select: function(){
-		var $fhitems = $(this.root)[this.op](this.filter);
-		$fhitems.selector = selector(this)||$fhitems.selector;
-		return $fhitems;
+	exec: function(){
+		return $(this.root)[this.op](this.filter);
+	},
+	selector: function(){
+		return (this.root.selector||this.root) + '>' + (this.filter||'');
 	}
-};
+}
+
+var	fhitemsArgTypes = {
+		'function':	'fn',
+		'boolean':	'scope',
+		'element':	'root',
+		'jquery':	'root',
+		'undefined':	'root',
+		'null':		'root'
+	},
+	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings'),
+	T = $.TypeOf,
+	optType = T.makeTest(function( o, t ){
+		return t==='string' ? o==='*' && 'scope' || o in $.fn && 'op' || 'sx' : fhitemsArgTypes[t];
+	});
+
+function normalize_options(){
+	var o={ op_sx:'' }, i, v, k;
+	for ( i=0; i<arguments.length; ++i ){
+		(k=optType(v=arguments[i])) && (o[k]=v);
+	}
+
+	o.scope = typeof(o.scope)==='string' && o.scope
+		|| o.scope===true && '*'
+		|| o.scope===false && ':not('+sx.items+')'
+		|| sx.items;
+
+	if ( o.op==='next' || o.op==='prev' ) {
+		o.op+='All'; o.op_sx=':first';
+	} else if ( !o.op || T.not('string', o.op) ) {
+		o.op = 'root' in o && 'closest' || o.fn && 'filter' || 'children';
+	}
+
+	return o;
+}
 })();
 
 
