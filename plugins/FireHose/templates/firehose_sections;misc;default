@@ -65,7 +65,7 @@ END;
 $(function(){
 $any('firehose-sections').mousedown(function( event ){
 		// select a section on mousedown
-		var $section = $(event.originalTarget).closest('li[id^=fhsection-]');
+		var $section = $(event.originalTarget || event.target).closest('li[id^=fhsection-]');
 		if ( !$section.is('.active') ) {
 			var section = $section.metadata();
 			if ( section.id === 'unsaved' ) {
