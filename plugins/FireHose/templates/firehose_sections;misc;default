@@ -80,7 +80,7 @@ $any('firehose-sections').mousedown(function( event ){
 	}).
 	click(function( event ){
 		// edit only for a click in the edit button
-		var $edit = $(event.originalTarget).closest('a.links-sections-edit');
+		var $edit = $(event.originalTarget || event.target).closest('a.links-sections-edit');
 		if ( $edit.length ) {
 			var section = $edit.closest('li[id^=fhsection-]').metadata();
 			if ( section.id === 'unsaved' ) {
