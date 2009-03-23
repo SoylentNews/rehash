@@ -566,25 +566,34 @@ function tag_ui_in( $fhitem ){
 	return { widget:$W, expanded:$W.is('.expanded') };
 }
 
-function firehose_toggle_tag_ui_to( if_expanded, any ){
+function firehose_toggle_tag_ui_to( want_expanded, any ){
 	var	$fhitem		= fhitem_of(any), // assert($fhitem.length)
 		id		= fhid_of($fhitem),
 		tag_ui		= tag_ui_in($fhitem),
-		toggle		= tag_ui.expanded == !if_expanded; // force boolean conversion
+		toggle		= tag_ui.expanded == !want_expanded; // force boolean conversion
 
 	if ( toggle ) {
+		if (want_expanded) { // need to expand
+			$fhitem.data('tags-opened-body', $fhitem.find('div[id^=fhbody-]').is('.empty,.hide'));
+		}
+	
 		setFirehoseAction();
-		if_expanded && $fhitem[0].fetch_tags();
+		want_expanded && $fhitem[0].fetch_tags();
 
 		$fhitem.find('.tag-widget').each(function(){ this.set_context(); });
-		tag_ui.widget.toggleClass('expanded', !!if_expanded);
-		tag_ui.widget.find('a.edit-toggle .button').setClass(applyToggle({expand:if_expanded, collapse:!if_expanded}));
-		$fhitem.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:if_expanded, tagshide:!if_expanded}));
+		tag_ui.widget.toggleClass('expanded', !!want_expanded);
+		tag_ui.widget.find('a.edit-toggle .button').setClass(applyToggle({expand:want_expanded, collapse:!want_expanded}));
+		$fhitem.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:want_expanded, tagshide:!want_expanded}));
+
+		if (!want_expanded && $fhitem.data('tags-opened-body')) { // is expanded, and parent was expanded by us
+			toggle_firehose_body($fhitem, -1);
+		}
+
 		after_article_moved($fhitem[0]);
 	}
 
 	// always focus for expand request, even if already expanded
-	if_expanded && tag_ui.widget.find('.tag-entry:visible:first').focus();
+	want_expanded && tag_ui.widget.find('.tag-entry:visible:first').focus();
 	return tag_ui.widget;
 }
 
