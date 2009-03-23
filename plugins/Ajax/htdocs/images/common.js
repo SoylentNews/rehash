@@ -156,9 +156,8 @@ function handleEnter(ev, func, arg) {
 
 
 function fhitems( o ){
-	var	no_new	= $.TypeOf(this)!=='fhitems',
-		self	= fhitems.fn.init.apply(no_new ? new fhitems : this, arguments);
-	return no_new ? self.exec() : self;
+	var fn = fhitems.fn.init.apply($.extend(function(){ return $(fn.root)[fn.op](fn.filter); }, fhitems.fn), arguments);
+	return $.TypeOf(this)==='fhitems' ? fn : fn();
 }
 (function(){
 var	sx = { root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
@@ -188,9 +187,6 @@ fhitems.fn = fhitems.prototype = {
 		this.op = o.op;
 		this.filter = o.fn || sxv.join('') || undefined;
 		return this;
-	},
-	exec: function(){
-		return $(this.root)[this.op](this.filter);
 	},
 	selector: function(){
 		return (this.root.selector||this.root) + '>' + (this.filter||'');
