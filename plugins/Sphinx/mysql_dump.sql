@@ -1,5 +1,9 @@
 INSERT INTO dbs (id, virtual_user, isalive, type, weight, weight_adjust) VALUES (NULL, 'sphinx01', 'yes', 'sphinx', 1, 1);
 
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (0, 'main', 1, '2000-01-01 00:00:00', 86400);
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (1, 'delta1', 0, '2000-01-01 00:00:00', 900);
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (2, 'delta2', 0, '2000-01-01 00:00:00', 5);
+
 INSERT INTO vars (name, value, description) VALUES ('sphinx', '0', 'Is Sphinx installed?');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_01_hostname_searchd', '', 'Hostname for the sphinx01 instance: searchd');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_01_hostname_sphinxse', '', 'Hostname for the sphinx01 instance: SphinxSE on mysqld');
