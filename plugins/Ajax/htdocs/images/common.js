@@ -173,14 +173,16 @@ fhitems.fn = fhitems.prototype = {
 		var sxv = [ // ...will become this.filter.
 			sx.root+'>',
 			o.scope,
-			o.sx || relOps[o.op]&&sx.current || '',
+			o.sx || '',
 			o.op_sx
 		];
 
 		if ( 'root' in o ) {
 			this.root=o.root;
-		} else if ( o.op!=='children' || o.fn && o.sx ) {
-			this.root=sxv.slice(0,3).join(''); sxv[0]=sxv[2]='';
+		} else if ( relOps[o.op] ) {
+			this.root = sx.root+'>'+sx.items+sx.current; sxv[0]='';
+		} else if ( o.op!=='children' ) {
+			this.root = sxv.slice(0,3).join(''); sxv[0]=sxv[2]='';
 		} else {
 			this.root=$root; sxv[0]='';
 		}
@@ -189,7 +191,9 @@ fhitems.fn = fhitems.prototype = {
 		return this;
 	},
 	selector: function(){
-		return (this.root.selector||this.root) + '>' + (this.filter||'');
+		return this.op==='children'
+			? (this.root.selector||this.root)+'>'+(this.filter||'')
+			: fhitems(this).selector;
 	}
 }
 
@@ -203,7 +207,8 @@ var	fhitemsArgTypes = {
 	},
 	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings'),
 	T = $.TypeOf,
-	optType = T.makeTest(function( o, t ){
+	optType = T.makeTest(function( o ){
+		var t=T(o, true);
 		return t==='string' ? o==='*' && 'scope' || o in $.fn && 'op' || 'sx' : fhitemsArgTypes[t];
 	});
 
@@ -213,9 +218,8 @@ function normalize_options(){
 		(k=optType(v=arguments[i])) && (o[k]=v);
 	}
 
-	o.scope = typeof(o.scope)==='string' && o.scope
-		|| o.scope===true && '*'
-		|| o.scope===false && ':not('+sx.items+')'
+	o.scope = o.scope===false && ':not('+sx.items+')'
+		|| o.scope && '*'
 		|| sx.items;
 
 	if ( o.op==='next' || o.op==='prev' ) {
