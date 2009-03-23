@@ -443,7 +443,7 @@ sub run_tagboxes_until {
 	my $tagbox_obj = { };
 
 	my $num_children = $constants->{tags_tagbox_numchildren} || 1;
-	my $do_fork = ($num_children > 1);
+	my $can_fork = ($num_children > 1);
 	while (time() < $run_until && !$task_exit_flag) {
 		my $cur_count = 20;
 		my $cur_minweightsum = 1;
@@ -466,7 +466,7 @@ sub run_tagboxes_until {
 
 		# If we're multiprocessing, grab more id's here because we're
 		# going to pass them out to multiple processes to do in parallel.
-		$cur_count *= $num_children if $do_fork;
+		$cur_count *= $num_children if $can_fork;
 
 		my $affected_ar = $tagboxdb->getMostImportantTagboxAffectedIDs({
 			num			=> $cur_count,
@@ -485,7 +485,7 @@ sub run_tagboxes_until {
 		$tagboxdb->markClaimed($affected_ar);
 
 		$activity = 1;
-		if ($do_fork) {
+		if ($can_fork && scalar(@$affected_ar) >= 5) {
 
 			my $partitioned_ar = rtu_partition($affected_ar, $num_children);
 			rtu_dbs_disconnect();
@@ -494,7 +494,9 @@ sub run_tagboxes_until {
 			rtu_wait_for_children();
 
 		} else {
-			# This code path is taken if tags_tagbox_numchildren <= 1.
+			# This code path is taken if tags_tagbox_numchildren <= 1
+			# or if there are too few tbid/globjid pairs to bother
+			# forking off new processes.
 			for my $affected_hr (@$affected_ar) {
 				my $tagbox_obj = $tagboxdb->getTagboxObject($affected_hr->{tbid});
 
