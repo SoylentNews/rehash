@@ -587,6 +587,7 @@ function firehose_toggle_tag_ui_to( want_expanded, any ){
 
 		if (!want_expanded && $fhitem.data('tags-opened-body')) { // is expanded, and parent was expanded by us
 			toggle_firehose_body($fhitem, -1);
+			$fhitem.removeData('tags-opened-body');
 		}
 
 		after_article_moved($fhitem[0]);
