@@ -377,11 +377,7 @@ function toggle_firehose_body( any, unused, /*optional:*/toggle_to ) {
 
 	$fhitem.removeClass('article briefarticle adminmode usermode').
 		addClass((showing ? 'article ' : 'briefarticle ') + (fh_is_admin ? 'adminmode' : 'usermode'));
-/*
-	$fhitem.removeClass('article briefarticle adminmode usermode').
-		addClass((showing ? 'article ' : 'briefarticle ') + (fh_is_admin ? 'adminmode' : 'usermode')).
-		find('h3 a img')[ showing ? 'show' : 'hide' ]('fast');
-*/
+
 	after_article_moved($fhitem);
 	inlineAdFirehose(showing && $fhitem);
 	return false;
