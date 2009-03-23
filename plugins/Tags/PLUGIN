@@ -14,7 +14,6 @@ template=templates/data;tags;default
 template=templates/index;tags;default
 template=templates/recenttagnamesbox;misc;default
 template=templates/tagsstorydivadmin;misc;default
-template=templates/tagsstorydivtagbox;misc;default
 template=templates/tagsurldivtagbox;misc;default
 template=templates/tagsstorydivuser;misc;default
 template=templates/tagsurldivuser;misc;default
