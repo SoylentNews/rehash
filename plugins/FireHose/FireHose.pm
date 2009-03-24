@@ -1136,12 +1136,6 @@ sub getFireHoseEssentialsParams {
 	}
 
 
-	if ($options->{ids}) {
-# SSS		return($items, $results) if @{$options->{ids}} < 1; # XXX: do we really want to return? or just ignore this param?  -- pudge
-		my @globjids = map { $_->{globjid} } values %{ $self->getFireHoseMulti($options->{ids}) };
-		push @sphinx_opts, [ filter => globjidattr => \@globjids ] if @globjids;
-	}
-
 	if ($options->{not_id}) {
 		my $globjid = $self->getFireHose($options->{not_id})->{globjid};
 		push @sphinx_opts, [ filter => globjidattr => [ $globjid ], 1 ];
@@ -1401,7 +1395,7 @@ sub getFireHoseEssentials {
 
 
 	# GET STATS
-# SSS
+# SSS: don't think we need this, but don't remove it yet
 # 	if ($fetch_extra && @$items == $fetch_size) {
 # 		$fetch_extra = pop @$items;
 # 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
@@ -3166,7 +3160,7 @@ my @options = (
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
 		tagged_by_uid tagged_as offmainpage smalldevices
 		createtime_no_future createtime_subscriber_future
-		tagged_non_negative uid ids
+		tagged_non_negative uid
 	)
 );
 
