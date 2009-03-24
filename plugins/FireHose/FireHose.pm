@@ -1149,6 +1149,8 @@ sub getFireHoseEssentialsParams {
 			push @sphinx_terms, $query;
 		}
 	}
+
+	return(\@sphinx_opts, \@sphinx_terms, \@sphinx_where, \@sphinx_tables);
 }
 
 
