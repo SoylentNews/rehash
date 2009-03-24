@@ -397,6 +397,10 @@ sub _delete_web {
 
 	$self->sqlDo("DELETE FROM $table1 WHERE $where1");
 	$self->sqlDo("DELETE FROM $table2 WHERE $where2");
+
+	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
+	$dynamic_blocks->setUserBlock('messages', $uid) if $dynamic_blocks;
+
 	return 1;
 }
 

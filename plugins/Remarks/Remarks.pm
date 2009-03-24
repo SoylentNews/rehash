@@ -71,6 +71,9 @@ sub createRemark {
 		-time		=> 'NOW()',
 		remark		=> $remark_t,
 	});
+
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	$dynamic_blocks->setRemarkAsMessage() if $$dynamic_blocks;
 }
 
 ########################################################
