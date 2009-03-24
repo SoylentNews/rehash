@@ -120,6 +120,9 @@ sub _set {
 		$self->setUser_delete_memcached($uid_ar);
 		Time::HiRes::sleep(0.2);
 	}
+
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	$dynamic_blocks->setUserBlock('friends', $uid) if $dynamic_blocks;
 }
 
 
@@ -162,6 +165,9 @@ sub delete {
 	my $uid_list = join (',', @$uid_ar);
 	$self->sqlUpdate("users_info", { people_status => 'dirty' }, "uid IN ($uid_list)");
 	$self->setUser_delete_memcached($uid_ar);
+
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	$dynamic_blocks->setUserBlock('friends', $uid) if $dynamic_blocks;
 }
 
 sub topFriends {
