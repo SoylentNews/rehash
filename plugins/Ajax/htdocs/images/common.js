@@ -78,13 +78,54 @@ var fh_adTimerUrl       = '';
 
 
 
-function view( expr, how ){
+var view; // function view( what, how )
+(function(){
+var $body, $body_html, el_q=[];
+
+// el_q has a matching DOM element for each queued call to animate(); synchronized by queue() and dequeue().
+// el_q.length > 0 means a view() animation is in-progress, scrolling to reveal el_q[0].
+function queue( el, how ){
+	el_q.push(el);	// Keep el_q synchronized with the 'fx' queue on body.
+	$body.queue('fx', function(){
+		animate($(el), how);
+	});
+}
+function dequeue(){
+	el_q.shift();	// Keep el_q synchronized with the 'fx' queue on body.
+	$body.dequeue('fx');
+}
+
+// view(false) to stop animation yourself.
+view = function( what, how ){
+	var stop_old=(what===false), start_new=!stop_old, $el, el;
+	if ( start_new ) {
+		how = how || { animate: true };
+		$el=$any(what); el=$el[0];
+		if ( !el || $.TypeOf.not('element', el) || Bounds.empty($el) ) {
+			start_new = false;
+		} else if ( el_q.length && ($.TypeOf.defNo(how.animate) || !DOM_descendant(el_q[el_q.length-1], el)) ) {
+			// Stop the current animation for a request that is:
+			//   (a) non-animated, i.e., how.animated===false; or
+			//   (b) an element not contained in the current animation.
+			stop_old = true;
+		}
+	}
+	stop_old && stop();
+	start_new && queue(el, how);
+	return $el;
+}
+function stop(){
+	// All-stop.  Clear the animation queue.  Hopefully no one else is animating body.
+	$body_html.stop(true);
+	el_q.length=0;
+}
+
+function animate( $elem, how ){
 	// (minimally) scroll an element entirely into view; how='x' or how='y' to scroll only on that axis
-	var $elem=$any(expr), e;
-	if ( $elem.length!=1 || $.TypeOf.not('element', $elem[0]) || Bounds.empty(e=new Bounds($elem)) ) {
+	var e = new Bounds($elem);
+	if ( Bounds.empty(e) ) {
 		return;
 	}
-	how = how || { animate: true };
 
 	$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
 		e[edge] += scale*parseInt($elem.css('margin-'+edge));
@@ -102,13 +143,22 @@ function view( expr, how ){
 		var x=w.left+dx, y=w.top+dy;
 		if ( $.TypeOf.defNo(how.animate) ) {
 			window.scrollTo(x, y);
-			// dequeue this call
+			dequeue();
 		} else {
-			$('html,body').animate({ scrollLeft:x, scrollTop:y } /*, dequeue this call */);
+			$body_html.animate({ scrollLeft:x, scrollTop:y }, dequeue);
 		}
 	}
-	return $elem;
 }
+
+function DOM_descendant( a, b ){
+	return $(b).parents().filter(function(){ return this===a; }).length>0;
+}
+
+$(function(){
+	$body=$('body');
+	$body_html=$('body,html');
+});
+})();
 
 
 function createPopup(pos_selector, titlebar, name, contents, message, onmouseout) {
