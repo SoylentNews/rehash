@@ -11,12 +11,6 @@ use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-# At the moment, this module exists only to provide the usual
-# way of determining whether a plugin is active:  getObject() it
-# and see whether undef comes back.
-#
-# Useful Sphinx-specific methods may be added later, or may not.
-
 sub isInstalled {
 	my($class) = @_;
 	my $constants = getCurrentStatic();
