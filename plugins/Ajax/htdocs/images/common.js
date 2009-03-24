@@ -120,27 +120,45 @@ function stop(){
 	el_q.length=0;
 }
 
+function offset( el, w, how, delta ){
+	var $elem=$(el), e=new Bounds($elem);
+	if ( ! Bounds.empty(e) ) {
+		$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
+			e[edge] += scale*parseInt($elem.css('margin-'+edge));
+		});
+
+		delta || (delta={ dx:0, dy:0 });
+		if ( how.axis!='y' && !Bounds.contain(Bounds.x(w), e) ) {
+			delta.dx += (e.left<=w.left || w.width<=e.width() ? e.left-w.left : e.right-w.right);
+		}
+		if ( how.axis!='x' && !Bounds.contain(Bounds.y(w), e) ) {
+			delta.dy += (e.top<=w.top || w.height()<=e.height() ? e.top-w.top : e.bottom-w.bottom);
+		}
+	}
+	return delta;
+}
+
 function animate( $elem, how ){
 	// (minimally) scroll an element entirely into view; how='x' or how='y' to scroll only on that axis
-	var e = new Bounds($elem);
-	if ( Bounds.empty(e) ) {
-		return;
+	var w0=new Bounds(window), w1, delta;
+	if ( how.hint && !Bounds.empty($elem) ) {
+		// If a "hint element" is given, then calculate the goal as if we
+		//   viewed both in succession: view(how.hint); view($elem)
+		delta = offset(how.hint, w0, how);
+		w1 = new Bounds({
+			top:	w0.top+delta.dy,
+			left:	w0.left+delta.dx,
+			bottom:	w0.bottom+delta.dy,
+			right:	w0.right+delta.dx
+		});
+	} else {
+		delta = { dx:0, dy:0 };
+		w1 = new Bounds(w);
 	}
+	delta=offset($elem, w1, how, delta);
 
-	$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
-		e[edge] += scale*parseInt($elem.css('margin-'+edge));
-	});
-
-	var w=new Bounds(window), dx=0, dy=0;
-	if ( how.axis!='y' && !Bounds.contain(Bounds.x(w), e) ) {
-		dx = (e.left<=w.left || w.width<=e.width() ? e.left-w.left : e.right-w.right);
-	}
-	if ( how.axis!='x' && !Bounds.contain(Bounds.y(w), e) ) {
-		dy = (e.top<=w.top || w.height()<=e.height() ? e.top-w.top : e.bottom-w.bottom);
-	}
-
-	if ( dx || dy ) {
-		var x=w.left+dx, y=w.top+dy;
+	if ( delta.dx || delta.dy ) {
+		var x=w0.left+delta.dx, y=w0.top+delta.dy;
 		if ( $.TypeOf.defNo(how.animate) ) {
 			window.scrollTo(x, y);
 			dequeue();
