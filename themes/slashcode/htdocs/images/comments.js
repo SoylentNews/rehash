@@ -2277,7 +2277,8 @@ Slash.Util.qw.each('\
 	user_threshold \
 	user_uid \
 	', function(){
-	packageObj[this] = eval('(function(v){ if (v===undefined) return '+this+'; '+this+'=v;})');
+	packageObj[this] = eval('("IE bug workaround",(function(v){ if (v===undefined) return '+this+'; '+this+'=v;}))');
+
 });
 
 Slash.Util.Package({
