@@ -1214,7 +1214,7 @@ sub getFireHoseEssentials {
 
 	# SEARCH PARAM SETUP
 	my($sphinx_opts, $sphinx_terms, $sphinx_where, $sphinx_tables) = $self->getFireHoseEssentialsParams($options, $sphinx);
-
+#use Data::Dumper; print STDERR Dumper [$sphinx_opts, $sphinx_terms, $sphinx_where, $sphinx_tables];
 
 
 	# CACHE CHECK
@@ -1301,7 +1301,7 @@ sub getFireHoseEssentials {
 				push @sphinxse_opts, "maxmatches=$maxmatches" if defined $maxmatches;
 			}
 
-			my $query = $self->sqlQuote(join ';', @$sphinx_terms, @$sphinx_opts);
+			my $query = $self->sqlQuote(join ';', @$sphinx_terms, @sphinxse_opts);
 			my $swhere = join ' AND ', @$sphinx_where;
 			$swhere = " AND $swhere" if $swhere;
 			my $stables = join ',', @$sphinx_tables;
@@ -1417,7 +1417,7 @@ sub getFireHoseEssentials {
 			scalar(gmtime),
 			$sdebug_idset_elapsed, $sdebug_get_elapsed,
 			$sphinx_stats_tf, $count,
-			Dumper($sphinx_terms, $sphinx_opts)
+			Dumper([$sphinx_opts, $sphinx_terms, $sphinx_where, $sphinx_tables])
 		);
 	}
 
