@@ -87,7 +87,7 @@ var view;
 // how.speed=0:	scroll immediately to the goal, no animation (jQuery>=1.3)
 // how.focus:	on scroll-complete, $(what).focus()
 
-var $body, $body_html, el_q=[];
+var $body, $html_body, el_q=[];
 // el_q has a matching DOM element for each queued call to animate()
 // el_q.length > 0 means a view() animation is in-progress, scrolling to reveal el_q[0].
 
@@ -129,7 +129,7 @@ view = function( what, how ){
 	}
 
 	if ( stop ) {	// All-stop.  Clear the animation queue.  Hopefully no one else is animating body.
-		$body_html.stop(true);
+		$html_body.stop(true);
 		el_q.length=0;
 	}
 
@@ -139,7 +139,7 @@ view = function( what, how ){
 			var w=new Bounds(window);
 			how.hint && !Bounds.empty($el) && offset(how.hint, w, how);
 			offset($el, w, how);
-			$body_html.animate({ scrollTop:w.top, scrollLeft:w.left }, how.speed, function(){
+			$html_body.animate({ scrollTop:w.top, scrollLeft:w.left }, how.speed, function(){
 				how.focus && $el.focus();
 				// Dequeue; keep el_q synchronized with the 'fx' queue on body.
 				el_q.shift();
@@ -153,7 +153,7 @@ view = function( what, how ){
 
 $(function(){
 	$body=$('body');
-	$body_html=$('body,html');
+	$html_body=$('html,body');
 });
 })();
 
