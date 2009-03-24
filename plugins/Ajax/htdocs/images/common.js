@@ -527,6 +527,7 @@ firehose_set_options = function(name, value, context) {
 	}
 
 	if ( start_over[name] ) {
+		view(false);
 		window.scrollTo(0, 0);
 	}
 
@@ -2457,7 +2458,10 @@ $(function(){
 		if (keyo.next)           { firehose_go_next()        }
 		if (keyo.prev)           { firehose_go_prev()        }
 		if (keyo.more)           { firehose_more()           }
-		if (keyo.search)         { $('#searchquery').focus() }
+		if (keyo.search)         {
+			$('#searchquery').focus();
+			view($any('body'));
+		}
 		if (keyo.toggle && id)   { toggle_firehose_body(id)  }
 
 		if (keyo.open) {
