@@ -34,7 +34,7 @@ $task{$me}{code} = sub {
 		sleep 5 while !$task_exit_flag;
 	}
 
-	my $info = load_index_info();
+	my $src_info = load_index_info();
 
 	while (!$task_exit_flag) {
 		my($next_index, $run_at, $asynch) = get_next_index();
@@ -44,20 +44,20 @@ $task{$me}{code} = sub {
 		sleep 1;
 	}
 
-	wait_for_all_children;
+	wait_for_all_children();
 
 	return "ran indexer $num_runs times";
 };
 
 sub load_index_info {
-	my $info = { prev => { }, freq => { } };
-	$info->{prev} = $sphinxdb->sqlSelectAllKeyValue(
+	my $src_info = { prev => { }, freq => { } };
+	$src_info->{prev} = $sphinxdb->sqlSelectAllKeyValue(
 		'name, UNIX_TIMESTAMP(laststart)', 'sphinx_index');
-	$info->{freq} = $sphinxdb->sqlSelectAllKeyValue(
+	$src_info->{freq} = $sphinxdb->sqlSelectAllKeyValue(
 		'name, frequency', 'sphinx_index');
-	$info->{asynch} = $sphinxdb->sqlSelectAllKeyValue(
+	$src_info->{asynch} = $sphinxdb->sqlSelectAllKeyValue(
 		'name, asynch', 'sphinx_index');
-	$info;
+	$src_info;
 }
 
 sub set_laststart_now {
@@ -68,15 +68,16 @@ sub set_laststart_now {
 }
 
 sub get_next_index {
+	my($src_info) = @_;
 	my $name = undef;
 	my $run_at = 2**32-1;
-	for my $n (keys %{$info->{prev}}) {
-		my $t = $info->{prev}{$n} + $info->{freq}{$n};
+	for my $n (keys %{$src_info->{prev}}) {
+		my $t = $src_info->{prev}{$n} + $src_info->{freq}{$n};
 		next if $run_at < $t;
 		$run_at = $t;
 		$name = $n;
 	}
-	return($name, $run_at, $info->{asynch}{$name});
+	return($name, $run_at, $src_info->{asynch}{$name});
 }
 
 sub sleep_until {
@@ -119,7 +120,7 @@ sub do_system {
 		"--config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf",
 		"--rotate",
 		"--quiet",
-		"idx_firehose_$index",
+		"idx_firehose_$name",
 		"> /dev/null"));
 }
 
