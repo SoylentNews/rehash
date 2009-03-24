@@ -169,7 +169,8 @@ function animate( $elem, how ){
 }
 
 function DOM_descendant( a, b ){
-	return $(b).parents().filter(function(){ return this===a; }).length>0;
+	var ancestor=$(a)[0], $descendant=$(b).eq(0);
+	return ancestor && $descendant.parents().filter(function(){ return this===ancestor; }).length>0;
 }
 
 $(function(){
