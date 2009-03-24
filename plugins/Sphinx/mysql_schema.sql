@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `sphinx_search` (
 CREATE TABLE `sphinx_index` (
   `src` smallint(5) unsigned NOT NULL,
   `name` varchar(48) NOT NULL,
-  `ndc_ok` tinyint(3) unsigned NOT NULL default '1',
+  `asynch` tinyint(3) unsigned NOT NULL default '1',
   `laststart` datetime NOT NULL default '2000-01-01 00:00:00',
   `frequency` int(10) unsigned NOT NULL default '86400',
   PRIMARY KEY  (`src`),
