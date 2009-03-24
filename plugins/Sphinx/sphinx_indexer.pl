@@ -5,6 +5,7 @@
 
 use strict;
 
+use POSIX ':sys_wait_h';
 use Time::HiRes;
 
 use Slash;
@@ -37,9 +38,9 @@ $task{$me}{code} = sub {
 	my $src_info = load_index_info();
 
 	while (!$task_exit_flag) {
-		my($next_index, $run_at, $asynch) = get_next_index();
+		my($next_index, $run_at, $asynch) = get_next_index($src_info);
 		sleep_until($run_at);
-		run_index($next_index, $asynch);
+		run_next_index($src_info, $next_index, $asynch);
 		++$num_runs;
 		sleep 1;
 	}
@@ -57,6 +58,8 @@ sub load_index_info {
 		'name, frequency', 'sphinx_index');
 	$src_info->{asynch} = $sphinxdb->sqlSelectAllKeyValue(
 		'name, asynch', 'sphinx_index');
+	$src_info->{order} = $sphinxdb->sqlSelectAllKeyValue(
+		'name, src', 'sphinx_index');
 	$src_info;
 }
 
@@ -71,12 +74,34 @@ sub get_next_index {
 	my($src_info) = @_;
 	my $name = undef;
 	my $run_at = 2**32-1;
-	for my $n (keys %{$src_info->{prev}}) {
+	my $cur_time = time;
+	for my $n (sort keys %{$src_info->{prev}}) {
 		my $t = $src_info->{prev}{$n} + $src_info->{freq}{$n};
-		next if $run_at < $t;
-		$run_at = $t;
-		$name = $n;
-	}
+#print STDERR "gni checking $n next_time=$t run_at=$run_at time=" . time . " freq=$src_info->{freq}{$n}\n";
+		if ($t <= $cur_time) {
+			# This one needs to run ASAP.  It's probably next.
+			# But if the current-next item also needs to run ASAP,
+			# this one is only next if its order comes first.
+			if ($run_at == $cur_time) {
+				if ($src_info->{order}{$n} < $src_info->{order}{$name}) {
+					$run_at = $cur_time;
+					$name = $n;
+#print STDERR "gni found A $n $t\n";
+				}
+			} else {
+				$run_at = $cur_time;
+				$name = $n;
+#print STDERR "gni found B $n $t\n";
+			}
+		} elsif ($t < $run_at) {
+			# This one needs to run sooner than the best-known
+			# other alternative.
+			$run_at = $t;
+			$name = $n;
+#print STDERR "gni found C $n $t\n";
+		}
+        }
+#print STDERR "gni returning $name $run_at $src_info->{asynch}{$name}\n";
 	return($name, $run_at, $src_info->{asynch}{$name});
 }
 
@@ -89,10 +114,10 @@ sub sleep_until {
 }
 
 sub run_next_index {
-	my($name, $asynch) = @_;
+	my($src_info, $name, $asynch) = @_;
 	set_laststart_now($name);
 	if (!$asynch) {
-		do_system();
+		do_system($name);
 	} else {
 		local $SIG{CHLD} = sub { };
 		SI_FORK: {
@@ -102,7 +127,8 @@ sub run_next_index {
 				++$children_running;
 			} elsif (defined $pid) {
 				# Child.
-				do_system();
+				do_system($name);
+				exit 0;
 			} else {
 				# Error.
 				Time::HiRes::sleep(0.1);
@@ -111,10 +137,12 @@ sub run_next_index {
 		}
 		Time::HiRes::sleep(0.1);
 	}
+	$src_info->{prev}{$name} = time;
 }
 
 sub do_system {
 	my($name) = @_;
+	main::slashdLog("indexing $name pid $$");
 	system(join(' ',
 		"/usr/local/sphinx/bin/indexer",
 		"--config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf",
@@ -135,7 +163,7 @@ sub SI_REAPER {
 	return if !$children_running;
 	while (my $pid = waitpid(-1, WNOHANG)) {
 		last if $pid < 1;
-		main::slashdLog("REAPER in parent $$ found reaped pid $pid"); # XXX
+		main::slashdLog("REAPER in parent $$ found reaped pid $pid");
 		--$children_running;
 	}
 }

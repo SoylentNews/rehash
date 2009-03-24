@@ -6100,4 +6100,7 @@ CREATE TABLE `sphinx_index` (
   PRIMARY KEY  (`src`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB;
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (0, 'main', 1, '2000-01-01 00:00:00', 86400);
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (1, 'delta1', 0, '2000-01-01 00:00:00', 900);
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (2, 'delta2', 0, '2000-01-01 00:00:00', 5);
 
