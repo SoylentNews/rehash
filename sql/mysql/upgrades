@@ -6090,3 +6090,9 @@ ALTER TABLE badpasswords CHANGE uid uid mediumint UNSIGNED NOT NULL DEFAULT 0;
 # for themes/slashdot
 REPLACE INTO topics (tid,keyword,textname,series,image,width,height,submittable,searchable,storypickable) VALUES (249, 'oracle', 'Oracle', 'no', 'topicoracle.png', 97, 19, 'yes', 'yes', 'yes');
 
+# for plugins/Achievements
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_maker', 'The Maker', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comedian', 'Comedian', 'no', 0);
+
+# for plugins/Messages
+INSERT INTO message_codes (code, type, seclev, modes, delivery_bvalue) VALUES (25, 'Remarks', 100, '', 2);

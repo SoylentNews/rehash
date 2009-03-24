@@ -14,3 +14,5 @@ INSERT INTO achievements (name, description, repeatable, increment) VALUES ('2_u
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('3_uid_club', 'Member of the 3 Digit UID Club', 'yes', 1);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('4_uid_club', 'Member of the 4 Digit UID Club', 'yes', 1);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('5_uid_club', 'Member of the 5 Digit UID Club', 'yes', 1);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_maker', 'The Maker', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comedian', 'Comedian', 'no', 0);
