@@ -78,98 +78,77 @@ var fh_adTimerUrl       = '';
 
 
 
-var view; // function view( what, how )
-(function(){
+var view;
+(function(){ // function view( what, how ): smoothly, minimally scroll what entirely into view
+// view(false) to stop all current and pending views()
+
+// how.x|.y:	scroll only on the named axis
+// how.hint:	calculate the goal as if: view(how.hint); view(what)
+// how.speed=0:	scroll immediately to the goal, no animation (jQuery>=1.3)
+// how.focus:	on scroll-complete, $(what).focus()
+
 var $body, $body_html, el_q=[];
-
-// el_q has a matching DOM element for each queued call to animate(); synchronized by queue() and dequeue().
+// el_q has a matching DOM element for each queued call to animate()
 // el_q.length > 0 means a view() animation is in-progress, scrolling to reveal el_q[0].
-function queue( el, how ){
-	el_q.push(el);	// Keep el_q synchronized with the 'fx' queue on body.
-	$body.queue('fx', function(){
-		animate($(el), how);
-	});
-}
-function dequeue(){
-	el_q.shift();	// Keep el_q synchronized with the 'fx' queue on body.
-	$body.dequeue('fx');
-}
-
-// view(false) to stop animation yourself.
-view = function( what, how ){
-	var stop_old=(what===false), start_new=!stop_old, $el, el;
-	if ( start_new ) {
-		how = how || { animate: true };
-		$el=$any(what); el=$el[0];
-		if ( !el || $.TypeOf.not('element', el) || Bounds.empty($el) ) {
-			start_new = false;
-		} else if ( el_q.length && ($.TypeOf.defNo(how.animate) || !DOM_descendant(el_q[el_q.length-1], el)) ) {
-			// Stop the current animation for a request that is:
-			//   (a) non-animated, i.e., how.animated===false; or
-			//   (b) an element not contained in the current animation.
-			stop_old = true;
-		}
-	}
-	stop_old && stop();
-	start_new && queue(el, how);
-	return $el;
-}
-function stop(){
-	// All-stop.  Clear the animation queue.  Hopefully no one else is animating body.
-	$body_html.stop(true);
-	el_q.length=0;
-}
-
-function offset( el, w, how, delta ){
-	var $elem=$(el), e=new Bounds($elem);
-	if ( ! Bounds.empty(e) ) {
-		$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
-			e[edge] += scale*parseInt($elem.css('margin-'+edge));
-		});
-
-		delta || (delta={ dx:0, dy:0 });
-		if ( how.axis!='y' && !Bounds.contain(Bounds.x(w), e) ) {
-			delta.dx += (e.left<=w.left || w.width<=e.width() ? e.left-w.left : e.right-w.right);
-		}
-		if ( how.axis!='x' && !Bounds.contain(Bounds.y(w), e) ) {
-			delta.dy += (e.top<=w.top || w.height()<=e.height() ? e.top-w.top : e.bottom-w.bottom);
-		}
-	}
-	return delta;
-}
-
-function animate( $elem, how ){
-	// (minimally) scroll an element entirely into view; how='x' or how='y' to scroll only on that axis
-	var w0=new Bounds(window), w1, delta;
-	if ( how.hint && !Bounds.empty($elem) ) {
-		// If a "hint element" is given, then calculate the goal as if we
-		//   viewed both in succession: view(how.hint); view($elem)
-		delta = offset(how.hint, w0, how);
-		w1 = new Bounds({
-			top:	w0.top+delta.dy,
-			left:	w0.left+delta.dx,
-			bottom:	w0.bottom+delta.dy,
-			right:	w0.right+delta.dx
-		});
-	} else {
-		delta = { dx:0, dy:0 };
-		w1 = new Bounds(w);
-	}
-	delta=offset($elem, w1, how, delta);
-
-	if ( delta.dx || delta.dy ) {
-		var x=w0.left+delta.dx, y=w0.top+delta.dy;
-		if ( $.TypeOf.defNo(how.animate) ) {
-			window.scrollTo(x, y);
-			dequeue();
-		} else {
-			$body_html.animate({ scrollLeft:x, scrollTop:y }, dequeue);
-		}
-	}
-}
 
 function DOM_descendant( ancestor, descendant ){
 	return $(descendant).eq(0).parents().index(ancestor)>=0;
+}
+
+function offset( el, b, how ){
+	var $el=$(el), e=new Bounds($el);
+	if ( !Bounds.empty(e) ) {
+		$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
+			e[edge] += scale*parseInt($el.css('margin-'+edge));
+		});
+
+		if ( how.axis!='y' && !Bounds.contain(Bounds.x(b), e) ) {
+			var dx = e.left<=b.left || b.width<=e.width() ? e.left-b.left : e.right-b.right;
+			b.left+=dx; b.right+=dx;
+		}
+		if ( how.axis!='x' && !Bounds.contain(Bounds.y(b), e) ) {
+			var dy = e.top<=b.top || b.height()<=e.height() ? e.top-b.top : e.bottom-b.bottom;
+			b.top+=dy; b.bottom+=dy;
+		}
+	}
+	return b;
+}
+
+view = function( what, how ){
+	var stop=(what===false), start=!stop, $el, el;
+	if ( start ) {
+		how || (how = {});
+		'speed' in how || (how.speed = 'normal');
+
+		$el=$any(what); el=$el[0];
+		if ( !el || $.TypeOf.not('element', el) || Bounds.empty($el) ) {
+			start = false;	// ...because we have no destination.
+		} else if ( el_q.length && (!how.speed || !DOM_descendant(el_q[el_q.length-1], el)) ) {
+			stop = true;	// ...because the new request is synchronous, or else unrelated to current/pending.
+		}
+	}
+
+	if ( stop ) {	// All-stop.  Clear the animation queue.  Hopefully no one else is animating body.
+		$body_html.stop(true);
+		el_q.length=0;
+	}
+
+	if ( start ) {	// Queue a new animation; keep el_q synchronized with the 'fx' queue on body.
+		el_q.push(el);
+		$body.queue('fx', function(){
+			var w=new Bounds(window);
+			how.hint && !Bounds.empty($el) && offset(how.hint, w, how);
+			offset($el, w, how);
+			$body_html.animate({ scrollTop:w.top, scrollLeft:w.left }, how.speed, function(){
+				how.focus && $el.focus();
+				// Dequeue; keep el_q synchronized with the 'fx' queue on body.
+				el_q.shift();
+				$body.dequeue('fx');
+			});
+		});
+	}
+
+	return $el;
 }
 
 $(function(){
