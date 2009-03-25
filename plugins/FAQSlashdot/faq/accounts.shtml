@@ -161,17 +161,18 @@
 		<ul>
 		<li><em>The Tagger</em> -- tag a story
 		<li><em>The Contradictor</em> -- !tag a story
-		<li><em>Days Read in a Row</em> -- Your largest number of consecutive days reading slashdot
-		<li><em>Fast Cowboy</em> -- has received the slow down cowboy message
-		<li><em>Comedian</em> -- have posted a score:5 funny comment
-		<li><em>Pest Control</em> -- mod down at least 10 trolls
-		<li><em>Taunt</em> -- post a comment that actually entices CmdrTaco to reply
-		<li><em>Worth The Wait</em> -- Score:5 Comment to a story 48 hours old. (Scalable)
-		<li><em>First With The Most</em> -- (First non-funny post in a discussion to reach Score:5) (Scalable)
-		<li><em>Gift-Giver</em> -- Buy a subscription for someone else.
-		<li><em>For Me?</em> Have a subscription bought for you by someone else.
-		<li><em>Good Riddance</em> -- Gain a Freak who is him/herself the Foe of >= 20 people.
-		<li><em>Hot Streak</em> -- (Scalable starting at 2, comments posted w/ 1 upmod and 0 downmods)
+		<li><em>Days Read in a Row</em> -- your largest number of consecutive days reading Slashdot
+		<li><em>Days Metamoderated in a Row</em> -- your largest number of consecutive days metamodderating
+		<li><em>Comedian</em> -- have a score:5 funny comment when the story gets archived
+		<li><em>Member of the 1 Digit UID Club</em> -- really? You need an explanation?
+		<li><em>Member of the 2 Digit UID Club</em> -- really? You need an explanation?
+		<li><em>Member of the 3 Digit UID Club</em> -- really? You need an explanation?
+		<li><em>Member of the 4 Digit UID Club</em> -- really? You need an explanation?
+		<li><em>Member of the 5 Digit UID Club</em> -- really? You need an explanation?
+		<li><em>Posted a Comment</em> -- posted a positive comment to a story
+		<li><em>Posted a Journal Entry</em> -- yes, Slashdot users have journals
+		<li><em>The April Fool</em> -- posted in the April fools story
+		<li><em>Spend All My Mod Points</em> -- use em or lose em
 		</ul>
 
 		<p><em><small>
