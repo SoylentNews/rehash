@@ -222,6 +222,11 @@ sub moderateComment {
 			$achievements->setUserAchievement('mod_points_exhausted', $user->{uid}, { ignore_lookup => 1 }) if $achievements;
 		}
 
+		# Grant The Maker to the submitter
+		if ($raw_val > 0) {
+			$achievements->setTheMaker($sid) if $achievements;
+		}
+
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
 			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);
