@@ -425,7 +425,11 @@ function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) 
 	$fhitem.removeClass('article briefarticle adminmode usermode').
 		addClass((showing ? 'article ' : 'briefarticle ') + (fh_is_admin ? 'adminmode' : 'usermode'));
 
-	if (!dont_next && toggle_to < 0 && $fhitem.is('.currfh')) {
+	if (showing) {
+		view($fhitem, { speed:50 });
+	}
+
+	if (!dont_next && !showing && $fhitem.is('.currfh')) {
 		firehose_go_next();
 	}
 
@@ -527,8 +531,7 @@ firehose_set_options = function(name, value, context) {
 	}
 
 	if ( start_over[name] ) {
-		view(false);
-		window.scrollTo(0, 0);
+		view($('body'), { speed:0 });
 	}
 
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
@@ -637,7 +640,7 @@ function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 	}
 
 	// always focus for expand request, even if already expanded
-	want_expanded && tag_ui.widget.find('.tag-entry:visible:first').focus();
+	want_expanded && view(tag_ui.widget.find('.tag-entry:visible:first'), { hint:$fhitem, focus:true, speed:50 });
 	return tag_ui.widget;
 }
 
@@ -1880,12 +1883,18 @@ function firehose_set_cur($new_current) {
 			removeClass('currfh'); // after event
 	});
 
-	return view(
-		// scroll to and "focus" new current article
-		$new_current.
-			addClass('currfh'). // before event
-			trigger('focus-article', event_data)
-	);
+	$new_current.
+		addClass('currfh'). // before event
+		trigger('focus-article', event_data);
+
+	var viewhint = false;
+	if ( fhitems(':first')[0] === $new_current[0] ) {
+		viewhint = $('body');
+	} else if ( fhitems(':last')[0] === $new_current[0] ) {
+		viewhint = $any('div#fh-paginate');
+	}
+
+	return view($new_current, { hint:viewhint, speed:50 });
 }
 
 function firehose_go_next($current) {
@@ -1895,7 +1904,7 @@ function firehose_go_next($current) {
 	if ($next[0] || !$current[0]) {
 		return firehose_set_cur($next);
 	} else {
-		view('div#fh-paginate');
+		view($current, { hint:$any('div#fh-paginate') });
 		firehose_more();
 	}
 }
@@ -2450,8 +2459,7 @@ $(function(){
 		if (keyo.prev)           { firehose_go_prev()        }
 		if (keyo.more)           { firehose_more()           }
 		if (keyo.search)         {
-			$('#searchquery').focus();
-			view($any('body'));
+			view($any('searchquery'), { hint:$('body'), focus:true });
 		}
 		if (keyo.toggle && id)   { toggle_firehose_body(id)  }
 
