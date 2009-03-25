@@ -12,7 +12,7 @@ use Slash::Utility;
 my $PROGNAME = basename($0);
 
 my %opts;
-getopts('hu:acjpsdt', \%opts);
+getopts('hu:acjpsdtm', \%opts);
 usage() if (!keys %opts || $opts{h});
 
 createEnvironment($opts{u});
@@ -29,6 +29,7 @@ my $constants = getCurrentStatic();
         createStoriesAccepted($slashdb, $achievements) if $opts{s};
         createUIDClub($slashdb, $achievements)         if $opts{d};
         createTagger($slashdb, $achievements)          if $opts{t};
+	createMaker($slashdb, $achievements)           if $opts{m};
 
 sub createAll {
         my ($slashdb, $achievements) = @_;
@@ -39,6 +40,7 @@ sub createAll {
         createStoriesAccepted(@_);
         createUIDClub(@_);
         createTagger(@_);
+	createMaker(@_);
 }
 
 sub createComments {
@@ -47,7 +49,7 @@ sub createComments {
         my $users = $slashdb->sqlSelectColArrayref('uid', 'comments', 'uid != ' . $constants->{anonymous_coward_uid}, '', { distinct => 1});
         foreach my $uid (@$users) {
                 print "Creating 'comment_posted' achievement for: $uid\n";
-                $achievements->setUserAchievement('comment_posted', $uid, { ignore_lookup => 1, exponent => 0 });
+                $achievements->setUserAchievement('comment_posted', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1});
         }
 }
 
@@ -57,7 +59,7 @@ sub createJournals {
         my $users = $slashdb->sqlSelectColArrayref('uid', 'journals', 'uid != ' . $constants->{anonymous_coward_uid}, '', { distinct => 1});
         foreach my $uid (@$users) {
                 print "Creating 'journal_posted' achievement for: $uid\n";
-                $achievements->setUserAchievement('journal_posted', $uid, { ignore_lookup => 1, exponent => 0 });
+                $achievements->setUserAchievement('journal_posted', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
         }
 }
 
@@ -80,7 +82,7 @@ sub createStoriesAccepted {
                 my $count = scalar @$submissions;
                 if ($count) {
                         print "Creating 'story_accepted' achievement for: $uid: $count\n";
-                        $achievements->setUserAchievement('story_accepted', $uid, { ignore_lookup => 1, exponent => $count, force_convert => 1}) if $count;
+                        $achievements->setUserAchievement('story_accepted', $uid, { ignore_lookup => 1, exponent => $count, force_convert => 1, no_message => 1, maker_mode => 1}) if $count;
                 }
         }
 }
@@ -92,11 +94,11 @@ sub createUIDClub {
         foreach my $uid (@$users) {
                 my @digits = split(//, $uid);
                 my $num_digits = scalar @digits;
-                $achievements->setUserAchievement("1_uid_club", $uid, { ignore_lookup => 1, exponent => 5 }) if ($num_digits == 1);
-                $achievements->setUserAchievement("2_uid_club", $uid, { ignore_lookup => 1, exponent => 4 }) if ($num_digits == 2);
-                $achievements->setUserAchievement("3_uid_club", $uid, { ignore_lookup => 1, exponent => 3 }) if ($num_digits == 3);
-                $achievements->setUserAchievement("4_uid_club", $uid, { ignore_lookup => 1, exponent => 2 }) if ($num_digits == 4);
-                $achievements->setUserAchievement("5_uid_club", $uid, { ignore_lookup => 1, exponent => 1 }) if ($num_digits == 5);
+                $achievements->setUserAchievement("1_uid_club", $uid, { ignore_lookup => 1, exponent => 5, no_message => 1 }) if ($num_digits == 1);
+                $achievements->setUserAchievement("2_uid_club", $uid, { ignore_lookup => 1, exponent => 4, no_message => 1 }) if ($num_digits == 2);
+                $achievements->setUserAchievement("3_uid_club", $uid, { ignore_lookup => 1, exponent => 3, no_message => 1 }) if ($num_digits == 3);
+                $achievements->setUserAchievement("4_uid_club", $uid, { ignore_lookup => 1, exponent => 2, no_message => 1 }) if ($num_digits == 4);
+                $achievements->setUserAchievement("5_uid_club", $uid, { ignore_lookup => 1, exponent => 1, no_message => 1 }) if ($num_digits == 5);
         }
 }
 
@@ -118,8 +120,31 @@ sub createTagger {
                                 }
                         }
 
-                        $achievements->setUserAchievement('the_tagger', $uid, { ignore_lookup => 1, exponent => 0 }) if $has_tagged;
-                        $achievements->setUserAchievement('the_contradictor', $uid, { ignore_lookup => 1, exponent => 0 }) if $has_not_tagged;
+                        $achievements->setUserAchievement('the_tagger', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 }) if $has_tagged;
+                        $achievements->setUserAchievement('the_contradictor', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 }) if $has_not_tagged;
+                }
+        }
+}
+
+sub createMaker {
+        my ($slashdb, $achievements) = @_;
+
+        my $submissions =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'discussion, uid',
+                        'firehose',
+                        'uid != ' . $constants->{anonymous_coward_uid} . " and type = 'submission' and accepted = 'yes'"
+                );
+        foreach my $submission (@$submissions) {
+                next if ($submission->{discussion} == 0);
+                my ($cid, $create_time) =
+                        $slashdb->sqlSelect(
+                                'cid, NOW()',
+                                'comments',
+                                'sid = ' . $submission->{discussion} . ' and points > 0 limit 1'
+                        );
+                if ($cid) {
+                        $achievements->setUserAchievement('the_maker', $submission->{uid}, { ignore_lookup => 1, exponent => 0, no_message => 1, maker_mode => 1});
                 }
         }
 }
@@ -143,6 +168,7 @@ Main options:
         -s      Create accepted stories
         -d      Create UID club
         -t      Create Tagger/Contradictor
+	-m	Create The Maker
 
 EOT
         exit;

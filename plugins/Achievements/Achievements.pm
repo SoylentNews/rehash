@@ -67,6 +67,7 @@ sub setUserAchievement {
 		$slashdb->sqlInsert('user_achievements', $data);
 		$self->setUserAchievementObtained($uid, { exponent => $new_exponent, ach_increment => $increment });
 		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} }) unless $options->{no_message};
+		$self->setMakerMode($uid, $achievement->{$ach_name}{aid}) if $options->{maker_mode};
 		$dynamic_blocks->setUserBlock('achievements', $uid) if ($uid and $dynamic_blocks);
 	} elsif ($achievement->{$ach_name}{repeatable} eq 'yes' && ($new_exponent > $old_exponent)) {
 		# The user has the inferior version of the achievement. Upgrade them.
@@ -453,6 +454,25 @@ sub setTheMaker {
                 $self->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0 }) if $cid;
                 my $user = $slashdb->getUser($uid);
                 $slashdb->setUser($uid, { 'maker_mode' => $create_time }) if !$user->{'maker_mode'};
+        }
+}
+
+sub setMakerMode {
+        my ($self, $uid, $aid) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+
+        return if (!$uid || $uid == $constants->{anonymous_coward_uid});
+
+        my $uid_q = $slashdb->sqlQuote($uid);
+        my $user = $slashdb->getUser($uid);
+
+        my $create_time = $slashdb->sqlSelect('createtime', 'user_achievements', "aid = $aid and uid = $uid_q");
+
+	# createtime should always be set, actually...
+	if ($create_time and !$user->{'maker_mode'}) {
+                $slashdb->setUser($uid, { 'maker_mode' => $create_time });
         }
 }
 

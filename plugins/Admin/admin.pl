@@ -2535,7 +2535,7 @@ sub saveStory {
 		my $achievements = getObject('Slash::Achievements');
 		if ($achievements) {
 			# User
-			$achievements->setUserAchievement('story_accepted', $form->{submitter}) if ($form->{uid} != $form->{submitter});
+			$achievements->setUserAchievement('story_accepted', $form->{submitter}, { maker_mode => 1 }) if ($form->{uid} != $form->{submitter});
 			# Author
 			$achievements->setUserAchievement('story_posted', $form->{uid});
 		}
