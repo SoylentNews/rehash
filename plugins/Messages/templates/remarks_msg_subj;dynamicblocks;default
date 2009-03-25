@@ -1,0 +1,19 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+remarks_msg_subj
+__template__
+
+[% Slash.chopEntity(remark.remark, 130); %]
+
+__seclev__
+500
+__version__

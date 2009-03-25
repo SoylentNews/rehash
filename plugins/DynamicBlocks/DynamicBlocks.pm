@@ -105,7 +105,7 @@ sub setUserBlock {
 	} else {
 		# No data was returned for this box type, but id is set. Delete the box
 		# since it's stale.
-		$slashdb->sqlDelete('dynamic_user_blocks', "bid = $id and name = '$name-$uid' and $uid = $uid");
+		$slashdb->sqlDelete('dynamic_user_blocks', "bid = $id and name = '$name-$uid' and $uid = $uid") if $id;
 	}
 }
 

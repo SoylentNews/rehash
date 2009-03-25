@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+remarks_msg
+__template__
+[% IF msg.mode == 1 %]
+
+[%
+isstory_flag = 0;
+IF remark.stoid;
+        isstory_flag = 1;
+        thisstory = Slash.db.getStory(remark.stoid);
+END;
+%]
+
+<table cellspacing="10">
+<tr>
+<td>
+Priority: [% remark.priority || 0 %]
+</td>
+<td>
+[% IF isstory_flag; '<a href="'; gSkin.rootdir; '/admin.pl?sid='; thisstory.sid; '&amp;op=edit">'; END; %][% Slash.chopEntity(remark.remark, 130) %][% IF isstory_flag; '</a>'; END; %]
+</td>
+</tr>
+</table>
+
+[% END %]
+
+__seclev__
+500
+__version__
