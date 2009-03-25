@@ -35,7 +35,7 @@ $task{$me}{code} = sub {
 		if ($@) {
 			slashdLog("error parsing feed from $feed->{feed}");
 		} else {
-			for my $item (@{$rss->{items}}) {
+			for my $item (reverse @{$rss->{items}}) {
 				last if $adds >= $max_adds_per_run;
 				for (keys %{$item}) {
 					$item->{$_} = xmldecode($item->{$_});

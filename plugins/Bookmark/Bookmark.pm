@@ -86,7 +86,7 @@ sub getBookmarkFeeds {
 sub getBookmarkFeedByUid {
 	my($self, $uid) = @_;
 	my $uid_q = $self->sqlQuote($uid);
-	$self->sqlSelectHashref("*", "bookmark_feeds", "uid=$uid_q");
+	$self->sqlSelectHashref("*", "bookmark_feeds", "uid=$uid_q", "ORDER BY id");
 }
 
 sub getBookmark {
