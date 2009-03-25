@@ -24,3 +24,13 @@ CREATE TABLE IF NOT EXISTS `sphinx_search` (
   KEY `query` (`query`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `sphinx_index` (
+  `src` smallint(5) unsigned NOT NULL,
+  `name` varchar(48) NOT NULL,
+  `asynch` tinyint(3) unsigned NOT NULL default '1',
+  `laststart` datetime NOT NULL default '2000-01-01 00:00:00',
+  `frequency` int(10) unsigned NOT NULL default '86400',
+  PRIMARY KEY  (`src`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB;
+

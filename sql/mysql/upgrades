@@ -6096,3 +6096,18 @@ INSERT INTO achievements (name, description, repeatable, increment) VALUES ('com
 
 # for plugins/Messages
 INSERT INTO message_codes (code, type, seclev, modes, delivery_bvalue) VALUES (25, 'Remarks', 100, '', 2);
+
+# for plugins/Sphinx
+CREATE TABLE `sphinx_index` (
+  `src` smallint(5) unsigned NOT NULL,
+  `name` varchar(48) NOT NULL,
+  `asynch` tinyint(3) unsigned NOT NULL default '1',
+  `laststart` datetime NOT NULL default '2000-01-01 00:00:00',
+  `frequency` int(10) unsigned NOT NULL default '86400',
+  PRIMARY KEY  (`src`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB;
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (0, 'main', 1, '2000-01-01 00:00:00', 86400);
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (1, 'delta1', 0, '2000-01-01 00:00:00', 900);
+INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (2, 'delta2', 0, '2000-01-01 00:00:00', 5);
+

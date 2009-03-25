@@ -579,6 +579,7 @@ sub rtu_run_forks {
 				# Parent.
 				++$children_running;
 			} elsif (defined $pid) {
+				# Child.
 				my %tbids = ( map { ($_->{tbid}, 1) } @$affected_ar );
 				my @tbids = sort { $a <=> $b } keys %tbids;
 				for my $tbid (@tbids) {
@@ -591,6 +592,7 @@ sub rtu_run_forks {
 				}
 				exit 0;
 			} else {
+				# Error.
 				Time::HiRes::sleep(0.1);
 				redo TB_FORK;
 			}
