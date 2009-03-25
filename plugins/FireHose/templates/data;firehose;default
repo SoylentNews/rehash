@@ -109,6 +109,7 @@ __template__
 		[% IF !contentsonly %]
 		<span id="firehose_more"><span class="busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 		[% END %]
+		[% no_more = 0; %]
 		[% IF day_label && day_count && options.duration != -1;
 			IF need_day_label;
 				label = $day_label _ " ";
@@ -122,9 +123,14 @@ __template__
 			        label = future_count _ " more";
 			END;
 		   ELSIF future_count <= 0 ;
-			IF options.duration != -1 && options.orderby == "createtime";
-				label = "more";
-				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
+			IF options.orderby == "createtime";
+				IF options.duration != -1;
+					label = "more";
+					extra_onclick = 'firehose_set_options(\'duration\', -1); ';
+				ELSE;
+					label = "No More";
+					no_more = 1;
+				END;
 			ELSIF options.orderby != "createtime";
 				fh = Slash.getObject("Slash::FireHose") 
 				fh_array = fh.getFireHoseColors(1);
@@ -133,7 +139,10 @@ __template__
 				new_color   = fh_array.$fh_num;
 				IF new_color;
 					label = "More $new_color";
-					extra_onclick = "firehose_swatch_color('" _ new_color _ "'); firehose_settings.color='" _ new_color _ "'";
+					extra_onclick = "firehose_swatch_color('" _ new_color _ "'); firehose_settings.color='" _ new_color _ "';";
+				ELSE;
+					label = "No More";
+					no_more = 1;
 				END;
 			END;
 		   END;
@@ -141,7 +150,7 @@ __template__
 			label = "More";
 		   END;
 		%]
-		<span class="future [% new_color %]"><a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a></span>
+		<span class="future [% new_color %]"><a href="#" [% IF !no_more %]onclick="[% extra_onclick %] firehose_more(); return false;"[% END %]>[% label %]</a></span>
 		[% IF !contentsonly %]
 		</span>
 		[% END %]
