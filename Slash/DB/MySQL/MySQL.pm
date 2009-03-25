@@ -5976,13 +5976,16 @@ sub getStoryByTime {
 
 	my $returnable = $self->sqlSelectHashref(
 		'stories.stoid, sid, title, stories.tid',
-		'stories, story_text, story_topics_rendered',
+		"story_text, story_topics_rendered,
+		 stories LEFT JOIN story_param ON (stories.stoid=story_param.stoid
+			AND story_param.name='neverdisplay' AND story_param.value != 0)",
 		"stories.stoid = story_text.stoid
 		 AND stories.stoid = story_topics_rendered.stoid
 		 AND '$time' > DATE_SUB($now, INTERVAL $bytime_delay DAY)
 		 AND time $sign '$time'
 		 AND time <= $now
 		 AND in_trash = 'no'
+		 AND story_param.stoid IS NULL
 		 $where",
 
 		"GROUP BY stories.stoid ORDER BY time $order LIMIT $limit"
