@@ -827,8 +827,13 @@ $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
 		$fhitem.data('blur-closes-tags', !tag_ui_in($fhitem).expanded).
 			data('blur-closes-item', $fhitem.find('[id^=fhbody-]').is('.empty,.hide'));
 	});
-	$('#firehoselist a.more').
-	live('mousedown', pos_logger);
+
+$('#firehoselist a.more').
+	live('mousedown', function(){
+		var item=fhitems(this), pos=fhitems().index(item)+1;
+		this.href += (this.search ? '&' : '?') + 'art_pos=' + pos;
+		return true;
+	});
 
 });
 
@@ -1232,20 +1237,6 @@ function firehose_storyfuture( future ){
 		});
 }
 
-
-function pos_logger() {
-	var id = fhid_of(this);
-	var pos = 0;
-
-	pos = $('#firehoselist > div[id^=firehose-]:not(.daybreak)').index(elemAny('firehose-' + id)) + 1;
-
-	if(this.href.match(/\?/)) {
-		this.href = this.href + "&art_pos=" + pos;
-	} else {
-		this.href= this.href + "?art_pos=" + pos;
-	}
-	return true;
-}
 
 function firehose_reorder( required_order ){
 	// Reorder items in the firehose; complicated by the i2 ad.
