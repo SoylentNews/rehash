@@ -1174,7 +1174,7 @@ sub showInfo {
 		# Achievements pane
 		my $ach_reader = getObject('Slash::Achievements');
 		my ($user_achievements, $requested_user_achievements, $common_achievements, $achievements_datapane);
-		if ($ach_reader) {
+		if ($ach_reader and $user->{is_admin}) {
 			$requested_user_achievements = $ach_reader->getUserAchievements($requested_user->{uid});
 			if ($user->{uid} != $requested_user->{uid}) {
 				$user_achievements = $ach_reader->getUserAchievements($user->{uid});

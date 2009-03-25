@@ -86,6 +86,7 @@ __template__
                 latest_friends=latest_friends
                 tagshist=tagshist
 		achievements=requested_user_achievements
+		achievements_size=requested_user_achievements.size
 		dyn_achievements=dyn_achievements
 		dyn_messages=dyn_messages
                 is_admin=user.is_admin
@@ -231,7 +232,7 @@ __template__
         [% ELSIF data_pane == 'tags' %]
                 [% tags_datapane %]
 
-	[% ELSIF data_pane == 'achievements' && admin_flag %]
+	[% ELSIF data_pane == 'achievements' %]
 		[% achievements_datapane %]
 
         [% ELSIF data_pane == 'comments' %]
