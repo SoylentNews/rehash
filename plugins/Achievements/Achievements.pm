@@ -66,7 +66,7 @@ sub setUserAchievement {
                 };
 		$slashdb->sqlInsert('user_achievements', $data);
 		$self->setUserAchievementObtained($uid, { exponent => $new_exponent, ach_increment => $increment });
-		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} });
+		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} }) unless $options->{no_message};
 		$dynamic_blocks->setUserBlock('achievements', $uid) if ($uid and $dynamic_blocks);
 	} elsif ($achievement->{$ach_name}{repeatable} eq 'yes' && ($new_exponent > $old_exponent)) {
 		# The user has the inferior version of the achievement. Upgrade them.
@@ -76,7 +76,7 @@ sub setUserAchievement {
                 };
 		$slashdb->sqlUpdate('user_achievements', $data, "id = " . $user_achievement->{$aid}{id});
 		$self->setUserAchievementObtained($uid);
-		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} });
+		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} }) unless $options->{no_message};
 		$dynamic_blocks->setUserBlock('achievements', $uid) if ($uid and $dynamic_blocks);
 	} else {
 		# The user already has an achievement that is non-repeatable. Do nothing.
@@ -230,12 +230,23 @@ sub getScore5Comments {
 		push(@{$score5comments_archived->{$comments->{$cid}{uid}}}, $cid);
 	}
 
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $reasons = $mod_reader->getReasons() if $mod_reader;
 	foreach my $uid (keys %$score5comments_archived) {
 		$self->setUserAchievement('score5_comment', $uid, { ignore_lookup => 1, force_convert => 1, exponent => scalar(@{$score5comments_archived->{$uid}}) });
 
 		# If they've posted a Score:5 comment, they've clearly obtained this.
 		# Deprecate this when retroactive achievements are added?
 		$self->setUserAchievement('comment_posted', $uid, { ignore_lookup => 1, exponent => 0 });
+
+		# Score 5 Funny
+		foreach my $cid (@{$score5comments_archived->{$uid}}) {
+			my $reason = $self->sqlSelect('reason', 'comments', "cid = $cid");
+			if ($reasons->{$reason}{name} eq 'Funny') {
+				$self->setUserAchievement('comedian', $uid, { ignore_lookup => 1, exponent => 0 });
+				last;
+			}
+		}
 	}
 }
 
@@ -415,6 +426,33 @@ sub setAchievementMessage {
                         };
                         $messages->create($uid, $ach_message_code, $data);
                 }
+        }
+}
+
+sub setTheMaker {
+        my ($self, $sid) = @_;
+
+        return if !$sid;
+
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+
+        my $sid_q = $slashdb->sqlQuote($sid);
+        my $uid =
+                $slashdb->sqlSelect(
+                        'uid',
+                        'firehose',
+                        'uid != ' . $constants->{anonymous_coward_uid} .
+                        " and discussion = $sid_q" .
+                        " and type = 'submission'" .
+                        " and accepted = 'yes'"
+                );
+
+        if ($uid) {
+                my ($cid, $create_time) = $slashdb->sqlSelect('cid, NOW()', 'comments', "sid = $sid_q and points > 0 limit 1");
+                $self->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0 }) if $cid;
+                my $user = $slashdb->getUser($uid);
+                $slashdb->setUser($uid, { 'maker_mode' => $create_time }) if !$user->{'maker_mode'};
         }
 }
 
