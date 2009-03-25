@@ -117,10 +117,14 @@ __template__
 				label = label _ day_count _ " more";
 			END;
 		   ELSIF future_count > 0 ;
+			future_count_label = future_count;
+			IF future_count >= 1000; 
+				future_count_label = "Many"; 
+			END;
 		   	IF options.duration == -1;
-			        label = future_count _ " more";
+			        label = future_count_label _ " more";
 			ELSE;
-			        label = future_count _ " more";
+			        label = future_count_label _ " more";
 			END;
 		   ELSIF future_count <= 0 ;
 			IF options.orderby == "createtime";
