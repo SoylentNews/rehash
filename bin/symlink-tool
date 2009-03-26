@@ -96,6 +96,14 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		# system("cat $filelist > $destpath");
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
 
+		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
+		my $java = '/opt/dell/srvadmin/jre/bin/java';
+		my $yui_compressor = '/usr/local/src/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar';
+		my $compress = '';
+		if ( -f $java && -f $yui_compressor ) {
+			$compress = "$java -jar $yui_compressor";
+		}
+
 		# you can glob any kinds of files you like, even mixing them...
 		# ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
 		# (JavaScript::Minifier is a requirement in the Slash bundle)
@@ -103,12 +111,17 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			my($min_src, $min_dest);
 			open $min_src, '<', $destpath;
 			open $min_dest, '>', "${path}${name}-minified.js";
-			if (JavaScript::Minifier->can('jsmin')) {
+
+			if ( $compress && system("$compress $destpath -o ${path}${name}-minified.js")==0 ) {
+				print "symlink-tool: $compress \"$destpath\" -o \"${path}${name}-minified.js\"\n";
+			} elsif (JavaScript::Minifier->can('jsmin')) {
 				JavaScript::Minifier::jsmin($min_src, $min_dest);
+				print "symlink-tool: JavaScript::Minifier::jsmin(\"$destpath\", \"${path}${name}-minified.js\")\n";
 			} elsif (JavaScript::Minifier->can('minify')) {
 				&JavaScript::Minifier::minify(
 					input => $min_src, outfile => $min_dest
 				);
+				print "symlink-tool: JavaScript::Minifier::minify(input=>\"$destpath\", outfile=>\"${path}${name}-minified.js\")\n";
 			} else {
 				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
 			}
@@ -121,9 +134,13 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
  		  # create a `tidied' version of css globs if csstidy is available,
  		  #   else the tidied version is just a link to the original concatenation
  		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
- 			if ( system("csstidy $destpath --silent=true --template=high $tidiedpath") != 0 ) {
- 			  link("$destpath", "$tidiedpath");
- 			}
+			if ( $compress && system("$compress $destpath -o $tidiedpath")==0 ) {
+				print "symlink-tool: $compress \"$destpath\" -o \"$tidiedpath\"\n";
+			} elsif ( system("csstidy $destpath --silent=true --template=high $tidiedpath")==0 ) {
+				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n";
+			} else {
+				link("$destpath", "$tidiedpath");
+			}
  		}
 	}
 }
