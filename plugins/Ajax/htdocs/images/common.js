@@ -156,6 +156,11 @@ $(function(){
 })();
 
 
+function more_possible(){
+	// console.log($.trim($('#firehose_more').text()));
+}
+
+
 function createPopup(pos_selector, titlebar, name, contents, message, onmouseout) {
 	function div( kind, html ){
 		return $('<div id="'+name+'-'+kind+'" class="popup-'+kind+'">'+(html||'')+'</div>');
