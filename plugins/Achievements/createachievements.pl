@@ -26,10 +26,10 @@ my $constants = getCurrentStatic();
         createComments($slashdb, $achievements)        if $opts{c};
         createJournals($slashdb, $achievements)        if $opts{j};
         createStoriesPosted($slashdb, $achievements)   if $opts{p};
-        createStoriesAccepted($slashdb, $achievements) if $opts{s};
+        createStoriesAccepted($slashdb, $achievements) if $opts{'s'};
         createUIDClub($slashdb, $achievements)         if $opts{d};
         createTagger($slashdb, $achievements)          if $opts{t};
-	createMaker($slashdb, $achievements)           if $opts{m};
+	createMaker($slashdb, $achievements)           if $opts{'m'};
 
 sub createAll {
         my ($slashdb, $achievements) = @_;
