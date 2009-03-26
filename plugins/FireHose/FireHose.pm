@@ -1153,8 +1153,6 @@ sub getFireHoseEssentials {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-	#return($items, $results, $count, $future_count, $day_num, $day_label, $day_count);
-	return([], {}, 50, 500, 10, "foo", 10);
 
 
 
@@ -2846,7 +2844,6 @@ sub getUserViews {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
 
-
 	my ($where, @where);
 
 	my @uids = (0);
@@ -3462,8 +3459,10 @@ sub getAndSetOptions {
 		}
 	}
 
-	my $page = $form->{page} || 0;
-	$options->{page} = $page;
+	$options->{smalldevices} = 1 if $self->shouldForceSmall();
+	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
+
+	my $page = $options->{page} = $form->{page} || 0;
 	if ($page) {
 		$options->{offset} = $page * $options->{limit};
 	}
@@ -3690,10 +3689,6 @@ sub getAndSetOptions {
 			$self->setUser($user->{uid}, { firehose_max_more_num => $options->{more_num}});
 		}
 	}
-
-	$options->{smalldevices} = 1 if $self->shouldForceSmall();
-	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
-	$options->{firehose_sphinx} = $user->{firehose_sphinx} ? 1 : 0;
 
 	if ($options->{viewref} && $options->{viewref}{viewtitle}) {
 		if ($options->{viewref}{viewtitle} =~ /{nickname}/) {
@@ -4405,18 +4400,19 @@ sub genFireHoseParams {
 	my @params;
 
 	my $params = {
-		fhfilter 	=> 0,
-		color		=> 0,
-		orderdir	=> 0,
-		orderby		=> 0,
-		issue		=> 1,
-		startdate	=> 1,
-		duration	=> 1,
-		mode		=> 0,
-		index		=> 1,
+		fhfilter        => 0,
+		color           => 0,
+		orderdir        => 0,
+		orderby         => 0,
+		issue           => 1,
+		startdate       => 1,
+		duration        => 1,
+		mode            => 0,
+		index           => 1,
+		view            => 1
 	};
 	if ($user->{is_anon}) {
-		my ($label, $value) = @_;
+		my($label, $value) = @_;
 		if ($options->{sel_tabtype} || $form->{tabtype}) {
 			$label = "tabtype";
 			$value = $form->{tabtype} || $options->{sel_tabtype};
@@ -4429,7 +4425,6 @@ sub genFireHoseParams {
 	}
 
 	foreach my $label (keys %$params) {
-
 		next if $user->{is_anon} && $params->{$label} == 0;
 		next if !defined $data->{$label} && !defined $options->{$label};
 		my $value = defined $data->{$label} ? $data->{$label} : $options->{$label};

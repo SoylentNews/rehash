@@ -189,20 +189,6 @@ __template__
                         Enable advanced user controls
                 </div>
 		
-		[% IF user.is_admin %]
-		[% sphinx_check = '';
-                IF user.firehose_sphinx;
-                        sphinx_check = constants.markup_checked_attribute;
-                END
-                %]
-
-                <label><input type="checkbox" name="sphinx"[% sphinx_check %]> Sphinx</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_sphinx');return false;" class="help">?</a>
-                <br>
-                <div id="modalprefhelp_sphinx" class="modalprefhelp" style="display: none;">
-                        Use Sphinx for Queries
-                </div>
-		[% END %]
-
 
 		<p class="buttons">
         <input type="button" value="Save" onclick="saveModalPrefs()">

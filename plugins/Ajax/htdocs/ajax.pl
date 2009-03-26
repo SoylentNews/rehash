@@ -1554,7 +1554,7 @@ sub saveModalPrefs {
 				$fh->removeUserSections();
 			} else {
 				$user_edits_table = {};
-				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_sphinx firehose_pagesize index_beta)) {
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_beta)) {
 					$user_edits_table->{$_} = undef;
 				}
 				foreach (qw(noicons dst dfid)) {
@@ -1572,7 +1572,6 @@ sub saveModalPrefs {
 				firehose_nodates	=> ($params{showdates} ? undef: 1),
 				firehose_pause		=> ($params{paused} ? 1: 0),
 				firehose_advanced	=> ($params{advanced} ? 1 : undef),
-				firehose_sphinx		=> ($params{sphinx} ? 1 : undef),
 				firehose_pagesize	=> ($params{pagesize} ? $params{pagesize} : "small"),
 				index_beta		=> ($params{index_beta} ? 1 : 0 ),
 			};
