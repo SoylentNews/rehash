@@ -135,6 +135,6 @@ File::Type Apache::SSI String::Similarity Devel::Size Devel::FindGlobals
 Slash::Client JavaScript::Minifier Template::Plugin::GD Net::Telnet
 Finance::Quote Net::OSCAR Date::ICal WWW::Mechanize
 Plucene::Document SOAP::Lite Algorithm::NaiveBayes
-Math::BigInt Sphinx::Search
+Math::BigInt Sphinx::Search Games::WoW::Armory
 
 =cut
