@@ -6093,6 +6093,8 @@ REPLACE INTO topics (tid,keyword,textname,series,image,width,height,submittable,
 # for plugins/Achievements
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the_maker', 'The Maker', 'no', 0);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comedian', 'Comedian', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('april_fool', 'The April Fool', 'no', 0);
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comment_upmodded', 'Had a Comment Modded Up', 'no', 0);
 
 # for plugins/Messages
 INSERT INTO message_codes (code, type, seclev, modes, delivery_bvalue) VALUES (25, 'Remarks', 100, '', 2);
