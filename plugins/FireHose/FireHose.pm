@@ -1153,6 +1153,8 @@ sub getFireHoseEssentials {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	#return($items, $results, $count, $future_count, $day_num, $day_label, $day_count);
+	return([], {}, 50, 500, 10, "foo", 10);
 
 
 
@@ -2844,6 +2846,7 @@ sub getUserViews {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
 
+
 	my ($where, @where);
 
 	my @uids = (0);
@@ -2856,6 +2859,7 @@ sub getUserViews {
 		push @uids, $user->{uid};
 		push @where, "uid in (" . (join ',', @uids) . ")";
 	}
+	push @where, "seclev <= $user->{seclev}";
 
 	$where = join ' AND ', @where;
 	return $self->sqlSelectAllHashrefArray("*","firehose_view", $where, "ORDER BY uid, id");
