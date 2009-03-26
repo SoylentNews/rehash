@@ -1059,7 +1059,9 @@ function firehose_handle_update() {
 	var $fhl = $any('firehoselist');
 
 	var add_behind_scenes = $("#firehoselist h1.loading_msg").length;
-	if (add_behind_scenes) { firehose_busy(); }
+	if (add_behind_scenes) { 
+	//	firehose_busy(); 
+	}
 
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
@@ -1212,7 +1214,7 @@ function firehose_handle_update() {
 				elem.parentNode.removeChild(elem);
 			}
 			$fhl.fadeIn('slow');
-			firehose_busy_done();
+			//firehose_busy_done();
 		}
 		firehose_get_next_updates();
 	}
@@ -1230,6 +1232,7 @@ function firehose_after_update(){
 	firehose_update_title_count(
 		firehose_storyfuture(firehose_future).length
 	);
+	firehose_busy_done();
 }
 
 function firehose_storyfuture( future ){
@@ -1387,7 +1390,6 @@ function firehose_busy_done() {
 }
 
 function firehose_get_updates_handler(transport) {
-	firehose_busy_done();
 	var response = eval_response(transport);
 	if ( !response ){
 		return;
@@ -1450,6 +1452,7 @@ function firehose_get_item_idstring() {
 function firehose_get_updates(options) {
 	options = options || {};
 	run_before_update();
+	firehose_busy();
 	if ((fh_play === 0 && !options.oneupdate) || fh_is_updating == 1) {
 		firehose_add_update_timerid(setTimeout(firehose_get_updates, 2000));
 	//	alert("wait loop: " + fh_is_updating);
