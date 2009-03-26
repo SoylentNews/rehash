@@ -43,7 +43,6 @@ template=templates/ajax_reskey_signoff;misc;default
 template=templates/ajax_reskey_tag;misc;default
 template=templates/before_content;misc;default
 template=templates/data;ajax;default
-template=templates/datewidget;misc;default
 template=templates/edit_comment;ajax;default
 template=templates/hc_comment;ajax;default
 template=templates/modal_footer;misc;default
