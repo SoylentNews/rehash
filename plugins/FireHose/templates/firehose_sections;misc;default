@@ -27,7 +27,7 @@ __template__
 	skip_edit = 1;
 END;
 
-IF  form.op == "view";
+IF  form.op == "view" || form.taskgen;
 	skip_edit = 1;
 END;
 %]
@@ -61,7 +61,7 @@ END;
 		</li>
 	[% END %]
 </ul>
-[% IF (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" %]<script type="text/javascript">
+[% IF (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" && !form.taskgen %]<script type="text/javascript">
 $(function(){
 $any('firehose-sections').mousedown(function( event ){
 		// select a section on mousedown
