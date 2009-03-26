@@ -432,11 +432,6 @@ sub createComment {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
-	my $searchtoo = getObject('Slash::SearchToo');
-	if ($searchtoo) {
-#		$searchtoo->storeRecords(comments => $cid, { add => 1 });
-	}
-
 	my $firehose = getObject('Slash::FireHose');
 	if ($firehose && !isAnon($comment->{uid})) {
 		$firehose->createUpdateItemFromComment($cid);

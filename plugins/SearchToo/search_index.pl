@@ -10,8 +10,10 @@ use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '* * * * *';
-$task{$me}{timespec_panic_1} = ''; # if panic, this can wait
+# don't use this anymore (maybe we'll remove it later)
+$task{$me}{standalone} = 1;
+# $task{$me}{timespec} = '* * * * *';
+# $task{$me}{timespec_panic_1} = ''; # if panic, this can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtualuser, $constants, $slashdb, $user) = @_;

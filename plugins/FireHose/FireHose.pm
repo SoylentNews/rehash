@@ -71,11 +71,6 @@ sub createFireHose {
 	if ($ok) {
 		$text_data->{id} = $self->getLastInsertId({ table => 'firehose', prime => 'id' });
 
-		my $searchtoo = getObject('Slash::SearchToo');
-		if ($searchtoo) {
-			$searchtoo->storeRecords(firehose => $text_data->{id}, { add => 1 });
-		}
-
 		$ok = $self->sqlInsert("firehose_text", $text_data);
 		if (!$ok) {
 			warn "could not create firehose_text row for id '$text_data->{id}'";
@@ -2572,14 +2567,6 @@ sub setFireHose {
 	}
 
 	$self->deleteFireHoseCaches([ $id ], 1);
-
-	my $searchtoo = getObject('Slash::SearchToo');
-	if ($searchtoo) {
-		my $status = 'changed';
-# for now, no deletions ... this is what it would look like if we did!
-#		$status = 'deleted' if $data->{accepted} eq 'yes' || $data->{rejected} eq 'yes';
-		$searchtoo->storeRecords(firehose => $id, { $status => 1 });
-	}
 
 	return $rows;
 }
