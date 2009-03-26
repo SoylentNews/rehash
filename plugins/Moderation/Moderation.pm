@@ -222,11 +222,6 @@ sub moderateComment {
 			$achievements->setUserAchievement('mod_points_exhausted', $user->{uid}, { ignore_lookup => 1 }) if $achievements;
 		}
 
-		# Grant The Maker to the submitter
-		if ($raw_val > 0) {
-			$achievements->setTheMaker($sid) if $achievements;
-		}
-
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
 			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);
@@ -269,6 +264,12 @@ sub moderateComment {
 				$cu_changes->{-downmods} = "downmods + 1";
 			} elsif ($val > 0) {
 				$cu_changes->{-upmods} = "upmods + 1";
+				if ($achievements) {
+                                        $achievements->setUserAchievement('comment_upmodded', $comment->{uid}, { ignore_lookup => 1 });
+                                        if ($achievements->checkMeta($comment->{uid}, 'the_maker', ['comment_upmodded', 'story_accepted'])) {
+                                                $achievements->setUserAchievement('the_maker', $comment->{uid}, { ignore_lookup => 1 });
+                                        }
+                                }
 			}
 			if ($karma_change < 0) {
 				$cu_changes->{-karma} = "GREATEST("

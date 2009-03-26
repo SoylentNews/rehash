@@ -12,7 +12,7 @@ use Slash::Utility;
 my $PROGNAME = basename($0);
 
 my %opts;
-getopts('hu:acjpsdtm', \%opts);
+getopts('hu:acjpsdtmfro', \%opts);
 usage() if (!keys %opts || $opts{h});
 
 createEnvironment($opts{u});
@@ -26,10 +26,13 @@ my $constants = getCurrentStatic();
         createComments($slashdb, $achievements)        if $opts{c};
         createJournals($slashdb, $achievements)        if $opts{j};
         createStoriesPosted($slashdb, $achievements)   if $opts{p};
-        createStoriesAccepted($slashdb, $achievements) if $opts{'s'};
+        createStoriesAccepted($slashdb, $achievements) if $opts{s};
         createUIDClub($slashdb, $achievements)         if $opts{d};
+	createCommentUpmods($slashdb, $achievements)   if $opts{o};
+	createMaker($slashdb, $achievements)           if $opts{m};
         createTagger($slashdb, $achievements)          if $opts{t};
-	createMaker($slashdb, $achievements)           if $opts{'m'};
+	createAprilFool($slashdb, $achievements)       if $opts{f};
+	setMakerModeForStoryAccepted($slashdb, $achievements) if $opts{r};
 
 sub createAll {
         my ($slashdb, $achievements) = @_;
@@ -38,9 +41,10 @@ sub createAll {
         createJournals(@_);
         createStoriesPosted(@_);
         createStoriesAccepted(@_);
+	createCommentUpmods(@_);
+	createMaker(@_);
         createUIDClub(@_);
         createTagger(@_);
-	createMaker(@_);
 }
 
 sub createComments {
@@ -81,10 +85,19 @@ sub createStoriesAccepted {
                 my $submissions = $slashdb->getSubmissionsByUID($uid, '', { accepted_only => 1});
                 my $count = scalar @$submissions;
                 if ($count) {
-                        print "Creating 'story_accepted' achievement for: $uid: $count\n";
-                        $achievements->setUserAchievement('story_accepted', $uid, { ignore_lookup => 1, exponent => $count, force_convert => 1, no_message => 1, maker_mode => 1}) if $count;
+                        print "Creating 'story_accepted' achievement for: $uid\n";
+                        $achievements->setUserAchievement('story_accepted', $uid, { ignore_lookup => 1, exponent => $count, force_convert => 1, no_message => 1, maker_mode => 1});
+			if ($achievements->checkMeta($uid, 'the_maker', ['story_accepted', 'comment_upmodded'])) {
+                                print "\tCreating the_maker for: $uid\n";
+                                $achievements->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
+                        }
                 }
         }
+
+	# Achievements are only set when a new achievement is an upgrade for an existing achievement.
+	# This ensures people who were granted story_accepted before we implemented maker_mode
+	# have the param set.
+	setMakerModeForStoryAccepted($slashdb, $achievements);
 }
 
 sub createUIDClub {
@@ -126,26 +139,83 @@ sub createTagger {
         }
 }
 
+sub createCommentUpmods {
+        my ($slashdb, $achievements) = @_;
+
+        my $users =
+                $slashdb->sqlSelectColArrayref(
+                        'uid',
+                        'users_info',
+                        'upmods > 0',
+                        '', { distinct => 1}
+                );
+
+        foreach my $uid (@$users) {
+                print "Creating comment_upmodded for: $uid\n";
+                $achievements->setUserAchievement('comment_upmodded', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
+                if ($achievements->checkMeta($uid, 'the_maker', ['comment_upmodded', 'story_accepted'])) {
+                        print "\tCreating the_maker for: $uid\n";
+                        $achievements->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
+                }
+        }
+}
+
 sub createMaker {
         my ($slashdb, $achievements) = @_;
 
-        my $submissions =
-                $slashdb->sqlSelectAllHashrefArray(
-                        'discussion, uid',
-                        'firehose',
-                        'uid != ' . $constants->{anonymous_coward_uid} . " and type = 'submission' and accepted = 'yes'"
+        my $users =
+                $slashdb->sqlSelectColArrayref(
+                        'uid',
+                        'user_achievements',
+                        'uid != ' . $constants->{anonymous_coward_uid},
+                        '', { distinct => 1}
                 );
-        foreach my $submission (@$submissions) {
-                next if ($submission->{discussion} == 0);
-                my ($cid, $create_time) =
-                        $slashdb->sqlSelect(
-                                'cid, NOW()',
-                                'comments',
-                                'sid = ' . $submission->{discussion} . ' and points > 0 limit 1'
-                        );
-                if ($cid) {
-                        $achievements->setUserAchievement('the_maker', $submission->{uid}, { ignore_lookup => 1, exponent => 0, no_message => 1, maker_mode => 1});
+
+        foreach my $uid (@$users) {
+                if ($achievements->checkMeta($uid, 'the_maker', ['story_accepted', 'comment_upmodded'])) {
+                        print "Creating the_maker for: $uid\n";
+                        $achievements->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
                 }
+        }
+}
+
+sub createAprilFool {
+        my ($slashdb, $achievements) = @_;
+
+	# SET THIS!
+	my $sid;
+	return if !$sid;
+
+        my $users =
+                $slashdb->sqlSelectColArrayref(
+                        'uid',
+                        'comments',
+                        'uid != ' . $constants->{anonymous_coward_uid},
+                        " and sid = $sid",
+                        '', { distinct => 1}
+                );
+
+        foreach my $uid (@$users) {
+                print "Creating 'april_fool' achievement for: $uid\n";
+                $achievements->setUserAchievement('april_fool', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
+        }
+}
+
+sub setMakerModeForStoryAccepted {
+        my ($slashdb, $achievements) = @_;
+
+        my $achievement = $achievements->getAchievement('story_accepted');
+        my $users =
+                $slashdb->sqlSelectColArrayref(
+                        'uid',
+                        'user_achievements',
+                        'uid != ' . $constants->{anonymous_coward_uid},
+                        ' and aid = ' . $achievement->{'story_accepted'}{aid},
+                        '', { distinct => 1}
+                );
+
+        foreach my $uid (@$users) {
+                $achievements->setMakerMode($uid, $achievement->{'story_accepted'}{aid});
         }
 }
 
@@ -169,6 +239,9 @@ Main options:
         -d      Create UID club
         -t      Create Tagger/Contradictor
 	-m	Create The Maker
+	-f      Create The April Fool
+	-r      Set user param 'maker_mode' for users with story_accepted
+	-o      Create comment_upmodded
 
 EOT
         exit;

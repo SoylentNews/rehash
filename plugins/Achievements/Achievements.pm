@@ -78,6 +78,7 @@ sub setUserAchievement {
 		$slashdb->sqlUpdate('user_achievements', $data, "id = " . $user_achievement->{$aid}{id});
 		$self->setUserAchievementObtained($uid);
 		$self->setAchievementMessage($uid, { description => $achievement->{$ach_name}{description} }) unless $options->{no_message};
+		$self->setMakerMode($uid, $achievement->{$ach_name}{aid}) if $options->{maker_mode};
 		$dynamic_blocks->setUserBlock('achievements', $uid) if ($uid and $dynamic_blocks);
 	} else {
 		# The user already has an achievement that is non-repeatable. Do nothing.
@@ -430,31 +431,30 @@ sub setAchievementMessage {
         }
 }
 
-sub setTheMaker {
-        my ($self, $sid) = @_;
+# setMeta($uid, $meta_name, [$prereq1, $prereq2 ... ]);
+sub checkMeta {
+        my ($self, $uid, $meta, $prereqs) = @_;
 
-        return if !$sid;
+        return 0 if (!$meta);
 
         my $slashdb = getCurrentDB();
         my $constants = getCurrentStatic();
 
-        my $sid_q = $slashdb->sqlQuote($sid);
-        my $uid =
-                $slashdb->sqlSelect(
-                        'uid',
-                        'firehose',
-                        'uid != ' . $constants->{anonymous_coward_uid} .
-                        " and discussion = $sid_q" .
-                        " and type = 'submission'" .
-                        " and accepted = 'yes'"
-                );
+        my $user_achievements = $self->getUserAchievements($uid);
+        my $meta_achievement = $self->getAchievement($meta);
+        my $meta_aid = $meta_achievement->{$meta}{aid};
 
-        if ($uid) {
-                my ($cid, $create_time) = $slashdb->sqlSelect('cid, NOW()', 'comments', "sid = $sid_q and points > 0 limit 1");
-                $self->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0 }) if $cid;
-                my $user = $slashdb->getUser($uid);
-                $slashdb->setUser($uid, { 'maker_mode' => $create_time }) if !$user->{'maker_mode'};
+        return 0 if ($user_achievements->{$meta_aid});
+
+        my $has_prereqs = 0;
+        foreach my $prereq (@$prereqs) {
+                my $prereq_achievement = $self->getAchievement($prereq);
+                my $prereq_achievement_aid = $prereq_achievement->{$prereq}{aid};
+                $has_prereqs = ($user_achievements->{$prereq_achievement_aid}) ? 1 : 0;
+                last if ($has_prereqs == 0);
         }
+
+        return $has_prereqs;
 }
 
 sub setMakerMode {

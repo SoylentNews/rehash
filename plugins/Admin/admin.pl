@@ -2535,7 +2535,12 @@ sub saveStory {
 		my $achievements = getObject('Slash::Achievements');
 		if ($achievements) {
 			# User
-			$achievements->setUserAchievement('story_accepted', $form->{submitter}, { maker_mode => 1 }) if ($form->{uid} != $form->{submitter});
+			if ($form->{uid} != $form->{submitter}) {
+				$achievements->setUserAchievement('story_accepted', $form->{submitter}, { maker_mode => 1 });
+				if ($achievements->checkMeta($form->{submitter}, 'the_maker', ['story_accepted', 'comment_upmodded'])) {
+					$achievements->setUserAchievement('the_maker', $form->{submitter}, { ignore_lookup => 1, exponent => 0 });
+				}
+			}
 			# Author
 			$achievements->setUserAchievement('story_posted', $form->{uid});
 		}
