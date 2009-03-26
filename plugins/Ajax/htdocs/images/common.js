@@ -832,7 +832,7 @@ $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
 	});
 
 $('#firehoselist a.more').
-	live('mousedown', function(){
+	live('mousedown', function(){ // pos_logger
 		var item=fhitems(this), pos=fhitems().index(item)+1;
 		this.href += (this.search ? '&' : '?') + 'art_pos=' + pos;
 		return true;
