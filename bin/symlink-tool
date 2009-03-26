@@ -97,11 +97,16 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
 
 		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
-		my $java = '/opt/dell/srvadmin/jre/bin/java';
-		my $yui_compressor = '/usr/local/src/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar';
 		my $compress = '';
-		if ( -f $java && -f $yui_compressor ) {
-			$compress = "$java -jar $yui_compressor";
+		my $java = '';
+		if ( -f '/usr/java/jdk1.5.0_15/jre/bin/java' ) {
+			$java = '/usr/java/jdk1.5.0_15/jre/bin/java';
+		} elsif ( -f '/opt/dell/srvadmin/jre/bin/java' ) {
+			$java = '/opt/dell/srvadmin/jre/bin/java';
+		}
+		my $compressor_jar = '/usr/local/src/slash/plugins/Ajax/yuicompressor.jar';
+		if ( $java && -f $compressor_jar ) {
+			$compress = "$java -jar $compressor_jar";
 		}
 
 		# you can glob any kinds of files you like, even mixing them...
