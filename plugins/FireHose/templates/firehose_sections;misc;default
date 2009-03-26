@@ -27,7 +27,7 @@ __template__
 	skip_edit = 1;
 END;
 
-IF user.is_anon || form.op == "view";
+IF  form.op == "view";
 	skip_edit = 1;
 END;
 %]
@@ -56,12 +56,12 @@ END;
 		[% END %]
 		<li class="[% IF is_active %]active[% ELSIF hide %]hide[% END %][% IF is_default %] default[% END %]" id="fhsection-[% fh_section.fsid %]">
 			<a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !skip_edit %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
-			[% IF !user.is_anon && !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
+			[% IF !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
 		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
 	[% END %]
 </ul>
-[% IF !user.is_anon && (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" %]<script type="text/javascript">
+[% IF (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" %]<script type="text/javascript">
 $(function(){
 $any('firehose-sections').mousedown(function( event ){
 		// select a section on mousedown
@@ -80,6 +80,10 @@ $any('firehose-sections').mousedown(function( event ){
 	}).
 	click(function( event ){
 		// edit only for a click in the edit button
+		[% IF user.is_anon %]
+			show_login_box();
+			return false;
+		[% END %]
 		var $edit = $(event.originalTarget || event.target).closest('a.links-sections-edit');
 		if ( $edit.length ) {
 			var section = $edit.closest('li[id^=fhsection-]').metadata();
