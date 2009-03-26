@@ -85,7 +85,7 @@ Size.prototype = {
 		return this;
 	},
 	toString: function(){
-		return '{ top:'+this.top+', left:'+this.left+' }';
+		return '{ height:'+this.height+', width:'+this.width+' }';
 	}
 };
 Size._expected = function( o ){ return _isSize(o) ? o : new Size(o); };
@@ -113,7 +113,7 @@ Position.prototype = {
 		return this;
 	},
 	toString: function(){
-		return '{ height:'+this.height+', width:'+this.width+' }';
+		return '{ top:'+this.top+', left:'+this.left+' }';
 	}
 };
 Position._expected = function( o ){ return _isPosition(o) ? o : new Position(o); };
