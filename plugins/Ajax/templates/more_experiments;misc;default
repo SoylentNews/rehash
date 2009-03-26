@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+more_experiments
+__template__
+[% percent=100; r=percent.rand; IF r < 10 %]
+<script type="text/javascript">
+(function(){
+var regexp=/^\s*(?:\d+|many)\s+more\s*$/i;
+
+function more(){
+	var $more_link = $('#more-experiment a');
+	$more_link.each(function(){
+		Bounds.intersect(window, $more_link) && $more_link.click();
+	});
+}
+
+$('#more-experiment a').
+	live('more-possible', function( event ){
+		var $more_link=$(this);
+		if ( regexp.test($more_link.text()) ) {
+		[% IF r < 5 %]
+			$more_link.after('<span id="more-hint" class="feature-hint"><em>NEW: Fetch stories in-line!</em></span>');
+		[% ELSE %]
+			$(document).bind('scroll', more);
+		} else {
+			$(document).unbind('scroll', more);
+		[% END %]
+		}
+	});
+})();
+</script>
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

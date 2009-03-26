@@ -156,8 +156,8 @@ $(function(){
 })();
 
 
-function more_possible(){
-	// console.log($.trim($('#firehose_more').text()));
+function more_possible( text ){
+	$('#more-experiment a').trigger('more-possible');
 }
 
 

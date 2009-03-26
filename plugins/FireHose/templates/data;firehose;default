@@ -157,7 +157,8 @@ __template__
 		   	href = '#';
 		   END;
 		%]
-		<span class="future [% new_color %]"><a href="[% href %]" [% IF !no_more %]onclick="[% extra_onclick %] firehose_more(); return false;"[% END %]>[% label %]</a></span>
+		<span id="more-experiment" class="future [% new_color %]"><a href="[% href %]" [% IF !no_more %]onclick="[% extra_onclick %] firehose_more(); return false;"[% END %]>[% label %]</a></span>
+		<script type="text/javascript">more_possible('[% label %]');</script>
 		[% IF !contentsonly %]
 		</span>
 		[% END %]

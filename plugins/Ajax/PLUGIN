@@ -46,6 +46,7 @@ template=templates/data;ajax;default
 template=templates/edit_comment;ajax;default
 template=templates/hc_comment;ajax;default
 template=templates/modal_footer;misc;default
+template=templates/more_experiments;misc;default
 template=templates/prefs_d2;ajax;default
 template=templates/prefs_d2_posting;ajax;default
 template=templates/prefs_messages;ajax;default
