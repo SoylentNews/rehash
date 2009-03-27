@@ -2773,6 +2773,9 @@ sub getOptionsValidator {
 		categories 	=> \%categories
 	};
 
+	if ($user->{is_admin} || $user->{is_subscriber}) {
+		$valid->{pagesizes}->{huge} = 1;
+	}
 	if ($user->{is_admin}) {
 		$valid->{pagesizes}->{single} = 1;
 	}
@@ -3712,6 +3715,7 @@ sub getAndSetOptions {
 sub getFireHoseLimitSize {
 	my($self, $mode, $pagesize, $forcesmall, $options) = @_;
 	$pagesize ||= '';
+
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
@@ -3723,6 +3727,9 @@ sub getFireHoseLimitSize {
 			$limit = $options->{viewref}{admin_maxitems};
 		} else {
 			$limit = $options->{viewref}{maxitems};
+		}
+		if ($pagesize eq "huge" && ($user->{is_admin} || $user->{is_subscriber})) {
+			$limit *= 1.5;
 		}
 		if ($pagesize eq "small") {
 			$limit = int($limit / 1.5);

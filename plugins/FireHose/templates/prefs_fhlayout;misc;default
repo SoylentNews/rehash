@@ -163,6 +163,7 @@ __template__
 		[% default = user.firehose_pagesize || "small" %]
 		[% pagesizes = { 'small' => 'Small', 'large' => 'Large'} %]
 		[% IF user.is_admin; pagesizes.single = "Single"; END %]
+		[% IF user.is_admin || user.is_subscriber; pagesizes.huge = "Huge"; END %]
 		<label>Page size</label> [% Slash.createSelect('pagesize', pagesizes, { default => default, return => 1} ) %]<br>
 		[% pause_check = '';
                 IF user.firehose_pause || !user.firehose_pause.defined;
