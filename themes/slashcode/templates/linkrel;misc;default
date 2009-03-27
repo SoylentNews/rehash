@@ -98,6 +98,15 @@ ELSIF env.script_name.search('bookmark\.pl');
 	tmp = BLOCK -%]
 <link rel="alternate" title="[% constants.sitename | strip_attribute %] Recent Bookmarks" href="[% gSkin.rootdir %]/bookmarks_recent.rss" type="application/rss+xml">
 	[%- END; linkrels.push(tmp);
+ELSIF env.script_name.search('users2\.pl');
+	IF !user.is_anon; 
+		the_user = Slash.db.getUser(form.uid); 
+		filter= '"home:' _ the_user.nickname _ '"'; 
+		filter_str = "fhfilter=" _ Slash.strip_paramattr(filter); tmp = BLOCK -%]
+<link rel="alternate" title="[% the_user.nickname | strip_attribute %] Homepage" href="[% constants.real_rootdir %]/firehose.pl?op=rss&amp;content_type=rss&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=&amp;[% filter_str %]&amp;logtoken=[% Slash.strip_paramattr(Slash.getPublicLogToken()) %]" type="application/rss+xml">
+
+	[%- END; linkrels.push(tmp); END;
+
 
 ELSE; # default author link, where author is a nickname
 	    IF link.author; tmp = BLOCK -%]
