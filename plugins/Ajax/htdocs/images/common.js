@@ -9,6 +9,8 @@
 	firehose_set_cur firehose_style_switch
 	firehose_style_switch_handler */
 
+YAHOO.namespace('slashdot');
+
 ;$(function(){
 	$.ajaxSetup({
 		url:	'/ajax.pl',
