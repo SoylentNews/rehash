@@ -12,7 +12,7 @@ CREATE TABLE dynamic_user_blocks (
   portal_id mediumint(8) unsigned NOT NULL default '0',
   type_id tinyint(1) unsigned NOT NULL default '0',
   uid mediumint(8) unsigned NOT NULL default '0',
-  title varchar(30) NOT NULL default '',
+  title varchar(64) NOT NULL default '',
   url varchar(128) NOT NULL default '',
   name varchar(30) NOT NULL default '',
   description varchar(64) NOT NULL default '',

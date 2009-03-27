@@ -6115,3 +6115,6 @@ INSERT INTO sphinx_index (src, name, asynch, laststart, frequency) VALUES (2, 'd
 
 # 2009-03-26
 UPDATE vars SET value = 'T_2_5_0_248' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Achievements
+ALTER TABLE dynamic_user_blocks MODIFY COLUMN title varchar(64) NOT NULL default '';
