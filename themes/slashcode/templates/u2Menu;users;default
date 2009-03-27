@@ -15,7 +15,7 @@ __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
 <div class="nav">
 <ul class="menu" id="tablist">
-<li[% IF main_view %] class="active"[% active = 1; ELSE; active = 0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]">[% nickname | strip_literal %]</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="firehose"; END %]</li>
+<li[% IF main_view %] class="active"[% active = 1; ELSE; active = 0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]">[% nickname | strip_literal %]</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="homepage"; END %]</li>
 <li[% IF data_pane == 'firehose' && !main_view %] class="active"[% active=1; ELSE; active = 0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/firehose">Firehose</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="firehose"; END;%]</li>
 [% IF comments_size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/comments">Comments</a></li>[% END %]
 [% IF journals_size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% active = 1; ELSE; active=0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/journal">Journals</a> [% IF active; PROCESS u2_rsslink useredit=useredit name="journal"; END; %]</li>[% END %]
