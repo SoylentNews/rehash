@@ -73,7 +73,7 @@ sub createRemark {
 	});
 
 	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
-	$dynamic_blocks->setRemarkAsMessage() if $$dynamic_blocks;
+	$dynamic_blocks->setRemarkAsMessage() if $dynamic_blocks;
 }
 
 ########################################################
