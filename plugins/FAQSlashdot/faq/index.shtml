@@ -166,7 +166,6 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/accounts.shtml#ac1050">My RSS Headline Reader Tells me I Was Banned!</a></strong></li>
                 <li><strong><a href="/faq/accounts.shtml#ac1100">Why is someone else's User Name appearing on my User Page's Menu?</a></strong></li>
                 <li><strong><a href="/faq/accounts.shtml#ac1200">What are Login Sessions?</a></strong></li>
-                <li><strong><a href="/faq/accounts.shtml#ac1300">What are these achievement things I keep hearing about?</a></strong></li>
         </ul><!-- Friends and Journals -->
         <h2><strong><a href="/faq/friends.shtml">Friends and Journals</a></strong></h2>
         <ul>

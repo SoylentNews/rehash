@@ -700,22 +700,29 @@ var tag_widget_fns = {
 
 							// now hide() will work, so hide the display (child) instead of the widget (parent)
 							// but we can't _really_ hide it, because we need to ask its width
-							$display.show().css('height', '0');
-							$parent.show();
+							$display.
+								css('height', 0).
+								add($parent).
+									show();
+
+							var restore_h3, ul=Size($display.find('ul'));
+							$parent.closest('h3').each(function(){
+								var $h3=$(this), saved=$h3.css('max-height')||'';
+								$h3.css('max-height', $h3.height()+ul.height+'px');
+								restore_h3 = function(){ $h3.css('max-height', saved); };
+							});
+
 							try {
-								var max_left = $parent.width() - $display.find('ul').width();
+								var max_left = $parent.width() - ul.width;
 								best_left = Math.min(best_left, max_left);
 							} catch ( e0 ) {
 							}
 
-							$display.hide();
-							$display.css({
-								height:		'',
-								left:		best_left
-							});
-
-							$display.slideDown(400);
-							$display.dequeue();
+							$display.
+								hide().
+								css({ height:'', left:best_left }).
+								slideDown(400, restore_h3).
+								dequeue();
 						});
 					}
 				});

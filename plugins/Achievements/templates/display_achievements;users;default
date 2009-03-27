@@ -196,6 +196,8 @@ ach_obtained_aid = ach_obtained.$ach_key.aid;
 </div>
 [% END %]
 
+<h3><a href="/faq/accounts.shtml#ac1300">What are these achievement things?</a></h3>
+
 __seclev__
 500
 __version__

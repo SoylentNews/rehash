@@ -1247,8 +1247,9 @@ sub showInfo {
 		my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
                 my ($dyn_achievements, $dyn_messages);
                 if ($dynamic_blocks_reader and $user->{is_admin}) {
-                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid);
-                        $dyn_messages     = $dynamic_blocks_reader->displayBlock('messages-' . $uid);
+			my $user_self = ($requested_user->{uid} == $user->{uid}) ? 1 : 0;
+                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self });
+                        $dyn_messages     = $dynamic_blocks_reader->displayBlock('messages-' . $user->{uid});
                 }
 
 		slashDisplay('u2MainView', {

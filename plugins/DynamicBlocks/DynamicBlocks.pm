@@ -45,6 +45,8 @@ sub setBlock {
                 };
                 $slashdb->sqlInsert('dynamic_user_blocks', $data);
         } else {
+		$data->{'title'} = $block->{title},
+		$data->{'url'}   = $block->{url},
                 $data->{'block'} = $block->{block};
                 $data->{'-last_update'} = 'NOW()';
                 $slashdb->sqlUpdate('dynamic_user_blocks', $data, "bid = $bid and name = $block_name");
@@ -97,6 +99,8 @@ sub setUserBlock {
                         $slashdb->sqlInsert('dynamic_user_blocks', $data);
                 } else {
                         $data = {
+				"title"        => $block->{title},
+				"url"          => $block->{url},
                                 "block"        => $block->{block},
                                 "-last_update" => 'NOW()',
                         };
@@ -134,12 +138,10 @@ sub setUserCommentBlock {
                                 comments => $comments,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $comments_block;
-                $block->{url} = "~$nick/comments";
-                $block->{title} = $nick . "'s Comments";
-                $block->{description} = 'Comments';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/comments';
+                $block->{title} =  strip_literal($user->{nickname}) . "'s Comments";
+		$block->{description} = 'Comments';
         }
 
         return (keys %$block) ? $block : 0;
@@ -167,12 +169,10 @@ sub setUserJournalBlock {
                                 journals => $journals,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $journals_block;
-                $block->{url} = "~$nick/journal";
-                $block->{title} = $nick . "'s Journal Entries";
-                $block->{description} = 'Journal';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/journal';
+                $block->{title} =  strip_literal($user->{nickname}) . "'s Journal";
+		$block->{description} = 'Journal';
         }
 
         return (keys %$block) ? $block : 0;
@@ -193,7 +193,7 @@ sub setUserAchievementBlock {
                 $slashdb->sqlSelectAllHashrefArray(
                         'aid, createtime',
                         'user_achievements',
-                        "uid = " . $user->{uid} . " and aid != " . $obtained_aid . " order by createtime desc limit 5"
+                        "uid = " . $user->{uid} . " and aid != " . $obtained_aid . " order by createtime desc limit 3"
                 );
         foreach my $achievement (@$achievements) {
                 $achievement->{description} = $slashdb->sqlSelect('description', 'achievements', 'aid = ' . $achievement->{aid});
@@ -206,12 +206,10 @@ sub setUserAchievementBlock {
                                 achievements => $achievements,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $achievements_block;
-                $block->{url} = "~$nick/achievements";
-                $block->{title} = $nick . "'s Achievements";
-                $block->{description} = 'Achievements';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/achievements';
+                $block->{title} = strip_literal($user->{nickname}) . "'s Achievements";
+		$block->{description} = 'Achievements';
         }
 
         return (keys %$block) ? $block : 0;
@@ -236,12 +234,10 @@ sub setUserBookmarksBlock {
                                 bookmarks => $bookmarks,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $bookmarks_block;
-                $block->{url} = "~$nick/bookmarks";
-                $block->{title} = $nick . "'s Bookmarks";
-                $block->{description} = 'Bookmarks';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/bookmarks';
+                $block->{title} =  strip_literal($user->{nickname}) . "'s Bookmarks";
+		$block->{description} = 'Bookmarks';
         }
 
         return (keys %$block) ? $block : 0;
@@ -290,12 +286,10 @@ sub setUserTagsBlock {
                                 tags => $unique_tags,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $tags_block;
-                $block->{url} = "~$nick/tags";
-                $block->{title} = $nick . "'s Tags";
-                $block->{description} = 'Tags';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/tags';
+                $block->{title} =  strip_literal($user->{nickname}) . "'s Tags";
+		$block->{description} = 'Tags';
         }
 
         return (keys %$block) ? $block : 0;
@@ -330,12 +324,10 @@ sub setUserFriendsBlock {
                                 friends => $friends,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $friends_block;
-                $block->{url} = "~$nick/friends";
-                $block->{title} = $nick . "'s Friends";
-                $block->{description} = 'Friends';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/friends';
+                $block->{title} =  strip_literal($user->{nickname}) . "'s Friends";
+		$block->{description} = 'Friends';
         }
 
         return (keys %$block) ? $block : 0;
@@ -368,12 +360,10 @@ sub setUserSubmissionsBlock {
                                 submissions => $submissions,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $submissions_block;
-                $block->{url} = "~$nick/submissions";
-                $block->{title} = $nick . "'s Submissions";
-                $block->{description} = 'Submissions';
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/submissions';
+                $block->{title} =  strip_literal($user->{nickname}) . "'s Submissions";
+		$block->{description} = 'Submissions';
         }
 
         return (keys %$block) ? $block : 0;
@@ -405,8 +395,6 @@ sub setUserMessagesBlock {
                                 messages => $messages,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
-                my $nick;
-                $nick = strip_paramattr($user->{nickname});
                 $block->{block} = $messages_block;
                 $block->{url} = 'my/messages';
                 $block->{title} = 'Messages';
@@ -684,7 +672,7 @@ sub getBlocksEligibleForUpdate {
 }
 
 sub displayBlock {
-        my ($self, $name) = @_;
+        my ($self, $name, $options) = @_;
 
         my $slashdb = getCurrentDB();
 
@@ -692,6 +680,8 @@ sub displayBlock {
         ($block->{block}, $block->{title}, $block->{url}) =
                 $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "name = '$name'");
         $block->{name} = $name;
+
+	($block->{title}) = $block->{title} =~ /^.+\s(\w+)$/ if $options->{user_self};
 
         return
                 slashDisplay('displayblock', {
