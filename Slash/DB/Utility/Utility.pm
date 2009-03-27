@@ -9,6 +9,7 @@ use Config '%Config';
 use Slash::Utility;
 use DBIx::Password;
 use Time::HiRes;
+use Encode qw(decode_utf8 is_utf8);
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -296,6 +297,7 @@ sub sqlConnect {
 		}
 	}
 	$self->{_dbh}{PrintError} = 0; #"off" this kills the issue of bad SQL sending errors to the client
+	$self->{_dbh}->{mysql_enable_utf8} = 1; # enable utf8 mode (add utf8 flag)
 
 	return 1; # We return true that the sqlConnect was ok.
 }
@@ -1089,6 +1091,7 @@ sub sqlDo {
 	my($self, $sql) = @_;
 	$self->_refCheck($sql);
 	$self->sqlConnect() or return undef;
+	is_utf8($sql) or $sql = decode_utf8($sql);
 	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
 		unless ($sql =~ /^INSERT\s+IGNORE\b/i) {

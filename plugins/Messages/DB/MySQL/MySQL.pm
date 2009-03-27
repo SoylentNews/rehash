@@ -24,6 +24,7 @@ use Slash::DB;
 use Slash::Constants qw(:messages);
 use Slash::Utility;
 use Storable qw(nfreeze thaw);
+use Encode qw(decode_utf8 is_utf8);
 
 use base 'Slash::Plugin';
 
@@ -208,7 +209,7 @@ sub _create {
 		fuser	=> $fuser,
 		altto	=> $altto || '',
 		code	=> $code,
-		message	=> $frozen,
+		'-message'	=> "0x" . unpack("H*", $frozen),
 		'send'	=> $send || 'now',
 	});
 
@@ -229,6 +230,10 @@ sub _get_web {
 	$prime    = $self->{_web_prime1};
 	$self->sqlUpdate($table, { readed => 1 }, "$prime=$id_db");
 
+	# force to set UTF8 flag because these fields are 'blob'.
+	$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
+	$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
+
 	return $data;
 }
 
@@ -243,6 +248,11 @@ sub _get_web_by_uid {
 	my $data = $self->sqlSelectAllHashrefArray(
 		$cols, $table, "$prime=$id_db", $other
 	);
+
+	# force to set UTF8 flag because these fields are 'blob'.
+	map { $_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'})); } @$data;
+	map { $_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'})); } @$data;
+
 	return $data;
 }
 

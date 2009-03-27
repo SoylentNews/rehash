@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use open ':utf8';
 use Slash;
 use File::Path;
 use Slash::Constants ':slashd';

@@ -24,6 +24,8 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
+use open ":utf8";
+use open ":std";
 use Fcntl qw(:flock :seek);
 use File::Basename;
 use File::Path;
@@ -36,6 +38,7 @@ use Slash::Utility::Data;
 use Slash::Utility::Environment;
 use Symbol 'gensym';
 use Time::HiRes ();
+use Encode qw(encode);
 
 use base 'Exporter';
 
@@ -118,6 +121,15 @@ sub sendEmail {
 		return 0;
 	}
 
+	# Character Code Conversion; target encoding must be valid name
+	# Characters not representable in the destination character set
+	# and encoding will be replaced with \x{HHHH} place-holders
+	# (s. Encode(3) perldoc, Handling Malformed Data)
+	my $b_code = $constants->{mail_charset_body} || "UTF-8";
+	my $h_code = $constants->{mail_charset_header} || "MIME-Header";
+	$content = encode($b_code, $content, Encode::FB_PERLQQ);
+	$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
+
 	my %data = (
 		From		=> $constants->{mailfrom},
 		Smtp		=> $constants->{smtp_server},
@@ -125,8 +137,8 @@ sub sendEmail {
 		Message		=> $content,
 		To		=> $addr,
 		# put in vars ... ?
-		'Content-type'			=> 'text/plain; charset="us-ascii"',
-		'Content-transfer-encoding'	=> '8bit',
+		'Content-type'			=> qq|text/plain; charset="$b_code"|,
+		'Content-transfer-encoding'	=> $constants->{mail_content_transfer_encoding} || '8bit',
 		'Message-Id'			=> messageID(),
 	);
 
@@ -189,6 +201,12 @@ sub bulkEmail {
 
 	my @list = grep { emailValid($_) } @$addrs;
 
+	# Character Code Conversion; see comments in sendEmail()
+	my $b_code = $constants->{mail_charset_body} || "UTF-8";
+	my $h_code = $constants->{mail_charset_header} || "MIME-Header";
+	$content = encode($b_code, $content, Encode::FB_PERLQQ);
+	$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
+
 	my $bulk = Slash::Custom::Bulkmail->new(
 		From    => $constants->{mailfrom},
 		Smtp	=> $constants->{smtp_server},
@@ -199,8 +217,8 @@ sub bulkEmail {
 		BAD	=> $badfile,
 		ERRFILE	=> $errfile,
 		# put in vars ... ?
-		'Content-type'			=> 'text/plain; charset="us-ascii"',
-		'Content-transfer-encoding'	=> '8bit',
+		'Content-type'			=> qq|text/plain; charset="$b_code"|,
+		'Content-transfer-encoding'	=> $constants->{mail_content_transfer_encoding} || '8bit',
 		'Message-Id'			=> messageID(),
 	);
 	my $return = $bulk->bulkmail;
@@ -461,6 +479,7 @@ sub prog2file {
 			if (!open $fh, "> $filename\0") {
 				$err_str .= " could not write to '$filename': '$!'";
 			} else {
+				binmode $fh, ":encoding($options->{encoding})" if (defined($options->{encoding}));
 				print $fh $data;
 				close $fh;
 				$success = 1;

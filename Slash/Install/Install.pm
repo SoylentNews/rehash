@@ -136,6 +136,7 @@ sub writeTemplateFile {
 	my($self, $filename, $template) = @_;
 	my $fh = gensym;
 	open($fh, "> $filename\0") or die "Can't open $filename to write to: $!";
+	binmode $fh, ':utf8';
 	for (qw(skin description title page lang name template seclev version)) { #(keys %$template) {
 		next if $_ eq 'tpid';
 		print $fh "__${_}__\n";

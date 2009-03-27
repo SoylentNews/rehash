@@ -1747,6 +1747,7 @@ sub getDescForTopicsRendered {
 sub write_to_temp_file {
 	my($data) = @_;
 	my($fh, $file) = tempfile();
+	binmode $fh, ':utf8';
 	print $fh $data;
 	close $fh;
 	return $file;
