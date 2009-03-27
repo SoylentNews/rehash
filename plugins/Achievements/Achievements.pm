@@ -28,7 +28,7 @@ sub setUserAchievement {
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 
-	return if ($uid == $constants->{anonymous_coward_uid});
+	return if (!$uid or ($uid == $constants->{anonymous_coward_uid}));
 
         #my $uid_q = $self->sqlQuote($uid);
 
