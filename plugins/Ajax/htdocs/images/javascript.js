@@ -1,9 +1,16 @@
 (function(){
 
+//
+// "Array Extras", iff not already provided by this JavaScript environment
+//	(compatibility code from mozilla.org --- except that I use a local reference to Array.prototype)
+//
+
+var A=Array.prototype, S=String.prototype;
+
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/indexOf#Compatibility
-if (!Array.prototype.indexOf)
+if (!A.indexOf)
 {
-  Array.prototype.indexOf = function(elt /*, from*/)
+  A.indexOf = function(elt /*, from*/)
   {
     var len = this.length;
 
@@ -25,9 +32,9 @@ if (!Array.prototype.indexOf)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/lastIndexOf#Compatibility
-if (!Array.prototype.lastIndexOf)
+if (!A.lastIndexOf)
 {
-  Array.prototype.lastIndexOf = function(elt /*, from*/)
+  A.lastIndexOf = function(elt /*, from*/)
   {
     var len = this.length;
 
@@ -58,9 +65,9 @@ if (!Array.prototype.lastIndexOf)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/every#Compatibility
-if (!Array.prototype.every)
+if (!A.every)
 {
-  Array.prototype.every = function(fun /*, thisp*/)
+  A.every = function(fun /*, thisp*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -79,9 +86,9 @@ if (!Array.prototype.every)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/filter#Compatibility
-if (!Array.prototype.filter)
+if (!A.filter)
 {
-  Array.prototype.filter = function(fun /*, thisp*/)
+  A.filter = function(fun /*, thisp*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -104,9 +111,9 @@ if (!Array.prototype.filter)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/forEach#Compatibility
-if (!Array.prototype.forEach)
+if (!A.forEach)
 {
-  Array.prototype.forEach = function(fun /*, thisp*/)
+  A.forEach = function(fun /*, thisp*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -122,9 +129,9 @@ if (!Array.prototype.forEach)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/map#Compatibility
-if (!Array.prototype.map)
+if (!A.map)
 {
-  Array.prototype.map = function(fun /*, thisp*/)
+  A.map = function(fun /*, thisp*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -143,9 +150,9 @@ if (!Array.prototype.map)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/some#Compatibility
-if (!Array.prototype.some)
+if (!A.some)
 {
-  Array.prototype.some = function(fun /*, thisp*/)
+  A.some = function(fun /*, thisp*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -164,9 +171,9 @@ if (!Array.prototype.some)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduce#Compatibility
-if (!Array.prototype.reduce)
+if (!A.reduce)
 {
-  Array.prototype.reduce = function(fun /*, initial*/)
+  A.reduce = function(fun /*, initial*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -209,9 +216,9 @@ if (!Array.prototype.reduce)
 }
 
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduceRight#Compatibility
-if (!Array.prototype.reduceRight)
+if (!A.reduceRight)
 {
-  Array.prototype.reduceRight = function(fun /*, initial*/)
+  A.reduceRight = function(fun /*, initial*/)
   {
     var len = this.length;
     if (typeof fun != "function")
@@ -253,5 +260,102 @@ if (!Array.prototype.reduceRight)
   };
 }
 
+
+
+//
+// String methods from JavaScript 1.8.1, iff not already provided by this JavaScript environment
+//	(our code, because mozilla.org provided none)
+//
+
+if (!S.trim)
+{
+  var trim_regexp=/^\s+|\s+$/g;
+  S.trim = function()
+  {
+    return this.replace(trim_regexp, '');
+  };
+}
+
+if (!S.trimLeft)
+{
+  var trimLeft_regexp=/^\s+/;
+  S.trimLeft = function()
+  {
+    return this.replace(trimLeft_regexp, '');
+  };
+}
+
+if (!S.trimRight)
+{
+  var trimRight_regexp=/\s+$/;
+  S.trimLeft = function()
+  {
+    return this.replace(trimRight_regexp, '');
+  };
+}
+
+
+
+//
+// Array/String "Generics", iff not already provided by this JavaScript environment
+//	(our code, because mozilla.org provided none)
+//
+
+
+function make_generic( name ){
+	var fn;
+	name in this || typeof(fn=this.prototype[name])!=='function' || (this[name]=function( o ){
+		return fn.apply(o, A.slice.call(arguments, 1));
+	});
+}
+
+// We would prefer _not_ to know method names, but to iterate directly over the
+// prototype.  Unfortunately,
+//
+//	for ( var name in /*Array|String*/.prototype )
+//
+// is unreliable, perhaps because of the native implementation(s).
+
+[
+	'concat',
+	'every',
+	'filter',
+	'forEach',
+	'indexOf',
+	'join',
+	'lastIndexOf',
+	'map',
+	'pop',
+	'push',
+	'reduce',
+	'reduceRight',
+	'reverse',
+	'shift',
+	'slice',
+	'some',
+	'sort',
+	'splice',
+	'unshift'
+].forEach(make_generic, Array);
+
+[
+	'charAt',
+	'charCodeAt',
+	'concat',
+	'indexOf',
+	'lastIndexOf',
+	'match',
+	'replace',
+	'search',
+	'slice',
+	'split',
+	'substr',
+	'substring',
+	'toLowerCase',
+	'toUpperCase',
+	'trim',
+	'trimLeft',
+	'trimRight'
+].forEach(make_generic, String);
 
 })();

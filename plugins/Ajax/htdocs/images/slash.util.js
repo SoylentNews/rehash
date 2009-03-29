@@ -13,20 +13,6 @@ var T=$.TypeOf;
 
 // code to be exported
 
-function each( o, fn ){
-	var non_empty = T.nonEmpty(o);
-	if ( T.list(o, non_empty) ) {
-		for ( var i=0, N=o.length, v=o[i]; i<N && !T.defNo(fn.call(v, i, v)); v=o[++i] ) {  }
-	} else if ( non_empty ) {
-		for ( var k in o ) {
-			if ( T.defNo(fn.call(o[k], k, o[k])) ) {
-				break;
-			}
-		}
-	}
-}
-
-
 function clone( o ){
 	if ( o===undefined || o===null ) { return o; }
 
@@ -52,36 +38,11 @@ function clone( o ){
 	if ( T.nonEmpty(o, tn) ) {
 		// ...as long as we're willing to copy all the properties (even works on arrays)
 		// and key that we do this for functions as well... they can have properties
-		each(o, function(k, v){
+		core.each(o, function(k, v){
 			o2[k] = clone(v);
 		});
 	}
 	return o2;
-}
-
-function accumulate( initial_value, accumulate_fn, collection /* [, collection]+ */ ){
-	var others = Array.prototype.slice.call(arguments, 3);
-	var if_others = others.length > 0;
-
-	var o = initial_value;
-	each(collection, function(k, v){
-		var args = [k, v];
-		if ( if_others ) {
-			each(others, function(i, other){
-				args.push(other[k]);
-			});
-		}
-		accumulate_fn.apply(o, args);
-	});
-	return o;
-}
-
-function keys(obj){
-	return accumulate([], function(k){ this.push(k); }, obj);
-}
-
-function values(obj){
-	return accumulate([], function(k, v){ this.push(v); }, obj);
 }
 
 function qw_as_array( qw ){
@@ -91,7 +52,7 @@ function qw_as_array( qw ){
 		qw = $.map(qw.split(/\s+/), function(w){if(w)return w;});
 	}
 	if ( T.not('list', qw) ) {
-		qw = accumulate([], function(k, v){if(v){this.push(k);}}, qw);
+		qw = core.reduce(qw, [], function( k, v ){ v && this.push(k); })
 	}
 	// else: qw already _is_ an array
 
@@ -105,7 +66,7 @@ function qw_as_set( qw ){
 		qw = qw_as_array(qw);
 	}
 	if ( T.list(qw) ) {
-		qw = accumulate({}, function(k,v){this[v]=true;}, qw);
+		qw = core.reduce(qw, {}, function( i, v ){ this[v]=true; });
 	}
 	// else qw already _is_ a set
 
@@ -139,18 +100,11 @@ function qw_each( qw, fn ){
 	}
 
 	var use_key = T.not('list', qw);
-	each(qw, function(k, v){
+	core.each(qw, function(k, v){
 		if ( T.not('defNo', v) ) {
 			return fn.call(use_key ? k : v);
 		}
 	});
-}
-
-function splice_string( s, offset, length, replacement ){
-	if ( length || replacement ) {
-		s = s.slice(0, offset) + (replacement||'') + s.slice(offset+(length||0));
-	}
-	return s;
 }
 
 function ensure_namespace( path ){
@@ -244,7 +198,7 @@ function Package( o ){
 		if ( T.not('defNo', je_api) ) {
 			var j_prefix = jstem_name + '__';
 			if ( T.nonEmpty(e_api) ) {
-				each(e_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
+				core.each(e_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
 					$.fn[j_prefix + fn_name] = je_ctor ?
 						function(){
 							var args = arguments;
@@ -259,7 +213,7 @@ function Package( o ){
 				}});
 			}
 			if ( T.nonEmpty(je_api) ) {
-				each(je_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
+				core.each(je_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
 					$.fn[j_prefix + fn_name] = fn;
 				}});
 			}
@@ -301,7 +255,7 @@ function jproxy_free_fn( fn ){
 // e.g., elem.tag_server.ajax(a, b, c) ==> tag_server_api.ajax(elem, a, b, c){ this===elem }
 function inject_element_api(elem, api_defn, obj){
 	obj = obj || elem;
-	each(api_defn, function(fn_name, fn){
+	core.each(api_defn, function(fn_name, fn){
 		if ( T.fn(fn) ) {
 			obj[fn_name] = proxy_fn(elem, fn);
 		}
@@ -321,7 +275,7 @@ function with_packages(){
 /*jslint evil: false */
 		if ( api_instance && api_instance.__api__ && api_instance.__api__.exports ) {
 			var allowed_exports = api_instance.__api__.exports.split(/\s+/);
-			each(allowed_exports, function(i, member_name){
+			core.each(allowed_exports, function(i, member_name){
 				if ( member_name in api_instance ) {
 					exports.push(member_name);
 				}
@@ -362,18 +316,7 @@ Package({ named: 'Slash.Util',
 		clone:			clone,
 		ensure_namespace:	ensure_namespace
 	},
-	exports: 'clone ' +
-		 'Package qw'
-});
-
-Package({ named: 'Slash.Util.Algorithm',
-	api: {
-		each:			each,
-		accumulate:		accumulate,
-		keys:			keys,
-		values:			values
-	},
-	exports: 'each accumulate keys values'
+	exports: 'clone Package qw'
 });
 
 // Yes, I could phrase this as a Package; but I don't need to, here.

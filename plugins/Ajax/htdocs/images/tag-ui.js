@@ -1,14 +1,6 @@
 ; // tag-ui.js
 
-var keys, values, qw;
-(function(){
-	var U=Slash.Util, A=U.Algorithm;
-	keys	= A.keys;
-	values	= A.values;
-	qw	= U.qw;
-})();
-
-var context_triggers, well_known_tags;
+var qw=Slash.Util.qw, context_triggers, well_known_tags;
 
 function animate_wiggle( $selector ){
 	$selector.
@@ -278,7 +270,7 @@ var tag_display_fns = {
 		}));
 
 		// a $ list of the actual .tag elements we updated in-place
-		var $changed_tags = $(values(update_map));
+		var $changed_tags = $(core.values(update_map));
 
 		if ( $new_elems.length ) {
 			// construct all the completely new tag entries and associated machinery
@@ -323,7 +315,7 @@ var tag_display_fns = {
 			if_remove_all = mapped[1];
 		}
 
-		var $remove_li = $(values(tags)).parent();
+		var $remove_li = $(core.values(tags)).parent();
 
 		var display = this;
 		if ( opts.fade_remove ) {
@@ -540,7 +532,7 @@ function normalize_tag_commands( commands, excludes ){
 			}
 
 			// excludes should already be a set, let's make sure it's not empty
-			if ( !keys(excludes).length ) {
+			if ( !core.keys(excludes).length ) {
 				excludes = null;
 			}
 		} catch (e) {

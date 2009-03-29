@@ -1,7 +1,7 @@
 ;(function($){
 /*jslint evil:true */
 // bring names from Slash.Util, etc., into scope, e.g., Package
-eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
+eval(Slash.Util.Package.with_packages('Slash.Util'));
 /*jslint evil:false */
 
 var T = $.TypeOf;
@@ -714,7 +714,7 @@ function compute_tag_styles( $displays, signal_styles, static_styles_fn ){
 
 	// "computed styles" is the set of css classes that tell in which displays a tag appears,
 	// e.g., a tag that appears in both the user and system displays gets css classes 'u s'
-	var signals_done={}, styles={}, signals_remaining=keys(signal_styles).length;
+	var signals_done={}, styles={}, signals_remaining=core.keys(signal_styles).length;
 	$displays.filter('.ready[class*=respond-]:not(.no-tags)').each(function(){
 		var $display=$(this), signal=$display.tag_ui_responder__signals();
 		if ( (signal in signal_styles) && !(signal in signals_done) ) {
@@ -804,7 +804,7 @@ new Package({ named: 'Slash.TagUI.Display',
 			}));
 
 			// a $ list of the actual .tag elements we updated in-place
-			var $changed_tags = $(values(update_map));
+			var $changed_tags = $(core.values(update_map));
 
 			if ( $new_elems.length ) {
 				// construct all the completely new tag entries and associated machinery
@@ -842,7 +842,7 @@ new Package({ named: 'Slash.TagUI.Display',
 				if_remove_all = mapped[1];
 			}
 
-			var $remove_li = $(values(tags)).parent();
+			var $remove_li = $(core.values(tags)).parent();
 
 			if ( opts.fade_remove ) {
 				$remove_li
@@ -1062,7 +1062,7 @@ function normalize_tag_commands( commands, excludes ){
 			}
 
 			// excludes should already be a set, let's make sure it's not empty
-			if ( !keys(excludes).length ) {
+			if ( !core.keys(excludes).length ) {
 				excludes = null;
 			}
 		} catch (e) {

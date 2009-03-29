@@ -30,6 +30,8 @@ __template__
 [% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% IF constants.css_use_imagedir; constants.imagedir; ELSE; constants.rootdir; END %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
 [% END -%]
 [%- IF constants.plugin.Ajax %]
+<script src="[% constants.imagedir %]/javascript.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% PROCESS after_jquery %]
 <script src="[% constants.imagedir %]/jquery.typeof.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
