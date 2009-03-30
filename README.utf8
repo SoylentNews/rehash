@@ -1,0 +1,91 @@
+How to run your slashsite on UTF-8 mode
+=======================================
+
+UTF-8 slash is based on following software features:
+
+ * Unicode support in Perl (see perlunicode(1))
+ * MySQL Character Set Support
+   (see http://dev.mysql.com/doc/refman/5.0/en/charset.html)
+
+You can use UTF-8 mode only when you are using above correctly.
+
+Required software versions
+--------------------------
+
+ * MySQL 4.1 or later
+ * Perl 5.6 or later
+ * Perl DBD::mysql 4.001 or later
+
+In case of creating new slash site
+----------------------------------
+
+Write your my.cnf (for DB servers) as below:
+
+   [client]
+   default-character-set = utf8
+
+   [mysqld]
+   default-character-set = utf8
+
+Restart mysqld and check settings.
+
+% mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+:
+mysql> SHOW GLOBAL VARIABLES LIKE 'character_set\_%';
++--------------------------+--------+
+| Variable_name            | Value  |
++--------------------------+--------+
+| character_set_client     | utf8   | 
+| character_set_connection | utf8   | 
+| character_set_database   | utf8   | 
+| character_set_filesystem | binary | 
+| character_set_results    | utf8   | 
+| character_set_server     | utf8   | 
+| character_set_system     | utf8   | 
++--------------------------+--------+
+7 rows in set (0.00 sec)
+
+Write your my.cnf (for web servers) as below:
+
+   [client]
+   default-character-set = utf8
+
+Change your DBIx::Password setting to read my.cnf:
+
+   'connect' => 'DBI:mysql:database=mysql;host=localhost;mysql_read_default_file=/your/my.cnf',
+
+Run "install-slashsite".
+
+In case of changing existing slash site
+---------------------------------------
+
+The precondition is configuring correct charset at all existing tables.
+Because mysqld will convert charset of request and reply into cliant charset (UTF-8).
+If it has configured incorrect charset, SQL will fail or incorrect data will have returned.
+
+You can check the charset settings as below:
+
+mysql> SHOW CREATE TABLE tablename\G
+*************************** 1. row ***************************
+       Table: tablename
+Create Table: CREATE TABLE `tablename` (
+:
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+1 row in set (0.04 sec)
+
+"DEFAULT CHARSET" value is the configured charset for this table.  You should check
+charset of the contents of this table is the same as configured.  Fix charset when
+it is wrong.
+
+Then, Write your my.cnf (for all servers) as below:
+
+   [client]
+   default-character-set = utf8
+
+And change your DBIx::Password setting to read my.cnf:
+
+   'connect' => 'DBI:mysql:database=mysql;host=localhost;mysql_read_default_file=/your/my.cnf',
+
+Restart apache and slashd.
+
