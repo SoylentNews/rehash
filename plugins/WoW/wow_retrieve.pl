@@ -13,7 +13,7 @@ use vars qw(
 	$last_retrieval
 );
 
-$task{$me}{timespec} = '1 * * * *';
+$task{$me}{timespec} = '* * * * *';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
@@ -47,13 +47,15 @@ $task{$me}{code} = sub {
 
 sub sleep_until_next_retrieval {
 	$last_retrieval ||= 0;
-	next if !$last_retrieval;
+	return if !$last_retrieval;
 	my $constants = getCurrentStatic();
 	my $sleep_until = $last_retrieval + ($constants->{wow_retrieval_pause} || 3);
 	while (time < $sleep_until) {
 		return if $task_exit_flag;
 		my $minisleep_time = $sleep_until - Time::HiRes::time;
 		$minisleep_time = 9 if $minisleep_time > 10;
+		$minisleep_time = 0 if $minisleep_time < 0;
+		last if $minisleep_time < 0.002;
 		Time::HiRes::sleep($minisleep_time);
 	}
 }

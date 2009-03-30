@@ -212,7 +212,7 @@ sub setChar {
 sub getCharMetadata {
 	my($self, $charid) = @_;
 	return undef if $charid !~ /^\d+$/;
-	my $char_hr = $self->sqlSelectAllHashref('*', 'wow_chars', "charid=$charid");
+	my $char_hr = $self->sqlSelectHashref('*', 'wow_chars', "charid=$charid");
 	return undef if !$char_hr || !$char_hr->{charname};
 	$char_hr->{guildname} = $char_hr->{guildid}
 		? $self->sqlSelect('guildname', 'wow_guilds', "guildid=$char_hr->{guildid}")
