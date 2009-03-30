@@ -262,19 +262,23 @@ sub logArmoryData {
 	$self->updateArmoryRecord($charid, $armory_hr);
 }
 
+sub getLatestArmoryRecord {
+	my($self, $charid) = @_;
+	return undef if !$charid || $charid !~ /^\d+$/;
+	my $frozenarmory = $self->sqlSelect('armorydata', 'wow_char_armorylog',
+		"charid=$charid", 'ORDER BY ts DESC LIMIT 1');
+	return undef if !$frozenarmory;
+	return Storable::thaw($frozenarmory);
+}
+
 sub updateArmoryRecord {
 	my($self, $charid, $armory_hr) = @_;
 	return 0 if !$charid || $charid !~ /^\d+$/;
-	if (!$armory_hr) {
-		my $frozenarmory = $self->sqlSelect('armorydata', 'wow_char_armorylog',
-			"charid=$charid", 'ORDER BY ts DESC LIMIT 1');
-		return 0 if !$frozenarmory;
-		$armory_hr = Storable::nthaw($frozenarmory);
-	}
+	$armory_hr ||= $self->getLatestArmoryRecord($charid);
 	return 0 if !$armory_hr;
 
 	my $data = { };
-	for my $field (qw( class faction gender level name race title )) {
+	for my $field (qw( class faction gender level name race title guildName )) {
 		$data->{$field} = $armory_hr->{$field};
 	}
 	my @fields = sort keys %$data;
@@ -305,9 +309,9 @@ sub updateArmoryRecord {
 		}
 	}
 
-	if ($armory_hr->{guild}) {
+	if ($armory_hr->{guildName}) {
 		$charmd_hr ||= $self->getCharMetadata($charid);
-		my $guildid = $self->getGuildidCreate($charmd_hr->{realmid}, $armory_hr->{guild})
+		my $guildid = $self->getGuildidCreate($charmd_hr->{realmid}, $armory_hr->{guildName})
 			|| undef;
 		$self->setChar($charid, { guildid => $guildid });
 	}
@@ -319,9 +323,18 @@ sub getCharidsNeedingRetrieval {
 		'last_retrieval_attempt IS NULL',
 		'ORDER BY charid LIMIT 10');
 	return $charids_ar if @$charids_ar;
+
+	my $constants = getCurrentStatic();
+	my $retry = $constants->{wow_retrieval_retry} || 10800;
 	$charids_ar = $self->sqlSelectColArrayref('charid', 'wow_chars',
 		'last_retrieval_success IS NULL
-		 AND last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL 6 HOUR)',
+		 AND last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL $retry SECOND)',
+		'ORDER BY charid LIMIT 10');
+	return $charids_ar if @$charids_ar;
+
+	my $reload = $constants->{wow_retrieval_reload} || 608400;
+	$charids_ar = $self->sqlSelectColArrayref('charid', 'wow_chars',
+		'last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL $reload SECOND)',
 		'ORDER BY charid LIMIT 10');
 	return $charids_ar if @$charids_ar;
 	return [ ];

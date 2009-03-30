@@ -1,4 +1,6 @@
 INSERT INTO vars (name, value, description) VALUES ('wow', '0', 'Is the WoW plugin enabled?');
+INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_retry', '10800', 'Seconds to wait before retrying failed retrieval attempt (typically hours)');
+INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_reload', '608400', 'Seconds to wait after retrieval success before retrieving again (typically days)');
 
 INSERT INTO wow_realms (realmid, countryname, realmname, type, battlegroup) VALUES (1, 'us', 'Aegwynn', 'pvp', 'Vengeance');
 INSERT INTO wow_realms (realmid, countryname, realmname, type, battlegroup) VALUES (2, 'us', 'Aerie Peak', 'pve', 'Nightfall');
@@ -359,4 +361,7 @@ INSERT INTO wow_char_types (wcdtype, name) VALUES (4, 'level');
 INSERT INTO wow_char_types (wcdtype, name) VALUES (5, 'name');
 INSERT INTO wow_char_types (wcdtype, name) VALUES (6, 'race');
 INSERT INTO wow_char_types (wcdtype, name) VALUES (7, 'title');
+INSERT INTO wow_char_types (wcdtype, name) VALUES (8, 'guildName');
+
+INSERT INTO achievements (name, description, repeatable, increment) VALUES ('wowlevel80', 'Level 80', 'no', 0);
 
