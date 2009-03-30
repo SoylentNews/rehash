@@ -4,4 +4,4 @@ description="World of Warcraft"
 htdoc=wow.pl
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
-task=armory_update.pl
+task=wow_retrieve.pl

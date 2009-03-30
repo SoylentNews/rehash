@@ -32,14 +32,14 @@ sub setUserAchievement {
 
         #my $uid_q = $self->sqlQuote($uid);
 
-	# Count the current numnber of items eligible for this achievement
+	# Count the current number of items eligible for this achievement
 	my $count = 0;
 	my $new_exponent = 0;
 	$count = $self->getAchievementItemCount($ach_name, $uid, $slashdb) unless $options->{ignore_lookup};
 	$count = $options->{exponent} if ($options->{ignore_lookup} && $options->{force_convert});
 	$new_exponent = $options->{exponent} if ($options->{exponent} && !$options->{force_convert});
 
-	# Convert to our desred format. Truncate as int so we don't get
+	# Convert to our desired format. Truncate as int so we don't get
 	# exponents like 2.xxx.
 	my $achievement = $self->getAchievement($ach_name);
         my $increment = $achievement->{$ach_name}{increment};
