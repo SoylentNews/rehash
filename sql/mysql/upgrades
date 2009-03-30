@@ -6118,3 +6118,6 @@ UPDATE vars SET value = 'T_2_5_0_248' WHERE name = 'cvs_tag_currentcode';
 
 # for plugins/Achievements
 ALTER TABLE dynamic_user_blocks MODIFY COLUMN title varchar(64) NOT NULL default '';
+INSERT INTO ajax_ops VALUES (NULL, 'enable_maker_adless', 'Slash::Achievement', 'ajaxEnableMakerAdless', 'ajax_user', 'createuse');
+INSERT INTO vars (name, value, description) VALUES ('ach_maker_adlesstime', '259200', 'After a maker_mode user turns off ads, how long does the adless state persist, in seconds');
+

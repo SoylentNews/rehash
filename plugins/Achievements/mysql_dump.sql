@@ -18,3 +18,7 @@ INSERT INTO achievements (name, description, repeatable, increment) VALUES ('the
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comedian', 'Comedian', 'no', 0);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('april_fool', 'The April Fool', 'no', 0);
 INSERT INTO achievements (name, description, repeatable, increment) VALUES ('comment_upmodded', 'Had a Comment Modded Up', 'no', 0);
+
+INSERT INTO ajax_ops VALUES (NULL, 'enable_maker_adless', 'Slash::Achievement', 'ajaxEnableMakerAdless', 'ajax_user', 'createuse');
+INSERT INTO vars (name, value, description) VALUES ('ach_maker_adlesstime', '259200', 'After a maker_mode user turns off ads, how long does the adless state persist, in seconds');
+

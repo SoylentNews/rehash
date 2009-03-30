@@ -1656,6 +1656,10 @@ sub prepareUser {
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
 		}
 	}
+	if ($user->{maker_mode_adless} && $user->{maker_mode_adless} =~ /^\d+$/
+		&& time < $user->{maker_mode_adless} + ($constants->{ach_maker_adlesstime} || 259200)) {
+		$user->{state}{page_adless} = 1;
+	}
 	if (!$user->{is_subscriber} && $constants->{daypass}) {
 		# If the user is not a subscriber, they may still be
 		# _effectively_ a subscriber if they have a daypass.

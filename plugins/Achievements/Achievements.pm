@@ -476,6 +476,12 @@ sub setMakerMode {
         }
 }
 
+sub ajaxEnableMakerAdless {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$slashdb->setUser($user->{uid}, { maker_mode_adless => time })
+		if $user->{uid} && ! $user->{is_anon} && $user->{maker_mode};
+}
+
 sub DESTROY {
         my($self) = @_;
         $self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
