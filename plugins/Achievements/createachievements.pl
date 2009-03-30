@@ -12,7 +12,7 @@ use Slash::Utility;
 my $PROGNAME = basename($0);
 
 my %opts;
-getopts('hu:acjpsdtmfro', \%opts);
+getopts('hu:acjpsdtmfron', \%opts);
 usage() if (!keys %opts || $opts{h});
 
 createEnvironment($opts{u});
@@ -33,6 +33,7 @@ my $constants = getCurrentStatic();
         createTagger($slashdb, $achievements)          if $opts{t};
 	createAprilFool($slashdb, $achievements)       if $opts{f};
 	setMakerModeForStoryAccepted($slashdb, $achievements) if $opts{r};
+	setMakerModeForCommentUpmod($slashdb, $achievements)  if $opts{n};
 
 sub createAll {
         my ($slashdb, $achievements) = @_;
@@ -152,7 +153,7 @@ sub createCommentUpmods {
 
         foreach my $uid (@$users) {
                 print "Creating comment_upmodded for: $uid\n";
-                $achievements->setUserAchievement('comment_upmodded', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
+                $achievements->setUserAchievement('comment_upmodded', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1, maker_mode => 1 });
                 if ($achievements->checkMeta($uid, 'the_maker', ['comment_upmodded', 'story_accepted'])) {
                         print "\tCreating the_maker for: $uid\n";
                         $achievements->setUserAchievement('the_maker', $uid, { ignore_lookup => 1, exponent => 0, no_message => 1 });
@@ -219,6 +220,24 @@ sub setMakerModeForStoryAccepted {
         }
 }
 
+sub setMakerModeForCommentUpmod {
+        my ($slashdb, $achievements) = @_;
+
+        my $achievement = $achievements->getAchievement('comment_upmodded');
+        my $users =
+                $slashdb->sqlSelectColArrayref(
+                        'uid',
+                        'user_achievements',
+                        'uid != ' . $constants->{anonymous_coward_uid},
+                        ' and aid = ' . $achievement->{'comment_upmodded'}{aid},
+                        '', { distinct => 1}
+                );
+
+        foreach my $uid (@$users) {
+                $achievements->setMakerMode($uid, $achievement->{'comment_upmodded'}{aid});
+        }
+}
+
 sub usage {
         print "*** $_[0]\n" if $_[0];
         print <<EOT;
@@ -242,6 +261,7 @@ Main options:
 	-f      Create The April Fool
 	-r      Set user param 'maker_mode' for users with story_accepted
 	-o      Create comment_upmodded
+	-n      Set user param 'maker_mode' for users with comment_upmodded
 
 EOT
         exit;

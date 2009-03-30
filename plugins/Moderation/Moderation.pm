@@ -265,7 +265,7 @@ sub moderateComment {
 			} elsif ($val > 0) {
 				$cu_changes->{-upmods} = "upmods + 1";
 				if ($achievements) {
-                                        $achievements->setUserAchievement('comment_upmodded', $comment->{uid}, { ignore_lookup => 1 });
+                                        $achievements->setUserAchievement('comment_upmodded', $comment->{uid}, { ignore_lookup => 1, maker_mode => 1 });
                                         if ($achievements->checkMeta($comment->{uid}, 'the_maker', ['comment_upmodded', 'story_accepted'])) {
                                                 $achievements->setUserAchievement('the_maker', $comment->{uid}, { ignore_lookup => 1 });
                                         }
