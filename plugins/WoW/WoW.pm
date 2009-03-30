@@ -327,14 +327,14 @@ sub getCharidsNeedingRetrieval {
 	my $constants = getCurrentStatic();
 	my $retry = $constants->{wow_retrieval_retry} || 10800;
 	$charids_ar = $self->sqlSelectColArrayref('charid', 'wow_chars',
-		'last_retrieval_success IS NULL
-		 AND last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL $retry SECOND)',
+		"last_retrieval_success IS NULL
+		 AND last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL $retry SECOND)",
 		'ORDER BY charid LIMIT 10');
 	return $charids_ar if @$charids_ar;
 
 	my $reload = $constants->{wow_retrieval_reload} || 608400;
 	$charids_ar = $self->sqlSelectColArrayref('charid', 'wow_chars',
-		'last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL $reload SECOND)',
+		"last_retrieval_attempt < DATE_SUB(NOW(), INTERVAL $reload SECOND)",
 		'ORDER BY charid LIMIT 10');
 	return $charids_ar if @$charids_ar;
 	return [ ];
