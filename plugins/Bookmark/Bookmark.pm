@@ -35,6 +35,10 @@ sub createBookmark {
 	my($self, $data) = @_;
 	$self->sqlInsert("bookmarks", $data);
 	my $id = $self->getLastInsertId();
+
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+        $dynamic_blocks->setUserBlock('bookmarks', $data->{uid}) if $dynamic_blocks;
+
 	return $id;
 }
 

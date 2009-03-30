@@ -15,26 +15,34 @@ __seclev__
 __template__
 [% IF !user.is_anon;
 	filter_str = "";
+	viewname = "";
 	IF name == "journal";
 		filter = '"author:' _ useredit.nickname _ '" journal';
+		viewname = "userjournal";
 	ELSIF name == "journalfriends";
 		filter = '"authorfriend: ' _ useredit.nickname _ '" journal';
+		viewname = "userjournalfriends";
 	ELSIF name == "submissions";
 		filter = '"author:' _ useredit.nickname _ '" submission';
+		viewname = "usersubmission";
 	ELSIF name == "bookmarks";
 		filter = '"user:' _ useredit.nickname _ '" bookmark';
+		viewname = "userbookmark";
 	ELSIF name == "firehose";
 		filter = '"user:' _ useredit.nickname _ '"';
+		viewname = "userfirehose";
 	ELSIF name == "usertag";
 		filter = '"user:' _ useredit.nickname _ '" "tag:' _ form.tagname _ '"';
+		viewname = "usertag";
 	ELSE;
 		filter = '"home:' _ useredit.nickname _ '"';
+		viewname = "userhomepage";
 	END;
 
-	filter_str = "fhfilter=" _ Slash.strip_paramattr(filter);
+	filter_str = "&amp;fhfilter=" _ Slash.strip_paramattr(filter);
 	
-	rss_param_str = "&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=";
-	rss_param_str = filter_str _ rss_param_str;
+	rss_param_str = "&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=&amp;user_view_uid=" _ useredit.uid;
+	rss_param_str = "view=" _ viewname _ filter_str _ rss_param_str;
 	rss_link = Slash.root2abs() _ "/firehose.pl?op=rss&amp;content_type=rss&amp;" _ rss_param_str _ "&amp;logtoken=" _ Slash.strip_paramattr(Slash.getPublicLogToken());
 	%]
 	<a href="[% rss_link %]"><img src="[% constants.imagedir %]/feed.png" alt="RSS for [% alt %]"></a>

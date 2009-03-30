@@ -103,7 +103,7 @@ ELSIF env.script_name.search('users2\.pl');
 		the_user = Slash.db.getUser(form.uid); 
 		filter= '"home:' _ the_user.nickname _ '"'; 
 		filter_str = "fhfilter=" _ Slash.strip_paramattr(filter); tmp = BLOCK -%]
-<link rel="alternate" title="[% the_user.nickname | strip_attribute %] Homepage" href="[% constants.real_rootdir %]/firehose.pl?op=rss&amp;content_type=rss&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=&amp;[% filter_str %]&amp;logtoken=[% Slash.strip_paramattr(Slash.getPublicLogToken()) %]" type="application/rss+xml">
+<link rel="alternate" title="[% the_user.nickname | strip_attribute %] Homepage" href="[% constants.real_rootdir %]/firehose.pl?op=rss&amp;content_type=rss&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=&amp;[% filter_str %]&amp;user_view_uid=[% the_user.uid %]&amp;view=userhomepage&amp;logtoken=[% Slash.strip_paramattr(Slash.getPublicLogToken()) %]" type="application/rss+xml">
 
 	[%- END; linkrels.push(tmp); END;
 
