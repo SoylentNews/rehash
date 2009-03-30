@@ -18,9 +18,6 @@ en_US
 __name__
 firehose_sections
 __template__
-[% fh = Slash.getObject("Slash::FireHose")
-   sections = fh.getFireHoseSectionsMenu;
-%]
 [% cur_section_id = 0 %]
 [% skip_edit = 0 %]
 [% UNLESS (user.currentPage == "firehose" || user.currentPage == "index2" || user.currentPage == "console" || user.currentPage == "index");
@@ -31,7 +28,7 @@ IF  form.op == "view" || form.taskgen;
 	skip_edit = 1;
 END;
 %]
-[% cur_section = fh.determineCurrentSection() %]
+
 [% IF cur_section && cur_section.fsid; cur_section_id = cur_section.fsid; END %]
 [% default_section_id = constants.mainpage_skid %]
 [% IF !user.is_anon && user.firehose_default_section; default_section_id = user.firehose_default_section; END %]
