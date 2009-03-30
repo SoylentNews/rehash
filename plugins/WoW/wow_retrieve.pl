@@ -38,6 +38,7 @@ $task{$me}{code} = sub {
 				$wowdb->logArmoryData($id, $armory_hr);
 				++$num_retrievals;
 			}
+			main::slashdLog("char $id retrieval " . ($armory_hr ? 'succeeded' : 'failed'));
 		}
 		sleep 3;
 	}

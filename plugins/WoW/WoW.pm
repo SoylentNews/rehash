@@ -39,7 +39,7 @@ sub getRealmidIfExists {
         my $constants = getCurrentStatic();
         my $table_cache         = "_realms_cache";
         my $table_cache_time    = "_realms_cache_time";
-        _genericCacheRefresh($self, 'realms', $constants->{block_expire});
+        $self->_genericCacheRefresh('realms', $constants->{block_expire});
         if ($self->{$table_cache_time} && $self->{$table_cache}{$countryname}{$realmname}) {
                 return $self->{$table_cache}{$countryname}{$realmname};
         }
@@ -73,7 +73,7 @@ sub getGuildidIfExists {
         my $constants = getCurrentStatic();
         my $table_cache         = "_guilds_cache";
         my $table_cache_time    = "_guilds_cache_time";
-        _genericCacheRefresh($self, 'guilds', $constants->{block_expire});
+        $self->_genericCacheRefresh('guilds', $constants->{block_expire});
         if ($self->{$table_cache_time} && $self->{$table_cache}{$realmid}{$guildname}) {
                 return $self->{$table_cache}{$realmid}{$guildname};
         }
@@ -107,7 +107,7 @@ sub getCharidIfExists {
         my $constants = getCurrentStatic();
         my $table_cache         = "_chars_cache";
         my $table_cache_time    = "_chars_cache_time";
-        _genericCacheRefresh($self, 'chars', $constants->{block_expire});
+        $self->_genericCacheRefresh('chars', $constants->{block_expire});
         if ($self->{$table_cache_time} && $self->{$table_cache}{$realmid}{$charname}) {
                 return $self->{$table_cache}{$realmid}{$charname};
         }
@@ -244,7 +244,7 @@ sub retrieveArmoryData {
 		country =>	$charmd_hr->{countryname},
 	});
 	my $armory_hr = $armory->character();
-	my $char_update = { -last_retrieval_attempt => 'NOW()' );
+	my $char_update = { -last_retrieval_attempt => 'NOW()' };
 	$char_update->{-last_retrieval_success} = 'NOW()' if $armory_hr && $armory_hr->{name};
 	$self->setChar($charid, $char_update);
 	return $armory_hr;
