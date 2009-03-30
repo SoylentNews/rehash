@@ -42,7 +42,7 @@ __template__
 	filter_str = "fhfilter=" _ Slash.strip_paramattr(filter);
 	
 	rss_param_str = "&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=&amp;user_view_uid=" _ useredit.uid;
-	rss_param_str = "&amp;view=" _ viewname _filter_str _ rss_param_str;
+	rss_param_str = "&amp;view=" _ viewname _ filter_str _ rss_param_str;
 	rss_link = Slash.root2abs() _ "/firehose.pl?op=rss&amp;content_type=rss&amp;" _ rss_param_str _ "&amp;logtoken=" _ Slash.strip_paramattr(Slash.getPublicLogToken());
 	%]
 	<a href="[% rss_link %]"><img src="[% constants.imagedir %]/feed.png" alt="RSS for [% alt %]"></a>
