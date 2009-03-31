@@ -156,7 +156,7 @@ CREATE TABLE firehose_view_settings (
 
 DROP TABLE IF EXISTS firehose_update_log;
 CREATE TABLE firehose_update_log (
-	id mediumint(8) unsigned NOT NULL auto_increment,
+	id int(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	new_count SMALLINT UNSIGNED NOT NULL DEFAULT '0', 
 	update_count SMALLINT UNSIGNED NOT NULL DEFAULT '0',
@@ -170,7 +170,7 @@ CREATE TABLE firehose_update_log (
 
 DROP TABLE IF EXISTS firehose_setting_log;
 CREATE TABLE firehose_setting_log (
-	id mediumint(8) unsigned NOT NULL auto_increment,
+	id int(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	name VARCHAR(32) NOT NULL DEFAULT '',
 	value VARCHAR(64) NOT NULL DEFAULT '',
