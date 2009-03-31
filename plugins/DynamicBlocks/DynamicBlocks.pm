@@ -681,7 +681,7 @@ sub displayBlock {
                 $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "name = '$name'");
         $block->{name} = $name;
 
-	($block->{title}) = $block->{title} =~ /^.+\s(\w+)$/ if $options->{user_self};
+	($block->{title}) = $block->{title} =~ /^.+\s(\w+)$/ if ($options->{user_self} and $block->{block});
 
         return
                 slashDisplay('displayblock', {

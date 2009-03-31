@@ -119,10 +119,9 @@ sub setUserAchievementObtained {
 }
 
 sub getUserAchievements {
-        my($self, $uid, $options) = @_;
+        my($self, $uid, $options, $extra) = @_;
 
         my $slashdb = getCurrentDB();
-        #my $uid_q = $self->sqlQuote($uid);
 
         my $where_string = "uid = $uid";
         if ($options) {
@@ -149,6 +148,39 @@ sub getUserAchievements {
 
 		$achievements->{$achievement}{createtime} = (split(/\s/, $achievements->{$achievement}{createtime}))[0];
 	}
+
+	if ($extra->{cheat_mode}) {
+                my $cheater_achievement = $self->getAchievement('cheater');
+                my $cheater_aid = $cheater_achievement->{'cheater'}{aid};
+                my $cheaters = $slashdb->getVar('achievement_cheaters', 'value', 1);
+                if ($cheater_aid and $cheaters) {
+                        if (grep { $uid == $_ } split(/,\s*/, $cheaters)) {
+                                my $ach_obtained_achievement = $self->getAchievement('achievement_obtained');
+                                my $ach_obtained_aid = $ach_obtained_achievement->{'achievement_obtained'}{aid};
+
+				# Get the #2 score. Make sure it's not a tie for #1 and not the cheating UID.
+				my $exponent_cheat =
+                                        $slashdb->sqlSelect('distinct exponent',
+                                                            'user_achievements',
+                                                            "aid = $ach_obtained_aid and uid != $uid order by exponent desc limit 1,1"
+                                        );
+
+                                if ($exponent_cheat) {
+                                        $achievements->{$cheater_aid} = {
+                                                pseudo      => 1,
+                                                aid         => $cheater_aid,
+                                                description => $cheater_achievement->{'cheater'}{description},
+                                                increment   => $cheater_achievement->{'cheater'}{increment},
+                                                repeatable  => $cheater_achievement->{'cheater'}{repeatable},
+                                                exponent    => $exponent_cheat,
+                                                createtime  => $achievements->{$ach_obtained_aid}{createtime},
+                                        };
+
+                                        $achievements->{$ach_obtained_aid}{exponent} += $exponent_cheat;
+                                }
+                        }
+                }
+        }
 
         return $achievements;
 }
