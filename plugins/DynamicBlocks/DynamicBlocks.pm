@@ -453,7 +453,7 @@ sub getPortalBlocks {
                 $blocks->{$block}{private} = $block_definition->{private};
 
                 ($blocks->{$block}{block}, $blocks->{$block}{title}, $blocks->{$block}{url}) =
-                        $self->getPortalBlockContent($blocks->{$block}{portal_id}, $slashdb);
+                        $self->getPortalBlockContent($blocks->{$block}{portal_id});
         }
 
         return (keys %$blocks) ? $blocks : 0;
@@ -525,7 +525,7 @@ sub getUserBlocks {
 
                 if ($block_definition->{type} eq 'portal') {
                         ($user_blocks->{$user_block}{block}, $user_blocks->{$user_block}{title}, $user_blocks->{$user_block}{url}) =
-                                $self->getPortalBlockContent($user_blocks->{$user_block}{portal_id}, $slashdb);
+                                $self->getPortalBlockContent($user_blocks->{$user_block}{portal_id});
                 }
 
                 $blocks->{$user_block} = $user_blocks->{$user_block};
@@ -536,7 +536,9 @@ sub getUserBlocks {
 
 # Returns the 3 main fields not normally mirrored in 'dynamic_user_blocks'
 sub getPortalBlockContent {
-	my ($self, $id, $slashdb) = @_;
+	my ($self, $id) = @_;
+
+	my $slashdb = getCurrentDB();
 
         my @block_data = $slashdb->sqlSelect('block, title, url', 'blocks', "id = $id");
         return @block_data;
@@ -654,7 +656,7 @@ sub getBlocksEligibleForUpdate {
                         my ($block_data, $block_title, $block_url);
                         if ($block_definition->{type} eq "portal") {
                                 ($block_data, $block_title, $block_url) =
-                                        $self->getPortalBlockContent($portal_id, $slashdb);
+                                        $self->getPortalBlockContent($portal_id);
 			} else {
                                 ($block_data, $block_title, $block_url) =
                                         $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "bid = $bid");
