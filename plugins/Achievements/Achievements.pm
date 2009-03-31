@@ -510,8 +510,10 @@ sub setMakerMode {
 
 sub ajaxEnableMakerAdless {
 	my($slashdb, $constants, $user, $form, $options) = @_;
-	$slashdb->setUser($user->{uid}, { maker_mode_adless => time })
-		if $user->{uid} && ! $user->{is_anon} && $user->{maker_mode};
+	if ($user->{uid} && ! $user->{is_anon} && $user->{maker_mode}) {
+		my $val = $form->{off} ? undef : time;
+		$slashdb->setUser($user->{uid}, { maker_mode_adless => $val })
+	}
 }
 
 sub DESTROY {

@@ -6124,7 +6124,7 @@ ALTER TABLE firehose_update_log  CHANGE id id int unsigned not null auto_increme
 ALTER TABLE firehose_setting_log CHANGE id id int unsigned not null auto_increment;
 
 # for plugins/Ajax
-INSERT INTO ajax_ops VALUES (NULL, 'enable_maker_adless', 'Slash::Achievements', 'ajaxEnableMakerAdless', 'ajax_user', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'enable_maker_adless', 'Slash::Achievements', 'ajaxEnableMakerAdless', 'ajax_user_static', 'createuse');
 
 # for plugins/Achievements
 INSERT INTO vars (name, value, description) VALUES ('ach_maker_adlesstime', '259200', 'After a maker_mode user turns off ads, how long does the adless state persist, in seconds');

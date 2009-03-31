@@ -1052,6 +1052,20 @@ function json_update(response) {
 	}
 }
 
+
+function adsToggle(val) {
+	var params = {};
+	params.op = 'enable_maker_adless';
+	if (!val) {
+		params.off = 1;
+	} else {
+		$('.advertisement').hide();
+	}
+	params.reskey = reskey_static,
+	ajax_update(params);
+	
+}
+
 function firehose_handle_update() {
 
 	var	saved_selection		= new $.TextSelection(gFocusedText),
@@ -1978,6 +1992,7 @@ var adTimerSeen   = {};
 var adTimerSecs   = 0;
 var adTimerClicks = 0;
 var adTimerInsert = 0;
+
 
 function inlineAdReset(id) {
 	if (id !== undefined)
