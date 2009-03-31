@@ -18,13 +18,13 @@ use vars qw($VERSION);
 
 
 sub main {
-	my $slashdb   = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $user      = getCurrentUser();
-	my $form      = getCurrentForm();
-	my $gSkin     = getCurrentSkin();
-	my $firehose  = getObject("Slash::FireHose");
-	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
+	my $slashdb   		= getCurrentDB();
+	my $constants 		= getCurrentStatic();
+	my $user      		= getCurrentUser();
+	my $form      		= getCurrentForm();
+	my $gSkin     		= getCurrentSkin();
+	my $firehose_reader  	= getObject("Slash::FireHose", { db_type => 'reader' });
+	my $reader    		= getObject('Slash::DB', { db_type => 'reader' });
 
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
@@ -86,7 +86,10 @@ sub main {
 			$title = "$constants->{sitename} - $constants->{slogan}";
 		}
 		if ($form->{op} && $form->{op} eq "view") {
-			my $item = $firehose->getFireHose($form->{id});
+			my $item = $firehose_reader->getFireHose($form->{id});
+			if (!$item && $form->{sid}) {
+				$item = $firehose_reader->getFireHoseBySidOrStoid($form->{sid});
+			}
 			if ($item && $item->{id}) {
 				$title = "$constants->{sitename} - $item->{title}" if $item->{title};
 				my $author = $reader->getUser($item->{uid});
@@ -141,6 +144,9 @@ sub view {
 	my $firehose_reader = getObject("Slash::FireHose", { db_type => 'reader' });
 	my $options = $firehose->getAndSetOptions();
 	my $item = $firehose_reader->getFireHose($form->{id});
+	if (!$item && $form->{sid}) {
+		$item = $firehose_reader->getFireHoseBySidOrStoid($form->{sid});
+	}
     	my $vote = '';
 	if ($item) {
 		$vote = $firehose->getUserFireHoseVotesForGlobjs($user->{uid}, [$item->{globjid}])->{$item->{globjid}};

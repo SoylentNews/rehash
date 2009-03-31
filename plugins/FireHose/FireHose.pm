@@ -1506,6 +1506,12 @@ sub getUserFireHoseVotesForGlobjs {
 	return $results;
 }
 
+sub getFireHoseBySidOrStoid {
+	my($self, $id) = @_;
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	return $self->getFireHoseByTypeSrcid("story", $stoid);
+}
+
 sub getFireHoseByTypeSrcid {
 	my($self, $type, $id) = @_;
 	my $type_q = $self->sqlQuote($type);
