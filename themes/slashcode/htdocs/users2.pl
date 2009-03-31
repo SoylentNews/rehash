@@ -2032,7 +2032,7 @@ sub saveUser {
 			$user_edits_table->{wow_main_realm} = $form->{wow_main_realm};
 			my $charid = $wowdb->getCharidCreate($user_edits_table->{wow_main_realm},
 				$user_edits_table->{wow_main_name});
-			$wowdb->setChar($charid, { uid => $params{uid} }) if $charid;
+			$wowdb->setChar($charid, { uid => $uid }) if $charid;
 		}
 	}
 
