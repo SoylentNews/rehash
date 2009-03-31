@@ -20,6 +20,7 @@ use Time::HiRes;
 use URI::Escape;
 use XML::Parser::Expat;
 use XML::RSS 0.95;
+use Sys::Hostname;
 
 use Slash;
 use Slash::Display;
@@ -29,7 +30,10 @@ use vars qw(
 	%opts %task $me $task_name $hard_verbosity
 	$virtual_user $constants $slashdb $user $dir $gSkin
 	$task_exit_flag
+	$hostname
 );
+
+$hostname = $ENV{SF_SYSTEM_FUNC} || hostname();
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);

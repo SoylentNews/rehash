@@ -48,7 +48,7 @@ $task{$me}{code} = sub {
 	my $skins = $slashdb->getSkins();
 	for my $skid (keys %$skins) {
 		next if $skid != $constants->{mainpage_skid}
-			&& $run_number % $sectional_freq != 0;
+			&& $run_number % $sectional_freq != $sectional_freq-1;
 		my $skinname = $skins->{$skid}{name};
 		foreach (keys %$rss) {
 			gen_firehose_rss($virtual_user, "${skinname}_$skid", $skinname,
@@ -69,8 +69,7 @@ $task{$me}{code} = sub {
 
 sub get_start_min {
 	my($freq) = @_;
-	my $hostname = `hostname`;
-	my $hosthash = hex(substr(Digest::MD5::md5_hex($hostname), 0, 4));
+	my $hosthash = hex(substr(Digest::MD5::md5_hex($main::hostname), 0, 4));
 	my $frac = $hosthash / 65536;
 	return int($freq * $frac);
 }
