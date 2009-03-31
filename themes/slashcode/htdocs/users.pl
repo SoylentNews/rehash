@@ -2678,8 +2678,19 @@ sub saveUser {
 		aimdisplay	=> $form->{aimdisplay},
 		icq		=> $form->{icq},
 		playing		=> $form->{playing},
-                mobile_text_address => $form->{mobile_text_address},
+		mobile_text_address => $form->{mobile_text_address},
 	};
+
+	if ($constants->{wow}) {
+		my $wowdb = getObject("Slash::WoW");
+		if ($wowdb) {
+			$user_edits_table->{wow_main_name} = "\L\u$form->{wow_main_name}";
+			$user_edits_table->{wow_main_realm} = $form->{wow_main_realm};
+			my $charid = $wowdb->getCharidCreate($user_edits_table->{wow_main_realm},
+				$user_edits_table->{wow_main_name});
+			$wowdb->setChar($charid, { uid => $uid }) if $charid;
+		}
+	}
 
 	for (keys %extr) {
 		$user_edits_table->{$_} = $extr{$_} if defined $extr{$_};

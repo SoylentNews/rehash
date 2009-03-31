@@ -1489,6 +1489,17 @@ sub saveModalPrefs {
 			mobile_text_address => $params{mobile_text_address},
 		};
 
+		if ($constants->{wow}) {
+			my $wowdb = getObject("Slash::WoW");
+			if ($wowdb) {
+				$user_edits_table->{wow_main_name} = "\L\u$params{wow_main_name}";
+				$user_edits_table->{wow_main_realm} = $params{wow_main_realm};
+				my $charid = $wowdb->getCharidCreate($user_edits_table->{wow_main_realm},
+					$user_edits_table->{wow_main_name});
+				$wowdb->setChar($charid, { uid => $params{uid} }) if $charid;
+			}
+		}
+
 		for (keys %extr) {
 			$user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
 		}

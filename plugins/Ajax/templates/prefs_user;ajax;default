@@ -91,6 +91,18 @@ __template__
 
                         &nbsp;<p>
 
+[% IF constants.wow %]
+
+                        <b>Warcraft Main</b>&nbsp;<input type="text" name="wow_main_name" value="[% user.wow_main_name | strip_attribute %]" size="12">&nbsp;[% wowdb = Slash.getObject('Slash::WoW'); wowdb.createRealmSelect(user.wow_main_realm) %]&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_wow');" class="help">?</a>
+                        <br>
+                        <div id="modalprefhelp_wow" class="modalprefhelp" style="display: none;">
+                                If you play World of Warcraft, share the name of your main character.
+                        </div>
+
+                        &nbsp;<p>
+
+[% END %]
+
                         <b>Sig</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sig');" class="help">?</a>
                         <div id="modalprefhelp_sig" class="modalprefhelp" style="display: none;">
                                 Appended to the end of comments you post. The maximum is 120 characters.
