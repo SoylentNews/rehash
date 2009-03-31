@@ -64,14 +64,15 @@ __template__
 			wowdb = Slash.getObject('Slash::WoW');
 			char_id = wowdb.getCharidIfExists(useredit.wow_main_realm, useredit.wow_main_name);
 			charmd = wowdb.getCharMetadata(char_id);
-			IF charmd.countryname = 'us'; armhost='www'; ELSE; armhost='eu'; END;
-			'<br>WoW main: <a href="http://'; armhost; '.wowarmory.com/character-sheet.xml?r=';
+			IF charmd.countryname == 'us'; armhost = 'www'; ELSE; armhost='eu'; END;
+			'<br>WoW: <a href="http://'; armhost; '.wowarmory.com/character-sheet.xml?r=';
 			charmd.realmname | strip_paramattr;
 			'&n=';
 			charmd.charname | strip_paramattr;
 			'">';
 			charmd.charname | strip_html;
-			'</a>';
+			'</a>@';
+			charmd.realmname | strip_html;
                 END;
 
                 IF user.uid == useredit.uid OR user.is_admin;

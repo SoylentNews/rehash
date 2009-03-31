@@ -251,13 +251,15 @@ sub main {
 	if ($gSkin->{skid} == 36 && (! $form->{op} && ! ($form->{uid} || $form->{nick}))) {
 		# Default to ThinkGeek user if we're in the ThinkGeek skin
 		$form->{uid} = 1387321;
+	} elsif ($gSkin->{skid} == 37 && (! $form->{op} && ! ($form->{uid} || $form->{nick}))) {
+		$form->{uid} = 1;
 	}
 
 	# If we're in the wrong skin for this user, redirect.
 	# Obviously this should be generalized and skin/uid's should be data in a
 	# table somewhere, and article.pl's redirect() should use the same logic.
 	# Let's fix that someday.
-	if ($gSkin->{skid} != 1 && $form->{uid} != 1387321) {
+	if ($gSkin->{skid} != 1 && $form->{uid} != 1387321 && $form->{uid} != 1) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $mp_skin = $reader->getSkin(1);
 		redirect("$mp_skin->{rootdir}$ENV{REQUEST_URI}");
@@ -266,6 +268,11 @@ sub main {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $tg_skin = $reader->getSkin(36);
 		redirect("$tg_skin->{rootdir}$ENV{REQUEST_URI}");
+		return;
+	} elsif ($gSkin->{skid} != 37 && $form->{uid} == 1 && $constants->{skin_redir}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $ct_skin = $reader->getSkin(37);
+		redirect("$ct_skin->{rootdir}$ENV{REQUEST_URI}");
 		return;
 	}
 

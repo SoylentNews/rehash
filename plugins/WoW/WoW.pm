@@ -32,7 +32,6 @@ sub getGuildidCreate {
 sub getCharidCreate {
 	my($self, $realmid, $charname) = @_;
 	return 0 if !$self->confirmRealmid($realmid);
-	$charname = $self->
 	return     $self->getCharidIfExists($realmid, $charname)
 		|| $self->createCharid($realmid, $charname);
 }
@@ -109,7 +108,8 @@ sub getGuildidIfExists {
 sub getCharidIfExists {
 	my($self, $realmid, $charname) = @_;
 	return 0 if !$self->confirmRealmid($realmid);
-	return 0 if $charname !~ /^\w{1,12}$/;
+	return 0 if $charname !~ /^[a-z]{1,12}$/i;
+	$charname = "\U\l$charname";
 
         my $constants = getCurrentStatic();
         my $table_cache         = "_chars_cache";
@@ -131,7 +131,6 @@ sub getCharidIfExists {
                 }
         }
 
-	$charname = "\U\l$charname";
 	my $charname_q = $self->sqlQuote($charname);
 	my $charid = $self->sqlSelect('charid', 'wow_chars',
 		"charname=$charname_q AND realmid=$realmid");
@@ -178,6 +177,8 @@ sub createGuildid {
 
 sub createCharid {
 	my($self, $realmid, $charname) = @_;
+	return 0 if !$self->confirmRealmid($realmid);
+	return 0 if $charname !~ /^[a-z]{1,12}$/i;
 	$charname = "\U\l$charname";
 	my $rows = $self->sqlInsert('wow_chars', {
 			realmid => $realmid,
