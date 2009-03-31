@@ -2022,7 +2022,9 @@ sub saveUser {
 		aimdisplay	=> $form->{aimdisplay},
 		icq		=> $form->{icq},
 		playing		=> $form->{playing},
-                mobile_text_address => $form->{mobile_text_address},
+		mobile_text_address => $form->{mobile_text_address},
+		wow_main_name   => $form->{wow_main_name},
+		wow_main_realm  => $form->{wow_main_realm},
 	};
 
 	for (keys %extr) {

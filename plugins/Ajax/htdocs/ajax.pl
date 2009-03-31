@@ -1487,6 +1487,8 @@ sub saveModalPrefs {
 			aimdisplay	    => $params{aimdisplay},
 			icq		    => $params{icq},
 			mobile_text_address => $params{mobile_text_address},
+			wow_main_name       => $params{wow_main_name},
+			wow_main_realm      => $params{wow_main_realm},
 		};
 
 		for (keys %extr) {

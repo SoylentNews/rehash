@@ -340,5 +340,21 @@ sub getCharidsNeedingRetrieval {
 	return [ ];
 }
 
+sub createRealmSelect {
+	my($self, $realmid) = @_;
+	$realmid ||= 0;
+	my $str = '<select name="wow_realm">';
+	$str .= '<option value="0"' . ($realmid == 0 ? ' selected' : '') . '>Choose realm</option>';
+	my $rd = $self->sqlSelectAllHashref('realmid', 'realmid, countryname, realmname', 'wow_realms');
+	my %realm = ( map { ($_, "$rd->{$_}{realmname} ($rd->{$_}{countryname})" ) } keys %$rd );
+	my @ids = sort { $realm{$a} cmp $realm{$b} } keys %realm;
+	for my $id (@ids) {
+		my $sel = $realmid == $id ? ' selected' : '';
+		$str .= qq{<option value="$id"$sel>$realm{$id}</option>};
+	}
+	$str .= '</select>';
+	$str;
+}
+
 1;
 
