@@ -5,13 +5,26 @@
 # $Id$
 
 use strict;
+use Digest::MD5;
 use Slash;
 use Slash::XML;
 use Slash::Constants ':slashd';
 
-use vars qw( %task $me );
+use vars qw( %task $me
+	$minutes_run
+	$run_number $sectional_freq
+);
 
-$task{$me}{timespec} = '0-59/10 * * * *';
+# Change this var to change how often the task runs.  Sandboxes
+# run it every half-hour, other sites every 10 minutes.
+$minutes_run = (-e '/etc/sbhost' ? 30 : 10);
+
+# Process the non-mainpage skins less often.  Sandboxes run them
+# every 5 invocations, other sites every other invocation.
+$run_number = 0;
+$sectional_freq = (-e '/etc/sbhost' ? 5 : 2);
+
+$task{$me}{timespec} = get_start_min($minutes_run) . "-59/$minutes_run * * * *";
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
@@ -33,15 +46,34 @@ $task{$me}{code} = sub {
 	}
 
 	my $skins = $slashdb->getSkins();
-	foreach(keys %$skins) {
-		my $skinname = $skins->{$_}{name};
+	for my $skid (keys %$skins) {
+		next if $skid != $constants->{mainpage_skid}
+			&& $run_number % $sectional_freq != 0;
+		my $skinname = $skins->{$skid}{name};
 		foreach (keys %$rss) {
-			gen_firehose_rss($virtual_user, "$skinname\_$_", $skinname, $rss->{$_}->[0], $rss->{$_}->[1], "$skinname $rss->{$_}->[2]", $rss->{$_}->[3], "rss");
+			gen_firehose_rss($virtual_user, "${skinname}_$skid", $skinname,
+				$rss->{$skid}[0], $rss->{$skid}[1],
+				"$skinname $rss->{$skid}[2]", $rss->{$skid}[3],
+				"rss");
 		}
 	}
 
 
 };
+
+# A bunch of sandboxes all starting this script at the same time spikes
+# resource load every n minutes.  Instead, stagger startup times randomly
+# based on the hash of each sandbox's hostname.  If the task runs every
+# 30 minutes, this will spread the initial hourly runs between :00 and :29
+# (with successive runs equally staggered of course).
+
+sub get_start_min {
+	my($freq) = @_;
+	my $hostname = `hostname`;
+	my $hosthash = hex(substr(Digest::MD5::md5_hex($hostname), 0, 4));
+	my $frac = $hosthash / 65536;
+	return int($freq * $frac);
+}
 
 sub gen_firehose_rss {
 	my($vu, $base, $skin, $label, $color, $filter, $opts, $content_type) = @_;
@@ -95,6 +127,9 @@ sub gen_firehose_rss {
 	}, 1);
 
 	save2file("$constants->{basedir}/$base\.$content_type", $rss, \&fudge);
+
+	# Pause between files to limit the resources required.
+	sleep 2;
 }
 
 
@@ -106,7 +141,5 @@ sub fudge {
 	return($current, $new);
 }
 
-
-
-
 1;
+
