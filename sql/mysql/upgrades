@@ -6140,3 +6140,5 @@ ALTER TABLE user_achievements ADD INDEX aid_exponent (aid, exponent);
 
 UPDATE ajax_ops SET reskey_name='ajax_user_static' WHERE op='enable_maker_adless';'
 
+ALTER TABLE topics ADD usesprite ENUM("no","yes") DEFAULT "no" NOT NULL;
+# Please run themes/slashdot/sql/mysql/upgrades
