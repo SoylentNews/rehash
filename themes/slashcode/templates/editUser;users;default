@@ -89,6 +89,11 @@ __template__
                         [% PROCESS formLabel value => 'Mobile Text Address' %]
                         <input type="text" name="mobile_text_address" value="[% useredit.mobile_text_address | strip_attribute %]" size="40">
 
+[% IF constants.wow %]
+			[% PROCESS formLabel value => 'Warcraft Main' %]
+                        <input type="text" name="wow_main_name" value="[% user.wow_main_name | strip_attribute %]" size="12">&nbsp;[% wowdb = Slash.getObject('Slash::WoW'); wowdb.createRealmSelect(user.wow_main_realm) %]
+[% END %]
+
 			[% PROCESS formLabel value => 'Sig' %]
 			<textarea name="sig" rows="2" cols="30">[% useredit.sig | strip_literal %]</textarea>
 			<div class="notes">
