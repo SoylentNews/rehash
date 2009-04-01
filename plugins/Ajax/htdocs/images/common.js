@@ -1058,11 +1058,9 @@ function adsToggle(val) {
 	params.op = 'enable_maker_adless';
 	if (!val) {
 		params.off = 1;
-	} else {
-		$('.advertisement').hide();
-	}
+	} 
 	params.reskey = reskey_static,
-	ajax_update(params);
+	ajax_update(params, '', { onComplete: json_handler });
 	
 }
 

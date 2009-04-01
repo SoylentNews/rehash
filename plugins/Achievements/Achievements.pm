@@ -9,6 +9,7 @@ use Slash;
 use Slash::Display;
 use Slash::Utility;
 use Time::Local;
+use Data::JavaScript::Anon;
 
 use base 'Slash::Plugin';
 
@@ -510,10 +511,14 @@ sub setMakerMode {
 
 sub ajaxEnableMakerAdless {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $return = { };
 	if ($user->{uid} && ! $user->{is_anon} && $user->{maker_mode}) {
 		my $val = $form->{off} ? undef : time;
-		$slashdb->setUser($user->{uid}, { maker_mode_adless => $val })
+		$slashdb->setUser($user->{uid}, { maker_mode_adless => $val });
+		$return->{eval_first} = '$(\'.advertisement\').hide();' if $val;
 	}
+	return Data::JavaScript::Anon->anon_dump($return);
+	
 }
 
 sub DESTROY {
