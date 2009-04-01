@@ -323,7 +323,7 @@ sub updateArmoryRecord {
 
 	my $charmd_hr = undef;
 
-	if ($armory_hr->{level} == 80) {
+	if ($armory_hr->{level} && $armory_hr->{level} == 80) {
 		my $achievements = getObject('Slash::Achievements');
 		if ($achievements) {
 			$charmd_hr ||= $self->getCharMetadata($charid);
