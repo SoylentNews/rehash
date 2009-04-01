@@ -1656,6 +1656,16 @@ sub prepareUser {
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
 		}
 	}
+
+	if (!$user->{is_anon} && $user->{maker_mode} && $form->{adtoggle}) {
+		print STDERR "adtoggle |$form->{adsoff}|\n';
+		my $val;
+		if($form->{adsoff}) {
+			$val = time;
+		}
+		$slashdb->setUser($user->{uid}, { maker_mode_adless => $val });
+		$user->{maker_mode_adless} = $val;
+	}
 	if ($user->{maker_mode_adless} && $user->{maker_mode_adless} =~ /^\d+$/
 		&& time < $user->{maker_mode_adless} + ($constants->{ach_maker_adlesstime} || 259200)) {
 		$user->{state}{page_adless} = 1;
