@@ -6138,3 +6138,5 @@ UPDATE vars SET value = 'T_2_5_0_249' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Achievements
 ALTER TABLE user_achievements ADD INDEX aid_exponent (aid, exponent);
 
+UPDATE ajax_ops SET reskey_name='ajax_user_static' WHERE op='enable_maker_adless';'
+
