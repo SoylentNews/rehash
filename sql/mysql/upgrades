@@ -6120,8 +6120,8 @@ UPDATE vars SET value = 'T_2_5_0_248' WHERE name = 'cvs_tag_currentcode';
 ALTER TABLE dynamic_user_blocks MODIFY COLUMN title varchar(64) NOT NULL default '';
 
 # for plugins/FireHose
-ALTER TABLE firehose_update_log  CHANGE id id int unsigned not null auto_increment primary key;
-ALTER TABLE firehose_setting_log CHANGE id id int unsigned not null auto_increment primary key;
+ALTER TABLE firehose_update_log  CHANGE id id int unsigned not null auto_increment;
+ALTER TABLE firehose_setting_log CHANGE id id int unsigned not null auto_increment;
 
 # for plugins/Ajax
 INSERT INTO ajax_ops VALUES (NULL, 'enable_maker_adless', 'Slash::Achievements', 'ajaxEnableMakerAdless', 'ajax_user', 'createuse');
