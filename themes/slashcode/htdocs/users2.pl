@@ -2032,14 +2032,26 @@ sub saveUser {
 		mobile_text_address => $form->{mobile_text_address},
 	};
 
-	if ($constants->{wow}) {
+	if ($constants->{wow}
+		&& $form->{wow_main_name}
+		&& $form->{wow_main_realm}) {
 		my $wowdb = getObject("Slash::WoW");
 		if ($wowdb) {
 			$user_edits_table->{wow_main_name} = "\L\u$form->{wow_main_name}";
 			$user_edits_table->{wow_main_realm} = $form->{wow_main_realm};
 			my $charid = $wowdb->getCharidCreate($user_edits_table->{wow_main_realm},
 				$user_edits_table->{wow_main_name});
-			$wowdb->setChar($charid, { uid => $uid }) if $charid;
+			if ($charid) {
+				# Disallow poaching of already-entered
+				# character names.  We don't yet have the
+				# ability for the first claimer to prove
+				# s/he actually owns the character, but
+				# they got there first so for now we
+				# assume it's actually theirs.
+				my $charmd_hr = $wowdb->getCharMetadata($charid);
+				$wowdb->setChar($charid, { uid => $uid })
+					unless $charmd_hr->{uid};
+			}
 		}
 	}
 

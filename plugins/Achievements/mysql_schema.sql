@@ -17,7 +17,8 @@ CREATE TABLE user_achievements (
         exponent smallint unsigned NOT NULL default '0',
         createtime datetime NOT NULL default '0000-00-00 00:00:00',
         PRIMARY KEY (id),
-        UNIQUE KEY achievement (uid,aid)
+        UNIQUE KEY achievement (uid,aid),
+	INDEX aid_exponent (aid,exponent)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS user_achievement_streaks;
