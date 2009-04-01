@@ -1658,7 +1658,7 @@ sub prepareUser {
 	}
 
 	if (!$user->{is_anon} && $user->{maker_mode} && $form->{adtoggle}) {
-		print STDERR "adtoggle |$form->{adsoff}|\n';
+		print STDERR "adtoggle |$form->{adsoff}|\n";
 		my $val;
 		if($form->{adsoff}) {
 			$val = time;
