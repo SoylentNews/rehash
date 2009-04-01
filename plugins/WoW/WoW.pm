@@ -109,7 +109,7 @@ sub getCharidIfExists {
 	my($self, $realmid, $charname) = @_;
 	return 0 if !$self->confirmRealmid($realmid);
 	return 0 if $charname !~ /^[a-z]{1,12}$/i;
-	$charname = "\U\l$charname";
+	$charname = "\L\u$charname";
 
         my $constants = getCurrentStatic();
         my $table_cache         = "_chars_cache";
@@ -179,7 +179,7 @@ sub createCharid {
 	my($self, $realmid, $charname) = @_;
 	return 0 if !$self->confirmRealmid($realmid);
 	return 0 if $charname !~ /^[a-z]{1,12}$/i;
-	$charname = "\U\l$charname";
+	$charname = "\L\u$charname";
 	my $rows = $self->sqlInsert('wow_chars', {
 			realmid => $realmid,
 			charname => $charname,
