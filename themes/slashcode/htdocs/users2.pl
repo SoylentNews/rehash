@@ -1181,7 +1181,7 @@ sub showInfo {
 		# Achievements pane
 		my $ach_reader = getObject('Slash::Achievements');
 		my ($user_achievements, $requested_user_achievements, $common_achievements, $achievements_datapane);
-		if ($ach_reader and $user->{is_admin}) {
+		if ($ach_reader) {
 			$requested_user_achievements = $ach_reader->getUserAchievements($requested_user->{uid}, {}, { cheat_mode => 1 });
 			if ($user->{uid} != $requested_user->{uid}) {
 				$user_achievements = $ach_reader->getUserAchievements($user->{uid}, {}, { cheat_mode => 1 });
@@ -1255,7 +1255,7 @@ sub showInfo {
                 my ($dyn_achievements, $dyn_messages);
                 if ($dynamic_blocks_reader) {
 			my $user_self = ($requested_user->{uid} == $user->{uid}) ? 1 : 0;
-                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self }) if $user->{is_admin};
+                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self });
                         $dyn_messages     = $dynamic_blocks_reader->displayBlock('messages-' . $user->{uid}) if $user->{is_admin};
                 }
 
