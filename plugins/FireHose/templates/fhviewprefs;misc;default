@@ -26,7 +26,7 @@ __template__
 <input type="hidden" name="formname" value="firehoseview">
 <div class="close"><a title="Close" href="#" class="close" onclick="return false" >Close</a></div>
 [% IF rss_link %]
-<div class="rss"><a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]"><img src="[% constants.imagedir %]/feed.png"></a></div>
+<div class="rss"><a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]">RSS</a></div>
 [% END %]
 [% IF is_primary_section %]
 <div class="section_name">[% name | strip_literal %]</div>
