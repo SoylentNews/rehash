@@ -17,12 +17,12 @@ use vars qw( %task $me
 
 # Change this var to change how often the task runs.  Sandboxes
 # run it every half-hour, other sites every 10 minutes.
-$minutes_run = (-e '/etc/sbhost' ? 30 : 10);
+$minutes_run = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 10 : 30);
 
 # Process the non-mainpage skins less often.  Sandboxes run them
 # every 5 invocations, other sites every other invocation.
 $run_number = 0;
-$sectional_freq = (-e '/etc/sbhost' ? 5 : 2);
+$sectional_freq = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 2 : 5);
 
 $task{$me}{timespec} = get_start_min($minutes_run) . "-59/$minutes_run * * * *";
 $task{$me}{timespec_panic_1} = ''; # not that important
