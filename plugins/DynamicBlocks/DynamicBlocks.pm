@@ -701,9 +701,11 @@ sub getUserBioBlock {
         }
 
 	# Remove the formatting from messages.
-        $messages =~ s/<\/?ul>//g;
-        $messages =~ s/<li>//g;
-        $messages =~ s/<\/li>/<br\/>/g;
+	if ($messages) {
+	        $messages =~ s/<\/?ul>//g;
+        	$messages =~ s/<li>//g;
+	        $messages =~ s/<\/li>/<br\/>/g;
+	}
 
         my $biobox = slashDisplay('userbio', {
                         user       => $user,
