@@ -11,6 +11,7 @@ en_US
 __name__
 rsslink
 __template__
+[% skinname = skinname || gSkin.name %]
 [%- feed_type = feed_type || 'rss';
     IF (constants.rss_allow_index && (
 	user.is_admin
@@ -21,7 +22,7 @@ __template__
 ));
 %][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %][%
     ELSE
-%][% gSkin.rootdir %]/[% Slash.sitename2filename(gSkin.name) %].[% feed_type %][%
+%][% gSkin.rootdir %]/[% Slash.sitename2filename(skinname) %].[% feed_type %][%
     END;
     feed_type = '';
 -%]
