@@ -479,7 +479,7 @@ sub linkStory {
 	# But, we must link to the .pl when necessary.
 
 	# if we REALLY want dynamic
-	my $dynamic = $story_link->{dynamic} || 0;
+	my $dynamic = $constants->{article_link_story_dynamic} || $story_link->{dynamic} || 0;
 	# takes precedence over dynamic
 	my $static  = $story_link->{static}  || 0;
 
