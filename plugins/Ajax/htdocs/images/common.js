@@ -812,6 +812,7 @@ $(function(){
 // Page initialization.
 //
 
+$('#fhsearch').show();
 firehose_init_tag_ui();
 $any('firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
 
