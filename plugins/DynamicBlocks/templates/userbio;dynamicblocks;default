@@ -1,0 +1,58 @@
+__section__
+default
+__description__
+Display the user bio
+
+__title__
+
+__page__
+dynamicblocks
+__lang__
+en_US
+__name__
+userbio
+__template__
+
+<div class="block" id="userbio_self">
+        <div class="title" id="userbio_self-title">
+                <h4>
+                        <a href="[% gSkin.rootdir %]/[% user.nickname | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
+                        [% PROCESS zoo_icons person = user.uid implied="" %]
+                </h4>
+        </div>
+                <div class="content" id="userbio_self-content">
+                        <div id="userbio_self-messages">
+                        [% IF messages %]
+                                [% messages %]
+                                <br/>
+                        [% END %]
+                        </div>
+
+                        Karma: [% PROCESS karma useredit = user admin_flag = user.is_admin %]
+
+                        <p></p>
+
+                        [% IF user.points %]
+                                [%
+                                        plural = '';
+                                        IF user.points > 1; plural = 's'; END;
+                                %]
+                                [% IF expirydate %]
+                                        Your [% user.points %] moderator point[% plural %] will expire on [% expirydate %].
+                                [% ELSE %]
+                                        You have [% user.points %] moderator point[% plural %].
+                                [% END %]
+
+                                <p></p>
+                                Welcome to those of you just joining: please read the <a href=[% gSkin.rootdir %]/moderation.shtml>moderator guidelines</a>
+                                for instructions. You can't post & moderate the same discussion. Concentrate on promoting more than demoting. Browse at -1
+                                to keep an eye out for abuses. <a href=mailto:help@slashdot.org>Mail the admin</a> URLs showing abuse (include the cid link please!).
+                                <p></p>
+                        [% END %]
+
+                        <div style="text-align: center;"><a href="[% gSkin.rootdir %]/my/journal">Journal</a> | <a href="[% gSkin.rootdir %]/subscribe.pl">Subscription</a>[% IF !user.is_subscriber %]&nbsp;<a href="/faq/subscriptions.shtml#ss100">(Why subscribe?)</a>[% END %] | <a href="[% gSkin.rootdir %]/my/preferences">Account</a></div>
+                </div>
+</div>
+__seclev__
+500
+__version__

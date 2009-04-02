@@ -8,6 +8,7 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Time::Local;
 
 use base 'Slash::Plugin';
 
@@ -671,6 +672,46 @@ sub getBlocksEligibleForUpdate {
         }
 
         return (keys %$dynamic_blocks) ? $dynamic_blocks : 0;
+}
+
+sub getUserBioBlock {
+        my ($self, $user) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+
+        return if ($user->{uid} == $constants->{anonymous_coward_uid});
+
+        my ($messages, $expiry_secs) =
+                $slashdb->sqlSelect(
+                        'block',
+                        'dynamic_user_blocks',
+                        "name = 'messages-" . $user->{uid} . "'"
+                );
+
+        my $expiry_date;
+        if ($user->{lastgranted} and ($user->{lastgranted} ne '0000-00-00 00:00:00')) {
+                my ($gyear, $gmonth, $gday, $ghour, $gmin, $gsec) =
+                        $user->{lastgranted} =~ /^(\d+)\-(\d+)\-(\d+)\s(\d+)\:(\d+)\:(\d+)$/;
+
+                my $granted_secs = timelocal($gsec, $gmin, $ghour, $gday, $gmonth - 1 , $gyear);
+                my $expiry_secs = $granted_secs + (60 * 60 * $constants->{mod_stir_hours});
+                my ($sec, $min, $hour, $mday, $mon, $year) = localtime($expiry_secs);
+                $expiry_date = sprintf("%4d-%02d-%02d", $year+1900,$mon + 1,$mday, undef, undef, undef);
+        }
+
+	# Remove the formatting from messages.
+        $messages =~ s/<\/?ul>//g;
+        $messages =~ s/<li>//g;
+        $messages =~ s/<\/li>/<br\/>/g;
+
+        my $biobox = slashDisplay('userbio', {
+                        user       => $user,
+                        expirydate => $expiry_date,
+                        messages   => $messages,
+                     }, { Page => 'dynamicblocks', Skin => 'default', Return => 1 });
+
+        return $biobox;
 }
 
 sub displayBlock {

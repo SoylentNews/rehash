@@ -441,9 +441,6 @@ sub setAchievementMessage {
         my $slashdb = getCurrentDB();
         my $user = $slashdb->getUser($uid);
 
-	# Temp. check for admin
-	return if ($user->{seclev} < 1000);
-
 	my $ach_message_code = $slashdb->sqlSelect('code', 'message_codes', "type = 'Achievement'");
         my $messages = getObject('Slash::Messages');
         if ($messages && $ach_message_code) {
