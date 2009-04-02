@@ -16,7 +16,7 @@ __seclev__
 __template__
 [% fh = Slash.getObject("Slash::FireHose"); %]
 
-[% rss_options = { "fhfilter" => "fhfilter", "orderdir" => "orderdir", "orderby" => "orderby", color => "color", "duration" => "duration" } %]
+[% rss_options = { "fhfilter" => "fhfilter", "orderdir" => "orderdir", "orderby" => "orderby", color => "color", "duration" => "duration", "view" => "view" } %]
 [% rss_param_str = "" %]
 [% IF !user.is_anon %]
 [% FOREACH param = rss_options.keys;
@@ -24,9 +24,12 @@ __template__
 	rss_param_str = rss_param_str _ "=" _ Slash.strip_attribute(options.${rss_options.$param});
 END %]
 [% rss_skin_pre = "";
-   IF (section && section != constants.mainpage_skid);
-	   rss_skin = Slash.db.getSkin(section);
-	   rss_skin_pre = rss_skin.name _ "_";
+   IF section;
+	   fh_section = fh.getFireHoseSection(section);
+           IF (fh_section && fh_section.skid);
+		   rss_skin = Slash.db.getSkin(fh_section.skid);
+		   rss_skin_pre = rss_skin.name _ "_";
+	   END;
    END;
 %]
 [% END %]
@@ -63,6 +66,7 @@ END %]
 				[% rss_link = "";
 				   IF view.viewname == "stories";
 					rss_link = Slash.root2abs() _ "/" _ rss_skin_pre _ "firehose_stories.rss";
+					rss_link = BLOCK; PROCESS rsslink skinname = rss_skin.name; END;
                                    ELSIF view.viewname == "recent";
 					rss_link = Slash.root2abs() _ "/" _ rss_skin_pre _ "firehose_recent.rss";
 				   ELSIF view.viewname == "popular";
@@ -72,11 +76,17 @@ END %]
 				   END;
 				%]
 			[% END %]
-			<li [% IF active_view %]class="active"[% END %]><a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">[% view.viewname.ucfirst %]</a> 
-			[%- IF !user.is_anon -%]
-				[% IF active_view && rss_link %]<a href="[% rss_link %]" title="RSS for [% view.viewname %]"><img src="[% constants.imagedir %]/feed.png"  alt="RSS for [% view.viewname %]"></a><a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit"><img src="[% constants.imagedir %]/sic_edit.png" alt="Edit"></a>[% END %]</li>
+			<li [% IF active_view %]class="active"[% END %]><a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">[% view.viewtitle.ucfirst %]</a> 
+				[% IF active_view %]
+					[% IF rss_link %]
+						<a href="[% rss_link %]" title="RSS for [% view.viewname %]"><img src="[% constants.imagedir %]/feed.png"  alt="RSS for [% view.viewname %]"></a>
+					[% END %]
+					[% IF !user.is_anon %]
+						<a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit"><img src="[% constants.imagedir %]/sic_edit.png" alt="Edit"></a>
+					[% END %]
+				[% END %]
+				</li>
 			[%- END -%]
-		[% END %]
 
 
 	[% FOREACH tab = tabs %]
