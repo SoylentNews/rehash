@@ -28,6 +28,7 @@ __template__
 	<div class="head">
 		<div class="yui-b">
 		<!-- block -->
+		[% IF userbio; userbio; END; %]
 		</div>
 
 		[% firehosetext %]

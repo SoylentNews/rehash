@@ -12,7 +12,6 @@ en_US
 __name__
 userbio
 __template__
-
 <div class="block" id="userbio_self">
         <div class="title" id="userbio_self-title">
                 <h4>
@@ -21,36 +20,42 @@ __template__
                 </h4>
         </div>
                 <div class="content" id="userbio_self-content">
+                <ul>
+                        [% IF messages %]<li>[% END %]
                         <div id="userbio_self-messages">
                         [% IF messages %]
                                 [% messages %]
-                                <br/>
                         [% END %]
                         </div>
+                        [% IF messages %]</li>[% END %]
 
-                        Karma: [% PROCESS karma useredit = user admin_flag = user.is_admin %]
-
-                        <p></p>
+                        <li>
+                        <b>Karma: [% PROCESS karma useredit = user admin_flag = user.is_admin %]</b>
+                        </li>
 
                         [% IF user.points %]
+                                <li>
                                 [%
                                         plural = '';
                                         IF user.points > 1; plural = 's'; END;
                                 %]
                                 [% IF expirydate %]
-                                        Your [% user.points %] moderator point[% plural %] will expire on [% expirydate %].
+                                        <b>Your [% user.points %] moderator point[% plural %] will expire on [% expirydate %].</b>
                                 [% ELSE %]
-                                        You have [% user.points %] moderator point[% plural %].
+                                        <b>You have [% user.points %] moderator point[% plural %].</b>
                                 [% END %]
 
                                 <p></p>
                                 Welcome to those of you just joining: please read the <a href=[% gSkin.rootdir %]/moderation.shtml>moderator guidelines</a>
                                 for instructions. You can't post & moderate the same discussion. Concentrate on promoting more than demoting. Browse at -1
                                 to keep an eye out for abuses. <a href=mailto:help@slashdot.org>Mail the admin</a> URLs showing abuse (include the cid link please!).
-                                <p></p>
+                                </li>
                         [% END %]
 
-                        <div style="text-align: center;"><a href="[% gSkin.rootdir %]/my/journal">Journal</a> | <a href="[% gSkin.rootdir %]/subscribe.pl">Subscription</a>[% IF !user.is_subscriber %]&nbsp;<a href="/faq/subscriptions.shtml#ss100">(Why subscribe?)</a>[% END %] | <a href="[% gSkin.rootdir %]/my/preferences">Account</a></div>
+                        <li>
+                        <div style="text-align: center"><span style="font-size: x-small"><a href="[% gSkin.rootdir %]/my/journal">Journal</a> | <a href="[% gSkin.rootdir %]/subscribe.pl">Subscription</a>[% IF !user.is_subscriber %]&nbsp;<a href="/faq/subscriptions.shtml#ss100">(Why subscribe?)</a>[% END %] | <a href="[% gSkin.rootdir %]/my/preferences">Account</a></span></div>
+                        </li>
+                </ul>
                 </div>
 </div>
 __seclev__

@@ -170,8 +170,13 @@ sub view {
 			vote			=> $vote
 		});
 
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		my $userbio = '';
+		$userbio = $dynamic_blocks->getUserBioBlock($user) if ($dynamic_blocks && !$user->{is_anon});
+
 		slashDisplay("view", {
-			firehosetext => $firehosetext
+			firehosetext => $firehosetext,
+			userbio      => $userbio,
 		});
 
 		if ($discussion) {
