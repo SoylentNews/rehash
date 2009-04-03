@@ -653,12 +653,20 @@ function firehose_toggle_tag_ui( any ) {
 }
 
 function firehose_click_tag( event ) {
-	var $target = $(event.target), command = '', $menu;
+	var	$target	= $(event.target),
+		$fhitem	= fhitems($target),
+		leaving	= !!$target.closest('a[href]:not([href=#])').length,
+		command	= '',
+		$menu;
+
+	if ( !leaving ) {
+		// _any_ click can trigger, but click-specific ad will win
+		setTimeout(function(){ inlineAdFirehose(); }, 0);
+		$fhitem.length && firehose_set_cur($fhitem);
+	}
 
 	// skip for non-JS hrefs
 	if (! $target.closest('a[href]:not([href=#])').length) {
-		// _any_ click can trigger, but click-specific ad will win
-		setTimeout(function(){ inlineAdFirehose(); }, 0);
 	}
 
 	$related_trigger = $target;
@@ -680,11 +688,6 @@ function firehose_click_tag( event ) {
 		$related_trigger = $().filter();
 	}
 
-	var $server = $target.closest('[tag-server]');
-	if ($server.length) {
-		firehose_set_cur($server);
-	}
-
 	if ( command ) {
 		// No!  You no hurt Dr. Jones!  You log-in first!
 		if ( ! check_logged_in() ) {
@@ -692,34 +695,30 @@ function firehose_click_tag( event ) {
 		}
 
 		// Make sure the user sees some feedback...
-		if ( $menu || event.shiftKey ) {
-			// for a menu command or copying a tag into edit field, open the tag_ui
-			var $widget = firehose_toggle_tag_ui_to(kExpanded, $server);
-
-			// the menu is hover css, you did the command, so the menu should go away
-			// but you're still hovering
-			if ( $menu ) {
-				// so explicitly hide the menu
-				$menu.hide();
-				// Yikes! that makes it permanently gone; so undo at our earliest convenience
-				setTimeout(function(){ $menu.removeAttr('style'); });
-				// it can't immediately re-pop because you no longer qualify for the hover
-			}
+		// the menu is hover css, you did the command, so the menu should go away
+		// but you're still hovering
+		if ( $menu ) {
+			// so explicitly hide the menu
+			$menu.hide();
+			// Yikes! that makes it permanently gone; so undo at our earliest convenience
+			setTimeout(function(){ $menu.removeAttr('style'); });
+			// it can't immediately re-pop because you no longer qualify for the hover
 		}
 
 		if ( event.shiftKey ) { // if the shift key is down, append the tag to the edit field
-			$widget.find('.tag-entry:text:visible:first').each(function(){
-				if ( this.value ) {
-					var last_char = this.value[ this.value.length-1 ];
-					if ( '-^#!)_ '.indexOf(last_char) == -1 ) {
-						this.value += ' ';
+			// for a menu command or copying a tag into edit field, open the tag_ui
+			firehose_toggle_tag_ui_to(kExpanded, $fhitem).
+				find('input.tag-entry:first').each(function(){
+					if ( this.value ) {
+						var last_char = this.value[ this.value.length-1 ];
+						if ( '-^#!)_ '.indexOf(last_char) == -1 ) {
+							this.value += ' ';
+						}
 					}
-				}
-				this.value += command;
-				this.focus();
-			});
+					this.value += command;
+				});
 		} else { // otherwise, send it the server to be processed
-			$server.each(function(){
+			$fhitem.each(function(){
 				this.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
 		}
