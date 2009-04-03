@@ -1123,7 +1123,7 @@ function firehose_handle_update() {
 					css({ opacity: 0, height: 0 }).
 					animate(t.duration, {
 							opacity: 1,
-							height: fh_view_mode==='full' ? 200 : 50,
+							height: fh_view_mode==='full' ? 200 : 50
 						}, function(){
 							$(this).css({ opacity:'', height:'' });
 						});
