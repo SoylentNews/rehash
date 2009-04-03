@@ -218,7 +218,7 @@ sub moderateComment {
 		$user->{points} = 0 if $user->{points} < 0;
 
 		my $achievements = getObject('Slash::Achievements');
-		if (!$user->{is_admin} && $user->{points} == 0) {
+		if (!$user->{is_admin} && ($user->{points} == 0)) {
 			$achievements->setUserAchievement('mod_points_exhausted', $user->{uid}, { ignore_lookup => 1 }) if $achievements;
 		}
 
