@@ -16,21 +16,31 @@ __template__
 (function(){
 var regexp=/^\s*(?:\d+|many)\s+more\s*$/i;
 
-function more(){
+function auto_more(){
 	var $more_link = $('#more-experiment a');
 	$more_link.each(function(){
-		Bounds.intersect(window, fhitems(':last')) && ($more_link.click(), more=undefined);
+		Bounds.intersect(window, fhitems(':last')) && ($more_link.click(), auto_more=undefined);
 	});
 }
 
-function more_once(){ more && more(); }
+function hint_more( $more_link ){
+	if ( !auto_more ){
+		$more_link.
+			click(function(){
+				hint_more = undefined;
+			}).
+			after('<span id="more-hint" class="feature-hint"><em>NEW: Fetch stories in-line!</em></span>');
+	}
+}
+
+function more_once(){ auto_more && auto_more(); }
 
 $('#more-experiment a').
 	live('more-possible', function( event ){
 		var $more_link=$(this);
 		if ( regexp.test($more_link.text()) ) {
 		[% IF r < 10 %]
-			more || $more_link.after('<span id="more-hint" class="feature-hint"><em>NEW: Fetch stories in-line!</em></span>');
+			hint_more && hint_more($more_link);
 		[% END %]
 			$(document).bind('scroll', more_once);
 		} else {
