@@ -1059,7 +1059,7 @@ function adsToggle(val) {
 	if (!val) {
 		params.off = 1;
 	} 
-	params.reskey = reskey_static,
+	params.reskey = reskey_static;
 	ajax_update(params, '', { onComplete: json_handler });
 	
 }
