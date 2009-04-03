@@ -2696,7 +2696,7 @@ sub dispFireHose {
 		options 	=> $options->{options},
 		item 		=> $item,
 		skipvote 	=> 1 
-	}, { Return => 1});
+	}, { Return => 1, Page => 'firehose'});
 
 	my $atstorytime;
 	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
