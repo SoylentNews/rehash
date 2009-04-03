@@ -1242,7 +1242,7 @@ CREATE TABLE topics (
 	submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	searchable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	storypickable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
-	usesprite ENUM("no","yes") DEFAULT "no" NOT NULL;
+	usesprite ENUM("no","yes") DEFAULT "no" NOT NULL,
 	PRIMARY KEY (tid)
 ) TYPE=InnoDB;
 
