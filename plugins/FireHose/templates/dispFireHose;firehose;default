@@ -48,7 +48,7 @@ __template__
 	END;
     IF user.is_admin;
 	adminmode = 1;
-	IF options.usermode;
+	IF options.usermode.defined;
 		IF options.usermode;
 			adminmode = 0;
 		END;
@@ -105,8 +105,8 @@ END %]
 
 [% IF !form.skipvote && !options.nothumbs && !skipvote && !featured %]
 	<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
-	  <a href="#" class="up" title="Vote this item up">+</a>
-	  <a href="#" class="down" title="Vote this item down">-</a>
+	  <a href="[% PROCESS nojslink %]" class="up" title="Vote this item up">+</a>
+	  <a href="[% PROCESS nojslink %]" class="down" title="Vote this item down">-</a>
 	</span>
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url featured = featured %]
@@ -118,17 +118,12 @@ END %]
 							END;
 						   END;
 						%]
-						<h3 class="[% title_type %]">
+						<h3 class="[% title_type %]" id="title-[% item.id %]">
 							[% IF item.thumb && thumbfile && !featured %]
 								<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]"><img src="[% constants.imagedir %][% thumbfile.name %] " height="25" width="30" alt="Screenshot-sm"></a>
 
 							[% END %]
 							[% title %]
-							[% IF user.is_admin %]
-								<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
-									<a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit</a>
-								</form>
-							[% END %]
 				[% IF item.discussion && featured;
 						skin = gSkin;
 						IF item.type == "story"; skin = Slash.db.getSkin(item.primaryskid); END %]
@@ -141,11 +136,11 @@ END %]
 							[% Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');	%]
 							<div class="[% IF bodycontent && mode == 'fulltitle' %]hide[% ELSIF bodycontent %]body[% ELSE %]hide[% END %]" id="fhbody-[% item.id %]"[% IF !hasimage %] style="min-height: auto !important;"[% END %]>
 								[% IF item.thumb && ((!featured) || (featured && !item.media)) %]
-								<span class="media topicicon">
+								<span class="media topicicon" id="topic-[% item.id %]">
 									[% PROCESS dispTopicFireHose item = item %]
 								</span>
 								[% ELSIF item.tid && topic.image && !featured %]
-								<span class="media topic topicicon">
+								<span class="media topic topicicon" id="topic-[% item.id %]">
 									[% PROCESS dispTopicFireHose item = item %]
 								</span>
 								[% END %]
@@ -189,7 +184,8 @@ END %]
 
 									<div class="article-foot">
 									<span class="reader">
-									<a href="[% link_url %]" class="more">Read More</a>
+									<a href="[% link_url %]" class="more">Read[% IF item.body_length %] [% item.body_length; END %] More[% IF item.body_length %] Bytes[% END %]...</a>
+
 									<span class="commentcnt"> <a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]">[% disc.commentcount || 0 %]</a> comments</span>
 									</span>
 									__TAG_WIDGET__

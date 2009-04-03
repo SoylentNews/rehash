@@ -56,7 +56,7 @@ END;
 		[% END %]
 		<li class="[% IF is_active %]active[% ELSIF hide %]hide[% END %][% IF is_default %] default[% END %]" id="fhsection-[% fh_section.fsid %]">
 			<a id="fhsectiontitle-[% fh_section.fsid %]" href="[% link_loc %]"[% IF !skip_edit %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
-			[% IF !skip_edit %] <a class="links-sections-edit">[e]</a>[% END %]
+			[% IF !skip_edit %] <a href="[% PROCESS nojslink %]" class="links-sections-edit">[e]</a>[% END %]
 		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
 	[% END %]
