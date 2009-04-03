@@ -97,7 +97,11 @@ var tag_server_fns = {
 
 			// Just for fun...
 			if ( options && options.classes ) {
-				animate_wiggle($user_displays.find('.'+options.classes + ':not(:contains("-"))'));
+				animate_wiggle(
+					$user_displays.
+						removeClass('no-visible-tags').
+						find('.'+options.classes + ':not(:contains("-"))')
+				);
 			}
 
 			server_params.tags = qw.as_string(tag_cmds);
