@@ -156,12 +156,8 @@ var tag_server_fns = {
 };
 
 function install_tag_server( selector, item_id ) {
-	if ( item_id === undefined ) {
-		item_id = '*';
-	}
-
 	return $(selector).
-		attr('tag-server', item_id).
+		attr('tag-server', item_id||'*').
 		each(function(){
 			$.extend(this, tag_server_fns);
 			this.busy_depth = 0;
@@ -697,11 +693,11 @@ var tag_widget_fns = {
 								add($parent).
 									show();
 
-							var restore_h3, ul=Size($display.find('ul'));
-							$parent.closest('h3').each(function(){
-								var $h3=$(this), saved=$h3.css('max-height')||'';
-								$h3.css('max-height', $h3.height()+ul.height+'px');
-								restore_h3 = function(){ $h3.css('max-height', saved); };
+							var restore_outer, ul=Size($display.find('ul'));
+							$parent.closest('h3,div.body-widget').each(function(){
+								var $outer=$(this), saved=$outer.css('max-height')||'';
+								$outer.css('max-height', $outer.height()+ul.height+'px');
+								restore_outer = function(){ $outer.css('max-height', saved); };
 							});
 
 							try {
@@ -713,7 +709,7 @@ var tag_widget_fns = {
 							$display.
 								hide().
 								css({ height:'', left:best_left }).
-								slideDown(400, restore_h3).
+								slideDown(400, restore_outer).
 								dequeue();
 						});
 					}

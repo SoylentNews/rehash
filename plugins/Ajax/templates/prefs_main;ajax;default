@@ -50,9 +50,10 @@ END
 <h3><a href="#" onclick="javascript:getModalPrefs('fhlayout', 'Index Beta Settings', 1); return false" style="text-decoration: none;">Index Beta Settings</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_indexbeta'); return false" title="Click To Expand Help" class="help">?</a></h3>
 
 <div style="padding-left: 10px;">
-        <div id="modalprefhelp_indexbeta" class="modalprefhelp" style="display: none;">
-	Configure the layout of the new Index, what items are excluded, and settings for different view tabs
-        </div>
+	<div id="modalprefhelp_indexbeta" class="modalprefhelp" style="display: none;">
+		Configure the layout of the new Index, what items are excluded, and settings for different view tabsa
+	</div>
+</div>
 <br>
 
 <h3><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %] style="text-decoration: none;">Discussions</a>&nbsp;<a href="/users.pl?op=editcomm" onclick="displayModalPrefHelp('modalprefhelp_discussions'); return false" title="Click To Expand Help" class="help">?</a></h3>

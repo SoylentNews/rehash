@@ -29,53 +29,12 @@ __template__
         [% dyn_achievements %]
 [% END %]
 
-[% IF latest_comments.size != 0 %]
-<div class="block" id="latest_comments">
-        <div class="title" id="latest_comments_title">
-                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/comments">Comments</a></h4>
-        </div>
-
-        <div class="content" id="latest_comments_content">
-                <ul>
-                [% FOREACH cid = latest_comments.keys.sort.reverse %]
-			[%
-                        reason_num = '';
-                        reason_text = '';
-                        IF latest_comments.$cid.points > 1;
-                                reason_num = latest_comments.$cid.reason;
-                                reason_text = reasons.$reason_num.name;
-                        END;
-                        %]
-                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a>
-			[%
-                        IF latest_comments.$cid.points > 1;
-                                '&nbsp;(Score:';latest_comments.$cid.points;
-                                IF reason_text != 'Normal';
-                                        ',&nbsp;';reason_text;
-                                END;
-                                ')';
-                        END;
-                        %]
-			</li>
-                [% END %]
-                </ul>
-        </div>
-</div>
+[% IF dyn_comments %]
+        [% dyn_comments %]
 [% END %]
 
-[% IF latest_journals.size != 0 %]
-<div class="block" id="latest_journals">
-        <div class="title" id="latest_journals_title">
-                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/journal">Journal Entries</a></h4>
-        </div>
-        <div class="content" id="latest_journals_content">
-                <ul>
-                [% FOREACH jid = latest_journals.keys.sort.reverse %]
-                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
-                [% END %]
-                </ul>
-        </div>
-</div>
+[% IF dyn_journals %]
+        [% dyn_journals %]
 [% END %]
 
 [% IF latest_submissions.size != 0 %]
@@ -152,9 +111,6 @@ __template__
 </div>
 [% END %]
 
-[% IF is_admin && dyn_messages %]
-        [% dyn_messages %]
-[% END %]
 __seclev__
 500
 __version__

@@ -40,9 +40,9 @@ __template__
                                         IF user.points > 1; plural = 's'; END;
                                 %]
                                 [% IF expirydate %]
-                                        <b>Your [% user.points %] moderator point[% plural %] will expire on [% expirydate %].</b>
+					<b>[% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a> expire [% expirydate %].</b>
                                 [% ELSE %]
-                                        <b>You have [% user.points %] moderator point[% plural %].</b>
+					<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a>.</b>
                                 [% END %]
 
                                 <p></p>

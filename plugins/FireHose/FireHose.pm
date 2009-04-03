@@ -2688,9 +2688,21 @@ sub dispFireHose {
 		}
 	}
 
+	my $tag_widget = slashDisplay('tag_widget', {
+		id 		=> $item->{id},
+		top_tags 	=> $options->{top_tags},
+		system_tags 	=> $options->{system_tags},
+		vote 		=> $options->{vote},
+		options 	=> $options->{options},
+		item 		=> $item,
+		skipvote 	=> 1 
+	}, { Return => 1, Page => 'firehose'});
+
 	my $atstorytime;
 	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
 	$retval =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
+
+	$retval =~ s/\Q__TAG_WIDGET__/$tag_widget/g;
 	slashProf("","fh_dispFireHose");
 
 	return $retval;
