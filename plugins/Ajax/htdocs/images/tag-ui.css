@@ -28,7 +28,7 @@ span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
 }
 
 div.body-widget div {
-	display: inline;
+	/* display: inline; */
 }
 
 
