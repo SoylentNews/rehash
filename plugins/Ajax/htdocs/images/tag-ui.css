@@ -27,10 +27,6 @@ span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
 	cursor: text !important;
 }
 
-div.body-widget div {
-	/* display: inline; */
-}
-
 
 .tag-display span.tag,
 .tag-widget .admin-buttons {
