@@ -2693,7 +2693,7 @@ sub dispFireHose {
 		top_tags 	=> $options->{top_tags},
 		system_tags 	=> $options->{system_tags},
 		vote 		=> $options->{vote},
-		options 	=> $options ->{options},
+		options 	=> $options->{options},
 		item 		=> $item,
 		skipvote 	=> 1 
 	}, { Return => 1});
