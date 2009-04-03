@@ -338,14 +338,6 @@ span.tag-display {
 	display: none !important;
 }
 
-.tag-widget .tag-display[context=user] {
-	display: none;
-}
-
-.tag-widget.expanded .tag-display[context=user] {
-	display: inline;
-}
-
 
 .tag-display[context=related] {
 	display: block;
