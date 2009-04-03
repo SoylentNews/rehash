@@ -156,12 +156,8 @@ var tag_server_fns = {
 };
 
 function install_tag_server( selector, item_id ) {
-	if ( item_id === undefined ) {
-		item_id = '*';
-	}
-
 	return $(selector).
-		attr('tag-server', item_id).
+		attr('tag-server', item_id||'*').
 		each(function(){
 			$.extend(this, tag_server_fns);
 			this.busy_depth = 0;
