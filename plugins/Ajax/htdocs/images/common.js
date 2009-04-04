@@ -654,7 +654,7 @@ function firehose_toggle_tag_ui( any ) {
 
 function firehose_click_tag( event ) {
 	var	$target	= $(event.target),
-		$fhitem	= fhitems($target),
+		$fhitem	= $('#firehoselist').length ? fhitems($target) : $target.closest('div.article'),
 		leaving	= !!$target.closest('a[href]:not([href=#])').length,
 		command	= '',
 		$menu;
@@ -663,10 +663,6 @@ function firehose_click_tag( event ) {
 		// _any_ click can trigger, but click-specific ad will win
 		setTimeout(function(){ inlineAdFirehose(); }, 0);
 		$fhitem.length && firehose_set_cur($fhitem);
-	}
-
-	// skip for non-JS hrefs
-	if (! $target.closest('a[href]:not([href=#])').length) {
 	}
 
 	$related_trigger = $target;
