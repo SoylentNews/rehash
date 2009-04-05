@@ -21,13 +21,14 @@ __template__
         </div>
                 <div class="content" id="userbio_self-content">
                 <ul>
-                        [% IF messages %]<li>[% END %]
-                        <div id="userbio_self-messages">
-                        [% IF messages %]
-                                [% messages %]
-                        [% END %]
-                        </div>
-                        [% IF messages %]</li>[% END %]
+			[% display = 'none'; IF messages; display = 'block'; END %]
+			<li id="userbio_self-messages-begin" style="display: [% display %]">
+				<div id="userbio_self-messages">
+				[% IF messages %]
+					[% messages %]
+				[% END %]
+                                </div>
+                        </li>
 
                         <li>
                         <b>Karma: [% PROCESS karma useredit = user admin_flag = user.is_admin %]</b>

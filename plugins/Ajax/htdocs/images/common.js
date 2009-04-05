@@ -1325,6 +1325,34 @@ function dynamic_blocks_update(blocks) {
 	});
 }
 
+function dynamic_blocks_delete_message(val, type) {
+	var params = {};
+	params.op = 'dynamic_blocks_delete_message';
+	params.val = val;
+	params.reskey = reskey_static;
+	if (type == 'user_bio_messages') {
+		params.user_bio_messages = 1;
+		params.strip_list = 1;
+	}
+	ajax_update(
+		params,
+		'',
+		{
+			onComplete: function(transport) {
+				var response = eval_response(transport);
+				var block_content = '';
+				if (response != undefined) {
+					block_content = response.block;
+				}
+				$('#userbio_self-messages').html(block_content);
+				if ((block_content == '') || (response == undefined)) {
+					$('#userbio_self-messages-begin').hide();
+				}
+			}
+		}
+	);
+}
+
 function firehose_busy() {
 	return Slash.markBusy('firehose', true);
 }
