@@ -80,22 +80,16 @@ END %]
 
 
 			<li [% IF active_view %]class="active"[% END %]>
-			<a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">
-			[% view.viewtitle.ucfirst %]
-			</a> 
-
-				[% IF active_view %]
+			<a href="[% gSkin.rootdir %]/firehose.pl?view=[% view.viewname %]" onclick="firehose_set_options('view', '[% view.viewname %]');return false;">[% view.viewtitle.ucfirst %]</a>
+			[% IF active_view %]
 					[% IF rss_link %]
 						<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>
 					[% END %]
-
-
 					[% IF !user.is_anon %]
 						<span class="tab_edit"><a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit">Edit</a></span>
 					[% END %]
 				[% END %]
 				</li>
-
 			[%- END -%]
 
 
