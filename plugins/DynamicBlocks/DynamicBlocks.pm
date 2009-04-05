@@ -432,6 +432,30 @@ sub setRemarkAsMessage {
         }
 }
 
+# Returns a named block
+sub getDynamicBlock { 
+        my ($self, $name, $options) = @_;
+
+        my $slashdb = getCurrentDB();
+
+        my $block;
+        ($block->{block}, $block->{title}, $block->{url}) =
+                $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "name = '$name'");
+        $block->{name} = $name;
+
+        if ($options->{strip_list} && $block->{block}) {
+                $block->{block} =~ s/<\/?ul>//g;
+                $block->{block} =~ s/<li>//g;
+                $block->{block} =~ s/<\/li>/<br\/>/g;
+        }
+
+        if ($options->{user_bio_messages} && $block->{block}) {
+                $block->{block} =~ s/\(('(\d+,?)+')\)/\($1, 'user_bio_messages'\)/g;
+        }
+
+        return $block->{block} ? $block : 0;
+}
+
 # Returns all portal blocks.
 sub getPortalBlocks {
 	my ($self, $keyed_on, $options) = @_;
@@ -682,14 +706,10 @@ sub getUserBioBlock {
 
         return if ($user->{uid} == $constants->{anonymous_coward_uid});
 
-        my ($messages, $expiry_secs) =
-                $slashdb->sqlSelect(
-                        'block',
-                        'dynamic_user_blocks',
-                        "name = 'messages-" . $user->{uid} . "'"
-                );
+	my $messages = $self->getDynamicBlock('messages-' . $user->{uid}, { user_bio_messages => 1, strip_list => 1 });
+        my $block = $messages->{block} if $messages;
 
-        my $expiry_date;
+	my $expiry_date;
         if ($user->{lastgranted} and ($user->{lastgranted} ne '0000-00-00 00:00:00')) {
                 my ($gyear, $gmonth, $gday, $ghour, $gmin, $gsec) =
                         $user->{lastgranted} =~ /^(\d+)\-(\d+)\-(\d+)\s(\d+)\:(\d+)\:(\d+)$/;
@@ -700,17 +720,10 @@ sub getUserBioBlock {
                 $expiry_date = sprintf("%4d-%02d-%02d", $year+1900,$mon + 1,$mday, undef, undef, undef);
         }
 
-	# Remove the formatting from messages.
-	if ($messages) {
-	        $messages =~ s/<\/?ul>//g;
-        	$messages =~ s/<li>//g;
-	        $messages =~ s/<\/li>/<br\/>/g;
-	}
-
         my $biobox = slashDisplay('userbio', {
                         user       => $user,
                         expirydate => $expiry_date,
-                        messages   => $messages,
+                        messages   => $block,
                      }, { Page => 'dynamicblocks', Skin => 'default', Return => 1 });
 
         return $biobox;
@@ -721,17 +734,46 @@ sub displayBlock {
 
         my $slashdb = getCurrentDB();
 
-        my $block;
-        ($block->{block}, $block->{title}, $block->{url}) =
-                $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "name = '$name'");
-        $block->{name} = $name;
-
-	($block->{title}) = $block->{title} =~ /^.+\s(\w+)$/ if ($options->{user_self} and $block->{block});
+	my $block = $self->getDynamicBlock($name);
+        ($block->{title}) = $block->{title} =~ /^.+\s(\w+)$/ if ($options->{user_self} and $block and $block->{block});
 
         return
                 slashDisplay('displayblock', {
                         block => $block,
                 }, { Page => 'dynamicblocks', Return => 1 });
+}
+
+sub ajaxDeleteMessage {
+        my ($self, $constants, $user, $form, $options) = @_;
+
+        my $messages = getObject('Slash::Messages');
+        my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+        return 0 if (!$messages       ||
+                     !$dynamic_blocks ||
+                     !$user->{uid}    ||
+                     !$form->{val}    ||
+                     ($user->{uid} == $constants->{anonymous_coward_uid})
+        );
+
+        my $ids = [];
+        @$ids = split(/,/, $form->{val});
+        foreach my $id (@$ids) {
+                my $message = $messages->getWeb($id);
+                next if ($user->{uid} != $message->{user}{uid});
+                $messages->_delete_web($id, $user->{uid});
+        }
+
+        my $gb_options = {};
+        $gb_options->{strip_list} = 1 if ($form->{strip_list} == 1);
+        $gb_options->{user_bio_messages} = 1 if ($form->{user_bio_messages} == 1);
+        my $block = $dynamic_blocks->getDynamicBlock('messages-' . $user->{uid}, $gb_options);
+
+        if ($block && $block->{block}) {
+                $block->{user_bio_messages} = 1 if ($form->{user_bio_messages} == 1);
+                $block->{strip_list} = 1 if ($form->{strip_list} == 1);
+        }
+
+        return Data::JavaScript::Anon->anon_dump($block);
 }
 
 sub DESTROY {
