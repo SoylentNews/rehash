@@ -1,0 +1,18 @@
+__section__
+default
+__description__
+ 
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+nojslink
+__template__
+//[% gSkin.rootdir %]/faq/UI.shtml#ui700
+__seclev__
+1000
+__version__
+$Id$

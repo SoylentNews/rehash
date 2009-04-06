@@ -32,8 +32,8 @@ __template__
 
 	[%# the disclosure triangle %]
 	<a class="edit-toggle"
-	[%  IF user.tags_canwrite_stories	%] href="#" onclick="this.blur(); this.parentNode.toggle_widget(this); return false"
-	[%- ELSIF user.is_anon			%] href="#" onclick="this.blur(); show_login_box(); return false"
+	[%  IF user.tags_canwrite_stories	%] href="[% PROCESS nojslink %]" onclick="this.blur(); this.parentNode.toggle_widget(this); return false"
+	[%- ELSIF user.is_anon			%] href="[% PROCESS nojslink %]" onclick="this.blur(); show_login_box(); return false"
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]>
 		<span class="button collapse"></span>
