@@ -1155,7 +1155,7 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 
 
-
+	return ([],{});
 	# SEARCH SETUP
 	my($sphinx_debug, $sphinx_other) = (0, 0);
 	my $sphinx = {
@@ -1946,6 +1946,7 @@ sub genSetOptionsReturn {
 	my $section_changed = $form->{section} && $form->{sectionchanged};
 	if (($form->{view} && $form->{viewchanged}) || $section_changed) {
 		$data->{eval_last} = "firehose_swatch_color('$opts->{color}');";
+		
 		$event_data->{'select_section'} = $section_changed;
 	}
 	$data->{events} = [{
@@ -1954,7 +1955,7 @@ sub genSetOptionsReturn {
 	}];
 
 	my $eval_first = "";
-	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view fhfilter base_filter)) {
+	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view viewtitle fhfilter base_filter)) {
 		my $value = $opts->{$o};
 		if ($o eq 'orderby' && $value eq 'editorpop') {
 			$value = 'popularity';
@@ -3716,6 +3717,7 @@ sub getAndSetOptions {
 			my $nick_user = $options->{user_view_uid} || $user->{uid};
 			my $nick = $self->getUser($nick_user, 'nickname');
 			$options->{viewref}{viewtitle} =~ s/\{nickname\}/$nick/;
+			$options->{viewtitle} = $options->{viewref}{viewtitle}
 		}		
 	}
 

@@ -200,6 +200,9 @@ cmdrtaco dot net but be forgiving of beta code!
 	firehose_settings.issue = [% firehose.js_anon_dump(options.issue) %];
 	firehose_settings.section = [% firehose.js_anon_dump(section) %];
 	firehose_settings.metamod = [% form.metamod ? 1 : 0 %];
+	firehose_sitename = [% firehose.js_anon_dump(constants.sitename) %];
+	firehose_slogan = [% firehose.js_anon_dump(constants.slogan) %];
+	firehose_update_title_count();
 	
 	[% IF featured && featured.id %]
 		firehose_settings.not_id = [% firehose.js_anon_dump(featured.id) %];
