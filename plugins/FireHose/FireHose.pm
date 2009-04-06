@@ -3716,8 +3716,8 @@ sub getAndSetOptions {
 			my $nick_user = $options->{user_view_uid} || $user->{uid};
 			my $nick = $self->getUser($nick_user, 'nickname');
 			$options->{viewref}{viewtitle} =~ s/\{nickname\}/$nick/;
-			$options->{viewtitle} = $options->{viewref}{viewtitle}
 		}		
+		$options->{viewtitle} = $options->{viewref}{viewtitle};
 	}
 
 #use Data::Dumper;
