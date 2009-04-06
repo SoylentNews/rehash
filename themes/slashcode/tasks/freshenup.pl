@@ -7,15 +7,25 @@
 use File::Path;
 use File::Temp;
 use Fcntl;
+use Digest::MD5;
 use Slash::Constants ':slashd';
 
 use strict;
 
-use vars qw( %task $me $task_exit_flag );
+use vars qw( %task $me $task_exit_flag
+	$minutes_run
+	$sectional_freq
+);
 
-my $total_freshens = 0;
+# Change this var to change how often the task runs.  Sandboxes
+# run it every ten minutes, Slashdot.org every minute.
+$minutes_run = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 1 : 10);
 
-$task{$me}{timespec} = '0-59 * * * *';
+# Process the non-mainpage skins less often.  Sandboxes run them
+# every 5 invocations, Slashdot.org every 10.
+$sectional_freq = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 10 : 5);
+
+$task{$me}{timespec} = freshenup_get_start_min($minutes_run) . "-59/$minutes_run * * * *";
 $task{$me}{timespec_panic_1} = '1-59/10 * * * *';
 $task{$me}{timespec_panic_2} = '';
 $task{$me}{resource_locks} = getCurrentStatic('cepstral_audio') ? { cepstral => 1 } : { };
@@ -37,7 +47,7 @@ $task{$me}{code} = sub {
 	# preserve the stories table's query cache, we only update
 	# commentcount/hitparades if at least one of those three stories
 	# had a small commentcount.
-	my $do_all = ($info->{invocation_num} % 10 == 1) || 0;
+	my $do_all = ($info->{invocation_num} % $sectional_freq == 1) || 0;
 
 	# If run with runtask, you can specify some options on the comand
 	# line, e.g. to chew through writing .shtml files to disk for up
@@ -476,6 +486,14 @@ $task{$me}{code} = sub {
 	return $totalChangedStories ?
 		"totalChangedStories $totalChangedStories" : '';
 };
+
+sub freshenup_get_start_min {
+	my($freq) = @_;
+	return 0 if $freq < 2;
+	my $hosthash = hex(substr(Digest::MD5::md5_hex($me . $main::hostname), 0, 4));
+	my $frac = $hosthash / 65536;
+	return int($freq * $frac);
+}
 
 sub _make_cchp_file {
 	my $constants = getCurrentStatic();

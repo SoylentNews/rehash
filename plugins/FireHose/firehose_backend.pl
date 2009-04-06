@@ -12,7 +12,7 @@ use Slash::Constants ':slashd';
 
 use vars qw( %task $me
 	$minutes_run
-	$run_number $sectional_freq
+	$sectional_freq
 );
 
 # Change this var to change how often the task runs.  Sandboxes
@@ -21,10 +21,9 @@ $minutes_run = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 10 : 30);
 
 # Process the non-mainpage skins less often.  Sandboxes run them
 # every 5 invocations, other sites every other invocation.
-$run_number = 0;
 $sectional_freq = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 2 : 5);
 
-$task{$me}{timespec} = get_start_min($minutes_run) . "-59/$minutes_run * * * *";
+$task{$me}{timespec} = fhbackend_get_start_min($minutes_run) . "-59/$minutes_run * * * *";
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
@@ -48,7 +47,7 @@ $task{$me}{code} = sub {
 	my $skins = $slashdb->getSkins();
 	for my $skid (keys %$skins) {
 		next if $skid != $constants->{mainpage_skid}
-			&& $run_number % $sectional_freq != $sectional_freq-1;
+			&& $info->{invocation_num} % $sectional_freq != $sectional_freq-1;
 		my $skinname = $skins->{$skid}{name};
 		foreach (keys %$rss) {
 			gen_firehose_rss($virtual_user, "${skinname}_$skid", $skinname,
@@ -67,9 +66,10 @@ $task{$me}{code} = sub {
 # 30 minutes, this will spread the initial hourly runs between :00 and :29
 # (with successive runs equally staggered of course).
 
-sub get_start_min {
+sub fhbackend_get_start_min {
 	my($freq) = @_;
-	my $hosthash = hex(substr(Digest::MD5::md5_hex($main::hostname), 0, 4));
+	return 0 if $freq < 2;
+	my $hosthash = hex(substr(Digest::MD5::md5_hex($me . $main::hostname), 0, 4));
 	my $frac = $hosthash / 65536;
 	return int($freq * $frac);
 }
