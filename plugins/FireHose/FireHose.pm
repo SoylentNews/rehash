@@ -1155,7 +1155,6 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 
 
-	return ([],{});
 	# SEARCH SETUP
 	my($sphinx_debug, $sphinx_other) = (0, 0);
 	my $sphinx = {
