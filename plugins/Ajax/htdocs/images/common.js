@@ -1330,7 +1330,7 @@ function dynamic_blocks_delete_message(val, type) {
 	params.op = 'dynamic_blocks_delete_message';
 	params.val = val;
 	params.reskey = reskey_static;
-	if (type == 'user_bio_messages') {
+	if (type === 'user_bio_messages') {
 		params.user_bio_messages = 1;
 		params.strip_list = 1;
 	}
@@ -1345,7 +1345,7 @@ function dynamic_blocks_delete_message(val, type) {
 					block_content = response.block;
 				}
 				$('#userbio_self-messages').html(block_content);
-				if ((block_content == '') || (response == undefined)) {
+				if ((block_content === '') || (response === undefined)) {
 					$('#userbio_self-messages-begin').hide();
 				}
 			}

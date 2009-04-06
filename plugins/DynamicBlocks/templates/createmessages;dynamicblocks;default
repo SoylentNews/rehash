@@ -14,12 +14,17 @@ createmessages
 __template__
 
 <ul>
+[% ids = ''; count = 0; %]
 [% FOREACH message = messages %]
 <li>
-<a href="[% constants.real_rootdir %]/messages.pl?op=display&id=[% message.id %]">[% message.subject %]</a>
+<a href="[% constants.real_rootdir %]/messages.pl?op=display&id=[% message.id %]">[% message.subject %]</a>&nbsp;<a href="#" onClick="dynamic_blocks_delete_message('[% message.id %]'); return false;" style="text-decoration: none">[X]</a>
 </li>
-[% END %]
 </ul>
+[% count = count + 1; ids = ids _ message.id; IF count != messages.size; ids = ids _ ','; END; %]
+[% END %]
+
+<span style="font-size: x-small"><a href="[% constants.real_rootdir %]/messages.pl?op=list">[% messagecount %] More</a> | <a href="#" onClick="dynamic_blocks_delete_message('[% ids %]'); return false;">Delete All</a></span>
+
 __seclev__
 500
 __version__

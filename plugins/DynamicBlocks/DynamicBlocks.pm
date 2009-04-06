@@ -377,12 +377,13 @@ sub setUserMessagesBlock {
 
         my $slashdb = getCurrentDB();
 
+	my $limit = 5;
         my $messages =
                 $slashdb->sqlSelectAllHashrefArray(
                         'id',
                         'message_web',
                         "user = " . $user->{uid} .
-                        ' order by date desc limit 5'
+                        " order by date desc limit $limit"
                 );
 
         foreach my $message (@$messages) {
@@ -391,9 +392,13 @@ sub setUserMessagesBlock {
 
         my $block;
         if (scalar @$messages) {
+		my $count = $slashdb->sqlSelect('count(id)', 'message_web', "user = " . $user->{uid});
+		$count -= $limit;
+		$count = 0 if (scalar @$messages < 5);
                 my $messages_block =
                         slashDisplay('createmessages', {
-                                messages => $messages,
+                                messages     => $messages,
+				messagecount => $count,
                         }, { Page => 'dynamicblocks', Return => 1 });
 
                 $block->{block} = $messages_block;
