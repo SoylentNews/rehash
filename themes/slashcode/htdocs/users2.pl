@@ -1260,6 +1260,11 @@ sub showInfo {
 			$dyn_journals     = $dynamic_blocks_reader->displayBlock('journal-'      . $uid, { user_self => $user_self });
                 }
 
+		my $userbio;
+                if ($requested_user->{uid} == $user->{uid}) {
+                        $userbio = $dynamic_blocks_reader->getUserBioBlock($user) if ($dynamic_blocks_reader && !$user->{is_anon});
+                }
+
 		slashDisplay('u2MainView', {
 			title			    => $title,
 			uid			    => $uid,
@@ -1300,6 +1305,7 @@ sub showInfo {
 			dyn_achievements            => $dyn_achievements,
 			dyn_comments                => $dyn_comments,
 			dyn_journals                => $dyn_journals,
+			userbio			    => $userbio,
 			
 		}, { Page => 'users', Skin => 'default'});
 	}

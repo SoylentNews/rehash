@@ -17,7 +17,7 @@ __template__
 [% IF main_view %]
 <div class="head">
 	<div class="yui-b">
-		[% PROCESS u2UserBio useredit=useredit %]
+		[% IF userbio; userbio; ELSE; PROCESS u2UserBio useredit=useredit; END %]
 	</div>
 
 	[% IF firehose_marquee.defined %]
@@ -75,7 +75,13 @@ __template__
 %]
 
 <div class="yui-b" id="userboxes">
-        [% IF !main_view; PROCESS u2UserBio useredit=useredit; END; %]
+	[% IF !main_view;
+                IF userbio;
+                        userbio;
+                ELSE;
+                        PROCESS u2UserBio useredit=useredit;
+                END;
+        END %]
 
         [% PROCESS u2UserBoxes
                 latest_comments=latest_comments
