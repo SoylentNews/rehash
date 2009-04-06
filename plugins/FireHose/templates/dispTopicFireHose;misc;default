@@ -26,7 +26,7 @@ __template__
 	<a href="[% link_url %]"><img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; IF file.height; " height='$file.height'"; END; %] [% IF item.media && item.mediatype == "video" %]onclick="firehose_get_media_popup('[% item.id %]'); return false;"[% END %]></a><br>[% IF item.media && item.mediatype == "video"%]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]')">[% END %]<br>[% IF item.media && item.mediatype == "video" %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]'); return false;" class="watch">Watch</a>[% END %][% END %]
 							 
 [% ELSIF item.tid && topic.image %]
-	<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
+	<a href="[% gSkin.rootdir %]/index2.pl?fhfilter=[% topic.keword %]">
 	<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
 	</a>
 [% END %]
