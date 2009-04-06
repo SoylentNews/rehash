@@ -12,11 +12,16 @@ $fhs.sortable({				// make sections sortable...
 		axis: 'y',
 		containment: '#links-sections',
 		opacity: 0.8,
+		//start: function(event, ui) { return check_logged_in() },
 		update: saveFirehoseSectionMenu	// ...and save their new order
 	});
 });
 
 function saveFirehoseSectionMenu(){
+	if (! check_logged_in()) {
+		return false;
+	}
+
 	// tell the server our current (ordered) list of sections
 	ajax_update({
 		op:	'firehose_save_section_menu',
