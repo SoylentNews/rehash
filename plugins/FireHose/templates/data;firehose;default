@@ -107,7 +107,7 @@ __template__
 [% CASE 'firehose_more_link' %]
 		[% extra_onclick = '' %]
 		[% IF !contentsonly %]
-		<span id="firehose_more"><span class="busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
+		<span id="firehose_more"><span class="busy"><img src="[% constants.imagedir %]/spinner_000onccc.gif"></span>
 		[% END %]
 		[% no_more = 0; %]
 		[% IF day_label && day_count && options.duration != -1;
