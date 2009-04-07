@@ -1954,7 +1954,7 @@ sub genSetOptionsReturn {
 	}];
 
 	my $eval_first = "";
-	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view viewtitle fhfilter base_filter)) {
+	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color more_num tab view viewtitle fhfilter base_filter sectionname)) {
 		my $value = $opts->{$o};
 		if ($o eq 'orderby' && $value eq 'editorpop') {
 			$value = 'popularity';
@@ -3718,6 +3718,9 @@ sub getAndSetOptions {
 			$options->{viewref}{viewtitle} =~ s/\{nickname\}/$nick/;
 		}		
 		$options->{viewtitle} = $options->{viewref}{viewtitle};
+	}
+	if ($options->{sectionref} && $options->{sectionref}{section_name}) {
+		$options->{sectionname} = $options->{sectionref}{{section_name}
 	}
 
 #use Data::Dumper;

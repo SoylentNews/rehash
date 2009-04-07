@@ -38,6 +38,7 @@ var firehose_settings = {};
   firehose_settings.is_embedded = 0;
   firehose_settings.not_id = 0;
   firehose_settings.section = 0;
+  firehose_settings.sectionname = '';
   firehose_settings.more_num = 0;
   firehose_settings.metamod = 0;
   firehose_settings.admin_filters = 0;
@@ -1234,15 +1235,17 @@ function firehose_reorder( required_order ){
 }
 
 function firehose_update_title_count(num) {
-	var newtitle = document.title;
+	var newtitle;
+	var end;
 	if (!num) {
 		num = $('#firehoselist>div[class!=daybreak]').length;
 	}
 	if (num > 0) {
-		newtitle = firehose_sitename + " - " + firehose_settings.viewtitle + " ("  + num + ")";
+		end =  " ("  + num + ")";
 	} else {
-		newtitle = firehose_sitename  + ": " + firehose_slogan;
+		end = " " + firehose_slogan;
 	}
+	newtitle = firehose_sitename + " - " + " " + firehose_settings.sectionname + " " + firehose_settings.viewtitle + end;
 	document.title = newtitle;
 }
 
