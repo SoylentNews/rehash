@@ -632,7 +632,7 @@ function firehose_toggle_tag_ui( any ) {
 function firehose_click_tag( event ) {
 	var	$target	= $(event.target),
 		$fhitem	= $('#firehoselist').length ? fhitems($target) : $target.closest('div.article'),
-		leaving	= !!$target.closest('a[href]:not([href=#])').length,
+		leaving	= !!$target.closest('a[href]:not([href=#],[onclick])').length,
 		command	= '',
 		$menu;
 
