@@ -1141,13 +1141,19 @@ function firehose_handle_update() {
 			if ( !add_behind_scenes && firehose_removals<10 && Bounds.intersect(window, update.fhitem) ) {
 				wait_interval = t.interval;
 				update.fhitem.
-					animate(t.duration, {
-						opacity: 0,
-						height: 0
-					}, function(){
-						before_article_removed(this, true);
-						$(this).remove();
-					});
+					animate(
+						{
+							opacity: 0,
+							height: 0
+						},
+
+						t.duration,
+
+						function(){
+							before_article_removed(this, true);
+							$(this).remove();
+						}
+					);
 			} else {
 				wait_interval = 25;
 				update.fhitem.remove();
