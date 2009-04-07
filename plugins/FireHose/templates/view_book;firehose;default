@@ -1,0 +1,51 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+view_book
+__seclev__
+10000
+__template__
+<table class="book_details" cellpadding="2" cellspacing="0">
+        <tr>
+                <td colspan=2 class="book_title">
+                [% story.book_title %]
+                </td>
+        </tr>
+        <tr>
+                <td class="book_label">author</td>
+                <td class="book_data">[% story.book_author %]</td>
+        </tr>
+        <tr>
+                <td class="book_label">pages</td>
+                <td class="book_data">[% story.book_pages %]</td>
+        </tr>
+        <tr>
+                <td class="book_label">publisher</td>
+                <td class="book_data">[% story.book_publisher %]</td>
+        </tr>
+        <tr>
+                <td class="book_label">rating</td>
+                <td class="book_data">[% story.book_rating %]</td>
+        </tr>
+        <tr>
+                <td class="book_label">reviewer</td>
+                <td class="book_data">[% story.book_reviewer %]</td>
+        </tr>
+        <tr>
+                <td class="book_label">ISBN</td>
+                <td class="book_data">[% story.book_isbn %]</td>
+        </tr>
+        <tr>
+                <td class="book_label">summary</td>
+                <td class="book_data">[% story.book_summary %]</td>
+        </tr>
+</table>
+__version__
