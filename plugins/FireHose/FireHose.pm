@@ -3720,7 +3720,7 @@ sub getAndSetOptions {
 		$options->{viewtitle} = $options->{viewref}{viewtitle};
 	}
 	if ($options->{sectionref} && $options->{sectionref}{section_name}) {
-		$options->{sectionname} = $options->{sectionref}{{section_name}
+		$options->{sectionname} = $options->{sectionref}{section_name};
 	}
 
 #use Data::Dumper;
