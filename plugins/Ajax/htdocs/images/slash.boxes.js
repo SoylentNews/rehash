@@ -2,6 +2,10 @@
 // No client-callable functions.  It's all automatic.
 
 function save_slashboxes(){
+	if (! check_logged_in()) {
+		return false;
+	}
+
 	// tell the server our current list of slashboxes
 	ajax_update({
 		op:	'page_save_user_boxes',
