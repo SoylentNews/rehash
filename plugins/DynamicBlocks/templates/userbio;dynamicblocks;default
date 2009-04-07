@@ -15,7 +15,7 @@ __template__
 <div class="block" id="userbio_self">
         <div class="title" id="userbio_self-title">
                 <h4>
-                        <a href="[% gSkin.rootdir %]/[% user.nickname | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
+                        <a href="[% gSkin.rootdir %]/~[% user.nickname | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
                         [% PROCESS zoo_icons person = user.uid implied="" %]
                 </h4>
         </div>
