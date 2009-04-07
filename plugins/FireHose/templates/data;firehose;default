@@ -20,7 +20,7 @@ __template__
 	[% IF !hidediv %]
 	<div class="details" id="details-[% item.id %]">
 	[% END %]
-	<b>
+	<strong>
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
 	[% IF item.type == "submission" %]
 		Submitted
@@ -74,7 +74,7 @@ __template__
 	[% IF extras && adminmode && num_with_ipid != '0' %]
 		([% accepted_from_ipid %]/[% num_with_ipid %])
 	[% END %]
-	<span id="fhtime-[% item.id %]">[% item.atstorytime %]</span></b>
+	<span id="fhtime-[% item.id %]">[% item.atstorytime %]</span></strong>
 	[% IF item.type == "comment" %]
 		(<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]&amp;cid=[% item.srcid %]">#[% item.srcid %]</a>)
 	[% END %]
@@ -84,7 +84,7 @@ __template__
 		disc = Slash.db.getDiscussion(com.sid); %]
 		Attached to: <a href="[% disc.url %]">[% disc.title | strip_literal %]</a><br>
 	[% END %]
-		[% IF constants.use_dept && item.dept %]<strong>from the <b>[% item.dept %]</b> dept.</strong>[% END %]
+		[% IF constants.use_dept && item.dept %]<strong>from the <strong>[% item.dept %]</strong> dept.</strong>[% END %]
 	[% IF !hidediv %]
 
 	</div>
@@ -96,13 +96,13 @@ __template__
 	   fh_num   = fh_hash.${options.color};
 	   new_color   = fh_array.$fh_num;
 	%]
-		<b>
+		<strong>
 		[% IF user.state.firehose_page == "user" %]
 			This user's Firehose page contains no [% IF form.page %]additional [% END %]entries;
 		[% ELSE %]
 			No matches were found.  You may want to try [% IF new_color %]<a href="?[% IF form.embed %]embed=1&amp;[% END %]color=[% new_color | strip_paramattr %]">[% END %]lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]  or [% IF options.duration != -1 %]<a href="?[% IF form.embed %]embed=1&amp;[% END %]startdate=&amp;duration=-1">[% END %]expanding your time window[% IF options.duration != -1 %]</a>[% END %]
 		[% END %]
-		</b>
+		</strong>
 		<br><br>
 [% CASE 'firehose_more_link' %]
 		[% extra_onclick = '' %]
