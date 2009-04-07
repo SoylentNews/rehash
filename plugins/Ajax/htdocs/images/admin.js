@@ -319,14 +319,14 @@ function firehose_open_note( expr ) {
 	}
 	return $(expr).
 		each(function(){
-			var $entry = $(this), id = fhid_of(this);
+			var $entry = $(this), fhid = this.id.substr(9);
 			if ( $entry.is('[class^=brief]') ) {
-				toggle_firehose_body(id, true);
+				toggle_firehose_body($entry, true);
 			}
 			$entry.find('.note-wrapper').removeClass('no-note');
-			$entry.find('#note-form-'+id).removeClass('hide');
-			$entry.find('#note-input-'+id).each(function(){this.focus();});
-			$entry.find('#note-text-'+id).addClass('hide');
+			$entry.find('#note-form-'+fhid).removeClass('hide');
+			$entry.find('#note-input-'+fhid).each(function(){this.focus();});
+			$entry.find('#note-text-'+fhid).addClass('hide');
 		});
 }
 

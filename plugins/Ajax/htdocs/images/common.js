@@ -284,29 +284,6 @@ function normalize_options(){
 })();
 
 
-function fhitem_of( any ){
-	// Returns a jQuery selection of the firehose-item that is, contains, or is identified by any.
-	// Use fhitem_of() to present the "any" API from functions that work on firehose-items.
-	switch ( $.TypeOf.unqualified(any) ) {
-		case 'string':	if ( !/^\d+$/.test(any) ) { break; }
-		case 'number':	any = 'firehose-' + any;
-	}
-	return $any(any).closest('#firehoselist>*');
-}
-
-function fhid_of( any ){
-	// Returns the firehose-id associated with any, e.g., from 'firehose-12345', return 12345.
-	var M;
-	switch ( $.TypeOf.unqualified(any) ) {
-		case 'number':
-			return any;
-		case 'element': case 'string':
-			if ( M=/^(?:[-a-z]-)?(\d+)$/.exec(any.id||any) ) { return M[1]; }
-		default:
-			return (fhitem_of(any).attr('id') || '').substr(9); // chop off 'firehose-'
-	}
-}
-
 function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
 	$any('firehoselist').trigger('articlesMoved', data);
@@ -388,8 +365,8 @@ function reportError(request) {
 function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) {
 	setFirehoseAction();
 
-	var	$fhitem		= fhitem_of(any),
-		id		= fhid_of($fhitem),
+	var	$fhitem		= fhitems(any),
+		fhid		= $fhitem.attr('id').substr(9),
 		$body		= $fhitem.children('[id^=fhbody-]'),
 		body_is_empty	= $body.is('.empty'),
 		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
@@ -415,11 +392,11 @@ function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) 
 	if ( body_is_empty ) {
 		var handlers = {};
 		fh_is_admin && (handlers.onComplete = function(){
-			firehose_get_admin_extras(id);
+			firehose_get_admin_extras(fhid);
 		});
-		ajax_update({ op:'firehose_fetch_text', id:id, reskey:reskey_static }, $body.attr('id'), handlers);
+		ajax_update({ op:'firehose_fetch_text', id:fhid, reskey:reskey_static }, $body.attr('id'), handlers);
 	} else if ( fh_is_admin && showing ) {
-		firehose_get_admin_extras(id);
+		firehose_get_admin_extras(fhid);
 	}
 
 	$body.	removeClass('body empty hide').
@@ -577,10 +554,10 @@ function firehose_fix_up_down( id, new_state ){
 }
 
 function firehose_click_nodnix_reason( event ) {
-	var $fhitem=fhitem_of(event.target), id=fhid_of($fhitem);
+	var $fhitem=fhitems(event.target), fhid=$fhitem.attr('id').substr(9);
 
-	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+id).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
-		firehose_collapse_entry(id);
+	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+fhid).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
+		firehose_collapse_entry(fhid);
 	}
 
 	return true;
@@ -613,8 +590,8 @@ function tag_ui_in( $fhitem ){
 }
 
 function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
-	var	$fhitem		= fhitem_of(any), // assert($fhitem.length)
-		id		= fhid_of($fhitem),
+	var	$fhitem		= fhitems(any), // assert($fhitem.length)
+		fhid		= $fhitem.attr('id').substr(9),
 		tag_ui		= tag_ui_in($fhitem),
 		toggle		= tag_ui.expanded == !want_expanded; // force boolean conversion
 
@@ -632,7 +609,7 @@ function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 		$fhitem.find('.tag-widget').each(function(){ this.set_context(); });
 		tag_ui.widget.toggleClass('expanded', !!want_expanded);
 		tag_ui.widget.find('a.edit-toggle .button').setClass(applyToggle({expand:want_expanded, collapse:!want_expanded}));
-		$fhitem.find('#toggletags-body-'+id).setClass(applyToggle({tagbody:want_expanded, tagshide:!want_expanded}));
+		$fhitem.find('#toggletags-body-'+fhid).setClass(applyToggle({tagbody:want_expanded, tagshide:!want_expanded}));
 
 		if (!want_expanded && $fhitem.data('tags-opened-body')) { // is expanded, and parent was expanded by us
 			toggle_firehose_body($fhitem, 0, false);
@@ -648,7 +625,7 @@ function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 }
 
 function firehose_toggle_tag_ui( any ) {
-	var $fhitem = fhitem_of(any);
+	var $fhitem = fhitems(any);
 	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
 }
 
@@ -878,9 +855,9 @@ function firehose_init_tag_ui( $new_entries ){
 
 	$new_entries.
 		each(function(){
-			var $this = $(this), id = fhid_of(this);
+			var $this = $(this);
 
-			install_tag_server(this, id);
+			install_tag_server(this, this.id.substr(9));
 
 			if ( tag_admin ) {
 				this.command_pipeline.push(firehose_handle_admin_commands);
@@ -1079,12 +1056,12 @@ function firehose_handle_update() {
 					};
 
 		if( update.op == "add" ) {
-			var	$other		= fhitem_of(firehose_before[update.fhid]),
+			var	$other		= $any('firehose-'+firehose_before[update.fhid]),
 				insert_op	= 'insertAfter',
 				test_edge	= 'bottom';
 
 			if ( !$other.length ) {
-				$other = fhitem_of(firehose_after[update.fhid]).
+				$other = $any('firehose-'+firehose_after[update.fhid]).
 						prevAll('div[id^=firehose-]:not(.daybreak):first');
 			}
 			if ( !$other.length ) {
@@ -1129,7 +1106,7 @@ function firehose_handle_update() {
 						}
 					);
 			}
-		} else if ( update.op==='remove' && !(update.fhitem=fhitem_of(update.fhid)).is('.currfh') ) {
+		} else if ( update.op==='remove' && !(update.fhitem=$any('firehose-'+update.fhid)).is('.currfh') ) {
 			var t = { interval:500, duration:400 };
 			if (firehose_updates_size > 10) {
 				t.duration *= 2;
@@ -2448,7 +2425,7 @@ $(function(){
 		if (keyo.search)         {
 			view($any('searchquery'), { hint:$('body'), focus:true });
 		}
-		if (keyo.toggle && id)   { toggle_firehose_body(id)  }
+		if (keyo.toggle && id)   { toggle_firehose_body(el)  }
 
 		if (keyo.open) {
 			var mylink = '';
