@@ -38,6 +38,10 @@ sub main {
 	);
 
 	my $op = $form->{op} || "";
+
+	if ($form->{sid} || $form->{id}) {
+		$op = 'view';
+	}
 	
 	my $rss = $op eq "rss" && $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
 	
@@ -72,7 +76,6 @@ sub main {
 			return;
 		}
 	}
-
 	if ($op ne "rss") {
 		my $title = "$constants->{sitename} - Firehose";
 		if ($gSkin->{name} && $gSkin->{name} eq "idle") {
@@ -85,8 +88,14 @@ sub main {
 		if ($form->{index}) {
 			$title = "$constants->{sitename} - $constants->{slogan}";
 		}
-		if ($form->{op} && $form->{op} eq "view") {
-			my $item = $firehose_reader->getFireHose($form->{id});
+		if ($op && $op eq "view") {
+			my $item;
+			if ($form->{type} && $form->{id}) {
+				$item = $firehose_reader->getFireHoseByTypeSrcid($form->{type}, $form->{id});
+			} elsif ($form->{id}) {
+				$item = $firehose_reader->getFireHose($form->{id});
+			}
+			
 			if (!$item && $form->{sid}) {
 				$item = $firehose_reader->getFireHoseBySidOrStoid($form->{sid});
 			}
@@ -143,7 +152,12 @@ sub view {
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject("Slash::FireHose", { db_type => 'reader' });
 	my $options = $firehose->getAndSetOptions();
-	my $item = $firehose_reader->getFireHose($form->{id});
+	my $item;
+	if ($form->{type} && $form->{id}) {
+		$item = $firehose_reader->getFireHoseByTypeSrcid($form->{type}, $form->{id});
+	} elsif ($form->{id}) {
+		$item = $firehose_reader->getFireHose($form->{id});
+	}
 	if (!$item && $form->{sid}) {
 		$item = $firehose_reader->getFireHoseBySidOrStoid($form->{sid});
 	}
