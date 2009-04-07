@@ -1116,12 +1116,18 @@ function firehose_handle_update() {
 
 				update.fhitem.
 					css({ opacity: 0, height: 0 }).
-					animate(t.duration, {
+					animate(
+						{
 							opacity: 1,
 							height: fh_view_mode==='full' ? 200 : 50
-						}, function(){
+						},
+
+						t.duration,
+
+						function(){
 							$(this).css({ opacity:'', height:'' });
-						});
+						}
+					);
 			}
 		} else if ( update.op==='remove' && !(update.fhitem=fhitem_of(update.fhid)).is('.currfh') ) {
 			var t = { interval:500, duration:400 };
