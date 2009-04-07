@@ -3447,7 +3447,14 @@ sub _slashlink_to_link {
 		# Different behavior here, depending on whether we are
 		# outputting for a dynamic page, or a static one.
 		# This is the main reason for doing slashlinks at all!
-		if ($ssi) {
+		# Added 2009-04: and now it's mostly obviated :) since
+		# we no longer want to output .shtml but instead will
+		# trust Varnish to cache non-user-specific data, and
+		# will dynamically generate the rest with .pl.
+		# Set article_link_story_dynamic to 2 or greater and
+		# even slashized links will be forced dynamic.
+		my $force_dyn = $constants->{article_link_story_dynamic} > 1 ? 1 : 0;
+		if (!$force_dyn && $ssi) {
 			$url .= qq{$skin_root/};
 			$url .= qq{$skin_name/$attr{sid}.shtml};
 			$url .= qq{?tid=$attr{tid}} if $attr{tid};
