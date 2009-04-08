@@ -35,6 +35,7 @@ END;
 <ul id="firehose-sections">
 	<script type="data">{ active_id:[% cur_section_id %], default_id:[% default_section_id %] }</script>
 	[% FOREACH fh_section= sections %]
+		[% NEXT if skip_section_id && fh_section.fsid == skip_section_id %]
 		[% hide = 0 %]
 		[% IF fh_section.user_display; fh_section.display = fh_section.user_display; END %]
 		[% IF fh_section.user_section_name; fh_section.section_name = fh_section.user_section_name; END %]
