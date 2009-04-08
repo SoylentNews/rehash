@@ -131,17 +131,35 @@ sub newUser {
 				? strip_nohtml($form->{pubkey}, 1)
 				: '';
 
-			if ($form->{newsletter} || $form->{comment_reply} || $form->{headlines}) {
-				my $messages  = getObject('Slash::Messages');
-				my %params;
-				$params{MSG_CODE_COMMENT_REPLY()} = MSG_MODE_EMAIL()
-					if $form->{comment_reply};
+			# Default message preferences
+			my $messages  = getObject('Slash::Messages');
+			my %params;
+
+			# We are defaulting these to webmail. If you're adding a new default,
+			# make sure that type can handle MSG_MODE_WEB.
+			my @default_types = (
+				'Comment Moderation',
+                                'Comment Reply',
+                                'Journal Entry by Friend',
+                                'Subscription Running Low',
+                                'Subscription Expired',
+                                'Achievement',
+                                'Relationship Change'
+                        );
+
+			foreach my $type (@default_types) {
+                                my $code = $messages->getDescription('messagecodes', $type);
+                                $params{$code} = MSG_MODE_WEB() if $code;
+                        }
+
+			if ($form->{newsletter} || $form->{headlines}) {
 				$params{MSG_CODE_NEWSLETTER()}  = MSG_MODE_EMAIL()
 					if $form->{newsletter};
 				$params{MSG_CODE_HEADLINES()}   = MSG_MODE_EMAIL()
 					if $form->{headlines};
-				$messages->setPrefs($uid, \%params);
 			}
+
+			$messages->setPrefs($uid, \%params);
 
 			my $user_send = $slashdb->getUser($uid);
 			_sendMailPasswd(@_, $user_send);

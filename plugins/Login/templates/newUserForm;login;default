@@ -45,9 +45,6 @@ __template__
 					Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %] without you setting your preferences to display it.
 				</div>
 				<label>
-					<input type="checkbox" name="comment_reply" value="1" checked> Replies to my comments will be mailed to me
-				</label>
-				<label>
 					<input type="checkbox" name="newsletter" value="1"> Send me the newsletter
 				</label>
 				<label>
