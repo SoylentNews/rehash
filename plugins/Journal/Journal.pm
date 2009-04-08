@@ -36,7 +36,7 @@ sub set {
 	}
 
 	$j2{article}   = delete $j1{article};
-	$j2{introtext} = $self->getIntrotext($id, $j2{article}, 0, $uid) if $j2{article};
+	$j2{introtext} = $self->getIntrotext($id, $j2{article}, ($j1{posttype}||0), $uid) if $j2{article};
 	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
