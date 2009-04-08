@@ -2464,3 +2464,35 @@ $(function(){
 });
 
 
+function shorten_fh_pag_menu() {
+	while (1) {
+		var $firstitem = $('#fh-pag-div div:.currcolor');
+		var $lastitem  = $('#fh-paginate span:last');
+
+		if (!$firstitem.length || !$lastitem.length) {
+			return;
+		}
+
+		var firstb = new Bounds($firstitem);
+		var lastb  = new Bounds($lastitem);
+
+		if (!firstb || !lastb || !firstb.top || !lastb.top) {
+			return;
+		}
+
+
+		if (firstb.top != lastb.top) {
+			var $spans = $('#fh-paginate span.active,span.inactive');
+			var idx = $spans.length;
+			idx--; idx--; // second from last item
+			if (idx > 0) {
+				$($spans[idx]).remove();
+			} else {
+				return;
+			}
+		} else {
+			return;
+		}
+	}
+}
+
