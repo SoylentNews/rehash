@@ -173,6 +173,17 @@ sub view {
 		my $system_tags = $firehose_reader->getFireHoseSystemTags($item);
 		my $discussion = $item->{discussion};
 
+		# Extra book review info
+		my $book_info = '';
+		if (($item->{type} eq 'story') && $item->{primaryskid}) {
+			my $skins = $slashdb->getSkins();
+			if ($skins->{$item->{primaryskid}}{name} eq 'books') {
+				my $sid = $slashdb->getStorySidFromDiscussion($item->{discussion});
+				my $story = $slashdb->getStory($sid) if $sid;
+				$book_info = slashDisplay("view_book", { story => $story }, { Return => 1 }) if $story->{book_title};
+			}
+		}
+
 		my $firehosetext = $firehose_reader->dispFireHose($item, {
 			mode			=> 'full',
 			view_mode		=> 1,
@@ -181,7 +192,8 @@ sub view {
 			system_tags		=> $system_tags,
 			options			=> $options,
 			nostorylinkwrapper	=> $discussion ? 1 : 0,
-			vote			=> $vote
+			vote			=> $vote,
+			book_info		=> $book_info
 		});
 
 		my $dynamic_blocks = getObject('Slash::DynamicBlocks');

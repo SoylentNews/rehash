@@ -160,6 +160,7 @@ END %]
 										[% introtext = item.introtext;
 										    PROCESS formatHoseIntro;
 										    introtext;
+										    IF book_info; book_info; END;
 										%]</div>
 										[% IF view_mode && item.bodytext %]
 										<div class="bodytext">[% item.bodytext %]</div>

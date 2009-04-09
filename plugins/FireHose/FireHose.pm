@@ -2676,7 +2676,8 @@ sub dispFireHose {
 			bodycontent_include	=> $options->{bodycontent_include},
 			nostorylinkwrapper	=> $options->{nostorylinkwrapper},
 			view_mode		=> $options->{view_mode},
-			featured		=> $options->{featured}
+			featured		=> $options->{featured},
+			book_info               => $options->{book_info},
 		}, { Page => "firehose",  Return => 1 });
 
 		if ($mcd) {
