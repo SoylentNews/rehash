@@ -115,6 +115,7 @@ $('#links-sections script[type=data]').
 $any('firehose-sections').metadata().home_id = $any('links-sections-title').metadata().id;
 })();
 
+
 function highlight_menu_item( section_id ){
 	return firehose_section_menu_item(section_id).each(function(){
 		$('#links-sections .active').not(this).removeClass('active');
@@ -122,6 +123,7 @@ function highlight_menu_item( section_id ){
 		$any('firehose-sections').metadata().active_id = section_id;
 	});
 }
+
 
 $any('links-sections').
 	mousedown(function( event ){	// "activate" a section (immediately) on mousedown in the section menu
@@ -155,6 +157,17 @@ $any('links-sections').
 		[% END %]
 		return false;
 	});
+
+
+// Drag items in the section-menu to reorder it permanently.
+$any('firehose-sections').
+	sortable({
+		axis: 'y',
+		containment: '#links-sections',
+		opacity: 0.8,
+		update: saveFirehoseSectionMenu
+	});
+
 
 $(document).
 	bind('firehose-setting-section', function( e, section_id ){

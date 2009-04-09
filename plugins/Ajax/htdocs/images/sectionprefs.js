@@ -1,22 +1,5 @@
 ; // $Id$
 
-$(function(){
-var $fhs=$any('firehose-sections'), $md=$fhs.children('script[type=data]');
-if ( $md.length ) {
-	$fhs.metadata({ type:'elem', name:'script' });	// force metadata initialization
-	$md.remove();	// and delete the element that delivered it to us
-}
-
-
-$fhs.sortable({				// make sections sortable...
-		axis: 'y',
-		containment: '#links-sections',
-		opacity: 0.8,
-		//start: function(event, ui) { return check_logged_in() },
-		update: saveFirehoseSectionMenu	// ...and save their new order
-	});
-});
-
 function saveFirehoseSectionMenu(){
 	if (! check_logged_in()) {
 		return false;
