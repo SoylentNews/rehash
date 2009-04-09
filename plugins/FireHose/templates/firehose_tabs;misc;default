@@ -77,7 +77,7 @@ END %]
 				%]
 			[% END %]
 
-			[% short_url_views = { stories = 1 recent = 1 popular = 1 daddypants = 1 } %];
+			[% short_url_views = { stories = 1 recent = 1 popular = 1 daddypants = 1 } %]
 
 			<li [% IF active_view %]class="active"[% END %]>
 			<a href="[% gSkin.rootdir %]/[% IF short_url_views.${view.viewname}; view.viewname; ELSE %]firehose.pl?view=[% view.viewname %][% END %]" [% IF !user.is_anon %]onclick="firehose_set_options('view', '[% view.viewname %]');return false;"[% END %]>[% view.viewtitle %]</a>
