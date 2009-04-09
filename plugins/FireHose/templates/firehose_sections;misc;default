@@ -61,54 +61,131 @@ END;
 </ul>
 [% IF !user.is_anon && (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" && !form.taskgen %]<script type="text/javascript">
 $(function(){
-$any('firehose-sections').mousedown(function( event ){
-		// select a section on mousedown
-		var $section = $(event.originalTarget || event.target).closest('li[id^=fhsection-]');
-		if ( !$section.is('.active') ) {
-			var section = $section.metadata();
-			if ( section.id === 'unsaved' ) {
-				firehose_set_options('setfhfilter', section.filter);
-				firehose_set_options('view', section.viewname);
-				section.color && firehose_set_options('color', section.color);
-			} else {
-				firehose_set_options('section', section.id);
-			}
-		}
-		// allow other handlers to run
-	}).
-	click(function( event ){
-		// edit only for a click in the edit button
-		[% IF user.is_anon %]
-			show_login_box();
-			return false;
-		[% END %]
-		var $edit = $(event.originalTarget || event.target).closest('a.links-sections-edit');
-		if ( $edit.length ) {
-			var section = $edit.closest('li[id^=fhsection-]').metadata();
-			if ( section.id === 'unsaved' ) {
-				edit_the_unsaved_section();
-			} else {
-				getModalPrefs('firehoseview','Save Custom Section', 0, { id: section.id });
-			}
-		}
-		return false;
-	}).
-	find('>li').
-		each(function(){
-			var $this = $(this);
-			$this.metadata({type:'elem', name:'script'}); // force metadata initialization
-			$this.children('script[type=data]').remove(); // and get rid of the (now useless) elem that delivered it to us
-		});
 
-$(document).bind('firehose-setting-section', function( e, fhsid ){
-	var $section=$any('fhsection-' + fhsid), section=$section.metadata();
-	firehose_highlight_section($section);
-	$(document).
-		trigger('firehose-setting-setfhfilter', section.filter).
-		trigger('firehose-setting-view', section.viewname).
-		trigger('firehose-setting-color', section.color);
-	firehose_style_switch(fhsid);
+function unsaved(){
+	var $unsaved = $any('fhsection-unsaved');
+	if ( !$unsaved.length ) {
+		($unsaved = $(unsaved.template).prependTo('#firehose-sections')).metadata().id = 'unsaved';
+	}
+	return $unsaved;
+}
+
+var section_matching;
+(function(){
+var signatures={}, ids={}, ws=/\s+/, default_color = {
+	stories: 'green',
+	recent: 'blue',
+	popular: 'green',
+	daddypants: 'indigo'
+};
+
+function signature( section ){
+	return section.viewname + ';'
+		+ (section.color||default_color[section.viewname]) + ';'
+		+ $.trim(section.filter).toLowerCase().split(ws).sort().join(' ');
+}
+
+section_matching = function( data ){
+	var id		= $any('firehose-sections').metadata().active_id,
+		goal	= signature(data),
+		$menu_item;
+	(id==='unsaved' || signatures[id]!==goal) && (id = ids[goal]);
+	return id && ($menu_item=firehose_section_menu_item(id)) && $menu_item.metadata();
+}
+
+$(document).bind('section-updated.firehose', function( event, update ){
+	var section = (update.menu_item||firehose_section_menu_item(update.id)).metadata();
+	update.changes && $.extend(section, update.changes);
+	if ( update.id && update.id !== 'unsaved' ) {
+		delete ids[ signatures[update.id] ];
+		ids[ signatures[update.id]=signature(section) ] = update.id;
+	}
 });
+
+// Force-initialize the metadata and build the section_matching map.
+$('#links-sections script[type=data]').
+	closest('li,div.title').
+		each(function(){
+			var section = $(this).metadata({type:'elem', name:'script'});
+			ids[ signatures[section.id]=signature(section) ] = section.id;
+		}).
+	end().
+	remove();
+
+$any('firehose-sections').metadata().home_id = $any('links-sections-title').metadata().id;
+})();
+
+function highlight_menu_item( section_id ){
+	return firehose_section_menu_item(section_id).each(function(){
+		$('#links-sections .active').not(this).removeClass('active');
+		$(this).addClass('active');
+		$any('firehose-sections').metadata().active_id = section_id;
+	});
+}
+
+$any('links-sections').
+	mousedown(function( event ){	// "activate" a section (immediately) on mousedown in the section menu
+		$(event.originalTarget||event.target).	// mouseDown was on this element...
+			closest('li,div.title').not('.active,:has(.active)').
+				each(function(){
+					var section = $(this).metadata();
+					if ( section.id !== 'unsaved' ) {
+						firehose_set_options('section', section.id);
+					} else {
+						firehose_set_options('setfhfilter', section.filter);
+						firehose_set_options('view', section.viewname);
+						section.color && firehose_set_options('color', section.color);
+					}
+				});
+		// allow other handlers to run (by not returning false)
+	}).
+	click(function( event ){		// edit only for a click in the edit button
+		[% IF user.is_anon %]
+		show_login_box();
+		[% ELSE %]
+
+		$(event.originalTarget||event.target).	// mouseDown was on this element...
+			closest('a.links-sections-edit').	// ...in this edit icon (if any)
+				each(function(){
+					var id = $(this).closest('li,div.title').metadata().id;
+					id==='unsaved' && (id=void(0));
+					getModalPrefs('firehoseview', 'Save Custom Section', 0, { id: id });
+				});
+
+		[% END %]
+		return false;
+	});
+
+$(document).
+	bind('firehose-setting-section', function( e, section_id ){
+		// Request to change sections is on its way to the server; update the UI now (don't wait for response)
+		var section = highlight_menu_item(section_id).metadata();
+		$(document).
+			trigger('firehose-setting-setfhfilter', section.filter).
+			trigger('firehose-setting-view', section.viewname).
+			trigger('firehose-setting-color', section.color);
+		firehose_style_switch(section_id);
+	}).
+	bind('set-options.firehose', function( e, data ){
+		// Changing some option (possibly even the 'section' option)
+		if ( !data.select_section ) {
+			// OK, _not_ the 'section' option.  Activate a section that matches the new options, or else "unsaved"
+			delete data.id;
+
+			data = section_matching(data)||data;
+			if ( !data.id ) {
+				var $unsaved = unsaved();
+				data = $.extend($unsaved.metadata(), data);
+				$(document).
+					one('update.firehose', function( e, updated ){
+						$unsaved.find('a span').text(updated.local_time);
+					});
+			}
+		}
+		highlight_menu_item(data.id);
+	});
+
+unsaved.template = '<li id="fhsection-unsaved"><a><i>unsaved</i> <span></span></a><a class="links-sections-edit">[e]</a></li>';
 
 });
 </script>[% END %]

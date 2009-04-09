@@ -1902,100 +1902,12 @@ function firehose_more(noinc) {
 	inlineAdFirehose();
 }
 
-function firehose_highlight_section( $section ){
-	$section.addClass('active').siblings().removeClass('active');
-}
-
-function on_firehose_select_section( event, data ){
-	firehose_highlight_section($('#firehose-sections #fhsection-'+data.id));
-	$any('viewsearch').parent().toggleClass('mode-filter', data.id!=='unsaved');
-}
-
-function on_firehose_set_options( event, data ){
-	if ( !data.select_section ) {
-		delete data.id;
-
-		var $next_section;
-		$('#firehose-sections li').each(function(){
-			var $this=$(this), section=$this.metadata();
-			if ( section.filter == data.filter && section.viewname == data.viewname && section.color == data.color ) {
-				$next_section = $this;
-				data.id = section.id;
-				return false;
-			}
+function firehose_section_menu_item( section_id ){
+	var id = 'fhsection-'+section_id;
+	return section_id && $('#links-sections-title,#'+id).
+		filter(function(){
+			return this.id===id || $(this).metadata().id==section_id;
 		});
-
-		if ( !$next_section ) {
-			$next_section = the_unsaved_section();
-			data = $.extend($next_section.metadata(), data);
-			$(document).
-				one('update.firehose', function( event, updated ){
-					$next_section.find('a span').text(updated.local_time);
-				});
-		}
-	}
-	on_firehose_select_section(event, data);
-}
-
-$(function(){
-	$(document).bind('set-options.firehose', on_firehose_set_options);
-});
-
-function the_unsaved_section( dont_create ){
-	var	$section_menu	= $any('firehose-sections'),
-		$unsaved_item	= $section_menu.find('> #fhsection-unsaved');
-
-	if ( !$unsaved_item.length && !dont_create ) {
-		var	$title	= $('<a><i>unsaved</i> <span></span></a>'),
-			$edit	= $('<a class="links-sections-edit">[e]</a>');
-		$section_menu.prepend(
-			$unsaved_item = $('<li id="fhsection-unsaved" />').append($title).append($edit)
-		);
-		$unsaved_item.metadata().id = 'unsaved';
-	}
-
-	return $unsaved_item;
-}
-
-function edit_the_unsaved_section(){
-	the_unsaved_section('dont-create').each(function(){
-		getModalPrefs('firehoseview', 'Save Custom Section', 0, { id: undefined });
-	});
-}
-
-function save_the_unsaved_section( requested, fn ){
-	the_unsaved_section('dont-create').each(function(){
-		if ( !requested.name ) {
-			return;
-		}
-
-		var $unsaved = $(this);
-		$unsaved.find('a:first').text(requested.name);
-
-		ajax_update({	op:		'firehose_new_section',
-				reskey:		reskey_static,
-
-				name:		requested.name,
-				color:		requested.color,
-				fhfilter:	requested.filter,
-				view_id:	requested.view,
-
-				as_default:	requested.as_default
-
-			}, '', { onComplete: function( transport ){
-				var response = eval_response(transport);
-				if ( response && response.li ) {
-					var	was_active	= $unsaved.is('.active'),
-						$saved		= $(response.li),
-						md		= $saved.metadata();
-					$unsaved.before($saved).remove();
-					(was_active && firehose_highlight_section($saved));
-					saveFirehoseSectionMenu();
-					(fn && fn(response.id));
-				}
-			}
-		});
-	});
 }
 
 
@@ -2420,9 +2332,7 @@ $(function(){
 		}
 
 		if (keyo.slash)          {
-			// a bit silly
-			var fsid = $('#firehose-sections').find('li:not([id=fhsection-unsaved]):first')[0].id.substr(10);
-			firehose_set_options('section', fsid);
+			firehose_set_options('section', $any('links-sections-title').metadata().id);
 		}
 		if (keyo.unfocus)        { $(e.target).blur()        }
 		if (keyo.next)           { firehose_go_next()        }
