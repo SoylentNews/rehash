@@ -1156,7 +1156,6 @@ sub getFireHoseEssentials {
 
 
 	# SEARCH SETUP
-	return ([],{});
 	my($sphinx_debug, $sphinx_other) = (0, 0);
 	my $sphinx = {
 		no_mcd    => $user->{is_admin} && !$options->{usermode} ? 1 : 0,
