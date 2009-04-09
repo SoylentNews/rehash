@@ -204,6 +204,7 @@ END %]
 				[% END %]
 
 						<hr>
+[% IF related_stories; '<h3 class="related story">Related Stories</h3>'; related_stories; END %]
 [% IF divwrapper %]
 </div>
 [% END %]

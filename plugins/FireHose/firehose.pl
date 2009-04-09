@@ -173,6 +173,10 @@ sub view {
 		my $system_tags = $firehose_reader->getFireHoseSystemTags($item);
 		my $discussion = $item->{discussion};
 
+		# Related Stories
+		my $related_stories = '';
+		$related_stories = displayRelatedStories($item->{srcid}) if (($item->{type} eq 'story') && $item->{srcid});
+
 		# Extra book review info
 		my $book_info = '';
 		if (($item->{type} eq 'story') && $item->{primaryskid}) {
@@ -193,6 +197,7 @@ sub view {
 			options			=> $options,
 			nostorylinkwrapper	=> $discussion ? 1 : 0,
 			vote			=> $vote,
+			related_stories		=> $related_stories,
 			book_info		=> $book_info
 		});
 

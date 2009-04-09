@@ -2677,6 +2677,7 @@ sub dispFireHose {
 			nostorylinkwrapper	=> $options->{nostorylinkwrapper},
 			view_mode		=> $options->{view_mode},
 			featured		=> $options->{featured},
+			related_stories		=> $options->{related_stories},
 			book_info               => $options->{book_info},
 		}, { Page => "firehose",  Return => 1 });
 
