@@ -161,6 +161,7 @@ $(function(){
 
 
 function more_possible( text ){
+	shorten_fh_pag_menu();
 	$('#more-experiment a').trigger('more-possible');
 }
 
@@ -817,6 +818,9 @@ $('#firehoselist a.more').
 		this.href += (this.search ? '&' : '?') + 'art_pos=' + pos;
 		return true;
 	});
+
+shorten_fh_pag_menu();
+$(window).bind('resize', shorten_fh_pag_menu);
 
 });
 
@@ -2376,27 +2380,25 @@ $(function(){
 
 function shorten_fh_pag_menu() {
 	while (1) {
-		var $firstitem = $('#fh-pag-div div:.currcolor');
-		var $lastitem  = $('#fh-paginate span:last');
-
-		if (!$firstitem.length || !$lastitem.length) {
-			return;
-		}
-
-		var firstb = new Bounds($firstitem);
-		var lastb  = new Bounds($lastitem);
-
-		if (!firstb || !lastb || !firstb.top || !lastb.top) {
-			return;
-		}
-
-
-		if (firstb.top != lastb.top) {
-			var $spans = $('#fh-paginate span.active,span.inactive');
+		var check = shorten_fh_pag_menu_check();
+		if (check < 0) {
+			var $spans = $('#fh-paginate span.active:visible,span.inactive:visible');
 			var idx = $spans.length;
 			idx--; idx--; // second from last item
 			if (idx > 0) {
-				$($spans[idx]).remove();
+				$($spans[idx]).hide();
+			} else {
+				return;
+			}
+		} else if (check > 0) {
+			var $spans = $('#fh-paginate span.active:hidden,span.inactive:hidden');
+			var idx = $spans.length;
+			if (idx > 0) {
+				$($spans[0]).show();
+				if (shorten_fh_pag_menu_check() < 0) {
+					$($spans[0]).hide();
+					return;				
+				}
 			} else {
 				return;
 			}
@@ -2404,5 +2406,27 @@ function shorten_fh_pag_menu() {
 			return;
 		}
 	}
+}
+
+function shorten_fh_pag_menu_check() {
+	var $firstitem = $('#fh-pag-div div:.currcolor');
+	var $lastitem  = $('#fh-paginate span:last');
+
+	if (!$firstitem.length || !$lastitem.length) {
+		return 0;
+	}
+
+	var firstb = new Bounds($firstitem);
+	var lastb  = new Bounds($lastitem);
+
+	if (!firstb || !lastb || !firstb.top || !lastb.top) {
+		return 0;
+	}
+
+	if (firstb.top != lastb.top) {
+		return -1;
+	} else {
+		return 1;
+	}	
 }
 
