@@ -93,14 +93,15 @@ section_matching = function( data ){
 	return id && ($menu_item=firehose_section_menu_item(id)) && $menu_item.metadata();
 }
 
-$(document).bind('section-updated.firehose', function( event, update ){
-	var section = (update.menu_item||firehose_section_menu_item(update.id)).metadata();
-	update.changes && $.extend(section, update.changes);
-	if ( update.id && update.id !== 'unsaved' ) {
-		delete ids[ signatures[update.id] ];
-		ids[ signatures[update.id]=signature(section) ] = update.id;
-	}
-});
+$(document).
+	bind('section-updated.firehose', function( event, update ){
+		var section = (update.menu_item||firehose_section_menu_item(update.id)).metadata();
+		update.changes && $.extend(section, update.changes);
+		if ( update.id && update.id !== 'unsaved' ) {
+			delete ids[ signatures[update.id] ];
+			ids[ signatures[update.id]=signature(section) ] = update.id;
+		}
+	});
 
 // Force-initialize the metadata and build the section_matching map.
 $('#links-sections script[type=data]').
@@ -192,7 +193,8 @@ $(document).
 				$(document).
 					one('update.firehose', function( e, updated ){
 						$unsaved.find('a span').text(updated.local_time);
-					});
+					}).
+					trigger('unsaved.firehose', data);
 			}
 		}
 		highlight_menu_item(data.id);
