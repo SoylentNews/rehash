@@ -5879,7 +5879,7 @@ CREATE TABLE firehose_view_settings (
 	PRIMARY KEY (uid,id)
 ) ENGINE=InnoDB;
 ALTER TABLE firehose_view ADD COLUMN datafilter VARCHAR(128) NOT NULL DEFAULT '', ADD COLUMN admin_unsigned ENUM("no","yes") DEFAULT 'no', ADD COLUMN usermode ENUM("no","yes") DEFAULT "yes";
-ALTER TABLE MODIFY firehose_view COLUMN mode ENUM ("full","fulltitle", "mixed", "") DEFAULT "";
+ALTER TABLE firehose_view MODIFY COLUMN mode ENUM ("full","fulltitle", "mixed", "") DEFAULT "";
 UPDATE firehose_view set mode="mixed" where mixedmode=1;
 ALTER TABLE firehose_view DROP COLUMN mixedmode;
 UPDATE firehose_view SET usermode="yes",admin_unsigned="no";
