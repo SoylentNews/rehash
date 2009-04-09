@@ -427,6 +427,15 @@ sub IndexHandler {
 		}
 
 		my $slashdb = getCurrentDB();
+
+		my $fh_tabs = { recent => 1, stories => 1, daddypants => 1, popular => 1};
+
+		if ($fh_tabs->{$key}) {
+			$r->args("view=$key");
+			$r->uri('/index2.pl');
+			return OK;
+		}
+
 		my $new_skin = $slashdb->getSkin($key);
 		my $new_skid = $new_skin->{skid} || $constants->{mainpage_skid};
 #print STDERR scalar(localtime) . " $$ IndexHandler B new_skid=$new_skid\n";
