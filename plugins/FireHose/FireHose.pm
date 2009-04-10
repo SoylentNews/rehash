@@ -1155,6 +1155,7 @@ sub getFireHoseEssentials {
 	my $constants = getCurrentStatic();
 
 
+
 	# SEARCH SETUP
 	my($sphinx_debug, $sphinx_other) = (0, 0);
 	my $sphinx = {
@@ -1945,7 +1946,6 @@ sub genSetOptionsReturn {
 	my $section_changed = $form->{section} && $form->{sectionchanged};
 	if (($form->{view} && $form->{viewchanged}) || $section_changed) {
 		$data->{eval_last} = "firehose_swatch_color('$opts->{color}');";
-		
 		$event_data->{'select_section'} = $section_changed;
 	}
 	$data->{events} = [{
