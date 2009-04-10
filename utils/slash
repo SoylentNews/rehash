@@ -164,7 +164,7 @@ case "$1" in
 
 	restart)
 		$0 stop;
-		echo -n "Sleeping 10 seconds to be clean: "; 
+		echo -n "Sleeping 10 seconds in a probably futile attempt to be clean: "; 
 		sleep 10;
 		echo "ok.";
 		$0 start;
