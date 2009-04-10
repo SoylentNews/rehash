@@ -193,10 +193,11 @@ __template__
 
 	// keep the save button in sync with the name field... that is: disabled for invalid names
 	var	save_disabled	= 	'',
-		excluded		= 	$menu_item.find('a[onclick]')[0],
+		excluded		= 	$menu_item.find('a.data-title')[0],
 		invalid_name	=	Slash.Util.qw.as_set(	// can't save a new section with an existing section's name
-								$('#links-sections a[onclick]').not(excluded).map(foldtext).get()
+								$('#links-sections a.data-title').not(excluded).map(foldtext).get()
 							);
+		invalid_name['unsaved'] = true;
 		invalid_name[''] = true;
 
 	// test and enable/disable (as needed) on keyup

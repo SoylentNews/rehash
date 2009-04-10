@@ -167,7 +167,7 @@ __template__
 [% CASE 'metamod_msg' %]
 For [% constants.sitename %]'s moderation system to function properly, we need your help.  Below are a number of random user comments in our system.  You are asked to decide if these are good or bad.  Clicking the + and - indicates that you think that a comment is good or bad.  You are welcome to skip any comment that you are unsure about.  What is most important is that you are objective and honest- a comment that you mark with the '+' means that you think that other [% constants.sitename %] readers would benefit from this comment.  Don't hesitate to flag mediocrity with the '-' graphic either.  The only way the system gets smarter is if you are honest, objective and a little bit harsh.
 [% CASE 'newsectionli' %]
-<li id="fhsection-[% id %]"><a id="fhsectiontitle-[% id %]" href="[% gSkin.rootdir%]/firehose.pl?section=[% id %]">[% name | strip_literal %]</a><a href="[% PROCESS nojslink %]" class="links-sections-edit">[e]</a>
+<li id="fhsection-[% id %]"><a id="fhsectiontitle-[% id %]" class="data-title" href="[% gSkin.rootdir%]/firehose.pl?section=[% id %]"[% IF !user.is_anon %] onclick="return false;"[% END %]>[% name | strip_literal %]</a><a href="[% PROCESS nojslink %]" onclick="[% IF user.is_anon %]show_login_box(); [% END %]return false;" class="links-sections-edit">[e]</a>
 <script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 </li>
 [% CASE 'alternate_section_stylesheet' %]
