@@ -11,7 +11,7 @@ en_US
 __name__
 nojslink
 __template__
-//[% gSkin.rootdir %]/faq/UI.shtml#ui700
+[% gSkin.rootdir %]/faq/UI.shtml#ui700
 __seclev__
 1000
 __version__
