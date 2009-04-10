@@ -59,7 +59,7 @@ END;
 		</li>
 	[% END %]
 </ul>
-[% IF user.is_anon && (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" && !form.taskgen %]<script type="text/javascript">
+[% IF (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" && !form.taskgen %]<script type="text/javascript">
 $(function(){
 
 function unsaved(){
