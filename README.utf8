@@ -16,6 +16,12 @@ Required software versions
  * Perl 5.6 or later
  * Perl DBD::mysql 4.001 or later
 
+Required software patches
+-------------------------
+
+ * Perl Cache::Memcached UTF8 flag patch
+   - cache-memcached-utf8.patch
+
 In case of creating new slash site
 ----------------------------------
 

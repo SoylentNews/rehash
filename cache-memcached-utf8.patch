@@ -1,0 +1,38 @@
+diff -urNad libcache-memcached-perl-1.15~/Memcached.pm libcache-memcached-perl-1.15/Memcached.pm
+--- libcache-memcached-perl-1.15~/Memcached.pm	2007-07-12 04:57:24.000000000 +0000
++++ libcache-memcached-perl-1.15/Memcached.pm	2007-07-12 04:58:19.000000000 +0000
+@@ -14,6 +14,7 @@
+ use IO::Handle ();
+ use Time::HiRes ();
+ use String::CRC32;
++use Encode;
+ use Errno qw( EINPROGRESS EWOULDBLOCK EISCONN );
+ 
+ use fields qw{
+@@ -27,6 +28,7 @@
+ # flag definitions
+ use constant F_STORABLE => 1;
+ use constant F_COMPRESS => 2;
++use constant F_UTF8	=> 4;
+ 
+ # size savings required before saving compressed value
+ use constant COMPRESS_SAVINGS => 0.20; # percent
+@@ -419,6 +421,8 @@
+     if (ref $val) {
+         $val = Storable::nfreeze($val);
+         $flags |= F_STORABLE;
++    } elsif (Encode::is_utf8($val)) {
++        $flags |= F_UTF8;
+     }
+ 
+     my $len = length($val);
+@@ -597,6 +601,9 @@
+                 delete $ret->{$k};
+             }
+         }
++	if ($flags{$sock} & F_UTF8) {
++	    Encode::_utf8_on($ret->{$k});
++	}
+     };
+ 
+     my $read = sub {
