@@ -143,10 +143,6 @@ $any('links-sections').
 		// allow other handlers to run (by not returning false)
 	}).
 	click(function( event ){		// edit only for a click in the edit button
-		[% IF user.is_anon %]
-		show_login_box();
-		[% ELSE %]
-
 		$(event.originalTarget||event.target).	// mouseDown was on this element...
 			closest('a.links-sections-edit').	// ...in this edit icon (if any)
 				each(function(){
@@ -154,8 +150,6 @@ $any('links-sections').
 					id==='unsaved' && (id=void(0));
 					getModalPrefs('firehoseview', 'Save Custom Section', 0, { id: id });
 				});
-
-		[% END %]
 		return false;
 	});
 
