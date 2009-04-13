@@ -659,12 +659,17 @@ function firehose_toggle_tag_ui( any ) {
 	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
 }
 
+var non_command_context = {
+	user:	true,
+	top:	true,
+	system:	true
+};
+
 function firehose_click_tag( event ) {
 	var	$target	= $(event.target),
 		$fhitem	= $('#firehoselist').length ? fhitems($target) : $target.closest('div.article'),
 		leaving	= !!$target.closest('a[href]:not([href=#],[onclick])').length,
-		command	= '',
-		$menu;
+		command, $menu;
 
 	if ( !leaving ) {
 		// _any_ click can trigger, but click-specific ad will win
@@ -680,6 +685,11 @@ function firehose_click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
+		if ( !event.shiftKey && non_command_context[ $target.closest('span.tag-display').attr('context') || 'unknown' ] ) {
+			// Even anonymous readers may click tags to refine the current search/filter.
+			slash_refine_search(command);
+			return false;
+		}
 	} else if ( ($menu = $target.closest('.tmenu')).length ) {
 		var op = $target.text();
 		var $tag = $target.closest(':has(span.tag)').find('.tag');
