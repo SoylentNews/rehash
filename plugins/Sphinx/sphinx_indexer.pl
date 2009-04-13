@@ -152,7 +152,7 @@ sub do_system {
 	# files into place.
 	my $constants = getCurrentStatic();
 	my $vardir = $constants->{sphinx_01_vardir} || '/srv/sphinx/var';
-	my $do_rotate = -e carfile($vardir, 'data', "firehose_$name.spm") ? 1 : 0;
+	my $do_rotate = -e catfile($vardir, 'data', "firehose_$name.spm") ? 1 : 0;
 
 	main::slashdLog("sphinx_indexer indexing($do_rotate) $name pid $$");
 	my @args = (
