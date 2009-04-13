@@ -1,5 +1,5 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
-body { background: #e5e5e5 url("/images/bg2.gif") repeat-x; }
+body { background: #e5e5e5 url("[% constants.imagedir %]/bg2.gif") repeat-x; }
 a { color: #600; }
 a:visited { color: #000; }
 
@@ -20,7 +20,7 @@ body #index #articles
 {
 	width: 115px;
 	height: 80px;
-	background: url("/images/logo.gif") no-repeat;
+	background: url("[% constants.imagedir %]/logo.gif") no-repeat;
 }
 
 #slogan h2
@@ -33,12 +33,12 @@ body #index #articles
 
 /* links */
 #links { background: #e5e5e5; }
-#links div.block { background: #fff url("/images/cbl.gif") bottom left no-repeat; }
-#links div.title { background: #b2b2b2 url("/images/ctl_grey.gif") top left no-repeat; }
+#links div.block { background: #fff url("[% constants.imagedir %]/cbl.gif") bottom left no-repeat; }
+#links div.title { background: #b2b2b2 url("[% constants.imagedir %]/ctl_grey.gif") top left no-repeat; }
 
 #links h4
 {
-	background: url("/images/ctr_grey.gif") top right no-repeat;
+	background: url("[% constants.imagedir %]/ctr_grey.gif") top right no-repeat;
 	font-weight: bold;
 	font-size: 80%;
 	font-family: sans-serif;
@@ -46,7 +46,7 @@ body #index #articles
 
 #links div.content
 {
-	background: url("/images/cbr.gif") bottom right no-repeat;
+	background: url("[% constants.imagedir %]/cbr.gif") bottom right no-repeat;
 	padding: .3em .3em .6em .3em;
 	font-size: 75.5%;
 	line-height: 140%;
@@ -57,12 +57,12 @@ body #index #articles
 
 /* slashboxes */
 #slashboxes { background: #e5e5e5; }
-#slashboxes div.block { background: #fff url("/images/cbr.gif") bottom right no-repeat; }
-#slashboxes div.title { background: #b2b2b2 url("/images/ctl_grey.gif") top left no-repeat; }
+#slashboxes div.block { background: #fff url("[% constants.imagedir %]/cbr.gif") bottom right no-repeat; }
+#slashboxes div.title { background: #b2b2b2 url("[% constants.imagedir %]/ctl_grey.gif") top left no-repeat; }
 
 #slashboxes h4
 {
-	background: url("/images/ctr_grey.gif") top right no-repeat;
+	background: url("[% constants.imagedir %]/ctr_grey.gif") top right no-repeat;
 	font-weight: bold;
 	font-family: sans-serif;
 	font-size: 80%;
@@ -71,7 +71,7 @@ body #index #articles
 
 #slashboxes div.content
 {
-	background: url("/images/cbl.gif") bottom left no-repeat;
+	background: url("[% constants.imagedir %]/cbl.gif") bottom left no-repeat;
 	font-size: 75.5%;
 	line-height: 140%;
 }
@@ -85,12 +85,12 @@ body #index #articles
 }
 
 /* General */
-.generaltitle { background: url("/images/bg_red.gif") #933 repeat-x; }
-.generaltitle div.title { background: transparent url("/images/ctl_red.gif") top left no-repeat; }
+.generaltitle { background: url("[% constants.imagedir %]/bg_red.gif") #933 repeat-x; }
+.generaltitle div.title { background: transparent url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat; }
 
 .generaltitle h3
 {
-	background: transparent url("/images/ctr_red.gif") top right no-repeat;
+	background: transparent url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	font-family: sans-serif;
 	font-size: 100%;
@@ -105,12 +105,12 @@ body #index #articles
 
 
 /* articles */
-.article { background: #933 url("/images/bg_red.gif") repeat-x; }
-.article div.title { background: url("/images/ctl_red.gif") top left no-repeat; }
+.article { background: #933 url("[% constants.imagedir %]/bg_red.gif") repeat-x; }
+.article div.title { background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat; }
 
 #journal .article h3
 {
-	background: url("/images/ctr_red.gif") top right no-repeat;
+	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	font-family: sans-serif;
 	font-size: 100%;
@@ -122,30 +122,30 @@ body #index #articles
 	font-weight: normal;
 	font-family: sans-serif;
 	border: 1px solid #aaa;
-	background: #ddd url("/images/bg_details.gif") repeat-x;
+	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
 }
 .article .body
 {
 	border: 1px solid #aaa;
 	border-top: none;
-	background: #fff url("/images/bg_white.gif") repeat-x;
+	background: #fff url("[% constants.imagedir %]/bg_white.gif") repeat-x;
 }
 
 div.storylinks
 {
-	background: #eee url("/images/bg_storylinks.gif") bottom repeat-x;
+	background: #eee url("[% constants.imagedir %]/bg_storylinks.gif") bottom repeat-x;
 	font-size: 80%;
 	font-family: sans-serif;
 	
 }
 
-div.storylinks div { background: url("/images/cbr_ltgrey.gif") bottom right no-repeat; }
+div.storylinks div { background: url("[% constants.imagedir %]/cbr_ltgrey.gif") bottom right no-repeat; }
 div.storylinks div ul { height: 1em;} 
 div.storylinks div ul 
 {
 	padding: .6em 1em; 
 	margin: 0; 
-	background: url("/images/cbl_ltgrey.gif") bottom left no-repeat;
+	background: url("[% constants.imagedir %]/cbl_ltgrey.gif") bottom left no-repeat;
 }
 div.storylinks ul li 
 { 

@@ -119,7 +119,7 @@ html > body .commentwrap table {
 	margin: 0 0 0 -.3em;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("/images/comm-minus.gif") 0 .2em no-repeat;
+	background: url("[% constants.imagedir %]/comm-minus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 2;
 	cursor: pointer;
@@ -130,7 +130,7 @@ html > body .commentwrap table {
 	margin: 0;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("/images/comm-plus.gif") 0 .2em no-repeat;
+	background: url("[% constants.imagedir %]/comm-plus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 1;
 	cursor: pointer;
@@ -412,7 +412,7 @@ span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; fon
 .inline_comment textarea {margin: 1em; width: auto}
 .inline_comment .generalbody {margin: 0; padding: 0;}
 .inline_comment .pref {position: absolute; right: 0; top: -.8em}
-.inline_comment .pref a {right: 10px; background-image: url("/images/sic_icons.png"); color: #fff; background-repeat: no-repeat; background-position: 0px -1198px;padding: 5px 10px; position:absolute; text-decoration:none; text-indent:-7000em; top: .8em; }
+.inline_comment .pref a {right: 10px; background-image: url("[% constants.imagedir %]/sic_icons.png"); color: #fff; background-repeat: no-repeat; background-position: 0px -1198px;padding: 5px 10px; position:absolute; text-decoration:none; text-indent:-7000em; top: .8em; }
 .inline_comment .state { display: none }
 .inline_comment .replyto_buttons, .inlinemsg {margin: .5em 1em;}
 .inline_comment .replyto_buttons, #discussion_buttons { font-size: 80% }

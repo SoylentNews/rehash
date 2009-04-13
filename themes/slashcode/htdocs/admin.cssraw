@@ -106,7 +106,7 @@ html>body #admin { margin: 0 auto .2em 0; }
 {
 	padding: 0;
 	margin: 0 0 0 2em;
-	list-style: url("/images/drop.gif");
+	list-style: url("[% constants.imagedir %]/drop.gif");
 }
 
 #slashboxes #slashd li em,
