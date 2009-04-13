@@ -8261,6 +8261,7 @@ sub getSlashConf {
 		# same as absolutedir.  Same for imagedir_secure.
 	$conf{absolutedir_secure} ||= $conf{absolutedir};
 	$conf{imagedir_secure}	||= $conf{imagedir};
+	$conf{cssdir}           ||= $conf{css_use_imagedir} ? $conf{imagedir} : $conf{rootdir};
 	$conf{adminmail_mod}	||= $conf{adminmail};
 	$conf{adminmail_post}	||= $conf{adminmail};
 	$conf{adminmail_ban}	||= $conf{adminmail};

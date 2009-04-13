@@ -42,7 +42,7 @@ __template__
 				</span>
 				[%# the note button %]
 				<span class="admin-note">
-					<a id="note-text-[% item.id %]" href="[% PROCESS nojslink %]" onclick="firehose_open_note('[% item.id %]'); return false">[%- IF !item.note  %]<img src="//images.slashdot.org/sic_notes.png" alt="Note">[% END -%][% item.note | strip_literal -%]</a>
+					<a id="note-text-[% item.id %]" href="[% PROCESS nojslink %]" onclick="firehose_open_note('[% item.id %]'); return false">[%- IF !item.note  %]<img src="[% constants.imagedir %]/sic_notes.png" alt="Note">[% END -%][% item.note | strip_literal -%]</a>
 				</span>
 			</div>
 		</span>

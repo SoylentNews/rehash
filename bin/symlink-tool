@@ -69,85 +69,19 @@ my $plugin_list = $install->_getList(
 	$constants->{slashdir}, "plugins", "PLUGIN", 1
 );
 
-############################################################
-# Handle globbing and minifying/tidying, do this first so results can be linked
-for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
-	for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
-		my $destpath = canonpath(
-			catfile($theme_or_plugin->{dir},
-				$theme_or_plugin->{'glob'}{$glob})
-		);
-		my @filelist = ( );
-		for my $file (@{$theme_or_plugin->{$glob}}) {
-			push @filelist, canonpath(catfile($theme_or_plugin->{dir}, $file));
-		}
-
-		my $glob_template = Template->new({
-			INCLUDE_PATH	=> $theme_or_plugin->{dir},
-			PROCESS				=> \@filelist,
-			OUTPUT				=> \$destpath,
-			ABSOLUTE			=> 1,
-			RELATIVE			=> 1,
-			INTERPOLATE		=> 0,
-		}) || die "$Template::ERROR\n";
-		
-		$glob_template->process($filelist[0], $constants, $destpath) || die $glob_template->error(), "\n";
-
-		# system("cat $filelist > $destpath");
-		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
-
-		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
-		my $compress = '';
-		my $java = '';
-		if ( -f '/usr/java/jdk1.5.0_15/jre/bin/java' ) {
-			$java = '/usr/java/jdk1.5.0_15/jre/bin/java';
-		} elsif ( -f '/opt/dell/srvadmin/jre/bin/java' ) {
-			$java = '/opt/dell/srvadmin/jre/bin/java';
-		}
-		my $compressor_jar = '/usr/local/src/slash/plugins/Ajax/yuicompressor.jar';
-		if ( $java && -f $compressor_jar ) {
-			$compress = "$java -jar $compressor_jar";
-		}
-
-		# you can glob any kinds of files you like, even mixing them...
-		# ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
-		# (JavaScript::Minifier is a requirement in the Slash bundle)
-		if ($suffix eq '.js') {
-			my($min_src, $min_dest);
-			open $min_src, '<', $destpath;
-			open $min_dest, '>', "${path}${name}-minified.js";
-
-			if ( $compress && system("$compress $destpath -o ${path}${name}-minified.js")==0 ) {
-				print "symlink-tool: $compress \"$destpath\" -o \"${path}${name}-minified.js\"\n";
-			} elsif (JavaScript::Minifier->can('jsmin')) {
-				JavaScript::Minifier::jsmin($min_src, $min_dest);
-				print "symlink-tool: JavaScript::Minifier::jsmin(\"$destpath\", \"${path}${name}-minified.js\")\n";
-			} elsif (JavaScript::Minifier->can('minify')) {
-				&JavaScript::Minifier::minify(
-					input => $min_src, outfile => $min_dest
-				);
-				print "symlink-tool: JavaScript::Minifier::minify(input=>\"$destpath\", outfile=>\"${path}${name}-minified.js\")\n";
-			} else {
-				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
-			}
-		}
-
-		# ...similarly for CSS, I'll also make a `csstidied' version
-		# (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
- 		elsif ($suffix eq '.css') {
- 		  my $tidiedpath = "${path}${name}-tidied.css";
- 		  # create a `tidied' version of css globs if csstidy is available,
- 		  #   else the tidied version is just a link to the original concatenation
- 		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
-			if ( $compress && system("$compress $destpath -o $tidiedpath")==0 ) {
-				print "symlink-tool: $compress \"$destpath\" -o \"$tidiedpath\"\n";
-			} elsif ( system("csstidy $destpath --silent=true --template=high $tidiedpath")==0 ) {
-				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n";
-			} else {
-				link("$destpath", "$tidiedpath");
-			}
- 		}
-	}
+sub template_process {
+	my($include_path, $filelist, $destpath) = @_;
+	my $glob_template = Template->new({
+		INCLUDE_PATH	=> $include_path,
+		PROCESS		=> $filelist,
+		OUTPUT		=> \$destpath,
+		ABSOLUTE	=> 1,
+		RELATIVE	=> 1,
+		INTERPOLATE	=> 0,
+	}) || die "$Template::ERROR\n";
+	$glob_template->process($filelist->[0], { constants => $constants }, $destpath)
+		|| die $glob_template->error(), "\n";
+	return $destpath;
 }
 
 
@@ -156,17 +90,17 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 # to have a list of all the files that our theme references.
 my %theme_subdir_files = ( );
 my %plugin_subdir_files = ( );
-my %theme_css_translate = ();
-my %plugin_css_translate = ();
+my %theme_css_use_imagedir = ();
+my %plugin_css_use_imagedir = ();
 # First, pull in the files referenced by the theme.
 my @theme_htdocs_keys = grep /^(htdoc|image|topic|css)/, keys %$theme_hr;
 for my $key (@theme_htdocs_keys) {
 	next unless $key && $theme_hr->{$key};
-	if ($key eq "css" and $constants->{css_use_imagedir}) {		
+	if ($key =~ /^css/ && $constants->{css_use_imagedir}) {
 		if (ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq "ARRAY") {
-			$theme_css_translate{$_} = 1 foreach @{$theme_hr->{$key}};
+			$theme_css_use_imagedir{$_} = 1 foreach @{$theme_hr->{$key}};
 		} else {
-			$theme_css_translate{$theme_hr->{$key}} = 1;
+			$theme_css_use_imagedir{$theme_hr->{$key}} = 1;
 		}
 	}
 	push @{$theme_subdir_files{htdocs}},
@@ -198,11 +132,11 @@ for my $plugin (keys %$plugin_list) {
 	my $plugin_hr = $plugin_list->{$plugin};
 	for my $key (@plugin_htdocs_keys) {
 		next unless $key && $plugin_hr->{$key};
-		if ($key eq "css" and $constants->{css_use_imagedir}) {		
+		if ($key =~ /^css/ && $constants->{css_use_imagedir}) {
 			if (ref($plugin_hr->{$key}) && ref($plugin_hr->{$key}) eq "ARRAY") {
-				$plugin_css_translate{$plugin}{$_} = 1 foreach @{$plugin_hr->{$key}};
+				$plugin_css_use_imagedir{$plugin}{$_} = 1 foreach @{$plugin_hr->{$key}};
 			} else {
-				$plugin_css_translate{$plugin}{$_} = $plugin_hr->{$key};
+				$plugin_css_use_imagedir{$plugin}{ $plugin_hr->{$key} } = 1;
 			}
 		}
 		push @{$plugin_subdir_files{$plugin}{htdocs}},
@@ -225,20 +159,19 @@ for my $plugin (keys %$plugin_list) {
 #print "plugin_list: " . Dumper($plugin_list);
 #print "theme_subdir_files: " . Dumper(\%theme_subdir_files);
 #print "plugin_subdir_files: " . Dumper(\%plugin_subdir_files);
-#print "theme css translate: " . Dumper(\%theme_css_translate);
-#print "plugin css translate: " . Dumper(\%plugin_css_translate);
+#print "theme css imagedir: " . Dumper(\%theme_css_use_imagedir);
+#print "plugin css imagedir: " . Dumper(\%plugin_css_use_imagedir);
 
 my $theme_dir = $theme_hr->{dir};
-my $site_dir = $constants->{datadir};
+my $datadir = $constants->{datadir};
 
-if (!$testing && !-w $site_dir) {
-	print STDERR "No write access to '$site_dir'\n";
+if (!$testing && !-w $datadir) {
+	print STDERR "No write access to '$datadir'\n";
 	print STDERR "for EUID $>, cannot write any files\n";
 	exit 1;
 }
 
 my %processed = ( );
-my $num_changes = 0;
 for my $subdir (sort keys %theme_subdir_files) {
 	my @files = sort @{$theme_subdir_files{$subdir}};
 	for my $target_file (@files) {
@@ -249,9 +182,9 @@ for my $subdir (sort keys %theme_subdir_files) {
 		1 while $theme_file_abs =~ s{/[^/]+/\.\.}{};
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
-		my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
-
-		$site_file_abs 	= css_translate($site_file_abs) if ($theme_css_translate{$target_file});
+		my($site_file_abs, $site_file_abs_wrong) =
+			get_right_and_wrong_file_abs($site_rel_file,
+				$theme_css_use_imagedir{$target_file});
 
 		if ($processed{$site_file_abs}) {
 			if ($verbose) {
@@ -268,9 +201,14 @@ for my $subdir (sort keys %theme_subdir_files) {
 		# $theme_file_abs is e.g.
 		# '/usr/local/slash/theme/slashcode/tasks/spamarmor.pl'
 
-
-		$num_changes += handle_file($site_file_abs, $theme_file_abs,
-			$site_file_abs_dot, $site_file_abs_dot_short);
+		# Process an .Xraw file (e.g. cssraw) and write its .X file.
+		my($filetype) = $theme_file_abs =~ /\.(\w+)$/;
+		$filetype ||= '';
+		if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
+			my $destfile = $theme_file_abs;
+			$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
+			template_process($theme_dir, [ $target_file ], $destfile);
+		}
 		$processed{$site_file_abs} = 1;
 	}
 }
@@ -288,9 +226,9 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# Plugins don't get the type prepended so we need to
 			# do that here.
 			$site_rel_file =~ s{^(?:$subdir/)?}{$subdir/};
-			my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
-			
-			$site_file_abs 	= css_translate($site_file_abs) if ($plugin_css_translate{$plugin}{$target_file});
+			my($site_file_abs, $site_file_abs_wrong) =
+				get_right_and_wrong_file_abs($site_rel_file,
+					$plugin_css_use_imagedir{$plugin}{$target_file});
 
 #print "plugin '$plugin' subdir '$subdir' site_rel_file '$site_rel_file' site_file_abs '$site_file_abs'\n";
 			if ($processed{$site_file_abs}) {
@@ -307,9 +245,174 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# '/usr/local/slash/site/mysite/tasks/.adminmail.pl
 			# $plugin_file_abs is e.g.
 			# '/usr/local/slash/plugin/Stats/adminmail.pl'
-			
+
+			# Process an .Xraw file (e.g. cssraw) and write its .X file.
+			my($filetype) = $plugin_file_abs =~ /\.(\w+)$/;
+			$filetype ||= '';
+			if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
+				my $destfile = $plugin_file_abs;
+				$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
+				template_process($plugin_dir, [ $target_file ], $destfile);
+			}
+			$processed{$site_file_abs} = 1;
+		}
+	}
+}
+
+############################################################
+# Handle globbing and minifying/tidying.  This has to happen after
+# the above cssraw->css conversion, but before the css symlinking
+# below so globs can be symlinked.
+for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
+	for my $glob (keys %{$theme_or_plugin->{'glob'}}) { # 'alljs'
+		my $destpath = canonpath(
+			catfile($theme_or_plugin->{dir}, # /usr/local/slash/themes/slashdot
+				$theme_or_plugin->{'glob'}{$glob}) # htdocs/core.css
+		);
+		my @filelist = ( );
+		for my $file (@{$theme_or_plugin->{$glob}}) {
+			push @filelist, canonpath(catfile($theme_or_plugin->{dir}, $file));
+		}
+		# @filelist = e.g. ('htdocs/base.css','htdocs/ostgnavbar.css'...)
+
+		template_process($theme_or_plugin->{dir}, \@filelist, $destpath);
+
+		# system("cat $filelist > $destpath");
+		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+
+		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
+		my $compress = '';
+		my $java = '';
+		if ( -f '/usr/java/jdk1.5.0_15/jre/bin/java' ) {
+			$java = '/usr/java/jdk1.5.0_15/jre/bin/java';
+		} elsif ( -f '/opt/dell/srvadmin/jre/bin/java' ) {
+			$java = '/opt/dell/srvadmin/jre/bin/java';
+		}
+		my $compressor_jar = '/usr/local/src/slash/plugins/Ajax/yuicompressor.jar';
+		if ( $java && -f $compressor_jar ) {
+			$compress = "$java -jar $compressor_jar";
+		}
+
+		# you can glob any kinds of files you like, even mixing them...
+		# ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
+		# (JavaScript::Minifier is a requirement in the Slash bundle)
+		if ($suffix eq '.js') {
+			my($min_src, $min_dest);
+			open $min_src, '<', $destpath;
+			my $minified_name = "${path}${name}-minified.$virtuser.js";
+			open $min_dest, '>', $minified_name;
+
+			if ( $compress && system("$compress $destpath -o $minified_name")==0 ) {
+				print "symlink-tool: $compress \"$destpath\" -o \"$minified_name\"\n";
+			} elsif (JavaScript::Minifier->can('jsmin')) {
+				JavaScript::Minifier::jsmin($min_src, $min_dest);
+				print "symlink-tool: JavaScript::Minifier::jsmin(\"$destpath\", \"$minified_name\")\n";
+			} elsif (JavaScript::Minifier->can('minify')) {
+				&JavaScript::Minifier::minify(
+					input => $min_src, outfile => $min_dest
+				);
+				print "symlink-tool: JavaScript::Minifier::minify(input=>\"$destpath\", outfile=>\"$minified_name\")\n";
+			} else {
+				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
+			}
+		}
+
+		# ...similarly for CSS, I'll also make a `csstidied' version
+		# (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
+		elsif ($suffix eq '.css') {
+		  my $tidiedpath = "${path}${name}-tidied.$virtuser.css";
+		  # create a `tidied' version of css globs if csstidy is available,
+		  #   else the tidied version is just a link to the original concatenation
+		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
+			if ( $compress && system("$compress $destpath -o $tidiedpath")==0 ) {
+				print "symlink-tool: $compress \"$destpath\" -o \"$tidiedpath\"\n";
+			} elsif ( system("csstidy $destpath --silent=true --template=high $tidiedpath")==0 ) {
+				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n";
+			} else {
+				link("$destpath", "$tidiedpath");
+			}
+		}
+	}
+}
+
+%processed = ( );
+my $num_changes = 0;
+for my $subdir (sort keys %theme_subdir_files) {
+	my @files = sort @{$theme_subdir_files{$subdir}};
+	for my $target_file (@files) {
+		# Strip off "../slashcode/" from front to find
+		# where the symlink was installed in the
+		# "site/foo" tree.
+		my $theme_file_abs = canonpath(catfile($theme_dir, $target_file));
+		1 while $theme_file_abs =~ s{/[^/]+/\.\.}{};
+		$theme_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/;
+		my $site_rel_file = $target_file;
+		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
+		$site_rel_file =~ s/\.(\w+)raw$/.$1/;
+		my($site_file_abs, $site_file_abs_wrong) =
+			get_right_and_wrong_file_abs($site_rel_file,
+				$theme_css_use_imagedir{$target_file});
+
+		if ($processed{$site_file_abs}) {
+			if ($verbose) {
+				print "Skipping file in theme, already processed: '$site_file_abs'\n";
+			}
+			next;
+		}
+		my $site_file_abs_dot = dotfile($site_file_abs);
+		my $site_file_abs_dot_short = dotfile($site_rel_file);
+		# At this point, $site_file_abs is e.g.
+		# '/usr/local/slash/site/mysite/tasks/spamarmor.pl'
+		# $site_file_abs_dot is e.g.
+		# '/usr/local/slash/site/mysite/tasks/.spamarmor.pl'
+		# $theme_file_abs is e.g.
+		# '/usr/local/slash/theme/slashcode/tasks/spamarmor.pl'
+
+		$num_changes += handle_file($site_file_abs, $theme_file_abs,
+			$site_file_abs_dot, $site_file_abs_dot_short,
+			$site_file_abs_wrong);
+		$processed{$site_file_abs} = 1;
+	}
+}
+for my $plugin (sort keys %plugin_subdir_files) {
+	my $plugin_hr = $plugin_subdir_files{$plugin};
+	my $plugin_dir = $plugin_list->{$plugin}{dir};
+	for my $subdir (sort keys %$plugin_hr) {
+		my @files = sort @{$plugin_hr->{$subdir}};
+#print "plugin '$plugin' subdir '$subdir' files '@files'\n";
+		for my $target_file (@files) {
+			my $plugin_file_abs = canonpath(catfile($plugin_dir, $target_file));
+			1 while $plugin_file_abs =~ s{/[^/]+/\.\.}{};
+			$plugin_file_abs =~ s/\.cssraw$/.$virtuser.css/;
+			my $site_rel_file = $target_file;
+			1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
+			$site_rel_file =~ s/\.cssraw$/.css/;
+			# Plugins don't get the type prepended so we need to
+			# do that here.
+			$site_rel_file =~ s{^(?:$subdir/)?}{$subdir/};
+			my($site_file_abs, $site_file_abs_wrong) =
+				get_right_and_wrong_file_abs($site_rel_file,
+					$plugin_css_use_imagedir{$plugin}{$target_file});
+
+#print "plugin '$plugin' subdir '$subdir' site_rel_file '$site_rel_file' site_file_abs '$site_file_abs'\n";
+			if ($processed{$site_file_abs}) {
+				if ($verbose) {
+					print "Skipping file in '$plugin' plugin, already processed: '$site_file_abs'\n";
+				}
+				next;
+			}
+			my $site_file_abs_dot = dotfile($site_file_abs);
+			my $site_file_abs_dot_short = dotfile($site_rel_file);
+			# At this point, $site_file_abs is e.g.
+			# '/usr/local/slash/site/mysite/tasks/adminmail.pl'
+			# $site_file_abs_dot is e.g.
+			# '/usr/local/slash/site/mysite/tasks/.adminmail.pl
+			# $plugin_file_abs is e.g.
+			# '/usr/local/slash/plugin/Stats/adminmail.pl'
+
 			$num_changes += handle_file($site_file_abs, $plugin_file_abs,
-				$site_file_abs_dot, $site_file_abs_dot_short);
+				$site_file_abs_dot, $site_file_abs_dot_short,
+				$site_file_abs_wrong);
 			$processed{$site_file_abs} = 1;
 		}
 	}
@@ -324,11 +427,29 @@ if (@dotfiles) {
 
 ###############################################
 sub handle_file {
-	my($symlink_file, $target_file, $symlink_file_dot, $symlink_file_dot_short) = @_;
+	my($symlink_file, $target_file, $symlink_file_dot, $symlink_file_dot_short, $symlink_file_wrong) = @_;
 
 	if (!-e $target_file) {
 		print "Target file '$target_file' missing, can't create symlink\n";
 		return 1;
+	}
+	if ($symlink_file_wrong) {
+		lstat($symlink_file_wrong);
+		if (-e _ && -l _) {
+			# $symlink_file_wrong is the wrong place to put a symlink.
+			# (Well, it's one wrong place -- technically there are an
+			# infinite number of wrong places -- but this wrong place
+			# is the one that would be correct if the css_use_imagedir
+			# var were flipped.)  If a symlink is there already,
+			# remove it to avoid confusion.
+			print "Incorrect symlink present at '$symlink_file_wrong'; ";
+			if ($testing) {
+				print "would be unlinked.\n";
+			} else {
+				print "unlinking.\n";
+				unlink $symlink_file_wrong;
+			}
+		}
 	}
 
 	if (!-e $symlink_file && -e $symlink_file_dot) {
@@ -411,15 +532,20 @@ sub handle_file {
 }
 
 ###############################################
-sub css_translate {
-	my ($file_abs) = @_;
-	my $seen_htdocs = 0;
-	my ($volume, $dirs, $file) = splitpath($file_abs);
-	my @dirs = splitdir($dirs);
-	push @dirs, "images";
-	return catfile(@dirs, $file);
-	
+sub get_right_and_wrong_file_abs {
+	my($site_rel_file, $use_imagedir) = @_;
+	my $htdocs_version = canonpath(catfile($datadir, $site_rel_file));
+	my $srf_images = $site_rel_file;
+	$srf_images =~ s{^htdocs}{htdocs/images};
+	my $images_version = '';
+	$images_version = canonpath(catfile($datadir, $srf_images)) if $site_rel_file ne $srf_images;;
+	if ($use_imagedir) {
+		return ($images_version, $htdocs_version);
+	} else {
+		return ($htdocs_version, $images_version);
+	}
 }
+
 ###############################################
 sub dotfile {
 	my($file_abs) = @_;

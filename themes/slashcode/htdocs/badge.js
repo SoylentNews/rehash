@@ -1,6 +1,6 @@
 (
   function() {
-    var sitename   = '[% sitename | replace("[^A-Za-z_]+", "_")  %]';
+    var sitename   = '[% constants.sitename | replace("[^A-Za-z_]+", "_")  %]';
     var url_attr   = 'url='   + encodeURIComponent(window.[sitename + "_url"]         || window.location.href);
     var style_attr = 'style=' + encodeURIComponent(window.[sitename + "_badge_style"] || 'h0');
     var title_attr = 'title=' + encodeURIComponent(window.[sitename + "_title"]       || document.title);
@@ -12,7 +12,7 @@
       dy=80;
     }
     
-    var iframe = '<iframe src="[% absolutedir %]/badge.pl'+src_query+'"' +
+    var iframe = '<iframe src="[% constants.absolutedir %]/badge.pl'+src_query+'"' +
                   ' height="' + dy + '" width="' + dx + '" scrolling="no" frameborder="0"></iframe>'
     document.write(iframe);
   }

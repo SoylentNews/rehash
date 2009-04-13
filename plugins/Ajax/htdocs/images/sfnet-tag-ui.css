@@ -124,5 +124,5 @@ span.tag,
 .p span.tag, .no-visible-tags { display: none; }
 
 /* Toggle */
-.expand {background:transparent url(http://images.slashdot.org/login-arrow-expanded.gif) no-repeat scroll 0% 50%; padding: 8px;}
-.collapse {background:transparent url(http://images.slashdot.org/login-arrow-collapsed.gif) no-repeat scroll 0% 50%; padding: 8px;}
+.expand {background:transparent url([% constants.imagedir %]/login-arrow-expanded.gif) no-repeat scroll 0% 50%; padding: 8px;}
+.collapse {background:transparent url([% constants.imagedir %]/login-arrow-collapsed.gif) no-repeat scroll 0% 50%; padding: 8px;}
