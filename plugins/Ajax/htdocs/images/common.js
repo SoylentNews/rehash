@@ -445,8 +445,9 @@ function firehose_style_switch(section) {
 						|| json.css_includes && $(json.css_includes).appendTo('head')[0];
 			if ( skin ) {
 				skin.disabled = false;
-				$skins.not(skin).attr('disabled', true);
+				$skins = $skins.not(skin);
 			}
+			$skins.attr('disabled', true);
 		}
 	});
 }
