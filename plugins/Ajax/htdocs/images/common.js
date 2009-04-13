@@ -2068,6 +2068,9 @@ $(function(){
 	$footer = $any('ft');
 	$slashboxes = $('#slashboxes, #userboxes').eq(0);
 
+	$(document).
+		bind('firehose-setting-noslashboxes', fix_ad_position);
+
 	$any('firehoselist').
 		bind('articlesMoved', fix_ad_position).
 		bind('beforeArticleRemoved', notice_article_removed);
@@ -2125,11 +2128,14 @@ function verticalAdSpace(){
 	return bounds;
 }
 
-var pinClasses = {};
-pinClasses[-1]		= 'Top';	// pinned to the top of the available space, though the natural top is higher
-pinClasses[0]		= 'No';		// not pinned
-pinClasses[1]		= 'Bottom';	// pinned to the bottom of the available space, though the natural top would be lower
-pinClasses[undefined]	= 'Empty';	// not enough room to hold an ad
+var NO_SPACE	= 0,
+	NOT_PINNED	= 2,
+	pinClasses	= [	// index by (pinning+2)||0
+		'Empty',	// not enough room to hold an ad
+		'Top',		// pinned to the top of the available space, though the natural top is higher
+		'No',		// not pinned
+		'Bottom'	// pinned to the bottom of the available space, though the natural top would be lower
+	];
 
 
 function fix_ad_position(){
@@ -2147,9 +2153,9 @@ function fix_ad_position(){
 			natural_top = Bounds($ad_position.prev()).bottom;
 		}
 
-		var	pinning		= between(space.top, natural_top, space.bottom),
-			now_pinned	= pinning !== 0,
-			now_empty	= pinning === undefined,
+		var	pinning		= $slashboxes.is(':visible') && between(space.top, natural_top, space.bottom)+NOT_PINNED || NO_SPACE,
+			now_pinned	= pinning !== NOT_PINNED,
+			now_empty	= pinning === NO_SPACE,
 			was_pinned	= $ad_position.is('.Top, .Bottom, .Empty'),
 			was_empty	= $ad_position.is('.Empty');
 
@@ -2228,7 +2234,7 @@ Slash.Firehose.articles_on_screen = function(){
 Slash.Firehose.ready_ad_space = function( $articles ){
 	var $result = $([]);
 	try {
-		if ( !is_ad_locked ) {
+		if ( !is_ad_locked && $slashboxes.is(':visible') ) {
 			var visible = Bounds.intersection(Bounds.y(window), verticalAdSpace());
 			visible.bottom -= AD_HEIGHT;
 
