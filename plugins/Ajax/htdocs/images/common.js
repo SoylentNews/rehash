@@ -453,7 +453,7 @@ function firehose_style_switch( section_id ){
 	var	$item	= firehose_section_menu_item(section_id),
 		section	= $item.length && $item.metadata();
 
-	if ( 'skin' in section ) {
+	if ( 'skin' in section || section_id==='unsaved' ) {
 		use_skin(section.skin);
 		return;
 	}
