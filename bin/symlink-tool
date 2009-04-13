@@ -536,13 +536,20 @@ sub get_right_and_wrong_file_abs {
 	my($site_rel_file, $use_imagedir) = @_;
 	my $htdocs_version = canonpath(catfile($datadir, $site_rel_file));
 	my $srf_images = $site_rel_file;
-	$srf_images =~ s{^htdocs}{htdocs/images};
-	my $images_version = '';
-	$images_version = canonpath(catfile($datadir, $srf_images)) if $site_rel_file ne $srf_images;;
-	if ($use_imagedir) {
-		return ($images_version, $htdocs_version);
+	if ($srf_images =~ s{^htdocs(?!/images)}{htdocs/images}) {
+		# The images version is different;  there is indeed a right
+		# and a wrong answer here so return them both.
+		my $images_version = canonpath(catfile($datadir, $srf_images));
+		if ($use_imagedir) {
+			return ($images_version, $htdocs_version);
+		} else {
+			return ($htdocs_version, $images_version);
+		}
 	} else {
-		return ($htdocs_version, $images_version);
+		# There is no "images version" (this site_rel_file is
+		# already in the htdocs/images directory).  Just return
+		# the correct version.
+		return ($htdocs_version, '');
 	}
 }
 
