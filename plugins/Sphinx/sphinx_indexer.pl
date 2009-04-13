@@ -13,6 +13,7 @@ use Slash::Constants ':slashd';
 
 use vars qw(
 	%task	$me	$task_exit_flag
+	$conffile
 	$sphinxdb	$children_running
 );
 
@@ -34,6 +35,9 @@ $task{$me}{code} = sub {
 		main::slashdLog('sphinx apparently not installed -- sleeping permanently');
 		sleep 5 while !$task_exit_flag;
 	}
+
+	my $writedir = catdir($constants->{datadir}, 'misc');
+	$conffile = catfile($writedir, 'sphinx01.conf');
 
 	my $src_info = load_index_info();
 
@@ -142,14 +146,26 @@ sub run_next_index {
 
 sub do_system {
 	my($name) = @_;
-	main::slashdLog("indexing $name pid $$");
-	system(join(' ',
-		"/usr/local/sphinx/bin/indexer",
-		"--config /usr/local/slash/site/banjo.slashdot.org/misc/sphinx01.conf",
-		"--rotate",
-		"--quiet",
+
+	# Only pass indexer the --rotate option if there is something
+	# there to rotate.  Otherwise searchd refuses to drop the new
+	# files into place.
+	my $constants = getCurrentStatic();
+	my $vardir = $constants->{sphinx_01_vardir} || '/srv/sphinx/var';
+	my $do_rotate = -e carfile($vardir, 'data', "firehose_$name.spm") ? 1 : 0;
+
+	main::slashdLog("sphinx_indexer indexing($do_rotate) $name pid $$");
+	my @args = (
+		'/usr/local/sphinx/bin/indexer',
+		"--config $conffile",
+	);
+	push @args, '--rotate' if $do_rotate;
+	push @args, (
+		'--quiet',
 		"idx_firehose_$name",
-		"> /dev/null"));
+		'> /dev/null',
+	);
+	system(join(' ', @args));
 }
 
 sub wait_for_all_children {
