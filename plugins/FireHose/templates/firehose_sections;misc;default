@@ -150,8 +150,13 @@ update_section = function( which, data, make_default ){
 	}
 
 	if ( id!=='unsaved' && (newsig=signature(section))!==(oldsig=signatures[id]) ) {
-		if ( oldsig ) { delete ids[ oldsig ]; }
 		ids[ signatures[id]=newsig ] = id;
+		if ( oldsig ) {
+			delete ids[ oldsig ];
+			if ( section.skin && oldsig.split(';')[2]!==newsig.split(';')[2] ) {
+				delete section.skin;
+			}
+		}
 	}
 
 	if ( arguments.length > 1 ) {

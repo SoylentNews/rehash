@@ -431,23 +431,44 @@ function toggleFirehoseTagbox(id) {
 	after_article_moved(elemAny('firehose-'+id));
 }
 
-function firehose_style_switch(section) {
+function use_skin( link ){
+	// Note: use_skin('') or equivalent => disable alternates (e.g., for "Slashdot" section)
+
+	var $others	= $('head link[rel=alternate stylesheet]'),
+		$skin	= link && $(link),
+		skin	= $skin && (
+					$others.filter('[title=' + $skin.attr('title') + ']')[0]
+					|| $skin.appendTo('head')[0]
+				);
+
+	if ( skin ) {
+		skin.disabled = false;
+		$others = $others.not(skin);
+	}
+	$others.attr('disabled', true);
+}
+
+function firehose_style_switch( section_id ){
+	// If we've cached the skin-info in the section-metadata, use that.
+	var	$item	= firehose_section_menu_item(section_id),
+		section	= $item.length && $item.metadata();
+
+	if ( 'skin' in section ) {
+		use_skin(section.skin);
+		return;
+	}
+
+	// Otherwise, ask the server for the right skin.
 	ajax_update({
 		op: 'firehose_section_css',
 		reskey: reskey_static,
 		layout: 'yui',
-		section: section
+		section: section_id
 	}, '', {
 		onComplete: function( xhr ){
-			var json	= eval_response(xhr) || {},
-				$skins	= $('head link[rel=alternate stylesheet]'),
-				skin	= json.skin_name && $skins.filter('[title='+json.skin_name+']')[0]
-						|| json.css_includes && $(json.css_includes).appendTo('head')[0];
-			if ( skin ) {
-				skin.disabled = false;
-				$skins = $skins.not(skin);
-			}
-			$skins.attr('disabled', true);
+			var json = eval_response(xhr)||{};
+			use_skin(json.css_includes);
+			section && (section.skin=json.css_includes);
 		}
 	});
 }
