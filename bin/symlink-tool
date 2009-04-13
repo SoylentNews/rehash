@@ -171,6 +171,7 @@ if (!$testing && !-w $datadir) {
 	exit 1;
 }
 
+my %valid_file = ( );
 my %processed = ( );
 for my $subdir (sort keys %theme_subdir_files) {
 	my @files = sort @{$theme_subdir_files{$subdir}};
@@ -209,7 +210,7 @@ for my $subdir (sort keys %theme_subdir_files) {
 			$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
 			template_process($theme_dir, [ $target_file ], $destfile);
 		}
-		$processed{$site_file_abs} = 1;
+		$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 	}
 }
 for my $plugin (sort keys %plugin_subdir_files) {
@@ -254,7 +255,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 				$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
 				template_process($plugin_dir, [ $target_file ], $destfile);
 			}
-			$processed{$site_file_abs} = 1;
+			$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 		}
 	}
 }
@@ -371,7 +372,7 @@ for my $subdir (sort keys %theme_subdir_files) {
 		$num_changes += handle_file($site_file_abs, $theme_file_abs,
 			$site_file_abs_dot, $site_file_abs_dot_short,
 			$site_file_abs_wrong);
-		$processed{$site_file_abs} = 1;
+		$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 	}
 }
 for my $plugin (sort keys %plugin_subdir_files) {
@@ -413,7 +414,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			$num_changes += handle_file($site_file_abs, $plugin_file_abs,
 				$site_file_abs_dot, $site_file_abs_dot_short,
 				$site_file_abs_wrong);
-			$processed{$site_file_abs} = 1;
+			$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 		}
 	}
 }
@@ -433,7 +434,7 @@ sub handle_file {
 		print "Target file '$target_file' missing, can't create symlink\n";
 		return 1;
 	}
-	if ($symlink_file_wrong) {
+	if ($symlink_file_wrong && !$valid_file{$symlink_file_wrong}) {
 		lstat($symlink_file_wrong);
 		if (-e _ && -l _) {
 			# $symlink_file_wrong is the wrong place to put a symlink.
