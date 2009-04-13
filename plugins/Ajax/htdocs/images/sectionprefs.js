@@ -1,39 +1,5 @@
 ; // $Id$
 
-function saveFirehoseSectionMenu(){
-	if (! check_logged_in()) {
-		return false;
-	}
-
-	// tell the server our current (ordered) list of sections
-	ajax_update({
-		op:	'firehose_save_section_menu',
-		reskey:	reskey_static,
-		fsids:	$('#firehose-sections > li').
-				map(function(){
-					var id = this.id.slice(10);	// slice off leading 'fhsection-'
-					if ( id !== 'unsaved' ) {
-						return id;
-					}
-				}).
-				get().
-				join(',')
-	});
-}
-
-function firehose_delete_section(id,undo) {
-	if (undo == undefined ) {
-		undo = 0;
-	}
-	ajax_update({
-		op:	'firehose_delete_section_menu',
-		reskey:	reskey_static,
-		undo:	undo,
-		id: 	id
-	});
-}
-
-
 function configSectionPopup() { 
 	var title = "<a href=\"#\" onclick=\"window.location.reload()\" style=\"color:#fff;\">Sectional&nbsp;Display&nbsp;Prefs</a>&nbsp;";
 	var buttons = createPopupButtons("<a href=\"/faq/UI.shtml#ui500\">[?]</a>","<a href=\"#\" onclick=\"window.location.reload()\">[X]</a>");

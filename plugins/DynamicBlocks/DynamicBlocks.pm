@@ -77,14 +77,14 @@ sub setUserBlock {
 
 	$id = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "name = '$name-$uid' and $uid = $uid");
         if ($block) {
-                my $block_definition;
-                if ($options->{private}) {
-                        $block_definition = $self->getBlockDefinition('', { type => 'user', private => $options->{private} });
-                } else {
-                        $block_definition = $self->getBlockDefinition('', { type => 'user', private => 'no'});
-                }
-
                 if (!$id) {
+			my $block_definition;
+			if ($options->{private}) {
+				$block_definition = $self->getBlockDefinition('', { type => 'user', private => $options->{private} });
+			} else {
+				$block_definition = $self->getBlockDefinition('', { type => 'user', private => 'no'});
+			}
+
                         $data = {
                                 type_id        => $block_definition->{type_id},
                                 uid            => $uid,

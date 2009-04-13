@@ -439,11 +439,15 @@ function firehose_style_switch(section) {
 		section: section
 	}, '', {
 		onComplete: function( xhr ){
-			var json=eval_response(xhr), name=json&&json.skin_name, new_css=name&&json.css_includes;
-			$('head link[rel=alternate stylesheet]').each(function(){
-				(this.disabled = this.getAttribute('title')!==name) || (new_css=null);
-			});
-			new_css && $('head').append(new_css);
+			var json	= eval_response(xhr) || {},
+				$skins	= $('head link[rel=alternate stylesheet]'),
+				skin	= json.skin_name && $skins.filter('[title='+json.skin_name+']')[0]
+						|| json.css_includes && $(json.css_includes).appendTo('head')[0];
+			if ( skin ) {
+				skin.disabled = false;
+				$skins = $skins.not(skin);
+			}
+			$skins.attr('disabled', true);
 		}
 	});
 }

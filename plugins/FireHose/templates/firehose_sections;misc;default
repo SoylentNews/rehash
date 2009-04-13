@@ -60,19 +60,47 @@ END;
 	[% END %]
 </ul>
 [% IF (user.currentPage == "index2" || user.currentPage == "firehose" || user.currentPage == "console") && form.op != "view" && !form.taskgen %]<script type="text/javascript">
+
+var firehose_delete_section, update_section;
+
 $(function(){
+var $section_menu = $any('firehose-sections');
+
+firehose_delete_section = function( id, undo ) {
+	ajax_update({
+		op:	'firehose_delete_section_menu',
+		reskey:	reskey_static,
+		undo:	undo||0,
+		id: 	id
+	});
+	firehose_set_options('section', $section_menu.metadata().default_id);
+}
+
+function save_menu(){
+	if ( !check_logged_in() ) { return false; }
+
+	// tell the server our current (ordered) list of sections
+	ajax_update({
+		op:	'firehose_save_section_menu',
+		reskey:	reskey_static,
+		fsids:	$section_menu.
+					children('li:not(#fhsection-unsaved)').
+						map(function(){ return this.id.slice(10); }).get().join(',')
+	});
+}
+
 
 function unsaved(){
 	var $unsaved = $any('fhsection-unsaved');
 	if ( !$unsaved.length ) {
-		($unsaved = $(unsaved.template).prependTo('#firehose-sections')).metadata().id = 'unsaved';
+		($unsaved = $(unsaved.template).prependTo($section_menu)).metadata().id = 'unsaved';
 	}
 	return $unsaved;
 }
 
 var section_matching;
 (function(){
-var signatures={}, ids={}, ws=/\s+/, default_color = {
+var signatures={}, ids={}, ws=/\s+/, id_prefix=/^fhsection-/, default_color = {
 	stories: 'green',
 	recent: 'blue',
 	popular: 'green',
@@ -86,34 +114,60 @@ function signature( section ){
 }
 
 section_matching = function( data ){
-	var id		= $any('firehose-sections').metadata().active_id,
+	var id		= $section_menu.metadata().active_id,
 		goal	= signature(data),
 		$menu_item;
 	(id==='unsaved' || signatures[id]!==goal) && (id = ids[goal]);
 	return id && ($menu_item=firehose_section_menu_item(id)) && $menu_item.metadata();
-}
+};
 
-$(document).
-	bind('section-updated.firehose', function( event, update ){
-		var section = (update.menu_item||firehose_section_menu_item(update.id)).metadata();
-		update.changes && $.extend(section, update.changes);
-		if ( update.id && update.id !== 'unsaved' ) {
-			delete ids[ signatures[update.id] ];
-			ids[ signatures[update.id]=signature(section) ] = update.id;
+update_section = function( which, data, make_default ){
+	var $item, id, section, oldsig, newsig;
+	if ( which instanceof jQuery ) {
+		$item = which;
+		id = $item.attr('id').replace(id_prefix, '');
+	} else {
+		if ( which.id ) {
+			id = which.id
+			data || (data = which);
+		} else {
+			id = which;
 		}
-	});
+		$item = firehose_section_menu_item(id);
+	}
+
+	$item.find('script[type=data]').
+		each(function(){
+			section = $item.metadata({type:'elem', name:'script'});
+		}).
+		remove();
+	section || (section=$item.metadata());
+	section.id && (id=section.id);
+	$.extend(section, data, id && { id: id });
+
+	if ( !id ) {
+		return;
+	}
+
+	if ( id!=='unsaved' && (newsig=signature(section))!==(oldsig=signatures[id]) ) {
+		if ( oldsig ) { delete ids[ oldsig ]; }
+		ids[ signatures[id]=newsig ] = id;
+	}
+
+	if ( arguments.length > 1 ) {
+		highlight_menu_item(id);
+		make_default && id && ($menu.metadata().default_id=id);
+		old_sig || save_menu();
+	}
+};
 
 // Force-initialize the metadata and build the section_matching map.
 $('#links-sections script[type=data]').
 	closest('li,div.title').
-		each(function(){
-			var section = $(this).metadata({type:'elem', name:'script'});
-			ids[ signatures[section.id]=signature(section) ] = section.id;
-		}).
-	end().
-	remove();
+		each(function(){ update_section($(this)); });
 
-$any('firehose-sections').metadata().home_id = $any('links-sections-title').metadata().id;
+$section_menu.metadata({type:'elem', name:'script'}).home_id = $any('links-sections-title').metadata().id;
+$section_menu.find('script[type=data]').remove();
 })();
 
 
@@ -121,7 +175,7 @@ function highlight_menu_item( section_id ){
 	return firehose_section_menu_item(section_id).each(function(){
 		$('#links-sections .active').not(this).removeClass('active');
 		$(this).addClass('active');
-		$any('firehose-sections').metadata().active_id = section_id;
+		$section_menu.metadata().active_id = section_id;
 	});
 }
 
@@ -157,12 +211,12 @@ $any('links-sections').
 
 
 // Drag items in the section-menu to reorder it permanently.
-$any('firehose-sections').
+$section_menu.
 	sortable({
 		axis: 'y',
 		containment: '#links-sections',
 		opacity: 0.8,
-		update: saveFirehoseSectionMenu
+		update: save_menu
 	});
 
 

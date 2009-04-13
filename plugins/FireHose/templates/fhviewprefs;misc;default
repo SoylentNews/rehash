@@ -21,7 +21,7 @@ __template__
 
    section_id = id;
    is_primary_section = fh_section && fh_section.uid == 0 && fh_section.skid == constants.mainpage_skid;
-   is_unsaved_section = !id;
+   is_unsaved_section = !id || (id == 'unsaved');
 %]
 <form id ="modal_prefs" method="post">
 <input type="hidden" name="formname" value="firehoseview">
@@ -54,8 +54,8 @@ __template__
 // dialog not yet shown; move to tie it to the menu item
 (function(){
 	var	$menu			= $any('firehose-sections'),
-		$menu_item		= firehose_section_menu_item('[% IF section_id; section_id; ELSE %]unsaved[% END %]'),
-		menu_item_offset	= $menu_item.offset(),
+		$item		= firehose_section_menu_item('[% IF section_id; section_id; ELSE %]unsaved[% END %]'),
+		item_offset	= $item.offset(),
 		$dialog			= get_modal_parts('#modal_box'),
 		$edit_field		= $dialog.find('input#fhsectionname'),
 		$save_button	= $dialog.find('input[type=button][value=save]');
@@ -66,8 +66,8 @@ __template__
 		css({	// make the dialog look as though it _is_ the menu item
 			position:	'absolute',
 			margin:		0,
-			top:		menu_item_offset.top + 'px',
-			left:		menu_item_offset.left + 'px'
+			top:		item_offset.top + 'px',
+			left:		item_offset.left + 'px'
 		});
 
 	[% IF section_id %]
@@ -80,10 +80,10 @@ __template__
 		click(function(){
 			var action = $(this).val();
 			if ( action == 'delete' ) {
-				$menu_item.remove();
-				$menu_item = $([]);
+				$item.remove();
+				$item = $([]);
 			}
-			$menu_item.toggleClass('hide', action=='hide');
+			$item.toggleClass('hide', action=='hide');
 			firehose_delete_section([% section_id %], {unhide:'undo'}[action]);
 		});
 	function save_as_default(){
@@ -94,21 +94,16 @@ __template__
 		});
 		$menu.metadata().default_id = [% section_id %];
 	}
-	function update_metadata( updated ){
-		$(document).trigger('section-updated.firehose', {
-			id: [% section_id %],
-			changes: {
-				name:		updated.name,
-				color:		updated.color,
-				filter:		updated.filter,
-				viewname:	updated.viewname
-			},
-			menu_item: $menu_item
-		});
-
-		updated.as_default && ($menu.metadata().default_id = [% section_id %]);
-	}
 	[% END %]
+
+	function update_metadata( updated, which ){
+		update_section(which, {
+			name:		updated.name,
+			color:		updated.color,
+			filter:		updated.filter,
+			viewname:	updated.viewname
+		}, updated.as_default);
+	}
 
 	// custom show/hide
 	var dialog_elem = $dialog[0];
@@ -116,9 +111,9 @@ __template__
 		var	to_height	= $dialog.height(),
 			to_width	= $dialog.width();
 
-		$menu_item.animate({ height: $dialog.outerHeight()-6+'px' });
-		$dialog.height($menu_item.height()).
-			width($menu_item.width() - ($dialog.outerWidth()-to_width)).
+		$item.animate({ height: $dialog.outerHeight()-6+'px' });
+		$dialog.height($item.height()).
+			width($item.width() - ($dialog.outerWidth()-to_width)).
 			css({ overflow: 'hidden' }).
 			animate({
 				height:	to_height,
@@ -137,7 +132,7 @@ __template__
 
 	dialog_elem._custom_hide_fn = function(){
 		// allow the menu item to shrink back down to normal height
-		$menu_item.removeAttr('style');
+		$item.removeAttr('style');
 		$dialog.find('#modal_box_content').css({ height:'' });
 	};
 
@@ -164,25 +159,25 @@ __template__
 					}),
 		picker_color	= $picker.data('color_fn');
 
-	picker_color('color-saved', $menu_item.metadata().color || firehose_settings.color);
+	picker_color('color-saved', $item.metadata().color || firehose_settings.color);
 
 	function dialog_values(){
 		return {
 			name:		$edit_field.length ? $edit_field.val() : $dialog.find('div.sectionname').text(),
 			color:		picker_color(),
 			filter:		$dialog.find('input[name=section_filter]').val(),
-			viewname:	$dialog.find('select').val(),
+			viewname:	$dialog.find('select option[selected]').text().toLowerCase(),
 			as_default:	!!$dialog.find('input[name=section_default]').attr('checked')
 		};
 	}
 	var saved = dialog_values();
 
 	if ( !saved.name && !saved.filter ) {
-		$dialog.find('input[name=section_filter]').val( $menu_item.metadata().filter );
+		$dialog.find('input[name=section_filter]').val( $item.metadata().filter );
 		$edit_field.keyup();
 
 		var	$select	= $dialog.find('select'),
-			view_id	= $select.find(':contains(' + $menu_item.metadata().viewname.substr(1) + ')').val();
+			view_id	= $select.find(':contains(' + $item.metadata().viewname.substr(1) + ')').val();
 		$select.val(view_id);
 	}
 
@@ -191,26 +186,30 @@ __template__
 		return $.trim(o.nodeType ? o.text||o.value : o).toLowerCase();
 	}
 
+var save_state_for;
+(function(){
+var in_use=$('#links-sections a.data-title'), mine=$item.find('a.data-title')[0];
+in_use = (mine ? in_use.not(mine) : in_use).map(foldtext).get();
+in_use.push('unsaved', '');
+in_use = Slash.Util.qw.as_set(in_use);
+
+save_state_for = function( name ){
+	return in_use[foldtext(name)] ? 'disabled' : '';
+};
+})();
+
 	// keep the save button in sync with the name field... that is: disabled for invalid names
-	var	save_disabled	= 	'',
-		excluded		= 	$menu_item.find('a.data-title')[0],
-		invalid_name	=	Slash.Util.qw.as_set(	// can't save a new section with an existing section's name
-								$('#links-sections a.data-title').not(excluded).map(foldtext).get()
-							);
-		invalid_name['unsaved'] = true;
-		invalid_name[''] = true;
+	var	save_state = '';
 
 	// test and enable/disable (as needed) on keyup
 	$edit_field.keyup(function( e ){
-		var	invalid	= sign(invalid_name[foldtext(this)]),
-			disable	= ['', 'disabled'][invalid];
-
-		if ( disable != save_disabled ) {
-			save_disabled = disable;
-			$save_button.attr('disabled', disable);
+		var	s=save_state_for(this);
+		if ( s != save_state ) {
+			save_state = s;
+			$save_button.attr('disabled', save_state);
 			[% IF !section_id %]
 			$dialog.find('input[name=section_default]').
-				attr({ checked: '', disabled: disable });
+				attr({ checked: '', disabled: save_state });
 			[% END %]
 		}
 	});
@@ -220,8 +219,9 @@ __template__
 
 	[% IF is_unsaved_section %]
 
-		$menu_item.find('a:first').text(requested.name);
-		ajax_update({	op:		'firehose_new_section',
+		$item.find('a:first').text(requested.name);
+		ajax_update({
+				op:			'firehose_new_section',
 				reskey:		reskey_static,
 
 				name:		requested.name,
@@ -234,13 +234,9 @@ __template__
 			}, '', { onComplete: function( transport ){
 				var json = eval_response(transport);
 				if ( json && json.li ) {
-					var	$saved		= $(json.li).insertBefore($menu_item),
-						saved_id	= $saved.metadata({type:'elem', name:'script'}).id||json.id;
-					$menu_item.remove();
-					$(document).
-						trigger('section-updated.firehose', { id: saved_id, menu_item: $saved }).
-						trigger('firehose-setting-section', saved_id);
-					saveFirehoseSectionMenu();
+					var	$saved = json.li && $(json.li).insertBefore($item);
+					$item.remove();
+					update_metadata(requested, $saved);
 				}
 			}
 		});
@@ -253,9 +249,9 @@ __template__
 		});
 		changed.query = changed.color||changed.filter||changed.viewname;
 
-		changed.name && $menu_item.find('a:first').text(requested.name);
+		changed.name && $item.find('a:first').text(requested.name);
 		if ( changed.name || changed.query ) {
-			update_metadata(requested);
+			update_metadata(requested, [% section_id %]);
 			saveModalPrefs();
 		}
 		changed.query && $(document).trigger('firehose-setting-section', [% section_id %]);
