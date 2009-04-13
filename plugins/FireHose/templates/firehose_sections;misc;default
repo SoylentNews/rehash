@@ -174,7 +174,7 @@ $section_menu.find('script[type=data]').remove();
 function highlight_menu_item( section_id ){
 	return firehose_section_menu_item(section_id).each(function(){
 		$('#links-sections .active').not(this).removeClass('active');
-		$(this).addClass('active');
+		$( $('h4', this)[0] || this ).addClass('active');
 		$section_menu.metadata().active_id = section_id;
 	});
 }
