@@ -497,6 +497,8 @@ sub handle_file {
 			print "would create: '$target_file'\n";
 			return 1;
 		}
+		my $symlink_file_dir = (splitpath($symlink_file))[1];
+		mkpath $symlink_file_dir;
 		my $success = symlink($target_file, $symlink_file);
 		if (!$success) {
 			print "attempt to create FAILED: $!\n";
