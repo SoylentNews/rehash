@@ -685,7 +685,7 @@ var tag_widget_fns = {
 							// if display had no tags before, $display.hide() would silently fail, because it's already hidden
 							// so hide the widget itself while we make the changes
 							$parent.hide();
-							display.set_tags(context_tags, { classes: 'suggestion' });
+							display.set_tags(context_tags, { classes: 'suggestion b' });
 							if ( widget.modify_context ) {
 								widget.modify_context(display, context);
 							}
@@ -788,6 +788,7 @@ function $init_tag_widgets( $stubs, options ){
 
 
 /*
+	'b' "button"
 	'w'	warning
 	'u'	user tag
 	't'	top tag
@@ -1049,15 +1050,15 @@ topicTags = ["keyword",
 	update_class_map(well_known_tags, 'y p', ['nod', 'metanod']);
 	update_class_map(well_known_tags, 'x p', ['nix', 'metanix']);
 	update_class_map(well_known_tags, 'p', ['mainpage']);	// Rob requests 'mainpage' never show its face
-	update_class_map(well_known_tags, 'd p', data_types);
+	update_class_map(well_known_tags, 'd p b', data_types);
 
 	if ( tag_admin ) {
-		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);
-		update_class_map(well_known_tags, 'd w', ['unknown']);	// Tags.pm debugging
-		update_class_map(well_known_tags, 'p', ['feedback']);
+		update_class_map(well_known_tags, 'w p b', ['signed', 'unsigned', 'signoff']);
+		update_class_map(well_known_tags, 'd w b', ['unknown']);	// Tags.pm debugging
+		update_class_map(well_known_tags, 'p b', ['feedback']);
 	} else {
-		update_class_map(well_known_tags, 'd p', ['unknown']);	// Tags.pm debugging, non-admins don't get to see
-		update_class_map(well_known_tags, 'w', ['feedback']);
+		update_class_map(well_known_tags, 'd p b', ['unknown']);	// Tags.pm debugging, non-admins don't get to see
+		update_class_map(well_known_tags, 'w b', ['feedback']);
 	}
 });
 

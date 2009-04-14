@@ -60,7 +60,7 @@ function tagsHistory( selector_fragment, context ) {
 //
 
 function firehose_admin_context( display ){
-	display.update_tags('extras history', { order: 'prepend' });
+	display.update_tags('extras history', { order: 'prepend', classes: 'b' });
 }
 
 function firehose_handle_admin_commands( commands ){
