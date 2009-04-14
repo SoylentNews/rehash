@@ -190,7 +190,8 @@ sub main {
 	# instead of emitting a webpage.
 
 	my $header_emitted = 0;
-	my $title = $discussion ? $discussion->{'title'} : 'Comments';
+	my $title = 'Slashdot Comments';
+	$title .= " | $discussion->{'title'}" if $discussion;
 	if ($op ne 'submit') {
 		header($title, $section) or return;
 		$header_emitted = 1;
