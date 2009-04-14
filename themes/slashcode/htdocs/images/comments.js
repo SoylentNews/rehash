@@ -116,13 +116,13 @@ function updateComment(cid, mode) {
 			existingdiv.className = new_class;
 			var parentdiv = fetchEl('tree_' + cid);
 			parentdiv.className = parentdiv.className.replace(' contain', '');
-			if (mode == 'full')
+			if (mode==='full')
 				parentdiv.className = parentdiv.className + ' contain';
 		}
 		if (adTimerUrl) {
 			var addiv = fetchEl('comment_ad_' + cid);
 			if (addiv) {
-				if (mode == 'hidden')
+				if (mode==='hidden')
 					addiv.style.display = 'none';
 				else
 					addiv.style.display = 'block';
@@ -206,7 +206,7 @@ function setFocusComment(cid, alone, no_ads) {
 // 	resetModifiers();
 
 	var was_hidden = 0;
-	if (displaymode[abscid] == 'hidden' || prehiddendisplaymode[abscid] == 'hidden')
+	if (displaymode[abscid]==='hidden' || prehiddendisplaymode[abscid]==='hidden')
 		was_hidden = 1;
 
 	if (alone && alone == 1) {
@@ -331,7 +331,7 @@ function kidHiddens(cid, kidhiddens) {
 		hidestring_cid.className = 'hide';
 
 	// may not be changed yet, that's OK
-	if (futuredisplaymode[cid] == 'hidden') {
+	if (futuredisplaymode[cid]==='hidden') {
 		hiddens_cid.className = 'hide';
 		if (comments[cid]['points'] == -2) // -2 is special case for placeholder-hiddens
 			return kidhiddens;
@@ -373,7 +373,7 @@ function revealKids(cid, not_top) {
 				revealKids(kid, 1); // 1 == not at the top level
 				continue;
 			}
-			if (displaymode[kid] == 'hidden') {
+			if (displaymode[kid]==='hidden') {
 				futuredisplaymode[kid] = only_one ? 'full' : 'oneline';
 				updateDisplayMode(kid, futuredisplaymode[kid], 1);
 				updateComment(kid, futuredisplaymode[kid]);
@@ -443,9 +443,9 @@ function setShortSubject(cid, mode, cl) {
 		setDefaultDisplayMode(comments[cid]['pid']);
 		if (!mode)
 			mode = displaymode[cid];
-		if (mode == 'full' || (mode == 'oneline' && displaymode[comments[cid]['pid']] == 'hidden')) {
+		if (mode==='full' || (mode==='oneline' && displaymode[comments[cid]['pid']]==='hidden')) {
 			cl.innerHTML = comments[cid]['subject'];
-		} else if (mode == 'oneline') {
+		} else if (mode==='oneline') {
 			cl.innerHTML = 'Re:';
 		}
 	}
@@ -567,9 +567,9 @@ function getDescendants(cids, first) {
 
 function faGetSetting(cid, ctype, relation, prevview, canbelower) {
 	var newview = behaviors[ctype][relation];
-	if (newview == 'none') {
+	if (newview==='none') {
 		return prevview;
-	} else if (newview == 'prehidden') {
+	} else if (newview==='prehidden') {
 		setDefaultDisplayMode(cid);
 		return prehiddendisplaymode[cid];
 	}
@@ -1312,7 +1312,7 @@ function grepNode(obj, id) {
 	var parent = obj.parentNode;
 	if (!parent)
 		return false;
-//	if (parent.nodeName == '#document')
+//	if (parent.nodeName==='#document')
 	if (parent.id.match(id))
 		return parent;
 	return grepNode(parent);
@@ -1506,7 +1506,7 @@ function updateMoreNum(num) { // should be an integer, or empty string
 
 function scrollWindowTo(cid) {
 	var comment_y = Position(fetchEl('comment_' + cid)).top;
-	if ($dom('d2out').className == 'horizontal')
+	if ($dom('d2out').className==='horizontal')
 		comment_y -= 60;
 	scroll(Position(window).left, comment_y);
 }
@@ -1842,7 +1842,7 @@ function commTreeNextComm (cid, old_cid, getNextUnread, no_parent) {
 		if (this_cid) {
 			if (!getNextUnread) {
 				setDefaultDisplayMode(this_cid);
-				if (displaymode[this_cid] == 'hidden' || comments[this_cid]['points'] <= -2) {
+				if (displaymode[this_cid]==='hidden' || comments[this_cid]['points'] <= -2) {
 					// try to dig deeper to find non-hidden
 					// if available
 					if (comments[this_cid].kids.length) {
