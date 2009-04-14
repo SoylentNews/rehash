@@ -2093,9 +2093,7 @@ var packageObj = Slash.Discussion = {
 	getSliderTotals:        getSliderTotals
 };
 
-
-
-$.each(Qw('\
+[% exports="\
 	abbrev_comments \
 	adTimerUrl \
 	comment_body_reply \
@@ -2124,8 +2122,12 @@ $.each(Qw('\
 	user_is_subscriber \
 	user_threshold \
 	user_uid \
-	'), function( i, name ){
-	packageObj[name] = eval('("IE bug workaround",(function(v){ if (v===undefined) return '+this+'; '+this+'=v;}))');
+	" %]
+
+$.extend(packageObj, {
+[%- FOREACH k IN exports.split() %]
+	[% k %]: function( v ){ return arguments.length ? ([% k %]=v) : [% k %] }[% IF !loop.last() %],[% END -%]
+[% END %]
 });
 
 })(Slash.jQuery); // (function($){
