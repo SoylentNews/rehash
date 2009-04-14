@@ -659,11 +659,20 @@ function firehose_toggle_tag_ui( any ) {
 	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
 }
 
-var non_command_context = {
+var search_eligible;
+(function(){
+var context_search_eligible = {
 	user:	true,
 	top:	true,
 	system:	true
 };
+search_eligible = function( tag_el ){
+	var $li		= $(tag_el).closest('li'),
+		context	= $li.closest('span.tag-display').attr('context') || 'unknown';
+
+	return context_search_eligible[context] && $li.is(':not(.p,.w,.b,.suggestion)');
+};
+})();
 
 function firehose_click_tag( event ) {
 	var	$target	= $(event.target),
@@ -685,7 +694,7 @@ function firehose_click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
-		if ( !event.shiftKey && non_command_context[ $target.closest('span.tag-display').attr('context') || 'unknown' ] ) {
+		if ( !event.shiftKey && search_eligible($target) ) {
 			// Even anonymous readers may click tags to refine the current search/filter.
 			slash_refine_search(command);
 			return false;
