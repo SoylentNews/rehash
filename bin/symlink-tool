@@ -93,10 +93,10 @@ my %plugin_subdir_files = ( );
 my %theme_css_use_imagedir = ();
 my %plugin_css_use_imagedir = ();
 # First, pull in the files referenced by the theme.
-my @theme_htdocs_keys = grep /^(htdoc|image|topic|css)/, keys %$theme_hr;
+my @theme_htdocs_keys = grep /^(htdoc|image|topic|css|js|idle|core)/, keys %$theme_hr;
 for my $key (@theme_htdocs_keys) {
 	next unless $key && $theme_hr->{$key};
-	if ($key =~ /^css/ && $constants->{css_use_imagedir}) {
+	if ($key =~ /css/ && $constants->{css_use_imagedir}) {
 		if (ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq "ARRAY") {
 			$theme_css_use_imagedir{$_} = 1 foreach @{$theme_hr->{$key}};
 		} else {
@@ -208,7 +208,16 @@ for my $subdir (sort keys %theme_subdir_files) {
 		if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
 			my $destfile = $theme_file_abs;
 			$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
-			template_process($theme_dir, [ $target_file ], $destfile);
+			# If a minified that's handled in a glob, skip it here
+			my $in_glob = 0;
+			for my $g (keys %{ $theme_hr->{'glob'} }) {
+				my $f = $theme_hr->{'glob'}{$g};
+				$f =~ s/\.(\w+)$/.${1}raw/;
+				my $f_minified = $f;
+				$f_minified =~ s/\.(\w+raw)$/-minified.$1/;
+				$in_glob = 1 if $target_file eq $f || $target_file eq $f_minified;
+			}
+			template_process($theme_dir, [ $target_file ], $destfile) unless $in_glob;
 		}
 		$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 	}
@@ -253,7 +262,16 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
 				my $destfile = $plugin_file_abs;
 				$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
-				template_process($plugin_dir, [ $target_file ], $destfile);
+				# If a minified that's handled in a glob, skip it here
+				my $in_glob = 0;
+				for my $g (keys %{ $theme_hr->{'glob'} }) {
+					my $f = $theme_hr->{'glob'}{$g};
+					$f =~ s/\.(\w+)$/.${1}raw/;
+					my $f_minified = $f;
+					$f_minified =~ s/\.(\w+raw)$/-minified.$1/;
+					$in_glob = 1 if $target_file eq $f || $target_file eq $f_minified;
+				}
+				template_process($plugin_dir, [ $target_file ], $destfile) unless $in_glob;
 			}
 			$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 		}
@@ -276,10 +294,20 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		}
 		# @filelist = e.g. ('htdocs/base.css','htdocs/ostgnavbar.css'...)
 
-		template_process($theme_or_plugin->{dir}, \@filelist, $destpath);
-
-		# system("cat $filelist > $destpath");
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+		$destpath = "$path$name.$virtuser$suffix";
+		my @cooked_filelist = ( );
+		for my $file (@filelist) {
+			my($filetype) = $file =~ /\.(\w+)$/;
+			if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
+				my $destfile = $file;
+				$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
+				push @cooked_filelist, $destfile;
+			} else {
+				push @cooked_filelist, $file;
+			}
+		}
+		template_process($theme_or_plugin->{dir}, \@cooked_filelist, $destpath);
 
 		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
 		my $compress = '';
@@ -330,7 +358,7 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			} elsif ( system("csstidy $destpath --silent=true --template=high $tidiedpath")==0 ) {
 				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n";
 			} else {
-				link("$destpath", "$tidiedpath");
+				symlink("$destpath", "$tidiedpath");
 			}
 		}
 	}
