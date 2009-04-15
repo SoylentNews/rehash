@@ -444,9 +444,13 @@ sub getDynamicBlock {
         my $slashdb = getCurrentDB();
 
         my $block;
-        ($block->{block}, $block->{title}, $block->{url}) =
-                $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "name = '$name'");
+        ($block->{block}, $block->{title}, $block->{url}, $block->{portal_id}) =
+                $slashdb->sqlSelect('block, title, url, portal_id', 'dynamic_user_blocks', "name = '$name'");
         $block->{name} = $name;
+
+	if ($block->{portal_id}) {
+		($block->{block}, $block->{title}, $block->{url}) = $self->getPortalBlockContent($block->{portal_id});
+	}
 
         if ($options->{strip_list} && $block->{block}) {
                 $block->{block} =~ s/<\/?ul>//g;
@@ -735,16 +739,25 @@ sub getUserBioBlock {
 }
 
 sub displayBlock {
-        my ($self, $name, $options) = @_;
+        my ($self, $name, $options, $supplemental_pages) = @_;
 
         my $slashdb = getCurrentDB();
 
 	my $block = $self->getDynamicBlock($name);
         ($block->{title}) = $block->{title} =~ /^.+\s(\w+)$/ if ($options->{user_self} and $block and $block->{block});
 
+	my $supplement = '';
+	foreach my $sp (@$supplemental_pages) {
+		my ($page, $data) = each %$sp;
+		$supplement .= slashDisplay($page, {
+			supplement_data => $data
+		}, { Page => 'dynamicblocks', Return => 1 });
+	}
+
         return
                 slashDisplay('displayblock', {
-                        block => $block,
+                        block      => $block,
+			supplement => $supplement,
                 }, { Page => 'dynamicblocks', Return => 1 });
 }
 

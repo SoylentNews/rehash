@@ -13,34 +13,41 @@ __name__
 u2UserBio
 __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
+[% IF user.is_anon;
+        user_url = useredit.nickname | strip_paramattr;
+        PROCESS userlogin_cover return_url = gSkin.rootdir _ '/~' _ user_url;
+END %]
 <div class="block" id="user_bio">
         <div class="title" id="user_bio_title">
-        	<h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]" style="text-decoration:none;">[% useredit.nickname | strip_literal %] ([% useredit.uid %])</a> [% PROCESS zoo_icons person=useredit.uid implied="" %][% IF user.is_admin %]&nbsp;<a href="" onclick="getModalPrefs('adminblock', 'Admin', 0, {'field':'uid', 'id':'[% useredit.uid %]', 'fieldname':'uid', 'userfield':'[% useredit.uid %]'}); return false;"><img src="[% constants.imagedir %]/zoo_user_edit.png" alt="Edit"></a>[% END %]</h4>
+        	<h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]" style="text-decoration:none;">[% useredit.nickname | strip_literal %] ([% useredit.uid %])</a> [% PROCESS zoo_icons person=useredit.uid implied="" %][% IF user.is_anon %]&nbsp;<a href="" onclick="show_login_box(); return false;"><img src="[% constants.imagedir %]/neutral.gif" alt="Log In"></a>[% END %][% IF user.is_admin %]&nbsp;<a href="" onclick="getModalPrefs('adminblock', 'Admin', 0, {'field':'uid', 'id':'[% useredit.uid %]', 'fieldname':'uid', 'userfield':'[% useredit.uid %]'}); return false;"><img src="[% constants.imagedir %]/zoo_user_edit.png" alt="Edit"></a>[% END %]</h4>
 	</div>
 
         <div class="content" id="user_bio_content">
         [%
-                IF user.uid == useredit.uid OR user.is_admin;
-                        IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)'; END;
-			'<br>';
-                        '<a href="mailto:';
-                        useredit.realemail | strip_paramattr; '">';
-                        Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
-                        '<br>';
 
-                        IF useredit.fakeemail;
-                                IF useredit.fakeemail == useredit.realemail;
-                                        '(shown without obfuscation)';
-                                ELSE;
-                                        'shown as <a href="mailto:';
-                                        useredit.fakeemail | strip_paramattr; '">';
-                                        Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
-                                END;
-                        ELSE;
-                                '(email not shown publicly)';
-                        END;
-                ELSE;
-                        IF useredit.fakeemail;
+	'<ul>';
+	'<li>';
+	IF user.is_admin;
+		IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)'; END;
+		'<br>';
+		'<a href="mailto:';
+		useredit.realemail | strip_paramattr; '">';
+		Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
+		'<br>';
+
+		IF useredit.fakeemail;
+			IF useredit.fakeemail == useredit.realemail;
+				'(shown without obfuscation)';
+			ELSE;
+				'shown as <a href="mailto:';
+				useredit.fakeemail | strip_paramattr; '">';
+				Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
+			END;
+		ELSE;
+			'(email not shown publicly)';
+		END;
+	ELSE;
+		IF useredit.fakeemail;
                                 '<a href="mailto:';
                                 useredit.fakeemail | strip_paramattr; '">';
                                 Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
@@ -49,91 +56,83 @@ __template__
                         END;
                 END;
 
-                IF useredit.homepage;
-                        '<br><a href="';
-                        useredit.homepage | strip_attribute;
-                        '"';
-                        IF useredit.karma <= constants.goodkarma;
-                                ' rel="nofollow"';
-                        END;
-                        '>';
-                        Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</a>';
+	IF useredit.homepage;
+                '<br><a href="';
+                useredit.homepage | strip_attribute;
+                '"';
+                IF useredit.karma <= constants.goodkarma;
+                        ' rel="nofollow"';
                 END;
+                '>';
+                Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</a>';
+        END;
 
-                IF constants.wow && useredit.wow_main_name && useredit.wow_main_realm;
-			wowdb = Slash.getObject('Slash::WoW');
-			char_id = wowdb.getCharidIfExists(useredit.wow_main_realm, useredit.wow_main_name);
-			charmd = wowdb.getCharMetadata(char_id);
-			IF charmd.countryname == 'us'; armhost = 'www'; ELSE; armhost='eu'; END;
-			'<br>WoW: <a href="http://'; armhost; '.wowarmory.com/character-sheet.xml?r=';
-			charmd.realmname | strip_paramattr;
-			'&n=';
-			charmd.charname | strip_paramattr;
-			'">';
-			charmd.charname | strip_html;
-			'</a>@';
-			charmd.realmname | strip_html;
-                END;
+        IF useredit.aim && !useredit.aimdisplay;
+                '<br><b>AOL IM:</b> ';
+                useredit.aim | strip_literal;
+                ' (<b><a href="aim:addbuddy?screenname=';
+                useredit.aim | strip_attribute;
+                '">Add Buddy</a>, ';
+                '<a href="aim:goim?screenname=';
+                useredit.aim | strip_attribute;
+                '&amp;message=Greetings!">Send Message</a></b>)';
+        END;
 
-                IF user.uid == useredit.uid OR user.is_admin;
-                        '<br>Karma: ';
-                        PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
-                END;
+	IF useredit.yahoo;
+                '<br><b>Yahoo! ID:</b> ';
+                '<a href="http://profiles.yahoo.com/';
+                useredit.yahoo | strip_attribute;
+                '">';
+                useredit.yahoo | strip_literal;
+                '</a> (<b><a href="http://edit.yahoo.com/config/set_buddygrp?';
+                '.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=';
+                useredit.yahoo | strip_attribute;
+                '">Add User</a>, ';
+                '<a href="http://edit.yahoo.com/config/send_webmesg?.target=';
+                useredit.yahoo | strip_attribute;
+                '">Send Message</a></b>)';
+        END;
 
-                IF useredit.aim && !useredit.aimdisplay;
-                        '<br><b>AOL IM:</b> ';
-                        useredit.aim | strip_literal;
-                        ' (<b><a href="aim:addbuddy?screenname=';
-                        useredit.aim | strip_attribute;
-                        '">Add Buddy</a>, ';
-                        '<a href="aim:goim?screenname=';
-                        useredit.aim | strip_attribute;
-                        '&amp;message=Greetings!">Send Message</a></b>)';
-                END;
+        IF useredit.jabber;
+                '<br><b>Jabber:</b> ';
+                useredit.jabber | strip_literal;
+        END;
 
-                IF useredit.yahoo;
-                        '<br><b>Yahoo! ID:</b> ';
-                        '<a href="http://profiles.yahoo.com/';
-                        useredit.yahoo | strip_attribute;
-                        '">';
-                        useredit.yahoo | strip_literal;
-                        '</a> (<b><a href="http://edit.yahoo.com/config/set_buddygrp?';
-                        '.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=';
-                        useredit.yahoo | strip_attribute;
-                        '">Add User</a>, ';
-                        '<a href="http://edit.yahoo.com/config/send_webmesg?.target=';
-                        useredit.yahoo | strip_attribute;
-                        '">Send Message</a></b>)';
-                END;
+        IF useredit.calendar_url;
+                '<br><b>Public Calendar:</b> ';
+                '<a href="webcal://';
+                useredit.calendar_url | strip_attribute;
+                '">Subscribe</a>, <a href="http://';
+                useredit.calendar_url | strip_attribute;
+                '">Download</a>';
+        END;
+        '</li>';
 
-                IF useredit.jabber;
-                        '<br><b>Jabber:</b> ';
-                        useredit.jabber | strip_literal;
-                END;
+	IF useredit.bio;
+                '<li>';
+                Slash.parseDomainTags(useredit.bio);
+                '</li>';
+        END;
 
-                IF useredit.calendar_url;
-                        '<br><b>Public Calendar:</b> ';
-                        '<a href="webcal://';
-                        useredit.calendar_url | strip_attribute;
-                        '">Subscribe</a>, <a href="http://';
-                        useredit.calendar_url | strip_attribute;
-                        '">Download</a>';
-                END;
+        IF user.is_admin;
+                '<li>';
+                'Karma: ';
+                PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
+                '</li>';
+        END;
 
-                IF useredit.bio;
-                        '<br><hr>';
-                        Slash.parseDomainTags(useredit.bio);
-                END;
+        IF !user.is_anon;
+                '<li>';
+                '<b><a href="';
+                gSkin.rootdir;
+                '/zoo.pl?op=check&uid=';
+                useredit.uid;
+                '">Friend This User';
+                '</a></b>';
+                '</li>';
+        END;
+        '</ul>';
 
-                IF user.uid != useredit.uid;
-                        '<br><b><a href="';
-                        gSkin.rootdir;
-                        '/zoo.pl?op=check&uid=';
-                        useredit.uid;
-                        '">Change your relationship with ';
-                        useredit.nickname | strip_literal;
-                        '</a></b>';
-                END;
         %]        
         </div>
 </div>
