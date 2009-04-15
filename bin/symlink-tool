@@ -328,15 +328,15 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			open $min_dest, '>', $minified_name;
 
 			if ( $compress && system("$compress $destpath -o $minified_name")==0 ) {
-				print "symlink-tool: $compress \"$destpath\" -o \"$minified_name\"\n";
+				print "symlink-tool: $compress \"$destpath\" -o \"$minified_name\"\n" if $verbose;
 			} elsif (JavaScript::Minifier->can('jsmin')) {
 				JavaScript::Minifier::jsmin($min_src, $min_dest);
-				print "symlink-tool: JavaScript::Minifier::jsmin(\"$destpath\", \"$minified_name\")\n";
+				print "symlink-tool: JavaScript::Minifier::jsmin(\"$destpath\", \"$minified_name\")\n" if $verbose;
 			} elsif (JavaScript::Minifier->can('minify')) {
 				&JavaScript::Minifier::minify(
 					input => $min_src, outfile => $min_dest
 				);
-				print "symlink-tool: JavaScript::Minifier::minify(input=>\"$destpath\", outfile=>\"$minified_name\")\n";
+				print "symlink-tool: JavaScript::Minifier::minify(input=>\"$destpath\", outfile=>\"$minified_name\")\n" if $verbose;
 			} else {
 				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
 			}
@@ -350,9 +350,9 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		  #   else the tidied version is just a link to the original concatenation
 		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
 			if ( $compress && system("$compress $destpath -o $tidiedpath")==0 ) {
-				print "symlink-tool: $compress \"$destpath\" -o \"$tidiedpath\"\n";
+				print "symlink-tool: $compress \"$destpath\" -o \"$tidiedpath\"\n" if $verbose;
 			} elsif ( system("csstidy $destpath --silent=true --template=high $tidiedpath")==0 ) {
-				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n";
+				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n" if $verbose;
 			} else {
 				symlink("$destpath", "$tidiedpath");
 			}
@@ -370,7 +370,9 @@ for my $subdir (sort keys %theme_subdir_files) {
 		# "site/foo" tree.
 		my $theme_file_abs = canonpath(catfile($theme_dir, $target_file));
 		1 while $theme_file_abs =~ s{/[^/]+/\.\.}{};
-		$theme_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/;
+		$theme_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/
+			or $theme_file_abs =~ s/-tidied\.css/-tidied.$virtuser.css/
+			or $theme_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 		$site_rel_file =~ s/\.(\w+)raw$/.$1/;
@@ -408,7 +410,9 @@ for my $plugin (sort keys %plugin_subdir_files) {
 		for my $target_file (@files) {
 			my $plugin_file_abs = canonpath(catfile($plugin_dir, $target_file));
 			1 while $plugin_file_abs =~ s{/[^/]+/\.\.}{};
-			$plugin_file_abs =~ s/\.cssraw$/.$virtuser.css/;
+			$plugin_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/
+				or $plugin_file_abs =~ s/-tidied\.css/-tidied.$virtuser.css/
+				or $plugin_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
 			my $site_rel_file = $target_file;
 			1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 			$site_rel_file =~ s/\.cssraw$/.css/;
