@@ -175,7 +175,7 @@ sub view {
 
 		# Related Stories
 		my $related_stories = '';
-		$related_stories = displayRelatedStories($item->{srcid}) if (($item->{type} eq 'story') && $item->{srcid});
+		$related_stories = displayRelatedStories($item->{srcid}, { fh_view => 1 }) if (($item->{type} eq 'story') && $item->{srcid});
 
 		# Extra book review info
 		my $book_info = '';

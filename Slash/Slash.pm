@@ -144,6 +144,7 @@ sub dispStory {
 		thresh_commentcount => $other->{thresh_commentcount},
 		expandable 	=> $other->{expandable},
 		getintro	=> $other->{getintro},
+		fh_view         => $other->{fh_view},
 	);
 
 #use Data::Dumper; print STDERR scalar(localtime) . " dispStory data: " . Dumper(\%data);
@@ -302,13 +303,14 @@ sub displayStory {
 #========================================================================
 
 sub displayRelatedStories {
-	my($stoid) = @_;
+	my($stoid, $options) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 	my $return = "";
+	my $fh_view = $options->{fh_view} || '';
 
 	my $related = $reader->getRelatedStoriesForStoid($stoid);
 
@@ -317,7 +319,7 @@ sub displayRelatedStories {
 			my $viewable = $reader->checkStoryViewable($rel->{rel_sid});
 			next if !$viewable;
 			my $related_story = $reader->getStory($rel->{rel_sid});
-			$return .= displayStory($related_story->{stoid}, 0, { dispmode => "brief", getintro => 1, expandable => 1 });
+			$return .= displayStory($related_story->{stoid}, 0, { dispmode => "brief", getintro => 1, expandable => 1, fh_view => $fh_view});
 		} elsif ($rel->{fhid}) {
 			my $firehose = getObject("Slash::FireHose");
 			my $fh_item = $firehose->getFireHose($rel->{fhid});
