@@ -4464,15 +4464,12 @@ sub genFireHoseParams {
 
 	my $params = {
 		fhfilter        => 0,
-		color           => 0,
-		orderdir        => 0,
-		orderby         => 0,
 		issue           => 1,
 		startdate       => 1,
 		duration        => 1,
-		mode            => 0,
 		index           => 1,
-		view            => 1
+		view            => 1,
+		color		=> 1
 	};
 	if ($user->{is_anon}) {
 		my($label, $value) = @_;
@@ -4487,7 +4484,10 @@ sub genFireHoseParams {
 		push @params, "$label=$value";
 	}
 
+	my $skip_false = { startdate => 1, issue => 1 }; 
+
 	foreach my $label (keys %$params) {
+		next if $skip_false->{$label} && !$data->{label} && !$options->{label};
 		next if $user->{is_anon} && $params->{$label} == 0;
 		next if !defined $data->{$label} && !defined $options->{$label};
 		my $value = defined $data->{$label} ? $data->{$label} : $options->{$label};
