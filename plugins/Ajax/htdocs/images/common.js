@@ -161,6 +161,7 @@ $(function(){
 
 
 function more_possible( text ){
+	anchor_fh_pag_menu();
 	shorten_fh_pag_menu();
 	$('#more-experiment a').trigger('more-possible');
 }
@@ -878,8 +879,12 @@ $('#firehoselist a.more').
 		return true;
 	});
 
+anchor_fh_pag_menu();
 shorten_fh_pag_menu();
 $(window).bind('resize', shorten_fh_pag_menu);
+$(window).bind('scroll', anchor_fh_pag_menu);
+// Safari 3 hack.  hooray or something.
+$("#fh-pag-div").hide(); setTimeout('$("#fh-pag-div").show()', 0);
 
 });
 
@@ -2513,5 +2518,40 @@ function shorten_fh_pag_menu_check() {
 	} else {
 		return 1;
 	}	
+}
+
+function anchor_fh_pag_menu() {
+	var $fhl = $('#firehose'); // FH list
+	var $fft = $('#fh-pag-div'); // FH footer
+	var $pft = $('#ft'); // page footer
+
+	var fhlbounds = new Bounds($fhl);
+	var fftbounds = new Bounds($fft);
+	var pftbounds = new Bounds($pft);
+	var winbounds = new Bounds(window);
+
+	var modified = 0;
+
+	var fhlvis = winbounds.bottom > fhlbounds.bottom; // && winbounds.top < fhlbounds.bottom;
+	var pftvis = winbounds.bottom > pftbounds.top;
+
+	// if bottom of FH list is above bottom of page, AND
+	// page footer is not visible, float the FH footer
+	// otherwise keep it at bottom of page above page footer 
+	if (fhlvis && !pftvis) {
+		if (!$fft.hasClass('float')) {
+			$fft.addClass('float');
+			modified = 1;
+		}
+	} else {
+		if ($fft.hasClass('float')) {
+			$fft.removeClass('float');
+			modified = 1;
+		}
+	}
+
+	if (modified) {
+		shorten_fh_pag_menu();
+	}
 }
 

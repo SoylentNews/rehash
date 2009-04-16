@@ -541,10 +541,6 @@ sub getCSS {
 	return $css;
 }
 
-
-
-
-
 ########################################################
 # ok, I was tired of trying to mold getDescriptions into
 # taking more args.
