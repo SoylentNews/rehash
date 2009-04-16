@@ -185,6 +185,7 @@ sub setFireHoseViewPrefs {
 	my $uid_q = $self->sqlQuote($user->{uid});
 
 	my $cur_view = $self->getUserViewById($id);
+	return if $cur_view->{editable} eq "no";
 
 	if ($cur_view) {
 		my $cur_prefs = $self->getViewUserPrefs($cur_view->{id});
@@ -2900,6 +2901,10 @@ sub getUserViews {
 
 	if($options->{tab_display}) {
 		push @where, "tab_display=" . $self->sqlQuote($options->{tab_display});
+	}
+	
+	if($options->{editable}) {
+		push @where, "editable=" . $self->sqlQuote($options->{editable});
 	}
 
 	if (!$user->{is_anon}) {

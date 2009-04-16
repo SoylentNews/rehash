@@ -24,7 +24,7 @@ __template__
                 <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a></span>
                 <span class="preftab active">Exclusions</span>
 		[% fh = Slash.getObject("Slash::FireHose");
-		   views = fh.getUserViews({ tab_display => "yes" });
+		   views = fh.getUserViews({ tab_display => "yes", editable => "yes" });
 		%]
 		[% FOREACH view = views %]
 	                <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %] View', 1); return false;">[% view.viewtitle %]</a></span>

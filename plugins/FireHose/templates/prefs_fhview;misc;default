@@ -24,7 +24,7 @@ __template__
                 <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhlayout', 'Layout', 1); return false;">Layout</a></span>
                 <span class="preftab"><a href="javascript:return false;" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false;">Exclusions</a></span>
 		[% fh = Slash.getObject("Slash::FireHose");
-		   views = fh.getUserViews({ tab_display => "yes" });
+		   views = fh.getUserViews({ tab_display => "yes", editable => "yes" });
 		%]
 		[% FOREACH the_view = views %]
                 	<span class="preftab [% IF view.viewname == the_view.viewname  %]active[% END %]"><a href="javascript:return false;" onclick="getModalPrefs('fhview[% the_view.viewname %]', 'Customize [% the_view.viewtitle %] View', 1); return false;">[% the_view.viewtitle %]</a></span>

@@ -138,6 +138,7 @@ CREATE TABLE firehose_view (
 	admin_unsigned ENUM("no","yes") DEFAULT 'no', 
 	usermode ENUM("no","yes") DEFAULT "yes",
 	use_exclusions ENUM("no", "yes") DEFAULT "yes",
+	editable ENUM("no", "yes") DEFAULT "yes",
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
