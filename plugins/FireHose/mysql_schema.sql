@@ -44,7 +44,8 @@ CREATE TABLE firehose (
 	KEY neediness (neediness),
 	KEY url_id (url_id),
 	KEY uid (uid),
-	KEY last_update (last_update)
+	KEY last_update (last_update),
+	KEY type_srcid (type, srcid)
 ) TYPE=InnoDB;
 
 # The table giving an Object's Generally Accepted Story Publication Time

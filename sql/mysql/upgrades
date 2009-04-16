@@ -6159,3 +6159,5 @@ UPDATE message_codes SET seclev = 1 WHERE type = 'Achievement';
 
 # for plugins/Firehose
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_picker_search', 'Slash::FireHose', 'ajaxTogglePickerSearch', 'ajax_user_static', 'createuse');
+ALTER TABLE firehose ADD INDEX type_srcid (type, srcid);
+
