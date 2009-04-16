@@ -467,9 +467,8 @@ function firehose_style_switch( section_id ){
 	}, '', {
 		onComplete: function( xhr ){
 			var json = eval_response(xhr)||{};
-			use_skin(json.css_includes);
-			section && (section.skin=json.css_includes);
-
+			
+			// remove sectional css need to apply similar when cached data is used
 			if(json.section_exclude_re) {
 				$('head link[rel=stylesheet]').each(function(){
 					if(this.getAttribute('href').match(json.section_exclude_re)) {
@@ -477,6 +476,10 @@ function firehose_style_switch( section_id ){
 					}
 				});
 			}
+
+			use_skin(json.css_includes);
+			section && (section.skin=json.css_includes);
+
 		}
 	});
 }
