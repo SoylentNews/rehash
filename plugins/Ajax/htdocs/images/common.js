@@ -1285,6 +1285,10 @@ function firehose_reorder( required_order ){
 function firehose_update_title_count(num) {
 	var newtitle;
 	var end;
+	var sectionname = "";
+	if (firehose_settings.sectionname != "Main") {
+		sectionname = firehose_settings.sectionname;
+	}
 	if (!num) {
 		num = $('#firehoselist>div[class!=daybreak]').length;
 	}
@@ -1293,7 +1297,7 @@ function firehose_update_title_count(num) {
 	} else {
 		end = " " + firehose_slogan;
 	}
-	newtitle = firehose_sitename + " - " + " " + firehose_settings.sectionname + " " + firehose_settings.viewtitle + end;
+	newtitle = firehose_sitename + sectionname + " " + firehose_settings.viewtitle + end;
 	document.title = newtitle;
 }
 
