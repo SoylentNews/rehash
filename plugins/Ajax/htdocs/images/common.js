@@ -493,6 +493,7 @@ var	qw		= Slash.Util.qw,
 	flags_param	= {	fhfilter:	'filterchanged',
 				more_num:	'ask_more',
 				section:	'sectionchanged',
+				addfhfilter: 	'filterchanged',
 				setfhfilter:	'filterchanged',
 				setsearchfilter:'searchtriggered',
 				tab:		'tabchanged',
@@ -521,6 +522,18 @@ function set_fhfilter_from( expr ){
 	});
 }
 
+function add_to_fhfilter(text) {
+	alert('add_to_fhfilter' + text);
+	if (firehose_settings.fhfilter == '') {
+		firehose_settings.fhfilter = text;
+	} else {
+		firehose_settings.fhfilter = firehose_settings.fhfilter + " " + text;
+	}
+	$('form[name=firehoseform] input[name=fhfilter], #searchquery').each(function(){
+		this.value = firehose_settings.fhfilter;
+	});
+}
+
 firehose_set_options = function(name, value, context) {
 	// Exit early for trouble.
 	if ( !firehose_user_class || name==='color' && !value ) {
@@ -541,11 +554,12 @@ firehose_set_options = function(name, value, context) {
 	resets_pagemore[name]	&& (firehose_settings.page = firehose_settings.more_num = 0);
 	// ...and a few exceptions "by hand".
 	switch ( name ) {
-		case 'fhfilter':	set_fhfilter_from('form[name=firehoseform] input[name=fhfilter]'); break;
-		case 'issue':		firehose_settings.startdate=value; firehose_settings.duration=1; break;
-		case 'mode':		fh_view_mode=value; break;
-		case 'tabsection':	params.tabtype='tabsection'; break;
-		case 'view':		set_fhfilter_from('#searchquery'); break;
+		case 'fhfilter':		set_fhfilter_from('form[name=firehoseform] input[name=fhfilter]'); break;
+		case 'issue':			firehose_settings.startdate=value; firehose_settings.duration=1; break;
+		case 'mode':			fh_view_mode=value; break;
+		case 'tabsection':		params.tabtype='tabsection'; break;
+		case 'view':			set_fhfilter_from('#searchquery'); break;
+		case 'addfhfilter':		alert('1');add_to_fhfilter(value);alert('2'); break;
 	}
 
 	if ( start_over[name] ) {
