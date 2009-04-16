@@ -37,6 +37,10 @@ __template__
         [% dyn_journals %]
 [% END %]
 
+[% IF dyn_friends %]
+	[% dyn_friends %]
+[% END %]
+
 [% IF latest_submissions.size != 0 %]
 <div class="block" id="latest_submissions">
         <div class="title" id="latest_submissions_title">
@@ -67,22 +71,6 @@ __template__
                         [% LAST IF bookmarks_counter == 5 %]
                         <li><a href="[% bid.url %]">[% bid.initialtitle %]</a></li>
                         [% bookmarks_counter = bookmarks_counter + 1 %]
-                [% END %]
-                </ul>
-        </div>
-</div>
-[% END %]
-
-[% IF latest_friends.size != 0 %]
-<div class="block" id="latest_friends">
-        <div class="title" id="latest_friends_title">
-                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/friends">Friends</a></h4>
-        </div>
-
-        <div class="content" id="latest_friends_content">
-                <ul>
-                [% FOREACH fid = latest_friends.keys.sort %]
-                        <li><a href="[% constants.real_rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a>[% IF latest_friends.$fid.bio; ':&nbsp;'; latest_friends.$fid.bio; END; %]</li>
                 [% END %]
                 </ul>
         </div>

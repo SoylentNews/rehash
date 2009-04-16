@@ -84,18 +84,15 @@ __template__
         END %]
 
         [% PROCESS u2UserBoxes
-                latest_comments=latest_comments
-		reasons=reasons
-                latest_journals=latest_journals
                 latest_submissions=latest_submissions
                 latest_bookmarks=latest_bookmarks
-                latest_friends=latest_friends
                 tagshist=tagshist
 		achievements=requested_user_achievements
 		achievements_size=requested_user_achievements.size
 		dyn_achievements=dyn_achievements
 		dyn_comments=dyn_comments
 		dyn_journals=dyn_journals
+		dyn_friends=dyn_friends
                 is_admin=user.is_admin
         %]
 

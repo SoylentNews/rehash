@@ -6153,3 +6153,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'dynamic_blocks_delete_message', 'Slash::Dyna
 
 # 2009-04-09
 UPDATE vars SET value = 'T_2_5_0_251' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Messages
+UPDATE message_codes SET seclev = 1 WHERE type = 'Achievement';
