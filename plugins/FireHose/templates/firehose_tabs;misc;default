@@ -68,7 +68,7 @@ END %]
 			</script>
 		[% END %]
 	<ul class="menu" id="fhtablist">[% END %]
-	
+
 			[% FOREACH view = views %]
 				[% active_view = 0 %]
 				[% IF options.view == view.viewname;
@@ -89,13 +89,13 @@ END %]
 					   END;
 					%]
 				[% END %]
-	
+
 				[% short_url_views = { stories = 1 recent = 1 popular = 1 daddypants = 1 } %]
-	
+
 				<li [% IF active_view %]class="active"[% END %]>
 				<a href="[% gSkin.rootdir %]/[% IF short_url_views.${view.viewname}; view.viewname; ELSE %]firehose.pl?view=[% view.viewname %][% END %]" [% IF !user.is_anon %]onclick="firehose_set_options('view', '[% view.viewname %]');return false;"[% END %]>[% view.viewtitle %]</a>
 				[% IF active_view %]
-	
+
 						[% IF rss_link %]
 							<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>
 						[% END %]
@@ -105,8 +105,8 @@ END %]
 					[% END %]
 					</li>
 				[%- END -%]
-	
-	
+
+
 		[% FOREACH tab = tabs %]
 			[% this_tab_active = 0 %]
 			<li id="fhtab-[% tab.tabid %]"[% IF options.tab == tab.tabname && !active_set; active_set = 1; this_tab_active = 1; %] class="active"[% END %]>
