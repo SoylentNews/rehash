@@ -379,6 +379,10 @@ sub ajaxFireHoseSectionCSS {
 	return $data_dump;
 }
 
+sub ajaxTogglePickerSearch {
+        my($slashdb, $constants, $user, $form, $options) = @_;
+        $slashdb->setUser($user->{uid}, {firehose_disable_picker_search => undef});
+}
 
 sub getFireHoseSectionBySkid {
 	my($self, $skid) = @_;

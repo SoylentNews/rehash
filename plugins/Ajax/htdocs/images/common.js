@@ -1396,6 +1396,22 @@ function dynamic_blocks_delete_message(val, type) {
 	);
 }
 
+function firehose_toggle_picker_search() {
+	var params = {};
+	params.op = 'firehose_toggle_picker_search';
+	params.reskey = reskey_static;
+	ajax_update(
+		params,
+		'',
+		{
+			onComplete: function() {
+				$('#fh_picker_search_text').hide();
+				$('#fh_picker_search').show();
+			}
+		}
+	);
+}
+
 function firehose_busy() {
 	return Slash.markBusy('firehose', true);
 }
