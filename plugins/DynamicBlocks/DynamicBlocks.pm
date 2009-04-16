@@ -314,6 +314,7 @@ sub setUserFriendsBlock {
 
         foreach my $friend (@$friends) {
                 $friend->{nick} = $slashdb->sqlSelect('nickname', 'users', "uid = " . $friend->{person});
+		$friend->{displaynick} = $friend->{nick};
                 $friend->{nick} = strip_paramattr($friend->{nick});
                 $friend->{bio}  = $slashdb->sqlSelect('bio', 'users_info', "uid = " . $friend->{person}) if $user->{u2_friends_bios};
         }

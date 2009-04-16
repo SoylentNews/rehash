@@ -16,7 +16,7 @@ __template__
 <ul>
 [% FOREACH friend = friends %]
 <li>
-<a href="[% constants.real_rootdir %]/~[% friend.nick %]">[% friend.nick %]</a>[% IF friend.bio; ':&nbsp;'; friend.bio; END; %]
+<a href="[% constants.real_rootdir %]/~[% friend.nick %]">[% friend.displaynick %]</a>[% IF friend.bio; ':&nbsp;'; friend.bio; END; %]
 </li>
 [% END %]
 </ul>
