@@ -222,15 +222,32 @@ sub removeUserSections {
 }
 
 sub getFireHoseSectionsMenu {
-	my($self, $fsid) = @_;
+	my($self, $fsid, $layout) = @_;
 	my $user = getCurrentUser();
 	my($uid_q) = $self->sqlQuote($user->{uid});
+
+	$layout ||= 'yui';
+
+	my $layout_q = $self->sqlQuote($layout);
 
 	my $fsid_limit;
 	if ($fsid) {
 		my $fsid_q = $self->sqlQuote($fsid);
 		$fsid_limit = " AND firehose_section.fsid=$fsid_q ";
 	}
+
+	my $css = $self->sqlSelectAllHashrefArray(
+		"css.*, skins.name as skin_name, fsid",
+		"css, skins, firehose_section",
+		"css.skin=skins.name and css.layout=$layout_q and admin='no' AND skins.skid=firehose_section.skid AND firehose_section.uid=0"
+	);
+
+	my $css_hr = {};
+
+	foreach (@$css) {
+		push @{$css_hr->{$_->{fsid}}}, $_;
+	}
+	
 	my $sections = $self->sqlSelectAllHashrefArray(
 		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name, firehose_section_settings.section_filter AS user_section_filter, firehose_section_settings.view_id AS user_view_id, firehose_section_settings.section_color AS user_section_color",
 		"firehose_section LEFT JOIN firehose_section_settings on firehose_section.fsid=firehose_section_settings.fsid AND firehose_section_settings.uid=$uid_q", 
@@ -249,6 +266,14 @@ sub getFireHoseSectionsMenu {
 
 		$_->{data}{viewname} 	= $viewname;
 		$_->{data}{color}	= $_->{user_section_color} ? $_->{user_section_color} : $_->{section_color};
+
+		if ($_->{skid} && ((!$_->{user_section_filter}) || ($_->{section_filter} eq $_->{user_section_filter}))  ) {
+			if ($css_hr->{$_->{fsid}}) {
+				foreach my $css(@{$css_hr->{$_->{fsid}}}) {
+					$_->{data}{skin} .= getData('alternate_section_stylesheet', { css => $css, }, 'firehose');
+				}
+			}
+		}
 	}
 
 	if (!$user->{firehose_section_order}) {
@@ -273,7 +298,6 @@ sub createFireHoseSection {
 	my($self, $data) = @_;
 	$self->sqlInsert("firehose_section", $data);
 	return $self->getLastInsertId({ table => 'firehose_section', prime => 'fsid' });
-
 }
 
 sub ajaxSaveFireHoseSections {
