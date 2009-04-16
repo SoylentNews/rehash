@@ -469,6 +469,14 @@ function firehose_style_switch( section_id ){
 			var json = eval_response(xhr)||{};
 			use_skin(json.css_includes);
 			section && (section.skin=json.css_includes);
+			
+			if(json.section_exclude_re) {
+				$('head link[rel=stylesheet]').each(function(){
+					if(this.getAttribute('href').match(json.section_exclude_re)) {
+					      this.disabled=true;
+					}
+				});
+			}
 		}
 	});
 }
