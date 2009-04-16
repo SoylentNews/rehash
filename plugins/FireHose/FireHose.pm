@@ -3020,6 +3020,11 @@ sub applyViewOptions {
 	$viewfilter .= " $view->{datafilter}" if $view->{datafilter};
 	$viewfilter .= " unsigned" if $user->{is_admin} && $view->{admin_unsigned} eq "yes";
 
+	if ($viewfilter =~ /{nickname}/) {
+		my $the_user = $self->getUser($form->{user_view_uid}) || $user;
+		$viewfilter =~ s/{nickname}/$the_user->{nickname}/;
+	}
+
 	my $validator = $self->getOptionsValidator();
 
 	if ($view->{useparentfilter} eq "no") {
@@ -3267,6 +3272,11 @@ sub getAndSetOptions {
 	my $form 	= getCurrentForm();
 	my $gSkin	= getCurrentSkin();
 
+	my $nick_user = $user;
+	if ($form->{user_view_uid}) {
+		$nick_user = $self->getUser($form->{user_view_uid}) || $user;
+	}
+
 	my $mainpage = 0;
 
 	my ($f_change, $v_change, $t_change, $s_change, $search_trigger);
@@ -3397,7 +3407,7 @@ sub getAndSetOptions {
 	}
 
 	$options->{global} = $global_opts;
-
+	$options->{base_filter} =~s /{nickname}/$user->{nickname}/;	
 	$options->{fhfilter} = $options->{base_filter};
 
 	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
@@ -3762,6 +3772,10 @@ sub getAndSetOptions {
 	if ($options->{sectionref} && $options->{sectionref}{section_name}) {
 		$options->{sectionname} = $options->{sectionref}{section_name};
 	}
+
+	$options->{fhfilter} =~ s/{nickname}/$nick_user->{nickname}/g;
+	$options->{base_filter} =~ s/{nickname}/$nick_user->{nickname}/g;
+	$options->{view_filter} =~ s/{nickname}/$nick_user->{nickname}/g;
 
 #use Data::Dumper;
 #print STDERR Dumper($options);
