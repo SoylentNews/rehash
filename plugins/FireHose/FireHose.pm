@@ -3020,7 +3020,7 @@ sub applyViewOptions {
 	if ($view->{useparentfilter} eq "no") {
 		$options->{fhfilter} = $viewfilter;
 		$options->{view_filter} = $viewfilter;
-		$options->{basefilter} = "";
+		$options->{base_filter} = $viewfilter;
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
 	} else {
@@ -3528,6 +3528,8 @@ sub getAndSetOptions {
 		if (!$opts->{user_view}) {
 			if ($form->{user_view_uid}) {
 				$opts->{user_view} = $self->getUser($form->{user_view_uid}) || $user;
+			} else {
+				$opts->{user_view} = $user;
 			}
 		}
 		my $the_nickname = $opts->{user_view}{nickname};
