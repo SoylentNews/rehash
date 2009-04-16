@@ -1565,7 +1565,7 @@ sub saveModalPrefs {
 				$fh->removeUserSections();
 			} else {
 				$user_edits_table = {};
-				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_beta)) {
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_beta firehose_picker_search)) {
 					$user_edits_table->{$_} = undef;
 				}
 				foreach (qw(noicons dst dfid)) {
@@ -1576,15 +1576,16 @@ sub saveModalPrefs {
 
 		} else {
 			$user_edits_table = {
-				noicons			=> ($params{showicons} ? undef : 1),
-				tags_turnedoff		=> ($params{showtags} ? undef : 1),
-				firehose_nocolors	=> ($params{showcolors} ? undef: 1),
-				firehose_nobylines	=> ($params{showbylines} ? undef: 1),
-				firehose_nodates	=> ($params{showdates} ? undef: 1),
-				firehose_pause		=> ($params{paused} ? 1: 0),
-				firehose_advanced	=> ($params{advanced} ? 1 : undef),
-				firehose_pagesize	=> ($params{pagesize} ? $params{pagesize} : "small"),
-				index_beta		=> ($params{index_beta} ? 1 : 0 ),
+				noicons				=> ($params{showicons} ? undef : 1),
+				tags_turnedoff			=> ($params{showtags} ? undef : 1),
+				firehose_nocolors		=> ($params{showcolors} ? undef: 1),
+				firehose_nobylines		=> ($params{showbylines} ? undef: 1),
+				firehose_nodates		=> ($params{showdates} ? undef: 1),
+				firehose_pause			=> ($params{paused} ? 1: 0),
+				firehose_advanced		=> ($params{advanced} ? 1 : undef),
+				firehose_pagesize		=> ($params{pagesize} ? $params{pagesize} : "small"),
+				index_beta			=> ($params{index_beta} ? 1 : 0 ),
+				firehose_disable_picker_search  => ($params{firehose_disable_picker_search} ? undef : 1),
 			};
 
 			if (defined $params{tzcode} && defined $params{tzformat}) {

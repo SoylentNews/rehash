@@ -189,6 +189,18 @@ __template__
                 <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
                         Enable advanced user controls
                 </div>
+
+		[% picker_search_check = '';
+                IF !user.firehose_disable_picker_search;
+                        picker_search_check = constants.markup_checked_attribute;
+                END
+                %]
+
+		<label><input type="checkbox" name="firehose_disable_picker_search"[% picker_search_check %] onclick="void(document.forms['modal_prefs'].refreshable.value=1);"> Filter Controls</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_picker_search');return false;" class="help">?</a>
+                <br>
+                <div id="modalprefhelp_firehose_picker_search" class="modalprefhelp" style="display: none;">
+                        Enable filter controls.
+                </div>
 		
 
 		<p class="buttons">
