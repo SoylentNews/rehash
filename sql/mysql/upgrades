@@ -6164,7 +6164,7 @@ ALTER TABLE firehose ADD INDEX type_srcid (type, srcid);
 # for plugins/FireHose
 UPDATE firehose_view set tab_display="yes" where viewname="userhomepage";
 ALTER TABLE firehose_view ADD COLUMN editable ENUM("no","yes") DEFAULT "yes";
-UPDATE firehose_view SET editable = "no" WHERE viewname like 'user%'  || viewname = "metamod";
+UPDATE firehose_view SET editable = "no" WHERE viewname like 'user%' OR  viewname = "metamod";
 
 
 
