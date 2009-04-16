@@ -535,11 +535,15 @@ sub getCSS {
 	my $where = "css.ctid=css_type.ctid AND ";
 	$where .= join ' AND ', @clauses;
 
-	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
-
+	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond,skin", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
+	
 	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout} = $css;
 	return $css;
 }
+
+
+
+
 
 ########################################################
 # ok, I was tired of trying to mold getDescriptions into

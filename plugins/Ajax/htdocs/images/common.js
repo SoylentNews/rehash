@@ -433,7 +433,9 @@ function toggleFirehoseTagbox(id) {
 
 function use_skin( link ){
 	// Note: use_skin('') or equivalent => disable alternates (e.g., for "Slashdot" section)
-
+	
+	// remove skin data from main css before applying any new css
+	$('link.data-skin').each(function(){ this.disabled = true; });
 	var $others	= $('head link[rel=alternate stylesheet]'),
 		$skin	= link && $(link),
 		skin	= $skin && (
@@ -467,19 +469,8 @@ function firehose_style_switch( section_id ){
 	}, '', {
 		onComplete: function( xhr ){
 			var json = eval_response(xhr)||{};
-			
-			// remove sectional css need to apply similar when cached data is used
-			if(json.section_exclude_re) {
-				$('head link[rel=stylesheet]').each(function(){
-					if(this.getAttribute('href').match(json.section_exclude_re)) {
-					      this.disabled=true;
-					}
-				});
-			}
-
 			use_skin(json.css_includes);
 			section && (section.skin=json.css_includes);
-
 		}
 	});
 }

@@ -388,13 +388,6 @@ sub ajaxFireHoseSectionCSS {
 		);
 	}
 
-	my $section_css_remove = $slashdb->sqlSelectColArrayref(
-		"file", "css,skins",
-		"css.skin=skins.name and css.layout=$layout_q and admin='no';"
-	);
-	my $section_exclude_re = join '|', @$section_css_remove;
-
-
 	my $retval = "";
 	my $skin_name = "";
 	foreach (@$css) {
@@ -404,7 +397,6 @@ sub ajaxFireHoseSectionCSS {
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		skin_name 		=> $skin_name,
 		css_includes 		=> $retval,
-		section_exclude_re	=> $section_exclude_re,
 	});
 
 	return $data_dump;
