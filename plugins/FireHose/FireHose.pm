@@ -2909,7 +2909,11 @@ sub getUserViews {
 	push @where, "seclev <= $user->{seclev}";
 
 	$where = join ' AND ', @where;
-	return $self->sqlSelectAllHashrefArray("*","firehose_view", $where, "ORDER BY uid, id");
+	my $items = $self->sqlSelectAllHashrefArray("*","firehose_view", $where, "ORDER BY uid, id");
+	foreach (@$items) {
+		$_->{viewtitle} =~ s/{nickname}/$user->{nickname}/g;
+	}
+	return $items;
 }
 	
 sub getUserViewById {
