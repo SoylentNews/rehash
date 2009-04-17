@@ -2499,8 +2499,8 @@ function shorten_fh_pag_menu() {
 				$($spans[0]).show();
 				if (shorten_fh_pag_menu_check() < 0) {
 					$($spans[0]).hide();
-					return;				
 				}
+				return;				
 			} else {
 				return;
 			}
