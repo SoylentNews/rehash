@@ -1230,14 +1230,26 @@ function firehose_handle_update() {
 	$menu.show();
 }
 
-function firehose_after_update(){
+var firehose_after_update;
+(function(){
+var pending = new fhitems(':animated');
+function notify(){ $(document).trigger('updated.firehose'); }
+
+firehose_after_update = function(){
 	firehose_reorder(firehose_ordered);
 	firehose_update_title_count(
 		firehose_storyfuture(firehose_future).length
 	);
 	firehose_busy_done();
-	$(document).trigger('updated.firehose');
+
+	pending().
+		queue(function(){
+			$(this).dequeue();
+			pending().length || notify();
+		}).length || notify();
 }
+
+})();
 
 function firehose_storyfuture( future ){
 	// Select all articles in #firehoselist.  Update .story|.future as needed.  Return the complete list.
