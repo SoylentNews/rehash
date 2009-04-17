@@ -3540,6 +3540,7 @@ sub getAndSetOptions {
 
 	$fhfilter =~ s/^\s+|\s+$//g;
 
+	$options->{user_view_uid} = $opts->{user_view}{uid} || $form->{user_view_uid};
 	if ($fhfilter =~ /\{nickname\}/) {
 		if (!$opts->{user_view}) {
 			if ($form->{user_view_uid}) {
@@ -3549,7 +3550,6 @@ sub getAndSetOptions {
 			}
 		}
 		my $the_nickname = $opts->{user_view}{nickname};
-		$options->{user_view_uid} = $opts->{user_view}{uid};
 		
 		$fhfilter =~ s/\{nickname\}/$the_nickname/g;
 		$options->{fhfilter} =~ s/\{nickname\}/$the_nickname/g;

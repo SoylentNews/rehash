@@ -1307,7 +1307,7 @@ function firehose_update_title_count(num) {
 	var end;
 	var sectionname = "";
 	if (firehose_settings.sectionname != "Main") {
-		sectionname = firehose_settings.sectionname;
+		sectionname = " " + firehose_settings.sectionname;
 	}
 	if (!num) {
 		num = $('#firehoselist>div[class!=daybreak]').length;
