@@ -883,8 +883,6 @@ anchor_fh_pag_menu();
 shorten_fh_pag_menu();
 $(window).bind('resize', shorten_fh_pag_menu);
 $(window).bind('scroll', anchor_fh_pag_menu);
-// Safari 3 hack.  hooray or something.
-$("#fh-pag-div").hide(); setTimeout('$("#fh-pag-div").show()', 0);
 
 });
 
@@ -2552,6 +2550,8 @@ function anchor_fh_pag_menu() {
 
 	if (modified) {
 		shorten_fh_pag_menu();
+		// Safari 3 hack.  hooray or something.
+		$("#fh-pag-div").hide(); setTimeout('$("#fh-pag-div").show()', 0);
 	}
 }
 
