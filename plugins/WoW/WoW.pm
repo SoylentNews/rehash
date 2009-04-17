@@ -7,7 +7,7 @@ package Slash::WoW;
 use strict;
 
 use Storable;
-use Games::WoW::Armory;
+use Slash::Custom::WoWArmory;
 
 use Slash;
 
@@ -208,7 +208,7 @@ sub confirmRealmid {
 }
 
 sub setChar {
-	my($self, $charid, $data_hr) = @_;
+	my($self, $charid, $data_hr, $options) = @_;
 	my $update_hr = { };
 	for my $field (qw( guildid uid last_retrieval_attempt last_retrieval_success )) {
 		if (exists($data_hr->{$field})) {
@@ -217,7 +217,12 @@ sub setChar {
 			$update_hr->{"-$field"} = $data_hr->{"-$field"};
 		}
 	}
-	if ($data_hr->{uid}) {
+	my $unclaimed_clause = '';
+	$unclaimed_clause = ' AND uid IS NULL' if $options->{if_unclaimed};
+	my $rows = 0;
+	$rows = $self->sqlUpdate('wow_chars', $update_hr, "charid=$charid$unclaimed_clause")
+		if keys %$update_hr;
+	if ($rows && $data_hr->{uid}) {
 		my $chardata_hr = $self->getCharData($charid);
 		if ($chardata_hr && $chardata_hr->{level} && $chardata_hr->{level} == 80) {
 			my $achievements = getObject('Slash::Achievements');
@@ -226,9 +231,11 @@ sub setChar {
 					{ ignore_lookup => 1 });
 			}
 		}
+#		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+#		if ($dynamic_blocks) {
+#			$dynamic_blocks->setUserBlock('wow', $data_hr->{uid});
+#		}
 	}
-	my $rows = 0;
-	$rows = $self->sqlUpdate('wow_chars', $update_hr, "charid=$charid") if keys %$update_hr;
 	$rows;
 }
 
@@ -263,7 +270,7 @@ sub retrieveArmoryData {
 	my($self, $charid) = @_;
 	my $charmd_hr = $self->getCharMetadata($charid);
 	return undef if !$charmd_hr;
-	my $armory = Games::WoW::Armory->new();
+	my $armory = Slash::Custom::WoWArmory->new();
 	$armory->search_character({
 		realm =>	$charmd_hr->{realmname},
 		character =>	$charmd_hr->{charname},
@@ -380,6 +387,11 @@ sub createRealmSelect {
 	}
 	$str .= '</select>';
 	$str;
+}
+
+sub getFellows {
+	my($self) = @_;
+	return { };
 }
 
 1;

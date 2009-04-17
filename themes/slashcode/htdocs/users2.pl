@@ -2052,17 +2052,8 @@ sub saveUser {
 			$user_edits_table->{wow_main_realm} = $form->{wow_main_realm};
 			my $charid = $wowdb->getCharidCreate($user_edits_table->{wow_main_realm},
 				$user_edits_table->{wow_main_name});
-			if ($charid) {
-				# Disallow poaching of already-entered
-				# character names.  We don't yet have the
-				# ability for the first claimer to prove
-				# s/he actually owns the character, but
-				# they got there first so for now we
-				# assume it's actually theirs.
-				my $charmd_hr = $wowdb->getCharMetadata($charid);
-				$wowdb->setChar($charid, { uid => $uid })
-					unless $charmd_hr->{uid};
-			}
+			$wowdb->setChar($charid, { uid => $uid }, { if_unclaimed => 1 })
+				if $charid;
 		}
 	}
 

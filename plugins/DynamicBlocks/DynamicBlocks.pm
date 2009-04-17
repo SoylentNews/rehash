@@ -74,6 +74,7 @@ sub setUserBlock {
         $block = $self->setUserFriendsBlock($user)     if ($name eq 'friends');
         $block = $self->setUserSubmissionsBlock($user) if ($name eq 'submissions');
         $block = $self->setUserMessagesBlock($user)    if ($name eq 'messages');
+#        $block = $self->setUserWarcraftBlock($user)    if ($name eq 'wow');
 
 	$id = $slashdb->sqlSelect('bid', 'dynamic_user_blocks', "name = '$name-$uid' and $uid = $uid");
         if ($block) {
@@ -409,6 +410,34 @@ sub setUserMessagesBlock {
         }
 
         return (keys %$block) ? $block : 0;
+}
+
+sub setUserWarcraftBlock {
+	my($self, $user) = @_;
+	return 0 if !$user->{uid};
+	my $wowdb = getObject('Slash::WoW');
+	return 0 if !$wowdb;
+
+	my $fellows_info = $wowdb->getFellows($user->{uid});
+	my @fellows = sort keys %$fellows_info;
+
+	my $data = {
+		toprealm_name => 'a',
+		toprealm_count => '1',
+		fels => \@fellows,
+		felinfo => $fellows_info,
+	};
+
+	my $block = { };
+	my $warcraft_text = slashDisplay('createwarcraft', $data,
+		{ Page => 'dynamicblocks', Return => 1 });
+
+	$block->{block} = $warcraft_text;
+	$block->{url} = ''; # don't have a wow.pl yet
+	$block->{title} = 'World of Warcraft';
+	$block->{description} = 'World of Warcraft';
+
+	return $block;
 }
 
 sub setRemarkAsMessage {
