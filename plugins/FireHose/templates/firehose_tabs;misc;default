@@ -99,7 +99,7 @@ END %]
 						[% IF rss_link %]
 							<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>
 						[% END %]
-						[% IF !user.is_anon %]
+						[% IF !user.is_anon && view.editable == "yes" %]
 							<span class="tab_edit"><a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit">Edit</a></span>
 						[% END %]
 					[% END %]
