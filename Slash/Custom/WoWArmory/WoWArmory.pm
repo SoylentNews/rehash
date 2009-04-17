@@ -7,6 +7,7 @@
 package Slash::Custom::WoWArmory;
 
 use strict;
+use Carp qw( croak );
 use base 'Games::WoW::Armory';
 use vars qw($VERSION);
 
