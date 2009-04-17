@@ -161,8 +161,7 @@ $(function(){
 
 
 function more_possible( text ){
-	anchor_fh_pag_menu();
-	shorten_fh_pag_menu();
+	anchor_fh_pag_menu(true);
 	$('#more-experiment a').trigger('more-possible');
 }
 
@@ -293,6 +292,7 @@ function normalize_options(){
 function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
 	$any('firehoselist').trigger('articlesMoved', data);
+	anchor_fh_pag_menu(true);
 }
 
 function before_article_removed( article, if_also_trigger_moved ){
@@ -879,8 +879,7 @@ $('#firehoselist a.more').
 		return true;
 	});
 
-anchor_fh_pag_menu();
-shorten_fh_pag_menu();
+anchor_fh_pag_menu(true);
 $(window).bind('resize', shorten_fh_pag_menu);
 $(window).bind('scroll', anchor_fh_pag_menu);
 
@@ -1173,6 +1172,7 @@ function firehose_handle_update() {
 
 						function(){
 							$(this).css({ opacity:'', height:'' });
+							anchor_fh_pag_menu(true);
 						}
 					);
 			}
@@ -1218,6 +1218,7 @@ function firehose_handle_update() {
 			$fhl.fadeIn('slow', function(){
 				$(this).css({ opacity:'' });
 			});
+			anchor_fh_pag_menu(true);
 		}
 		firehose_get_next_updates();
 	}
@@ -2531,7 +2532,7 @@ function shorten_fh_pag_menu_check() {
 	}	
 }
 
-function anchor_fh_pag_menu() {
+function anchor_fh_pag_menu(modified) {
 	var $fhl = $('#firehose'); // FH list
 	var $fft = $('#fh-pag-div'); // FH footer
 	var $pft = $('#ft'); // page footer
@@ -2540,8 +2541,6 @@ function anchor_fh_pag_menu() {
 	var fftbounds = new Bounds($fft);
 	var pftbounds = new Bounds($pft);
 	var winbounds = new Bounds(window);
-
-	var modified = 0;
 
 	var fhlvis = winbounds.bottom > fhlbounds.bottom; // && winbounds.top < fhlbounds.bottom;
 	var pftvis = winbounds.bottom > pftbounds.top;
@@ -2552,12 +2551,12 @@ function anchor_fh_pag_menu() {
 	if (fhlvis && !pftvis) {
 		if (!$fft.hasClass('float')) {
 			$fft.addClass('float');
-			modified = 1;
+			modified = true;
 		}
 	} else {
 		if ($fft.hasClass('float')) {
 			$fft.removeClass('float');
-			modified = 1;
+			modified = true;
 		}
 	}
 
