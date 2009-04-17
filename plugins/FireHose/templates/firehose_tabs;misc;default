@@ -46,7 +46,7 @@ END %]
 					[% END %]
 
 [% IF gSkin.name != 'idle' %]
-	
+
 	[% UNLESS nodiv %]
 		[% IF !user.is_anon && gSkin.name != 'idle' %]
 			[% IF !article_header %]
