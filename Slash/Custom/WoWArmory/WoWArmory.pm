@@ -103,8 +103,12 @@ sub get_arena_teams {
 	if (!ref $members->{name}) {
 	    my %char_copy = %$members;
 	    my $name = $members->{name};
-	    $team->{members}{character} = { $name => \%char_copy };
-	    $members = $$team{members}{character};
+            if (!$name) {
+                $members = { };
+            } else {
+	        $team->{members}{character} = { $name => \%char_copy };
+	        $members = $$team{members}{character};
+            }
 	}
         foreach my $member (keys %{$members}){
             my $m = Games::WoW::Armory::Character->new;
