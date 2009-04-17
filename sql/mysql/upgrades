@@ -6166,5 +6166,6 @@ UPDATE firehose_view set tab_display="yes" where viewname="userhomepage";
 ALTER TABLE firehose_view ADD COLUMN editable ENUM("no","yes") DEFAULT "yes";
 UPDATE firehose_view SET editable = "no" WHERE viewname like 'user%' OR  viewname = "metamod";
 
-
+# 2009-04-16
+UPDATE vars SET value = 'T_2_5_0_252' WHERE name = 'cvs_tag_currentcode';
 
