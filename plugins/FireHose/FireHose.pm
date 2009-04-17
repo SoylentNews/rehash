@@ -3273,7 +3273,8 @@ sub getAndSetOptions {
 	my $gSkin	= getCurrentSkin();
 
 	my $nick_user = $user;
-	if ($form->{user_view_uid}) {
+	if ($opts->{user_view} && $opts->{user_view}{uid}) {
+		$form->{user_view_uid} = $opts->{user_view}{uid};
 		$nick_user = $self->getUser($form->{user_view_uid}) || $user;
 	}
 
