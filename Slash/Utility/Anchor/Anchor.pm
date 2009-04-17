@@ -41,6 +41,7 @@ our @EXPORT  = qw(
 	header
 	footer
 	redirect
+	emit404
 	ssiHeadFoot
 	prepAds
 	getAd
@@ -121,19 +122,23 @@ sub header {
 			|| $options->{content_type}
 			|| 'text/html');
 
-		# Caching used to be Cache-Control: private but that doesn't
-		# seem to be correct; let's hope switching to no-cache
-		# causes few complaints.
-		$r->header_out('Cache-Control', 'no-cache');
-		# And while Pragma: no-cache is not really correct (it's
-		# to be used for requests and the RFC doesn't define it to
-		# mean anything for responses) it probably doesn't hurt
-		# anything and allegedly has stopped users from complaining.
-		$r->header_out('Pragma', 'no-cache')
-			# This is here for historical reasons, my best guess
-			# is that it's silly and unnecessary but I'm not
-			# going to take it out and break stuff.
-			unless $ENV{SCRIPT_NAME} =~ /comments/ || $user->{seclev} > 1;
+		my $no_cache = 1;
+		$no_cache = 0 if $options->{no_no_cache};
+		# This is here for historical reasons, my best guess
+		# is that it's silly and unnecessary but I'm not
+		# going to take it out and break stuff.
+		$no_cache &&= 0 if $ENV{SCRIPT_NAME} =~ /comments/ || $user->{seclev} > 1;
+		if ($no_cache) {
+			# Caching used to be Cache-Control: private but that doesn't
+			# seem to be correct; let's hope switching to no-cache
+			# causes few complaints.
+			$r->header_out('Cache-Control', 'no-cache');
+			# And while Pragma: no-cache is not really correct (it's
+			# to be used for requests and the RFC doesn't define it to
+			# mean anything for responses) it probably doesn't hurt
+			# anything and allegedly has stopped users from complaining.
+			$r->header_out('Pragma', 'no-cache')
+		}
 
 # 		unless ($user->{seclev} || $ENV{SCRIPT_NAME} =~ /comments/) {
 # 			$r->header_out('Cache-Control', 'no-cache');
@@ -163,7 +168,9 @@ sub header {
 	for my $key (qw( meta_desc story_title )) {
 		$template_vars->{$key} = $options->{$key} if $options->{$key};
 	}
-	slashDisplay('html-header', $template_vars, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
+	my $return_str = '';
+	$return_str = slashDisplay('html-header', $template_vars,
+		{ Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
 		unless $options->{noheader};
 
 	$user->{state}{mt}{curcol} = 0;
@@ -194,11 +201,9 @@ sub header {
 
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
-		$display = slashDisplay('header-admin', $data, { Return => $options->{Return}, Page => $options->{Page} });
-#use Data::Dumper; print STDERR "header('$data' '$skin_name') A display=$display options: " . Dumper($options);
+		$return_str .= slashDisplay('header-admin', $data, { Return => $options->{Return}, Page => $options->{Page} });
 	} else {
-		$display = slashDisplay('header', $data, { Return => $options->{Return}, Page => $options->{Page} });
-#use Data::Dumper; print STDERR "header('$data' '$skin_name') B display=$display options: " . Dumper($options);
+		$return_str .= slashDisplay('header', $data, { Return => $options->{Return}, Page => $options->{Page} });
 	}
 
 	# I bet someday we end up with an SSI bug from this -Brian
@@ -223,8 +228,8 @@ sub header {
 			);
 		}
 	}
-	
-	return $display;
+
+	return $return_str;
 }
 
 #========================================================================
@@ -358,7 +363,7 @@ sub footer {
 	} else {
 		$display = slashDisplay('footer', '', { Return => $options->{Return}, Page => $options->{Page} });
 	}
-	
+
 	return $display;
 }
 
@@ -408,6 +413,36 @@ sub redirect {
 
 #========================================================================
 
+sub emit404 {
+	my $form = getCurrentForm();
+
+        my $r = Apache->request;
+        $r->status(404);
+
+	$ENV{REQUEST_URI} ||= '';
+        my $url = strip_literal(substr($ENV{REQUEST_URI}, 1));
+
+        header('404 File Not Found', $form->{section}) or return;
+
+        my($new_url, $errnum) = fixHref($ENV{REQUEST_URI}, 1);
+
+	my $data = {
+		url => $new_url,
+		origin => $url,
+	};
+        if ($errnum && $errnum !~ /^\d+$/) {
+		$data->{message} = $errnum;
+        } else {
+		$data->{error} = $errnum;
+        }
+	slashDisplay('main', $data, { Page => '404' });
+
+        writeLog($url);
+        footer();
+}
+
+#========================================================================
+
 =head2 ssiHeadFoot()
 
 Prints the head for server-parsed HTML pages.
@@ -443,7 +478,7 @@ sub ssiHeadFoot {
 		$slashdb->existsTemplate({
 			name	=> $headorfoot,
 		        skin	=> $gSkin->{name},
-	        	page	=> $user->{currentPage} 
+			page	=> $user->{currentPage}
 		}) ||
 
 		$slashdb->existsTemplate({
@@ -453,7 +488,7 @@ sub ssiHeadFoot {
 		}))
 
 	);
-	
+
 	my $ssiheadorfoot = 'ssi' . substr($headorfoot, 0, 4);
 
 	slashDisplay($ssiheadorfoot, {

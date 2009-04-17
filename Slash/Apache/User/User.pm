@@ -466,7 +466,8 @@ sub handler {
 	# Weird hack for getCurrentCache() till I can code up proper logic for it
 	{
 		my $cache = getCurrentCache();
-		if (!$cache->{_cache_time} || ((time() - $cache->{_cache_time}) > $constants->{apache_cache})) {
+
+		if (!$cache->{_cache_time} || ((time() - $cache->{_cache_time}) > ($constants->{apache_cache} || 0))) {
 			# we can't do $cache = {}, because that won't
 			# overwrite the actual ref stored in $cfg->{cache}
 			%{$cache} = ();

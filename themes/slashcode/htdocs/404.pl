@@ -36,32 +36,7 @@ sub main {
 		}
 	}
 
-	my $r = Apache->request;
-	$r->status(404);
-
-	my $url = strip_literal(substr($ENV{REQUEST_URI}, 1));
-	my $admin = $constants->{adminmail};
-
-	header('404 File Not Found', $form->{section}) or return;
-
-	my($new_url, $errnum) = fixHref($ENV{REQUEST_URI}, 1);
-
-	if ($errnum && $errnum !~ /^\d+$/) {
-		slashDisplay('main', {
-			url	=> $new_url,
-			origin	=> $url,
-			message	=> $errnum,
-		});
-	} else {
-		slashDisplay('main', {
-			url	=> $new_url,
-			origin	=> $url,
-			error	=> $errnum,
-		});
-	}
-
-	writeLog($url);
-	footer();
+	emit404();
 }
 
 createEnvironment();
