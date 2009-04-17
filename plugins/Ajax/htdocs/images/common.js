@@ -292,6 +292,7 @@ function normalize_options(){
 function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
 	$any('firehoselist').trigger('articlesMoved', data);
+	anchor_fh_pag_menu(true);
 }
 
 function before_article_removed( article, if_also_trigger_moved ){
@@ -884,10 +885,6 @@ $(window).bind('scroll', anchor_fh_pag_menu);
 
 });
 
-$(document).bind('updated.firehose', function() {
-	anchor_fh_pag_menu(true);
-});
-
 
 
 function inject_reasons( expr, init ){
@@ -1175,6 +1172,7 @@ function firehose_handle_update() {
 
 						function(){
 							$(this).css({ opacity:'', height:'' });
+							anchor_fh_pag_menu(true);
 						}
 					);
 			}
@@ -1220,6 +1218,7 @@ function firehose_handle_update() {
 			$fhl.fadeIn('slow', function(){
 				$(this).css({ opacity:'' });
 			});
+			anchor_fh_pag_menu(true);
 		}
 		firehose_get_next_updates();
 	}
