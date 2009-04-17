@@ -17,6 +17,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	setCurrentSkin(determineCurrentSkin());
 	my $gSkin = getCurrentSkin();
 	my $formname = $0;
 	$formname =~ s/.*\/(\w+)\.pl/$1/;
