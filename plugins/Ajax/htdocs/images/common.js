@@ -161,8 +161,7 @@ $(function(){
 
 
 function more_possible( text ){
-	anchor_fh_pag_menu();
-	shorten_fh_pag_menu();
+	anchor_fh_pag_menu(true);
 	$('#more-experiment a').trigger('more-possible');
 }
 
@@ -879,11 +878,14 @@ $('#firehoselist a.more').
 		return true;
 	});
 
-anchor_fh_pag_menu();
-shorten_fh_pag_menu();
+anchor_fh_pag_menu(true);
 $(window).bind('resize', shorten_fh_pag_menu);
 $(window).bind('scroll', anchor_fh_pag_menu);
 
+});
+
+$(document).bind('updated.firehose', function() {
+	anchor_fh_pag_menu(true);
 });
 
 
@@ -2519,7 +2521,7 @@ function shorten_fh_pag_menu_check() {
 	}	
 }
 
-function anchor_fh_pag_menu() {
+function anchor_fh_pag_menu(modified) {
 	var $fhl = $('#firehose'); // FH list
 	var $fft = $('#fh-pag-div'); // FH footer
 	var $pft = $('#ft'); // page footer
@@ -2528,8 +2530,6 @@ function anchor_fh_pag_menu() {
 	var fftbounds = new Bounds($fft);
 	var pftbounds = new Bounds($pft);
 	var winbounds = new Bounds(window);
-
-	var modified = 0;
 
 	var fhlvis = winbounds.bottom > fhlbounds.bottom; // && winbounds.top < fhlbounds.bottom;
 	var pftvis = winbounds.bottom > pftbounds.top;
@@ -2540,12 +2540,12 @@ function anchor_fh_pag_menu() {
 	if (fhlvis && !pftvis) {
 		if (!$fft.hasClass('float')) {
 			$fft.addClass('float');
-			modified = 1;
+			modified = true;
 		}
 	} else {
 		if ($fft.hasClass('float')) {
 			$fft.removeClass('float');
-			modified = 1;
+			modified = true;
 		}
 	}
 
