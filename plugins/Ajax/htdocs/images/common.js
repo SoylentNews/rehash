@@ -517,7 +517,6 @@ function set_fhfilter_from( expr ){
 }
 
 function add_to_fhfilter(text) {
-	alert('add_to_fhfilter' + text);
 	if (firehose_settings.fhfilter == '') {
 		firehose_settings.fhfilter = text;
 	} else {
@@ -553,7 +552,7 @@ firehose_set_options = function(name, value, context) {
 		case 'mode':			fh_view_mode=value; break;
 		case 'tabsection':		params.tabtype='tabsection'; break;
 		case 'view':			set_fhfilter_from('#searchquery'); break;
-		case 'addfhfilter':		alert('1');add_to_fhfilter(value);alert('2'); break;
+		case 'addfhfilter':		add_to_fhfilter(value); break;
 	}
 
 	if ( start_over[name] ) {
