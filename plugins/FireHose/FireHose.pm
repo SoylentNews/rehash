@@ -3408,7 +3408,7 @@ sub getAndSetOptions {
 	}
 
 	$options->{global} = $global_opts;
-	$options->{base_filter} =~s /{nickname}/$user->{nickname}/;	
+	$options->{base_filter} =~ s/{nickname}/$user->{nickname}/;
 	$options->{fhfilter} = $options->{base_filter};
 
 	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
