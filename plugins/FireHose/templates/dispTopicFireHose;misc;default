@@ -26,7 +26,7 @@ __template__
 	<a href="[% link_url %]"><img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; IF file.height; " height='$file.height'"; END; %] [% IF item.media && item.mediatype == "video" %]onclick="firehose_get_media_popup('[% item.id %]'); return false;"[% END %]></a><br>[% IF item.media && item.mediatype == "video"%]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]')">[% END %]<br>[% IF item.media && item.mediatype == "video" %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]'); return false;" class="watch">Watch</a>[% END %][% END %]
 							 
 [% ELSIF item.tid && topic.image %]
-	<a href="[% gSkin.rootdir %]/index2.pl?fhfilter=[% topic.keyword %]" [% IF !user.is_anon && !form.op == "view" && !form.id && !form.sid %]onclick="firehose_set_options('addfhfilter','[% topic.keyword %]');return false;"[% END %]>
+	<a href="[% gSkin.rootdir %]/index2.pl?fhfilter=[% topic.keyword %]" [% IF !user.is_anon %]onclick="return addfhfilter('" _ topic.keyword _ "');"[% END %]>
 	<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
 	</a>
 [% END %]

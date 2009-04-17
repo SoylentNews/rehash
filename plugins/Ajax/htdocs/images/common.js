@@ -71,6 +71,7 @@ var vendor_popup_timerids = [];
 var vendor_popup_id = 0;
 var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
+var firehose_exists = 0;
 
 // ads
 var fh_adTimerSecsMax   = 15;
@@ -483,6 +484,21 @@ function firehose_style_switch( section_id ){
 	});
 }
 
+function addfhfilter(text) {
+	if (has_hose()) {
+		firehose_set_options('addfhfilter', text);
+		return false;
+	}
+	return true;
+} 
+
+function setfhfilter(text) {
+	if (has_hose()) {
+		firehose_set_options('setfhfilter', text);
+		return false;
+	}
+	return true;
+}
 
 var firehose_set_options;
 (function(){
@@ -1828,6 +1844,8 @@ function hide_login_box(){ get_login_parts().hide(); }
 
 var logged_in = 1;
 function check_logged_in(){ return logged_in || (show_login_box(), 0); }
+
+function has_hose() { return firehose_exists }
 
 
 function getModalPrefs(section, title, tabbed, params){

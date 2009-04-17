@@ -190,6 +190,7 @@ cmdrtaco dot net but be forgiving of beta code!
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page last_day = last_day firehose_more_data = firehose_more_data %]
 <script type="text/javascript">
+	firehose_exists = 1;
 	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color', 'view', 'tab', 'base_filter', 'user_view_uid', 'viewtitle','sectionname'] %]
 		[%- opt_value = options.$opt -%]
 		[% IF opt == 'startdate' %]
