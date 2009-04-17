@@ -40,7 +40,7 @@ sub main {
 	my $op = $form->{op} || "";
 
 	if ($form->{sid} || $form->{id}) {
-		$op = 'view';
+		$op ||= 'view';
 	}
 	
 	my $rss = $op eq "rss" && $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
