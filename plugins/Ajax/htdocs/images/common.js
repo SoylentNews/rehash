@@ -1236,6 +1236,7 @@ function firehose_after_update(){
 		firehose_storyfuture(firehose_future).length
 	);
 	firehose_busy_done();
+	$(document).trigger('updated.firehose');
 }
 
 function firehose_storyfuture( future ){
