@@ -16,11 +16,9 @@ __template__
 [% range = [ lo .. hi ] %]
 
                 [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Posting</span>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('d2', 'Discussion 2', 1); return false;">Viewing</a>
+                <div class="pref">
+                <span class="preftab active">Posting</span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('d2', 'Discussion 2', 1); return false;">Viewing</a></span>
                 </div>
                 [% END %]
 

@@ -12,11 +12,9 @@ prefs_d2
 __template__
 
                 [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false;">Posting</a>
-                &nbsp;|&nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Viewing</span>
+                <div class="pref">
+                <span class="preftab"><a href="" onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false;">Posting</a></span>
+                <span class="preftab active">Viewing</span>
                 </div>
                 [% END %]
 
