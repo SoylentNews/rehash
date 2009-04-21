@@ -129,6 +129,7 @@ htdoc=htdocs/index.pl
 htdoc=htdocs/moderation.shtml
 htdoc=htdocs/ok.txt
 htdoc=htdocs/robots.txt
+htdoc=htdocs/shtml.pl
 htdoc=htdocs/topics.pl
 htdoc=htdocs/users.pl
 htdoc=htdocs/users2.pl

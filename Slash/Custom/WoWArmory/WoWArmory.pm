@@ -129,5 +129,32 @@ sub get_arena_teams {
     $self->character->arenaTeams( \@team_objs );
 }
 
+sub get_heroic_access {
+    my $self = shift;
+
+    my @heroic_array = ( );
+    return unless ref($self->character->reputation) eq 'HASH';
+    foreach my $rep ( keys %{ $self->character->reputation } ) {
+        next unless ref($self->character->reputation->{$rep}) eq 'HASH';
+        foreach my $fac ( keys %{ $self->character->reputation->{ $rep } } ) {
+            next unless ref($self->character->reputation->{$rep}{$fac}) eq 'HASH';
+            foreach my $city (
+                keys %{ $self->character->reputation->{ $rep }{ $fac }{ 'faction' } } )
+            {
+                next unless ref($self->character->reputation->{$rep}{$fac}{faction}) eq 'HASH';
+                foreach my $r ( keys %{ $Games::WoW::Armory::HEROIC_REPUTATIONS } ) {
+                    if (   $r eq $city
+                        && $self->character->reputation->{ $rep }{ $fac }{ 'faction' }
+                        { $city }{ 'reputation' } >= 21000 )
+                    {
+                        push @heroic_array, $$Games::WoW::Armory::HEROIC_REPUTATIONS{ $r };
+                    }
+                }
+            }
+        }
+    }
+    $self->character->heroic_access( \@heroic_array );
+}
+
 1;
 

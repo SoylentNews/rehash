@@ -161,8 +161,7 @@ $(function(){
 
 
 function more_possible( text ){
-	anchor_fh_pag_menu();
-	shorten_fh_pag_menu();
+	anchor_fh_pag_menu(true);
 	$('#more-experiment a').trigger('more-possible');
 }
 
@@ -293,6 +292,7 @@ function normalize_options(){
 function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
 	$any('firehoselist').trigger('articlesMoved', data);
+	anchor_fh_pag_menu(true);
 }
 
 function before_article_removed( article, if_also_trigger_moved ){
@@ -879,12 +879,9 @@ $('#firehoselist a.more').
 		return true;
 	});
 
-anchor_fh_pag_menu();
-shorten_fh_pag_menu();
+anchor_fh_pag_menu(true);
 $(window).bind('resize', shorten_fh_pag_menu);
 $(window).bind('scroll', anchor_fh_pag_menu);
-// Safari 3 hack.  hooray or something.
-$("#fh-pag-div").hide(); setTimeout('$("#fh-pag-div").show()', 0);
 
 });
 
@@ -1175,6 +1172,7 @@ function firehose_handle_update() {
 
 						function(){
 							$(this).css({ opacity:'', height:'' });
+							anchor_fh_pag_menu(true);
 						}
 					);
 			}
@@ -1220,6 +1218,7 @@ function firehose_handle_update() {
 			$fhl.fadeIn('slow', function(){
 				$(this).css({ opacity:'' });
 			});
+			anchor_fh_pag_menu(true);
 		}
 		firehose_get_next_updates();
 	}
@@ -1232,13 +1231,26 @@ function firehose_handle_update() {
 	$menu.show();
 }
 
-function firehose_after_update(){
+var firehose_after_update;
+(function(){
+var pending = new fhitems(':animated');
+function notify(){ $(document).trigger('updated.firehose'); }
+
+firehose_after_update = function(){
 	firehose_reorder(firehose_ordered);
 	firehose_update_title_count(
 		firehose_storyfuture(firehose_future).length
 	);
 	firehose_busy_done();
+
+	pending().
+		queue(function(){
+			$(this).dequeue();
+			pending().length || notify();
+		}).length || notify();
 }
+
+})();
 
 function firehose_storyfuture( future ){
 	// Select all articles in #firehoselist.  Update .story|.future as needed.  Return the complete list.
@@ -1307,7 +1319,7 @@ function firehose_update_title_count(num) {
 	var end;
 	var sectionname = "";
 	if (firehose_settings.sectionname != "Main") {
-		sectionname = firehose_settings.sectionname;
+		sectionname = " " + firehose_settings.sectionname;
 	}
 	if (!num) {
 		num = $('#firehoselist>div[class!=daybreak]').length;
@@ -2487,8 +2499,8 @@ function shorten_fh_pag_menu() {
 				$($spans[0]).show();
 				if (shorten_fh_pag_menu_check() < 0) {
 					$($spans[0]).hide();
-					return;				
 				}
+				return;				
 			} else {
 				return;
 			}
@@ -2520,7 +2532,7 @@ function shorten_fh_pag_menu_check() {
 	}	
 }
 
-function anchor_fh_pag_menu() {
+function anchor_fh_pag_menu(modified) {
 	var $fhl = $('#firehose'); // FH list
 	var $fft = $('#fh-pag-div'); // FH footer
 	var $pft = $('#ft'); // page footer
@@ -2529,8 +2541,6 @@ function anchor_fh_pag_menu() {
 	var fftbounds = new Bounds($fft);
 	var pftbounds = new Bounds($pft);
 	var winbounds = new Bounds(window);
-
-	var modified = 0;
 
 	var fhlvis = winbounds.bottom > fhlbounds.bottom; // && winbounds.top < fhlbounds.bottom;
 	var pftvis = winbounds.bottom > pftbounds.top;
@@ -2541,17 +2551,20 @@ function anchor_fh_pag_menu() {
 	if (fhlvis && !pftvis) {
 		if (!$fft.hasClass('float')) {
 			$fft.addClass('float');
-			modified = 1;
+			modified = true;
 		}
 	} else {
 		if ($fft.hasClass('float')) {
 			$fft.removeClass('float');
-			modified = 1;
+			modified = true;
 		}
 	}
 
 	if (modified) {
 		shorten_fh_pag_menu();
+		// Safari 3 hack.  hooray or something.
+		setTimeout('$("#fh-pag-div").hide()', 0);
+		setTimeout('$("#fh-pag-div").show()', 0);
 	}
 }
 

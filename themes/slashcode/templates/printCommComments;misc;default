@@ -130,7 +130,7 @@ __template__
 [% END %]
 
 [% IF !user.is_anon %]
-<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a></b></p></span>[% END %]
+<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %]>Prefs</a></b></p></span>[% END %]
 
 [% IF (can_moderate || user.acl.candelcomments_always) %]
 <span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Help</a></b></p></span>[% END %]

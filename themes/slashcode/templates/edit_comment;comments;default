@@ -134,7 +134,7 @@ END %]
         prefslink = "<a href=\"" _ gSkin.rootdir _ "/my/comments\" target=\"_blank\"";
 
         IF constants.modal_prefs_active;
-                prefslink = prefslink _ "  onclick=\"getModalPrefs('d2_posting', 'Discussion 2')\; return false\"";
+                prefslink = prefslink _ "  onclick=\"getModalPrefs('d2_posting', 'Discussion 2', 1)\; return false\"";
         END;
 
         prefslink = prefslink _ ">Customize Posting Preferences</a><p>&nbsp;<br>";
