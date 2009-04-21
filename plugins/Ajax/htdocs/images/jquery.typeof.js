@@ -15,6 +15,7 @@ var	objToString = Object.prototype.toString,
 		'[object NodeList]':	'nodelist',
 		'[object String]':	'string'
 	},
+	nodeType = window.Node || {}, // FIXME
 	nodeTypes = [
 		undefined,
 		'node.element',
@@ -54,7 +55,7 @@ var	objToString = Object.prototype.toString,
 	},
 	singletonTypes = {};
 
-// 'singletons': the very first thing to check in _typeOf
+// FIXME: 'singletons': the very first thing to check in _typeOf
 singletonTypes[document]	= 'node.document';
 singletonTypes[false]		= 'boolean';
 singletonTypes[Infinity]	= 'number.Infinity';
@@ -84,7 +85,7 @@ function _typeOf( o, unq ){
 		singletonTypes[ o ]
 		|| objectTypes[ ots=objToString.call(o) ]
 		|| typeof(o.__typeOf)==='function' && o.__typeOf(unq)
-		|| !(oot=orderedObjectTypes[ots]) && o instanceof Node && (nodeTypes[o.nodeType] || 'node');
+		|| !(oot=orderedObjectTypes[ots]) && o instanceof nodeType && (nodeTypes[o.nodeType] || 'node');
 
 	if ( t ) {
 		ut = unqualifyTypes[t] || t;
