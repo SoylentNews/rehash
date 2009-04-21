@@ -15,7 +15,7 @@ var	objToString = Object.prototype.toString,
 		'[object NodeList]':	'nodelist',
 		'[object String]':	'string'
 	},
-	nodeType = window.Node || {}, // FIXME
+	nodeType = window.Node || function(){}, // FIXME
 	nodeTypes = [
 		undefined,
 		'node.element',
