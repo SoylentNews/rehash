@@ -16,7 +16,7 @@ __template__
 (function(){
 var regexp=/^\s*(?:\d+|many)\s+more\s*$/i, auto_more_count=2;
 
-function auto_more(){
+var auto_more = [% !user.noautomore %] && function auto_more(){
 	var $more_link = $('#more-experiment a');
 	$more_link.each(function(){
 		if ( Bounds.intersect(window, fhitems(':last')) ) {
@@ -26,7 +26,7 @@ function auto_more(){
 			$(document).unbind('scroll', call_auto_more);
 		}
 	});
-}
+};
 
 function hint_more( $more_link ){
 	if ( !auto_more ){
