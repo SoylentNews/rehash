@@ -1441,8 +1441,23 @@ function firehose_toggle_picker_search() {
 		'',
 		{
 			onComplete: function() {
-				$('#fh_picker_search_text').hide();
+				$('#fh_filtercontrol_toggle').hide();
 				$('#fh_picker_search').show();
+			}
+		}
+	);
+}
+
+function firehose_toggle_smallscreen_mode() {
+	var params = {};
+	params.op = 'firehose_toggle_smallscreen_mode';
+	params.reskey = reskey_static;
+	ajax_update(
+		params,
+		'',
+		{
+			onComplete: function() {
+				document.location=document.URL;
 			}
 		}
 	);
