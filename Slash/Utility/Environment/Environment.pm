@@ -1546,6 +1546,14 @@ sub prepareUser {
 		setUserDate($user);
 	}
 
+	if ($r) {
+		my $ua = $r->headers_in->{'user-agent'};
+		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
+		if (!$user->{is_anon} && $ua && $smalldev_re && !$user->{disable_ua_check} && ($ua =~ $smalldev_re)) {
+			$user->{state}{smalldevice} = 1;
+		}
+	}
+
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
 	$user->{srcids}		= get_srcids({ ip => $hostip, uid => $uid });
 	@{$user}{qw[ipid subnetid classbid hostip]} = get_ipids();

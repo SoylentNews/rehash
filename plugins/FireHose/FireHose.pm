@@ -408,6 +408,18 @@ sub ajaxTogglePickerSearch {
         $slashdb->setUser($user->{uid}, {firehose_disable_picker_search => undef});
 }
 
+sub ajaxToggleSmallScreen {
+ 	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $prefs = {
+	        smallscreen => undef,
+        	firehose_noslashboxes => undef,
+	        firehose_nosectionmenu => undef,
+        	disable_ua_check       => 1,
+	};
+	$slashdb->setUser($user->{uid}, $prefs);
+}
+
 sub getFireHoseSectionBySkid {
 	my($self, $skid) = @_;
 	my $skid_q = $self->sqlQuote($skid);
