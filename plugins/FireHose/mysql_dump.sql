@@ -24,7 +24,7 @@ INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, 
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_admin_extras', 'Slash::FireHose', 'ajaxGetAdminExtras', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_form', 'Slash::FireHose', 'ajaxGetFormContents', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'ajaxFireHoseGetUpdates', 'ajax_base', 'createuse');
-INSERT INTO ajax_ops VALUES (NULL, 'firehose_set_options', 'Slash::FireHose', 'ajaxFireHoseSetOptions', 'ajax_user_static', 'use');
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_set_options', 'Slash::FireHose', 'ajaxFireHoseSetOptions', 'ajax_base', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_section_menu', 'Slash::FireHose', 'ajaxSaveFireHoseSections', 'ajax_user_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_section_menu_visible', 'Slash::FireHose', 'ajaxSaveHideSectionMenu', 'ajax_user_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_delete_section_menu', 'Slash::FireHose', 'ajaxDeleteFireHoseSection', 'ajax_user_static', 'use');
