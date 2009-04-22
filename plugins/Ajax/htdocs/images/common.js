@@ -553,7 +553,7 @@ function add_to_fhfilter(text) {
 
 firehose_set_options = function(name, value, context) {
 	// Exit early for trouble.
-	if ( !firehose_user_class || name==='color' && !value ) {
+	if(name==='color' && !value ) {
 		return;
 	}
 
@@ -581,8 +581,7 @@ firehose_set_options = function(name, value, context) {
 
 	if ( start_over[name] ) {
 		view($('body'), { speed:0 });
-	}
-
+	} 
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
 		$('div.paginate').hide();
