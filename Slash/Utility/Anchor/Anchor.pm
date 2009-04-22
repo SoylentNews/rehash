@@ -273,7 +273,9 @@ sub http_send {
 
 	if ($opt->{etag} || $opt->{do_etag}) {
 		if ($opt->{do_etag} && $opt->{content}) {
-			$opt->{etag} = get_etag(encode_utf8($opt->{content}));
+			$opt->{etag} = get_etag(
+				getCurrentStatic('utf8') ? encode_utf8($opt->{content}) : $opt->{content}
+			);
 		}
 		$r->header_out('ETag', $opt->{etag});
 

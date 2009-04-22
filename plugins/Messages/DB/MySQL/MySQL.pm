@@ -204,14 +204,20 @@ sub _create {
 
 	# fix scalar to be a ref for freezing
 	my $frozen = nfreeze(ref $message ? $message : \$message);
-	$self->sqlInsert($table, {
+
+	my %insert_data = (
 		user	=> $user,
 		fuser	=> $fuser,
 		altto	=> $altto || '',
 		code	=> $code,
-		'-message'	=> "0x" . unpack("H*", $frozen),
+		message	=> $frozen,
 		'send'	=> $send || 'now',
-	});
+	);
+
+	$insert_data{'-message'} = "0x" . unpack("H*", delete $insert_data{message})
+		if getCurrentStatic('utf8');
+
+	$self->sqlInsert($table, \%insert_data);
 
 	my($msg_id) = $self->getLastInsertId({ table => $table, prime => $prime });
 	return $msg_id;
@@ -231,8 +237,10 @@ sub _get_web {
 	$self->sqlUpdate($table, { readed => 1 }, "$prime=$id_db");
 
 	# force to set UTF8 flag because these fields are 'blob'.
-	$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
-	$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
+	if (getCurrentStatic('utf8')) {
+		$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
+		$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
+	}
 
 	return $data;
 }
@@ -250,8 +258,12 @@ sub _get_web_by_uid {
 	);
 
 	# force to set UTF8 flag because these fields are 'blob'.
-	map { $_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'})); } @$data;
-	map { $_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'})); } @$data;
+	if (getCurrentStatic('utf8')) {
+		for (@$data) {
+			$_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'}));
+			$_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'}));
+		}
+	}
 
 	return $data;
 }

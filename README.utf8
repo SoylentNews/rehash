@@ -1,6 +1,10 @@
 How to run your slashsite on UTF-8 mode
 =======================================
 
+NOTE: THIS DOCUMENT IS INCOMPLETE.  More could be required to get it working.
+Caveat coder and all that.
+
+
 UTF-8 slash is based on following software features:
 
  * Unicode support in Perl (see perlunicode(1))

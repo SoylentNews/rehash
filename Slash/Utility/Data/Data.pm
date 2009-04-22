@@ -951,7 +951,7 @@ sub encryptPassword {
 	my $slashdb = getCurrentDB();
 	my $vu = $slashdb->{virtual_user};
 	my $salt = Slash::Apache::User::PasswordSalt::getCurrentPwSalt($vu);
-	$passwd = Encode::encode_utf8($passwd);
+	$passwd = Encode::encode_utf8($passwd) if getCurrentStatic('utf8');
 	return md5_hex("$salt:$uid:$passwd");
 }
 
@@ -2422,8 +2422,7 @@ The escaped data.
 
 sub fixparam {
 	my($url) = @_;
-	no utf8;
-	$url = encode_utf8($url) if (is_utf8($url));
+	$url = encode_utf8($url) if (getCurrentStatic('utf8') && is_utf8($url));
 	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
 	$url =~ s/ /+/g;
 	return $url;
@@ -2466,8 +2465,7 @@ The escaped data.
 $allowed .= '#';
 sub fixurl {
 	my($url) = @_;
-	no utf8;
-	$url = encode_utf8($url) if (is_utf8($url));
+	$url = encode_utf8($url) if (getCurrentStatic('utf8') && is_utf8($url));
 	$url =~ s/([^$allowed])/$URI::Escape::escapes{$1}/og;
 	$url =~ s/%(?![a-fA-F0-9]{2})/%25/g;
 	return $url;
@@ -2668,7 +2666,7 @@ Chomped string.
 
 sub chopEntity {
 	my($text, $length, $end) = @_;
-	$text = decode_utf8($text) unless (is_utf8($text));
+	$text = decode_utf8($text) if (getCurrentStatic('utf8') && !is_utf8($text));
 	if ($length && $end) {
 		$text = substr($text, -$length);
 	} elsif ($length) {
@@ -2728,7 +2726,7 @@ sub html2text {
 	$form = new HTML::FormatText (leftmargin => 0, rightmargin => $col-2);
 	$refs = new HTML::FormatText::AddRefs;
 
-	my $was_utf8 = is_utf8($html);
+	my $was_utf8 = getCurrentStatic('utf8') ? is_utf8($html) : 0;
 	$tree->parse($html);
 	$tree->eof;
 	$refs->parse_refs($tree);

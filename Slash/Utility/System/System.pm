@@ -24,8 +24,6 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use open ":utf8";
-use open ":std";
 use Fcntl qw(:flock :seek);
 use File::Basename;
 use File::Path;
@@ -39,6 +37,10 @@ use Slash::Utility::Environment;
 use Symbol 'gensym';
 use Time::HiRes ();
 use Encode qw(encode);
+
+use open (getCurrentStatic('utf8') ? ':utf8' : ':encoding(us-ascii)');
+use open ':std';
+
 
 use base 'Exporter';
 
@@ -125,10 +127,12 @@ sub sendEmail {
 	# Characters not representable in the destination character set
 	# and encoding will be replaced with \x{HHHH} place-holders
 	# (s. Encode(3) perldoc, Handling Malformed Data)
-	my $b_code = $constants->{mail_charset_body} || "UTF-8";
-	my $h_code = $constants->{mail_charset_header} || "MIME-Header";
-	$content = encode($b_code, $content, Encode::FB_PERLQQ);
-	$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
+	my $b_code = $constants->{mail_charset_body} || ($constants->{utf8} ? 'UTF-8' : 'us-ascii');
+	my $h_code = $constants->{mail_charset_header} || 'MIME-Header';
+	if ($constants->{utf8}) {
+		$content = encode($b_code, $content, Encode::FB_PERLQQ);
+		$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
+	}
 
 	my %data = (
 		From		=> $constants->{mailfrom},
@@ -202,10 +206,12 @@ sub bulkEmail {
 	my @list = grep { emailValid($_) } @$addrs;
 
 	# Character Code Conversion; see comments in sendEmail()
-	my $b_code = $constants->{mail_charset_body} || "UTF-8";
+	my $b_code = $constants->{mail_charset_body} || ($constants->{utf8} ? 'UTF-8' : 'us-ascii');
 	my $h_code = $constants->{mail_charset_header} || "MIME-Header";
-	$content = encode($b_code, $content, Encode::FB_PERLQQ);
-	$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
+	if ($constants->{utf8}) {
+		$content = encode($b_code, $content, Encode::FB_PERLQQ);
+		$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
+	}
 
 	my $bulk = Slash::Custom::Bulkmail->new(
 		From    => $constants->{mailfrom},

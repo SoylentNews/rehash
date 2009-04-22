@@ -42,6 +42,7 @@ sub init {
 
 sub create {
 	my($self, $values) = @_;
+	my $constants = getCurrentStatic();
 	my $table = $self->{'_table'};
 	my $prime = $self->{'_prime'};
 
@@ -78,7 +79,7 @@ sub create {
 		my $base = 1024**2;  # 1MB
 		if ($len > $base) {
 			$value = $self->sqlGetVar($var);
-			my $needed = $len*2+2 + $base;
+			my $needed = $constants->{utf8} ? ($len*2+2 + $base) : ($len + $base);
 
 			if ($value < $needed) {
 				return unless $self->sqlSetVar($var, $needed*2);
@@ -103,15 +104,21 @@ sub create {
 					$size = $base >= $value ? $base/2 : $base; 
 					$data = $values->{data};
 					$values->{data} = substr($data, 0, $size, '');
-					$values->{"-data"} = "0x" . unpack('H*', $values->{data});
-					delete($values->{data});
+					if ($constants->{utf8}) {
+						$values->{"-data"} = "0x" . unpack('H*', delete $values->{data});
+					}
 				}
 
 				$self->sqlInsert($table, $values) or return undef;
 
 				if ($do_chunk) {
 					while (length $data) {
-						my $chunk = "0x" . unpack('H*', substr($data, 0, $size, ''));
+						my $chunk = substr($data, 0, $size, '');
+						if ($constants->{utf8}) {
+							$chunk = "0x" . unpack('H*', $chunk);
+						} else {
+							$chunk = $self->sqlQuote($chunk);
+						}
 						my $ok = $self->sqlUpdate($table, {
 								-data => "CONCAT(data, $chunk)"
 							}, $where
@@ -135,8 +142,9 @@ sub create {
 
 		# true $value means we already saved the data
 		unless ($value) {
-			$values->{"-data"} = "0x" . unpack("H*", $values->{data});
-			delete($values->{data});
+			if ($constants->{utf8}) {
+				$values->{"-data"} = "0x" . unpack("H*", delete $values->{data});
+			}
 
 			$self->sqlInsert($table, $values) or return undef;
 		}
