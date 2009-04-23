@@ -100,7 +100,7 @@ __template__
 		[% IF user.state.firehose_page == "user" %]
 			This user's page contains no [% IF form.page %]additional [% END %]entries;
 		[% ELSE %]
-			No matches were found.  You may want to try modifying your search [% IF new_color %]<a href="" onclick="firehose_set_options('color','[% newcolor %]')">[% END %] or lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]
+			No matches were found.  You may want to try modifying your search [% IF new_color %]<a href="" onclick="firehose_set_options('color','[% new_color %]');return false;">[% END %] or lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]
 		[% END %]
 		</strong>
 		<br><br>

@@ -6173,7 +6173,8 @@ UPDATE vars SET value = 'T_2_5_0_252' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_smallscreen_mode', 'Slash::FireHose', 'ajaxToggleSmallScreen', 'ajax_user_static', 'createuse');
 
 # For plugins/FireHose
-UPDATE ajax_ops SET reskey_name="ajax_base" WHERE op in("firehose_set_options","firehose_get_updates");
+UPDATE ajax_ops SET reskey_name="ajax_base" WHERE op in ("firehose_get_updates");
+UPDATE ajax_ops SET reskey_name="ajax_base_static" WHERE op in("firehose_set_options");
 
 ALTER TABLE firehose_view ADD COLUMN shortcut ENUM ("yes","no") DEFAULT "no", 
 	ADD COLUMN short_url VARCHAR(32) DEFAULT "" NOT NULL, 
