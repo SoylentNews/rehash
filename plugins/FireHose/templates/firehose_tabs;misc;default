@@ -89,8 +89,6 @@ END %]
 					   END;
 					%]
 				[% END %]
-
-<<<<<<< HEAD:plugins/FireHose/templates/firehose_tabs;misc;default
 				[% view_url = "index2.pl?view=" _ view.viewname;
 				   IF view.short_url;
 					view_url = view.short_url;
