@@ -1568,7 +1568,7 @@ sub saveModalPrefs {
 				$fh->removeUserSections();
 			} else {
 				$user_edits_table = {};
-				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_beta firehose_picker_search)) {
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_beta firehose_picker_search firehose_noslashboxes firehose_nosectionmenu disable_ua_check firehose_noautomore)) {
 					$user_edits_table->{$_} = undef;
 				}
 				foreach (qw(noicons dst dfid)) {
@@ -1589,6 +1589,11 @@ sub saveModalPrefs {
 				firehose_pagesize		=> ($params{pagesize} ? $params{pagesize} : "small"),
 				index_beta			=> ($params{index_beta} ? 1 : 0 ),
 				firehose_disable_picker_search  => ($params{firehose_disable_picker_search} ? undef : 1),
+				smallscreen			=> ($params{smallscreen} ? 1 : undef),
+				firehose_noslashboxes		=> ($params{noslashboxes} ? undef: 1),
+				firehose_nosectionmenu		=> ($params{nosectionmenu} ? undef: 1),
+				disable_ua_check		=> ($params{disable_ua_check} ? undef: 1),
+				firehose_noautomore		=> ($params{noautomore} ? undef: 1),
 			};
 
 			if (defined $params{tzcode} && defined $params{tzformat}) {
