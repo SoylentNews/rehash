@@ -1443,6 +1443,7 @@ function firehose_toggle_picker_search() {
 			onComplete: function() {
 				$('#fh_filtercontrol_toggle').hide();
 				$('#fh_picker_search').show();
+				$('#hd').removeClass('nofilter');
 			}
 		}
 	);
