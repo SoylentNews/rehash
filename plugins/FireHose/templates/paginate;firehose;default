@@ -63,7 +63,7 @@ __template__
 		FOREACH cur_day = days;
 		%]
 		<span class="[% IF (cur_day.0 != last_day || options.orderby != "createtime") || firehose_more_data.future_count <= 0 %]in[% END %]active">
-			<a [% IF !user.is_anon %]onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, issue => cur_day.0}); f; %]">[% cur_day.1 | strip_literal %]</a>
+			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, issue => cur_day.0}); f; %]">[% cur_day.1 | strip_literal %]</a>
 				[% IF firehose_more_data.day_num == cur_day.0 && firehose_more_data.future_count >=0 %]
 					[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 					[% got_more_link = 1; %]
@@ -92,7 +92,7 @@ __template__
 
 	[% FOREACH cur_day = days %]
 		<span class="[% IF orig_day != cur_day.0; %]in[% END %]active">
-			<a [% IF !user.is_anon %]onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => cur_day.0, duration => -1 }); f; %]">[% cur_day.1 | strip_literal %]</a>
+			<a onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => cur_day.0, duration => -1 }); f; %]">[% cur_day.1 | strip_literal %]</a>
 			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose') IF orig_day == cur_day.0 %]
 		</span>
 	[% END %]
@@ -117,11 +117,11 @@ __template__
 
 [% ELSIF options.duration == -1 && firehose_more_data && firehose_more_data.future_count.defined && firehose_more_data.future_count <= 0 %]
 	<span class="inactive">
-		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', ''); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
+		<a onclick="firehose_set_options('startdate', ''); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
 	</span>
 	<span class="active">
 		[% mycolor = fh.getFireHoseColorDelta(options.color, 1) %]
-		<a[% IF !user.is_anon %] onclick="firehose_set_options('color', '[% mycolor %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, color => mycolor }); f %]"><span class="trigger-swatch [% mycolor %]">[% mycolor %]</span></a>
+		<a onclick="firehose_set_options('color', '[% mycolor %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, color => mycolor }); f %]"><span class="trigger-swatch [% mycolor %]">[% mycolor %]</span></a>
 	</span>
 
 [% ELSIF options.duration == -1  %]
@@ -154,18 +154,18 @@ __template__
 				firehose_more_data.href = daylink _ "&amp;page=" _ (page+1);
 			END %]
 	<span class="[% IF orig_day != cur_day.0; %]in[% END %]active">
-		<a [% IF !user.is_anon %]onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;"[% END %] href="[% daylink %]">[% cur_day.1 | strip_literal %]</a>
+		<a onclick="firehose_set_options('startdate','[% cur_day.0 %]'); return false;" href="[% daylink %]">[% cur_day.1 | strip_literal %]</a>
 	</span>
 		[% END %]
 	[% ELSE;
 		days = Slash.getOlderDaysFromDay(orig_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 });
 		IF days.0.1 != 'Today' %]
 	<span class="inactive">
-		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', ''); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
+		<a onclick="firehose_set_options('startdate', ''); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => '', duration => -1, no_label => "1"}); f; %]">Today</a>
 	</span>
 		[% END %]
 	<span class="active">
-		<a[% IF !user.is_anon %] onclick="firehose_set_options('startdate', '[% days.0.0 %]'); return false;"[% END %] href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => orig_day, duration => -1 }); f %]">[% days.0.1 %]</a>
+		<a onclick="firehose_set_options('startdate', '[% days.0.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { view => options.view, startdate => orig_day, duration => -1 }); f %]">[% days.0.1 %]</a>
 	</span>
 	[% END %]
 	<span class="inactive">
