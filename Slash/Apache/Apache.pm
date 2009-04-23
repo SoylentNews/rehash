@@ -434,11 +434,7 @@ sub IndexHandler {
 			my $fh_tabs = $fh_reader->getShortcutUserViews();
 
 			if ($fh_tabs->{$key}) {
-				my %the_args = $r->args();
-				print STDERR "ARGS " .$r->args();
-				$the_args{view} = $key;
-				$r->args(%the_args);
-				print STDERR "ARGS " .$r->args();
+				$r->args("view=$key");
 				$r->uri('/index2.pl');
 				return OK;
 			}
