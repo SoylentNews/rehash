@@ -433,22 +433,29 @@ function toggleFirehoseTagbox(id) {
 }
 
 function use_skin( link ){
-	// Note: use_skin('') or equivalent => disable alternates (e.g., for "Slashdot" section)
-	
-	// remove skin data from main css before applying any new css
-	$('link.data-skin').each(function(){ this.disabled = true; });
-	var $others	= $('head link[rel=alternate stylesheet]'),
-		$skin	= link && $(link),
-		skin	= $skin && (
-					$others.filter('[title=' + $skin.attr('title') + ']')[0]
-					|| $skin.appendTo('head')[0]
-				);
+	// Change the current "skin" of the page, e.g., to the CSS of the "Games" section.
+	// Some sections don't have skins (e.g., "Slashdot", "Science"): link will be empty.
+	// Otherwise, link is a <link type=text/css...> to install in <head> (if not already there).
 
-	if ( skin ) {
-		skin.disabled = false;
-		$others = $others.not(skin);
+	// Disable _all_ currently installed skins.
+	var $installed_skins=$('head link.data-skin').attr('disabled', true), $link, $new_skin;
+	// Now we're back down to the bare green metal of the Slashdot page.
+
+	// If we are enabling a skin...
+	if ( link ) {
+		$link = $(link);
+
+		// ...search the installed skins: we may already have it.
+		$new_skin = $installed_skins.filter('[title=' + $link.attr('title') + ']');
+
+		if ( !$new_skin.length ) {		// Not found; let's install it ourselves.
+			$new_skin = $link.
+				addClass('data-skin').	// Ensure we can _always_ search only for 'data-skin'.
+				attr('disabled', true).	// Safari: if inserting new, must come in disabled.
+				appendTo('head');		// Install it!
+		}
+		$new_skin.attr('disabled', false);
 	}
-	$others.attr('disabled', true);
 }
 
 function firehose_style_switch( section_id ){
