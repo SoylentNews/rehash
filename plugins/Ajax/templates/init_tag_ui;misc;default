@@ -33,7 +33,7 @@ var suggestions_for_context = {
 	metanod: 'insightful interesting informative funny underrated',
 	metanix: 'offtopic flamebait troll redundant overrated'
 };
-var tag_admin = [% IF user.is_admin %]true[% ELSE %]false[% END %];
+[% IF user.is_admin %]tag_admin = true;[% END %]
 </script>
 [% END %]
 

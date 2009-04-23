@@ -188,8 +188,8 @@ function remarks_config_save() {
 	var optional_params = {
 		min_priority:	$('#remarks_min_priority').val(),
 		limit:		$('#remarks_limit').val(),
-		filter:		$('#remarks_filter').val(),
-	}
+		filter:		$('#remarks_filter').val()
+	};
 	$.each(optional_params, function(k, v){ v && (params[k]=v); });
 
 	$('#remarksconfig-message').text('Saving...');

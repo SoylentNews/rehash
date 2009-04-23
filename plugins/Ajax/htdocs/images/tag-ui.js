@@ -1,6 +1,6 @@
 ; // tag-ui.js
 
-var qw=Slash.Util.qw, context_triggers, well_known_tags;
+var qw=Slash.Util.qw, context_triggers, well_known_tags, tag_admin=false;
 
 function animate_wiggle( $selector ){
 	$selector.
