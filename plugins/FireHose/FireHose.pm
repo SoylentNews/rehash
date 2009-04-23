@@ -303,17 +303,20 @@ sub createFireHoseSection {
 
 sub ajaxSaveFireHoseSections {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
 	$slashdb->setUser($user->{uid}, {firehose_section_order => $form->{fsids}});
 }
 
 sub ajaxSaveHideSectionMenu {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
 	my $hide = $form->{hide_section_menu} && ($form->{hide_section_menu} ne 'false');
 	$slashdb->setUser($user->{uid}, {firehose_hide_section_menu => $hide});
 }
 
 sub ajaxSetFireHoseDefaultSection {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
 	$slashdb->setUser($user->{uid}, {firehose_default_section => $form->{default_section}});
 }
 
@@ -404,12 +407,14 @@ sub ajaxFireHoseSectionCSS {
 }
 
 sub ajaxTogglePickerSearch {
-        my($slashdb, $constants, $user, $form, $options) = @_;
-        $slashdb->setUser($user->{uid}, {firehose_disable_picker_search => undef});
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
+	$slashdb->setUser($user->{uid}, {firehose_disable_picker_search => undef});
 }
 
 sub ajaxToggleSmallScreen {
  	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
 
 	my $prefs = {
 	        smallscreen => undef,
@@ -3776,7 +3781,7 @@ sub getAndSetOptions {
 		if (!$user->{is_admin} && (($options->{limit} + $options->{more_num}) > 200)) {
 			$options->{more_num} = 200 - $options->{limit} ;
 		}
-		if ($options->{more_num} > $user->{firehose_max_more_num}) {
+		if (!$user->{is_anon} && $options->{more_num} > $user->{firehose_max_more_num}) {
 			$self->setUser($user->{uid}, { firehose_max_more_num => $options->{more_num}});
 		}
 	}
