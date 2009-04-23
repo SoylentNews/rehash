@@ -4517,7 +4517,7 @@ sub genFireHoseParams {
 	my $skip_false = { startdate => 1, issue => 1 }; 
 
 	foreach my $label (keys %$params) {
-		next if $skip_false->{$label} && !$data->{label} && !$options->{label};
+		next if $skip_false->{$label} && !$data->{$label} && !$options->{$label};
 		next if $user->{is_anon} && $params->{$label} == 0;
 		next if !defined $data->{$label} && !defined $options->{$label};
 		my $value = defined $data->{$label} ? $data->{$label} : $options->{$label};
