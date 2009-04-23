@@ -2903,6 +2903,11 @@ sub getAndSetGlobalOptions {
 	return $options;
 }
 
+sub getShortcutUserViews {
+	my ($self) = @_;
+	return $self->sqlSelectAllHashref("viewname","viewname","firehose_view", "uid=0");
+}
+
 sub getUserViews {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
@@ -2928,7 +2933,9 @@ sub getUserViews {
 	$where = join ' AND ', @where;
 	my $items = $self->sqlSelectAllHashrefArray("*","firehose_view", $where, "ORDER BY uid, id");
 	foreach (@$items) {
+		my $strip_nick = strip_paramattr($user->{nickname});
 		$_->{viewtitle} =~ s/{nickname}/$user->{nickname}/g;
+		$_->{short_url} =~ s/{nickname}/$strip_nick/g;
 	}
 	return $items;
 }

@@ -428,12 +428,20 @@ sub IndexHandler {
 
 		my $slashdb = getCurrentDB();
 
-		my $fh_tabs = { recent => 1, stories => 1, daddypants => 1, popular => 1};
+		if ($constants->{plugin}{FireHose}) {
+			my $fh_reader = getObject("Slash::FireHose", { db_type => 'reader'});
 
-		if ($fh_tabs->{$key}) {
-			$r->args("view=$key");
-			$r->uri('/index2.pl');
-			return OK;
+			my $fh_tabs = $fh_reader->getShortcutUserViews();
+
+			if ($fh_tabs->{$key}) {
+				my %the_args = $r->args();
+				print STDERR "ARGS " .$r->args();
+				$the_args{view} = $key;
+				$r->args(%the_args);
+				print STDERR "ARGS " .$r->args();
+				$r->uri('/index2.pl');
+				return OK;
+			}
 		}
 
 		my $new_skin = $slashdb->getSkin($key);

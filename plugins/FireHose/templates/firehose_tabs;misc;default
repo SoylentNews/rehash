@@ -90,9 +90,14 @@ END %]
 					%]
 				[% END %]
 
-				[% short_url_views = { stories = "short_url" recent = "recent" popular = "popular" daddypants = "daddypants" } %]
-				[% short_url_views.userhomepage = "~" _ user.nickname | strip_paramattr %]
-				<li [% IF active_view %]class="active [% view.viewtitle %]"[% END %]><a href="[% gSkin.rootdir %]/[% IF short_url_views.${view.viewname}; short_url_views.${view.viewname}; ELSE %]index2.pl?view=[% view.viewname %][% END %]" [% IF !user.is_anon %]onclick="firehose_set_options('view', '[% view.viewname %]');return false;"[% END %]>[% view.viewtitle %]</a>[% IF active_view %][% IF rss_link %]<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>[% END %][% IF !user.is_anon && view.editable == "yes" %]<span class="tab_edit"><a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit">Edit</a></span>[% END %][% END %]</li>
+<<<<<<< HEAD:plugins/FireHose/templates/firehose_tabs;misc;default
+				[% view_url = "index2.pl?view=" _ view.viewname;
+				   IF view.short_url;
+					view_url = view.short_url;
+				   END;
+				%]
+				<li [% IF active_view %]class="active [% view.viewtitle %]"[% END %]><a href="[% gSkin.rootdir %]/[% view_url %][% END %]" [% IF !user.is_anon %]onclick="firehose_set_options('view', '[% view.viewname %]');return false;"[% END %]>[% view.viewtitle %]</a>[% IF active_view %][% IF rss_link %]<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>[% END %][% IF !user.is_anon && view.editable == "yes" %]<span class="tab_edit"><a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit">Edit</a></span>[% END %][% IF view.link_icon == "yes" %] <span class="tab_link"><a href="[% gSkin.rootdir %]/[% view_url %]" title="Link to [% view.viewtitle %]">Link</a></span>[% END %]
+[% END %]</li>
 				[%- END -%]
 
 
