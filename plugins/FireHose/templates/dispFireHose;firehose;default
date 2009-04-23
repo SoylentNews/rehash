@@ -109,7 +109,7 @@ END %]
 	  <a href="[% PROCESS nojslink %]" class="down" title="Vote this item down">-</a>
 	</span>
 [% END %]
-	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url featured = featured %]
+	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url featured = featured mode=mode %]
 						[% title_type = "firehose" %]
 						[% IF item.type == "story";
 							title_type = "story";

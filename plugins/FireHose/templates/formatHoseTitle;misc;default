@@ -75,7 +75,7 @@ END;
 title_href=link_url;
 
 IF form.index || featured || view_mode;
-	IF (form.index && form.taskgen);
+	IF (options.view == "stories"  && mode == "full");
 		onclick="";
 	END;
 	IF item.type == "story";
