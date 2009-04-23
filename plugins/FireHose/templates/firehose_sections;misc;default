@@ -66,6 +66,8 @@ var firehose_delete_section, update_section;
 $(function(){
 var $section_menu = $any('firehose-sections');
 
+[% IF !user.is_anon %]
+
 firehose_delete_section = function( id, undo ) {
 	ajax_update({
 		op:	'firehose_delete_section_menu',
@@ -75,6 +77,7 @@ firehose_delete_section = function( id, undo ) {
 	});
 	firehose_set_options('section', $section_menu.metadata().default_id);
 }
+[% END %]
 
 function save_menu(){
 	if ( !check_logged_in() ) { return false; }
@@ -192,11 +195,15 @@ $any('links-sections').
 				each(function(){
 					var section = $(this).metadata();
 					if ( section.id !== 'unsaved' ) {
+						[% IF !user.is_anon %]
 						firehose_set_options('section', section.id);
+						[% END %]
 					} else {
+						[% IF !user.is_anon %]
 						firehose_set_options('setfhfilter', section.filter);
 						firehose_set_options('view', section.viewname);
 						section.color && firehose_set_options('color', section.color);
+						[% END %]
 					}
 				});
 		// allow other handlers to run (by not returning false)
