@@ -1812,6 +1812,8 @@ function get_modal_parts( filter ){
 	return $parts;
 }
 function custom_modal_box( action_name ){
+	$(document).trigger(action_name+'.modal');
+
 	var	custom_fn_name	= '_custom_' + action_name + '_fn',
 		$all_parts	= get_modal_parts(),
 		$dialog		= $all_parts.filter('#modal_box'),
