@@ -1870,6 +1870,7 @@ function getModalPrefs(section, title, tabbed, params){
 		}, params||{}),
 		function(){
 			$any('preference_title').html(title);
+			 $('#modal_box').addClass("tabbed");
 			show_modal_box().data('tabbed', tabbed);
 		}
 	);
