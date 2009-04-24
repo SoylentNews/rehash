@@ -2923,6 +2923,9 @@ sub getUserViews {
 
 	if($options->{tab_display}) {
 		push @where, "tab_display=" . $self->sqlQuote($options->{tab_display});
+		if ($user->{is_anon}) {
+			push @where, "viewname not like 'user%'";
+		}
 	}
 	
 	if($options->{editable}) {
