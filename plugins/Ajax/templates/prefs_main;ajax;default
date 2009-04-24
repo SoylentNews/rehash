@@ -54,6 +54,9 @@ END
 		Configure the layout of the new Index, what items are excluded, and settings for different view tabsa
 	</div>
 </div>
+
+	<div style="padding-left: 15px;"><a href="#" onclick="getModalPrefs('fhlayout', 'Index Beta Settings', 1); return false">Layout</a>, <a href="#" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false">Exclusions</a>, <a href="#" onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false">Stories</a>, <a href="#" onclick="getModalPrefs('fhviewrecent', 'Customize Recent View', 1); return false">Recent</a>, <a href="#" onclick="getModalPrefs('fhviewpopular', 'Customize Popular View', 1); return false">Popular</a>, <a href="#" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false">Search</a>.</div>
+
 <br>
 
 <h3><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %] style="text-decoration: none;">Discussions</a>&nbsp;<a href="/users.pl?op=editcomm" onclick="displayModalPrefHelp('modalprefhelp_discussions'); return false" title="Click To Expand Help" class="help">?</a></h3>
