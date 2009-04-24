@@ -1178,7 +1178,7 @@ function firehose_handle_update() {
 					  { interval:400, duration:350 },
 					  { interval:200, duration:175 },
 					  { interval:100, duration:117 } ][
-					Math.max(3, Math.floor(firehose_updates_size/10))
+					Math.ceil(3, Math.floor(firehose_updates_size/10))
 				];
 				wait_interval = t.interval;
 
