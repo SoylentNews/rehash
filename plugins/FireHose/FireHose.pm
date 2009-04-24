@@ -2833,7 +2833,7 @@ sub getOptionsValidator {
 		type 		=> { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1, project => 1 },
 		orderdir 	=> { ASC => 1, DESC => 1},
 		orderby 	=> { createtime => 1, popularity => 1, editorpop => 1, neediness => 1 },
-		pagesizes 	=> { "small" => 1, "large" => 1 },
+		pagesizes 	=> { "tiny" => 1, "small" => 1, "large" => 1 },
 		colors		=> $colors,
 		categories 	=> \%categories
 	};
@@ -3823,63 +3823,44 @@ sub getFireHoseLimitSize {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
-
 	my $limit;
 
-	if ($options->{view} && $options->{viewref}) {
-		if ($user->{is_admin}) {
-			$limit = $options->{viewref}{admin_maxitems};
-		} else {
-			$limit = $options->{viewref}{maxitems};
-		}
-		if ($pagesize eq "huge" && ($user->{is_admin} || $user->{is_subscriber})) {
-			$limit *= 1.5;
-		}
-		if ($pagesize eq "small") {
-			$limit = int($limit / 1.5);
-		}
+	my $pagesizes = {
+		single	=> [1,1,1],
+		tiny	=> [5,5,5],
+		small	=> [10,10,20],
+		large	=> [15,20,30],
+		huge	=> [50,50,50],
+	};
 
-		if ($mode eq "full") {
-			$limit = int($limit / 2);
-		} elsif ($mode eq "mixed") {
-			$limit = int($limit / 1.5);
-		}
-		
-	}
-	my $mod = $limit % 5;
-	$limit += (5-$mod) if $mod;
-
-	if (!$limit) {
-		if ($mode eq "full") {
-			if ($user->{is_admin}) {
-				$limit = $pagesize eq "large" ? 50 : 25;
-			} else {
-				$limit = $pagesize eq "large" ? 20 : 15;
-			}
-		} else {
-			$limit = $user->{is_admin} ? 50 :
-				$pagesize eq "large" ? 30 : 20;
-		}
+	$pagesize ||= "small";
+	if ($forcesmall) {
+		$pagesize = "tiny";
 	}
 
-	$limit = 10 if $forcesmall || $form->{metamod};
-	$limit = 1 if $pagesize eq "single" && $user->{is_admin};
+	my $mode_map = { full => 0, mixed => 1, fulltitle => 2 };
+
+	my $mode_id = $mode_map->{$mode};
+
+	$limit = $pagesizes->{$pagesize}[$mode_id];
+
+	$limit ||= 10;
+	
+	$limit = 15 if $options->{view} =~ /^user/ && $limit >= 15;
+	$limit = 10 if $form->{metamod};
+
 	return $limit;
 }
 
 sub shouldForceSmall {
 	my($self) = @_;
 	my $form = getCurrentForm();
+	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
 	# the non-normal cases: a small device (e.g., iPhone) or an embedded use (e.g., Google Gadget)
 	my $force_smaller = $form->{embed} ? 1 : 0;
-	if (!$force_smaller && $constants->{smalldevices_ua_regex}) {
-		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
-		if ($ENV{HTTP_USER_AGENT} && $ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
-			$force_smaller = 1;
-		}
-	}
+	$force_smaller = 1 if $user->{state}{smalldevice};
 	return $force_smaller;
 }
 

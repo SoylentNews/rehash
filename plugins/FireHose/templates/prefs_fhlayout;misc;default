@@ -161,9 +161,10 @@ __template__
                 </div>
 
 		[%
-                default = user.firehose_pagesize || "large";
-                pagesizes = [ { 'tiny' => 'Tiny' }, { 'small' => 'Small' }, { 'medium' => 'Medium' }, { 'large' => 'Large' } ];
-                IF user.is_admin || user.is_subscriber; pagesizes.push({ 'huge' => 'Huge' }); END;
+                default = user.firehose_pagesize || "small";
+                pagesizes = [ { 'tiny' => 'Tiny'}, { 'small' => 'Small' }, { 'large' => 'Large' } ];
+                
+		IF user.is_admin || user.is_subscriber; pagesizes.push({ 'huge' => 'Huge' }); END;
                 IF user.is_admin; pagesizes.push({ 'single' => 'Single' }); END;
                 %]
 
