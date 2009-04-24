@@ -6176,12 +6176,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_smallscreen_mode', 'Slash::F
 UPDATE ajax_ops SET reskey_name="ajax_base" WHERE op in ("firehose_get_updates");
 UPDATE ajax_ops SET reskey_name="ajax_base_static" WHERE op in("firehose_set_options");
 
-ALTER TABLE firehose_view ADD COLUMN shortcut ENUM ("yes","no") DEFAULT "no", 
-	ADD COLUMN short_url VARCHAR(32) DEFAULT "" NOT NULL, 
-	ADD COLUMN link_icon ENUM ("no","yes") DEFAULT "no", 
-	ADD COLUMN placeholder ENUM("no","yes") DEFAULT "no", 
-	ADD COLUMN addable ENUM("no", "yes") DEFAULT "no", 
-	ADD COLUMN removable ENUM("no","yes") DEFAULT "no";
+ALTER TABLE firehose_view ADD COLUMN shortcut ENUM ("yes","no") DEFAULT "no", ADD COLUMN short_url VARCHAR(32) DEFAULT "" NOT NULL, ADD COLUMN link_icon ENUM ("no","yes") DEFAULT "no", ADD COLUMN placeholder ENUM("no","yes") DEFAULT "no", ADD COLUMN addable ENUM("no", "yes") DEFAULT "no", ADD COLUMN removable ENUM("no","yes") DEFAULT "no";
 
 UPDATE firehose_view SET shortcut="yes", short_url = viewname WHERE viewname IN ("stories","popular","recent","daddypants");
 UPDATE firehose_view SET short_url = "~{nickname}", link_icon = "yes" WHERE viewname="userhomepage";
