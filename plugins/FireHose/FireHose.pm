@@ -2667,7 +2667,9 @@ sub genFireHoseMCDKey {
 		&& !$opts->{nocolors}
 		&& !$opts->{nothumbs} && !$options->{vote}
 		&& !$form->{skippop} 
-		&& !$user->{is_admin}) {
+		&& !$user->{is_admin} 
+		&& !$opts->{view_mode}
+		&& !$opts->{featured}) {
 		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id:$index";
 	}
 	return $mcdkey;
