@@ -29,7 +29,7 @@ __template__
 END %]
 
 [% IF user.is_anon %]
-	<a href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
+	<a class="login"  href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
 [% ELSE %]
 	<a class="prefs" href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %]>Prefs</a>
 [% END %]
