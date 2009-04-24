@@ -74,6 +74,9 @@ __template__
 		[% smallscreen_check = ''; IF user.smallscreen; smallscreen_check = constants.markup_checked_attribute; END; %]
 		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="smallscreen" id="smallscreen" [% smallscreen_check %] onclick="setLayoutPrefs()"> Small Screen</label></p>
 
+		[% lowbandwidth_check = ''; IF user.lowbandwidth; lowbandwidth_check = constants.markup_checked_attribute; END; %]
+                <p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="lowbandwidth" id="lowbandwidth" [% lowbandwidth_check %] onclick="setLayoutPrefs()"> Lowbandwidth</label></p>
+
 		<div style="padding-left: 20px;">
                 [% i_check = ''; IF !user.noicons; i_check = constants.markup_checked_attribute; END %]
 
@@ -161,9 +164,10 @@ __template__
                 </div>
 
 		[%
-                default = user.firehose_pagesize || "large";
-                pagesizes = [ { 'small' => 'Small' }, { 'medium' => 'Medium' }, { 'large' => 'Large' } ];
-                IF user.is_admin || user.is_subscriber; pagesizes.push({ 'huge' => 'Huge' }); END;
+                default = user.firehose_pagesize || "small";
+                pagesizes = [ { 'tiny' => 'Tiny'}, { 'small' => 'Small' }, { 'large' => 'Large' } ];
+                
+		IF user.is_admin || user.is_subscriber; pagesizes.push({ 'huge' => 'Huge' }); END;
                 IF user.is_admin; pagesizes.push({ 'single' => 'Single' }); END;
                 %]
 
@@ -208,12 +212,25 @@ ss_unset_defaults.showdates   = false;
 ss_unset_defaults.firehose_disable_picker_search = false;
 ss_unset_defaults.noslashboxes  = false;
 ss_unset_defaults.nosectionmenu = false;
+ss_unset_defaults.noautomore = false;
 ss_unset_defaults.pagesize = 0;
+
+// Set 2 (lowbandwidth)
+var master_lb_status = document.getElementById('lowbandwidth').checked;
+
+var lb_unset_defaults = new Array();
+lb_unset_defaults.showtags  = false;
+lb_unset_defaults.showicons = false;
+lb_unset_defaults.paused    = false;
+lb_unset_defaults.noslashboxes = false;
+lb_unset_defaults.noautomore   = false;
+lb_unset_defaults.pagesize = 0;
 
 // Master prefs
 var prefs = new Array();
 
 	if (master_ss_status === true) { prefs = addPref(ss_unset_defaults, prefs); }
+	if (master_lb_status === true) { prefs = addPref(lb_unset_defaults, prefs); }
 
 	for (var key in prefs) {
 		var control = document.getElementById(key);

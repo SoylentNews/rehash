@@ -56,6 +56,8 @@ __template__
                         <li>
                         <div style="text-align: center"><span style="font-size: x-small"><a href="[% gSkin.rootdir %]/my/journal">Journal</a> | <a href="[% gSkin.rootdir %]/subscribe.pl">Subscription</a>[% IF !user.is_subscriber %]&nbsp;<a href="/faq/subscriptions.shtml#ss100">(Why subscribe?)</a>[% END %] | <a href="[% gSkin.rootdir %]/my/preferences">Account</a></span></div>
                         </li>
+
+			[% IF user.mylinks; '<li>'; user.mylinks; '</li>'; END; %]
                 </ul>
                 </div>
 </div>

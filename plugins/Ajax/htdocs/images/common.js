@@ -556,6 +556,10 @@ firehose_set_options = function(name, value, context) {
 	if(name==='color' && !value ) {
 		return;
 	}
+	if (!logged_in && name == "color") {
+		show_login_box();
+		return;
+	}
 
 	// Perl thinks true and false are strings, so never let booleans get to the server.
 	typeof(value)==='boolean' && (value = sign(value));
@@ -1868,6 +1872,7 @@ function getModalPrefs(section, title, tabbed, params){
 		}, params||{}),
 		function(){
 			$any('preference_title').html(title);
+			 $('#modal_box').addClass("tabbed");
 			show_modal_box().data('tabbed', tabbed);
 		}
 	);
