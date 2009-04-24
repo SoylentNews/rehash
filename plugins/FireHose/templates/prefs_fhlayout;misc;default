@@ -162,7 +162,7 @@ __template__
 
 		[%
                 default = user.firehose_pagesize || "large";
-                pagesizes = [ { 'small' => 'Small' }, { 'medium' => 'Medium' }, { 'large' => 'Large' } ];
+                pagesizes = [ { 'tiny' => 'Tiny' }, { 'small' => 'Small' }, { 'medium' => 'Medium' }, { 'large' => 'Large' } ];
                 IF user.is_admin || user.is_subscriber; pagesizes.push({ 'huge' => 'Huge' }); END;
                 IF user.is_admin; pagesizes.push({ 'single' => 'Single' }); END;
                 %]
@@ -208,6 +208,7 @@ ss_unset_defaults.showdates   = false;
 ss_unset_defaults.firehose_disable_picker_search = false;
 ss_unset_defaults.noslashboxes  = false;
 ss_unset_defaults.nosectionmenu = false;
+ss_unset_defaults.noautomore = false;
 ss_unset_defaults.pagesize = 0;
 
 // Master prefs
