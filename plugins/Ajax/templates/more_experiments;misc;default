@@ -11,45 +11,70 @@ en_US
 __name__
 more_experiments
 __template__
-[% percent=100; r=percent.rand; IF r < 101 %]
+[%	auto_chance	= 100;
+	auto_count	= 2;
+	hint_chance	= 10;
+
+	IF user.firehose_noautomore;
+		auto_ok	= 0;
+		hint_ok	= 0;
+	ELSE;
+		percent	= 100;
+		roll	= percent.rand();
+		auto_ok	= roll <= auto_chance && !user.state.smalldevice;
+		hint_ok	= roll <= hint_chance;
+	END;
+%]
+
+[% IF auto_ok || hint_ok %]
 <script type="text/javascript">
 (function(){
-var regexp=/^\s*(?:\d+|many)\s+more\s*$/i, auto_more_count=2;
+var regexp=/^\s*(?:\d+|many)\s+more\s*$/i;
 
-var auto_more = [% !user.firehose_noautomore %] && function auto_more(){
-	var $more_link = $('#more-experiment a');
-	$more_link.each(function(){
-		if ( Bounds.intersect(window, fhitems(':last')) ) {
-			$more_link.click();
-			!--auto_more_count && (auto_more=undefined);
-			// don't allow a call till the next paginate gets built and |more_possible|
-			$(document).unbind('scroll', call_auto_more);
+	[% IF auto_ok %]
+	var auto_more_count = [% auto_count %];
+
+	function auto_more(){
+		var $more_link = $('#more-experiment a');
+		$more_link.each(function(){
+			if ( Bounds.intersect(window, fhitems(':last')) ) {
+				$more_link.click();
+				!--auto_more_count && (auto_more=undefined);
+				// don't allow a call till the next paginate gets built and |more_possible|
+				$(document).unbind('scroll', call_auto_more);
+			}
+		});
+	};
+
+	function call_auto_more(){ auto_more && auto_more(); }
+	[% END %]
+
+
+	[% IF hint_ok %]
+	function hint_more( $more_link ){
+		if ( !auto_more ){
+			$more_link.
+				click(function(){
+					hint_more = undefined;
+				}).
+				after('<span id="more-hint" class="feature-hint"><em>NEW: Fetch stories in-line!</em></span>');
 		}
-	});
-};
-
-function hint_more( $more_link ){
-	if ( !auto_more ){
-		$more_link.
-			click(function(){
-				hint_more = undefined;
-			}).
-			after('<span id="more-hint" class="feature-hint"><em>NEW: Fetch stories in-line!</em></span>');
 	}
-}
+	[% END %]
 
-function call_auto_more(){ auto_more && auto_more(); }
 
 $('#more-experiment a').
 	live('more-possible', function( event ){
 		var $more_link=$(this);
 		if ( regexp.test($more_link.text()) ) {
-		[% IF r < 10 %]
+		[% hint_ok %]
 			hint_more && hint_more($more_link);
 		[% END %]
+		[% IF auto_ok %]
 			$(document).bind('scroll', call_auto_more);
 		} else {
 			$(document).unbind('scroll', call_auto_more);
+		[% END %]
 		}
 	});
 })();
