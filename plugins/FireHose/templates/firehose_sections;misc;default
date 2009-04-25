@@ -184,6 +184,7 @@ function highlight_menu_item( section_id ){
 		$('#links-sections .active').not(this).removeClass('active');
 		$( $('h4', this)[0] || this ).addClass('active');
 		$section_menu.metadata().active_id = section_id;
+		firehose_style_switch(section_id);
 	});
 }
 
@@ -240,10 +241,6 @@ $(document).
 			trigger('firehose-setting-setfhfilter', section.filter).
 			trigger('firehose-setting-view', section.viewname).
 			trigger('firehose-setting-color', section.color);
-		firehose_style_switch(section_id);
-	}).
-	bind('unsaved.firehose', function(){
-		firehose_style_switch('unsaved');
 	}).
 	bind('set-options.firehose', function( e, data ){
 		// Changing some option (possibly even the 'section' option)
