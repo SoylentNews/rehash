@@ -504,7 +504,7 @@ var firehose_set_options;
 (function(){
 var	qw		= Slash.Util.qw,
 	loading_msg	= '<h1 class="loading_msg">Loading New Items</h1>',
-	removes_all	= qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view'),
+	removes_all	= qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view startdate issue'),
 	start_over	= $.extend(qw.as_set('startdate'), removes_all),
 	uses_setfield	= qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
 	sets_param	= $.extend(qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),

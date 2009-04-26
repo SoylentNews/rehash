@@ -23,7 +23,7 @@ __template__
 [% count = count + 1; ids = ids _ message.id; IF count != messages.size; ids = ids _ ','; END; %]
 [% END %]
 
-<span style="font-size: x-small"><a href="[% constants.real_rootdir %]/messages.pl?op=list">[% messagecount %] More</a> | <a href="#" onClick="dynamic_blocks_delete_message('[% ids %]'); return false;">Delete All</a></span>
+<span style="font-size: x-small">[% IF messagecount %]<a href="[% constants.real_rootdir %]/messages.pl?op=list">[% messagecount %] More</a> | [% END %]<a href="#" onClick="dynamic_blocks_delete_message('[% ids %]'); return false;">Delete All</a></span>
 
 __seclev__
 500
