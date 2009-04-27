@@ -67,7 +67,7 @@ $('#more-experiment a').
 	live('more-possible', function( event ){
 		var $more_link=$(this);
 		if ( regexp.test($more_link.text()) ) {
-		[% hint_ok %]
+		[% IF hint_ok %]
 			hint_more && hint_more($more_link);
 		[% END %]
 		[% IF auto_ok %]
