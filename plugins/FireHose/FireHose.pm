@@ -2170,8 +2170,9 @@ sub ajaxFireHoseGetUpdates {
 		$mixed_abbrev_pop = $firehose->getMinPopularityForColorLevel(3);
 	}
 
-
+	my $item_number = 0;
 	foreach (@$items) {
+		$item_number++;
 		if ($opts->{mode} eq "mixed") {
 			$curmode = "full";
 			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
@@ -2213,9 +2214,11 @@ sub ajaxFireHoseGetUpdates {
 			}
 		} else {
 			# new
+
+			my $insert_loc = $item_number >= scalar @$items ? "bottom" : "top";
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
 			if ($_->{day}) {
-				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }) ];
+				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }), $insert_loc ];
 			} else {
 				$update_data->{new}++;
 				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
@@ -2230,7 +2233,7 @@ sub ajaxFireHoseGetUpdates {
 					options => $opts
 				};
 				slashProf("firehosedisp");
-				push @$updates, ["add", $_->{id}, $firehose->dispFireHose($item, $data) ];
+				push @$updates, ["add", $_->{id}, $firehose->dispFireHose($item, $data), $insert_loc ];
 				slashProf("","firehosedisp");
 			}
 			$added->{$_->{id}}++;
@@ -2265,7 +2268,7 @@ sub ajaxFireHoseGetUpdates {
 	} @$updates;
 
 	foreach (keys %ids) {
-		push @$updates, ["remove", $_, ""];
+		push @$updates, ["remove", $_, "",""];
 		$update_data->{removals}++;
 	}
 
