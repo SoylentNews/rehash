@@ -144,7 +144,7 @@ CREATE TABLE firehose_view (
 	link_icon ENUM ("no","yes") DEFAULT "no",
 	placeholder ENUM("no","yes") DEFAULT "no",
 	addable ENUM("no", "yes") DEFAULT "no",
-	removable ENUM("no","yes") DEFAULT "noa,
+	removable ENUM("no","yes") DEFAULT "noa",
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
