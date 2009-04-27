@@ -124,7 +124,7 @@ view = function( what, how ){
 		'speed' in how || (how.speed = 'normal');
 
 		$el=$any(what); el=$el[0];
-		if ( !el || $.TypeOf.not('element', el) || Bounds.empty($el) ) {
+		if ( !el || (_typeof(el) !== 'element') || Bounds.empty($el) ) {
 			start = false;	// ...because we have no destination.
 		} else if ( el_q.length && (!how.speed || !DOM_descendant(el_q[el_q.length-1], el)) ) {
 			stop = true;	// ...because the new request is synchronous, or else unrelated to current/pending.
