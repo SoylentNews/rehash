@@ -1147,7 +1147,8 @@ function firehose_handle_update() {
 			update		= {	op:		next[0],
 						fhid:		next[1],
 						id:		'firehose-' + next[1],
-						content:	next[2]
+						content:	next[2],
+						insert_at:	next[3]
 					};
 
 		if( update.op == "add" ) {
@@ -1161,7 +1162,7 @@ function firehose_handle_update() {
 			}
 			if ( !$other.length ) {
 				$other = $fhl;
-				if ( insert_new_at === 'bottom' ) {
+				if ( update.insert_new_at === 'bottom' ) {
 					insert_op = 'appendTo';
 				} else {
 					insert_op = 'prependTo';
