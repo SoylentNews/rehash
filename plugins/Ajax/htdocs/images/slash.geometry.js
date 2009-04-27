@@ -22,12 +22,12 @@ function Bounds(){
 (function(){
 
 function _unwrap( o, allow_lists ){
-	if ( $.TypeOf(o) === 'string' ) {
+	if ( _typeof(o) === 'string' ) {
 		var el = document.getElementById(o);
 		o = el ? el : $(o);
 	}
 
-	return allow_lists||!$.TypeOf(o, 'jquery') ? o : o[0];
+	return allow_lists || ((_typeof(o) !== 'jquery') ? o : o[0]);
 }
 
 var	_isSize		= $.TypeOf.makeTest(function( o, t ){
@@ -55,10 +55,7 @@ Size.prototype = {
 	__typeOf: function(){ return 'size'; },
 
 	assign: function( o ){
-		switch ( !!o && $.TypeOf(o=_unwrap(o), true) ) {
-			case 'size':
-				break;
-
+		switch ( !!o && _typeof(o=_unwrap(o)) ) {
 			case 'document':
 			case 'element':
 			case 'window':
@@ -96,7 +93,7 @@ Position.prototype = {
 
 	assign: function( o ){
 		if ( !_isPosition(o) ) {
-			switch ( !!o && $.TypeOf(o=_unwrap(o), true) ) {
+			switch ( !!o && _typeof(o=_unwrap(o)) ) {
 				case 'window':
 					o = $(o);
 					o = { top:o.scrollTop(), left:o.scrollLeft() };

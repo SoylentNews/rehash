@@ -106,7 +106,7 @@ function offset( el, b, how ){
 		});
 
 		if ( how.axis!='y' && !Bounds.contain(Bounds.x(b), e) ) {
-			var dx = e.left<=b.left || b.width<=e.width() ? e.left-b.left : e.right-b.right;
+			var dx = e.left<=b.left || b.width()<=e.width() ? e.left-b.left : e.right-b.right;
 			b.left+=dx; b.right+=dx;
 		}
 		if ( how.axis!='x' && !Bounds.contain(Bounds.y(b), e) ) {
@@ -2481,10 +2481,10 @@ $(function(){
 
 		// if keyo.form, only work on form elements; if not, then
 		// never work on form elements.
-		// "type" should handle all our cases here.
-		if (!keyo.form && e.target && e.target.type)
+		var is_input = e.target && $(e.target).is(':input');
+		if (!keyo.form && is_input)
 			return true;
-		if (keyo.form && (!e.target || !e.target.type))
+		if (keyo.form && !is_input)
 			return true;
 
 		var cur = firehose_get_cur();
