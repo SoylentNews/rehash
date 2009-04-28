@@ -1179,8 +1179,8 @@ function firehose_handle_update() {
 			if ( !add_behind_scenes && Bounds.intersect(window, update.bounds) ) {
 
 				// times based on magnitude of the change
-				var t = [ { interval:300, duration:250 },
-					  { interval:200, duration:175 },
+				var t = [ { interval:200, duration:175 },
+					  { interval:180, duration:150 },
 					  { interval:150, duration:120 },
 					  { interval:100, duration:117 } ][
 					Math.min(3, Math.floor(firehose_updates_size/10))
