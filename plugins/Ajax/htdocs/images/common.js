@@ -1158,7 +1158,7 @@ function firehose_handle_update() {
 
 			if ( !$other.length ) {
 				$other = $any('firehose-'+firehose_after[update.fhid]).
-						prevAll('div[id^=firehose-]:not(.daybreak):first');
+						prevAll('div[id^=firehose-]:first');
 			}
 			if ( !$other.length ) {
 				$other = $fhl;
