@@ -17,6 +17,7 @@ __template__
                 <h4>
                         <a href="[% gSkin.rootdir %]/~[% user.nickname | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
                         [% PROCESS zoo_icons person = user.uid implied="" %]
+			<span class="prefs"><a href="#" onClick="getModalPrefs('messages', 'Messages', 1); return false">Prefs</a></span>
                 </h4>
         </div>
                 <div class="content" id="userbio_self-content">
