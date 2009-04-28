@@ -2215,7 +2215,7 @@ sub ajaxFireHoseGetUpdates {
 		} else {
 			# new
 
-			my $insert_loc = $item_number >= scalar @$items ? "bottom" : "top";
+			my $insert_loc = $item_number > (scalar @$items / 2) ? "bottom" : "top";
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
 			if ($_->{day}) {
 				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }), $insert_loc ];
