@@ -6123,7 +6123,6 @@ ALTER TABLE dynamic_user_blocks MODIFY COLUMN title varchar(64) NOT NULL default
 ALTER TABLE firehose_update_log  CHANGE id id int unsigned not null auto_increment;
 ALTER TABLE firehose_setting_log CHANGE id id int unsigned not null auto_increment;
 
-
 # for plugins/Achievements
 INSERT INTO ajax_ops VALUES (NULL, 'enable_maker_adless', 'Slash::Achievements', 'ajaxEnableMakerAdless', 'ajax_user_static', 'createuse');
 INSERT INTO vars (name, value, description) VALUES ('ach_maker_adlesstime', '259200', 'After a maker_mode user turns off ads, how long does the adless state persist, in seconds');
@@ -6137,6 +6136,7 @@ UPDATE vars SET value = 'T_2_5_0_249' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Achievements
 ALTER TABLE user_achievements ADD INDEX aid_exponent (aid, exponent);
 
+# for plugins/Ajax
 UPDATE ajax_ops SET reskey_name='ajax_user_static' WHERE op='enable_maker_adless';
 
 ALTER TABLE topics ADD usesprite ENUM("no","yes") DEFAULT "no" NOT NULL;
@@ -6172,14 +6172,13 @@ UPDATE vars SET value = 'T_2_5_0_252' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Firehose
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_smallscreen_mode', 'Slash::FireHose', 'ajaxToggleSmallScreen', 'ajax_user_static', 'createuse');
 
-# For plugins/FireHose
+# for plugins/FireHose
 UPDATE ajax_ops SET reskey_name="ajax_base" WHERE op in ("firehose_get_updates");
 UPDATE ajax_ops SET reskey_name="ajax_base_static" WHERE op in("firehose_set_options");
-
 ALTER TABLE firehose_view ADD COLUMN shortcut ENUM ("yes","no") DEFAULT "no", ADD COLUMN short_url VARCHAR(32) DEFAULT "" NOT NULL, ADD COLUMN link_icon ENUM ("no","yes") DEFAULT "no", ADD COLUMN placeholder ENUM("no","yes") DEFAULT "no", ADD COLUMN addable ENUM("no", "yes") DEFAULT "no", ADD COLUMN removable ENUM("no","yes") DEFAULT "no";
-
 UPDATE firehose_view SET shortcut="yes", short_url = viewname WHERE viewname IN ("stories","popular","recent","daddypants");
 UPDATE firehose_view SET short_url = "~{nickname}", link_icon = "yes" WHERE viewname="userhomepage";
 
 # 2009-04-23
 UPDATE vars SET value = 'T_2_5_0_253' WHERE name = 'cvs_tag_currentcode';
+
