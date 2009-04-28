@@ -1171,12 +1171,15 @@ function firehose_handle_update() {
 			}
 			update.fhitem = $(update.content)[ insert_op ]($other);
 
-			update.bounds = new Bounds($other);
-			update.bounds.top = update.bounds[test_edge];
-			update.bounds.bottom = update.bounds.top + update.fhitem.height();
+			if (!add_behind_scenes && !update.fhitem.is(":last-child")) {
+				update.bounds = new Bounds($other);
+				update.bounds.top = update.bounds[test_edge];
+				update.bounds.bottom = update.bounds.top + update.fhitem.height();
+			}
 
 			wait_interval = 0;
-			if ( !add_behind_scenes && Bounds.intersect(window, update.bounds) ) {
+			var ok;
+			if ( !add_behind_scenes && !update.fhitem.is(":last-child") && Bounds.intersect(window, update.bounds) ) {
 
 				// times based on magnitude of the change
 				var t = [ { interval:200, duration:175 },
@@ -1233,18 +1236,16 @@ function firehose_handle_update() {
 				update.fhitem.remove();
 			}
 		}
-
-		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_after_update();
 		if (add_behind_scenes) {
 			//firehose_busy_done();
 			$fhl.find('h1.loading_msg').remove();
-			$('div.paginate').show();
-			$fhl.fadeIn('slow', function(){
+			$fhl.show('fast', function(){
 				$(this).css({ opacity:'' });
 			});
+			$('div.paginate').show();
 			anchor_fh_pag_menu(true);
 		}
 		firehose_get_next_updates();
