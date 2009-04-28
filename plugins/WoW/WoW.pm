@@ -269,28 +269,31 @@ sub getCharData {
 sub retrieveArmoryData {
 	my($self, $charid) = @_;
 	my $charmd_hr = $self->getCharMetadata($charid);
-	return undef if !$charmd_hr;
+	return if !$charmd_hr;
 	my $armory = Slash::Custom::WoWArmory->new();
 	$armory->search_character({
 		realm =>	$charmd_hr->{realmname},
 		character =>	$charmd_hr->{charname},
 		country =>	$charmd_hr->{countryname},
 	});
+	my $raw_content = $armory->{resultat}->content;
 	my $armory_hr = $armory->character();
 	my $char_update = { -last_retrieval_attempt => 'NOW()' };
 	$char_update->{-last_retrieval_success} = 'NOW()' if $armory_hr && $armory_hr->{name};
 	$self->setChar($charid, $char_update);
-	return $armory_hr;
+	return($armory_hr, $raw_content);
 }
 
 sub logArmoryData {
-	my($self, $charid, $armory_hr) = @_;
+	my($self, $charid, $armory_hr, $raw_content) = @_;
 	return 0 if !$charid || $charid !~ /^\d+$/;
+	$raw_content ||= undef;
 	my $frozenarmory = Storable::nfreeze($armory_hr);
 	$self->sqlInsert('wow_char_armorylog', {
 		charid =>	$charid,
 		-ts =>		'NOW()',
-		armorydata =>	$frozenarmory
+		armorydata =>	$frozenarmory,
+		raw_content =>	$raw_content,
 	});
 	$self->updateArmoryRecord($charid, $armory_hr);
 }

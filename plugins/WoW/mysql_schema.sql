@@ -37,6 +37,7 @@ CREATE TABLE wow_char_armorylog (
 	charid		int unsigned not null,
 	ts		datetime not null,
 	armorydata	mediumblob not null,
+	raw_content	mediumblob default null,
 	PRIMARY KEY (arlid),
 	INDEX ts (ts),
 	INDEX charid_ts (charid, ts)

@@ -6182,3 +6182,6 @@ UPDATE firehose_view SET short_url = "~{nickname}", link_icon = "yes" WHERE view
 # 2009-04-23
 UPDATE vars SET value = 'T_2_5_0_253' WHERE name = 'cvs_tag_currentcode';
 
+# for plugins/WoW
+ALTER TABLE wow_char_armorylog ADD COLUMN raw_content mediumblob default null;
+

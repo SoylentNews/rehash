@@ -31,11 +31,11 @@ $task{$me}{code} = sub {
 		for my $id (@$charids_ar) {
 			sleep_until_next_retrieval();
 			last if $task_exit_flag;
-			my $armory_hr = $wowdb->retrieveArmoryData($id);
+			my($armory_hr, $raw_content) = $wowdb->retrieveArmoryData($id);
 			sleep 30 if !$armory_hr; # if the armory is down, slow down requests
 			$last_retrieval = Time::HiRes::time;
 			if ($armory_hr) {
-				$wowdb->logArmoryData($id, $armory_hr);
+				$wowdb->logArmoryData($id, $armory_hr, $raw_content);
 				++$num_retrievals;
 			}
 			main::slashdLog("char $id retrieval " . ($armory_hr ? 'succeeded' : 'failed'));
