@@ -1,10 +1,10 @@
 // Temporary routines to replace broken uses of TypeOf
 
-var  _typeof, _typeof_list, _typeof_node;
+var  _typeof, _typeof_list, _typeof_node, _typeof_fn;
 
 (function(){
 var U=void(0), N=null, W=window, A=Array, J=window['jQuery']||function(){},
-	OBJECT_OTYPE,
+	OBJECT_OTYPE, FUNCTION_OTYPE,
 	TYPEOF={}, TYPEOF_NODE=[];
 
 _debug_typeof = function(){
@@ -14,6 +14,10 @@ _debug_typeof = function(){
 function otype( o ){
 	return o!==U && o!==N && Object.prototype.toString.call(o) || U;
 }
+
+_typeof_fn = function( o ){
+	return otype(o)===FUNCTION_OTYPE && 'function' || U;
+};
 
 _typeof_node = function( o ){
 	try {
@@ -38,6 +42,7 @@ _typeof = function( o ){
 	return TYPEOF[ typeof(o) ]
 		|| o===N && 'null'
 		|| TYPEOF[ otype(o) ]
+		|| _typeof_fn(o.__typeOf) && o.__typeOf()
 		|| _typeof_node(o)
 		|| o===W && 'window'
 		|| _typeof_list(o)
@@ -56,6 +61,7 @@ _not_typeof = function( t, o ){
 
 (function(){
 	OBJECT_OTYPE=otype({});
+	FUNCTION_OTYPE=otype(function(){});
 
 /*
 	TYPEOF_TEST = {
