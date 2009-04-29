@@ -21,6 +21,7 @@ css=htdocs/tag-ui.css
 #####
 htdoc=htdocs/ajax.pl
 htdoc=htdocs/preferences.pl
+htdoc=htdocs/images/temp.typeof.js
 htdoc=htdocs/images/javascript.js
 htdoc=htdocs/images/core.js
 htdoc=htdocs/images/admin.js
