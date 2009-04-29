@@ -27,7 +27,7 @@ function _unwrap( o, allow_lists ){
 		o = el ? el : $(o);
 	}
 
-	return allow_lists || ((_typeof(o) !== 'jquery') ? o : o[0]);
+	return allow_lists||!_typeof.list(o) ? o : o[0];
 }
 
 var	_isSize		= $.TypeOf.makeTest(function( o, t ){
@@ -181,7 +181,7 @@ Bounds.equal = function( a, b ){
 
 function _each_op( a, b ){
 	var	result	= new Bounds(a=_unwrap(a, true)),
-		A	= arguments.length==1 && $.TypeOf(a, 'jquery') ? a : arguments;
+		A	= arguments.length==1 && _typeof.list(a) ? a : arguments;
 	for ( var i=1; i<A.length; ++i ){
 		result[this](A[i]);
 	}

@@ -213,7 +213,7 @@ function handleEnter(ev, func, arg) {
 
 function fhitems( o ){
 	var fn = fhitems.fn.init.apply($.extend(function(){ return $(fn.root)[fn.op](fn.filter); }, fhitems.fn), arguments);
-	return $.TypeOf(this)==='fhitems' ? fn : fn();
+	return this.__typeOf===fhitems.fn.__typeOf ? fn : fn();
 }
 (function(){
 var	sx = { root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
@@ -222,7 +222,7 @@ $(function(){ $root = $(sx.root); });
 fhitems.fn = fhitems.prototype = {
 	__typeOf: function(){ return 'fhitems'; },
 	init: function( o ){
-		if ( arguments.length===1 && T(o)==='fhitems' ) {
+		if ( arguments.length===1 && _typeof(o)==='fhitems' ) {
 			return $.extend(this, o); // "copy-constructor"
 		}
 		o = normalize_options.apply(this, arguments);
@@ -258,16 +258,16 @@ var	fhitemsArgTypes = {
 		'function':	'fn',
 		'boolean':	'scope',
 		'element':	'root',
-		'jquery':	'root',
+		'jquery':	'list',
 		'undefined':	'root',
 		'null':		'root'
 	},
-	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings'),
-	T = $.TypeOf,
-	optType = T.makeTest(function( o ){
-		var t=T(o, true);
-		return t==='string' ? o==='*' && 'scope' || o in $.fn && 'op' || 'sx' : fhitemsArgTypes[t];
-	});
+	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings');
+
+function optType( o ){
+	var t = _typeof(o);
+	return t==='string' ? o==='*' && 'scope' || o in $.fn && 'op' || 'sx' : fhitemsArgTypes[t];
+}
 
 function normalize_options(){
 	var o={ op_sx:'' }, i, v, k;
@@ -281,7 +281,7 @@ function normalize_options(){
 
 	if ( o.op==='next' || o.op==='prev' ) {
 		o.op+='All'; o.op_sx=':first';
-	} else if ( !o.op || T.not('string', o.op) ) {
+	} else if ( !o.op || _typeof(o.op)!=='string' ) {
 		o.op = 'root' in o && 'closest' || o.fn && 'filter' || 'children';
 	}
 
