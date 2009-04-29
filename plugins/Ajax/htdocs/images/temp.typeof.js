@@ -1,78 +1,86 @@
 // Temporary routines to replace broken uses of TypeOf
 
-var  _typeof, _typeof_list, _typeof_node, _typeof_fn;
-
+var  _typeof;
 (function(){
-var U=void(0), N=null, W=window, A=Array, J=window['jQuery']||function(){},
-	OBJECT_OTYPE, FUNCTION_OTYPE,
-	TYPEOF={}, TYPEOF_NODE=[];
+var U=void(0), N=null, W=window,
+	OBJECT, FUNCTION,
+	TYPEOF={}, TYPEOF_NODE=[], TYPEOF_LIST={};
 
-_debug_typeof = function(){
-	return TYPEOF;
-};
+function otype( o, compare ){
+	var ot;
+	return o!==U
+		&& o!==N
+		&& (ot=Object.prototype.toString.call(o))
+		&& (!compare || compare===ot)
+		&& ot
 
-function otype( o ){
-	return o!==U && o!==N && Object.prototype.toString.call(o) || U;
+		|| U;
 }
 
-_typeof_fn = function( o ){
-	return otype(o)===FUNCTION_OTYPE && 'function' || U;
-};
+function typeof_fn( o ){
+	return otype(o, FUNCTION);
+}
 
-_typeof_node = function( o ){
+function typeof_node( o ){
 	try {
-		return o && o.nodeName && TYPEOF_NODE[o.nodeType] || U;
+		if ( o && o.nodeName ) {
+			return TYPEOF_NODE[o.nodeType];
+		}
 	} catch ( e ) {
 	}
-};
+}
 
-_typeof_list = function( o ){
+function qualify_element( o ){
+	if ( typeof_node(o)==='element' ) {
+		return o.nodeName.toLowerCase();
+	}
+}
+
+function qualify_node( o ){
+	var t;
+	return qualify_element(o)
+		|| (t=typeof_node(o))!=='document' && o.nodeName
+		|| t;
+}
+
+function intrusive_typeof( o ){
+	// UNSAFE!! |o| must be defined and non-null
+	return typeof_fn(o.__typeOf) && o.__typeOf();
+}
+
+function typeof_list( o ){
 	var len;
 	try {
-		return typeof(o)==='string' && 'string'
-			|| o instanceof A && 'array'
-			|| o instanceof J && 'jquery'
-			|| o && !isNaN(len=o.length) && (!len || len-1 in o) && 'list'
-			|| U;
+		if ( o && !isNaN(len=o.length) && (!len || len-1 in o) ) {
+			return 'list';
+		}
 	} catch ( e ) {
 	}
-};
+}
 
 _typeof = function( o ){
 	return TYPEOF[ typeof(o) ]
 		|| o===N && 'null'
 		|| TYPEOF[ otype(o) ]
-		|| _typeof_fn(o.__typeOf) && o.__typeOf()
-		|| _typeof_node(o)
+		|| intrusive_typeof(o)
+		|| typeof_node(o)
 		|| o===W && 'window'
-		|| _typeof_list(o)
+		|| typeof_list(o)
 		|| 'object';
 };
+_typeof.fn		= typeof_fn;
+_typeof.element	= qualify_element;
+_typeof.node	= qualify_node;
+_typeof.list	= function( o ){ return TYPEOF_LIST[ _typeof(o) ]; };
 
-/*
-var TYPEOF_TEST;
-_not_typeof = function( t, o ){
-	if ( t in TYPEOF_TEST && TYPEOF_TEST[t](o) ) {
-		return;
-	}
-	return _typeof(o);
-};
-*/
+_typeof.debug	= function(){ return TYPEOF; };
+
 
 (function(){
-	OBJECT_OTYPE=otype({});
-	FUNCTION_OTYPE=otype(function(){});
+	OBJECT		= otype({});
+	FUNCTION	= otype(function(){});
 
-/*
-	TYPEOF_TEST = {
-		element:	function( o ){ return _typeof_node(o)==='element'; },
-		list:		_typeof_list,
-		node:		_typeof_node,
-		jquery:		function( o ){ return _typeof_list(o)==='jquery'; }
-	};
-*/
-
-	var ELEMENT_NODE=1, DOCUMENT_NODE=9, BROKEN=[ 'object', OBJECT_OTYPE ];
+	var ELEMENT_NODE=1, DOCUMENT_NODE=9, BROKEN=[ 'object', OBJECT ];
 	for ( var i=0; i<=12; ++i ){
 		TYPEOF_NODE[i] = 'node';
 	}
@@ -80,18 +88,18 @@ _not_typeof = function( t, o ){
 	TYPEOF_NODE[DOCUMENT_NODE] = 'document';
 
 	var INIT = [
-		{ o:undefined },
-		{ o:false },
-		{ o:0 },
-		{ o:'' },
-		{ o:function(){} },
+		{ o:undefined,												list:false },
+		{ o:false,													list:false },
+		{ o:0,														list:false },
+		{ o:'',														list:true },
+		{ o:function(){},											list:false },
 		{ o:{} },
-		{ o:[],									want:'array' },
-		{ o:/./,			expect:'object',	want:'regexp' },
-		{ o:new Date(),		expect:'object',	want:'date' },
-		{ o:new Error(),	expect:'object',	want:'error' },
-		{ o:document,							want:'document' },
-		{ o:W,									want:'window' }
+		{ o:[],									want:'array',		list:true },
+		{ o:/./,			expect:'object',	want:'regexp',		list:false },
+		{ o:new Date(),		expect:'object',	want:'date',		list:false },
+		{ o:new Error(),	expect:'object',	want:'error',		list:false },
+		{ o:document,							want:'document',	list:false },
+		{ o:W,									want:'window',		list:false }
 	];
 
 	while ( INIT.length ){
@@ -101,9 +109,12 @@ _not_typeof = function( t, o ){
 			want			= entry.want||entry.expect||actual;
 
 		entry.expect && actual!==entry.expect&& BROKEN.push(actual);
-		actual!=='object' && (TYPEOF[ actual ] = want);
-		actual_otype!==OBJECT_OTYPE && (TYPEOF[ actual_otype ] = want);
+		actual!=='object'		&& (TYPEOF[ actual ] = want);
+		actual_otype!==OBJECT	&& (TYPEOF[ actual_otype ] = want);
+		entry.list!==U			&& (TYPEOF_LIST[want] = entry.list && want || U);
 	}
+	TYPEOF_LIST.list = 'list';
+
 	while ( BROKEN.length ){
 		delete TYPEOF[ BROKEN.pop() ];
 	}
