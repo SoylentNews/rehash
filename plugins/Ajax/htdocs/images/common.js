@@ -2613,8 +2613,10 @@ function anchor_fh_pag_menu(modified) {
 	if (modified) {
 		shorten_fh_pag_menu();
 		// Safari 3 hack.  hooray or something.
-		setTimeout('$("#fh-pag-div").hide()', 0);
-		setTimeout('$("#fh-pag-div").show()', 0);
+		if ($("#fh-pag-div:visible").length) {
+			setTimeout('$("#fh-pag-div").hide()', 0);
+			setTimeout('$("#fh-pag-div").show()', 0);
+		}
 	}
 }
 
