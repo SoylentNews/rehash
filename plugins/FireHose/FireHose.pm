@@ -1727,7 +1727,12 @@ use Data::Dumper; print STDERR scalar(gmtime) . " $$ gFHM returned non-hashref f
 
 	# Then convert the keys in the answer back to globjids.
 	for my $id (keys %$firehose_hr) {
-print STDERR scalar(gmtime) . " $$ gFHM returned non-hashref-hashref from '@ids' options: " . Dumper($options) if ref($firehose_hr->{$id}) ne 'HASH';
+if (ref($firehose_hr->{$id}) ne 'HASH') {
+my $opt_str = Dumper($options); $opt_str =~ s/\s+/ /g;
+my $fh_str = Dumper($firehose_hr); $fh_str =~ s/\s+/ /g;
+print STDERR scalar(gmtime) . " $$ gFHM returned non-hashref-hashref for '$id' from '@ids' options '$opt_str' fh '$fh_str'\n";
+next;
+}
 		$ret_hr->{ $firehose_hr->{$id}{globjid} } = $firehose_hr->{$id};
 	}
 	return $ret_hr;
