@@ -541,13 +541,15 @@ function set_fhfilter_from( expr ){
 }
 
 function add_to_fhfilter(text) {
-	if (firehose_settings.fhfilter == '') {
-		firehose_settings.fhfilter = text;
-	} else {
-		firehose_settings.fhfilter = firehose_settings.fhfilter + " " + text;
-	}
+	var seen = {};
+
+	var finaltext = $.map($.trim((firehose_settings.fhfilter||'') + ' ' + text).split(ws), function( term ){
+		if ( !(term in seen) ) { return seen[term]=term; }
+	}).join(' ')
+
+	firehose_settings.fhfilter = finaltext;
 	$('form[name=firehoseform] input[name=fhfilter], #searchquery').each(function(){
-		this.value = firehose_settings.fhfilter;
+		this.value = finaltext;
 	});
 }
 
@@ -738,7 +740,7 @@ function firehose_click_tag( event ) {
 		command = $target.text();
 		if ( !event.shiftKey && search_eligible($target) ) {
 			// Even anonymous readers may click tags to refine the current search/filter.
-			slash_refine_search(command);
+			addfhfilter(command);
 			return false;
 		}
 	} else if ( ($menu = $target.closest('.tmenu')).length ) {
