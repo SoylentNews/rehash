@@ -1,0 +1,27 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+preview_slashboxes
+__template__
+
+<!-- ######################################################################################### -->
+
+[%
+dynamic_blocks_reader = Slash.getObject("Slash::DynamicBlocks");
+slashbox = dynamic_blocks_reader.getDynamicBlock(preview_bid);
+slashbox.block;
+%]
+
+<!-- ######################################################################################### -->
+
+__seclev__
+500
+__version__
+$Id$

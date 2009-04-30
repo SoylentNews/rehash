@@ -129,14 +129,21 @@ sub displaySlashboxes {
                         # Don't add this Slashbox at all if the site has it toggled off
 
 		} else {
-			$boxcache->{$bid} ||= portalsidebox(
-				$boxBank->{$bid}{title},
-				$reader->getBlock($bid, 'block'),
-				$boxBank->{$bid}{bid},
-				$boxBank->{$bid}{url},
-				$getblocks
-			);
-			$return .= $boxcache->{$bid};
+			my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
+			my $block = '';
+			$block = $dynamic_blocks_reader->displayBlock($bid) if $dynamic_blocks_reader;
+			if ($block) {
+				$return .= $block;
+			} else {
+				$boxcache->{$bid} ||= portalsidebox(
+					$boxBank->{$bid}{title},
+					$reader->getBlock($bid, 'block'),
+					$boxBank->{$bid}{bid},
+					$boxBank->{$bid}{url},
+					$getblocks
+				);
+				$return .= $boxcache->{$bid};
+			}
 		}
 	}
 

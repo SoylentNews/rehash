@@ -1,0 +1,387 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+new_slashboxes
+__template__
+
+<!-- ######################################################################################### -->
+
+<form id="modal_prefs" name="myform" method="post" action="" onsubmit="savePreviewBlock(); false">
+
+<div class="block_name"><input type="hidden" name="block_name" value="" class="block_name" id="blockname"></div>
+<input type="hidden" name="formname" value="slashboxes">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
+
+<div id="dialog" title="Add New Slashbox">
+
+	<div class="yui-g slashboxselector"> 
+		<div id="slashbox-first" class="yui-u first">
+<!--
+			<div class="slashbox-tabs">
+				<span class="slashboxes-public"><p>Public</p></span>
+			</div>
+-->
+        			<div id="slashbox-tabs">
+			                <ul>
+						<li><span class="slashboxes-public"><a href="#fragment-1"><span>Public</span></a></span></li>
+						<li><span class="slashboxes-public"><a href="#fragment-2"><span>[% user.nickname %]</span></a></span></li>
+						<li><span class="slashboxes-public"><a href="#fragment-3"><span>Friends</span></a></span></li>
+			                </ul>
+					<input type="input" name="slashbox-filter" id="slashbox-filter" size="30" value="" />              
+			                <div id="fragment-1">
+						<select id="slashboxes-available-public" name="pselect" size=10 class="select">
+						[% FOREACH block = pblocks_order %]
+							[% IF block.title != 'More' && block.title != 'Slashdot Login' && block.name != 'emailsponsor' && block.name != 'vendor_intel' && block.name != 'apple_more' && block.name != 'developers_more' && block.name != 'games_more' && block.title != 'more' && block.name != 'rand' %]
+							<option value="[% block.name %]">[% block.title || block.name %]</option>
+							[% END %]
+				                [% END %]
+						</select>
+			                </div>  
+			                <div id="fragment-2">
+						<select id="slashboxes-available-user" name="uselect" size=10 class="select">
+						[% FOREACH block = ublocks_order %]
+							[% IF block.title != 'Messages' %]
+							<option value="[% block.name %]">[% block.title || block.name %]</option>
+							[% END %]
+				                [% END %]
+                                                </select>
+			                </div>
+			                <div id="fragment-3">
+						<select id="slashboxes-available-friend" name="fselect" size=10 class="select">
+						[% FOREACH block = fblocks_order %]
+							[% IF block.title != 'More' %]
+							<option value="[% block.name %]">[% block.title || block.name %]</option>
+							[% END %]
+				                [% END %]
+                                                </select>
+			                </div>
+				</div>
+				<div class="actions">
+				</div>
+				<div class="closedialog">
+					<a href="#" onclick="cancelPreviewBlock(); return false;"><span class="closebox">x</span></a>
+					<input type="button" value="Save" onclick="savePreviewBlock()">
+					<input type="button" value="Cancel" onclick="cancelPreviewBlock(); return false;">
+				</div>
+		</div>
+	</div>
+</div>
+</form>
+
+<script type="text/javascript">
+//var	create_button	= $('#newslashbox-create').html();
+var	create_button	= "<div class='title collapsed' id='newslashbox-title'> <h4><a onclick='getModalPrefs(\"new_slashboxes\",\"Slashboxes\", 0 ); return false;' href='#' id='newslashbox-edit'>Create New Slashbox<span class='addbox'>+</span></a><span class='closebox'>x</span></h4> </div> <div class='content' id='newslashbox-content'> </div>";
+$('#newslashbox-create').html();
+var	pfilter	= new filterlist(document.myform.pselect,0);
+var	ufilter	= new filterlist(document.myform.uselect,1);
+var	ffilter	= new filterlist(document.myform.fselect,2);
+$('newslashbox-content').hide();
+function filterlist(selectobj,tabnum) {
+	this.selectobj = selectobj;
+	this.tabnum = tabnum;
+	this.match_text = true;
+	this.match_value = false;
+
+	this.init = function() {
+		this.backup = new Array();
+		if (this.selectobj && this.selectobj.options) {
+			for (var i=0; i < this.selectobj.options.length; ++i ) {
+				this.backup[i] = new Option();
+				this.backup[i].text = selectobj.options[i].text;
+				if (selectobj.options[i].value) {
+					this.backup[i].value = selectobj.options[i].value;
+				} else {
+					this.backup[i].value = selectobj.options[i].text;
+				}
+			}
+		}
+	}
+
+	this.set = function(pattern) {
+		var j=0, k=0, regexp, e;
+		this.selectobj.options.length = 0;
+		try {
+			regexp = new RegExp(pattern, 'i' );
+		} catch(e) {
+			if (typeof this.hook == 'function') {
+				this.hook();
+			}
+			return;
+		}
+
+		for (j=0; j < this.backup.length; ++j ) {
+			var option = this.backup[j];
+			if ((this.match_text && regexp.test(option.text)) || (this.match_value && regexp.test(option.value))) {
+				this.selectobj.options[k++] = new Option(option.text, option.value, false);
+			}
+		}
+		if( this.selectobj.length == 1 && this.tabnum == $('#slashbox-tabs').tabs('option', 'selected') ) {
+			this.selectobj.options[0].selected = true;
+			populatePreview( this.selectobj.options[0].value, this.selectobj.options[0].text );
+		}
+
+		if (typeof this.hook == 'function') {
+			this.hook();
+		}
+	}
+
+	this.init();
+}
+
+function formatSlashboxSelectorUI() {
+        var	$block          = $('#newslashbox-create'),
+		$slashbox	= $('#slashbox-first'),
+		block_offset    = $block.offset(),
+		$dialog         = get_modal_parts('#modal_box')
+		$edit_field     = $dialog.find('input#slashbox-filter'),
+		new_classname   = 'newslashbox-edit' + ($block.is('.active') ? ' active' : '')
+		$style		= $('#slashboxes').find('div.block:first');
+
+	$dialog.anchor_width	= $block.width() / 3 * 2;
+	$dialog.anchor_height	= $block.height();
+	$dialog.anchor_top	= block_offset.top;
+	$dialog.anchor_left	= block_offset.left;
+
+
+	$dialog.addClass(new_classname).
+		css({
+			position:	'absolute',
+			padding:	0,
+			margin:		0,
+			width:		$dialog.anchor_width,
+			height:		$dialog.anchor_height,
+			top:		$dialog.anchor_top + 'px',
+			left:		$dialog.anchor_left + 'px'
+		});
+
+	$any('modal_cover').
+		css({ opacity: 0 }).
+		show().
+		animate({ opacity: 0.75 }, 1000);
+
+	var dialog_elem = $dialog[0];
+	dialog_elem._custom_show_fn = function(){
+		var     $content        = $dialog.find('#modal_box_content').css('overflow', 'hidden'),
+			to_height       = 270,
+			to_width        = $dialog.anchor_width,
+			to_top		= $dialog.anchor_top + 'px',
+			to_left		= $dialog.anchor_left - $dialog.anchor_width + 'px';
+
+			$dialog.animate({
+				top:		to_top,
+				left:		to_left,
+				height:		to_height,
+				width:		to_width
+			}, function(){
+				$content.css('overflow', '');
+				$edit_field.focus();
+			});
+	};
+}
+
+function resizePreview( preview_text ) {
+	$('newslashbox-content').show();
+	var $slashbox_title = preview_text || "Semi-Random Box";
+	var $title = $("div#newslashbox-title");
+	$title.html( "<h4>" + $slashbox_title + "<a href='#' onclick='cancelPreviewBlock(); return false'><span class='closebox'>x</span></a></h4>" );
+	$title.removeClass('collapsed');
+	var	$dialog         = get_modal_parts('#modal_box'),
+		$edit_field     = $dialog.find('input#slashbox-filter'),
+		$block          = $('#newslashbox-create'),
+		block_offset    = $block.offset(),
+		$wrapper	= $('#slashbox-wrapper'),
+		wrapper_height	= $wrapper.height(),
+		$chooser	= $('#slashbox-first'),
+		chooser_height	= $chooser.height() + 40,
+		new_height	= 0,
+		new_top		= block_offset.top + 'px';
+	if( chooser_height >= wrapper_height ) {
+		new_height = chooser_height;
+	} else {
+		new_height = wrapper_height;
+	}
+	$dialog.animate({
+		top:		new_top,
+		height:		new_height
+	}, function(){
+		$edit_field.focus();
+	});
+	$('div#newslashbox-content').addClass('preview');
+}
+
+function populatePreview( preview_bid, preview_text ) {
+        var     $dialog         = get_modal_parts('#modal_box'),
+		params		= {};
+	params['op']		= 'getModalPrefs';
+	params['reskey']	= reskey_static;
+	params['section']	= 'preview_slashboxes';
+	params['tabbed']	= 0;
+	params['preview_bid']	= preview_bid;
+	ajax_update(params, 'newslashbox-content', { onComplete: resizePreview( preview_text ) });
+}
+
+function randPreviewBlock( $select ) {
+	var	$length		= $select.find('option').length,
+		randbox		= Math.floor( Math.random() * $length ),
+		randopt		= $select.find('option')[randbox],
+		randbid		= randopt.value,
+		randtitle	= randopt.text;
+	populatePreview( randbid, randtitle );
+}
+
+function savePreviewBlock() {
+	var $avail;
+	var new_prefix = 'showbox';
+	if( $('#slashbox-tabs').tabs('option', 'selected') == 0 ) {
+		$avail = $('select#slashboxes-available-public');
+	}
+	if( $('#slashbox-tabs').tabs('option', 'selected') == 1 ) {
+		$avail = $('select#slashboxes-available-user');
+		new_prefix = 'dynamic';
+	}
+	if( $('#slashbox-tabs').tabs('option', 'selected') == 2 ) {
+		$avail = $('select#slashboxes-available-friend');
+		new_prefix = 'dynamic';
+	}
+	var is_selected = false;
+	$avail.find('option').each( function() {
+		if( $(this).attr('selected') ) {
+			is_selected = true;
+		}
+	});
+
+	if( $avail.attr('length') == 1 || is_selected == true ) {
+		var	blocks = "";
+		$('#slashboxes').find('.block').each(function(){
+			var blockdiv = $( this ).find('.title').attr('id');
+			blockdiv = blockdiv.replace(/-title/i,'');
+			if( blockdiv != "newslashbox" && blockdiv != "userbio_self" ) {
+				var old_prefix = 'showbox';
+				$('select#slashboxes-available-user').find('option').each( function(){
+					if( $(this).val() == blockdiv ) {
+						old_prefix = 'dynamic';
+					}
+				});
+				$('select#slashboxes-available-friend').find('option').each( function(){
+					if( $(this).val() == blockdiv ) {
+						old_prefix = 'dynamic';
+					}
+				});
+				blocks = blocks + "&" + old_prefix + "_" + blockdiv + "=on";
+			}
+		});
+		var params = {};
+		params['op']		= 'saveModalPrefs';
+		params['reskey']	= reskey_static;
+		params['data']		= 'formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + $avail.val() + '=on';
+		params['blocks']	= blocks;
+		ajax_update(params);
+		var $block = $('#newslashbox-create');
+		$block.find('div.title').attr('id', $avail.val() + '-title');
+		$block.find('div.content').attr('id', $avail.val() + '-content');
+		$block.attr("id", $avail.val() );
+		var new_content = "<div class='block' id='newslashbox-create'>" + create_button + "</div>";
+		$('#slashboxes').find('div.block:last').after( new_content );
+		$('newslashbox-content').hide();
+		$("input#slashbox-filter").val( "" );
+		pfilter.set("");
+		ufilter.set("");
+		ffilter.set("");
+		randPreviewBlock( $avail );
+	}
+}
+
+function cancelPreviewBlock() {
+	$('#newslashbox-create').html( create_button );
+	$('div#newslashbox-content').removeClass('preview');
+	$('newslashbox-content').hide();
+	hide_modal_box();
+}
+
+function updatePreview( $avail ) {
+	var	preview_bid	= "",
+		preview_title	= "";
+	if( $avail.val() ) {
+		preview_bid = $avail.val();
+		$avail.find('option').each( function() {
+			if( $(this).val() == $avail.val() ) {
+				preview_title = $.trim( $(this).text() );
+			}
+		});
+		populatePreview( preview_bid, preview_title );
+	}
+}
+
+(function() {
+	$('form#modal_prefs').submit(function(){return false;})
+
+	$(document).one('hide.modal', function(){
+		cancelPreviewBlock();
+	});
+
+	$(document).keydown(function(event){
+		if (event.keyCode == 27) {
+			cancelPreviewBlock();
+		}
+	});
+
+	$('#slashbox-tabs').tabs();
+	$('#slashbox-tabs').bind('tabsselect', function(event, ui) {
+		var fval = $("input#slashbox-filter").val();
+		pfilter.set(fval);
+		ufilter.set(fval);
+		ffilter.set(fval);
+	});
+
+	$("#slashboxes-available-public").change(function() {
+		var	$avail = $("#slashboxes-available-public");
+		updatePreview( $avail );
+	});
+	$("#slashboxes-available-user").change(function() {
+		var	$avail = $("#slashboxes-available-user");
+		updatePreview( $avail );
+	});
+	$("#slashboxes-available-friend").change(function() {
+		var	$avail = $("#slashboxes-available-friend");
+		updatePreview( $avail );
+	});
+
+	formatSlashboxSelectorUI();
+	randPreviewBlock( $('select#slashboxes-available-public') );
+
+//	JTB: next two lines for wolf's filter (not working for some reason)
+//	var $options	= $('select option');
+//	var old_filter = '.';
+	$("input#slashbox-filter").keyup(function () {
+		pfilter.set(this.value);
+		ufilter.set(this.value);
+		ffilter.set(this.value);
+//	JTB: next nine lines for wolf's filter (not working for some reason)
+//		var	regexp, new_filter=$input.val()||'.';
+//		if ( new_filter !== old_filter ) {
+//			regexp = new RegExp(new_filter, 'i');
+//			$options.each(function(){
+//				var $opt=$(this);
+//				$opt.css('display', regexp.test($opt.text()) ? '' : 'none');
+//			});
+//			old_filter = new_filter;
+//		}
+	});
+
+})();
+</script>
+
+<!-- ######################################################################################### -->
+
+__seclev__
+500
+__version__
+$Id$
