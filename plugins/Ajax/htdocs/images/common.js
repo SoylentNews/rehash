@@ -255,12 +255,12 @@ fhitems.fn = fhitems.prototype = {
 }
 
 var	fhitemsArgTypes = {
-		'function':	'fn',
-		'boolean':	'scope',
-		'element':	'root',
-		'jquery':	'list',
-		'undefined':	'root',
-		'null':		'root'
+		'function':     'fn',
+		'boolean':      'scope',
+		'element':      'root',
+		'list':         'root',
+		'undefined':    'root',
+		'null':         'root'
 	},
 	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings');
 
@@ -1847,7 +1847,7 @@ function custom_modal_box( action_name ){
 		dialog_elem	= $dialog[0],
 		fn		= dialog_elem[custom_fn_name] || function(){ $all_parts[action_name](); };
 	fn($all_parts);
-	delete dialog_elem[custom_fn_name];
+	dialog_elem[custom_fn_name] = 'undefined';
 	return $all_parts;
 }
 function show_modal_box(){
