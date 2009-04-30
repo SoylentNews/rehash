@@ -12,16 +12,13 @@ prefs_admin
 __template__
 [% IF user.is_admin %]
 
-                [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
-                &nbsp;|&nbsp;
-                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
-                &nbsp;|&nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Admin</span>
-                </div>
-                [% END %]
+		[% IF tabbed == 1 %]
+		<div class="pref">
+		<span class="preftab"><a href="" onclick="getModalPrefs('user', 'User', 1); return false;">User</a></span>
+		<span class="preftab"><a href="" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a></span>
+		<span class="preftab active">Admin</span>
+		</div>
+		[% END %]
 
                 <br>
 

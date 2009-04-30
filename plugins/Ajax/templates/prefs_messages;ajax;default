@@ -20,18 +20,13 @@ __template__
 		   modeweb  = Slash.MSG_MODE_WEB;
 		%]
 
-                [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
-                &nbsp;|&nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Messages</span>
-                [% IF user.is_admin %]
-                &nbsp;|&nbsp;
-                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('admin', 'Admin', 1); return false;">Admin</a>
-                [% END %]
-                </div>
-                [% END %]
+		[% IF tabbed == 1 %]
+		<div class="pref">
+		<span class="preftab"><a href="" onclick="getModalPrefs('user', 'User', 1); return false;">User</a></span>
+		<span class="preftab active">Messages</span>
+		[% IF user.is_admin %]<span class="preftab"><a href="" onclick="getModalPrefs('admin', 'Admin', 1); return false;">Messages</a></span>[% END %]
+		</div>
+		[% END %]
 
                 &nbsp;<br>
 
