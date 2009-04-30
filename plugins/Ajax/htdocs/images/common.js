@@ -1476,19 +1476,35 @@ function firehose_toggle_picker_search() {
 	);
 }
 
-function firehose_toggle_smallscreen_mode() {
-	var params = {};
-	params.op = 'firehose_toggle_smallscreen_mode';
-	params.reskey = reskey_static;
-	ajax_update(
-		params,
-		'',
-		{
-			onComplete: function() {
-				document.location=document.URL;
-			}
+function firehose_toggle_smallscreen_mode(force_ss) {
+	if (force_ss) {
+		var uri = document.location.search;
+		var base = document.location.href.replace(/\?.*/, '');
+		uri = uri.replace(/\&?ss=1/, "");
+
+		// This was the only param
+		if (uri === '?') {
+			uri = '';
 		}
-	);
+
+		// Prevent malformed URI
+		uri = uri.replace(/^\?\&/, '?');
+
+		document.location = (base + uri);
+	} else {
+		var params = {};
+		params.op = 'firehose_toggle_smallscreen_mode';
+		params.reskey = reskey_static;
+		ajax_update(
+			params,
+			'',
+			{
+				onComplete: function() {
+					document.location=document.URL;
+				}
+			}
+		);
+	}
 }
 
 function firehose_busy() {
