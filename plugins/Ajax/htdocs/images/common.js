@@ -1847,7 +1847,7 @@ function custom_modal_box( action_name ){
 		dialog_elem	= $dialog[0],
 		fn		= dialog_elem[custom_fn_name] || function(){ $all_parts[action_name](); };
 	fn($all_parts);
-	dialog_elem[custom_fn_name] = 'undefined';
+	dialog_elem[custom_fn_name] = undefined;
 	return $all_parts;
 }
 function show_modal_box(){
