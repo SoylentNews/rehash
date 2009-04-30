@@ -1547,10 +1547,25 @@ sub prepareUser {
 	}
 
 	if ($r) {
+		my %uri = $r->args;
+		if ($uri{ss} == 1) {
+			$user->{state}{explicit_smalldevice} = 1;
+			$user->{state}{smalldevice} = 1;
+		}
+
 		my $ua = $r->headers_in->{'user-agent'};
 		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
-		if (!$user->{is_anon} && $ua && $smalldev_re && !$user->{disable_ua_check} && ($ua =~ $smalldev_re)) {
+		if ($ua && $smalldev_re && !$user->{disable_ua_check} && ($ua =~ $smalldev_re)) {
 			$user->{state}{smalldevice} = 1;
+		}
+
+		# Any options we're forcing onto SS users.
+		if ($user->{state}{smalldevice}) {
+			$user->{firehose_pause} = 1;
+
+			if ($user->{is_anon}) {
+				$user->{firehose_noautomore} = 1;
+			}
 		}
 	}
 
