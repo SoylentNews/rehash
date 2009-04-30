@@ -53,7 +53,7 @@ END;
 			   END %]
 		[% END %]
 		<li class="[% IF is_active %]active[% ELSIF hide %]hide[% END %][% IF is_default %] default[% END %]" id="fhsection-[% fh_section.fsid %]">
-			<a id="fhsectiontitle-[% fh_section.fsid %]" class="data-title" href="[% link_loc %]"[% IF !user.is_anon %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
+			<a id="fhsectiontitle-[% fh_section.fsid %]" class="data-title" href="[% link_loc %]"[% IF !user.is_anon && !skip_edit %] onclick="return false;"[% END %]>[% fh_section.section_name %]</a>
 			[% IF !skip_edit %] <a href="[% PROCESS nojslink %]" onclick="[% IF user.is_anon %]show_login_box(); [% END %]return false;" class="links-sections-edit">[e]</a>[% END %]
 		<script type="data">[% fh.js_anon_dump(fh_section.data); %]</script>
 		</li>
@@ -66,7 +66,7 @@ var firehose_delete_section, update_section;
 $(function(){
 var $section_menu = $any('firehose-sections');
 
-[% IF !user.is_anon %]
+[% IF !user.is_anon && !skip_edit %]
 
 firehose_delete_section = function( id, undo ) {
 	ajax_update({
