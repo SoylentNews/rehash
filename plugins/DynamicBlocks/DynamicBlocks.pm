@@ -699,7 +699,7 @@ sub getBlocksEligibleForUpdate {
 	my ($self, $list, $options) = @_;
 
         my $constants = getCurrentStatic();
-        return 0 if (!$constants->{dynamic_blocks} || !$options->{min_time} || !$options->{is_admin});
+        return 0 if (!$constants->{dynamic_blocks} || !$options->{min_time});
 
         my $slashdb = getCurrentDB();
         my $min_time = $options->{min_time};

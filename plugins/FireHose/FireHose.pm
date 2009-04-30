@@ -2336,7 +2336,7 @@ sub ajaxFireHoseGetUpdates {
 	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
         my $dynamic_blocks;
         if ($dynamic_blocks_reader) {
-                $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time, is_admin => $user->{is_admin} });
+                $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time });
         }
 
 	my $color_js = "\$('.currcolor').removeClass('red orange yellow green blue violet indigo black').addClass('$opts->{color}');";
