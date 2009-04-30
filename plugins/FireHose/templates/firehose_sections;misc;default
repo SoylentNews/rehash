@@ -165,7 +165,7 @@ update_section = function( which, data, make_default ){
 	if ( arguments.length > 1 ) {
 		highlight_menu_item(id);
 		make_default && id && ($menu.metadata().default_id=id);
-		old_sig || save_menu();
+		oldsig || save_menu();
 	}
 };
 
