@@ -591,8 +591,12 @@ firehose_set_options = function(name, value, context) {
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
 		$('div.paginate').hide();
-		// Fade the list; replace its contents with a single loading message; re-show it.
-		$fhl.fadeOut(function(){ $fhl.html(loading_msg).show(); });
+		$('div.paginate').addClass('paginatehidden');
+		// Fade the list; and empty its contents
+		$fhl.fadeOut().html('');
+		$('#itemsreturned').html(loading_msg);
+	} else {
+		$('#itemsreturned').html('');
 	}
 
 
@@ -1242,11 +1246,10 @@ function firehose_handle_update() {
 		firehose_after_update();
 		if (add_behind_scenes) {
 			//firehose_busy_done();
-			$fhl.find('h4.loading_msg').remove();
+			$('#itemsreturned .loading_msg').html('');
+			$fhl.show().css({ opacity:'' });
 			$('div.paginate').show();
-			$fhl.fadeIn('slow', function(){
-				$(this).css({ opacity:'' });
-			});
+			$('div.paginate').removeClass('paginatehidden');
 			anchor_fh_pag_menu(true);
 		}
 		firehose_get_next_updates();
@@ -2629,8 +2632,10 @@ function anchor_fh_pag_menu(modified) {
 	if (modified) {
 		shorten_fh_pag_menu();
 		// Safari 3 hack.  hooray or something.
-		setTimeout('$("#fh-pag-div").hide()', 0);
-		setTimeout('$("#fh-pag-div").show()', 0);
+		if (!$("div.paginatehidden").length) {
+			setTimeout('$("#fh-pag-div").hide()', 0);
+			setTimeout('$("#fh-pag-div").show()', 0);
+		}
 	}
 }
 
