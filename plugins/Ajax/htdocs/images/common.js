@@ -503,7 +503,7 @@ function setfhfilter(text) {
 var firehose_set_options;
 (function(){
 var	qw		= Slash.Util.qw,
-	loading_msg	= '<h4 class="loading_msg">Loading New Items</h4>',
+	loading_msg	= '<span class="loading_msg">Loading New Items...</span>',
 	removes_all	= qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view startdate issue'),
 	start_over	= $.extend(qw.as_set('startdate'), removes_all),
 	uses_setfield	= qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
@@ -1143,7 +1143,7 @@ function firehose_handle_update() {
 	var	saved_selection		= new $.TextSelection(gFocusedText),
 		$menu				= $('div.ac_results:visible'),
 		$fhl				= $any('firehoselist'),
-		add_behind_scenes	= $fhl.is(':has(h4.loading_msg)'),
+		add_behind_scenes	= $('#itemsreturned .loading_msg').length,
 		wait_interval		= add_behind_scenes ? 0 : 800;
 
 	// if (add_behind_scenes) { firehose_busy(); }
@@ -1177,12 +1177,15 @@ function firehose_handle_update() {
 			}
 			update.fhitem = $(update.content)[ insert_op ]($other);
 
-			update.bounds = new Bounds($other);
-			update.bounds.top = update.bounds[test_edge];
-			update.bounds.bottom = update.bounds.top + update.fhitem.height();
+			if (!add_behind_scenes && !update.fhitem.is(":last-child")) {
+				update.bounds = new Bounds($other);
+				update.bounds.top = update.bounds[test_edge];
+				update.bounds.bottom = update.bounds.top + update.fhitem.height();
+			}
 
 			wait_interval = 0;
-			if ( !add_behind_scenes && Bounds.intersect(window, update.bounds) ) {
+			var ok;
+			if ( !add_behind_scenes && !update.fhitem.is(":last-child") && Bounds.intersect(window, update.bounds) ) {
 
 				// times based on magnitude of the change
 				var t = [ { interval:200, duration:175 },
@@ -1239,8 +1242,6 @@ function firehose_handle_update() {
 				update.fhitem.remove();
 			}
 		}
-
-		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_after_update();
@@ -1568,7 +1569,7 @@ function firehose_get_updates_handler(transport) {
 		firehose_removed_first = 0;
 		processed = processed + 1;
 		var $fh = $any('firehoselist');
-		$fh.find('h4.loading_msg').show().length && $fh.hide();
+		$('#itemsreturned .loading_msg').length && $fh.hide();
 		firehose_handle_update();
 	}
 }
