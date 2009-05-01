@@ -29,19 +29,29 @@ $task{$me}{code} = sub {
         $block_names = $slashdb->sqlSelectColArrayref('name', 'dynamic_user_blocks', 'type_id = ' . $admin_public_blocks_def->{type_id});
         my $block = '';
         foreach my $name (@$block_names) {
-                $block = $admin_db->showPerformanceBox({ contents_only => 1})    if ($name eq 'performancebox');
-                $block = $admin_db->showAuthorActivityBox({ contents_only => 1}) if ($name eq 'authoractivity');
+		if ($name eq 'performancebox') {
+                        $block = $admin_db->showPerformanceBox({ contents_only => 1});
+                        $title = 'Performance';
+                }
+
+                if ($name eq 'authoractivity') {
+                        $block = $admin_db->showAuthorActivityBox({ contents_only => 1});
+                        $title = 'Author Activity';
+                }
 
                 if ($name eq 'admintodo') {
                         ($block) = $admin_db->showAdminTodo() =~ m{(<b><a href.+<hr>)};
+                        $title = 'Admin Todo';
                 }
 
                 if (($name eq 'recenttagnames') && (my $tagsdb = getObject('Slash::Tags'))) {
                         $block = $tagsdb->showRecentTagnamesBox({ contents_only => 1 });
+                        $title = 'Recent Tags';
                 }
 
                 if (($name eq 'firehoseusage') && (my $fh_db = getObject('Slash::FireHose'))) {
                         $block = $fh_db->ajaxFireHoseUsage();
+                        $title = 'Firehose Usage';
                 }
 
                 my $old_block_content =
@@ -52,7 +62,7 @@ $task{$me}{code} = sub {
                                 " and name = '$name'"
                         );
 
-                $dynamic_blocks_db->setBlock( { block => $block, name => $name } ) if ($old_block_content ne $block);
+                $dynamic_blocks_db->setBlock( { block => $block, name => $name, title => $title } ) if ($old_block_content ne $block);
         }
 
 	# private admin
@@ -72,7 +82,7 @@ $task{$me}{code} = sub {
                                 " and uid = $uid"
                         );
 
-                $dynamic_blocks_db->setBlock( { block => $block, name => $name } ) if ($old_block_content ne $block);
+                $dynamic_blocks_db->setBlock( { block => $block, name => $name, title => 'Story Admin' } ) if ($old_block_content ne $block);
         }
 
         return;
