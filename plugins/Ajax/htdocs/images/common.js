@@ -724,17 +724,26 @@ search_eligible = function( tag_el ){
 };
 })();
 
+function user_intent( intent, data ){
+	intent && $(document).trigger('user-intent-'+intent, data);
+}
+
+$(function(){
+	$(document).
+		bind('user-intent-interest', function( e, item ){
+			item && firehose_set_cur($(item));
+		}).
+		bind('user-intent-search', function( e ){
+			view(document);
+		});
+});
+
 function firehose_click_tag( event ) {
 	var	$target	= $(event.target),
 		$fhitem	= $('#firehoselist').length ? fhitems($target) : $target.closest('div.article'),
 		leaving	= !!$target.closest('a[href]:not([href=#],[onclick])').length,
-		command, $menu;
-
-	if ( !leaving ) {
-		// _any_ click can trigger, but click-specific ad will win
-		setTimeout(function(){ inlineAdFirehose(); }, 0);
-		$fhitem.length && firehose_set_cur($fhitem);
-	}
+		intent	= !leaving && 'interest',
+		command, $menu, click_handled = false;
 
 	$related_trigger = $target;
 
@@ -743,11 +752,13 @@ function firehose_click_tag( event ) {
 	} else if ( $target.is('a.down') ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
-		command = $target.text();
+		var tag = $target.text();
 		if ( !event.shiftKey && search_eligible($target) ) {
 			// Even anonymous readers may click tags to refine the current search/filter.
-			addfhfilter(command);
-			return false;
+			addfhfilter(tag);
+			leaving = intent = 'search';
+		} else {
+			command = tag;
 		}
 	} else if ( ($menu = $target.closest('.tmenu')).length ) {
 		var op = $target.text();
@@ -757,14 +768,10 @@ function firehose_click_tag( event ) {
 		var tag = $tag.text();
 		command = normalize_tag_menu_command(tag, op);
 	} else {
-		$related_trigger = $().filter();
+		$related_trigger = $([]);
 	}
 
-	if ( command ) {
-		// No!  You no hurt Dr. Jones!  You log-in first!
-		if ( ! check_logged_in() ) {
-			return false;
-		}
+	if ( command && (click_handled=true) && check_logged_in() ) {
 
 		// Make sure the user sees some feedback...
 		// the menu is hover css, you did the command, so the menu should go away
@@ -794,10 +801,17 @@ function firehose_click_tag( event ) {
 				this.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
 		}
-		return false;
 	}
 
-	return true;
+	if ( leaving ) {
+		user_intent(intent);
+	} else {
+		user_intent(intent, $fhitem[0]);
+		// _any_ click can trigger, but click-specific ad will win
+		setTimeout(function(){ inlineAdFirehose(); }, 0);
+	}
+
+	return !click_handled;
 }
 
 
