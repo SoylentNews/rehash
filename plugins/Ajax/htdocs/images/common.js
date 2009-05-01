@@ -751,7 +751,7 @@ function firehose_click_tag( event ) {
 		command = 'nod';
 	} else if ( $target.is('a.down') ) {
 		command = 'nix';
-	} else if ( $target.is('.sodify') ) {
+	} else if ( $target.is('.sodify,.skin,.topic a') ) {
 		// mostly already handled by its own click-handler, but...
 		intent = 'search';
 	} else if ( $target.is('.tag') ) {
