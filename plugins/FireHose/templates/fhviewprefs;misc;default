@@ -124,10 +124,7 @@ __template__
 				$edit_field.focus().keyup();
 			});
 
-		$any('modal_cover').
-			css({ opacity: 0 }).
-			show().
-			animate({ opacity: 0.75 }, 3000);
+		$any('modal_cover').css('opacity', 0.75);
 	};
 
 	dialog_elem._custom_hide_fn = function(){
