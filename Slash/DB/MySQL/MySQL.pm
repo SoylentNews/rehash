@@ -1562,6 +1562,7 @@ sub getUserCrossSiteAuthenticate {
 	my $gSkin = getCurrentSkin();
 
 	my $tstamp = $params->{tstamp} || 0;
+	$tstamp =~ s/\.\d+$//;
 	$tstamp = 0 if $tstamp !~ /^\d+$/;
 
 	errorLog("xsite: wrong host"), return unless $site->{host} eq $gSkin->{hostname};
