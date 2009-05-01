@@ -732,9 +732,6 @@ $(function(){
 	$(document).
 		bind('user-intent-interest', function( e, item ){
 			item && firehose_set_cur($(item));
-		}).
-		bind('user-intent-search', function( e ){
-			view(document);
 		});
 });
 
@@ -751,7 +748,7 @@ function firehose_click_tag( event ) {
 		command = 'nod';
 	} else if ( $target.is('a.down') ) {
 		command = 'nix';
-	} else if ( $target.is('.sodify,.skin,.topic a') ) {
+	} else if ( $target.is('.sodify,.skin,.topic *') ) {
 		// mostly already handled by its own click-handler, but...
 		intent = 'search';
 	} else if ( $target.is('.tag') ) {
