@@ -22,5 +22,5 @@ CREATE TABLE dynamic_user_blocks (
   last_update datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY (bid),
   UNIQUE KEY name (name),
-  UNIQUE KEY block (name, uid)
+  UNIQUE KEY idx_uid_name (uid, name)
 ) ENGINE=InnoDB;

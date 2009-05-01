@@ -6187,3 +6187,8 @@ ALTER TABLE wow_char_armorylog ADD COLUMN raw_content mediumblob default null;
 
 # 2009-04-30
 UPDATE vars SET value = 'T_2_5_0_254' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/DynamicBlocks
+ALTER TABLE dynamic_user_blocks ADD UNIQUE INDEX idx_uid_name (uid, name);
+ALTER TABLE dynamic_user_blocks DROP INDEX block;
+
