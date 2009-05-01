@@ -751,6 +751,9 @@ function firehose_click_tag( event ) {
 		command = 'nod';
 	} else if ( $target.is('a.down') ) {
 		command = 'nix';
+	} else if ( $target.is('.sodify') ) {
+		// mostly already handled by its own click-handler, but...
+		intent = 'search';
 	} else if ( $target.is('.tag') ) {
 		var tag = $target.text();
 		if ( !event.shiftKey && search_eligible($target) ) {
