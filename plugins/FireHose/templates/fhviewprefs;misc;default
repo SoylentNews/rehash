@@ -124,7 +124,9 @@ __template__
 				$edit_field.focus().keyup();
 			});
 
-		$any('modal_cover').css('opacity', 0.75);
+		$any('modal_cover').
+			css('opacity', 0.75).
+			show();
 	};
 
 	dialog_elem._custom_hide_fn = function(){
