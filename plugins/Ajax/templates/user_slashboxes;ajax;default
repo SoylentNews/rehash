@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+user_slashboxes
+__template__
+
+[% FOREACH block = blocks_order %]
+	[% IF block.title != 'Messages' %]
+		<option value="[% block.name %]">[% block.title || block.name %]</option>
+	[% END %]
+[% END %]
+
+__seclev__
+500
+__version__
+$Id$

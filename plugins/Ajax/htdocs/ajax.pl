@@ -715,93 +715,94 @@ sub getModalPrefs {
 		);
 
 	} elsif ($form->{'section'} eq 'new_slashboxes') {
-		my $section_descref = { };
-		my $box_order;
-		my $sections_description = $slashdb->getSectionBlocks();
-		my $slashboxes_hr = { };
-		my $slashboxes_textlist = $user->{slashboxes};
-		my $userspace = $user->{mylinks} || "";
-
-#		my $author_hr = $slashdb->getDescriptions('authors_recent');
-#		my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
-
-		my $pblocks;
-		my $ublocks;
-		my $fblocks;
-		my $pblocks_order;
-		my $ublocks_order;
-		my $fblocks_order;
-		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
-		if ($dynamic_blocks) {
-			$pblocks = $dynamic_blocks->getPortalBlocks( 'name' );
-			if ($pblocks) {
-				my $pblocks_unsort;
-				foreach my $pb (keys %$pblocks) {
-					my $ppair = {
-						name	=> $pblocks->{$pb}->{'name'},
-						title	=> $pblocks->{$pb}->{'title'}
-					};
-					push @$pblocks_unsort, $ppair;
-				}
-				@$pblocks_order = sort{$a->{title} cmp $b->{title} } @$pblocks_unsort;
-			}
-			$ublocks = $dynamic_blocks->getUserBlocks( 'name', $user->{uid} );
-			if ($ublocks) {
-				my $ublocks_unsort;
-				foreach my $ub (keys %$ublocks) {
-					my $upair = {
-						name	=> $ublocks->{$ub}->{'name'},
-						title	=> $ublocks->{$ub}->{'title'}
-					};
-					push @$ublocks_unsort, $upair;
-				}
-				@$ublocks_order = sort{$a->{title} cmp $b->{title} } @$ublocks_unsort;
-			}
-			$fblocks = $dynamic_blocks->getFriendBlocks( 'name', $user->{uid} );
-			if ($fblocks) {
-				my $fblocks_unsort;
-				foreach my $fb (keys %$fblocks) {
-					my $fpair = {
-						name	=> $fblocks->{$fb}->{'name'},
-						title	=> $fblocks->{$fb}->{'title'}
-					};
-					push @$fblocks_unsort, $fpair;
-				}
-				@$fblocks_order = sort{$a->{title} cmp $b->{title} } @$fblocks_unsort;
-			}
-		}
-
-#		if (!$slashboxes_textlist) {
-#			my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
-#			$slashboxes_textlist = join ",", @{$skinBoxes->{$constants->{mainpage_skid}}};
-#		}
-#
-#		for my $bid (map { /^'?([^']+)'?$/; $1 } split(/,/, $slashboxes_textlist)) {
-#			$slashboxes_hr->{$bid} = 1;
-#		}
-#
-#		for my $ary (sort { lc $a->[1] cmp lc $b->[1]} @$sections_description) {
-#			my($bid, $title, $boldflag) = @$ary;
-#			push @$box_order, $bid;
-#			$section_descref->{$bid}{checked} = $slashboxes_hr->{$bid} ? $constants->{markup_checked_attribute} : '';
-#			$title =~ s/<(.*?)>//g;
-#			$section_descref->{$bid}{title} = $title;
-#		}
 
 		return
 			slashDisplay('new_slashboxes', {
 				user			=> $user,
-#				box_order		=> $box_order,
-#				pblocks			=> $pblocks,
-#				ublocks			=> $ublocks,
-#				fblocks			=> $fblocks,
-				pblocks_order		=> $pblocks_order,
-				ublocks_order		=> $ublocks_order,
-				fblocks_order		=> $fblocks_order,
-#				dblocks_textlist	=> $dblocks_textlist,
-#				dblocks_descref		=> $dblocks_descref,
-#				section_descref		=> $section_descref,
-				userspace		=> $userspace,
+				tabbed			=> $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
+
+	} elsif ($form->{'section'} eq 'portal_slashboxes') {
+		my $blocks;
+		my $blocks_order;
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		if ($dynamic_blocks) {
+			$blocks = $dynamic_blocks->getPortalBlocks( 'name' );
+			if ($blocks) {
+				my $blocks_unsort;
+				foreach my $keyb (keys %$blocks) {
+					my $pair = {
+						name	=> $blocks->{$keyb}->{'name'},
+						title	=> $blocks->{$keyb}->{'title'}
+					};
+					push @$blocks_unsort, $pair;
+				}
+				@$blocks_order = sort{$a->{title} cmp $b->{title} } @$blocks_unsort;
+			}
+		}
+
+		return
+			slashDisplay('portal_slashboxes', {
+				user			=> $user,
+				blocks_order		=> $blocks_order,
+				tabbed			=> $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
+
+	} elsif ($form->{'section'} eq 'user_slashboxes') {
+		my $blocks;
+		my $blocks_order;
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		if ($dynamic_blocks) {
+			$blocks = $dynamic_blocks->getUserBlocks( 'name', $user->{uid} );
+			if ($blocks) {
+				my $blocks_unsort;
+				foreach my $keyb (keys %$blocks) {
+					my $pair = {
+						name	=> $blocks->{$keyb}->{'name'},
+						title	=> $blocks->{$keyb}->{'title'}
+					};
+					push @$blocks_unsort, $pair;
+				}
+				@$blocks_order = sort{$a->{title} cmp $b->{title} } @$blocks_unsort;
+			}
+		}
+
+		return
+			slashDisplay('portal_slashboxes', {
+				user			=> $user,
+				blocks_order		=> $blocks_order,
+				tabbed			=> $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
+
+	} elsif ($form->{'section'} eq 'friend_slashboxes') {
+		my $blocks;
+		my $blocks_order;
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		if ($dynamic_blocks) {
+			$blocks = $dynamic_blocks->getFriendBlocks( 'name', $user->{uid} );
+			if ($blocks) {
+				my $blocks_unsort;
+				foreach my $keyb (keys %$blocks) {
+					my $pair = {
+						name	=> $blocks->{$keyb}->{'name'},
+						title	=> $blocks->{$keyb}->{'title'}
+					};
+					push @$blocks_unsort, $pair;
+				}
+				@$blocks_order = sort{$a->{title} cmp $b->{title} } @$blocks_unsort;
+			}
+		}
+
+		return
+			slashDisplay('portal_slashboxes', {
+				user			=> $user,
+				blocks_order		=> $blocks_order,
 				tabbed			=> $form->{'tabbed'},
 			},
 			{ Return => 1 }

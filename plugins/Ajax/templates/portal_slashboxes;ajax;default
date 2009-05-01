@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+portal_slashboxes
+__template__
+
+[% FOREACH block = blocks_order %]
+	[% IF block.title != 'More' && block.title != 'Slashdot Login' && block.name != 'emailsponsor' && block.name != 'vendor_intel' && block.name != 'apple_more' && block.name != 'developers_more' && block.name != 'games_more' && block.title != 'more' && block.name != 'rand' %]
+		<option value="[% block.name %]">[% block.title || block.name %]</option>
+	[% END %]
+[% END %]
+
+__seclev__
+500
+__version__
+$Id$
