@@ -392,21 +392,42 @@ sub IndexHandler {
 			return DECLINED;
 		} else {
 			# user not logged in
-	
+
 			# consider using File::Basename::basename() here
 			# for more robustness, if it ever matters -- pudge
 			my($base) = split(/\./, $gSkin->{index_handler});
-			$base = "index_firehose" if $constants->{index_anon_index_firehose} && $r->header_in('User-Agent') !~ /MSIE [2-8]/;
+			my $new_filename = "$base.shtml";
 
-			$base = $constants->{index_handler_noanon}
-				if $constants->{index_noanon};
-			if ($gSkin->{skid} == $constants->{mainpage_skid}) {
-				$r->filename("$basedir/$base.shtml");
-				$r->uri("/$base.shtml");
-			} else {
-				$r->filename("$basedir/$gSkin->{name}/$base.shtml");
-				$r->uri("/$gSkin->{name}/$base.shtml");
+			# If index_anon_index_firehose is set, then anonymous users
+			# get to see the firehose if appropriate -- overriding
+			# the (non-users*) setting in the skin.
+			if ($constants->{index_anon_index_firehose}) {
+				my $ua = $r->header_in('User-Agent') || '';
+				my $ua_type =
+					  $ua =~ /MSIE [2-6]/ ? 'msie6'
+					: $ua =~ /MSIE 7/     ? 'msie7'
+					: $ua =~ /MSIE 8/     ? 'msie8'
+					: $ua =~ /iPhone/     ? 'iphone'
+					: $ua =~ /Firefox/    ? 'firefox'
+					: $ua =~ /Safari/     ? 'safari'
+					                      : 'other';
+				$new_filename = $constants->{"index_anon_for_$ua_type"} || 'index2.pl';
 			}
+
+			my $new_filename_abs       = "$basedir/";
+			my $new_uri                = '/';
+			if ($gSkin->{skid} == $constants->{mainpage_skid}
+				&& $new_filename =~ /\.shtml$/) {
+				# Only handle subdirs for .shtml;  there aren't .pl
+				# scripts in those subdirs.
+				$new_filename_abs .= "$gSkin->{name}/";
+				$new_uri          .= "$gSkin->{name}/";
+			}
+			$new_filename_abs         .= $new_filename;
+			$new_uri                  .= $new_filename;
+
+			$r->filename($new_filename_abs);
+			$r->uri($new_uri);
 			writeLog('shtml');
 			return OK;
 		}

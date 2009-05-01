@@ -2545,27 +2545,13 @@ sub errorLog {
 
 Places optional data in the accesslog.
 
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item DATA
-
-Strings that are concatenated together to be used in the SLASH_LOG_DATA field.
-
-=back
-
-=item Return value
-
-No value is returned.
-
-=back
-
 =cut
 
 sub writeLog {
+	# XXX this should be done with $user->{state} I believe...
+	# doing it with an apache header adds an unnecessary header to
+	# outgoing user requests, which is helpful for debugging but
+	# a waste of bandwidth -Jamie
 	return unless $ENV{GATEWAY_INTERFACE};
 	my @args = grep { defined $_ } @_;
 	my $dat = @args ? join("\t", @args) : '';
