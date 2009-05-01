@@ -31,16 +31,16 @@ function typeof_node( o ){
 }
 
 function qualify_element( o ){
-	if ( typeof_node(o)==='element' ) {
-		return o.nodeName.toLowerCase();
+	var t = typeof_node(o);
+	if ( t !== 'node' ) {
+		return t==='element' && o.nodeName.toLowerCase()
+			|| t;
 	}
 }
 
 function qualify_node( o ){
-	var t;
 	return qualify_element(o)
-		|| (t=typeof_node(o))!=='document' && o.nodeName
-		|| t;
+		|| typeof_node(o);
 }
 
 function intrusive_typeof( o ){
