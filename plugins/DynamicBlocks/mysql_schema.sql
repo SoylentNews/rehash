@@ -23,5 +23,6 @@ CREATE TABLE dynamic_user_blocks (
   PRIMARY KEY (bid),
   UNIQUE KEY name (name),
   UNIQUE KEY idx_uid_name (uid, name),
-  KEY idx_typeid (type_id)
+  KEY idx_typeid (type_id),
+  KEY idx_portalid (portal_id)
 ) ENGINE=InnoDB;

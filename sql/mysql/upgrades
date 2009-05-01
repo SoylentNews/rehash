@@ -6200,3 +6200,5 @@ INSERT INTO vars (name, value, description) VALUES ('index_anon_for_firefox', 'i
 INSERT INTO vars (name, value, description) VALUES ('index_anon_for_safari', 'index2.pl', 'Resolve / to this script for Safari users');
 INSERT INTO vars (name, value, description) VALUES ('index_anon_for_other', 'index2.pl', 'Resolve / to this script for all other users');
 
+# 2009-05-1
+ ALTER TABLE dynamic_user_blocks ADD INDEX idx_portalid (portal_id);
