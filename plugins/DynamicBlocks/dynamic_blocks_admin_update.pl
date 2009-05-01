@@ -28,6 +28,7 @@ $task{$me}{code} = sub {
         my $block_names = '';
         $block_names = $slashdb->sqlSelectColArrayref('name', 'dynamic_user_blocks', 'type_id = ' . $admin_public_blocks_def->{type_id});
         my $block = '';
+	my $title = '';
         foreach my $name (@$block_names) {
 		if ($name eq 'performancebox') {
                         $block = $admin_db->showPerformanceBox({ contents_only => 1});
