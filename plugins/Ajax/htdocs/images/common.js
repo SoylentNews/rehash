@@ -101,9 +101,11 @@ function DOM_descendant( ancestor, descendant ){
 function offset( el, b, how ){
 	var $el=$(el), e=new Bounds($el);
 	if ( !Bounds.empty(e) ) {
-		$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
-			e[edge] += scale*parseInt($el.css('margin-'+edge));
-		});
+		if ( _typeof($el[0]) !== 'document' ) {
+			$.each({ top:-1, left:-1, bottom:1, right:1 }, function(edge, scale){
+				e[edge] += scale*parseInt($el.css('margin-'+edge));
+			});
+		}
 
 		if ( how.axis!='y' && !Bounds.contain(Bounds.x(b), e) ) {
 			var dx = e.left<=b.left || b.width()<=e.width() ? e.left-b.left : e.right-b.right;
@@ -124,7 +126,7 @@ view = function( what, how ){
 		'speed' in how || (how.speed = 'normal');
 
 		$el=$any(what); el=$el[0];
-		if ( !el || (_typeof(el) !== 'element') || Bounds.empty($el) ) {
+		if ( !_typeof.element(el) || Bounds.empty($el) ) {
 			start = false;	// ...because we have no destination.
 		} else if ( el_q.length && (!how.speed || !DOM_descendant(el_q[el_q.length-1], el)) ) {
 			stop = true;	// ...because the new request is synchronous, or else unrelated to current/pending.
