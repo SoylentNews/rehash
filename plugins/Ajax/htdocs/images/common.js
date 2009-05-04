@@ -371,6 +371,26 @@ function reportError(request) {
 }
 
 //Firehose functions begin
+
+function toggle_fh_body_wrap_return( any, unused, /*optional:*/toggle_to, dont_next ) {
+
+	var	$fhitem		= fhitems(any),
+		fhid		= $fhitem.attr('id').substr(9),
+		$body		= $fhitem.children('[id^=fhbody-]'),
+		body_is_empty	= $body.is('.empty'),
+		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
+
+	if (firehose_settings.view == "stories" && toggle_from == "1") {
+	return true;
+	}
+
+	toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ); 
+	return false;
+}
+
+
+
+
 function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) {
 	setFirehoseAction();
 
