@@ -255,6 +255,10 @@ $(document).
 				$(document).
 					one('update.firehose', function( e, updated ){
 						$unsaved.find('a span').text(updated.local_time);
+						if ( updated.skin ) {
+							data.skin = updated.skin;
+							firehose_style_switch('unsaved');
+						}
 					}).
 					trigger('unsaved.firehose', data);
 			}
