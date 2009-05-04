@@ -4479,6 +4479,11 @@ sub linkFireHose {
 	} elsif ($item->{type} eq "comment") {
 		my $com = $self->getComment($item->{srcid});
 		$link_url = $gSkin->{rootdir} . "/comments.pl?sid=$com->{sid}&amp;cid=$com->{cid}";
+	} elsif ($item->{type} eq "submission") {
+		my $title = $item->{title};
+		$title =~ s/\s+/-/g;
+		$title =~ s/[^A-Za-z0-9\-]//g;
+		$link_url = $gSkin->{rootdir} . "/submission/$item->{srcid}/$title";
 	} else {
 		$link_url = $gSkin->{rootdir} . '/firehose.pl?op=view&amp;id=' . $item->{id};
 	}
