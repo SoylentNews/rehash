@@ -735,7 +735,7 @@ $(function(){
 		});
 });
 
-function firehose_click_tag( event ) {
+function page_click_handler( event ) {
 	var	$target	= $(event.target),
 		$fhitem	= $('#firehoselist').length ? fhitems($target) : $target.closest('div.article'),
 		leaving	= !!$target.closest('a[href]:not([href=#],[onclick])').length,
@@ -899,7 +899,7 @@ $(function(){
 
 $('#fhsearch').show();
 firehose_init_tag_ui();
-$any('firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
+$any('firehoselist').click(page_click_handler);	// if no #firehoselist, install click handler per article
 
 // .live() binds these handlers to all current _and_ future firehose items
 $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
@@ -993,7 +993,7 @@ function firehose_init_tag_ui( $new_entries ){
 		});
 
 	if ( ! $firehoselist.length ) {
-		$new_entries.click(firehose_click_tag);
+		$new_entries.click(page_click_handler);
 	}
 
 	var $widgets = $init_tag_widgets($new_entries.find('.tag-widget-stub'));

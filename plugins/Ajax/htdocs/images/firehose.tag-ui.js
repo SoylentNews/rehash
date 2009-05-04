@@ -6,7 +6,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util'));
 // public API
 Package({ named: 'Slash.Firehose.TagUI',
 	api: {
-		click_handler:	firehose_click_tag,
+		click_handler:	page_click_handler,
 		init_entries:	firehose_init_tag_ui,
 		toggle:		firehose_toggle_tag_ui,
 		toggle_to:	firehose_toggle_tag_ui_to,
@@ -73,7 +73,7 @@ function form_submit_tags( form, options ){
 		});
 }
 
-function firehose_click_tag( event ) {
+function page_click_handler( event ) {
 	var $target = $(event.target), command='', $menu;
 
 	$related_trigger = $target;
