@@ -35,14 +35,14 @@ __template__
                         <b>Karma: [% PROCESS karma useredit = user admin_flag = user.is_admin %]</b>
                         </li>
 
-                        [% IF user.points %]
+                        [% IF !user.is_admin && user.points %]
                                 <li>
                                 [%
                                         plural = '';
                                         IF user.points > 1; plural = 's'; END;
                                 %]
                                 [% IF expirydate %]
-					<b>[% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a> expire [% expirydate %].</b>
+					<b>[% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a> expire[% IF !plural; 's'; END %] [% expirydate %].</b>
                                 [% ELSE %]
 					<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a>.</b>
                                 [% END %]

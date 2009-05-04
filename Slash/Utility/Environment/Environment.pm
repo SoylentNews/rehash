@@ -1559,6 +1559,8 @@ sub prepareUser {
 			$user->{state}{smalldevice} = 1;
 		}
 
+		delete $user->{state}{smalldevice} if ((exists $uri{ss}) && ($uri{ss} == 0));
+
 		# Any options we're forcing onto SS users.
 		if ($user->{state}{smalldevice}) {
 			$user->{firehose_pause} = 1;

@@ -1498,21 +1498,34 @@ function firehose_toggle_picker_search() {
 	);
 }
 
-function firehose_toggle_smallscreen_mode(force_ss) {
+function firehose_toggle_smallscreen_mode(force_ss, is_anon) {
 	if (force_ss) {
 		var uri = document.location.search;
 		var base = document.location.href.replace(/\?.*/, '');
-		uri = uri.replace(/\&?ss=1/, "");
 
-		// This was the only param
-		if (uri === '?') {
-			uri = '';
+		if (is_anon == 1) {
+			if (uri.match("ss=1")) {
+				uri = uri.replace(/ss=1/, "ss=0");
+			} else {
+				if (uri.match(/\?/)) {
+					uri = uri + '&ss=0';
+				} else {
+					uri = '?ss=0';
+				}
+			}
+		} else {
+			uri = uri.replace(/\&?ss=1/, "");
+
+			// This was the only param
+			if (uri === '?') {
+				uri = '';
+			}
+
+			// Prevent malformed URI
+			uri = uri.replace(/^\?\&/, '?');
 		}
 
-		// Prevent malformed URI
-		uri = uri.replace(/^\?\&/, '?');
-
-		document.location = (base + uri);
+		 document.location = (base + uri);
 	} else {
 		var params = {};
 		params.op = 'firehose_toggle_smallscreen_mode';
