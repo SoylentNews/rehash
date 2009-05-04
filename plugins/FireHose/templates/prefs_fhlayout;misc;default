@@ -121,8 +121,8 @@ __template__
                         Enable filter controls.
                 </div>
 
-                [% pause_check = ''; IF user.firehose_pause || !user.firehose_pause.defined; pause_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="paused" name="paused"[% pause_check %]> Paused</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
+                [% pause_check = ''; IF !user.firehose_pause || !user.firehose_pause.defined; pause_check = constants.markup_checked_attribute; END; %]
+                <label><input type="checkbox" id="paused" name="paused"[% pause_check %]> Dynamic Homepage</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
                         Pause updates, don't auto-update view.
@@ -214,6 +214,7 @@ ss_unset_defaults.noslashboxes  = false;
 ss_unset_defaults.nosectionmenu = false;
 ss_unset_defaults.noautomore = false;
 ss_unset_defaults.pagesize = 0;
+ss_unset_defaults.paused = false;
 
 // Set 2 (lowbandwidth)
 var master_lb_status = document.getElementById('lowbandwidth').checked;

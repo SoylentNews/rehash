@@ -1498,21 +1498,34 @@ function firehose_toggle_picker_search() {
 	);
 }
 
-function firehose_toggle_smallscreen_mode(force_ss) {
+function firehose_toggle_smallscreen_mode(force_ss, is_anon) {
 	if (force_ss) {
 		var uri = document.location.search;
 		var base = document.location.href.replace(/\?.*/, '');
-		uri = uri.replace(/\&?ss=1/, "");
 
-		// This was the only param
-		if (uri === '?') {
-			uri = '';
+		if (is_anon == 1) {
+			if (uri.match("ss=1")) {
+				uri = uri.replace(/ss=1/, "ss=0");
+			} else {
+				if (uri.match(/\?/)) {
+					uri = uri + '&ss=0';
+				} else {
+					uri = '?ss=0';
+				}
+			}
+		} else {
+			uri = uri.replace(/\&?ss=1/, "");
+
+			// This was the only param
+			if (uri === '?') {
+				uri = '';
+			}
+
+			// Prevent malformed URI
+			uri = uri.replace(/^\?\&/, '?');
 		}
 
-		// Prevent malformed URI
-		uri = uri.replace(/^\?\&/, '?');
-
-		document.location = (base + uri);
+		 document.location = (base + uri);
 	} else {
 		var params = {};
 		params.op = 'firehose_toggle_smallscreen_mode';
@@ -1864,6 +1877,7 @@ function custom_modal_box( action_name ){
 		fn		= dialog_elem[custom_fn_name] || function(){ $all_parts[action_name](); };
 	fn($all_parts);
 	dialog_elem[custom_fn_name] = undefined;
+	$all_parts.filter('#modal_cover').click(hide_modal_box);
 	return $all_parts;
 }
 function show_modal_box(){
@@ -1874,12 +1888,14 @@ function show_modal_box(){
 }
 function hide_modal_box(){
 	// clients may have customized; restore defaults before next use
-	return custom_modal_box('hide').
+	custom_modal_box('hide').
 		hide().
 		attr('style', 'display: none;').
 		removeClass().
 		removeData('tabbed').
 		unbind();
+
+	return false; // ...so we can be used as a click handler.
 }
 
 function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
@@ -1892,28 +1908,46 @@ function check_logged_in(){ return logged_in || (show_login_box(), 0); }
 function has_hose() { return firehose_exists }
 
 
+
 function getModalPrefs(section, title, tabbed, params){
-	var $still_open = get_modal_parts('#modal_box:visible');
+	var	BUSY_FETCHING_MODAL	= 'modal-fetch',
+		$still_open			= get_modal_parts('#modal_box:visible'),
+		$bg;
+
 	$still_open.length && $still_open.data('tabbed')!=tabbed && hide_modal_box();
 
 	if ( !reskey_static ) {
 		return show_login_box();
 	}
 
+	Slash.busy(BUSY_FETCHING_MODAL, true);
+
+	// Dim the background to prevent further modal-triggering-clicks while we wait.
+	$bg = get_modal_parts('#modal_cover').css('opacity', 0.75).show();
+
 	// .load ensures we are fetching as HTML, and that <script> elements will be executed
 	$any('modal_box_content').load(
 		'/ajax.pl',
+
 		$.extend({
 			op:		'getModalPrefs',
 			section:	section,
 			reskey:		reskey_static,
 			tabbed:		tabbed
-		}, params||{}),
-		function(){
-			$any('preference_title').html(title);
-			 $('#modal_box').addClass("tabbed");
-			show_modal_box().data('tabbed', tabbed);
+		}, params||null),
+
+		function( response, status, transport ){
+			if ( status==='success' ) {
+				$any('preference_title').html(title);
+				var $modal = show_modal_box().data('tabbed', tabbed);
+				tabbed && $modal.addClass("tabbed");
+			} else {
+				// Can this happen?  Un-dim the background.  Report the error?
+				$bg.hide();
+			}
+			Slash.busy(BUSY_FETCHING_MODAL, false);
 		}
+
 	);
 }
 

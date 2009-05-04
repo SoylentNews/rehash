@@ -1695,7 +1695,7 @@ sub saveModalPrefs {
 				firehose_nocolors		=> ($params{showcolors} ? undef: 1),
 				firehose_nobylines		=> ($params{showbylines} ? undef: 1),
 				firehose_nodates		=> ($params{showdates} ? undef: 1),
-				firehose_pause			=> ($params{paused} ? 1: 0),
+				firehose_pause			=> ($params{paused} ? 0 : 1),
 				firehose_advanced		=> ($params{advanced} ? 1 : undef),
 				firehose_pagesize		=> ($params{pagesize} ? $params{pagesize} : "small"),
 				index_beta			=> ($params{index_beta} ? 1 : 0 ),
