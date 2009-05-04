@@ -239,12 +239,13 @@ fhitems.fn = fhitems.prototype = {
 		if ( 'root' in o ) {
 			this.root=o.root;
 		} else if ( relOps[o.op] ) {
-			this.root = sx.root+'>'+sx.items+sx.current; sxv[0]='';
+			this.root = sx.root+'>'+sx.items+sx.current;
 		} else if ( o.op!=='children' ) {
-			this.root = sxv.slice(0,3).join(''); sxv[0]=sxv[2]='';
+			this.root = sxv.slice(0,3).join(''); sxv[2] = '';
 		} else {
-			this.root=$root; sxv[0]='';
+			this.root = $root;
 		}
+		sxv[0] = '';
 		this.op = o.op;
 		this.filter = o.fn || sxv.join('') || undefined;
 		return this;
