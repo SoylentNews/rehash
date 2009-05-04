@@ -38,29 +38,14 @@ __template__
 					<input type="input" name="slashbox-filter" id="slashbox-filter" size="30" value="" />              
 			                <div id="fragment-1">
 						<select id="slashboxes-available-public" name="pselect" size=10 class="select">
-						[% FOREACH block = pblocks_order %]
-							[% IF block.title != 'More' && block.title != 'Slashdot Login' && block.name != 'emailsponsor' && block.name != 'vendor_intel' && block.name != 'apple_more' && block.name != 'developers_more' && block.name != 'games_more' && block.title != 'more' && block.name != 'rand' %]
-							<option value="[% block.name %]">[% block.title || block.name %]</option>
-							[% END %]
-				                [% END %]
 						</select>
 			                </div>  
 			                <div id="fragment-2">
 						<select id="slashboxes-available-user" name="uselect" size=10 class="select">
-						[% FOREACH block = ublocks_order %]
-							[% IF block.title != 'Messages' %]
-							<option value="[% block.name %]">[% block.title || block.name %]</option>
-							[% END %]
-				                [% END %]
                                                 </select>
 			                </div>
 			                <div id="fragment-3">
 						<select id="slashboxes-available-friend" name="fselect" size=10 class="select">
-						[% FOREACH block = fblocks_order %]
-							[% IF block.title != 'More' %]
-							<option value="[% block.name %]">[% block.title || block.name %]</option>
-							[% END %]
-				                [% END %]
                                                 </select>
 			                </div>
 				</div>
@@ -77,64 +62,10 @@ __template__
 </form>
 
 <script type="text/javascript">
-//var	create_button	= $('#newslashbox-create').html();
-var	create_button	= "<div class='title collapsed' id='newslashbox-title'> <h4><a onclick='getModalPrefs(\"new_slashboxes\",\"Slashboxes\", 0 ); return false;' href='#' id='newslashbox-edit'>Create New Slashbox<span class='addbox'>+</span></a><span class='closebox'>x</span></h4> </div> <div class='content' id='newslashbox-content'> </div>";
-$('#newslashbox-create').html();
-var	pfilter	= new filterlist(document.myform.pselect,0);
-var	ufilter	= new filterlist(document.myform.uselect,1);
-var	ffilter	= new filterlist(document.myform.fselect,2);
-$('newslashbox-content').hide();
-function filterlist(selectobj,tabnum) {
-	this.selectobj = selectobj;
-	this.tabnum = tabnum;
-	this.match_text = true;
-	this.match_value = false;
-
-	this.init = function() {
-		this.backup = new Array();
-		if (this.selectobj && this.selectobj.options) {
-			for (var i=0; i < this.selectobj.options.length; ++i ) {
-				this.backup[i] = new Option();
-				this.backup[i].text = selectobj.options[i].text;
-				if (selectobj.options[i].value) {
-					this.backup[i].value = selectobj.options[i].value;
-				} else {
-					this.backup[i].value = selectobj.options[i].text;
-				}
-			}
-		}
-	}
-
-	this.set = function(pattern) {
-		var j=0, k=0, regexp, e;
-		this.selectobj.options.length = 0;
-		try {
-			regexp = new RegExp(pattern, 'i' );
-		} catch(e) {
-			if (typeof this.hook == 'function') {
-				this.hook();
-			}
-			return;
-		}
-
-		for (j=0; j < this.backup.length; ++j ) {
-			var option = this.backup[j];
-			if ((this.match_text && regexp.test(option.text)) || (this.match_value && regexp.test(option.value))) {
-				this.selectobj.options[k++] = new Option(option.text, option.value, false);
-			}
-		}
-		if( this.selectobj.length == 1 && this.tabnum == $('#slashbox-tabs').tabs('option', 'selected') ) {
-			this.selectobj.options[0].selected = true;
-			populatePreview( this.selectobj.options[0].value, this.selectobj.options[0].text );
-		}
-
-		if (typeof this.hook == 'function') {
-			this.hook();
-		}
-	}
-
-	this.init();
-}
+var	create_button	= "<div class='title collapsed' id='newslashbox-title'><h4><a href='#' id='newslashbox-edit'>Add Slashbox<span class='addbox'>+</span></a></h4></div><div class='content' id='newslashbox-content'></div>";
+var	ploaded = false;
+var	uloaded = false;
+var	floaded = false;
 
 function formatSlashboxSelectorUI() {
         var	$block          = $('#newslashbox-create'),
@@ -225,38 +156,109 @@ function populatePreview( preview_bid, preview_text ) {
 	params['section']	= 'preview_slashboxes';
 	params['tabbed']	= 0;
 	params['preview_bid']	= preview_bid;
-	ajax_update(params, 'newslashbox-content', { onComplete: resizePreview( preview_text ) });
+	ajax_update(params, 'newslashbox-content', { onComplete: function() { resizePreview( preview_text ) } });
+}
+
+function getPortalBoxes() {
+        var     params		= {};
+	params['op']		= 'getModalPrefs';
+	params['reskey']	= reskey_static;
+	params['section']	= 'portal_slashboxes';
+	params['tabbed']	= 0;
+	ajax_update(params, 'slashboxes-available-public', { onComplete: filterPortalBoxes });
+}
+
+function getUserBoxes() {
+        var     params		= {};
+	params['op']		= 'getModalPrefs';
+	params['reskey']	= reskey_static;
+	params['section']	= 'user_slashboxes';
+	params['tabbed']	= 0;
+	ajax_update(params, 'slashboxes-available-user', { onComplete: filterUserBoxes });
+}
+
+function getFriendBoxes() {
+        var     params		= {};
+	params['op']		= 'getModalPrefs';
+	params['reskey']	= reskey_static;
+	params['section']	= 'friend_slashboxes';
+	params['tabbed']	= 0;
+	ajax_update(params, 'slashboxes-available-friend', { onComplete: filterFriendBoxes });
+}
+
+function markAdded( $avail ) {
+	$('#slashboxes').find('div.block').each( function() {
+		var block = $( this ).find('.title').attr('id');
+		block = block.replace(/-title/i,'');
+		$avail.find('option').each( function() {
+			if ( block == $(this).val() ) {
+				$(this).addClass( "added" );
+				$(this).css('display','none');
+			}
+		});
+	});
+}
+
+function filterPortalBoxes() {
+	ploaded = true;
+	var $avail = $('select#slashboxes-available-public');
+	markAdded( $avail );
+	randPreviewBlock( $avail );
+}
+
+function filterUserBoxes() {
+	uloaded = true;
+	var $avail = $('select#slashboxes-available-user');
+	markAdded( $avail );
+	randPreviewBlock( $avail );
+}
+
+function filterFriendBoxes() {
+	floaded = true;
+	var $avail = $('select#slashboxes-available-friend');
+	markAdded( $avail );
+	randPreviewBlock( $avail );
 }
 
 function randPreviewBlock( $select ) {
-	var	$length		= $select.find('option').length,
-		randbox		= Math.floor( Math.random() * $length ),
-		randopt		= $select.find('option')[randbox],
-		randbid		= randopt.value,
-		randtitle	= randopt.text;
+	var	count		= $select.find('option').length,
+		randbox		= Math.floor( Math.random() * count ),
+		$randopt	= $select.find('option:nth-child('+randbox+')'),
+		randbid		= $randopt.val(),
+		randtitle	= $randopt.text();
 	populatePreview( randbid, randtitle );
+	$randopt.attr('selected',true);
 }
 
 function savePreviewBlock() {
-	var $avail;
-	var new_prefix = 'showbox';
-	if( $('#slashbox-tabs').tabs('option', 'selected') == 0 ) {
-		$avail = $('select#slashboxes-available-public');
+	var	currtab = $('#slashbox-tabs').tabs('option','selected'),
+		is_selected = false,
+		new_prefix,
+		$avail;
+	switch( currtab )
+	{
+		case 0:
+			$avail = $('select#slashboxes-available-public');
+			break;
+		case 1:
+			$avail = $('select#slashboxes-available-user');
+			new_prefix = 'dynamic';
+			break;
+		case 2:
+			$avail = $('select#slashboxes-available-friend');
+			new_prefix = 'dynamic';
+			break;
+		default:
+			new_prefix = 'showbox';
+			break;
 	}
-	if( $('#slashbox-tabs').tabs('option', 'selected') == 1 ) {
-		$avail = $('select#slashboxes-available-user');
-		new_prefix = 'dynamic';
+
+	var $option = $avail.find('option[selected]');
+	if( $option.length == 1 ) {
+		is_selected = true;
+		$option.addClass('added');
+		$option.css('display','none');
 	}
-	if( $('#slashbox-tabs').tabs('option', 'selected') == 2 ) {
-		$avail = $('select#slashboxes-available-friend');
-		new_prefix = 'dynamic';
-	}
-	var is_selected = false;
-	$avail.find('option').each( function() {
-		if( $(this).attr('selected') ) {
-			is_selected = true;
-		}
-	});
 
 	if( $avail.attr('length') == 1 || is_selected == true ) {
 		var	blocks = "";
@@ -290,17 +292,16 @@ function savePreviewBlock() {
 		$block.attr("id", $avail.val() );
 		var new_content = "<div class='block' id='newslashbox-create'>" + create_button + "</div>";
 		$('#slashboxes').find('div.block:last').after( new_content );
+        	$('#newslashbox-title a').one('click', function(){ getModalPrefs('new_slashboxes','Slashboxes', 0 ); return false; });
 		$('newslashbox-content').hide();
 		$("input#slashbox-filter").val( "" );
-		pfilter.set("");
-		ufilter.set("");
-		ffilter.set("");
 		randPreviewBlock( $avail );
 	}
 }
 
 function cancelPreviewBlock() {
 	$('#newslashbox-create').html( create_button );
+        $('#newslashbox-title a').one('click', function(){ getModalPrefs('new_slashboxes','Slashboxes', 0 ); return false; });
 	$('div#newslashbox-content').removeClass('preview');
 	$('newslashbox-content').hide();
 	hide_modal_box();
@@ -321,6 +322,7 @@ function updatePreview( $avail ) {
 }
 
 (function() {
+
 	$('form#modal_prefs').submit(function(){return false;})
 
 	$(document).one('hide.modal', function(){
@@ -334,11 +336,32 @@ function updatePreview( $avail ) {
 	});
 
 	$('#slashbox-tabs').tabs();
+
+	getPortalBoxes();
+
 	$('#slashbox-tabs').bind('tabsselect', function(event, ui) {
 		var fval = $("input#slashbox-filter").val();
-		pfilter.set(fval);
-		ufilter.set(fval);
-		ffilter.set(fval);
+		if( ui.index == 0 ) {
+			if( !ploaded ) {
+				getPortalBoxes();
+			} else {
+				randPreviewBlock( $('select#slashboxes-available-public') );
+			}
+		}
+		if( ui.index == 1 ) {
+			if( !uloaded ) {
+				getUserBoxes();
+			} else {
+				randPreviewBlock( $('select#slashboxes-available-user') );
+			}
+		}
+		if( ui.index == 2 ) {
+			if( !floaded ) {
+				getFriendBoxes();
+			} else {
+				randPreviewBlock( $('select#slashboxes-available-friend') );
+			}
+		}
 	});
 
 	$("#slashboxes-available-public").change(function() {
@@ -355,25 +378,37 @@ function updatePreview( $avail ) {
 	});
 
 	formatSlashboxSelectorUI();
-	randPreviewBlock( $('select#slashboxes-available-public') );
 
-//	JTB: next two lines for wolf's filter (not working for some reason)
-//	var $options	= $('select option');
-//	var old_filter = '.';
+	var old_filter = '.';
 	$("input#slashbox-filter").keyup(function () {
-		pfilter.set(this.value);
-		ufilter.set(this.value);
-		ffilter.set(this.value);
-//	JTB: next nine lines for wolf's filter (not working for some reason)
-//		var	regexp, new_filter=$input.val()||'.';
-//		if ( new_filter !== old_filter ) {
-//			regexp = new RegExp(new_filter, 'i');
-//			$options.each(function(){
-//				var $opt=$(this);
-//				$opt.css('display', regexp.test($opt.text()) ? '' : 'none');
-//			});
-//			old_filter = new_filter;
-//		}
+		var	new_filter=$("input#slashbox-filter").val()||'.',
+			currtab = $('#slashbox-tabs').tabs('option', 'selected'),
+			regexp,
+			$avail,
+			$options;
+		if ( currtab == 0 ) {
+			$avail = $('#slashboxes-available-public');
+		}
+		if ( currtab == 1 ) {
+			$avail = $('#slashboxes-available-user');
+		}
+		if ( currtab == 2 ) {
+			$avail = $('#slashboxes-available-friend');
+		}
+		$options = $avail.find('option');
+		if ( new_filter !== old_filter ) {
+			regexp = new RegExp(new_filter, 'i');
+			$options.each(function(){
+				var $opt=$(this);
+				$opt.css('display', regexp.test($opt.text()) && !$opt.hasClass('added') ? '' : 'none');
+			});
+			old_filter = new_filter;
+		}
+		var $choose = $avail.find('option').filter(':visible');
+		if( $choose.length == 1 ) {
+			$choose.attr('selected',true);
+			populatePreview( $choose.val(), $choose.text() );
+		}
 	});
 
 })();
