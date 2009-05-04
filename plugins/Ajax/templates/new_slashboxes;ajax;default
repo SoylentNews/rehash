@@ -124,6 +124,7 @@ function resizePreview( preview_text ) {
 	var $title = $("div#newslashbox-title");
 	$title.html( "<h4>" + $slashbox_title + "<a href='#' onclick='cancelPreviewBlock(); return false'><span class='closebox'>x</span></a></h4>" );
 	$title.removeClass('collapsed');
+	$title.parent().addClass('expanded');
 	var	$dialog         = get_modal_parts('#modal_box'),
 		$edit_field     = $dialog.find('input#slashbox-filter'),
 		$block          = $('#newslashbox-create'),
@@ -303,6 +304,7 @@ function cancelPreviewBlock() {
 	$('#newslashbox-create').html( create_button );
         $('#newslashbox-title a').one('click', function(){ getModalPrefs('new_slashboxes','Slashboxes', 0 ); return false; });
 	$('div#newslashbox-content').removeClass('preview');
+	$('div#newslashbox-create').removeClass('expanded');
 	$('newslashbox-content').hide();
 	hide_modal_box();
 }
