@@ -113,6 +113,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/com-mod.shtml#cm1100">I just got moderator access. What do I do?</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm1200">Why can't I moderate any more?</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm1250">Why don't you give moderators unlimited moderator access to 5 stories instead of giving them just 5 points?</a></strong></li>
+                <li><strong><a href="/faq/com-mod.shtml#cm1260">Why do I have 10 moderator points instead of the usual 5?</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm1300">I found a comment that was unfairly moderated!</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm1320">What about separating the rating (+1,-1), from the qualifier (off-topic, informative)? Often times a post may be flamebait, but of excellent quality, nevertheless.</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm1400">Is this censorship?</a></strong></li>
@@ -166,6 +167,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/accounts.shtml#ac1050">My RSS Headline Reader Tells me I Was Banned!</a></strong></li>
                 <li><strong><a href="/faq/accounts.shtml#ac1100">Why is someone else's User Name appearing on my User Page's Menu?</a></strong></li>
                 <li><strong><a href="/faq/accounts.shtml#ac1200">What are Login Sessions?</a></strong></li>
+                <li><strong><a href="/faq/accounts.shtml#ac1300">What are these achievement things I keep hearing about?</a></strong></li>
         </ul><!-- Friends and Journals -->
         <h2><strong><a href="/faq/friends.shtml">Friends and Journals</a></strong></h2>
         <ul>
@@ -280,6 +282,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/tags.shtml#tags300">What are Slashdot Bookmarks?</a></strong></li>
                 <li><strong><a href="/faq/tags.shtml#tags310">How do I save a Slashdot Bookmark?</a></strong></li>
                 <li><strong><a href="/faq/tags.shtml#tags320">How do I share my Bookmarks?</a></strong></li>
+
 	</ul><!-- Firehose -->
         <h2><strong><a href="/faq/firehose.shtml">Firehose</a></strong></h2>
         <ul>

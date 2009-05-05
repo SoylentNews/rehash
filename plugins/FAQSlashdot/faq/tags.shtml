@@ -29,16 +29,10 @@
 <p> Slashdot is currently experimenting with tagging articles.  You are
 encouraged to use this feature to submit a handful of tags: brief labels
 that you think best describe this article.  You might choose to say that
-this is an article about 'security' and 'mozilla'.
+this is an article about "security" and "mozilla".
 </p>
 
-<p>This is all very beta. Currently, tagging is open to our users whose
-accounts are more than about six months old. If your account is more
-recent, you can still get tag access by
-<a href="/subscribe.pl">becoming a Slashdot subscriber</a>.</p>
-
-<p>We don't know exactly how this will all work, and a lot of it really
-depends on you.  If you choose to add your own tags, be aware:</p>
+<p>If you do add your own tags, be aware:</p>
 
 <ul>
 <li>Your tags are <b>public</b>. Everyone will be able to see them!</li>
@@ -53,6 +47,8 @@ means "not funny."</li>
 text field for you. If you clear it and re-click Tag, your old tags
 are undone. To add more tags, just add them to your list and
 re-click Tag.</li>
+<li>Clicking Tag multiple times with the same tag does not increase
+its weight.
 <li>Tags must be all-lowercase, no punctuation. Numbers can  
 appear but can't be first. Smoosh them up: for "Web 2.0", tag  
 "web20". Max 64 chars.</li>
@@ -60,14 +56,9 @@ appear but can't be first. Smoosh them up: for "Web 2.0", tag
 But sometimes singular would be silly: "starwars".</li>
 </ul>
 
-<p>We're excited about this, and see huge potential for this system.
-From user feedback on articles, to comment moderation, the system is
-really limited only by your participation, and our database hardware! 
-</p>
-
-<p><i><font size=-1>Answered by: <a  
-href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 11/22/07</font></i>
+<p>Answered by: <a  
+href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 04/29/09
 
 
 
@@ -79,10 +70,10 @@ punt on the issue of objective meaning. So the tag "foo" means for each
 user whatever they want it to mean, and to the system it means nothing
 at all, it's just an identifier.</p>
 
-<p>We're going to build the next generation of moderation on top of
+<p>We're building the next generation of moderation on top of
 tags. That means we're going to poach your namespace. Some tags will
-have a substantive effect on the system right from the start (or very
-soon). Our article tagger knows about tags like "dupe" or "typo".
+have a substantive effect on the system right from the start.
+Our article tagger knows about tags like "dupe" or "typo".
 When we roll out tagging on comments, we will teach it "troll" and
 "informative". These tags can have a meaning in the system. And when
 <em>you</em> come up with ways of using tags that <em>we</em>
@@ -90,22 +81,21 @@ haven't anticipated, we will bring them into the system.</p>
 
 <p>But your tags do not belong to you, they belong to everyone.
 We reserve the right to make changes that we think are necessary.
-Since this system is totally experimental, we don't know exactly what all
-of this might mean: it could mean one day we consolidate and change all
-"canine" to "dog" tags.  It could mean we define some system tag and usurp
+This could mean one day we consolidate and change all
+"canine" to "dog" tags. It could mean we define some system tag and usurp
 another tag. This is the nature of a system in active development. Don't
 say we didn't warn you!</p>
 
 <p>Tags elsewhere are your own personal playground and nobody cares if
-you mess around. On Slashdot, abusive uses of tags could have negative
-consequences. Precisely what that means, we don't know yet.</p>
+you mess around. On Slashdot, abusive uses of tags have negative
+consequences: they can reduce the effect your future tags have on
+the system.</p>
 
-<p>Yes, that's pretty arbitrary. We'll spell out policy as this evolves.
-For now, the deal is: tag in good faith, and if there's abuse, we'll
+<p>The deal is: tag in good faith, and if there's abuse, we'll
 deal with it in good faith.</p>
 
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 2/10/06</font></i>
+<p>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 02/10/06
 
 
 <br><a name="tags200" id="tags200"></a>
@@ -127,8 +117,8 @@ But they won't show up on the top tags list. Trying to get around this
 with similarly spelled (but system-meaningless) tags like "dupitydupe"
 is discouraged.</p>
 
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 11/22/07</font></i>
+<p>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 11/22/07
 
 
 <br><a name="tags300" id="tags300"></a>
@@ -150,8 +140,8 @@ can now be automatically submitted to Slashdot editors for mainpage post
 consideration, so bookmarks are a great way to quickly
 submit stories.</p>
 
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 3/22/06</font></i>
+<p>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 03/22/06
 
 
 <br><a name="tags310" id="tags310"></a>
@@ -171,8 +161,8 @@ Subscribers using SSL will want to use the HTTPS version of this link.</p>
 HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">Post to Slashdot</a> (for subscribers using SSL)
 </p>
 
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 03/22/06</font></i>
+<p>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 03/22/06
 
 
 <br><a name="tags320" id="tags320"></a>
@@ -181,22 +171,22 @@ HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='
 <p>In case your site's webpages aren't already cluttered enough with
 "Digg It" and "Add to Del.icio.us" links, you can add a badge or link that
 automatically submits your page to Slashdot. If enough readers
-click, your page will be brought to our editors' attention -- it's
+click, your page will be brought to our editors' attention &mdash; it's
 like a cheap, fast
 <a href="/submit.pl">submit.pl</a>.</p>
 
-<p><img src="http://images.slashdot.org/sdit6n.png" alt="sample slashdot badge" style="float:left; padding-right:1.5em;">
+<p><img src="//images.slashdot.org/sdit6n.png" alt="sample slashdot badge" style="float:left; padding-right:1.5em;">
 Badges look like this, and besides allowing submission,
 show readers the current popularity of a submitted page
 and let them vote on it themselves. Here's a block of
 HTML you can include in any page:</p>
 
-<blockquote><p><pre>&lt;script src="http://slashdot.org/slashdot-it.js" type="text/javascript"&gt;&lt;/script&gt;</pre></blockquote>
+<blockquote><p><pre>&lt;script src="//slashdot.org/slashdot-it.js" type="text/javascript"&gt;&lt;/script&gt;</pre></blockquote>
 
 <p>You'll find details and examples in our <a href="/faq/badges.shtml">Badges How-To</a>.</p>
 
-<p><i><font size=-1>Answered by: <a href="mailto:scc@slashdot.org">scc</a></font></i>
-<br><i><font size=-1>Last Modified: 10/03/07</font></i>
+<p>Answered by: <a href="mailto:scc@slashdot.org">scc</a>
+<br>Last Modified: 10/03/07
 
 
 <br><a name="tags400" id="tags400"></a>
@@ -207,8 +197,8 @@ href="/my/bookmarks">/my/bookmarks</a>.  You can access other users'
 bookmarks from their homepages.  To read mine, you would use
 <a href="/~CmdrTaco/bookmarks/">/~CmdrTaco/bookmarks</a>.
 </p>
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 3/22/06</font></i>
+<p>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 03/22/06
 
 
 <br><a name="tags410" id="tags410"></a>
@@ -240,11 +230,11 @@ and the Jeopardy-style answers
 or any user's tags at
 <a href="/~CmdrTaco/tags">/~CmdrTaco/tags</a>.
 
-<p>We'll be doing the usual improvements -- RSS feeds, tag clouds,
-nicer formatting -- a little while down the road.</p>
+<p>We'll be doing the usual improvements &mdash; RSS feeds, tag clouds,
+nicer formatting &mdash; a little while down the road.</p>
 
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+<p>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a>
+<br>Last Modified: 11/02/06
 
 
 <hr>

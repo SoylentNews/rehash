@@ -23,98 +23,40 @@
         </div>
 
 <h2><a name="fh100">What is the Slashdot Firehose?</a></h2>
-	<p>The Slashdot Firehose is a way for you to participate in the Slashdot editorial
-process.  You are able to
-see all the content submitted to Slashdot: from RSS Feeds and user submissions, to journal entries and
-successful completed Slashdot stories.</p>
-
-<p>You can participate by voting on these entries: click the minus icon if you don't think the story is great
-for Slashdot, and click the plus if you do.  Better yet, when you make these choices you can help further refine
-your decision by clarifying why you made the choice you did.  You can tell us if a story was binspam, or a
-dupe, or insightful.  If you don't like the options provided in the pop-up windows, you can always open the
-tagging box and provide whatever tags you think will help Slashdot Editors, and other Slashdot Readers
-make informed decisions about the content they are reading.</p>
+	<p>The Firehose is a collection of all the content that appears anywhere on Slashdot. Everything from comments and journal entries to RSS feeds and story submissions go into the firehose, and you can filter and interact with them in a number of ways. The plus/minus box on the left side of firehose entry lets you vote on that particular piece of content; plus if you like it, minus if you don't. A small context menu will appear when you select one, giving you the option of appending one of a few common, more descriptive tags. You can also expand the submission and use the tag box if you'd like to add a specific tag of your choice, such as "awesome" or "typo." Voting and tagging is useful and helpful; it shows other firehose users what the interesting submissions are, and helps the editors decide which ones make it to the front page.</p>
 	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 08/02/2007
+		Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+		Last Modified: 05/01/2009
 	</small></em></p>
 
-<h2><a name="fh200">Why does the Firehose have articles in it?</a></h2>
-	<p>The Firehose has all data on Slashdot.  RSS Feeds.  Journal Entries.  Story Submissions.  And of course,
-accepted Slashdot Stories.  The idea is that this view of Slashdot can provide you a single place to view
-all Slashdot content in one interface.</p>
+<h2><a name="fh200">How can I filter the Firehose to see what I want?</a></h2>
+	<p>The text field in the top right corner is where you enter filter terms. You can sort for any particular type of entry by entering its type into the field and hitting enter. For example, doing "journal" would sort for journal entries. You can also sort for story, comment, feed, bookmark, and submission. Putting a "-" in front of a type will exclude that type. For example: "-feed" would exclude all RSS feeds. You can also sort for things like "linux", "openbsd" or "riaa" to see stories with those tags or comments and submissions that mention them. You can set it to display particular users or editors if you'd like to see just the things they've contributed by doing "user:CmdrTaco".</p>
 
-<p>If you don't like any particular data type, you can filter it out.  If you don't like journals, you can just filter on
--journal and they are gone.  If you don't want Slashdot stories,  -story will get you there.
+<p>We realize this is a lot to take in, so we've given you several easy ways to see what readers are usually most interested in. The left side menu lets you sort by topic; hitting the Games link will show you entries related to games. Once you've used a term in the filter field, you'll notice a new entry in the section menu called "untitled," which has an edit icon next to it. You can click on that to create and save custom filters. Afterward they'll appear in that side menu for easy access. You can also use the tabs near the top to see several common views: Stories brings up a list of the recent front page items, while Recent and Popular show submissions fitting those descriptions. Using the edit button on the tab lets you modify them and save the new settings. You can also subscribe to an RSS feed for a particular tab or section.
 </p>
-<p>You will note a variety of interesting options that allow you to control how this page is displayed.  For example,
-if you filter on 'story' and set 'expand top rated' you will see a page that is very similar to Slashdot's main page today... except that it dynamically updates and allows voting and in-place expansion of sectional content.  Alternatively, filtering to -story and toggling 'abbreviated mode' will let you see a real-time stream of reader contributions.  It's really up to you</p>
 	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 08/02/2007
+		nswered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+		Last Modified: 05/01/2009
 	</small></em></p>
 
 <h2><a name="fh300">What do the colors mean?</a></h2>
-	<p>The spectrum of colors represents an overall quality rating for content.  Red is the most popular, the highest
-rated, and hopefully the best content on Slashdot.   There is relatively little Red content, although most stories
-we post default to red.  Some stories show up as orange.  As you work down the spectrum you will find more
-content.  Default submissions to the Firehose start at blue.  At indigo you will find a number of RSS feeds and
-journal entries.  At violet you are probably wasting your time, and at black you definitely are!
+	<p>The colors serve as a rough quality rating for entries in the firehose. You can sort for colors by using the color-picker next to the filter field. Red is the most popular, black is the least popular, and story submissions enter the firehose at blue. Your nods and nixes affect this, so the more often you vote, the more useful color sorting becomes. The lower your color threshold, the more content you'll see. Once you get down to violet and black, you'll have a ton of feeds and comments, and filter terms will really help to focus in on the content you want to see.
 </p>
 
-<p>Play with the color menu to find the level you enjoy reading most at.  Use Red or Orange for busy days or if you
-are a casual reader.  The lower you set the color, the more content you will see.
-</p>
 	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 02/26/2009
-	</small></em></p>
-	
-<h2><a name="fh500">What can I do with the Firehose tabs?</a></h2>
-	<p>We've found that we like to use the firehose in a number of different ways.  Sometimes I want a casual view of
-Slashdot, and other times i want to see more stories.  Sometimes I want to see only the stories I've tagged.  Other
-times I just want to see Journals.  Well, shockingly enough, each tab will remember your settings and allow you
-to quickly return to them later.
-</p>
-
-<p>If you change your settings, you do so in an 'Untitled' tab.  If you click on your tab, you can name it which will save
-it for later.  Also, you can subscribe to an RSS feed for any particular tab if that's your cup of tea.  Please keep
-in mind that we have a robots.txt file that restricts the rate that you refresh pages.  I'd suggest a 30 minute minimum.
-</p>
-	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 08/02/2007
-	</small></em></p>
-	
-<h2><a name="fh600">What browsers are supported?</a></h2>
-	<p>Currently we work great under Firefox 1.5 and 2.0, as well as Safari.  IE7 is functional but has glitches
-that we are working to fix.  The iPhone functions as well with a number of optimizations for small screens (although
-the bandwidth requirements are still fairly steep so you are probably better off on a WiFi connection for now)
-</p>
-
-<p>IE6 is known to be broken.  Other browsers might work, but we haven't really tested them.</p>
-	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 08/02/2007
+		Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+		Last Modified: 05/01/2009
 	</small></em></p>
 	
 <h2><a name="fh700">Why didn't you post a submission that made it to red?</a></h2>
-	<p>Slashdot is a complex beast with readers with a wide variety of interests.  Part of
-the job of Slashdot Editor is to create a website that is interesting to all of us.  That
-means that sometimes our opinions may differ from yours.  We use the voting in the Firehose
-as an indicator of value, but not as the definitive measure of if something is a Slashdot
-story.
-
-</p> <p>If you don't like that, you can simply remove our Slashdot stories by putting -story  in
-your filter.  The firehose you read will be then be completely reader driven.  We believe that
-the way we've built this system can appeal to the wide variety of Slashdot readers without compromising
-the story quality for our core audience.
+	<p>Slashdot is user-driven, but it's still up to the editors to maintain some basic content standards that fit the theme of the site. A submission may be very interesting, but also very off-topic.  Political submissions often fall into this category. Another common reason is because the submission is a dupe. For every dupe that makes it to the front page, there are dozens that get weeded out by the editors. Some of them get voted up very high; after all, it was interesting enough to be run the first time. But, if you'd like to rely solely on user selections, you're certainly welcome to do so -- just filter to -story.
 </p>
 	<p><em><small>
-		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
-		Last Modified: 08/02/2007
+		Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+		Last Modified: 05/01/2009
 	</small></em></p>
 	
+
 <h2><a name="fh800">Doesn't this make you just like...</a></h2>
 	<p>Well first of all, we're happy to use good ideas when we see them.  Countless websites have knocked off
 our cool ideas, just like we joyously took ideas from those that came before us.  But ultimately the idea
@@ -134,6 +76,18 @@ will work for everyone.  Your feedback can only improve the system for everyone.
 		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
 		Last Modified: 08/02/2007
 	</small></em></p>
+	
+<h2><a name="fh600">What browsers are supported?</a></h2>
+	<p>Currently we work great under Firefox 1.5, 2.0, and 3.0 as well as Safari.  IE7 and IE8 are functional but has glitches
+that we are working to fix.  The iPhone functions as well with a number of optimizations for small screens (although
+the bandwidth requirements are still fairly steep so you are probably better off on a WiFi connection for now).
+</p>
+
+<p>IE6 is known to be broken.  Other browsers might work, but we haven't really tested them. We're keeping an eye on Chrome and Opera, and fixing bugs when we have time.</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 05/01/2009
+	</small></em></p>	
 
         <hr>
         <ul class="menu">

@@ -23,14 +23,14 @@
         </div>
 
 <h2><a name="ss100" id="ss100">Why does Slashdot have subscriptions?</a></h2>
-        <p>Read <a href="http://slashdot.org/article.pl?sid=02/03/01/1352200&amp;mode=nocomment">CmdrTaco's story</a> to learn why Slashdot implemented a subscription system.</p>
+        <p>Read <a href="//slashdot.org/article.pl?sid=02/03/01/1352200&amp;mode=nocomment">CmdrTaco's story</a> to learn why Slashdot implemented a subscription system.</p>
         <p><em><small>
                 Answered by: <a href="mailto:robo@slashdot.org">Robo</a><br>
                 Last Modified: 03/03/02
         </small></em></p>
 
 <h2><a name="ss200" id="ss200">Where / How can I purchase a subscription to slashdot?</a></h2>
-        <p><a href="http://slashdot.org/users.pl">Log In</a> and go to the <a href="http://slashdot.org/subscribe.pl">subscriptions page</a>. Click on the paypal or credit-card link, and follow the instructions.</p>
+        <p><a href="//slashdot.org/users.pl">Log In</a> and go to the <a href="//slashdot.org/subscribe.pl">subscriptions page</a>. Click on the paypal or credit-card link, and follow the instructions.</p>
         <p>If you don't have an account to log in to, you'll have to <a href="/login.pl?op=newuserform">create one</a>.</p>
         <p><em><small>
                 Answered by: <a href="mailto:robo@slashdot.org">Robo</a><br>
@@ -60,7 +60,7 @@
         </small></em></p>
 
 <h2><a name="ss500" id="ss500">I have an idea for a feature for subscription users.</a></h2>
-        <p>"<em>We are doing our best to learn from the mistakes made by other sites that have started charging for subscriptions. We won't create subscriber only features that cost more to maintain than they generate.</em>" -- CmdrTaco<br></p>
+        <p>"<em>We are doing our best to learn from the mistakes made by other sites that have started charging for subscriptions. We won't create subscriber only features that cost more to maintain than they generate.</em>" &mdash; CmdrTaco<br></p>
         <p>&nbsp;</p>
         <p>Check out the <a href="suggestions.shtml">suggestions</a> page.</p>
         <p><em><small>
@@ -76,7 +76,7 @@
         </small></em></p>
 
 <h2><a name="ss800" id="ss800">How do I see how many pages I've used up on my subscription?</a></h2>
-        <p>Logged in, go back to the <a href="http://slashdot.org/subscribe.pl">subscription page</a>. It should show you how many pages you have paid for and how many pages you have used.</p>
+        <p>Logged in, go back to the <a href="//slashdot.org/subscribe.pl">subscription page</a>. It should show you how many pages you have paid for and how many pages you have used.</p>
         <p><em><small>
                 Answered by: <a href="mailto:Robo@slashdot.org">Robo</a><br>
                 Last Modified: 03/03/02
@@ -107,12 +107,12 @@
         <ul>
                 <li>Make sure you're logged in!!</li>
                 <li>You may have exceeded the daily amount of ads you've set to suppress. See <a href="subscriptions.shtml#ss1500">How can I control how many ads I suppress daily?</a></li>
-                <li>Check the <a href="http://slashdot.org/subscribe.pl">subscriptions</a> page and make sure that you have "No Ads" turned on where you don't want ads to show up.</li>
+                <li>Check the <a href="//slashdot.org/subscribe.pl">subscriptions</a> page and make sure that you have "No Ads" turned on where you don't want ads to show up.</li>
                 <li>Slashdot pages that are <em>static</em>, like the faq, always serve ads.</li>
                 <li>If you're looking at a subsection of Slashdot like <a href="http://apple.slashdot.org">apple.slashdot.org</a>, make sure that you log in. If you want subsections of slashdot to remember you, you'll have to initially log in to one of the subsections.</li>
                 <li>We could be experiencing technical difficulties and we've turned on a static front page.</li>
         </ul>
-        <p><strong>If you are a subscriber and saw an ad, it will not count against your subscription.</strong> If you are <em>sure</em> that pages on which you are seeing ads are incrementing your "used up" count on <a href="/subscribe.pl">subscribe.pl</a>, that's a serious bug -- please <a href="http://sourceforge.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421">let us know</a> immediately (Category: Other, Group: Slashdot).</p>
+        <p><strong>If you are a subscriber and saw an ad, it will not count against your subscription.</strong> If you are <em>sure</em> that pages on which you are seeing ads are incrementing your "used up" count on <a href="/subscribe.pl">subscribe.pl</a>, that's a serious bug &mdash; please <a href="http://sourceforge.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421">let us know</a> immediately (Category: Other, Group: Slashdot).</p>
         <p><em><small>
                 Answered by: <a href="mailto:Robo@slashdot.org">Robo</a><br>
                 Last Modified: 03/03/02
@@ -135,9 +135,9 @@
 <h2><a name="ss1400" id="ss1400">In general, what pages count towards my subscription base?</a></h2>
         <p>There are currently three types of pages that Slashdot generates for subscribers.<br></p>
         <ul>
-                <li><strong>Static:</strong> <a href="http://slashdot.org/faq/">The FAQ</a> / <a href="http://slashdot.org/code.shtml">code</a> / <a href="http://slashdot.org/about.shtml">about</a> / <a href="http://slashdot.org/hof.shtml">hof</a> / and so on. These pages are plain old text. There is no smarts in them to decide if you get an ad or not. This is for performance reasons. It just doesn't make sense to run scripts on those pages. So you'll see banner ads on them, but they won't affect your subscription.</li>
-                <li><strong>The Main Pages</strong>: <a href="http://slashdot.org/">The homepage</a>, articles, and comments. These pages are configured in your subscription settings. You can choose which page types to see ads on. By default, a subscriber has ads suppressed on the index and article pages, but comments are left with ads on. This is because it's really easy to casually load dozens of comments pages.</li>
-                <li><strong>The lesser pages</strong>: There are a variety of other pages on Slashdot that are dynamic, but are less loaded than The Main Pages. For example, <a href="http://slashdot.org/users.pl">Users</a> (for example editing your preferences) <a href="http://slashdot.org/submit.pl">Submissions</a> (Submitting a story) <a href="http://slashdot.org/journal.pl">Journals</a> (I think you can figure that out yourself) and <a href="http://slashdot.org/subscribe.pl">Subscriptions</a> (Well, Duh!). If you are a subscriber, and are set to suppress ads on one of the Main Pages, then we suppress ads on these pages without decrementing your page bank. In other words, buy the ads on the homepage or articles, and <strong>you get Journals, Submissions, Users, and so forth for free</strong>.</li>
+                <li><strong>Static:</strong> <a href="//slashdot.org/faq/">The FAQ</a> / <a href="//slashdot.org/code.shtml">code</a> / <a href="//slashdot.org/about.shtml">about</a> / <a href="//slashdot.org/hof.shtml">hof</a> / and so on. These pages are plain old text. There is no smarts in them to decide if you get an ad or not. This is for performance reasons. It just doesn't make sense to run scripts on those pages. So you'll see banner ads on them, but they won't affect your subscription.</li>
+                <li><strong>The Main Pages</strong>: <a href="//slashdot.org/">The homepage</a>, articles, and comments. These pages are configured in your subscription settings. You can choose which page types to see ads on. By default, a subscriber has ads suppressed on the index and article pages, but comments are left with ads on. This is because it's really easy to casually load dozens of comments pages.</li>
+                <li><strong>The lesser pages</strong>: There are a variety of other pages on Slashdot that are dynamic, but are less loaded than The Main Pages. For example, <a href="//slashdot.org/users.pl">Users</a> (for example editing your preferences) <a href="//slashdot.org/submit.pl">Submissions</a> (Submitting a story) <a href="//slashdot.org/journal.pl">Journals</a> (I think you can figure that out yourself) and <a href="//slashdot.org/subscribe.pl">Subscriptions</a> (Well, Duh!). If you are a subscriber, and are set to suppress ads on one of the Main Pages, then we suppress ads on these pages without decrementing your page bank. In other words, buy the ads on the homepage or articles, and <strong>you get Journals, Submissions, Users, and so forth for free</strong>.</li>
         </ul>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
@@ -145,7 +145,7 @@
         </small></em></p>
 
 <h2><a name="ss1500" id="ss1500">How can I control how many ads I suppress daily?</a></h2>
-        <p>Edit your <a href="http://slashdot.org/subscribe.pl">subscription preferences</a>. Currently, subscribers default ad suppression is 10 ads per day. You can increase or decrease your ad suppression to fit your needs. Just remember, the higher your ad suppression, the faster you'll go through your subscription.</p>
+        <p>Edit your <a href="//slashdot.org/subscribe.pl">subscription preferences</a>. Currently, subscribers default ad suppression is 10 ads per day. You can increase or decrease your ad suppression to fit your needs. Just remember, the higher your ad suppression, the faster you'll go through your subscription.</p>
         <p>To suppress all ads, <strong>set your limit to 0</strong> and remember to make sure that you have "No Ads" selected for <strong>all</strong> three options.</p>
         <p><em><small>
                 Answered by: <a href="mailto:Robo@slashdot.org">Robo</a><br>
@@ -158,7 +158,7 @@
                 <li>You can see each story 10-20 minutes before it goes "live." (Assuming we posted it that far in advance, which usually we do.) Look for the red titlebar and a timestamp from "The Mysterious Future." More information is available in <a href="/article.pl?sid=03/03/06/1548245">this story</a>.</li>
                 <li>You can get a message sent to you when people change their relationship to you (friend or foe). Go to your <a href="/my/messages">message prefs</a> page and edit the "Relationship Change" setting. Don't worry, you'll get at most one message per day, summarizing that day's changes.</li>
                 <li>When <a href="/journal.pl?op=edit">writing a journal entry</a>, your choices for comments are not just "Comments Disabled" and "Comments Enabled." You can also limit commenting to just your friends; just your friends and their friends; to exclude just your foes; or to exclude your foes and your friends' foes.</li>
-                <li>You get a "More Comments" link on <a href="/users.pl?op=userinfo">your user page</a> and on <a href="/~CmdrTaco/">other users' pages</a>. Going through comment history might be a bit DB-intensive but we trust subscribers not to abuse the privilege. (But just to be clear -- robots will be banned, regardless of whether they subscribe or not!)</li>
+                <li>You get a "More Comments" link on <a href="/users.pl?op=userinfo">your user page</a> and on <a href="/~CmdrTaco/">other users' pages</a>. Going through comment history might be a bit DB-intensive but we trust subscribers not to abuse the privilege. (But just to be clear &mdash; robots will be banned, regardless of whether they subscribe or not!)</li>
                 <li>You can add up to 400 <a href="/my/friends">friends</a> and <a href="/my/foes">foes</a>, instead of being limited to 200.</li>
                 <li>You get an <a href="/faq/com-mod.shtml#cm2600">asterisk</a> appended to your user ID for all comments you post while you're a subscriber. Other users can adjust those comments' scores up, if they want... or down, if they're prejudiced against subscribers for some reason. If you're bashful, you can switch this off (check the "No Subscriber Bonus" checkbox while posting).</li>
 <!--
@@ -170,7 +170,7 @@ from the homepage. Yeah, we give our subscribers what they want: Less
 Slashdot!  Non-subscribers can exclude about 17 topics on average,
 subscribers about 60.</li>
 -->
-                <li>Your personal index <a href="feeds.shtml#fe200">feed</a>, linked from the bottom of the homepage, will be customized for your <a href="/my/homepage">homepage preferences</a>. If you have sections set up to always appear on your homepage, they will be in your custom RSS feed too -- and the same holds for sections or authors you have excluded.</li>
+                <li>Your personal index <a href="feeds.shtml#fe200">feed</a>, linked from the bottom of the homepage, will be customized for your <a href="/my/homepage">homepage preferences</a>. If you have sections set up to always appear on your homepage, they will be in your custom RSS feed too &mdash; and the same holds for sections or authors you have excluded.</li>
                 <li>Full HTML in your index and journal <a href="feeds.shtml#fe200">feeds</a>.</li>
         </ul>
         <p>Note that several of these "plums" require that you pick "No Ads" on at least one type of page, and that your limit of the maximum number of ads suppressed per day not be decreased (below the default value of 10). If you don't seem to be able to take advantage of the features listed above, go to your <a href="/subscribe.pl">Edit Subscription</a> page, and doublecheck your settings.</p>

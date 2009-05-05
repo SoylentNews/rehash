@@ -66,16 +66,6 @@
 					<li><tt>http://slashdot.org/my/inbox/rss/<b>$logtoken</b></tt></li>
 			</ul></li>
 
-			<li>Zoo<ul>
-					<li><tt>http://slashdot.org/~<b>$username</b>/friends/rss</tt></li>
-					<li><tt>http://slashdot.org/~<b>$username</b>/foes/rss</tt></li>
-					<li><tt>http://slashdot.org/~<b>$username</b>/fans/rss</tt></li>
-					<li><tt>http://slashdot.org/~<b>$username</b>/freaks/rss</tt></li>
-					<li><tt>http://slashdot.org/~<b>$username</b>/zoo/rss</tt></li>
-					<li><tt>http://slashdot.org/~<b>$username</b>/friends/friends/rss</tt></li>
-					<li><tt>http://slashdot.org/~<b>$username</b>/friends/foes/rss</tt></li>
-			</ul></li>
-
 			<li>Search Results<ul>
 					<li>Merely add <tt>&amp;content_type=rss</tt> to the query string</li>
 			</ul></li>
@@ -83,7 +73,14 @@
 
 	<p><em><small>
 		Answered by: <a href="mailto:pudge@slashdot.org">pudge</a><br>
-		Last Modified: 12/12/06
+		Last Modified: 05/01/09
+	</small></em></p>
+	
+	<h2><a name="fe100">How do I set up a custom feed?</a></h2>
+	<p>Use the filter field to sort for whatever type of content you like. On the section menu, you'll se an "untitled" section, which you can use to save those settings. Once that's done, hitting the edit button again will bring up an an RSS icon which you can use to subscribe to the custom feed. You can also grab feeds off of the tabs at the top of the page, which are modifiable as well.</p>
+	<p><em><small>
+		Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+		Last Modified: 05/01/09
 	</small></em></p>
 
 

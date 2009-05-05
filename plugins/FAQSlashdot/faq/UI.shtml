@@ -22,6 +22,20 @@
                 </ul>
         </div>
 
+<h2><a name="ui300" id="ui300">How can I see older stories?</a></h2>
+        <p>By scrolling down to the bottom of the page, you'll trigger the auto-more function, which will dynamically add stories to your page. It will do this twice, after which the page gets pretty big, so you can choose "Many more" to keep adding stories, or pick a particular day to see that day's stories.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+                Last Modified: 05/01/09
+        </small></em></p>
+		
+<h2><a name="ui200" id="ui200">What are Slashboxes? What can I do with them?</a></h2>
+        <p>Slashboxes are the rectangular fields on the right hand side of the index that contain things like polls, a recent tag list, and a place to log in. They're dynamic, and you can click and drag the title bar to move them up and down. The X in the top right corner closes them. Reloading the page will bring back closed Slashboxes.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+                Last Modified: 05/01/09
+        </small></em></p>
+		
 <h2><a name="ui100" id="ui100">I want a Slashbox that does X</a></h2>
         <p>The policy for Slashboxes is as follows:</p>
         <ol>
@@ -35,58 +49,11 @@
                 Last Modified: 10/23/2007
         </small></em></p>
 
-<h2><a name="ui200" id="ui200">What is this little [?] I see in stories?</a></h2>
-        <p>It designates a glossary style link to <a href="http://www.everything2.com">Everything2</a>. We use these to link things like acronyms or names when we think that they might be obscure enough that someone else might need some clarification.</p>
+<h2><a name="ui400" id="ui400">What is the section menu for?</a></h2>
+        <p>Each Slashdot story goes into one or more sections, determined by the tags and topics selected for that story. Clicking on a section will show you only stories related to that topic. You've also probably noticed that for some stories on the front page, only the titles are visible. These stories are only displayed in full if you're looking at that particular section, or if you click on the headline. We use this when we think the content is too specialized for the front page, but still think it's interesting enough to warrant a post. If a sectional story receives enough comments in a short period of time, it will be automatically promoted to the front page. Each of the section buttons has an edit icon, which you can use to change how they're displayed. You can change the active tab in which they're sorted (for example, changing Stories to Popular would give you the more interesting submissions that weren't posted), and you can add filter terms. Entering terms into the filter field also allows you to save custom sections, and you can subscribe to RSS feeds for any section.</p>
         <p><em><small>
-                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 6/14/00
-        </small></em></p>
-
-<h2><a name="ui300" id="ui300">How can I see old stories?</a></h2>
-        <p>Slashdot has archived stories going back pretty much to the beginning of the site. You can access them by hitting the "older stuff" link on the main page or by searching for them in the database by using the search form at the bottom of the front page.</p>
-        <p><em><small>
-                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 12/17/01
-        </small></em></p>
-
-<h2><a name="ui400" id="ui400">Why do I see Some Other User's Nickname in my Menu?</a></h2>
-        <p>This is a short cut. Essentially, there is a tab on your user menu (appearing on many pages like Journals and Users) that shows the nickname and UID of the last user that you looked at. This is not a bug! This is a helpful shortcut so that you can hop back and forth between your friends information, and theirs.</p>
-        <p><em><small>
-                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 3/3/03
-        </small></em></p>
-
-<h2><a name="ui500" id="ui500">How do I control the amount of content on my index?</a></h2>
-
-<p>Slashdot content is broken down into Sections like Apple or Book  Reviews.  Within each
-of these sections, content is further divided into what we call 'Main  Page' and 'Sectional
-Content'.  The Main Page is the stuff we think is the best.  But we  try to keep
-the number of articles on the main page to 15-20 or so articles.   Some sections have
-more stories than that.  So we pick some stories as "Sectional Content".</p>
-
-<p>You have the ability to choose how much or how little content you  want to see from
-each section.  Further, you have th ability to choose if you want to  view each type
-of article in 'Full Text' or 'Abbreviated' format.</p>
-
-<p>Today on Slashdot, we default to having you see all Main Page  content in Full Text
-mode, and all Sectional Content in the new 'Abbreviated' format.  You  can change these
-settings both globally, as well as on a per section basis using a  tool usable from
-the left hand sectional menu, as well as from your user preference  page.  Each of these
-features a 'spectrum' of options.  On the far right, you will see  every single story
-posted to every section in full text.  On the far left, you will see  only main page
-stories, and even those only abbreviated.  The break down is as follows:
-
-<ul>
-<li><b>Full, Full</b> - Displays every single story we post, in full  text.</li>
-<li><b>Full, Abbreviated</b> - The current default is to display the  main page articles in full text, but to abbreviate all sectional content.</li>
-<li><b>Abbreviated, Abbreviated</b> - This setting abbreviates every  story posted to the section.</li>
-<li><b>Full, None</b> - This setting most closely mimics the old  Slashdot settings, where the main page stories were included up top, but the sectional stories were relegated to the sectional indexes.</li>
-<li><b>Abbreviated, None</b> - Abbreviate the main page content, and  hide the sectional content.</li>
-<li><b>None</b> - Completely suppress this section.  Hide it entirely  from your index.</li>
-</ul>
-        <p><em><small>
-                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 1/21/06 
+                Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+                Last Modified: 05/01/09
         </small></em></p>
         
 <h2><a name="ui600" id="ui600">How do I navigate Slashdot with keyboard shortcuts?</a></h2>
@@ -134,9 +101,24 @@ stories, and even those only abbreviated.  The break down is as follows:
 
 Last Modified: 3/13/09</small></em></p>
 
-<h2><a name="ui700" id="ui700">Why does "This Function Require JavaScript?"</a></h2>
+<h2><a name="ui300" id="ui300">What does "Read More" mean?</a></h2>
+        <p>What you see on Slashdot are summaries of interesting articles in various places on the web. Sometimes, there's just too much information to summarize while keeping individual stories reasonably short. In these cases, you'll see "Read X More Bytes..." Clicking on it will take you to the rest of the summary. Other times, we'll have original content, such as book reviews, game reviews, or freelance articles. These fall under the same category, and we usually try to mention that there's more to read. If it doesn't say there are "X More Bytes," then that just means the summary you see is complete. Clicking Read More will take you to the same place clicking the headline will -- a page where you can read user comments. </p>
+        <p><em><small>
+                Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+                Last Modified: 05/01/09
+        </small></em></p>
+		
+		<h2><a name="ui300" id="ui300">What do these buttons by the header do?</a></h2>
+        <p>At the top right, there are a handful of commonly used links. Clicking your username takes you to your personal page, where you can see recent comments and submissions you've made, as well as change your friend and foe settings. Subscribe takes you to where you can sign up for ad-free pages, and Journal goes to its own interface. Submit Story, Help, and Log Out are self-explanatory</p>
+        <p>On the bar below that (the one with the tabs), you'll see |< and >| on the sides of the page, which are buttons that will hide the section menu and slashboxes, respectively. This lets you expand the stories to take up more real estate in your browser window. On the right side of the page, you'll also have a preferences icon to alter your firehose settings, and there is a play/pause button which governs whether or not your page will update dynamically.</p>
+		<p><em><small>
+                Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
+                Last Modified: 05/01/09
+        </small></em></p>
+		
+		<h2><a name="ui700" id="ui700">Why does "This Function Require JavaScript?"</a></h2>
 
-<p>Welcome to the now man!</p>
+<p>Welcome to the now, man!</p>
 
 <p>Some elements of Slashdot's UI require the use of Javascript. In most cases we've provided backwards compatibility for the more paranoid folks in our crowd that are fearful of executing unknown code within their browsers, but sometimes it's just not practical to maintain a second UI for this. Right now this includes the customizable section menus, tagging, and a great number of user interface customization options. We know it's a potential security hazard, but sometimes you just have to jump out of the airplane to get that adrenaline rush. Try it sometime. Pack your own chute tho. </p>
 

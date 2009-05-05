@@ -34,7 +34,7 @@
         <p>So do it! <a href="/users.pl">Log In</a> Already!</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">Rob "CmdrTaco" Malda</a><br>
-                Last Modified: 6/16/03
+                Last Modified: 06/16/03
         </small></em></p>
 
 <h2><a name="ac100">Can I change my nickname?</a></h2>
@@ -45,40 +45,40 @@
         </small></em></p>
 
 <h2><a name="ac105">How do I change my password or email address?</a></h2>
-        <p>Go to the <a href="http://slashdot.org/users.pl?op=edituser">User Info Editing Page</a> while you are logged in and use the form provided there.</p>
+        <p>Go to the <a href="//slashdot.org/users.pl?op=edituser">User Info Editing Page</a> while you are logged in and use the form provided there.</p>
         <p><em><small>
                 Answered by: <a href="mailto:pater@slashdot.org">CowboyNeal</a><br>
-                Last Modified: 4/03/03
+                Last Modified: 04/29/09
         </small></em></p>
 
 <h2><a name="ac200">How can I delete my account?</a></h2>
         <p>You can't. The system needs to keep track of the users, so accounts are permanent. Don't sweat leaving unused accounts hanging around. It doesn't hurt anything.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 6/13/00
+                Last Modified: 06/13/00
         </small></em></p>
 
 <h2><a name="ac300">I forgot/can't get my password!</a></h2>
         <p>You should be able to get it from <a href="/users.pl">the user login page</a>. Just type in your nickname and hit 'mailpasswd' and your password will be whisked off to your email address. If, however, this doesn't seem to be working, email <a href="mailto:passwords@slashdot.org">passwords@slashdot.org</a> for help.</p>
         <p><em><small>
                 Answered by: <a href="mailto:pater@slashdot.org">CowboyNeal</a><br>
-                Last Modified: 3/4/02
+                Last Modified: 03/4/02
         </small></em></p>
 
 <h2><a name="ac400">I'm having trouble logging in.</a></h2>
-        <p>Make sure you have cookies turned on. If you don't, it won't work. Also make sure that the date and time on your computer is correct. In an handful of cases, the problem could be related to a problem with a proxy server, but this is very unlikely. If you've turned cookies on and tried again to log in, and it still doesn't work, email <a href="mailto:passwords@slashdot.org">passwords@slashdot.org</a> for help.</p>
-        <p>Really, though, the system works for thousands of people every day, so the problem is most likely on your end ;)</p>
+        <p>Make sure you have cookies turned on. If you don't, it won't work. Also make sure that the date and time on your computer is correct. In a handful of cases, we've seen problems related to a proxy server; but this is very unlikely. If you've turned cookies on and tried again to log in, and it still doesn't work, email <a href="mailto:passwords@slashdot.org">passwords@slashdot.org</a> for help.</p>
+        <p>Really, though, the system works for tens of thousands of people every day, so the problem is most likely on your end ;)</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 6/13/00
+                Last Modified: 04/29/09
         </small></em></p>
 
 <h2><a name="ac450">I'm having trouble logging into Slashdot Sections (Like Apple, YRO, or BSD)</a></h2>
-        <p>You can be logged into slashdot while you view any of the subsections. All you need to do is hit any of the sections, and log in. Logging into one of them logs you into all. But you need to log into at least one section <em>seperate</em> from logging into <a href="http://slashdot.org">http://slashdot.org</a>.</p>
+        <p>You can be logged in to Slashdot while you view any of the sections. All you need to do is hit any of the sections, and log in. Logging in to one of them logs you into all. But you need to log in to at least one section seperate from logging in to <a href="//slashdot.org">slashdot.org</a>.</p>
         <p>Yeah, we know this is confusing, but we didn't write the RFC for cookies. Sorry for the inconvenience.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 3/30/02
+                Last Modified: 04/29/09
         </small></em></p>
 
 <h2><a name="ac500">I don't want to accept a cookie!</a></h2>
@@ -86,7 +86,7 @@
         <p>If you don't want to use cookies, you don't have to. You can still post (either anonymously, or by entering your password each time you submit a comment) but you will not be able to use all of the advanced features of Slashdot (story filtering, customized Slashboxes, user preferences etc.). If your paranoia requires you not to use cookies, this is the sacrifice you'll have to make.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 6/13/00
+                Last Modified: 06/13/00
         </small></em></p>
 
 <h2><a name="ac600">Someone is posting under a false identity, or an account designed to look like someone else</a></h2>
@@ -94,21 +94,21 @@
         <p>In most cases, these folks are caught by <a href="com-mod.shtml#cm600">moderation</a>, and they eventually get <a href="com-mod.shtml#cm700">karma</a> that is low enough to make it obvious that they are impostors.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 6/19/00
+                Last Modified: 06/19/00
         </small></em></p>
 
 <h2><a name="ac700">Why do I keep getting randomly logged out?</a></h2>
-        <p>You might need to log in to both 'foo.slashdot.org' and 'slashdot.org'. Because of how cookies work, if you log into the latter first, you might find yourself logged out of the former. Or vice versa. Once you log into both, you'll be fine. Yes, this is annoying. No we can't fix it. We don't write the RFCs.</p>
+        <p>You might need to log in to both foo.slashdot.org and slashdot.org. Because of how cookies work, if you log into the latter first, you might find yourself logged out of the former. Or vice versa. Once you log in to both, you'll be fine. Yes, this is annoying. No, we can't fix it. We don't write the RFCs.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 7/08/02
+                Last Modified: 04/29/09
         </small></em></p>
 
 <h2><a name="ac800">Do you ban people from Slashdot?</a></h2>
-        <p>Occassionally we <a href="accounts.shtml#ac900">ban IPs</a> who are abusing our servers in some way. If this happens, please read <a href="accounts.shtml#ac1000">How do I get an IP Unbanned</a>. These bans are relatively rare, but they are necessary in cases where specific Users or IPs intentionally try to disrupt service for other users by crapflooding the forums, game the moderation system, or to overburden our servers.</p>
-        <p>The moderation system has a variety of limits in it as well, but these bans are temporary and exist more as a rate limiter to make sure that people stay on topic, and everyone gets a chance to speak. You can learn more about the moderation system by reading <a href="com-mod.shtml">Comments and Moderation</a>.</p>
+        <p>Occassionally we <a href="accounts.shtml#ac900">ban IPs</a> from which are originating some form of abuse of our servers. If this happens, please read <a href="accounts.shtml#ac1000">How do I get an IP Unbanned</a>. These bans are relatively rare, but they are necessary in cases where specific Users or IPs intentionally try to disrupt service for other users by crapflooding the forums, gaming the moderation system, or otherwise overburdening our servers.</p>
+        <p>The moderation system has a variety of limits in it as well, but these bans are temporary and exist more as a rate limiter to make sure that people stay on topic, and that everyone gets a chance to speak. You can learn more about the moderation system by reading <a href="com-mod.shtml">Comments and Moderation</a>.</p>
         <p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-        Last Modified: 03/26/02<br></small></em></p>
+        Last Modified: 04/29/09<br></small></em></p>
 
 <h2><a name="ac900">Why is my IP banned?</a></h2>
         <ul>
@@ -119,30 +119,30 @@
         </ul>
         <p>
         <em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-        Last Modified: 7/02/02<br></small></em></p>
+        Last Modified: 07/02/02<br></small></em></p>
 
 <h2><a name="ac1000">How do I get an IP Unbanned?</a></h2>
         <p>Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a>. Make sure to include the IP in question, UID, timeframes, and any other pertinent information. If you are connecting through a proxy server, you might need to have your proxy server's admin contact us instead of you.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 3/26/02
+                Last Modified: 03/26/02
         </small></em></p>
 
 <h2><a name="ac1050">My RSS Headline Reader Tells me I Was Banned!</a></h2>
-        <p>Due largely to the absolutely ridiculous amount of abuse we get on a daily basis from poorly implemented headline readers, we were forced to implement a much more liberal automated banning system on RSS/RDF headline reading applications. Our policy is to allow one request every 30 minutes. We'll allow a few more before you will get banned, and we are more flexible still with proxy servers. However, in many cases, we have no choice but to ban abuse.</p>
+        <p>Due largely to the absolutely ridiculous amount of abuse we get on a daily basis from poorly implemented headline readers, we were forced to institute a much more rigorous automated banning system on RSS/RDF headline reading applications. Our policy is to allow one request every 30 minutes. We'll allow a few more before you will get banned, and we are more flexible still with proxy servers.</p>
         <p>You should still be able to access the rest of the website, just not the <tt>.rss</tt>, <tt>.rdf</tt>, and <tt>.xml</tt> pages.</p>
-        <p>You have 2 options: First is to stop beating the crap out of our servers, and just wait a few days/hours. Depending on the severity of the abuse, you should be back in a couple of days. If, after 72 hours, you are still banned, please Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a> and ask for help. Please include the approximate time of the ban, the srcid hex string that the ban message told you to tell us, and what <em>you</em> think your IP number is.</p>
-        <p>If you have reason to believe you're connecting through a proxy server, please mention that too -- and you might need to have your proxy server's admin contact us instead of you.</p>
+        <p>You have two options. The first is simply to stop beating the crap out of our servers, and just wait. Depending on the severity of the abuse, you should be back in a couple of hours or a couple of days. If, after 72 hours, you are still banned, please email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a> and ask for help. Please include the approximate time of the ban, the srcid hex string that the ban message told you to tell us, and what <em>you</em> think your IP number is.</p>
+        <p>If you have reason to believe you're connecting through a proxy server, please mention that too &mdash; and you might need to have your proxy server's admin contact us instead of you.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 4/05/03
+                Last Modified: 04/05/03
         </small></em></p>
 
 <h2><a name="ac1100">Why is someone else's User Name appearing on my User Page's Menu?</a></h2>
         <p>This is not a bug. This is a feature! That name is the last user page (besides your own ;) that you have visited. This is useful when you want to hop around between your user info, and someone else's: to compare friends and foes for example. Your account has not been hacked, this is totally by design.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 1/06/03
+                Last Modified: 01/06/03
         </small></em></p>
 
 <h2><a name="ac1200">What are Login Sessions?</a></h2>
@@ -150,34 +150,30 @@
         <p>The second decision is your location. The first choice is 'Never Moves' which basically means you have a static IP and you never log out of Slashdot or share your computer. The second choice is 'Moves within Subnet' which is useful if you have a desktop and never log out, but your ISP likes to change your IP on you occasionally. The last choice is 'Follows me Everywhere' which is the choice for machines that move from network to network. This last option is the least secure, but oh-so convenient. It is also the default.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 1/25/04
+                Last Modified: 01/25/04
         </small></em></p>
         
 <h2><a name="ac1300" id="ac1300">What are these achievement things I keep hearing about?</a></h2>
 		<p>The achievements system was launched on April fools day of 2009 in order to allow for certain joke achievements, but the system itself is a real one.  This allows Slashdot users to track accomplishments and milestones (and stroke the epeen, which is what it's all about anyway) as they use the site. </p>
-		<p>You can view your own accomplishments or view a comparison of your achievements against a friend's by visiting the respective user page (ex: http://slashdot.org/~CmdrTaco/achievements).</p>
+		<p>You can view your own accomplishments or view a comparison of your achievements against a friend's by visiting the respective user page (ex: //slashdot.org/~CmdrTaco/achievements).</p>
 		<p>A few achievements have been listed below, but the full list will only be uncovered with a fair amount of digging on the site, happy hunting. </p>
 
 		<ul>
-		<li><em>The Tagger</em> -- tag a story
-		<li><em>The Contradictor</em> -- !tag a story
-		<li><em>Days Read in a Row</em> -- your largest number of consecutive days reading Slashdot
-		<li><em>Days Metamoderated in a Row</em> -- your largest number of consecutive days metamodderating
-		<li><em>Comedian</em> -- have a score:5 funny comment when the story gets archived
-		<li><em>Member of the 1 Digit UID Club</em> -- really? You need an explanation?
-		<li><em>Member of the 2 Digit UID Club</em> -- really? You need an explanation?
-		<li><em>Member of the 3 Digit UID Club</em> -- really? You need an explanation?
-		<li><em>Member of the 4 Digit UID Club</em> -- really? You need an explanation?
-		<li><em>Member of the 5 Digit UID Club</em> -- really? You need an explanation?
-		<li><em>Posted a Comment</em> -- posted a positive comment to a story
-		<li><em>Posted a Journal Entry</em> -- yes, Slashdot users have journals
-		<li><em>The April Fool</em> -- posted in the April fools story
-		<li><em>Spent All My Mod Points</em> -- use em or lose em
+		<li><em>The Tagger</em> &mdash; tag a story
+		<li><em>The Contradictor</em> &mdash; !tag a story
+		<li><em>Days Read in a Row</em> &mdash; your largest number of consecutive days reading Slashdot
+		<li><em>Days Metamoderated in a Row</em> &mdash; your largest number of consecutive days metamodderating
+		<li><em>Comedian</em> &mdash; have a score:5 funny comment when the story gets archived
+		<li><em>Member of the {1,2,3,4,5} Digit UID Club</em> &mdash; really? You need an explanation?
+		<li><em>Posted a Comment</em> &mdash; posted a positive comment to a story
+		<li><em>Posted a Journal Entry</em> &mdash; yes, Slashdot users have journals
+		<li><em>The April Fool</em> &mdash; posted in the April fools story
+		<li><em>Spent All My Mod Points</em> &mdash; used 'em and didn't lose 'em
 		</ul>
 
 		<p><em><small>
 				Answered by: <a href="mailto:scuttlemonkey@slashdot.org">Scuttlemonkey</a><br>
-				Last Modified: 3/26/09
+				Last Modified: 04/29/09
 		</small></em></p>
 
 
