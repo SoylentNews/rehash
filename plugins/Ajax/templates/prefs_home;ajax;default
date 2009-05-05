@@ -17,16 +17,19 @@ __template__
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">
 
+
+
+
+
+
+
+
                 [% IF tabbed == 1 %]
-                <div style="margin-top: 1em; text-align: center;">
-                &nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Homepage</span>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false;">Slashboxes</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a>
+				<div class="pref">
+                <span class="preftab active">Homepage</span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false;">Slashboxes</a></span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a></span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a></span>
                 </div>
                 [% END %]
 
