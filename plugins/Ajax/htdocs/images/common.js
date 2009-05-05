@@ -520,6 +520,19 @@ function setfhfilter(text) {
 	return true;
 }
 
+function view_change_hide_show(view) {
+	var hide = { 	'daddypants': 'div.message',
+		   	'search': 'div.message'
+		   };
+	if (hide[view]) {
+		$(hide[view]).hide();
+	}
+	if (view != 'daddypants' && view!= 'search') {
+		$('div.message').show();
+	}
+	
+}
+
 var firehose_set_options;
 (function(){
 var	qw		= Slash.Util.qw,

@@ -2016,6 +2016,7 @@ sub genSetOptionsReturn {
 			$value ||= 0;
 		}
 		$data->{eval_first} .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
+		$data->{eval_first} .= "view_change_hide_show(firehose_settings.view);";
 	}
 	my $fh_is_admin =  $user->{is_admin} && !$opts->{usermode} ? 1 : 0;
 
