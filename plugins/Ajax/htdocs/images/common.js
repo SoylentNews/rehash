@@ -63,6 +63,7 @@ var vendor_popup_timerids = [];
 var vendor_popup_id = 0;
 var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
+var is_wk = ua.match("/AppleWebKit/");
 var firehose_exists = 0;
 
 // ads
@@ -952,9 +953,11 @@ $('#firehoselist a.more').
 		return true;
 	});
 
-anchor_fh_pag_menu(true);
-$(window).bind('resize', shorten_fh_pag_menu);
-$(window).bind('scroll', anchor_fh_pag_menu);
+	anchor_fh_pag_menu(true);
+	$(window).bind('resize', shorten_fh_pag_menu);
+	if (!is_ie) {
+		$(window).bind('scroll', anchor_fh_pag_menu);
+	}
 
 });
 
@@ -2829,37 +2832,39 @@ function shorten_fh_pag_menu_check() {
 }
 
 function anchor_fh_pag_menu(modified) {
-	var $fhl = $('#firehose'); // FH list
-	var $fft = $('#fh-pag-div'); // FH footer
-	var $pft = $('#ft'); // page footer
+	if (!is_ie) {
+		var $fhl = $('#firehose'); // FH list
+		var $fft = $('#fh-pag-div'); // FH footer
+		var $pft = $('#ft'); // page footer
 
-	var fhlbounds = new Bounds($fhl);
-	var fftbounds = new Bounds($fft);
-	var pftbounds = new Bounds($pft);
-	var winbounds = new Bounds(window);
+		var fhlbounds = new Bounds($fhl);
+		var fftbounds = new Bounds($fft);
+		var pftbounds = new Bounds($pft);
+		var winbounds = new Bounds(window);
 
-	var fhlvis = winbounds.bottom > fhlbounds.bottom; // && winbounds.top < fhlbounds.bottom;
-	var pftvis = winbounds.bottom > pftbounds.top;
+		var fhlvis = winbounds.bottom > fhlbounds.bottom; // && winbounds.top < fhlbounds.bottom;
+		var pftvis = winbounds.bottom > pftbounds.top;
 
-	// if bottom of FH list is above bottom of page, AND
-	// page footer is not visible, float the FH footer
-	// otherwise keep it at bottom of page above page footer 
-	if (fhlvis && !pftvis) {
-		if (!$fft.hasClass('float')) {
-			$fft.addClass('float');
-			modified = true;
-		}
-	} else {
-		if ($fft.hasClass('float')) {
-			$fft.removeClass('float');
-			modified = true;
+		// if bottom of FH list is above bottom of page, AND
+		// page footer is not visible, float the FH footer
+		// otherwise keep it at bottom of page above page footer 
+		if (fhlvis && !pftvis) {
+			if (!$fft.hasClass('float')) {
+				$fft.addClass('float');
+				modified = true;
+			}
+		} else {
+			if ($fft.hasClass('float')) {
+				$fft.removeClass('float');
+				modified = true;
+			}
 		}
 	}
 
 	if (modified) {
 		shorten_fh_pag_menu();
-		// Safari 3 hack.  hooray or something.
-		if (!$("div.paginatehidden").length) {
+		// Safari 3 hack.  hooray or something. any other platform need this?
+		if (is_wk && !$("div.paginatehidden").length) {
 			setTimeout('$("#fh-pag-div").hide()', 0);
 			setTimeout('$("#fh-pag-div").show()', 0);
 		}
