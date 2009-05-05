@@ -14,7 +14,7 @@ use Slash::Utility;
 use vars qw($VERSION @ISA);
 @ISA = qw(DynaLoader);
 $VERSION = '2.005';
-bootstrap Slash::Apache::Shtml $VERSION;
+#bootstrap Slash::Apache::Shtml $VERSION;
 
 # Of course renaming requires editing a .conf file (see
 # bin/install-slashsite PerlTransHandler).
