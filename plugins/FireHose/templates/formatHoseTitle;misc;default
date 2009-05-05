@@ -68,16 +68,13 @@ ELSIF item.type == "journal";
 		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=journal" title="Filter to journal"  class="skin">Journal:</a> ';
 
 END;
-onclick = "onclick=\"return toggle_fh_body_wrap_return(this, $adminmode)\"";
+onclick = "onclick=\"return toggle_fh_body_wrap_return(this, $adminmode);\"";
 IF !link_url;
 	link_url = firehose.linkFireHose(item);
 END;
 title_href=link_url;
 
 IF form.index || featured || view_mode;
-	IF (options.view == "stories"  && mode == "full");
-		onclick="";
-	END;
 	IF item.type == "story";
 		story = Slash.db.getStory(item.srcid);
 		link = Slash.linkStory({
