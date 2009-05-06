@@ -62,8 +62,8 @@ var fh_idle_skin = 0;
 var vendor_popup_timerids = [];
 var vendor_popup_id = 0;
 var ua=navigator.userAgent;
-var is_ie = ua.match("/MSIE/");
-var is_wk = ua.match("/AppleWebKit/");
+var is_ie = ua.match(/MSIE/);
+var is_wk = ua.match(/AppleWebKit/);
 var firehose_exists = 0;
 
 // ads
