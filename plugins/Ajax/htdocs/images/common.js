@@ -1403,6 +1403,94 @@ update_firehose_content = function( updates, sequence ){
 	Slash.busy('firehose-content', false);
 }
 
+
+var start_animation, stop_animation;
+(function(){
+var id=0, abort_fn, aborting=false;
+stop_animation = function( abort ){
+	if ( id && !aborting ) {
+		aborting = abort && abort_fn;
+
+		clearInterval(id);
+		id = 0;
+
+		aborting && abort_fn(true);
+		aborting = false;
+		return true;
+	}
+}
+start_animation = function( step_fn, interval, opt_abort_fn ){
+	// It's ok to stop the existing timer (abandoning pending), as those unhandled items will be picked up by the new loop.
+	stop_animation(true);
+	if ( interval ) {
+		id = setInterval(step_fn, interval);
+		abort_fn = opt_abort_fn;
+	}
+}
+})();
+
+var first_addition, last_removal, changes, changes_after;
+$(function(){
+first_addition	= new fhitems(true, '.data-add-ready:first');
+last_removal	= new fhitems(true, '.data-remove-ready:not(.currfh):last');
+changes			= new fhitems(true, '.data-add-ready,.data-remove-ready:not(.currfh)');
+changes_after	= new fhitems(true, undefined, 'nextAll', '.data-add-ready,.data-remove-ready:not(.currfh)');
+});
+
+function boundary_items(){
+	var y=new Bounds(window).bottom, above, below;
+	$('#firehoselist>div:visible').each(function(){
+		return $(this).offset().top<y ? (above=this) : (below=this, false);
+	});
+	return { above:above, below:below };
+}
+
+function all( $all, duration ){
+	var t=duration||0;
+	$all.each(function(){
+		var match=CHANGES_RE.exec(this.className), $item=match && $(this);
+		switch ( match && match[1] ) {
+			case 'add':		$item.fadeIn(t, function(){ $item.removeClass(MARK_ADDING).css('display', ''); }); break;
+			case 'remove':	$item.fadeOut(t, function(){ $item.remove(); }); break;
+		}
+	});
+	return $all;
+}
+
+function next( duration ){
+	var t=duration||0, edge_item=boundary_items();
+	return edge_item.below && !all(changes_after(edge_item.above))
+		|| all(first_addition(), t).length
+		|| all(last_removal(), t).length;
+}
+
+animate_firehose_changes = function( interval, duration, complete_fn ){
+
+	function complete( aborting ){
+		Slash.busy('firehose-animation', false);
+		if ( !aborting ) {
+			stop_animation();
+			complete_fn && complete_fn();
+		}
+		Slash.busy('firehose-update', false);
+		return false;
+	}
+
+	function step(){
+		return next(duration) || complete();
+	}
+
+	Slash.busy('firehose-animation', true);
+	stop_animation(true);
+
+	if ( interval ) {
+		step() && start_animation(step, interval, complete);
+	} else {
+		all(changes());
+		complete();
+	}
+}
+
 })();
 
 function firehose_handle_update() {
