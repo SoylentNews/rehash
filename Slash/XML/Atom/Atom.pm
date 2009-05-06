@@ -195,10 +195,7 @@ sub as_atom_1_0 {
 		$val = $self->{channel}{selflink};
 	} elsif ($ENV{REQUEST_URI}) {
 		(my $host = $ENV{HTTP_HOST}) =~ s/:\d+$//;
-		my $scheme = defined &Slash::Apache::ConnectionIsSSL
-	        	     && Slash::Apache::ConnectionIsSSL()
-			? 'https'
-			: 'http';
+		my $scheme = apacheConnectionSSL ? 'https' : 'http';
 		$val = $self->encode("$scheme://$host$ENV{REQUEST_URI}");
 	}
 	$output .= qq[<link rel="self" href="$val"/>\n] if $val;

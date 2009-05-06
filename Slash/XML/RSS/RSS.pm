@@ -166,12 +166,11 @@ sub create {
 		encoding	=> $encoding,
 	);
 
-	my $dynamic = 0;
-	my $absolutedir = $gSkin->{absolutedir};
-	if (defined &Slash::Apache::ConnectionIsSSL) {
-		$dynamic = 1;
-		$absolutedir = $gSkin->{absolutedir_secure} if Slash::Apache::ConnectionIsSSL();
-	}
+	# A convenient way to tell whether our caller is apache.
+	# Seems like there should be a better-supported way, but this
+	# way is convenient.
+	my $dynamic = defined &Slash::Apache::ConnectionIsSSL;
+	my $absolutedir = apacheConnectionSSL ? $gSkin->{absolutedir_secure} : $gSkin->{absolutedir};
 
 	# set defaults
 	my %channel = (

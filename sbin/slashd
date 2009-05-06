@@ -229,7 +229,7 @@ sub update_static {
 		|| $my_time > $last_static_update + 30) {
 		my $old_panic = $constants->{panic} || 0;
 		sleep 5 until $slashdb->sqlConnect();
-		createCurrentStatic($slashdb->getSlashConf());
+		createCurrentStatic($slashdb->getSlashConf(0), $slashdb->getSlashConf(1));
 		$constants = getCurrentStatic();
 		$last_static_update = $my_time;
 		if ($old_panic != $constants->{panic}) {

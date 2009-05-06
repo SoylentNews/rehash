@@ -108,6 +108,8 @@ our @EXPORT  = qw(
 	get_srcid_vis
 	decode_srcid_prependbyte
 
+	apacheConnectionSSL
+
 );
 
 use constant DST_HR  => 0;
@@ -117,7 +119,7 @@ use constant DST_MON => 3;
 
 # These are file-scoped variables that are used when you need to use the
 # set methods when not running under mod_perl
-my($static_user, $static_form, $static_constants, $static_site_constants, 
+my($static_user, $static_form, $static_constants, $static_constants_secure,
 	$static_db, $static_anonymous_coward, $static_cookie,
 	$static_virtual_user, $static_objects, $static_cache, $static_hostname,
 	$static_skin);
@@ -736,24 +738,20 @@ MEMBER is passed in then only its value will be returned.
 =cut
 
 sub getCurrentStatic {
-	my($value) = @_;
+	my($value, $force_secure) = @_;
+	my $want_secure = defined($force_secure)
+		? $force_secure
+		: apacheConnectionSSL();
 
 	my $constants;
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-## XXXSKIN - this should probably go away, along with SlashSectionHost,
-## SlashSetFormHost, and SlashSetVarHost in Slash::Apache, except ...
-#		my $hostname = $r->header_in('host');
-#		$hostname =~ s/:\d+$//;
-#		if ($const_cfg->{'site_constants'}{$hostname}) { 
-#			$constants = $const_cfg->{site_constants}{$hostname};
-#		} else {
-## XXXSKIN - ... this would be the one line to keep
-			$constants = $const_cfg->{'constants'};
-#		}
+		$constants = $want_secure
+			? $const_cfg->{constants_secure} : $const_cfg->{constants};
 	} else {
-		$constants = $static_constants;
+		$constants = $want_secure
+			? $static_constants_secure : $static_constants;
 	}
 
 	return defined $value ? $constants->{$value} : $constants;
@@ -787,8 +785,7 @@ Returns no value.
 =cut
 
 sub createCurrentStatic {
-	($static_constants) = @_;
-	$static_site_constants = $_[1] if defined $_[1];
+	($static_constants, $static_constants_secure) = @_;
 }
 
 #========================================================================
@@ -796,8 +793,9 @@ sub createCurrentStatic {
 =head2 createCurrentHostname(HOSTNAME)
 
 Allows you to set a host so that constants will behave properly.
-This is used as a key into %$static_site_constants so that a single
-Apache process can serve multiple Slash sites.
+( This is not true or never implemented as far as I know, Jamie 2009-04:
+"This is used as a key into %$static_site_constants so that a single
+Apache process can serve multiple Slash sites." )
 
 =over 4
 
@@ -2745,7 +2743,8 @@ sub createEnvironment {
 	createCurrentForm(filter_params(\%form));
 
 	my $slashdb = Slash::DB->new($virtual_user);
-	my $constants = $slashdb->getSlashConf();
+	my $constants = $slashdb->getSlashConf(0);
+	my $constants_secure = $slashdb->getSlashConf(1);
 
 	########################################
 	# Skip the nonsense that used to be here.  Previously we
@@ -2770,7 +2769,7 @@ sub createEnvironment {
 
 	# We assume that the user for scripts is the anonymous user
 	createCurrentDB($slashdb);
-	createCurrentStatic($constants);
+	createCurrentStatic($constants, $constants_secure);
 
 	# The current anonymous coward may end up changing later,
 	# if a new skin is assigned, and the current user may end up
@@ -3351,6 +3350,21 @@ sub get_srcid_vis {
 	return $srcid if $type eq 'uid';
 	my $vislen = getCurrentStatic('id_md5_vislength') || 5;
 	return substr($srcid, 2, $vislen);
+}
+
+#========================================================================
+
+=head2 apacheConnectionSSL
+
+Returns true if the current code is running as part of a web request
+(as opposed to e.g. from slashd) and if that request was made over
+Secure HTTP as defined in Slash::Apache.
+
+=cut
+
+sub apacheConnectionSSL {
+	return defined &Slash::Apache::ConnectionIsSSL
+		&& Slash::Apache::ConnectionIsSSL();
 }
 
 #========================================================================

@@ -43,7 +43,8 @@ my $virtuser = $opts{u} || 'slash';
 createEnvironment($virtuser);
 my @dotfiles = ( );
 my $slashdb = getCurrentDB();
-my $constants = getCurrentStatic();
+my $constants        = getCurrentStatic(undef, 0);
+my $constants_secure = getCurrentStatic(undef, 1);
 my $install = Slash::Install->new($virtuser);
 
 # This will read all the themes and all the plugins available for this
@@ -66,7 +67,11 @@ my $plugin_list = $install->_getList(
 );
 
 sub template_process {
-	my($include_path, $filelist, $destpath) = @_;
+	my($include_path, $filelist, $destpath, $destpath_secure) = @_;
+	if (!$destpath_secure)  {
+		$destpath_secure = $destpath;
+		$destpath_secure =~ s/\.(\w+)$/\.ssl\.$1/;
+	}
 	my $glob_template = Template->new({
 		INCLUDE_PATH	=> $include_path,
 		PROCESS		=> $filelist,
@@ -76,6 +81,8 @@ sub template_process {
 		INTERPOLATE	=> 0,
 	}) || die "$Template::ERROR\n";
 	$glob_template->process($filelist->[0], { constants => $constants }, $destpath)
+		|| die $glob_template->error(), "\n";
+	$glob_template->process($filelist->[0], { constants => $constants_secure }, $destpath_secure)
 		|| die $glob_template->error(), "\n";
 	return $destpath;
 }
@@ -190,7 +197,7 @@ for my $subdir (sort keys %theme_subdir_files) {
 			next;
 		}
 		my $site_file_abs_dot = dotfile($site_file_abs);
-		my $site_file_abs_dot_short = dotfile($site_rel_file);
+		my $site_file_dot_short = dotfile($site_rel_file);
 		# At this point, $site_file_abs is e.g.
 		# '/usr/local/slash/site/mysite/tasks/spamarmor.pl'
 		# $site_file_abs_dot is e.g.
@@ -204,6 +211,8 @@ for my $subdir (sort keys %theme_subdir_files) {
 		if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
 			my $destfile = $theme_file_abs;
 			$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
+			my $destfile_secure = $theme_file_abs;
+			$destfile_secure =~ s/\.\Q$filetype\E$/.$virtuser.ssl.$cookedtype/;
 			# If a minified that's handled in a glob, skip it here
 			my $in_glob = 0;
 			for my $g (keys %{ $theme_hr->{'glob'} }) {
@@ -213,7 +222,7 @@ for my $subdir (sort keys %theme_subdir_files) {
 				$f_minified =~ s/\.(\w+raw)$/-minified.$1/;
 				$in_glob = 1 if $target_file eq $f || $target_file eq $f_minified;
 			}
-			template_process($theme_dir, [ $target_file ], $destfile) unless $in_glob;
+			template_process($theme_dir, [ $target_file ], $destfile, $destfile_secure) unless $in_glob;
 		}
 		$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 	}
@@ -244,7 +253,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 				next;
 			}
 			my $site_file_abs_dot = dotfile($site_file_abs);
-			my $site_file_abs_dot_short = dotfile($site_rel_file);
+			my $site_file_dot_short = dotfile($site_rel_file);
 			# At this point, $site_file_abs is e.g.
 			# '/usr/local/slash/site/mysite/tasks/adminmail.pl'
 			# $site_file_abs_dot is e.g.
@@ -258,6 +267,8 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
 				my $destfile = $plugin_file_abs;
 				$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
+				my $destfile_secure = $plugin_file_abs;
+				$destfile_secure =~ s/\.\Q$filetype\E$/.$virtuser.ssl.$cookedtype/;
 				# If a minified that's handled in a glob, skip it here
 				my $in_glob = 0;
 				for my $g (keys %{ $theme_hr->{'glob'} }) {
@@ -267,7 +278,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 					$f_minified =~ s/\.(\w+raw)$/-minified.$1/;
 					$in_glob = 1 if $target_file eq $f || $target_file eq $f_minified;
 				}
-				template_process($plugin_dir, [ $target_file ], $destfile) unless $in_glob;
+				template_process($plugin_dir, [ $target_file ], $destfile, $destfile_secure) unless $in_glob;
 			}
 			$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 		}
@@ -292,18 +303,10 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
 		$destpath = "$path$name.$virtuser$suffix";
-		my @cooked_filelist = ( );
-		for my $file (@filelist) {
-			my($filetype) = $file =~ /\.(\w+)$/;
-			if (my($cookedtype) = $filetype =~ /^(\w+)raw$/) {
-				my $destfile = $file;
-				$destfile =~ s/\.\Q$filetype\E$/.$virtuser.$cookedtype/;
-				push @cooked_filelist, $destfile;
-			} else {
-				push @cooked_filelist, $file;
-			}
-		}
-		template_process($theme_or_plugin->{dir}, \@cooked_filelist, $destpath);
+		my $destpath_secure = "$path$name.$virtuser.ssl$suffix";
+		# XXX actually I think we want the raw files here, to avoid double-processing, right?
+		# Update 2009-04: Right.
+		template_process($theme_or_plugin->{dir}, \@filelist, $destpath, $destpath_secure);
 
 		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
 		my $compress = '';
@@ -323,38 +326,52 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		# (JavaScript::Minifier is a requirement in the Slash bundle)
 		if ($suffix eq '.js') {
 			my($min_src, $min_dest);
-			open $min_src, '<', $destpath;
-			my $minified_name = "${path}${name}-minified.$virtuser.js";
-			open $min_dest, '>', $minified_name;
-
-			if ( $compress && system("$compress $destpath -o $minified_name")==0 ) {
-				print "symlink-tool: $compress \"$destpath\" -o \"$minified_name\"\n" if $verbose;
-			} elsif (JavaScript::Minifier->can('jsmin')) {
-				JavaScript::Minifier::jsmin($min_src, $min_dest);
-				print "symlink-tool: JavaScript::Minifier::jsmin(\"$destpath\", \"$minified_name\")\n" if $verbose;
-			} elsif (JavaScript::Minifier->can('minify')) {
-				&JavaScript::Minifier::minify(
-					input => $min_src, outfile => $min_dest
-				);
-				print "symlink-tool: JavaScript::Minifier::minify(input=>\"$destpath\", outfile=>\"$minified_name\")\n" if $verbose;
-			} else {
-				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
+			my %to_link = (
+				$destpath,        "${path}${name}-minified.$virtuser.js",
+				$destpath_secure, "${path}${name}-minified.$virtuser.ssl.js",
+			);
+			for my $dp (sort keys %to_link) {
+				open $min_src, '<', $dp;
+				my $minified_name = $to_link{$dp};
+				open $min_dest, '>', $minified_name;
+				if ( $compress && system("$compress $dp -o $minified_name")==0 ) {
+					print "symlink-tool: $compress $dp -o $minified_name\n" if $verbose;
+				} elsif (JavaScript::Minifier->can('jsmin')) {
+					JavaScript::Minifier::jsmin($min_src, $min_dest);
+					print "symlink-tool: JavaScript::Minifier::jsmin($dp, $minified_name)\n" if $verbose;
+				} elsif (JavaScript::Minifier->can('minify')) {
+					&JavaScript::Minifier::minify(
+						input => $min_src, outfile => $min_dest
+					);
+					print "symlink-tool: JavaScript::Minifier::minify(input=>$dp, outfile=>$minified_name)\n" if $verbose;
+				} else {
+					die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
+				}
+				close $min_src;
+				close $min_dest;
 			}
 		}
 
 		# ...similarly for CSS, I'll also make a `csstidied' version
 		# (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
 		elsif ($suffix eq '.css') {
-		  my $tidiedpath = "${path}${name}-tidied.$virtuser.css";
-		  # create a `tidied' version of css globs if csstidy is available,
-		  #   else the tidied version is just a link to the original concatenation
-		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
-			if ( $compress && system("$compress $destpath -o $tidiedpath")==0 ) {
-				print "symlink-tool: $compress \"$destpath\" -o \"$tidiedpath\"\n" if $verbose;
-			} elsif ( system("csstidy $destpath --silent=true --template=high $tidiedpath")==0 ) {
-				print "symlink-tool: csstidy \"$destpath\" --silent=true --template=high \"$tidiedpath\"\n" if $verbose;
-			} else {
-				symlink("$destpath", "$tidiedpath");
+			my %to_link = (
+				$destpath,        "${path}${name}-tidied.$virtuser.css",
+				$destpath_secure, "${path}${name}-tidied.$virtuser.ssl.css",
+			);
+			for my $dp (sort keys %to_link) {
+				my $tidiedpath = $to_link{$dp};
+				# create a `tidied' version of css globs if csstidy is available,
+				#   else the tidied version is just a link to the original concatenation
+				# consider: allow custom install dir for csstidy?
+				# like sbindir, datadir, hc_fontpath, et al.?
+				if ( $compress && system("$compress $dp -o $tidiedpath")==0 ) {
+					print "symlink-tool: $compress $dp -o $tidiedpath\n" if $verbose;
+				} elsif ( system("csstidy $dp --silent=true --template=high $tidiedpath")==0 ) {
+					print "symlink-tool: csstidy $dp --silent=true --template=high $tidiedpath\n" if $verbose;
+				} else {
+					symlink($dp, $tidiedpath);
+				}
 			}
 		}
 	}
@@ -370,9 +387,11 @@ for my $subdir (sort keys %theme_subdir_files) {
 		# "site/foo" tree.
 		my $theme_file_abs = canonpath(catfile($theme_dir, $target_file));
 		1 while $theme_file_abs =~ s{/[^/]+/\.\.}{};
-		$theme_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/
-			or $theme_file_abs =~ s/-tidied\.css/-tidied.$virtuser.css/
-			or $theme_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
+		my $has_virtuser = 0;
+		$has_virtuser = 1 if
+			$theme_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/
+				or $theme_file_abs =~ s/-tidied\.css/-tidied.$virtuser.css/
+				or $theme_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 		$site_rel_file =~ s/\.(\w+)raw$/.$1/;
@@ -386,19 +405,31 @@ for my $subdir (sort keys %theme_subdir_files) {
 			}
 			next;
 		}
+
 		my $site_file_abs_dot = dotfile($site_file_abs);
-		my $site_file_abs_dot_short = dotfile($site_rel_file);
+		my $site_file_dot_short = dotfile($site_rel_file);
 		# At this point, $site_file_abs is e.g.
 		# '/usr/local/slash/site/mysite/tasks/spamarmor.pl'
 		# $site_file_abs_dot is e.g.
 		# '/usr/local/slash/site/mysite/tasks/.spamarmor.pl'
 		# $theme_file_abs is e.g.
 		# '/usr/local/slash/theme/slashcode/tasks/spamarmor.pl'
-
 		$num_changes += handle_file($site_file_abs, $theme_file_abs,
-			$site_file_abs_dot, $site_file_abs_dot_short,
+			$site_file_abs_dot, $site_file_dot_short,
 			$site_file_abs_wrong);
 		$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
+
+		my $site_rel_file_secure = $site_rel_file;
+		if ($has_virtuser && $site_rel_file_secure =~ s/\.(css|js)$/.ssl.$1/) {
+			my($site_file_abs_secure, $site_file_abs_secure_wrong) =
+				get_right_and_wrong_file_abs($site_rel_file_secure,
+					$theme_css_use_imagedir{$target_file});
+			my $theme_file_abs_secure = $theme_file_abs;
+			$theme_file_abs_secure =~ s/\.(css|js)$/.ssl.$1/;
+			$num_changes += handle_file($site_file_abs_secure, $theme_file_abs_secure,
+				$site_file_abs_dot, $site_file_dot_short,
+				$site_file_abs_secure_wrong);
+		}
 	}
 }
 for my $plugin (sort keys %plugin_subdir_files) {
@@ -410,9 +441,11 @@ for my $plugin (sort keys %plugin_subdir_files) {
 		for my $target_file (@files) {
 			my $plugin_file_abs = canonpath(catfile($plugin_dir, $target_file));
 			1 while $plugin_file_abs =~ s{/[^/]+/\.\.}{};
-			$plugin_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/
-				or $plugin_file_abs =~ s/-tidied\.css/-tidied.$virtuser.css/
-				or $plugin_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
+			my $has_virtuser = 0;
+			$has_virtuser = 1 if
+				$plugin_file_abs =~ s/\.(\w+)raw$/.$virtuser.$1/
+					or $plugin_file_abs =~ s/-tidied\.css/-tidied.$virtuser.css/
+					or $plugin_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
 			my $site_rel_file = $target_file;
 			1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 			$site_rel_file =~ s/\.cssraw$/.css/;
@@ -431,7 +464,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 				next;
 			}
 			my $site_file_abs_dot = dotfile($site_file_abs);
-			my $site_file_abs_dot_short = dotfile($site_rel_file);
+			my $site_file_dot_short = dotfile($site_rel_file);
 			# At this point, $site_file_abs is e.g.
 			# '/usr/local/slash/site/mysite/tasks/adminmail.pl'
 			# $site_file_abs_dot is e.g.
@@ -440,9 +473,21 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# '/usr/local/slash/plugin/Stats/adminmail.pl'
 
 			$num_changes += handle_file($site_file_abs, $plugin_file_abs,
-				$site_file_abs_dot, $site_file_abs_dot_short,
+				$site_file_abs_dot, $site_file_dot_short,
 				$site_file_abs_wrong);
 			$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
+
+			my $site_rel_file_secure = $site_rel_file;
+			if ($has_virtuser && $site_rel_file_secure =~ s/\.(css|js)$/.ssl.$1/) {
+				my($site_file_abs_secure, $site_file_abs_secure_wrong) =
+					get_right_and_wrong_file_abs($site_rel_file_secure,
+						$plugin_css_use_imagedir{$target_file});
+				my $plugin_file_abs_secure = $plugin_file_abs;
+				$plugin_file_abs_secure =~ s/\.(css|js)$/.ssl.$1/;
+				$num_changes += handle_file($site_file_abs_secure, $plugin_file_abs_secure,
+					$site_file_abs_dot, $site_file_dot_short,
+					$site_file_abs_secure_wrong);
+			}
 		}
 	}
 }

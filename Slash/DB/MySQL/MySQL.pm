@@ -482,6 +482,7 @@ sub getCSS {
 	my $skin = getCurrentSkin('name');
 	my $admin = $user->{is_admin};
 	my $theme = ($user->{simpledesign} || $user->{pda}) ? "light" : $user->{css_theme};
+	my $secure = apacheConnectionSSL();
 	$layout ||= '';
 	my $constants = getCurrentStatic();
 
@@ -499,9 +500,9 @@ sub getCSS {
 	my $css_layouts_ref	= $self->{_css_layouts_cache};
 
 	$css_pages_ref = $self->getCSSValuesHashForCol('page') if !$css_pages_ref;
-	$css_skins_ref = $self->getCSSValuesHashForCol('skin')   if !$css_skins_ref;
-	$css_themes_ref= $self->getCSSValuesHashForCol('theme') if !$css_themes_ref;
-	$css_layouts_ref= $self->getCSSValuesHashForCol('layout') if !$css_layouts_ref;
+	$css_skins_ref = $self->getCSSValuesHashForCol('skin') if !$css_skins_ref;
+	$css_themes_ref = $self->getCSSValuesHashForCol('theme') if !$css_themes_ref;
+	$css_layouts_ref = $self->getCSSValuesHashForCol('layout') if !$css_layouts_ref;
 
 	my $lowbandwidth = ($user->{lowbandwidth} || $user->{pda}) ? "yes" : "no";
 
@@ -510,8 +511,8 @@ sub getCSS {
 	$theme  = '' if !$css_themes_ref->{$theme};
 	$layout = '' if !$css_layouts_ref->{$layout};
 
-	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}
-		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout};
+	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}{$secure}
+		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}{$secure};
 
 	my @clauses;
 
@@ -536,9 +537,13 @@ sub getCSS {
 	my $where = "css.ctid=css_type.ctid AND ";
 	$where .= join ' AND ', @clauses;
 
-	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond,skin", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
+	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond,skin",
+		"css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
+	if ($secure) {
+		for my $hr (@$css) { $hr->{file} =~ s/\.css/.ssl.css/ }
+	}
 	
-	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout} = $css;
+	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}{$secure} = $css;
 	return $css;
 }
 
@@ -8202,7 +8207,8 @@ sub getSignoffsInLastMinutes {
 
 ########################################################
 sub _getSlashConf_rawvars {
-	my($self) = @_;
+	my($self, $secure) = @_;
+	$secure = $secure ? 1 : 0;
 	my $vu = $self->{virtual_user};
 	return undef unless $vu;
 	my $mcd = $self->getMCD({ no_getcurrentstatic => 1 });
@@ -8210,7 +8216,7 @@ sub _getSlashConf_rawvars {
 	my $got_from_memcached = 0;
 	my $vars_hr;
 	if ($mcd) {
-		$mcdkey = "$self->{_mcd_keyprefix}:vars";
+		$mcdkey = "$self->{_mcd_keyprefix}:vars$secure";
 		if ($vars_hr = $mcd->get($mcdkey)) {
 			$got_from_memcached = 1;
 		}
@@ -8229,11 +8235,11 @@ sub _getSlashConf_rawvars {
 # cache elsewhere (namely in %Slash::Apache::constants) - Brian
 # I'm caching this in memcached now though. - Jamie
 sub getSlashConf {
-	my($self) = @_;
+	my($self, $secure) = @_;
 
 	# Get the raw vars data (possibly from a memcached cache).
 
-	my $vars_hr = $self->_getSlashConf_rawvars();
+	my $vars_hr = $self->_getSlashConf_rawvars($secure);
 	return if !defined $vars_hr;
 	my %conf = %$vars_hr;
 
@@ -8271,12 +8277,21 @@ sub getSlashConf {
 		# same as absolutedir.  Same for imagedir_secure.
 	$conf{absolutedir_secure} ||= $conf{absolutedir};
 	$conf{imagedir_secure}	||= $conf{imagedir};
+	$conf{css_extension}      = 'css';
+#	if (defined &Slash::Apache::ConnectionIsSSL && Slash::Apache::ConnectionIsSSL())
+	if ($secure) {
+		# On Secure HTTP connections, force absolutedir/imagedir to
+		# be the secure versions.
+		$conf{imagedir} = $conf{imagedir_secure};
+		$conf{absolutedir} = $conf{absolutedir_secure};
+		$conf{css_extension} = 'ssl.css';
+	}
 	$conf{cssdir}           ||= $conf{css_use_imagedir} ? $conf{imagedir} : $conf{rootdir};
+	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";
 	$conf{adminmail_mod}	||= $conf{adminmail};
 	$conf{adminmail_post}	||= $conf{adminmail};
 	$conf{adminmail_ban}	||= $conf{adminmail};
 	$conf{basedir}		||= "$conf{datadir}/public_html";
-	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";
 	$conf{index_handler}	||= 'index.pl';
 	$conf{cookiepath}	||= URI->new($conf{rootdir})->path . '/';
 	$conf{maxkarma}		  =  999 unless defined $conf{maxkarma};
@@ -8308,7 +8323,7 @@ sub getSlashConf {
 	# everywhere this won't matter, but still should be do
 	# it for the others, since they are URL paths
 	# -- pudge
-	for (qw[rootdir absolutedir imagedir basedir]) {
+	for (qw[rootdir absolutedir imagedir imagedir_secure basedir]) {
 		$conf{$_} =~ s|/+$||;
 	}
 
