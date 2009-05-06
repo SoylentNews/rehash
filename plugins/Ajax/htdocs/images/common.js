@@ -61,9 +61,6 @@ var fh_colors = [];
 var fh_idle_skin = 0;
 var vendor_popup_timerids = [];
 var vendor_popup_id = 0;
-var ua=navigator.userAgent;
-var is_ie = ua.match(/MSIE/);
-var is_wk = ua.match(/AppleWebKit/);
 var firehose_exists = 0;
 
 // ads
@@ -955,7 +952,7 @@ $('#firehoselist a.more').
 
 	anchor_fh_pag_menu(true);
 	$(window).bind('resize', shorten_fh_pag_menu);
-	if (!is_ie) {
+	if (!$.browser.msie) {
 		$(window).bind('scroll', anchor_fh_pag_menu);
 	}
 
@@ -2832,7 +2829,7 @@ function shorten_fh_pag_menu_check() {
 }
 
 function anchor_fh_pag_menu(modified) {
-	if (!is_ie) {
+	if (!$.browser.msie) {
 		var $fhl = $('#firehose'); // FH list
 		var $fft = $('#fh-pag-div'); // FH footer
 		var $pft = $('#ft'); // page footer
@@ -2864,7 +2861,7 @@ function anchor_fh_pag_menu(modified) {
 	if (modified) {
 		shorten_fh_pag_menu();
 		// Safari 3 hack.  hooray or something. any other platform need this?
-		if (is_wk && !$("div.paginatehidden").length) {
+		if ($.browser.safari && !$("div.paginatehidden").length) {
 			setTimeout('$("#fh-pag-div").hide()', 0);
 			setTimeout('$("#fh-pag-div").show()', 0);
 		}
