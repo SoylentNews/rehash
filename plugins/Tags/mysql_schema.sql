@@ -11,6 +11,7 @@ CREATE TABLE tags (
 	KEY tagnameid (tagnameid),
 	KEY globjid_tagnameid (globjid, tagnameid),
 	KEY uid_globjid_tagnameid_inactivated (uid, globjid, tagnameid, inactivated),
+	KEY uid_tagnameid_globjid_inactivated (uid, tagnameid, globjid, inactivated),
 	KEY created_at (created_at)
 ) TYPE=InnoDB;
 

@@ -122,7 +122,7 @@ sub createTag {
 		# preceding the one just inserted with matching the
 		# criteria.  If so, the insert is rolled back and
 		# 0 is returned.
-		# Because of the uid_globjid_tagnameid_inactivated index,
+		# Because of the uid_tagnameid_globjid_inactivated index,
 		# this should, I believe, not even touch table data,
 		# so it should be very fast.
 		# XXX Might want to make it faster by doing this
@@ -860,6 +860,34 @@ sub addTagnameDataToHashrefArray {
 			$hr->{$key} = $d->{$key};
 		}
 	}
+}
+
+sub getMostRecentGlobjidTagged {
+	my($self, $options) = @_;
+	my $uid = undef;
+	if ($options->{uid}) {
+		$uid = $options->{uid};
+		return undef unless $uid =~ /^\d+$/;
+	}
+	my $tagnameid = undef;
+	if ($options->{tagnameid}) {
+		$tagnameid = $options->{tagnameid};
+	} elsif ($options->{tagname}) {
+		$tagnameid = $self->getTagnameidFromNameIfExists($options->{tagname});
+		# If the tagname's never been used, nothing has been tagged with it.
+		return undef unless $tagnameid;
+	}
+	my @where = ( );
+	push @where, 'inactivated IS NULL';
+	push @where, "uid=$uid" if $uid;
+	push @where, "tagnameid=$tagnameid" if $tagnameid;
+	# Whether uid or tagnameid or both or neither is specified, the
+	# tagnameid index, the uid_tagnameid_globjid_inactivated index,
+	# or (I believe) the created_at index should make this not a
+	# table scan.
+	return $self->sqlSelect('globjid', 'tags',
+		join(' AND ', @where),
+		'ORDER BY created_at DESC LIMIT 1');
 }
 
 # XXX memcached here would be good
