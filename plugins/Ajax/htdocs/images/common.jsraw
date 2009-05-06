@@ -43,7 +43,7 @@ var firehose_settings = {};
   firehose_settings.metamod = 0;
   firehose_settings.admin_filters = 0;
   firehose_sitename = "";
-  firehose_slogan =""; 
+  firehose_slogan ="";
 
 // Settings to port out of settings object
   firehose_item_count = 0;
@@ -375,7 +375,7 @@ function toggle_fh_body_wrap_return( any, unused, /*optional:*/toggle_to, dont_n
 		return true;
 	}
 
-	toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ); 
+	toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next );
 	return false;
 }
 
@@ -500,7 +500,7 @@ function addfhfilter(text) {
 		return false;
 	}
 	return true;
-} 
+}
 
 function setfhfilter(text) {
 	if (has_hose()) {
@@ -512,7 +512,7 @@ function setfhfilter(text) {
 
 function view_change_hide_show(view) {
 	var hide = { 	'daddypants': 'div.message',
-		   	'search': 'div.message'
+			'search': 'div.message'
 		   };
 	if (hide[view]) {
 		$(hide[view]).hide();
@@ -520,7 +520,7 @@ function view_change_hide_show(view) {
 	if (view != 'daddypants' && view!= 'search') {
 		$('div.message').show();
 	}
-	
+
 }
 
 var firehose_set_options;
@@ -610,7 +610,7 @@ firehose_set_options = function(name, value, context) {
 
 	if ( start_over[name] ) {
 		view($('body'), { speed:0 });
-	} 
+	}
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
 		$('div.paginate').
@@ -705,7 +705,7 @@ function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 				$fhitem.data('tags-opened-body', true);
 			}
 		}
-	
+
 		setFirehoseAction();
 		want_expanded && $fhitem[0].fetch_tags();
 
@@ -1173,10 +1173,10 @@ function adsToggle(val) {
 	params.op = 'enable_maker_adless';
 	if (!val) {
 		params.off = 1;
-	} 
+	}
 	params.reskey = reskey_static;
 	ajax_update(params, '', { onComplete: json_handler });
-	
+
 }
 
 var update_firehose_content, animate_firehose_changes;
@@ -2131,7 +2131,7 @@ function getModalPrefs(section, title, tabbed, params){
 function firehose_get_media_popup(id) {
 	$any('preference_title').html('Media');
 	show_modal_box();
-	$any('modal_box_content').html("<h4>Loading...</h4><img src='/images/spinner_large.gif'>");
+	$any('modal_box_content').html("<h4>Loading...</h4><img src='[% constants.imagedir %]/spinner_large.gif'>");
 	ajax_update({
 		op:	'firehose_get_media',
 		id:	id
@@ -2796,7 +2796,7 @@ function shorten_fh_pag_menu() {
 				if (shorten_fh_pag_menu_check() < 0) {
 					$($spans[0]).hide();
 				}
-				return;				
+				return;
 			} else {
 				return;
 			}
@@ -2825,7 +2825,7 @@ function shorten_fh_pag_menu_check() {
 		return -1;
 	} else {
 		return 1;
-	}	
+	}
 }
 
 function anchor_fh_pag_menu(modified) {
