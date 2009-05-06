@@ -208,9 +208,7 @@ function fhitems( o ){
 	return this.__typeOf===fhitems.fn.__typeOf ? fn : fn();
 }
 (function(){
-var	sx = { root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' },
-	$root = $([]);	// Don't cache sx.root until it actually exists...
-$(function(){ $root = $(sx.root); });
+var	$root, sx={ root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' };
 fhitems.fn = fhitems.prototype = {
 	__typeOf: function(){ return 'fhitems'; },
 	init: function( o ){
@@ -280,6 +278,17 @@ function normalize_options(){
 
 	return o;
 }
+
+$(function(){
+	var IDLE_ROOT = 'data-fhitems-root';
+	if ( $('div.head>div.article[id^=firehose-]').length ) {
+		// For Idle, the marquee item qualifies --- but don't expect 'next', et al, to
+		// bridge the gap).
+		$('#firehoselist,div.head').addClass(IDLE_ROOT);
+		sx.root = 'div.'+IDLE_ROOT;
+	}
+	$root = $(sx.root);
+});
 })();
 
 
