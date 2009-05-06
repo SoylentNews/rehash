@@ -1187,6 +1187,23 @@ function adsToggle(val) {
 	
 }
 
+var update_firehose_content, animate_firehose_changes;
+(function(){
+var	MARK_ADDING			= 'data-add-ready',
+	MARK_REMOVING		= 'data-remove-ready',
+
+	MAX_OFFSCREEN_CHUNK	= 5,
+
+	CHANGES_RE			= /\bdata-(add|remove)-ready\b/;
+
+
+var	D=document, U=void(0), $FHL, FHL;
+$(function(){
+	$FHL = $any('firehoselist'); FHL=$FHL[0];
+});
+
+
+
 function Run(){ return this; }
 Run.prototype = {
 	head:	function(){ return this._run[ 0 ]; },
@@ -1267,6 +1284,126 @@ DocumentFragmentRun.prototype = $.extend(new Run, {
 	insertBefore:	function( next ){ next.parentNode.insertBefore(this._fragment, next); },
 	insertLast:		function( parent ){ parent.appendChild(this._fragment); }
 });
+
+
+
+function insert_runs_after( prev_run, runs ){
+	// |prev_run| is already in place.  While we can find a run in |runs| that matches
+	// the current tail: insert that new run in place, now match against _that_ tail.
+
+	var next_run, tail_id, after_el;
+	while ( prev_run && (tail_id=prev_run.tailId()) && (next_run=runs[tail_id]) ) {
+		next_run.insertAfter(prev_run.tail())
+		prev_run = next_run;
+	}
+}
+
+
+function prepare( html ){
+	return $(html).addClass(MARK_ADDING).css('display', 'none')[0];
+}
+
+update_firehose_content = function( updates, sequence ){
+	// Assert: FHL, $FHL.length
+
+	// |updates| is a collection of instructions for adding and removing items.
+	// |sequence| is an ordered list of ids (well... id fragments anyway) representing
+	// the desired final order of the actual items within the hose.
+
+	// This function adds new, removes old (well... marks for later removal), and
+	// re-orders existing items to conform to |sequence|.  We only add items here.
+	// Animation and removal are handled by <FIXME: what routine animates?>.
+
+	if ( !(updates && updates.length || sequence && sequence.length) ) {
+		return;
+	}
+	// There are (probably content) changes: warn anyone who cares.
+	Slash.busy('firehose-content', true);
+
+
+
+	// Algorithm:
+
+	// An item mentioned in |sequence| is "out-of-order" if it doesn't immediately
+	// follow (ignoring items _not_ mentioned) the thing |sequence| says it should. A
+	// "run" is a sequence of in-order items; a maximal run obviously starts with an
+	// out-of-order item (or else the very first item in the hose).  Reorder the whole
+	// thing by matching run-heads to the right tails.
+
+	// We build a dictionary of maximal runs, |loose_runs|, indexed by the ids of the
+	// tails they need to follow.  Roll insertion of new items into the reorder by
+	// providing those new items in runs.
+
+
+
+	var adding={};
+	var removing_sx = $.map(updates, function( update ){	// ...for each entry in |updates|.
+		var op=update[0], fhid=update[1], html=update[2];
+		switch ( !!fhid && op ) {
+			case 'remove':	return '#firehose-'+fhid;		// Assemble a selector for removals.
+			case 'add':		adding[fhid] = prepare(html);	// Convert HTML into actual elements, for additions.
+		}
+	}).join(',');
+
+	// Mark all the removals... they belong to the animator now.
+	$(removing_sx, FHL).addClass(MARK_REMOVING);
+
+
+	// Collect runs of items-to-be-added (saved in |loose_runs|, as described above).
+	var loose_runs={}, run, elid_before={}, prev_elid=0;
+	$.each(sequence, function( i, fhid ){
+		// Does this position in |sequence| refer to an item being added?
+		var item = adding[fhid];
+		if ( item ) {	// Yes.  Push the addition onto the current run (creating if need be).
+			run || (run = loose_runs[prev_elid] = new DocumentFragmentRun());
+			run.push(item);
+		} else {		// No.  Close the current run, if any.
+			run = U;
+		}
+
+		// Build a map: element-id => the element-id of the preceding item, so later we can
+		// match heads to tails.
+		var elid = 'firehose-'+fhid;
+		elid_before[elid] = prev_elid;
+		prev_elid = elid;
+	});
+
+
+	// Collect maximal runs in the current contents of the hose (again, saved in |loose_runs|).
+	var	i=0, $fhitems=$FHL.children(), el=$fhitems[i], sequence_known=el && el.id in elid_before,
+
+		// Unfortunately, the i2 ad complicates things.  Re-inserting it will unavoidably
+		// re-runs its scripts.  Therefor, the run that contains the i2 ad must not be moved.
+		i2ad_pos=$fhitems.index($('#floating-slashbox-ad', FHL)), fixed_run;
+
+	i2ad_pos<0 && (i2ad_pos=Infinity);
+
+	while ( el ){
+		run = new DocumentRun();
+		prev_elid = U;
+		do {
+			sequence_known && (prev_elid = el.id);
+			run.push(el, sequence_known);
+		} while ( (el=$fhitems[++i]) && (!(sequence_known=el.id in elid_before) || prev_elid===U || elid_before[el.id]===prev_elid) );
+
+		// Does the run we just built contain the i2 ad?
+		if ( i > i2ad_pos ) {	// Yes.
+			fixed_run = run;			// This run must not be moved.
+			i2ad_pos = Infinity;		// No other run can contain the i2 ad.
+		} else {				// No.  It may be re-ordered if necessary.
+			loose_runs[ elid_before[run.headId()] ] = run;
+		}
+	}
+
+	// Reorder existing runs, insert new runs.
+	(run=loose_runs[0])	&& insert_runs_after(run.prependTo(FHL), loose_runs);
+	fixed_run			&& insert_runs_after(fixed_run, loose_runs);
+
+	// Our work here is done, old chum.  Let us away to the Bat Cave.
+	Slash.busy('firehose-content', false);
+}
+
+})();
 
 function firehose_handle_update() {
 
