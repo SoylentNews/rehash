@@ -623,8 +623,10 @@ firehose_set_options = function(name, value, context) {
 	} 
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
-		$('div.paginate').hide();
-		$('div.paginate').addClass('paginatehidden');
+		$('div.paginate').
+			hide().
+			addClass('paginatehidden');
+
 		// Fade the list; and empty its contents
 		$fhl.fadeOut().html('');
 		$('#itemsreturned').html(loading_msg);
