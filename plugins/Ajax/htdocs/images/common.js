@@ -1187,6 +1187,87 @@ function adsToggle(val) {
 	
 }
 
+function Run(){ return this; }
+Run.prototype = {
+	head:	function(){ return this._run[ 0 ]; },
+	lhead:	function(){ return this.head(); },
+	headId:	function(){ return (this.lhead()||{}).id; },
+
+	tail: function(){
+		var len = this._run && this._run.length;
+		return len && this._run[ len-1 ];
+	},
+	ltail:	function(){ return this.tail(); },
+	tailId:	function(){ return (this.ltail()||{}).id; },
+
+	_manip: function( parent, next ){
+		var el = next;
+		while ( el && el.nodeType!==1 ) {
+			el = el.nextSibling;
+		}
+		if ( !el ) {
+			this.appendTo(parent);
+		} else if ( el !== this.head() ) {
+			this.insertBefore(next);
+		}
+		return this;
+	},
+
+	prependTo: function( parent ){
+		return this._manip(parent, parent.firstChild);
+	},
+
+	insertBefore: function( next ){
+		this.tail().nextSibling!==next && $(this._run).insertBefore(next);
+		return this;
+	},
+
+	insertAfter: function( prev ){
+		return this._manip(prev.parentNode, prev.nextSibling);
+	},
+
+	appendTo: function( parent ){
+		var tail=this.tail();
+		(tail.parentNode!==parent || tail.nextSibling) && $(this._run).appendTo(parent);
+		return this;
+	}
+};
+
+
+function DocumentRun(){
+	this._run = [];
+	return this;
+};
+DocumentRun.prototype = $.extend(new Run, {
+	lhead: function(){ return this._lhead; },
+	ltail: function(){ return this._ltail; },
+
+	push: function( el, logical ) {
+		this._run.push(el);
+		if ( logical ) {
+			this._lhead || (this._lhead = el);
+			this._ltail = el;
+		}
+		return this;
+	}
+});
+
+
+function DocumentFragmentRun(){
+	this._fragment = D.createDocumentFragment();
+	this._run = this._fragment.childNodes;
+	return this;
+}
+DocumentFragmentRun.prototype = $.extend(new Run, {
+	push: function( el ){
+		this._fragment.appendChild(el);
+		return this;
+	},
+
+	insertBefore:	function( next ){ next.parentNode.insertBefore(this._fragment, next); },
+	insertLast:		function( parent ){ parent.appendChild(this._fragment); }
+});
+
 function firehose_handle_update() {
 
 	var	saved_selection		= new $.TextSelection(gFocusedText),
