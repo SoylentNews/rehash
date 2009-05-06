@@ -3066,7 +3066,7 @@ sub applyViewOptions {
 	my $validator = $self->getOptionsValidator();
 
 	if ($view->{useparentfilter} eq "no") {
-		if(!$second) {
+		if(!$second && !$form->{viewchanged} && !$form->{sectionchanged}) {
 			$options->{fhfilter} = $viewfilter;
 			$options->{view_filter} = $viewfilter;
 			$options->{base_filter} = $viewfilter;
