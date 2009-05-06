@@ -214,7 +214,7 @@ function handleEnter(ev, func, arg) {
 
 
 function fhitems( o ){
-	var fn = fhitems.fn.init.apply($.extend(function(){ return $(fn.root)[fn.op](fn.filter); }, fhitems.fn), arguments);
+	var fn = fhitems.fn.init.apply($.extend(function( root ){ return $(fn.root||root)[fn.op](fn.filter); }, fhitems.fn), arguments);
 	return this.__typeOf===fhitems.fn.__typeOf ? fn : fn();
 }
 (function(){
