@@ -233,7 +233,7 @@ fhitems.fn = fhitems.prototype = {
 		} else {
 			this.root = $root;
 		}
-		sxv[0] = '';
+		o.op!=='closest' && (sxv[0] = '');
 		this.op = o.op;
 		this.filter = o.fn || sxv.join('') || undefined;
 		return this;
