@@ -1393,6 +1393,32 @@ function firehose_reorder( required_order ){
 		after_article_moved();
 	}
 
+(function(){
+var INIT_INTERVAL=400, timer, next_to_init;
+
+function step(){
+	var $item = next_to_init();
+
+	if ( $item.length ) {
+		firehose_init_tag_ui($item);
+		fh_idle_skin	&& firehose_init_idle($item);
+		fh_is_admin		&& firehose_init_note_flags($item);
+	} else {
+		clearInterval(timer);
+		timer = 0;
+	}
+}
+
+$(document).bind('firehose-content-end', function(){
+	timer || (timer=setInterval(step, INIT_INTERVAL));
+});
+
+$(function(){
+next_to_init = new fhitems(':visible:not([tag-server]):first');
+});
+
+})();
+
 	return $fhl;
 }
 
