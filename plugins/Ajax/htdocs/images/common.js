@@ -1658,18 +1658,16 @@ function firehose_get_item_idstring() {
 function firehose_get_updates(options) {
 	options = options || {};
 	run_before_update();
-	firehose_busy();
-	if ((fh_play === 0 && !options.oneupdate) || fh_is_updating == 1) {
+	if ((fh_play === 0 && !options.oneupdate) || Slash.busy('firehose-ajax')) {
 		firehose_add_update_timerid(setTimeout(firehose_get_updates, 2000));
-	//	alert("wait loop: " + fh_is_updating);
 		return;
 	}
 	if (fh_update_timerids.length > 0) {
 		var id = 0;
 		while((id = fh_update_timerids.pop())) { clearTimeout(id); }
 	}
-	fh_is_updating = 1;
 
+	Slash.busy('firehose-ajax', true);
 	ajax_update($.extend({
 		op:		'firehose_get_updates',
 		ids:		firehose_get_item_idstring(),
@@ -1677,7 +1675,15 @@ function firehose_get_updates(options) {
 		fh_pageval:	firehose_settings.pageval,
 		embed:		firehose_settings.is_embedded,
 		dynamic_blocks:	dynamic_blocks_list()
-	}, firehose_settings), '', { onComplete: firehose_get_updates_handler, onError: firehose_updates_error_handler });
+	}, firehose_settings), '', {
+
+		onComplete:	function( transport ){
+			Slash.busy('firehose-ajax', false);
+			firehose_get_updates_handler(transport);
+		},
+
+		onError:	firehose_updates_error_handler
+	});
 }
 
 function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
