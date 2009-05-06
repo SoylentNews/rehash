@@ -4456,6 +4456,10 @@ sub linkFireHose {
 	my $link_url;
 	my $item = ref($id_or_item) ? $id_or_item : $self->getFireHose($id_or_item);
 
+	my $linktitle = $item->{title};
+	$linktitle =~ s/\s+/-/g;
+	$linktitle =~ s/[^A-Za-z0-9\-]//g;
+
 	if ($item->{type} eq "story") {
 		my $story = $self->getStory($item->{srcid});
 		my $story_link_ar = linkStory({
@@ -4474,17 +4478,16 @@ sub linkFireHose {
 				my $shill_skin = $self->getSkin($shill->{skid});
 				$rootdir = $shill_skin->{rootdir};
 			}
+			$link_url = $rootdir . "/journal/$item->{srcid}/$linktitle";
+		} else {
+			$link_url = $rootdir . "/~" . fixparam($the_user->{nickname}) . "/journal/$item->{srcid}";
 		}
-		$link_url = $rootdir . "/~" . fixparam($the_user->{nickname}) . "/journal/$item->{srcid}";
 
 	} elsif ($item->{type} eq "comment") {
 		my $com = $self->getComment($item->{srcid});
 		$link_url = $gSkin->{rootdir} . "/comments.pl?sid=$com->{sid}&amp;cid=$com->{cid}";
 	} elsif ($item->{type} eq "submission") {
-		my $title = $item->{title};
-		$title =~ s/\s+/-/g;
-		$title =~ s/[^A-Za-z0-9\-]//g;
-		$link_url = $gSkin->{rootdir} . "/submission/$item->{srcid}/$title";
+		$link_url = $gSkin->{rootdir} . "/submission/$item->{srcid}/$linktitle";
 	} else {
 		$link_url = $gSkin->{rootdir} . '/firehose.pl?op=view&amp;id=' . $item->{id};
 	}
