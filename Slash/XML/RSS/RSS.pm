@@ -170,7 +170,7 @@ sub create {
 	# Seems like there should be a better-supported way, but this
 	# way is convenient.
 	my $dynamic = defined &Slash::Apache::ConnectionIsSSL;
-	my $absolutedir = apacheConnectionSSL ? $gSkin->{absolutedir_secure} : $gSkin->{absolutedir};
+	my $absolutedir = apacheConnectionSSL() ? $gSkin->{absolutedir_secure} : $gSkin->{absolutedir};
 
 	# set defaults
 	my %channel = (
