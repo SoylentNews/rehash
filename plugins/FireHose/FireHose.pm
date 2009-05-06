@@ -3066,9 +3066,11 @@ sub applyViewOptions {
 	my $validator = $self->getOptionsValidator();
 
 	if ($view->{useparentfilter} eq "no") {
-		$options->{fhfilter} = $viewfilter;
-		$options->{view_filter} = $viewfilter;
-		$options->{base_filter} = $viewfilter;
+		if(!$second) {
+			$options->{fhfilter} = $viewfilter;
+			$options->{view_filter} = $viewfilter;
+			$options->{base_filter} = $viewfilter;
+		}
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
 	} else {
