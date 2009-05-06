@@ -1423,14 +1423,14 @@ function firehose_get_next_updates() {
 }
 
 (function(){
-var depth={};
+var $D, $B, depth={}, ROOT_RE=/^[^-]+(?=-)/, EVENT=[ '-end', '-begin' ];
 
 //
 // Slash.busy --- mark <body> with a class, e.g., 'busy-x', within the range you
 //	declare x "busy": busy('x', true)...busy('x', false).  Ranges nest;
 //	Slash.busy maintains a logical "busy-depth" per key.
 //
-Slash.busy = function( k, more ){
+function busy( k, more, for_root ){
 	var N=depth[k]||0, was_busy=N>0; // N guards against depth[k]===undefined.
 
 	// busy(k) is a "getter"
@@ -1442,9 +1442,17 @@ Slash.busy = function( k, more ){
 			more = sign(more) || -1;	// busy(k, expr) means ++depth[k] or --depth[k]
 		}
 		(N+=more) ? depth[k]=N : delete depth[k];
-		Slash.markBusy(k, N>0);	// Physical state may differ from logical, so let markBusy decide.
+		now_busy = N>0;
+		Slash.markBusy(k, now_busy);	// Physical state may differ from logical, so let markBusy decide.
+		for_root || was_busy!==now_busy && $D.trigger(k+EVENT[sign(now_busy)]);
 	}
 	return was_busy; // Return previous "logical" state: old depth[k] > 0.
+}
+
+Slash.busy = function( k, more ){
+	var was_busy=busy(k, more), m;
+	arguments.length>1 && (m=ROOT_RE.exec(k)) && busy(m[0], more, true);
+	return was_busy;
 };
 
 //
@@ -1452,12 +1460,16 @@ Slash.busy = function( k, more ){
 //	when you're calls to busy(..., true) and busy(..., false) don't balance.
 //
 Slash.markBusy = function( k, state ){
-	var	$body = $('body'),
-		was_busy = $body.is('.busy-'+k),
-		now_busy = state || arguments.length<2 && depth[k]>0; // markBusy(k) resets to depth[k]>0.
-	now_busy != was_busy && $body.toggleClass('busy-'+k);
+	var	was_busy = $B.is('.busy-'+k),
+		now_busy = !!state || arguments.length<2 && depth[k]>0; // markBusy(k) resets mark to depth[k]>0.
+	was_busy!==now_busy && $B.toggleClass('busy-'+k);
 	return was_busy; // Return previous "physical" state: body had class "busy-"+k.
 };
+
+$(function(){
+	$D=$(document); $B=$('body');
+})
+
 })();
 
 $(function(){
