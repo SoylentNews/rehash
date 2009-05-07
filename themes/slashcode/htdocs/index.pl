@@ -25,7 +25,7 @@ my $start_time = Time::HiRes::time;
 		$slashdb->setUser($user->{uid}, { index_beta => $index_beta });
 		$user->{index_beta} = $index_beta;
 	}
-	$script = "/index2.pl" if $user->{index_beta} && !$form->{content_type};
+	$script = "/index2.pl" if $user->{index_beta} && !$form->{content_type} && !$user->{lowbandwidth};
 
 	if ($form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
 			# Any login attempt, successful or not, gets
@@ -37,7 +37,7 @@ my $start_time = Time::HiRes::time;
 		my $refer = $form->{returnto} || $script;
 		redirect($refer); return;
 	}
-	redirect($script) if $user->{index_beta} && !$form->{content_type};
+	redirect($script) if $user->{index_beta} && !$form->{content_type} && !$user->{lowbandwidth};
 
 	my($stories, $Stories); # could this be MORE confusing please? kthx
 
@@ -53,6 +53,7 @@ my $start_time = Time::HiRes::time;
 		return;
 	}
 
+	$form->{content_type} = 'rss' if $user->{lowbandwidth};
 	my $rss = $constants->{rss_allow_index}
 		&& $form->{content_type} && $form->{content_type} =~ $constants->{feed_types}
 		&& (
@@ -243,7 +244,7 @@ my $start_time = Time::HiRes::time;
 		$future_plug = 1;
 	}
 
-	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
+	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss || ($rss && $user->{lowbandwidth});
 
 	# Do we want to display the plug offering the user a daypass?
 	my $daypass_plug_text = '';
