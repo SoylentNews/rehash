@@ -114,6 +114,7 @@ view = function( what, how ){
 	if ( start ) {
 		how || (how = {});
 		'speed' in how || (how.speed = 'normal');
+		if ($.browser.opera) { how.speed = 0 }
 
 		$el=$any(what); el=$el[0];
 		if ( !_typeof.element(el) || Bounds.empty($el) ) {
