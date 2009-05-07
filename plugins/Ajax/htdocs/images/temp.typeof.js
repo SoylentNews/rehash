@@ -3,7 +3,7 @@
 var  _typeof;
 (function(){
 var U=void(0), N=null, W=window,
-	OBJECT, FUNCTION,
+	OBJECT, FUNCTION, NUMBER,
 	TYPEOF={}, TYPEOF_NODE=[], TYPEOF_LIST={};
 
 function otype( o, compare ){
@@ -73,12 +73,21 @@ _typeof.element	= qualify_element;
 _typeof.node	= qualify_node;
 _typeof.list	= function( o ){ return TYPEOF_LIST[ _typeof(o) ]; };
 
+_typeof.number = function( o, all ){
+	if ( otype(o, NUMBER) ) {
+		return isFinite(o) && 'number'
+			|| all && o.toString()
+			|| U;
+	}
+};
+
 _typeof.debug	= function(){ return TYPEOF; };
 
 
 (function(){
 	OBJECT		= otype({});
 	FUNCTION	= otype(function(){});
+	NUMBER		= otype(1);
 
 	var ELEMENT_NODE=1, DOCUMENT_NODE=9, BROKEN=[ 'object', OBJECT ];
 	for ( var i=0; i<=12; ++i ){
