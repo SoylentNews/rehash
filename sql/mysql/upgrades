@@ -6203,7 +6203,10 @@ ALTER TABLE dynamic_user_blocks ADD INDEX idx_portalid (portal_id);
 
 # SLASHDOT LAST UPDATED HERE
 
+
 # for plugins/Tags
 ALTER TABLE tags ADD INDEX uid_tagnameid_globjid_inactivated (uid, tagnameid, globjid, inactivated);
 ALTER TABLE tags DROP INDEX uid_globjid_tagnameid_inactivated;
 
+#2009-05-05
+INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) VALUES ('stylesheet','text/css','screen, projection','yui_idle.css','idle','no','6','no','','yui');
