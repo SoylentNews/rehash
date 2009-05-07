@@ -14,7 +14,7 @@ userInfo2
 __template__
 [% orig_title = title %]
 
-        <div class="head">
+        <div class="head fhroot">
                 <div class="yui-b">
                         <div class="block" id="user_bio">
                                 <div class="title" id="user_bio_title">

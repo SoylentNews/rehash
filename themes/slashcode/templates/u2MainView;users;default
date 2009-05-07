@@ -13,9 +13,10 @@ __name__
 u2MainView
 __template__
 [% orig_title = title %]
+[% isa_fhroot = firehose_marquee.defined && firehose_marquee && firehose_marquee.id %]
 
 [% IF main_view %]
-<div class="head">
+<div class="head[% IF isa_fhroot %] fhroot[% END %]">
 	<div class="yui-b">
 		[% IF userbio; userbio; ELSE; PROCESS u2UserBio useredit=useredit; END %]
 	</div>
