@@ -304,20 +304,26 @@ sub getFireHoseMarquee {
 	my ($self, $uid, $shill_static_marquee) = @_;
 	my $fh = getObject("Slash::FireHose");
 
-	my $fhe_opts;
-	if ($shill_static_marquee) {
-		$fhe_opts = {
-			type            => ['journal', 'submission', 'comment', 'feed', 'story', 'bookmark'],
-			orderby         => 'createtime',
-			orderdir        => 'DESC',
-			color           => 'black',
-			duration        => '-1',
-			limit           => 1,
-			tagged_by_uid   => $uid,
-			tagged_as       => 'marquee'
-		};
-	} else {
-		$fhe_opts = {
+	my $check_marquee_tag = $shill_static_marquee || 0;
+	my $marquee_return;
+
+	# If any of the following steps fail, we should fall back on retrieving the standard marquee.
+	if ($check_marquee_tag) {
+		my $tags_reader = getObject("Slash::Tags");
+		$check_marquee_tag = 0 if !$tags_reader;
+
+		my $fh_globjid = $tags_reader->getMostRecentGlobjidTagged({ uid => $uid, tagname => 'marquee' }) if $check_marquee_tag;
+		$check_marquee_tag = 0 if !$fh_globjid;
+
+		my $fh_item = $fh->getFireHoseByGlobjid($fh_globjid) if $check_marquee_tag;
+		$check_marquee_tag = 0 if !$fh_item;
+
+		$marquee_return = $check_marquee_tag ? $fh_item : 0;
+	}
+
+	# $user->{shill_static_marquee} was not set, or the above failed.
+	if (!$check_marquee_tag) {
+		my $fhe_opts = {
 			type            => ['journal', 'submission', 'comment', 'feed'],
 			orderby         => 'createtime',
 			orderdir        => 'DESC',
@@ -326,13 +332,15 @@ sub getFireHoseMarquee {
 			limit           => 1,
 			uid             => $uid
         	};
+
+		my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $fh->getFireHoseEssentials($fhe_opts);
+
+		$marquee_return = (@$items >= 1) ? $items->[0]: 0;
 	}
 
-	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $fh->getFireHoseEssentials($fhe_opts);
+	return $marquee_return;
 
-	return @$items >=1 ? $items->[0]: 0;
 }
-
 
 sub getMarqueeFireHoseId {
 	my($self, $marquee) = @_;
