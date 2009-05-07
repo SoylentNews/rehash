@@ -41,6 +41,10 @@ __template__
 	[% dyn_friends %]
 [% END %]
 
+[% IF dyn_tags %]
+	[% dyn_tags %]
+[% END %]
+
 [% IF latest_submissions.size != 0 %]
 <div class="block" id="latest_submissions">
         <div class="title" id="latest_submissions_title">
@@ -76,29 +80,6 @@ __template__
         </div>
 </div>
 [% END %]
-
-[% IF tagshist.size > 2 %]
-<div class="block" id="latest_tags">
-        <div class="title" id="latest_tags_title">
-                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/tags">Tags</a></h4>
-        </div>
-
-        <div class="content" id="latest_tags_content">
-                <ul>
-                [% tags_counter = 0 %]
-                [% FOREACH tag = tagshist.keys %]
-                        [% LAST IF tags_counter == 5 %]
-                        [% NEXT IF !is_admin && tagshist.$tag.0.private == 1 %] 
-                        <li>
-                        <a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
-                        </li>
-                        [% tags_counter = tags_counter + 1 %]
-                [% END %]
-                </ul>
-        </div>
-</div>
-[% END %]
-
 __seclev__
 500
 __version__

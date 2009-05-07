@@ -1253,13 +1253,14 @@ sub showInfo {
 
 		# Dynamic blocks
 		my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
-                my ($dyn_achievements, $dyn_comments, $dyn_journals, $dyn_friends);
+                my ($dyn_achievements, $dyn_comments, $dyn_journals, $dyn_friends, $dyn_tags);
                 if ($dynamic_blocks_reader) {
 			my $user_self = ($requested_user->{uid} == $user->{uid}) ? 1 : 0;
-                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self });
-			$dyn_comments     = $dynamic_blocks_reader->displayBlock('comments-'     . $uid, { user_self => $user_self });
-			$dyn_journals     = $dynamic_blocks_reader->displayBlock('journal-'      . $uid, { user_self => $user_self });
-			$dyn_friends      = $dynamic_blocks_reader->displayBlock('friends-'      . $uid, { user_self => $user_self });
+                        $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self }) || 0;
+			$dyn_comments     = $dynamic_blocks_reader->displayBlock('comments-'     . $uid, { user_self => $user_self }) || 0;
+			$dyn_journals     = $dynamic_blocks_reader->displayBlock('journal-'      . $uid, { user_self => $user_self }) || 0;
+			$dyn_friends      = $dynamic_blocks_reader->displayBlock('friends-'      . $uid, { user_self => $user_self }) || 0;
+			$dyn_tags         = $dynamic_blocks_reader->displayBlock('tags-'         . $uid, { user_self => $user_self }) || 0;
                 }
 
 		my $userbio;
@@ -1308,6 +1309,7 @@ sub showInfo {
 			dyn_comments                => $dyn_comments,
 			dyn_journals                => $dyn_journals,
 			dyn_friends		    => $dyn_friends,
+			dyn_tags		    => $dyn_tags,
 			userbio			    => $userbio,
 			
 		}, { Page => 'users', Skin => 'default'});

@@ -93,6 +93,7 @@ __template__
 		dyn_comments=dyn_comments
 		dyn_journals=dyn_journals
 		dyn_friends=dyn_friends
+		dyn_tags=dyn_tags
                 is_admin=user.is_admin
         %]
 
