@@ -6214,4 +6214,3 @@ INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) 
 # 2009-05-05
 ALTER TABLE css MODIFY media varchar(64);
 INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) VALUES ('stylesheet','text/css','only screen and (max-device-width: 480px)','iphone.css','','no','3','no','','');
-
