@@ -15,8 +15,8 @@ __template__
 [% IF block.block %]
 <div class="block" id="[% block.name %]">
         <div class="title" id="[% block.name %]-title">
-                <h4><a href="[% constants.real_rootdir %]/[% block.url %]">[% block.title %]</a></h4>
-        </div>
+        	<h4><a href="[% IF !block.portal_id; constants.real_rootdir _ '/'; END %][% block.url %]">[% block.title %]</a></h4>
+	</div>
 
         <div class="content" id="[% block.name %]-content">
                 [% block.block %]

@@ -26,20 +26,21 @@ $task{$me}{code} = sub {
         $slashdb->setVar('lastsrandsec', $choice);
         my $title = ucfirst($choice);
 
-        my $url = "http://slashdot.org/index.pl?section=$choice";
+	my $url = '';
 
-        if ($choice eq 'askslashdot') { $title = 'Ask Slashdot'; }
-        if ($choice eq 'interview')   { $title = 'Interviews'; }
-        if ($choice eq 'bsd')         { $title = 'BSD'; }
-        if ($choice eq 'yro')         { $title = 'YRO'; }
-        if ($choice eq 'firehose')    { $title = 'Firehose'; $url = "//slashdot.org/firehose/" }
+        if ($choice eq 'askslashdot') { $title = 'Ask Slashdot'; $url = "//ask.slashdot.org" }
+        if ($choice eq 'interview')   { $title = 'Interviews';   $url = "//interviews.slashdot.org" }
+        if ($choice eq 'bsd')         { $title = 'BSD';          $url = "//bsd.slashdot.org" }
+        if ($choice eq 'science')     { $title = 'Science';      $url = "//science.slashdot.org" }
+        if ($choice eq 'yro')         { $title = 'YRO';          $url = "//yro.slashdot.org" }
+        if ($choice eq 'firehose')    { $title = 'Firehose';     $url = "//slashdot.org/firehose/" }
         if ($choice eq 'topcomments') { $title = 'Hot Comments'; $url = '' }
-        if ($choice eq 'books')       { $title = 'Book Reviews'; }
-        if ($choice eq 'activetags')  { $title = 'Recent Tags'; $url = "/tags" }
-        if ($choice eq 'idle_video')  { $title = 'Idle Video'; $url = "//idle.slashdot.org" }
-        if ($choice eq 'idle_pics')  { $title = 'Idle Pics'; $url = "//idle.slashdot.org" }
+        if ($choice eq 'books')       { $title = 'Book Reviews'; $url = "//books.slashdot.org"}
+        if ($choice eq 'activetags')  { $title = 'Recent Tags';  $url = "/tags" }
+        if ($choice eq 'idle_video')  { $title = 'Idle Video';   $url = "//idle.slashdot.org" }
+        if ($choice eq 'idle_pics')   { $title = 'Idle Pics';    $url = "//idle.slashdot.org" }
 
-        $slashdb->sqlUpdate("blocks",{ block=>$slashdb->getBlock($choice, 'block'), title=>$title, url=> $url }, "bid='srandblock'");
+        $slashdb->sqlUpdate("blocks",{ block=>$slashdb->getBlock($choice, 'block'), title => $title, url => $url }, "bid='srandblock'");
 
 	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
         $dynamic_blocks->syncPortalBlocks('srandblock') if $dynamic_blocks;
