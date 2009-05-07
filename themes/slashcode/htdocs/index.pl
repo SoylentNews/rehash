@@ -58,7 +58,7 @@ my $start_time = Time::HiRes::time;
 		&& $form->{content_type} && $form->{content_type} =~ $constants->{feed_types}
 		&& (
 			   $user->{is_admin}
-			|| ($constants->{rss_allow_index} > 1 && $user->{is_subscriber})
+			|| ($constants->{rss_allow_index} > 1 && ($user->{is_subscriber} || $user->{lowbandwidth}))
 			|| ($constants->{rss_allow_index} > 2 && !$user->{is_anon})
 		);
 
