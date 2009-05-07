@@ -448,7 +448,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 					or $plugin_file_abs =~ s/-minified\.js/-minified.$virtuser.js/;
 			my $site_rel_file = $target_file;
 			1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
-			$site_rel_file =~ s/\.cssraw$/.css/;
+			$site_rel_file =~ s/\.(\w+)raw$/.$1/;
 			# Plugins don't get the type prepended so we need to
 			# do that here.
 			$site_rel_file =~ s{^(?:$subdir/)?}{$subdir/};
