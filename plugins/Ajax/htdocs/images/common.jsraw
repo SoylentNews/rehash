@@ -929,6 +929,8 @@ $(function(){
 // Page initialization.
 //
 
+$.browser.chrome = $.browser.safari && /chrome/.test( navigator.userAgent.toLowerCase() );
+
 $('#fhsearch').show();
 firehose_init_tag_ui();
 $any('firehoselist').click(page_click_handler);	// if no #firehoselist, install click handler per article
