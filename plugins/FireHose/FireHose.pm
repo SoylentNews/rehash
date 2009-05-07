@@ -2018,6 +2018,10 @@ sub genSetOptionsReturn {
 		$data->{eval_first} .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
 		$data->{eval_first} .= "view_change_hide_show(firehose_settings.view);";
 	}
+	if ($opts->{resetfilter}) {
+		print STDERR "RESET FILTER\n";
+		$data->{eval_first} .= "alert(firehose_settings.base_filter);alert(firehose_settings.fhfilter);";
+	}
 	my $fh_is_admin =  $user->{is_admin} && !$opts->{usermode} ? 1 : 0;
 
 	$data->{eval_first} .= "fh_is_admin = $fh_is_admin;";;
@@ -3070,6 +3074,10 @@ sub applyViewOptions {
 			$options->{fhfilter} = $viewfilter;
 			$options->{view_filter} = $viewfilter;
 			$options->{base_filter} = $viewfilter;
+		}
+		if ($form->{viewchanged} || $form->{sectionchanged}) {
+			print STDERR "RESET FILTER SET\n";	
+			$options->{resetfilter} = 1;
 		}
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
