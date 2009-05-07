@@ -3025,6 +3025,7 @@ sub determineCurrentSection {
 	my $gSkin = getCurrentSkin();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	my $section;
 
@@ -3035,7 +3036,7 @@ sub determineCurrentSection {
 	}
 	
 	if (!$section && !$section->{fsid}) {
-		if ($user->{firehose_default_section}) {
+		if ($user->{firehose_default_section} && $gSkin->{skid}== $constants->{mainpage_skid}) {
 			$section = $self->getFireHoseSection($user->{firehose_default_section});
 		} else {
 			$section = $self->getFireHoseSectionBySkid($gSkin->{skid});
