@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+* header_text = text from header()
+__title__
+__page__
+shtmlpl
+__lang__
+en_US
+__name__
+header-faq
+__template__
+[% header_text %]
+
+<div class="nav">
+
+  [% firehosedb = Slash.getObject('Slash::FireHose');
+     IF firehosedb;
+       views = firehosedb.getUserViews({ tab_display => 'yes' });
+       PROCESS firehose_tabs views = views article_header = 1;
+     END %]
+  </div>
+
+  <div id="yui-main">
+    <div class="yui-gf" style="position: relative">
+      <div class="yui-u first" id="links">
+  [% PROCESS mainmenu %]
+      </div>
+    </div>
+  </div>
+
+  <div class="yui-u maincol faq" style="padding:1em">
+
+__seclev__
+10000
+__version__
+$Id$
