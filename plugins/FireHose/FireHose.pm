@@ -364,6 +364,48 @@ sub ajaxNewFireHoseSection {
 	return $data_dump;
 }
 
+sub getSectionSkidFromFilter {
+	my($self, $filter) = @_;
+	my $got_section = 0;
+
+	foreach (split(/\s+/, $filter)) {
+		last if $got_section;
+		my $cur_skin = $self->getSkin($_);
+		if ($cur_skin) {
+			$got_section = $cur_skin->{skid};
+		}
+	}
+	return $got_section;
+}
+
+sub getCSSForSkid {
+	my($self,$skid,$layout) = @_;
+	my $form = getCurrentForm();
+
+	$layout = defined $layout ? $layout: 
+		defined $form->{layout} ? $form->{layout} : "yui";
+	
+	my $layout_q = $self->sqlQuote($layout);
+	
+	my $css = [];
+	if ($skid) {
+		my $skid_q = $self->sqlQuote($skid);
+		$css = $self->sqlSelectAllHashrefArray(
+			"css.*, skins.name as skin_name",
+			"css, skins",
+			"css.skin=skins.name and css.layout=$layout_q and admin='no' AND skins.skid=$skid_q"
+		);
+	}
+	
+	my $retval = "";
+	my $skin_name = "";
+	foreach (@$css) {
+		$skin_name = $_->{skin_name};
+		$retval .= getData('alternate_section_stylesheet', { css => $_, }, 'firehose');
+	}
+	return $retval;
+}
+
 sub ajaxFireHoseSectionCSS {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	my $fh = getObject("Slash::FireHose");
@@ -371,33 +413,13 @@ sub ajaxFireHoseSectionCSS {
 	my $got_section = 0;
 
 	if ($section && $section->{fsid}) {
-		foreach (split(/\s+/, $section->{section_filter})) {
-			last if $got_section;
-			my $cur_skin = $slashdb->getSkin($_);
-			if ($cur_skin) {
-				$got_section = $cur_skin->{skid};
-			}
-		}
+		$got_section = $fh->getSectionSkidFromFilter($section->{section_filter});
 	}
 
-	my $layout_q = $slashdb->sqlQuote($form->{layout});
-
-	my $css = [];
-	if ($got_section) {
-		my $skid_q = $slashdb->sqlQuote($got_section);
-		$css = $slashdb->sqlSelectAllHashrefArray(
-			"css.*, skins.name as skin_name",
-			"css, skins",
-			"css.skin=skins.name and css.layout=$layout_q and admin='no' AND skins.skid=$skid_q"
-		);
-	}
-
-	my $retval = "";
-	my $skin_name = "";
-	foreach (@$css) {
-		$skin_name = $_->{skin_name};
-		$retval .= getData('alternate_section_stylesheet', { css => $_, }, 'firehose');
-	}
+	my $retval = $fh->getCSSForSkid($got_section, $form->{layout});
+	my $skin_name;
+	my $skin = $slashdb->getSkin($got_section);
+	$skin_name = $skin->{name};
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		skin_name 		=> $skin_name,
 		css_includes 		=> $retval,
@@ -2319,6 +2341,9 @@ sub ajaxFireHoseGetUpdates {
 	$update_time = $recent if $recent gt $update_time;
 	my $values = {};
 
+	my $skid = $firehose->getSectionSkidFromFilter("$opts->{base_filter}");
+	my $skin = $firehose->getCSSForSkid($skid, $form->{layout});
+
 	my $update_event = {
 		event		=> 'update.firehose',
 		data		=> {
@@ -2327,6 +2352,7 @@ sub ajaxFireHoseGetUpdates {
 			view		=> strip_literal($opts->{view}),
 			local_time	=> timeCalc($slashdb->getTime(), "%H:%M"),
 			gmt_time	=> timeCalc($slashdb->getTime(), "%H:%M", 0),
+			skin		=> $skin
 		},
 	};
 	my $events = [ $update_event ];
