@@ -169,7 +169,7 @@ function install_tag_ui( $roots, if_authenticated ){
 
 function install_d2( d2, authenticated ){
 	d2.each(function(){
-		var key = Slash.ArticleInfo.key(this) || { key: window.location.href, key_type: 'url' };
+		var key = fhitem_key(this) || { key: window.location.href, key_type: 'url' };
 		var inner_url = '';
 		if ( key.key_type === 'url' ) {
 			inner_url = key.key || '';

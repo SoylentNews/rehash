@@ -1570,7 +1570,7 @@ function firehose_storyfuture( future ){
 	// Select all articles in #firehoselist.  Update .story|.future as needed.  Return the complete list.
 
 	var if_not=['h3.future', 'h3.story'], class_if=['story', 'future'];
-	return $any('firehoselist').article_info__find_articles().
+	return $('div.fhroot>div.fhitem').
 		each(function(){
 			var is_future = sign(future[this.id.substr(9)]);
 			$(this).find(if_not[is_future]).attr('className', class_if[is_future]);
@@ -2405,7 +2405,7 @@ function inlineAdFirehose($article) {
 	if (!$article || !$article.length)
 		return 0;
 
-	var id = $article.article_info__key().key;
+	var id = fhitem_key($article).key;
 	if (!id)
 		return 0;
 
@@ -2580,38 +2580,36 @@ Slash.Firehose.articles_on_screen = function(){
 		lo,	// index within the jQuery selection of the first article visible on the screen
 		hi=0;	// index one beyond the last article visible on the screen
 
-	var $articles = $('#firehose > #firehoselist').
-		article_info__find_articles().
-			filter(':visible').
-				// examine articles in order until I _know_ no further articles can be on screen
-				each(function(){
-					var $this=$(this), this_top=$this.offset().top;
-					// hi is the index of this article
+	var $articles = $('#firehoselist>div.fhitem:visible').
+		// examine articles in order until I _know_ no further articles can be on screen
+		each(function(){
+			var $this=$(this), this_top=$this.offset().top;
+			// hi is the index of this article
 
-					if ( this_top >= visible.bottom ) {
-						// ...then this article, and all that follow must be entirely below the screen
-						// the last article on screen (if any) must be the previous one (at hi-1)
-						return false;
-					}
+			if ( this_top >= visible.bottom ) {
+				// ...then this article, and all that follow must be entirely below the screen
+				// the last article on screen (if any) must be the previous one (at hi-1)
+				return false;
+			}
 
-					// until we find the first on-screen article...
-					if ( lo === undefined ) {
-						var this_bottom = this_top + $this.height();
+			// until we find the first on-screen article...
+			if ( lo === undefined ) {
+				var this_bottom = this_top + $this.height();
 
-						// we know this_top is above visible.bottom, so...
-						if ( this_bottom > visible.top ) {
-							// ...then _this_ article must be (the first) on screen
-							lo = hi;
-						}
+				// we know this_top is above visible.bottom, so...
+				if ( this_bottom > visible.top ) {
+					// ...then _this_ article must be (the first) on screen
+					lo = hi;
+				}
 
-						if ( this_bottom >= visible.bottom ) {
-							// ...then we must be the _only_ article on screen
-							++hi; // starting one past this article, everything is below the screen
-							return false;
-						}
-					}
-					++hi;
-				});
+				if ( this_bottom >= visible.bottom ) {
+					// ...then we must be the _only_ article on screen
+					++hi; // starting one past this article, everything is below the screen
+					return false;
+				}
+			}
+			++hi;
+		});
 
 	if ( lo === undefined ) {
 		return $([]);

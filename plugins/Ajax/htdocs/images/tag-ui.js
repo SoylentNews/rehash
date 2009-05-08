@@ -60,7 +60,7 @@ var tag_server_fns = {
 			},
 			options );
 
-		var key = Slash.ArticleInfo.key(this);
+		var key = fhitem_key(this);
 
 		var server_params = $.extend(
 			{},

@@ -338,6 +338,28 @@ $.fn.extend({
 
 // not exactly sure what to do with these yet
 
+var fhitem_info, fhitem_key;
+(function( $ ){
+var KEY_TYPE=/\bsd-key-([-a-z]+)/i;
+
+fhitem_info = function( item, type ){
+	return $('span.sd-info-block span.'+type, item).text();
+}
+
+
+fhitem_key = function( item ){
+	var result;
+	$('span.sd-info-block span[class^=sd-key-]', item).each(function(){
+		result = {
+			key:		this.textContent,
+			key_type:	KEY_TYPE.exec(this.className)[1]
+		};
+		return false;
+	});
+	return result;
+}
+})(jQuery);
+
 function sign( o ){ return $.TypeOf(o, 'number') && o<0 && -1 || (o ? 1 : 0); }
 
 function between( lo, o, hi ){ if ( lo<=hi ) { return o<lo && -1 || o>hi && 1 || 0; } }

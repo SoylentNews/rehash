@@ -46,10 +46,10 @@ function tagsHistory( selector_fragment, context ) {
 	);
 
 	// Ask the server to fill in the pop-up's content.
-	var item_key = $item.article_info__key();
+	var item_key = fhitem_key($item);
 	ajax_update({
 		op:		'tags_history',
-		type:		$item.article_info('type'),
+		type:		fhitem_info($item, 'type'),
 		key:		item_key.key,
 		key_type:	item_key.key_type
 	}, popup_id + '-contents');
@@ -92,13 +92,11 @@ function firehose_handle_admin_commands( commands ){
 			case 'signed':
 			case 'signoff':
 			case 'unsigned':
-				if ( ! $entry.article_info('awaiting-thumbnail') ) {
-					entry._ajax_request('', {
-						op:	'admin_signoff',
-						stoid:	$entry.article_info('stoid'),
-						ajax:	{ success: function(){ $('[context=signoff]', entry).remove(); } }
-					});
-				}
+				entry._ajax_request('', {
+					op:	'admin_signoff',
+					stoid:	fhitem_info($entry, 'stoid'),
+					ajax:	{ success: function(){ $('[context=signoff]', entry).remove(); } }
+				});
 				firehose_collapse_entry(id);
 				break;
 
@@ -287,47 +285,34 @@ function firehose_reject (el) {
 	firehose_remove_entry(el.value);
 }
 
-function firehose_init_note_flags(){
-	var $entries = $(document).article_info__find_articles(':not(:has(> h3 > span.note-flag))');
+function firehose_init_note_flags( $items ){
+	return ($items || $('div.fhitem:not(:has(>h3>span.note-flag))')).
+		each(function(){
+			var	$item			= $(this),
+				$flag_parent	= $item.find('>h3:first'),
+				$note			= $item.find('.note-wrapper'),
+				has_note		= $note.length && !$note.is('.no-note'),
+				text			= has_note ? $.trim($note.find('.admin-note a').text()) : '';
 
-	// set up the "note flag"
-	return $entries.each(function(){
-		var $entry = $(this);
-		var $note = $entry.find('.note-wrapper');
-		var note_text='', no_note = ! $note.length || $note.hasClass('no-note');
-		if ( ! no_note ) {
-			note_text = $.trim($note.find('.admin-note a').text());
-		}
-
-		var $note_flag = $entry.find('> h3').
-			append('<span class="note-flag">note</span>').
-			find('.note-flag').
-				attr('title', note_text).
-				click(function(){
-					firehose_open_note($entry)
-				});
-
-		if ( no_note ) {
-			$note_flag.addClass('no-note');
-		}
-	});
+			$('<span class="note-flag">note</span>').
+				appendTo($flag_parent).
+				attr('title', text).
+				toggleClass('no-note', !has_note).
+				click(firehose_open_note);
+		});
 }
 
-function firehose_open_note( expr ) {
-	if ( typeof expr === 'string' || typeof expr === 'number' ) {
-		expr = '#firehose-' + expr;
-	}
-	return $(expr).
+function firehose_open_note( o ) {
+	$(!o && this || o.target || o.originalTarget || o).closest('div.fhitem').
 		each(function(){
-			var $entry = $(this), fhid = this.id.substr(9);
-			if ( $entry.is('[class^=brief]') ) {
-				toggle_firehose_body($entry, true);
-			}
-			$entry.find('.note-wrapper').removeClass('no-note');
-			$entry.find('#note-form-'+fhid).removeClass('hide');
-			$entry.find('#note-input-'+fhid).each(function(){this.focus();});
-			$entry.find('#note-text-'+fhid).addClass('hide');
+			var $item=$(this), fhid=this.id.substr(9);
+			toggle_firehose_body($item, void(0), toggle_firehose_body.SHOW);
+			$item.find('.note-wrapper').removeClass('no-note');
+			$item.find('#note-form-'+fhid).removeClass('hide');
+			$item.find('#note-input-'+fhid).focus();
+			$item.find('#note-text-'+fhid).addClass('hide');
 		});
+	// allow other click-handlers to run (by returning nothing)
 }
 
 function firehose_save_note(id) {
