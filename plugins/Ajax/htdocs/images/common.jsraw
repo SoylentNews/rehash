@@ -586,7 +586,7 @@ function add_to_fhfilter(text) {
 
 function set_filter_inputs(text) {
 	$('form[name=firehoseform] input[name=fhfilter], #searchquery').each(function(){
-		this.value = ltext;
+		this.value = text;
 	});
 }
 
@@ -1597,7 +1597,7 @@ function firehose_update_title_count(num) {
 }
 
 (function(){
-var $D, $B, depth={}, ROOT_RE=/^[^-]+(?=-)/, EVENT=[ '-end', '-begin' ];
+var $D=$(document), $B, depth={}, ROOT_RE=/^[^-]+(?=-)/, EVENT=[ '-end', '-begin' ];
 
 //
 // Slash.busy --- mark <body> with a class, e.g., 'busy-x', within the range you
@@ -1605,7 +1605,7 @@ var $D, $B, depth={}, ROOT_RE=/^[^-]+(?=-)/, EVENT=[ '-end', '-begin' ];
 //	Slash.busy maintains a logical "busy-depth" per key.
 //
 function busy( k, more, for_root ){
-	var N=depth[k]||0, was_busy=N>0; // N guards against depth[k]===undefined.
+	var N=depth[k]||0, was_busy=N>0, now_busy; // N guards against depth[k]===undefined.
 
 	// busy(k) is a "getter"
 	if ( arguments.length > 1 ) {
@@ -1618,13 +1618,14 @@ function busy( k, more, for_root ){
 		(N+=more) ? depth[k]=N : delete depth[k];
 		now_busy = N>0;
 		Slash.markBusy(k, now_busy);	// Physical state may differ from logical, so let markBusy decide.
-		for_root || was_busy!==now_busy && $D.trigger(k+EVENT[sign(now_busy)]);
+
+		!for_root && was_busy!==now_busy && $D.trigger(k+EVENT[sign(now_busy)]);
 	}
 	return was_busy; // Return previous "logical" state: old depth[k] > 0.
 }
 
 Slash.busy = function( k, more ){
-	var was_busy=busy(k, more), m;
+	var was_busy=busy.apply(null, arguments), m;
 	arguments.length>1 && (m=ROOT_RE.exec(k)) && busy(m[0], more, true);
 	return was_busy;
 };
@@ -1641,7 +1642,7 @@ Slash.markBusy = function( k, state ){
 };
 
 $(function(){
-	$D=$(document); $B=$('body');
+	$B=$('body');
 })
 
 })();
