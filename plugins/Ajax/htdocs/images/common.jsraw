@@ -586,7 +586,7 @@ function add_to_fhfilter(text) {
 
 function set_filter_inputs(text) {
 	$('form[name=firehoseform] input[name=fhfilter], #searchquery').each(function(){
-		this.value = ltext;
+		this.value = text;
 	});
 }
 
