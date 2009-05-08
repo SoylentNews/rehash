@@ -1,5 +1,12 @@
 ; // SourceForge specific JS.  Hostile environment assumed.
 
+/* Exported tagging functions need work.
+
+	If you guys decide to take up this project again, let me know
+	and I can bring the special exported functionality here up-to-date.
+		-- Wolf <wolf@slashdot.org>
+*/
+
 Slash.Util.ensure_namespace('SFX');
 SFX.jQuery = jQuery /* .noConflict(true) */;
 

@@ -2393,17 +2393,6 @@ function inlineAdCheckTimer(id, url, clickMax, secsMax) {
 	return inlineAdInsertId(id);
 }
 
-// TODO: remove this jQuery method when integration is complete and this method is really provided by Slash.TagUI
-(function($){
-$.fn.tag_ui__tags = function(){
-	var tags = {};
-	this.find('span.tag').each(function(){
-		tags[ $(this).text() ] = true;
-	});
-	return Slash.Util.qw(tags);
-}
-})(Slash.jQuery);
-
 function inlineAdFirehose($article) {
 	if (!fh_adTimerUrl)
 		return 0;
@@ -2429,14 +2418,13 @@ function inlineAdFirehose($article) {
 	if (Slash.Firehose.floating_slashbox_ad.is_visible())
 		return 0;
 
-	var $system = $article.find('[context=system]');
-	var topic = $system.find('.t2:not(.s1)').tag_ui__tags().join(',');
-	var skin  = $system.find('.s1').tag_ui__tags()[0];
-	var adUrl = fh_adTimerUrl + '?skin=' + (skin || 'mainpage');
-	if (topic)
-		adUrl = adUrl + '&topic=' + topic;
-
-	var ad_content = '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
+	var $list		= $article.find('[context=system]'),
+		topic		= $list.find('.t2:not(.s1):first .tag').text(),
+		skin		= $list.find('.s1:first .tag').text(),
+		adUrl		= fh_adTimerUrl
+						+ '?skin=' + (skin || 'mainpage')
+						+ (topic ? '&topic='+topic : ''),
+		ad_content	= '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
 
 	Slash.Firehose.floating_slashbox_ad($article, ad_content);
 
