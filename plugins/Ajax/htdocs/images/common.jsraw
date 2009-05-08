@@ -1026,7 +1026,7 @@ function firehose_init_tag_ui( $new_entries ){
 			if ( have_nodnix ) {
 				// install nod/nix handling only if I see the nod/nix buttons
 				this.command_pipeline.push(
-					($this.is('.fhitem-comment') ?
+					$this.is('.fhitem-comment') ?
 						firehose_handle_comment_nodnix :
 						firehose_handle_nodnix);
 				inject_reasons(this, false);

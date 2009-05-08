@@ -290,7 +290,7 @@ function firehose_init_tag_ui( $new_entries ){
 		tag_ui_server(fhid, pipeline, { request_data: { reskey: reskey_static } }).
 		each(function(){
 			this.tag_ui_server.command_pipeline.push(
-				($(this).is('.fhitem-comment') ?
+				$(this).is('.fhitem-comment') ?
 					firehose_handle_comment_nodnix :
 					firehose_handle_nodnix );
 		}).
