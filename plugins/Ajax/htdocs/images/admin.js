@@ -305,7 +305,7 @@ function firehose_init_note_flags( $items ){
 function firehose_open_note( o ) {
 	$(!o && this || o.target || o.originalTarget || o).closest('div.fhitem').
 		each(function(){
-			var $item=$(this), fhid=this.id.substr(9);
+			var $item=$(this), fhid=this.id.replace(FHID_PREFIX, '');
 			toggle_firehose_body($item, void(0), toggle_firehose_body.SHOW);
 			$item.find('.note-wrapper').removeClass('no-note');
 			$item.find('#note-form-'+fhid).removeClass('hide');

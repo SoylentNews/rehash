@@ -69,7 +69,7 @@ var fh_adTimerClicksMax = 0;
 var fh_adTimerUrl       = '';
 //fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
 
-
+var FHID_PREFIX=/^firehose-/;
 
 var view;
 (function(){ // function view( what, how ): smoothly, minimally scroll what entirely into view
@@ -376,7 +376,7 @@ function reportError(request) {
 function toggle_fh_body_wrap_return( any, unused, /*optional:*/toggle_to, dont_next ) {
 
 	var	$fhitem		= fhitems(any),
-		fhid		= $fhitem.attr('id').substr(9),
+		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
 		$body		= $fhitem.children('[id^=fhbody-]'),
 		body_is_empty	= $body.is('.empty'),
 		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
@@ -393,7 +393,7 @@ function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) 
 	setFirehoseAction();
 
 	var	$fhitem		= fhitems(any),
-		fhid		= $fhitem.attr('id').substr(9),
+		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
 		$body		= $fhitem.children('[id^=fhbody-]'),
 		body_is_empty	= $body.is('.empty'),
 		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
@@ -671,7 +671,7 @@ function firehose_fix_up_down( id, new_state ){
 }
 
 function firehose_click_nodnix_reason( event ) {
-	var $fhitem=fhitems(event.target), fhid=$fhitem.attr('id').substr(9);
+	var $fhitem=fhitems(event.target), fhid=$fhitem.attr('id').replace(FHID_PREFIX, '');
 
 	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+fhid).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
 		firehose_collapse_entry(fhid);
@@ -708,7 +708,7 @@ function tag_ui_in( $fhitem ){
 
 function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 	var	$fhitem		= fhitems(any), // assert($fhitem.length)
-		fhid		= $fhitem.attr('id').substr(9),
+		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
 		tag_ui		= tag_ui_in($fhitem),
 		toggle		= tag_ui.expanded == !want_expanded; // force boolean conversion
 
@@ -1015,7 +1015,7 @@ function firehose_init_tag_ui( $new_entries ){
 		each(function(){
 			var $this = $(this);
 
-			install_tag_server(this, this.id.substr(9));
+			install_tag_server(this, this.id.replace(FHID_PREFIX, ''));
 
 			if ( tag_admin ) {
 				this.command_pipeline.push(firehose_handle_admin_commands);
@@ -1572,7 +1572,7 @@ function firehose_storyfuture( future ){
 	var if_not=['h3.future', 'h3.story'], class_if=['story', 'future'];
 	return $('div.fhroot>div.fhitem').
 		each(function(){
-			var is_future = sign(future[this.id.substr(9)]);
+			var is_future = sign(future[this.id.replace(FHID_PREFIX, '')]);
 			$(this).find(if_not[is_future]).attr('className', class_if[is_future]);
 		});
 }
@@ -2720,7 +2720,7 @@ $(function(){
 		var el, id;
 		if (cur.length) {
 			el = cur[0];
-			id = el.id.substr(9);
+			id = el.id.replace(FHID_PREFIX, '');
 		}
 
 		if (keyo.tag && el) {
