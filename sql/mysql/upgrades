@@ -6217,3 +6217,5 @@ INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) 
 
 
 # PLEASE DELETE symlinks to lick*css*
+
+UPDATE vars SET value = 'T_2_5_0_255' WHERE name = 'cvs_tag_currentcode';
