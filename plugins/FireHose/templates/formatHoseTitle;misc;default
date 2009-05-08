@@ -68,7 +68,7 @@ ELSIF item.type == "journal";
 		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=journal" title="Filter to journal"  class="skin">Journal:</a> ';
 
 END;
-onclick = "onclick=\"return toggle_fh_body_wrap_return(this, $adminmode);\"";
+onclick = "onclick=\"return toggle_fh_body_wrap_return(this);\"";
 IF !link_url;
 	link_url = firehose.linkFireHose(item);
 END;

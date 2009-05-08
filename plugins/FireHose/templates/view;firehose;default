@@ -37,8 +37,7 @@ __template__
 <script type="text/javascript">
 var firehose_user_class = [% user.is_anon ? 0 : 1 %];
 $(function(){
-	$('div.fhroot').click(page_click_handler);
-	[% IF user.is_admin %]firehose_init_note_flags();[% END %]
+	[% IF user.is_admin && !options.usermode %]firehose_init_note_flags();[% END %]
 });
 </script>
 __version__

@@ -204,95 +204,6 @@ function handleEnter(ev, func, arg) {
 
 
 
-function fhitems( o ){
-	var fn = fhitems.fn.init.apply($.extend(function( root ){ return $(fn.root||root)[fn.op](fn.filter); }, fhitems.fn), arguments);
-	return this.__typeOf===fhitems.fn.__typeOf ? fn : fn();
-}
-(function(){
-var	$root, sx={ root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)', current:'.currfh' };
-fhitems.fn = fhitems.prototype = {
-	__typeOf: function(){ return 'fhitems'; },
-	init: function( o ){
-		if ( arguments.length===1 && TypeOf(o)==='fhitems' ) {
-			return $.extend(this, o); // "copy-constructor"
-		}
-		o = normalize_options.apply(this, arguments);
-
-		var sxv = [ // ...will become this.filter.
-			sx.root+'>',
-			o.scope,
-			o.sx || '',
-			o.op_sx
-		];
-
-		if ( 'root' in o ) {
-			this.root=o.root;
-		} else if ( relOps[o.op] ) {
-			this.root = sx.root+'>'+sx.items+sx.current;
-		} else if ( o.op!=='children' ) {
-			this.root = sxv.slice(0,3).join(''); sxv[2] = '';
-		} else {
-			this.root = $root;
-		}
-		o.op!=='closest' && (sxv[0] = '');
-		this.op = o.op;
-		this.filter = o.fn || sxv.join('') || undefined;
-		return this;
-	},
-	selector: function(){
-		return this.op==='children'
-			? (this.root.selector||this.root)+'>'+(this.filter||'')
-			: fhitems(this).selector;
-	}
-}
-
-var	fhitemsArgTypes = {
-		'function':     'fn',
-		'boolean':      'scope',
-		'element':      'root',
-		'list':         'root',
-		'undefined':    'root',
-		'null':         'root'
-	},
-	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings');
-
-function optType( o ){
-	var t = TypeOf(o);
-	return t==='string' ? o==='*' && 'scope' || o in $.fn && 'op' || 'sx' : fhitemsArgTypes[t];
-}
-
-function normalize_options(){
-	var o={ op_sx:'' }, i, v, k;
-	for ( i=0; i<arguments.length; ++i ){
-		(k=optType(v=arguments[i])) && (o[k]=v);
-	}
-
-	o.scope = o.scope===false && ':not('+sx.items+')'
-		|| o.scope && '*'
-		|| sx.items;
-
-	if ( o.op==='next' || o.op==='prev' ) {
-		o.op+='All'; o.op_sx=':first';
-	} else if ( !o.op || TypeOf(o.op)!=='string' ) {
-		o.op = 'root' in o && 'closest' || o.fn && 'filter' || 'children';
-	}
-
-	return o;
-}
-
-$(function(){
-	var IDLE_ROOT = 'data-fhitems-root';
-	if ( $('div.head>div.article[id^=firehose-]').length ) {
-		// For Idle, the marquee item qualifies --- but don't expect 'next', et al, to
-		// bridge the gap).
-		$('#firehoselist,div.head').addClass(IDLE_ROOT);
-		sx.root = 'div.'+IDLE_ROOT;
-	}
-	$root = $(sx.root);
-});
-})();
-
-
 function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
 	$any('firehoselist').trigger('articlesMoved', data);
@@ -373,26 +284,19 @@ function reportError(request) {
 
 //Firehose functions begin
 
-function toggle_fh_body_wrap_return( any, unused, /*optional:*/toggle_to, dont_next ) {
-
-	var	$fhitem		= fhitems(any),
-		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
-		$body		= $fhitem.children('[id^=fhbody-]'),
-		body_is_empty	= $body.is('.empty'),
-		toggle_from	= sign(!body_is_empty && !$body.is('.hide') || -1);
-
-	if (firehose_settings.view == "stories" && toggle_from == "1") {
-		return true;
-	}
-
-	toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next );
-	return false;
+function is_body_expanded( el ){
+	return $(el).closest('.fhitem').is(':has(>[id^=fhbody-]:not(.empty,.hide))');
 }
 
-function toggle_firehose_body( any, unused, /*optional:*/toggle_to, dont_next ) {
+function toggle_fh_body_wrap_return( el ) {
+	return firehose_settings.view==='stories' && is_body_expanded(el)
+		|| toggle_firehose_body.apply(null, arguments) && false;
+}
+
+function toggle_firehose_body( el, unused, /*optional:*/toggle_to, dont_next ) {
 	setFirehoseAction();
 
-	var	$fhitem		= fhitems(any),
+	var	$fhitem		= $(el).closest('.fhitem'),
 		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
 		$body		= $fhitem.children('[id^=fhbody-]'),
 		body_is_empty	= $body.is('.empty'),
@@ -671,7 +575,8 @@ function firehose_fix_up_down( id, new_state ){
 }
 
 function firehose_click_nodnix_reason( event ) {
-	var $fhitem=fhitems(event.target), fhid=$fhitem.attr('id').replace(FHID_PREFIX, '');
+	var	$fhitem	= $(event.target).closest('.fhitem'),
+		fhid	= $fhitem.attr('id').replace(FHID_PREFIX, '');
 
 	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+fhid).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
 		firehose_collapse_entry(fhid);
@@ -706,8 +611,8 @@ function tag_ui_in( $fhitem ){
 	return { widget:$W, expanded:$W.is('.expanded') };
 }
 
-function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
-	var	$fhitem		= fhitems(any), // assert($fhitem.length)
+function firehose_toggle_tag_ui_to( want_expanded, el, dont_next ){
+	var	$fhitem		= $(el).closest('.fhitem'), // assert($fhitem.length)
 		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
 		tag_ui		= tag_ui_in($fhitem),
 		toggle		= tag_ui.expanded == !want_expanded; // force boolean conversion
@@ -741,8 +646,8 @@ function firehose_toggle_tag_ui_to( want_expanded, any, dont_next ){
 	return tag_ui.widget;
 }
 
-function firehose_toggle_tag_ui( any ) {
-	var $fhitem = fhitems(any);
+function firehose_toggle_tag_ui( el ) {
+	var $fhitem = $(el).closest('.fhitem');
 	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
 }
 
@@ -774,7 +679,7 @@ $(function(){
 
 function page_click_handler( event ) {
 	var	$target	= $(event.target),
-		$fhitem	= $('#firehoselist').length ? fhitems($target) : $target.closest('div.article'),
+		$fhitem	= $target.closest('.fhitem'),
 		leaving	= !!$target.closest('a[href]:not([href=#],[onclick])').length,
 		intent	= !leaving && 'interest',
 		command, $menu, click_handled = false;
@@ -930,6 +835,9 @@ function firehose_handle_comment_nodnix( commands ){
 
 
 $(function(){
+var $FHL=$any('firehoselist');
+
+
 //
 // Page initialization.
 //
@@ -938,7 +846,7 @@ $.browser.chrome = $.browser.safari && /chrome/.test( navigator.userAgent.toLowe
 
 $('#fhsearch').show();
 firehose_init_tag_ui();
-$any('firehoselist').click(page_click_handler);	// if no #firehoselist, install click handler per article
+$('div.fhroot').click(page_click_handler);
 
 // .live() binds these handlers to all current _and_ future firehose items
 $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
@@ -961,7 +869,7 @@ $('#firehoselist > div[id^=firehose-]:not(.daybreak)').
 
 $('#firehoselist a.more').
 	live('mousedown', function(){ // pos_logger
-		var item=fhitems(this), pos=fhitems().index(item)+1;
+		var $item=$(this).closest('.fhitem'), pos=$FHL.children().index(item)+1;
 		this.href += (this.search ? '&' : '?') + 'art_pos=' + pos;
 		return true;
 	});
@@ -997,57 +905,37 @@ inject_reasons.template = (
 );
 
 
-function firehose_init_tag_ui( $new_entries ){
-	var $firehoselist = $('#firehoselist');
+function firehose_init_tag_ui( $fhitems ){
+	var COMMENT_RE=/\bfhitem-comment\b/, have_nodnix, $widgets;
 
-	if ( ! $new_entries || ! $new_entries.length ) {
-		if ( $firehoselist.length ) {
-			$new_entries = $firehoselist.children('[id^=firehose-][class*=article]');
-		} else {
-			$new_entries = $('[class*=article]');
+	$fhitems = $fhitems
+		? $fhitems.filter(':not([tag-server])')
+		: $('div.fhroot>.fhitem:not([tag-server])');
+
+	have_nodnix = $fhitems.is(':has(>[id^=updown-])');
+
+	$fhitems.each(function(){
+		install_tag_server(this, this.id.replace(FHID_PREFIX, ''));
+
+		tag_admin && this.command_pipeline.push(firehose_handle_admin_commands);
+		this.command_pipeline.push(firehose_handle_context_triggers);
+
+		if ( have_nodnix ) {
+			// install nod/nix handling only if I see the nod/nix buttons
+			this.command_pipeline.push(
+				COMMENT_RE.test(this.className) ?
+					firehose_handle_comment_nodnix :
+					firehose_handle_nodnix);
+			inject_reasons(this, false);
 		}
-	}
+	});
 
-	$new_entries = $new_entries.filter(':not([tag-server])');
-	var have_nodnix = $new_entries.children('[id^=updown-]').length;
+	$widgets = $init_tag_widgets($fhitems.find('.tag-widget-stub'));
+	tag_admin && $widgets.filter('.body-widget').each(function(){
+		this.modify_context = firehose_admin_context;
+	});
 
-	$new_entries.
-		each(function(){
-			var $this = $(this);
-
-			install_tag_server(this, this.id.replace(FHID_PREFIX, ''));
-
-			if ( tag_admin ) {
-				this.command_pipeline.push(firehose_handle_admin_commands);
-			}
-
-			this.command_pipeline.push(firehose_handle_context_triggers);
-
-			if ( have_nodnix ) {
-				// install nod/nix handling only if I see the nod/nix buttons
-				this.command_pipeline.push(
-					$this.is('.fhitem-comment') ?
-						firehose_handle_comment_nodnix :
-						firehose_handle_nodnix);
-				inject_reasons(this, false);
-			}
-		});
-
-	if ( ! $firehoselist.length ) {
-		$new_entries.click(page_click_handler);
-	}
-
-	var $widgets = $init_tag_widgets($new_entries.find('.tag-widget-stub'));
-
-	if ( tag_admin ) {
-		$widgets.
-			filter('.body-widget').
-				each(function(){
-					this.modify_context = firehose_admin_context;
-				});
-	}
-
-	return init_tag_ui_styles($new_entries);
+	return init_tag_ui_styles($fhitems);
 }
 // firehose functions end
 
@@ -1437,13 +1325,9 @@ start_animation = function( step_fn, interval, opt_abort_fn ){
 }
 })();
 
-var first_addition, last_removal, changes, changes_after;
-$(function(){
-first_addition	= new fhitems(true, '.data-add-ready:first');
-last_removal	= new fhitems(true, '.data-remove-ready:not(.currfh):last');
-changes			= new fhitems(true, '.data-add-ready,.data-remove-ready:not(.currfh)');
-changes_after	= new fhitems(true, undefined, 'nextAll', '.data-add-ready,.data-remove-ready:not(.currfh)');
-});
+var	FIRST_ADD_READY		= '.data-add-ready:first',
+	LAST_REMOVE_READY	= '.data-remove-ready:not(.currfh):last',
+	READY				= '.data-add-ready,.data-remove-ready:not(.currfh)';
 
 function boundary_items(){
 	var y=new Bounds(window).bottom, above, below;
@@ -1467,9 +1351,9 @@ function all( $all, duration ){
 
 function next( duration ){
 	var t=duration||0, edge_item=boundary_items();
-	return edge_item.below && !all(changes_after(edge_item.above))
-		|| all(first_addition(), t).length
-		|| all(last_removal(), t).length;
+	return edge_item.below && !all($(edge_item.above).nextAll(READY))
+		|| all($FHL.children(FIRST_ADD_READY), t).length
+		|| all($FHL.children(LAST_REMOVE_READY), t).length;
 }
 
 animate_firehose_changes = function( interval, duration, complete_fn ){
@@ -1494,7 +1378,7 @@ animate_firehose_changes = function( interval, duration, complete_fn ){
 	if ( interval ) {
 		step() && start_animation(step, interval, complete);
 	} else {
-		all(changes());
+		all($FHL.children(READY));
 		complete();
 	}
 }
@@ -1503,10 +1387,10 @@ animate_firehose_changes = function( interval, duration, complete_fn ){
 
 
 (function(){
-var INIT_INTERVAL=400, timer, next_to_init;
+var INIT_INTERVAL=400, $fhroots, timer;
 
 function step(){
-	var $item = next_to_init();
+	var $item = $fhroots.children('.fhitem:visible:not([tag-server]):first');
 
 	if ( $item.length ) {
 		firehose_init_tag_ui($item);
@@ -1522,10 +1406,7 @@ $(document).bind('firehose-content-end', function(){
 	timer || (timer=setInterval(step, INIT_INTERVAL));
 });
 
-$(function(){
-next_to_init = new fhitems(':visible:not([tag-server]):first');
-});
-
+$(function(){ $fhroots=$('div.fhroot'); });
 })();
 
 function firehose_handle_update( updates, sequence ) {
@@ -2269,10 +2150,10 @@ function firehose_set_cur($new_current) {
 		addClass('currfh'). // before event
 		trigger('focus-article', event_data);
 
-	var viewhint = false;
-	if ( fhitems(':first')[0] === $new_current[0] ) {
+	var viewhint=false, $fhitems=$('#firehoselist>.fhitem'), pos=$fhitems.index($new_current);
+	if ( pos==0 ) {
 		viewhint = $('body');
-	} else if ( fhitems(':last')[0] === $new_current[0] ) {
+	} else if ( pos == $fhitems.length-1 ) {
 		viewhint = $any('div#fh-paginate');
 	}
 
