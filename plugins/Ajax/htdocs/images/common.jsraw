@@ -173,7 +173,7 @@ function createPopup(pos_selector, titlebar, name, contents, message, onmouseout
 				append(div('contents', contents)).
 				append(div('message', message));
 
-	$.TypeOf.fn(onmouseout) && $popup.mouseleave(onmouseout);
+	TypeOf.fn(onmouseout) && $popup.mouseleave(onmouseout);
 	return $popup[0];
 }
 
@@ -213,7 +213,7 @@ var	$root, sx={ root:'#firehoselist', items:'div[id^=firehose-]:not(.daybreak)',
 fhitems.fn = fhitems.prototype = {
 	__typeOf: function(){ return 'fhitems'; },
 	init: function( o ){
-		if ( arguments.length===1 && _typeof(o)==='fhitems' ) {
+		if ( arguments.length===1 && TypeOf(o)==='fhitems' ) {
 			return $.extend(this, o); // "copy-constructor"
 		}
 		o = normalize_options.apply(this, arguments);
@@ -257,7 +257,7 @@ var	fhitemsArgTypes = {
 	relOps = Slash.Util.qw.as_set('next nextAll prev prevAll siblings');
 
 function optType( o ){
-	var t = _typeof(o);
+	var t = TypeOf(o);
 	return t==='string' ? o==='*' && 'scope' || o in $.fn && 'op' || 'sx' : fhitemsArgTypes[t];
 }
 
@@ -273,7 +273,7 @@ function normalize_options(){
 
 	if ( o.op==='next' || o.op==='prev' ) {
 		o.op+='All'; o.op_sx=':first';
-	} else if ( !o.op || _typeof(o.op)!=='string' ) {
+	} else if ( !o.op || TypeOf(o.op)!=='string' ) {
 		o.op = 'root' in o && 'closest' || o.fn && 'filter' || 'children';
 	}
 
@@ -986,7 +986,7 @@ function inject_reasons( expr, init ){
 				click(firehose_click_nodnix_reason);
 
 	// Unless caller _explicitly_ tells me _not_ to init, e.g., inject_reasons(..., false)...
-	if ( $.TypeOf.not('defNo', init) ) {
+	if ( init || init===undefined ) {
 		$init_tag_widgets($selection.find('.tag-widget-stub'));
 	}
 }
@@ -1610,9 +1610,9 @@ function busy( k, more, for_root ){
 	// busy(k) is a "getter"
 	if ( arguments.length > 1 ) {
 		// busy(k, expr) is a (relative) "setter".  Let's deduce the delta...
-		if ( $.TypeOf(more)==='number' ) {	// busy(k, number) means depth[k]+=number, except...
+		if ( TypeOf.number(more) ) {	// busy(k, number) means depth[k]+=number, except...
 			more===0 && (more = -N);	// ...busy(k, 0) means "reset"
-		} else {				// For non-numbers (including 'number.Nan', 'number.Infinity' --- thank you, $.TypeOf)
+		} else {						// For non-numbers (including 'Nan', 'Infinity' --- thank you, TypeOf)
 			more = sign(more) || -1;	// busy(k, expr) means ++depth[k] or --depth[k]
 		}
 		(N+=more) ? depth[k]=N : delete depth[k];
@@ -2534,7 +2534,7 @@ var NO_SPACE	= 0,
 function fix_ad_position(){
 	if ( $ad_position.length ) {
 		var space = verticalAdSpace();
-		if ( $.TypeOf(space.top)!=='number' ||  $.TypeOf(space.bottom)!=='number' ) {
+		if ( !TypeOf.number(space.top) ||  !TypeOf.number(space.bottom) ) {
 			return;
 		}
 		space.bottom-=AD_HEIGHT;

@@ -22,40 +22,48 @@ function Bounds(){
 (function(){
 
 function _unwrap( o, allow_lists ){
-	if ( _typeof(o) === 'string' ) {
+	if ( TypeOf(o) === 'string' ) {
 		var el = document.getElementById(o);
 		o = el ? el : $(o);
 	}
 
-	return allow_lists||!_typeof.list(o) ? o : o[0];
+	return allow_lists||!TypeOf.list(o) ? o : o[0];
 }
 
-var	_isSize		= $.TypeOf.makeTest(function( o, t ){
-				var nt='number';
-				return (t==='size'
-					|| o && this(o.height, nt) && this(o.width, nt));
-			}),
-	_hasSize	= $.TypeOf.makeTest(function( o, t ){
-				return o && this.fn(o.height) && this.fn(o.width);
-			}),
-	_isPosition	= $.TypeOf.makeTest(function( o, t ){
-				var nt='number';
-				return (t==='position'
-					|| t==='bounds'
-					|| o && this(o.top, nt) && this(o.left, nt));
-			}),
-	_isBounds	= $.TypeOf.makeTest(function( o, t ){
-				var nt='number';
-				return (t==='bounds'
-					|| o && this(o.top, nt) && this(o.left, nt) && this(o.bottom, nt) && this(o.right, nt));
-			});
+function _isSize( o ){
+	var t=TypeOf(o), isNum=TypeOf.number;
+	if ( t==='size' || o && isNum(o.height) && isNum(o.width) ) {
+		return t;
+	}
+}
+
+function _hasSize( o ){
+	var t=TypeOf(o), isFn=TypeOf.fn;
+	if ( o && isFn(o.height) && isFn(o.width) ) {
+		return t;
+	}
+}
+
+function _isPosition( o ){
+	var t=TypeOf(o), isNum=TypeOf.number;
+	if ( t==='position' || t==='bounds' || o && isNum(o.top) && isNum(o.left) ) {
+		return t;
+	}
+}
+
+function _isBounds( o ){
+	var t=TypeOf(o), isNum=TypeOf.number;
+	if ( t==='bounds' || o && isNum(o.top) && isNum(o.left) && isNum(o.bottom) && isNum(o.right) ) {
+		return t;
+	}
+}
 
 Size.prototype = {
 	__isa: Size,
 	__typeOf: function(){ return 'size'; },
 
 	assign: function( o ){
-		switch ( !!o && _typeof(o=_unwrap(o)) ) {
+		switch ( !!o && TypeOf(o=_unwrap(o)) ) {
 			case 'document':
 			case 'element':
 			case 'window':
@@ -93,7 +101,7 @@ Position.prototype = {
 
 	assign: function( o ){
 		if ( !_isPosition(o) ) {
-			switch ( !!o && _typeof(o=_unwrap(o)) ) {
+			switch ( !!o && TypeOf(o=_unwrap(o)) ) {
 				case 'window':
 					o = $(o);
 					o = { top:o.scrollTop(), left:o.scrollLeft() };
@@ -181,7 +189,7 @@ Bounds.equal = function( a, b ){
 
 function _each_op( a, b ){
 	var	result	= new Bounds(a=_unwrap(a, true)),
-		A	= arguments.length==1 && _typeof.list(a) ? a : arguments;
+		A	= arguments.length==1 && TypeOf.list(a) ? a : arguments;
 	for ( var i=1; i<A.length; ++i ){
 		result[this](A[i]);
 	}

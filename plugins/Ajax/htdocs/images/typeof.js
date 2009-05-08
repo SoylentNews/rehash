@@ -1,10 +1,8 @@
-// Temporary routines to replace broken uses of TypeOf
-
-var  _typeof;
+var  TypeOf;
 (function(){
 var U=void(0), N=null, W=window,
 	OBJECT, FUNCTION, NUMBER,
-	TYPEOF={}, TYPEOF_NODE=[], TYPEOF_LIST={};
+	TYPEOF={}, TYPEOF_NODE=[], TYPEOF_SCALAR={}, TYPEOF_LIST={};
 
 function otype( o, compare ){
 	var ot;
@@ -58,7 +56,7 @@ function typeof_list( o ){
 	}
 }
 
-_typeof = function( o ){
+TypeOf = function( o ){
 	return TYPEOF[ typeof(o) ]
 		|| o===N && 'null'
 		|| TYPEOF[ otype(o) ]
@@ -68,12 +66,12 @@ _typeof = function( o ){
 		|| typeof_list(o)
 		|| 'object';
 };
-_typeof.fn		= typeof_fn;
-_typeof.element	= qualify_element;
-_typeof.node	= qualify_node;
-_typeof.list	= function( o ){ return TYPEOF_LIST[ _typeof(o) ]; };
+TypeOf.fn		= typeof_fn;
+TypeOf.element	= qualify_element;
+TypeOf.node		= qualify_node;
+TypeOf.list		= function( o ){ return TYPEOF_LIST[ TypeOf(o) ]; };
 
-_typeof.number = function( o, all ){
+TypeOf.number = function( o, all ){
 	if ( otype(o, NUMBER) ) {
 		return isFinite(o) && 'number'
 			|| all && o.toString()
@@ -81,7 +79,13 @@ _typeof.number = function( o, all ){
 	}
 };
 
-_typeof.debug	= function(){ return TYPEOF; };
+TypeOf.scalar = function( o ){
+	return TYPEOF_SCALAR[ typeof(o) ]
+		|| o===N && 'null'
+		|| U;
+}
+
+TypeOf.debug	= function(){ return TYPEOF; };
 
 
 (function(){
@@ -97,18 +101,18 @@ _typeof.debug	= function(){ return TYPEOF; };
 	TYPEOF_NODE[DOCUMENT_NODE] = 'document';
 
 	var INIT = [
-		{ o:undefined,												list:false },
-		{ o:false,													list:false },
-		{ o:0,														list:false },
-		{ o:'',														list:true },
-		{ o:function(){},											list:false },
+		{ o:undefined,												scalar:true,	list:false },
+		{ o:false,													scalar:true,	list:false },
+		{ o:0,														scalar:true,	list:false },
+		{ o:'',														scalar:true,	list:true },
+		{ o:function(){},															list:false },
 		{ o:{} },
-		{ o:[],									want:'array',		list:true },
-		{ o:/./,			expect:'object',	want:'regexp',		list:false },
-		{ o:new Date(),		expect:'object',	want:'date',		list:false },
-		{ o:new Error(),	expect:'object',	want:'error',		list:false },
-		{ o:document,							want:'document',	list:false },
-		{ o:W,									want:'window',		list:false }
+		{ o:[],									want:'array',						list:true },
+		{ o:/./,			expect:'object',	want:'regexp',						list:false },
+		{ o:new Date(),		expect:'object',	want:'date',						list:false },
+		{ o:new Error(),	expect:'object',	want:'error',						list:false },
+		{ o:document,							want:'document',					list:false },
+		{ o:W,									want:'window',						list:false }
 	];
 
 	while ( INIT.length ){
@@ -117,9 +121,10 @@ _typeof.debug	= function(){ return TYPEOF; };
 			actual_otype	= otype(entry.o),
 			want			= entry.want||entry.expect||actual;
 
-		entry.expect && actual!==entry.expect&& BROKEN.push(actual);
+		entry.expect && actual!==entry.expect && BROKEN.push(actual);
 		actual!=='object'		&& (TYPEOF[ actual ] = want);
 		actual_otype!==OBJECT	&& (TYPEOF[ actual_otype ] = want);
+		entry.scalar!==U		&& (TYPEOF_SCALAR[want] = want);
 		entry.list!==U			&& (TYPEOF_LIST[want] = entry.list && want || U);
 	}
 	TYPEOF_LIST.list = 'list';

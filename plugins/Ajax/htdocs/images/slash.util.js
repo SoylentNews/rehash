@@ -8,19 +8,23 @@ $.ajaxSetup({
 	contentType: 'application/x-www-form-urlencoded'
 });
 
-
-var T=$.TypeOf;
+function nonEmpty( o ){
+	if ( !TypeOf.scalar(o) ) {
+		for ( var k in o ) {
+			return true;
+		}
+	}
+}
 
 // code to be exported
 
 function clone( o ){
 	if ( o===undefined || o===null ) { return o; }
 
-	var tn = T(o);
-	if ( T.scalar(o, tn) ) { return o.valueOf(); };
+	if ( TypeOf.scalar(o) ) { return o.valueOf(); };
 
 	var o2;
-	if ( tn==='function' ) {
+	if ( TypeOf.fn(o) ) {
 		// if it's a function, I'll have to cheat...
 		// extract the source code for the function
 		var S = o.toString();
@@ -35,7 +39,7 @@ function clone( o ){
 		o2 = new o.constructor();
 	}
 
-	if ( T.nonEmpty(o, tn) ) {
+	if ( nonEmpty(o) ) {
 		// ...as long as we're willing to copy all the properties (even works on arrays)
 		// and key that we do this for functions as well... they can have properties
 		core.each(o, function(k, v){
@@ -48,10 +52,10 @@ function clone( o ){
 function qw_as_array( qw ){
 	if ( ! qw ) { return []; }
 
-	if ( T(qw, 'string') ) {
+	if ( typeof(qw)==='string' ) {
 		qw = $.map(qw.split(/\s+/), function(w){if(w)return w;});
 	}
-	if ( T.not('list', qw) ) {
+	if ( !TypeOf.list(qw) ) {
 		qw = core.reduce(qw, [], function( k, v ){ v && this.push(k); })
 	}
 	// else: qw already _is_ an array
@@ -62,10 +66,10 @@ function qw_as_array( qw ){
 function qw_as_set( qw ){
 	if ( ! qw ) { return {}; }
 
-	if ( T(qw, 'jquery') || T(qw, 'string') ) {
+	if ( typeof(qw)==='string' ) {
 		qw = qw_as_array(qw);
 	}
-	if ( T.list(qw) ) {
+	if ( TypeOf.list(qw) ) {
 		qw = core.reduce(qw, {}, function( i, v ){ this[v]=true; });
 	}
 	// else qw already _is_ a set
@@ -76,7 +80,7 @@ function qw_as_set( qw ){
 function qw_as_string( qw ){
 	if ( !qw ) { return ''; }
 
-	if ( T(qw, 'string') ) {
+	if ( typeof(qw)==='string' ) {
 		return /\S/.test(qw) ? qw : '';
 	}
 	// else turn it _into_ a string
@@ -95,13 +99,13 @@ function qw_concat_strings(){
 function qw_each( qw, fn ){
 	if ( ! qw ) { return; }
 
-	if ( T(qw, 'jquery') || T(qw, 'string') ) {
+	if ( typeof(qw)==='string' ) {
 		qw = qw_as_array(qw);
 	}
 
-	var use_key = T.not('list', qw);
+	var use_key = !TypeOf.list(qw);
 	core.each(qw, function(k, v){
-		if ( T.not('defNo', v) ) {
+		if ( v || v===undefined ) {
 			return fn.call(use_key ? k : v);
 		}
 	});
@@ -133,6 +137,9 @@ function ensure_namespace( path ){
 
 ensure_namespace('Slash').jQuery = $;
 
+function ifFn( fn ){
+	return TypeOf.fn(fn) && fn;
+}
 
 function Package( o ){
 	var root_name = qw_as_array((o.named||'').replace(/\.+/g, ' '));
@@ -147,7 +154,7 @@ function Package( o ){
 	// e_api implies stem_name
 
 	function inject_free_api( stem_obj, extra ){
-		if ( T.not('defNo', o.exports) ) {
+		if ( o.exports || o.exports===undefined ) {
 			stem_obj.__api__ = stem_obj.__api__ && [].concat(stem_obj.__api__, o) || o;
 		}
 		// roll in the element_api first, so the free api can override same-named
@@ -155,7 +162,7 @@ function Package( o ){
 	}
 
 	var defn_stem_fn =
-		e_api && T.objIf('fn', o.element_constructor) || T.objIf('fn', o.stem_function);
+		e_api && ifFn(o.element_constructor) || ifFn(o.stem_function);
 
 	function e_ctor_fn( stem_name ){
 		return function( e ){
@@ -182,23 +189,23 @@ function Package( o ){
 		var jstem_name = oj.named || estem_name;
 
 		// $.jstem_name
-		if ( T.not('defNo', oj.api) ) {
-			$[jstem_name] = T.nonEmpty(oj.api) ?
+		if ( oj.api || oj.api===undefined ) {
+			$[jstem_name] = nonEmpty(oj.api) ?
 				inject_free_api(e_api && e_ctor_fn(jstem_name) || {}, oj.api) :
 				stem_obj;
 		}
 		// $(expr).jstem_name()
 		var je_api = oj.element_api;
-		var defn_jstem_fn = T.objIf('fn', oj.element_constructor) || T.objIf('fn', oj.stem_function);
-		var je_ctor = T.objIf('fn', defn_jstem_fn) || e_ctor && jproxy_free_fn(e_ctor);
+		var defn_jstem_fn = ifFn(oj.element_constructor) || ifFn(oj.stem_function);
+		var je_ctor = ifFn(defn_jstem_fn) || e_ctor && jproxy_free_fn(e_ctor);
 		if ( je_ctor ) {
 			$.fn[jstem_name] = je_ctor;
 		}
 		// $(expr).jstem_name__fn_name()
-		if ( T.not('defNo', je_api) ) {
+		if ( je_api || je_api===undefined ) {
 			var j_prefix = jstem_name + '__';
-			if ( T.nonEmpty(e_api) ) {
-				core.each(e_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
+			if ( nonEmpty(e_api) ) {
+				core.each(e_api, function( fn_name, fn ){ if ( TypeOf.fn(fn) ) {
 					$.fn[j_prefix + fn_name] = je_ctor ?
 						function(){
 							var args = arguments;
@@ -212,8 +219,8 @@ function Package( o ){
 						jproxy_free_fn(fn);
 				}});
 			}
-			if ( T.nonEmpty(je_api) ) {
-				core.each(je_api, function( fn_name, fn ){ if ( T.fn(fn) ) {
+			if ( nonEmpty(je_api) ) {
+				core.each(je_api, function( fn_name, fn ){ if ( TypeOf.fn(fn) ) {
 					$.fn[j_prefix + fn_name] = fn;
 				}});
 			}
@@ -256,7 +263,7 @@ function jproxy_free_fn( fn ){
 function inject_element_api(elem, api_defn, obj){
 	obj = obj || elem;
 	core.each(api_defn, function(fn_name, fn){
-		if ( T.fn(fn) ) {
+		if ( TypeOf.fn(fn) ) {
 			obj[fn_name] = proxy_fn(elem, fn);
 		}
 	});
@@ -360,7 +367,7 @@ fhitem_key = function( item ){
 }
 })(jQuery);
 
-function sign( o ){ return $.TypeOf(o, 'number') && o<0 && -1 || (o ? 1 : 0); }
+function sign( o ){ return TypeOf.number(o) && o<0 && -1 || (o ? 1 : 0); }
 
 function between( lo, o, hi ){ if ( lo<=hi ) { return o<lo && -1 || o>hi && 1 || 0; } }
 function pin_between( lo, o, hi ){
