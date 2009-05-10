@@ -578,7 +578,7 @@ function firehose_click_nodnix_reason( event ) {
 	var	$fhitem	= $(event.target).closest('.fhitem'),
 		fhid	= $fhitem.attr('id').replace(FHID_PREFIX, '');
 
-	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+fhid).is('.voteddown') || $fhitem.is('[type=comment]')) ) {
+	if ( (fh_is_admin || firehose_settings.metamod) && ($any('updown-'+fhid).is('.voteddown') || $fhitem.is('.fhitem-comment')) ) {
 		firehose_collapse_entry(fhid);
 	}
 

@@ -101,7 +101,7 @@ function firehose_handle_admin_commands( commands ){
 				break;
 
 			case 'binspam':
-				if ( $entry.is('[type=feed]') )
+				if ( $entry.is('.fhitem-feed') )
 					break;
 				/* else fall through */
 			case 'hold':
