@@ -1518,15 +1518,11 @@ Slash.busy = function( k, more ){
 //	when you're calls to busy(..., true) and busy(..., false) don't balance.
 //
 Slash.markBusy = function( k, state ){
-	var	was_busy = $B.is('.busy-'+k),
+	var	was_busy = ($B||($B=$('body'))).is('.busy-'+k),
 		now_busy = !!state || arguments.length<2 && depth[k]>0; // markBusy(k) resets mark to depth[k]>0.
 	was_busy!==now_busy && $B.toggleClass('busy-'+k);
 	return was_busy; // Return previous "physical" state: body had class "busy-"+k.
 };
-
-$(function(){
-	$B=$('body');
-})
 
 })();
 
