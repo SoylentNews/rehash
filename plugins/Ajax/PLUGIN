@@ -8,17 +8,6 @@ glob=taguicss:htdocs/tag-ui.css
 taguicss=htdocs/images/tag-ui.css
 taguicss=htdocs/images/jquery/jquery.autocomplete.css
 css=htdocs/tag-ui.css
-#####
-# As far as I can tell, these two have never actually been
-# copied into place, because they have never been in this
-# PLUGIN file.  If I wanted to start doing that now I would
-# uncomment these lines.  However I do not know whether
-# that is a good idea so I shall not.  - Jamie 2009-04-09
-#glob=sfnettaguicss:htdocs/images/sfnet-tag-ui.css
-#glob=slashsfnetjs:htdocs/images/slash.sfnet.js
-#sfnettaguicss=htdocs/images/sfnet-tag-ui.css
-#slashsfnetjs=htdocs/images/slash.sfnet.js
-#####
 htdoc=htdocs/ajax.pl
 htdoc=htdocs/preferences.pl
 htdoc=htdocs/images/typeof.js
