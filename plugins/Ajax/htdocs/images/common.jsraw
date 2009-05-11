@@ -782,6 +782,9 @@ function firehose_handle_nodnix( commands ){
 	if ( commands.length ) {
 		var $reasons = $('.nod-nix-reasons', this);
 		var nodnix_context = function( ctx ){
+			$('#firehoselist div.nod-nix-reasons>.tag-display:visible').parent().each(function(){
+				this.set_context();
+			});
 			$reasons.each(function(){
 				this.set_context(ctx);
 			});
@@ -1972,7 +1975,7 @@ function hide_modal_box(){
 }
 
 function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
-function show_login_box(){ get_login_parts().show(); }
+function show_login_box(){ get_login_parts().show(); $('#login_box_content form input[name=unickname]').focus(); }
 function hide_login_box(){ get_login_parts().hide(); }
 
 var logged_in = 1;
@@ -2539,10 +2542,10 @@ $(function(){
 	var validkeys = {};
 	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
 		validkeys = {
-			'X' : {           tags    : 1, signoff  : 1 },
-			'T' : {           tags    : 1, tag      : 1 },
-			187 : { chr: '+', tags    : 1, tag      : 1, nod    : 1 }, // 61, 107
-			189 : { chr: '-', tags    : 1, tag      : 1, nix    : 1 }, // 109
+			'X' : {           tags    : 1, signoff  : 1, noanon : 1 },
+			'T' : {           tags    : 1, tag      : 1, noanon : 1 },
+			187 : { chr: '+', tags    : 1, tag      : 1, noanon : 1, nod    : 1 }, // 61, 107
+			189 : { chr: '-', tags    : 1, tag      : 1, noanon : 1, nix    : 1 }, // 109
 
 			'R' : {           open    : 1, readmore : 1 },
 			'E' : {           open    : 1, edit     : 1 },
@@ -2587,6 +2590,13 @@ $(function(){
 		if (!keyo)
 			return true;
 
+		if (keyo.noanon && !check_logged_in())
+			return false;
+
+		if (keyo.admin && !fh_is_admin)
+			return true;
+
+
 		// if keyo.form, only work on form elements; if not, then
 		// never work on form elements.
 		var is_input = e.target && $(e.target).is(':input');
@@ -2603,9 +2613,9 @@ $(function(){
 		}
 
 		if (keyo.tag && el) {
+			firehose_toggle_tag_ui_to(true, el);
 			if (keyo.nod)     { el.submit_tags('nod') }
 			if (keyo.nix)     { el.submit_tags('nix') }
-			firehose_toggle_tag_ui_to(true, el);
 		}
 
 		if (keyo.signoff && el && tag_admin) {
