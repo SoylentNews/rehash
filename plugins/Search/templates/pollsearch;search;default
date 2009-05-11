@@ -36,6 +36,13 @@ __template__
 [% PROCESS pagination %]
 </div>
 </div>
+<script type="text/javascript">
+(function() {
+	// coremetrics
+	cmCreatePageviewTag('OLD POLLS');
+})();
+</script>
+
 __seclev__
 100
 __version__

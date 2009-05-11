@@ -64,6 +64,13 @@ by [% item.4 %]<br>
 [% END %]
 
 <p><center>generated on [% currtime %]</center></p>
+<script type="text/javascript">
+(function() {
+	// coremetrics
+	cmCreatePageviewTag('HALL OF FAME');
+})();
+</script>
+
 __seclev__
 10000
 __version__
