@@ -15,6 +15,98 @@ use Games::WoW::Armory;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+sub fetch_data {
+    my ( $self, $params ) = @_;
+    $self->{ ua } = LWP::UserAgent->new() || croak $!;
+    $self->{ ua }->agent(
+        "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1"
+    );
+
+    my $base_url;
+    if ( $$params{ country } =~ /eu/i ) {
+        $base_url = $WOW_EUROPE;
+    }
+    elsif ( $$params{ country } =~ /us/i ) {
+        $base_url = $WOW_US;
+    }
+    else {
+        croak "Unknown region code, please choose US or EU";
+    }
+
+    if ( defined $$params{ team } ) {
+        $self->url( $base_url
+                . $$params{ xml } . "?r="
+                . $$params{ realm } . "&ts="
+                . $$params{ ts } . "&t="
+                . $$params{ team } );
+
+    }
+    else {
+        $self->url( $base_url
+                . $$params{ xml } . "?r="
+                . $$params{ realm } . "&n="
+                . $$params{ name } );
+
+    }
+
+    $self->{ resultat } = $self->{ ua }->get( $self->url );
+
+    $self->{ xp }   = XML::Simple->new;
+    $self->{ data } = $self->{ resultat }->is_success()
+	? $self->{ xp }->XMLin( $self->{ resultat }->content )
+	: undef;
+}
+
+sub search_character {
+    my ( $self, $params ) = @_;
+
+    my $xml = 'character-sheet.xml';
+
+    croak "you need to specify a character name"
+        unless defined $$params{ character };
+    croak "you need to specify a realm" unless defined $$params{ realm };
+    croak "you need to specify a country name"
+        unless defined $$params{ country };
+
+    $self->fetch_data(
+        {   xml     => $xml,
+            realm   => $$params{ realm },
+            name    => $$params{ character },
+            country => $$params{ country }
+        }
+    );
+
+    return 0 if !$self->{ data };
+
+    my $character     = $self->{ data }{ characterInfo }{ character };
+    my $skill         = $self->{ data }{ characterInfo }{ skillTab };
+    my $characterinfo = $self->{ data }{ characterInfo }{ characterTab };
+
+    $self->character( Games::WoW::Armory::Character->new );
+    $self->character->name( $$character{ name } );
+    $self->character->class( $$character{ class } );
+    $self->character->guildName( $$character{ guildName } );
+
+    $self->character->battleGroup( $$character{ battleGroup } );
+    $self->character->realm( $$character{ realm } );
+    $self->character->race( $$character{ race } );
+    $self->character->gender( $$character{ gender } );
+    $self->character->faction( $$character{ faction } );
+    $self->character->level( $$character{ level } );
+    $self->character->lastModified( $$character{ lastModified } );
+    $self->character->title( $$character{ title } );
+
+    $self->character->skill( $skill );
+    $self->character->characterinfo( $characterinfo );
+
+    # Reputation information requires a separate XML file.
+    $self->get_reputation( $params );
+
+    $self->get_arena_teams( $params );
+
+    1;
+}
+
 sub get_reputation {
     my ( $self, $params ) = @_;
 

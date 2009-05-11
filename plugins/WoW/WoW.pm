@@ -271,13 +271,17 @@ sub retrieveArmoryData {
 	my $charmd_hr = $self->getCharMetadata($charid);
 	return if !$charmd_hr;
 	my $armory = Slash::Custom::WoWArmory->new();
-	$armory->search_character({
+
+	my($armory_hr, $raw_content) = (undef, undef);
+	my $success = $armory->search_character({
 		realm =>	$charmd_hr->{realmname},
 		character =>	$charmd_hr->{charname},
 		country =>	$charmd_hr->{countryname},
 	});
-	my $raw_content = $armory->{resultat}->content;
-	my $armory_hr = $armory->character();
+	if ($success) {
+		$raw_content = $armory->{resultat}->content;
+		$armory_hr = $armory->character();
+	}
 	my $char_update = { -last_retrieval_attempt => 'NOW()' };
 	$char_update->{-last_retrieval_success} = 'NOW()' if $armory_hr && $armory_hr->{name};
 	$self->setChar($charid, $char_update);
