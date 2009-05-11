@@ -24,10 +24,10 @@ sub fetch_data {
 
     my $base_url;
     if ( $$params{ country } =~ /eu/i ) {
-        $base_url = $WOW_EUROPE;
+        $base_url = $Games::WoW::Armory::WOW_EUROPE;
     }
     elsif ( $$params{ country } =~ /us/i ) {
-        $base_url = $WOW_US;
+        $base_url = $Games::WoW::Armory::WOW_US;
     }
     else {
         croak "Unknown region code, please choose US or EU";
