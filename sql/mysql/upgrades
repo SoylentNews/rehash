@@ -6211,10 +6211,6 @@ ALTER TABLE tags DROP INDEX uid_globjid_tagnameid_inactivated;
 #2009-05-05
 INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) VALUES ('stylesheet','text/css','screen, projection','yui_idle.css','idle','no','6','no','','yui');
 
-# 2009-05-05
-ALTER TABLE css MODIFY media varchar(64);
-INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) VALUES ('stylesheet','text/css','only screen and (max-device-width: 480px)','iphone.css','','no','3','no','','');
-
 
 # PLEASE DELETE symlinks to lick*css*
 
