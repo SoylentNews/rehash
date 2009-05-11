@@ -37,5 +37,12 @@ END %]
 <p>
 Want to know more about bookmarks? See the <a href="[% gSkin.rootdir %]/faq/tags.shtml#tags300">Bookmarking FAQ</a>
 </p>
+<script type="text/javascript">
+(function() {
+	// coremetrics
+	cmCreatePageviewTag('POPULAR BOOKMARKS');
+})();
+</script>
+
 __version__
 $Id$

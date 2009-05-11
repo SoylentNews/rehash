@@ -50,6 +50,10 @@ END %]
 <a name="main-articles"></a>
 <div id="articles">
 [% Slash.displayStory(story.sid, 'Full', { is_future => story.is_future, topiclist => Slash.db.getTopiclistForStory(story.sid) }) %]
+<script type="text/javascript">
+// coremetrics
+cmCreatePageviewTag('ARTICLE DETAIL', null, null, null,'[% story.title %]-_-[% story.section %]');  
+</script>
 
 <div class="prev-next">
 [% IF constants.use_prev_next_link %]

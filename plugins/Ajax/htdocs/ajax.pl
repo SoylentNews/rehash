@@ -1657,7 +1657,7 @@ sub saveModalPrefs {
 			willing		=> ($params{willing}	     ? 1 : 0),
 			tags_turnedoff	=> ($params{showtags}	     ? undef : 1),
 			opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
-			index_beta	=> ($params{index_beta} ? 1 : 0 ),
+			index_beta	=> ($params{index_beta} ? 0 : 1 ),
 		};
 
 		if (defined $params{tzcode} && defined $params{tzformat}) {
@@ -1698,7 +1698,7 @@ sub saveModalPrefs {
 				firehose_pause			=> ($params{paused} ? 0 : 1),
 				firehose_advanced		=> ($params{advanced} ? 1 : undef),
 				firehose_pagesize		=> ($params{pagesize} ? $params{pagesize} : "small"),
-				index_beta			=> ($params{index_beta} ? 1 : 0 ),
+				index_beta			=> ($params{index_beta} ? 0 : 1 ),
 				firehose_disable_picker_search  => ($params{firehose_disable_picker_search} ? undef : 1),
 				smallscreen			=> ($params{smallscreen} ? 1 : undef),
 				lowbandwidth			=> ($params{lowbandwidth} ? 1 : undef),

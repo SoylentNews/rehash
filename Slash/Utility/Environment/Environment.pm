@@ -740,11 +740,10 @@ MEMBER is passed in then only its value will be returned.
 sub getCurrentStatic {
 	my($value, $force_secure) = @_;
 
-	# Commented out for testing, 20090508
-#	my $want_secure = defined($force_secure)
-#		? $force_secure
-#		: apacheConnectionSSL();
-	my $want_secure = 0;
+	my $want_secure = defined($force_secure)
+		? $force_secure
+		: apacheConnectionSSL();
+#	my $want_secure = 0;
 
 	my $constants;
 
