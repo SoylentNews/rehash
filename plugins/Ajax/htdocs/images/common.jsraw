@@ -851,7 +851,7 @@ firehose_init_tag_ui();
 $('div.fhroot').click(page_click_handler);
 
 // .live() binds these handlers to all current _and_ future firehose items
-$('#firehoselist > div[id^=firehose-]:not(.daybreak)').
+$('#firehoselist > div.fhitem').
 	live('blur-article', function(){
 		var $fhitem = $(this);
 		if ( $fhitem.data('blur-closes-item') ) {		toggle_firehose_body($fhitem, 0, false, true);
@@ -912,7 +912,7 @@ function firehose_init_tag_ui( $fhitems ){
 
 	$fhitems = $fhitems
 		? $fhitems.filter(':not([tag-server])')
-		: $('div.fhroot>.fhitem:not([tag-server])');
+		: $('div.fhroot>div.fhitem:not([tag-server])');
 
 	have_nodnix = $fhitems.is(':has(>[id^=updown-])');
 
@@ -1392,7 +1392,7 @@ animate_firehose_changes = function( interval, duration, complete_fn ){
 var INIT_INTERVAL=400, $fhroots, timer;
 
 function step(){
-	var $item = $fhroots.children('.fhitem:visible:not([tag-server]):first');
+	var $item = $fhroots.children('div.fhitem:visible:not([tag-server]):first');
 
 	if ( $item.length ) {
 		firehose_init_tag_ui($item);
@@ -1468,7 +1468,7 @@ function firehose_update_title_count(num) {
 		sectionname = " " + firehose_settings.sectionname;
 	}
 	if (!num) {
-		num = $('#firehoselist>div:not(".daybreak")').length;
+		num = $('div.fhroot>div.fhitem').length;
 	}
 	if (num > 0) {
 		end =  " ("  + num + ")";
@@ -2120,11 +2120,11 @@ function toggle_filter_prefs() {
 
 
 function firehose_get_cur() {
-	return $('#firehoselist > div.currfh');
+	return $('#firehoselist > div.fhitem.currfh');
 }
 
 function firehose_get_first() {
-	return $('#firehoselist > div[id^=firehose-]:not(.daybreak):first');
+	return $('#firehoselist > div.fhitem:first');
 }
 
 function firehose_set_cur($new_current) {
@@ -2135,7 +2135,7 @@ function firehose_set_cur($new_current) {
 	if ($new_current.is('.currfh'))
 		return $new_current;
 
-	var	$old_current	= $new_current.siblings('div[id^=firehose-]:not(.daybreak).currfh'),
+	var	$old_current	= $new_current.siblings('div.fhitem.currfh'),
 		event_data	= { blurring:$old_current, focusing:$new_current };
 
 	$old_current.each(function(){
@@ -2148,7 +2148,7 @@ function firehose_set_cur($new_current) {
 		addClass('currfh'). // before event
 		trigger('focus-article', event_data);
 
-	var viewhint=false, $fhitems=$('#firehoselist>.fhitem'), pos=$fhitems.index($new_current);
+	var viewhint=false, $fhitems=$('#firehoselist>div.fhitem'), pos=$fhitems.index($new_current);
 	if ( pos==0 ) {
 		viewhint = $('body');
 	} else if ( pos == $fhitems.length-1 ) {
@@ -2160,7 +2160,7 @@ function firehose_set_cur($new_current) {
 
 function firehose_go_next($current) {
 	$current = $current || firehose_get_cur();
-	var $next = $current.nextAll('div[id^=firehose-]:not(.daybreak):first');
+	var $next = $current.nextAll('div.fhitem:first');
 	// if no current, pick top; if current but no next, do more
 	if ($next[0] || !$current[0]) {
 		return firehose_set_cur($next);
@@ -2173,7 +2173,7 @@ function firehose_go_next($current) {
 function firehose_go_prev($current) {
 	$current = $current || firehose_get_cur();
 	return firehose_set_cur(
-		$current.prevAll('div[id^=firehose-]:not(.daybreak):first')
+		$current.prevAll('div.fhitem:first')
 	);
 }
 

@@ -37,7 +37,7 @@ var regexp=/^\s*(?:\d+|many)\s+more\s*$/i;
 	function auto_more(){
 		var $more_link = $('#more-experiment a');
 		$more_link.each(function(){
-			if ( Bounds.intersect(window, $('#firehoselist>.fhitem:visible:last')) ) {
+			if ( Bounds.intersect(window, $('#firehoselist>div.fhitem:visible:last')) ) {
 				$more_link.click();
 				!--auto_more_count && (auto_more=undefined);
 				// don't allow a call till the next paginate gets built and |more_possible|
