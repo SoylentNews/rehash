@@ -18,14 +18,8 @@ __template__
 <input type="hidden" name="refreshable" value="">
 
 
-
-
-
-
-
-
                 [% IF tabbed == 1 %]
-				<div class="pref">
+		<div class="pref">
                 <span class="preftab active">Homepage</span>
                 <span class="preftab"><a href="" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false;">Slashboxes</a></span>
                 <span class="preftab"><a href="" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a></span>
@@ -34,14 +28,17 @@ __template__
                 [% END %]
 
                 <br>
+		
 		[% 
-                IF user.index_beta;
+                IF !user.index_beta;
                         beta_check = constants.markup_checked_attribute;
                 END;
 		%]
 		<label>
-			<input type="checkbox" name="index_beta"[% beta_check %]> Use Beta Index
+			<input type="checkbox" name="index_beta"[% beta_check %]> Use Classic Index
 		</label>
+
+		<br><br>
 
                 <label>Date/Time Format</label>
                 [%
