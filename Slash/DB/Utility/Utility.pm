@@ -381,6 +381,9 @@ sub sqlGetVar {
 # by removal of that file).  
 ########################################################
 
+{
+my $_querylog_lastchecktime = 0;
+my $_querylog_lastval = undef;
 sub _querylog_enabled {
 	my($self) = @_;
 
@@ -390,44 +393,42 @@ sub _querylog_enabled {
 		Carp::cluck "no ql for $self, perhaps SUPER::init was not called correctly?";
 		$self->{_querylog} = { };
 	}
-	return $self->{_querylog}{enabled}
-		if defined $self->{_querylog}{enabled}
-			&& $self->{_querylog}{next_check_time} > time;
+	return $_querylog_lastval
+		if defined $_querylog_lastval
+			&& $_querylog_lastchecktime + 20 > time;
 
 	# Need to (re)calculate whether it is enabled.  Note that this
 	# location is hardcoded!  We can't call getCurrentStatic() at
 	# this level, so we can't use $constants->{datadir}.  It would
 	# be better to put this into /u/l/s/site/sitename but, same
 	# problem.
-	my $was_enabled = $self->{_querylog}{enabled} || 0;
-	my $is_enabled = -e "/usr/local/slash/querylog";
+	my $was_enabled = $_querylog_lastval || 0;
+	my $is_enabled = -e '/usr/local/slash/querylog';
 	my $user;
-	if ($is_enabled) {
-		$user = getCurrentUser();
-		$is_enabled = 0 unless $user && $user->{state};
-	}
+	$user = getCurrentUser() if $is_enabled;
+	$is_enabled = 0 unless $user && $user->{state};
 	if ($is_enabled) {
 		my $siteid = getCurrentStatic('siteid');
 		$siteid =~ s/\./_2e/g;
 		$self->{_querylog}{apache_prefix} = "Apache::ROOT${siteid}::";
 	}
-	$self->{_querylog}{enabled} = $is_enabled;
-	$self->{_querylog}{qlid} = 0;
-	$self->{_querylog}{next_check_time} = time
-		+ ($is_enabled && $was_enabled ? 60 : 5)
-		+ int(rand(5));
-	
-	# Set up the querylog db object as necessary (the current
-	# DB object has-a separate DB object inside it).
+	$_querylog_lastchecktime = time;
+	$_querylog_lastval = $is_enabled;
+
 	if (!$is_enabled) {
 		$self->{_querylog}{db} = undef;
-	} else {
+	} elsif (!$was_enabled) {
+		# State just changed from "not enabled" to "enabled."
+		# Initialize some stuff.
+		$self->{_querylog}{qlid} = 0;
 		$self->{_querylog}{db} ||=
 			$user->{state}{dbs}{querylog}
 				? getObject('Slash::DB', { db_type => 'querylog' })
 				: $self;
 	}
+
 	return $is_enabled;
+}
 }
 
 sub _querylog_start {
