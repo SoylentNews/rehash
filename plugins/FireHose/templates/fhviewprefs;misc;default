@@ -190,7 +190,7 @@ var save_state_for;
 var in_use=$('#links-sections a.data-title'), mine=$item.find('a.data-title')[0];
 in_use = (mine ? in_use.not(mine) : in_use).map(foldtext).get();
 in_use.push('unsaved', '');
-in_use = Slash.Util.qw.as_set(in_use);
+in_use = Qw.as_set(in_use);
 
 save_state_for = function( name ){
 	return in_use[foldtext(name)] ? 'disabled' : '';

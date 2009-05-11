@@ -7,7 +7,7 @@
 		-- Wolf <wolf@slashdot.org>
 */
 
-Slash.Util.ensure_namespace('SFX');
+window.SFX || (window.SFX = {});
 SFX.jQuery = jQuery /* .noConflict(true) */;
 
 
@@ -95,8 +95,7 @@ function install_tag_ui( $roots, if_authenticated ){
 
 	var	Server	= Slash.TagUI.Server,
 		Markup	= Slash.TagUI.Markup,
-		Command	= Slash.TagUI.Command,
-		qw	= Slash.Util.qw;
+		Command	= Slash.TagUI.Command;
 
 	Server.need_cross_domain();
 	Markup.add_style_triggers(['nod', 'metanod'], 'y p');
@@ -124,7 +123,7 @@ function install_tag_ui( $roots, if_authenticated ){
 		tag_ui__init({
 			for_display: {
 				for_display: {
-					menu: qw.as_string(allowed_ops)
+					menu: Qw.as_string(allowed_ops)
 				}
 			}
 		}).

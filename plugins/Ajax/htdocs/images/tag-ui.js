@@ -1,6 +1,6 @@
 ; // tag-ui.js
 
-var qw=Slash.Util.qw, context_triggers, well_known_tags, tag_admin=false;
+var context_triggers, well_known_tags, tag_admin=false;
 
 function animate_wiggle( $selector ){
 	$selector.
@@ -77,7 +77,7 @@ var tag_server_fns = {
 
 		if ( tag_cmds ) {
 			tag_cmds = normalize_tag_commands(
-				this.preprocess_commands(qw(tag_cmds), options),
+				this.preprocess_commands(Qw(tag_cmds), options),
 				this );
 
 			// if caller wanted to execute some commands,
@@ -104,7 +104,7 @@ var tag_server_fns = {
 				);
 			}
 
-			server_params.tags = qw.as_string(tag_cmds);
+			server_params.tags = Qw.as_string(tag_cmds);
 			// console.log('SENDING: '+server_params.tags);
 		}
 
@@ -220,7 +220,7 @@ var tag_display_fns = {
 		} else {
 			// how must be a list
 			//  return a set that is the intersection of how and the tags I actually have
-			var allowed_tags = qw.as_set(how, bare_tag);
+			var allowed_tags = Qw.as_set(how, bare_tag);
 			map_fn = function(bt){return bt in allowed_tags;};
 		}
 
@@ -254,7 +254,7 @@ var tag_display_fns = {
 		// no other call adds tags (except by calling _me_)
 
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
-		var update_map = this.map_tags(tags = qw(tags))[0];
+		var update_map = this.map_tags(tags = Qw(tags))[0];
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags_seen = {};
@@ -338,7 +338,7 @@ var tag_display_fns = {
 
 	// like remove_tags() followed by update_tags(tags) except order preserving for existing tags
 	set_tags: function( tags, options ){
-		var allowed_tags = qw.as_set(tags = qw(tags), bare_tag);
+		var allowed_tags = Qw.as_set(tags = Qw(tags), bare_tag);
 		var removed_tags = this.map_tags(function(bt){
 			return !(bt in allowed_tags);
 		})[0];
@@ -405,7 +405,7 @@ function $init_tag_displays( $stubs, options ){
 
 			var menu_template = menu_items ? (
 					'<ul class="tmenu">' +
-					$.map(qw(menu_items), function(label){
+					$.map(Qw(menu_items), function(label){
 						return markup_menu(label);
 					}).join('') +
 					'</ul>' ) : '';
@@ -498,7 +498,7 @@ function normalize_nodnix( commands ){
 function normalize_tag_commands( commands, excludes ){
 
 	// want to iterate over commands, so ensure it is an array
-	commands = qw(commands);
+	commands = Qw(commands);
 	if ( !commands.length ) {
 		return [];
 	}
@@ -528,7 +528,7 @@ function normalize_tag_commands( commands, excludes ){
 
 			// if excludes is a list (string or array)...
 			if ( excludes.length !== undefined ) {
-				excludes = qw.as_set(excludes);
+				excludes = Qw.as_set(excludes);
 			}
 
 			// excludes should already be a set, let's make sure it's not empty
@@ -658,7 +658,7 @@ var tag_widget_fns = {
 		if ( new_context || new_trigger ) {
 			var context_tags = [];
 			if ( context && context in suggestions_for_context ) {
-				context_tags = qw(suggestions_for_context[context]);
+				context_tags = Qw(suggestions_for_context[context]);
 			}
 
 			$('.ready[context=related]', this)
@@ -1040,7 +1040,7 @@ topicTags = ["keyword",
 		'project'
 	];
 
-	context_triggers = qw.as_set(data_types);
+	context_triggers = Qw.as_set(data_types);
 	context_triggers['feedback']=true;
 
 

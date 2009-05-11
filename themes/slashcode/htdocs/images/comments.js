@@ -2141,7 +2141,7 @@ visible to the --LEFTORTOP-- of the discussion.)</i></p>\
 	$('#modal_box_content').html(html);
 }
 
-var packageObj = {
+var packageObj = Slash.Discussion = {
 	// methods
 	ajaxFetchComments:      ajaxFetchComments,
 	boxStatus:              boxStatus,
@@ -2167,7 +2167,9 @@ var packageObj = {
 	getSliderTotals:        getSliderTotals
 };
 
-Slash.Util.qw.each('\
+
+
+$.each(Qw('\
 	abbrev_comments \
 	adTimerUrl \
 	comment_body_reply \
@@ -2196,14 +2198,8 @@ Slash.Util.qw.each('\
 	user_is_subscriber \
 	user_threshold \
 	user_uid \
-	', function(){
-	packageObj[this] = eval('("IE bug workaround",(function(v){ if (v===undefined) return '+this+'; '+this+'=v;}))');
-
-});
-
-Slash.Util.Package({
-	named: 'Slash.Discussion',
-	api: packageObj
+	'), function( i, name ){
+	packageObj[name] = eval('("IE bug workaround",(function(v){ if (v===undefined) return '+this+'; '+this+'=v;}))');
 });
 
 })(Slash.jQuery); // (function($){

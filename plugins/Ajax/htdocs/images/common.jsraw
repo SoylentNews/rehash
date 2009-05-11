@@ -9,13 +9,16 @@
 	firehose_set_cur firehose_style_switch
 	firehose_style_switch_handler */
 
-;$(function(){
+$(function(){
 	$.ajaxSetup({
 		url:	'/ajax.pl',
 		type:	'POST',
 		contentType: 'application/x-www-form-urlencoded'
 	});
 });
+
+window.Slash || (window.Slash = {});
+Slash.Firehose || (Slash.Firehose = {});
 
 var reskey_static = '';
 
@@ -439,12 +442,11 @@ function view_change_hide_show(view) {
 
 var firehose_set_options;
 (function(){
-var	qw		= Slash.Util.qw,
-	loading_msg	= '<span class="loading_msg">Loading New Items...</span>',
-	removes_all	= qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view startdate issue'),
-	start_over	= $.extend(qw.as_set('startdate color addfhfilter'), removes_all),
-	uses_setfield	= qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
-	sets_param	= $.extend(qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),
+var	loading_msg	= '<span class="loading_msg">Loading New Items...</span>',
+	removes_all	= Qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view startdate issue'),
+	start_over	= $.extend(Qw.as_set('startdate color addfhfilter'), removes_all),
+	uses_setfield	= Qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
+	sets_param	= $.extend(Qw.as_set('color duration issue pagesize pause startdate tab tabtype usermode'), uses_setfield),
 	flags_param	= {	fhfilter:	'filterchanged',
 				more_num:	'ask_more',
 				section:	'sectionchanged',
@@ -455,12 +457,12 @@ var	qw		= Slash.Util.qw,
 				usermode:	'setusermode',
 				view:		'viewchanged'
 			},
-	sets_directly	= qw.as_set('color duration issue mode orderby orderdir section startdate tab view'),
+	sets_directly	= Qw.as_set('color duration issue mode orderby orderdir section startdate tab view'),
 	sets_indirectly	= {	setfhfilter:	'fhfilter',
 				setsearchfilter:'fhfilter',
 				tabsection:	'section'
 			},
-	resets_pagemore	= qw.as_set('fhfilter view tab issue pagesize section setfhfilter setsearchfilter'),
+	resets_pagemore	= Qw.as_set('fhfilter view tab issue pagesize section setfhfilter setsearchfilter'),
 	update_handlers	= {	onComplete: function(transport) {
 					json_handler(transport);
 					firehose_get_updates({ oneupdate: 1 });
@@ -2448,13 +2450,13 @@ function fix_ad_position(){
 	}
 }
 
-Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
-	api: {
-		is_visible:		function(){ return Bounds.intersect(window, $ad_position); },
-		remove:			remove_ad
-	},
-	stem_function: insert_ad
-});
+(function(){
+var M = Slash.Firehose.floating_slashbox_ad = insert_ad;
+M.is_visible = function(){
+	return Bounds.intersect(window, $ad_position);
+};
+M.remove = remove_ad;
+})();
 
 Slash.Firehose.articles_on_screen = function(){
 	var	visible = Bounds.y(window),
