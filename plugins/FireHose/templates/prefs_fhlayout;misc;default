@@ -121,6 +121,8 @@ __template__
                         Turn this off to hide user bylines on items.
                 </div>
 		
+		<br>
+
 		[% dates_check = ''; IF !user.firehose_nodates; dates_check = constants.markup_checked_attribute; END %]
                 <label><input type="checkbox" id="showdates" name="showdates"[% dates_check %]> Dates</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');return false;" class="help">?</a>
                 <br>

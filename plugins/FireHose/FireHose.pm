@@ -106,7 +106,7 @@ sub createUpdateItemFromJournal {
 		my $globjid_q = $self->sqlQuote($globjid);
 		my($itemid) = $self->sqlSelect("id", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
-			my $bodytext  = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
+			my $bodytext  = $journal->{article};
 			my $introtext = $journal->{introtext} || $bodytext;
 
 			$self->setFireHose($itemid, {
