@@ -13,7 +13,7 @@ firehosehead
 __seclev__
 10000
 __template__
-[% this_message = BLOCK; PROCESS rand_mesg firehose=1; END %]
+[% this_message = BLOCK; PROCESS rand_mesg firehose_header=1; END %]
 [% IF this_message || user.points > 0  %]
 	[% IF this_message %]<p>[% this_message %]</p>[% END %]
 	[% IF !user.is_anon && user.points > 0 %]
