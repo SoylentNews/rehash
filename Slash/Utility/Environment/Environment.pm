@@ -3364,16 +3364,16 @@ Secure HTTP as defined in Slash::Apache.
 
 =cut
 
-{
-my $cached_value = undef;
+#{
+#my $cached_value = undef;
 sub apacheConnectionSSL {
-	return $cached_value if defined($cached_value);
+#	return $cached_value if defined($cached_value);
 	my $retval = defined &Slash::Apache::ConnectionIsSSL
 		&& Slash::Apache::ConnectionIsSSL();
-	$cached_value = $retval if $ENV{GATEWAY_INTERFACE};
+#	$cached_value = $retval if $ENV{GATEWAY_INTERFACE};
 	return $retval;
 }
-}
+#}
 
 #========================================================================
 {my($prof_ok, @prof) = (0);

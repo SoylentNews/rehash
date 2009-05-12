@@ -309,11 +309,13 @@ sub ConnectionIsSSL {
 	my $x = $r->header_in('X-SFINC-SSL');
 	return 1 if $x && $x eq 'true';
 
-	my $subr = $r->lookup_uri($r->uri);
-	if ($subr) {
-		my $se = $subr->subprocess_env('HTTPS');
-		return 1 if $se && $se eq 'on'; # https is on
-	}
+	# This is a very expensive test and not one useful to us.
+	# It is doubtful Slashdot will ever turn this back on.
+#	my $subr = $r->lookup_uri($r->uri);
+#	if ($subr) {
+#		my $se = $subr->subprocess_env('HTTPS');
+#		return 1 if $se && $se eq 'on'; # https is on
+#	}
 
 	$x = $r->header_in('X-SSL-On');
 	return 1 if $x && $x eq 'yes'; 
