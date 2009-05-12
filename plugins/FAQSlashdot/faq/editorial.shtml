@@ -103,7 +103,7 @@
         </small></em></p>
 
 <h2><a name="ed230" id="ed230">Why do some stories show up in the index, but not on the homepage?</a></h2>
-        <p>Slashdot has too many submissions to post them all, but many submissions are worth posting for folks specifically interested in them. We post many stories in the sub sections that don't appear on the homepage. Examples are <a href="http://slashdot.org/askslashdot">Ask Slashdot</a>, <a href="http://slashdot.org/yro">Your Rights Online</a>, and <a href="http://slashdot.org/apache">Apache</a>. Each of these sections has a smaller, more devoted group of readers with a more specific interest in these subjects.</p>
+        <p>Slashdot has too many submissions to post them all, but many submissions are worth posting for folks specifically interested in them. We post many stories in the sub sections that don't appear on the homepage. Examples are <a href="http://ask.slashdot.org">Ask Slashdot</a>, <a href="http://yro.slashdot.org">Your Rights Online</a>, and <a href="http://slashdot.org/apache">Apache</a>. Each of these sections has a smaller, more devoted group of readers with a more specific interest in these subjects.</p>
         <p>These sections are listed on the left hand side of Slashdot, along with the date they were last updated, and the number of stories that appeared within that section on that day.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
@@ -207,11 +207,10 @@
         <h3>Index</h3>This is Slashdot's catch-all category. If your submission doesn't fit better into one of the sections described below, you can always choose "Index." Most submissions should go in this section, but if there is a more appropriate section, choosing it will get it into the hands of the right person more quickly.
         <h3>Apache</h3>The Apache section is for anything about the <a href="http://www.apache.org">Apache</a> web server.
         <h3>Apple</h3>For all things Mac, or otherwise related to Apple computers and OS X.
-        <p><strong>Editor</strong> <a href="mailto:pudge@slashdot.org">pudge@slashdot.org</a></p>
         <h3>Ask Slashdot</h3>
         <p>If you're seeking advice from the Slashdot readership about jobs, computer hardware, software glitches, philosophical problems, etc, select the Ask Slashdot section. Regarding Legal Advice: When seeking advice on topics that touch on legal aspects, please remember that you should always be prepared to consult professional legal representation. It doesn't hurt to Ask Slashdot for pointers, and suggestions to save you some time, but Ask Slashdot should not be used in place of professional legal representation.</p>
         <h3>Book Reviews</h3>This section is for your original book reviews on (not necessarily) tech books, the more recent the better. If you're interested in submitting book reviews to slashdot, make sure you've read through the <a href="https://slashdot.org/book.review.guidelines.shtml">book review guidelines</a>, too.
-        <p><strong>Editor</strong> <a href="mailto:timothy@slashdot.org">timothy@slashdot.org</a></p>
+        <p><strong>Editor</strong> <a href="mailto:samzenpus@slashdot.org">samzenpus</a></p>
         <h3>BSD</h3>The BSD section hosts news about the various modern UNIXes derived from Berkeley's distribution (like Free, Open and NetBSD).
         <h3>Developers</h3>News about the software, or anything that directly affects the practice of programming. A new programming language? A useful technique? Licensing snafus? Use "Developers."
         <h3>Features</h3>For your original feature-length articles.
@@ -219,7 +218,6 @@
         <p>Editors <a href="mailto:games@slashdot.org">games@slashdot.org</a></p>
         <h3>Geeks in Space</h3>We've disabled this section for submissions (Geeks in Space is a web audio broadcast featuring several of the editors of Slashdot, which you may have forgotten since it hasn't had fresh episodes recently).
         <h3>Interviews</h3>This is a good place to suggest possible Slashdot interviewees (with contact information, if possible, and background material for un-informed editors).
-        <p>Editor <a href="mailto:roblimo@slashdot.org">roblimo@slashdot.org</a></p>
         <h3>IT</h3>Anything that people with "Information Technology" in their job description might be interested to know.
         <h3>Linux</h3>The Linux section is for news specific to every penguin's favorite OS.
         <h3>Politics</h3>This section is for news relevant to United States government politics. It was created primarily to cover the 2004 US Presidential Election, but today exists for occasional stories that fit the bill.

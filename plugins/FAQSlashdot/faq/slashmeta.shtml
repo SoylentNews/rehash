@@ -23,11 +23,10 @@
         </div>
 
 <h2><a name="sm100" id="sm100">Who does this?</a></h2>
-        <p>Slashdot was originally created in September of 1997 by <a href="mailto:malda@slashdot.org">Rob "CmdrTaco" Malda</a>. Today it is owned by <a href="http://www.ostg.com">OSTG</a>, which, in turn is owned by <a href="http://www.vasoftware.com">VA Software</a>.</p>
-        <p>Slashdot is run primarily by me and by <a href="http://Hemos.net">Jeff "Hemos" Bates</a>, who posts stories and manages other sites for OSTG.</p>
-        <p><a href="http://www.slashcode.com">Slashcode</a> is wrangled and various other deeds of a technical nature are committed by the OSTG Slashteam: Jamie McCarthy, Chris "Pudge" Nandor, Brian "Krow" Aker, and Jon "CowboyNeal" Pater.</p>
-        <p>Editorial responsibilities are still handled by Rob "CmdrTaco" Malda, along with the rest of the Slashdot Authors: Jeff "Hemos" Bates, Timothy Lord (Managing Editor), Cliff Wood (Ask Slashdot Editor), Michael Sims, Jamie McCarthy (YRO Sectior), Simon "Simoniker" Carless (Games Section) and Jon 'CowboyNeal' Pater (Editor at Very Large).</p>
-        <p>Our bandwidth and co-loc comes from <a href="http://www.exodus.net">Exodus.Net</a>, and our hardware comes from <a href="http://www.valinux.com">VA Linux Systems</a>. (You can learn more about our setup <a href="tech.shtml#te050">here</a>.)</p>
+        <p>Slashdot was originally created in September of 1997 by <a href="mailto:malda@slashdot.org">Rob "CmdrTaco" Malda</a>. Today it is owned by SourceForge, Inc (not to be confused with SourceForge.net, which is also owned by SourceForge, Inc).</p>
+        <p>Slashdot is run primarily by me and a handful of other others, who post stories and wrangle the day-to-day affairs of Slashdot.</p>
+        <p><a href="http://www.slashcode.com">Slashcode</a> is wrangled and various other deeds of a technical nature are committed by Slashteam: Jamie McCarthy, Chris "Pudge" Nandor, Wolf, Chris Brown, and Tim Vroom.</p>
+        <p>Editorial responsibilities are still handled by Rob "CmdrTaco" Malda, along with the rest of the Slashdot Authors: Timothy Lord, Patrick "Scuttlemonkey" McGarry, Jeff "Soulskill" Boehm, Rob "Samzenpus" Rozeboom, and Keith Dawson.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
                 Last Modified: 2/07/02
@@ -83,14 +82,14 @@
         </small></em></p>
 
 <h2><a name="sm300" id="sm300">How much traffic does Slashdot serve?</a></h2>
-        <p>Slashdot typically serves 80 million pages per month. We serve around 3 million pages on weekdays, and slightly less on weekends.</p>
+        <p>Slashdot typically serves around 40 million pages and 5 million uniques per month. Traffic is a hard thing to quantify today without a lot of quid pro quos due to AJAX, but we still serve quite a bit of traffic even though we are trying to reduce the number of page loads required for a visit to as close to one as possible.</p>
         <p><em><small>
-                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 7/12/04
+                Answered by: <a href="mailto:scuttlemonkey@slashdot.org">Scuttlemonkey</a><br>
+                Last Modified: 5/12/2009
         </small></em></p>
 
 <h2><a name="sm330" id="sm330">Why has Slashdot become so successful?</a></h2>
-        <p>Slashdot is successful for the same reasons anything else is. We provided something that was needed before anyone else did, and we worked (and continue to work ) our butts off to make it as good as it could be.</p>
+        <p>Slashdot is successful for the same reasons anything else is. We provided something that was needed before anyone else did, and we worked (and continue to work) our butts off to make it as good as it could be.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
                 Last Modified: 10/28/00
