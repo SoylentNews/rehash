@@ -9,68 +9,69 @@
 	firehose_set_cur firehose_style_switch
 	firehose_style_switch_handler */
 
-$(function(){
-	$.ajaxSetup({
-		url:	'/ajax.pl',
-		type:	'POST',
-		contentType: 'application/x-www-form-urlencoded'
-	});
+$.ajaxSetup({
+	url:			'/ajax.pl',
+	type:			'POST',
+	contentType:	'application/x-www-form-urlencoded'
 });
 
+// Ensure our "namespaces" exist
 window.Slash || (window.Slash = {});
 Slash.Firehose || (Slash.Firehose = {});
 
 var reskey_static = '';
 
-// global settings, but a firehose might use a local settings object instead
-var firehose_settings = {};
-  firehose_settings.startdate = '';
-  firehose_settings.duration = '';
-  firehose_settings.mode = '';
-  firehose_settings.color = '';
-  firehose_settings.orderby = '';
-  firehose_settings.orderdir = '';
-  firehose_settings.view = '';
-  firehose_settings.viewtitle = '';
-  firehose_settings.tab = '';
-  firehose_settings.fhfilter  = '';
-  firehose_settings.base_filter = '';
-  firehose_settings.user_view_uid = '';
+// Global settings, but a firehose might use a local settings object instead
+var firehose_settings = {
+  startdate:		'',
+  duration:			'',
+  mode:				'',
+  color:			'',
+  orderby:			'',
+  orderdir:			'',
+  view:				'',
+  viewtitle:		'',
+  tab:				'',
+  fhfilter:			'',
+  base_filter:		'',
+  user_view_uid:	'',
 
-  firehose_settings.issue = '';
-  firehose_settings.is_embedded = 0;
-  firehose_settings.not_id = 0;
-  firehose_settings.section = 0;
-  firehose_settings.sectionname = '';
-  firehose_settings.more_num = 0;
-  firehose_settings.metamod = 0;
-  firehose_settings.admin_filters = 0;
-  firehose_sitename = "";
-  firehose_slogan ="";
+  issue:			'',
+  is_embedded:		0,
+  not_id:			0,
+  section:			0,
+  sectionname:		'',
+  more_num:			0,
+  metamod:			0,
+  admin_filters:	0
+};
+
+var	firehose_sitename		= "",
+	firehose_slogan			= "";
 
 // Settings to port out of settings object
-  firehose_item_count = 0;
-  firehose_future = null;
-  firehose_more_increment = 10;
+var	firehose_item_count		= 0,
+	firehose_future			= null,
+	firehose_more_increment	= 10;
 
-// globals we haven't yet decided to move into |firehose_settings|
-var fh_play = 0;
-var fh_is_timed_out = 0;
-var fh_update_timerids = [];
-var fh_is_admin = 0;
-var console_updating = 0;
-var fh_ticksize;
-var fh_colors = [];
-var fh_idle_skin = 0;
-var vendor_popup_timerids = [];
-var vendor_popup_id = 0;
-var firehose_exists = 0;
+// Globals we haven't yet decided to move into |firehose_settings|
+var	fh_play					= 0,
+	fh_is_timed_out			= 0,
+	fh_update_timerids		= [],
+	fh_is_admin				= 0,
+	console_updating		= 0,
+	fh_ticksize,
+	fh_colors				= [],
+	fh_idle_skin			= 0,
+	vendor_popup_timerids	= [],
+	vendor_popup_id			= 0,
+	firehose_exists			= 0;
 
-// ads
-var fh_adTimerSecsMax   = 15;
-var fh_adTimerClicksMax = 0;
-var fh_adTimerUrl       = '';
-//fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
+// Ads
+var	fh_adTimerSecsMax   = 15,
+	fh_adTimerClicksMax = 0,
+	fh_adTimerUrl       = '';
+	//fh_adTimerUrl		= '/images/iframe/firehose.html'; // testing
 
 var FHID_PREFIX=/^firehose-/;
 
