@@ -2591,19 +2591,18 @@ $(function(){
 		if (!keyo)
 			return true;
 
-		if (keyo.noanon && !check_logged_in())
-			return false;
-
-		if (keyo.admin && !fh_is_admin)
-			return true;
-
-
 		// if keyo.form, only work on form elements; if not, then
 		// never work on form elements.
 		var is_input = e.target && $(e.target).is(':input');
 		if (!keyo.form && is_input)
 			return true;
 		if (keyo.form && !is_input)
+			return true;
+
+		if (keyo.noanon && !check_logged_in())
+			return false;
+
+		if (keyo.admin && !fh_is_admin)
 			return true;
 
 		var cur = firehose_get_cur();
