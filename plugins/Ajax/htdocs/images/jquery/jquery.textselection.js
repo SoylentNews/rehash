@@ -12,13 +12,14 @@ $.TextSelection = function( el, r ){
 $.TextSelection.Error = function( description, obj ){
 	this._description = description;
 	this._obj = obj;
+	return this;
 };
 
 // public 'class' methods
 $.TextSelection.get = function( el ){
 	// expected to throw an exception if for any reason el doesn't satisfy
 	if ( ! el ) {
-		throw $.TextSelection.Error('$.TextSelection.get(el): argument is required', el);
+		throw new $.TextSelection.Error('$.TextSelection.get(el): argument is required', el);
 	}
 
 	try {
@@ -45,13 +46,13 @@ $.TextSelection.get = function( el ){
 		// fall through...
 	}
 
-	throw $.TextSelection.Error('$.TextSelection.get(el): no range operations available on el', el);
+	throw new $.TextSelection.Error('$.TextSelection.get(el): no range operations available on el', el);
 };
 
 $.TextSelection.set = function( el, r ){
 	// expected to throw an exception if for any reason el doesn't satisfy
 	if ( !(el && r) ) {
-		throw $.TextSelection.Error('$.TextSelection.set(el, r): both arguments are required', el);
+		throw new $.TextSelection.Error('$.TextSelection.set(el, r): both arguments are required', el);
 	}
 
 	try {
@@ -73,7 +74,7 @@ $.TextSelection.set = function( el, r ){
 		// fall through...
 	}
 
-	throw $.TextSelection.Error('$.TextSelection.set(el, r): no range operations available on el', el);
+	throw new $.TextSelection.Error('$.TextSelection.set(el, r): no range operations available on el', el);
 };
 
 
@@ -117,7 +118,7 @@ $.TextSelection.prototype = {
 		}
 	},
 	focus: function(){
-		$(this._el || []).focus();
+		$(this._el||[]).filter(':enabled:visible').focus();
 	},
 	save: function( el ){
 		return spull(this, el);
