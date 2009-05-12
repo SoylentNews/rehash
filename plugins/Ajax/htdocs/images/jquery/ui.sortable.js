@@ -10,7 +10,7 @@
  * Depends:
  *	ui.core.js
  */
-(function($) {
+;(function($) {
 
 $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 	_init: function() {

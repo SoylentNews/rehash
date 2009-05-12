@@ -12,7 +12,7 @@
  * Version:  1.4.0
  *
  */
-(function($) {
+;(function($) {
 
     $.fn.lazyload = function(options) {
         var settings = {

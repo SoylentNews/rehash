@@ -9,7 +9,7 @@
  * Date: 2009-02-19 17:34:21 -0500 (Thu, 19 Feb 2009)
  * Revision: 6246
  */
-(function(){
+;(function(){
 
 var 
 	// Will speed up references to window, and allows munging its name.

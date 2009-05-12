@@ -1,4 +1,6 @@
-(function(){
+// javascript.js
+
+;(function(){
 
 //
 // "Array Extras", iff not already provided by this JavaScript environment

@@ -1,3 +1,5 @@
+; // slash.geometry.js
+
 function Size(){
 	var	bare	= this.__isa !== Size,		// called without 'new'
 		self	= bare ? new Size : this,

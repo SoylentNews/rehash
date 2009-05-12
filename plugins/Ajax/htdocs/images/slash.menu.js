@@ -1,4 +1,6 @@
-(function($){
+// slash.menu.js
+
+;(function($){
 
 $.widget("slash.menu", $.extend({}, $.ui.mouse, {
 

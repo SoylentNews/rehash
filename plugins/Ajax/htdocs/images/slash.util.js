@@ -1,4 +1,6 @@
-(function( $ ){ // global setup
+// slash.util.js
+
+;(function( $ ){ // global setup
 window.Slash || (window.Slash = {});
 Slash.jQuery = $;
 
