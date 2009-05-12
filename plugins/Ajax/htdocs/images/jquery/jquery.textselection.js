@@ -1,12 +1,17 @@
-;(function($){
+;(function( $ ){
 
 // constructor
 $.TextSelection = function( el, r ){
+	if ( this.field!==$.TextSelection.prototype.field ) {
+		return new $.TextSelection(el, r);
+	}
+
 	spull(this, el); // initializes:
 	// this._el	to: text field DOM element, iff $.TextSelection.get() understands it
 	// this._r	to: browser-specific object representing a selection range
 
-	if ( r ) { spush(this.range(r)); }
+	r && spush(this.range(r));
+	return this;
 };
 
 $.TextSelection.Error = function( description, obj ){
@@ -14,6 +19,7 @@ $.TextSelection.Error = function( description, obj ){
 	this._obj = obj;
 	return this;
 };
+$.TextSelection.Error.prototype = new Error;
 
 // public 'class' methods
 $.TextSelection.get = function( el ){
@@ -42,7 +48,7 @@ $.TextSelection.get = function( el ){
 				selectionEnd:	bound(END)
 			};
 		}
-	} catch ( unused_error ) {
+	} catch ( e ) {
 		// fall through...
 	}
 
@@ -70,7 +76,7 @@ $.TextSelection.set = function( el, r ){
 		}
 
 		return;
-	} catch ( unused_error ) {
+	} catch ( e ) {
 		// fall through...
 	}
 
@@ -84,7 +90,7 @@ function spull( ts, el ){
 	// initialize or update a TextSelection, fetching the currently selected range
 	try {
 		ts._r = $.TextSelection.get(ts._el=(el||ts._el));
-	} catch ( unused_error ) {
+	} catch ( e ) {
 		ts._el = null;
 	}
 	return ts;
@@ -94,7 +100,7 @@ function spush( ts, el ){
 	// apply the range described by a TextSelection to a text field
 	try {
 		$.TextSelection.set(el || ts._el, ts._r);
-	} catch ( unused_error ) {
+	} catch ( e ) {
 		// non-fatal, ignore
 	}
 	return ts;
