@@ -184,11 +184,13 @@ END %]
 									[% END %]
 
 									<div class="article-foot">
+									[% IF !view_mode %]
 									<span class="reader">
 									<a href="[% link_url %]" class="more">Read[% IF item.body_length %] [% item.body_length; END %] More[% IF item.body_length %] Bytes[% END %]...</a>
 
 									<span class="commentcnt"> <a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]">[% disc.commentcount || 0 %]</a> comments</span>
 									</span>
+									[% END %]
 									__TAG_WIDGET__
 									</div>
 
