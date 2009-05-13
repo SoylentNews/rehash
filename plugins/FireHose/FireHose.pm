@@ -1359,6 +1359,8 @@ sub getFireHoseEssentials {
 	if (!@$sphinx_ar) {
 		$sdebug_idset_elapsed = Time::HiRes::time;
 	my(@sphinx_ars, @sphinx_statses);
+	# make sure we'll go through loop with dummy data if there's no actual multi data
+	$sphinx_opts_multi = [] unless @$sphinx_opts_multi;
 	for my $multi (@$sphinx_opts_multi) {
 		if ($constants->{sphinx_se}) {
 			my @sphinxse_opts;
