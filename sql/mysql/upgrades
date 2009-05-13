@@ -6208,9 +6208,9 @@ ALTER TABLE dynamic_user_blocks ADD INDEX idx_portalid (portal_id);
 ALTER TABLE tags ADD INDEX uid_tagnameid_globjid_inactivated (uid, tagnameid, globjid, inactivated);
 ALTER TABLE tags DROP INDEX uid_globjid_tagnameid_inactivated;
 
-#2009-05-05
-INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) VALUES ('stylesheet','text/css','screen, projection','yui_idle.css','idle','no','6','no','','yui');
+# 2009-05-05
 
+INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) VALUES ('stylesheet','text/css','screen, projection','yui_idle.css','idle','no','6','no','','yui');
 
 # PLEASE DELETE symlinks to lick*css*
 
@@ -6218,3 +6218,8 @@ INSERT INTO css (rel,type,media,file,skin,admin,ctid,lowbandwidth,title,layout) 
 UPDATE vars SET value = 'T_2_5_0_255' WHERE name = 'cvs_tag_currentcode';
 
 UPDATE blocks SET rdf = 'http://rss.sciam.com/ScientificAmerican-Global' WHERE bid = 'sciam';
+
+# for plugins/WoW
+ALTER TABLE wow_chars ADD INDEX last_retrieval_attempt (last_retrieval_attempt);
+INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_pause', '3', 'Seconds to wait between all WoW retrievals');
+

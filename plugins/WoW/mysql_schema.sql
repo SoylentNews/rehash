@@ -10,7 +10,8 @@ CREATE TABLE wow_chars (
 	UNIQUE realm_name (realmid, charname),
 	INDEX name (charname),
 	INDEX uid (uid),
-	INDEX last_retrieval_success (last_retrieval_success)
+	INDEX last_retrieval_success (last_retrieval_success),
+	INDEX last_retrieval_attempt (last_retrieval_attempt)
 ) ENGINE=InnoDB;
 
 CREATE TABLE wow_realms (

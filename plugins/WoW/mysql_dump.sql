@@ -1,4 +1,5 @@
 INSERT INTO vars (name, value, description) VALUES ('wow', '0', 'Is the WoW plugin enabled?');
+INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_pause', '3', 'Seconds to wait between all WoW retrievals');
 INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_retry', '10800', 'Seconds to wait before retrying failed retrieval attempt (typically hours)');
 INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_reload', '608400', 'Seconds to wait after retrieval success before retrieving again (typically days)');
 
