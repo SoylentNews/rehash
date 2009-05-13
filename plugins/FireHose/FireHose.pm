@@ -501,7 +501,7 @@ sub getViewUserPrefs {
 
 {
 my $constants = getCurrentStatic();
-my $color_str = $constants->{firehose_color_labels};
+my $color_str = $constants->{firehose_color_labels} || '';
 my $color_a = [ split(/\|/, $color_str) ];
 my $color_h = {};
 my $i = 0;
@@ -1024,7 +1024,7 @@ sub getFireHoseEssentialsParams {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	my(@sphinx_opts, @sphinx_terms, @sphinx_where);
+	my(@sphinx_opts, @sphinx_opts_multi, @sphinx_terms, @sphinx_where);
 	my @sphinx_tables = ('sphinx_search');
 
 	my $cur_time = $self->getTime({ unix_format => 1 });
@@ -1237,7 +1237,7 @@ sub getFireHoseEssentialsParams {
 		}
 	}
 
-	return(\@sphinx_opts, \@sphinx_terms, \@sphinx_where, \@sphinx_tables);
+	return(\@sphinx_opts, \@sphinx_opts_multi, \@sphinx_terms, \@sphinx_where, \@sphinx_tables);
 }
 
 
@@ -1285,10 +1285,11 @@ sub getFireHoseEssentials {
 
 	$options->{limit} += $options->{more_num} if $options->{more_num};
 
-	my $fetch_size = $options->{limit};
+	my $qoptions = {};
+	$qoptions->{fetch_size} = $options->{limit};
 	if ($options->{orderby} && $options->{orderby} eq "createtime" && $options->{duration} != -1) {
 		$fetch_extra = 1;
-		$fetch_size++;
+		$qoptions->{fetch_size}++;
 	}
 
 	$options->{'pop'} = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
@@ -1300,8 +1301,8 @@ sub getFireHoseEssentials {
 
 
 	# SEARCH PARAM SETUP
-	my($sphinx_opts, $sphinx_terms, $sphinx_where, $sphinx_tables) = $self->getFireHoseEssentialsParams($options, $sphinx);
-#use Data::Dumper; print STDERR Dumper [$sphinx_opts, $sphinx_terms, $sphinx_where, $sphinx_tables];
+	my($sphinx_opts, $sphinx_opts_multi, $sphinx_terms, $sphinx_where, $sphinx_tables) = $self->getFireHoseEssentialsParams($options, $sphinx);
+#use Data::Dumper; print STDERR Dumper [$sphinx_opts, $sphinx_opts_multi, $sphinx_terms, $sphinx_where, $sphinx_tables];
 
 
 	# CACHE CHECK
@@ -1331,24 +1332,24 @@ sub getFireHoseEssentials {
 
 
 	# QUERY OPTION SETUP
-	my $offset_num = defined $options->{offset} ? $options->{offset} : '';
-	$offset_num = '' if $offset_num !~ /^\d+$/;
+	$qoptions->{offset_num} = defined $options->{offset} ? $options->{offset} : '';
+	$qoptions->{offset_num} = '' if $qoptions->{offset_num} !~ /^\d+$/;
 
-	my $orderby  = $sphinx_orderby{$options->{orderby}}   || 'createtime_ut';
-	my $orderdir = $sphinx_orderdir{$options->{orderdir}} || SPH_SORT_ATTR_DESC;
-	$sph->SetSortMode($orderdir, $orderby);
+	my $qoptions->{orderby}  = $sphinx_orderby{$options->{orderby}}   || 'createtime_ut';
+	my $qoptions->{orderdir} = $sphinx_orderdir{$options->{orderdir}} || SPH_SORT_ATTR_DESC;
+	$sph->SetSortMode($qoptions->{orderdir}, $qoptions->{orderby});
 	$sph->SetMatchMode($sphinx_mode{$sphinx->{mode}} || SPH_MATCH_ALL) if $sphinx->{mode};
 
-	my $maxmatches = 0;
+	my $qoptions->{maxmatches} = 0;
 	if (@$sphinx_tables > 1) {
-		my $offset = length $offset_num ? "$offset_num, " : '';
-		$sphinx_other = "LIMIT $offset$fetch_size";
+		my $offset = length $qoptions->{offset_num} ? "$qoptions->{offset_num}, " : '';
+		$sphinx_other = "LIMIT $offset$qoptions->{fetch_size}";
 
-		$maxmatches = $constants->{sphinx_01_max_matches} || 10000;
-		$sph->SetLimits(0, $maxmatches, $maxmatches);
+		$qoptions->{maxmatches} = $constants->{sphinx_01_max_matches} || 10000;
+		$sph->SetLimits(0, $qoptions->{maxmatches}, $qoptions->{maxmatches});
 	} else {
-		$maxmatches = $fetch_size > 1000 ? $fetch_size : undef; # SSS make 1000 a var?
-		$sph->SetLimits($offset_num || 0, $fetch_size, $maxmatches);
+		$qoptions->{maxmatches} = $qoptions->{fetch_size} > 1000 ? $qoptions->{fetch_size} : undef; # SSS make 1000 a var?
+		$sph->SetLimits($qoptions->{offset_num} || 0, $qoptions->{fetch_size}, $qoptions->{maxmatches});
 	}
 
 
@@ -1357,6 +1358,8 @@ sub getFireHoseEssentials {
 	my($sdebug_idset_elapsed, $sdebug_get_elapsed) = (0, 0);
 	if (!@$sphinx_ar) {
 		$sdebug_idset_elapsed = Time::HiRes::time;
+	my(@sphinx_ars, @sphinx_statses);
+	for my $multi (@$sphinx_opts_multi) {
 		if ($constants->{sphinx_se}) {
 			my @sphinxse_opts;
 			for my $opt (@$sphinx_opts) {
@@ -1375,17 +1378,17 @@ sub getFireHoseEssentials {
 				push @sphinxse_opts, $opt_str;
 			}
 
-			$orderdir = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
-			push @sphinxse_opts, "sort=$orderdir:$orderby";
+			$qoptions->{orderdir} = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
+			push @sphinxse_opts, "sort=$qoptions->{orderdir}:$qoptions->{orderby}";
 			push @sphinxse_opts, "mode=$sphinx->{mode}" if $sphinx->{mode};
 
 			if (@$sphinx_tables > 1) {
-				push @sphinxse_opts, "limit=$maxmatches";
-				push @sphinxse_opts, "maxmatches=$maxmatches";
+				push @sphinxse_opts, "limit=$qoptions->{maxmatches}";
+				push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}";
 			} else {
-				push @sphinxse_opts, "offset=$offset_num" if length $offset_num;
-				push @sphinxse_opts, "limit=$fetch_size";
-				push @sphinxse_opts, "maxmatches=$maxmatches" if defined $maxmatches;
+				push @sphinxse_opts, "offset=$qoptions->{offset_num}" if length $qoptions->{offset_num};
+				push @sphinxse_opts, "limit=$qoptions->{fetch_size}";
+				push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}" if defined $qoptions->{maxmatches};
 			}
 
 			my $query = $self->sqlQuote(join ';', @$sphinx_terms, @sphinxse_opts);
@@ -1400,7 +1403,8 @@ sub getFireHoseEssentials {
 			$sphinx_stats = $sphinxdb->getSphinxStats;
 
 		} else {
-			for my $opt (@$sphinx_opts) {
+			$sph->ResetFilters; # for multi mode
+			for my $opt (@$sphinx_opts, @$multi) {
 				my $type = shift @$opt;
 				if ($type eq 'filter') {
 					$sph->SetFilter(@$opt);
@@ -1460,6 +1464,16 @@ sub getFireHoseEssentials {
 				) if $sphinx_debug;
 			}
 		}
+		push @sphinx_ars, $sphinx_ar;
+		push @sphinx_statses, $sphinx_stats;
+	}
+
+	for (0 .. @sphinx_ars) {
+		$sphinx_ar = $sphinx_ars[$_];
+		$sphinx_stats = $sphinx_statses[$_];
+	}
+
+
 		$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
 
 		if ($mcdkey_data) {
@@ -1485,7 +1499,7 @@ sub getFireHoseEssentials {
 
 	# GET STATS
 # SSS: don't think we need this, but don't remove it yet
-# 	if ($fetch_extra && @$items == $fetch_size) {
+# 	if ($fetch_extra && @$items == $qoptions->{fetch_size}) {
 # 		$fetch_extra = pop @$items;
 # 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
 # 			$fetch_extra, $options, $tables, \@where, $count_other
