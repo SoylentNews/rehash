@@ -24,7 +24,7 @@ __template__
   <div id="yui-main">
     <div class="yui-gf" style="position: relative">
       <div class="yui-u first" id="links">
-  [% PROCESS mainmenu %]
+  [% PROCESS mainmenu section_menu_type="firehose" %]
       </div>
     </div>
   </div>
