@@ -1335,12 +1335,12 @@ sub getFireHoseEssentials {
 	$qoptions->{offset_num} = defined $options->{offset} ? $options->{offset} : '';
 	$qoptions->{offset_num} = '' if $qoptions->{offset_num} !~ /^\d+$/;
 
-	my $qoptions->{orderby}  = $sphinx_orderby{$options->{orderby}}   || 'createtime_ut';
-	my $qoptions->{orderdir} = $sphinx_orderdir{$options->{orderdir}} || SPH_SORT_ATTR_DESC;
+	$qoptions->{orderby}  = $sphinx_orderby{$options->{orderby}}   || 'createtime_ut';
+	$qoptions->{orderdir} = $sphinx_orderdir{$options->{orderdir}} || SPH_SORT_ATTR_DESC;
 	$sph->SetSortMode($qoptions->{orderdir}, $qoptions->{orderby});
 	$sph->SetMatchMode($sphinx_mode{$sphinx->{mode}} || SPH_MATCH_ALL) if $sphinx->{mode};
 
-	my $qoptions->{maxmatches} = 0;
+	$qoptions->{maxmatches} = 0;
 	if (@$sphinx_tables > 1) {
 		my $offset = length $qoptions->{offset_num} ? "$qoptions->{offset_num}, " : '';
 		$sphinx_other = "LIMIT $offset$qoptions->{fetch_size}";
