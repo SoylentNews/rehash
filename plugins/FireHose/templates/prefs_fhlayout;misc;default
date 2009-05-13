@@ -87,7 +87,7 @@ __template__
                 <div id="modalprefhelp_showicons" class="modalprefhelp" style="display: none;">
                         Turn this off to hide topic icons on stories
                 </div>
-                <br />
+                <br>
 
                 [% tag_check = ''; IF !user.tags_turnedoff; tag_check = constants.markup_checked_attribute; END %]
                 <label><input type="checkbox" id="showtags" name="showtags"[%tag_check %]> Tags</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');return false;" class="help">?</a>
@@ -95,7 +95,7 @@ __template__
                 <div id="modalprefhelp_showtags" class="modalprefhelp" style="display: none;">
                         Turn this off to ignore all tags.
                 </div>
-                <br />
+                <br>
 
 		[% colors_check = ''; IF !user.firehose_nocolors; colors_check = constants.markup_checked_attribute; END %]
                 <label><input type="checkbox" id="showcolors" name="showcolors"[% colors_check %]> Colors</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showcolors');return false;" class="help">?</a>
@@ -103,7 +103,7 @@ __template__
                 <div id="modalprefhelp_showcolors" class="modalprefhelp" style="display: none;">
                         Turn this off to hide color swatches on items.
                 </div>
-                <br />
+                <br>
 
 		[% bylines_check = ''; IF !user.firehose_nobylines; bylines_check = constants.markup_checked_attribute; END %]
                 <label><input type="checkbox" id="showbylines" name="showbylines"[% bylines_check %]> Bylines</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showbylines');return false;" class="help">?</a>
@@ -112,7 +112,7 @@ __template__
                 <div id="modalprefhelp_showbylines" class="modalprefhelp" style="display: none;">
                         Turn this off to hide user bylines on items.
                 </div>
-                <br />
+                <br>
 
 		[% dates_check = ''; IF !user.firehose_nodates; dates_check = constants.markup_checked_attribute; END %]
                 <label><input type="checkbox" id="showdates" name="showdates"[% dates_check %]> Dates</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');return false;" class="help">?</a>
@@ -120,7 +120,7 @@ __template__
                 <div id="modalprefhelp_showdates" class="modalprefhelp" style="display: none;">
                         Turn this off to hide dates on abbreviated items
                 </div>
-                <br />
+                <br>
 
 		[% picker_search_check = ''; IF !user.firehose_disable_picker_search; picker_search_check = constants.markup_checked_attribute; END; %]
                 <label><input type="checkbox" id="firehose_disable_picker_search" name="firehose_disable_picker_search"[% picker_search_check %]> Filter Controls</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_picker_search');return false;" class="help">?</a>
@@ -128,7 +128,7 @@ __template__
                 <div id="modalprefhelp_firehose_picker_search" class="modalprefhelp" style="display: none;">
                         Enable filter controls.
                 </div>
-                <br />
+                <br>
 
                 [% pause_check = ''; IF !user.firehose_pause || !user.firehose_pause.defined; pause_check = constants.markup_checked_attribute; END; %]
                 <label><input type="checkbox" id="paused" name="paused"[% pause_check %]> Dynamic Homepage</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
@@ -136,7 +136,7 @@ __template__
                 <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
                         Auto-update view.
                 </div>
-                <br />
+                <br>
 
 
                 [% boxes_check = ''; IF !user.firehose_noslashboxes; boxes_check = constants.markup_checked_attribute; END; %]
@@ -145,7 +145,7 @@ __template__
                 <div id="modalprefhelp_noslashboxes" class="modalprefhelp" style="display: none;">
                         Enable slashboxes.
                 </div>
-                <br />
+                <br>
 
 
 		[% sectionmenu_check = ''; IF !user.firehose_nosectionmenu; sectionmenu_check = constants.markup_checked_attribute; END; %]
@@ -154,7 +154,7 @@ __template__
                 <div id="modalprefhelp_nosectionmenu" class="modalprefhelp" style="display: none;">
                         Enable the section menu.
                 </div>
-                <br />
+                <br>
 
 
                 [% ua_check = ''; IF !user.disable_ua_check; ua_check = constants.markup_checked_attribute; END; %]
@@ -163,7 +163,7 @@ __template__
                 <div id="modalprefhelp_ua_check" class="modalprefhelp" style="display: none;">
                         Enable smallscreen browser detection.
                 </div>
-                <br />
+                <br>
 
 
                 [% am_check = ''; IF !user.firehose_noautomore; am_check = constants.markup_checked_attribute; END; %]
@@ -172,7 +172,7 @@ __template__
                 <div id="modalprefhelp_firehose_noautomore" class="modalprefhelp" style="display: none;">
                         Enable Auto More.
                 </div>
-                <br />
+                <br>
 
 
 
@@ -182,7 +182,7 @@ __template__
                 <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
                         Enable advanced user controls
                 </div>
-                <br />
+                <br>
 
 
 
