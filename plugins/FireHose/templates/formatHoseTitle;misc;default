@@ -92,6 +92,7 @@ END;
 
 
 title = "<a $onclick $rnf href=\"$title_href\" class=\"datitle\">$title</a>";
+IF user.simpledesign; the_skin_title = ''; END;
 title = the_skin_title _ title;
 IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" $rnf title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
