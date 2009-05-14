@@ -24,7 +24,7 @@ __template__
 	skip_edit = 1;
 END;
 
-IF  form.op == "view" || form.taskgen;
+IF  form.op == "view" || form.taskgen || user.simpledesign || user.state.simpledesign || user.firehose_nographics;
 	skip_edit = 1;
 END;
 %]
