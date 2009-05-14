@@ -447,6 +447,19 @@ sub ajaxToggleSmallScreen {
 	$slashdb->setUser($user->{uid}, $prefs);
 }
 
+sub ajaxToggleSimpleDesign {
+        my($slashdb, $constants, $user, $form, $options) = @_;
+        return if $user->{is_anon};
+
+        my $prefs = {
+                simpledesign => undef,
+                firehose_noslashboxes => undef,
+                firehose_nosectionmenu => undef,
+                firehose_nographics => undef,
+        };
+        $slashdb->setUser($user->{uid}, $prefs);
+}
+
 sub getFireHoseSectionBySkid {
 	my($self, $skid) = @_;
 	my $skid_q = $self->sqlQuote($skid);

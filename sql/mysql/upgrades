@@ -6223,3 +6223,5 @@ UPDATE blocks SET rdf = 'http://rss.sciam.com/ScientificAmerican-Global' WHERE b
 ALTER TABLE wow_chars ADD INDEX last_retrieval_attempt (last_retrieval_attempt);
 INSERT INTO vars (name, value, description) VALUES ('wow_retrieval_pause', '3', 'Seconds to wait between all WoW retrievals');
 
+# for plugins/Firehose
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_simpledesign_mode', 'Slash::FireHose', 'ajaxToggleSimpleDesign', 'ajax_user_static', 'createuse');

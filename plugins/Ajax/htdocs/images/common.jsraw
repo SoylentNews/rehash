@@ -1596,6 +1596,7 @@ function firehose_toggle_picker_search() {
 				$('#fh_filtercontrol_toggle').hide();
 				$('#fh_picker_search').show();
 				$('#hd').removeClass('nofilter');
+				$('#fh_simpledesign_toggle').show();
 			}
 		}
 	);
@@ -1639,6 +1640,45 @@ function firehose_toggle_smallscreen_mode(force_ss, is_anon) {
 			{
 				onComplete: function() {
 					document.location=document.URL;
+				}
+			}
+		);
+	}
+}
+
+function firehose_toggle_simpledesign_mode(force_sd, is_anon) {
+	if (force_sd) {
+		var uri = document.location.search;
+		var base = document.location.href.replace(/\?.*/,'');
+		if (is_anon==1) {
+			if (uri.match("sd=1")) {
+				uri = uri.replace(/sd=1/,"sd=0");
+			} else {
+				if (uri.match(/\?/)) {
+					uri = uri+'&sd=0';
+				} else {
+					uri = '?sd=0';
+				}
+			}
+		else {
+			uri = uri.replace(/\&?sd=1/,"");
+				if (uri === '?') {
+					uri = '';
+				}
+				uri = uri.replace(/^\?\&/,'?');
+		}
+
+		document.location = (base + uri);
+	} else {
+		var params = {};
+		params.op = 'firehose_toggle_simpledesign_mode';
+		params.reskey = reskey_static;
+		ajax_update(
+			params,
+			'',
+			{
+				onComplete: function() {
+					document.location = document.URL;
 				}
 			}
 		);

@@ -1553,6 +1553,10 @@ sub prepareUser {
 			$user->{state}{smalldevice} = 1;
 		}
 
+		if ($uri{sd} == 1) {
+			$user->{state}{simpledesign} = 1;
+		}
+
 		my $ua = $r->headers_in->{'user-agent'};
 		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
 		if ($ua && $smalldev_re && !$user->{disable_ua_check} && ($ua =~ $smalldev_re)) {
@@ -1560,14 +1564,26 @@ sub prepareUser {
 		}
 
 		delete $user->{state}{smalldevice} if ((exists $uri{ss}) && ($uri{ss} == 0));
+		delete $user->{state}{simpledesign} if ((exists $uri{sd}) && ($uri{sd} == 0));
 
-		# Any options we're forcing onto SS users.
+		# Any options we're forcing onto SS/SD users.
 		if ($user->{state}{smalldevice}) {
 			$user->{firehose_pause} = 1;
 
 			if ($user->{is_anon}) {
 				$user->{firehose_noautomore} = 1;
 			}
+		}
+
+		if ($user->{state}{simpledesign}) {
+			$user->{simpledesign} = 1;
+			$user->{firehose_disable_picker_search} = 1;
+			$user->{firehose_noautomore} = 1;
+			$user->{firehose_nobylines} = 1;
+			$user->{firehose_nocolors} = 1;
+			$user->{firehose_nographics} = 1;
+			$user->{tags_turnedoff} = 1;
+			$user->{firehose_pause} = 1;
 		}
 	}
 
