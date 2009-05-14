@@ -67,6 +67,7 @@ by [% item.4 %]<br>
 <script type="text/javascript">
 (function() {
 	// coremetrics
+	cmSetProduction();
 	cmCreatePageviewTag('HALL OF FAME');
 })();
 </script>

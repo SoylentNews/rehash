@@ -52,6 +52,7 @@ END %]
 [% Slash.displayStory(story.sid, 'Full', { is_future => story.is_future, topiclist => Slash.db.getTopiclistForStory(story.sid) }) %]
 <script type="text/javascript">
 // coremetrics
+cmSetProduction();
 cmCreatePageviewTag('ARTICLE DETAIL', null, null, null,'[% story.title %]-_-[% story.section %]');  
 </script>
 

@@ -62,6 +62,7 @@ __template__
 <script type="text/javascript">
 (function() {
 	// coremetrics
+	cmSetProduction();
 	cmCreatePageviewTag('OLD STORIES');
 })();
 </script>
