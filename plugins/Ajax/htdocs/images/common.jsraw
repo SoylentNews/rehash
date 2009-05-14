@@ -1660,7 +1660,7 @@ function firehose_toggle_simpledesign_mode(force_sd, is_anon) {
 					uri = '?sd=0';
 				}
 			}
-		else {
+		} else {
 			uri = uri.replace(/\&?sd=1/,"");
 				if (uri === '?') {
 					uri = '';
