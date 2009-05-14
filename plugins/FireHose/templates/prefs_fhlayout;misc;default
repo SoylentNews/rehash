@@ -31,6 +31,8 @@ __template__
                 </div>
                 [% END %]
 
+		<br>
+
 		[% 
                 IF !user.index_beta;
                         beta_check = constants.markup_checked_attribute;
@@ -38,6 +40,7 @@ __template__
 		%]
 		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="index_beta"[% beta_check %]> Use Classic Index</label></p>
 
+		<br>
 
 		<label>Date/Time Format
                 [%
@@ -73,118 +76,144 @@ __template__
 
                 </p>
 
+		<br>
+
 		[% smallscreen_check = ''; IF user.smallscreen; smallscreen_check = constants.markup_checked_attribute; END; %]
 		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="smallscreen" id="smallscreen" [% smallscreen_check %] onclick="setLayoutPrefs()"> Small Screen</label></p>
 
 		[% lowbandwidth_check = ''; IF user.lowbandwidth; lowbandwidth_check = constants.markup_checked_attribute; END; %]
                 <p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="lowbandwidth" id="lowbandwidth" [% lowbandwidth_check %] onclick="setLayoutPrefs()"> Lowbandwidth</label></p>
 
+		[% simple_check = ''; IF user.simpledesign; simple_check = constants.markup_checked_attribute; END; %]
+                <p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="simpledesign" id="simpledesign" [% simple_check %] onclick="setLayoutPrefs()"> Simple Design</label></p>
+
 		<div style="padding-left: 20px;">
-                [% i_check = ''; IF !user.noicons; i_check = constants.markup_checked_attribute; END %]
+		<table>
+			<tr>
+				<td>
+		                [% i_check = ''; IF !user.noicons; i_check = constants.markup_checked_attribute; END %]
+                		<label><input type="checkbox" id="showicons" name="showicons"[% i_check %]> Icons</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showicons');return false;" class="help">?</a>
 
-                <label><input type="checkbox" id="showicons" name="showicons"[% i_check %]> Icons</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showicons');return false;" class="help">?</a>
+		                <div id="modalprefhelp_showicons" class="modalprefhelp" style="display: none;">
+                		        Turn this off to hide topic icons on stories
+		                </div>
+				</td>
 
-                <div id="modalprefhelp_showicons" class="modalprefhelp" style="display: none;">
-                        Turn this off to hide topic icons on stories
-                </div>
-                <br>
+				<td>
+		                [% tag_check = ''; IF !user.tags_turnedoff; tag_check = constants.markup_checked_attribute; END %]
+		                <label><input type="checkbox" id="showtags" name="showtags"[%tag_check %]> Tags</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');return false;" class="help">?</a>
 
-                [% tag_check = ''; IF !user.tags_turnedoff; tag_check = constants.markup_checked_attribute; END %]
-                <label><input type="checkbox" id="showtags" name="showtags"[%tag_check %]> Tags</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');return false;" class="help">?</a>
+		                <div id="modalprefhelp_showtags" class="modalprefhelp" style="display: none;">
+                		        Turn this off to ignore all tags.
+		                </div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+				[% colors_check = ''; IF !user.firehose_nocolors; colors_check = constants.markup_checked_attribute; END %]
+                		<label><input type="checkbox" id="showcolors" name="showcolors"[% colors_check %]> Colors</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showcolors');return false;" class="help">?</a>
 
-                <div id="modalprefhelp_showtags" class="modalprefhelp" style="display: none;">
-                        Turn this off to ignore all tags.
-                </div>
-                <br>
+		                <div id="modalprefhelp_showcolors" class="modalprefhelp" style="display: none;">
+                		        Turn this off to hide color swatches on items.
+		                </div>
+				</td>
 
-		[% colors_check = ''; IF !user.firehose_nocolors; colors_check = constants.markup_checked_attribute; END %]
-                <label><input type="checkbox" id="showcolors" name="showcolors"[% colors_check %]> Colors</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showcolors');return false;" class="help">?</a>
+				<td>
+				[% bylines_check = ''; IF !user.firehose_nobylines; bylines_check = constants.markup_checked_attribute; END %]
+                		<label><input type="checkbox" id="showbylines" name="showbylines"[% bylines_check %]> Bylines</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showbylines');return false;" class="help">?</a>
 
-                <div id="modalprefhelp_showcolors" class="modalprefhelp" style="display: none;">
-                        Turn this off to hide color swatches on items.
-                </div>
-                <br>
+		                <div id="modalprefhelp_showbylines" class="modalprefhelp" style="display: none;">
+                		        Turn this off to hide user bylines on items.
+		                </div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+				[% dates_check = ''; IF !user.firehose_nodates; dates_check = constants.markup_checked_attribute; END %]
+                		<label><input type="checkbox" id="showdates" name="showdates"[% dates_check %]> Dates</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');return false;" class="help">?</a>
 
-		[% bylines_check = ''; IF !user.firehose_nobylines; bylines_check = constants.markup_checked_attribute; END %]
-                <label><input type="checkbox" id="showbylines" name="showbylines"[% bylines_check %]> Bylines</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showbylines');return false;" class="help">?</a>
+		                <div id="modalprefhelp_showdates" class="modalprefhelp" style="display: none;">
+                		        Turn this off to hide dates on abbreviated items
+		                </div>
+				</td>
 
+				<td>
+				[% picker_search_check = ''; IF !user.firehose_disable_picker_search; picker_search_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="firehose_disable_picker_search" name="firehose_disable_picker_search"[% picker_search_check %]> Filter Controls</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_picker_search');return false;" class="help">?</a>
 
-                <div id="modalprefhelp_showbylines" class="modalprefhelp" style="display: none;">
-                        Turn this off to hide user bylines on items.
-                </div>
-                <br>
+		                <div id="modalprefhelp_firehose_picker_search" class="modalprefhelp" style="display: none;">
+                		        Enable filter controls.
+		                </div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+		                [% pause_check = ''; IF !user.firehose_pause || !user.firehose_pause.defined; pause_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="paused" name="paused"[% pause_check %]> Dynamic Homepage</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
 
-		[% dates_check = ''; IF !user.firehose_nodates; dates_check = constants.markup_checked_attribute; END %]
-                <label><input type="checkbox" id="showdates" name="showdates"[% dates_check %]> Dates</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_showdates');return false;" class="help">?</a>
+		                <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
+                		        Auto-update view.
+		                </div>
+				</td>
 
-                <div id="modalprefhelp_showdates" class="modalprefhelp" style="display: none;">
-                        Turn this off to hide dates on abbreviated items
-                </div>
-                <br>
+				<td>
+		                [% boxes_check = ''; IF !user.firehose_noslashboxes; boxes_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="noslashboxes" name="noslashboxes"[% boxes_check %]> Slashboxes</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_noslashboxes');return false;" class="help">?</a>
 
-		[% picker_search_check = ''; IF !user.firehose_disable_picker_search; picker_search_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="firehose_disable_picker_search" name="firehose_disable_picker_search"[% picker_search_check %]> Filter Controls</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_picker_search');return false;" class="help">?</a>
+		                <div id="modalprefhelp_noslashboxes" class="modalprefhelp" style="display: none;">
+                		        Enable slashboxes.
+		                </div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+				[% sectionmenu_check = ''; IF !user.firehose_nosectionmenu; sectionmenu_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="nosectionmenu" name="nosectionmenu"[% sectionmenu_check %]> Section Menu</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nosectionmenu');return false;" class="help">?</a>
 
-                <div id="modalprefhelp_firehose_picker_search" class="modalprefhelp" style="display: none;">
-                        Enable filter controls.
-                </div>
-                <br>
+		                <div id="modalprefhelp_nosectionmenu" class="modalprefhelp" style="display: none;">
+                		        Enable the section menu.
+		                </div>
+				</td>
 
-                [% pause_check = ''; IF !user.firehose_pause || !user.firehose_pause.defined; pause_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="paused" name="paused"[% pause_check %]> Dynamic Homepage</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
+				<td>
+		                [% ua_check = ''; IF !user.disable_ua_check; ua_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="disable_ua_check" name="disable_ua_check"[% ua_check %]> Detect Smallscreen Browsers</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_ua_check');return false;" class="help">?</a>
 
-                <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
-                        Auto-update view.
-                </div>
-                <br>
+		                <div id="modalprefhelp_ua_check" class="modalprefhelp" style="display: none;">
+                		        Enable smallscreen browser detection.
+		                </div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+		                [% am_check = ''; IF !user.firehose_noautomore; am_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="noautomore" name="noautomore"[% am_check %]> Auto 'More'</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_noautomore');return false;" class="help">?</a>
 
+		                <div id="modalprefhelp_firehose_noautomore" class="modalprefhelp" style="display: none;">
+                		        Enable Auto More.
+		                </div>
+				</td>
 
-                [% boxes_check = ''; IF !user.firehose_noslashboxes; boxes_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="noslashboxes" name="noslashboxes"[% boxes_check %]> Slashboxes</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_noslashboxes');return false;" class="help">?</a>
+				<td>
+                                [% graphics_check = ''; IF !user.firehose_nographics; graphics_check = constants.markup_checked_attribute; END; %]
+                                <label><input type="checkbox" id="nographics" name="nographics"[% graphics_check %]> Cosmetic Graphics</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_nographics');return false;" class="help">?</a>
+                                <br>
+                                <div id="modalprefhelp_firehose_nographics" class="modalprefhelp" style="display: none;">
+                                        Display cosmetic graphics.
+                                </div>
+                                </td>
+                        </tr>
+                        <tr>
+                                <td>
+				[% advanced_check = ''; IF user.firehose_advanced; advanced_check = constants.markup_checked_attribute; END %]
+				<label><input type="checkbox" id="advanced" name="advanced"[% advanced_check %]> Advanced</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');return false;" class="help">?</a>
 
-                <div id="modalprefhelp_noslashboxes" class="modalprefhelp" style="display: none;">
-                        Enable slashboxes.
-                </div>
-                <br>
+		                <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
+                		        Enable advanced user controls
+		                </div>
+				</td>
 
-
-		[% sectionmenu_check = ''; IF !user.firehose_nosectionmenu; sectionmenu_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="nosectionmenu" name="nosectionmenu"[% sectionmenu_check %]> Section Menu</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nosectionmenu');return false;" class="help">?</a>
-
-                <div id="modalprefhelp_nosectionmenu" class="modalprefhelp" style="display: none;">
-                        Enable the section menu.
-                </div>
-                <br>
-
-
-                [% ua_check = ''; IF !user.disable_ua_check; ua_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="disable_ua_check" name="disable_ua_check"[% ua_check %]> Detect Smallscreen Browsers</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_ua_check');return false;" class="help">?</a>
-
-                <div id="modalprefhelp_ua_check" class="modalprefhelp" style="display: none;">
-                        Enable smallscreen browser detection.
-                </div>
-                <br>
-
-
-                [% am_check = ''; IF !user.firehose_noautomore; am_check = constants.markup_checked_attribute; END; %]
-                <label><input type="checkbox" id="noautomore" name="noautomore"[% am_check %]> Auto 'More'</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_noautomore');return false;" class="help">?</a>
-
-                <div id="modalprefhelp_firehose_noautomore" class="modalprefhelp" style="display: none;">
-                        Enable Auto More.
-                </div>
-                <br>
-
-
-
-		[% advanced_check = ''; IF user.firehose_advanced; advanced_check = constants.markup_checked_attribute; END %]
-		<label><input type="checkbox" id="advanced" name="advanced"[% advanced_check %]> Advanced</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');return false;" class="help">?</a>
-
-                <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
-                        Enable advanced user controls
-                </div>
-                <br>
-
-
+				<td>
 
 		[%
                 default = user.firehose_pagesize || "small";
@@ -203,10 +232,14 @@ __template__
                         [% END %]
                 </select>
 
+				</td>
+			</tr>
+			</table>
+
                 </div>
 	
 		<p class="buttons">
-        <input type="button" value="Save" onclick="saveModalPrefs()">
+	        <input type="button" value="Save" onclick="saveModalPrefs()">
 		<input type="button" value="Cancel" onclick="hide_modal_box()">
 		<input type="button" value="Reset Layout" onclick="resetModalPrefs()">
 		<input type="button" value="Reset Section Menu" onclick="resetModalPrefs('resetsectionmenu')">
@@ -250,11 +283,24 @@ lb_unset_defaults.noslashboxes = false;
 lb_unset_defaults.noautomore   = false;
 lb_unset_defaults.pagesize = 0;
 
+// Set 3 (simpledesign)
+var master_sd_status = document.getElementById('simpledesign').checked;
+
+var sd_unset_defaults = new Array();
+sd_unset_defaults.showtags  = false;
+sd_unset_defaults.showicons = false;
+sd_unset_defaults.showcolors = false;
+sd_unset_defaults.nographics = false;
+sd_unset_defaults.firehose_disable_picker_search = false;
+sd_unset_defaults.showdates   = false;
+sd_unset_defaults.showbylines = false;
+
 // Master prefs
 var prefs = new Array();
 
 	if (master_ss_status === true) { prefs = addPref(ss_unset_defaults, prefs); }
 	if (master_lb_status === true) { prefs = addPref(lb_unset_defaults, prefs); }
+	if (master_sd_status === true) { prefs = addPref(sd_unset_defaults, prefs); }
 
 	for (var key in prefs) {
 		var control = document.getElementById(key);
