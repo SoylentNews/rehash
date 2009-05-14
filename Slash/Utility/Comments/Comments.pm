@@ -1004,9 +1004,14 @@ sub printComments {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $pretext = '';
+	$options ||= {};
+
+	
 
 	if (!$discussion || !$discussion->{id}) {
-		print Slash::getData('no_such_sid', '', '');
+		my $retval =  Slash::getData('no_such_sid', '', '');
+		return $retval if $options->{Return};
 		return 0;
 	}
 
@@ -1058,6 +1063,7 @@ sub printComments {
 			sid => $discussion->{id},
 			cid => $cid,
 		}, '');
+		return $d if $options->{Return};
 		print $d;
 		return 0;
 	}
@@ -1087,11 +1093,11 @@ sub printComments {
 		if ($discussion->{is_future} && !$constants->{subscribe_future_post}) {
 			$user->{state}{discussion_future_nopost} = 1;
 		}
-		slashDisplay('printCommNoArchive', { discussion => $discussion });
+		$pretext .= slashDisplay('printCommNoArchive', { discussion => $discussion }, { Return => $options->{Return}});
 	}
 
 #slashProf("printCommentsMain");
-	slashDisplay('printCommentsMain', {
+	$pretext .= slashDisplay('printCommentsMain', {
 		comments	=> $comments,
 		title		=> $discussion->{title},
 		'link'		=> $discussion->{url},
@@ -1101,10 +1107,10 @@ sub printComments {
 		pid		=> $pid,
 		lvl		=> $lvl,
 		options		=> $options,
-	});
+	}, { Return => $options->{Return}} );
 #slashProf("", "printCommentsMain");
 
-	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
+	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
 	my($comment, $next, $previous);
 	if ($cid && !$discussion2) {
@@ -1152,8 +1158,10 @@ sub printComments {
 	}
 
 #use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments->{34}) . "discussion2: " . Dumper($discussion2);
+	my $comment_html = $options->{Return} ?  $pretext : '';
 
-	my $comment_html = slashDisplay('printCommComments', {
+
+	$comment_html .= slashDisplay('printCommComments', {
 		can_moderate	=> $can_mod_any,
 		comment		=> $comment,
 		comments	=> $comments,
@@ -1204,7 +1212,7 @@ sub printComments {
 #slashProf("", "comment regexes");
 #slashProf("", "printComments: $discussion2, $discussion->{id}");
 #slashProfEnd();
-
+	return $comment_html if $options->{Return};
 	print $comment_html;
 }
 

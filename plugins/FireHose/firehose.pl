@@ -205,14 +205,18 @@ sub view {
 		my $userbio = '';
 		$userbio = $dynamic_blocks->getUserBioBlock($user) if ($dynamic_blocks && !$user->{is_anon});
 
+		my $commenttext="";
+		
+		if ($discussion) {
+			$commenttext = printComments( $firehose_reader->getDiscussion($discussion),0,0, { Return => 1});
+		}
+
 		slashDisplay("view", {
 			firehosetext => $firehosetext,
 			userbio      => $userbio,
+			commenttext  => $commenttext
 		});
 
-		if ($discussion) {
-			printComments( $firehose_reader->getDiscussion($discussion) );
-		}
 
 		my $plugins = $slashdb->getDescriptions('plugins');
 		if (!$user->{is_anon} && $plugins->{Tags}) {
