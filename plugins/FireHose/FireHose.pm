@@ -1019,6 +1019,32 @@ my %sphinx_mode = (
 	extended2  => SPH_MATCH_EXTENDED2
 );
 
+# This method will allow multiple search paths to be followed, for merging
+# back together later.  ** DO NOT ** use this unless you really know what
+# you're doing.  Srsly.  For every set of params you push on here, you
+# *multiply*, not *add" to, the number of queries needed.  -- pudge
+sub getFireHoseEssentialsPushMulti {
+	my($multi, $new) = @_;
+
+	return unless ref($multi) && ref($new);
+	return unless @$new;
+
+	if (!@$multi) {
+		# deepcopy
+		for (@$new) { push @$multi, [ @$_ ] }
+		return;
+	}
+
+	my $tmp = [];
+	for my $mar (@$multi) {
+		for my $nar (@$new) {
+			push @$tmp, [ @$mar, @$nar ];
+		}
+	}
+
+	@$multi = @$tmp;
+}
+
 sub getFireHoseEssentialsParams {
 	my($self, $options, $sphinx) = @_;
 	my $user = getCurrentUser();
@@ -1121,23 +1147,23 @@ sub getFireHoseEssentialsParams {
 		if ($options->{unsigned}) {
 			push @sphinx_opts, [ filter => signoff => [ $user->{uid} ], 1 ];
 
+			my $days_relevant = 30;
+			my $time_back = $cur_time - (86400 * $days_relevant);
+
 			if ((!$options->{type} || $options->{type} eq 'story') && (!$options->{not_type} || $options->{not_type} ne 'story')) {
-				my $days_relevant = 30;
-				my $time_back = $cur_time - (86400 * $days_relevant);
 				push @sphinx_opts, [ range => createtime_ut => 0, $time_back, 1 ];
 			}
 
 			# SSS sample pseudocode for multi
 # 			my $time_filter = [ range => createtime_ut => 0, $time_back, 1 ];
 # 			if (!$options->{type} && (!$options->{not_type} || $options->{not_type} ne 'story')) {
-# 				push @sphinx_opts_multi, [
+# 				getFireHoseEssentialsPushMulti(\@sphinx_opts_multi, [[
 # 					[ filter => gtid => $gtid_types{story} ],
 # 					$time_filter
-# 				];
-# 				push @sphinx_opts_multi, [
+# 				], [
 # 					[ filter => gtid => $gtid_types{story}, 1 ], 
-# 				];
-# 			} elsif ($option->{type} eq 'story') {
+# 				]]);
+# 			} elsif ($options->{type} eq 'story') {
 # 				push @sphinx_opts, $time_filter;
 # 			}
 
