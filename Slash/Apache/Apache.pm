@@ -511,14 +511,42 @@ sub IndexHandler {
 			}
 		}
 	}
-	if ($uri =~ m|^/(\w+)(/rss)?(/.*)/?$|) {
+	print STDERR "BEFORE CHECK\n";
+	if ($uri =~ m|^/(\w+)/([^/]*)/?([^/]*)?/?$|) {
 		my ($key, $rss_or_search, $search) = ($1,$2,$3);
 		print STDERR "$key  | $rss_or_search | $search\n";
+		my $rss;	
 		if (!$dbon) {
 			$r->uri('/index.shtml');
 			return DECLINED;
 		}
+		$rss = 1 if $rss_or_search && $rss_or_search eq "rss";
+		$search = $rss_or_search if !$rss;
+		
+		if ($constants->{plugin}{FireHose}) {
+			my $fh_reader = getObject("Slash::FireHose", { db_type => 'reader'});
+			my $fh_tabs = $fh_reader->getShortcutUserViews();
+
+			if ($fh_tabs->{$key}) {
+		
+				my @ops;
+				push @ops, "view=$key";
+				push @ops, "op=rss", "content_type=rss" if $rss;
+				push @ops, "fhfilter=$search", "content_type=rss" if $search;
+
+				$r->args(join('&',@ops));
+				if ($rss) {
+					print STDERR "FH URL\n";
+					$r->uri('/firehose.pl');
+				} else {
+					print STDERR "I2 URL\n";
+					$r->uri('/index2.pl');
+				}
+				return OK;
+			}
+		}
 	}
+	print STDERR "AFTER CHECK\n";
 	
 	# Match /datatype/id /story/sid or datatype/id/Item-title syntax
 	if ($uri =~ /^\/(journal|submission|comment|story)\/(rss\/)?(\d+(?:\/\d+\/\d+\/\d+)?)\/?(\w+|\-)*\/?/) {
