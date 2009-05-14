@@ -511,10 +511,8 @@ sub IndexHandler {
 			}
 		}
 	}
-	print STDERR "BEFORE CHECK\n";
 	if ($uri =~ m#^/(stories|recent|popular|daddypants|search)/([^/]*)/?([^/]*)?/?$#) {
 		my ($key, $rss_or_search, $search) = ($1,$2,$3);
-		print STDERR "$key  | $rss_or_search | $search\n";
 		my $rss;	
 		if (!$dbon) {
 			$r->uri('/index.shtml');
