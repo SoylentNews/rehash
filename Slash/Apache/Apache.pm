@@ -511,6 +511,14 @@ sub IndexHandler {
 			}
 		}
 	}
+	if ($uri =~ m|^/(\w+)(/rss)?(/.*)/?$|) {
+		my ($key, $rss_or_search, $search) = ($1,$2,$3);
+		print STDERR "$key  | $rss_or_search | $search\n";
+		if (!$dbon) {
+			$r->uri('/index.shtml');
+			return DECLINED;
+		}
+	}
 	
 	# Match /datatype/id /story/sid or datatype/id/Item-title syntax
 	if ($uri =~ /^\/(journal|submission|comment|story)\/(rss\/)?(\d+(?:\/\d+\/\d+\/\d+)?)\/?(\w+|\-)*\/?/) {
