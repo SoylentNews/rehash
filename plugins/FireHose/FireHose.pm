@@ -1385,121 +1385,121 @@ sub getFireHoseEssentials {
 	if (!@$sphinx_ar) {
 		$sdebug_idset_elapsed = Time::HiRes::time;
 	my(@sphinx_ars, @sphinx_statses);
-	# make sure we'll go through loop with dummy data if there's no actual multi data
-	$sphinx_opts_multi = [] unless @$sphinx_opts_multi;
-	for my $multi (@$sphinx_opts_multi) {
-		if ($constants->{sphinx_se}) {
-			my @sphinxse_opts;
-			for my $opt (@$sphinx_opts) {
-				my $neg;
-				my $opt_str = "$opt->[0]=$opt->[1],";
-				if ($opt->[0] eq 'filter') {
-					$opt_str .= join ',', @{$opt->[2]};
-					$neg = $opt->[3];
-				} elsif ($opt->[0] eq 'range') {
-					$opt_str .= "$opt->[2],$opt->[3]";
-					$neg = $opt->[4];
+		# make sure we'll go through loop with dummy data if there's no actual multi data
+		$sphinx_opts_multi = [] unless @$sphinx_opts_multi;
+		for my $multi (@$sphinx_opts_multi) {
+			if ($constants->{sphinx_se}) {
+				my @sphinxse_opts;
+				for my $opt (@$sphinx_opts) {
+					my $neg;
+					my $opt_str = "$opt->[0]=$opt->[1],";
+					if ($opt->[0] eq 'filter') {
+						$opt_str .= join ',', @{$opt->[2]};
+						$neg = $opt->[3];
+					} elsif ($opt->[0] eq 'range') {
+						$opt_str .= "$opt->[2],$opt->[3]";
+						$neg = $opt->[4];
+					}
+					if ($neg) {
+						$opt_str = '!' . $opt_str;
+					}
+					push @sphinxse_opts, $opt_str;
 				}
-				if ($neg) {
-					$opt_str = '!' . $opt_str;
+	
+				$qoptions->{orderdir} = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
+				push @sphinxse_opts, "sort=$qoptions->{orderdir}:$qoptions->{orderby}";
+				push @sphinxse_opts, "mode=$sphinx->{mode}" if $sphinx->{mode};
+	
+				if (@$sphinx_tables > 1) {
+					push @sphinxse_opts, "limit=$qoptions->{maxmatches}";
+					push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}";
+				} else {
+					push @sphinxse_opts, "offset=$qoptions->{offset_num}" if length $qoptions->{offset_num};
+					push @sphinxse_opts, "limit=$qoptions->{fetch_size}";
+					push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}" if defined $qoptions->{maxmatches};
 				}
-				push @sphinxse_opts, $opt_str;
-			}
-
-			$qoptions->{orderdir} = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
-			push @sphinxse_opts, "sort=$qoptions->{orderdir}:$qoptions->{orderby}";
-			push @sphinxse_opts, "mode=$sphinx->{mode}" if $sphinx->{mode};
-
-			if (@$sphinx_tables > 1) {
-				push @sphinxse_opts, "limit=$qoptions->{maxmatches}";
-				push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}";
-			} else {
-				push @sphinxse_opts, "offset=$qoptions->{offset_num}" if length $qoptions->{offset_num};
-				push @sphinxse_opts, "limit=$qoptions->{fetch_size}";
-				push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}" if defined $qoptions->{maxmatches};
-			}
-
-			my $query = $self->sqlQuote(join ';', @$sphinx_terms, @sphinxse_opts);
-			my $swhere = join ' AND ', @$sphinx_where;
-			$swhere = " AND $swhere" if $swhere;
-			my $stables = join ',', @$sphinx_tables;
-
-			$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
-				'sphinx_search.globjid',
-				$stables, "query=$query$swhere", $sphinx_other,
-				{ sql_no_cache => 1 });
-			$sphinx_stats = $sphinxdb->getSphinxStats;
-
-		} else {
-			$sph->ResetFilters; # for multi mode
-			for my $opt (@$sphinx_opts, @$multi) {
-				my $type = shift @$opt;
-				if ($type eq 'filter') {
-					$sph->SetFilter(@$opt);
-				} elsif ($type eq 'range') {
-					$sph->SetFilterRange(@$opt);
-				}
-			}
-
-			my $sresults = $sph->Query(join(' ', @$sphinx_terms));
-			if (!defined $sresults) {
-				my $err = $sph->GetLastError() || '';
-				print STDERR scalar(gmtime) . " $$ gFHE sph err: '$err'\n";
-				# return empty results
-				$sresults = {
-					matches     => [ ],
-					total       => 0,
-					total_found => 0,
-					'time'      => 0,
-					words       => 0,
-				};
-			}
-			$sphinx_ar = [ map { $_->{doc} } @{ $sresults->{matches} } ];
-			$sphinx_stats = {
-				total         => $sresults->{total},
-				total_found   => $sresults->{total_found},
-				'time'        => $sresults->{'time'},
-				words         => $sresults->{words},
-			};
-
-			# If $sph_check_sql was set, it means there are further
-			# restrictions that must be checked in MySQL.  What we
-			# got back is a potentially quite large list of globjids
-			# (up to 10,000) which now need to be filtered in MySQL.
-			# For now we do this a not-very-smart way (check the
-			# whole list at once instead of repeated splices, and
-			# if we end up with not enough, don't repeat the Sphinx
-			# query with SetLimits(offset)).
-
-			if ($sphinx->{check_sql} && @$sphinx_ar) {
-				my $in = 'IN (' . join(',', @$sphinx_ar) . ')';
-				my @sph_tables = grep { $_ ne 'sphinx_search' } @$sphinx_tables;
-				my $sphtables = join ',', @sph_tables;
-				# note: see above, where this clause is added:
-				# 'tags.globjid = sphinx_search.globjid'
-				my @sph_where =
-					map { s/\s*=\s*sphinx_search\.globjid/ $in/; $_ }
-					@$sphinx_where;
-				my $sphwhere = join ' AND ', @sph_where;
+	
+				my $query = $self->sqlQuote(join ';', @$sphinx_terms, @sphinxse_opts);
+				my $swhere = join ' AND ', @$sphinx_where;
+				$swhere = " AND $swhere" if $swhere;
+				my $stables = join ',', @$sphinx_tables;
+	
 				$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
-					'globjid',
-					$sphtables, $sphwhere, $sphinx_other,
+					'sphinx_search.globjid',
+					$stables, "query=$query$swhere", $sphinx_other,
 					{ sql_no_cache => 1 });
-				print STDERR sprintf("%s sphinx:sph_check_sql: %d char where found %d\n",
-					scalar(gmtime),
-					length($sphwhere),
-					scalar(@$sphinx_ar)
-				) if $sphinx_debug;
+				$sphinx_stats = $sphinxdb->getSphinxStats;
+	
+			} else {
+				$sph->ResetFilters; # for multi mode
+				for my $opt (@$sphinx_opts, @$multi) {
+					my $type = shift @$opt;
+					if ($type eq 'filter') {
+						$sph->SetFilter(@$opt);
+					} elsif ($type eq 'range') {
+						$sph->SetFilterRange(@$opt);
+					}
+				}
+	
+				my $sresults = $sph->Query(join(' ', @$sphinx_terms));
+				if (!defined $sresults) {
+					my $err = $sph->GetLastError() || '';
+					print STDERR scalar(gmtime) . " $$ gFHE sph err: '$err'\n";
+					# return empty results
+					$sresults = {
+						matches     => [ ],
+						total       => 0,
+						total_found => 0,
+						'time'      => 0,
+						words       => 0,
+					};
+				}
+				$sphinx_ar = [ map { $_->{doc} } @{ $sresults->{matches} } ];
+				$sphinx_stats = {
+					total         => $sresults->{total},
+					total_found   => $sresults->{total_found},
+					'time'        => $sresults->{'time'},
+					words         => $sresults->{words},
+				};
+	
+				# If $sph_check_sql was set, it means there are further
+				# restrictions that must be checked in MySQL.  What we
+				# got back is a potentially quite large list of globjids
+				# (up to 10,000) which now need to be filtered in MySQL.
+				# For now we do this a not-very-smart way (check the
+				# whole list at once instead of repeated splices, and
+				# if we end up with not enough, don't repeat the Sphinx
+				# query with SetLimits(offset)).
+	
+				if ($sphinx->{check_sql} && @$sphinx_ar) {
+					my $in = 'IN (' . join(',', @$sphinx_ar) . ')';
+					my @sph_tables = grep { $_ ne 'sphinx_search' } @$sphinx_tables;
+					my $sphtables = join ',', @sph_tables;
+					# note: see above, where this clause is added:
+					# 'tags.globjid = sphinx_search.globjid'
+					my @sph_where =
+						map { s/\s*=\s*sphinx_search\.globjid/ $in/; $_ }
+						@$sphinx_where;
+					my $sphwhere = join ' AND ', @sph_where;
+					$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
+						'globjid',
+						$sphtables, $sphwhere, $sphinx_other,
+						{ sql_no_cache => 1 });
+					print STDERR sprintf("%s sphinx:sph_check_sql: %d char where found %d\n",
+						scalar(gmtime),
+						length($sphwhere),
+						scalar(@$sphinx_ar)
+					) if $sphinx_debug;
+				}
 			}
+			push @sphinx_ars, $sphinx_ar;
+			push @sphinx_statses, $sphinx_stats;
 		}
-		push @sphinx_ars, $sphinx_ar;
-		push @sphinx_statses, $sphinx_stats;
-	}
-
-	for (0 .. @sphinx_ars) {
-		$sphinx_ar = $sphinx_ars[$_];
-		$sphinx_stats = $sphinx_statses[$_];
-	}
+	
+		for (0 .. @sphinx_ars) {
+			$sphinx_ar = $sphinx_ars[$_];
+			$sphinx_stats = $sphinx_statses[$_];
+		}
 
 
 		$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
