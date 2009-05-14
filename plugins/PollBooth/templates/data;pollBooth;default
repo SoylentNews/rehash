@@ -21,6 +21,23 @@ __template__
 	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Poll
 
+[% CASE 'longtitle' %]
+        [% returnme.data_constant = 1 %]
+        [%
+        poll_reader = Slash.getObject("Slash::PollBooth");
+        discussion_id = poll_reader.getPollQuestion(qid, "discussion");
+        discussion = poll_reader.getDiscussion(discussion_id);
+        wordcount = 0;
+
+        FOREACH word IN discussion.title.split(' ');
+                LAST IF wordcount == 6;
+                long_title = long_title _ word _ ' ';
+                wordcount = wordcount + 1;
+        END;
+        long_title = long_title _ '...';
+        %]
+        [% constants.sitename %] Poll | [% long_title %]
+
 [% CASE 'edit_poll_title' %]
 	[% IF qid %]Editing Poll #[% qid %][% ELSE %]New Poll[% END %]
 

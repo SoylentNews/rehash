@@ -39,7 +39,8 @@ sub main {
 		undef $form->{aid} if $form->{aid} < -1 || $form->{aid} > 8;
 	}
 
-	header(getData('title'), $form->{section}, { tab_selected => 'poll'}) or return;
+	my $longtitle = 'long' if ($op eq 'default' and $form->{'qid'});
+	header(getData($longtitle . 'title', { qid => $form->{'qid'} }), $form->{section}, { tab_selected => 'poll'}) or return;
 
 	$ops{$op}->($form, $slashdb, $constants);
 
