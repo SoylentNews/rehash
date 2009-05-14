@@ -68,7 +68,6 @@ sub main {
 	my $title;
 	$title = "$constants->{sitename} - $constants->{slogan}";
 	$form->{'index'} = 1;
-	$form->{no_saved} = 1;
 	header($title, '') or return;
 
 

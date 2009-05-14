@@ -3792,7 +3792,7 @@ sub getAndSetOptions {
 
 	$options->{public} = "yes";
 
-	if (!$options->{usermode}) {
+	if (!$options->{usermode} && $user->{is_admin}) {
 		$options->{admin_filters} = 1;
 	}
 
