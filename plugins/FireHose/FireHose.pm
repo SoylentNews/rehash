@@ -3508,8 +3508,16 @@ sub getAndSetOptions {
 	}
 
 	$options->{global} = $global_opts;
+	if ($opts->{initial} && $form->{addfilter}) {
+		my $addfilter = $form->{addfilter};
+		$addfilter =~ s/[^a-zA-Z0-9]//g;
+		$options->{base_filter} .= " $addfilter" if $addfilter;
+	
+	}
 	$options->{base_filter} =~ s/{nickname}/$user->{nickname}/;
 	$options->{fhfilter} = $options->{base_filter};
+
+	
 
 	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
 

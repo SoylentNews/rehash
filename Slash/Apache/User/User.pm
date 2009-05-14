@@ -643,7 +643,6 @@ sub userdir_handler {
 		my $path = URI->new($gSkin->{rootdir})->path;
 		$uri =~ s/^\Q$path//;
 	}
-
 	# URIs like /tags and /tags/foo and /tags/foo?type=bar are special cases.
 	if ($uri =~ m[^/tags (?: /([^?]*) | /? ) (?: \?(.*) )? $]x) {
 		my($word, $query) = ($1, $2);
@@ -679,7 +678,7 @@ sub userdir_handler {
 			# This is in case something in this scope wants it -- pudge
 			$query = $1;
 		}
-
+		
 		my($op, $extra) = split /\//, $string, 2;
 		$extra ||= '';
 
@@ -828,6 +827,10 @@ sub userdir_handler {
 				$r_args =~ s/dp=tags/dp=usertag/ if $u2 && $extra;
 				# XXX "!" is a 'reserved' char in URI, escape it here?
 				$r_args .= "&tagname=$extra" if $extra;
+			} elsif ($u2 && ($op eq 'submissions' || $op eq 'bookmarks' || $op eq 'firehose' || $op eq 'default' || $op eq 'journal' )) {
+				if ($extra && $extra ne "rss") {
+					$r_args .= "&addfilter=$extra" if $extra;
+				}
 			}
 		}
 
