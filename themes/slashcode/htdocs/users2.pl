@@ -1253,7 +1253,7 @@ sub showInfo {
 
 		# Dynamic blocks
 		my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
-                my ($dyn_achievements, $dyn_comments, $dyn_journals, $dyn_friends, $dyn_tags);
+                my ($dyn_achievements, $dyn_comments, $dyn_journals, $dyn_friends, $dyn_tags, $dyn_bookmarks);
                 if ($dynamic_blocks_reader) {
 			my $user_self = ($requested_user->{uid} == $user->{uid}) ? 1 : 0;
                         $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self }) || 0;
@@ -1261,6 +1261,7 @@ sub showInfo {
 			$dyn_journals     = $dynamic_blocks_reader->displayBlock('journal-'      . $uid, { user_self => $user_self }) || 0;
 			$dyn_friends      = $dynamic_blocks_reader->displayBlock('friends-'      . $uid, { user_self => $user_self }) || 0;
 			$dyn_tags         = $dynamic_blocks_reader->displayBlock('tags-'         . $uid, { user_self => $user_self }) || 0;
+			$dyn_bookmarks    = $dynamic_blocks_reader->displayBlock('bookmarks-'    . $uid, { user_self => $user_self }) || 0;
                 }
 
 		my $userbio;
@@ -1310,6 +1311,7 @@ sub showInfo {
 			dyn_journals                => $dyn_journals,
 			dyn_friends		    => $dyn_friends,
 			dyn_tags		    => $dyn_tags,
+			dyn_bookmarks		    => $dyn_bookmarks,
 			userbio			    => $userbio,
 			
 		}, { Page => 'users', Skin => 'default'});
