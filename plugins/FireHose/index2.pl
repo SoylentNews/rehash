@@ -33,6 +33,10 @@ sub main {
 
 	my $op = $form->{op} || "";
 
+	if ($ENV{HTTP_USER_AGENT} =~ /MSIE [2-6]/) {
+		redirect("/index.pl");
+		return;
+	}
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED] || $user->{seclev} < $ops{$op}[MINSECLEV] ) {
 		$op = 'default';
 	}
