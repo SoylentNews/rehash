@@ -272,7 +272,15 @@ sub rss {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
 	my $options = $firehose->getAndSetOptions({ no_set => 1 });
-	my ($its, $results) = $firehose->getFireHoseEssentials($options);
+	my ($its, $results, $item, $channeltitle);
+
+	if ($form->{id} && $form->{type}) {
+		my $item = $firehose->getFireHoseByTypeSrcid($form->{type}, $form->{id});
+		$its = [$item];
+		$channeltitle = "$constants->{sitename} $item->{title}";
+	} else {
+		($its, $results) = $firehose->getFireHoseEssentials($options);
+	}
 	my @items;
 	foreach (@$its) {
 		my $item = $firehose->getFireHose($_->{id});
@@ -284,9 +292,10 @@ sub rss {
 			description	=> $item->{introtext}
 		};
 	}
+	$channeltitle ||= "$constants->{sitename} Firehose - Filtered to  '$options->{fhfilter}'";
 	xmlDisplay($form->{content_type} => {
 		channel => {
-			title		=> "$constants->{sitename} Firehose - Filtered to  '$options->{fhfilter}'",
+			title		=> $channeltitle,
 			'link'		=> "$gSkin->{absolutedir}/firehose.pl",
 			descriptions 	=> "$constants->{sitename} Firehose"
 		},

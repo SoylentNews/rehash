@@ -513,17 +513,23 @@ sub IndexHandler {
 	}
 	
 	# Match /datatype/id /story/sid or datatype/id/Item-title syntax
-	if ($uri =~ /^\/(journal|submission|comment|story)\/(\d+(?:\/\d+\/\d+\/\d+)?)\/?(\w+|\-)*\/?/) {
+	if ($uri =~ /^\/(journal|submission|comment|story)\/(rss\/)?(\d+(?:\/\d+\/\d+\/\d+)?)\/?(\w+|\-)*\/?/) {
 		my $basedir  = $constants->{basedir};
-		my($datatype, $id) = ($1,$2);
+		my($datatype, $rss, $id) = ($1,$2,$3);
+		my ($op_string, $rss_string) = ('op=view','');
+		if ($rss) {
+			$rss_string = "\&content_type=rss";
+			$op_string = "op=rss";
+		}
 		if ($datatype && $id) {
 			my $idtype = "id";
 			if ($datatype eq "story" && $id =~/\//) {
 				$idtype = "sid";
 			} 
+
 			$r->filename("$basedir/firehose.pl");
 			$r->uri("/firehose.pl");
-			$r->args("op=view\&type=$datatype\&$idtype=$id");
+			$r->args("$op_string\&type=$datatype\&$idtype=$id$rss_string");
 			return OK;
 		}
 	}
