@@ -632,9 +632,9 @@ var tag_widget_fns = {
 
 
 	set_context: function( context, force ){
-		var	widget=this, $widget=$(widget),
-			new_trigger = !$previous_context_trigger.length || ($previous_context_trigger[0] !== $related_trigger[0]),
-			new_context = context != this._current_context;
+		var widget = this;
+		var new_trigger = !$previous_context_trigger.length || ($previous_context_trigger[0] !== $related_trigger[0]);
+		var new_context = context != this._current_context;
 
 		if ( context ) {
 			if ( !new_context && !new_trigger && !force ) {
@@ -663,17 +663,19 @@ var tag_widget_fns = {
 
 			$('.ready[context=related]', this)
 				.each(function(){
-					var display=this, $display=$(display);
+					var display = this;
+					var $display = $(display);
 
-					$display.is(':has(span.tag)') && $display.slideUp(400, function(){
-						$widget.hide();
-					});
+					if ( $display.find('span.tag').length ) {
+						$display.slideUp(400);
+					}
 
 
 
 					if ( context_tags.length ) {
-						var	global_left	= $related_trigger.offset().left,
-							parent_left	= $widget.offset().left,
+						var	$parent		= $display.parent(),
+							global_left	= $related_trigger.offset().left,
+							parent_left	= $parent.offset().left,
 							best_left	= global_left - parent_left;
 
 						$display.queue(function(){
@@ -682,7 +684,7 @@ var tag_widget_fns = {
 
 							// if display had no tags before, $display.hide() would silently fail, because it's already hidden
 							// so hide the widget itself while we make the changes
-							$widget.hide();
+							$parent.hide();
 							display.set_tags(context_tags, { classes: 'suggestion b' });
 							if ( widget.modify_context ) {
 								widget.modify_context(display, context);
@@ -692,18 +694,18 @@ var tag_widget_fns = {
 							// but we can't _really_ hide it, because we need to ask its width
 							$display.
 								css('height', 0).
-								add($widget).
+								add($parent).
 									show();
 
 							var restore_outer, ul=Size($display.find('ul'));
-							$widget.closest('h3,div.body-widget').each(function(){
+							$parent.closest('h3,div.body-widget').each(function(){
 								var $outer=$(this), saved=$outer.css('max-height')||'';
 								$outer.css('max-height', $outer.height()+ul.height+'px');
 								restore_outer = function(){ $outer.css('max-height', saved); };
 							});
 
 							try {
-								var max_left = $widget.width() - ul.width;
+								var max_left = $parent.width() - ul.width;
 								best_left = Math.min(best_left, max_left);
 							} catch ( e0 ) {
 							}
