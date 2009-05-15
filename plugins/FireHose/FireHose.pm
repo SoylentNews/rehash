@@ -1367,7 +1367,10 @@ sub getFireHoseEssentials {
 	$sph->SetMatchMode($sphinx_mode{$sphinx->{mode}} || SPH_MATCH_ALL) if $sphinx->{mode};
 
 	$qoptions->{maxmatches} = 0;
-	if (@$sphinx_tables > 1) {
+	# in both these cases, we need to do a secondary filter run, so we are
+	# getting a large number from the initial query(ies), and then getting
+	# the smaller number from a MySQL query
+	if (@$sphinx_tables > 1 || @$sphinx_opts_multi) {
 		my $offset = length $qoptions->{offset_num} ? "$qoptions->{offset_num}, " : '';
 		$sphinx_other = "LIMIT $offset$qoptions->{fetch_size}";
 
@@ -1384,13 +1387,13 @@ sub getFireHoseEssentials {
 	my($sdebug_idset_elapsed, $sdebug_get_elapsed) = (0, 0);
 	if (!@$sphinx_ar) {
 		$sdebug_idset_elapsed = Time::HiRes::time;
-	my(@sphinx_ars, @sphinx_statses);
+		my(@sphinx_ars, @sphinx_statses);
 		# make sure we'll go through loop with dummy data if there's no actual multi data
 		$sphinx_opts_multi = [] unless @$sphinx_opts_multi;
 		for my $multi (@$sphinx_opts_multi) {
 			if ($constants->{sphinx_se}) {
 				my @sphinxse_opts;
-				for my $opt (@$sphinx_opts) {
+				for my $opt (@$sphinx_opts, @$multi) {
 					my $neg;
 					my $opt_str = "$opt->[0]=$opt->[1],";
 					if ($opt->[0] eq 'filter') {
@@ -1410,7 +1413,7 @@ sub getFireHoseEssentials {
 				push @sphinxse_opts, "sort=$qoptions->{orderdir}:$qoptions->{orderby}";
 				push @sphinxse_opts, "mode=$sphinx->{mode}" if $sphinx->{mode};
 	
-				if (@$sphinx_tables > 1) {
+				if (@$sphinx_tables > 1 || @$sphinx_opts_multi) {
 					push @sphinxse_opts, "limit=$qoptions->{maxmatches}";
 					push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}";
 				} else {
@@ -1495,12 +1498,36 @@ sub getFireHoseEssentials {
 			push @sphinx_ars, $sphinx_ar;
 			push @sphinx_statses, $sphinx_stats;
 		}
-	
-		for (0 .. @sphinx_ars) {
-			$sphinx_ar = $sphinx_ars[$_];
-			$sphinx_stats = $sphinx_statses[$_];
-		}
 
+		# merge and re-order; if only one element in array, not multi:
+		# use existing $sphinx_ar, $sphinx_stats values
+		if (@sphinx_ars > 1) {
+			my %uniq;
+			my @globjids = grep { !$uniq{$_}++ } map { @$_ } @sphinx_ars;
+
+			# SSS not sure how to merge "words" (we currently
+			# do not use "words" at all, so not important) -- pudge
+
+			# total_found is not quite the total number of globjids
+			# we have; it could be larger, but if it is, we likely
+			# won't ever return them anyway
+			my $stats = {
+				'time'       => 0,
+				total_found  => scalar(@globjids)
+			};
+
+			# we don't really care about this, but might as well
+			# add it up just in case
+			$stats->{'time'} += $_->{'time'} for @$sphinx_stats;
+
+			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('globjid', 'firehose',
+				sprintf(q{globjid IN (%s)}, join(',', @globjids)),
+				"ORDER BY $options->{orderby} $options->{orderdir} $sphinx_other"
+			);
+
+			$stats->{total} = scalar @$sphinx_ar;
+			$sphinx_stats = $stats;
+		}
 
 		$sdebug_idset_elapsed = Time::HiRes::time - $sdebug_idset_elapsed;
 
