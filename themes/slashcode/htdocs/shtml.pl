@@ -139,7 +139,7 @@ sub replace_footer {
 			{ Return => 1, Page => 'shtmlpl' });
 		$replace_anchor = '<!--#include virtual="/slashfoot.inc"-->';
 	} elsif ($options->{type} eq 'gen') {
-		$new_footer = slashDisplay('footer-hof',
+		$new_footer = slashDisplay('footer-misc',
 			{ footer_text => $footer_text },
 			{ Return => 1, Page => 'shtmlpl' });
 		$replace_anchor = '<!-- end generated body -->';
