@@ -1150,22 +1150,22 @@ sub getFireHoseEssentialsParams {
 			my $days_relevant = 30;
 			my $time_back = $cur_time - (86400 * $days_relevant);
 
-			if ((!$options->{type} || $options->{type} eq 'story') && (!$options->{not_type} || $options->{not_type} ne 'story')) {
-				push @sphinx_opts, [ range => createtime_ut => 0, $time_back, 1 ];
-			}
+# 			if ((!$options->{type} || $options->{type} eq 'story') && (!$options->{not_type} || $options->{not_type} ne 'story')) {
+# 				push @sphinx_opts, [ range => createtime_ut => 0, $time_back, 1 ];
+# 			}
 
 			# SSS sample pseudocode for multi
-# 			my $time_filter = [ range => createtime_ut => 0, $time_back, 1 ];
-# 			if (!$options->{type} && (!$options->{not_type} || $options->{not_type} ne 'story')) {
-# 				getFireHoseEssentialsPushMulti(\@sphinx_opts_multi, [[
-# 					[ filter => gtid => $gtid_types{story} ],
-# 					$time_filter
-# 				], [
-# 					[ filter => gtid => $gtid_types{story}, 1 ], 
-# 				]]);
-# 			} elsif ($options->{type} eq 'story') {
-# 				push @sphinx_opts, $time_filter;
-# 			}
+			my $time_filter = [ range => createtime_ut => 0, $time_back, 1 ];
+			if (!$options->{type} && (!$options->{not_type} || $options->{not_type} ne 'story')) {
+				getFireHoseEssentialsPushMulti(\@sphinx_opts_multi, [[
+					[ filter => gtid => [$gtid_types{story}] ],
+					$time_filter
+				], [
+					[ filter => gtid => [$gtid_types{story}], 1 ], 
+				]]);
+			} elsif ($options->{type} eq 'story') {
+				push @sphinx_opts, $time_filter;
+			}
 
 		} elsif ($options->{signed}) {
 			push @sphinx_opts, [ filter => signoff => [ $user->{uid} ] ];
@@ -1389,7 +1389,7 @@ sub getFireHoseEssentials {
 		$sdebug_idset_elapsed = Time::HiRes::time;
 		my(@sphinx_ars, @sphinx_statses);
 		# make sure we'll go through loop with dummy data if there's no actual multi data
-		$sphinx_opts_multi = [] unless @$sphinx_opts_multi;
+		@$sphinx_opts_multi = [] unless @$sphinx_opts_multi;
 		for my $multi (@$sphinx_opts_multi) {
 			if ($constants->{sphinx_se}) {
 				my @sphinxse_opts;
@@ -1518,7 +1518,7 @@ sub getFireHoseEssentials {
 
 			# we don't really care about this, but might as well
 			# add it up just in case
-			$stats->{'time'} += $_->{'time'} for @$sphinx_stats;
+			$stats->{'time'} += $_->{'time'} for @sphinx_statses;
 
 			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('globjid', 'firehose',
 				sprintf(q{globjid IN (%s)}, join(',', @globjids)),
