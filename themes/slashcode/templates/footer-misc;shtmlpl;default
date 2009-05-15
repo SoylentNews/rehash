@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+* footer_text = text from footer()
+__title__
+__page__
+shtmlpl
+__lang__
+en_US
+__name__
+footer-misc
+__template__
+  </div>
+</div>
+
+[% footer_text %]
+
+__seclev__
+10000
+__version__
+$Id$

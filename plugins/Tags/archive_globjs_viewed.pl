@@ -12,7 +12,7 @@ use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '0-59/5 * * * *';
+$task{$me}{timespec} = '0-59/10 3-10 * * *';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;

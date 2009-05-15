@@ -49,7 +49,7 @@ END
 
 <br>
 
-<h3><a href="/code.shtml" style="text-decoration: none;">About Slashcode</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_3'); return false" title="Click To Expand Help" class="help">?</a></h3>
+<h3><a href="/faq/code.shtml" style="text-decoration: none;">About Slashcode</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_3'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_3" class="modalprefhelp" style="display: none;">
         Slashcode is wrangled and various other deeds of a technical nature are committed by the <a href="http://sourceforge.com/" target="_blank">SourceForce Inc.</a> Slashteam.<br>

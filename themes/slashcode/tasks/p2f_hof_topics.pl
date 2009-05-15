@@ -17,7 +17,7 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $args = "ssi=yes virtual_user=$virtual_user";
 
-	my $bd = $constants->{basedir}; # convenience
+	my $bd = $constants->{basedir};
 	for my $name (qw( hof topics authors )) {
 		prog2file(
 			"$bd/$name.pl", 

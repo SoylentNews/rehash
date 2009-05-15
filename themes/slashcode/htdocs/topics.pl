@@ -20,6 +20,11 @@ sub main {
 		: { };
 	header(getData('head'), $form->{section}, $data) or return;
 
+	# Would be cleaner to put this into a template that encapsulates
+	# the whole body, but that's not how this script was written
+	# and I'm too lazy to rewrite it
+	print "\n<!-- begin generated body -->\n";
+
 	print createMenu('topics');
 
 	if ($hierarchy_op) {
@@ -27,6 +32,8 @@ sub main {
 	} else {
 		listTopics();
 	}
+
+	print "\n<!-- begin generated body -->\n";
 
 	footer();
 }

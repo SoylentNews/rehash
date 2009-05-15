@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <title>Slashdot Book Review Guidelines</title>
+        <base href="http://slashdot.org/">
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+        <hr width="90%">
+        <blockquote>
+                Slashdot welcomes readers' book reviews. In particular, we're interested in reviews of books on programming, computer security, the history of technology and anything else (including Science Fiction, cyberpunk, etc.) that fits under the "News for Nerds" umbrella.
+        </blockquote>
+        <hr width="90%">
+        <p><strong>Pick your poison:</strong><br>
+        Slashdot reviews cover a wide range of topics and genres. Please use Slashdot's search engine to see whether the book you'd like to review has already been covered. Unless you have a special reason for doing so, don't choose a book which has already been reviewed on Slashdot. (Searching for the "$Booktitle + Slashdot" on Google is your best bet). If multiple reviewers submit reviews of the same book, we may run more than one, or excerpt from several to present elements of both.</p>
+        <p>Choose books that are either timely (<cite>Programming In Perl 7</cite>, when it comes out) or timeless (underappreciated or unknown classic science fiction, say). Be cautious about submitting reviews of popular books which have been reviewed extensively in mainstream media.</p>
+        <p>If you review an older book, your review has a greater burden to bear, because it has to be compelling enough to justify running compared to previously existing reviews. That is, please don't review <cite>Neuromancer</cite>. On the other hand, feel free to review <cite>Neuromancer: A 25-Year Retrospective</cite> (including DVD of unreleased sit-com pilot based on the book, and a sample of William Gibson's DNA)* on its own merits. Special editions, annotated versions, re-issues, retrospectives, etc. can make an older book worth reviewing -- but take into account both the differences or improvements and the context, not just the bare original text.<br>
+        <font size="-2">*Note, not a real book. Don't worry.</font></p>
+        <p><strong>Think and sketch:</strong> Take notes on the book you're dissecting, and decide how you want to approach your review. Remember that things which may be clear with the book in front of you won't necessarily be obvious to a reader who has only the review to go on. Here are some questions which may help you formulate a non-fiction review:</p>
+        <ul>
+                <li>What is the book about? What is the scope?</li>
+                <li>How gracefully do you expect the content to age? If reviewing an updated / revised book (and you have access to the previous edition), in what ways do the revisions add to or detract from the book?</li>
+                <li>Is the title accurate? (i.e. Does <cite>Introduction to BingoWidgets For Novices</cite> serve as an adequate explanation of BingoWidgets to the average reader with no experience? Or do you find that in actuality, a working acquaintance is practically necessary to understand even the introduction?) This is usually worth noting only if the title is for some reason <em>not</em> a good match for the text -- for instance, if it seriously under- or overstates the book's content.</li>
+                <li>What level of experience is needed to well use the information in the book? Who will find it most useful? Is there an existing, canonical book which already covers the same ground?</li>
+                <li>Is the book readable as well as technically accurate? Is the language stilted, or natural? Are examples easy to follow?</li>
+                <li>Is the book illustrated? Are the illustrations appropriate and well executed?</li>
+                <li>Do any extras come with the book, like a CD-ROM of additional information or code samples? How helpful are they?</li>
+                <li>What's missing from the book? Would it benefit from illustrations, a better index, a final chapter on practical applications?</li>
+        </ul>
+        <p>If reviewing a computer book, begin by introducing things gently.<br></p>
+        <ul>
+                <li>What is a Relational Database Applications Framework Management System Defrobnobdicator, and what does one eat? Don't dive straight into jargon and buzzwords without stopping to say what they mean, or linking to good explanations on a site like WikiPedia if appropriate. Likewise, avoid eccentric spelling and capitalization unless there is a compelling reason to use it.</li>
+                <li>What hardware and software does the author assume readers will be dealing with? (If this book is about software, what operating systems are dealt with? If it's about hacking into a proprietary video game console, will it work only with certain production runs' output?) Don't assume that everyone is running Microsoft Windows on an Intel-based desktop computer, or Debian GNU/Linux on a solar-powered home-brewed wristwatch -- be as specific as makes sense.</li>
+                <li>If the book is about software, under what license or licenses is the software released? How much does it cost? (And are licensing and pricing consistent among supported platforms?)</li>
+                <li>Another thing to remember when reviewing software books: remember that Slashdot readers are interested in Free and Open Source software as well as the proprietary kind; be sure to address both of these domains. If your review covers a book about an expensive software package, mention at least in passing whether there are cheaper alternatives, especially Free / Open Source ones, and how well the expensive package justifies its price.</li>
+        </ul>For any book, make a point of explaining why you're reviewing it, your background in the topic or genre, and where else people might want to look if they are interested in the basic area the book addresses. Explaining your expectations going in will help ground your review; an OS X book "for newbies" could be perceived very differently by an OS X expert than by a genuine newbie, so don't praise or pan a book without specifying your context and expectations.<br>
+        <ul>
+                <li>Did you like previous works from the same author, publisher, or series?</li>
+                <li>Do you have a pressing workplace need for a certain type of computer system, and you bought an introductory book to help you implement it?</li>
+                <li>Did someone recommend the book to you?</li>
+        </ul>For a work of fiction, here are some starting points:
+        <ul>
+                <li>Where and when does the story take place? Does it cover an alternate universe, the present day, a span of thousands of years, a single day?</li>
+                <li>Is this book part of a series or otherwise tied to an existing fictional universe?</li>
+                <li>Is there an identifiable central conflict, or a complex of conflicts?</li>
+                <li>What is the tone and style of the narrative? Is it frightening? Clinical? Amusing? Scattered?</li>
+                <li>Do you like the characters? What about them makes them believeable or phoney, dynamic or static?</li>
+                <li>From whose viewpoint is the story told, and how does that affect the narrative?</li>
+                <li>Is the pace satisfying? Did you have to slog through any portion of the story?</li>
+                <li>Does the book remind you (or remind you too much) of others by the same author, or in the same genre?</li>
+                <li>Do any twists particularly inspire? Are there major gaps in the plot or storyline? How satisfying is the ending? (Don't give away <em>too</em> much, of course.)</li>
+        </ul>
+        <p><strong>Write away:</strong><br>
+        Once you've read the book and taken notes, writing a review may be the easiest part (providing you've read the instructions below on mechanics and style). Writing a Slashdot review should be <em>fun</em> -- and reading it should be, too. Write conversationally but seriously, as you might in a topical letter to an acquaintance who's asked you to send your impressions of a book.</p>
+        <p>At the same time, please be sure to write a <em>review</em>, not just a summary. Do explain the content of the book, but don't stop there: the whole point of a review is to offer insight on a book's worth, not just whether it has a chapter on interfacing with MySQL. Compare it to other books, explain whether this one met your expectations, criticize, parse.</p>
+        <p>By the same token, don't feel obligated to defend a poor book for its faultless page numbering and clean, unobstructed margins, or stretch to play up faults in a book you think is excellent in order to appear objective. A reader should know from your review your general impression of the book, and have an idea whether it's one they would benefit from or enjoy.</p>
+        <p>So write away. Fill your coffee mug, tea cup, or caffeine IV, tap out your review and submit: we assume book review submissions are intended for publication, and reserve the right to edit and publish them (as outlined below).</p>
+        <p>Here are some notes on style, mechanics, legalities, etc. to bear in mind -- this isn't as short a list as we'd like it to be, but reading these guidelines completely before you start writing will make it far more likely your review will run; reviews which ignore these guidelines may be declined without explanation.</p>
+        <ul>
+                <li>First, an important one: by submitting your review to Slashdot, you represent that the review is your own work, that it is original to Slashdot, and that it is unencumbered by any existing or anticipated contractual relationship; further, you are granting Slashdot permission to publish your review, including any editing the Slashdot editorial team finds necessary and appropriate. (Major edits will involve consultation by email or other means.) If you've reviewed the book elsewhere anywhere besides a personal home page (for instance, on Amazon) please be sure that your review for Slashdot is substantially different.</li>
+                <li>We can't publish original material without knowing a working email address for the submitter -- please supply your email address and phone number along with any other contact information you feel appropriate. (The URL to your homepage is not sufficient.) If you are on IRC or an instant-messaging system, and don't mind being contacted that way, it's appreciated if you supply that sort of information too. (Like "I'm frequently using IRC on EFnet, my nick is 'hamburglar,' and I can also be reached by shouting from the base of the redwood tree in which I reside / protest.") Please indicate your preference with regard to email privacy, too: do you want your email to appear publically? Appear, but obfuscated? Not appear at all? Feel free to include a note like [EDITORS, PLEASE NOTE -- Please only print my obfuscated address!] and we'll do our best to honor your wishes.
+                        <p>If you'd like to be on our list for occasional free books for review, include a U.S. mailing address as well.</p>
+                </li>
+                <li>Important: If you have a relationship (other than as an ordinary reader) to the author or publisher of a book you're reviewing, disclose that relationship. This means not only cases like "My brother, the author, has given me a million dollars to type this review, and is holding me at gunpoint, while dictating to me from the Amazon review he himself wrote," but also "I used to work at this book's publisher, and was a technical reviewer for this book's three chapters on networking," or "The author is a good friend of mine." Better to disclose more than you think necessary (it can always be edited out if sensible; we'll let you know if we think there's an inappropriate conflict of interest) than <em>less</em> than actually necessary. If in doubt, please speak up.</li>
+                <li>Plan to write a review of 800-1200 words. There is no formal length requirement, but reviews of much less than this frequently don't have enough information to let a reader know if a book is even worth investigating. (We ask many more submitter to lengthen their reviews than to shorten them.) You're free to write more than 1200 words, too -- some books demand it -- but be cautious that a longer review means more and better information, not just a higher word count. In the end, the book you're reviewing needs to be the guide. Remember, most readers will have less knowledge than you do in your area of expertise -- take some time to bring them up to speed.</li>
+                <li>Write in complete sentences, and use logically connected paragraphs; avoid making your review a list of annotated chapter titles. Don't feel obliged to give each chapter or section equal space in your review; group logically to avoid a formulaic plodding-through ("Chapter 1 covers X, while chapter 2 delves into Z, followed the the 3rd chapter on Q ..."). Address chapters in the way you feel most comfortable, but stepping duly through the Table of Contents is often not the best approach. Which chapters are most important? Are there chapters which are not adjacent but which cover similar topics?
+                        <p>Remember, the body of your review should not resemble a bulleted list. (Also, don't include the book's Table of Contents with your review; if it's available online and particularly informative, feel free to include a hyperlink to it, though.)</p>
+                        <p>Strive for correct spelling, grammar and punctuation in your review (and proofread with these in mind) but don't agonize over minutia. (Please run your review through a spell-checker before submitting, though.) If you're a hesitant writer, or if English is not your first language, it's a good idea to enlist a friend for advice and initial editing. One of the most common shortfalls in Slashdot reviews as submitted is a scarcity of commas to offset parenthetical phrases; don't be shy with commas.</p>
+                        <p>There are excellent style guides online; my favorite at the moment is <a href="http://www.andromeda.rutgers.edu/~jlynch/Writing/index.html">Jack Lynch's Guide to Grammar and Style</a>. If he contradicts me, go with him! Strunk and White's <cite>The Elements of Style</cite> is my favorite in-print book, and can be downright amusing.</p>
+                        <p>If extensive revisions are necessary, they can be handled by email, but the Web form is the right way to get the stories into Slashdot's system.</p>
+                </li>
+                <li>Try not to sound like a marketing campaign. That means:
+                        <ul>
+                                <li>Avoid cliches (this book, which is better than sliced bread, cuts through the clutter to break down to the nuts and bolts of the real brass tacks at the heart of the matter). Write plainly.</li>
+                                <li>Go easy on the exclamation marks and glib hyperbole ("This book belongs on every developer's desk!" sounds too much like "You're <em>not</em> going to pay a lot for this muffler!")</li>
+                                <li>Be cautious in general about suprelatives and strong adjectives. Don't say a book is "unsurpassed" or "the best available" on a given topic without doing some actual comparisons to likely contenders. Some other words of praise or derision are often used with too little backing evidence: rather than just calling a book "excellent," "sloppy," "boring," etc., provide concrete examples from the text that demonstrate these qualities.</li>
+                                <li>Watch your background. Even if each one is sensible by itself, too many adjectives in a sentence (or a review) makes it look like adjective soup. In particular, intensifiers like "very" and "extremely" in most cases can be excised to everyone's benefit.</li>
+                                <li>Rhetorical questions are fine in small doses, but not large ones. More than a few rhetorical questions in a review can make it sound breathless and silly.</li>
+                        </ul>
+                </li>
+                <li>Please use simple HTML to write your review. Use <strong>&lt;p&gt;</strong> tags to separate paragraphs, not <strong>&lt;br&gt;</strong> tags or doubled <strong>&lt;br&gt;</strong> tags. Use <strong>&lt;cite&gt;</strong> tags to distinguish book titles (<cite>Great Escapes: How I Made It Through Zelda Alive</cite>), including around abbreviated versions of the title (<cite>Escapes</cite>), rather than <strong>&lt;i&gt;</strong> tags, quotation marks, underlining, asterices, or other means.</li>
+                <li>Use quotation marks around chapter and section titles; remember that the <em>title</em> of chapter 5 could be "Applying Bingo to Wingo," but it's not "Chapter 5: Bingto to Wingo."</li>
+                <li>Word processors or Web-page creation programs frequently create incompatibilities which may not be apparent while submitting, like using "smart" (curly) quotes not all browsers can render, or inserting spaces without being told to. Suggestion: use a simple text editor, such as kedit, gedit, or nano (under a Free operating system), and Notepad or similar editor (under Microsoft Windows). Please keep a local copy for yourself -- Murphy's Law is alive and well. Don't use the submissions form as a text editor, since it makes a lousy (and lossy) one.</li>
+                <li>Use American-style ("illogical") quotation marks. That is, place commas and periods <em>inside</em> quotation marks.
+                        <blockquote>
+                                "Jump into the air again, but smiling," he whispered, twirling the baton menacingly.
+                        </blockquote><br>
+                </li>
+                <li>Hyphenate compound modifiers (with the general exception of words ending in "y"). Examples:
+                        <ul>
+                                <li>half-height layout (not "half height layout")</li>
+                                <li>step-by-step explanation (not "step by step explanation")</li>
+                                <li>15-page chapter (not "15 page chapter")</li>
+                                <li>Chicago-based chain of coffee shops (not "Chicago based chain of coffee shops")</li>
+                        </ul>
+                </li>
+                <li>Unless your Net access is severely limited, submit your review through the <a href="http://slashdot.org/submit.pl">Slashdot submissions page</a>. Select "Book Reviews" from the drop-down menu, and an appropriate topic from the list. Paste in your HTML text (select "HTML formatted" from the box under the text area), and then preview: you should see a form on the preview page for you to include the ISBN number, publisher, and other details which will help readers locate the book for themselves. Go ahead and tap that information in -- please don't include it separately in the body of your review.
+                        <p>You'll see there's a "Subject" field as well as one for labeled "Book Title." The reason that both are included is simply that some books' full titles (main title and subtitle together) are so long they won't fit into the space alloted on Slashdot for the review's headline. So, we've broken it down like this:</p>
+                        <blockquote>
+                                <ul>
+                                        <li><strong>Subject</strong> -- This space is for the book's <em>main</em> title. For instance, if you reviewed <cite>Going Critical: How The Nuclear Energy Lobby Has Hidden The Dangerous Truth About Giant Rats in Nevada</cite>, just type "Going Critical" into this space. Please don't label it further, as in "Book Review: Going Critical" or "Arthur Previnger's "Going Critical," or assign a creative title like "A Scathing Critique of the Nuclear Lobby's Rodent Program."</li>
+                                        <li><strong>Book Title</strong> -- This is the place to put in the long version (if there is one) of the book's title ("Going Critical: How The Nuclear Energy Lobby Has Hidden The Dangerous Truth About Giant Rats in Nevada") or to simply repeat the title if it's short to start with ("Jaws").</li>
+                                </ul>
+                        </blockquote>This form also asks for your rating: this rating should be an integer from 1 to 10, along the following scale:
+                        <blockquote>
+                                <ol>
+                                        <li><font size="-2">Execrable. Possibly fit for lining cages. Only a truly bad book should ever get a 1, and the review should justify this well.</font></li>
+                                        <li><font size="-2">A thoroughly bad book, but not perhaps quite so bad as to deserve a 1.</font></li>
+                                        <li><font size="-2">A "3" book might have flashes of good, but is one you're disappointed with in most respects</font></li>
+                                        <li><font size="-2">Mediocre; it may have some redeeming qualities, but they're overshadowed by the flaws, or is simply mis-aimed. A book might rank a "4" but still be worthwhile for particular readers.</font></li>
+                                        <li><font size="-2">Neither terrible nor terribly good, but with enough good points to make it useful for a fair number of readers.</font></li>
+                                        <li><font size="-2">Decent and useful (or enjoyable), but difficult to strongly recommend for reasons outlined in the review; run of the mill.</font></li>
+                                        <li><font size="-2">A good book; better than merely adequate, though not outstanding.</font></li>
+                                        <li><font size="-2">Very good.</font></li>
+                                        <li><font size="-2">Outstanding, but with enough shortcomings that a perfect score would be stretching things.</font></li>
+                                        <li><font size="-2">Excellent; unsurpassed in its niche, a classic work. A review which makes a book sound merely Good should not be paired with a "10" rating.</font></li>
+                                </ol>
+                        </blockquote>This number is rough, and will reflect the weight you assign to every aspect of the book -- from its title, to whether the index is helpful, to whether you think it will still be worth reading in 2, 5 or 50 years. What's most important is that this rating reflect the content of your review. Most books worth reading will cluster in the upper half of this range.
+                </li>
+                <li>The text of every Slashdot book review is broken into two sections: the first part, consisting of one paragraph of introductory text, appears on the home page; the remainder is shown along with this introduction when a reader clicks on the "Read More" link from there. Keep this in mind when formulating your review; don't be too mysterious or coy about the title, nature or subject of the book in an attempt to draw the reader in. Make sure your introductory text (the first 100-125 words, say) indicates at least the nature of the book and its title.
+                        <p>On the first reference, please use the book's title capitalized and punctuated as shown on the book's cover or frontispiece. (Use the subtitle, too, if it scans sensibly. Some subtitles are too unwieldy to include.) Some titles are long enough that on later references you'll find it easier to abbreviate quite a bit, but don't call <cite>Robert Wallywhumper: Hero of the Revolt On Penullbian Three</cite> merely <cite>Bob</cite> until you've prepared the reader for the transition.</p>
+                </li>
+                <li>Your review is intended for online viewing, so take advantage of that. Include relevant links to sites that cover the book itself, the author, or the topic. (Most technical books these days have at least a summary page online, and sometimes quite complex sites.) Authors' personal home pages are great, particularly when they show off more of their interests and writing. You may find links to interviews with the author, or (especially with fiction writers) full-blown fan sites.
+                        <p>If you include hyperlinks, make sure they're readable. The hyperlinks that appear in Slashdot stories appear not just in the running text, but in a column on the right hand side of the page for quick reference; they should be as comprehensible as reasonably possible in that context. For instance:</p>
+                        <ul>
+                                <li>"Check out the author's website at <a href="http://www.goobernuts.com/index.html">http://www.goobernuts.com/index.html</a>" should become</li>
+                                <li>"Check out the author's website at <a href="http://www.goobernuts.com/index.html">goobernuts.com</a>," or (even better)</li>
+                                <li>"Check out the <a href="http://www.goobernuts.com/index.html">author's website</a>."</li>
+                        </ul>
+                </li>
+                <li>Speaking of links, please do not include links in your reviews to online bookstores. Slashdot has an linking arrangement with Barnes &amp; Noble; that's why when bn.com carries a particular book, you'll see a link to it at the bottom of the review.
+                        <p>An exception: if a book is <em>not</em> available from bn.com, make sure your review addresses availability: is it available used? Only direct from the author or publisher, or only from non-U.S. foreign retailer? In this case, a link to an online bookstore that actually carries it is welcome. Lots of good books are not in wide circulation -- help out your readers by telling them where to look. (And if you had to hunt to find a book that everyone should know about, that's probably worth mentioning in your review.)</p>
+                </li>
+                <li>If you would like a small biographical note ("E.C. Ho also reviewed <cite>BingoWidgets 2.0</cite> and has been involved in the BingoWidget community since that fateful trip with Grandpa in 1973.") at the conclusion of your review, please include it. Don't make it <em>too</em> pluggy though, or we'll have to trim. Think 20 or so words; consider including a hyperlink to your own site if you'd like people to reach your C.V. or pet software project.<br></li>
+        </ul>
+        <p>Have fun, and don't hesitate to ask Tim if you have any questions!</p>
+        <p><strong>A note for publishers and authors:</strong><br>
+        Many of Slashdot's book reviews are unsolicited, and many reach our regular reviewers as review copies sent to Slashdot. We can't guarantee that a particular book will be reviewed (since we receive more books, and more reviews, than we can run), but review / advance copies are always welcome to:</p>
+        <center>
+                Slashdot / OSTG<br>
+                (Attn: Book Reviews)<br>
+                3515 Broad St.<br>
+                Dexter, MI 48130<br>
+        </center>
+
+<!--#include virtual="/slashfoot.inc"-->

@@ -18,6 +18,8 @@ __name__
 main
 __template__
 
+<!-- begin generated body -->
+
 [% PROCESS titlebar %]
 <div class="generalbody">
 	<div class="message">
@@ -41,6 +43,8 @@ __template__
 		Generated on [% time %]
 	</div>
 </div>
+
+<!-- end generated body -->
 
 __seclev__
 10000
