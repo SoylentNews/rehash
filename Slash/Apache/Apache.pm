@@ -586,6 +586,28 @@ sub IndexHandler {
 		return OK;
 	}
 
+	# Moved, 2009-05
+	if ($uri eq '/code.shtml') {
+		redirect('/faq/code.shtml', 301);
+		return DONE;
+	} elsif ($uri eq '/slashdottit.shtml') {
+		redirect('/faq/badges.shtml', 301);
+		return DONE;
+	} elsif ($uri eq '/book.review.guidelines.shtml') {
+                redirect('/faq/bookreviews.shtml', 301);
+                return DONE;
+        }
+
+	# These files are long-outdated and were removed, 2009-05
+	if ($uri =~ m{^/
+		(   authorguidelines | fool | rules | slashdot_techsay
+		  | slashguide | techjobs | anniversary_contest_rules
+		)\.shtml
+	}x) {
+		redirect('/faq/', 301);
+		return DONE;
+	}
+
 	# redirect to static if
 	# * not a user, nor a daypass holder,
 	# and

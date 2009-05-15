@@ -386,6 +386,10 @@ Redirect browser to URL.
 
 URL to redirect browser to.
 
+=item code
+
+HTTP code: 301 for permanent, 302 for temporary. Defaults to 302.
+
 =back
 
 =item Return value
@@ -401,17 +405,18 @@ The 'html-redirect' template block.
 =cut
 
 sub redirect {
-	my($url) = @_;
+	my($url, $code) = @_;
+	$code = 302 if !$code || $code != 301;
 	my $constants = getCurrentStatic();
 	$url = url2abs($url);
 	my $r = Apache->request;
 
 	$r->content_type($constants->{content_type_webpage} || 'text/html');
 	$r->header_out(Location => $url);
-	$r->status(302);
+	$r->status($code);
 	$r->send_http_header;
 
-	slashDisplay('html-redirect', { url => $url });
+	slashDisplay('html-redirect', { url => $url, code => $code });
 }
 
 #========================================================================

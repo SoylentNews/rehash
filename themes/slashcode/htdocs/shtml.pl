@@ -12,20 +12,21 @@ use Slash::Utility;
 
 sub main {
 	my($file_abs, $file_type) = getRequestedFileAndType();
+#print STDERR scalar(gmtime) . " shtml.pl file_abs='$file_abs' file_type='$file_type'\n";
 	if (!$file_abs) {
-print STDERR scalar(gmtime) . " shtml.pl no file_abs\n";
+		print STDERR scalar(gmtime) . " shtml.pl no file_abs\n";
 		emit404();
 		return;
 	}
 	my $file_text = getFileText($file_abs);
 	if (!$file_text) {
-print STDERR scalar(gmtime) . " shtml.pl no file_text for '$file_abs'\n";
+		print STDERR scalar(gmtime) . " shtml.pl no file_text for '$file_abs'\n";
 		emit404();
 		return;
 	}
 	my $parsed_data = parse($file_text, $file_type);
 	if (!$parsed_data) {
-print STDERR scalar(gmtime) . " shtml.pl no parsed_data for '$file_abs'\n";
+		print STDERR scalar(gmtime) . " shtml.pl no parsed_data for '$file_abs'\n";
 		emit404();
 		return;
 	}
@@ -41,19 +42,26 @@ sub getRequestedFileAndType {
 		return '';
 	}
 
+	my($file_rel, $type) = undef;
 	if ($uri =~ m{^/(\w+/\d\d/\d\d/\d\d/\d+\.shtml)}) {
 		# an article .shtml
-		my $file_rel = $1;
-		my $basedir = $constants->{basedir};
-		my $file_abs = catfile($basedir, $file_rel);
-		return($file_abs, 'article');
-	}
-	if ($uri =~ m{^/(faq[^?;]*?\.shtml)}) {
+		$file_rel = $1;
+		$type = 'article';
+	} elsif ($uri =~ m{^/(faq[^?;]*?\.shtml)}) {
 		# a FAQ entry
-		my $file_rel = $1;
+		$file_rel = $1;
+		$type = 'faq';
+	} elsif ($uri =~ m{^/(hof|cheesyportal|authors)\.shtml}) {
+		$file_rel = $uri;
+		$type = 'gen'; # "generated", with a custom HTML comment
+	} elsif ($uri =~ m{^/(about|topics|awards|supporters|prettypictures)\.shtml}) {
+		$file_rel = $uri;
+		$type = 'misc';
+	}
+	if ($file_rel && $type) {
 		my $basedir = $constants->{basedir};
 		my $file_abs = catfile($basedir, $file_rel);
-		return($file_abs, 'faq');
+		return($file_abs, $type);
 	}
 #	warn "unknown uri '$uri'";
 	return '';
@@ -84,6 +92,73 @@ sub parse {
 	return $text;
 }
 
+sub replace_header {
+	my($text, $options) = @_;
+
+	my $title = $options->{title} || '';
+	my $header_text = header($title, '', { Return => 1, Page => 'index2' });
+
+	my $new_header;
+	my $replace_anchor;
+	if ($options->{type} eq 'faq') {
+		$new_header = slashDisplay('header-faq',
+			{ header_text => $header_text },
+			{ Return => 1, Page => 'shtmlpl' });
+		$replace_anchor = '<!--#include virtual="/slashhead-gen-full.inc"-->';
+	} elsif ($options->{type} eq 'gen') {
+		$new_header = slashDisplay('header-misc',
+			{ header_text => $header_text },
+			{ Return => 1, Page => 'shtmlpl' });
+		$replace_anchor = '<!-- begin generated body -->';
+	} elsif ($options->{type} eq 'misc') {
+		$new_header = slashDisplay('header-misc',
+			{ header_text => $header_text },
+			{ Return => 1, Page => 'shtmlpl' });
+		$replace_anchor = '<!--#include virtual="/slashhead-gen-full.inc"-->';
+	} else {
+		$new_header = $header_text;
+		$replace_anchor = '<!--#include virtual="/slashhead-gen-full.inc"-->';
+	}
+
+	$text =~ s{\A.*$replace_anchor}{$new_header}s;
+#	my $repl = $text =~ s{\A.*$replace_anchor}{$new_header}s;
+#print STDERR scalar(gmtime) . " replace_header type=$options->{type} repl=$repl len=" . length($new_header) . "\n";
+	return $text;
+}
+
+sub replace_footer {
+	my($text, $options) = @_;
+
+	my $footer_text = footer({ Return => 1, Page => 'index2' });
+
+	my $new_footer;
+	my $replace_anchor;
+	if ($options->{type} eq 'faq') {
+		$new_footer = slashDisplay('footer-faq',
+			{ footer_text => $footer_text },
+			{ Return => 1, Page => 'shtmlpl' });
+		$replace_anchor = '<!--#include virtual="/slashfoot.inc"-->';
+	} elsif ($options->{type} eq 'gen') {
+		$new_footer = slashDisplay('footer-hof',
+			{ footer_text => $footer_text },
+			{ Return => 1, Page => 'shtmlpl' });
+		$replace_anchor = '<!-- end generated body -->';
+	} elsif ($options->{type} eq 'misc') {
+		$new_footer = slashDisplay('footer-misc',
+			{ footer_text => $footer_text },
+			{ Return => 1, Page => 'shtmlpl' });
+		$replace_anchor = '<!--#include virtual="/slashfoot.inc"-->';
+	} else {
+		$new_footer = '';
+		$replace_anchor = '<!--#include virtual="/slashfoot.inc"-->';
+	}
+
+	$text =~ s{$replace_anchor.*\Z}{$new_footer}s;
+#	my $repl = $text =~ s{$replace_anchor.*\Z}{$new_footer}s;
+#print STDERR scalar(gmtime) . " replace_footer type=$options->{type} repl=$repl len=" . length($new_footer) . "\n";
+	return $text;
+}
+
 #sub expand_includes {
 #	my($text) = @_;
 #	# If we wanted to handle any of the #include's that
@@ -104,43 +179,6 @@ sub parse {
 #	my $file_abs = catfile($basedir, $include_file);
 #	return getFileText($file_abs);
 #}
-
-sub replace_header {
-	my($text, $options) = @_;
-
-	my $title = $options->{title} || '';
-	my $header_text = header($title, '', { Return => 1, Page => 'index2' });
-
-	my $new_header;
-	if ($options->{type} eq 'faq') {
-		$new_header = slashDisplay('header-faq',
-			{ header_text => $header_text },
-			{ Return => 1, Page => 'shtmlpl' });
-	} else {
-		$new_header = $header_text;
-	}
-
-	$text =~ s{\A.*<!--#include\s+virtual="/slashhead-gen-full.inc"-->}{$new_header}s;
-	return $text;
-}
-
-sub replace_footer {
-	my($text, $options) = @_;
-
-	my $footer_text = footer({ Return => 1, Page => 'index2' });
-
-	my $new_footer;
-	if ($options->{type} eq 'faq') {
-		$new_footer = slashDisplay('footer-faq',
-			{ footer_text => $footer_text },
-			{ Return => 1, Page => 'shtmlpl' });
-	} else {
-		$new_footer = '';
-	}
-
-	$text =~ s{<!--#include\s+virtual="/slashfoot.inc"-->.*\Z}{$new_footer}s;
-	return $text;
-}
 
 createEnvironment();
 main();

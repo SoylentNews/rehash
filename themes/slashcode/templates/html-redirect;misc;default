@@ -1,9 +1,10 @@
 __section__
 default
 __description__
-Text composing a redirect body; this will be sent after (in addition to) the HTTP 302 header request for the browser to be redirected, and should only be seen by browsers that do not understand the redirection request
+Text composing a redirect body; this will be sent after (in addition to) the HTTP header request for the browser to be redirected, and should only be seen by browsers that do not understand the redirection request
 
 * url = URL to redirect to
+* code = HTTP redirect code, 301 for permanent, 302 for temporary
 __title__
 
 __page__
@@ -14,7 +15,8 @@ __name__
 html-redirect
 __template__
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<html><head><title>302 Moved</title></head><body>
+[% code = 302 IF !code || code != 301 %]
+<html><head><title>[% code %] Moved</title></head><body>
 <p>You really want to be on <a href="[% url %]">[% url %]</a> now.</p>
 </body>
 

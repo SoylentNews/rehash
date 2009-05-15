@@ -2,6 +2,9 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# This Apache handler massages existing .shtml files to give them a
+# modern (2009) header and footer.
+
 package Slash::Apache::Shtml;
 
 use strict;
@@ -14,10 +17,7 @@ use Slash::Utility;
 use vars qw($VERSION @ISA);
 @ISA = qw(DynaLoader);
 $VERSION = '2.005';
-#bootstrap Slash::Apache::Shtml $VERSION;
 
-# Of course renaming requires editing a .conf file (see
-# bin/install-slashsite PerlTransHandler).
 sub handler {
 	my($r) = @_;
 
@@ -29,8 +29,10 @@ sub handler {
 	# Only .shtml URLs are processed by this handler.
 	return DECLINED unless $uri =~ m{\.shtml(\?|$)};
 
-	# And right now, only /faq/ is processed by this handler.
-	return DECLINED unless $uri =~ m{^/faq};
+	# And right now, only a few of them.
+	return DECLINED unless
+		   $uri =~ m{^/faq}
+		|| $uri =~ m{^/(hof|about|moderation|cheesyportal|authors|awards|supporters|prettypictures)\.shtml};
 
 	my $constants = getCurrentStatic();
 	$r->args("uri=$uri");
