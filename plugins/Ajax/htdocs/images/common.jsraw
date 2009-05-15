@@ -875,7 +875,7 @@ $('#firehoselist > div.fhitem').
 
 $('#firehoselist a.more').
 	live('mousedown', function(){ // pos_logger
-		var $item=$(this).closest('.fhitem'), pos=$FHL.children().index(item)+1;
+		var $item=$(this).closest('.fhitem'), pos=$FHL.children().index($item)+1;
 		this.href += (this.search ? '&' : '?') + 'art_pos=' + pos;
 		return true;
 	});
