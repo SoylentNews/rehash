@@ -113,8 +113,9 @@ __template__
         </td>
         </tr>
 </table>
-<br>
+<p class="buttons">
 <input type="button" value="Save" onclick="saveModalPrefs()">
+</p>
 </form>
 __seclev__
 500
