@@ -534,17 +534,14 @@ sub IndexHandler {
 
 				$r->args(join('&',@ops));
 				if ($rss) {
-					print STDERR "FH URL\n";
 					$r->uri('/firehose.pl');
 				} else {
-					print STDERR "I2 URL\n";
 					$r->uri('/index2.pl');
 				}
 				return OK;
 			}
 		}
 	}
-	print STDERR "AFTER CHECK\n";
 	
 	# Match /datatype/id /story/sid or datatype/id/Item-title syntax
 	if ($uri =~ /^\/(journal|submission|comment|story)\/(rss\/)?(\d+(?:\/\d+\/\d+\/\d+)?)\/?(\w+|\-)*\/?/) {
