@@ -851,8 +851,14 @@ var $FHL=$any('firehoselist');
 $.browser.chrome = $.browser.safari && /chrome/.test( navigator.userAgent.toLowerCase() );
 
 $('#fhsearch').show();
-firehose_init_tag_ui();
-$('div.fhroot').click(page_click_handler);
+
+var $roots = $('div.fhroot');
+if ( $roots.length ) {
+	firehose_init_tag_ui();
+	$roots.click(page_click_handler);
+} else {
+	firehose_init_tag_ui($('div.article').click(page_click_handler));
+}
 
 // .live() binds these handlers to all current _and_ future firehose items
 $('#firehoselist > div.fhitem').
