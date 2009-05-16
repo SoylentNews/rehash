@@ -54,7 +54,7 @@ sub getRequestedFileAndType {
 	} elsif ($uri =~ m{^/(hof|cheesyportal|authors)\.shtml}) {
 		$file_rel = $uri;
 		$type = 'gen'; # "generated", with a custom HTML comment
-	} elsif ($uri =~ m{^/(about|topics|awards|supporters|prettypictures)\.shtml}) {
+	} elsif ($uri =~ m{^/(about|topics|awards|supporters|prettypictures|moderation)\.shtml}) {
 		$file_rel = $uri;
 		$type = 'misc';
 	}
