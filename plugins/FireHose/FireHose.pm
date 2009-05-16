@@ -136,7 +136,7 @@ sub deleteHideFireHoseSection {
 	if ($cur_section->{uid} == $user->{uid}) {
 		$self->sqlDelete("firehose_section", "fsid=$cur_section->{fsid}");
 	} elsif ($cur_section->{uid} == 0) {
-		$self->setFireHoseSectionPrefs($id, { 
+		$self->setFireHoseSectionPrefs($id, {
 			display 	=> "no",
 			section_name 	=> $cur_section->{section_name},
 			section_filter 	=> $cur_section->{section_filter},
@@ -174,8 +174,6 @@ sub setFireHoseSectionPrefs {
 			$self->sqlInsert("firehose_section_settings", $data);
 		}
 	}
-
-	
 }
 
 sub setFireHoseViewPrefs {
@@ -202,7 +200,7 @@ sub setFireHoseViewPrefs {
 }
 
 sub removeUserPrefsForView {
-	my ($self, $id) = @_;
+	my($self, $id) = @_;
 	my $user = getCurrentUser();
 	return if $user->{is_anon};
 
@@ -213,15 +211,14 @@ sub removeUserPrefsForView {
 }
 
 sub removeUserSections {
-	my ($self, $id) = @_;
+	my($self, $id) = @_;
 	my $user = getCurrentUser();
 	return if $user->{is_anon};
-	
+
 	my $uid_q = $self->sqlQuote($user->{uid});
 	$self->sqlDelete("firehose_section_settings", "uid=$uid_q");
 	$self->sqlDelete("firehose_section", "uid=$uid_q");
 	$self->setUser($user->{uid}, { firehose_default_section => undef });
-	
 }
 
 sub getFireHoseSectionsMenu {
@@ -250,10 +247,10 @@ sub getFireHoseSectionsMenu {
 	foreach (@$css) {
 		push @{$css_hr->{$_->{fsid}}}, $_;
 	}
-	
+
 	my $sections = $self->sqlSelectAllHashrefArray(
 		"firehose_section.*, firehose_section_settings.display AS user_display, firehose_section_settings.section_name as user_section_name, firehose_section_settings.section_filter AS user_section_filter, firehose_section_settings.view_id AS user_view_id, firehose_section_settings.section_color AS user_section_color",
-		"firehose_section LEFT JOIN firehose_section_settings on firehose_section.fsid=firehose_section_settings.fsid AND firehose_section_settings.uid=$uid_q", 
+		"firehose_section LEFT JOIN firehose_section_settings on firehose_section.fsid=firehose_section_settings.fsid AND firehose_section_settings.uid=$uid_q",
 		"firehose_section.uid in (0,$uid_q) $fsid_limit",
 		"ORDER BY uid, ordernum, section_name"
 	);
@@ -270,7 +267,7 @@ sub getFireHoseSectionsMenu {
 		$_->{data}{viewname} 	= $viewname;
 		$_->{data}{color}	= $_->{user_section_color} ? $_->{user_section_color} : $_->{section_color};
 
-		if ($_->{skid} && ((!$_->{user_section_filter}) || ($_->{section_filter} eq $_->{user_section_filter}))  ) {
+		if ( $_->{skid} && ((!$_->{user_section_filter}) || ($_->{section_filter} eq $_->{user_section_filter})) ) {
 			if ($css_hr->{$_->{fsid}}) {
 				foreach my $css(@{$css_hr->{$_->{fsid}}}) {
 					$_->{data}{skin} .= getData('alternate_section_stylesheet', { css => $css, }, 'firehose');
@@ -285,7 +282,7 @@ sub getFireHoseSectionsMenu {
 		my %sections_hash = map { $_->{fsid}  => $_ } @$sections;
 		my @ordered_sections;
 		foreach (split /,/, $user->{firehose_section_order}) {
-			if($sections_hash{$_}) {
+			if ($sections_hash{$_}) {
 				push @ordered_sections, delete $sections_hash{$_};
 			}
 		}
@@ -347,7 +344,7 @@ sub ajaxNewFireHoseSection {
 	};
 
 	my $fsid = $fh->createFireHoseSection($data);
-	
+
 	my $data_dump = {};
 
 	if ($fsid) {
@@ -385,11 +382,11 @@ sub getCSSForSkid {
 	my $form = getCurrentForm();
 	my $secure = apacheConnectionSSL();
 
-	$layout = defined $layout ? $layout: 
+	$layout = defined $layout ? $layout:
 		defined $form->{layout} ? $form->{layout} : "yui";
-	
+
 	my $layout_q = $self->sqlQuote($layout);
-	
+
 	my $css = [];
 	if ($skid) {
 		my $skid_q = $self->sqlQuote($skid);
@@ -476,7 +473,7 @@ sub getFireHoseSection {
 	my $user = getCurrentUser();
 	my $uid_q = $self->sqlQuote($user->{uid});
 	my $fsid_q = $self->sqlQuote($fsid);
-	
+
 	return $self->sqlSelectHashref("*","firehose_section","uid in(0,$uid_q) AND fsid=$fsid_q");
 }
 
@@ -496,7 +493,6 @@ sub getViewUserPrefs {
 	my $id_q = $self->sqlQuote($id);
 	my $uid_q = $self->sqlQuote($user->{uid});
 	return $self->sqlSelectHashref("*", "firehose_view_settings", "uid=$uid_q AND id=$id_q");
-	
 }
 
 {
@@ -538,7 +534,7 @@ sub createUpdateItemFromComment {
 	my($self, $cid) = @_;
 	my $comment = $self->getComment($cid);
 	my $text = $self->getCommentText($cid);
-	
+
 	my $item = $self->getFireHoseByTypeSrcid("comment", $cid);
 	my $fhid;
 
@@ -549,7 +545,6 @@ sub createUpdateItemFromComment {
 		$fhid = $self->createItemFromComment($cid);
 	}
 	return $fhid;
-	
 }
 
 sub createItemFromComment {
@@ -1005,7 +1000,7 @@ my %sphinx_orderby = (
 	neediness  => 'neediness'
 );
 
-# SPH_SORT_RELEVANCE ATTR_DESC ATTR_ASC TIME_SEGMENTS EXTENDED EXPR 
+# SPH_SORT_RELEVANCE ATTR_DESC ATTR_ASC TIME_SEGMENTS EXTENDED EXPR
 my %sphinx_orderdir = (
 	ASC        => SPH_SORT_ATTR_ASC,
 	DESC       => SPH_SORT_ATTR_DESC
@@ -1408,11 +1403,11 @@ sub getFireHoseEssentials {
 					}
 					push @sphinxse_opts, $opt_str;
 				}
-	
+
 				$qoptions->{orderdir} = $options->{orderdir} eq 'ASC' ? 'attr_asc' : 'attr_desc';
 				push @sphinxse_opts, "sort=$qoptions->{orderdir}:$qoptions->{orderby}";
 				push @sphinxse_opts, "mode=$sphinx->{mode}" if $sphinx->{mode};
-	
+
 				if (@$sphinx_tables > 1 || @$sphinx_opts_multi) {
 					push @sphinxse_opts, "limit=$qoptions->{maxmatches}";
 					push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}";
@@ -1421,18 +1416,18 @@ sub getFireHoseEssentials {
 					push @sphinxse_opts, "limit=$qoptions->{fetch_size}";
 					push @sphinxse_opts, "maxmatches=$qoptions->{maxmatches}" if defined $qoptions->{maxmatches};
 				}
-	
+
 				my $query = $self->sqlQuote(join ';', @$sphinx_terms, @sphinxse_opts);
 				my $swhere = join ' AND ', @$sphinx_where;
 				$swhere = " AND $swhere" if $swhere;
 				my $stables = join ',', @$sphinx_tables;
-	
+
 				$sphinx_ar = $sphinxdb->sqlSelectColArrayref(
 					'sphinx_search.globjid',
 					$stables, "query=$query$swhere", $sphinx_other,
 					{ sql_no_cache => 1 });
 				$sphinx_stats = $sphinxdb->getSphinxStats;
-	
+
 			} else {
 				$sph->ResetFilters; # for multi mode
 				for my $opt (@$sphinx_opts, @$multi) {
@@ -1443,7 +1438,7 @@ sub getFireHoseEssentials {
 						$sph->SetFilterRange(@$opt);
 					}
 				}
-	
+
 				my $sresults = $sph->Query(join(' ', @$sphinx_terms));
 				if (!defined $sresults) {
 					my $err = $sph->GetLastError() || '';
@@ -1464,7 +1459,7 @@ sub getFireHoseEssentials {
 					'time'        => $sresults->{'time'},
 					words         => $sresults->{words},
 				};
-	
+
 				# If $sph_check_sql was set, it means there are further
 				# restrictions that must be checked in MySQL.  What we
 				# got back is a potentially quite large list of globjids
@@ -1473,7 +1468,7 @@ sub getFireHoseEssentials {
 				# whole list at once instead of repeated splices, and
 				# if we end up with not enough, don't repeat the Sphinx
 				# query with SetLimits(offset)).
-	
+
 				if ($sphinx->{check_sql} && @$sphinx_ar) {
 					my $in = 'IN (' . join(',', @$sphinx_ar) . ')';
 					my @sph_tables = grep { $_ ne 'sphinx_search' } @$sphinx_tables;
@@ -1563,7 +1558,7 @@ sub getFireHoseEssentials {
 
 	my $count = $sphinx_stats->{total_found};
 	my $sphinx_stats_tf = $sphinx_stats->{total_found};
-	$results->{records_pages} ||= ceil($count / $page_size );
+	$results->{records_pages} ||= ceil($count / $page_size);
 	$results->{records_page}  ||= (int(($options->{offset} || 0) / $options->{limit}) + 1) || 1;
 	my $future_count = $count - $options->{limit} - ($options->{offset} || 0);
 
@@ -1604,7 +1599,7 @@ sub getNextDayAndCount {
 	my $rows = $self->sqlSelectAllHashrefArray("firehose.id", $tables, $where, $other);
 	my $row_num = @$rows;
 	my $day_count = $row_num;
-	
+
 	if ($row_num == 1 && !$other) {
 		$day_count = $rows->[0]->{'count(*)'};
 	}
@@ -2031,7 +2026,7 @@ sub rejectItem {
 }
 
 sub reject {
-	my ($self, $id) = @_;
+	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $tags = getObject("Slash::Tags");
@@ -2108,7 +2103,7 @@ sub ajaxRemoveUserTab {
 sub genSetOptionsReturn {
 	my($slashdb, $constants, $user, $form, $options, $opts) = @_;
 	my $data = {};
-	
+
 	my $firehose = getObject("Slash::FireHose");
 	my $views = $firehose->getUserViews({ tab_display => "yes"});
 	$data->{html}->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}, views => $views  }, { Return => 1});
@@ -2334,11 +2329,11 @@ sub ajaxFireHoseGetUpdates {
 					my $the_user  	= $slashdb->getUser($item->{uid});
 					$item->{atstorytime} = '__TIME_TAG__';
 					my $title = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
-					
+
 					my $atstorytime;
 					$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
 					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
-					
+
 					$title_js .= "\$('\#title-" . $_->{id} . "').html(" . Data::JavaScript::Anon->anon_dump($title) . ");\n";
 					$title_js .= "inject_reasons('#firehose-" . $_->{id} . "')";
 
@@ -2399,7 +2394,7 @@ sub ajaxFireHoseGetUpdates {
 
 	my $target_pos = 100;
 	if (scalar (keys %$next_to_old) == 1) {
-		my ($key) = keys %$next_to_old;
+		my($key) = keys %$next_to_old;
 		$target_pos = $pos->{$key};
 
 	}
@@ -2471,7 +2466,7 @@ sub ajaxFireHoseGetUpdates {
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{filter_text} = "Filtered to ".strip_literal($opts->{color})." '".strip_literal($opts->{fhfilter})."'";
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
-	$html->{itemsreturned} = getData("noitems", { options => $opts }, 'firehose') if $num_items == 0; 
+	$html->{itemsreturned} = getData("noitems", { options => $opts }, 'firehose') if $num_items == 0;
 #	$html->{firehose_more} = getData("firehose_more_link", { options => $opts, future_count => $future_count, contentsonly => 1, day_label => $day_label, day_count => $day_count }, 'firehose');
 
 	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
@@ -2631,7 +2626,7 @@ sub ajaxGetAdminExtras {
 		$num_with_ipid = $slashdb->countSubmissionsFromIPID($item->{ipid});
 		$accepted_from_ipid = $slashdb->countSubmissionsFromIPID($item->{ipid}, { del => 2});
 	}
-	
+
 	if ($user->{is_admin}) {
 		$firehose->setFireHoseSession($item->{id});
 	}
@@ -2658,7 +2653,7 @@ sub ajaxGetAdminExtras {
 		subnotes_ref			=> $subnotes_ref,
 		similar_stories			=> $similar_stories,
 	}, { Return => 1 });
-	
+
 	my $atstorytime;
 	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
 	$byline =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
@@ -2818,8 +2813,8 @@ sub genFireHoseMCDKey {
 	if ($mcd
 		&& !$opts->{nocolors}
 		&& !$opts->{nothumbs} && !$options->{vote}
-		&& !$form->{skippop} 
-		&& !$user->{is_admin} 
+		&& !$form->{skippop}
+		&& !$user->{is_admin}
 		&& !$opts->{view_mode}
 		&& !$opts->{featured}) {
 		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id:$index";
@@ -2833,7 +2828,7 @@ sub genFireHoseMCDAllKeys {
 	return [ ] if !$constants->{firehose_mcd_disp};
 	my $keys = [ ];
 	my $mcd = $self->getMCD();
-	
+
 	if ($mcd) {
 		foreach my $mode (qw(full fulltitle)) {
 			foreach my $index (qw(0 1)) {
@@ -2861,7 +2856,7 @@ sub dispFireHose {
 		}
 	}
 
-	$item->{atstorytime} = "__TIME_TAG__"; 
+	$item->{atstorytime} = "__TIME_TAG__";
 
 	if (!$retval) {  # No cache hit
 		$retval = slashDisplay('dispFireHose', {
@@ -2896,7 +2891,7 @@ sub dispFireHose {
 		vote 		=> $options->{vote},
 		options 	=> $options->{options},
 		item 		=> $item,
-		skipvote 	=> 1 
+		skipvote 	=> 1
 	}, { Return => 1, Page => 'firehose'});
 
 	my $atstorytime;
@@ -2923,11 +2918,12 @@ sub getMemoryForItem {
 		my $match = $memory->{submatch};
 
 		if ($item->{email} =~ m/$match/i ||
-		    $item->{name}  =~ m/$match/i ||
-		    $item->{title}  =~ m/$match/i ||
-		    $item->{ipid}  =~ m/$match/i ||
-		    $item->{introtext} =~ m/$match/i ||
-		    $url =~ m/$match/i) {
+			$item->{name}  =~ m/$match/i ||
+			$item->{title}  =~ m/$match/i ||
+			$item->{ipid}  =~ m/$match/i ||
+			$item->{introtext} =~ m/$match/i ||
+			$url =~ m/$match/i
+		) {
 			push @$subnotes_ref, $memory;
 		}
 	}
@@ -2973,7 +2969,7 @@ sub getOptionsValidator {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	
+
 	my $colors = $self->getFireHoseColors();
 	my %categories = map { ($_, $_) } (qw(hold quik),
 		(ref $constants->{submit_categories}
@@ -3021,7 +3017,7 @@ sub getGlobalOptionDefaults {
 		usermode	=> 0,
 	};
 
-	return $defaults;	
+	return $defaults;
 }
 
 sub getAndSetGlobalOptions {
@@ -3050,10 +3046,9 @@ sub getAndSetGlobalOptions {
 			}
 
 			# if we haven't set the option, pull from saved user options
-			if(!$set_opt) { 
+			if (!$set_opt) {
 				$options->{$_} = $user->{"firehose_$_"} if defined $user->{"firehose_$_"};
 			}
-			
 		}
 		if (keys %$set_options > 0) {
 			$self->setUser($user->{uid}, $set_options);
@@ -3063,7 +3058,7 @@ sub getAndSetGlobalOptions {
 }
 
 sub getShortcutUserViews {
-	my ($self) = @_;
+	my($self) = @_;
 	return $self->sqlSelectAllHashref("viewname","viewname","firehose_view", "uid=0");
 }
 
@@ -3071,18 +3066,18 @@ sub getUserViews {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
 
-	my ($where, @where);
+	my($where, @where);
 
 	my @uids = (0);
 
-	if($options->{tab_display}) {
+	if ($options->{tab_display}) {
 		push @where, "tab_display=" . $self->sqlQuote($options->{tab_display});
 		if ($user->{is_anon}) {
 			push @where, "viewname not like 'user%'";
 		}
 	}
-	
-	if($options->{editable}) {
+
+	if ($options->{editable}) {
 		push @where, "editable=" . $self->sqlQuote($options->{editable});
 	}
 
@@ -3101,7 +3096,7 @@ sub getUserViews {
 	}
 	return $items;
 }
-	
+
 sub getUserViewById {
 	my($self, $id, $options) = @_;
 	my $user = getCurrentUser();
@@ -3122,7 +3117,6 @@ sub getUserViewByName {
 	return $uview if $uview;
 
 	my $sview =  $self->getSystemViewByName($name);
-	
 
 	return $sview;
 }
@@ -3135,7 +3129,7 @@ sub getSystemViewByName {
 }
 
 sub determineCurrentSection {
-	my ($self) = @_;
+	my($self) = @_;
 	my $gSkin = getCurrentSkin();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -3144,11 +3138,11 @@ sub determineCurrentSection {
 	my $section;
 
 	# XXX what to do if fhfilter is specified?
-	
+
 	if ($form->{section}) {
 		$section = $self->getFireHoseSection($form->{section});
 	}
-	
+
 	if (!$section && !$section->{fsid}) {
 		if ($user->{firehose_default_section} && $gSkin->{skid}== $constants->{mainpage_skid}) {
 			$section = $self->getFireHoseSection($user->{firehose_default_section});
@@ -3187,7 +3181,7 @@ sub applyUserSectionPrefs {
 	}
 	return $section;
 }
-	
+
 sub applyViewOptions {
 	my($self, $view, $options, $second) = @_;
 	my $gSkin = getCurrentSkin();
@@ -3210,7 +3204,7 @@ sub applyViewOptions {
 	my $validator = $self->getOptionsValidator();
 
 	if ($view->{useparentfilter} eq "no") {
-		if(!$second || ($form->{viewchanged} || $form->{sectionchanged})) {
+		if (!$second || ($form->{viewchanged} || $form->{sectionchanged})) {
 			$options->{fhfilter} = $viewfilter;
 			$options->{view_filter} = $viewfilter;
 			$options->{base_filter} = $viewfilter;
@@ -3224,7 +3218,7 @@ sub applyViewOptions {
 		$options->{fhfilter} = "$options->{base_filter}";
 		$options->{view_filter} = $viewfilter;
 	}
-	
+
 	if ($view->{use_exclusions} eq "yes") {
 		if ($user->{story_never_author}) {
 			my $author_exclusions;
@@ -3238,15 +3232,15 @@ sub applyViewOptions {
 			my $base_ops = $self->splitOpsFromString($options->{base_filter});
 			my %base_ops = map { $_ => 1 } @$base_ops;
 			my $ops = $self->splitOpsFromString($user->{firehose_exclusions});
-			my @fh_exclusions; 
-			
+			my @fh_exclusions;
+
 			my $skins = $self->getSkins();
 			my %skin_nexus = map { $skins->{$_}{name} => $skins->{$_}{nexus} } keys %$skins;
 
 			foreach (@$ops) {
 				my($not, $op) = $_ =~/^(-?)(.*)$/;
 				next if $base_ops{$op};
-				
+
 				if ($validator->{type}{$_}) {
 					push @fh_exclusions, "-$op";
 				} elsif ($skin_nexus{$_}) {
@@ -3278,7 +3272,7 @@ sub applyViewOptions {
 	if ($user->{is_admin}) {
 		foreach (qw(usermode admin_unsigned)) {
 			$options->{$_} = $view->{$_} eq "yes" ? 1 : 0;
-		}		
+		}
 	}
 	return $options;
 }
@@ -3309,7 +3303,7 @@ sub genUntitledTab {
 		if ($options->{tab} eq $tab->{tabname}) {
 			$tab->{active} = 1;
 		}
-		
+
 		if ($equal) {
 			$tab_match = 1;
 		}
@@ -3325,7 +3319,7 @@ sub genUntitledTab {
 		}
 		$user_tabs = $self->getUserTabs();
 		foreach (@$user_tabs) {
-			$_->{active} = 1 if $_->{tabname} eq "untitled" 
+			$_->{active} = 1 if $_->{tabname} eq "untitled";
 		}
 	}
 	return $user_tabs;
@@ -3424,7 +3418,7 @@ sub serializeOptions {
 	for my $opt (@options) {
 		next unless defined $options->{$opt};
 		my $ref = ref $options->{$opt};
-		
+
 		if ($ref eq 'ARRAY') {
 			# normalize sort
 			if ($stringsort{$opt}) {
@@ -3467,12 +3461,12 @@ sub getAndSetOptions {
 
 	my $mainpage = 0;
 
-	my ($f_change, $v_change, $t_change, $s_change, $search_trigger);
+	my($f_change, $v_change, $t_change, $s_change, $search_trigger);
 
 	if (!$opts->{initial}) {
 		($f_change, $v_change, $t_change, $s_change, $search_trigger) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged}, $form->{sectionchanged}, $form->{searchtriggered});
 	}
-	
+
 	my $validator = $self->getOptionsValidator();
 
 	$opts 	        ||= {};
@@ -3494,11 +3488,11 @@ sub getAndSetOptions {
 			$form->{tab} = '';
 			$opts->{view} = '';
 			$form->{view} ||= 'search';
-			
+
 		} else {
-		
+
 			my $section = $self->determineCurrentSection();
-		
+
 			if ($section && $section->{fsid}) {
 				$options->{sectionref} = $section;
 				$options->{section} = $section->{fsid};
@@ -3509,9 +3503,9 @@ sub getAndSetOptions {
 				$options->{color} = $section->{section_color};
 			}
 
-		
+
 			# Jump to default view as necessary
-	
+
 			if (!$opts->{view} && !$form->{view}) {
 				my $view;
 				if ($section) {
@@ -3525,7 +3519,7 @@ sub getAndSetOptions {
 				}
 			}
 		}
-		
+
 		my $view;
 
 		if ($opts->{view} || $form->{view}) {
@@ -3548,13 +3542,13 @@ sub getAndSetOptions {
 		# handle non-initial pageload
 		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
 		$options->{base_filter} = $form->{fhfilter} if defined $form->{fhfilter};
-		
+
 		if (($f_change || $search_trigger) && defined $form->{fhfilter}) {
 			my $fhfilter = $form->{fhfilter};
 
 			$options->{fhfilter} = $fhfilter;
 			$options->{base_filter} = $fhfilter;
-			
+
 			if ($search_trigger) {
 				$form->{view} = 'search';
 			}
@@ -3576,7 +3570,7 @@ sub getAndSetOptions {
 				} else {
 					$opts->{view} = "stories";
 				}
-				
+
 				$options->{viewref} = $self->getUserViewByName($opts->{view});
 
 				$options = $self->applyViewOptions($options->{viewref}, $options, 1);
@@ -3584,10 +3578,10 @@ sub getAndSetOptions {
 			}
 		} elsif ($form->{view}) {
 			my $view = $self->getUserViewByName($form->{view});
-			if($view) {
+			if ($view) {
 				$options->{view} = $form->{view};
 				$options->{viewref} = $view;
-			} 
+			}
 		}
 
 		$options = $self->applyViewOptions($options->{viewref}, $options, 1) if !$view_applied && $options->{viewref};
@@ -3599,12 +3593,10 @@ sub getAndSetOptions {
 		my $addfilter = $form->{addfilter};
 		$addfilter =~ s/[^a-zA-Z0-9]//g;
 		$options->{base_filter} .= " $addfilter" if $addfilter;
-	
 	}
 	$options->{base_filter} =~ s/{nickname}/$user->{nickname}/;
 	$options->{fhfilter} = $options->{base_filter};
 
-	
 
 	my $fhfilter = $options->{base_filter} . " " . $options->{view_filter};
 
@@ -3614,17 +3606,17 @@ sub getAndSetOptions {
 
 	if (defined $form->{nocommentcnt} && $form->{setfield}) {
 		$options->{nocommentcnt} = $form->{nocommentcnt} ? 1 : 0;
-	} 
-	
+	}
+
 	my $mode = $options->{mode};
 
 	if (!$s_change && !$v_change && !$search_trigger) {
 		$mode = $form->{mode} || $options->{mode} || '';
 	}
-	
+
 	my $pagesize;
 	$pagesize = $options->{pagesize} = $validator->{pagesizes}{$options->{pagesize}} ? $options->{pagesize} : "small";
-	
+
 	if (!$s_change && !$v_change && !$search_trigger) {
 		$options->{mode} = $s_change ? $options->{mode} : $mode;
 	}
@@ -3643,7 +3635,7 @@ sub getAndSetOptions {
 
 		if (defined $form->{startdate}) {
 			if ($form->{startdate} =~ /^\d{8}$/) {
-				my ($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
+				my($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
 				if ($y) {
 					$options->{startdate} = "$y-$m-$d";
 				}
@@ -3654,7 +3646,7 @@ sub getAndSetOptions {
 		$options->{startdate} = "" if !$options->{startdate};
 		if ($form->{issue}) {
 			if ($form->{issue} =~ /^\d{8}$/) {
-				my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
+				my($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
 				$options->{startdate} = "$y-$m-$d";
 				$options->{issue} = $form->{issue};
 				$options->{duration} = 1;
@@ -3712,8 +3704,8 @@ sub getAndSetOptions {
 	#if ($the_skin && $the_skin->{name} && $the_skin->{skid} != $constants->{mainpage_skid})  {
 	#	$skin_prefix = "$the_skin->{name} ";
 	#}
-	
-	#$user_tabs = $self->genUntitledTab($user_tabs, $options);	
+
+	#$user_tabs = $self->genUntitledTab($user_tabs, $options);
 
 
 	foreach (qw(nodates nobylines nothumbs nocolors noslashboxes nomarquee)) {
@@ -3745,7 +3737,7 @@ sub getAndSetOptions {
 			}
 		}
 		my $the_nickname = $opts->{user_view}{nickname};
-		
+
 		$fhfilter =~ s/\{nickname\}/$the_nickname/g;
 		$options->{fhfilter} =~ s/\{nickname\}/$the_nickname/g;
 		$options->{base_filter} =~ s/\{nickname\}/$the_nickname/g;
@@ -3756,8 +3748,8 @@ sub getAndSetOptions {
 		$fhfilter =~ s/\{tag\}/$the_tag/g;
 		$options->{fhfilter} =~ s/\{tag\}/$the_tag/g;
 		$options->{base_filter} =~ s/\{tag\}/$the_tag/g;
-	}	
-	
+	}
+
 	my $fh_ops = $self->splitOpsFromString($fhfilter);
 
 	my $skins = $self->getSkins();
@@ -3836,7 +3828,7 @@ sub getAndSetOptions {
 			$filter_word =~ s/[^a-zA-Z0-9_-]+//g;
 			$filter_word = "-" . $filter_word if $not;
 			$fh_options->{filter} .= "$filter_word ";
-			
+
 			# Don't filter this
 			$fh_options->{qfilter} .= $_ . ' ';
 			$fh_options->{qfilter} = '-' . $fh_options->{qfilter} if $not;
@@ -3852,7 +3844,7 @@ sub getAndSetOptions {
 			if ($user->{index_classic} && $user->{story_never_nexus}) {
 				push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus});
 			}
-			
+
 			$fh_options->{offmainpage} = "no";
 			$fh_options->{stories_mainpage} = 1;
 		} else {
@@ -3866,7 +3858,7 @@ sub getAndSetOptions {
 		@{$fh_options->{nexus}} = grep { !$not_nexus{$_} } @{$fh_options->{nexus}};
 		delete $fh_options->{nexus} if @{$fh_options->{nexus}} == 0;
 	}
-	
+
 	my $color = (defined $form->{color} && !$s_change && !$v_change) && $validator->{colors}->{$form->{color}} ? $form->{color} : "";
 	$color = defined $options->{color} && $validator->{colors}->{$options->{color}} ? $options->{color} : "" if !$color;
 
@@ -3883,7 +3875,7 @@ sub getAndSetOptions {
 		$adminmode = 0;
 	} elsif (defined $options->{usermode}) {
 		$adminmode = 0 if $options->{usermode};
-	} 
+	}
 
 	$options->{public} = "yes";
 
@@ -3919,7 +3911,6 @@ sub getAndSetOptions {
 		$options->{not_id} = $form->{not_id};
 	}
 
-	
 
 	if ($v_change) {
 		$options->{section} = $form->{section};
@@ -3928,13 +3919,13 @@ sub getAndSetOptions {
 		}
 		$self->applyViewOptions($options->{viewref}, $options, 1);
 	}
-	
+
 	if ($form->{index}) {
 		$options->{index} = 1;
 		$options->{skipmenu} = 1;
 
 		if ($options->{stories_mainpage}) {
-			if(!$form->{issue}) {
+			if (!$form->{issue}) {
 				$options->{duration} = "-1";
 				$options->{mode} = "mixed";
 			}
@@ -3944,7 +3935,6 @@ sub getAndSetOptions {
 			$options->{duration} = "-1";
 			$options->{mode} = 'full';
 		}
-		
 	}
 
 	if ($form->{more_num} && $form->{more_num} =~ /^\d+$/) {
@@ -3962,7 +3952,7 @@ sub getAndSetOptions {
 			my $nick_user = $options->{user_view_uid} || $user->{uid};
 			my $nick = $self->getUser($nick_user, 'nickname');
 			$options->{viewref}{viewtitle} =~ s/\{nickname\}/$nick/;
-		}		
+		}
 		$options->{viewtitle} = $options->{viewref}{viewtitle};
 	}
 	if ($options->{sectionref} && $options->{sectionref}{section_name}) {
@@ -4013,7 +4003,7 @@ sub getFireHoseLimitSize {
 	$limit = $pagesizes->{$pagesize}[$mode_id];
 
 	$limit ||= 10;
-	
+
 	$limit = 15 if $options->{view} =~ /^user/ && $limit >= 15;
 	$limit = 10 if $form->{metamod};
 
@@ -4277,7 +4267,7 @@ sub listView {
 				datatype_tags		=> $tags->{'datatype'},	# new-style
 				options			=> $options,
 				vote			=> $votes->{$item->{globjid}},
-				bodycontent_include	=> $user->{is_anon} 
+				bodycontent_include	=> $user->{is_anon}
 			});
 			slashProf("","firehosedisp");
 		}
@@ -4302,7 +4292,7 @@ sub listView {
 	if ($gSkin->{skid} != $constants->{mainpage_skid}) {
 		$section = $gSkin->{skid};
 	}
-	
+
 	my $firehose_more_data = {
 		future_count => $future_count,
 		options => $options,
@@ -4333,7 +4323,7 @@ sub listView {
 		views			=> $views,
 		theupdatetime		=> timeCalc($slashdb->getTime(), "%H:%M"),
 	}, { Page => "firehose", Return => 1 });
-	
+
 	slashProf("","fh_listview");
 	slashProfEnd("FH_LISTVIEW");
 	return $ret;
@@ -4341,7 +4331,7 @@ sub listView {
 }
 
 sub setFireHoseSession {
-	my ($self, $id, $action) = @_;
+	my($self, $id, $action) = @_;
 	my $user = getCurrentUser();
 	my $item = $self->getFireHose($id);
 
@@ -4422,7 +4412,7 @@ sub ajaxFirehoseListTabs {
 }
 
 sub splitOpsFromString {
-	my ($self, $str) = @_;
+	my($self, $str) = @_;
 	my @fh_ops_orig = map { lc($_) } split(/(\s+|")/, $str);
 	my @fh_ops;
 
@@ -4510,7 +4500,7 @@ sub getOlderMonthsFromDay {
 	my $days = [];
 
 	for ($start..$end) {
-		my ($ny, $nm, $nd) = Add_Delta_YMD($y, $m, $d, 0, $_, 0);
+		my($ny, $nm, $nd) = Add_Delta_YMD($y, $m, $d, 0, $_, 0);
 		$nm = "0$nm" if $nm < 10;
 		$nd = "0$nd" if $nd < 10;
 		my $the_day = "$ny$nm$nd";
@@ -4691,7 +4681,7 @@ sub genFireHoseParams {
 		push @params, "$label=$value";
 	}
 
-	my $skip_false = { startdate => 1, issue => 1 }; 
+	my $skip_false = { startdate => 1, issue => 1 };
 
 	foreach my $label (keys %$params) {
 		next if $skip_false->{$label} && !$data->{$label} && !$options->{$label};
