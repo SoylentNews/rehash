@@ -439,29 +439,29 @@ sub ajaxTogglePickerSearch {
 }
 
 sub ajaxToggleSmallScreen {
- 	my($slashdb, $constants, $user, $form, $options) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
 	return if $user->{is_anon};
 
 	my $prefs = {
-	        smallscreen => undef,
-        	firehose_noslashboxes => undef,
-	        firehose_hide_section_menu => undef,
-        	disable_ua_check       => 1,
+		smallscreen => undef,
+		firehose_noslashboxes => undef,
+		firehose_hide_section_menu => undef,
+		disable_ua_check       => 1,
 	};
 	$slashdb->setUser($user->{uid}, $prefs);
 }
 
 sub ajaxToggleSimpleDesign {
-        my($slashdb, $constants, $user, $form, $options) = @_;
-        return if $user->{is_anon};
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
 
-        my $prefs = {
-                simpledesign => undef,
-                firehose_noslashboxes => undef,
-                firehose_hide_section_menu => undef,
-                firehose_nographics => undef,
-        };
-        $slashdb->setUser($user->{uid}, $prefs);
+	my $prefs = {
+		simpledesign => undef,
+		firehose_noslashboxes => undef,
+		firehose_hide_section_menu => undef,
+		firehose_nographics => undef,
+	};
+	$slashdb->setUser($user->{uid}, $prefs);
 }
 
 sub getFireHoseSectionBySkid {
@@ -1161,7 +1161,7 @@ sub getFireHoseEssentialsParams {
 					[ filter => gtid => [$gtid_types{story}] ],
 					$time_filter
 				], [
-					[ filter => gtid => [$gtid_types{story}], 1 ], 
+					[ filter => gtid => [$gtid_types{story}], 1 ],
 				]]);
 			} elsif ($options->{type} eq 'story') {
 				push @sphinx_opts, $time_filter;
@@ -2475,10 +2475,10 @@ sub ajaxFireHoseGetUpdates {
 #	$html->{firehose_more} = getData("firehose_more_link", { options => $opts, future_count => $future_count, contentsonly => 1, day_label => $day_label, day_count => $day_count }, 'firehose');
 
 	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
-        my $dynamic_blocks;
-        if ($dynamic_blocks_reader) {
-                $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time });
-        }
+	my $dynamic_blocks;
+	if ($dynamic_blocks_reader) {
+		$dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time });
+	}
 
 	my $sprite_info = $firehose->getSpriteInfoByFHID($ordered->[0]);
 
