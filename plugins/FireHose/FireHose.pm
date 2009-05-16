@@ -607,7 +607,7 @@ sub createItemFromJournal {
 	my $user = getCurrentUser();
 	my $journal_db = getObject("Slash::Journal");
 	my $journal = $journal_db->get($id);
-	my $bodytext  = $journal->fixJournalText($journal->{article}, $journal->{posttype}, $journal->{uid});
+	my $bodytext  = $journal_db->fixJournalText($journal->{article}, $journal->{posttype}, $journal->{uid});
 	my $introtext = $journal->{introtext} || $bodytext;
 	if ($journal) {
 		my $constants = getCurrentStatic();
