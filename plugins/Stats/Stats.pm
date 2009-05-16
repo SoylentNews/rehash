@@ -1735,7 +1735,7 @@ sub getTopReferers {
 		"op != 'slashdot-it'
 		 AND referer IS NOT NULL AND LENGTH(referer) > 0 AND referer LIKE 'http%'
 		 $where",
-		"GROUP BY referer ORDER BY c DESC, referer LIMIT $count"
+		"GROUP BY SUBSTRING_INDEX(referer,'/',3) ORDER BY c DESC, referer LIMIT $count"
 	);
 }
 
