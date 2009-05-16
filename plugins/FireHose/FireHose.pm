@@ -106,7 +106,7 @@ sub createUpdateItemFromJournal {
 		my $globjid_q = $self->sqlQuote($globjid);
 		my($itemid) = $self->sqlSelect("id", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
-			my $bodytext  = $journal->fixJournalText($journal->{article}, $journal->{posttype}, $journal->{uid});
+			my $bodytext  = $journal_db->fixJournalText($journal->{article}, $journal->{posttype}, $journal->{uid});
 			my $introtext = $journal->{introtext} || $bodytext;
 
 			$self->setFireHose($itemid, {
