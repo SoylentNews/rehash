@@ -77,101 +77,123 @@ Does not, itself, modify any system objects... but if you want to, you can hang 
 var TypeOf;
 (function(){
 var U=void(0), N=null, W=window,
-	NUM_T='number', LIST_T='list', EL_T='element', DOC_T='document', EVENT_T='event',
-	KNOWN_TYPE={}, SCALAR_TYPE={}, LIST_TYPE={}, NODE_TYPE=[];
+	ots=Object.prototype.toString, TRIMTK_RE=/^\[.+ |\]$/g,
+	FN_TK='[object Function]', NAN_TK='[type NaN]', NUM_TK='[object Number]', OBJ_TK='[object Object]',
+	DOC_T='document', EL_T='element', EVT_T='event', FN_T='function', LIST_T='list', OBJ_T='object', WIN_T='window',
+	KNOWN_TYPE={}, LIST_TYPE={}, NODE_TYPE=[], SCALAR_TYPE={}, CHECKED_TYPE={}, FN_TYPE={};
 
 
-function TK( o ){
-	var tk;
-	return o===U && '[type undefined]'
-		|| o===N && '[type null]'
-		|| (tk=Object.prototype.toString.call(o))==='[object Number]' && isNaN(o) && '[type NaN]'
-		|| tk;
+function typekey( o ){
+	var tk=ots.call(o);
+	return tk in CHECKED_TYPE && (o===U && '[type undefined]' || o===N && '[type null]' || tk===NUM_TK && isNaN(o) && NAN_TK) || tk;
+}
+function distinct_typekey( o ){
+	var tk=typekey(o);
+	return tk!==OBJ_TK && tk;
+}
+function trim( tk ){
+	return tk && tk.replace(TRIMTK_RE, '');
 }
 
-function is_fn( o ){
-	return TK(o)==='[object Function]';
-}
 
 
-function scalar_type( o ){
-	return SCALAR_TYPE[ TK(o) ];
+function maybe_fn( o ){
+	return false;
 }
-function qualify_number( o ){
-	var t=typeof(o);
-	return t===NUM_T && (isFinite(o) ? t : o.toString());
+function qualify_fn( o ){
+	var qt=FN_TYPE[ typekey(o) ];
+	return (qt===OBJ_T ? maybe_fn(o) : qt) || false;
 }
 
+function maybe_event( o ){
+	return (typekey(o.cancelBubble)==='[object Boolean]' || qualify_fn(o.stopPropagation)) && EVT_T;
+}
 
 function maybe_list( o ){
-	try { return !!o && qualify_number(n=o.length)===NUM_T && (!n || n-1 in o) && LIST_T; } catch ( e ) {}
+	try { return typekey(n=o.length)===NUM_TK && isFinite(n) && (!n || n-1 in o) && LIST_T; } catch ( e ) {}
 }
-function list_type( o ){
-	var tk=TK(o);
-	return tk in LIST_TYPE ? LIST_TYPE[ tk ] : maybe_list(o);
-}
-
 
 function maybe_node( o ){
-	try { return !!o && o.nodeName && NODE_TYPE[ o.nodeType ]; } catch ( e ) {}
+	try { return o.nodeName && NODE_TYPE[ o.nodeType ]; } catch ( e ) {}
 }
 function qualify_node( o ){
 	var t;
-	return (t=maybe_node(o))===DOC_T && t
-		|| t===EL_T && o.nodeName.toLowerCase()
-		|| t && o.nodeName
-		|| t;
-}
-function qualify_element( o ){
-	return maybe_node(o)===EL_T && qualify_node(o);
+	return !!o && (
+		(t=maybe_node(o))===DOC_T && t
+			|| t===EL_T && o.nodeName.toLowerCase()
+			|| t && o.nodeName
+			|| t
+	);
 }
 
-
-function maybe_event( o ){
-	return !!o && is_fn(o.preventDefault) && is_fn(o.stopPropagation) && EVENT_T;
-}
-function qualify_event( o ){
-	return maybe_event(o) && o.type;
-}
 
 
 TypeOf = function( o ){
-	return KNOWN_TYPE[ TK(o) ]
-		|| is_fn(o.__typeOf) && o.__typeOf()
-		|| o===W && 'window'
+	var tk=typekey(o);
+	return KNOWN_TYPE[ tk ]
+		|| qualify_fn(o.__typeOf) && o.__typeOf()
+		|| o===W && WIN_T
 		|| maybe_node(o)
 		|| maybe_event(o)
 		|| maybe_list(o)
-		|| 'object';
+		|| tk===OBJ_TK && maybe_fn(o)
+		|| OBJ_T;
 }
-TypeOf.scalar	= scalar_type;
-TypeOf.number	= qualify_number;
-TypeOf.fn		= function( o ){ return is_fn(o) && 'function'; };
-TypeOf.list		= list_type;
-TypeOf.node		= qualify_node;
-TypeOf.element	= qualify_element;
-TypeOf.event	= qualify_event;
+
+
+TypeOf.debug = KNOWN_TYPE;
+TypeOf.element = function( o ){
+	return !!o && maybe_node(o)===EL_T && qualify_node(o);
+};
+TypeOf.event = function( o ){
+	var qt;
+	if ( !o || !maybe_event(o) )
+		return false;
+	try { qt=o.type; } catch ( e ) { }
+	return qt || trim(distinct_typekey(o)) || EVT_T;
+};
+TypeOf.fn = qualify_fn;
+TypeOf.list = function( o ){
+	var tk=typekey(o);
+	return tk in LIST_TYPE ? LIST_TYPE[ tk ] : !!o && maybe_list(o);
+};
+TypeOf.node = qualify_node;
+TypeOf.number = function( o ){
+	return ots.call(o)===NUM_TK && (isFinite(o) ? 'number' : o.toString());
+};
+TypeOf.object = function( o ){
+	return trim(typekey(o).replace(NAN_TK, NUM_TK));
+};
+TypeOf.scalar = function( o ){
+	return SCALAR_TYPE[ typekey(o) ] || false;
+};
+
 
 (function(){
-	var i;
+	var EL_NT=1, DOC_NT=9, LAST_NT=12;
 
-	for ( i=document.ELEMENT_NODE; i<=document.NOTATION_NODE; ++i ) {
+	FN_TYPE[ FN_TK ] = 'function';
+
+	CHECKED_TYPE[ ots.call(U) ] = true;
+	CHECKED_TYPE[ ots.call(N) ] = true;
+	CHECKED_TYPE[ NUM_TK ] = false;
+
+	for ( var i=EL_NT; i<=LAST_NT; ++i ) {
 		NODE_TYPE[ i ] = 'node';
 	}
-	NODE_TYPE[ document.ELEMENT_NODE ] = EL_T;
-	NODE_TYPE[ document.DOCUMENT_NODE ] = DOC_T;
-
+	NODE_TYPE[ EL_NT ] = EL_T;
+	NODE_TYPE[ DOC_NT ] = DOC_T;
 
 	function define( o, scalar, list, tn ){
-		var tk=TK(o), unique=(tk!==TK({}));
-		if ( unique ) {
-			tn || (tn = tk.replace(/^\[.+ |\]$/g, '').toLowerCase());
+		var tk=distinct_typekey(o);
+		if ( tk ) {
+			tn || (tn = trim(tk).toLowerCase());
 
 			KNOWN_TYPE[ tk ] = tn;
 			scalar!==U	&& (SCALAR_TYPE[ tk ] = tn);
 			list!==U	&& (LIST_TYPE[ tk ] = list && tn);
 		}
-		return unique;
+		return tk;
 	}
 
 	define(void(0),			true, false);
@@ -188,15 +210,31 @@ TypeOf.event	= qualify_event;
 	define(new Error(),		false, false);
 
 	define(document,		false, false, DOC_T);
-	define(window,			false, false, 'window');
+	if ( !define(window,	false, false, WIN_T) ) {
+		TypeOf.list = function( o ){
+			var tk;
+			return o!==window && ((tk=typekey(o)) in LIST_TYPE ? LIST_TYPE[ tk ] : !!o && maybe_list(o));
+		};
+	}
 
 	define(document.childNodes, false, true, LIST_T);
 	define(arguments,		false, true, LIST_T);
 
-	define(document.createEvent('UIEvents'),		false, false, EVENT_T);
-	define(document.createEvent('MouseEvents'),		false, false, EVENT_T);
-	define(document.createEvent('MutationEvents'),	false, false, EVENT_T);
-	define(document.createEvent('HTMLEvents'),		false, false, EVENT_T);
+	if ( document.createEvent ) {
+		define(document.createEvent('UIEvents'),		false, false, EVT_T);
+		define(document.createEvent('MouseEvents'),		false, false, EVT_T);
+		define(document.createEvent('MutationEvents'),	false, false, EVT_T);
+		define(document.createEvent('HTMLEvents'),		false, false, EVT_T);
+	}
+
+	if ( !qualify_fn(document.getElementById) ) {
+		FN_TYPE[ OBJ_TK ] = OBJ_T;
+		maybe_fn = function( o ){
+			return FN_TYPE[ typekey(o.call) ]
+				&& FN_TYPE[ typekey(o.apply) ]
+				&& FN_T;
+		};
+	}
 })();
 
 })();
