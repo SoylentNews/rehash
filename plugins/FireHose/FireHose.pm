@@ -4694,6 +4694,56 @@ sub getProjectsChangedSince {
 	return $hr_ar;
 }
 
+sub getSpriteInfo {
+	my($self, $id) = @_;
+	my $item = $self->getFireHose($id);
+	my $opts = { initial => '1'};
+	my @images;
+	if ($item) {
+		if ($item->{type} eq "story") {
+			$opts->{view} = "stories";
+		} else {
+			$opts->{view} = "recent";
+		}
+		my $options = $self->getAndSetOptions($opts);
+		my ($items, $info) = $self->getFireHoseEssentials($options);
+
+                my $i = 0;
+                my $seen = {};
+                my $key;
+                foreach my $it (@$items) {
+                        if ($i == 0 && $it->{type} eq "story" && !$it->{thumb}) {
+                                my $topiclist = $self->getTopiclistForStory($item->{srcid});
+                                foreach (@$topiclist) {
+                                        $key = "tid-$_";
+                                        my $topic = $self->getTopic($_);
+                                        if ($topic->{image}) {
+                                                push @images, { label => $key, width => $topic->{width}, height => $topic->{height}, file => "/topics/$topic->{image}"} if !$seen->{$key};
+                                                $seen->{$key}++;
+                                        }
+                                }
+                        }
+                        if ($it->{thumb}) {
+                                $key = "thumb-$it->{thumb}";
+                                my $file = $self->getStaticFile($it->{thumb});
+                                push @images, { label => $key, width => $file->{width}, height => $file->{height},  file => $file->{name}} if !$seen->{$key};
+                                $seen->{$key}++;
+                        } else {
+                                $key = "tid-$it->{tid}";
+                                my $topic = $self->getTopic($it->{tid});
+                                if ($topic->{image}) {
+                                        push @images, { label => $key, width => $topic->{width}, height => $topic->{height}, file => "/topics/$topic->{image}"} if !$seen->{$key};
+                                        $seen->{$key}++;
+                                }
+
+                        }
+                        $i++;
+                }
+        }
+        return \@images;
+
+}
+
 
 
 1;
