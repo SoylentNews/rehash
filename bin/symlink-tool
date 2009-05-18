@@ -67,11 +67,12 @@ my $plugin_list = $install->_getList(
 );
 
 sub template_process {
-	my($include_path, $filelist, $destpath, $destpath_secure) = @_;
+	my($include_path, $filelist, $destpath, $destpath_secure, $is_glob) = @_;
 	if (!$destpath_secure)  {
 		$destpath_secure = $destpath;
 		$destpath_secure =~ s/\.(\w+)$/\.ssl\.$1/;
 	}
+	my $javascript_debug = $is_glob ? 0 : 1;
 	my $glob_template = Template->new({
 		INCLUDE_PATH	=> $include_path,
 		PROCESS		=> $filelist,
@@ -80,9 +81,13 @@ sub template_process {
 		RELATIVE	=> 1,
 		INTERPOLATE	=> 0,
 	}) || die "$Template::ERROR\n";
-	$glob_template->process($filelist->[0], { constants => $constants }, $destpath)
+	$glob_template->process($filelist->[0],
+		{ constants => $constants,        javascript_debug => $javascript_debug },
+		$destpath)
 		|| die $glob_template->error(), "\n";
-	$glob_template->process($filelist->[0], { constants => $constants_secure }, $destpath_secure)
+	$glob_template->process($filelist->[0],
+		{ constants => $constants_secure, javascript_debug => $javascript_debug },
+		$destpath_secure)
 		|| die $glob_template->error(), "\n";
 	return $destpath;
 }
@@ -222,7 +227,7 @@ for my $subdir (sort keys %theme_subdir_files) {
 				$f_minified =~ s/\.(\w+raw)$/-minified.$1/;
 				$in_glob = 1 if $target_file eq $f || $target_file eq $f_minified;
 			}
-			template_process($theme_dir, [ $target_file ], $destfile, $destfile_secure) unless $in_glob;
+			template_process($theme_dir, [ $target_file ], $destfile, $destfile_secure, 0) unless $in_glob;
 		}
 		$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 	}
@@ -278,7 +283,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 					$f_minified =~ s/\.(\w+raw)$/-minified.$1/;
 					$in_glob = 1 if $target_file eq $f || $target_file eq $f_minified;
 				}
-				template_process($plugin_dir, [ $target_file ], $destfile, $destfile_secure) unless $in_glob;
+				template_process($plugin_dir, [ $target_file ], $destfile, $destfile_secure, 0) unless $in_glob;
 			}
 			$processed{$site_file_abs} = $valid_file{$site_file_abs} = 1;
 		}
@@ -306,7 +311,7 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		my $destpath_secure = "$path$name.$virtuser.ssl$suffix";
 		# XXX actually I think we want the raw files here, to avoid double-processing, right?
 		# Update 2009-04: Right.
-		template_process($theme_or_plugin->{dir}, \@filelist, $destpath, $destpath_secure);
+		template_process($theme_or_plugin->{dir}, \@filelist, $destpath, $destpath_secure, 1);
 
 		# Hack until Java is available on the sandboxes, too; and I figure out how to do it right.
 		my $compress = '';
