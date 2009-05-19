@@ -419,7 +419,7 @@ sub IndexHandler {
 
 			my $new_filename_abs       = "$basedir/";
 			my $new_uri                = '/';
-			if ($gSkin->{skid} == $constants->{mainpage_skid}
+			if ($gSkin->{skid} != $constants->{mainpage_skid}
 				&& $new_filename =~ /\.shtml$/) {
 				# Only handle subdirs for .shtml;  there aren't .pl
 				# scripts in those subdirs.
