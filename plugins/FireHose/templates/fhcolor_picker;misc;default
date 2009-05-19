@@ -15,7 +15,7 @@ __seclev__
 10000
 __template__
 <span id="[% id %]-trigger" class="color-picker trigger" style="display: none;"><span></span></span>
-<ul id="[% id %]-menu" class="color-picker menu" style="display: none">
+<ul id="[% id %]-menu" class="color-picker menu" style="display: none; z-index: 1000001">
 	<li class="red"><span>red (best)</span></li>
 	<li class="orange"><span>orange</span></li>
 	<li class="yellow"><span>yellow</span></li>
@@ -75,20 +75,15 @@ $menu.menu({
 	cssNamespace:	'slash',
 
 	start: function(){
-		var inset = {};
-		$.each(['left', 'right', 'bottom'], function(){
-			inset[this] = parseInt($swatch.css('padding-'+this)) + parseInt($swatch.css('margin-'+this));
-		});
-
-		var css	= $.extend({
-			position: 'absolute',
-			width: $swatch.outerWidth() - (inset.left + inset.right)
-		}, $swatch.position());
-
-		css.left += inset.left;
-		css.top += $swatch.outerHeight() - inset.bottom;
-
-		$menu.css(css).show();
+		var align=$swatch.offset();
+		$menu.
+			appendTo(document.body).
+			css({
+				position: 'absolute',
+				top: align.top + $swatch.height(),
+				left: align.left
+			}).
+			show();
 	},
 	over: function( e, ui ){
 		swatch_color('color-shown', $any(ui.over).data('color'));
