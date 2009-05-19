@@ -4696,9 +4696,11 @@ sub getProjectsChangedSince {
 
 sub getSpriteInfo {
 	my($self, $id) = @_;
+	my $constants = getCurrentStatic();
 	my $item = $self->getFireHose($id);
 	my $opts = { initial => '1'};
 	my @images;
+	my $basepath = "$constants->{basedir}/images";
 	if ($item) {
 		if ($item->{type} eq "story") {
 			$opts->{view} = "stories";
@@ -4718,7 +4720,7 @@ sub getSpriteInfo {
                                         $key = "tid-$_";
                                         my $topic = $self->getTopic($_);
                                         if ($topic->{image}) {
-                                                push @images, { label => $key, width => $topic->{width}, height => $topic->{height}, file => "/topics/$topic->{image}"} if !$seen->{$key};
+                                                push @images, { label => $key, width => $topic->{width}, height => $topic->{height}, file => "$basepath/topics/$topic->{image}"} if !$seen->{$key};
                                                 $seen->{$key}++;
                                         }
                                 }
@@ -4726,13 +4728,13 @@ sub getSpriteInfo {
                         if ($it->{thumb}) {
                                 $key = "thumb-$it->{thumb}";
                                 my $file = $self->getStaticFile($it->{thumb});
-                                push @images, { label => $key, width => $file->{width}, height => $file->{height},  file => $file->{name}} if !$seen->{$key};
+                                push @images, { label => $key, width => $file->{width}, height => $file->{height},  file => "$basepath$file->{name}"} if !$seen->{$key};
                                 $seen->{$key}++;
                         } else {
                                 $key = "tid-$it->{tid}";
                                 my $topic = $self->getTopic($it->{tid});
                                 if ($topic->{image}) {
-                                        push @images, { label => $key, width => $topic->{width}, height => $topic->{height}, file => "/topics/$topic->{image}"} if !$seen->{$key};
+                                        push @images, { label => $key, width => $topic->{width}, height => $topic->{height}, file => "$basepath/topics/$topic->{image}"} if !$seen->{$key};
                                         $seen->{$key}++;
                                 }
 
