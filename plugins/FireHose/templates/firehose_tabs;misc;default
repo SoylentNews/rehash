@@ -49,7 +49,7 @@ END %]
 
 	[% UNLESS nodiv %]
 		[% IF !user.is_anon && gSkin.name != 'idle' && !is_smallscreen && !user.simpledesign && !user.firehose_nographics %]
-			[% IF !article_header %]
+			[% IF !user.is_anon %]
 			<a id="toggleleftmenu" onclick="return false" class="[% IF user.firehose_hide_section_menu && (user.firehose_hide_section_menu != 'false') %]collapsed[% ELSE %]expanded[% END %]" href="[% PROCESS nojslink %]" title="Toggle left menu">Toggle left menu</a>
 			[% END %]
 			<script type="text/javascript">
