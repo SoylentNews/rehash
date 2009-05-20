@@ -2235,6 +2235,9 @@ sub ajaxFireHoseGetUpdates {
 	if ($vol->{story_vol} < 25) {
 		$mixed_abbrev_pop = $firehose->getMinPopularityForColorLevel(3);
 	}
+	if ($opts->{view} eq "popular") {
+		$mixed_abbrev_pop = $firehose->getMinPopularityForColorLevel(4);
+	}
 
 	my $item_number = 0;
 	foreach (@$items) {
