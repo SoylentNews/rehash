@@ -2037,6 +2037,11 @@ function reduceThreshold(highlight, no_save) {
 	setCurrentComment(next_cid);
 }
 
+var RE=/--(SCORE|SCORE1|HIGHLIGHT|LEFTORTOP)--/g;
+function map_replacements( dict ){
+	return function( k ){ return dict[k]; };
+}
+
 function reduceThresholdPrint(highlight) {
 	if (currents['hidden'] <= 0 || user_threshold <= -1 || no_lower_threshold)
 		return;
@@ -2047,9 +2052,8 @@ function reduceThresholdPrint(highlight) {
 	var html = '<div>\
 <p>There are no more comments available at Score:--SCORE--, but there might be more at Score:--SCORE1--.</p><p>Would you like to lower your threshold for \
 <input type="button" value="this" onclick="D2.reduceThreshold(--HIGHLIGHT--,1)"> ';
-	if (!user_is_anon)
-		html = html + '<input type="button" value="all"  onclick="D2.reduceThreshold(--HIGHLIGHT--)"> ';
-	html = html + 'discussion(s)?<br>\
+	user_is_anon || (html += '<input type="button" value="all"  onclick="D2.reduceThreshold(--HIGHLIGHT--)"> ');
+	html += 'discussion(s)?<br>\
 <input type="button" value="No Thanks" onclick="D2.reduceThreshold(-1)">\
 </p>\
 \
@@ -2057,14 +2061,12 @@ function reduceThresholdPrint(highlight) {
 visible to the --LEFTORTOP-- of the discussion.)</i></p>\
 </div>';
 
-	html = html.replace(/\-\-SCORE\-\-/g, user_threshold);
-	html = html.replace(/\-\-SCORE1\-\-/g, (user_threshold-1));
-	html = html.replace(/\-\-HIGHLIGHT\-\-/g, highlight);
-
-	var leftortop = $('#d2out').hasClass('horizontal') ? 'top' : 'left';
-	html = html.replace(/\-\-LEFTORTOP\-\-/g, leftortop);
-
-	$('#modal_box_content').html(html);
+	$('#modal_box_content').html(html.replace(RE, map_replacements({
+		SCORE:		user_threshold,
+		SCORE1:		user_threshold-1,
+		HIGHLIGHT:	highlight,
+		LEFTORTOP:	$('#d2out').hasClass('horizontal') ? 'top' : 'left'
+	})));
 }
 
 var packageObj = Slash.Discussion = {
