@@ -56,6 +56,21 @@
 
 ;(function($) {
 
+function evalMetadata( json ){
+	var result, key;
+	if ( json && /\S/.test(json) ) {
+		key = 'evalMetadata_'+new Date().getTime();
+		$.globalEval('window.'+key+' = '+json);
+
+		if ( key in window ) {
+			result = window[key];
+			delete window[key];
+		}
+	}
+	return result;
+}
+
+
 $.extend({
 	metadata : {
 		defaults : {
@@ -97,7 +112,7 @@ $.extend({
 			if ( data.indexOf( '{' ) <0 )
 			data = "{" + data + "}";
 			
-			data = eval("(" + data + ")");
+			data = evalMetadata("(" + data + ")");
 			
 			$.data( elem, settings.single, data );
 			return data;

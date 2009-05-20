@@ -12,6 +12,22 @@ $.ajaxSetup({
 
 })(jQuery);
 
+// non-evil eval().  If you don't want a result, call $.globalEval(script) directly instead.
+// Note: the eval()'d script will NOT be executed in the context of your closure.
+// ...and that's a GOOD thing!
+function evalExpr( json ){
+	var result, key;
+	if ( json && /\S/.test(json) ) {
+		key = 'evalExpr_'+new Date().getTime();
+		$.globalEval('window.'+key+' = '+json);
+
+		if ( key in window ) {
+			result = window[key];
+			delete window[key];
+		}
+	}
+	return result;
+}
 
 
 var Qw;

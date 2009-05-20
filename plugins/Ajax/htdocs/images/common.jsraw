@@ -1048,20 +1048,12 @@ function ajax_periodic_update(interval_in_seconds, request_params, id, handlers,
 	}, interval_in_seconds*1000);
 }
 
-function eval_response(transport) {
-	var response;
-	try {
-/*jslint evil: true */
-		eval("response = " + transport.responseText);
-/*jslint evil: false */
-	} catch (e) {
-		//alert(e + "\n" + transport.responseText)
-	}
-	return response;
+function eval_response( xhr ) {
+	return evalExpr(xhr.responseText);
 }
 
-function json_handler(transport) {
-	var response = eval_response(transport);
+function json_handler(xhr) {
+	var response = eval_response(xhr);
 	response && json_update(response);
 	return response;
 }
@@ -1071,15 +1063,7 @@ function json_update(response) {
 		return;
 	}
 
-	if (response.eval_first) {
-		try {
-/*jslint evil: true */
-			eval(response.eval_first);
-/*jslint evil: false */
-		} catch (e0) {
-
-		}
-	}
+	$.globalEval(response.eval_first);
 
 	// Server says:
 
@@ -1126,15 +1110,7 @@ function json_update(response) {
 		}
 	});
 
-	if (response.eval_last) {
-		try {
-/*jslint evil: true */
-			eval(response.eval_last);
-/*jslint evil: false */
-		} catch (e1) {
-
-		}
-	}
+	$.globalEval(response.eval_last);
 }
 
 
