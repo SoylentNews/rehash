@@ -1068,6 +1068,8 @@ sub getFireHoseEssentialsParams {
 		my @arr = $startdate =~ $db_levels->{$level}{re};
 		$startdate = $db_levels->{$level}{timefmt}->(@arr);
 
+		$startdate = $options->{startdate} if $options->{spritegen};
+
 		my $st_sphinx  = timeCalc($startdate, '%s', -$user->{off_set});
 
 		if (defined $options->{duration} && $options->{duration} >= 0) {
@@ -3312,7 +3314,7 @@ my @options = (
 		filter color category not_id not_uid public not_public
 		accepted not_accepted rejected not_rejected type not_type
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
-		tagged_by_uid tagged_as offmainpage smalldevices
+		spritegen tagged_by_uid tagged_as offmainpage smalldevices
 		createtime_no_future createtime_subscriber_future
 		tagged_non_negative uid
 	)
@@ -4140,7 +4142,7 @@ sub listView {
 		push @$globjs, $_->{globjid} if $_->{globjid}
 	}
 
-	if ($options->{orderby} eq "createtime") {
+	if ($options->{orderby} eq "createtime" && !$options->{spritegen}) {
 		$items = $self->addDayBreaks($items, $user->{off_set});
 	}
 
@@ -4698,7 +4700,7 @@ sub getSpriteInfo {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 	my $item = $self->getFireHose($id);
-	my $opts = { initial => '1'};
+	my $opts = { initial => '1', spritegen => 1, startdate => $item->{createtime}};
 	my @images;
 	my $basepath = "$constants->{basedir}/images";
 	if ($item) {
