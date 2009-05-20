@@ -67,6 +67,21 @@ END %]
 			});
 			</script>
 		[% END %]
+	[% IF article_header;
+		options.view = "stories";
+		IF item;
+			IF item.type != "story";	
+				options.view = "recent";
+				pop_val = fh.getPopLevelForPopularity(item.userpop);
+				IF pop_val <= 3;
+					options.view = "recent";
+				END;
+			END;
+			IF user.is_admin;
+				options.view = "daddypants";
+			END;
+		END;
+	END %]
 	<ul class="menu" id="fhtablist">[% END %]
 
 			[% FOREACH view = views %]
@@ -94,7 +109,7 @@ END %]
 					view_url = view.short_url;
 				   END;
 				%]
-				<li [% IF active_view %]class="active [% view.viewtitle %]"[% END %]><a href="[% gSkin.rootdir %]/[% view_url %]" [% IF !user.is_anon && !article_header %]onclick="firehose_set_options('view', '[% view.viewname %]');return false;"[% END %]>[% view.viewtitle %]</a>[% IF active_view %][% IF rss_link && !is_smallscreen && !user.firehose_nographics %]<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>[% END %][% IF !user.is_anon && view.editable == "yes" && !is_smallscreen && !user.firehose_nographics %]<span class="tab_edit"><a href="" onclick="[% IF user.is_anon %]show_login_box():[% ELSE %]getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);[% END %]return false;"  title="Edit">Edit</a></span>[% END %][% IF view.link_icon == "yes" %] <span class="tab_link"><a href="[% gSkin.rootdir %]/[% view_url %]" title="Link to [% view.viewtitle %]">Link</a></span>[% END %][% END %]</li>
+				<li [% IF active_view %]class="active [% view.viewtitle %]"[% END %]><a href="[% gSkin.rootdir %]/[% view_url %]" [% IF !user.is_anon && !article_header %]onclick="firehose_set_options('view', '[% view.viewname %]');return false;"[% END %]>[% view.viewtitle %]</a>[% IF active_view %][% IF rss_link && !article_header && !is_smallscreen && !user.firehose_nographics %]<span class="tab_rss"><a href="[% rss_link %]" title="RSS for [% view.viewname %]">RSS</a></span>[% END %][% IF !user.is_anon && view.editable == "yes" && !article_header && !is_smallscreen && !user.firehose_nographics %]<span class="tab_edit"><a href="" onclick="[% IF user.is_anon %]show_login_box():[% ELSE %]getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);[% END %]return false;"  title="Edit">Edit</a></span>[% END %][% IF view.link_icon == "yes" %] <span class="tab_link"><a href="[% gSkin.rootdir %]/[% view_url %]" title="Link to [% view.viewtitle %]">Link</a></span>[% END %][% END %]</li>
 				[%- END -%]
 
 

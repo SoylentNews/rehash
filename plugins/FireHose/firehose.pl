@@ -198,7 +198,7 @@ sub view {
 			nostorylinkwrapper	=> $discussion ? 1 : 0,
 			vote			=> $vote,
 			related_stories		=> $related_stories,
-			book_info		=> $book_info
+			book_info		=> $book_info,
 		});
 
 		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
@@ -212,9 +212,10 @@ sub view {
 		}
 
 		slashDisplay("view", {
-			firehosetext => $firehosetext,
-			userbio      => $userbio,
-			commenttext  => $commenttext
+			firehosetext	=> $firehosetext,
+			userbio		=> $userbio,
+			commenttext	=> $commenttext,
+			item		=> $item
 		});
 
 
