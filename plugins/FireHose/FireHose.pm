@@ -1059,8 +1059,14 @@ sub getFireHoseEssentialsParams {
 		}
 		push @sphinx_where, 'inactivated IS NULL';
 	}
-
-	if ($options->{startdate}) {
+	if ($options->{startdateraw}) {
+		my $st_sphinx = timeCalc($options->{startdateraw}, '%s',0);
+		if ($options->{orderby} eq "ASC") {
+			push @sphinx_opts, [ range => createtime_ut => 0, $st_sphinx, 1 ];
+		} else {
+			push @sphinx_opts, [ range => createtime_ut => 0, $st_sphinx ];
+		}
+	} elsif ($options->{startdate}) {
 		my $startdate = $options->{startdate};
 
 		my($db_levels, $db_order) = getDayBreakLevels();
@@ -3306,7 +3312,7 @@ my @options = (
 	# meta search parameters
 	qw(
 		limit more_num orderby orderdir offset
-		startdate duration admin_filters
+		startdate startdateraw duration admin_filters
 	),
 	# other search parameters
 	# don't need usermode, since !usermode == no cache
@@ -4700,7 +4706,7 @@ sub getSpriteInfo {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 	my $item = $self->getFireHose($id);
-	my $opts = { initial => '1', spritegen => 1, startdate => $item->{createtime}};
+	my $opts = { initial => '1'};
 	my @images;
 	my $basepath = "$constants->{basedir}/images";
 	if ($item) {
@@ -4710,6 +4716,8 @@ sub getSpriteInfo {
 			$opts->{view} = "recent";
 		}
 		my $options = $self->getAndSetOptions($opts);
+		$options->{spritegen} =  1;
+		$options->{startdateraw} = $item->{createtime};
 		my ($items, $info) = $self->getFireHoseEssentials($options);
 
                 my $i = 0;
