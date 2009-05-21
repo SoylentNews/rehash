@@ -115,8 +115,16 @@ sub handleFileCmd {
 		slashdLog("handling upload\n");
 		uploadFile($cmd);
 	}
+
+	if ($cmd->{action} eq 'sprite' && $cmd->{fhid}) {
+		slashdLog("handling sprite\n");
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->createSprite($cmd->{fhid});
+	}
+
 	$slashdb->deleteFileQueueCmd($cmd->{fqid});
-	if (verifyFileLocation($cmd->{file})) {
+
+	if (($cmd->{action} ne 'sprite') && verifyFileLocation($cmd->{file})) {
 		# unlink $cmd->{file};
 	}
 }

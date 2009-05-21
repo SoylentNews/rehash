@@ -2098,6 +2098,11 @@ sub updateStory {
 		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 
+		# Create the sprite for this sid.
+		# This may change to calling addFileToQueue() with globjid.
+		my $fh_reader = getObject("Slash::FireHose");
+		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($form->{sid});
+		$slashdb->addFileToQueue({ fhid => $sprite_fhid->{id}, action => 'sprite' });
 
 		# handle any media files that were given
 		handleMediaFileForStory($st->{stoid});
@@ -2545,6 +2550,12 @@ sub saveStory {
 			# Author
 			$achievements->setUserAchievement('story_posted', $form->{uid});
 		}
+
+		# Create the sprite for this sid.
+		# This may change to calling addFileToQueue() with globjid.
+		my $fh_reader = getObject("Slash::FireHose");
+		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($sid);
+		$slashdb->addFileToQueue({ fhid => $sprite_fhid->{id}, action => 'sprite' });
 
 		listStories(@_);
 	} else {
