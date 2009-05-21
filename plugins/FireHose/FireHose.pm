@@ -383,6 +383,7 @@ sub getSectionSkidFromFilter {
 sub getCSSForSkid {
 	my($self,$skid,$layout) = @_;
 	my $form = getCurrentForm();
+	my $secure = apacheConnectionSSL();
 
 	$layout = defined $layout ? $layout: 
 		defined $form->{layout} ? $form->{layout} : "yui";
@@ -398,11 +399,12 @@ sub getCSSForSkid {
 			"css.skin=skins.name and css.layout=$layout_q and admin='no' AND skins.skid=$skid_q"
 		);
 	}
-	
+
 	my $retval = "";
 	my $skin_name = "";
 	foreach (@$css) {
 		$skin_name = $_->{skin_name};
+		$_{file} =~ s/\.css/.ssl.css/ if $secure;
 		$retval .= getData('alternate_section_stylesheet', { css => $_, }, 'firehose');
 	}
 	return $retval;
