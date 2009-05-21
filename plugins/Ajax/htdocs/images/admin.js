@@ -31,14 +31,15 @@ function storyInfo( selector_fragment ) {
 			add($item.find('#updown-'+selector_fragment));	// the nod/nix capsule
 
 	// Instantiate the pop-up at that position.
-	var popup_id = "storyinfo-" + $item.id;
-	createPopup(
+	var popup_id = "storyinfo-" + selector_fragment;
+	var popup = createPopup(
 		$where,
 		'Story Info ' + createPopupButtons(
 			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>'
 		),
 		popup_id
 	);
+	$(popup).draggable();
 
 	// Ask the server to fill in the pop-up's content.
 	ajax_update({
@@ -60,18 +61,19 @@ function tagsHistory( selector_fragment, context ) {
 				add($W.find('.edit-toggle')).	// the disclosure triangle
 				add($item.find('#updown-'+selector_fragment));	// the nod/nix capsule
 	} else {
-		$where = $any('taghist-' + $item.id);
+		$where = $any('taghist-' + selector_fragment);
 	}
 
 	// Instantiate the pop-up at that position.
-	var popup_id = "taghistory-" + $item.id;
-	createPopup(
+	var popup_id = "taghistory-" + selector_fragment;
+	var popup = createPopup(
 		$where,
 		'History ' + createPopupButtons(
 			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>'
 		),
 		popup_id
 	);
+	$(popup).draggable();
 
 	// Ask the server to fill in the pop-up's content.
 	var item_key = fhitem_key($item);
