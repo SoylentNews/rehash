@@ -677,6 +677,11 @@ sub saveSub {
 		$slashdb->addUrlForGlobj($url_id, $globjid);
 	}
 
+	if ($messagesub->{subid} && ($uid != getCurrentStatic('anonymous_coward_uid'))) {
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		$dynamic_blocks->setUserBlock('submissions', $uid) if $dynamic_blocks;
+	}
+
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);

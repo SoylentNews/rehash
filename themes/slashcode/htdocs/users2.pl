@@ -1253,7 +1253,7 @@ sub showInfo {
 
 		# Dynamic blocks
 		my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
-                my ($dyn_achievements, $dyn_comments, $dyn_journals, $dyn_friends, $dyn_tags, $dyn_bookmarks);
+                my ($dyn_achievements, $dyn_comments, $dyn_journals, $dyn_friends, $dyn_tags, $dyn_bookmarks, $dyn_submissions);
                 if ($dynamic_blocks_reader) {
 			my $user_self = ($requested_user->{uid} == $user->{uid}) ? 1 : 0;
                         $dyn_achievements = $dynamic_blocks_reader->displayBlock('achievements-' . $uid, { user_self => $user_self }) || 0;
@@ -1262,6 +1262,7 @@ sub showInfo {
 			$dyn_friends      = $dynamic_blocks_reader->displayBlock('friends-'      . $uid, { user_self => $user_self }) || 0;
 			$dyn_tags         = $dynamic_blocks_reader->displayBlock('tags-'         . $uid, { user_self => $user_self }) || 0;
 			$dyn_bookmarks    = $dynamic_blocks_reader->displayBlock('bookmarks-'    . $uid, { user_self => $user_self }) || 0;
+			$dyn_submissions  = $dynamic_blocks_reader->displayBlock('submissions-'  . $uid, { user_self => $user_self }) || 0;
                 }
 
 		my $userbio;
@@ -1295,7 +1296,6 @@ sub showInfo {
 			latest_journals             => $latest_journals,
 			latest_submissions          => $latest_submissions,
 			latest_bookmarks            => $latest_bookmarks,
-			#latest_friends              => $latest_friends,
 			firehose_marquee	    => $firehose_marquee,
 			marquee                     => $marquee,
 			relations_datapane          => $relations_datapane,
@@ -1312,6 +1312,7 @@ sub showInfo {
 			dyn_friends		    => $dyn_friends,
 			dyn_tags		    => $dyn_tags,
 			dyn_bookmarks		    => $dyn_bookmarks,
+			dyn_submissions		    => $dyn_submissions,
 			userbio			    => $userbio,
 			
 		}, { Page => 'users', Skin => 'default'});
