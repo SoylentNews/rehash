@@ -2528,11 +2528,7 @@ sub createUser {
 
 	my $initdomain = email_to_domain($email);
 
-	my $index_beta = $constants->{index_new_user_beta} ? 1 : 0;
-
-	$index_beta = 1 if $ENV{HTTP_USER_AGENT} =~ /Firefox/i && $constants->{index_new_firefox_user_beta};
-
-	$self->setUser($uid, {
+	my $newuser_data = {
 		'registered'		=> 1,
 		'expiry_comm'		=> $constants->{min_expiry_comm},
 		'expiry_days'		=> $constants->{min_expiry_days},
@@ -2540,8 +2536,10 @@ sub createUser {
 		'user_expiry_days'	=> $constants->{min_expiry_days},
 		initdomain		=> $initdomain,
 		created_ipid		=> getCurrentUser('ipid') || '',
-		index_beta		=> $index_beta,
-	});
+	};
+	$newuser_data->{index_classic} = 1 if $ENV{HTTP_USER_AGENT} =~ /msie [2-6]/i;
+
+	$self->setUser($uid, $newuser_data);
 
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");

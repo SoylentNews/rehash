@@ -379,6 +379,9 @@ sub handler {
 	}
 
 	my $user = prepareUser($uid, $form, $uri, $cookies, $method);
+	# Reload $uri because prepareUser() may have changed it.
+	$uri = $r->uri;
+
 	# "_dynamic_page" or any hash key name beginning with _ or .
 	# cannot be accessed from templates -- pudge
 	if ($uri =~ /\.pl$/ || $uri =~ /\.tmpl$/) {

@@ -33,12 +33,8 @@ __template__
 
 		<br>
 
-		[% 
-                IF !user.index_beta;
-                        beta_check = constants.markup_checked_attribute;
-                END;
-		%]
-		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="index_beta"[% beta_check %]> Use Classic Index</label></p>
+		[% classic_check = constants.markup_checked_attribute IF user.index_classic %]
+		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="index_classic" [% classic_check %]> Use Classic Index</label></p>
 
 		<br>
 

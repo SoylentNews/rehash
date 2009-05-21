@@ -19,25 +19,8 @@ my $start_time = Time::HiRes::time;
 	my $form	= getCurrentForm();
 	my $slashdb	= getCurrentDB();
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
-	my $script = $ENV{SCRIPT_NAME};
-	if (!$user->{is_anon} && defined $form->{usebeta}) {
-		my $index_beta = $form->{usebeta} eq "1" ? 1 : 0;
-		$slashdb->setUser($user->{uid}, { index_beta => $index_beta });
-		$user->{index_beta} = $index_beta;
-	}
-	$script = "/index2.pl" if $user->{index_beta} && !$form->{content_type} && $ENV{HTTP_USER_AGENT} !~ /MSIE [2-6]/;
 
-	if ($form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
-			# Any login attempt, successful or not, gets
-			# redirected to the homepage, to avoid keeping
-			# the password or nickname in the query_string of
-			# the URL (this is a security risk via "Referer")
-		|| $form->{upasswd} || $form->{unickname}
-	) {
-		my $refer = $form->{returnto} || $script;
-		redirect($refer); return;
-	}
-	redirect($script) if $user->{index_beta} && !$form->{content_type} && $ENV{HTTP_USER_AGENT} !~ /MSIE [2-6]/;
+	return if redirect_home_if_necessary();
 
 	my($stories, $Stories); # could this be MORE confusing please? kthx
 
@@ -349,6 +332,53 @@ my $start_time = Time::HiRes::time;
 #		}
 #	}
 
+}
+
+# Slash::Apache::User can turn a "/" request into an index.pl request
+# if the user has index_classic set or the user-agent is MSIE 6.
+# So, since this already is index.pl, be sure not to redirect to
+# "/" if either of those things is true, since that would be an
+# infinite redirection loop.
+
+sub redirect_home_if_necessary {
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $script = '';
+	if (!$user->{is_anon} && defined $form->{usebeta}) {
+		my $usebeta = $form->{usebeta} eq '1';
+		my $index_classic = $usebeta ? undef : 1;
+		if ($user->{index_classic} xor $index_classic) {
+			my $slashdb = getCurrentDB();
+			$slashdb->setUser($user->{uid}, { index_classic => $index_classic });
+			$user->{index_classic} = $index_classic;
+		}
+		$script = '/' if $usebeta
+			&& !$form->{content_type}
+			&& $ENV{HTTP_USER_AGENT} !~ /MSIE [2-6]/;
+	}
+
+	if (       $form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
+		|| $form->{upasswd}
+		|| $form->{unickname}
+	) {
+		# Any login attempt, successful or not, gets
+		# redirected to the homepage, to avoid keeping
+		# the password or nickname in the query_string of
+		# the URL (this is a security risk via "Referer").
+		# (If we've determined the user needs to go to
+		# index2.pl, send them there.)  Note that
+		# $form->{returnto} is processed by
+		# Slash::Apache::User::handler, which for reasons
+		# of a mysterious bug defers the actual redirect
+		# to be handled by this script.
+		$script = $form->{returnto} || '/';
+	}
+
+	if ($script) {
+		redirect($script);
+		return 1;
+	}
+	return 0;
 }
 
 sub getDispModesForStories {

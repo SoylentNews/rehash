@@ -29,13 +29,9 @@ __template__
 
                 <br>
 		
-		[% 
-                IF !user.index_beta;
-                        beta_check = constants.markup_checked_attribute;
-                END;
-		%]
+		[% classic_check = constants.markup_checked_attribute IF user.index_classic %]
 		<label>
-			<input type="checkbox" name="index_beta"[% beta_check %]> Use Classic Index
+			<input type="checkbox" name="index_classic" [% classic_check %]> Use Classic Index
 		</label>
 
 		<br><br>

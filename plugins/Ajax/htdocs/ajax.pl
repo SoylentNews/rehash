@@ -1657,7 +1657,7 @@ sub saveModalPrefs {
 			willing		=> ($params{willing}	     ? 1 : 0),
 			tags_turnedoff	=> ($params{showtags}	     ? undef : 1),
 			opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
-			index_beta	=> ($params{index_beta} ? 0 : 1 ),
+			index_classic	=> ($params{index_classic}   ? 1 : undef ),
 		};
 
 		if (defined $params{tzcode} && defined $params{tzformat}) {
@@ -1679,14 +1679,13 @@ sub saveModalPrefs {
 				$fh->removeUserSections();
 			} else {
 				$user_edits_table = {};
-				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize firehose_picker_search firehose_noslashboxes firehose_nosectionmenu disable_ua_check firehose_noautomore firehose_nographics smallscreen lowbandwidth simpledesign)) {
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_classic firehose_picker_search firehose_noslashboxes firehose_nosectionmenu disable_ua_check firehose_noautomore firehose_nographics smallscreen lowbandwidth simpledesign)) {
 					$user_edits_table->{$_} = undef;
 				}
 				foreach (qw(noicons dst dfid)) {
 					$user_edits_table->{$_} = 0;
 				}
 				$user_edits_table->{tzcode} = "EST";
-				$user_edits_table->{index_beta} = 1;
 			}
 
 		} else {
@@ -1699,7 +1698,7 @@ sub saveModalPrefs {
 				firehose_pause			=> ($params{paused} ? 0 : 1),
 				firehose_advanced		=> ($params{advanced} ? 1 : undef),
 				firehose_pagesize		=> ($params{pagesize} ? $params{pagesize} : "small"),
-				index_beta			=> ($params{index_beta} ? 0 : 1 ),
+				index_classic			=> ($params{index_classic} ? 1 : undef ),
 				firehose_disable_picker_search  => ($params{firehose_disable_picker_search} ? undef : 1),
 				smallscreen			=> ($params{smallscreen} ? 1 : undef),
 				lowbandwidth			=> ($params{lowbandwidth} ? 1 : undef),

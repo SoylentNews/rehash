@@ -45,7 +45,7 @@ __template__
 <input type="hidden" name="op" value="savehome">
 <input type="hidden" name="uid" value="[% user_edit.uid %]">
 		<label>
-			<input type="checkbox" name="index_beta" [% beta_check %]> Use Beta Index
+			<input type="checkbox" name="index_classic" [% classic_check %]> Use Classic Index
 		</label>
 
 		<label>

@@ -33,16 +33,16 @@ sub main {
 
 	my $op = $form->{op} || "";
 
-	if ($ENV{HTTP_USER_AGENT} =~ /MSIE [2-6]/) {
-		redirect("/index.pl");
-		return;
-	}
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED] || $user->{seclev} < $ops{$op}[MINSECLEV] ) {
 		$op = 'default';
 	}
 
-	# If default or list op and not logged in force them to be using allowed params or math anonval param
-	if (($op eq 'default' || $op eq 'list') && $user->{seclev} < $ops{$op}[0]) {
+	# If default or list op and not logged in, and the var is set to allow
+	# anonymous redirects to this .shtml, force them to be using allowed
+	# params or math anonval param if they want the dynamic page
+	if ($constants->{index_anon_firehoseshtml}
+		&& ($op eq 'default' || $op eq 'list')
+		&& $user->{is_anon}) {
 
 		my $redirect = 0;
 		if ($ops{$op}[4] && ref($ops{$op}[4]) eq "HASH") {
@@ -63,6 +63,7 @@ sub main {
 			redirect("$gSkin->{rootdir}/${prefix}firehose.shtml");
 			return;
 		}
+
 	}
 
 	my $title;
@@ -70,12 +71,10 @@ sub main {
 	$form->{'index'} = 1;
 	header($title, '') or return;
 
-
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
 
 	footer();
 }
-
 
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;

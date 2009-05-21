@@ -1546,14 +1546,26 @@ sub prepareUser {
 		setUserDate($user);
 	}
 
+	# The URI can be reset here.  This must be done before currentPage
+	# is set.
+        if ($uri eq '/index2.pl') {
+                # Under certain circumstances, switch out the URI without
+                # doing an HTTP redirect.
+                if ($user->{index_classic} || $r->header_in('User-Agent') =~ /MSIE [2-6]/) {
+                        $r->uri('/index.pl');
+                        $r->filename($constants->{basedir} . '/index.pl');
+			$uri = $r->uri;
+                }
+        }
+
 	if ($r) {
-		my %uri = $r->args;
-		if ($uri{ss} == 1) {
+		my %params = $r->args;
+		if ($params{ss} == 1) {
 			$user->{state}{explicit_smalldevice} = 1;
 			$user->{state}{smalldevice} = 1;
 		}
 
-		if ($uri{sd} == 1) {
+		if ($params{sd} == 1) {
 			$user->{state}{simpledesign} = 1;
 		}
 
@@ -1563,8 +1575,8 @@ sub prepareUser {
 			$user->{state}{smalldevice} = 1;
 		}
 
-		delete $user->{state}{smalldevice} if ((exists $uri{ss}) && ($uri{ss} == 0));
-		delete $user->{state}{simpledesign} if ((exists $uri{sd}) && ($uri{sd} == 0));
+		delete $user->{state}{smalldevice} if ((exists $params{ss}) && ($params{ss} == 0));
+		delete $user->{state}{simpledesign} if ((exists $params{sd}) && ($params{sd} == 0));
 
 		# Any options we're forcing onto SS/SD users.
 		if ($user->{state}{smalldevice}) {
