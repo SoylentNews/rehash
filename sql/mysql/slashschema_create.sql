@@ -541,7 +541,7 @@ CREATE TABLE file_queue (
 	stoid mediumint(8) unsigned default NULL,
 	fhid mediumint(8) unsigned default NULL,
 	file varchar(255) default NULL,
-	action enum('upload','thumbnails') default NULL,
+	action enum('upload','thumbnails','sprite') default NULL,
 	blobid VARCHAR(32) DEFAULT "" NOT NULL,
 	PRIMARY KEY  (fqid)
 ) ENGINE=InnoDB;
