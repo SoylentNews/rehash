@@ -1506,25 +1506,22 @@ function d2act () {
 	}
 }
 
-function toggleDisplayOptions() {
+function toggleDisplayOptions( newMode ) {
 	var gods  = $dom('gods');
 	var d2out = $dom('d2out');
-
-	// update user prefs
-	var newMode = '';
 
 	var isHidden = gods.style.display == 'none';
 	gods.style.display = 'none';
 
 	// none -> ( vertical -> horizontal -> rooted )
-	if ( user_d2asp || d2out.className == 'vertical' ) { // vertical->horizontal
+	if ( newMode==='horizontal' || user_d2asp || d2out.className==='vertical' && !newMode ) { // vertical->horizontal
 		newMode = d2out.className = 'horizontal';
 		D2.slider.setOrientation('x');
-	} else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
+	} else if ( d2out.className==='horizontal' && !newMode ) { // horizontal->rooted
 		newMode = 'rooted';
 		d2out.className = 'horizontal rooted';
 	} else {
-		if (!low_bandwidth) { // (rooted, none)->vertical
+		if ( !low_bandwidth ) { // (rooted, none)->vertical
 			newMode = d2out.className = 'vertical';
 			D2.slider.setOrientation('y');
 		} else { // vertical not happy in low-bandwidth
@@ -1546,6 +1543,10 @@ function toggleDisplayOptions() {
 
 	return false;
 }
+
+$(document).bind('firehose-setting-nolinks', function( event, hide ){
+	toggleDisplayOptions( hide ? 'horizontal' : 'vertical' );
+});
 
 
 function updateMoreNum(num) { // should be an integer, or empty string

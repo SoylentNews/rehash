@@ -56,6 +56,7 @@ END %]
 			$(function(){
 				$("#toggleleftmenu").click(function(){
 					var hide = $(this).setClass(applyMap('expanded', 'collapsed')).is('.collapsed');
+					$(document).trigger('firehose-setting-nolinks', hide);
 					$('div#yui-main div.yui-b, div#topfoot div.search').toggleClass('hideleftmenu', hide);
 					ajax_update({
 						op:			'firehose_save_section_menu_visible',
