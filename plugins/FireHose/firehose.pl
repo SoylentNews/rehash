@@ -100,7 +100,17 @@ sub main {
 				$item = $firehose_reader->getFireHoseBySidOrStoid($form->{sid});
 			}
 			if ($item && $item->{id}) {
-				$title = "$constants->{sitename} - $item->{title}" if $item->{title};
+				if ($ENV{HTTP_USER_AGENT} =~ /MSIE [2-6]/) {
+					if ($item->{type} eq "story") {
+						my $story = $firehose_reader->getStory($item->{srcid});
+						redirect("/artcicle.pl?sid=$story->{sid}");
+					} elsif ($item->{type} eq "journal") {
+						redirect("/journal.pl?op=display&uid=$item->{uid}&id=$item->{srcid}");
+					}
+				}
+				my $type = uc($item->{type});
+				my $skintitle = " $gSkin->{title}" if $gSkin->{skid} != $constants->{mainpage_skid};
+				$title = "$constants->{sitename}$skintitle | $item->{title}" if $item->{title};
 				my $author = $reader->getUser($item->{uid});
 				if ($author->{shill_id}) {
 					my $shill = $reader->getShillInfo($author->{shill_id});
