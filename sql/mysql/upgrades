@@ -6236,7 +6236,10 @@ ALTER TABLE firehose ADD COLUMN sprite_info text NOT NULL DEFAULT '';
 ALTER TABLE file_queue MODIFY COLUMN action enum('upload','thumbnails','sprite');
 INSERT INTO vars (name, value, description) VALUES ('firehose_link_article2', '0', 'True to link article2 from index2');
 
+# 2009-05-21
 UPDATE skins SET index_handler='index2.pl' WHERE index_handler='index.pl';
 INSERT INTO vars (name, value, description) VALUES ('index_anon_firehoseshtml', '0', 'Redirect index2.pl requests to firehose.shtml for anonymous, non-param requests?');
 INSERT INTO users_param (param_id, uid, name, value) SELECT NULL, uid, 'index_classic', '1' FROM users_param WHERE name='index_beta' AND value='0';
+
+INSERT INTO ajax_ops VALUES (NULL, 'admin_signoffbox', 'Slash::Admin', 'ajax_signoffbox', 'ajax_admin', 'createuse');
 

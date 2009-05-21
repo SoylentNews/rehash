@@ -19,6 +19,34 @@ function um_set_settings(behavior) {
 	}, 'links-vendors-content');
 }
 
+function storyInfo( selector_fragment ) {
+	// Pop-up, admin-only, the signoff history for this story.
+
+	// Where on the page shall we place the new pop-up?
+	var $where, $item=$('[tag-server='+selector_fragment+']');
+		// hang the pop-up from the first available of:
+	var $W = $item.find('div.tag-widget.body-widget:first');
+	$where = $related_trigger.		// whatever you clicked
+			add($W.find('.edit-toggle')).	// the disclosure triangle
+			add($item.find('#updown-'+selector_fragment));	// the nod/nix capsule
+
+	// Instantiate the pop-up at that position.
+	var popup_id = "storyinfo-" + $item.id;
+	createPopup(
+		$where,
+		'Story Info ' + createPopupButtons(
+			'<a href="#" onclick="return false">[?]</a></span><span><a href="#" onclick="closePopup(' + "'" + popup_id + "-popup'" + '); return false">[X]</a>'
+		),
+		popup_id
+	);
+
+	// Ask the server to fill in the pop-up's content.
+	ajax_update({
+		op:			'admin_signoffbox',
+		stoid:		fhitem_info($item, 'stoid')
+	}, popup_id + '-contents');
+}
+
 function tagsHistory( selector_fragment, context ) {
 	// Pop-up, admin-only, the history of tags applied to this item.
 
@@ -60,7 +88,11 @@ function tagsHistory( selector_fragment, context ) {
 //
 
 function firehose_admin_context( display ){
-	display.update_tags('extras history', { order: 'prepend', classes: 'b' });
+	var additions = 'extras history';
+	if ( $(display).is('.fhitem-story .tag-display') ) {
+		additions += ' info';
+	}
+	display.update_tags(additions, { order: 'prepend', classes: 'b' });
 }
 
 function firehose_handle_admin_commands( commands ){
@@ -75,6 +107,10 @@ function firehose_handle_admin_commands( commands ){
 
 			case 'history':
 				tagsHistory(id, 'firehose');
+				break;
+
+			case 'info':
+				storyInfo(id);
 				break;
 
 			case 'neverdisplay':

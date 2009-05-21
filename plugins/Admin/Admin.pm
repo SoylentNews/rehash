@@ -611,6 +611,16 @@ sub showSignoffBox {
 	return slashDisplay("sidebox", { title => $title, contents => $signofftext, name => "signoff" }, { Return => 1});
 }
 
+sub ajax_signoffbox {
+	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+
+	my $stoid = $form->{stoid};
+	my $admin = getObject("Slash::Admin");
+	return $admin->showSignoffBox($stoid, { contents_only => 1, use_title_for_header => 1 });
+}
+
 sub ajax_learnword {
 	my($self) = @_;
 	my $form = getCurrentForm();
