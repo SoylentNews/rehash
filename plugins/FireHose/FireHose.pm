@@ -4545,13 +4545,18 @@ sub linkFireHose {
 
 	if ($item->{type} eq "story") {
 		my $story = $self->getStory($item->{srcid});
-		my $story_link_ar = linkStory({
-			sid	=> $story->{sid},
-			link 	=> $story->{title},
-			tid 	=> $story->{tid},
-			skin	=> $story->{primaryskid}
-		}, 0);
-		$link_url = $story_link_ar->[0];
+		unless ($constants->{firehose_link_article2}) {
+			my $story_link_ar = linkStory({
+				sid	=> $story->{sid},
+				link 	=> $story->{title},
+				tid 	=> $story->{tid},
+				skin	=> $story->{primaryskid}
+			}, 0);
+			$link_url = $story_link_ar->[0];
+		} else {
+			my $story_skin = $self->getSkin($story->{primaryskid});
+			$link_url = "$story_skin->{rootdir}/story/$story->{sid}/$linktitle";
+		}
 	} elsif ($item->{type} eq "journal") {
 		my $the_user = $self->getUser($item->{uid});
 		my $rootdir = $constants->{real_rootdir};
