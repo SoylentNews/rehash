@@ -1679,13 +1679,14 @@ sub saveModalPrefs {
 				$fh->removeUserSections();
 			} else {
 				$user_edits_table = {};
-				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_beta firehose_picker_search firehose_noslashboxes firehose_nosectionmenu disable_ua_check firehose_noautomore firehose_nographics smallscreen lowbandwidth simpledesign)) {
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize firehose_picker_search firehose_noslashboxes firehose_nosectionmenu disable_ua_check firehose_noautomore firehose_nographics smallscreen lowbandwidth simpledesign)) {
 					$user_edits_table->{$_} = undef;
 				}
 				foreach (qw(noicons dst dfid)) {
 					$user_edits_table->{$_} = 0;
 				}
 				$user_edits_table->{tzcode} = "EST";
+				$user_edits_table->{index_beta} = 1;
 			}
 
 		} else {

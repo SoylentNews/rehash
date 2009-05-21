@@ -79,13 +79,13 @@ __template__
 		<br>
 
 		[% smallscreen_check = ''; IF user.smallscreen; smallscreen_check = constants.markup_checked_attribute; END; %]
-		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="smallscreen" id="smallscreen" [% smallscreen_check %] onclick="setLayoutPrefs()"> Small Screen</label></p>
+		<label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="smallscreen" id="smallscreen" [% smallscreen_check %] onclick="setLayoutPrefs()"> Small Screen</label>
 
 		[% lowbandwidth_check = ''; IF user.lowbandwidth; lowbandwidth_check = constants.markup_checked_attribute; END; %]
-                <p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="lowbandwidth" id="lowbandwidth" [% lowbandwidth_check %] onclick="setLayoutPrefs()"> Lowbandwidth</label></p>
+                <label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="lowbandwidth" id="lowbandwidth" [% lowbandwidth_check %] onclick="setLayoutPrefs()"> Lowbandwidth</label>
 
 		[% simple_check = ''; IF user.simpledesign; simple_check = constants.markup_checked_attribute; END; %]
-                <p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="simpledesign" id="simpledesign" [% simple_check %] onclick="setLayoutPrefs()"> Simple Design</label></p>
+                <label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="simpledesign" id="simpledesign" [% simple_check %] onclick="setLayoutPrefs()"> Simple Design</label>
 
 		<div style="padding-left: 20px;">
 		<table>
