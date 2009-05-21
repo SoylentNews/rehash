@@ -64,6 +64,7 @@ __template__
 	// coremetrics
 	cmSetProduction();
 	cmCreatePageviewTag('OLD STORIES');
+	cmCreatePageviewTag && cmCreatePageviewTag('OLD STORIES') && (cmCreatePageviewTag = null);
 })();
 </script>
 

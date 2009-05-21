@@ -42,6 +42,7 @@ Want to know more about bookmarks? See the <a href="[% gSkin.rootdir %]/faq/tags
 	// coremetrics
 	cmSetProduction();
 	cmCreatePageviewTag('POPULAR BOOKMARKS');
+	cmCreatePageviewTag && cmCreatePageviewTag('POPULAR BOOKMARKS') && (cmCreatePageviewTag = null);
 })();
 </script>
 

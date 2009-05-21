@@ -53,7 +53,7 @@ END %]
 <script type="text/javascript">
 // coremetrics
 cmSetProduction();
-cmCreatePageviewTag('ARTICLE DETAIL', null, null, null,'[% story.title %]-_-[% story.section %]');  
+cmCreatePageviewTag && cmCreatePageviewTag('ARTICLE DETAIL', null, null, null,'[% story.title %]-_-[% story.section %]') && (cmCreatePageviewTag = null);
 </script>
 
 <div class="prev-next">

@@ -40,7 +40,7 @@ __template__
 (function() {
 	// coremetrics
 	cmSetProduction();
-	cmCreatePageviewTag('OLD POLLS');
+	cmCreatePageviewTag && cmCreatePageviewTag('OLD POLLS') && (cmCreatePageviewTag = null);
 })();
 </script>
 
