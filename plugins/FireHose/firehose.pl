@@ -103,7 +103,7 @@ sub main {
 				if ($ENV{HTTP_USER_AGENT} =~ /MSIE [2-6]/) {
 					if ($item->{type} eq "story") {
 						my $story = $firehose_reader->getStory($item->{srcid});
-						redirect("/artcicle.pl?sid=$story->{sid}");
+						redirect("/article.pl?sid=$story->{sid}");
 					} elsif ($item->{type} eq "journal") {
 						redirect("/journal.pl?op=display&uid=$item->{uid}&id=$item->{srcid}");
 					}
