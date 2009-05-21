@@ -6229,3 +6229,9 @@ UPDATE firehose_view SET shortcut="yes", short_url = viewname WHERE viewname IN 
 
 # 2009-05-14
 UPDATE vars SET value = 'T_2_5_0_256' WHERE name = 'cvs_tag_currentcode';
+
+# For plugins/Firehose
+ALTER TABLE firehose ADD COLUMN sprite varchar(128) NOT NULL DEFAULT '';
+ALTER TABLE firehose ADD COLUMN sprite_info text NOT NULL DEFAULT '';
+ALTER TABLE file_queue MODIFY COLUMN action enum('upload','thumbnails','sprite');
+
