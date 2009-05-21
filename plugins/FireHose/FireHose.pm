@@ -32,6 +32,8 @@ use POSIX qw(ceil);
 use LWP::UserAgent;
 use URI;
 use Time::HiRes;
+use File::Spec::Functions qw(catdir);
+use File::Path qw(mkpath);
 
 use Slash;
 use Slash::Display;
@@ -4703,6 +4705,63 @@ sub getProjectsChangedSince {
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
 
 	return $hr_ar;
+}
+
+sub createSprite {
+	my($self, $fhid, $options) = @_;
+
+	my $constants = getCurrentStatic();
+	my $convert = $constants->{imagemagick_convert};
+	my $convert_ops = ' -background none -mosaic -bordercolor none -border 0x0 -quality 100 -depth 8';
+	my $convert_image_ops = '';
+	my $border = 50;
+	my $x_offset = 0;
+	my $y_offset = 0;
+	my $output_file = $fhid . '.png';
+	my $image_ar = $self->getSpriteInfo($fhid);
+
+	# Build the param list to convert.
+	foreach my $image (@$image_ar) {
+		$convert_image_ops .= " -page +0+$y_offset " . $image->{file};
+		$image->{x_coord} = $x_offset;
+		$image->{y_coord} = $y_offset;
+		$image->{y_coord} = '-' . $image->{y_coord} if ($image->{y_coord});
+		($image->{raw_filename}) = $image->{file} =~ m{^.+/(.+)\.\w{3}$};
+		$y_offset += ($border + $image->{height});
+	}
+
+	# Create the dest path.
+	my $bd = $constants->{basedir};
+	my ($numdir) = sprintf("%09d", $fhid);
+	my ($i, $j) = $numdir =~ /(\d\d\d)(\d\d\d)\d\d\d/;
+	my $path = catdir($bd, "images", "firehose", $i, $j);
+	mkpath($path, 0, 0775);
+
+	# Increment the version number of the sprite.
+	my $version = 1;
+	if (-s "$path/$output_file") {
+		my $sprite_info = $self->sqlSelect('sprite_info', 'firehose', "id = $fhid");
+		if ($sprite_info) {
+			($version) = $sprite_info =~ m{$output_file\?(\d)};
+			++$version;
+		}
+	}
+
+	# Format CSS
+	my $css =
+		slashDisplay('format_sprite_info', {
+			fhid        => $fhid,
+			path        => "firehose/$i/$j",
+			sprite_name => $output_file,
+			version     => $version,
+			images      => $image_ar,
+		}, { Page => 'firehose', Return => 1 });
+
+	# Convert and UPDATE
+	my $cmd = $convert . $convert_image_ops . $convert_ops . " $path/$output_file";
+	system($cmd);
+
+	$self->sqlUpdate('firehose', { sprite => "$i/$j/$output_file", sprite_info => $css }, "id = $fhid");
 }
 
 sub getSpriteInfo {
