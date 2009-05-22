@@ -383,6 +383,7 @@ sub getSectionSkidFromFilter {
 sub getCSSForSkid {
 	my($self,$skid,$layout) = @_;
 	my $form = getCurrentForm();
+	my $secure = apacheConnectionSSL();
 
 	$layout = defined $layout ? $layout: 
 		defined $form->{layout} ? $form->{layout} : "yui";
@@ -398,11 +399,12 @@ sub getCSSForSkid {
 			"css.skin=skins.name and css.layout=$layout_q and admin='no' AND skins.skid=$skid_q"
 		);
 	}
-	
+
 	my $retval = "";
 	my $skin_name = "";
 	foreach (@$css) {
 		$skin_name = $_->{skin_name};
+		$_->{file} =~ s/\.css/.ssl.css/ if $secure;
 		$retval .= getData('alternate_section_stylesheet', { css => $_, }, 'firehose');
 	}
 	return $retval;
@@ -2409,6 +2411,8 @@ sub ajaxFireHoseGetUpdates {
                 $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time });
         }
 
+	my $sprite_info = $firehose->getSpriteInfoByFHID($ordered->[0]);
+
 	my $color_js = "\$('.currcolor').removeClass('red orange yellow green blue violet indigo black').addClass('$opts->{color}');";
 	my $eval_last = "$color_js $title_js";
 
@@ -2423,6 +2427,7 @@ sub ajaxFireHoseGetUpdates {
 		value 		=> $values,
 		events		=> $events,
 		dynamic_blocks  => $dynamic_blocks,
+		sprite_info     => $sprite_info,
 	});
 	my $reskey_dump = "";
 	my $update_time_dump;
@@ -4545,13 +4550,18 @@ sub linkFireHose {
 
 	if ($item->{type} eq "story") {
 		my $story = $self->getStory($item->{srcid});
-		my $story_link_ar = linkStory({
-			sid	=> $story->{sid},
-			link 	=> $story->{title},
-			tid 	=> $story->{tid},
-			skin	=> $story->{primaryskid}
-		}, 0);
-		$link_url = $story_link_ar->[0];
+		unless ($constants->{firehose_link_article2}) {
+			my $story_link_ar = linkStory({
+				sid	=> $story->{sid},
+				link 	=> $story->{title},
+				tid 	=> $story->{tid},
+				skin	=> $story->{primaryskid}
+			}, 0);
+			$link_url = $story_link_ar->[0];
+		} else {
+			my $story_skin = $self->getSkin($story->{primaryskid});
+			$link_url = "$story_skin->{rootdir}/story/$story->{sid}/$linktitle";
+		}
 	} elsif ($item->{type} eq "journal") {
 		my $the_user = $self->getUser($item->{uid});
 		my $rootdir = $constants->{real_rootdir};
@@ -4818,7 +4828,22 @@ sub getSpriteInfo {
 
 }
 
+sub getSpriteInfoByFHID {
+	my ($self, $fhid, $options) = @_;
 
+	my $sprite = {};
+	return {} if !$fhid;
+
+	my $fhid_q = $self->sqlQuote($fhid);
+	my $sprite_info = $self->sqlSelect('sprite_info', 'firehose', "id = $fhid_q");
+
+	foreach my $rule ($sprite_info =~ /(\..+?\{.+?\})/g) {
+		my ($topic) = $rule =~ /^\.(.+?)\s?\{.+$/;
+		$sprite->{$topic} = $rule;
+	}
+
+	return  $sprite;
+}
 
 1;
 

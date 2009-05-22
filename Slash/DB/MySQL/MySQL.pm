@@ -1339,7 +1339,18 @@ sub createAccessLog {
 		}
 	}
 
-	if ($dat =~ /(.*)\/(\d{2}\/\d{2}\/\d{2}\/\d{4,7}).*/) {
+	if ($op eq "firehose") {
+		if ($form->{type}) {
+			my $type_to_op = {
+				story => 'article2',
+				journal => 'journal2',
+				submission => 'submission2'
+			};
+			$op = $type_to_op->{$form->{type}} if $type_to_op->{$form->{type}};
+		}
+	}
+
+	if ($op ne "firehose" && $dat =~ /(.*)\/(\d{2}\/\d{2}\/\d{2}\/\d{4,7}).*/) {
 		$dat = $2;
 		$op = 'article';
 		my $firstword = $1;
