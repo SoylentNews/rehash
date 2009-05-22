@@ -108,7 +108,7 @@ sub main {
 						redirect("/journal.pl?op=display&uid=$item->{uid}&id=$item->{srcid}");
 					}
 				}
-				my $type = uc($item->{type});
+				my $type = ucfirst($item->{type});
 				my $skintitle = " $gSkin->{title}" if $gSkin->{skid} != $constants->{mainpage_skid};
 				$title = "$constants->{sitename}$skintitle $type | $item->{title}" if $item->{title};
 				my $author = $reader->getUser($item->{uid});
