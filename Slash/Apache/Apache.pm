@@ -504,6 +504,7 @@ sub IndexHandler {
 				# consider using File::Basename::basename() here
 				# for more robustness, if it ever matters -- pudge
 				my($base) = split(/\./, $index_handler);
+				$base = 'index' if $base eq 'index2';
 				$r->uri("/$key/$base.shtml");
 				$r->filename("$basedir/$key/$base.shtml");
 				writeLog('shtml');
