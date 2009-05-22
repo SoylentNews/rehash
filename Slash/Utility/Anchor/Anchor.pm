@@ -199,6 +199,9 @@ sub header {
 #print STDERR "header(options->page) defined: '$options->{page}' for title '$data->{title}'\n" if defined($options->{page});
 	$data->{tab_selected} = $options->{tab_selected} if $options->{tab_selected};
 	$data->{nopageid} = $options->{nopageid};
+	for my $key (grep /^shtmlpl/, keys %$options) {
+		$data->{$key} = $options->{$key};
+	}
 
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
