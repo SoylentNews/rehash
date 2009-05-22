@@ -20,13 +20,8 @@ __name__
 printCommentsMain
 __template__
 [% horiz = 0; rooted = 0;
-   IF gSkin.name == 'idle' || user.lowbandwidth;
+   IF gSkin.name == 'idle' || user.lowbandwidth || user.firehose_hide_section_menu;
    	horiz = 1;
-   ELSIF user.comments_control;
-   	rooted = 1 IF user.comments_control == 'rooted';
-   	horiz = 1 IF rooted || user.comments_control == 'horizontal';
-   ELSE;
-   	horiz = 1 IF constants.comments_control_horizontal;
    END;
    count = count || 0;
    discussion2 = Slash.discussion2();
