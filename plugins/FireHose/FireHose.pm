@@ -2411,6 +2411,8 @@ sub ajaxFireHoseGetUpdates {
                 $dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time });
         }
 
+	my $sprite_info = $firehose->getSpriteInfoByFHID($ordered->[0]);
+
 	my $color_js = "\$('.currcolor').removeClass('red orange yellow green blue violet indigo black').addClass('$opts->{color}');";
 	my $eval_last = "$color_js $title_js";
 
@@ -2425,6 +2427,7 @@ sub ajaxFireHoseGetUpdates {
 		value 		=> $values,
 		events		=> $events,
 		dynamic_blocks  => $dynamic_blocks,
+		sprite_info     => $sprite_info,
 	});
 	my $reskey_dump = "";
 	my $update_time_dump;
@@ -4825,7 +4828,22 @@ sub getSpriteInfo {
 
 }
 
+sub getSpriteInfoByFHID {
+	my ($self, $fhid, $options) = @_;
 
+	my $sprite = {};
+	return {} if !$fhid;
+
+	my $fhid_q = $self->sqlQuote($fhid);
+	my $sprite_info = $self->sqlSelect('sprite_info', 'firehose', "id = $fhid_q");
+
+	foreach my $rule ($sprite_info =~ /(\..+?\{.+?\})/g) {
+		my ($topic) = $rule =~ /^\.(.+?)\s?\{.+$/;
+		$sprite->{$topic} = $rule;
+	}
+
+	return  $sprite;
+}
 
 1;
 
