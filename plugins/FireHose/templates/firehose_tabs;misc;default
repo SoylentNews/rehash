@@ -69,8 +69,8 @@ END %]
 			</script>
 		[% END %]
 	[% IF article_header;
-		options.view = "stories";
 		IF item;
+			options.view = "stories";
 			IF item.type != "story";	
 				options.view = "recent";
 				pop_val = fh.getPopLevelForPopularity(item.userpop);
