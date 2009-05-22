@@ -42,6 +42,7 @@ $task{$me}{code} = sub {
 	my $fontname = $constants->{topic_tree_draw_fontname} || 'freefont/FreeMono';
 	my $fontsize = $constants->{topic_tree_draw_fontsize} || 10;
 	my $g = GraphViz->new(
+		concentrate => 1,		# edge merging for clarity
 		epsilon => 0.001,		# try real hard to reduce clutter
 		rankdir => 1,			# horizontal layout
 		node =>	{ fontname => $fontname, fontsize => $fontsize },
