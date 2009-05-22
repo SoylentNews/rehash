@@ -6243,3 +6243,6 @@ INSERT INTO users_param (param_id, uid, name, value) SELECT NULL, uid, 'index_cl
 
 INSERT INTO ajax_ops VALUES (NULL, 'admin_signoffbox', 'Slash::Admin', 'ajax_signoffbox', 'ajax_admin', 'createuse');
 
+# 2009-05-21
+UPDATE vars SET value = 'T_2_5_0_257' WHERE name = 'cvs_tag_currentcode';
+
