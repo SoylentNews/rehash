@@ -96,7 +96,7 @@ sub replace_header {
 	my($text, $options) = @_;
 
 	my $title = $options->{title} || '';
-	my $header_text = header($title, '', { Return => 1, Page => 'index2' });
+	my $header_text = header($title, '', { Return => 1, Page => 'index2', "shtmlpl_$options->{type}" => 1 });
 
 	my $new_header;
 	my $replace_anchor;
