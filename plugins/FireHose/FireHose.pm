@@ -404,7 +404,7 @@ sub getCSSForSkid {
 	my $skin_name = "";
 	foreach (@$css) {
 		$skin_name = $_->{skin_name};
-		$_{file} =~ s/\.css/.ssl.css/ if $secure;
+		$_->{file} =~ s/\.css/.ssl.css/ if $secure;
 		$retval .= getData('alternate_section_stylesheet', { css => $_, }, 'firehose');
 	}
 	return $retval;
