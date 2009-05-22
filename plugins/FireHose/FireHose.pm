@@ -4790,6 +4790,11 @@ sub getSpriteInfo {
 		my $options = $self->getAndSetOptions($opts);
 		$options->{spritegen} =  1;
 		$options->{startdateraw} = $item->{createtime};
+		
+		# Don't filter out items in the future
+		$options->{createtime_no_future} = 0;
+		$options->{createtime_subscriber_future} = 0;
+
 		my ($items, $info) = $self->getFireHoseEssentials($options);
 
                 my $i = 0;
