@@ -22,61 +22,59 @@ END
 [% END %]
 <br>
 
-<h3><a href="/users.pl?op=edituser" onclick="javascript:getModalPrefs('user', 'User', 1); return false" style="text-decoration: none;">User Info</a>&nbsp;<a href="/users.pl?op=edituser" onclick="displayModalPrefHelp('modalprefhelp_userinfo'); return false" title="Click To Expand Help" class="help">?</a></h3>
-
-<div style="padding-left: 10px;">
+<h3><a href="/users.pl?op=edituser" onclick="javascript:getModalPrefs('user', 'User', 1); return false" >User Info</a>&nbsp;<a href="/users.pl?op=edituser" onclick="displayModalPrefHelp('modalprefhelp_userinfo'); return false" title="Click To Expand Help" class="help">?</a></h3>
+<div class="h">
         <div id="modalprefhelp_userinfo" class="modalprefhelp" style="display: none;">
         Configure your real name, email address, instant messaging nicks, your sig, and more. You may also change your password and manage your subscriptions from here.
         </div>
 
-        <div style="padding-left: 15px;"><a href="/users.pl?op=edituser" onclick="javascript:getModalPrefs('user', 'User', 1); return false">General</a>, <a href="/my/messages" onclick="getModalPrefs('messages', 'Messages', 1); return false">Messages</a>, <a href="/subscribe.pl">Subscriptions</a>, <a href="/my/password">Password</a>.</div>
+        <div><a href="/users.pl?op=edituser" onclick="javascript:getModalPrefs('user', 'User', 1); return false">General</a>, <a href="/my/messages" onclick="getModalPrefs('messages', 'Messages', 1); return false">Messages</a>, <a href="/subscribe.pl">Subscriptions</a>, <a href="/my/password">Password</a>.</div>
 </div>
 
 <br>
 
-<h3><a href="/users.pl?op=edithome" onclick="javascript:getModalPrefs('home', 'Homepage', 1); return false" style="text-decoration: none;">Classic Index</a>&nbsp;<a href="/users.pl?op=edithome" onclick="displayModalPrefHelp('modalprefhelp_index'); return false" title="Click To Expand Help" class="help">?</a></h3>
-
-<div style="padding-left: 10px;">
+<h3><a href="/users.pl?op=edithome" onclick="javascript:getModalPrefs('home', 'Homepage', 1); return false" >Classic Index</a>&nbsp;<a href="/users.pl?op=edithome" onclick="displayModalPrefHelp('modalprefhelp_index'); return false" title="Click To Expand Help" class="help">?</a></h3>
+<div class="h">
         <div id="modalprefhelp_index" class="modalprefhelp" style="display: none;">
         Configure the homepage's general look and feel. Set your date and time, toggle off tags, and set up your Slashboxes.
         You also have the ability to choose how much or how little content you want to see from each section. Further, you have
         the ability to choose if you want to view each type of article in 'Full Text' or 'Abbreviated' format.
         </div>
 
-        <div style="padding-left: 15px;"><a href="/users.pl?op=edithome" onclick="getModalPrefs('home', 'Homepage', 1); return false">General</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false">Slashboxes</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false">Sections</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('authors', 'Authors', 1); return false">Authors</a>.</div>
+        <div><a href="/users.pl?op=edithome" onclick="getModalPrefs('home', 'Homepage', 1); return false">General</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false">Slashboxes</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false">Sections</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('authors', 'Authors', 1); return false">Authors</a>.</div>
 </div>
 
 <br>
-<h3><a href="#" onclick="javascript:getModalPrefs('fhlayout', 'Index Beta Settings', 1); return false" style="text-decoration: none;">Dynamic Index</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_indexbeta'); return false" title="Click To Expand Help" class="help">?</a></h3>
-
-<div style="padding-left: 10px;">
+<h3><a href="#" onclick="javascript:getModalPrefs('fhlayout', 'Index Beta Settings', 1); return false" >Dynamic Index</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_indexbeta'); return false" title="Click To Expand Help" class="help">?</a></h3>
+<div class="h">
 	<div id="modalprefhelp_indexbeta" class="modalprefhelp" style="display: none;">
 		Configure the layout of the Dynamic Index, what items are excluded, and settings for different view tabs.
 	</div>
 </div>
 
-	<div style="padding-left: 15px;"><a href="#" onclick="getModalPrefs('fhlayout', 'Index Beta Settings', 1); return false">Layout</a>, <a href="#" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false">Exclusions</a>, <a href="#" onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false">Stories</a>, <a href="#" onclick="getModalPrefs('fhviewrecent', 'Customize Recent View', 1); return false">Recent</a>, <a href="#" onclick="getModalPrefs('fhviewpopular', 'Customize Popular View', 1); return false">Popular</a>, <a href="#" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false">Search</a>.</div>
-
+<div class="h">
+	<div><a href="#" onclick="getModalPrefs('fhlayout', 'Index Beta Settings', 1); return false">Layout</a>, <a href="#" onclick="getModalPrefs('fhexclusions', 'Exclusions', 1); return false">Exclusions</a>, <a href="#" onclick="getModalPrefs('fhviewstories', 'Customize Stories View', 1); return false">Stories</a>, <a href="#" onclick="getModalPrefs('fhviewrecent', 'Customize Recent View', 1); return false">Recent</a>, <a href="#" onclick="getModalPrefs('fhviewpopular', 'Customize Popular View', 1); return false">Popular</a>, <a href="#" onclick="getModalPrefs('fhviewsearch', 'Customize Search View', 1); return false">Search</a>.</div>
+</div>
 <br>
 
-<h3><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %] style="text-decoration: none;">Discussions</a>&nbsp;<a href="/users.pl?op=editcomm" onclick="displayModalPrefHelp('modalprefhelp_discussions'); return false" title="Click To Expand Help" class="help">?</a></h3>
-
-<div style="padding-left: 10px;">
+<h3><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %] >Discussions</a>&nbsp;<a href="/users.pl?op=editcomm" onclick="displayModalPrefHelp('modalprefhelp_discussions'); return false" title="Click To Expand Help" class="help">?</a></h3>
+<div class="h">
         <div id="modalprefhelp_discussions" class="modalprefhelp" style="display: none;">
         Change which discussion style you prefer to use, hide your email address, display your sig, and apply karma and subscriber
         bonuses to comments. You may also sort comments by their score or date, and choose how many to retrieve at one time.
         </div>
 
-        <div style="padding-left: 15px;"><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false"[% END %]>Posting</a>, <a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %]>Viewing</a>.</div>
+        <div><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false"[% END %]>Posting</a>, <a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %]>Viewing</a>.</div>
 </div>
 
 <br>
 
 [% IF user.is_admin %]
-<h3><a href="#" onclick="javascript:getModalPrefs('admin', 'Admin'); return false" style="text-decoration: none;">Admin</a></h3>
-<div style="padding-left: 15px;">
+<h3><a href="#" onclick="javascript:getModalPrefs('admin', 'Admin'); return false" >Admin</a></h3>
+<div class="h">
         Legacy Preference Pages<br>
         <a href="/users.pl?op=edituser" target="_blank">User</a>, <a href="/users.pl?op=edithome" target="_blank">Homepage</a>, <a href="/users.pl?op=editcomm" target="_blank">Comments</a>.
+</div>
 </div>
 [% END %]
 
