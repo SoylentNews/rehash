@@ -66,7 +66,7 @@ EOT
 	my $qlid = $slashdb->_querylog_start('SELECT', 'accesslog');
 	my $sth = $logdb->sqlSelectMany("dat", "accesslog",
 		"id BETWEEN $lastmaxid AND $newmaxid
-			AND status=200 AND op='article'");
+			AND status=200 AND op in ('article','article2')");
 	while (my($dat) = $sth->fetchrow_array()) {
 		next unless $dat =~ m{^\d+/\d+/\d}; # got 3 sets of digits? good enough
 		$sid_count{$dat}++;
