@@ -39,7 +39,22 @@ Qualified calls, e.g., TypeOf.list(o), return a typename just as TypeOf(o) would
 
 		TypeOf(o)==='number'		=> exclude NaN (i.e., typeof(o)==='number' && !isNaN(o))
 		TypeOf.number(o)==='number'	=> exclude NaN and +/- Infinity (i.e., typeof(o)==='number' && isFinite(o))
-		TypeOf.number(o)			=> include NaN, +/- Infinity (i.e., typeof(o)==='number')
+		TypeOf.number(o)			=> include NaN, +/- Infinity (i.e., typeof(o)==='number')... but
+			also includes the following:
+
+	JavaScript is "flexible" with types.  Using == rather than ===, some
+	examples and TypeOf.number's results:
+		'number (boolean)'	true == 1
+		'number (boolean)'	false == 0
+		'number (null)'		null == 0
+		'number (string)'	'' == 0
+		'Infinity (string)'	'Infinity' == Infinity
+		'number (string)'	'5' == 5
+		'number (array)'	[] == 0
+		'number (array)'	[7] == 7
+	For any expression, x, that _can_ be interpreted as a number: x/1 gives you the number value.
+
+	Let this be a lesson to you: === is almost _always_ preferable to ==.
 
 
 Recognizes nodes:
@@ -63,6 +78,9 @@ Recognizes events:
 								what.hide();
 			}
 		}
+
+	Uninitialized event objects return their event category if possible (e.g., 'MouseEvents')
+	or else 'event'.
 
 Recognizes some "almost builtin" types:
 
@@ -96,6 +114,19 @@ function trim( tk ){
 }
 
 
+function qualify_number( o ){
+	var	tk=typekey(o), how;
+
+	if ( tk===NUM_TK ) {
+		how = '';
+	} else if ( isNaN(o/=1) ) {
+		return false;
+	} else {
+		how = ' (' + KNOWN_TYPE[ tk ] + ')';
+	}
+
+	return (isFinite(o) ? 'number' : o.toString()) + how;
+}
 
 function maybe_fn( o ){
 	return false;
@@ -110,7 +141,7 @@ function maybe_event( o ){
 }
 
 function maybe_list( o ){
-	try { return typekey(n=o.length)===NUM_TK && isFinite(n) && (!n || n-1 in o) && LIST_T; } catch ( e ) {}
+	try { return qualify_number(n=o.length)==='number' && (!n || n-1 in o) && LIST_T; } catch ( e ) {}
 }
 
 function maybe_node( o ){
@@ -158,9 +189,7 @@ TypeOf.list = function( o ){
 	return tk in LIST_TYPE ? LIST_TYPE[ tk ] : !!o && maybe_list(o);
 };
 TypeOf.node = qualify_node;
-TypeOf.number = function( o ){
-	return ots.call(o)===NUM_TK && (isFinite(o) ? 'number' : o.toString());
-};
+TypeOf.number = qualify_number;
 TypeOf.object = function( o ){
 	return trim(typekey(o).replace(NAN_TK, NUM_TK));
 };
