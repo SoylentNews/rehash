@@ -43,7 +43,6 @@ __template__
 <!--
 [%- IF gSkin.name != 'idle' %]
 	D2.d2_keybindings_disable()[191] = 1;[% END # turn off '/' key %]
-	window.onscroll = D2.d2act;
 	D2.boxStatus(1);
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }, gSkin) %]
 //-->

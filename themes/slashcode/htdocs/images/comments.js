@@ -1464,7 +1464,7 @@ function enableControls() {
 	morelink.removeClass('hide');
 	morelink.parents('span.nbutton:first').removeClass('hide');
 
-	d2act();
+	D2.fixWidgetLayout();
 	loaded = 1;
 }
 
@@ -1472,81 +1472,6 @@ function floatButtons () {
 	$dom('gods').className='thor';
 }
 
-function d2act () {
-	var gd = $dom('d2act');
-	if (gd) {
-		var targetTop = Position('commentwrap').top;
-		var vOffset = 0;
-		if ( typeof window.pageYOffset == 'number' )
-			vOffset = window.pageYOffset;
-		else if ( document.body && document.body.scrollTop )
-			vOffset = document.body.scrollTop;
-		else if ( document.documentElement && document.documentElement.scrollTop )
-			vOffset = document.documentElement.scrollTop;
-
-		var oldpos = gd.style.position;
-
-		var mode = $dom('d2out').className;
-		if (!user_d2asp && (mode=='horizontal rooted' || targetTop>vOffset)) {
-			gd.style.position = 'absolute';
-			gd.className      = 'rooted';
-			gd.style.top      = '0px';
-		} else {
-			gd.style.position = 'fixed';
-			gd.className      = '';
-			gd.style.top      = '0px';
-		}
-
-		// for Safari and maybe others, force redraw on change
-		if ( oldpos != gd.style.position ) {
-			gd.style.display = 'none';
-			setTimeout("$dom('d2act').style.display = 'inline'", 1);
-			// gd.style.display = 'inline';
-		}
-	}
-}
-
-function toggleDisplayOptions( newMode ) {
-	var gods  = $dom('gods');
-	var d2out = $dom('d2out');
-
-	var isHidden = gods.style.display == 'none';
-	gods.style.display = 'none';
-
-	// none -> ( vertical -> horizontal -> rooted )
-	if ( newMode==='horizontal' || user_d2asp || d2out.className==='vertical' && !newMode ) { // vertical->horizontal
-		newMode = d2out.className = 'horizontal';
-		D2.slider.setOrientation('x');
-	} else if ( d2out.className==='horizontal' && !newMode ) { // horizontal->rooted
-		newMode = 'rooted';
-		d2out.className = 'horizontal rooted';
-	} else {
-		if ( !low_bandwidth ) { // (rooted, none)->vertical
-			newMode = d2out.className = 'vertical';
-			D2.slider.setOrientation('y');
-		} else { // vertical not happy in low-bandwidth
-			newMode = d2out.className = 'horizontal';
-			D2.slider.setOrientation('x');
-		}
-	}
-
-	d2act();
-	gods.style.display = 'block';
-
-	if (!user_is_anon) {
-		var params = {};
-		params['comments_control'] = newMode;
-		params['op'] = 'comments_set_prefs';
-		params['reskey'] = reskey_static;
-		ajax_update(params);
-	}
-
-	return false;
-}
-
-$(document).bind('firehose-setting-nolinks', function( event, hide ){
-	toggleDisplayOptions( hide ? 'horizontal' : 'vertical' );
-});
 
 
 function updateMoreNum(num) { // should be an integer, or empty string
@@ -1764,7 +1689,7 @@ function keyHandler(e, k) {
 			if (keyo) {
 				if (keyo['toggle']) {
 					if (keyo['widget'])
-						toggleDisplayOptions();
+						D2.toggleWidgetRooted();
 
 				// keys that rely on current comment
 				} else if (keyo['current'] && current_cid) {
@@ -2147,7 +2072,6 @@ var packageObj = Slash.Discussion = {
 	ajaxFetchComments:      ajaxFetchComments,
 	boxStatus:              boxStatus,
 	cancelReply:            cancelReply,
-	d2act:                  d2act,
 	doModerate:             doModerate,
 	editReply:              editReply,
 	finishLoading:          finishLoading,
@@ -2161,7 +2085,6 @@ var packageObj = Slash.Discussion = {
 	setFocusComment:        setFocusComment,
 	submitCountdown:        submitCountdown,
 	submitReply:            submitReply,
-	toggleDisplayOptions:   toggleDisplayOptions,
 	updateMoreNum:          updateMoreNum,
 
 	changeTHT:              changeTHT,
@@ -2474,5 +2397,76 @@ D2Slider.prototype = {
 	}
 
 };
+
+})();
+
+
+(function(){
+var $d2act, d2out, $gods, $links, $commentwrap,
+	MODE_RE=/^(vertical|horizontal)(?:\s+(rooted))?/, AXIS=1, ROOTED=2;
+
+function fixLayout(){
+	var	mode		= MODE_RE.exec(d2out.className),
+		vertical	= mode[AXIS]==='vertical',
+		rootY		= vertical
+						? Bounds($links).bottom
+						: Position($commentwrap).top,
+		css			= { position:'absolute', display:'inline', top:'0px' },
+		cn			= 'rooted';
+
+	if ( !mode[ROOTED] && $(window).scrollTop() >= rootY ) {
+		css.position = 'fixed';
+		cn = '';
+	} else if ( vertical ) {
+		// when 'fixed' or hidden, offsetParent() is wrong
+		css.top = rootY - $d2act.parent().offsetParent().offset().top + 'px';
+	}
+
+	$d2act.attr('className', cn).css(css);
+}
+
+function setMode( fn ){
+	$gods.hide();
+	d2out.className = fn.apply(d2out, MODE_RE.exec(d2out.className));
+	fixLayout();
+	$gods.show();
+}
+
+function toggleRooted(){
+	var root;
+	setMode(function( m, o, r ){
+		root = r ? '' : 'rooted';
+		return o + (root && ' '+root);
+	});
+
+	user_is_anon || ajax_update({
+		op:					'comments_set_prefs',
+		reskey:				reskey_static,
+		comments_control:	root || 0
+	});
+}
+
+
+Slash.Discussion.fixWidgetLayout = function(){
+	$gods	= $any('gods');
+	d2out	= $dom('d2out');
+	$links	= $any('links');
+	$commentwrap = $any('commentwrap');
+	$d2act	= $any('d2act').each(function(){
+				$(document).
+					bind('firehose-setting-noslashboxes', fixLayout).
+					bind('firehose-setting-hide-section-menu', function( event, hide ){
+						setMode(function( m ){
+							D2.slider.setOrientation(hide ? 'x' : 'y');
+							return m.replace(/vertical|horizontal/, hide ? 'horizontal' : 'vertical');
+						});
+					});
+				$(window).scroll(fixLayout);
+			});
+	Slash.Discussion.fixWidgetLayout = fixLayout;
+	Slash.Discussion.toggleWidgetRooted = toggleRooted;
+	fixLayout();
+}
+$(function(){ Slash.Discussion.fixWidgetLayout(); });
 
 })();

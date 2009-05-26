@@ -20,6 +20,7 @@ __name__
 printCommentsMain
 __template__
 [% horiz = 0; rooted = 0;
+   rooted = 1 IF user.comments_control == 'rooted';
    IF gSkin.name == 'idle' || user.lowbandwidth || user.firehose_hide_section_menu;
    	horiz = 1;
    END;
@@ -125,7 +126,7 @@ __template__
 	</div>
 	</div>
 	[% IF discussion2 %]
-		<div id="d2out" class="[% IF horiz %]horizontal[% IF rooted %] rooted[% END %][% ELSE %]vertical[% END %]">
+		<div id="d2out" class="[% IF horiz %]horizontal[% ELSE %]vertical[% END %][% IF rooted %] rooted[% END %]">
 		<div id="d2act" class="hide">
 		<div class="loki" id="gods">
 		<div class="block">
@@ -149,7 +150,7 @@ __template__
 				}) %]
 				[% END %]
 		<span class="ccw-header-links">[% PROCESS printCommentsLinks commentslinks_id => 'b' %]</span>
-		<span id="d2toggle" title="Toggle window location" onclick="D2.toggleDisplayOptions()" class="close">/</span>
+		<span id="d2toggle" title="Toggle window location" onclick="D2.toggleWidgetRooted(); return false;" class="close">/</span>
 				</h4>
 			</div>
 		</div>
