@@ -163,7 +163,7 @@ __template__
 			</tr>
 			<tr>
 				<td>
-				[% sectionmenu_check = ''; IF !user.firehose_nosectionmenu; sectionmenu_check = constants.markup_checked_attribute; END; %]
+				[% sectionmenu_check = ''; IF !user.firehose_hide_section_menu; sectionmenu_check = constants.markup_checked_attribute; END; %]
                 		<label><input type="checkbox" id="nosectionmenu" name="nosectionmenu"[% sectionmenu_check %]> Section Menu</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nosectionmenu');return false;" class="help">?</a>
 
 		                <div id="modalprefhelp_nosectionmenu" class="modalprefhelp" style="display: none;">
