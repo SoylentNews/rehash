@@ -131,8 +131,8 @@ function qualify_node( o ){
 TypeOf = function( o ){
 	var tk=typekey(o);
 	return KNOWN_TYPE[ tk ]
-		|| qualify_fn(o.__typeOf) && o.__typeOf()
 		|| o===W && WIN_T
+		|| qualify_fn(o.__typeOf) && o.__typeOf()
 		|| maybe_node(o)
 		|| maybe_event(o)
 		|| maybe_list(o)
