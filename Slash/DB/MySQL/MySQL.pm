@@ -1346,6 +1346,7 @@ sub createAccessLog {
 				journal => 'journal2',
 				submission => 'submission2'
 			};
+			$dat = $form->{sid} || $form->{id};
 			$op = $type_to_op->{$form->{type}} if $type_to_op->{$form->{type}};
 		}
 	}
