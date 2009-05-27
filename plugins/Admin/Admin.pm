@@ -617,8 +617,14 @@ sub ajax_signoffbox {
 	my $user = getCurrentUser();
 
 	my $stoid = $form->{stoid};
+	my $story = $slashdb->getStory($stoid);
 	my $admin = getObject("Slash::Admin");
-	return $admin->showSignoffBox($stoid, { contents_only => 1, use_title_for_header => 1 });
+
+	my $prefix = '';
+	if ( $story->{hits} ) {
+		$prefix = 'This story has been viewed ' . $story->{hits} . ' times.<br><br>';
+	}
+	return $prefix . $admin->showSignoffBox($stoid, { contents_only => 1, use_title_for_header => 1 });
 }
 
 sub ajax_learnword {
