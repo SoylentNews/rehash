@@ -1679,7 +1679,7 @@ sub saveModalPrefs {
 				$fh->removeUserSections();
 			} else {
 				$user_edits_table = {};
-				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_classic firehose_picker_search firehose_noslashboxes firehose_nosectionmenu disable_ua_check firehose_noautomore firehose_nographics smallscreen lowbandwidth simpledesign)) {
+				foreach (qw(tags_turnedoff firehose_nocolors firehose_nobylines firehose_nodates firehose_pause firehose_advanced firehose_pagesize index_classic firehose_picker_search firehose_noslashboxes firehose_hide_section_menu disable_ua_check firehose_noautomore firehose_nographics smallscreen lowbandwidth simpledesign)) {
 					$user_edits_table->{$_} = undef;
 				}
 				foreach (qw(noicons dst dfid)) {
@@ -1704,7 +1704,7 @@ sub saveModalPrefs {
 				lowbandwidth			=> ($params{lowbandwidth} ? 1 : undef),
 				simpledesign                    => ($params{simpledesign} ? 1 : undef),
 				firehose_noslashboxes		=> ($params{noslashboxes} ? undef: 1),
-				firehose_nosectionmenu		=> ($params{nosectionmenu} ? undef: 1),
+				firehose_hide_section_menu	=> ($params{nosectionmenu} ? undef: 1),
 				disable_ua_check		=> ($params{disable_ua_check} ? undef: 1),
 				firehose_noautomore		=> ($params{noautomore} ? undef: 1),
 				firehose_nographics             => ($params{nographics} ? undef: 1),

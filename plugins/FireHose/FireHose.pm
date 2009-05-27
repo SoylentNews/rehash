@@ -445,7 +445,7 @@ sub ajaxToggleSmallScreen {
 	my $prefs = {
 	        smallscreen => undef,
         	firehose_noslashboxes => undef,
-	        firehose_nosectionmenu => undef,
+	        firehose_hide_section_menu => undef,
         	disable_ua_check       => 1,
 	};
 	$slashdb->setUser($user->{uid}, $prefs);
@@ -458,7 +458,7 @@ sub ajaxToggleSimpleDesign {
         my $prefs = {
                 simpledesign => undef,
                 firehose_noslashboxes => undef,
-                firehose_nosectionmenu => undef,
+                firehose_hide_section_menu => undef,
                 firehose_nographics => undef,
         };
         $slashdb->setUser($user->{uid}, $prefs);
