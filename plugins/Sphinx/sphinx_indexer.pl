@@ -156,7 +156,7 @@ sub do_system {
 
 	main::slashdLog("sphinx_indexer indexing($do_rotate) $name pid $$");
 	my @args = (
-		'/usr/local/sphinx/bin/indexer',
+		($constants->{sphinx_indexer} || '/usr/local/sphinx/bin/indexer'),
 		"--config $conffile",
 	);
 	push @args, '--rotate' if $do_rotate;

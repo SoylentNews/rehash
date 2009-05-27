@@ -16,4 +16,4 @@ INSERT INTO vars (name, value, description) VALUES ('sphinx_01_vardir', '/srv/sp
 INSERT INTO vars (name, value, description) VALUES ('sphinx_stopwords', 'the to of and http in that is com for www it on with this be as you are an writes has from have at html but by they or will not can about org was we news new their', 'Space-sep list of stopwords');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_se', '0', 'Use SphinxSE instead of the API directly?');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_match_mode', 'all', 'all, any, phrase, boolean, extended2');
-
+INSERT INTO vars (name, value, description) VALUES ('sphinx_indexer', '/usr/local/sphinx/bin/indexer', 'The path of sphinx indexer command');
