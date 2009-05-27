@@ -378,7 +378,7 @@ sub main {
 		-in_progress    => 'in_progress+1',
 	});
 
-	$0 = "$PROGNAME $virtual_user $basename_nopl";
+	$0 = "$PROGNAME $virtual_user $task_name_nopl";
 
 	my $subref = get_task_subref();
 	slashdLog("$task_name begin"
