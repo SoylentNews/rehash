@@ -432,7 +432,7 @@ update_sprites = function( hash ){
 }
 
 function unwrap_image(){
-	var $s=$('script:last'), $ns=$script.prev('noscript');
+	var $s=$('script:last'), $ns=$s.prev('noscript');
 	$ns.length && $($ns.text()).each(function(){
 			have_rule(this.className) && this.removeAttribute('style');
 			$ns.replaceWith(this);
