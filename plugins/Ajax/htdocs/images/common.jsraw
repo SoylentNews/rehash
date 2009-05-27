@@ -412,6 +412,50 @@ function firehose_style_switch( section_id ){
 	});
 }
 
+var update_sprites, use_sprites, allow_use_sprites;
+(function(){
+var $sprite_rules=$('<style id="sprite-rules">').appendTo($('head')), noop=function(){};
+
+function have_rule( for_class ){
+	return !for_class || $('<div class="'+for_class+'">').css('background-url');
+}
+
+update_sprites = function( hash ){
+	var old_css, new_css=[];
+	$.each(hash, function( for_class, new_rule ){
+		!have_rule(for_class) && new_css.push(new_rule);
+	});
+	if ( new_css.length ) {
+		(old_css=$sprite_rules.text()) && new_css.unshift(old_css);
+		$sprite_rules.text( new_css.join('\n'));
+	}
+}
+
+function unwrap_image(){
+	var $s=$('script:last'), $ns=$script.prev('noscript');
+	$ns.length && $($ns.text()).each(function(){
+			have_rule(this.className) && this.removeAttribute('style');
+			$ns.replaceWith(this);
+			$s.remove();
+			return false;
+		});
+}
+
+allow_use_sprites = function( allow ){
+	use_sprites = (allow || allow===undefined) ? unwrap_image : noop;
+}
+
+// While the document is loading, allow unwrapping.
+allow_use_sprites(true);
+// But once initial page-load completes:
+$(function(){
+	allow_use_sprites(false);			// Turn off unwrapping to prevent accidents.
+	$sprite_rules.appendTo($('head'));	// Ensure our sprite-rules really are last.
+});
+})();
+
+
+
 function addfhfilter(text) {
 	if (has_hose()) {
 		firehose_set_options('addfhfilter', text);
@@ -1304,8 +1348,10 @@ update_firehose_content = function( updates, sequence ){
 	}
 
 	// Reorder existing runs, insert new runs.
+	allow_use_sprites(true);
 	(run=loose_runs[0])	&& insert_runs_after(run.prependTo(FHL), loose_runs);
 	fixed_run			&& insert_runs_after(fixed_run, loose_runs);
+	allow_use_sprites(false);
 
 	// Our work here is done, old chum.  Let us away to the Bat Cave.
 	Slash.busy('firehose-content', false);
@@ -1716,6 +1762,7 @@ function firehose_get_updates_handler(transport) {
 
 	response.dynamic_blocks &&	dynamic_blocks_update(response.dynamic_blocks);
 	response.html &&			json_update(response);
+	response.sprite_rules &&	update_sprites(response.sprite_rules);
 	response.updates &&			firehose_handle_update(response.updates, response.ordered);
 }
 
