@@ -1057,8 +1057,9 @@ sub getFireHoseEssentialsParams {
 	$need_tagged = 3 if $options->{tagged_by_uid} && $options->{tagged_for_homepage};
 
 	if ($need_tagged) {
-		my $tagged_by_uid = $options->{tagged_by_uid} || 0;
-		$tagged_by_uid =~ s/\D+//g;
+		my $tagged_by_uid = $options->{tagged_by_uid};
+		@$tagged_by_uid = grep $_ && !/\D/, @$tagged_by_uid;
+
 		if ($need_tagged == 1) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
@@ -1070,17 +1071,17 @@ sub getFireHoseEssentialsParams {
 			push @sphinx_where, "tags.tagnameid = $tag_id";
 			push @sphinx_where, "tags.uid = $tagged_by_uid";
 			$sphinx->{check_sql} = 1;
-			push @sphinx_opts, [ filter => tfh => [ $tagged_by_uid ] ];
+			push @sphinx_opts, [ filter => tfh => $tagged_by_uid ];
 		} elsif ($need_tagged == 2) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
 			# any "tagged for hose" tags (/~foo/firehose).
-			push @sphinx_opts, [ filter => tfh => [ $tagged_by_uid ] ];
+			push @sphinx_opts, [ filter => tfh => $tagged_by_uid ];
 		} elsif ($need_tagged == 3) {
 			# This combination of options means to restrict to only
 			# those hose entries tagged by one particular user with
 			# any "tagged for homepage" tags (/~foo).
-			push @sphinx_opts, [ filter => tfhp => [ $tagged_by_uid ] ];
+			push @sphinx_opts, [ filter => tfhp => $tagged_by_uid ];
 		}
 		push @sphinx_where, 'inactivated IS NULL';
 	}
@@ -3395,7 +3396,7 @@ my @options = (
 		primaryskid not_primaryskid signed unsigned nexus not_nexus
 		spritegen tagged_by_uid tagged_as offmainpage smalldevices
 		createtime_no_future createtime_subscriber_future
-		tagged_non_negative uid
+		tagged_non_negative tagged_for_homepage uid
 	)
 );
 
@@ -3798,27 +3799,24 @@ sub getAndSetOptions {
 			my $friends = $zoo->getFriendsUIDs($uid);
 			$friends = [-1], if @$friends < 1;   # No friends, pass a UID that won't match
 			push @{$fh_options->{$not."uid"}}, @$friends;
-		} elsif (/^user:/) {
-			my $nick = $_;
-			$nick =~ s/user://g;
+		} elsif (/^(user|home|hose):/) {
+			my $type = $1;
+			(my $nick = $_) =~ s/^$type://;
 			my $uid;
-			if ($nick) {
-				$uid = $self->getUserUID($nick);
-			}
+			$uid = $self->getUserUID($nick) if $nick;
 			$uid ||= $user->{uid};
-			$fh_options->{tagged_by_uid} = $uid;
-			$fh_options->{tagged_non_negative} = 1;
-#			$fh_options->{ignore_nix} = 1;
-		} elsif (/^home:/) {
-			my $nick = $_;
-			$nick =~ s/home://g;
-			my $uid;
-			if ($nick) {
-				$uid = $self->getUserUID($nick);
+			$fh_options->{tagged_by_uid} = [$uid];
+			if ($type eq 'user') {
+				$fh_options->{tagged_non_negative} = 1;
+#				$fh_options->{ignore_nix} = 1;
+			} elsif ($type eq 'home') {
+				$fh_options->{tagged_for_homepage} = 1;
+			} elsif ($type eq 'hose') {
+				$fh_options->{tagged_non_negative} = 1;
+				my $zoo = getObject("Slash::Zoo");
+				my $friends = $zoo->getFriendsUIDs($uid);
+				push @{$fh_options->{tagged_by_uid}}, @$friends;
 			}
-			$uid ||= $user->{uid};
-			$fh_options->{tagged_by_uid} = $uid;
-			$fh_options->{tagged_for_homepage} = 1;
 		} elsif (/^tag:/) {
 			my $tag = $_;
 			$tag =~s/tag://g;

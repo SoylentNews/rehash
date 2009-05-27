@@ -65,7 +65,7 @@ INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter
 
 INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "userbookmark", "User's Bookmarks", "no", '"user:{nickname}" bookmark', "createtime", "DESC", "black", "-1", "fulltitle", "no", "no", 20, 20, 0,"1","yes", "no","no");
 
-INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "userfirehose", "User's FireHose", "no", '"user:{nickname}"', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "no","no");
+INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "userfirehose", "User's FireHose", "no", '"hose:{nickname}"', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "no","no");
 
 INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "userhomepage", "User's Homepage", "no", '"home:{nickname}"', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "yes","yes");
 
