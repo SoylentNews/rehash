@@ -1786,6 +1786,7 @@ function firehose_get_updates(options) {
 }
 
 function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
+	Slash.busy('firehose-update', false);
 	if (fh_is_admin) {
 		firehose_update_failed_modal();
 	}
