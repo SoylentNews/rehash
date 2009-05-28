@@ -591,10 +591,9 @@ firehose_set_options = function(name, value, context) {
 
 		// Fade the list; and empty its contents
 		$fhl.fadeOut().html('');
-		$('#itemsreturned').html(loading_msg);
-	} else {
-		$('#itemsreturned').html('');
 	}
+
+	push_message( removes_all[name] ? loading_msg : true );
 
 
 	// Tell the server (asynchronously).
@@ -1481,9 +1480,8 @@ function firehose_handle_update( updates, sequence ) {
 		$menu				= $('div.ac_results:visible'),
 
 		$fhl				= $any('firehoselist'),
-		$loading_msg		= $('#itemsreturned .loading_msg'),
 
-		add_behind_scenes	= $loading_msg[0],
+		add_behind_scenes	= $('div.message .loading_msg').length,
 		animate				= !add_behind_scenes || 0,
 		INTERVAL			= animate && 60,
 		DURATION			= animate && 180;
@@ -1499,11 +1497,11 @@ function firehose_handle_update( updates, sequence ) {
 				firehose_storyfuture(firehose_future).length
 			);
 			if ( add_behind_scenes ) {
-				$loading_msg.html('');
 				$fhl.show().css({ opacity:'' });
 				$('div.paginate').show().removeClass('paginatehidden');
 				anchor_fh_pag_menu(true);
 			}
+			pop_message();
 		}
 	);
 
@@ -1816,7 +1814,9 @@ function firehose_get_updates(options) {
 function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
 	Slash.busy('firehose-update', false);
 	if (fh_is_admin) {
-		push_message('<p><a href="#" onclick="firehose_reinit_updates()">[Admin] Slashdot updated failed' + (textStatus ? ' ("'+textStatus+'")' : '') + '.  Click to retry.</a></p>');
+		show_message('<p><a href="#" onclick="firehose_reinit_updates()">[Admin] Slashdot updated failed' + (textStatus ? ' ("'+textStatus+'")' : '') + '.  Click to retry.</a></p>');
+	} else {
+		pop_message();
 	}
 }
 
