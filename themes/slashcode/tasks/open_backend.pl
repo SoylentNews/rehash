@@ -58,7 +58,6 @@ sub fudge {
 sub _do_rss {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
 		$name, $stories, $version, $type) = @_;
-
 	$type ||= 'rss';
 
 	my $file    = sitename2filename($name);
@@ -142,10 +141,19 @@ EOT
 	for my $story (@$stories) {
 		my @str = (xmlencode($story->{title}), xmlencode($story->{dept}));
 		my $author = $slashdb->getAuthor($story->{uid}, 'nickname');
+		my $link;
+		if ($constants->{firehose_link_article2}) {
+			my $linktitle = $story->{title};
+			$linktitle =~ s/\s+/-/g;
+			$linktitle =~ s/[^A-Za-z0-9\-]//g;
+			$link = "$gSkin->{absolutedir}/story/$story->{sid}/$linktitle";
+		} else {
+			$link = "$gSkin->{absolutedir}/article.pl?sid=$story->{sid}";
+		}
 		$x.= <<EOT;
 	<story>
 		<title>$str[0]</title>
-		<url>$gSkin->{absolutedir}/article.pl?sid=$story->{sid}</url>
+		<url>$link</url>
 		<time>$story->{'time'}</time>
 		<author>$author</author>
 		<department>$str[1]</department>
