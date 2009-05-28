@@ -4793,7 +4793,7 @@ sub createSprite {
 		$image->{x_coord} = $x_offset;
 		$image->{y_coord} = $y_offset;
 		$image->{y_coord} = '-' . $image->{y_coord} if ($image->{y_coord});
-		($image->{raw_filename}) = $image->{file} =~ m{^.+/(.+)\.\w{3}$};
+		#($image->{raw_filename}) = $image->{file} =~ m{^.+/(.+)\.\w{3}$};
 		$y_offset += ($border + $image->{height});
 	}
 
