@@ -120,6 +120,13 @@ section_matching = function( data ){
 	var id		= $section_menu.metadata().active_id,
 		goal	= signature(data),
 		$menu_item;
+
+	[% IF user.is_admin %]
+	if ( id!=='unsaved' && signatures[id]!==goal && window.console && window.console.log ) {
+		window.console.log('unsaved: from '+id+' (hash "'+signatures[id]+'"), for hash "'+goal+'"');
+	}
+	[% END %]
+
 	(id==='unsaved' || signatures[id]!==goal) && (id = ids[goal]);
 	return id && ($menu_item=firehose_section_menu_item(id)) && $menu_item.metadata();
 };
