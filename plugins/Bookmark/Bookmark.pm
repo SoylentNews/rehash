@@ -52,6 +52,9 @@ sub getUserBookmarkByUrlId {
 sub updateBookmark {
 	my($self, $bookmark) = @_;
 	$self->sqlUpdate("bookmarks", $bookmark, "bookmark_id = $bookmark->{bookmark_id}");
+
+	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+	$dynamic_blocks->setUserBlock('bookmarks', $bookmark->{uid}) if $dynamic_blocks;
 }
 
 sub getRecentBookmarks {

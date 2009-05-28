@@ -45,6 +45,10 @@ __template__
 	[% dyn_tags %]
 [% END %]
 
+[% IF dyn_bookmarks %]
+	[% dyn_bookmarks %]
+[% END %]
+
 [% IF latest_submissions.size != 0 %]
 <div class="block" id="latest_submissions">
         <div class="title" id="latest_submissions_title">
@@ -55,26 +59,6 @@ __template__
                 <ul>
                 [% FOREACH sid = latest_submissions.keys.sort.reverse %]
                         <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
-                [% END %]
-                </ul>
-        </div>
-</div>
-[% END %]
-
-[% IF latest_bookmarks.size != 0 %]
-<div class="block" id="latest_bookmarks">
-        <div class="title" id="latest_bookmarks_title">
-                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/bookmarks">Bookmarks</a></h4>
-        </div>
-
-        <div class="content" id="latest_bookmarks_content">
-                <ul>
-                [% bookmarks_counter = 0 %]
-                [% FOREACH bid = latest_bookmarks %]
-                        [% NEXT IF bid.initialtitle == '' %]
-                        [% LAST IF bookmarks_counter == 5 %]
-                        <li><a href="[% bid.url %]">[% bid.initialtitle %]</a></li>
-                        [% bookmarks_counter = bookmarks_counter + 1 %]
                 [% END %]
                 </ul>
         </div>
