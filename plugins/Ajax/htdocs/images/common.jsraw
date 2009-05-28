@@ -1854,9 +1854,9 @@ function getFirehoseUpdateInterval() {
 	return interval;
 }
 
-function run_before_update() {
+function run_before_update( force_pause ) {
 	var secs = getSecsSinceLastFirehoseAction();
-	if (secs > inactivity_timeout) {
+	if (secs > inactivity_timeout || force_pause) {
 		fh_is_timed_out = 1;
 		push_message('<p><a href="#" onclick="setFirehoseAction()">Resume Slashdot automatic updates.</a></p>');
 	}
