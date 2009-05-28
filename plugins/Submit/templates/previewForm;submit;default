@@ -116,25 +116,23 @@ __template__
 	
 		<input type="submit" name="update" value="Update">
 		<input type="submit" name="del_[% subid %]" value="Delete">
-
-			<a class="submissionmemory" href="#">Submissions Memory</a>
+	<br>
 	</form>
 
-		<div class="submissionmemory">
+	<br>
         <form action="[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
         <tr class="data_head">
-        	<th colspan=4>Submissions Memory</th>
+                <th colspan="4">Submissions Memory</th>
         </tr>
-			[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
-				<tr class="data_hl[% i %]">
-						<td>[% subnote.submatch %]</td>
-						<td>[% subnote.subnote %]</td>
-						<td>[% subnote.time %]</td>
-						<td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
-				</tr>
-			[% END # FOREACH %]
-
+[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
+        <tr class="data_hl[% i %]">
+                <td>[% subnote.submatch %]</td>
+                <td>[% subnote.subnote %]</td>
+                <td>[% subnote.time %]</td>
+                <td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
+        </tr>
+[% END # FOREACH %]
         <tr>
                 <td><input name="submatch" size="10"></td>
                 <td colspan="2"><input name="subnote" size="40"></td>
@@ -149,7 +147,6 @@ __template__
         </tr>
         </table>
         </form>
-        </div>
 
 	<br>
 	<script type="text/javascript">
