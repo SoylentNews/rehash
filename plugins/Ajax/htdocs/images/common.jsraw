@@ -418,7 +418,9 @@ var RULES=$('<style id="sprite-rules" type="text/css">').appendTo('head')[0];
 
 function need_rule( for_class, rule ){
 	var have=$('<div class="'+for_class+'">').css('background-image');
-	return (!have || have==='none') && (rule||true);
+	if ( !have || have==='none' ) {
+		return rule || true;
+	}
 }
 sprite_rules = function( hash ){
 	var new_rules=core.map(hash, need_rule);
