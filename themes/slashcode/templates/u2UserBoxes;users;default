@@ -49,20 +49,8 @@ __template__
 	[% dyn_bookmarks %]
 [% END %]
 
-[% IF latest_submissions.size != 0 %]
-<div class="block" id="latest_submissions">
-        <div class="title" id="latest_submissions_title">
-                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/submissions">Submissions</a></h4>
-        </div>
-
-        <div class="content" id="latest_submissions_content">
-                <ul>
-                [% FOREACH sid = latest_submissions.keys.sort.reverse %]
-                        <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
-                [% END %]
-                </ul>
-        </div>
-</div>
+[% IF dyn_submissions %]
+	[% dyn_submissions %]
 [% END %]
 __seclev__
 500

@@ -95,6 +95,8 @@ __template__
 		dyn_journals=dyn_journals
 		dyn_friends=dyn_friends
 		dyn_tags=dyn_tags
+		dyn_bookmarks=dyn_bookmarks
+		dyn_submissions=dyn_submissions
                 is_admin=user.is_admin
         %]
 
