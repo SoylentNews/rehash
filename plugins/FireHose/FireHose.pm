@@ -2859,6 +2859,8 @@ sub dispFireHose {
 
 	$item->{atstorytime} = "__TIME_TAG__";
 
+	my $sprite_info = $self->js_anon_dump($self->getSpriteInfoByFHID($item->{id}));
+
 	if (!$retval) {  # No cache hit
 		$retval = slashDisplay('dispFireHose', {
 			item			=> $item,
@@ -2874,6 +2876,7 @@ sub dispFireHose {
 			featured		=> $options->{featured},
 			related_stories		=> $options->{related_stories},
 			book_info               => $options->{book_info},
+			sprite_info		=> $sprite_info,
 		}, { Page => "firehose",  Return => 1 });
 
 		if ($mcd) {
