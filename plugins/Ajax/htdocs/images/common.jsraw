@@ -2632,7 +2632,7 @@ function openInWindow(mylink, samewin) {
 $(function(){
 	// firehose only!
 	var validkeys = {};
-	if (window.location.href.match(/\b(?:firehose|index2|console)\.pl\b/)) {
+	if ( $('div.fhroot').length ) {
 		validkeys = {
 			'X' : {           tags    : 1, signoff  : 1, noanon : 1 },
 			'T' : {           tags    : 1, tag      : 1, noanon : 1 },
