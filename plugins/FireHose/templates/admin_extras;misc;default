@@ -13,22 +13,18 @@ admin_extras
 __seclev__
 10000
 __template__
-
-	<a class="submissionmemory" rel="[% item.id %]" href="#">Submissions Memory</a>
-
-	<div class="submissionmemory" id="sm-[% item.id %]">
         <form action="[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
         <tr class="data_head">
                 <th colspan="4">Submissions Memory</th>
         </tr>
-		[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
-			<tr class="data_hl[% i %]">
-					<td>[% subnote.submatch %]</td>
-					<td colspan="2">[% subnote.subnote %]</td>
-					<td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
-			</tr>
-		[% END # FOREACH %]
+[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
+        <tr class="data_hl[% i %]">
+                <td>[% subnote.submatch %]</td>
+                <td colspan="2">[% subnote.subnote %]</td>
+                <td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
+        </tr>
+[% END # FOREACH %]
         <tr>
                 <td><input name="submatch" size="10" id="submatch-[% item.id %]"></td>
                 <td colspan="2"><input name="subnote" size="40" id="subnote-[% item.id %]"></td>
@@ -39,14 +35,13 @@ __template__
                       <input type="hidden" name="subid" value="[% subid %]">
                       <input type="submit" value="Remember" onclick="admin_submit_memory([% item.id %]); return false;">
               </td>
-        </tr>
-		<tr>
-			<td colspan="2" id="sub_mem_message-[% item.id %]"></td>
-		</tr>
-		</table>
-		</form>
-	</div>
 
+        </tr>
+	<tr>
+		<td colspan="2" id="sub_mem_message-[% item.id %]"></td>
+	</tr>
+</table>
+</form>
 [% IF similar_stories.size > 0 %]
 	<table border="0" cellpadding="2" cellspacing="0" class="data">
 		<tr class="data_head"><td colspan="2"><b>Similar Stories</b></td></tr>
@@ -75,12 +70,5 @@ __template__
 		[% END %]
 	</table>
 [% END %]
-	<script>
-			$("a.submissionmemory").click(function () {
-				var smid = $(this).attr("rel");
-				$('div#sm-'+smid+'.submissionmemory').toggle();
-				return false;
-			});
-	</script>
 __version__
 $Id$
