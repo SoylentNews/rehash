@@ -434,6 +434,32 @@ $(use_sprites = function( ctx ){
 })();
 
 
+var show_message, push_message, pop_message;
+// ...control the system message tray:
+//	show_message(html):						set its content and show it
+//	show_message(), show_message(true):		show it with current content
+//	show_message(false):					hide it
+(function(){
+var $MESSAGE, MESSAGE_STACK=[];
+show_message = function( expr ){
+	var old=($MESSAGE || ($MESSAGE=$('div.message'))).html();
+	expr && expr!==true && $MESSAGE.html(expr);
+	$MESSAGE[ (expr || expr===undefined) ? 'show' : 'hide' ]();
+	return old;
+};
+push_message = function( expr ){
+	// save the current message on the stack; replace with new, if any
+	MESSAGE_STACK.push(show_message(expr));
+};
+pop_message = function( show ){
+	// restore the previous message (if any); otherwise retain current
+	show_message(MESSAGE_STACK.pop()||false);
+};
+
+$(function(){ $MESSAGE=$('div.message'); });
+})();
+
+
 
 function addfhfilter(text) {
 	if (has_hose()) {
