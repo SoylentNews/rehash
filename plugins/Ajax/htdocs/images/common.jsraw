@@ -1814,7 +1814,7 @@ function firehose_get_updates(options) {
 function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
 	Slash.busy('firehose-update', false);
 	if (fh_is_admin) {
-		firehose_update_failed_modal();
+		push_message('<p><a href="#" onclick="firehose_reinit_updates()">[Admin] Slashdot updated failed' + (textStatus ? ' ("'+textStatus+'")' : '') + '.  Click to retry.</a></p>');
 	}
 }
 
@@ -1829,6 +1829,7 @@ function setFirehoseAction() {
 		if (console_updating) {
 			console_update(1, 0);
 		}
+		pop_message();
 	}
 }
 
@@ -1857,15 +1858,8 @@ function run_before_update() {
 	var secs = getSecsSinceLastFirehoseAction();
 	if (secs > inactivity_timeout) {
 		fh_is_timed_out = 1;
-		firehose_inactivity_modal();
+		push_message('<p><a href="#" onclick="setFirehoseAction()">Resume Slashdot automatic updates.</a></p>');
 	}
-}
-
-function firehose_inactivity_modal() {
-	$any('preference_title').html('Firehose Paused due to inactivity');
-	show_modal_box();
-	$any('modal_box_content').html("<a href='#' onclick='setFirehoseAction();hide_modal_box()'>Click to unpause</a>");
-	show_modal_box();
 }
 
 function start_up_hose() {
@@ -2140,12 +2134,7 @@ function firehose_get_media_popup(id) {
 
 function firehose_reinit_updates() {
 	firehose_add_update_timerid(setTimeout(firehose_get_updates, 5000));
-}
-
-function firehose_update_failed_modal() {
-	$any('preference_title').html('Firehose updates failed');
-	$any('modal_box_content').html('Update failed or timed out.  <a href="#" onclick="firehose_reinit_updates();hide_modal_box();">Click to retry</a>');
-	show_modal_box();
+	pop_message();
 }
 
 function serialize_multiple( $form ){
