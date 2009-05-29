@@ -2862,8 +2862,6 @@ sub dispFireHose {
 
 	$item->{atstorytime} = "__TIME_TAG__";
 
-	#my $sprite_info = $self->js_anon_dump($self->getSpriteInfoByFHID($item->{id}));
-
 	if (!$retval) {  # No cache hit
 		$retval = slashDisplay('dispFireHose', {
 			item			=> $item,
@@ -2879,7 +2877,6 @@ sub dispFireHose {
 			featured		=> $options->{featured},
 			related_stories		=> $options->{related_stories},
 			book_info               => $options->{book_info},
-			#sprite_info		=> $sprite_info,
 		}, { Page => "firehose",  Return => 1 });
 
 		if ($mcd) {
@@ -4307,6 +4304,8 @@ sub listView {
 
 	my $views = $self->getUserViews({ tab_display => "yes"});
 
+	 my $sprite_rules = $self->js_anon_dump($self->getSpriteInfoByFHID($items->[0]->{id}));
+
 	my $ret = slashDisplay("list", {
 		itemstext		=> $itemstext,
 		itemnum			=> $itemnum,
@@ -4326,6 +4325,7 @@ sub listView {
 		firehose_more_data 	=> $firehose_more_data,
 		views			=> $views,
 		theupdatetime		=> timeCalc($slashdb->getTime(), "%H:%M"),
+		sprite_rules		=> $sprite_rules,
 	}, { Page => "firehose", Return => 1 });
 
 	slashProf("","fh_listview");
