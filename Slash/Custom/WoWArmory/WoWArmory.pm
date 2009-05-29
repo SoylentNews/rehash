@@ -52,9 +52,25 @@ sub fetch_data {
     $self->{ resultat } = $self->{ ua }->get( $self->url );
 
     $self->{ xp }   = XML::Simple->new;
-    $self->{ data } = $self->{ resultat }->is_success()
-	? $self->{ xp }->XMLin( $self->{ resultat }->content )
-	: undef;
+    $self->{ data } = undef;
+    if ($self->{ resultat }->is_success()) {
+	my $content = $self->{ resultat }->content;
+	eval {
+	    $self->{ data } = $self->{ xp }->XMLin( $content );
+	};
+	if ($@) {
+	    my $err = $@;
+	    chomp $err; $err =~ s/\s+/ /g;
+	    my $context = 'unknown';
+	    if (my($bytepos) = $err =~ /\bbyte (\d+)\b/) {
+		my $start = $bytepos - 30; $start = 0 if $start < 0;
+		my $len   =            60; $len = length($content)-$start if $start+$len > length($content);
+		$context = substr($content, $start, $len);
+		$context =~ s{\s+}{ }g;
+	    }
+	    warn('XMLin failed on ' . length($content) . " bytes ('$context'): '$err'");
+	}
+    }
 }
 
 sub search_character {
