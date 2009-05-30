@@ -1432,11 +1432,10 @@ sub getFireHoseEssentials {
 			} else {
 				$sph->ResetFilters; # for multi mode
 				for my $opt (@$sphinx_opts, @$multi) {
-					my $type = shift @$opt;
-					if ($type eq 'filter') {
-						$sph->SetFilter(@$opt);
-					} elsif ($type eq 'range') {
-						$sph->SetFilterRange(@$opt);
+					if ($opt->[0] eq 'filter') {
+						$sph->SetFilter(@$opt[1..$#$opt]);
+					} elsif ($opt->[0] eq 'range') {
+						$sph->SetFilterRange(@$opt[1..$#$opt]);
 					}
 				}
 
@@ -1516,10 +1515,14 @@ sub getFireHoseEssentials {
 			# add it up just in case
 			$stats->{'time'} += $_->{'time'} for @sphinx_statses;
 
-			$sphinx_ar = $sphinxdb->sqlSelectColArrayref('globjid', 'firehose',
-				sprintf(q{globjid IN (%s)}, join(',', @globjids)),
-				"ORDER BY $options->{orderby} $options->{orderdir} $sphinx_other"
-			);
+			if (@globjids) {
+				$sphinx_ar = $sphinxdb->sqlSelectColArrayref('globjid', 'firehose',
+					sprintf(q{globjid IN (%s)}, join(',', @globjids)),
+					"ORDER BY $options->{orderby} $options->{orderdir} $sphinx_other"
+				);
+			} else {
+				$sphinx_ar = [];
+			}
 
 			$stats->{total} = scalar @$sphinx_ar;
 			$sphinx_stats = $stats;
@@ -2859,8 +2862,6 @@ sub dispFireHose {
 
 	$item->{atstorytime} = "__TIME_TAG__";
 
-	#my $sprite_info = $self->js_anon_dump($self->getSpriteInfoByFHID($item->{id}));
-
 	if (!$retval) {  # No cache hit
 		$retval = slashDisplay('dispFireHose', {
 			item			=> $item,
@@ -2876,7 +2877,6 @@ sub dispFireHose {
 			featured		=> $options->{featured},
 			related_stories		=> $options->{related_stories},
 			book_info               => $options->{book_info},
-			#sprite_info		=> $sprite_info,
 		}, { Page => "firehose",  Return => 1 });
 
 		if ($mcd) {
@@ -4304,6 +4304,8 @@ sub listView {
 
 	my $views = $self->getUserViews({ tab_display => "yes"});
 
+	 my $sprite_rules = $self->js_anon_dump($self->getSpriteInfoByFHID($items->[0]->{id}));
+
 	my $ret = slashDisplay("list", {
 		itemstext		=> $itemstext,
 		itemnum			=> $itemnum,
@@ -4323,6 +4325,7 @@ sub listView {
 		firehose_more_data 	=> $firehose_more_data,
 		views			=> $views,
 		theupdatetime		=> timeCalc($slashdb->getTime(), "%H:%M"),
+		sprite_rules		=> $sprite_rules,
 	}, { Page => "firehose", Return => 1 });
 
 	slashProf("","fh_listview");
@@ -4649,7 +4652,7 @@ sub linkFireHose {
 
 sub js_anon_dump {
 	my($self, $var) = @_;
-	return Data::JavaScript::Anon->anon_dump($var);
+	return Data::JavaScript::Anon->anon_dump(strip_literal($var));
 }
 
 sub genFireHoseParams {
@@ -4692,7 +4695,7 @@ sub genFireHoseParams {
 		if ($label eq "startdate") {
 			$value =~s /-//g;
 		}
-		push @params, "$label=$value";
+		push @params, "$label=" . strip_paramattr($value);
 
 	}
 

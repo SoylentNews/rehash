@@ -78,19 +78,6 @@ IF !link_url;
 END;
 title_href=link_url;
 
-IF form.index || featured || view_mode;
-	IF item.type == "story";
-		story = Slash.db.getStory(item.srcid);
-		link = Slash.linkStory({
-			sid	=>	story.sid,
-			tid	=> 	story.tid,
-			skin	=>	story.primaryskid
-		}, 0);
-		title_href = link.0;
-	END;
-END;
-
-
 title = "<a $onclick $rnf href=\"$title_href\" class=\"datitle\">$title</a>";
 IF user.simpledesign; the_skin_title = ''; END;
 title = the_skin_title _ title;

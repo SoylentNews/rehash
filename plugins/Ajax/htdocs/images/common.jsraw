@@ -589,8 +589,9 @@ firehose_set_options = function(name, value, context) {
 			hide().
 			addClass('paginatehidden');
 
-		// Fade the list; and empty its contents
+		// Fade the list; and empty its contents / clear previous itemsreturned message
 		$fhl.fadeOut().html('');
+		$('#itemsreturned').html('');
 	}
 
 	push_message( removes_all[name] ? loading_msg : true );
