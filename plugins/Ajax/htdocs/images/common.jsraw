@@ -436,29 +436,35 @@ $(use_sprites = function( ctx ){
 })();
 
 
-var show_message, push_message, pop_message;
-// ...control the system message tray:
-//	show_message(html):						set its content and show it
-//	show_message(), show_message(true):		show it with current content
-//	show_message(false):					hide it
 (function(){
-var $MESSAGE, MESSAGE_STACK=[];
-show_message = function( expr ){
-	var old=($MESSAGE || ($MESSAGE=$('div.message'))).html();
-	expr && expr!==true && $MESSAGE.html(expr);
-	$MESSAGE[ (expr || expr===undefined) ? 'show' : 'hide' ]();
-	return old;
+var	NEXT_ID=1, NONE={ id:-Infinity, rank:-Infinity, content:'' }, DISPLAYED=NONE, AVAILABLE={}, $DISPLAY,
+	HINT_RE=/-(mode|warning|error)$/, RANK={ mode:2, warning:3, error:4 };
+function Message( o ){
+	var id=NEXT_ID++, hint;
+	(TypeOf.scalar(o) || o.content===void(0)) && (o={ content:o });
+	hint = (HINT_RE.exec(o.key)||{})[1];
+	$.extend(this, { rank:RANK[hint]||1, key:id, content:'' }, o, { id:id });
+	return AVAILABLE[this.key]=this;
+}
+function display(){
+	// Private.  Search through all available messages for the most important; update
+	// the display accordingly.  Nothing fancy.  Expected worst-case is a handful of
+	// messages: the base, some in-progress status, and an error.
+	var best=NONE;
+	core.each(AVAILABLE, function(){ (this.rank-best.rank || this.id-best.id)>0 && (best=this); });
+	best!==DISPLAYED && $DISPLAY.html((DISPLAYED=best).content);
+}
+Slash.message = function( o ){
+	// Call with the content you want to display: html (string), DOM element, or jQuery selection
+	//	OR, an object with a content member (same rules as above) which also allows you to specify a key and/or rank
+	// Returns the message key for use in Slash.clear_message.
+	$DISPLAY || (DISPLAYED=new Message({ rank:0, key:'default', content:($DISPLAY=$('div.message')).children() }));
+	return o && (o=new Message(o)) && (display(), o.key);
 };
-push_message = function( expr ){
-	// save the current message on the stack; replace with new, if any
-	MESSAGE_STACK.push(show_message(expr));
+Slash.clear_message = function( key ){
+	// Public.  Remove the message with the given key and update the display.
+	try { delete AVAILABLE[key] && display(); } catch ( e ) { }
 };
-pop_message = function( show ){
-	// restore the previous message (if any); otherwise retain current
-	show_message(MESSAGE_STACK.pop()||false);
-};
-
-$(function(){ $MESSAGE=$('div.message'); });
 })();
 
 
@@ -494,7 +500,7 @@ function view_change_hide_show(view) {
 
 var firehose_set_options;
 (function(){
-var	loading_msg	= '<span class="loading_msg">Loading New Items...</span>',
+var	loading_msg	= { key:'loading', content:'<span class="loading_msg">Loading New Items...</span>' },
 	removes_all	= Qw.as_set('firehose_usermode mixedmode mode nocolors nothumbs section setfhfilter setsearchfilter tab view startdate issue'),
 	start_over	= $.extend(Qw.as_set('startdate color addfhfilter'), removes_all),
 	uses_setfield	= Qw.as_set('mixedmode nobylines nocolors nocommentcnt nodates nomarquee noslashboxes nothumbs'),
@@ -592,9 +598,8 @@ firehose_set_options = function(name, value, context) {
 		// Fade the list; and empty its contents / clear previous itemsreturned message
 		$fhl.fadeOut().html('');
 		$('#itemsreturned').html('');
+		Slash.message(loading_msg);
 	}
-
-	push_message( removes_all[name] ? loading_msg : true );
 
 
 	// Tell the server (asynchronously).
@@ -1502,7 +1507,7 @@ function firehose_handle_update( updates, sequence ) {
 				$('div.paginate').show().removeClass('paginatehidden');
 				anchor_fh_pag_menu(true);
 			}
-			pop_message();
+			Slash.clear_message('loading');
 		}
 	);
 
@@ -1812,13 +1817,14 @@ function firehose_get_updates(options) {
 	});
 }
 
-function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
+function firehose_updates_error_handler( xhr, status ) {
 	Slash.busy('firehose-update', false);
-	if (fh_is_admin) {
-		show_message('<p><a href="#" onclick="firehose_reinit_updates()">[Admin] Slashdot updated failed' + (textStatus ? ' ("'+textStatus+'")' : '') + '.  Click to retry.</a></p>');
-	} else {
-		pop_message();
-	}
+	fh_is_admin && Slash.message({
+		key:		'update-error',
+		content:	'<p><a href="#" onclick="firehose_reinit_updates()">[Admin] Slashdot update failed'
+						+ (status && status!=='error' ? ' ("'+status+'")' : '')
+						+ '.  Click to retry.</a></p>'
+	});
 }
 
 function setFirehoseAction() {
@@ -1832,7 +1838,7 @@ function setFirehoseAction() {
 		if (console_updating) {
 			console_update(1, 0);
 		}
-		pop_message();
+		Slash.clear_message('paused-mode');
 	}
 }
 
@@ -1861,7 +1867,10 @@ function run_before_update( force_pause ) {
 	var secs = getSecsSinceLastFirehoseAction();
 	if (secs > inactivity_timeout || force_pause) {
 		fh_is_timed_out = 1;
-		push_message('<p><a href="#" onclick="setFirehoseAction()">Resume Slashdot automatic updates.</a></p>');
+		Slash.message({
+			key:		'paused-mode',
+			content:	'<p><a href="#" onclick="setFirehoseAction()">Resume automatic Slashdot updates.</a></p>'
+		});
 	}
 }
 
@@ -2137,7 +2146,7 @@ function firehose_get_media_popup(id) {
 
 function firehose_reinit_updates() {
 	firehose_add_update_timerid(setTimeout(firehose_get_updates, 5000));
-	pop_message();
+	Slash.clear_message('update-error');
 }
 
 function serialize_multiple( $form ){
