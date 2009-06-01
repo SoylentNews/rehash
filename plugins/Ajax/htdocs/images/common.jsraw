@@ -415,24 +415,22 @@ function firehose_style_switch( section_id ){
 var sprite_rules, use_sprites;
 (function(){
 var RULES=$('<style id="sprite-rules" type="text/css">').appendTo('head')[0];
-
-function need_rule( for_class, rule ){
-	var have=$('<div class="'+for_class+'">').css('background-image');
-	if ( !have || have==='none' ) {
-		return rule || true;
-	}
-}
-sprite_rules = function( hash ){
-	var new_rules=core.map(hash, need_rule);
-	new_rules.length && (RULES.textContent += new_rules.join('\n')+'\n');
+function need_rule( expr ){ return ($(expr).css('background-image')||'none')==='none'; }
+sprite_rules = function( rules ){
+	TypeOf.list(rules) || (rules=core.grep(rules, function(){
+		return need_rule('<div class="'+classAttr+'">');
+	}));
+	rules.length && (RULES.textContent += [].concat(rules).join('\n')+'\n');
 };
-$(use_sprites = function( ctx ){
-	$('noscript.image', !TypeOf.fn(ctx)&&ctx).each(function(){
-		$(this.textContent).each(function(){
-			need_rule(this.className) || this.removeAttribute('style')
-		}).replaceAll(this);
+use_sprites = function( root ){
+	$('div.maybe-sprite', root).each(function(){
+		var $div=$(this).removeClass('maybe-sprite');
+		$div.children('span.no-sprite').each(function(){
+			need_rule($div) && $div.attr('style', this.textContent);
+		}).remove();
 	});
-});
+};
+$(function(){ use_sprites(); });
 })();
 
 
