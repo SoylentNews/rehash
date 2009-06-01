@@ -225,6 +225,7 @@ sub getFireHoseSectionsMenu {
 	my($self, $fsid, $layout) = @_;
 	my $user = getCurrentUser();
 	my($uid_q) = $self->sqlQuote($user->{uid});
+	my $secure = apacheConnectionSSL;
 
 	$layout ||= 'yui';
 
@@ -270,6 +271,7 @@ sub getFireHoseSectionsMenu {
 		if ( $_->{skid} && ((!$_->{user_section_filter}) || ($_->{section_filter} eq $_->{user_section_filter})) ) {
 			if ($css_hr->{$_->{fsid}}) {
 				foreach my $css(@{$css_hr->{$_->{fsid}}}) {
+					$css->{file} =~ s/\.css/.ssl.css/ if $secure;
 					$_->{data}{skin} .= getData('alternate_section_stylesheet', { css => $css, }, 'firehose');
 				}
 			}
