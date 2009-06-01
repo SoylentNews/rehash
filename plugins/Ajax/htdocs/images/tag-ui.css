@@ -487,12 +487,16 @@ border-top:1px solid transparent !important;
 
 /*Opera tag bugs*/
 div.tag-widget.opera span.tag-display li {/*ensures the damn pop up things stay with its parents and don't "run away"*/
+/*
 display: inline-block
+*/
 }
 
 div.tag-widget.opera {/*fixing spacing between this widget and article*/
+/*
 padding-top:18px;
 margin-top:-16px;
+*/
 }
 
 div.tag-widget.opera span.tag-display.ready.dirty h1.legend {
@@ -502,8 +506,9 @@ left:0px !important;
 position:relative !important;
 float:left !important;
 clear:none !important;
-*/
+
 display:none;
+*/
 }
 
 
