@@ -117,14 +117,13 @@ __template__
 		<input type="submit" name="update" value="Update">
 		<input type="submit" name="del_[% subid %]" value="Delete">
 
-			<a class="submissionmemory" href="#">Submissions Memory</a>
+			
 	</form>
 
-		<div class="submissionmemory">
         <form action="[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
         <tr class="data_head">
-        	<th colspan=4>Submissions Memory</th>
+        	<th colspan=4><a class="submissionmemory" href="#">Submissions Memory</a></th>
         </tr>
 			[% i = 1; FOREACH subnote = subnotes_ref; i = i == 1 ? 2 : 1 %]
 				<tr class="data_hl[% i %]">
@@ -135,7 +134,7 @@ __template__
 				</tr>
 			[% END # FOREACH %]
 
-        <tr>
+        <tr class="submissionmemory">
                 <td><input name="submatch" size="10"></td>
                 <td colspan="2"><input name="subnote" size="40"></td>
                 <td>
@@ -149,7 +148,7 @@ __template__
         </tr>
         </table>
         </form>
-        </div>
+
 
 	<br>
 	<script type="text/javascript">

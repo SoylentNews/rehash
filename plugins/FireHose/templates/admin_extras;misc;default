@@ -74,18 +74,13 @@ __template__
 		[% END %]
 	</table>
 [% END %]
-	<script>
-	
-
-
+<script>
 $('a.submissionmemory').
-	live('click', function(){ 
-				var smid = $(this).attr("rel");
-				$('tr#sm-'+smid+'.submissionmemory').toggle();
-				return false;
-	});
-
-
-	</script>
+live('click', function(){ 
+			var smid = $(this).attr("rel");
+			$('tr#sm-'+smid+'.submissionmemory').toggle();
+			return false;
+});
+</script>
 __version__
 $Id$
