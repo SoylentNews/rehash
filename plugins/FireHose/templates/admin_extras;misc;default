@@ -75,11 +75,17 @@ __template__
 	</table>
 [% END %]
 	<script>
-			$("a.submissionmemory").click(function () {
+	
+
+
+$('a.submissionmemory').
+	live('click', function(){ 
 				var smid = $(this).attr("rel");
 				$('tr#sm-'+smid+'.submissionmemory').toggle();
 				return false;
-			});
+	});
+
+
 	</script>
 __version__
 $Id$
