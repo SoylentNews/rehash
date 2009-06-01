@@ -97,12 +97,12 @@ END %]
 						val('[% view.viewtitle %]').
 						show().
 						click(function() {
-							var form = $this.closest('form');
+							var form = $(this).closest('form');
 							var el = document.createElement("input");
 							el.type = "hidden";
 							el.name = "view";
 							el.value = "[% view.viewname %]";
-							form.appendChild(el);
+							form.append(el);
 							form.submit();
 						});
 				</script>
