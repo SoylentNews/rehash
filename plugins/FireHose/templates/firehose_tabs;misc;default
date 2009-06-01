@@ -91,6 +91,22 @@ END %]
 					active_view = 1;
 					active_set = 1;
 				 END %]
+				[% IF item && active_view %]
+				<script type="text/javascript">
+					$('#viewsearch').
+						val('[% view.viewtitle %]').
+						show().
+						click(function() {
+							var form = $this.closest('form');
+							var el = document.createElement("input");
+							el.type = "hidden";
+							el.name = "view";
+							el.value = "[% view.viewname %]";
+							form.appendChild(el);
+							form.submit();
+						});
+				</script>
+				[% END %]
 				[% IF active_view %]
 					[% rss_link = "";
 					   IF view.viewname == "stories";
