@@ -26,14 +26,16 @@ sub main {
 
 	# possible value of "op" parameter in form
 	my %ops = (
-		userlogin	=> [ 1,				\&loginForm		],
-		userclose	=> [ $user_ok,			\&loginForm		],
-		newuserform	=> [ 1,				\&newUserForm		],
-		newuser		=> [ $post_ok,			\&newUser		],
-		mailpasswdform	=> [ 1,				\&mailPasswdForm	],
-		mailpasswd	=> [ $post_ok,			\&mailPasswd		],
-		changeprefs	=> [ $user_ok,			\&changePrefs		],
-		saveprefs	=> [ $post_ok && $user_ok,	\&savePrefs		],
+		userlogin       => [ 1,                         \&loginForm        ],
+		userclose       => [ $user_ok,                  \&loginForm        ],
+		newuserform     => [ 1,                         \&newUserForm      ],
+		newuser         => [ $post_ok,                  \&newUser          ],
+		mailpasswdform  => [ 1,                         \&mailPasswdForm   ],
+		mailpasswd      => [ $post_ok,                  \&mailPasswd       ],
+		changeprefs     => [ $user_ok,                  \&changePrefs      ],
+		saveprefs       => [ $post_ok && $user_ok,      \&savePrefs        ],
+		claim_openid    => [ 1,                         \&claimOpenID      ],
+		verify_openid   => [ 1,                         \&verifyOpenID     ],
 	);
 
 	my $op = $form->{op};
@@ -473,6 +475,60 @@ sub getOtherUserParams {
 			? $form->{$param}
 			: $params->{$param};
 	}
+}
+
+sub errorOpenID {
+	header("OpenID");
+	print @_;
+	footer();
+}
+
+sub claimOpenID {
+	my($slashdb, $reader, $constants, $user, $form) = @_;
+	my $csr = getOpenID();
+	my $identity = $csr->claimed_identity($form->{openid_url});
+	unless ($identity) {
+		errorOpenID("Invalid identity supplied.");
+		return;
+	}
+
+	my $gSkin = getCurrentSkin();
+	my $check_url = $identity->check_url(
+		return_to  => "$gSkin->{absolutedir}/login.pl?op=verify_openid",
+		trust_root => "$gSkin->{absolutedir}/"
+	);
+
+	if ($check_url) {
+		redirect($check_url);
+		return;
+	}
+}
+
+sub verifyOpenID {
+	my($slashdb, $reader, $constants, $user, $form) = @_;
+	my $csr = getOpenID($form);
+
+	$csr->handle_server_response(
+		not_openid => sub {
+			errorOpenID("Not an OpenID message.");
+		},
+		setup_required => sub {
+			my($setup_url) = @_;
+			redirect($setup_url);
+		},
+		cancelled => sub {
+			errorOpenID("Cancelled.");
+		},
+		verified => sub {
+			my($vident) = @_;
+			errorOpenID("Verified as $vident->{identity}");
+		},
+		error => sub {
+			my($err) = @_;
+			errorOpenID("Error: $err");
+		},
+	);
+	
 }
 
 createEnvironment();

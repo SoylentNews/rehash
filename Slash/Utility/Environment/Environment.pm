@@ -1388,6 +1388,39 @@ sub setCookie {
 
 #========================================================================
 
+{
+my $ua;
+my $nonce;
+
+sub getOpenIDSecret {
+	my($time) = @_;
+	return $nonce + $time;
+}
+
+sub getOpenID {
+	my($form) = @_;
+	require Net::OpenID::Consumer;
+	require LWPx::ParanoidAgent;
+
+	$ua    ||= LWPx::ParanoidAgent->new;
+	$nonce ||= getAnonId(1);
+
+	my $csr = Net::OpenID::Consumer->new(
+		ua              => LWPx::ParanoidAgent->new,
+		consumer_secret => \&getOpenIDSecret,
+		args            => $form,
+		required_root   => getCurrentSkin('absolutedir') . '/',
+		#cache		=> '', # XXX should implement with $mcd
+		debug           => 1 # XXX
+	);
+
+	return $csr;
+}
+}
+
+
+#========================================================================
+
 =head2 getPollVoterHash([UID])
 
 =cut
