@@ -10,7 +10,7 @@
 use strict;
 use File::Basename;
 use File::Path;
-use File::Spec::Functions qw( :DEFAULT splitpath splitdir catfile );
+use File::Spec::Functions qw( :DEFAULT splitpath splitdir catfile file_name_is_absolute );
 use Cwd 'realpath';
 use Slash;
 use Slash::Utility;
@@ -74,18 +74,22 @@ sub template_process {
 		$destpath_secure =~ s/\.(\w+)$/\.ssl\.$1/;
 	}
 	my $javascript_debug = $is_glob ? 0 : 1;
-	my @abs_filelist = map { realpath(catfile($include_path, $_)) } @$filelist;
+	my @abs_filelist = map { realpath(
+		file_name_is_absolute($_)
+		? $_
+		: catfile($include_path, $_)
+	) } @$filelist;
 	my $glob_template = Template->new({
 		ABSOLUTE	=> 1,
 		PROCESS		=> \@abs_filelist,
 		OUTPUT		=> \$destpath,
 		INTERPOLATE	=> 0,
 	}) || die "$Template::ERROR\n";
-	$glob_template->process($filelist->[0],
+	$glob_template->process($abs_filelist[0],
 		{ constants => $constants,        javascript_debug => $javascript_debug },
 		$destpath)
 		|| die $glob_template->error(), "\n";
-	$glob_template->process($filelist->[0],
+	$glob_template->process($abs_filelist[0],
 		{ constants => $constants_secure, javascript_debug => $javascript_debug },
 		$destpath_secure)
 		|| die $glob_template->error(), "\n";
