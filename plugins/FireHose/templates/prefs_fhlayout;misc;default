@@ -33,47 +33,6 @@ __template__
 
 		<br>
 
-		[% classic_check = constants.markup_checked_attribute IF user.index_classic %]
-		<p><label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="index_classic" [% classic_check %]> Use Classic Index</label></p>
-
-		<br>
-
-		<label>Date/Time Format
-                [%
-                formats = Slash.db.getDescriptions('dateformats');
-                Slash.createSelect('tzformat', formats, user.dfid, 1);
-                %]
-                </label></p>
-                <p>
-                <label>
-				Time Zone / Daylight Savings Time
-                [%
-                USE this_format = format('%+0.4d %s');
-                this_tzdescs = Slash.db.getDescriptions('tzdescription');
-                this_tzcodes = Slash.db.getDescriptions('tzcodes');
-                these_tzdescs = {};
-                FOREACH tz = this_tzcodes.keys;
-                        this_num = this_tzcodes.$tz / 36;
-                        this_num = this_num.replace('50$', '30');
-                        these_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
-                END;
-
-                this_tzcode = user.tzcode_orig || user.tzcode;
-                Slash.createSelect('tzcode',
-                        these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
-                );
-				%]</label>[%
-                Slash.createSelect('dst', {
-                        ''      => 'Automatic',
-                        'on'    => 'Manual (On)',
-                        'off'   => 'Manual (Off)'
-                }, user.dst, 1);
-                %]
-
-                </p>
-
-		<br>
-
 		[% smallscreen_check = ''; IF user.smallscreen; smallscreen_check = constants.markup_checked_attribute; END; %]
 		<label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="smallscreen" id="smallscreen" [% smallscreen_check %] onclick="setLayoutPrefs()"> Small Screen</label>
 
@@ -82,6 +41,9 @@ __template__
 
 		[% simple_check = ''; IF user.simpledesign; simple_check = constants.markup_checked_attribute; END; %]
                 <label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="simpledesign" id="simpledesign" [% simple_check %] onclick="setLayoutPrefs()"> Simple Design</label>
+
+		[% classic_check = constants.markup_checked_attribute IF user.index_classic %]
+                <label style="background:#FFFF99;-moz-border-radius:.25em;-webkit-border-radius:.25em;padding:.5em"><input type="checkbox" name="index_classic" [% classic_check %]> Use Classic Index</label>
 
 		<div style="padding-left: 20px;">
 		<table>
@@ -233,6 +195,38 @@ __template__
 			</table>
 
                 </div>
+
+		<label>Date/Time Format
+                [%
+                formats = Slash.db.getDescriptions('dateformats');
+                Slash.createSelect('tzformat', formats, user.dfid, 1);
+                %]
+                </label></p>
+                <p>
+                <label>
+                                Time Zone / Daylight Savings Time
+                [%
+                USE this_format = format('%+0.4d %s');
+                this_tzdescs = Slash.db.getDescriptions('tzdescription');
+                this_tzcodes = Slash.db.getDescriptions('tzcodes');
+                these_tzdescs = {};
+                FOREACH tz = this_tzcodes.keys;
+                        this_num = this_tzcodes.$tz / 36;
+                        this_num = this_num.replace('50$', '30');
+                        these_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
+                END;
+
+                this_tzcode = user.tzcode_orig || user.tzcode;
+                Slash.createSelect('tzcode',
+                        these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
+                );
+                                %]</label>[%
+                Slash.createSelect('dst', {
+                        ''      => 'Automatic',
+                        'on'    => 'Manual (On)',
+                        'off'   => 'Manual (Off)'
+                }, user.dst, 1);
+                %]
 	
 		<p class="buttons">
 	        <input type="button" value="Save" onclick="saveModalPrefs()">

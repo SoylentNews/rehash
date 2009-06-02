@@ -221,11 +221,14 @@ sub view {
 			$commenttext = printComments( $firehose_reader->getDiscussion($discussion),0,0, { Return => 1});
 		}
 
+		my $sprite_rules = $firehose_reader->js_anon_dump($firehose_reader->getSpriteInfoByFHID($item->{id}));
+
 		slashDisplay("view", {
 			firehosetext	=> $firehosetext,
 			userbio		=> $userbio,
 			commenttext	=> $commenttext,
-			item		=> $item
+			item		=> $item,
+			sprite_rules	=> $sprite_rules
 		});
 
 

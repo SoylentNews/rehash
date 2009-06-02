@@ -6254,3 +6254,5 @@ UPDATE firehose_view SET filter = '"hose:{nickname}"' WHERE viewname = "userfire
 # 2009-05-28
 UPDATE vars SET value = 'T_2_5_0_258' WHERE name = 'cvs_tag_currentcode';
 
+# 2009-06-04
+# Please run themes/slashdot/sql/mysql/upgrades

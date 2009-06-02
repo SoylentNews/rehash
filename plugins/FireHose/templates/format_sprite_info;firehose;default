@@ -13,5 +13,5 @@ format_sprite_info
 __seclev__
 10000
 __template__
-[% FOREACH image = images %].[% image.label %] { background: url([% constants.imagedir %]/[% path %]/[% sprite_name %]?[% version %]) no-repeat top left; background-position: [% image.x_coord %]px [% image.y_coord %]px; width: [% image.width %]px; height: [% image.height %]px; } [% END %]
+[% FOREACH image = images %].[% image.label %] { background: url(__IMAGEDIR__/[% path %]/[% sprite_name %]?[% version %]) no-repeat top left; background-position: [% image.x_coord %]px [% image.y_coord %]px; width: [% image.width %]px; height: [% image.height %]px; } [% END %]
 __version__
