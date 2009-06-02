@@ -10,7 +10,8 @@
 use strict;
 use File::Basename;
 use File::Path;
-use File::Spec::Functions qw( :DEFAULT splitpath splitdir);
+use File::Spec::Functions qw( :DEFAULT splitpath splitdir catfile );
+use Cwd 'realpath';
 use Slash;
 use Slash::Utility;
 use Slash::DB;
@@ -73,12 +74,11 @@ sub template_process {
 		$destpath_secure =~ s/\.(\w+)$/\.ssl\.$1/;
 	}
 	my $javascript_debug = $is_glob ? 0 : 1;
+	my @abs_filelist = map { realpath(catfile($include_path, $_)) } @$filelist;
 	my $glob_template = Template->new({
-		INCLUDE_PATH	=> $include_path,
-		PROCESS		=> $filelist,
-		OUTPUT		=> \$destpath,
 		ABSOLUTE	=> 1,
-		RELATIVE	=> 1,
+		PROCESS		=> \@abs_filelist,
+		OUTPUT		=> \$destpath,
 		INTERPOLATE	=> 0,
 	}) || die "$Template::ERROR\n";
 	$glob_template->process($filelist->[0],
