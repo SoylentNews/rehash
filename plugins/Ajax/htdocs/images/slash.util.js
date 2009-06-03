@@ -87,7 +87,7 @@ fhitem_key = function( item ){
 	var result;
 	$('span.sd-info-block span[class^=sd-key-]', item).each(function(){
 		result = {
-			key:		this.textContent,
+			key:		$(this).text(),
 			key_type:	KEY_TYPE.exec(this.className)[1]
 		};
 		return false;

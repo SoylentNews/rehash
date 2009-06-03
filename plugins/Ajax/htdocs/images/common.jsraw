@@ -414,18 +414,19 @@ function firehose_style_switch( section_id ){
 
 var sprite_rules, use_sprites;
 (function(){
-var RULES=$('<style id="sprite-rules" type="text/css">').appendTo('head')[0];
-function need_rule( expr ){ return ($(expr).css('background-image')||'none')==='none'; }
+function need_rule( $expr ){ return ($expr.css('background-image')||'none')==='none'; }
 sprite_rules = function( rules ){
-	RULES.textContent += core.map(rules, function( classAttr, rule ){
-		return need_rule('<div class="'+classAttr+'">') ? rule+'\n' : void(0);
-	}).join('');
+	var $test=$('<div style="display:none">').appendTo('body');
+	(rules=core.grep(rules, function( classAttr ){
+		return need_rule($test.attr('className', classAttr));
+	}).join('\n')) && $('<style type="text/css">'+rules+'</style>').appendTo('head');
+	$test.remove();
 };
 use_sprites = function( root ){
 	$('div.maybe-sprite', root).each(function(){
 		var $div=$(this).removeClass('maybe-sprite');
 		$div.children('span.no-sprite').each(function(){
-			need_rule($div) && $div.attr('style', this.textContent);
+			need_rule($div) && $div.attr('style', $(this).text());
 		}).remove();
 	});
 };
