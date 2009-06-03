@@ -417,10 +417,9 @@ var sprite_rules, use_sprites;
 var RULES=$('<style id="sprite-rules" type="text/css">').appendTo('head')[0];
 function need_rule( expr ){ return ($(expr).css('background-image')||'none')==='none'; }
 sprite_rules = function( rules ){
-	rules = core.grep(rules, function( classAttr ){
-		return need_rule('<div class="'+classAttr+'">');
-	});
-	rules.length && (RULES.textContent += rules.join('\n')+'\n');
+	RULES.textContent += core.map(rules, function( classAttr, rule ){
+		return need_rule('<div class="'+classAttr+'">') ? rule+'\n' : void(0);
+	}).join('');
 };
 use_sprites = function( root ){
 	$('div.maybe-sprite', root).each(function(){
