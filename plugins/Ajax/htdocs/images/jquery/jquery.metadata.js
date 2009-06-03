@@ -57,14 +57,15 @@
 ;(function($) {
 
 function evalMetadata( json ){
-	var result, key;
+	var key, results, result;
 	if ( json && /\S/.test(json) ) {
 		key = 'evalMetadata_'+new Date().getTime();
-		$.globalEval('window.'+key+' = '+json);
+		results = window.evalMetadata_results || (window.evalMetadata_results={});
+		$.globalEval('window.evalMetadata_results.'+key+' = '+json);
 
-		if ( key in window ) {
-			result = window[key];
-			delete window[key];
+		if ( key in results ) {
+			result = results[key];
+			delete results[key];
 		}
 	}
 	return result;
