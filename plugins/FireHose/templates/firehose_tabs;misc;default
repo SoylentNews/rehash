@@ -45,7 +45,7 @@ END %]
 						<span class="tab_edit"><a href="" onclick="getModalPrefs('fhview[% view.viewname %]', 'Customize [% view.viewtitle %]', 1);return false;"  title="Edit">Edit</a></span>
 					[% END %]
 
-[% IF gSkin.name != 'idle' %]
+
 
 	[% UNLESS nodiv %]
 		[% IF !user.is_anon && gSkin.name != 'idle' && !is_smallscreen && !user.simpledesign && !user.firehose_nographics %]
@@ -123,7 +123,7 @@ END %]
 			[% IF this_tab_active && tab.tabname != "untitled" %]<span id="fhtabdel" class="close" title="Close this tab"><a href="[% PROCESS nojslink %]" onclick="firehose_remove_tab([% tab.tabid %])">[X]</a></span>[% END %]</li>
 		[% END %]
 	[% UNLESS nodiv %]</ul>[% END %]
-[% END %]
+
 <script type="text/javascript">
 $(function(){ // on document ready
 
