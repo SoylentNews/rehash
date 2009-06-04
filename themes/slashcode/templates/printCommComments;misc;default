@@ -38,7 +38,9 @@ __template__
 [% END %]
 
 [% IF discussion2 %]
-[% IF !form.printdiv %]	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>[% END %]
+[% IF !form.printdiv -%]
+	<script src="[% constants.imagedir %]/comments[% UNLESS user.is_admin && user.javascript_debug %]-minified[% END %].js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[%- END %]
 	<script type="text/javascript">
 <!--
 [%- IF gSkin.name != 'idle' %]

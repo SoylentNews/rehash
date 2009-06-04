@@ -186,7 +186,7 @@ IF do_br %]<br>[% END %]
 	<input type="submit" name="op" value="Submit" class="button">
 	[% END %]
 	[% IF form.pid && discussion2 %]
-	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+	<script src="[% constants.imagedir %]/comments[% UNLESS user.is_admin && user.javascript_debug %]-minified[% END %].js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	<script type="text/javascript">
 <!--
 	D2.comment_body_reply()[[% form.pid %]] = '[% pid_reply %]';
