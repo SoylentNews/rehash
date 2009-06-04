@@ -4920,16 +4920,6 @@ sub getSpriteInfoByFHID {
 	return  $sprite;
 }
 
-sub normalizeIntro {
-	my($self,$text) = @_;
-	my($firsttag) = $text =~ /^\s+<(\w+)/;
-
-	if (!$firsttag || ($firsttag && $firsttag !~ /^p$/i)) {
-		$text = "<p>$text</p>";
-	}
-	return $text;
-}
-
 1;
 
 __END__
