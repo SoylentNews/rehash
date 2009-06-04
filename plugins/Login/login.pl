@@ -566,7 +566,7 @@ sub verifyOpenID {
 
 			my $openid_url = $slashdb->checkOpenIDResKey($rkey->reskey);
 			$slashdb->setOpenID($user->{uid}, $openid_url); # $vident->{identity}
-			printOpenID("Verified as <b>$openid_url</b>; identity attached.  See your <a href=\"/my/password\">login preferences</a>.");
+			printOpenID("Verified as <b>$openid_url</b>.  Identity is attached to your account.  See your <a href=\"/my/password\">login preferences</a>.");
 		},
 		not_openid => sub {
 			$rkey->use;
