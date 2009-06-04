@@ -1125,7 +1125,7 @@ function adsToggle(val) {
 
 }
 
-var update_firehose_content, animate_firehose_changes;
+var update_firehose_content;
 (function(){
 var	MARK_ADDING			= 'data-add-ready',
 	MARK_REMOVING		= 'data-remove-ready',
@@ -1343,91 +1343,6 @@ update_firehose_content = function( updates, sequence ){
 	// Our work here is done, old chum.  Let us away to the Bat Cave.
 	Slash.busy('firehose-content', false);
 }
-
-
-var start_animation, stop_animation;
-(function(){
-var id=0, abort_fn, aborting=false;
-stop_animation = function( abort ){
-	if ( id && !aborting ) {
-		aborting = abort && abort_fn;
-
-		clearInterval(id);
-		id = 0;
-
-		aborting && abort_fn(true);
-		aborting = false;
-		return true;
-	}
-}
-start_animation = function( step_fn, interval, opt_abort_fn ){
-	// It's ok to stop the existing timer (abandoning pending), as those unhandled items will be picked up by the new loop.
-	stop_animation(true);
-	if ( interval ) {
-		id = setInterval(step_fn, interval);
-		abort_fn = opt_abort_fn;
-	}
-}
-})();
-
-var	FIRST_ADD_READY		= '.data-add-ready:first',
-	LAST_REMOVE_READY	= '.data-remove-ready:not(.currfh):last',
-	READY				= '.data-add-ready,.data-remove-ready:not(.currfh)';
-
-function boundary_items(){
-	var y=new Bounds(window).bottom, above, below;
-	$('#firehoselist>div:visible').each(function(){
-		return $(this).offset().top<y ? (above=this) : (below=this, false);
-	});
-	return { above:above, below:below };
-}
-
-function all( $all, duration ){
-	var t=duration||0;
-	$all.each(function(){
-		var match=CHANGES_RE.exec(this.className), $item=match && $(this);
-		switch ( match && match[1] ) {
-			case 'add':		$item.fadeIn(t, function(){ $item.removeClass(MARK_ADDING).css('display', ''); }); break;
-			case 'remove':	$item.fadeOut(t, function(){ $item.remove(); }); break;
-		}
-	});
-	return $all;
-}
-
-function next( duration ){
-	var t=duration||0, edge_item=boundary_items();
-	return edge_item.below && !all($(edge_item.above).nextAll(READY))
-		|| all($FHL.children(FIRST_ADD_READY), t).length
-		|| all($FHL.children(LAST_REMOVE_READY), t).length;
-}
-
-animate_firehose_changes = function( interval, duration, complete_fn ){
-
-	function complete( aborting ){
-		Slash.busy('firehose-animation', false);
-		if ( !aborting ) {
-			stop_animation();
-			complete_fn && complete_fn();
-		}
-		Slash.busy('firehose-update', false);
-		return false;
-	}
-
-	function step(){
-		return next(duration) || complete();
-	}
-
-	Slash.busy('firehose-animation', true);
-	stop_animation(true);
-
-	if ( interval ) {
-		step() && start_animation(step, interval, complete);
-	} else {
-		all($FHL.children(READY));
-		complete();
-	}
-}
-
 })();
 
 
@@ -1454,36 +1369,50 @@ $(document).bind('firehose-content-end', function(){
 $(function(){ $fhroots=$('div.fhroot'); });
 })();
 
+function new_available( n ){
+	TypeOf.number(n)!=='number' && (n=$('#firehoselist>div.fhitem.data-add-ready:hidden').length);
+	n && Slash.message({
+		key: 'new-warning',
+		content: '<p><a href="#" onclick="accept_new(); return false;">'+n+' update'+(n>1?'s':'')+' available.</a></p>'
+	});
+}
+function accept_new( $insert, $remove ){
+	var $FHL=$any('firehoselist'), INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)';
+
+	$insert!==false && (TypeOf.list($insert) ? $insert.filter(INSERT_SX) : $FHL.children(INSERT_SX)).removeClass('data-add-ready').css('display', '');
+	$remove!==false && (TypeOf.list($remove) ? $remove.filter(REMOVE_SX) : $FHL.children(REMOVE_SX)).remove();
+
+	firehose_update_title_count(
+		firehose_storyfuture(firehose_future).length
+	);
+
+	Slash.clear_message('new-warning');
+}
+
 function firehose_handle_update( updates, sequence ) {
 
 	var	saved_selection		= new $.TextSelection(gFocusedText),
 		$menu				= $('div.ac_results:visible'),
-
 		$fhl				= $any('firehoselist'),
-
-		add_behind_scenes	= $('div.message .loading_msg').length,
-		animate				= !add_behind_scenes || 0,
-		INTERVAL			= animate && 60,
-		DURATION			= animate && 180;
+		add_behind_scenes	= $('div.message .loading_msg').length;
 
 	add_behind_scenes && $fhl.hide();
 
 	update_firehose_content(updates, sequence);
 
-	animate_firehose_changes(INTERVAL, DURATION,
-
-		function(){			// on completion of the last addition/removal
-			firehose_update_title_count(
-				firehose_storyfuture(firehose_future).length
-			);
-			if ( add_behind_scenes ) {
-				$fhl.show().css({ opacity:'' });
-				$('div.paginate').show().removeClass('paginatehidden');
-				anchor_fh_pag_menu(true);
-			}
-			Slash.clear_message('loading');
-		}
-	);
+	if ( add_behind_scenes ) {
+		accept_new(true, false);
+		$fhl.show().css({ opacity:'' });
+		$('div.paginate').show().removeClass('paginatehidden');
+		anchor_fh_pag_menu(true);
+		Slash.clear_message('loading');
+	} else {
+		var $old_last	= $fhl.children('div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last'),
+			$tail		= $old_last.nextAll();
+		accept_new($tail, $tail);
+		new_available();
+	}
+	Slash.busy('firehose-update', false);
 
 	firehose_add_update_timerid(setTimeout(firehose_get_updates, getFirehoseUpdateInterval()));
 
