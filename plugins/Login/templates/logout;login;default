@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+logout modal
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+logout
+__template__
+                [% IF tabbed == 1 %]
+                <div class="pref">
+                <span class="preftab"><a href="#" onclick="hide_modal_box(); return false">User</a></span>
+                <span class="preftab"><a href="#" onclick="hide_modal_box(); return false">Messages</a></span>
+                [% IF user.is_admin %]<span class="preftab"><a href="#" onclick="hide_modal_box(); return false">Admin</a></span>[% END %]
+                <span class="preftab active">Log Out</span>
+                </div>
+                [% END %]
+
+<form id ="modal_prefs">
+<input type="hidden" name="refresh_onclose" value="1">
+<span style="text-align: center"><h2>You have successfully logged out of Slashdot.</h2></span>
+
+<br><br>
+
+<p class="buttons">
+<input type="button" value="Close" onclick="hide_modal_box(); return false">
+</form>
+__seclev__
+500
+__version__
+

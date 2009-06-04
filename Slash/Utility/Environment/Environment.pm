@@ -82,6 +82,7 @@ our @EXPORT  = qw(
 	eatUserCookie
 	setCookie
 	getPublicLogToken
+	userLogout
 
 	getPollVoterHash
 
@@ -1428,6 +1429,25 @@ sub getPublicLogToken {
 	return '';
 }
 
+#========================================================================
+
+=head2 userLogout($uid)
+
+Deletes the user's logtoken and cookie (logs them out).
+
+=cut
+
+sub userLogout {
+        my ($uid) = @_;
+
+        my $constants = getCurrentStatic();
+        return if (!$uid || ($uid == $constants->{anonymous_coward_uid}));
+
+        my $slashdb = getCurrentDB();
+
+        $slashdb->deleteLogToken($uid);
+        setCookie('user', '');
+}
 
 #========================================================================
 

@@ -16,6 +16,7 @@ __template__
 		<span class="preftab active">User</span>
 		<span class="preftab"><a href="" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a></span>
 		[% IF user.is_admin %]<span class="preftab"><a href="" onclick="getModalPrefs('admin', 'Admin', 1); return false;">Admin</a></span>[% END %]
+		<span class="preftab"><a href="" onclick="getModalPrefs('logout', 'Log Out', 1); return false;">Log Out</a></span>
 		</div>
 		[% END %]
 

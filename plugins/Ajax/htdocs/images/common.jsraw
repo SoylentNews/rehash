@@ -2052,6 +2052,10 @@ function hide_modal_box(){
 		removeData('tabbed').
 		unbind();
 
+	if (document.forms.modal_prefs.refresh_onclose && document.forms.modal_prefs.refresh_onclose.value) {
+		document.location = document.URL;
+	}
+
 	return false; // ...so we can be used as a click handler.
 }
 

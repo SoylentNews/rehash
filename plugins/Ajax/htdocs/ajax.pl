@@ -1447,6 +1447,16 @@ sub getModalPrefs {
                         { Return => 1 }
                 );
 
+	} elsif ($form->{'section'} eq 'logout') {
+		return if $user->{is_anon};
+
+		userLogout($user->{uid});
+
+		return
+			slashDisplay('logout', {
+				tabbed => $form->{'tabbed'},
+			}, { Return => 1, Page => 'login'});
+
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
