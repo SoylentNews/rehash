@@ -2133,13 +2133,14 @@ sub getOpenIDsByUID {
 	my($self, $uid) = @_;
 	return unless $uid;
 
-	my @openid_urls = map { $_->[0] } @{$self->sqlSelectAll(
+	my $openid_urls = $self->sqlSelectAll(
 		'openid_url',
 		'users_openid',
 		'uid=' . $self->sqlQuote($uid)
-	)};
+	);
+	return [] if !$openid_urls || !@$openid_urls;
 
-	return \@openid_urls;
+	return [ map { $_->[0] } @$openid_urls ];
 }
 
 sub setOpenID {
