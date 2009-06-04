@@ -2116,6 +2116,87 @@ sub deleteLogToken {
 }
 
 ########################################################
+#
+sub getUIDByOpenID {
+	my($self, $openid_url) = @_;
+	return unless $openid_url;
+
+	my($uid) = $self->sqlSelect(
+		'uid',
+		'users_openid',
+		'openid_url=' . $self->sqlQuote($openid_url)
+	);
+	return $uid;
+}
+
+sub getOpenIDsByUID {
+	my($self, $uid) = @_;
+	return unless $uid;
+
+	my @openid_urls = $self->sqlSelect(
+		'openid_url',
+		'users_openid',
+		'uid=' . $self->sqlQuote($uid)
+	);
+
+	return \@openid_urls;
+}
+
+sub setOpenID {
+	my($self, $uid, $openid_url) = @_;
+	return unless $uid && $openid_url;
+
+	return $self->sqlInsert('users_openid', {
+		openid_url => $openid_url,
+		uid        => $uid
+	});
+}
+
+sub deleteOpenID {
+	my($self, $uid, $openid_url) = @_;
+	return unless $uid && $openid_url;
+
+	return $self->sqlDelete('users_openid',
+		'openid_url=' . $self->sqlQuote($openid_url) .
+		' AND uid=' . $self->sqlQuote($uid)
+	);
+}
+
+sub deleteOpenIDs {
+	my($self, $uid) = @_;
+	return unless $uid;
+
+	return $self->sqlDelete('users_openid',
+		'uid=' . $self->sqlQuote($uid)
+	);
+}
+
+sub setOpenIDResKey {
+	my($self, $openid_url, $reskey) = @_;
+	return unless $openid_url && $reskey;
+
+	$self->sqlInsert('users_openid_reskeys', {
+		openid_url => $openid_url,
+		reskey     => $reskey
+	});
+
+}
+
+sub checkOpenIDResKey {
+	my($self, $reskey) = @_;
+	return unless $reskey;
+
+	my($openid_url) = $self->sqlSelect(
+		'openid_url',
+		'users_openid_reskeys',
+		'reskey=' . $self->sqlQuote($reskey)
+	);
+
+	return $openid_url;
+}
+
+
+########################################################
 # Get user info from the users table.
 # May be worth it to cache this at some point
 sub getUserUID {

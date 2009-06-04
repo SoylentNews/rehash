@@ -83,6 +83,7 @@ our @EXPORT  = qw(
 	setCookie
 	getPublicLogToken
 	userLogout
+	getOpenID
 
 	getPollVoterHash
 
@@ -1394,7 +1395,8 @@ my $nonce;
 
 sub getOpenIDSecret {
 	my($time) = @_;
-	return $nonce + $time;
+	return 'asdadasd'; # SSS
+	return $nonce . $time;
 }
 
 sub getOpenID {
@@ -1405,11 +1407,17 @@ sub getOpenID {
 	$ua    ||= LWPx::ParanoidAgent->new;
 	$nonce ||= getAnonId(1);
 
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $abs = $user->{state}{ssl}
+		? $constants->{absolutedir_secure}
+		: $constants->{absolutedir};
+
 	my $csr = Net::OpenID::Consumer->new(
 		ua              => LWPx::ParanoidAgent->new,
 		consumer_secret => \&getOpenIDSecret,
 		args            => $form,
-		required_root   => getCurrentSkin('absolutedir') . '/',
+		required_root   => $abs . '/',
 		#cache		=> '', # XXX should implement with $mcd
 		debug           => 1 # XXX
 	);

@@ -477,7 +477,7 @@ sub getOtherUserParams {
 	}
 }
 
-sub errorOpenID {
+sub printOpenID {
 	header("OpenID");
 	print @_;
 	footer();
@@ -485,17 +485,43 @@ sub errorOpenID {
 
 sub claimOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
-	my $csr = getOpenID();
-	my $identity = $csr->claimed_identity($form->{openid_url});
-	unless ($identity) {
-		errorOpenID("Invalid identity supplied.");
+
+	if ($user->{is_anon}) {
+		printOpenID("Must be logged in.");
 		return;
 	}
 
-	my $gSkin = getCurrentSkin();
+	my $csr = getOpenID();
+	my $identity = $csr->claimed_identity($form->{openid_url});
+	unless ($identity) {
+		printOpenID("Invalid identity supplied.");
+		return;
+	}
+
+	my $claimed_identity = $identity->claimed_url;
+	my $claimed_uid = $slashdb->getUIDByOpenID($identity->claimed_url);
+	if ($claimed_uid) {
+		# we do these checks in the DB anyway, but best to try them up front;
+		# don't worry, there's no atomicity problems
+		if ($claimed_uid == $user->{uid}) {
+			printOpenID("You have already claimed the identity <b>$claimed_identity</b>.");
+		} else {
+			printOpenID("You cannot claim the identity <b>$claimed_identity</b>."); # someone else claimed it
+		}
+		return;
+	}
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('openid', { nostate => 1 });
+	$rkey->create;
+	my $reskey_text = $rkey->reskey;
+	$slashdb->setOpenIDResKey($claimed_identity, $reskey_text);
+
+	my $abs = root2abs();
 	my $check_url = $identity->check_url(
-		return_to  => "$gSkin->{absolutedir}/login.pl?op=verify_openid",
-		trust_root => "$gSkin->{absolutedir}/"
+		delayed_return => 1,
+		return_to      => "$abs/login.pl?op=verify_openid&reskey=$reskey_text",
+		trust_root     => "$abs/"
 	);
 
 	if ($check_url) {
@@ -506,26 +532,50 @@ sub claimOpenID {
 
 sub verifyOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	if ($user->{is_anon}) {
+		printOpenID("Must be logged in.");
+		return;
+	}
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{reskey} });
+
 	my $csr = getOpenID($form);
 
 	$csr->handle_server_response(
-		not_openid => sub {
-			errorOpenID("Not an OpenID message.");
+		cancelled => sub {
+			$rkey->use;
+			printOpenID("Attempt to verify cancelled.");
 		},
 		setup_required => sub {
 			my($setup_url) = @_;
+			if (!$rkey->touch) {
+				printOpenID("Credentials failed for redirect:" . $rkey->errstr);
+				return;
+			}
 			redirect($setup_url);
-		},
-		cancelled => sub {
-			errorOpenID("Cancelled.");
 		},
 		verified => sub {
 			my($vident) = @_;
-			errorOpenID("Verified as $vident->{identity}");
+			if (!$rkey->use) {
+				use Data::Dumper;
+				printOpenID("Credentials failed for verify:" . Dumper($rkey));
+				return;
+			}
+
+			my $openid_url = $slashdb->checkOpenIDResKey($rkey->reskey);
+			$slashdb->setOpenID($user->{uid}, $openid_url); # $vident->{identity}
+			printOpenID("Verified as <b>$openid_url</b>; identity attached.  See your <a href=\"/my/password\">login preferences</a>.");
+		},
+		not_openid => sub {
+			$rkey->use;
+			printOpenID("Error: not an OpenID message.");
 		},
 		error => sub {
 			my($err) = @_;
-			errorOpenID("Error: $err");
+			$rkey->use;
+			printOpenID("Error: $err");
 		},
 	);
 	

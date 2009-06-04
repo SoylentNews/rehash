@@ -43,6 +43,7 @@ INSERT INTO reskey_resources VALUES (7, 'journal-soap-get', 'no');
 INSERT INTO reskey_resources VALUES (8, 'bookmark', 'no');
 INSERT INTO reskey_resources VALUES (9, 'comments-moderation-ajax', 'yes');
 INSERT INTO reskey_resources VALUES (10, 'misc', 'no');
+INSERT INTO reskey_resources VALUES (11, 'openid', 'no');
 
 ##### comments
 ### checks
@@ -244,4 +245,18 @@ INSERT INTO reskey_vars VALUES (10, 'acl_no', 'reskey_no_misc', 'If this ACL pre
 INSERT INTO reskey_vars VALUES (10, 'duration_max-failures',  10, 'how many failures per reskey');
 
 
+##### openid
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::AL2::Spammer',        531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::AL2::NoSubmit',       551);
+INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+### vars
+INSERT INTO reskey_vars VALUES (11, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (11, 'acl_no', 'reskey_no_openid', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (11, 'duration_max-uses',  20, 'how many uses per timeframe');
 

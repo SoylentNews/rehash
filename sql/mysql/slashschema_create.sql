@@ -1545,6 +1545,34 @@ CREATE TABLE users_logtokens (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'users_openid'
+#
+
+DROP TABLE IF EXISTS users_openid;
+CREATE TABLE users_openid (
+	openid_id int UNSIGNED NOT NULL auto_increment,
+	openid_url VARCHAR(255) NOT NULL,
+	uid mediumint UNSIGNED NOT NULL,
+	PRIMARY KEY (openid_id),
+	UNIQUE (openid_url),
+	INDEX (uid)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'users_openid_reskeys'
+#
+
+DROP TABLE IF EXISTS users_openid_reskeys;
+CREATE TABLE users_openid_reskeys (
+	oprid int UNSIGNED NOT NULL auto_increment,
+	openid_url VARCHAR(255) NOT NULL,
+	reskey CHAR(20) DEFAULT '' NOT NULL,
+	PRIMARY KEY (oprid),
+	INDEX (openid_url),
+	INDEX (reskey)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'users_param'
 #
 
