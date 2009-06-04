@@ -225,7 +225,7 @@ sub getFireHoseSectionsMenu {
 	my($self, $fsid, $layout) = @_;
 	my $user = getCurrentUser();
 	my($uid_q) = $self->sqlQuote($user->{uid});
-	my $secure = apacheConnectionSSL;
+	my $secure = apacheConnectionSSL();
 
 	$layout ||= 'yui';
 
@@ -2489,17 +2489,17 @@ sub ajaxFireHoseGetUpdates {
 	my $eval_last = "$color_js $title_js";
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
-		html		=> $html,
-		eval_last	=> $eval_last,
-		updates		=> $updates,
-		update_time	=> $update_time,
-		update_data	=> $update_data,
-		ordered		=> $ordered,
-		future		=> $future,
-		value 		=> $values,
-		events		=> $events,
+		html            => $html,
+		eval_last       => $eval_last,
+		updates         => $updates,
+		update_time     => $update_time,
+		update_data     => $update_data,
+		ordered         => $ordered,
+		future          => $future,
+		value           => $values,
+		events          => $events,
 		dynamic_blocks  => $dynamic_blocks,
-		sprite_rules     => $sprite_rules,
+		sprite_rules    => $sprite_rules,
 	});
 	my $reskey_dump = "";
 	my $update_time_dump;
