@@ -87,9 +87,11 @@ by [% item.4 %]<br>
 <p><center>generated on [% currtime %]</center></p>
 <script type="text/javascript">
 (function() {
-	// coremetrics
+// coremetrics
+if( window.location.hostname === 'slashdot.org' ) {
 	cmSetProduction();
-	cmCreatePageviewTag && cmCreatePageviewTag('HALL OF FAME') && (cmCreatePageviewTag = null);
+}
+cmCreatePageviewTag && cmCreatePageviewTag('HALL OF FAME') && (cmCreatePageviewTag = null);
 })();
 </script>
 

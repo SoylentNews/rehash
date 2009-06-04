@@ -38,9 +38,11 @@ __template__
 </div>
 <script type="text/javascript">
 (function() {
-	// coremetrics
+// coremetrics
+if( window.location.hostname === 'slashdot.org' ) {
 	cmSetProduction();
-	cmCreatePageviewTag && cmCreatePageviewTag('OLD POLLS') && (cmCreatePageviewTag = null);
+}
+cmCreatePageviewTag && cmCreatePageviewTag('OLD POLLS') && (cmCreatePageviewTag = null);
 })();
 </script>
 
