@@ -78,6 +78,19 @@ END; note %]
 			</fieldset>
 		</form>
 	</div>
+
+	[% openids = Slash.db.getOpenIDsByUID(user.uid) %]
+
+	<form action="[% constants.real_rootdir %]/login.pl" method="post">
+
+	<label>Claim OpenID</label>
+	<div class="note">Enter your OpenID identity.</div>
+	<input type="text" name="openid_url" size="32" maxlength="64" value="">
+
+	<input type="hidden" name="op" value="claim_openid">
+	<input type="submit" value="Claim ID" class="button">
+	</form>
+
 </div>
 __seclev__
 500
