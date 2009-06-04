@@ -100,8 +100,7 @@ END; note %]
 			[% END;
 		END %]
 	</div>
-	[% END %]
-[% END %]
+% END %]
 
 </div>
 __seclev__
