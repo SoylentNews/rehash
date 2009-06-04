@@ -136,5 +136,6 @@ Slash::Client JavaScript::Minifier Template::Plugin::GD Net::Telnet
 Finance::Quote Net::OSCAR Date::ICal WWW::Mechanize
 Plucene::Document SOAP::Lite Algorithm::NaiveBayes
 Math::BigInt Sphinx::Search Games::WoW::Armory
+LWPx::ParanoidAgent URI::Fetch Net::OpenID::Consumer
 
 =cut
