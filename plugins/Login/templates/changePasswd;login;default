@@ -93,7 +93,7 @@ END; note %]
 	[% openids = Slash.db.getOpenIDsByUID(user.uid);
 	   IF openids.size %]
 	<div><p>Your OpenIDs:</p>
-		FOR openid IN openids %]
+		[% FOR openid IN openids %]
 	<b>[% openid %]</b><br>
 		[% END %]
 	</div>
