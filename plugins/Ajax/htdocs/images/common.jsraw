@@ -463,6 +463,9 @@ Slash.clear_message = function( key ){
 	// Public.  Remove the message with the given key and update the display.
 	try { delete AVAILABLE[key] && display(); } catch ( e ) { }
 };
+Slash.has_message = function( key ){
+	return !!AVAILABLE[key];
+};
 })();
 
 
@@ -1394,7 +1397,7 @@ function firehose_handle_update( updates, sequence ) {
 	var	saved_selection		= new $.TextSelection(gFocusedText),
 		$menu				= $('div.ac_results:visible'),
 		$fhl				= $any('firehoselist'),
-		add_behind_scenes	= $('div.message .loading_msg').length;
+		add_behind_scenes	= Slash.has_message('loading');
 
 	add_behind_scenes && $fhl.hide();
 
