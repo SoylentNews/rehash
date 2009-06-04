@@ -95,7 +95,7 @@ END; note %]
 		[% IF !openids.size %]
 	<i>None</i>
 		[% ELSE %]
-			FOR openid IN openids %]
+			[% FOR openid IN openids %]
 	<i>[% openid %]</i><br>
 			[% END %]
 		[% END %]
