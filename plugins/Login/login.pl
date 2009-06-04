@@ -486,8 +486,18 @@ sub printOpenID {
 sub claimOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
+	if (!$constants->{openid_consumer_allow}) {
+		printOpenID("OpenID is not enabled.");
+		return;
+	}
+
 	if ($user->{is_anon}) {
 		printOpenID("Must be logged in.");
+		return;
+	}
+
+	if (!$user->{is_admin}) {
+		printOpenID("Only admins can do that.");
 		return;
 	}
 
@@ -533,8 +543,18 @@ sub claimOpenID {
 sub verifyOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
+	if (!$constants->{openid_consumer_allow}) {
+		printOpenID("OpenID is not enabled.");
+		return;
+	}
+
 	if ($user->{is_anon}) {
 		printOpenID("Must be logged in.");
+		return;
+	}
+
+	if (!$user->{is_admin}) {
+		printOpenID("Only admins can do that.");
 		return;
 	}
 
