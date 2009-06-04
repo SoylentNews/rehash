@@ -94,13 +94,13 @@ END; note %]
 	<div><p><b>Your OpenIDs</b></p>
 		[% IF !openids.size %]
 	<i>None</i>
-		[% ELSE;
+		[% ELSE %]
 			FOR openid IN openids %]
 	<i>[% openid %]</i><br>
-			[% END;
-		END %]
+			[% END %]
+		[% END %]
 	</div>
-% END %]
+[% END %]
 
 </div>
 __seclev__
