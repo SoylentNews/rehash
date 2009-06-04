@@ -30,7 +30,7 @@ __template__
 <div class="rss"><a href="[% rss_link %]" title="RSS for [% name | strip_attribute %]">RSS</a></div>
 [% END %]
 [% IF is_primary_section %]
-<div class="section_name">[% name | strip_literal %]</div>
+<div class="section_name">Slashdot</div>
 <div class="contents">
 [% ELSE %]
 <div class="section_name"><input type="text" name="section_name" value="[% name | strip_attribute %]" class="section_name" id="fhsectionname"></div>
@@ -96,13 +96,16 @@ __template__
 	}
 	[% END %]
 
-	function update_metadata( updated, which ){
-		update_section(which, {
+	function update_metadata( updated, el ){
+		update_section(el, {
 			name:		updated.name,
 			color:		updated.color,
 			filter:		updated.filter,
 			viewname:	updated.viewname
-		}, updated.as_default);
+		}, {
+			make_default:	updated.as_default,
+			highlight:		true
+		});
 	}
 
 	// custom show/hide
@@ -235,7 +238,7 @@ save_state_for = function( name ){
 				if ( json && json.li ) {
 					var	$saved = json.li && $(json.li).insertBefore($item);
 					$item.remove();
-					update_metadata(requested, $saved);
+					update_metadata(requested, $saved[0]);
 				}
 			}
 		});
@@ -250,7 +253,7 @@ save_state_for = function( name ){
 
 		changed.name && $item.find('a:first').text(requested.name);
 		if ( changed.name || changed.query ) {
-			update_metadata(requested, [% section_id %]);
+			update_metadata(requested, firehose_section_menu_item([% section_id %])[0]);
 			saveModalPrefs();
 		}
 		changed.query && $(document).trigger('firehose-setting-section', [% section_id %]);

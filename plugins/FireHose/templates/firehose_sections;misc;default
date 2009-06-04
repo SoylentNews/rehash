@@ -63,7 +63,7 @@ END;
 
 var firehose_delete_section, update_section;
 
-$(function(){
+(function(){
 var $section_menu = $any('firehose-sections');
 
 [% IF !user.is_anon && !skip_edit %]
@@ -110,6 +110,12 @@ var signatures={}, ids={}, ws=/\s+/, id_prefix=/^fhsection-/, default_color = {
 	daddypants: 'indigo'
 };
 
+function init_metadata( el ){
+	var $el=$(el), result=$el.metadata({ type:'elem', name:'script' });
+	$el.find('script[type=data]').remove();
+	return result;
+}
+
 function signature( section ){
 	return section.viewname + ';'
 		+ (section.color||default_color[section.viewname]) + ';'
@@ -117,72 +123,73 @@ function signature( section ){
 }
 
 section_matching = function( data ){
-	var id		= $section_menu.metadata().active_id,
-		goal	= signature(data),
-		$menu_item;
+	var	have_id			= $section_menu.metadata().active_id,
+		have			= signatures[have_id],
+		want			= signature(data),
+		want_id			= (have_id==='unsaved'||want!==have) ? ids[want] : have_id,
+		$want			= want_id && firehose_section_menu_item(want_id),
+		want_section	= want_id && $want.length && $want.metadata();
+
 
 	[% IF user.is_admin %]
-	if ( id!=='unsaved' && signatures[id]!==goal && window.console && window.console.log ) {
-		window.console.log('unsaved: from '+id+' (hash "'+signatures[id]+'"), for hash "'+goal+'"');
+	if ( want_id!==have_id ) {
+		function label( s ){
+			var name='';
+			if ( s.name ) {
+				name = s.name + '[' + s.id + ']:';
+			} else if ( s.id==='unsaved' ) {
+				name = s.id + ':';
+			}
+			return name+'"'+signature(s)+'"';
+		}
+		var	key		= 'unsaved-debug',
+			message = 'To '+label(want_section||data)+'; '+
+					  'from '+label(firehose_section_menu_item(have_id).metadata());
+		Slash.message({ key:key, content:$('<p id="'+key+'">').text(message) });
+		setTimeout(function(){
+			$any(key).fadeOut(2000, function(){ Slash.clear_message(key); });
+		}, 8000);
 	}
 	[% END %]
 
-	(id==='unsaved' || signatures[id]!==goal) && (id = ids[goal]);
-	return id && ($menu_item=firehose_section_menu_item(id)) && $menu_item.metadata();
+	return want_section;
 };
 
-update_section = function( which, data, make_default ){
-	var $item, id, section, oldsig, newsig;
-	if ( which instanceof jQuery ) {
-		$item = which;
-		id = $item.attr('id').replace(id_prefix, '');
-	} else {
-		if ( which.id ) {
-			id = which.id
-			data || (data = which);
-		} else {
-			id = which;
-		}
-		$item = firehose_section_menu_item(id);
-	}
+update_section = function( el, update, opts ){
+	var section	= init_metadata(el),
+		id		= section.id, // assert(id);
+		oldsig	= signatures[id],
+		newsig	= signature($.extend(section,
+					// Make the color explicit.
+					!section.color && { color:default_color[section.viewname] },
+					// Roll-in the updated data, if any; but protect the id.
+					update, { id:id }
+				));
 
-	$item.find('script[type=data]').
-		each(function(){
-			section = $item.metadata({type:'elem', name:'script'});
-		}).
-		remove();
-	section || (section=$item.metadata());
-	section.id && (id=section.id);
-	$.extend(section, data, id && { id: id });
-
-	if ( !id ) {
-		return;
-	}
-
-	if ( id!=='unsaved' && (newsig=signature(section))!==(oldsig=signatures[id]) ) {
+	// Update the signatures that let us match properties to existing sections.
+	if ( id!=='unsaved' && newsig!==oldsig ) {
 		ids[ signatures[id]=newsig ] = id;
 		if ( oldsig ) {
 			delete ids[ oldsig ];
-			if ( section.skin && oldsig.split(';')[2]!==newsig.split(';')[2] ) {
-				delete section.skin;
-			}
+			// Discard cached skin if the search has changed.
+			section.skin && oldsig.split(';')[2]!==newsig.split(';')[2] && delete section.skin;
+
+			// This must be a change to an existing menu item, so let's save the menu as a whole.
+			save_menu();
 		}
 	}
 
-	if ( arguments.length > 1 ) {
-		highlight_menu_item(id);
-		make_default && id && ($menu.metadata().default_id=id);
-		oldsig || save_menu();
+	if ( opts ) {
+		opts.highlight && highlight_menu_item(id);
+		opts.make_default && ($section_menu.metadata().default_id=id);
 	}
 };
 
 // Force-initialize the metadata and build the section_matching map.
-$('#links-sections script[type=data]').
-	closest('li,div.title').
-		each(function(){ update_section($(this)); });
-
-$section_menu.metadata({type:'elem', name:'script'}).home_id = $any('links-sections-title').metadata().id;
-$section_menu.find('script[type=data]').remove();
+var $sections=$any('links-sections').find('div.title,li');
+$sections.add($section_menu).each(function(){ init_metadata(this); });
+$('#links-sections-title').metadata().name = "Slashdot";
+$sections.each(function(){ update_section(this); });
 })();
 
 
@@ -284,7 +291,7 @@ unsaved.template = (
 	+ '</li>'
 );
 
-});
+})();
 </script>[% END %]
 __seclev__
 1000
