@@ -38,7 +38,8 @@ function pageload_done( $, console, maybe ){
 		$any(key).fadeOut(seconds(3), function(){ Slash.clear_message(key); });
 	}, seconds(15));
 [%- END %]
-	maybe || $.ajax({ data: {
+	// Only report 1% of cases.
+	maybe || (Math.random()>0.01) || $.ajax({ data: {
 		op: 'page_profile',
 		pagemark: pageload.pagemark,
 		dom: pageload.content_ready_time,
