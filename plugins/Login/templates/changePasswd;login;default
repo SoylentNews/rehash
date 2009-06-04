@@ -79,7 +79,7 @@ END; note %]
 		</form>
 	</div>
 
-
+[% IF vars.openid_consumer_allow && user.is_admin %]
 	<form action="[% constants.real_rootdir %]/login.pl" method="post">
 
 	<label>Claim OpenID</label>
@@ -90,14 +90,18 @@ END; note %]
 	<input type="submit" value="Claim ID" class="button">
 	</form>
 
-	[% openids = Slash.db.getOpenIDsByUID(user.uid);
-	   IF openids.size %]
-	<div><p>Your OpenIDs:</p>
-		[% FOR openid IN openids %]
-	<b>[% openid %]</b><br>
-		[% END %]
+	[% openids = Slash.db.getOpenIDsByUID(user.uid) %]
+	<div><p><b>Your OpenIDs</b></p>
+		[% IF !openids.size %]
+	<i>None</i>
+		[% ELSE;
+			FOR openid IN openids %]
+	<i>[% openid %]</i><br>
+			[% END;
+		END %]
 	</div>
 	[% END %]
+[% END %]
 
 </div>
 __seclev__
