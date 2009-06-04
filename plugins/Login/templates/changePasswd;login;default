@@ -79,11 +79,11 @@ END; note %]
 		</form>
 	</div>
 
-[% IF vars.openid_consumer_allow && user.is_admin %]
+[% IF constants.openid_consumer_allow && user.is_admin %]
 	<form action="[% constants.real_rootdir %]/login.pl" method="post">
 
 	<label>Claim OpenID</label>
-	<div class="note">Enter your OpenID identity.</div>
+	<div class="note">Enter your OpenID identity. (Google is not yet fully supported.)</div>
 	<input type="text" name="openid_url" size="32" maxlength="255" value="">
 
 	<input type="hidden" name="op" value="claim_openid">
