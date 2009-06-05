@@ -1372,16 +1372,14 @@ $(document).bind('firehose-content-end', function(){
 $(function(){ $fhroots=$('div.fhroot'); });
 })();
 
-function new_available( n ){
-	TypeOf.number(n)!=='number' && (n=$('#firehoselist>div.fhitem.data-add-ready:hidden').length);
-	n && Slash.message({
-		key: 'new-warning',
-		content: '<p><a href="#" onclick="accept_new(); return false;">'+n+' update'+(n>1?'s':'')+' available.</a></p>'
-	});
-}
-function accept_new( $insert, $remove ){
-	var $FHL=$any('firehoselist'), INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)';
 
+var accept_new, new_available;
+(function(){
+var	$FHL,
+	INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)',
+	NEW_SX='div.fhitem.data-add-ready:hidden', OLD_SX='div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last';
+
+accept_new = function( $insert, $remove ){
 	$insert!==false && (TypeOf.list($insert) ? $insert.filter(INSERT_SX) : $FHL.children(INSERT_SX)).removeClass('data-add-ready').css('display', '');
 	$remove!==false && (TypeOf.list($remove) ? $remove.filter(REMOVE_SX) : $FHL.children(REMOVE_SX)).remove();
 
@@ -1390,7 +1388,25 @@ function accept_new( $insert, $remove ){
 	);
 
 	Slash.clear_message('new-warning');
-}
+};
+
+new_available = function( n ){
+	var $last, $tail=true;
+
+	// If _not_ dynamic updates, _just_ add/remove anything off the end.
+	!fh_play && ($last=$FHL.children(OLD_SX)).length && (tail=$last.nextAll());
+	accept_new($tail, $tail);
+
+	TypeOf.number(n)!=='number' && (n=$FHL.children(NEW_SX).length);
+	n && Slash.message({
+		key: 'new-warning',
+		content: '<p><a href="#" onclick="accept_new(); return false;">'+n+' update'+(n>1?'s':'')+' available.</a></p>'
+	});
+};
+
+$(function(){ $FHL=$any('firehoselist'); });
+})();
+
 
 function firehose_handle_update( updates, sequence ) {
 
@@ -1404,15 +1420,12 @@ function firehose_handle_update( updates, sequence ) {
 	update_firehose_content(updates, sequence);
 
 	if ( add_behind_scenes ) {
-		accept_new(true, false);
+		accept_new();
 		$fhl.show().css({ opacity:'' });
 		$('div.paginate').show().removeClass('paginatehidden');
 		anchor_fh_pag_menu(true);
 		Slash.clear_message('loading');
 	} else {
-		var $old_last	= $fhl.children('div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last'),
-			$tail		= $old_last.nextAll();
-		accept_new($tail, $tail);
 		new_available();
 	}
 	Slash.busy('firehose-update', false);
