@@ -1,0 +1,24 @@
+__name__
+init_sprites
+__page__
+misc
+__section__
+default
+__description__
+inline-script to "activate" sprites
+  - if given, installs sprite_rules
+  - if given, limits scope to the element with id sprite_root_id
+  - self-destructs
+__template__
+<script id="init-sprites" type="text/javascript">[% IF sprite_rules %]
+sprite_rules([% sprite_rules %]);[% END %]
+use_sprites([% sprite_root_id ? '$dom("' _ sprite_root_id _ '")' : '' %]);
+$('script:last#init-sprites').remove();
+</script>
+__seclev__
+10000
+__lang__
+en_US
+__version__
+__title__
+Useless title to template

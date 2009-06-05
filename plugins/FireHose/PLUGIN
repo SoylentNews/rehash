@@ -32,6 +32,7 @@ template=templates/firehose_usage;misc;default
 template=templates/firehose_options;misc;default
 template=templates/formatHoseIntro;misc;default
 template=templates/formatHoseTitle;misc;default
+template=templates/init_sprites;misc;default
 template=templates/nodnix_capsule;firehose;default
 template=templates/paginate;firehose;default
 template=templates/prefs_fhlayout;misc;default

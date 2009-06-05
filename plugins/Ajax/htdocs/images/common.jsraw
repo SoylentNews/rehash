@@ -430,7 +430,6 @@ use_sprites = function( root ){
 		}).remove();
 	});
 };
-$(function(){ use_sprites(); });
 })();
 
 
