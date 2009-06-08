@@ -140,7 +140,7 @@ __template__
 					<span class="h-inline">[% IF user.state.d2asp -%]
 					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]" style="margin-left:4em">[% constants.sitename %]</a>:[% END %]
 					<a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>
-					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% this_title | strip_attribute %]"><span id="titlecountnum">[% count %]</span>&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
+					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% this_title | strip_attribute %]"><span id="titlecountnum">[% count %]</span> <span>Comment[% count == 1 ? '' : 's' %]</span></a></span>
 				[% ELSE %] 
 					[% Slash.linkComment({
 						sid	=> sid,
