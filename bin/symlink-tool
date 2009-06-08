@@ -66,6 +66,18 @@ my $theme_hr = $install->_getList(
 my $plugin_list = $install->_getList(
 	$constants->{slashdir}, "plugins", "PLUGIN", 1
 );
+my @template_preprocess = ( );
+
+
+sub absolute_paths {
+	my($include_path, $filelist) = @_;
+	my @result = map { realpath(
+		file_name_is_absolute($_)
+		? $_
+		: catfile($include_path, $_)
+	) } @$filelist;
+	return \@result;
+}
 
 sub template_process {
 	my($include_path, $filelist, $destpath, $destpath_secure, $is_glob) = @_;
@@ -74,28 +86,39 @@ sub template_process {
 		$destpath_secure =~ s/\.(\w+)$/\.ssl\.$1/;
 	}
 	my $javascript_debug = $is_glob ? 0 : 1;
-	my @abs_filelist = map { realpath(
-		file_name_is_absolute($_)
-		? $_
-		: catfile($include_path, $_)
-	) } @$filelist;
+	my $abs_filelist_ar = absolute_paths($include_path, $filelist);
 	my $glob_template = Template->new({
 		ABSOLUTE	=> 1,
-		PROCESS		=> \@abs_filelist,
+		PRE_PROCESS	=> \@template_preprocess,
+		PROCESS		=> $abs_filelist_ar,
 		OUTPUT		=> \$destpath,
 		INTERPOLATE	=> 0,
 	}) || die "$Template::ERROR\n";
-	$glob_template->process($abs_filelist[0],
+	$glob_template->process($abs_filelist_ar->[0],
 		{ constants => $constants,        javascript_debug => $javascript_debug },
 		$destpath)
 		|| die $glob_template->error(), "\n";
-	$glob_template->process($abs_filelist[0],
+	$glob_template->process($abs_filelist_ar->[0],
 		{ constants => $constants_secure, javascript_debug => $javascript_debug },
 		$destpath_secure)
 		|| die $glob_template->error(), "\n";
 	return $destpath;
 }
 
+
+############################################################
+# Build (once) the list of files that templates should PRE_PROCESS
+# THEMEs first, so PLUGINs can override
+for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
+	my $files = $theme_or_plugin->{template_preprocess};
+	next unless $files;
+
+	my @files = ( );
+	push @files, ref($files) && ref($files) eq 'ARRAY' ? @$files : $files;
+	push @template_preprocess, @{absolute_paths($theme_or_plugin->{dir}, \@files)};
+}
+#use Data::Dumper;
+#print "PRE_PROCESS: " . Dumper(\@template_preprocess);
 
 ############################################################
 # Set up the %theme_subdir_files and %plugin_subdir_files hashes,
