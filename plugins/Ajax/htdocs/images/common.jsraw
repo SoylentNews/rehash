@@ -2114,10 +2114,16 @@ function saveModalPrefs() {
 		data:	serialize_multiple($any('modal_prefs')),
 		reskey:	reskey_static
 	}, '', {
-		onComplete: function() {
-			hide_modal_box();
-			if (document.forms.modal_prefs.refreshable && document.forms.modal_prefs.refreshable.value) {
-				document.location=document.URL;
+		onComplete: function(transport) {
+			var response = eval_response(transport);
+			if (response !== undefined && response.message !== undefined && response.message_container !== undefined) {
+				$any(response.message_container).html(response.message);
+				$('#' + response.message_container).show();
+			} else {
+				hide_modal_box();
+				if (document.forms.modal_prefs.refreshable && document.forms.modal_prefs.refreshable.value) {
+					document.location=document.URL;
+				}
 			}
 		}
 	});

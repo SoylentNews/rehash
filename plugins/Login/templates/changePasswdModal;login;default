@@ -1,0 +1,101 @@
+__section__
+default
+__description__
+Change password form
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+changePasswdModal
+__template__
+
+                [% IF tabbed == 1 %]
+                <div class="pref">
+                <span class="preftab"><a href="" onclick="getModalPrefs('user', 'User', 1); return false;">User</a></span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a></span>
+                [% IF user.is_admin %]<span class="preftab"><a href="" onclick="getModalPrefs('admin', 'Admin', 1); return false;">Admin</a></span>[% END %]
+                <span class="preftab active">Change Password</span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('logout', 'Log Out', 1); return false;">Log Out</a></span>
+                </div>
+                [% END %]
+
+[% note_style = 'background: #DDDDDD none repeat scroll 0 0; border-top: 1px solid #555555; font-size: 93%; margin: 1em 0 0; padding: 0.5em 0.7em;' %]
+
+[%
+session = Slash.db.getDescriptions('session_login');
+session_sel = Slash.createSelect('session_login', session, user.session_login, 1);
+clocation = Slash.db.getDescriptions('cookie_location');
+clocation_order = [];
+FOREACH cloc = ['none', 'classbid', 'subnetid', 'ipid'];
+        clocation_order.push(cloc) IF clocation.$cloc;
+END;
+clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_location, 1, 0, clocation_order);
+%]
+
+<form id ="modal_prefs">
+<input type="hidden" name="formname" value="changePasswdModal">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="inputmode" value="">
+
+[% IF constants.offer_insecure_login_link %]
+        <p>You can automatically log in by clicking
+        <a href="[% constants.real_rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page.
+        This is totally insecure, but very convenient.
+        </p>
+        <br>
+[% END %]
+
+My <b><a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a></b> [% session_sel %] and [% clocation_sel %]
+
+<br>
+
+<p><b>Note:</b> changing your password or login cookie preferences will disable all
+other cookies for this account, requiring all other browsers using this account
+to reauthenticate.</p>
+
+<br>
+
+<label><b>Current Password</b></label>
+<div style="display: block; [% note_style %]">To change your password, enter your current password.</div>
+<input type="password" name="oldpass" size="20" maxlength="20" value="">
+
+<br><br>
+
+<label><b>New Password</b></label>
+<div style="display: block; [% note_style %]">Enter your new password twice, must be 6-20 chars long.</div>
+<input type="password" name="pass1" size="20" maxlength="20">
+<input type="password" name="pass2" size="20" maxlength="20">
+<input type="button" value="Change Login Prefs" onclick="void(document.forms['modal_prefs'].inputmode.value = 1); saveModalPrefs();">
+
+<div id="modal_message_feedback" style="display: none; [% note_style %]"></div>
+
+</form>
+
+[% IF constants.openid_consumer_allow && user.is_admin %]
+<br>
+<form style="padding:1em;" action="[% constants.real_rootdir %]/login.pl" method="post">
+<label><b>Claim OpenID</b></label>
+<div style="display: block; [% note_style %]">Enter your OpenID identity. (Google is not yet fully supported.)</div>
+<input type="text" name="openid_url" size="32" maxlength="255" value="">
+<input type="hidden" name="op" value="claim_openid">
+<input type="submit" value="Claim ID" class="button">
+
+[% openids = Slash.db.getOpenIDsByUID(user.uid) %]
+<div><p><b>Your OpenIDs</b></p>
+        [% IF !openids.size %]
+<i>None</i>
+        [% ELSE %]
+                [% FOR openid IN openids %]
+<i>[% openid %]</i><br>
+                [% END %]
+        [% END %]
+</div>
+</form>
+[% END %]
+__seclev__
+500
+__version__

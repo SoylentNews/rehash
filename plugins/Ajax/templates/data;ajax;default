@@ -22,6 +22,18 @@ __template__
 [% CASE 'no modcommentlog' %]
 	<p>No comment history available.</p>
 
+[% CASE 'passnomatch' %]
+        <p><b>Passwords do not match.</b></p>
+
+[% CASE 'passtooshort' %]
+        <p><b>Password is too short.</b></p>
+
+[% CASE 'passtoolong' %]
+        <p><b>Password is too long.</b></p>
+
+[% CASE 'oldpassbad' %]
+        <p><b>Current password is incorrect.</b></p>
+
 [% END %]
 __seclev__
 1000

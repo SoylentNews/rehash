@@ -17,6 +17,7 @@ __template__
                 <span class="preftab"><a href="#" onclick="hide_modal_box(); return false">User</a></span>
                 <span class="preftab"><a href="#" onclick="hide_modal_box(); return false">Messages</a></span>
                 [% IF user.is_admin %]<span class="preftab"><a href="#" onclick="hide_modal_box(); return false">Admin</a></span>[% END %]
+		<span class="preftab"><a href="#" onclick="hide_modal_box(); return false">Change Password</a></span>
                 <span class="preftab active">Log Out</span>
                 </div>
                 [% END %]
