@@ -1,6 +1,7 @@
 # $Id$
 name=slashcode
 description="Slashcode.com theme"
+template_preprocess=templates/constants.css.tt2
 topic=htdocs/images/topics/topicbug.jpg
 topic=htdocs/images/topics/topiceditorial.gif
 topic=htdocs/images/topics/topiclinux.gif
