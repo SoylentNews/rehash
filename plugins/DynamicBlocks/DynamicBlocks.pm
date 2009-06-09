@@ -706,7 +706,7 @@ sub getBlocksEligibleForUpdate {
         my $dynamic_blocks;
         foreach my $block (split(/,/, $list)) {
 		# Need better use of an exclusion list here.
-		next if ($block eq 'index_jobs');
+		next if ($block eq 'poll');
 
 		my ($bid, $portal_id, $type_id) =
                         $slashdb->sqlSelect(
