@@ -1426,6 +1426,23 @@ sub getOpenID {
 }
 }
 
+sub normalizeOpenID {
+	my($openid_url) = @_;
+	$openid_url =~ m|^(?:https?://)?(.+?)(?:/(.+?))?$|;
+	my($host, $path) = ($1, $2);
+	return $openid_url unless $host;
+	$host =~ s|/$||;
+	if ($host =~ /(?:\b|\.)(yahoo|google|flickr)\.com$/) {
+		my($h) = $1;
+		if ($h eq 'yahoo' || $h eq 'flickr') {
+			return 'http://www.yahoo.com/';
+		} else {
+			return "http://www.$h.com/";
+		}
+	}
+	return $openid_url;
+}
+
 
 #========================================================================
 

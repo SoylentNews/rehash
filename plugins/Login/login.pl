@@ -483,7 +483,7 @@ sub printOpenID {
 	footer();
 }
 
-sub claimOpenID {
+sub allowOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
 	if (!$constants->{openid_consumer_allow}) {
@@ -501,6 +501,14 @@ sub claimOpenID {
 		return;
 	}
 
+	return 1;	
+}
+
+sub claimOpenID {
+	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	return unless allowOpenID();
+
 	my $csr = getOpenID();
 	my $identity = $csr->claimed_identity($form->{openid_url});
 	unless ($identity) {
@@ -508,11 +516,17 @@ sub claimOpenID {
 		return;
 	}
 
+	# slightly different behavior if we are logging in rather than
+	# merely claiming an OpenID
+	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
+
 	my $claimed_identity = $identity->claimed_url;
 	my $claimed_uid = $slashdb->getUIDByOpenID($identity->claimed_url);
-	if ($claimed_uid) {
+	if (!$openid_login && $claimed_uid) {
 		# we do these checks in the DB anyway, but best to try them up front;
-		# don't worry, there's no atomicity problems
+		# don't worry, there's no atomicity problems, as these checks are not
+		# actually necessary -- pudge
+		# XXX we do need error checking on insert later
 		if ($claimed_uid == $user->{uid}) {
 			printOpenID("You have already claimed the identity <b>$claimed_identity</b>.");
 		} else {
@@ -527,39 +541,33 @@ sub claimOpenID {
 	my $reskey_text = $rkey->reskey;
 	$slashdb->setOpenIDResKey($claimed_identity, $reskey_text);
 
+	my $slash_return_to = $form->{slash_return_to} ? ('&slash_return_to=' . fixparam($form->{slash_return_to})) : '';
 	my $abs = root2abs();
 	my $check_url = $identity->check_url(
 		delayed_return => 1,
-		return_to      => "$abs/login.pl?op=verify_openid&reskey=$reskey_text",
+		return_to      => "$abs/login.pl?op=verify_openid$openid_login$slash_return_to&reskey=$reskey_text",
 		trust_root     => "$abs/"
 	);
 
 	if ($check_url) {
 		redirect($check_url);
 		return;
+	} else {
+		printOpenID("Unknown error trying to verify OpenID.");
 	}
 }
 
 sub verifyOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
-	if (!$constants->{openid_consumer_allow}) {
-		printOpenID("OpenID is not enabled.");
-		return;
-	}
-
-	if ($user->{is_anon}) {
-		printOpenID("Must be logged in.");
-		return;
-	}
-
-	if (!$user->{is_admin}) {
-		printOpenID("Only admins can do that.");
-		return;
-	}
+	return unless allowOpenID();
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{reskey} });
+
+	# slightly different behavior if we are logging in rather than
+	# merely claiming an OpenID
+	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
 
 	my $csr = getOpenID($form);
 
@@ -585,8 +593,29 @@ sub verifyOpenID {
 			}
 
 			my $openid_url = $slashdb->checkOpenIDResKey($rkey->reskey);
-			$slashdb->setOpenID($user->{uid}, $openid_url); # $vident->{identity}
-			printOpenID("Verified as <b>$openid_url</b>.  Identity is attached to your account.  See your <a href=\"/my/password\">login preferences</a>.");
+			my $normalized_openid_url = normalizeOpenID($openid_url);
+			if ($openid_url ne $normalized_openid_url) {
+				# if different, it's because it's a site like Yahoo or Google
+				# that doesn't actually check the identity we send to them,
+				# but they still return a reliable, unique, (and very ugly)
+				# OpenID URL, and we'll save that one, and never display it -- pudge
+				$openid_url = $vident->{identity};
+			}
+			if ($openid_login) {
+				my $claimed_uid = $slashdb->getUIDByOpenID($openid_url);
+				if ($claimed_uid) {
+					my $cookvalue = $slashdb->getLogToken($claimed_uid, 1);
+					setCookie('user', bakeUserCookie($claimed_uid, $cookvalue), $slashdb->getUser($claimed_uid, 'session_login'));
+					my $return_to = $form->{slash_return_to} || (root2abs() . '/');
+					redirect($return_to);
+				} else {
+					# XXX find way to attach this OpenID automatically after logging in? for now, no.
+					printOpenID("Verified as <b>$normalized_openid_url</b>; please <a href=\"login.pl\">log in</a> to attach this OpenID to an account.");
+				}
+			} else {
+				$slashdb->setOpenID($user->{uid}, $openid_url);
+				printOpenID("Verified as <b>$normalized_openid_url</b>.  Identity is attached to your account.  See your <a href=\"/my/password\">login preferences</a>.");
+			}
 		},
 		not_openid => sub {
 			$rkey->use;

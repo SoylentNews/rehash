@@ -96,7 +96,7 @@ END; note %]
 	<i>None</i>
 		[% ELSE %]
 			[% FOR openid IN openids %]
-	<i>[% openid %]</i><br>
+	<i>[% openid.normalized_url %]</i><br>
 			[% END %]
 		[% END %]
 	</div>

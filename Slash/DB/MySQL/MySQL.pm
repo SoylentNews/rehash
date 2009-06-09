@@ -2140,7 +2140,10 @@ sub getOpenIDsByUID {
 	);
 	return [] if !$openid_urls || !@$openid_urls;
 
-	return [ map { $_->[0] } @$openid_urls ];
+	return [ map { {
+		url => $_->[0],
+		normalized_openid_url => normalizeOpenID($_->[0])
+	} } @$openid_urls ];
 }
 
 sub setOpenID {
