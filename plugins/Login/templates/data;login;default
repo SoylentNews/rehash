@@ -168,6 +168,14 @@ and you'll have to send yourself another one.
 	[% returnme.data_constant = 1 %]
 	OpenID is not enabled.
 
+[% CASE 'openid_not_logged_in' %]
+	[% returnme.data_constant = 1 %]
+	Must be logged in.
+
+[% CASE 'openid_not_admin' %]
+	[% returnme.data_constant = 1 %]
+	OpenID currently requires user to be admin.
+
 [% CASE 'openid_not_yours' %]
 	You cannot delete <b>[% claimed_identity %]</b>.
 
@@ -198,7 +206,7 @@ and you'll have to send yourself another one.
 	Attempt to verify cancelled.
 
 [% CASE 'openid_verify_no_match' %]
-	Unable to vertify with <b>[% openid_url %]</b>.
+	Unable to verify with <b>[% openid_url %]</b>.
 
 [% CASE 'openid_verify_no_login' %]
 	Verified with <b>[% normalized_openid_url %]</b>;

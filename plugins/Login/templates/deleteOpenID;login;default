@@ -18,7 +18,7 @@ Do you really want to delete <b>[% openid_url | strip_literal %]</b>?
 <input type="submit" value="Yup, I'm positive">
 [% PROCESS reskey_tag %]
 <input type="hidden" name="op" value="delete_openid">
-<input type="hidden" name="openid_url" value="[% openid_url | strip_param %]">
+<input type="hidden" name="openid_url" value="[% openid_url | strip_attribute %]">
 </form>
 
 __seclev__

@@ -520,9 +520,10 @@ sub deleteOpenID {
 		return;
 	}
 
+	my $form_reskey = $form->{reskey};
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('openid');
-	if (!$rkey->reskey) {
+	if (!$form_reskey) {
 		$rkey->create;
 		printOpenID(
 			slashDisplay('deleteOpenID', { openid_url => $claimed_identity }, { Return => 1 })
@@ -633,7 +634,6 @@ sub verifyOpenID {
 		verified => sub {
 			my($vident) = @_;
 			if (!$rkey->use) {
-				use Data::Dumper;
 				printOpenID(getData("openid_reskey_failure_verify"));
 				return;
 			}
