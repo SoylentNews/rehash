@@ -6322,3 +6322,5 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Che
 INSERT INTO reskey_vars VALUES (109, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (109, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (109, 'duration_max-failures', 3, 'how many failures per reskey');
+
+ALTER TABLE firehose ADD COLUMN preview ENUM("no","yes") DEFAULT "no";

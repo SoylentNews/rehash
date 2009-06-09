@@ -1,0 +1,9 @@
+# $Id$
+description="Editor"
+name=Edit
+mysql_dump=dump
+mysql_schema=mysql_schema.sql
+pg_dump=dump
+htdoc=edit.pl
+template=templates/editor;edit;default
+template=templates/editorwrap;misc;default

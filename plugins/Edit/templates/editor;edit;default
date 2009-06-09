@@ -1,0 +1,47 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+edit
+__lang__
+en_US
+__name__
+editor
+__template__
+<div id="editor" class="admin">
+	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
+		[% IF constants.use_dept %]
+			[% PROCESS formLabel value => "Dept" %]
+				<input type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="50">
+		[% END %]
+
+		[% PROCESS formLabel value="Author" %]
+			[% author_select %]
+
+		Time: <input type="text" name="time" value="[% storyref.time %]" size="19">
+		<label>
+			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
+		</label>
+		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% storyref.introtext | strip_literal %]</textarea>
+
+
+		<a name="bodytext"></a>
+			<label>
+				<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
+			</label>
+			<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_literal %]</textarea>
+	
+			<label>
+				<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
+			</label>
+			<a name="media"></a>
+				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
+	</form>
+</div>
+
+__seclev__
+10000
+__version__
+$Id$

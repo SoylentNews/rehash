@@ -39,6 +39,7 @@ CREATE TABLE firehose (
 	offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no',
 	sprite varchar(128) NOT NULL DEFAULT '',
 	sprite_info text NOT NULL DEFAULT '',
+	preview enum('no','yes') default 'no',
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
