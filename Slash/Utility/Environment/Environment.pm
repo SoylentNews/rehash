@@ -1472,19 +1472,37 @@ sub getPublicLogToken {
 
 #========================================================================
 
-=head2 userLogout($uid)
+=head2 userLogout($uid, $cookies, $options)
 
 Deletes the user's logtoken and cookie (logs them out).
+Will accept (and modify) a $cookies hashref.
+Returns the AC UID for use in the caller.
 
 =cut
 
 sub userLogout {
-        my($uid) = @_;
+        my($uid, $cookies, $options) = @_;
         return if isAnon($uid);
 
+	my $constants = getCurrentStatic();
         my $slashdb = getCurrentDB();
+
         $slashdb->deleteLogToken($uid);
         setCookie('user', '');
+
+	# Perhaps cookies were not available in the caller
+	if(!keys %$cookies) {
+		$cookies = Apache::Cookie->fetch;
+		$options->{modify_cookies} = 1;
+	}
+
+	if (keys %$cookies && $options->{modify_cookies}) {
+		delete $cookies->{user};
+		createCurrentCookie($cookies);
+	}
+
+	# Could probably be used as a param to prepareUser()
+	return $constants->{anonymous_coward_uid};
 }
 
 #========================================================================
