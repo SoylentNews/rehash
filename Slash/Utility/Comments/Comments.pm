@@ -2156,9 +2156,8 @@ EOT
 	}
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		my $person = $comment->{uid};
-		my $zooicon = qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person">|
-			. qq|<img src="$constants->{imagedir}/__IMG__.$constants->{badge_icon_ext}" alt="__TITLE__" title="__TITLE__" |
-			. qq|width="$constants->{badge_icon_size}" height="$constants->{badge_icon_size}"></a></span>|;
+		my $zooicon = qq|<span class="zooicon __IMG__" title="__TITLE__"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person" title="__TITLE__">|;
+			$zooicon .= qq|__TITLE__</a></span>|;
 		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person} && !$user->{people}{FOF()}{$person} && !$user->{people}{EOF()}{$person}) {
 				($zoosphere_display .= $zooicon) =~ s/__IMG__/neutral/g;
 				$zoosphere_display =~ s/__TITLE__/Alter Relationship/g;
@@ -2227,7 +2226,7 @@ $comment_links
 		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span></h4>
 		</div>
 		<div class="details">
-			by $user_nick_to_display$zoosphere_display
+			<span class="by">by $user_nick_to_display</span>$zoosphere_display
 			<span class="otherdetails" id="comment_otherdetails_$comment->{cid}">$otherdetails</span>
 		</div>
 	</div>
