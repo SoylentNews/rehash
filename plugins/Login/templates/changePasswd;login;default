@@ -80,6 +80,7 @@ END; note %]
 	</div>
 
 [% IF constants.openid_consumer_allow && user.is_admin %]
+	<div>
 	<form action="[% constants.real_rootdir %]/login.pl" method="post">
 
 	<label>Claim OpenID</label>
@@ -96,10 +97,11 @@ END; note %]
 	<i>None</i>
 		[% ELSE %]
 			[% FOR openid IN openids %]
-	<i>[% openid.normalized_url %]</i><br>
+	<i>[% openid.normalized_openid_url %]</i> (<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&openid_url=[% openid.url 
+	 strip_paramattr %]">delete</a>)<br>
 			[% END %]
 		[% END %]
-	</div>
+	</div></div>
 [% END %]
 
 </div>

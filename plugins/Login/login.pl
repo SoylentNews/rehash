@@ -36,6 +36,7 @@ sub main {
 		saveprefs       => [ $post_ok && $user_ok,      \&savePrefs        ],
 		claim_openid    => [ 1,                         \&claimOpenID      ],
 		verify_openid   => [ 1,                         \&verifyOpenID     ],
+		delete_openid   => [ 1,                         \&deleteOpenID     ],
 	);
 
 	my $op = $form->{op};
@@ -487,50 +488,90 @@ sub allowOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
 	if (!$constants->{openid_consumer_allow}) {
-		printOpenID("OpenID is not enabled.");
+		printOpenID(getData("openid_not_enabled"));
 		return;
 	}
 
+	# no more checks needed if we're logging in
+	return 1 if $form->{openid_login};
+
 	if ($user->{is_anon}) {
-		printOpenID("Must be logged in.");
+		printOpenID(getData("openid_not_logged_in"));
 		return;
 	}
 
 	if (!$user->{is_admin}) {
-		printOpenID("Only admins can do that.");
+		printOpenID(getData("openid_not_admin"));
 		return;
 	}
 
 	return 1;	
 }
 
+sub deleteOpenID {
+	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	return unless &allowOpenID;
+
+	my $claimed_identity = $form->{openid_url};
+	my $claimed_uid = $slashdb->getUIDByOpenID($claimed_identity);
+	if (!$claimed_uid || $claimed_uid != $user->{uid}) {
+		printOpenID(getData("openid_not_yours", { claimed_identity => $claimed_identity }));
+		return;
+	}
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('openid');
+	if (!$rkey->reskey) {
+		$rkey->create;
+		printOpenID(
+			slashDisplay('deleteOpenID', { openid_url => $claimed_identity }, { Return => 1 })
+		);
+		return;
+	}
+
+	if (!$rkey->use) {
+		printOpenID(getData("openid_reskey_failure_verify"));
+		return;
+	}
+	if ($slashdb->deleteOpenID($user->{uid}, $claimed_identity)) {
+		# XXX redirect automatically to /my/password
+		printOpenID(getData("openid_verify_delete", { claimed_identity => $claimed_identity }));
+	} else {
+		printOpenID(getData("openid_error"));
+	}
+}
+
 sub claimOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
-	return unless allowOpenID();
-
-	my $csr = getOpenID();
-	my $identity = $csr->claimed_identity($form->{openid_url});
-	unless ($identity) {
-		printOpenID("Invalid identity supplied.");
-		return;
-	}
+	return unless &allowOpenID;
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
 	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
+	if ($openid_login && !$user->{is_anon}) {
+		printOpenID(getData("openid_already_logged_in"));
+		return;
+	}
+
+	my $csr = getOpenID();
+	my $identity = $csr->claimed_identity($form->{openid_url});
+	unless ($identity) {
+		printOpenID(getData("openid_invalid_identity"));
+		return;
+	}
 
 	my $claimed_identity = $identity->claimed_url;
-	my $claimed_uid = $slashdb->getUIDByOpenID($identity->claimed_url);
+	my $claimed_uid = $slashdb->getUIDByOpenID($claimed_identity);
 	if (!$openid_login && $claimed_uid) {
 		# we do these checks in the DB anyway, but best to try them up front;
 		# don't worry, there's no atomicity problems, as these checks are not
 		# actually necessary -- pudge
-		# XXX we do need error checking on insert later
 		if ($claimed_uid == $user->{uid}) {
-			printOpenID("You have already claimed the identity <b>$claimed_identity</b>.");
+			printOpenID(getData("openid_already_claimed_self", { claimed_identity => $claimed_identity }));
 		} else {
-			printOpenID("You cannot claim the identity <b>$claimed_identity</b>."); # someone else claimed it
+			printOpenID(getData("openid_already_claimed_other", { claimed_identity => $claimed_identity }));
 		}
 		return;
 	}
@@ -553,33 +594,38 @@ sub claimOpenID {
 		redirect($check_url);
 		return;
 	} else {
-		printOpenID("Unknown error trying to verify OpenID.");
+		printOpenID(getData("openid_error"));
+		return;
 	}
 }
 
 sub verifyOpenID {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
-	return unless allowOpenID();
-
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{reskey} });
+	return unless &allowOpenID;
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
 	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
+	if ($openid_login && !$user->{is_anon}) {
+		printOpenID(getData("openid_already_logged_in"));
+		return;
+	}
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{reskey} });
 
 	my $csr = getOpenID($form);
 
 	$csr->handle_server_response(
 		cancelled => sub {
 			$rkey->use;
-			printOpenID("Attempt to verify cancelled.");
+			printOpenID(getData("openid_verify_cancel"));
 		},
 		setup_required => sub {
 			my($setup_url) = @_;
 			if (!$rkey->touch) {
-				printOpenID("Credentials failed for redirect:" . $rkey->errstr);
+				printOpenID(getData("openid_reskey_failure_redirect"));
 				return;
 			}
 			redirect($setup_url);
@@ -588,7 +634,7 @@ sub verifyOpenID {
 			my($vident) = @_;
 			if (!$rkey->use) {
 				use Data::Dumper;
-				printOpenID("Credentials failed for verify:" . Dumper($rkey));
+				printOpenID(getData("openid_reskey_failure_verify"));
 				return;
 			}
 
@@ -600,6 +646,9 @@ sub verifyOpenID {
 				# but they still return a reliable, unique, (and very ugly)
 				# OpenID URL, and we'll save that one, and never display it -- pudge
 				$openid_url = $vident->{identity};
+			} elsif ($openid_url ne $vident->{identity}) {
+				printOpenID(getData("openid_verify_no_match", { openid_url => $openid_url }));
+				return;
 			}
 			if ($openid_login) {
 				my $claimed_uid = $slashdb->getUIDByOpenID($openid_url);
@@ -610,21 +659,23 @@ sub verifyOpenID {
 					redirect($return_to);
 				} else {
 					# XXX find way to attach this OpenID automatically after logging in? for now, no.
-					printOpenID("Verified as <b>$normalized_openid_url</b>; please <a href=\"login.pl\">log in</a> to attach this OpenID to an account.");
+					printOpenID(getData("openid_verify_no_login", { normalized_openid_url => $normalized_openid_url }));
 				}
 			} else {
+				# XXX we do need error checking here ...
 				$slashdb->setOpenID($user->{uid}, $openid_url);
-				printOpenID("Verified as <b>$normalized_openid_url</b>.  Identity is attached to your account.  See your <a href=\"/my/password\">login preferences</a>.");
+				# XXX redirect automatically to /my/password
+				printOpenID(getData("openid_verify_attach", { normalized_openid_url => $normalized_openid_url }));
 			}
 		},
 		not_openid => sub {
 			$rkey->use;
-			printOpenID("Error: not an OpenID message.");
+			printOpenID(getData("openid_not_openid"));
 		},
 		error => sub {
 			my($err) = @_;
 			$rkey->use;
-			printOpenID("Error: $err");
+			printOpenID(getData("openid_openid_error", { err => $err }));
 		},
 	);
 	

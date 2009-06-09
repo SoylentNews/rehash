@@ -164,6 +164,68 @@ but don't trust that value unless you know a reason to (we don't).[% END %]
 If you don't use this new password within [% constants.mailpass_valid_days %] days, it will expire
 and you'll have to send yourself another one.
 
+[% CASE 'openid_not_enabled' %]
+	[% returnme.data_constant = 1 %]
+	OpenID is not enabled.
+
+[% CASE 'openid_not_yours' %]
+	You cannot delete <b>[% claimed_identity %]</b>.
+
+[% CASE 'openid_reskey_failure_verify' %]
+	[% returnme.data_constant = 1 %]
+	Credentials failed for verify.
+
+[% CASE 'openid_reskey_failure_redirect' %]
+	[% returnme.data_constant = 1 %]
+	Credentials failed for redirect.
+
+[% CASE 'openid_invalid_identity' %]
+	[% returnme.data_constant = 1 %]
+	Invalid identity supplied.
+
+[% CASE 'openid_already_logged_in' %]
+	[% returnme.data_constant = 1 %]
+	You are already logged in.
+
+[% CASE 'openid_already_claimed_self' %]
+	You have already claimed the identity <b>[% claimed_identity %]</b>.
+
+[% CASE 'openid_already_claimed_other' %]
+	You cannot claim the identity <b>[% claimed_identity %]</b>.
+
+[% CASE 'openid_verify_cancel' %]
+	[% returnme.data_constant = 1 %]
+	Attempt to verify cancelled.
+
+[% CASE 'openid_verify_no_match' %]
+	Unable to vertify with <b>[% openid_url %]</b>.
+
+[% CASE 'openid_verify_no_login' %]
+	Verified with <b>[% normalized_openid_url %]</b>;
+	please <a href="/login.pl">log in</a> to attach this OpenID to an account.
+
+[% CASE 'openid_verify_delete' %]
+	Deleted <b>[% claimed_identity %]</b> from your account.
+	See your <a href="/my/password">login preferences</a>.
+
+[% CASE 'openid_verify_attach' %]
+	Verified with <b>[% normalized_openid_url %]</b>.
+	Identity is attached to your account.
+	See your <a href="/my/password">login preferences</a>.
+
+[% CASE 'openid_not_openid' %]
+	[% returnme.data_constant = 1 %]
+	Error: not an OpenID message.
+
+[% CASE 'openid_openid_error' %]
+	Error: [% err %].
+
+[% CASE 'openid_error' %]
+	[% returnme.data_constant = 1 %]
+	Error: unknown error trying to verify OpenID.
+
+
+
 [% END %]
 
 __seclev__

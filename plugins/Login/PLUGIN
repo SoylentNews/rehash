@@ -5,6 +5,7 @@ htdoc=login.pl
 template=templates/changePasswd;login;default
 template=templates/changePasswdModal;login;default
 template=templates/data;login;default
+template=templates/deleteOpenID;login;default
 template=templates/loginForm;login;default
 template=templates/newUserForm;login;default
 template=templates/newuser_msg;login;default

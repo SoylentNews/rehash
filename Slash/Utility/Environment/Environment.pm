@@ -84,6 +84,7 @@ our @EXPORT  = qw(
 	getPublicLogToken
 	userLogout
 	getOpenID
+	normalizeOpenID
 
 	getPollVoterHash
 

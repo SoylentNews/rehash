@@ -1,0 +1,27 @@
+__section__
+default
+__description__
+Delete OpenID verify
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+deleteOpenID
+__template__
+Do you really want to delete <b>[% openid_url | strip_literal %]</b>?
+
+<form method="POST" action="[% constants.real_rootdir %]/login.pl">
+<input type="submit" value="Yup, I'm positive">
+[% PROCESS reskey_tag %]
+<input type="hidden" name="op" value="delete_openid">
+<input type="hidden" name="openid_url" value="[% openid_url | strip_param %]">
+</form>
+
+__seclev__
+500
+__version__
+$Id$
