@@ -72,6 +72,11 @@ sub handleFileCmd {
 			if ($constants->{optipng} && $suffix eq "png") {
 				system("$constants->{optipng} -q $path$thumb");
 			}
+
+			if ($constants->{pngnq} && $suffix eq "png") {
+				pngnqOptimize("$path$thumb", "$path$thumb" . '-optimized');
+			}
+
 			my $data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0 ,
@@ -277,6 +282,23 @@ sub addFile {
 		slashdLog("addFile $data->{width} $data->{height}");
 	}
 	return $slashdb->addStaticFile($data);
+}
+
+sub pngnqOptimize {
+	my ($src, $dest, $options) = @_;
+
+	my $constants = getCurrentStatic();
+
+	my $pngnq = $constants->{pngnq};
+	return if (!$src || !$dest || !$pngnq || (!-e $pngnq));
+
+	slashdLog("pngnqOptimize: $src -> $dest");
+	system("$pngnq $src $dest");
+
+	unless ($options->{skip_copy}) {
+		slashdLog("pngnqOptimize: moving $dest -> $src");
+		move($dest, $src) if ((-s $dest) > 0);
+	}
 }
 
 1;
