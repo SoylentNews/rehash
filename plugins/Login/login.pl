@@ -191,8 +191,10 @@ sub newUser {
 sub loginForm {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
+	my $openid_login = $form->{openid_login} || 0;
+
 	header(getData('loginhead')) or return;
-	slashDisplay('loginForm');
+	slashDisplay('loginForm', { openid_login => $openid_login });
 	footer();
 }
 
