@@ -64,17 +64,24 @@ sub getTagnameList {
 	# but we skim off only the tagnameid on the client side since
 	# that's all we care about.
 
+	my $al2types = $tagsdb_reader->getAL2Types;
+	my $worthless_user_mask =
+		  (1 << $al2types->{spammer}{bitpos})
+		+ (1 << $al2types->{ban}    {bitpos});
+
 	my $tagnameid_ar = $tagsdb_reader->sqlSelectColArrayref(
 		'tags.tagnameid,
-		 COUNT(DISTINCT tags.uid) AS c,
-		 SUM(tag_clout * IF(value IS NULL, 1, value)) AS s,
-		 COUNT(DISTINCT tags.uid)/3 + SUM(tag_clout * IF(value IS NULL, 1, value)) AS sc',
-		'tags, users_info, tagnames
-		 LEFT JOIN tagname_params USING (tagnameid)',
+		 COUNT(DISTINCT users_info.created_ipid) AS c,
+		 SUM(tag_clout * IF(tnp.value IS NULL, 1, tnp.value)) AS s,
+		 COUNT(DISTINCT tags.uid)/3 + SUM(tag_clout * IF(tnp.value IS NULL, 1, tnp.value)) AS sc',
+		'tags,
+		 tagnames LEFT JOIN tagname_params AS tnp USING (tagnameid),
+		 users_info LEFT JOIN al2 ON (users_info.uid=al2.srcid)',
 		"tagnames.tagnameid=tags.tagnameid
 		 AND tags.uid=users_info.uid
 		 AND tags.inactivated IS NULL
-		 AND tagid >= $min_tagid",
+		 AND tagid >= $min_tagid
+		 AND (al2.value IS NULL OR al2.value & $worthless_user_mask = 0)",
 		"GROUP BY tags.tagnameid
 		 HAVING c >= $minc AND s >= $mins
 		 ORDER BY sc DESC, tagname ASC
