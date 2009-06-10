@@ -42,7 +42,7 @@ sub showEditor {
 	my $p_item = $fh->getFireHose($p_id);
 	$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
 	
-	$editor .= slashDisplay('editor', {}, { Page => 'edit', Return => 1 });
+	$editor .= slashDisplay('editor', { id => $p_id, item => $p_item }, { Page => 'edit', Return => 1 });
 	return $editor;
 }
 
