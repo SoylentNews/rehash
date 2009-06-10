@@ -2342,7 +2342,7 @@ sub ajaxFireHoseGetUpdates {
 					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
 
 					$title_js .= "\$('\#title-" . $_->{id} . "').html(" . Data::JavaScript::Anon->anon_dump($title) . ");\n";
-					$title_js .= "inject_reasons('#firehose-" . $_->{id} . "')";
+					$title_js .= "inject_reasons('#firehose-" . $_->{id} . "');";
 
 					my $introtext = $item->{introtext};
 					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
