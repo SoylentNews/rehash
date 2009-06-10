@@ -1457,6 +1457,14 @@ sub getModalPrefs {
 				tabbed => $form->{'tabbed'},
 			}, { Return => 1, Page => 'login'});
 
+	} elsif ($form->{'section'} eq 'changePasswdModal') {
+		return if $user->{is_anon};
+
+		return
+			slashDisplay('changePasswdModal', {
+				tabbed => $form->{'tabbed'},
+			}, { Return => 1, Page => 'login'});
+
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
@@ -1988,8 +1996,70 @@ sub saveModalPrefs {
 
         }
 
-        # Everything but Sections is saved here.
-	if ($params{'formname'} ne "sectional" && $params{'formname'} ne "firehoseview") {
+	if ($params{'formname'} eq "changePasswdModal") {
+		my $changepass = 0;
+                my $error = 0;
+                my $error_message = '';
+
+		# inputmode 1: password, cookie, or session
+		# inputmode 2: OpenID (not yet implemented)
+		if ($params{inputmode} == 1) {
+                        if ($params{'pass1'} || $params{'pass2'} || length($params{'pass1'}) || length($params{'pass2'})) {
+                                $changepass = 1;
+                        }
+
+                        if ($changepass) {
+                                if (!$error && ($params{pass1} ne $params{pass2})) {
+                                        $error_message = getData('passnomatch');
+                                        $error = 1;
+                                }
+
+                                if (!$error && (!$params{pass1} || length $params{pass1} < 6)) {
+                                        $error_message = getData('passtooshort');
+                                        $error = 1;
+                                }
+
+                                if (!$error && ($params{pass1} && length $params{pass1} > 20)) {
+                                        $error_message = getData('passtoolong');
+                                        $error = 1;
+                                }
+
+                                if (!$error) {
+                                        my $return_uid = $slashdb->getUserAuthenticate($params{uid}, $params{oldpass}, 1);
+                                        if (!$return_uid || $return_uid != $params{uid}) {
+                                                $error_message = getData('oldpassbad');
+                                                $error = 1;
+                                        }
+                                }
+                        }
+
+                        if (!$error) {
+                                my $user_save = {};
+                                $user_save->{passwd} = $params{pass1} if $changepass;
+                                $user_save->{session_login} = $params{session_login};
+                                $user_save->{cookie_location} = $params{cookie_location};
+
+                                $slashdb->deleteLogToken($params{uid}, 1);
+
+                                if ($user->{admin_clearpass} && !$user->{state}{admin_clearpass_thisclick}) {
+                                        $user_save->{admin_clearpass} = '';
+                                }
+
+                                $slashdb->setUser($params{uid}, $user_save);
+                                my $cookie = bakeUserCookie($params{uid}, $slashdb->getLogToken($params{uid}, 1));
+                                setCookie('user', $cookie, $user_save->{session_login});
+                        }
+
+                }
+
+                if ($error_message && $error) {
+                        my $ret = Data::JavaScript::Anon->anon_dump({message => $error_message, message_container => 'modal_message_feedback'});
+                        return $ret;
+                }
+
+        }
+
+	if ($params{'formname'} ne "sectional" && $params{'formname'} ne "firehoseview" && $params{'formname'} ne "changePasswdModal") {
 		$slashdb->setUser($params{uid}, $user_edits_table);
 	}
 }
