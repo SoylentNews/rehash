@@ -127,7 +127,7 @@ sub main {
 			}
 				
 		}
-		header($title, { noindex => $noindex }) or return;
+		header($title, '', { noindex => $noindex }) or return;
 	}
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);

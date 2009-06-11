@@ -71,8 +71,9 @@ sub main {
 	$title = "$constants->{sitename} - $constants->{slogan}";
 	$form->{'index'} = 1;
 	$noindex = 1 if $form->{view} eq "recent";
+	print STDERR "noindex: $noindex\n";
 
-	header($title, { noindex => $noindex }) or return;
+	header($title, '', { noindex => $noindex }) or return;
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
 
