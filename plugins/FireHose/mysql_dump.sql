@@ -33,6 +33,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_section_css', 'Slash::FireHose', 'a
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_picker_search', 'Slash::FireHose', 'ajaxTogglePickerSearch', 'ajax_user_static', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_smallscreen_mode', 'Slash::FireHose', 'ajaxToggleSmallScreen', 'ajax_user_static', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_toggle_simpledesign_mode', 'Slash::FireHose', 'ajaxToggleSimpleDesign', 'ajax_user_static', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_autoupdate', 'Slash::FireHose', 'ajaxSaveAutoUpdate', 'ajax_user_static', 'createuse');
 INSERT INTO vars (name, value, description) VALUES ('firehose_admindownclout', '0.5', 'Admin clout for downvotes can be reduced by specifying a number between 0 and 1');
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminudcclout', '0.5', 'Admin clout for udc purposes (number between 0 and 1, probably');
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminupclout', '0.5', 'Admin clout for upvotes can be reduced by specifying a number between 0 and 1');

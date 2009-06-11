@@ -1384,12 +1384,15 @@ var apply_updates_when, apply_updates, updates_available, debug_ask;
 var	$FHL,
 	INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)',
 	NEW_SX='div.fhitem.data-add-ready:hidden', OLD_SX='div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last',
-	APPLY_WHEN='never',
+	APPLY_WHEN=window.firehose_autoupdate || 'at-end',
 	NUMBERS=[ 'No', 'A', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine' ];
 
 apply_updates_when = function( when ){
-	APPLY_WHEN = when;
-	// save pref via ajax
+	ajax_update({ // save pref
+		op:			'firehose_save_autoupdate',
+		reskey:		reskey_static,
+		autoupdate:	APPLY_WHEN=when
+	});
 };
 
 apply_updates = function( $insert, $remove ){

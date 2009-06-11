@@ -105,12 +105,13 @@ __template__
 				</td>
 			</tr>
 			<tr>
-				<td>
-		                [% pause_check = ''; IF !user.firehose_pause || !user.firehose_pause.defined; pause_check = constants.markup_checked_attribute; END; %]
-                		<label><input type="checkbox" id="paused" name="paused"[% pause_check %]> Dynamic Homepage</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_pause');return false;" class="help">?</a>
 
-		                <div id="modalprefhelp_pause" class="modalprefhelp" style="display: none;">
-                		        Auto-update view.
+				<td>
+				[% sectionmenu_check = ''; IF !user.firehose_hide_section_menu; sectionmenu_check = constants.markup_checked_attribute; END; %]
+                		<label><input type="checkbox" id="nosectionmenu" name="nosectionmenu"[% sectionmenu_check %]> Section Menu</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nosectionmenu');return false;" class="help">?</a>
+
+		                <div id="modalprefhelp_nosectionmenu" class="modalprefhelp" style="display: none;">
+                		        Enable the section menu.
 		                </div>
 				</td>
 
@@ -124,12 +125,12 @@ __template__
 				</td>
 			</tr>
 			<tr>
-				<td>
-				[% sectionmenu_check = ''; IF !user.firehose_hide_section_menu; sectionmenu_check = constants.markup_checked_attribute; END; %]
-                		<label><input type="checkbox" id="nosectionmenu" name="nosectionmenu"[% sectionmenu_check %]> Section Menu</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nosectionmenu');return false;" class="help">?</a>
+                <td>
+				[% advanced_check = ''; IF user.firehose_advanced; advanced_check = constants.markup_checked_attribute; END %]
+				<label><input type="checkbox" id="advanced" name="advanced"[% advanced_check %]> Advanced</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');return false;" class="help">?</a>
 
-		                <div id="modalprefhelp_nosectionmenu" class="modalprefhelp" style="display: none;">
-                		        Enable the section menu.
+		                <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
+                		        Enable advanced user controls
 		                </div>
 				</td>
 
@@ -144,35 +145,15 @@ __template__
 			</tr>
 			<tr>
 				<td>
-		                [% am_check = ''; IF !user.firehose_noautomore; am_check = constants.markup_checked_attribute; END; %]
-                		<label><input type="checkbox" id="noautomore" name="noautomore"[% am_check %]> Auto 'More'</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_noautomore');return false;" class="help">?</a>
-
-		                <div id="modalprefhelp_firehose_noautomore" class="modalprefhelp" style="display: none;">
-                		        Enable Auto More.
-		                </div>
-				</td>
-
-				<td>
                                 [% graphics_check = ''; IF !user.firehose_nographics; graphics_check = constants.markup_checked_attribute; END; %]
                                 <label><input type="checkbox" id="nographics" name="nographics"[% graphics_check %]> Cosmetic Graphics</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_firehose_nographics');return false;" class="help">?</a>
                                 <br>
                                 <div id="modalprefhelp_firehose_nographics" class="modalprefhelp" style="display: none;">
                                         Display cosmetic graphics.
                                 </div>
-                                </td>
-                        </tr>
-                        <tr>
-                                <td>
-				[% advanced_check = ''; IF user.firehose_advanced; advanced_check = constants.markup_checked_attribute; END %]
-				<label><input type="checkbox" id="advanced" name="advanced"[% advanced_check %]> Advanced</label> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_advanced');return false;" class="help">?</a>
-
-		                <div id="modalprefhelp_advanced" class="modalprefhelp" style="display: none;">
-                		        Enable advanced user controls
-		                </div>
-				</td>
+                </td>
 
 				<td>
-
 		[%
                 default = user.firehose_pagesize || "small";
                 pagesizes = [ { 'tiny' => 'Tiny'}, { 'small' => 'Small' }, { 'large' => 'Large' } ];
@@ -190,6 +171,30 @@ __template__
                         [% END %]
                 </select>
 
+				</td>
+			</tr>
+			<tr>
+				<td>
+						[%	IF user.is_anon;
+								autoupdate = 'at-end';
+							ELSIF user.firehose_autoupdate;
+								autoupdate = user.firehose_autoupdate;
+							ELSIF !user.firehose_pause;
+								autoupdate = 'always';
+							ELSIF user.firehose_noautomore;
+								autoupdate = 'never';
+							ELSE;
+								autoupdate = 'at-end';
+							END %]
+                		<label>Auto Update:</label>
+							<input type="radio" name="autoupdate" value="always"[% IF autoupdate=='always'; constants.markup_checked_attribute; END %]> Always
+							<input type="radio" name="autoupdate" value="at-end"[% IF autoupdate=='at-end'; constants.markup_checked_attribute; END %]> Only the End
+							<input type="radio" name="autoupdate" value="never"[% IF autoupdate=='never'; constants.markup_checked_attribute; END %]> Never
+                		<a href="#" onclick="displayModalPrefHelp('modalprefhelp_autoupdate');return false;" class="help">?</a>
+
+		                <div id="modalprefhelp_autoupdate" class="modalprefhelp" style="display: none;">
+                		        Display new stories as soon as they are ready.
+		                </div>
 				</td>
 			</tr>
 			</table>

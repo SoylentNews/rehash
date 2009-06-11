@@ -1713,7 +1713,6 @@ sub saveModalPrefs {
 				firehose_nocolors		=> ($params{showcolors} ? undef: 1),
 				firehose_nobylines		=> ($params{showbylines} ? undef: 1),
 				firehose_nodates		=> ($params{showdates} ? undef: 1),
-				firehose_pause			=> ($params{paused} ? 0 : 1),
 				firehose_advanced		=> ($params{advanced} ? 1 : undef),
 				firehose_pagesize		=> ($params{pagesize} ? $params{pagesize} : "small"),
 				index_classic			=> ($params{index_classic} ? 1 : undef ),
@@ -1724,8 +1723,8 @@ sub saveModalPrefs {
 				firehose_noslashboxes		=> ($params{noslashboxes} ? undef: 1),
 				firehose_hide_section_menu	=> ($params{nosectionmenu} ? undef: 1),
 				disable_ua_check		=> ($params{disable_ua_check} ? undef: 1),
-				firehose_noautomore		=> ($params{noautomore} ? undef: 1),
 				firehose_nographics             => ($params{nographics} ? undef: 1),
+				firehose_autoupdate	=> $params{autoupdate},
 			};
 
 			if (defined $params{tzcode} && defined $params{tzformat}) {

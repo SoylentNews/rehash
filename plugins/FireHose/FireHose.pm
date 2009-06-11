@@ -315,6 +315,12 @@ sub ajaxSaveHideSectionMenu {
 	$slashdb->setUser($user->{uid}, {firehose_hide_section_menu => $hide});
 }
 
+sub ajaxSaveAutoUpdate {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	return if $user->{is_anon};
+	$slashdb->setUser($user->{uid}, {firehose_autoupdate => $form->{autoupdate}});
+}
+
 sub ajaxSetFireHoseDefaultSection {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	return if $user->{is_anon};
