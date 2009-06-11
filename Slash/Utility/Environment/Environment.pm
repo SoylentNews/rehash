@@ -1509,9 +1509,10 @@ sub userLogout {
         setCookie('user', '');
 
 	# Perhaps cookies were not available in the caller
-	if(!keys %$cookies) {
-		$cookies = Apache::Cookie->fetch;
-		$options->{modify_cookies} = 1;
+	if (!keys %$cookies) {
+		$cookies = getCurrentCookie();
+		$options->{modify_cookies} = 1
+			unless defined $options->{modify_cookies};
 	}
 
 	if (keys %$cookies && $options->{modify_cookies}) {
