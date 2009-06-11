@@ -500,11 +500,6 @@ sub allowOpenID {
 		return;
 	}
 
-	if (!$user->{is_admin}) {
-		printOpenID(getData("openid_not_admin"));
-		return;
-	}
-
 	return 1;	
 }
 

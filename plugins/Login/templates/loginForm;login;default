@@ -67,7 +67,6 @@ __template__
 				</fieldset>
 		</form>
 
-		[% IF form.openid_login %]
                 <form action="[% constants.real_rootdir %]/login.pl" method="post">
                 <input type="hidden" name="op" value="claim_openid">
                 <input type="hidden" name="openid_login" value="1">
@@ -78,7 +77,6 @@ __template__
                 <input type="text" name="openid_url" value="" size="32" maxlength="255">
                 <input type="submit" value="Log in with OpenID" class="button">
                 </form>
-                [% END %]
 
 		<p>
 			Forget your password? <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">Have your password mailed to you</a> by entering your nickname, uid, or email address.

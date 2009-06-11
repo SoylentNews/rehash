@@ -75,7 +75,7 @@ to reauthenticate.</p>
 
 </form>
 
-[% IF constants.openid_consumer_allow && user.is_admin %]
+[% IF constants.openid_consumer_allow %]
 <br>
 <form style="padding:1em;" action="[% constants.real_rootdir %]/login.pl" method="post">
 <label><b>Claim OpenID</b></label>

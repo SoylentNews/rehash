@@ -79,7 +79,7 @@ END; note %]
 		</form>
 	</div>
 
-[% IF constants.openid_consumer_allow && user.is_admin %]
+[% IF constants.openid_consumer_allow %]
 	<div>
 	<form action="[% constants.real_rootdir %]/login.pl" method="post">
 	<fieldset>

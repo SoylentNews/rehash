@@ -1392,12 +1392,10 @@ sub setCookie {
 
 {
 my $ua;
-my $nonce;
 
 sub getOpenIDSecret {
 	my($time) = @_;
-	return 'asdadasd'; # SSS
-	return $nonce . $time;
+	return getCurrentStatic('openid_consumer_secret') . $time;
 }
 
 sub getOpenID {
@@ -1405,8 +1403,7 @@ sub getOpenID {
 	require Net::OpenID::Consumer;
 	require LWPx::ParanoidAgent;
 
-	$ua    ||= LWPx::ParanoidAgent->new;
-	$nonce ||= getAnonId(1);
+	$ua ||= LWPx::ParanoidAgent->new;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
