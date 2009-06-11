@@ -2582,9 +2582,9 @@ function openInWindow(mylink, samewin) {
 }
 
 $(function(){
-	// firehose only!
+	// firehose only!  but REAL firehose, not the fake one with comments in it!
 	var validkeys = {};
-	if ( $('div.fhroot').length ) {
+	if ( $('div.fhroot').length && !$('ul#commentlisting').length ) {
 		validkeys = {
 			'X' : {           tags    : 1, signoff  : 1, noanon : 1 },
 			'T' : {           tags    : 1, tag      : 1, noanon : 1 },
