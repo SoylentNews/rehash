@@ -25,6 +25,7 @@ sub main {
 	my $gSkin     		= getCurrentSkin();
 	my $firehose_reader  	= getObject("Slash::FireHose", { db_type => 'reader' });
 	my $reader    		= getObject('Slash::DB', { db_type => 'reader' });
+	my $noindex = 0;
 
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
@@ -121,11 +122,12 @@ sub main {
 							return;
 						}
 					}
-				} 
+				}
+				$noindex = 1 if $item->{type} ne "story"; 
 			}
 				
 		}
-		header($title, '') or return;
+		header($title, { noindex => $noindex }) or return;
 	}
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);

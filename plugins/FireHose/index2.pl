@@ -25,6 +25,7 @@ sub main {
 	my $firehose  = getObject("Slash::FireHose");
 
 	my $anonval = $constants->{firehose_anonval_param} || "";
+	my $noindex = 0;
 
 	my %ops = (
 		list		=> [0,  \&list, 1, $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1, change => 1, section => 1  }],
@@ -69,7 +70,9 @@ sub main {
 	my $title;
 	$title = "$constants->{sitename} - $constants->{slogan}";
 	$form->{'index'} = 1;
-	header($title, '') or return;
+	$noindex = 1 if $form->{view} eq "recent";
+
+	header($title, { noindex => $noindex }) or return;
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
 
