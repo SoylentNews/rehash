@@ -1372,35 +1372,68 @@ $(function(){ $fhroots=$('div.fhroot'); });
 })();
 
 
-var accept_new, new_available;
+function user_wants_updates( when ){
+	apply_updates();
+	Slash.clear_message('updates-available');
+
+	when && check_logged_in() && apply_updates_when(when);
+}
+
+var apply_updates_when, apply_updates, updates_available, debug_ask;
 (function(){
 var	$FHL,
 	INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)',
-	NEW_SX='div.fhitem.data-add-ready:hidden', OLD_SX='div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last';
+	NEW_SX='div.fhitem.data-add-ready:hidden', OLD_SX='div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last',
+	APPLY_WHEN='never',
+	NUMBERS=[ 'No', 'A', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine' ];
 
-accept_new = function( $insert, $remove ){
+apply_updates_when = function( when ){
+	APPLY_WHEN = when;
+	// save pref via ajax
+};
+
+apply_updates = function( $insert, $remove ){
 	$insert!==false && (TypeOf.list($insert) ? $insert.filter(INSERT_SX) : $FHL.children(INSERT_SX)).removeClass('data-add-ready').css('display', '');
 	$remove!==false && (TypeOf.list($remove) ? $remove.filter(REMOVE_SX) : $FHL.children(REMOVE_SX)).remove();
 
-	firehose_update_title_count(
-		firehose_storyfuture(firehose_future).length
+	firehose_future && firehose_update_title_count(
+		firehose_storyfuture(firehose_future).filter(':visible').length
 	);
-
-	Slash.clear_message('new-warning');
 };
 
-new_available = function( n ){
-	var $last, $tail=true;
+function ask( about ){
+	var	$items	= TypeOf.list(about) ? about : $([]),
+		n		= $items.length || about/1,
+		how, kind;
 
-	// If _not_ dynamic updates, _just_ add/remove anything off the end.
-	!fh_play && ($last=$FHL.children(OLD_SX)).length && (tail=$last.nextAll());
-	accept_new($tail, $tail);
+	if ( n ) {
+		how = $FHL.children(NEW_SX+':last').prevAll('div.fhitem:not(.data-add-ready)').length ? [' more ', ' available.'] : [' new ', ' ready.'];
+		kind = $items.is(':not(.fhitem-story)') ? ['item is', 'items are'] : ['story is ', 'stories are'];
 
-	TypeOf.number(n)!=='number' && (n=$FHL.children(NEW_SX).length);
-	n && Slash.message({
-		key: 'new-warning',
-		content: '<p><a href="#" onclick="accept_new(); return false;">'+n+' update'+(n>1?'s':'')+' available.</a></p>'
-	});
+		Slash.message({
+			key: 'updates-available',
+			content:
+'<p>'+
+	'<a href="#" onclick="user_wants_updates(); return false" title="update now">'+
+		(NUMBERS[n]||n) + how[0] + kind[ (n!==1)/1 ] + how[1] +
+	'</a>'+
+	'  '+
+	'<a href="#" onclick="user_wants_updates(\'always\'); return false" title="always update, never ask">'+
+		'[Stop interrupting!]'+
+	'</a>'+
+'</p>'
+		});
+	}
+}
+debug_ask = ask;
+
+updates_available = function( n ){
+	var $last, $tail=true, $remaining;
+
+	APPLY_WHEN==='at-end' && ($last=$FHL.children(OLD_SX)).length && ($tail=$last.nextAll());
+	APPLY_WHEN!=='never' && apply_updates($tail, $tail);
+
+	($remaining=$FHL.children(NEW_SX)).length && ask($remaining);
 };
 
 $(function(){ $FHL=$any('firehoselist'); });
@@ -1419,13 +1452,13 @@ function firehose_handle_update( updates, sequence ) {
 	update_firehose_content(updates, sequence);
 
 	if ( add_behind_scenes ) {
-		accept_new();
+		apply_updates();
 		$fhl.show().css({ opacity:'' });
 		$('div.paginate').show().removeClass('paginatehidden');
 		anchor_fh_pag_menu(true);
 		Slash.clear_message('loading');
 	} else {
-		new_available();
+		updates_available();
 	}
 	Slash.busy('firehose-update', false);
 
@@ -1828,10 +1861,6 @@ function firehose_play(context) {
 	$any('pauseorplay').html('Updated');
 	$any('play').setClass('hide');
 	$any('pause').setClass('show');
-}
-
-function is_firehose_playing() {
-  return fh_play==1;
 }
 
 function firehose_pause(context) {
