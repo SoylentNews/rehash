@@ -13058,6 +13058,53 @@ sub getProjectByName {
 	return $self->sqlSelectHashref("*","projects", "unixname=$name_q");
 }
 
+sub createPreview {
+	my($self, $preview) = @_;
+	return unless $preview && $preview->{uid};
+	
+	my $data;
+	$data->{uid} 		= delete $preview->{uid};
+	$data->{introtext} 	= delete $preview->{introtext} || '';
+	$data->{bodytext} 	= delete $preview->{bodytext} || '';
+	$data->{preview_fhid} 	= delete $preview->{preview_fhid} || '';
+	$data->{src_fhid} 	= delete $preview->{src_fhid} || '';
+
+	$self->sqlInsert('preview', $data);
+	my $preview_id = $self->getLastInsertId();
+
+	# The next line makes sure that we get any section_extras in the DB - Brian
+	$self->setPreview($preview_id, $preview) if $preview_id && keys %$preview;
+
+	return $preview_id;
+}
+
+sub getPreview {
+	my $answer = _genericGet({
+		table		=> 'preview',
+		table_prime	=> 'preview_id',
+		param_table	=> 'preview_param',
+		arguments	=> \@_,
+	});
+	return $answer;
+}
+
+
+sub setPreview {
+	_genericSet('preview', 'preview_id', 'preview_param', @_);
+}
+
+sub deletePreview {
+	my($self, $id) = @_;
+	my $id_q = $self->sqlQuote($id);
+	my $preview = $self->getPreview($id);
+
+	# XXXEdit Delete preview fhitem too eventually
+	
+	$self->sqlDelete("preview","preview_id=$id_q");
+	$self->sqlDelete("preview_param","preview_id=$id_q");
+}
+
+
 sub _getStorySelfLink {
 	my($self, $stoid, $change_hr) = @_; 
 	my $story = $self->getStory($stoid);
