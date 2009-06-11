@@ -51,6 +51,8 @@ sub displaySlashboxes {
 		$boxcache = $cache->{slashboxes}{$getblocks}{$user->{light}} ||= {};
 	}
 
+	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
+
 	for my $bid (@boxes) {
 		next if $user->{lowbandwidth}  && $constants->{lowbandwidth_bids_regex} eq "NONE";
 		next if $user->{lowbandwidth} && !($bid =~ $constants->{lowbandwidth_bids_regex} );
@@ -91,14 +93,21 @@ sub displaySlashboxes {
                         # do nothing!
                         
 		} elsif ($bid eq 'poll' && !$constants->{poll_cache}) {
-			# this is only executed if poll is to be dynamic
-			$return .= portalsidebox(
-				$boxBank->{$bid}{title},
-				pollbooth('_currentqid', 1),
-				$boxBank->{$bid}{bid},
-				$boxBank->{$bid}{url},
-				$getblocks
-			);
+			if ($dynamic_blocks_reader) {
+				# Poll ad (currently disabled)
+				my $poll_supplement = [];
+				#$poll_supplement->[0] = { "poll_ad" => '' } if (!$user->{maker_mode_adless} && !$user->{is_subscriber});
+				$return .= $dynamic_blocks_reader->displayBlock('poll', {}, $poll_supplement);
+			} else {
+				# this is only executed if poll is to be dynamic
+				$return .= portalsidebox(
+					$boxBank->{$bid}{title},
+					pollbooth('_currentqid', 1),
+					$boxBank->{$bid}{bid},
+					$boxBank->{$bid}{url},
+					$getblocks
+				);
+			}
 		} elsif ($bid eq 'friends_journal' && $constants->{plugin}{Journal} && $constants->{plugin}{Zoo}) {
 			my $journal = getObject("Slash::Journal", { db_type => 'reader' });
 			my $zoo = getObject("Slash::Zoo", { db_type => 'reader' });
@@ -129,7 +138,6 @@ sub displaySlashboxes {
                         # Don't add this Slashbox at all if the site has it toggled off
 
 		} else {
-			my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
 			my $block = '';
 			$block = $dynamic_blocks_reader->displayBlock($bid) if $dynamic_blocks_reader;
 			if ($block) {

@@ -20,6 +20,7 @@ __template__
 
         <div class="content" id="[% block.name %]-content">
                 [% block.block %]
+		[% IF supplement; supplement; END %]
         </div>
 </div>
 [% END %]
