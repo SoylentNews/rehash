@@ -67,7 +67,7 @@ __template__
 				</fieldset>
 		</form>
 
-		[% IF openid_login %]
+		[% IF form.openid_login %]
                 <form action="[% constants.real_rootdir %]/login.pl" method="post">
                 <input type="hidden" name="op" value="claim_openid">
                 <input type="hidden" name="openid_login" value="1">
