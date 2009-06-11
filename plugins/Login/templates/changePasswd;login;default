@@ -82,26 +82,28 @@ END; note %]
 [% IF constants.openid_consumer_allow && user.is_admin %]
 	<div>
 	<form action="[% constants.real_rootdir %]/login.pl" method="post">
-
+	<fieldset>
 	<label>Claim OpenID</label>
-	<div class="note">Enter your OpenID identity. (Google is not yet fully supported.)</div>
+	<div class="note">Enter your OpenID identity.</div>
+	<img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
 	<input type="text" name="openid_url" size="32" maxlength="255" value="">
 
 	<input type="hidden" name="op" value="claim_openid">
 	<input type="submit" value="Claim ID" class="button">
+	</fieldset>
 	</form>
 
 	[% openids = Slash.db.getOpenIDsByUID(user.uid) %]
-	<div><p><b>Your OpenIDs</b></p>
+	<div><br><b>Your OpenIDs</b><dl>
 		[% IF !openids.size %]
-	<i>None</i>
+	<dt>None</dt>
 		[% ELSE %]
 			[% FOR openid IN openids %]
-	<i>[% openid.normalized_openid_url %]</i>
-	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&openid_url=[% openid.url | strip_paramattr %]">delete</a>)<br>
+	<dt>[% openid.normalized_openid_url %]
+	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&amp;openid_url=[% openid.url | strip_paramattr %]">delete</a>)</dt>
 			[% END %]
 		[% END %]
-	</div></div>
+	</dl></div></div>
 [% END %]
 
 </div>

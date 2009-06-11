@@ -2,6 +2,7 @@
 name=Login
 description="Login system for users"
 htdoc=login.pl
+image=htdocs/images/openid-16x16.gif
 template=templates/changePasswd;login;default
 template=templates/changePasswdModal;login;default
 template=templates/data;login;default

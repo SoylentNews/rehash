@@ -13,7 +13,7 @@ __template__
 
 [%
 IF !user.is_anon;
-        PROCESS prefs_titlebar title='Help & Preferences';
+        PROCESS prefs_titlebar title='Help &amp; Preferences';
 ELSE;
         PROCESS prefs_titlebar title='Help';
 END
