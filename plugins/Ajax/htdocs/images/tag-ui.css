@@ -454,7 +454,7 @@ div.head div.tag-widget-stub,
 	color: inherit;
 	background-color: inherit;
 	text-align: inherit;
-	padding-left: 0.8em;
+	/*padding-left: 0.8em;*/
 
 	z-index: 10;
 }
