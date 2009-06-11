@@ -755,6 +755,38 @@ CREATE TABLE pollvoters (
 	KEY qid (qid,id,uid)
 ) TYPE=InnoDB;
 
+#
+# Table structure for table 'preview'
+#
+
+DROP TABLE IF EXISTS preview;
+CREATE TABLE preview (
+	preview_id mediumint UNSIGNED NOT NULL auto_increment,
+	uid mediumint UNSIGNED NOT NULL,
+	src_fhid mediumint UNSIGNED NOT NULL DEFAULT 0,
+	preview_fhid mediumint UNSIGNED NOT NULL DEFAULT 0,
+	introtext text NOT NULL,
+	bodytext text NOT NULL,
+	PRIMARY KEY (preview_id)
+	KEY uid (uid),
+) TYPE=InnoDB;
+
+
+#
+# Table structure for table 'preview_param'
+#
+
+DROP TABLE IF EXISTS preview_param;
+CREATE TABLE preview_param (
+	param_id mediumint UNSIGNED NOT NULL auto_increment,
+	preview_id mediumint UNSIGNED NOT NULL,
+	name varchar(32) DEFAULT '' NOT NULL,
+	value text NOT NULL,
+	UNIQUE submission_key (preview_id,name),
+	PRIMARY KEY (param_id)
+) TYPE=InnoDB;
+
+
 DROP TABLE IF EXISTS projects;
 CREATE TABLE projects (
 	id mediumint UNSIGNED NOT NULL auto_increment,
