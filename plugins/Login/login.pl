@@ -566,11 +566,25 @@ sub claimOpenID {
 	}
 
 	my $claimed_identity = $identity->claimed_url;
+	# because google returns my identity as some generic openid.net URL,
+	# we look at the server itself for a clue here; we save this generic
+	# ID as the claimed ID, since all we really need it for is to just
+	# tell us to use the returned OpenID later anyway, after sending it
+	# through normalizeOpenID() -- pudge
+	if ($identity->identity_server eq 'https://www.google.com/accounts/o8/ud') {
+		# ooooooh, how i love google
+		# ooooooh, how i love google
+		# ooooooh, how i love google
+		# because they first loved me
+		$claimed_identity = $identity->identity_server;
+	}
 	my $claimed_uid = $slashdb->getUIDByOpenID($claimed_identity);
 	if (!$openid_login && $claimed_uid) {
 		# we do these checks in the DB anyway, but best to try them up front;
 		# don't worry, there's no atomicity problems, as these checks are not
-		# actually necessary -- pudge
+		# actually necessary; worse, we don't necessarily record this particular
+		# OpenID anyway, so it might not match anything in the DB even if
+		# it's already been added -- pudge
 		if ($claimed_uid == $user->{uid}) {
 			printOpenID(getData("openid_already_claimed_self", { claimed_identity => $claimed_identity }));
 		} else {
