@@ -74,7 +74,8 @@ __template__
                 <label>
                         OpenID URL
                 </label>
-                <img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID"><input type="text" name="openid_url" value="" size="32" maxlength="255">
+                <img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
+                <input type="text" name="openid_url" value="" size="32" maxlength="255">
                 <input type="submit" value="Log in with OpenID" class="button">
                 </form>
                 [% END %]

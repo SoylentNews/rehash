@@ -80,20 +80,22 @@ to reauthenticate.</p>
 <form style="padding:1em;" action="[% constants.real_rootdir %]/login.pl" method="post">
 <label><b>Claim OpenID</b></label>
 <div style="display: block; [% note_style %]">Enter your OpenID identity. (Google is not yet fully supported.)</div>
+<img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
 <input type="text" name="openid_url" size="32" maxlength="255" value="">
 <input type="hidden" name="op" value="claim_openid">
 <input type="submit" value="Claim ID" class="button">
 
 [% openids = Slash.db.getOpenIDsByUID(user.uid) %]
-<div><p><b>Your OpenIDs</b></p>
+<div><br><b>Your OpenIDs</b><dl>
         [% IF !openids.size %]
-<i>None</i>
+<dt>None</dt>
         [% ELSE %]
                 [% FOR openid IN openids %]
-<i>[% openid %]</i><br>
+<dt>[% openid.normalized_openid_url %]
+	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&amp;openid_url=[% openid.url | strip_paramattr %]">delete</a>)</dt>
                 [% END %]
         [% END %]
-</div>
+</dl></div>
 </form>
 [% END %]
 __seclev__

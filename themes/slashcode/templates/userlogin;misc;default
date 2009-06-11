@@ -36,6 +36,21 @@ __template__
 	<input type="submit" name="userlogin" value="Log in" class="button">
 	</fieldset>
 </form>
+
+<form action="[% constants.real_rootdir %]/login.pl" method="post">
+<fieldset>
+	<label>
+		OpenID URL
+	</label>
+	<input type="hidden" name="op" value="claim_openid">
+	<input type="hidden" name="openid_login" value="1">
+	<img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
+	<input type="text" name="openid_url" value="" size="32" maxlength="255">
+	<input type="submit" value="Log in with OpenID" class="button">
+</fieldset>
+</form>
+
+
 <p>
 	[ <b>
 		<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">
