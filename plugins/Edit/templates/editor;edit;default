@@ -11,7 +11,7 @@ __name__
 editor
 __template__
 <div id="editor" class="admin">
-	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
+	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 		[% PROCESS formLabel value => "Title" %]
 

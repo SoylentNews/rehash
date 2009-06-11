@@ -13,24 +13,26 @@ editorwrap
 __seclev__
 10000
 __template__
+<div class="nav">
   [% firehosedb = Slash.getObject('Slash::FireHose');
      IF firehosedb;
        views = firehosedb.getUserViews({ tab_display => 'yes' });
        PROCESS firehose_tabs views = views article_header = 1;
      END %]
-  </div>
+ </div>
 
-  <div id="yui-main">
-    <div class="yui-gf" style="position: relative">
-      <div class="yui-u first" id="links">
-  [% PROCESS mainmenu section_menu_type="firehose" %]
-      </div>
-    </div>
-  </div>
+ <div id="yui-main">
+ 	<div class="yui-gf" style="position: relative">
+ 		<div class="yui-u first" id="links">
+		[% PROCESS mainmenu section_menu_type="firehose" %]
+		</div>
+	</div>
+</div>
 
-  <div class="yui-u maincol faq" style="padding:1em">
-[% editor %]
-  </div>
+<div class="yui-u maincol faq" style="padding:1em">
+	[% editor %]
+</div>
+
 </div>
 
 
