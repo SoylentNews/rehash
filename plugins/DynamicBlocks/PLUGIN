@@ -13,3 +13,4 @@ template=templates/createtags;dynamicblocks;default
 template=templates/createmessages;dynamicblocks;default
 template=templates/displayblock;dynamicblocks;default
 template=templates/userbio;dynamicblocks;default
+template=templates/poll_ad;dynamicblocks;default
