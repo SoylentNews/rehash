@@ -24,7 +24,7 @@ sub getOrCreatePreview {
 
 		my $fh = getObject("Slash::FireHose");
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes"});
-		$self->setPreview({ preview_fhid => $fhid });
+		$self->setPreview($id, { preview_fhid => $fhid });
 		return $id;
 	}
 }
@@ -34,14 +34,17 @@ sub showEditor {
 
 	my $preview_id = $self->getOrCreatePreview();
 	my $editor;
-	$editor .=  "ID: $preview_id<br>";
+	$editor .=  "PREVIEW ID: $preview_id<br>";
 
 	my $preview = $self->getPreview($preview_id);
 	
 
 	my $fh = getObject("Slash::FireHose");
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
-	$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
+	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
+	if ($p_item && $p_item->{title} && $p_item->{introtext}) {
+		$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
+	}
 	
 	$editor .= slashDisplay('editor', { id => $preview_id, item => $p_item }, { Page => 'edit', Return => 1 });
 	return $editor;
