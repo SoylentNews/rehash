@@ -594,6 +594,13 @@ sub claimOpenID {
 
 	my $slash_return_to = $form->{slash_return_to} ? ('&slash_return_to=' . fixparam($form->{slash_return_to})) : '';
 	my $abs = root2abs();
+
+	$identity->set_extension_args(
+	        'http://openid.net/extensions/sreg/1.1', {
+			required => '',
+			optional => 'email,fullname,nickname,timezone',
+		}
+	);
 	my $check_url = $identity->check_url(
 		delayed_return => 1,
 		return_to      => "$abs/login.pl?op=verify_openid$openid_login$slash_return_to&reskey=$reskey_text",
