@@ -48,6 +48,7 @@ sub savePreview {
 	$p_data->{introtext} = $form->{introtext};
 	$p_data->{bodytext} = $form->{bodytext};
 
+	$fh_data->{title} = $form->{title};
 	$fh_data->{createtime} = $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
 	$fh_data->{media} = $form->{media};
 	$fh_data->{dept} = $form->{dept};
@@ -114,8 +115,9 @@ sub editCreateStory {
 	$data->{introtext} 	= $preview->{introtext};
 	$data->{bodytext} 	= $preview->{bodytext};
 	$data->{dept}		= $fhitem->{dept};
+	$data->{title}		= $fhitem->{title};
 		
-	for my $field (qw( introtext bodytext )) {
+	for my $field (qw( introtext bodytext title)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 	# XXXEdit 
 	#	$data->{$field} = $slashdb->autoUrl($form->{section}, $data->{$field});
