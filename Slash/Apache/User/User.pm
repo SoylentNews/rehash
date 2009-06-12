@@ -415,7 +415,7 @@ sub handler {
 			$uri =~ m{^/osdn-test/}
 			||
 			$uri =~ m{^/(?:users|login)\.pl}
-			) && (!$form->{op} || $form->{op} eq 'userlogin')
+			) && (!$form->{op} || $form->{op} eq 'userlogin' || $form->{openid_login})
 		)
 	) {
 		my $ans = $constants->{allow_nonadmin_ssl};
