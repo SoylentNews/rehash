@@ -34,6 +34,10 @@ sub main {
 			function	=> \&edit,
 			seclev		=> 100,
 		},
+		preview => {
+			function 	=> \&preview,
+			seclev		=> 100
+		}
 	};
 
 	# redirect for non-admin users for now 
@@ -58,6 +62,15 @@ sub edit {
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
 }
+
+sub preview {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $edit = getObject("Slash::Edit");
+	my $editor = $edit->showEditor();
+	
+}
+
+
 createEnvironment();
 main();
 1;
