@@ -37,6 +37,10 @@ sub main {
 		preview => {
 			function 	=> \&preview,
 			seclev		=> 100
+		},
+		save	=> {
+			function	=> \&save,
+			seclev		=> 100
 		}
 	};
 
@@ -70,6 +74,15 @@ sub preview {
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
 	
+}
+
+sub save {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $edit = getObject("Slash::Edit");
+	$edit->savePreview();
+	$edit->saveItem();
+	my $editor = $edit->showEditor();
+
 }
 
 
