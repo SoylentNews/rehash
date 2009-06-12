@@ -67,6 +67,7 @@ sub preview {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $edit = getObject("Slash::Edit");
 	my $editor = $edit->showEditor();
+	slashDisplay('editorwrap', { editor => $editor });
 	
 }
 
