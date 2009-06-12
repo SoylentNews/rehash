@@ -85,9 +85,9 @@ END; note %]
 	<fieldset>
 	<label>Claim OpenID</label>
 	<div class="note">Enter your OpenID identity.</div>
-	<img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
-	<input type="text" name="openid_url" size="32" maxlength="255" value="">
-
+	<label for="openid_url" class="openid_url">
+	<input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="">
+	</label>
 	<input type="hidden" name="op" value="claim_openid">
 	<input type="submit" value="Claim ID" class="button">
 	</fieldset>

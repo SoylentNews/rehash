@@ -39,13 +39,12 @@ __template__
 
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <fieldset>
-	<label>
-		OpenID URL
-	</label>
 	<input type="hidden" name="op" value="claim_openid">
 	<input type="hidden" name="openid_login" value="1">
-	<img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
-	<input type="text" name="openid_url" value="" size="32" maxlength="255">
+	<strong>OpenID URL</strong>
+	<label for="openid_url" class="openid_url">
+	<input type="text" name="openid_url" id="openid_url" value="" size="32" maxlength="255">
+	</label>
 	<input type="submit" value="Log in with OpenID" class="button">
 </fieldset>
 </form>

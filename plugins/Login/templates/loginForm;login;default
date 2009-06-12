@@ -70,11 +70,10 @@ __template__
                 <form action="[% constants.real_rootdir %]/login.pl" method="post">
                 <input type="hidden" name="op" value="claim_openid">
                 <input type="hidden" name="openid_login" value="1">
-                <label>
-                        OpenID URL
+				<strong>OpenID URL</strong>
+                <label for="openid_url" class="openid_url">
+                <input type="text" name="openid_url" id="openid_url" value="" size="32" maxlength="255">
                 </label>
-                <img src="[% constants.imagedir %]/openid-16x16.gif" alt="OpenID" title="OpenID">
-                <input type="text" name="openid_url" value="" size="32" maxlength="255">
                 <input type="submit" value="Log in with OpenID" class="button">
                 </form>
 
