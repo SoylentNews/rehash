@@ -1389,11 +1389,12 @@ var	$FHL,
 	APPLY_WHEN='at-end',
 	NUMBERS=[ 'No', 'A', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine' ];
 
-apply_updates_when = function( when ){
-	ajax_update({ // save pref
+apply_updates_when = function( when, init ){
+	APPLY_WHEN = when;
+	init || ajax_update({ // save pref
 		op:			'firehose_save_autoupdate',
 		reskey:		reskey_static,
-		autoupdate:	APPLY_WHEN=when
+		autoupdate:	when
 	});
 };
 
@@ -1442,10 +1443,7 @@ updates_available = function( n ){
 	($remaining=$FHL.children(NEW_SX)).length && ask($remaining);
 };
 
-$(function(){
-	$FHL=$any('firehoselist');
-	window.firehose_autoupdate && (APPLY_WHEN=window.firehose_autoupdate);
-});
+$(function(){ $FHL=$any('firehoselist'); });
 })();
 
 
