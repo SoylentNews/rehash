@@ -129,15 +129,23 @@ sub purge_old {
 		);
 	}
 
-	# finally, delete orphaned reskey_failures entries
+	# finally, delete orphaned reskey_failures and users_openid_reskeys entries
 	my $rkids = $self->sqlSelectAll('rkf.rkid',
 		'reskey_failures AS rkf LEFT JOIN reskeys AS rk ON rk.rkid=rkf.rkid',
 		'rk.rkid IS NULL'
 	);
-
 	if (@$rkids) {
 		my $rkid_string = join ',', map { $_->[0] } @$rkids;
 		$count += $self->sqlDelete('reskey_failures', "rkid IN ($rkid_string)");
+	}
+
+	my $oprids = $self->sqlSelectAll('oprid',
+		'users_openid_reskeys AS uor LEFT JOIN reskeys AS rk ON rk.reskey=uor.reskey',
+		'rk.reskey IS NULL'
+	);
+	if (@$oprids) {
+		my $oprid_string = join ',', map { $_->[0] } @$oprids;
+		$count += $self->sqlDelete('users_openid_reskeys', "oprid IN ($oprid_string)");
 	}
 
 	return $count;
