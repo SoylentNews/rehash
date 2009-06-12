@@ -33,6 +33,7 @@ sub savePreview {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $fh = getObject("Slash::FireHose");
 	return if $user->{is_anon} || !$form->{id};
 	
 	my $preview = $self->getPreview($form->{id});
@@ -54,7 +55,7 @@ sub savePreview {
 	$fh_data->{bodytext} = $form->{bodytext};
 
 	$self->setPreview($preview->{preview_id}, $p_data);
-	$self->setFireHose($preview->{preview_fhid}, $fh_data);
+	$fh->setFireHose($preview->{preview_fhid}, $fh_data);
 
 }
 
