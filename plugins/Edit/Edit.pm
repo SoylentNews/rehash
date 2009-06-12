@@ -29,6 +29,35 @@ sub getOrCreatePreview {
 	}
 }
 
+sub savePreview {
+	my($self, $options) = @_;
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	return if $user->{is_anon} || !$form->{id};
+	
+	my $preview = $self->getPreview($form->{id});
+	return if !$preview && $preview->{preview_id};
+
+	return if $user->{uid} != $preview->{uid};
+
+	my($p_data, $fh_data);
+
+	$p_data->{introtext} = $form->{introtext};
+	$p_data->{bodytext} = $form->{bodytext};
+
+	$fh_data->{createtime} = $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
+	$fh_data->{media} = $form->{media};
+	$fh_data->{dept} = $form->{dept};
+
+	#XXXEdit strip / balance
+	$fh_data->{introtext} = $form->{introtext};
+	$fh_data->{bodytext} = $form->{bodytext};
+
+	$self->setPreview($preview->{preview_id}, $p_data);
+	$self->setFireHose($preview->{preview_fhid}, $fh_data);
+
+}
+
 sub showEditor {
 	my($self, $options) = @_;
 
