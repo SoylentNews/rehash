@@ -3,7 +3,7 @@
 
 /*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody
 	firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
-	json_update getFirehoseUpdateInterval run_before_update
+	json_update getFirehoseUpdateInterval
 	firehose_play firehose_add_update_timerid firehose_collapse_entry
 	vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
 	firehose_set_cur firehose_style_switch
@@ -1373,6 +1373,8 @@ $(function(){ $fhroots=$('div.fhroot'); });
 
 
 function user_wants_updates( when ){
+	setFirehoseAction();
+
 	apply_updates();
 	Slash.clear_message('updates-available');
 
@@ -1384,7 +1386,7 @@ var apply_updates_when, apply_updates, updates_available, debug_ask;
 var	$FHL,
 	INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)',
 	NEW_SX='div.fhitem.data-add-ready:hidden', OLD_SX='div.fhitem:not(.data-add-ready,.data-remove-ready:not(.currfh)):last',
-	APPLY_WHEN=window.firehose_autoupdate || 'at-end',
+	APPLY_WHEN='at-end',
 	NUMBERS=[ 'No', 'A', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine' ];
 
 apply_updates_when = function( when ){
@@ -1422,13 +1424,14 @@ function ask( about ){
 	'</a>'+
 	'  '+
 	'<a href="#" onclick="user_wants_updates(\'always\'); return false" title="always update, never ask">'+
-		'[Stop interrupting!]'+
+		'(Automatically Update)'+
 	'</a>'+
 '</p>'
 		});
+
+		$('div.message').show(); // ...temporary fix for Daddypants
 	}
 }
-debug_ask = ask;
 
 updates_available = function( n ){
 	var $last, $tail=true, $remaining;
@@ -1439,7 +1442,10 @@ updates_available = function( n ){
 	($remaining=$FHL.children(NEW_SX)).length && ask($remaining);
 };
 
-$(function(){ $FHL=$any('firehoselist'); });
+$(function(){
+	$FHL=$any('firehoselist');
+	window.firehose_autoupdate && (APPLY_WHEN=window.firehose_autoupdate);
+});
 })();
 
 
@@ -1741,7 +1747,6 @@ function firehose_get_item_idstring() {
 
 function firehose_get_updates(options) {
 	options = options || {};
-	run_before_update();
 	if ((fh_play === 0 && !options.oneupdate) || Slash.busy('firehose-ajax')) {
 		firehose_add_update_timerid(setTimeout(firehose_get_updates, 2000));
 		return;
@@ -1792,7 +1797,6 @@ function setFirehoseAction() {
 		if (console_updating) {
 			console_update(1, 0);
 		}
-		Slash.clear_message('paused-mode');
 	}
 }
 
@@ -1829,17 +1833,6 @@ function getFirehoseUpdateInterval() {
 	}
 
 	return interval;
-}
-
-function run_before_update( force_pause ) {
-	var secs = getSecsSinceLastFirehoseAction();
-	if (secs > inactivity_timeout || force_pause) {
-		fh_is_timed_out = 1;
-		Slash.message({
-			key:		'paused-mode',
-			content:	'<p><a href="#" onclick="setFirehoseAction()">Resume automatic Slashdot updates.</a></p>'
-		});
-	}
 }
 
 function start_up_hose() {

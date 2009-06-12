@@ -15,7 +15,7 @@ __template__
 	auto_count	= 2;
 	hint_chance	= 10;
 
-	IF user.firehose_noautomore;
+	IF user.firehose_autoupdate == 'never';
 		auto_ok	= 0;
 		hint_ok	= 0;
 	ELSE;
