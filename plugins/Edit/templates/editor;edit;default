@@ -25,7 +25,7 @@ __template__
 			[% author_select %]
 
 		[% PROCESS formLabel value="Time" %]
-			<input type="text" name="time" value="[% item.createtime %]" size="19">
+			<input type="text" name="createtime" value="[% item.createtime %]" size="19">
 		<label>
 			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 		</label>
