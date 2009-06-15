@@ -118,12 +118,18 @@ sub saveItem {
 	return if $user->{uid} != $preview->{uid};
 
 	my $fhitem = $fh->getFireHose($preview->{preview_fhid});
+	my $create_retval = 0;
 
 	if ($fhitem && $fhitem->{id}) {
 		# creating a new story
 		if ($fhitem->{type} eq "story" && !$preview->{src_fhid}) {
-			$self->editCreateStory($preview, $fhitem);
+			$create_retval = $self->editCreateStory($preview, $fhitem);
 		}
+	}
+
+	# XXXEdit eventually make sure this is ours before deleting
+	if ($create_retval) {
+		$self->deletePreview($preview->{preview_id});
 	}
 }
 
@@ -150,7 +156,7 @@ sub editCreateStory {
 		$data->{$field} = balanceTags($data->{$field});
 	}
 
-	$self->createStory($data);
+	return $self->createStory($data);
 }
 
 sub DESTROY {
