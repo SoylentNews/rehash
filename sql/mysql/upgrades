@@ -6346,3 +6346,4 @@ CREATE TABLE preview_param (
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
 
+INSERT INTO globj_types VALUES (NULL, 'preview');

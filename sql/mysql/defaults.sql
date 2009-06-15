@@ -225,6 +225,7 @@ INSERT INTO globj_types VALUES (NULL, 'submissions');
 INSERT INTO globj_types VALUES (NULL, 'journals');
 INSERT INTO globj_types VALUES (NULL, 'comments');
 INSERT INTO globj_types VALUES (NULL, 'projects');
+INSERT INTO globj_types VALUES (NULL, 'preview');
 
 
 #

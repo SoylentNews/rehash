@@ -21,10 +21,11 @@ sub getOrCreatePreview {
 		return $id;
 	} else {
 		my $id = $self->createPreview({ uid => $user->{uid} });
+		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 
 		my $fh = getObject("Slash::FireHose");
 		my $type = $user->{is_admin} ? "story" : "submission";
-		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type });
+		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 		$self->setPreview($id, { preview_fhid => $fhid });
 		return $id;
 	}
