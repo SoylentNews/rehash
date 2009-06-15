@@ -19,7 +19,7 @@ sub getOrCreatePreview {
 
 	my $fh = getObject("Slash::FireHose");
 
-	if (!$form->{id}) {
+	if (!$form->{from_id}) {
 		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid}");
 	
 		if ($id) {
@@ -34,7 +34,7 @@ sub getOrCreatePreview {
 			return $id;
 		}
 	} else {
-		my $src_item = $fh->getFireHose($form->{id}); 
+		my $src_item = $fh->getFireHose($form->{from_id}); 
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 		my $type = $user->{is_admin} ? "story" : "submission";
@@ -45,10 +45,8 @@ sub getOrCreatePreview {
 		foreach (qw(introtext bodytext media title dept)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
-		print STDERR "src_item $src_item->{type} Type: $type\n";
 
 		if ($src_item->{type} ne "story" && $type eq "story") {
-			print STDERR "formatHoseIntro begin called\n";
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1 }, { Return => 1 });
 		}
 
