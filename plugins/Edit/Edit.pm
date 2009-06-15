@@ -80,7 +80,20 @@ sub showEditor {
 		$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
 	}
 	
-	$editor .= slashDisplay('editor', { id => $preview_id, item => $p_item }, { Page => 'edit', Return => 1 });
+	my $authors = $self->getDescriptions('authors', '', 1);
+	$authors->{$p_item->{uid}} = $self->getUser($p_item->{uid}, 'nickname') if $p_item->{uid} && !defined($authors->{$p_item->{uid}});
+	my $author_select = createSelect('uid', $authors, $p_item->{uid}, 1);
+	
+	my $description = $self->getDescriptions('commentcodes_extended');
+	my $commentstatus_select = createSelect('commentstatus', $description, $preview->{commentstatus}, 1);
+	
+	$editor .= slashDisplay('editor', { 
+		id 			=> $preview_id, 
+		item 			=> $p_item,
+		author_select 		=> $author_select,
+		commentstatus_select 	=> $commentstatus_select,
+	 }, { Page => 'edit', Return => 1 });
+
 	return $editor;
 }
 
