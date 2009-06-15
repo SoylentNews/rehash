@@ -26,7 +26,7 @@ __template__
 
 			[% commentstatus_select %]
 			<input type="text" name="createtime" value="[% item.createtime %]" size="19">
-
+		<label>
 			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 		</label>
 		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% item.introtext | strip_literal %]</textarea>

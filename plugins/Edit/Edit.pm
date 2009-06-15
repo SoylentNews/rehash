@@ -46,13 +46,15 @@ sub savePreview {
 
 	my($p_data, $fh_data);
 
-	$p_data->{introtext} = $form->{introtext};
-	$p_data->{bodytext} = $form->{bodytext};
+	$p_data->{introtext} 		= $form->{introtext};
+	$p_data->{bodytext} 		= $form->{bodytext};
+	$p_data->{commentstatus} 	= $form->{commentstatus};
 
-	$fh_data->{title} = $form->{title};
-	$fh_data->{createtime} = $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
-	$fh_data->{media} = $form->{media};
-	$fh_data->{dept} = $form->{dept};
+	$fh_data->{uid}		= $form->{uid};
+	$fh_data->{title} 	= $form->{title};
+	$fh_data->{createtime} 	= $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
+	$fh_data->{media} 	= $form->{media};
+	$fh_data->{dept} 	= $form->{dept};
 
 	#XXXEdit strip / balance
 	$fh_data->{introtext} = $form->{introtext};
@@ -65,6 +67,7 @@ sub savePreview {
 
 sub showEditor {
 	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
 
 	my $preview_id = $self->getOrCreatePreview();
 	my $editor;
@@ -84,6 +87,10 @@ sub showEditor {
 	$authors->{$p_item->{uid}} = $self->getUser($p_item->{uid}, 'nickname') if $p_item->{uid} && !defined($authors->{$p_item->{uid}});
 	my $author_select = createSelect('uid', $authors, $p_item->{uid}, 1);
 	
+	if (!$preview->{commentstatus}) {
+		$preview->{commentstatus} = $constants->{defaultcommentstatus};
+	}
+
 	my $description = $self->getDescriptions('commentcodes_extended');
 	my $commentstatus_select = createSelect('commentstatus', $description, $preview->{commentstatus}, 1);
 	
@@ -125,13 +132,14 @@ sub editCreateStory {
 	my $data;
 	$data->{uid} 		= $fhitem->{uid};
 	$data->{'time'}		= $fhitem->{createtime};
-	$data->{createtime} 	= $fhitem->{uid};
+	$data->{uid} 		= $fhitem->{uid};
+	$data->{commentstatus}	= $fhitem->{commentstatus};
 	$data->{introtext} 	= $preview->{introtext};
 	$data->{bodytext} 	= $preview->{bodytext};
 	$data->{dept}		= $fhitem->{dept};
 	$data->{title}		= $fhitem->{title};
 		
-	for my $field (qw( introtext bodytext title)) {
+	for my $field (qw( introtext bodytext)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 	# XXXEdit 
 	#	$data->{$field} = $slashdb->autoUrl($form->{section}, $data->{$field});
