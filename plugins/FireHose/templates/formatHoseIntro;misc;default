@@ -38,6 +38,9 @@ END;
 IF (!forform && item.type != "story") || nofollow;
 	introtext = Slash.noFollow(introtext);
 END;
+IF return_intro;
+	introtext;
+END;
 
 %]
 

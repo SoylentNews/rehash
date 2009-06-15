@@ -13,21 +13,51 @@ our $VERSION = $Slash::Constants::VERSION;
 sub getOrCreatePreview {
 	my($self) = @_;
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
 	return if $user->{is_anon};
 
-	my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid}");
+	my $fh = getObject("Slash::FireHose");
+
+	if (!$form->{id}) {
+		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid}");
 	
-	if ($id) {
-		return $id;
+		if ($id) {
+			return $id;
+		} else {
+			my $id = $self->createPreview({ uid => $user->{uid} });
+			my $preview_globjid = $self->getGlobjidCreate('preview', $id);
+
+			my $type = $user->{is_admin} ? "story" : "submission";
+			my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
+			$self->setPreview($id, { preview_fhid => $fhid });
+			return $id;
+		}
 	} else {
+		my $src_item = $fh->getFireHose($form->{id}); 
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
-
-		my $fh = getObject("Slash::FireHose");
 		my $type = $user->{is_admin} ? "story" : "submission";
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
-		$self->setPreview($id, { preview_fhid => $fhid });
+
+		my $fh_data;
+		
+		foreach (qw(introtext bodytext media title dept)) {
+			$fh_data->{$_} = $src_item->{$_};
+		}
+		print STDERR "src_item $src_item->{type} Type: $type\n";
+
+		if ($src_item->{type} ne "story" && $type eq "story") {
+			print STDERR "formatHoseIntro begin called\n";
+			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1 }, { Return => 1 });
+		}
+
+		$fh_data->{uid} = $src_item->{uid};
+		$fh->setFireHose($fhid, $fh_data);
+
+		$self->setPreview($id, { preview_fhid => $fhid, src_fhid => $src_item->{id} });
 		return $id;
+			
 	}
 }
 
