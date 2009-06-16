@@ -22,7 +22,7 @@ sub getOrCreatePreview {
 	if (!$form->{from_id}) {
 		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid}");
 	
-		if ($id) {
+		if ($id && !$form->{new}) {
 			return $id;
 		} else {
 			my $id = $self->createPreview({ uid => $user->{uid} });
