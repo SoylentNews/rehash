@@ -133,6 +133,7 @@ our @EXPORT  = qw(
 	timeCalc
 	url2html
 	url2abs
+	urlizeTitle
 	urlFromSite
 	xmldecode
 	xmlencode
@@ -2699,6 +2700,15 @@ print STDERR "url2html s/// url='$url' extra='$extra'\n" if !defined($url) || !d
 	# url2html-$$ is so we can remove the whole thing later for ecode
 
 	return $text;
+}
+
+sub urlizeTitle {
+	my($title) = @_;
+	$title = strip_notags($title);
+	$title =~ s/^\s+|\s+$//g;
+	$title =~ s/\s+/-/g;
+	$title =~ s/[^A-Za-z0-9\-]//g;
+	return $title;
 }
 
 

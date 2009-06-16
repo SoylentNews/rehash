@@ -7959,7 +7959,8 @@ sub createStory {
 			url		=> $self->getUrlFromSid(
 						$story->{sid},
 						$story->{primaryskid},
-						$tids->[0]
+						$tids->[0],
+						$story->{title}
 					   ),
 			stoid		=> $stoid,
 			sid		=> $story->{sid},
@@ -8028,14 +8029,19 @@ sub createStory {
 }
 
 sub getUrlFromSid {
-	my($self, $sid, $primaryskid, $tid) = @_;
+	my($self, $sid, $primaryskid, $tid, $title) = @_;
 	my $constants = getCurrentStatic();
 
 	my $storyskin = $self->getSkin($primaryskid || $constants->{mainpage_skid});
 	my $rootdir = $storyskin->{rootdir};
-
-	return "$rootdir/article.pl?sid=$sid" .
-		($tid && $constants->{tids_in_urls} ? "&tid=$tid" : '');
+	
+	if ($constants->{firehose_link_article2}) {
+		my $linktitle = urlizeTitle($title);
+		return "$rootdir/story/$sid/$linktitle";
+	} else {
+		return "$rootdir/article.pl?sid=$sid" .
+			($tid && $constants->{tids_in_urls} ? "&tid=$tid" : '');
+	}
 }
 
 
@@ -8125,7 +8131,8 @@ sub updateStory {
 			url		=> $self->getUrlFromSid(
 						$sid,
 						$data->{primaryskid},
-						$topiclist->[0]
+						$topiclist->[0],
+						$data->{title}
 					   ),
 			ts		=> $data->{'time'},
 			topic		=> $topiclist->[0],

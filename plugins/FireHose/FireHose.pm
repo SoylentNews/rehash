@@ -4617,9 +4617,7 @@ sub linkFireHose {
 	my $link_url;
 	my $item = ref($id_or_item) ? $id_or_item : $self->getFireHose($id_or_item);
 
-	my $linktitle = $item->{title};
-	$linktitle =~ s/\s+/-/g;
-	$linktitle =~ s/[^A-Za-z0-9\-]//g;
+	my $linktitle = urlizeTitle($item->{title});
 
 	if ($item->{type} eq "story") {
 		my $story = $self->getStory($item->{srcid});
