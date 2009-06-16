@@ -641,10 +641,12 @@ sub getModalPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('ajax_user', { nostate => 1 });
+	# anon calls get normal ajax_base
+	my $reskey_resource = (caller(1))[3] =~ /\bgetModalPrefsAnon$/ ? 'ajax_base' : 'ajax_user';
+	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;
 	if ($rkey->failure) {
-		# XXX
+		# XXX need to handle errors, esp. for HC
 		return;
 	} else {
 		$user->{state}{reskey} = $rkey->reskey;
@@ -2073,7 +2075,16 @@ sub saveModalPrefs {
 	}
 }
 
-# comments
+sub getModalPrefsAnon {
+	&getModalPrefs;
+}
+sub saveModalPrefsAnon {
+	&saveModalPrefs;
+}
+sub saveModalPrefsAnonHC {
+	&saveModalPrefs;
+}
+
 ###################
 
 
@@ -2150,9 +2161,19 @@ sub getOps {
 			reskey_name     => 'ajax_user_static',
 			reskey_type     => 'createuse',
 		},
+		getModalPrefsAnon       => {
+			function        => \&getModalPrefsAnon,
+			reskey_name     => 'ajax_base_static',
+			reskey_type     => 'createuse',
+		},
 		saveModalPrefs          => {
 			function        => \&saveModalPrefs,
 			reskey_name     => 'ajax_user',
+			reskey_type     => 'use',
+		},
+		saveModalPrefsAnon      => {
+			function        => \&saveModalPrefsAnon,
+			reskey_name     => 'ajax_base',
 			reskey_type     => 'use',
 		},
 		default	=> {

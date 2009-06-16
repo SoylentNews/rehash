@@ -2058,7 +2058,10 @@ function getModalPrefs(section, title, tabbed, params){
 
 	$still_open.length && $still_open.data('tabbed')!=tabbed && hide_modal_box();
 
-	if ( !reskey_static ) {
+	var formname = section;
+	if ( !reskey_static && 
+		(formname !== 'sendPasswdModal' && formname !== 'newUserModal')
+	) {
 		return show_login_box();
 	}
 
@@ -2158,10 +2161,15 @@ function resetModalPrefs(extra_param) {
 }
 
 function saveModalPrefs() {
-	var this_reskey = $dom('#modal_prefs').elements['reskey'].value || reskey_static;
+	var this_reskey = (document.forms.modal_prefs.reskey && document.forms.modal_prefs.reskey.value) || reskey_static;
+	var this_op = 'saveModalPrefs';
+	var formname = (document.forms.modal_prefs.formname && document.forms.modal_prefs.formname.value);
+	if (formname === 'sendPasswdModal' || formname === 'newUserModal') {
+		this_op = 'saveModalPrefsAnon';
+	}
 
 	ajax_update({
-		op:	'saveModalPrefs',
+		op:	this_op,
 		data:	serialize_multiple($any('modal_prefs')),
 		reskey:	this_reskey
 	}, '', {

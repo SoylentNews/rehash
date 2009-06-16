@@ -51,7 +51,9 @@ sub main {
 		return;
 	}
 
-	$ops{$op}[FUNCTION]->($slashdb, $reader, $constants, $user, $form);
+	my $login = getObject('Slash::Login');
+
+	$ops{$op}[FUNCTION]->($slashdb, $reader, $constants, $user, $form, $login);
 	writeLog($user->{nickname});
 }
 
@@ -504,16 +506,7 @@ sub allowOpenID {
 }
 
 sub deleteOpenID {
-	my($slashdb, $reader, $constants, $user, $form) = @_;
-
-	return unless &allowOpenID;
-
-	my $claimed_identity = $form->{openid_url};
-	my $claimed_uid = $slashdb->getUIDByOpenID($claimed_identity);
-	if (!$claimed_uid || $claimed_uid != $user->{uid}) {
-		printOpenID(getData("openid_not_yours", { claimed_identity => $claimed_identity }));
-		return;
-	}
+	my($slashdb, $reader, $constants, $user, $form, $login) = @_;
 
 	my $form_reskey = $form->{reskey};
 	my $reskey = getObject('Slash::ResKey');
@@ -521,27 +514,26 @@ sub deleteOpenID {
 	if (!$form_reskey) {
 		$rkey->create;
 		printOpenID(
-			slashDisplay('deleteOpenID', { openid_url => $claimed_identity }, { Return => 1 })
+			slashDisplay('deleteOpenID',
+				{ openid_url => $claimed_identity },
+				{ Return => 1, Page => 'login' }
+			)
 		);
 		return;
 	}
 
 	if (!$rkey->use) {
-		printOpenID(getData("openid_reskey_failure_verify"));
-		return;
+		return getLoginData("openid_reskey_failure_verify");
 	}
-	if ($slashdb->deleteOpenID($user->{uid}, $claimed_identity)) {
-		# XXX redirect automatically to /my/password
-		printOpenID(getData("openid_verify_delete", { claimed_identity => $claimed_identity }));
-	} else {
-		printOpenID(getData("openid_error"));
-	}
+
+	my $return = $login->deleteOpenID($form->{openid_url}) or return;
+	printOpenID($return);
 }
 
 sub claimOpenID {
-	my($slashdb, $reader, $constants, $user, $form) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $login) = @_;
 
-	return unless &allowOpenID;
+	return unless $login->allowOpenID;
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
@@ -617,9 +609,9 @@ sub claimOpenID {
 }
 
 sub verifyOpenID {
-	my($slashdb, $reader, $constants, $user, $form) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $login) = @_;
 
-	return unless &allowOpenID;
+	return unless $login->allowOpenID;
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
