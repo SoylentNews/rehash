@@ -24,6 +24,7 @@ __template__
 
 <form id ="modal_prefs" method="post">
 
+[% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="d2_posting">
 <input type="hidden" name="uid" value="[% user.uid %]">
 
@@ -60,7 +61,7 @@ __template__
                         b_check = constants.markup_checked_attribute;
                 END %]
                 <input type="hidden" name="nobonus_present" value="1">
-                <label><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;<b>No Karma Bonus</b></label><a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" class="help">?</a>
+                <label><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;<b>No Karma Bonus</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_karma" class="modalprefhelp" style="display: none;">
                         Normally users with high karma post at Score: 2, but you can choose to post down in the Score: 1 gutters with the rest of the user population with this option.

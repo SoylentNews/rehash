@@ -37,6 +37,7 @@ clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_loc
 %]
 
 <form id ="modal_prefs">
+[% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="changePasswdModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="inputmode" value="">

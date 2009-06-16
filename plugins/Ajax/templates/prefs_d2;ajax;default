@@ -20,6 +20,7 @@ __template__
 
 <form id ="modal_prefs" method="post">
 
+[% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="d2_display">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">

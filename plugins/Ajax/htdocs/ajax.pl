@@ -640,6 +640,16 @@ sub updateD2prefs {
 sub getModalPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('ajax_user', { nostate => 1 });
+	$rkey->create;
+	if ($rkey->failure) {
+		# XXX
+		return;
+	} else {
+		$user->{state}{reskey} = $rkey->reskey;
+	}
+
 	if ($form->{'section'} eq 'messages') {
 		my $messages  = getObject('Slash::Messages');
 		my $deliverymodes   = $messages->getDescriptions('deliverymodes');
@@ -2142,8 +2152,8 @@ sub getOps {
 		},
 		saveModalPrefs          => {
 			function        => \&saveModalPrefs,
-			reskey_name     => 'ajax_user_static',
-			reskey_type     => 'createuse',
+			reskey_name     => 'ajax_user',
+			reskey_type     => 'use',
 		},
 		default	=> {
 			function        => \&default,
