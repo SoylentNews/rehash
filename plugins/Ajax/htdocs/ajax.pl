@@ -1477,6 +1477,10 @@ sub getModalPrefs {
 				tabbed => $form->{'tabbed'},
 			}, { Return => 1, Page => 'login'});
 
+	} elsif ($form->{'section'} eq 'sendPasswdModal') {
+		my $login_reader = getObject("Slash::Login");
+		$login_reader->displaySendPassword();
+
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
@@ -2070,7 +2074,15 @@ sub saveModalPrefs {
 
         }
 
-	if ($params{'formname'} ne "sectional" && $params{'formname'} ne "firehoseview" && $params{'formname'} ne "changePasswdModal") {
+	if ($params{'formname'} eq 'sendPasswdModal') {
+		my $login_reader = getObject("Slash::Login");
+		$login_reader->sendPassword();
+	}
+
+	if ($params{'formname'} ne "sectional"         &&
+	    $params{'formname'} ne "firehoseview"      &&
+	    $params{'formname'} ne "changePasswdModal" &&
+	    $params{'formname'} ne "sendPasswdModal") {
 		$slashdb->setUser($params{uid}, $user_edits_table);
 	}
 }

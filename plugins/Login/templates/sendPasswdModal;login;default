@@ -17,7 +17,6 @@ __template__
 [% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="sendPasswdModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
-<input type="hidden" name="inputmode" value="">
 
 <h3>Forget your password? Enter your nickname, UID, or email address here to have the system mail your password to you.</h3>
 

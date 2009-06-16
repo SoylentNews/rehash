@@ -74,10 +74,35 @@ sub allowOpenID {
 	return 1;
 }
 
-
 sub getLoginData {
 	my($str) = @_;
 	return getData($str, { Page => 'login' });
+}
+
+sub displaySendPassword {
+	my ($self) = @_;
+
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
+	#use Data::Dumper;
+	#print STDERR "USER:\n";
+	#print STDERR Dumper $user;
+
+	return slashDisplay('sendPasswdModal', {}, { Return => 1, Page => 'login' });
+}
+
+sub sendPassword {
+	my ($self) = @_;
+
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
+	#use Data::Dumper;
+	#print STDERR "FORM\n";
+	#print STDERR Dumper $form;
 }
 
 1;
