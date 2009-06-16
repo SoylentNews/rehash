@@ -2059,7 +2059,7 @@ function getModalPrefs(section, title, tabbed, params){
 	$still_open.length && $still_open.data('tabbed')!=tabbed && hide_modal_box();
 
 	var formname = section;
-	if ( !reskey_static && 
+	if ( !reskey_static &&
 		(formname !== 'sendPasswdModal' && formname !== 'newUserModal')
 	) {
 		return show_login_box();
