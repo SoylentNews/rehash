@@ -6307,3 +6307,18 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_autoupdate', 'Slash::FireHose'
 
 # 2009-06-11
 UPDATE vars SET value = 'T_2_5_0_260' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Ajax
+INSERT INTO reskey_resources VALUES (109, 'ajax_base_hc', 'no');
+
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::Duration',            601);
+INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::HumanConf',           701);
+
+INSERT INTO reskey_vars VALUES (109, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (109, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (109, 'duration_max-failures', 3, 'how many failures per reskey');
