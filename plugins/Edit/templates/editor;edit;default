@@ -13,6 +13,7 @@ __template__
 <div id="editor" class="admin">
 	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
+		<input type="checkbox" name="display" [% display_check %]><b>Display</b>
 		[% PROCESS formLabel value => "Title" %]
 
 		<input type="text" name="title" value="[% item.title | strip_attribute %]" size="50">

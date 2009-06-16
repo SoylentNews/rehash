@@ -77,6 +77,7 @@ sub savePreview {
 	$p_data->{introtext} 		= $form->{introtext};
 	$p_data->{bodytext} 		= $form->{bodytext};
 	$p_data->{commentstatus} 	= $form->{commentstatus};
+	$p_data->{neverdisplay} 	= $form->{display} ? '' : 1;
 
 	$fh_data->{uid}		= $form->{uid};
 	$fh_data->{title} 	= $form->{title};
@@ -114,19 +115,25 @@ sub showEditor {
 	my $authors = $self->getDescriptions('authors', '', 1);
 	$authors->{$p_item->{uid}} = $self->getUser($p_item->{uid}, 'nickname') if $p_item->{uid} && !defined($authors->{$p_item->{uid}});
 	my $author_select = createSelect('uid', $authors, $p_item->{uid}, 1);
+		
+	my $display_check = $preview->{neverdisplay} ? '' : $constants->{markup_checked_attribute};
+
 	
 	if (!$preview->{commentstatus}) {
 		$preview->{commentstatus} = $constants->{defaultcommentstatus};
 	}
 
+
 	my $description = $self->getDescriptions('commentcodes_extended');
 	my $commentstatus_select = createSelect('commentstatus', $description, $preview->{commentstatus}, 1);
 	
 	$editor .= slashDisplay('editor', { 
-		id 			=> $preview_id, 
+		id 			=> $preview_id,
+		preview			=> $preview, 
 		item 			=> $p_item,
 		author_select 		=> $author_select,
 		commentstatus_select 	=> $commentstatus_select,
+		display_check		=> $display_check
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
@@ -172,6 +179,7 @@ sub editCreateStory {
 	$data->{bodytext} 	= $preview->{bodytext};
 	$data->{dept}		= $fhitem->{dept};
 	$data->{title}		= $fhitem->{title};
+	$data->{neverdisplay}	= $preview->{neverdisplay};
 		
 	for my $field (qw( introtext bodytext)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
