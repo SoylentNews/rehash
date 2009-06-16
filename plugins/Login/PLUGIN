@@ -11,4 +11,5 @@ template=templates/loginForm;login;default
 template=templates/newUserForm;login;default
 template=templates/newuser_msg;login;default
 template=templates/sendPasswdForm;login;default
+template=templates/sendPasswdModal;login;default
 template=templates/logout;login;default

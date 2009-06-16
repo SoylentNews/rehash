@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+Send password modal form
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+sendPasswdModal
+__template__
+
+<form id ="modal_prefs">
+[% PROCESS reskey_tag %]
+<input type="hidden" name="formname" value="sendPasswdModal">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="inputmode" value="">
+
+<h3>Forget your password? Enter your nickname, UID, or email address here to have the system mail your password to you.</h3>
+
+<br>
+
+<label><b>Nickname/UID/Email</b></label>
+<input type="text" name="unickname" size="20" value="">
+
+<br>
+
+<input type="button" value="Mail Password" onclick="saveModalPrefs()">
+
+</form>
+__seclev__
+500
+__version__
