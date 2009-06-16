@@ -2158,11 +2158,12 @@ function resetModalPrefs(extra_param) {
 }
 
 function saveModalPrefs() {
+	var this_reskey = $dom('#modal_prefs').elements['reskey'].value || reskey_static;
 
 	ajax_update({
 		op:	'saveModalPrefs',
 		data:	serialize_multiple($any('modal_prefs')),
-		reskey:	reskey_static
+		reskey:	this_reskey
 	}, '', {
 		onComplete: function(transport) {
 			var response = eval_response(transport);
