@@ -15,7 +15,7 @@ __template__
 <div class="user_admin">
 
 <form id="modal_prefs" method="post">
-
+[% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="adminblock">
 <input type="hidden" name="uid" value="[% useredit.uid %]">
 <input type="hidden" name="refreshable" value="">

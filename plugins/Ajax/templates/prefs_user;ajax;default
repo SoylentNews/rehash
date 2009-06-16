@@ -27,6 +27,7 @@ __template__
                 [% END %]
 
                 <form id ="modal_prefs" method="post">
+			[% PROCESS reskey_tag %]
                         <input type="hidden" name="formname" value="user">
                         <input type="hidden" name="uid" value="[% user.uid %]">
                         <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">

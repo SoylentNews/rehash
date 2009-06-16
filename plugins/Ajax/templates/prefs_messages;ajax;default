@@ -97,7 +97,7 @@ __template__
         	</table>
 	[% END %]
 
-
+	[% PROCESS reskey_tag %]
 	<input type="hidden" name="uid" value="[% user.uid %]">
 	<input type="hidden" name="formname" value="messages">
 	<input type="button" value="Save" onclick="saveModalPrefs()">

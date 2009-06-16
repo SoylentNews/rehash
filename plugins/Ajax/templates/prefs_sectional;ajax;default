@@ -88,7 +88,7 @@ You have the ability to choose how much or how little content you  want to see f
 </table>
 
 &nbsp;<p>
-
+[% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="sectional">
 <input type="hidden" name="refreshable" value="1">
 <input type="button" value="Save" onclick="saveModalPrefs()">
