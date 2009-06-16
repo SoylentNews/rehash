@@ -75,7 +75,6 @@ END
         Legacy Preference Pages<br>
         <a href="/users.pl?op=edituser" target="_blank">User</a>, <a href="/users.pl?op=edithome" target="_blank">Homepage</a>, <a href="/users.pl?op=editcomm" target="_blank">Comments</a>.
 </div>
-</div>
 [% END %]
 
 __seclev__
