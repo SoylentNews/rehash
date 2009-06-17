@@ -2220,10 +2220,10 @@ sub getOps {
 			reskey_type     => 'createuse',
 		},
 		getModalPrefsAnonHC     => {
-                        function        => \&getModalPrefsAnonHC,
-                        reskey_name     => 'ajax_base_static',
-                        reskey_type     => 'createuse',
-                },
+			function        => \&getModalPrefsAnonHC,
+			reskey_name     => 'ajax_base_static',
+			reskey_type     => 'createuse',
+		},
 		saveModalPrefs          => {
 			function        => \&saveModalPrefs,
 			reskey_name     => 'ajax_user',
@@ -2235,10 +2235,10 @@ sub getOps {
 			reskey_type     => 'use',
 		},
 		saveModalPrefsAnonHC    => {
-                        function        => \&saveModalPrefsAnonHC,
-                        reskey_name     => 'ajax_base_hc',
-                        reskey_type     => 'use',
-                },
+			function        => \&saveModalPrefsAnonHC,
+			reskey_name     => 'ajax_base_hc',
+			reskey_type     => 'use',
+		},
 		default	=> {
 			function        => \&default,
 		},
