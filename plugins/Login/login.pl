@@ -59,7 +59,7 @@ sub main {
 
 #################################################################
 sub newUserForm {
-	my($slashdb, $reader, $constants, $user, $form, $note) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $login, $note) = @_;
 
 	_validFormkey('generate_formkey') or return;
 
@@ -200,7 +200,7 @@ sub loginForm {
 
 #################################################################
 sub mailPasswdForm {
-	my($slashdb, $reader, $constants, $user, $form, $note) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $login, $note) = @_;
 
 	_validFormkey('generate_formkey') or return;
 
@@ -279,7 +279,7 @@ sub mailPasswd {
 
 #################################################################
 sub _sendMailPasswd {
-	my($slashdb, $reader, $constants, $user, $form, $user_send) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $login, $user_send) = @_;
 
 	my $uid       = $user_send->{uid};
 	my $newpasswd = $slashdb->getNewPasswd($uid);
@@ -316,7 +316,7 @@ sub _sendMailPasswd {
 
 #################################################################
 sub changePrefs {
-	my($slashdb, $reader, $constants, $user, $form, $note) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $login, $note) = @_;
 
 	# I am not going to add admin-modification right now,
 	# because they way it is currently done sucks.  we should
@@ -508,6 +508,8 @@ sub allowOpenID {
 sub deleteOpenID {
 	my($slashdb, $reader, $constants, $user, $form, $login) = @_;
 
+	my $claimed_identity = $form->{openid_url};
+
 	my $form_reskey = $form->{reskey};
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('openid');
@@ -526,7 +528,7 @@ sub deleteOpenID {
 		return getLoginData("openid_reskey_failure_verify");
 	}
 
-	my $return = $login->deleteOpenID($form->{openid_url}) or return;
+	my $return = $login->deleteOpenID($claimed_identity) or return;
 	printOpenID($return);
 }
 
