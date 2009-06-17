@@ -2059,9 +2059,10 @@ function getModalPrefs(section, title, tabbed, params){
 	$still_open.length && $still_open.data('tabbed')!=tabbed && hide_modal_box();
 
 	var formname = section;
-	if ( !reskey_static &&
-		(formname !== 'sendPasswdModal' && formname !== 'newUserModal')
-	) {
+	var this_op = 'getModalPrefs';
+	if (formname === 'sendPasswdModal' || formname === 'newUserModal') {
+		this_op = 'getModalPrefsAnon';
+	} else if ( !reskey_static ) {
 		return show_login_box();
 	}
 
@@ -2075,7 +2076,7 @@ function getModalPrefs(section, title, tabbed, params){
 		'/ajax.pl',
 
 		$.extend({
-			op:		'getModalPrefs',
+			op:		this_op,
 			section:	section,
 			reskey:		reskey_static,
 			tabbed:		tabbed
