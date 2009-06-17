@@ -84,10 +84,25 @@ sub savePreview {
 	$fh_data->{createtime} 	= $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{dept} 	= $form->{dept};
+	
+	
+	$fh_data->{dept} =~ s/[-\s]+/-/g;
+	$fh_data->{dept} =~ s/^-//;
+	$fh_data->{dept} =~ s/-$//;
+	$fh_data->{dept} =~ s/ /-/gi;
 
-	#XXXEdit strip / balance
-	$fh_data->{introtext} = $form->{introtext};
-	$fh_data->{bodytext} = $form->{bodytext};
+	for my $field (qw( introtext bodytext media)) {
+		local $Slash::Utility::Data::approveTag::admin = 2;
+
+	# XXXEdit check this
+	#	$fh_data->{$field} = $slashdb->autoUrl($form->{section}, $fh_data->{$field});
+		$fh_data->{$field} = cleanSlashTags($fh_data->{$field});
+		$fh_data->{$field} = strip_html($fh_data->{$field});
+		$fh_data->{$field} = slashizeLinks($fh_data->{$field});
+		$fh_data->{$field} = parseSlashizedLinks($fh_data->{$field});
+		$fh_data->{$field} = balanceTags($fh_data->{$field});
+	}
+
 
 	$self->setPreview($preview->{preview_id}, $p_data);
 	$fh->setFireHose($preview->{preview_fhid}, $fh_data);
@@ -177,13 +192,15 @@ sub editCreateStory {
 	$data->{commentstatus}	= $fhitem->{commentstatus};
 	$data->{introtext} 	= $preview->{introtext};
 	$data->{bodytext} 	= $preview->{bodytext};
+	$data->{media}	 	= $fhitem->{media};
 	$data->{dept}		= $fhitem->{dept};
 	$data->{title}		= $fhitem->{title};
 	$data->{neverdisplay}	= $preview->{neverdisplay};
 		
-	for my $field (qw( introtext bodytext)) {
+	for my $field (qw( introtext bodytext media)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
-	# XXXEdit 
+
+	# XXXEdit check this
 	#	$data->{$field} = $slashdb->autoUrl($form->{section}, $data->{$field});
 		$data->{$field} = cleanSlashTags($data->{$field});
 		$data->{$field} = strip_html($data->{$field});

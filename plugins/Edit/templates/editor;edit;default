@@ -30,20 +30,20 @@ __template__
 		<label>
 			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 		</label>
-		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% item.introtext | strip_literal %]</textarea>
+		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% preview.introtext | strip_literal %]</textarea>
 
 
 		<a name="bodytext"></a>
 			<label>
 				<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 			</label>
-			<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% item.bodytext | strip_literal %]</textarea>
+			<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
 	
 			<label>
 				<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
 			</label>
 			<a name="media"></a>
-				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
+				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea><br>
 			
 			<input type="submit" name="op" value="preview">
 			<input type="submit" name="op" value="save">
