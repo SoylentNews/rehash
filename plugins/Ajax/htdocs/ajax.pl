@@ -2070,6 +2070,14 @@ sub saveModalPrefs {
                 if ($error_message && $error) {
                         my $ret = Data::JavaScript::Anon->anon_dump({message => $error_message, message_container => 'modal_message_feedback'});
                         return $ret;
+
+			# Improved way to do the above
+			#my $updates = {
+			#	'modal_message_feedback' => $error_message,
+			#};
+
+			#my $ret = setModalUpdates($updates);
+			#return $ret;
                 }
 
         }
@@ -2085,6 +2093,30 @@ sub saveModalPrefs {
 	    $params{'formname'} ne "sendPasswdModal") {
 		$slashdb->setUser($params{uid}, $user_edits_table);
 	}
+}
+
+sub setModalUpdates {
+	my ($updates) = @_;
+
+	my $user = getCurrentUser();
+	my $reskey = getObject('Slash::ResKey');
+
+	# Set caller back 2 frames to see where we came from.
+	my $reskey_resource = (caller(2))[3] =~ /\bsaveModalPrefsAnon$/ ? 'ajax_base' : 'ajax_user';
+	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
+	$rkey->create;
+	if ($rkey->failure) {
+		# XXX need to handle errors, esp. for HC
+		# XXX Set a 'critical error' form element with a message and disable the input button? -Cbrown
+		return;
+	} else {
+		$user->{state}{reskey} = $rkey->reskey;
+	}
+
+	# Refresh the reskey
+	$updates->{rkey} = slashDisplay('reskey_tag', {}, { Return => 1 });
+	
+	return Data::JavaScript::Anon->anon_dump({ updates => $updates });
 }
 
 sub getModalPrefsAnon {
