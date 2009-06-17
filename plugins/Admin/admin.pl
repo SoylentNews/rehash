@@ -2097,12 +2097,11 @@ sub updateStory {
 
 		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
+		
+		if ($admindb) {
+			$admindb->addSpriteForSid($_);
+		}
 
-		# Create the sprite for this sid.
-		# This may change to calling addFileToQueue() with globjid.
-		my $fh_reader = getObject("Slash::FireHose");
-		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($form->{sid});
-		$slashdb->addFileToQueue({ fhid => $sprite_fhid->{id}, action => 'sprite' });
 
 		# handle any media files that were given
 		handleMediaFileForStory($st->{stoid});
@@ -2538,24 +2537,8 @@ sub saveStory {
 			}
 		}
 
-		my $achievements = getObject('Slash::Achievements');
-		if ($achievements) {
-			# User
-			if ($form->{uid} != $form->{submitter}) {
-				$achievements->setUserAchievement('story_accepted', $form->{submitter}, { maker_mode => 1 });
-				if ($achievements->checkMeta($form->{submitter}, 'the_maker', ['story_accepted', 'comment_upmodded'])) {
-					$achievements->setUserAchievement('the_maker', $form->{submitter}, { ignore_lookup => 1, exponent => 0 });
-				}
-			}
-			# Author
-			$achievements->setUserAchievement('story_posted', $form->{uid});
-		}
-
-		# Create the sprite for this sid.
-		# This may change to calling addFileToQueue() with globjid.
-		my $fh_reader = getObject("Slash::FireHose");
-		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($sid);
-		$slashdb->addFileToQueue({ fhid => $sprite_fhid->{id}, action => 'sprite' });
+		$admindb->grantStoryPostingAchievements($form->{uid}, $form->{submitter});
+		$admindb->addSpriteForSid($sid);
 
 		listStories(@_);
 	} else {

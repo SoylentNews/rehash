@@ -4,6 +4,7 @@ use strict;
 use Slash;
 use Slash::Utility;
 use Slash::Display;
+use Slash::Hook;
 
 use base 'Slash::Plugin';
 
@@ -84,6 +85,9 @@ sub savePreview {
 	$fh_data->{createtime} 	= $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{dept} 	= $form->{dept};
+	$fh_data->{introtext}	= $form->{introtext};
+	$fh_data->{bodytext}	= $form->{bodytext};
+	$fh_data->{title}	= $form->{title};
 	
 	
 	$fh_data->{dept} =~ s/[-\s]+/-/g;
@@ -123,7 +127,7 @@ sub showEditor {
 	my $fh = getObject("Slash::FireHose");
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
-	if ($p_item && $p_item->{title} && $p_item->{introtext}) {
+	if ($p_item && $p_item->{title} && $preview->{introtext}) {
 		$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
 	}
 	
@@ -186,16 +190,30 @@ sub saveItem {
 sub editCreateStory {
 	my($self, $preview, $fhitem) = @_;
 	my $data;
-	$data->{uid} 		= $fhitem->{uid};
-	$data->{'time'}		= $fhitem->{createtime};
-	$data->{uid} 		= $fhitem->{uid};
-	$data->{commentstatus}	= $fhitem->{commentstatus};
-	$data->{introtext} 	= $preview->{introtext};
-	$data->{bodytext} 	= $preview->{bodytext};
-	$data->{media}	 	= $fhitem->{media};
-	$data->{dept}		= $fhitem->{dept};
-	$data->{title}		= $fhitem->{title};
-	$data->{neverdisplay}	= $preview->{neverdisplay};
+	$data = {
+		uid 		=> $fhitem->{uid},
+		#sid
+		title		=> $fhitem->{title},
+		#section
+		#submitter
+		#topics_chosen
+		dept		=> $fhitem->{dept},
+		'time'		=> $fhitem->{createtime},
+		bodytext 	=> $preview->{bodytext},
+		introtext 	=> $preview->{introtext},
+		#relatedtext
+		media	 	=> $fhitem->{media},
+		#subid
+		#fhid
+		commentstatus	=> $preview->{commentstatus},
+		#thumb
+		-rendered	=> 'NULL',
+		neverdisplay	=> $preview->{neverdisplay},
+	};
+	
+	for (qw(dept bodytext relatedtext)) {
+		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
+	}
 		
 	for my $field (qw( introtext bodytext media)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
@@ -208,8 +226,30 @@ sub editCreateStory {
 		$data->{$field} = parseSlashizedLinks($data->{$field});
 		$data->{$field} = balanceTags($data->{$field});
 	}
+	
+	for (qw(dept bodytext relatedtext)) {
+		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
+	}
 
-	return $self->createStory($data);
+	my $sid =  $self->createStory($data);
+	
+	if ($sid) {
+		my $st = $self->getStory($sid);
+		#XXXEdit add this later
+		#$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
+		slashHook('admin_save_story_success', { story => $data });
+		my $stoid = $st->{stoid};
+		$self->createSignoff($st->{stoid}, $data->{uid}, "saved");
+		
+		#XXXEdit Tags Auto save?
+		my $admindb = getObject("Slash::Admin");
+		if ($admindb) {
+			$admindb->grantStoryPostingAchievements($data->{uid}, $data->{submitter});
+			$admindb->addSpriteForSid($_);
+		}
+
+		
+	}
 }
 
 sub DESTROY {

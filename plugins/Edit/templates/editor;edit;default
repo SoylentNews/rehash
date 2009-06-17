@@ -43,10 +43,11 @@ __template__
 				<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
 			</label>
 			<a name="media"></a>
-				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea><br>
-			
+				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
+			<p>
 			<input type="submit" name="op" value="preview">
 			<input type="submit" name="op" value="save">
+	
 	</form>
 </div>
 

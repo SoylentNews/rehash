@@ -678,6 +678,34 @@ sub getStoryThumbLargeLink {
 
 }
 
+sub grantStoryPostingAchievements {
+	my($self, $uid, $submitter) = @_;
+	my $achievements = getObject('Slash::Achievements');
+	if ($achievements) {
+		# User
+		if ($uid != $submitter) {
+			$achievements->setUserAchievement('story_accepted', $submitter, { maker_mode => 1 });
+			if ($achievements->checkMeta($submitter, 'the_maker', ['story_accepted', 'comment_upmodded'])) {
+				$achievements->setUserAchievement('the_maker', $submitter, { ignore_lookup => 1, exponent => 0 });
+			}
+		}
+		# Author
+		$achievements->setUserAchievement('story_posted', $uid);
+	}
+}
+
+# Create the sprite for this sid.
+# This may change to calling addFileToQueue() with globjid.
+
+sub addSpriteForSid {
+	my($self, $sid);
+	my $fh_reader = getObject("Slash::FireHose");
+	if ($fh_reader) {
+		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($sid);
+		$self->addFileToQueue({ fhid => $sprite_fhid->{id}, action => 'sprite' });
+	}
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
