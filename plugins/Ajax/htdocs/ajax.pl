@@ -642,7 +642,10 @@ sub getModalPrefs {
 
 	my $reskey = getObject('Slash::ResKey');
 	# anon calls get normal ajax_base
-	my $reskey_resource = (caller(1))[3] =~ /\bgetModalPrefsAnon$/ ? 'ajax_base' : 'ajax_user';
+	my $reskey_resource = 'ajax_user';
+	if ((caller(1))[3] =~ /\bgetModalPrefsAnon(HC)?$/) {
+		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
+	}
 	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;
 	if ($rkey->failure) {
@@ -2101,8 +2104,11 @@ sub setModalUpdates {
 	my $user = getCurrentUser();
 	my $reskey = getObject('Slash::ResKey');
 
-	# Set caller back 2 frames to see where we came from.
-	my $reskey_resource = (caller(2))[3] =~ /\bsaveModalPrefsAnon$/ ? 'ajax_base' : 'ajax_user';
+	my $reskey_resource = 'ajax_user';
+	if ((caller(2))[3] =~ /\bgetModalPrefsAnon(HC)?$/) {
+		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
+	}
+
 	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;
 	if ($rkey->failure) {
@@ -2124,6 +2130,9 @@ sub getModalPrefsAnon {
 }
 sub saveModalPrefsAnon {
 	&saveModalPrefs;
+}
+sub getModalPrefsAnonHC {
+	&getModalPrefs;
 }
 sub saveModalPrefsAnonHC {
 	&saveModalPrefs;
@@ -2210,6 +2219,11 @@ sub getOps {
 			reskey_name     => 'ajax_base_static',
 			reskey_type     => 'createuse',
 		},
+		getModalPrefsAnonHC     => {
+                        function        => \&getModalPrefsAnonHC,
+                        reskey_name     => 'ajax_base_static',
+                        reskey_type     => 'createuse',
+                },
 		saveModalPrefs          => {
 			function        => \&saveModalPrefs,
 			reskey_name     => 'ajax_user',
@@ -2220,6 +2234,11 @@ sub getOps {
 			reskey_name     => 'ajax_base',
 			reskey_type     => 'use',
 		},
+		saveModalPrefsAnonHC    => {
+                        function        => \&saveModalPrefsAnonHC,
+                        reskey_name     => 'ajax_base_hc',
+                        reskey_type     => 'use',
+                },
 		default	=> {
 			function        => \&default,
 		},

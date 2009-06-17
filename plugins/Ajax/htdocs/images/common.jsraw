@@ -2061,7 +2061,7 @@ function getModalPrefs(section, title, tabbed, params){
 	var formname = section;
 	var this_op = 'getModalPrefs';
 	if (formname === 'sendPasswdModal' || formname === 'newUserModal') {
-		this_op = 'getModalPrefsAnon';
+		this_op = 'getModalPrefsAnonHC';
 	} else if ( !reskey_static ) {
 		return show_login_box();
 	}
@@ -2166,7 +2166,7 @@ function saveModalPrefs() {
 	var this_op = 'saveModalPrefs';
 	var formname = (document.forms.modal_prefs.formname && document.forms.modal_prefs.formname.value);
 	if (formname === 'sendPasswdModal' || formname === 'newUserModal') {
-		this_op = 'saveModalPrefsAnon';
+		this_op = 'saveModalPrefsAnonHC';
 	}
 
 	ajax_update({
@@ -2176,9 +2176,7 @@ function saveModalPrefs() {
 	}, '', {
 		onComplete: function(transport) {
 			var response = eval_response(transport);
-			if (response !== undefined && response.message !== undefined && response.message_container !== undefined) {
-				//$any(response.message_container).html(response.message);
-				//$('#' + response.message_container).show();
+			if (response !== undefined && response.updates !== undefined) {
 				 $.each(response.updates,
 					function(id, update) {
 						$any(id).replaceWith(update).show();
