@@ -2068,16 +2068,16 @@ sub saveModalPrefs {
                 }
 
                 if ($error_message && $error) {
-                        my $ret = Data::JavaScript::Anon->anon_dump({message => $error_message, message_container => 'modal_message_feedback'});
-                        return $ret;
+                        #my $ret = Data::JavaScript::Anon->anon_dump({message => $error_message, message_container => 'modal_message_feedback'});
+                        #return $ret;
 
 			# Improved way to do the above
-			#my $updates = {
-			#	'modal_message_feedback' => $error_message,
-			#};
+			my $updates = {
+				'modal_message_feedback' => $error_message,
+			};
 
-			#my $ret = setModalUpdates($updates);
-			#return $ret;
+			my $ret = setModalUpdates($updates);
+			return $ret;
                 }
 
         }

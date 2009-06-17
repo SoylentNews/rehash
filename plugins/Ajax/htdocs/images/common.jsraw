@@ -2176,14 +2176,13 @@ function saveModalPrefs() {
 		onComplete: function(transport) {
 			var response = eval_response(transport);
 			if (response !== undefined && response.message !== undefined && response.message_container !== undefined) {
-				$any(response.message_container).html(response.message);
-				$('#' + response.message_container).show();
-				// $.each(response.updates,
-				//	function(element_name, update) {
-				//		$any(element_name).html(update);
-				//		$('#'+element_name).show();
-				//	}
-				//);
+				//$any(response.message_container).html(response.message);
+				//$('#' + response.message_container).show();
+				 $.each(response.updates,
+					function(id, update) {
+						$any(id).replaceWith(update).show();
+					}
+				);
 			} else {
 				hide_modal_box();
 				if (document.forms.modal_prefs.refreshable && document.forms.modal_prefs.refreshable.value) {
