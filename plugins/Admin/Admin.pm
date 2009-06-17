@@ -698,7 +698,7 @@ sub grantStoryPostingAchievements {
 # This may change to calling addFileToQueue() with globjid.
 
 sub addSpriteForSid {
-	my($self, $sid);
+	my($self, $sid) = @_;
 	my $fh_reader = getObject("Slash::FireHose");
 	if ($fh_reader) {
 		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($sid);

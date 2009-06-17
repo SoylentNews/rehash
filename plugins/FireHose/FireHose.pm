@@ -1681,21 +1681,22 @@ sub getFireHoseBySidOrStoid {
 }
 
 sub getFireHoseByTypeSrcid {
-	my($self, $type, $id) = @_;
+	my($self, $type, $id, $preview) = @_;
 	my $type_q = $self->sqlQuote($type);
 	my $id_q   = $self->sqlQuote($id);
 	my $exptime = 86400 * 7;
 	my $item = {};
+	$preview ? "yes" : "no";
 
 	my $mcd = $self->getMCD();
 	my $mcdkey;
 	my $fid;
 	if ($mcd) {
-		$mcdkey = "$self->{_mcd_keyprefix}:fhid_type_srcid:$type:$id";
+		$mcdkey = "$self->{_mcd_keyprefix}:fhid_type_srcid:$type:$id:";
 		$fid = $mcd->get($mcdkey);
 	}
 	if (!$fid) {
-		$fid = $self->sqlSelect("id", "firehose", "srcid=$id_q AND type=$type_q");
+		$fid = $self->sqlSelect("id", "firehose", "srcid=$id_q AND type=$type_q AND preview='$preview'");
 		if ($mcd && $fid) {
 			$mcd->set($mcdkey, $fid, $exptime);
 		}
