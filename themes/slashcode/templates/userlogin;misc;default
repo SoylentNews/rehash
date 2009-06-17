@@ -37,13 +37,17 @@ __template__
 	</fieldset>
 </form>
 
+
+
+<hr>
+
+
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <fieldset>
 	<input type="hidden" name="op" value="claim_openid">
 	<input type="hidden" name="openid_login" value="1">
-	<strong>OpenID URL</strong>
 	<label for="openid_url" class="openid_url">
-	<input type="text" name="openid_url" id="openid_url" value="" size="32" maxlength="255">
+	<input type="text" name="openid_url" id="openid_url" value="http://" size="32" maxlength="255">
 	</label>
 	<input type="submit" value="Log in with OpenID" class="button">
 </fieldset>

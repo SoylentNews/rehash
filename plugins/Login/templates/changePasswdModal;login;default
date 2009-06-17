@@ -76,13 +76,13 @@ to reauthenticate.</p>
 </form>
 
 [% IF constants.openid_consumer_allow %]
-<br>
+<hr>
 <form style="padding:1em;" action="[% constants.real_rootdir %]/login.pl" method="post">
 <label><strong>Claim OpenID</strong></label>
 <div style="display: block; [% note_style %]">Enter your OpenID identity.</div>
 <input type="hidden" name="op" value="claim_openid">
 <label for="openid_url" class="openid_url">
-<input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="">
+<input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
 </label>
 <input type="submit" value="Claim ID" class="button">
 
