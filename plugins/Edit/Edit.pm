@@ -200,13 +200,14 @@ sub saveItem {
 sub editCreateStory {
 	my($self, $preview, $fhitem) = @_;
 	my $data;
+	my $constants = getCurrentStatic();
 
 	my $chosen_hr = { };
 	my @topics;
-	push @topics, $fhitem->{tid} if $fhitem.tid;
+	push @topics, $fhitem->{tid} if $fhitem->{tid};
 
 	if ($fhitem->{primaryskid}) {
-		my $nexus = $slashdb->getNexusFromSkid($fhitem->{primaryskid});
+		my $nexus = $self->getNexusFromSkid($fhitem->{primaryskid});
 		push @topics, $nexus if $nexus;
 	}
 	for my $tid (@topics) {
