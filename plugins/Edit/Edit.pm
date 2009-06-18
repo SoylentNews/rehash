@@ -21,7 +21,7 @@ sub getOrCreatePreview {
 	my $fh = getObject("Slash::FireHose");
 
 	if (!$form->{from_id}) {
-		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid}");
+		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid} and active='yes'");
 	
 		if ($id && !$form->{new}) {
 			return $id;
@@ -188,10 +188,13 @@ sub saveItem {
 		}
 	}
 
-	# XXXEdit eventually make sure this is ours before deleting
+	# XXXEdit eventually make sure this is ours before setting inactive
+
+        # XXXEdit Turn all users previews inactive at this poin? 
 	if ($create_retval) {
-		$self->deletePreview($preview->{preview_id});
+		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
+
 }
 
 sub editCreateStory {
