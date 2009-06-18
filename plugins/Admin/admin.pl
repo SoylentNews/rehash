@@ -2099,7 +2099,7 @@ sub updateStory {
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		
 		if ($admindb) {
-			$admindb->addSpriteForSid($_);
+			$admindb->addSpriteForSid($form->{sid});
 		}
 
 
