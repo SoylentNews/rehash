@@ -2,6 +2,7 @@
 name=Tags
 description="Tags"
 htdoc=tags.pl
+htdoc=tags_synonyms.pl
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 requiresplugin=Ajax
@@ -13,6 +14,7 @@ task=tags_updateclouts.pl
 template=templates/data;tags;default
 template=templates/index;tags;default
 template=templates/recenttagnamesbox;misc;default
+template=templates/synonyms;tags;default
 template=templates/tagsstorydivadmin;misc;default
 template=templates/tagsurldivtagbox;misc;default
 template=templates/tagsstorydivuser;misc;default

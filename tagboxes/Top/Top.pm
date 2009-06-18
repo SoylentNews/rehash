@@ -97,74 +97,61 @@ sub run_process {
 	# due to the presence of opposite tags, there may be many
 	# entries in %scores with negative values.
 
-	my %scores = ( );
-	my %count = ( );
+	my $describe = $self->getCloutTypes()->{describe};
+	my %scores_orig = ( );
+	my %count_orig = ( );
 	for my $tag (@$tags_ar) {
-		$scores{$tag->{tagname}} += $tag->{total_clout};
-		$count {$tag->{tagname}} ++;
+		$scores_orig{$tag->{tagnameid}} += $tag->{total_clout};
+		$count_orig {$tag->{tagnameid}} ++;
 	}
 
-	my $minscore_mult = 1;
-	my @opposite_tagnames =
-		map { $tags_reader->getOppositeTagname($_) }
-		grep { $_ !~ /^!/ && $scores{$_} > 0 }
-		keys %scores;
-	for my $opp (@opposite_tagnames) {
-		next unless $scores{$opp};
-		# Both $opp and its opposite exist in %scores.  Subtract
-		# $opp's score from its opposite and vice versa.
-		my $orig = $tags_reader->getOppositeTagname($opp);
-		my $orig_score = $scores{$orig};
-		$scores{$orig} -= $scores{$opp};
-		$scores{$opp} -= $orig_score;
-		# If there are not many of either, make it harder
-		# for either to appear.  This can help prevent the
-		# problem of one user tagging "poop", then several
-		# others rightfully tagging "!poop", with the result
-		# being that "!poop" appears as a top tag.
-		if ($scores{$orig} == 0 || $scores{$opp} == 0) {
-			$minscore_mult *= 3;
-			next;
-		}
-		my $ratio = $scores{$opp} > $scores{$orig}
-			? $scores{$opp}/$scores{$orig}
-			: $scores{$orig}/$scores{$opp};
-		# XXX all these numbers should be vars
-		if ($count{$orig} + $count{$opp} <= 5
-			|| $count{$orig} <= 2
-			|| $count{$opp} <= 2
-			|| $ratio < 3) {
-			$minscore_mult *= 3;
-		}
-	}
+	# XXX doublecheck this logic
 
-	my @top = sort {
-		$scores{$b} <=> $scores{$a}
-		||
-		$a cmp $b
-	} keys %scores;
+	# This consolidates scores:  if both "foo" and "!foo" have been
+	# tagged, their scores are totaled counting against each other
+	# (each's score will be the negative of the other).
+
+	my $scores = $tagsdb->consolidateTagnameidValues(\%scores_orig, $describe);
+
+	# Since $abs is set, this consolidates counts, so that if both
+	# "foo" and "!foo" are set to 1, each will end up with a score
+	# of 2.
+
+	my $counts = $tagsdb->consolidateTagnameidValues(\%count_orig,  $describe,
+		{ abs => 1 });
 
 	# Eliminate tagnames in a given list, and their opposites.
-	my %nontop = ( map { ($_, 1) }
-		grep { $_ }
-		map { ($_, $tags_reader->getOppositeTagname($_)) }
-		@{$tags_reader->getExcludedTags}
-	);
-
-	# Eliminate tagnames that are just the author's name.
-	my @names = map { lc } @{ $tags_reader->getAuthorNames() };
-	for my $name (@names) { $nontop{$name} = 1 }
-
-	# Tagnames that begin with an author's name are half as likely
-	# to appear on the homepage.
-	my $author_regex_str = join '|', @names;
-	my $author_prefix_regex = qr{^($author_regex_str)};
-	for my $tagname (keys %scores) {
-		$scores{$tagname} *= 0.5 if $tagname =~ $author_prefix_regex;
+	my $exclude_hr = { };
+	my $exclude_ar = $tagsdb->getExcludedTagnameids();
+	for my $tnid (@$exclude_ar) {
+		$exclude_hr->{$tnid} = 1;
+	}
+	my $exclude_opposite_hr = $tagsdb->consolidateTagnameidValues($exclude_hr, $describe,
+		{ invert => 1, posonly => 1 });
+	for my $tnid (keys %$exclude_opposite_hr) {
+		$exclude_hr->{$tnid} = 1;
+	}
+	for my $tnid (keys %$exclude_hr) {
+		$scores->{$tnid} = 0 if $scores->{$tnid};
 	}
 
-	# Long tagnames are less likely to appear on the homepage.
-	for my $tagname (keys %scores) {
+	# Eliminate tagnames that are just the author's name.
+	my @names = @{ $tags_reader->getAuthorNames() };
+	my @name_ids = grep { $_ } map { $tagsdb->getTagnameidFromNameIfExists(lc $_) } @names;
+	for my $tnid (@name_ids) {
+		$scores->{$tnid} = 0 if $scores->{$tnid};
+	}
+
+	my $author_regex_str = join '|', @names;
+	my $author_prefix_regex = qr{^($author_regex_str)};
+	for my $tnid (keys %$scores) {
+
+		# Tagnames that begin with an author's name are half as likely
+		# to appear on the homepage.
+		my $tagname = $tagsdb->getTagnameDataFromId($tnid)->{tagname};
+		$scores->{$tnid} *= 0.5 if $tagname =~ $author_prefix_regex;
+
+		# Long tagnames are less likely to appear on the homepage.
 		my $l = length($tagname);
 		next if $l <= 8;
 		my $length_mod = 1;
@@ -182,14 +169,16 @@ sub run_process {
 			# to get these on the homepage)
 			$length_mod = 0.05 + (0.05-0.01)*(40 - $l)/(64-40);
 		}
-		$scores{$tagname} *= $length_mod;
+		$scores->{$tnid} *= $length_mod;
 	}
 
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
 	# XXX the "4" below (aka "top 5") is hardcoded currently, should be a var
-	my $minscore1 = $constants->{tagbox_top_minscore_urls} * $minscore_mult;
-	my $minscore2 = $constants->{tagbox_top_minscore_stories} * $minscore_mult;
+	my $minscore1 = $constants->{tagbox_top_minscore_urls};
+	my $minscore2 = $constants->{tagbox_top_minscore_stories};
+
+	my $tndata = $tagsdb->getTagnameDataFromIds([keys %$scores]);
 
 	my $plugin = getCurrentStatic('plugin');
 	if ($plugin->{FireHose}) {
@@ -197,13 +186,13 @@ sub run_process {
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
 		my @top = ( );
 		if ($fhid) {
-			@top =  grep { $scores{$_} >= $minscore1 }
-				grep { !$nontop{$_} }
+			@top =  map { $tndata->{$_}{tagname} }
+				grep { $scores->{$_} >= $minscore1 }
 				sort {
-					$scores{$b} <=> $scores{$a}
+					$scores->{$b} <=> $scores->{$a}
 					||
-					$a cmp $b
-				} keys %scores;
+					$tndata->{$a}{tagname} cmp $tndata->{$b}{tagname}
+				} keys %$scores;
 			$#top = 4 if $#top > 4;
 			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
 			$self->info_log("%d with %d tags, setFireHose %d to '%s' >= %d",
@@ -213,13 +202,13 @@ sub run_process {
 
 	if ($type eq 'stories') {
 
-		my @top = grep { $scores{$_} >= $minscore2 }
-			grep { !$nontop{$_} }
+		my @top = map { $tndata->{$_}{tagname} }
+			grep { $scores->{$_} >= $minscore2 }
 			sort {
-				$scores{$b} <=> $scores{$a}
+				$scores->{$b} <=> $scores->{$a}
 				||
-				$a cmp $b
-			} keys %scores;
+				$tndata->{$a}{tagname} cmp $tndata->{$b}{tagname}
+			} keys %$scores;
 		$#top = 4 if $#top > 4;
 		$self->setStory($target_id, { tags_top => join(' ', @top) });
 		main::tagboxLog("Top->run $affected_id with " . scalar(@$tags_ar) . " tags, setStory $target_id to '@top'");
@@ -231,6 +220,9 @@ sub run_process {
 		# field.
 		#
 		# (I think this code is obsolete...? - Jamie 2006/11/29)
+		# (it's still being run, but urls.popularity is not the
+		# same value as firehose.popularity, and I'm not sure if
+		# the former is being used anywhere - Jamie 2008/06/17)
 
 		my %tags_pos = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_pos} || "");
 		my %tags_neg = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_neg} || "");

@@ -996,21 +996,14 @@ sub getTagnameSfnetadmincmds {
 		$where_clause);
 }
 
+# this method is currently unused
+
 sub removeTagnameFromIndexTop {
 	my($self, $tagname) = @_;
 	my $tagid = $self->getTagnameidCreate($tagname);
 	return 0 if !$tagid;
-
 	my $changes = $self->setTagname($tagname, { noshow_index => 1 });
 	return 0 if !$changes;
-
-	# The tagname wasn't on the noshow_index list and now it is.
-	# Force tags_update.pl to rebuild starting from the first use
-	# of this tagname.
-	# XXX this part isn't gonna work since tagboxes
-	my $min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
-		"tagnameid=$tagid");
-	$self->setLastscanned($min_tagid);
 	return 1;
 }
 
@@ -1297,7 +1290,12 @@ sub normalizeAndOppositeAdminCommands {
 		my $count = $type =~ tr/#/#/;
 		$count{$tagname} ||= 0;
 		$count{$tagname} = $count if $count{$tagname} < $count;
-		my $opp = $self->getOppositeTagname($tagname);
+		# XXX If we want to formally decide that _ and # commands
+		# are intended only for descriptive tags, then we should
+		# use non-bang opposites here.  In practice I doubt it
+		# will matter much, as we probably won't get around to
+		# defining synonyms/antonyms for non-valuable tagnames.
+		my $opp = $self->getBangOppositeTagname($tagname);
 		$count{$opp} ||= 0;
 	}
 	
@@ -1420,6 +1418,11 @@ sub processAdminCommand {
 
 	my $constants = getCurrentStatic();
 	my $tagnameid = $self->getTagnameidCreate($tagname);
+	# XXX If we want to formally decide that _ and # commands
+	# are intended only for descriptive tags, then we should
+	# use non-bang opposites here.  In practice I doubt it
+	# will matter much, as we probably won't get around to
+	# defining synonyms/antonyms for non-valuable tagnames.
 	my $opp_tagnameids = $self->getOppositeTagnameids($tagnameid);
 	my %affected_tagnameid = (
 		map { ( $_, 1 ) } ( $tagnameid, @$opp_tagnameids )
@@ -1481,6 +1484,11 @@ sub processAdminCommand {
 			# applied to this story (that's the way we're doing it now,
 			# though I'm not ecstatic about it and it may change).
 			my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id, { include_private => 1 });
+			# XXX If we want to formally decide that _ and # commands
+			# are intended only for descriptive tags, then we should
+			# use non-bang opposites here.  In practice I doubt it
+			# will matter much, as we probably won't get around to
+			# defining synonyms/antonyms for non-valuable tagnames.
 			my $opp_tagnameids = $self->getOppositeTagnameids($tagnameid);
 			my @tags_to_zero = grep { $affected_tagnameid{ $_->{tagnameid} } } @$tags_ar;
 			for my $tag (@tags_to_zero) {
@@ -1649,7 +1657,7 @@ sub getAdminCommandCountAffectingUID {
 # existing "!".  This is not guaranteed to be the only opposite
 # of the given tagname.
 
-sub getOppositeTagname {
+sub getBangOppositeTagname {
 	my($self, $tagname) = @_;
 	return substr($tagname, 0, 1) eq '!' ? substr($tagname, 1) : '!' . $tagname;
 }
@@ -1661,10 +1669,10 @@ sub getOppositeTagname {
 # are all the opposites of at least one of the inputs.
 
 sub getOppositeTagnameids {
-	my($self, $data, $create) = @_;
-
-	my @tagnameids = ( );
+	my($self, $data, $create, $clid) = @_;
+	$clid ||= 0;
 	$data = [ $data ] if !ref($data);
+
 	my %tagnameid = ( );
 	for my $d (@$data) {
 		next unless $d;
@@ -1675,50 +1683,339 @@ sub getOppositeTagnameids {
 			$tagnameid{$id} = 1 if $id;
 		}
 	}
-	@tagnameids = keys %tagnameid;
-	return [ ] if !@tagnameids;
 
-	# Two ways to have an opposite of a tagname.  One is to prepend
-	# an "!" or remove an existing prepended "!";  we convert IDs to
-	# names and back to do this.  The other is to have an entry in
-	# the tagnames_similar table with type=0 and simil=-1.
-	# XXX Should probably recursively chase down type=0/simil=1
-	# entries as being the same, and opposites-of-opposites etc.
-	# Leave that for another day though.
-	# Type one:
-	my $tagnamedata_hr = $self->getTagnameDataFromIds([ @tagnameids ]);
-	my @tagnames =		map { $tagnamedata_hr->{$_}{tagname} }			@tagnameids;
-	my @opp_tagnames =	map { $self->getOppositeTagname($_) }			@tagnames;
-	my @opp_tagnameids_1 =	( );
-	if ($create) {
-		@opp_tagnameids_1 =
-				map { $self->getTagnameidCreate($_) }			@opp_tagnames;
-	} else {
-		@opp_tagnameids_1 =
-				grep { $_ }
-				map { $self->getTagnameidFromNameIfExists($_) }		@opp_tagnames;
-	}
-	# Type two:
-	my $src_tnids_str = join(',', @tagnameids);
-	my $opp_tagnameids_2_ar = $self->sqlSelectColArrayref(
-		'DISTINCT dest_tnid', 'tagnames_similar',
-		"type=0 AND simil=-1 AND src_tnid IN ($src_tnids_str)");
-	# Join them:
-	my %opp_tagnameids = ( map { ($_, 1) } @opp_tagnameids_1, @$opp_tagnameids_2_ar );
-	my @opp_tagnameids = sort { $a <=> $b } keys %opp_tagnameids;
+	my $orig_to_opp_hr = $self->consolidateTagnameidValues(\%tagnameid, $clid,
+		{ invert => 1, posonly => 1 });
 
+	my @opp_tagnameids = sort { $a <=> $b } keys %$orig_to_opp_hr;
 	return \@opp_tagnameids;
 }
 
-# XXX this method isn't gonna work since tagboxes
+# This takes a hashref with keys tagnameids and numeric values, a
+# similarity value of either 1 or -1, and optionally a clout type id.
+# It returns a hashref with keys the consolidated-preferred of the
+# original, and values the sum of the source original values.
+# If $abs is set, the values are the sum of the absolute values of
+# the source original values.
+#
+# For example, for a clout type with synonyms:
+#	obvious <- duh, !insightful
+#	insightful <- !obvious, !duh
+#	cool <- neat
+# and a source hashref:
+#	obvious => 1.2, duh => 3.4, !duh => 5.6, foo => 7.8, neat => 9.1
+# would return, for similarity = 1, the consolidated-preferred:
+# XXX this is wrong, includes positives only not negatives
+#	insightful => 1.8 (i.e. 5.6-(1.2+3.4)), foo => 7.8, cool => 9.1
+# For similarity = -1 would return the consolidated-opposite:
+#	obvious => -1.8, !foo => -7.8, !cool => -9.1
+# For similarity = 1 and abs set, would return:
+#	insightful => 10.3 (i.e. 5.6+1.2+3.4), foo => 7.8, cool => 9.1
+# For similarity = -1 and abs set, would return:
+#	obvious => 10.3, !foo => 7.8, !cool => 9.1
+#
+# I haven't spelled out anywhere a transitive or reflexive law of
+# tagnames, but if I did, corollaries of those laws would be
+# A) cTV(cTV(X, -1), -1) = cTV(X,  1)
+# B) cTV(cTV(X,  1), -1) = cTV(X, -1) = cTV(cTV(X, -1),  1)
+# C) cTV(cTV(X,  1),  1) = cTV(X,  1)
 
-sub setLastscanned {
-	my($self, $new_val) = @_;
-	return if !$new_val;
-	my $old_val = $self->sqlSelect('value', 'vars',
-		"name='tags_stories_lastscanned'");
-	return if $new_val > $old_val;
-	$self->setVar('tags_stories_lastscanned', $new_val - 1);
+# abs: when calculating values for antonyms, add instead of subtracting
+# invert: subtract for synonyms and add for antonyms
+#	(has no effect if abs is also specified)
+# synonly: only calculate values for synonyms, ignore antonyms
+# posonly: when all values are calculated, throw out all values <= 0
+#	(has no effect if abs is also specified)
+#	(has no effect if synonly is also specified and all input values are > 0)
+
+sub consolidateTagnameidValues {
+	my($self, $tagnameid_hr, $clid, $options) = @_;
+	$clid ||= 0;
+	my $abs = $options->{abs} || 0;
+	my $invert = $options->{invert} || 0;
+	my $synonly = $options->{synonly} || 0;
+	my $posonly = $options->{posonly} || 0;
+
+	# Two ways to have an opposite of a tagname.  The first only
+	# applied for a given clout type:  have an entry in the
+	# tagnames_similarity_rendered table.  If no clout ID is
+	# specified, this way does not apply.  We try this first, and
+	# -- for tagnames that do have such entries -- we know we
+	# don't need to try the second way because the first includes
+	# the second.
+
+	# The second way is a "bang" opposite:  prepare a "!" or
+	# remove an existing prepended "!".  This is slower than the
+	# first way because we have to convert IDs to names and back,
+	# but it's the only way that applies if no clout ID is
+	# specified.
+
+	# First we consolidate using the rendered similarity table.
+
+	my @tagnameids = keys %$tagnameid_hr;
+
+	my $origid_sim_pref = { };
+	if ($clid) {
+		my $src_tnids_str = join(',', @tagnameids);
+		my $where_clause =
+		my $origid_sim_pref_ar = $self->sqlSelectAllHashrefArray(
+			'syn_tnid, similarity, pref_tnid',
+			'tagnames_similarity_rendered',
+			"clid=$clid AND syn_tnid IN ($src_tnids_str)");
+		for my $hr (@$origid_sim_pref_ar) {
+			my $syn_tnid = $hr->{syn_tnid};
+			my $similarity = $hr->{similarity};
+			my $pref_tnid = $hr->{pref_tnid};
+			$origid_sim_pref->{$syn_tnid}{$similarity} = $pref_tnid;
+		}
+		@tagnameids = grep { !exists $origid_sim_pref->{$_} } @tagnameids;
+	}
+
+	# Second, we consolidate using bang-type opposites.
+
+	my $tndata_hr = $self->getTagnameDataFromIds([ @tagnameids ]);
+	for my $id (@tagnameids) {
+		next if $origid_sim_pref->{$id}{1};
+		$origid_sim_pref->{$id}{1} = $id;
+		next if $synonly;
+		my $tagname = $tndata_hr->{$id}{tagname};
+		my $oppname = $self->getBangOppositeTagname($tagname);
+		my $oppid = $self->getTagnameidCreate($oppname);
+		$origid_sim_pref->{$id}{-1} = $oppid;
+		$origid_sim_pref->{$oppid}{-1} = $id;
+		$origid_sim_pref->{$oppid}{1} = $oppid;
+	}
+
+	# Add up the consolidated values.
+
+	my $retval = { };
+	for my $id (keys %$tagnameid_hr) {
+		my $pref = $origid_sim_pref->{$id}{1};
+		my $opp  = $origid_sim_pref->{$id}{-1};
+		$retval->{$pref} ||= 0;
+		$retval->{$pref}  += $tagnameid_hr->{$id};
+		next if $synonly;
+		$retval->{$opp}  ||= 0;
+		$retval->{$opp}   += $tagnameid_hr->{$id} * ($abs ? 1 : -1);
+	}
+	if ($invert) {
+		for my $id (keys %$retval) {
+			$retval->{$id} = -$retval->{$id};
+		}
+	}
+	if ($posonly) {
+		my @nonpos = grep { $retval->{$_} <= 0 } keys %$retval;
+		delete @{$retval}{@nonpos};
+	}
+	$retval;
+}
+
+sub getPreferredTagname {
+	my($self, $tagname, $clid) = @_;
+	my $tagnameid = $self->getTagnameidFromNameIfExists($tagname);
+	return $tagname if !$tagnameid;
+	my $pref_id = $self->getPreferredTagnameid($tagnameid, $clid);
+	return $self->getTagnameDataFromId($pref_id)->{tagname};
+}
+
+sub getPreferredTagnameid {
+	my($self, $tagnameid, $clid) = @_;
+	# XXX memcached this? clearing cache will be a pain
+	my $pref_id = $self->sqlSelect('pref_tnid',
+		'tagnames_similarity_rendered',
+		"clid=$clid AND syn_tnid=$tagnameid AND similarity='1'");
+	return $pref_id || $tagnameid;
+}
+
+# Given a clid and a preferred-synonym pair of tagnameids, and using
+# the current tagnames_synonyms_chosen table, either return an error
+# (indicating a contradiction or loop with existing synonym pairs)
+# or return a list of (syn,simil,pref) tuples which define the new
+# rendered data and which the database has just been updated for.
+#
+# To declare 'nod' and 'nix' as antonyms, declare 'nod' to be the
+# preferred synonym for '!nix', and 'nix' the preferred synonym of
+# '!nod'.
+#
+# XXX At the moment there is no way to un-mark a pair of tagnames
+# (the closest equivalent would be to manually delete the pair from
+# tagnames_synonyms_chosen then add another pair).
+
+sub renderTagnameSimilarityFromChosen {
+	my($self, $pref, $syn, $clid) = @_;
+
+	my(%syn, %new_syn, %ant, %new_ant);
+
+	# Initialize the list of synonyms with the input pref-syn pair.
+	$syn{$pref} = 1;
+	$syn{$syn} = 1;
+
+	# We assume that what's already in the DB is well-formed, i.e.
+	# any network of synonyms and antonyms is fully fleshed out.
+	# Grab the matching synonyms.  Begin by getting the pref(s)
+	# that ties them all together.  There may be 0, 1 or 2.
+	my $old_both_pref_ar = $self->sqlSelectColArrayref(
+		'DISTINCT pref_tnid',
+		'tagnames_similarity_rendered',
+		"syn_tnid IN ($pref, $syn) AND clid=$clid AND similarity=1") || [ ];
+	my $old_pref_pref = undef;
+	if (scalar @$old_both_pref_ar > 1) {
+		$old_pref_pref = $self->sqlSelect(
+			'pref_tnid',
+			'tagnames_similarity_rendered',
+			"syn_tnid=$pref AND clid=$clid AND similarity=1");
+	}
+	# Now grab the pref(s)'s list of syns.
+	my $old_syn_ar = [ ];
+	if (@$old_both_pref_ar) {
+		$old_syn_ar = $self->sqlSelectColArrayref('syn_tnid',
+			'tagnames_similarity_rendered',
+			"clid=$clid AND similarity=1
+			 AND pref_tnid IN (" . join(',', @$old_both_pref_ar) . ')');
+	}
+	for my $tnid (@$old_syn_ar) {
+		$syn{$tnid} = 1;
+	}
+	my @syn = sort { $a <=> $b } keys %syn;
+	my $syn_str = join ',', @syn;
+
+	# Now get the list of opposite tagnames.
+	my $ant_ar = $self->getOppositeTagnameids(\@syn, 1);
+	my @ant = sort { $a <=> $b } @$ant_ar;
+	my $ant_str = join ',', @ant;
+	# If any antonyms are also synonyms, then this introduces a
+	# contradiction and we can't make this change.
+	for my $ant_id (@ant) {
+		if ($syn{$ant_id}) {
+			return (undef, "error: $ant_id both synonym and antonym");
+		}
+	}
+	# OK, we can proceed.
+
+	# Pick a preferred antonym.  Either the first preferred of the
+	# antonyms found, or the opposite of the preferred synonym.
+	my $ant_pref = $self->sqlSelect('DISTINCT pref_tnid',
+		'tagnames_synonyms_chosen',
+		"syn_tnid IN ($ant_str) AND clid=$clid",
+		'ORDER BY pref_tnid LIMIT 1');
+	$ant_pref ||= $self->getOppositeTagnameids([$pref], 1)->[0];
+
+	$self->sqlDo('START TRANSACTION');
+	# A preferred tagname is a synonym for itself.
+	$self->sqlReplace('tagnames_synonyms_chosen', {
+		clid => $clid,
+		pref_tnid => $pref,
+		syn_tnid => $pref,
+	});
+	# Add the new synonym pair.
+	$self->sqlReplace('tagnames_synonyms_chosen', {
+		clid => $clid,
+		pref_tnid => $pref,
+		syn_tnid => $syn,
+	});
+	# Add the synonyms and antonyms referencing the preferred synonym
+	# and antonym.  Begin by removing all synonyms and antonyms
+	# referencing them or referring to any in the list generated.
+	$self->sqlDelete('tagnames_similarity_rendered',
+		"clid=$clid AND (
+			   pref_tnid IN ($pref, $ant_pref)
+			OR syn_tnid IN ($syn_str, $ant_str)
+		)");
+	for my $syn_id (@syn) {
+		$self->sqlInsert('tagnames_similarity_rendered', {
+			clid => $clid,
+			syn_tnid => $syn_id,
+			similarity => '1',
+			pref_tnid => $pref,
+		});
+		$self->sqlInsert('tagnames_similarity_rendered', {
+			clid => $clid,
+			syn_tnid => $syn_id,
+			similarity => '-1',
+			pref_tnid => $ant_pref,
+		});
+	}
+	for my $ant_id (@ant) {
+		$self->sqlInsert('tagnames_similarity_rendered', {
+			clid => $clid,
+			syn_tnid => $ant_id,
+			similarity => '-1',
+			pref_tnid => $pref,
+		});
+		$self->sqlInsert('tagnames_similarity_rendered', {
+			clid => $clid,
+			syn_tnid => $ant_id,
+			similarity => '1',
+			pref_tnid => $ant_pref,
+		});
+	}
+	$self->sqlDo('COMMIT');
+
+	# Mark globj's tagged with the old synonyms as needing to be updated.
+	# XXX This is wrong -- not only $syn's antonym but also all syn/ant's
+	# that previously pointed to a different pref/ant_pref need to be
+	# similarly updated.
+	my $tagid_globjid = $self->sqlSelectAllKeyValue(
+		'tags.tagid, globjid',
+		"tags LEFT JOIN tag_params
+			ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout')",
+		"tagnameid=$syn AND (tag_params.value IS NULL OR tag_params.value > 0)");
+	my $tagboxdb = getObject("Slash::Tagbox");
+        my $tagboxes = $tagboxdb->getTagboxes();
+	for my $tagbox_hr (@$tagboxes) {
+		next if $tagbox_hr->{affected_type} eq 'user';
+		for my $tagid (keys %$tagid_globjid) {
+			$tagbox_hr->{object}->addFeederInfo({
+				affected_id =>  $tagid_globjid->{$tagid},
+				# XXX could try to fiddle with clout here...
+				importance =>   1,
+				tagid =>        $tagid,
+			});
+		}
+	}
+
+	return(1, [ $pref, \@syn, $ant_pref, \@ant ]);
+}
+
+sub listSynonymsAll {
+	my($self, $options) = @_;
+	my $hr = $self->sqlSelectAllHashref(
+		[qw( clid pref_tnid )], 'clid, pref_tnid',
+		'tagnames_similarity_rendered', '', 'GROUP BY clid, pref_tnid');
+
+	# $hr->{$clid}{$tnid} right now is a dummy hashref.  We will store
+	# there the data we care about for the tagname $tnid which is
+	# a preferred synonym for the clout type $clid.
+	#
+	# The data we care about is:
+	# tagname - the tagname of the preferred tagnameid
+	# synonym_ids - an arrayref of the ids of the preferred tagname's synonyms
+	# 	(in id order, excluding the preferred tagname itself)
+	# synonym_names - an arrayref of the tagnames, in tagname order
+	# antonym_ids - same for antonyms
+	# antonym_names - same for antonyms
+
+	for my $clid (keys %$hr) {
+		for my $tnid (keys %{$hr->{$clid}}) {
+			$hr->{$clid}{$tnid}{tagname} = $self->getTagnameDataFromId($tnid)->{tagname};
+			$hr->{$clid}{$tnid}{synonym_ids} = $self->sqlSelectColArrayref(
+				'syn_tnid', 'tagnames_similarity_rendered',
+				"clid=$clid AND pref_tnid=$tnid AND similarity='1'
+				 AND syn_tnid != pref_tnid",
+				'ORDER BY syn_tnid');
+			my $syndata_hr = $self->getTagnameDataFromIds( $hr->{$clid}{$tnid}{synonym_ids} );
+			$hr->{$clid}{$tnid}{synonym_names} = [ sort tagnameorder
+				map { $_->{tagname} } values %$syndata_hr ];
+			$hr->{$clid}{$tnid}{antonym_ids} = $self->sqlSelectColArrayref(
+				'syn_tnid', 'tagnames_similarity_rendered',
+				"clid=$clid AND pref_tnid=$tnid AND similarity='-1'",
+				'ORDER BY syn_tnid');
+			my $antdata_hr = $self->getTagnameDataFromIds( $hr->{$clid}{$tnid}{antonym_ids} );
+			$hr->{$clid}{$tnid}{antonym_names} = [ sort tagnameorder
+				map { $_->{tagname} } values %$antdata_hr ];
+		}
+	}
+	return $hr;
 }
 
 sub listTagnamesAll {
@@ -2321,6 +2618,12 @@ sub getExcludedTags {
 	my($self) = @_;
 	return $self->getTagnamesByParam('exclude', '1');
 }
+
+sub getExcludedTagnameids {
+	my($self) = @_;
+	return $self->getTagnameidsByParam('exclude', '1');
+}
+
 
 sub getFirehoseExcludeTags {
 	my($self) = @_;

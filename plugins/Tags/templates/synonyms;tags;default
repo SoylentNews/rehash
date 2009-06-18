@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+Output the /tags_synonyms.pl page
+
+__title__
+
+__page__
+tags
+__lang__
+en_US
+__name__
+synonyms
+__template__
+[% PROCESS titlebar title => 'Enter New Synonym' %]
+
+<form action="[% constants.rootdir %][% env.script_name %]" method="post">
+
+<p>Clout type: <input type="text" name="cloutname" value="describe">
+(probably "describe", also "vote", "moderate")
+
+<p>Unwanted tagname: <input type="text" name="syn_tagname" value="">
+(to define an antonym, make its "!" tagname a synonym)
+
+<p>Preferred tagname: <input type="text" name="pref_tagname" value="">
+
+<p><input type="submit" name="op" value="Add Synonym">
+
+</form>
+
+[% PROCESS titlebar title => 'Existing Tag Synonyms' %]
+
+<table border=1>
+[% FOREACH clid = synall.keys.sort;
+	FOREACH pref = synall.${clid}.keys.sort;
+		"<tr>";
+		"<td>("; clout_types.${clid}; ") <b>"; synall.${clid}.${pref}.tagname; "</b></td>";
+		"<td>SYN: "; synall.${clid}.${pref}.synonym_names.join(" "); "</td>";
+		"<td>ANT: "; synall.${clid}.${pref}.antonym_names.join(" "); "</td>";
+		"</tr>";
+	END;
+END %]
+</table>
+
+__seclev__
+10000
+__version__
+$Id$

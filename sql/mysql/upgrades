@@ -6348,3 +6348,22 @@ CREATE TABLE preview_param (
 ) TYPE=InnoDB;
 
 INSERT INTO globj_types VALUES (NULL, 'preview');
+
+# for plugins/Tags
+DROP TABLE tagnames_similar;
+CREATE TABLE tagnames_synonyms_chosen (
+        clid            smallint UNSIGNED NOT NULL DEFAULT '0',
+        pref_tnid       int UNSIGNED NOT NULL DEFAULT '0',
+        syn_tnid        int UNSIGNED NOT NULL DEFAULT '0',
+        UNIQUE clid_pref_syn (clid, pref_tnid, syn_tnid)
+) TYPE=InnoDB;
+CREATE TABLE tagnames_similarity_rendered (
+        clid            smallint UNSIGNED NOT NULL DEFAULT '0',
+        syn_tnid        int UNSIGNED NOT NULL DEFAULT '0',
+        similarity      enum('1', '-1') NOT NULL DEFAULT '1',
+        pref_tnid       int UNSIGNED NOT NULL DEFAULT '0',
+        UNIQUE clid_syn_sim (clid, syn_tnid, similarity)
+) TYPE=InnoDB;
+# Replace virtusername with your site's Slash virtual user.
+# perl -MSlash::Test=virtusername -le '$t = getObject("Slash::Tags"); $vc = $t->getCloutTypes()->{vote}; ($nod, $nix, $notnod, $notnix) = ($t->getTagnameidCreate("nod"), $t->getTagnameidCreate("nix"), $t->getTagnameidCreate("!nod"), $t->getTagnameidCreate("!nix")); $t->renderTagnameSimilarityFromChosen($nod, $notnix, $vc); $t->renderTagnameSimilarityFromChosen($nix, $notnod, $vc)'
+

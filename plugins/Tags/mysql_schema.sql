@@ -138,14 +138,19 @@ CREATE TABLE tags_peerweight (
 	KEY clid_gen_uid (clid, gen, uid)
 ) TYPE=InnoDB;
 
-CREATE TABLE tagnames_similar (
-	tsid		int UNSIGNED NOT NULL AUTO_INCREMENT,
-	type		smallint UNSIGNED NOT NULL DEFAULT '0',
-	src_tnid	int UNSIGNED NOT NULL DEFAULT '0',
-	dest_tnid	int UNSIGNED NOT NULL DEFAULT '0',
-	simil		float NOT NULL DEFAULT '0',
-	PRIMARY KEY (tsid),
-	UNIQUE type_src_dest (type, src_tnid, dest_tnid)
+CREATE TABLE tagnames_synonyms_chosen (
+	clid		smallint UNSIGNED NOT NULL DEFAULT '0',
+	pref_tnid	int UNSIGNED NOT NULL DEFAULT '0',
+	syn_tnid	int UNSIGNED NOT NULL DEFAULT '0',
+	UNIQUE clid_pref_syn (clid, pref_tnid, syn_tnid)
+) TYPE=InnoDB;
+
+CREATE TABLE tagnames_similarity_rendered (
+	clid		smallint UNSIGNED NOT NULL DEFAULT '0',
+	syn_tnid	int UNSIGNED NOT NULL DEFAULT '0',
+	similarity	enum('1', '-1') NOT NULL DEFAULT '1',
+	pref_tnid	int UNSIGNED NOT NULL DEFAULT '0',
+	UNIQUE clid_syn_sim (clid, syn_tnid, similarity)
 ) TYPE=InnoDB;
 
 CREATE TABLE tags_udc (
