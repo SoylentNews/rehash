@@ -55,10 +55,10 @@ sub getOrCreatePreview {
 			$p_data->{introtext} =  $fh_data->{introtext};
 		}
 		$p_data->{preview_fhid} = $fhid;
-		$p_data->{src_fhid} => $src_item->{id};
+		$p_data->{src_fhid} = $src_item->{id};
+		$p_data->{subid} = $src_item->{srcid} if $src_item->{type} eq 'submission';
 
 
-		$fh_data->{uid} = $src_item->{uid};
 		$fh->setFireHose($fhid, $fh_data);
 
 		$self->setPreview($id, $p_data);
@@ -213,7 +213,7 @@ sub editCreateStory {
 		introtext 	=> $preview->{introtext},
 		#relatedtext
 		media	 	=> $fhitem->{media},
-		#subid
+		subid		=> $preview->{subid},
 		fhid		=> $preview->{src_fhid},
 		commentstatus	=> $preview->{commentstatus},
 		primaryskid	=> $fhitem->{primaryskid},
