@@ -1502,7 +1502,6 @@ sub saveModalPrefs {
 	require URI;
 	my $url = URI->new('//e.a/?' . $form->{'data'});
 	my %params = $url->query_form;
-use Data::Dumper; print STDERR Dumper [\%params, $form];
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey;
