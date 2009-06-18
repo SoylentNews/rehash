@@ -53,6 +53,9 @@ sub getOrCreatePreview {
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1 }, { Return => 1 });
 			$p_data->{introtext} =  $fh_data->{introtext};
 		}
+		$p_data->{preview_fhid} = $fhid;
+		$p_data->{src_fhid} => $src_item->{id};
+
 
 		$fh_data->{uid} = $src_item->{uid};
 		$fh->setFireHose($fhid, $fh_data);
