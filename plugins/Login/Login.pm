@@ -37,17 +37,18 @@ our $VERSION = $Slash::Constants::VERSION;
 sub deleteOpenID {
 	my($self, $claimed_identity) = @_;
 	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
 	return unless allowOpenID();
 
-	my $claimed_uid = $self->getUIDByOpenID($claimed_identity);
+	my $claimed_uid = $slashdb->getUIDByOpenID($claimed_identity);
 	if (!$claimed_uid || $claimed_uid != $user->{uid}) {
 		return getLoginData("openid_not_yours", { claimed_identity => $claimed_identity });
 	}
 
-	if ($self->deleteOpenID($user->{uid}, $claimed_identity)) {
+	if ($slashdb->deleteOpenID($user->{uid}, $claimed_identity)) {
 		# XXX redirect automatically to /my/password
 		return getLoginData("openid_verify_delete", { claimed_identity => $claimed_identity });
 	} else {

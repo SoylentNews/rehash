@@ -1502,6 +1502,7 @@ sub saveModalPrefs {
 	require URI;
 	my $url = URI->new('//e.a/?' . $form->{'data'});
 	my %params = $url->query_form;
+use Data::Dumper; print STDERR Dumper [\%params, $form];
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey;
@@ -2129,8 +2130,8 @@ sub saveModalPrefs {
 		my $login = getObject('Slash::Login');
 		my $message = $login->deleteOpenID($params{'openid_url'});
 		my %updates;
-		$updates{modal_prefs} = slashDisplay('changePasswdModal',
-			{ tabbed => $form->{'tabbed'} },
+		$updates{changePasswdModal} = slashDisplay('changePasswdModal',
+			{ tabbed => 1 },
 			{ Return => 1, Page => 'login'}
 		);
 		$updates{modal_message_feedback} = $message if $message;

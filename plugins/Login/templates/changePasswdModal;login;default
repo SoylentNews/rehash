@@ -12,7 +12,7 @@ en_US
 __name__
 changePasswdModal
 __template__
-
+<div id="changePasswdModal">
                 [% IF tabbed == 1 %]
                 <div class="pref">
                 <span class="preftab"><a href="" onclick="getModalPrefs('user', 'User', 1); return false;">User</a></span>
@@ -78,7 +78,7 @@ to reauthenticate.</p>
 
 [% IF constants.openid_consumer_allow %]
 <hr>
-<form style="padding:1em;" action="[% constants.real_rootdir %]/login.pl" method="post">
+<form id="openids" style="padding:1em;" action="[% constants.real_rootdir %]/login.pl" method="post">
 <label><strong>Claim OpenID</strong></label>
 <div style="display: block; [% note_style %]">Enter your OpenID identity.</div>
 <input type="hidden" name="op" value="claim_openid">
@@ -93,12 +93,13 @@ to reauthenticate.</p>
 <dt>None</dt>
         [% ELSE %]
                 [% FOR openid IN openids %]
-<dt>[% openid.normalized_openid_url %]
-	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&amp;openid_url=[% openid.url | strip_paramattr %]" onclick="saveModalPrefs('deleteOpenID', 'op=delete_openid&amp;openid_url=[% openid.url | strip_urlattr %]'); return false;">delete</a>)</dt>
+<dt>[% openid.normalized_openid_url # double encoding is intentional, so it first passes through HTML, then needs to be sent still-encoded to server %]
+	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&amp;openid_url=[% openid.url | strip_paramattr %]" onclick="saveModalPrefs('deleteOpenID', 'formname=deleteOpenID&amp;op=delete_openid&amp;openid_url=[% openid.url | strip_urlattr | strip_paramattr %]'); return false;">delete</a>)</dt>
                 [% END %]
         [% END %]
 </dl></div>
 </form>
+</div>
 [% END %]
 __seclev__
 500
