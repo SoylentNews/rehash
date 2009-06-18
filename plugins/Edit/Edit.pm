@@ -41,14 +41,17 @@ sub getOrCreatePreview {
 		my $type = $user->{is_admin} ? "story" : "submission";
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
-		my $fh_data;
+		my ($fh_data, $p_data);
 		
-		foreach (qw(introtext bodytext media title dept)) {
+		foreach (qw(introtext bodytext media title dept tid primaryskid)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
 
+		$p_data->{submitter} = $src_item->{uid};
+
 		if ($src_item->{type} ne "story" && $type eq "story") {
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1 }, { Return => 1 });
+			$p_data->{introtext} =  $fh_data->{introtext};
 		}
 
 		$fh_data->{uid} = $src_item->{uid};
@@ -195,7 +198,7 @@ sub editCreateStory {
 		#sid
 		title		=> $fhitem->{title},
 		#section
-		#submitter
+		submitter	=> $preview->{submitter},
 		#topics_chosen
 		dept		=> $fhitem->{dept},
 		'time'		=> $fhitem->{createtime},
@@ -204,8 +207,10 @@ sub editCreateStory {
 		#relatedtext
 		media	 	=> $fhitem->{media},
 		#subid
-		#fhid
+		fhid		=> $preview->{src_fhid},
 		commentstatus	=> $preview->{commentstatus},
+		primaryskid	=> $fhitem->{primaryskid},
+		tid		=> $fhitem->{tid},
 		#thumb
 		-rendered	=> 'NULL',
 		neverdisplay	=> $preview->{neverdisplay},
