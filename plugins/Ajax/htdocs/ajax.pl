@@ -65,7 +65,7 @@ sub main {
 		} else  {
 			$rkey->use;
 		}
-		if (!$rkey->success) {
+		if (!$rkey->success && ($op ne 'saveModalPrefsAnonHC')) {
 			# feel free to send msgdiv => 'thisdivhere' to the ajax call,
 			# and any reskey error messages will be sent to it
 			if ($form->{msgdiv}) {
@@ -2127,7 +2127,7 @@ sub setModalUpdates {
 	if ($reskey_resource ne 'ajax_base_hc') {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
-		$rkey->create;
+		$rkey->create;		
 		if ($rkey->failure) {
 			# XXX need to handle errors, esp. for HC
 			# XXX Set a 'critical error' form element with a message and disable the input button? -Cbrown
@@ -2139,7 +2139,7 @@ sub setModalUpdates {
 
 	# Refresh the reskey
 	$updates->{reskey} = slashDisplay('reskey_tag', {}, { Return => 1 });
-	
+
 	return Data::JavaScript::Anon->anon_dump({ updates => $updates });
 }
 
