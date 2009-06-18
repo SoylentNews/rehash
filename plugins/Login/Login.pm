@@ -91,12 +91,12 @@ sub displaySendPassword {
 sub sendPassword {
 	my ($self) = @_;
 
+	my $updates = {};
+	my $error_message = '';
+	my $error = 0;
+
 	my $user = getCurrentUser();
 
-	# XXX This is not done, so return errors for testing
-	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
-	my $updates = {};
-	$updates->{hc} = $hc;
 	return $updates;
 }
 

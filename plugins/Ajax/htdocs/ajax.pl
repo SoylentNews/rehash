@@ -1498,18 +1498,21 @@ sub getModalPrefs {
 sub saveModalPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
 
+	# Ajax returns our form as key=value, so trick URI into decoding for us.
+	require URI;
+	my $url = URI->new('//e.a/?' . $form->{'data'});
+	my %params = $url->query_form;
+
 	my($rkey);
 	if ((caller(1))[3] =~ /\bsaveModalPrefsAnonHC$/) {
+		# XXX We should change how values are sent from JS saveModalPrefs() so we
+		# don't have to do this.
+		$form->{hcanswer} = $params{hcanswer};
 		my $reskey = getObject('Slash::ResKey');
 		$rkey = $reskey->key('ajax_base_hc');
 		$user->{state}{reskey} = $rkey->reskey;
 		$rkey->use;
 	}
-
-	# Ajax returns our form as key=value, so trick URI into decoding for us.
-	require URI;
-	my $url = URI->new('//e.a/?' . $form->{'data'});
-	my %params = $url->query_form;
 
 	# D2 display
 	my $user_edits_table;
@@ -2112,8 +2115,9 @@ sub saveModalPrefs {
 			$updates->{$update} = $sp_updates->{$update};
 		}
 
-		# XXX Test
-		$updates->{modal_message_feedback} = $error_message;
+		if ($error && $error_message) {
+			$updates->{modal_message_feedback} = $error_message;
+		}
 
 		if (keys %$updates) {
 			my $ret = setModalUpdates($updates);
