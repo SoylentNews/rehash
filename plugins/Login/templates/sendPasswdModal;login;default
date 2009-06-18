@@ -13,6 +13,8 @@ __name__
 sendPasswdModal
 __template__
 
+[% note_style = 'background: #DDDDDD none repeat scroll 0 0; border-top: 1px solid #555555; font-size: 93%; margin: 1em 0 0; padding: 0.5em 0.7em;' %]
+
 <form id ="modal_prefs">
 [% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="sendPasswdModal">
@@ -28,6 +30,8 @@ __template__
 <br>
 
 [% IF hc; hc; END %]
+
+<div id="modal_message_feedback" style="display: none; [% note_style %]"></div>
 
 <br>
 
