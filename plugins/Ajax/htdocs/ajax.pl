@@ -1503,12 +1503,12 @@ sub saveModalPrefs {
 	my $url = URI->new('//e.a/?' . $form->{'data'});
 	my %params = $url->query_form;
 
-	my($rkey);
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey;
 	if ((caller(1))[3] =~ /\bsaveModalPrefsAnonHC$/) {
 		# XXX We should change how values are sent from JS saveModalPrefs() so we
 		# don't have to do this.
 		$form->{hcanswer} = $params{hcanswer};
-		my $reskey = getObject('Slash::ResKey');
 		$rkey = $reskey->key('ajax_base_hc');
 		$user->{state}{reskey} = $rkey->reskey;
 		$rkey->use;
@@ -2125,6 +2125,18 @@ sub saveModalPrefs {
 		}
 	}
 
+	if ($params{'formname'} eq 'deleteOpenID') {
+		my $login = getObject('Slash::Login');
+		my $message = $login->deleteOpenID($params{'openid_url'});
+		my %updates;
+		$updates{modal_prefs} = slashDisplay('changePasswdModal',
+			{ tabbed => $form->{'tabbed'} },
+			{ Return => 1, Page => 'login'}
+		);
+		$updates{modal_message_feedback} = $message if $message;
+		return setModalUpdates(\%updates);
+	}
+
 	if ($params{'formname'} ne "sectional"         &&
 	    $params{'formname'} ne "firehoseview"      &&
 	    $params{'formname'} ne "changePasswdModal" &&
@@ -2134,7 +2146,7 @@ sub saveModalPrefs {
 }
 
 sub setModalUpdates {
-	my ($updates) = @_;
+	my($updates) = @_;
 
 	my $user = getCurrentUser();
 

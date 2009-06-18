@@ -36,7 +36,7 @@ END;
 clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_location, 1, 0, clocation_order);
 %]
 
-<form id ="modal_prefs">
+<form id="modal_prefs">
 [% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="changePasswdModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
@@ -94,7 +94,7 @@ to reauthenticate.</p>
         [% ELSE %]
                 [% FOR openid IN openids %]
 <dt>[% openid.normalized_openid_url %]
-	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&amp;openid_url=[% openid.url | strip_paramattr %]">delete</a>)</dt>
+	(<a href="[% constants.real_rootdir %]/login.pl?op=delete_openid&amp;openid_url=[% openid.url | strip_paramattr %]" onclick="saveModalPrefs('deleteOpenID', 'op=delete_openid&amp;openid_url=[% openid.url | strip_urlattr %]'); return false;">delete</a>)</dt>
                 [% END %]
         [% END %]
 </dl></div>
