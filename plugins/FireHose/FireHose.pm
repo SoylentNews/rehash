@@ -1196,6 +1196,10 @@ sub getFireHoseEssentialsParams {
 		push @sphinx_opts, [ filter => public => [ $pub ] ];
 	}
 
+	# For now we never want a previewed item returned, if we want it we'll ask with getFireHose
+	push @sphinx_opts, [ filter => preview => [ 0 ] ];
+
+
 	if ($options->{nexus}) {
 		push @sphinx_opts, [ filter => tid => $options->{nexus} ];
 	}
