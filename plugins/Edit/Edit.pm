@@ -199,12 +199,24 @@ sub saveItem {
 
 sub editCreateStory {
 	my($self, $preview, $fhitem) = @_;
-	my $data;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $data;
 
 	my $chosen_hr = { };
 	my @topics;
 	push @topics, $fhitem->{tid} if $fhitem->{tid};
+
+	my $tagsdb = getObject("Slash::Tags");
+
+	my $current_tags_array = $tagsdb->getTagsByNameAndIdArrayref(
+                        'preview', $preview->{preview_id}, { uid => $user->{uid}, include_private => 1 });
+        my @user_tags = sort map { $_->{tagname} } @$current_tags_array;
+
+	foreach (@user_tags) {
+		my $tid = $self->getTidByKeyword($_);
+		push @topics, $tid if $tid;
+	}
 
 	if ($fhitem->{primaryskid}) {
 		my $nexus = $self->getNexusFromSkid($fhitem->{primaryskid});
