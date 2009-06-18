@@ -1690,13 +1690,13 @@ sub getFireHoseByTypeSrcid {
 	my $id_q   = $self->sqlQuote($id);
 	my $exptime = 86400 * 7;
 	my $item = {};
-	$preview ? "yes" : "no";
+	$preview = $preview ? "yes" : "no";
 
 	my $mcd = $self->getMCD();
 	my $mcdkey;
 	my $fid;
 	if ($mcd) {
-		$mcdkey = "$self->{_mcd_keyprefix}:fhid_type_srcid:$type:$id:";
+		$mcdkey = "$self->{_mcd_keyprefix}:fhid_type_srcid:$type:$id:$preview";
 		$fid = $mcd->get($mcdkey);
 	}
 	if (!$fid) {
