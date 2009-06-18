@@ -23,16 +23,16 @@ __template__
 	<p>No comment history available.</p>
 
 [% CASE 'passnomatch' %]
-        <p><b>Passwords do not match.</b></p>
+        <p id="modal_message_feedback"><b>Passwords do not match.</b></p>
 
 [% CASE 'passtooshort' %]
-        <p><b>Password is too short.</b></p>
+        <p id="modal_message_feedback"><b>Password is too short.</b></p>
 
 [% CASE 'passtoolong' %]
-        <p><b>Password is too long.</b></p>
+        <p id="modal_message_feedback"><b>Password is too long.</b></p>
 
 [% CASE 'oldpassbad' %]
-        <p><b>Current password is incorrect.</b></p>
+        <p id="modal_message_feedback"><b>Current password is incorrect.</b></p>
 
 [% END %]
 __seclev__
