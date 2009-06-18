@@ -2120,7 +2120,7 @@ sub setModalUpdates {
 	}
 
 	# Refresh the reskey
-	$updates->{rkey} = slashDisplay('reskey_tag', {}, { Return => 1 });
+	$updates->{reskey} = slashDisplay('reskey_tag', {}, { Return => 1 });
 	
 	return Data::JavaScript::Anon->anon_dump({ updates => $updates });
 }

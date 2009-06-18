@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+Template which renders HC for modals.
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+hc_modal
+__template__
+
+[% IF user.state.hc && !user.state.hcinvalid %]
+<p>[% user.state.hcquestion; user.state.hchtml %]
+<input type="text" id="hcanswer" name="hcanswer" value="[% form.hcanswer | strip_attribute %]" size="8" maxlength="8">
+[% END %]
+
+__seclev__
+1000
+__version__

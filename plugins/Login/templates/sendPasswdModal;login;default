@@ -27,6 +27,10 @@ __template__
 
 <br>
 
+[% IF hc; hc; END %]
+
+<br>
+
 <input type="button" value="Mail Password" onclick="saveModalPrefs()">
 
 </form>

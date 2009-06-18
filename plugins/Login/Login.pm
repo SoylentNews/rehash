@@ -86,11 +86,8 @@ sub displaySendPassword {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	#use Data::Dumper;
-	#print STDERR "USER:\n";
-	#print STDERR Dumper $user;
-
-	return slashDisplay('sendPasswdModal', {}, { Return => 1, Page => 'login' });
+	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
+	return slashDisplay('sendPasswdModal', { hc => $hc }, { Return => 1, Page => 'login' });
 }
 
 sub sendPassword {
@@ -99,10 +96,6 @@ sub sendPassword {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-
-	#use Data::Dumper;
-	#print STDERR "FORM\n";
-	#print STDERR Dumper $form;
 }
 
 1;
