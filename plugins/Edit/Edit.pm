@@ -57,7 +57,7 @@ sub getOrCreatePreview {
 		$fh_data->{uid} = $src_item->{uid};
 		$fh->setFireHose($fhid, $fh_data);
 
-		$self->setPreview($id, { preview_fhid => $fhid, src_fhid => $src_item->{id} });
+		$self->setPreview($id, $p_data);
 		return $id;
 			
 	}
