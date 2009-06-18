@@ -287,7 +287,8 @@ source src_firehose_main
 				story_text.bodytext),						\
 		  IF(   gtid= 3, CONCAT_WS(' ', submissions.subj,				\
 				firehose.toptags,						\
-				submissions.story),						\
+				submissions.story,						\
+				submissions.name),						\
 		  IF(   gtid= 4, CONCAT_WS(' ', journals.description,				\
 				firehose.toptags,						\
 				journals_text.article),						\
@@ -325,6 +326,7 @@ source src_firehose_main
 		IF(accepted='yes',1,0) AS accepted,						\
 		IF(rejected='yes',1,0) AS rejected,						\
 		IF(attention_needed='yes',1,0) AS attention_needed,				\
+		IF(preview='yes',1,0) AS preview,						\
 		IF(is_spam='yes',1,0) AS is_spam,						\
 		IF(	category='',        0,							\
 		  IF(	category='Back',    1,							\
@@ -371,6 +373,7 @@ source src_firehose_main
 	sql_attr_uint		= offmainpage
 	sql_attr_uint		= primaryskid
 	sql_attr_uint		= uid
+	sql_attr_uint		= preview
 
 	sql_attr_multi		= uint signoff from ranged-query				\
 		;										\
@@ -447,7 +450,8 @@ source src_firehose_delta1 : src_firehose_main
 				story_text.bodytext),						\
 		  IF(   gtid= 3, CONCAT_WS(' ', submissions.subj,				\
 				firehose.toptags,						\
-				submissions.story),						\
+				submissions.story,						\
+				submissions.name),						\
 		  IF(   gtid= 4, CONCAT_WS(' ', journals.description,				\
 				firehose.toptags,						\
 				journals_text.article),						\
@@ -485,6 +489,7 @@ source src_firehose_delta1 : src_firehose_main
 		IF(accepted='yes',1,0) AS accepted,						\
 		IF(rejected='yes',1,0) AS rejected,						\
 		IF(attention_needed='yes',1,0) AS attention_needed,				\
+		IF(preview='yes',1,0) AS preview,						\
 		IF(is_spam='yes',1,0) AS is_spam,						\
 		IF(	category='',        0,							\
 		  IF(	category='Back',    1,							\
@@ -590,7 +595,8 @@ source src_firehose_delta2 : src_firehose_main
 				story_text.bodytext),						\
 		  IF(   gtid= 3, CONCAT_WS(' ', submissions.subj,				\
 				firehose.toptags,						\
-				submissions.story),						\
+				submissions.story,						\
+				submissions.name),						\
 		  IF(   gtid= 4, CONCAT_WS(' ', journals.description,				\
 				firehose.toptags,						\
 				journals_text.article),						\
@@ -628,6 +634,7 @@ source src_firehose_delta2 : src_firehose_main
 		IF(accepted='yes',1,0) AS accepted,						\
 		IF(rejected='yes',1,0) AS rejected,						\
 		IF(attention_needed='yes',1,0) AS attention_needed,				\
+		IF(preview='yes',1,0) AS preview,						\
 		IF(is_spam='yes',1,0) AS is_spam,						\
 		IF(	category='',        0,							\
 		  IF(	category='Back',    1,							\
