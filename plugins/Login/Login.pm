@@ -82,9 +82,7 @@ sub getLoginData {
 sub displaySendPassword {
 	my ($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $form = getCurrentForm();
 
 	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
 	return slashDisplay('sendPasswdModal', { hc => $hc }, { Return => 1, Page => 'login' });
@@ -93,9 +91,13 @@ sub displaySendPassword {
 sub sendPassword {
 	my ($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $form = getCurrentForm();
+
+	# XXX This is not done, so return errors for testing
+	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
+	my $updates = {};
+	$updates->{hc} = $hc;
+	return $updates;
 }
 
 1;

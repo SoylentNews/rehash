@@ -2086,8 +2086,24 @@ sub saveModalPrefs {
         }
 
 	if ($params{'formname'} eq 'sendPasswdModal') {
+		my $updates = {};
+		my $sp_updates = {};
+
+		# XXX Temporarily forcing errors
 		my $login_reader = getObject("Slash::Login");
-		$login_reader->sendPassword();
+		$sp_updates = $login_reader->sendPassword();
+
+		foreach my $update (keys %$sp_updates) {
+			$updates->{$update} = $sp_updates->{$update};
+		}
+
+		# XXX Test
+		$updates->{modal_message_feedback} = 1;
+
+		if (keys %$updates) {
+			my $ret = setModalUpdates($updates);
+			return $ret;
+		}
 	}
 
 	if ($params{'formname'} ne "sectional"         &&
@@ -2102,21 +2118,23 @@ sub setModalUpdates {
 	my ($updates) = @_;
 
 	my $user = getCurrentUser();
-	my $reskey = getObject('Slash::ResKey');
-
+	
 	my $reskey_resource = 'ajax_user';
-	if ((caller(2))[3] =~ /\bgetModalPrefsAnon(HC)?$/) {
+	if ((caller(2))[3] =~ /\bsaveModalPrefsAnon(HC)?$/) {
 		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
 	}
 
-	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
-	$rkey->create;
-	if ($rkey->failure) {
-		# XXX need to handle errors, esp. for HC
-		# XXX Set a 'critical error' form element with a message and disable the input button? -Cbrown
-		return;
-	} else {
-		$user->{state}{reskey} = $rkey->reskey;
+	if ($reskey_resource ne 'ajax_base_hc') {
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
+		$rkey->create;
+		if ($rkey->failure) {
+			# XXX need to handle errors, esp. for HC
+			# XXX Set a 'critical error' form element with a message and disable the input button? -Cbrown
+			return;
+		} else {
+			$user->{state}{reskey} = $rkey->reskey;
+		}
 	}
 
 	# Refresh the reskey
