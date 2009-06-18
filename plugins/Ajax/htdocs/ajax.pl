@@ -1501,7 +1501,7 @@ sub saveModalPrefs {
 	my($rkey);
 	if ((caller(1))[3] =~ /\bsaveModalPrefsAnonHC$/) {
 		my $reskey = getObject('Slash::ResKey');
-		$rkey = $reskey->key('ajax_base_hc', { nostate => 1 });
+		$rkey = $reskey->key('ajax_base_hc');
 		$user->{state}{reskey} = $rkey->reskey;
 		$rkey->use;
 	}
@@ -2026,10 +2026,6 @@ sub saveModalPrefs {
 		my $changepass = 0;
                 my $error = 0;
                 my $error_message = '';
-		if ($rkey->failure) {
-			$error_message = $rkey->errstr;
-			$error = 1;
-		}
 
 		# inputmode 1: password, cookie, or session
 		# inputmode 2: OpenID (not yet implemented)
@@ -2100,6 +2096,13 @@ sub saveModalPrefs {
 	if ($params{'formname'} eq 'sendPasswdModal') {
 		my $updates = {};
 		my $sp_updates = {};
+		my $error_message = '';
+		my $error = 0;
+
+		if ($rkey->failure) {
+                        $error_message = $rkey->errstr;
+                        $error = 1;
+                }
 
 		# XXX Temporarily forcing errors
 		my $login_reader = getObject("Slash::Login");
@@ -2110,7 +2113,7 @@ sub saveModalPrefs {
 		}
 
 		# XXX Test
-		$updates->{modal_message_feedback} = 1;
+		$updates->{modal_message_feedback} = $error_message;
 
 		if (keys %$updates) {
 			my $ret = setModalUpdates($updates);
