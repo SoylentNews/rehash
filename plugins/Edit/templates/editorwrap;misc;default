@@ -30,7 +30,12 @@ __template__
 </div>
 
 <div class="yui-u maincol faq" style="padding:1em">
-	[% editor %]
+	[% IF editor %]
+		[% editor %]
+	[% ELSIF newsid %]
+		<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;side=[% newsid %]">New Story Created ([% newsid %])<br>
+	[% END %]
+
 </div>
 
 </div>
