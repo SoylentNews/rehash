@@ -33,7 +33,7 @@ __template__
 	[% IF editor %]
 		[% editor %]
 	[% ELSIF newsid %]
-		<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;side=[% newsid %]">New Story Created ([% newsid %])<br>
+		<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% newsid %]">New Story Created ([% newsid %])<br>
 	[% END %]
 
 </div>

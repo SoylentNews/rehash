@@ -183,7 +183,7 @@ sub saveItem {
 
 	if ($fhitem && $fhitem->{id}) {
 		# creating a new story
-		if ($fhitem->{type} eq "story" && !$preview->{src_fhid}) {
+		if ($fhitem->{type} eq "story") {
 			$create_retval = $self->editCreateStory($preview, $fhitem);
 		}
 	}
@@ -262,6 +262,7 @@ sub editCreateStory {
 
 		
 	}
+	return $sid;
 }
 
 sub DESTROY {
