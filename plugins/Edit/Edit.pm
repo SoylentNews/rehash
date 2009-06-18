@@ -200,13 +200,30 @@ sub saveItem {
 sub editCreateStory {
 	my($self, $preview, $fhitem) = @_;
 	my $data;
+
+	my $chosen_hr = { };
+	my @topics;
+	push @topics, $fhitem->{tid} if $fhitem.tid;
+
+	if ($fhitem->{primaryskid}) {
+		my $nexus = $slashdb->getNexusFromSkid($fhitem->{primaryskid});
+		push @topics, $nexus if $nexus;
+	}
+	for my $tid (@topics) {
+		$chosen_hr->{$tid} =
+			$tid == $constants->{mainpage_nexus_tid}
+			? 30
+			: $constants->{topic_popup_defaultweight} || 10;
+	}
+	
+
 	$data = {
 		uid 		=> $fhitem->{uid},
 		#sid
 		title		=> $fhitem->{title},
 		#section
 		submitter	=> $preview->{submitter},
-		#topics_chosen
+		topics_chosen	=> $chosen_hr,
 		dept		=> $fhitem->{dept},
 		'time'		=> $fhitem->{createtime},
 		bodytext 	=> $preview->{bodytext},
@@ -216,8 +233,6 @@ sub editCreateStory {
 		subid		=> $preview->{subid},
 		fhid		=> $preview->{src_fhid},
 		commentstatus	=> $preview->{commentstatus},
-		primaryskid	=> $fhitem->{primaryskid},
-		tid		=> $fhitem->{tid},
 		#thumb
 		-rendered	=> 'NULL',
 		neverdisplay	=> $preview->{neverdisplay},
