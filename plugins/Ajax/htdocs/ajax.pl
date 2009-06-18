@@ -65,7 +65,7 @@ sub main {
 		} else  {
 			$rkey->use;
 		}
-		if (!$rkey->success && ($op ne 'saveModalPrefsAnonHC')) {
+		if (!$rkey->success) {
 			# feel free to send msgdiv => 'thisdivhere' to the ajax call,
 			# and any reskey error messages will be sent to it
 			if ($form->{msgdiv}) {
@@ -1498,6 +1498,14 @@ sub getModalPrefs {
 sub saveModalPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
 
+	my($rkey);
+	if ((caller(1))[3] =~ /\bsaveModalPrefsAnonHC$/) {
+		my $reskey = getObject('Slash::ResKey');
+		$rkey = $reskey->key('ajax_base_hc', { nostate => 1 });
+		$user->{state}{reskey} = $rkey->reskey;
+		$rkey->use;
+	}
+
 	# Ajax returns our form as key=value, so trick URI into decoding for us.
 	require URI;
 	my $url = URI->new('//e.a/?' . $form->{'data'});
@@ -2018,6 +2026,10 @@ sub saveModalPrefs {
 		my $changepass = 0;
                 my $error = 0;
                 my $error_message = '';
+		if ($rkey->failure) {
+			$error_message = $rkey->errstr;
+			$error = 1;
+		}
 
 		# inputmode 1: password, cookie, or session
 		# inputmode 2: OpenID (not yet implemented)
@@ -2118,7 +2130,7 @@ sub setModalUpdates {
 	my ($updates) = @_;
 
 	my $user = getCurrentUser();
-	
+
 	my $reskey_resource = 'ajax_user';
 	if ((caller(2))[3] =~ /\bsaveModalPrefsAnon(HC)?$/) {
 		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
@@ -2127,7 +2139,8 @@ sub setModalUpdates {
 	if ($reskey_resource ne 'ajax_base_hc') {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
-		$rkey->create;		
+		$rkey->create;
+
 		if ($rkey->failure) {
 			# XXX need to handle errors, esp. for HC
 			# XXX Set a 'critical error' form element with a message and disable the input button? -Cbrown
@@ -2255,7 +2268,7 @@ sub getOps {
 		saveModalPrefsAnonHC    => {
 			function        => \&saveModalPrefsAnonHC,
 			reskey_name     => 'ajax_base_hc',
-			reskey_type     => 'use',
+			reskey_type     => 'touch',
 		},
 		default	=> {
 			function        => \&default,
