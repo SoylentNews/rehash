@@ -76,8 +76,8 @@ sub allowOpenID {
 }
 
 sub getLoginData {
-	my($str) = @_;
-	return getData($str, { Page => 'login' });
+	my($str, $data) = @_;
+	return getData($str, $data, 'login');
 }
 
 sub displaySendPassword {
