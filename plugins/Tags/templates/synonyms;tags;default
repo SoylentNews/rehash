@@ -21,8 +21,7 @@ __template__
 prefers
 <input type="text" name="pref_tagname" value="">
 [% Slash.createSelect('cloutname', Slash.db.getCloutTypes.keys.grep("[a-z]"), 'describe', 1) %]
-<input type="text" name="cloutname" value="describe">
-<p><input type="submit" name="op" value="Synonymize">
+<input type="submit" name="op" value="Synonymize">
 
 </form>
 
