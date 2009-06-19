@@ -162,7 +162,10 @@ sub showEditor {
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
 	if ($p_item && $p_item->{title} && $preview->{introtext}) {
+		$editor .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
+		$editor .= "<div id='editpreview'>";
 		$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
+		$editor .= "</div>";
 	}
 	
 	my $authors = $self->getDescriptions('authors', '', 1);
