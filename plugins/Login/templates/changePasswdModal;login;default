@@ -83,7 +83,7 @@ to reauthenticate.</p>
 <div style="display: block; [% note_style %]">Enter your OpenID identity.</div>
 <input type="hidden" name="op" value="claim_openid">
 <label for="openid_url" class="openid_url">
-<input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
+<input type="text" name="openid_url" size="32" maxlength="255" value="http://">
 </label>
 <input type="submit" value="Claim ID" class="button">
 

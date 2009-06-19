@@ -86,7 +86,7 @@ END; note %]
 	<label>Claim OpenID</label>
 	<div class="note">Enter your OpenID identity.</div>
 	<label for="openid_url" class="openid_url">
-	<input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
+	<input type="text" name="openid_url" size="32" maxlength="255" value="http://">
 	</label>
 	<input type="hidden" name="op" value="claim_openid">
 	<input type="submit" value="Claim ID" class="button">
