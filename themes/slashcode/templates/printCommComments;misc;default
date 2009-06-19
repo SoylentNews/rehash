@@ -108,7 +108,7 @@ __template__
 	[% lcp %]
 
 [% IF discussion2 %]
-<div id="replyto_0"></div>
+<div class="newcmnt"><div id="replyto_0"></div></div>
 [% END %]
 
 [% IF discussion2 %]<noscript><p><b>There may be more comments in this discussion. Without JavaScript enabled, you might want to <a href="[% gSkin.rootdir %]/users.pl?op=editcomm">turn on Classic Discussion System</a> in your preferences instead.</b></p></noscript>[% END %]
