@@ -243,13 +243,14 @@ sub editCreateStory {
 		introtext 	=> $preview->{introtext},
 		#relatedtext
 		media	 	=> $fhitem->{media},
-		subid		=> $preview->{subid},
-		fhid		=> $preview->{src_fhid},
 		commentstatus	=> $preview->{commentstatus},
 		#thumb
 		-rendered	=> 'NULL',
 		neverdisplay	=> $preview->{neverdisplay},
 	};
+	
+	$data->{subid} = $preview->{subid} if $preview->{subid};
+	$data->{fhid} = $preview->{src_fhid} if $preview->{fhid};
 	
 	for (qw(dept bodytext relatedtext)) {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
