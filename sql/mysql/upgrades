@@ -6367,3 +6367,6 @@ CREATE TABLE tagnames_similarity_rendered (
 # Replace virtusername with your site's Slash virtual user.
 # perl -MSlash::Test=virtusername -le '$t = getObject("Slash::Tags"); $vc = $t->getCloutTypes()->{vote}; ($nod, $nix, $notnod, $notnix) = ($t->getTagnameidCreate("nod"), $t->getTagnameidCreate("nix"), $t->getTagnameidCreate("!nod"), $t->getTagnameidCreate("!nix")); $t->renderTagnameSimilarityFromChosen($nod, $notnix, $vc); $t->renderTagnameSimilarityFromChosen($nix, $notnod, $vc)'
 
+# 2009-06-18
+UPDATE vars SET value = 'T_2_5_0_261' WHERE name = 'cvs_tag_currentcode';
+
