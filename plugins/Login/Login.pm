@@ -49,7 +49,6 @@ sub deleteOpenID {
 	}
 
 	if ($slashdb->deleteOpenID($user->{uid}, $claimed_identity)) {
-		# XXX redirect automatically to /my/password
 		return getLoginData("openid_verify_delete", { claimed_identity => $claimed_identity });
 	} else {
 		return getLoginData("openid_error");

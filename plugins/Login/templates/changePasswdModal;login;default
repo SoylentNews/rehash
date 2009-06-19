@@ -72,7 +72,7 @@ to reauthenticate.</p>
 <input type="password" name="pass2" size="20" maxlength="20">
 <input type="button" value="Change Login Prefs" onclick="void(document.forms['modal_prefs'].inputmode.value = 1); saveModalPrefs();">
 
-<div id="modal_message_feedback" style="display: none; [% note_style %]"></div>
+<p id="modal_message_feedback" style="[% IF !error %]display: none;[% END %][% note_style %]">[% error %]</p>
 
 </form>
 
@@ -88,7 +88,8 @@ to reauthenticate.</p>
 <input type="submit" value="Claim ID" class="button">
 
 [% openids = Slash.db.getOpenIDsByUID(user.uid) %]
-<div><br><b>Your OpenIDs</b><dl>
+<p id="openid_modal_message_feedback" style="[% IF !openid_message %]display: none;[% END %][% note_style %]">[% openid_message %]</p>
+<div id="list_openids"><br><b>Your OpenIDs</b><dl>
         [% IF !openids.size %]
 <dt>None</dt>
         [% ELSE %]

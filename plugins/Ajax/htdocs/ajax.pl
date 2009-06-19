@@ -2130,10 +2130,9 @@ sub saveModalPrefs {
 		my $message = $login->deleteOpenID($params{'openid_url'});
 		my %updates;
 		$updates{changePasswdModal} = slashDisplay('changePasswdModal',
-			{ tabbed => 1 },
+			{ tabbed => 1, openid_message => $message },
 			{ Return => 1, Page => 'login'}
 		);
-		$updates{modal_message_feedback} = $message if $message;
 		return setModalUpdates(\%updates);
 	}
 
