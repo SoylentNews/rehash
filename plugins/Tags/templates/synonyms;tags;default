@@ -16,15 +16,13 @@ __template__
 
 <form action="[% constants.rootdir %][% env.script_name %]" method="post">
 
-<p>Clout type: <input type="text" name="cloutname" value="describe">
-(probably "describe", also "vote", "moderate")
-
-<p>Unwanted tagname: <input type="text" name="syn_tagname" value="">
-(to define an antonym, make its "!" tagname a synonym)
-
-<p>Preferred tagname: <input type="text" name="pref_tagname" value="">
-
-<p><input type="submit" name="op" value="Add Synonym">
+<p>Tag
+<input type="text" name="syn_tagname" value="">
+prefers
+<input type="text" name="pref_tagname" value="">
+[% Slash.createSelect('cloutname', Slash.db.getCloutTypes.keys.grep("[a-z]"), 'describe', 1) %]
+<input type="text" name="cloutname" value="describe">
+<p><input type="submit" name="op" value="Synonymize">
 
 </form>
 
