@@ -93,6 +93,8 @@ function firehose_admin_context( display ){
 	var additions = 'extras history';
 	if ( $(display).is('.fhitem-story .tag-display') ) {
 		additions += ' info';
+	} else {
+		additions += ' betaedit';
 	}
 	display.update_tags(additions, { order: 'prepend', classes: 'b' });
 }
@@ -137,7 +139,9 @@ function firehose_handle_admin_commands( commands ){
 				});
 				firehose_collapse_entry(id);
 				break;
-
+			case 'betaedit':
+				document.location.pathname = '/edit.pl?from_id=' + id;
+				break;
 			case 'binspam':
 				if ( $entry.is('.fhitem-feed') )
 					break;
