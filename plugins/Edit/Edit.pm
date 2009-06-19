@@ -62,8 +62,35 @@ sub getOrCreatePreview {
 		$fh->setFireHose($fhid, $fh_data);
 
 		$self->setPreview($id, $p_data);
+		my $preview = $self->getPreview($id);
+		$self->createInitialTagsForPreview($src_item, $preview);
 		return $id;
 			
+	}
+}
+
+sub createInitialTagsForPreview {
+	my($self, $item, $preview) = @_;
+	my $user = getCurrentUser();
+	return if $user->{is_anon} || !$preview || !$item || !$item->{id} || !$preview->{id};
+
+	my @tids;
+	push @tids, $item->{tid} if $item->{tid};
+	if ($item->{primaryskid}) {
+		my $nexus = $self->getNexusFromSkid($item->{primaryskid});
+		push @tids, $nexus if $nexus;
+	}
+
+	my $tree = $self->getTopicTree();
+	my $tagsdb = getObject('Slash::Tags');
+	my %tt = ( ); # topic tagnames
+	for my $tid (@tids) {
+		my $kw = $tree->{$tid}{keyword};
+		next unless $tagsdb->tagnameSyntaxOK($kw); # must be a valid tagname
+		$tt{$kw} = 1;
+	}
+	for my $tagname (sort keys %tt) {
+		$tagsdb->createTag({ name => $tagname, table => 'preview', id => $preview->{preview_id} });
 	}
 }
 
