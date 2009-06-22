@@ -83,7 +83,6 @@ our @EXPORT  = qw(
 	setCookie
 	getPublicLogToken
 	userLogout
-	getOpenID
 	normalizeOpenID
 
 	getPollVoterHash
@@ -1389,40 +1388,7 @@ sub setCookie {
 }
 
 #========================================================================
-
-{
-my $ua;
-
-sub getOpenIDSecret {
-	my($time) = @_;
-	return getCurrentStatic('openid_consumer_secret') . $time;
-}
-
-sub getOpenID {
-	my($form) = @_;
-	require Net::OpenID::Consumer;
-	require LWPx::ParanoidAgent;
-
-	$ua ||= LWPx::ParanoidAgent->new;
-
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-	my $abs = $user->{state}{ssl}
-		? $constants->{absolutedir_secure}
-		: $constants->{absolutedir};
-
-	my $csr = Net::OpenID::Consumer->new(
-		ua              => LWPx::ParanoidAgent->new,
-		consumer_secret => \&getOpenIDSecret,
-		args            => $form,
-		required_root   => $abs . '/',
-		#cache		=> '', # XXX should implement with $mcd
-		debug           => 1 # XXX
-	);
-
-	return $csr;
-}
-}
+# rest of OpenID stuff in Login plugin
 
 sub normalizeOpenID {
 	my($openid_url) = @_;

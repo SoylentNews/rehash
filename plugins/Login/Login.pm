@@ -25,7 +25,6 @@ LONG DESCRIPTION.
 
 use strict;
 
-use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
@@ -34,6 +33,40 @@ use Slash::Constants qw(:web :messages);
 use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
+
+# extra security similar to reskey, makes sure timestamp in return_to URL isn't faked
+# we probably don't need it since we have reskeys, but best to use it anyway
+sub getOpenIDSecret {
+	my($time) = @_;
+	return getCurrentStatic('openid_consumer_secret') . $time;
+}
+
+sub getOpenID {
+	my($self, $form) = @_;
+	require Net::OpenID::Consumer;
+	require LWPx::ParanoidAgent;
+
+	$self->{_ua}    ||= LWPx::ParanoidAgent->new;
+	$self->{_cache} ||= Slash::Login::Cache->new;
+
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $abs = $user->{state}{ssl}
+		? $constants->{absolutedir_secure}
+		: $constants->{absolutedir};
+
+	my $csr = Net::OpenID::Consumer->new(
+		ua              => $self->{_ua},
+		consumer_secret => \&getOpenIDSecret,
+		args            => $form,
+		required_root   => $abs . '/',
+		cache		=> $self->{_cache},
+		debug           => 1 # XXX
+	);
+
+	return $csr;
+}
+
 
 sub deleteOpenID {
 	my($self, $claimed_identity) = @_;
@@ -360,6 +393,30 @@ sub ajaxCheckNickAvailability {
 		);
 
         return Data::JavaScript::Anon->anon_dump({ updates => $updates });
+}
+
+
+package Slash::Login::Cache;
+use strict;
+use Slash;
+use Slash::Utility;
+
+sub new {
+	my $slashdb = getCurrentDB();
+	my $mcd = $slashdb->getMCD or return undef;
+	my $mcdkey = "$slashdb->{_mcd_keyprefix}:openid:";
+
+	return bless { _mcd => $mcd, _mcdkey => $mcdkey }, __PACKAGE__;
+}
+
+sub set {
+	my($self, $key, $value, $expires) = @_;
+	$self->{_mcd}->set($self->{_mcdkey} . $key, $value, $expires);
+}
+
+sub get {
+	my($self, $key) = @_;
+	$self->{_mcd}->get($self->{_mcdkey} . $key);
 }
 
 1;

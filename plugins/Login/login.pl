@@ -546,7 +546,7 @@ sub claimOpenID {
 		return;
 	}
 
-	my $csr = getOpenID();
+	my $csr = $login->getOpenID;
 	my $identity = $csr->claimed_identity($form->{openid_url});
 	unless ($identity) {
 		printOpenID(getData("openid_invalid_identity"));
@@ -627,7 +627,7 @@ sub verifyOpenID {
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{reskey} });
 
-	my $csr = getOpenID($form);
+	my $csr = $login->getOpenID($form);
 
 	$csr->handle_server_response(
 		cancelled => sub {
