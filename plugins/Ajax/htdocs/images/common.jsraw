@@ -2386,7 +2386,7 @@ function inlineAdCheckTimer(id, url, clickMax, secsMax) {
 }
 
 function inlineAdFirehose($article) {
-	var Fh=Slash.Firehose, Ad=Fh.floating_slashbox_ad;
+	var Fh=Slash.Firehose, Ad=Fh.floating_slashbox_ad, is_combined=Ad.combined_mode();
 
 	if (!fh_adTimerUrl)
 		return 0;
@@ -2409,7 +2409,7 @@ function inlineAdFirehose($article) {
 	if (! inlineAdCheckTimer(id, fh_adTimerUrl, fh_adTimerClicksMax, fh_adTimerSecsMax))
 		return 0;
 
-	if (Ad.is_visible())
+	if (!is_combined && Ad.is_visible())
 		return 0;
 
 	var $list		= $article.find('[context=system]'),
@@ -2418,7 +2418,7 @@ function inlineAdFirehose($article) {
 		adUrl		= fh_adTimerUrl
 						+ '?skin=' + (skin || 'mainpage')
 						+ (topic ? '&topic='+topic : '')
-						+ (Ad.combined_mode() ? '&pos=6&cat=imu' : ''),
+						+ (is_combined ? '&pos=6&cat=imu' : ''),
 		ad_content	= '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
 
 	Ad($article, ad_content);
