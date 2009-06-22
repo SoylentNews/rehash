@@ -2597,7 +2597,7 @@ function combined_mode( enable ){
 
 	enable = enable && fh_adTimerUrl && !$('#fad1,#fad2').length;
 	if ( COMBINED_MODE !== enable ) {
-		var suffix;
+		var suffix, padding;
 
 		if ( enable ) {
 			AD_HEIGHT = 250;
@@ -2608,7 +2608,12 @@ function combined_mode( enable ){
 			CROWN_HEIGHT = 0;
 			$(window).unbind('scroll', scroll_crown);
 		}
-		$slashboxes && $slashboxes.css('padding-top', CROWN_HEIGHT ? ''+CROWN_HEIGHT+'px' : '');
+
+		padding = CROWN_HEIGHT ? ''+CROWN_HEIGHT+'px' : '';
+		($slashboxes||$([])).css({
+			paddingTop:		padding,
+			paddingBottom:	padding
+		});
 		COMBINED_MODE = enable;
 		fix_ad_position();
 	}
