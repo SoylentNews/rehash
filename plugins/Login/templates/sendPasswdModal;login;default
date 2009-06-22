@@ -13,7 +13,7 @@ __name__
 sendPasswdModal
 __template__
 
-<form id ="modal_prefs">
+<form id ="modal_prefs" onsubmit="return false">
 [% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="sendPasswdModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
