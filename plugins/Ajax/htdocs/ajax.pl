@@ -1511,7 +1511,10 @@ sub saveModalPrefs {
 		$form->{hcanswer} = $params{hcanswer};
 		$rkey = $reskey->key('ajax_base_hc');
 		$user->{state}{reskey} = $rkey->reskey;
-		$rkey->use;
+
+		# Defer use for certain ops.
+		$rkey->use unless $params{formname} eq 'sendPasswdModal';
+		
 	}
 
 	# D2 display
@@ -2099,24 +2102,35 @@ sub saveModalPrefs {
 	if ($params{'formname'} eq 'sendPasswdModal') {
 		my $updates = {};
 		my $sp_updates = {};
-		my $error_message = '';
-		my $error = 0;
-
-		if ($rkey->failure) {
-                        $error_message = $rkey->errstr;
-                        $error = 1;
-                }
-
-		# XXX Temporarily forcing errors
+		my $validated_uid = $constants->{anonymous_coward_uid};
+		my $validated_nick = '';
+		
 		my $login_reader = getObject("Slash::Login");
-		$sp_updates = $login_reader->sendPassword();
+		$sp_updates = $login_reader->sendPassword(\%params, \$validated_uid, \$validated_nick);
 
 		foreach my $update (keys %$sp_updates) {
 			$updates->{$update} = $sp_updates->{$update};
 		}
 
-		if ($error && $error_message) {
-			$updates->{modal_message_feedback} = $error_message;
+		if (!$updates->{error}) {
+			$rkey->use;
+
+			if ($rkey->failure) {
+				$updates->{hc_error} = getData('hc_error', { error => $rkey->errstr }, 'login');
+				$updates->{unickname_error} = getData('modal_mail_reset_error', {}, 'login');
+			} elsif ($user->{state}{hcinvalid}) {
+				$updates->{hc_form} = '';
+				$updates->{hc_error} = getData('hc_invalid_error', { centered => 1 }, 'login');
+				$updates->{sendpass_submit} = getData('submit_to_close', { centered => 1 }, 'login');
+			} else {
+				$login_reader->sendMailPasswd($validated_uid);
+				$updates->{hc_form} = '';
+				$updates->{hc_error} = '';
+				$updates->{unickname} = '';
+				$updates->{unickname_label} = '';
+				$updates->{unickname_error} = getData('modal_mail_mailed_note', { centered => 1, name => $validated_nick }, 'login');
+				$updates->{sendpass_submit} = getData('submit_to_close', { centered => 1 }, 'login');
+			}
 		}
 
 		if (keys %$updates) {

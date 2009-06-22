@@ -89,15 +89,92 @@ sub displaySendPassword {
 }
 
 sub sendPassword {
-	my ($self) = @_;
+	my ($self, $params, $validated_uid, $validated_nick) = @_;
 
-	my $updates = {};
-	my $error_message = '';
-	my $error = 0;
+	my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+        my $user = getCurrentUser();
+        my $form = (keys %$params) ? $params : getCurrentForm();
 
-	my $user = getCurrentUser();
+        my $uid = $user->{uid};
+        my $unickname = $form->{unickname};
+        my $updates = {};
+        my $error_message = '';
+        my $error = 0;
 
-	return $updates;
+        if ($unickname) {
+                if ($unickname =~ /\@/) {
+                        $uid = $slashdb->getUserEmail($unickname);
+                } elsif ($unickname =~ /^\d+$/) {
+                        my $tmpuser = $slashdb->getUser($unickname, ['nickname', 'uid']);
+                        $uid = $tmpuser->{uid};
+                } else {
+                        $uid = $slashdb->getUserUID($unickname);
+                }
+        }
+
+	if (!$unickname || !$uid || isAnon($uid)) {
+                $updates->{unickname_error} = getData('modal_mail_nonickname', {}, 'login');
+                $updates->{error} = 1;
+        } elsif ($user->{acl}{nopasswd}) {
+                $updates->{unickname_error} = getData('modal_mail_acl_nopasswd', {}, 'login');
+                $updates->{error} = 1;
+        }
+
+        return $updates if $updates->{error};
+
+        my %srcids;
+        my $user_send = $slashdb->getUser($uid);
+
+        @srcids{keys %{$user->{srcids}}} = values %{$user->{srcids}};
+        delete $srcids{uid};
+
+        if ($slashdb->checkAL2(\%srcids, [qw( nopost nopostanon spammer openproxy )])) {
+                $updates->{unickname_error} = getData('modal_mail_readonly', {}, 'login');
+                $updates->{error} = 1;
+        } elsif ($slashdb->checkMaxMailPasswords($user_send)) {
+                $updates->{unickname_error} = getData('modal_mail_toooften', {}, 'login');
+                $updates->{error} = 1;
+        }
+
+        if (!$updates->{error}) {
+                $$validated_uid = $uid;
+                $$validated_nick = $user_send->{nickname};
+        }
+
+        return $updates;
+}
+
+sub sendMailPasswd {
+        my ($self, $uid) = @_;
+
+        return if isAnon($uid);
+
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+        my $user = $slashdb->getUser($uid);
+
+	#my $newpasswd = $slashdb->getNewPasswd($uid);
+	my $newpasswd = '__NEW_PASSWD__';
+
+        my $r = Apache->request;
+        my $remote_ip = $r->connection->remote_ip;
+
+        my $xff = $r->header_in('X-Forwarded-For') || '';
+        $xff =~ s/\s+/ /g;
+        $xff = substr(strip_notags($xff), 0, 20);
+
+        my $ua = $r->header_in('User-Agent') || '';
+        $ua =~ s/\s+/ /g;
+        $ua = substr(strip_attribute($ua), 0, 60);
+
+	#my $msg = getData('mail_msg', {
+	#	newpasswd       => $newpasswd,
+	#	tempnick        => $user->{nickname},
+	#	remote_ip       => $remote_ip,
+	#	x_forwarded_for => $xff,
+	#	user_agent      => $ua,
+	#}, { Page => 'login' });
 }
 
 1;
