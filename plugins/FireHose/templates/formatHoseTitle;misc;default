@@ -110,7 +110,7 @@ IF adminmode;
 		pop_str = '<span class="sodify" onclick="firehose_set_options(\'color\', \'' _ color _ '\')" title="Filter Firehose to entries rated ' _ color _ ' or better" ></span><span class="soda pop' _  pop_val _ '" title="Filter Firehose to entries rated ' _ color _ ' or better" onclick="firehose_set_options(\'color\', \'' _ color _ '\')"><span>' _ pop_disp _ editorpop_disp _ '</span></span> ';
 	END;
         IF item.type != "story"; reject_checkbox = PROCESS reject_firehose id = item.id; END;
-        title = reject_checkbox _ pop_str _ title;
+        title = pop_str _ title;
 ELSE;
 	IF !form.skippop && !options.nocolors;
 		pop_str = '<span class="sodify" onclick="firehose_set_options(\'color\', \'' _ color _ '\')" title="Filter Firehose to entries rated ' _ color _ ' or better" ></span><span class="soda pop' _  pop_val _ '"';
@@ -127,6 +127,7 @@ IF item.type == "journal";
 	END;
 END;
 	%]
+
 	[% IF user.is_admin;
 		title = title _ '<span class="journal_firehoseedit"><a href="' _ gSkin.rootdir _ '/firehose.pl?op=edit&amp;id=' _ item.id _ '" title="Edit Firehose Entry">Edit Firehose Entry</a></span>';
 	END %]
