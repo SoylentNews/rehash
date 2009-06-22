@@ -587,7 +587,7 @@ sub claimOpenID {
 	my $reskey_text = $rkey->reskey;
 	$slashdb->setOpenIDResKey($claimed_identity, $reskey_text);
 
-	my $slash_return_to = $form->{slash_return_to} ? ('&slash_return_to=' . fixparam($form->{slash_return_to})) : '';
+	my $slash_returnto = $form->{slash_returnto} ? ('&slash_returnto=' . fixparam($form->{slash_returnto})) : '';
 	my $abs = root2abs();
 
 	$identity->set_extension_args(
@@ -598,7 +598,7 @@ sub claimOpenID {
 	);
 	my $check_url = $identity->check_url(
 		delayed_return => 1,
-		return_to      => "$abs/login.pl?op=verify_openid$openid_login$slash_return_to&reskey=$reskey_text",
+		return_to      => "$abs/login.pl?op=verify_openid$openid_login$slash_returnto&reskey=$reskey_text",
 		trust_root     => "$abs/"
 	);
 
@@ -666,7 +666,7 @@ sub verifyOpenID {
 				if ($claimed_uid) {
 					my $cookvalue = $slashdb->getLogToken($claimed_uid, 1);
 					setCookie('user', bakeUserCookie($claimed_uid, $cookvalue), $slashdb->getUser($claimed_uid, 'session_login'));
-					my $return_to = $form->{slash_return_to} || (root2abs() . '/');
+					my $return_to = $form->{slash_returnto} || (root2abs() . '/');
 					redirect($return_to);
 				} else {
 					# XXX find way to attach this OpenID automatically after logging in? for now, no.
