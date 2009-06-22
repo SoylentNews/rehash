@@ -2418,8 +2418,9 @@ function inlineAdFirehose($article) {
 		adUrl		= fh_adTimerUrl
 						+ '?skin=' + (skin || 'mainpage')
 						+ (topic ? '&topic='+topic : '')
-						+ (is_combined ? '&pos=6&cat=imu' : ''),
-		ad_content	= '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
+						+ (is_combined ? '&pos=84&cat=medrec' : ''),
+		height		= is_combined ? 250 : 300,
+		ad_content	= '<iframe src="' + adUrl + '" height="' + height + '" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
 
 	Ad($article, ad_content);
 
