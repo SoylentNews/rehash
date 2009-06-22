@@ -2585,11 +2585,8 @@ function fix_ad_position( would_recurse ){
 			new_top = pin_between(space.top, natural_top, space.bottom) - Position($ad_offset_parent).top;
 		}
 
-		$ad_position.
-			removeClass('Empty Top No Bottom').
-			addClass(pinClasses[pinning]);
-
 		new_top!==false && $ad_position.css('top', new_top);
+		$ad_position.setClass(pinClasses[pinning] + ($ad_position.is('.Crown') ? ' Crown' : ''));
 	}
 }
 
