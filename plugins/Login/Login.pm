@@ -146,35 +146,38 @@ sub sendPassword {
 }
 
 sub sendMailPasswd {
-        my ($self, $uid) = @_;
+	my ($self, $uid) = @_;
 
-        return if isAnon($uid);
+	return if isAnon($uid);
 
-        my $slashdb = getCurrentDB();
-        my $constants = getCurrentStatic();
-        my $user = $slashdb->getUser($uid);
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $user = $slashdb->getUser($uid);
 
-	#my $newpasswd = $slashdb->getNewPasswd($uid);
-	my $newpasswd = '__NEW_PASSWD__';
+	my $newpasswd = $slashdb->getNewPasswd($uid);
 
-        my $r = Apache->request;
-        my $remote_ip = $r->connection->remote_ip;
+	my $r = Apache->request;
+	my $remote_ip = $r->connection->remote_ip;
 
-        my $xff = $r->header_in('X-Forwarded-For') || '';
-        $xff =~ s/\s+/ /g;
-        $xff = substr(strip_notags($xff), 0, 20);
+	my $xff = $r->header_in('X-Forwarded-For') || '';
+	$xff =~ s/\s+/ /g;
+	$xff = substr(strip_notags($xff), 0, 20);
 
-        my $ua = $r->header_in('User-Agent') || '';
-        $ua =~ s/\s+/ /g;
-        $ua = substr(strip_attribute($ua), 0, 60);
+	my $ua = $r->header_in('User-Agent') || '';
+	$ua =~ s/\s+/ /g;
+	$ua = substr(strip_attribute($ua), 0, 60);
 
-	#my $msg = getData('mail_msg', {
-	#	newpasswd       => $newpasswd,
-	#	tempnick        => $user->{nickname},
-	#	remote_ip       => $remote_ip,
-	#	x_forwarded_for => $xff,
-	#	user_agent      => $ua,
-	#}, { Page => 'login' });
+	my $subject = getData('mail_subject', { nickname => $user->{nickname} }, 'login');
+
+	my $msg = getData('mail_msg', {
+		newpasswd       => $newpasswd,
+		tempnick        => $user->{nickname},
+		remote_ip       => $remote_ip,
+		x_forwarded_for => $xff,
+		user_agent      => $ua,
+	}, 'login');
+
+	doEmail($uid, $subject, $msg);
 }
 
 1;
