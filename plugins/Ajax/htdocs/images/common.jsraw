@@ -2595,7 +2595,7 @@ function combined_mode( enable ){
 		return COMBINED_MODE;
 	}
 
-	enable = enable && !$('#fad1,#fad2').length;
+	enable = enable && fh_adTimerUrl && !$('#fad1,#fad2').length;
 	if ( COMBINED_MODE !== enable ) {
 		var suffix;
 
