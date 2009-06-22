@@ -2590,6 +2590,13 @@ function fix_ad_position( would_recurse ){
 	}
 }
 
+function ad_message( e ){
+	var match = /^p(.+):height=(\d+)$/.exec(e.data);
+	if ( match && match[1]==='6' ) {
+		$ad_position.children('iframe:first').attr('height', match[2]);
+	}
+}
+
 function combined_mode( enable ){
 	if ( enable===void(0) ) {
 		return COMBINED_MODE;
@@ -2602,11 +2609,15 @@ function combined_mode( enable ){
 		if ( enable ) {
 			AD_HEIGHT = 250;
 			CROWN_HEIGHT = AD_HEIGHT + CROWN_PADDING;
-			$(window).bind('scroll', scroll_crown);
+			$(window).
+				bind('scroll', scroll_crown).
+				bind('message', ad_message);
 		} else {
 			AD_HEIGHT = 300;
 			CROWN_HEIGHT = 0;
-			$(window).unbind('scroll', scroll_crown);
+			$(window).
+				unbind('message', ad_message).
+				unbind('scroll', scroll_crown);
 		}
 
 		padding = CROWN_HEIGHT ? ''+CROWN_HEIGHT+'px' : '';
