@@ -38,7 +38,7 @@ sub getOrCreatePreview {
 		my $src_item = $fh->getFireHose($form->{from_id}); 
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
-		my $type = $user->{is_admin} ? "story" : "submission";
+		my $type = $user->{is_admin} && $form->{type} ne "submission" ? "story" : "submission";
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
 		my ($fh_data, $p_data);
