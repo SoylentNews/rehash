@@ -37,9 +37,10 @@ chars = chars.replace('0123456789', '0-9');
 <br>
 <label for="openid_url" class="openid_url">
 <input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
+</label>
 <input type="button" value="Validate">
 
-<br><hr><br>
+<br><br>
 
 <label><b>Nick Name</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 <br>
@@ -56,7 +57,7 @@ chars = chars.replace('0123456789', '0-9');
 <input type="text" id="email" name="email" value="" size="40">
 <input type="text" id="email2" name="email2" value="" size="40">
 <br>
-Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %]<br>
+Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %]
 without you setting your preferences to display it.
 
 <br><br>
