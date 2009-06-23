@@ -116,7 +116,7 @@ sub header {
 	$data = { title => $data } unless ref($data) eq 'HASH';
 	$data->{title} = strip_notags($data->{title} || '');
 
-	my $r = undef;
+	my $r;
 	unless ($form->{ssi} || $form->{taskgen}) {
 		$r = Apache->request;
 
@@ -234,8 +234,8 @@ sub header {
 		}
 	}
 
-	$r->rflush() if $r && !$options->{Return};
 
+	$r->rflush if $r && !$options->{Return};
 	return $return_str;
 }
 
