@@ -1227,8 +1227,9 @@ sub editStory {
 
 		# not normally set here, so we force it to be safe
 		$storyref->{tid} = $storyref->{topiclist};
-
-		$storyref->{'time'} = findTheTime();
+			
+		my $admindb = getObject('Slash::Admin');
+		$storyref->{'time'} = $admindb->findTheTime();
 
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
@@ -1987,8 +1988,10 @@ sub updateStory {
 	my $related_sids = join ',', keys %$related_sids_hr;
 	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
+	
+	my $admindb = getObject('Slash::Admin');
 
-	my $time = findTheTime();
+	my $time = $admindb->findTheTime();
 
 	for my $field (qw( introtext bodytext media)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
@@ -2011,7 +2014,6 @@ sub updateStory {
 		$story_text = processSlashTags($story_text);
 	}
 
-	my $admindb = getObject('Slash::Admin');
 	$form->{relatedtext} = $admindb->relatedLinks(
 		$story_text, $topic,
 		$slashdb->getAuthor($form->{uid}, 'nickname'), $form->{uid}
@@ -2438,7 +2440,7 @@ sub saveStory {
 		$story_text, $tids, $edituser->{nickname}, $edituser->{uid}
 	);
 
-	my $time = findTheTime();
+	my $time = $admindb->findTheTime();
 	$slashdb->setCommonStoryWords();
 
 	# used to just pass $form to createStory, which is not
@@ -2555,41 +2557,6 @@ sub getTitle {
 	$hashref->{value} = $value;
 	return slashDisplay('titles', $hashref,
 		{ Return => 1, Nocomm => $nocomm });
-}
-
-##################################################################
-# Based on $form, returns the time for a story we're saving.  It
-# takes a look at the 'fastforward' checkbox, handles a blank field
-# semi-intelligently, and rounds all times down to the minute to
-# avoid triggering an annoying (if relatively harmless) misbehavior
-# in freshenup.pl.
-sub findTheTime {
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-	my $slashdb = getCurrentDB();
-	my $time;
-	if ($form->{fastforward}) {
-		$time = $slashdb->getTime();
-	} elsif ($form->{'time'}) {
-		$time = $form->{'time'};
-	} else {
-		# Whoops, the admin left the field blank, bad admin,
-		# no donut.  Pick a time far enough in the future that
-		# it gives the admin time to correct the mistake.
-		# Twenty minutes should be enough.
-		my $add_secs;
-		if ($constants->{subscribe_future_secs}) {
-			$add_secs = $constants->{subscribe_future_secs} + 20*60;
-		} else {
-			$add_secs = 20*60;
-		}
-		$time = $slashdb->getTime({ add_secs => $add_secs });
-	}
-	# Force story times to be rounded down to the nearest minute;  this
-	# eliminates confusion in freshenup.pl about whether index.pl or
-	# article.pl gets written first.
-	$time =~ s/( \d\d:\d\d):\d\d$/$1:00/;
-	return $time;
 }
 
 sub displaySignoffStats {

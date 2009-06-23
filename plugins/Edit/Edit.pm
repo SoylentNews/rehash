@@ -99,6 +99,7 @@ sub savePreview {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $fh = getObject("Slash::FireHose");
+	my $admindb = getObject("Slash::Admin");
 	return if $user->{is_anon} || !$form->{id};
 	
 	my $preview = $self->getPreview($form->{id});
@@ -116,7 +117,9 @@ sub savePreview {
 
 	$fh_data->{uid}		= $form->{uid};
 	$fh_data->{title} 	= $form->{title};
-	$fh_data->{createtime} 	= $form->{createtime} if $form->{createtime} =~ /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/;
+
+	# XXXEdit maybe only use findTheTime for story type?
+	$fh_data->{createtime} 	= $admindb->findTheTime();
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{dept} 	= $form->{dept};
 	$fh_data->{introtext}	= $form->{introtext};
@@ -238,6 +241,7 @@ sub editCreateStory {
 	push @topics, $fhitem->{tid} if $fhitem->{tid};
 
 	my $tagsdb = getObject("Slash::Tags");
+	my $admindb = getObject("Slash::Admin");
 
 	my $current_tags_array = $tagsdb->getTagsByNameAndIdArrayref(
                         'preview', $preview->{preview_id}, { uid => $user->{uid}, include_private => 1 });
@@ -268,7 +272,7 @@ sub editCreateStory {
 		submitter	=> $preview->{submitter},
 		topics_chosen	=> $chosen_hr,
 		dept		=> $fhitem->{dept},
-		'time'		=> $fhitem->{createtime},
+		'time'		=> $admindb->findTheTime($fhitem->{createtime}, $preview->{fastforward}),
 		bodytext 	=> $preview->{bodytext},
 		introtext 	=> $preview->{introtext},
 		#relatedtext

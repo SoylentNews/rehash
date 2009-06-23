@@ -706,6 +706,47 @@ sub addSpriteForSid {
 	}
 }
 
+##################################################################
+# Based on $t (time from form), returns the time for a story we're saving.  It
+# takes a look at the and $ff 'fastforward' checkbox, handles a blank field
+# semi-intelligently, and rounds all times down to the minute to
+# avoid triggering an annoying (if relatively harmless) misbehavior
+# in freshenup.pl.
+sub findTheTime {
+	my ($self, $t, $ff) = @_;
+	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
+	my $time;
+	
+	$t= $form->{time} if !defined($t);
+	$ff= $form->{fastforward} if !defined($ff);
+
+	if ($ff) {
+		$time = $slashdb->getTime();
+	} elsif ($t) {
+		$time = $t;
+	} else {
+		# Whoops, the admin left the field blank, bad admin,
+		# no donut.  Pick a time far enough in the future that
+		# it gives the admin time to correct the mistake.
+		# Twenty minutes should be enough.
+		my $add_secs;
+		if ($constants->{subscribe_future_secs}) {
+			$add_secs = $constants->{subscribe_future_secs} + 20*60;
+		} else {
+			$add_secs = 20*60;
+		}
+		$time = $slashdb->getTime({ add_secs => $add_secs });
+	}
+	# Force story times to be rounded down to the nearest minute;  this
+	# eliminates confusion in freshenup.pl about whether index.pl or
+	# article.pl gets written first.
+	$time =~ s/( \d\d:\d\d):\d\d$/$1:00/;
+	return $time;
+}
+
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
