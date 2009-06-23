@@ -25,6 +25,30 @@ __template__
 <input type="hidden" name="formname" value="newUserModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
 
+[%
+chars = constants.nick_chars;
+chars = chars.replace('abcdefghijklmnopqrstuvwxyz', 'a-z');
+chars = chars.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z');
+chars = chars.replace('0123456789', '0-9');
+%]
+
+<label><b>Nick Name</b></label>
+<input type="text" id="newusernick" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
+<br>
+(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
+
+<br><br>
+
+<label><b>Email Address</b></label>
+<br>
+<input type="text" id="email" name="email" value="" size="40">
+<input type="text" id="email2" name="email2" value="" size="40">
+<br>
+Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %]<br>
+without you setting your preferences to display it.
+
+<br><br>
+
 <input id="modal_submit" type="button" value="Create Account" onclick="saveModalPrefs()">
 
 </form>
