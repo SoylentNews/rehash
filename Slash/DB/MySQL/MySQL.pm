@@ -2230,6 +2230,22 @@ sub getUserUID {
 	return $uid;
 }
 
+sub getUserUIDWithMatchname {
+	my($self, $name) = @_;
+
+	my $newnick = $self->sqlQuote(nickFix($name));
+	my $matchname = $self->sqlQuote(nick2matchname($newnick));
+
+	my $uid = $self->sqlSelect(
+		'uid',
+		'users',
+		"nickname = $newnick || matchname = $matchname",
+		'ORDER BY uid ASC'
+	);
+
+	return $uid;
+}
+
 ########################################################
 # Get user info from the users table with email address.
 # May be worth it to cache this at some point

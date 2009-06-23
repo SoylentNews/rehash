@@ -196,13 +196,12 @@ sub displayNewUser {
 sub ajaxCheckNickAvailability {
         my ($slashdb, $constants, $user, $form, $options) = @_;
 
-        my $is_available = $slashdb->getUserUID($form->{nickname});
         my $updates = {};
 
-        if (!$is_available) {
-                $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is available' }, 'login');
-        } else {
+        if ($slashdb->getUserUIDWithMatchname($form->{nickname})) {
                 $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is not available' }, 'login');
+        } else {
+                $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is available' }, 'login');
         }
 
         my $reskey = getObject('Slash::ResKey');
