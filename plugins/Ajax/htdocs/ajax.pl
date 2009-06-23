@@ -1484,6 +1484,10 @@ sub getModalPrefs {
 		my $login_reader = getObject("Slash::Login");
 		$login_reader->displaySendPassword();
 
+	} elsif ($form->{'section'} eq 'newUserModal') {
+		my $login_reader = getObject("Slash::Login");
+		$login_reader->displayNewUser();
+
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
@@ -2121,7 +2125,7 @@ sub saveModalPrefs {
 			} elsif ($user->{state}{hcinvalid}) {
 				$updates->{hc_form} = '';
 				$updates->{hc_error} = getData('hc_invalid_error', { centered => 1 }, 'login');
-				$updates->{sendpass_submit} = getData('submit_to_close', { centered => 1 }, 'login');
+				$updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
 			} else {
 				$login_reader->sendMailPasswd($validated_uid);
 				$updates->{hc_form} = '';

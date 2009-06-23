@@ -242,7 +242,7 @@ and you'll have to send yourself another one.
         and try again.  If you are a human, we apologize for the inconvenience.</b></p>
 
 [% CASE 'submit_to_close' %]
-        <p[% IF centered %] align="center"[% END %]><input id="sendpass_submit" type="button" value="Close" onclick="hide_modal_box()"></p>
+        <p[% IF centered %] align="center"[% END %]><input id="modal_submit" type="button" value="Close" onclick="hide_modal_box()"></p>
 
 [% CASE 'modal_mail_reset_error' %]
         <p id="unickname_error"></p>

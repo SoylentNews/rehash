@@ -180,6 +180,14 @@ sub sendMailPasswd {
 	doEmail($uid, $subject, $msg);
 }
 
+sub displayNewUser {
+	my ($self) = @_;
+
+	return slashDisplay('newUserModal', {}, { Return => 1, Page => 'login' });
+}
+
+
+
 1;
 
 __END__

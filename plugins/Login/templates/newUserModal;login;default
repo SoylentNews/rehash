@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+New user modal form
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+newUserModal
+__template__
+
+        [% IF tabbed == 1 %]
+        <div class="pref">
+                <span class="preftab active">Create Account</a></span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('sendPasswdModal', 'Retrieve Password', 1); return false;">Retrieve Password</a></span>
+        </div>
+        [% END %]
+
+<form id="modal_prefs" onsubmit="return false">
+[% PROCESS reskey_tag %]
+<input type="hidden" name="formname" value="newUserModal">
+<input type="hidden" name="uid" value="[% user.uid %]">
+
+<input id="modal_submit" type="button" value="Create Account" onclick="saveModalPrefs()">
+
+</form>
+__seclev__
+500
+__version__

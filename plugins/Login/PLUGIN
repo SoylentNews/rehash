@@ -9,6 +9,7 @@ template=templates/data;login;default
 template=templates/deleteOpenID;login;default
 template=templates/loginForm;login;default
 template=templates/newUserForm;login;default
+template=templates/newUserModal;login;default
 template=templates/newuser_msg;login;default
 template=templates/sendPasswdForm;login;default
 template=templates/sendPasswdModal;login;default
