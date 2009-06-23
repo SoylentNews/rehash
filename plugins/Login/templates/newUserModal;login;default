@@ -39,6 +39,10 @@ chars = chars.replace('0123456789', '0-9');
 
 <br><br>
 
+<p id="nickname_error"><b>Error</b></p>
+
+<br>
+
 <label><b>Email Address</b></label>
 <br>
 <input type="text" id="email" name="email" value="" size="40">
@@ -49,9 +53,41 @@ without you setting your preferences to display it.
 
 <br><br>
 
+<p id="email_error"><b>Error</b></p>
+
+<br>
+
+<label><input type="checkbox" name="newsletter" value="1"> <b>Send me the newsletter</b></label>
+<br>
+<label><input type="checkbox" name="headlines" value="1"> <b>Send me the daily headlines</b></label>
+
+<br><br>
+
+<label><b>My timezone</b>
+<br>
+[%
+USE this_format = format('%+0.4d %s');
+this_tzdescs = Slash.db.getDescriptions('tzdescription');
+this_tzcodes = Slash.db.getDescriptions('tzcodes');
+these_tzdescs = {};
+FOREACH tz = this_tzcodes.keys;
+        this_num = this_tzcodes.$tz / 36;
+        this_num = this_num.replace('50$', '30');
+        these_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
+END;
+
+this_tzcode = user.tzcode_orig || user.tzcode;
+Slash.createSelect('tzcode', these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort);
+%]
+<br>
+Select your current local time.
+
+<br><br>
+
 <input id="modal_submit" type="button" value="Create Account" onclick="saveModalPrefs()">
 
 </form>
+
 __seclev__
 500
 __version__
