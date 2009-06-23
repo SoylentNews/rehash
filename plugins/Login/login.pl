@@ -529,8 +529,7 @@ sub deleteOpenID {
 	}
 
 	my $return = $login->deleteOpenID($claimed_identity) or return;
-	# XXX redirect automatically to /my/password
-	printOpenID($return . getData("returnto_prefs"));
+	changePrefs(@_, $return . getData("returnto_prefs"));
 }
 
 sub claimOpenID {
@@ -675,8 +674,7 @@ sub verifyOpenID {
 			} else {
 				# XXX we do need error checking here ...
 				$slashdb->setOpenID($user->{uid}, $openid_url);
-				# XXX redirect automatically to /my/password
-				printOpenID(
+				changePrefs(@_,
 					getData("openid_verify_attach", { normalized_openid_url => $normalized_openid_url }) .
 					getData("returnto_prefs")				
 				);
