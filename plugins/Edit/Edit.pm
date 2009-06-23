@@ -30,6 +30,8 @@ sub getOrCreatePreview {
 			my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 
 			my $type = $user->{is_admin} ? "story" : "submission";
+			$type = $form->{type} if $user->{is_admin} && $form->{type};
+
 			my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 			$self->setPreview($id, { preview_fhid => $fhid });
 			return $id;
