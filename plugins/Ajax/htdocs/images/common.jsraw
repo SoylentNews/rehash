@@ -2194,6 +2194,29 @@ function saveModalPrefs(formname, this_data, this_reskey) {
 	});
 }
 
+function createacct_check_nick() {
+	var params = {};
+	params.op = 'createacct_check_nick';
+	params.nickname = document.forms.modal_prefs.newusernick.value;
+	params.reskey = document.forms.modal_prefs.nick_rkey.value;
+	ajax_update(
+		params,
+		'',
+		{
+			onComplete: function(transport) {
+				var response = eval_response(transport);
+				if (response !== undefined && response.updates !== undefined) {
+					$.each(response.updates,
+						function(id, update) {
+							$any(id).replaceWith(update).show();
+						}
+					);
+				}
+			}
+		}
+	);
+}
+
 function displayModalPrefHelp(id) {
 	var el = $any(id);
 	el.css('display', el.css('display')!='none' ? 'none' : 'block');

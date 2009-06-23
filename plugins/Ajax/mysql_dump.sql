@@ -12,7 +12,7 @@ INSERT INTO reskey_resources VALUES (106, 'ajax_base_static', 'yes');
 INSERT INTO reskey_resources VALUES (107, 'ajax_admin_static', 'yes');
 INSERT INTO reskey_resources VALUES (108, 'ajax_user_static', 'yes');
 INSERT INTO reskey_resources VALUES (109, 'ajax_base_hc', 'no');
-
+INSERT INTO reskey_resources VALUES (110, 'ajax_base_modal_misc', 'no');
 
 ##### ajax_base
 
@@ -186,7 +186,6 @@ INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 5, 25);
 INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 9, 50);
 
 ##### ajax_base_hc
-
 INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::User',                101);
 INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'use', 'Slash::ResKey::Checks::Post',                151);
 INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Checks::ACL',                 201);
@@ -198,3 +197,15 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 109, 'all', 'Slash::ResKey::Che
 INSERT INTO reskey_vars VALUES (109, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (109, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (109, 'duration_max-failures', 3, 'how many failures per reskey');
+
+
+##### ajax_base_modal_misc
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+
+INSERT INTO reskey_vars VALUES (110, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (110, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (110, 'duration_max-uses', 10, 'how many uses per timeframe');

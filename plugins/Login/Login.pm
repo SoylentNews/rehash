@@ -181,12 +181,39 @@ sub sendMailPasswd {
 }
 
 sub displayNewUser {
-	my ($self) = @_;
+        my ($self) = @_;
 
-	return slashDisplay('newUserModal', {}, { Return => 1, Page => 'login' });
+        my $user = getCurrentUser();
+
+        my $reskey = getObject('Slash::ResKey');
+        my $reskey_resource = 'ajax_base_modal_misc';
+        my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
+        $rkey->create;
+
+	return slashDisplay('newUserModal', { nick_rkey => $rkey }, { Return => 1, Page => 'login' });
 }
 
+sub ajaxCheckNickAvailability {
+        my ($slashdb, $constants, $user, $form, $options) = @_;
 
+        my $is_available = $slashdb->getUserUID($form->{nickname});
+        my $updates = {};
+
+        if (!$is_available) {
+                $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is available' }, 'login');
+        } else {
+                $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is not available' }, 'login');
+        }
+
+        my $reskey = getObject('Slash::ResKey');
+        my $reskey_resource = 'ajax_base_modal_misc';
+        my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
+        $rkey->create;
+
+        $updates->{nick_rkey} = getData('replace_rkey', { rkey_id => 'nick_rkey', rkey_name => 'nick_rkey', rkey => $rkey->reskey }, 'login');
+
+        return Data::JavaScript::Anon->anon_dump({ updates => $updates });
+}
 
 1;
 

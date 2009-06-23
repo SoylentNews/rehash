@@ -6370,3 +6370,17 @@ CREATE TABLE tagnames_similarity_rendered (
 # 2009-06-18
 UPDATE vars SET value = 'T_2_5_0_261' WHERE name = 'cvs_tag_currentcode';
 
+# for plugins/Ajax
+INSERT INTO reskey_resources VALUES (110, 'ajax_base_modal_misc', 'no');
+
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 110, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+
+INSERT INTO reskey_vars VALUES (110, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (110, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (110, 'duration_max-uses', 10, 'how many uses per timeframe');
+
+INSERT INTO ajax_ops VALUES(NULL, 'createacct_check_nick', 'Slash::Login', 'ajaxCheckNickAvailability', 'ajax_base_modal_misc', 'use');

@@ -22,6 +22,7 @@ __template__
 
 <form id="modal_prefs" onsubmit="return false">
 [% PROCESS reskey_tag %]
+[% PROCESS reskey_tag reskey_label => 'nick_rkey', rkey => nick_rkey %]
 <input type="hidden" name="formname" value="newUserModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
 
@@ -43,6 +44,7 @@ chars = chars.replace('0123456789', '0-9');
 <label><b>Nick Name</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 <br>
 <input type="text" id="newusernick" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
+<input type="button" value="Check Availability" onclick="createacct_check_nick(); return false;">
 <input type="button" value="Check Availability">
 <br>
 (Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)

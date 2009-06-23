@@ -287,6 +287,12 @@ and you'll have to send yourself another one.
                 It will remain valid for [% constants.mailpass_valid_days %] days.</b>
         </p>
 
+[% CASE 'replace_rkey' %]
+        <input type="hidden" id="[% rkey_id %]" name="[% rkey_name %]" value="[% rkey %]">
+
+[% CASE 'modal_createacct_nickname_message' %]
+        <span id="nickname_error">The nickname '[% nickname %]' [% nickname_available %]</span>
+
 [% END %]
 
 __seclev__
