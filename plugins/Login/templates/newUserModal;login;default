@@ -32,18 +32,24 @@ chars = chars.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z');
 chars = chars.replace('0123456789', '0-9');
 %]
 
-<label><b>Nick Name</b></label>
+<label><b>OpenID (optional)</b></label>&nbsp;&nbsp;<span id="openid_error" style="display: none"></span>
+<br>
+<label for="openid_url" class="openid_url">
+<input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
+<input type="button" value="Validate">
+
+<br><hr><br>
+
+<label><b>Nick Name</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
+<br>
 <input type="text" id="newusernick" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
+<input type="button" value="Check Availability">
 <br>
 (Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
 
 <br><br>
 
-<p id="nickname_error"><b>Error</b></p>
-
-<br>
-
-<label><b>Email Address</b></label>
+<label><b>Email Address</b></label>&nbsp;&nbsp;<span id="email_error" style="display: none"></span>
 <br>
 <input type="text" id="email" name="email" value="" size="40">
 <input type="text" id="email2" name="email2" value="" size="40">
@@ -52,10 +58,6 @@ Enter a valid email address <b>twice</b> to send your registration information t
 without you setting your preferences to display it.
 
 <br><br>
-
-<p id="email_error"><b>Error</b></p>
-
-<br>
 
 <label><input type="checkbox" name="newsletter" value="1"> <b>Send me the newsletter</b></label>
 <br>
