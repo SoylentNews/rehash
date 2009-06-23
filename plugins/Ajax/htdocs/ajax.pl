@@ -1517,8 +1517,7 @@ sub saveModalPrefs {
 		$user->{state}{reskey} = $rkey->reskey;
 
 		# Defer use for certain ops.
-		$rkey->use unless $params{formname} eq 'sendPasswdModal';
-		
+		$rkey->use unless (($params{formname} eq 'sendPasswdModal') || ($params{formname} eq 'newUserModal'));	
 	}
 
 	# D2 display
@@ -2154,10 +2153,14 @@ sub saveModalPrefs {
 		return setModalUpdates(\%updates);
 	}
 
+	if ($params{'formname'} eq 'newUserModal') {
+	}
+
 	if ($params{'formname'} ne "sectional"         &&
 	    $params{'formname'} ne "firehoseview"      &&
 	    $params{'formname'} ne "changePasswdModal" &&
-	    $params{'formname'} ne "sendPasswdModal") {
+	    $params{'formname'} ne "sendPasswdModal"   &&
+	    $params{'formname'} ne "newUserModal") {
 		$slashdb->setUser($params{uid}, $user_edits_table);
 	}
 }
