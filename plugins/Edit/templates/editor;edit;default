@@ -13,26 +13,47 @@ __template__
 <div id="editor" class="admin">
 	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
+
+		[% IF item.type == 'submission' %]
+			[% PROCESS formLabel value => "Your Name" %]
+			<input type="text" name="name" value="[% item.name | strip_attribute %]" size="50" maxlength="50">
+			[% PROCESS formNote note => "Leave Blank to be Anonymous" %]
+			[% PROCESS formLabel value => "Your Email or Homepage" "Where Users Can Contact You" %]
+			<input type="text" name="email" value="[% item.email %]" size="50" maxlength="50">
+			[% PROCESS formNote note => "Where users can contact you" %]
+			[% IF constants.plugin.FireHose %]
+				[% PROCESS formLabel value => "Url"  %]
+				<input type="text" name="url" value="[% preview.url_text | strip_attribute %]" size="50"> Url type:
+				[% Slash.createSelect('mediatype', Slash.db.getDescriptions('mediatypes'), { default => form.mediatype || "none" , return => 1 }) %]
+				[% PROCESS formNote note => "Main url of submission (optional but if provided must be unique) " %]
+			[% END %]
+		[% END %]
+
+		[% IF item.type == 'story' %]
 		<input type="checkbox" name="display" [% display_check %]><b>Display</b>
+		[% END %]
 		[% PROCESS formLabel value => "Title" %]
 
 		<input type="text" name="title" value="[% item.title | strip_attribute %]" size="50">
-		[% IF constants.use_dept %]
-			[% PROCESS formLabel value => "Dept" %]
-				<input type="text" name="dept" value="[% item.dept | strip_attribute %]" size="50">
+		[% IF item.type == 'story' %]
+			[% IF constants.use_dept %]
+				[% PROCESS formLabel value => "Dept" %]
+					<input type="text" name="dept" value="[% item.dept | strip_attribute %]" size="50">
+			[% END %]
+		
+			[% PROCESS formLabel value="Author" %]
+				[% author_select %]
+
+				[% commentstatus_select %]
+				<input type="text" name="createtime" value="[% item.createtime %]" size="19">
+			<label>
 		[% END %]
-
-		[% PROCESS formLabel value="Author" %]
-			[% author_select %]
-
-			[% commentstatus_select %]
-			<input type="text" name="createtime" value="[% item.createtime %]" size="19">
 		<label>
 			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 		</label>
 		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% preview.introtext | strip_literal %]</textarea>
 
-
+		[% IF item.type == 'story' %]
 		<a name="bodytext"></a>
 			<label>
 				<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
@@ -44,9 +65,17 @@ __template__
 			</label>
 			<a name="media"></a>
 				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
-			<p>
-			<input type="submit" name="op" value="preview">
-			<input type="submit" name="op" value="save">
+		[% END %]
+		[% IF item.type == 'submission' %]
+			[% PROCESS formLabel value => "Submission format", comment => "" %]
+			[% def_type = preview.sub_type || 'html'; sub_types = { "html" => "HTML Formatted", "plain" => "Plain Old Text" }; Slash.createSelect('sub_type', sub_types, def_type, 1) %]
+			[% IF preview.url_id %]
+				<input type="hidden" name="url_id" value="[% preview.url_id | strip_attribute %]">
+			[% END %]
+		[% END %]
+		<p>
+		<input type="submit" name="op" value="preview">
+		<input type="submit" name="op" value="save">
 	
 	</form>
 </div>

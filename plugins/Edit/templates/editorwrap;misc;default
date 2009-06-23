@@ -32,8 +32,12 @@ __template__
 <div class="yui-u maincol faq" style="padding:1em">
 	[% IF editor %]
 		[% editor %]
-	[% ELSIF newsid %]
-		<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% newsid %]">New Story Created ([% newsid %])<br>
+	[% ELSIF id && type %]
+		[% IF type == "story" %]
+			<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">New Story Created ([% id %])<br>
+		[% ELSIF type == "submission" %]
+			<a href="[% constants.real_rootdir %]/submission/[% id %]">New Submission Created ([% id %])<br>
+		[% END %]
 	[% END %]
 
 </div>

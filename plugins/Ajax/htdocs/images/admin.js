@@ -140,9 +140,9 @@ function firehose_handle_admin_commands( commands ){
 				firehose_collapse_entry(id);
 				break;
 			case 'betaedit':
-				var loc = document.location;
+				var loc = document.location + '';
 				match = loc.match('https?://[^/]*');
-				document.location.pathname = match + '/edit.pl?from_id=' + id;
+				document.location = match + '/edit.pl?from_id=' + id;
 				break;
 			case 'binspam':
 				if ( $entry.is('.fhitem-feed') )

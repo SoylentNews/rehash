@@ -106,6 +106,8 @@ sub savePreview {
 	
 	my $preview = $self->getPreview($form->{id});
 	return if !$preview && $preview->{preview_id};
+	
+	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 
 	#XXXEdit check if user / or eventually session has access to this preview
 	return if $user->{uid} != $preview->{uid};
@@ -113,27 +115,37 @@ sub savePreview {
 	my($p_data, $fh_data);
 
 	$p_data->{introtext} 		= $form->{introtext};
-	$p_data->{bodytext} 		= $form->{bodytext};
-	$p_data->{commentstatus} 	= $form->{commentstatus};
-	$p_data->{neverdisplay} 	= $form->{display} ? '' : 1;
 
-	$fh_data->{uid}		= $form->{uid};
+	if ($p_item->{type} eq 'story') {
+		$p_data->{bodytext} 		= $form->{bodytext};
+		$p_data->{commentstatus} 	= $form->{commentstatus};
+		$p_data->{neverdisplay} 	= $form->{display} ? '' : 1;
+		
+		$fh_data->{uid}		= $form->{uid};
+		
+		# XXXEdit maybe only use findTheTime for story type?
+		$fh_data->{createtime} 	= $admindb->findTheTime();
+		$fh_data->{media} 	= $form->{media};
+		$fh_data->{dept} 	= $form->{dept};
+		$fh_data->{bodytext}	= $form->{bodytext};
+		
+		$fh_data->{dept} =~ s/[-\s]+/-/g;
+		$fh_data->{dept} =~ s/^-//;
+		$fh_data->{dept} =~ s/-$//;
+		$fh_data->{dept} =~ s/ /-/gi;
+	}
+
+	if ($p_item->{type} eq 'submission') {
+		$fh_data->{name} = $form->{name};
+		$fh_data->{email} = $form->{email};
+		$fh_data->{mediatype} = $form->{mediatype};
+		$p_data->{url_text} = $form->{url};
+		$p_data->{sub_type} = $form->{sub_type};
+	}
+
 	$fh_data->{title} 	= $form->{title};
-
-	# XXXEdit maybe only use findTheTime for story type?
-	$fh_data->{createtime} 	= $admindb->findTheTime();
-	$fh_data->{media} 	= $form->{media};
-	$fh_data->{dept} 	= $form->{dept};
 	$fh_data->{introtext}	= $form->{introtext};
-	$fh_data->{bodytext}	= $form->{bodytext};
-	$fh_data->{title}	= $form->{title};
 	
-	
-	$fh_data->{dept} =~ s/[-\s]+/-/g;
-	$fh_data->{dept} =~ s/^-//;
-	$fh_data->{dept} =~ s/-$//;
-	$fh_data->{dept} =~ s/ /-/gi;
-
 	for my $field (qw( introtext bodytext media)) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 
@@ -220,6 +232,8 @@ sub saveItem {
 		# creating a new story
 		if ($fhitem->{type} eq "story") {
 			$create_retval = $self->editCreateStory($preview, $fhitem);
+		} elsif ($fhitem->{type} eq 'submission') {
+			$create_retval = $self->editCreateSubmission($preview, $fhitem);
 		}
 	}
 
@@ -229,7 +243,7 @@ sub saveItem {
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
-	return $create_retval;
+	return ($create_retval, $fhitem->{type});
 }
 
 sub editCreateStory {
@@ -328,6 +342,28 @@ sub editCreateStory {
 		
 	}
 	return $sid;
+}
+
+sub editCreateSubmission {
+	my($self, $preview, $fhitem) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+
+	my $submission = {
+		email		=> $fhitem->{email},
+		#XXXEdit check handling of uid / post anon
+		uid		=> $fhitem->{uid},
+		name		=> $fhitem->{name},
+		story		=> $fhitem->{introtext},
+		subj		=> $fhitem->{title},
+		tid		=> $fhitem->{tid},
+		primaryskid 	=> $fhitem->{primaryskid},
+		mediatype	=> $fhitem->{mediatype}
+		
+	};
+	# XXXEdit add url_id handling
+	# $submission->{url_id} = 0;
+	return $self->createSubmission($submission);
 }
 
 sub DESTROY {
