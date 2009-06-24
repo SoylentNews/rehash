@@ -114,10 +114,10 @@ sub sendPassword {
         }
 
 	if (!$unickname || !$uid || isAnon($uid)) {
-                $updates->{unickname_error} = getData('modal_mail_nonickname', {}, 'login');
+                $updates->{unickname_error} = getData('modal_mail_nonickname', { note_type => 'modal_error' }, 'login');
                 $updates->{error} = 1;
         } elsif ($user->{acl}{nopasswd}) {
-                $updates->{unickname_error} = getData('modal_mail_acl_nopasswd', {}, 'login');
+                $updates->{unickname_error} = getData('modal_mail_acl_nopasswd', { note_type => 'modal_error' }, 'login');
                 $updates->{error} = 1;
         }
 
@@ -130,10 +130,10 @@ sub sendPassword {
         delete $srcids{uid};
 
         if ($slashdb->checkAL2(\%srcids, [qw( nopost nopostanon spammer openproxy )])) {
-                $updates->{unickname_error} = getData('modal_mail_readonly', {}, 'login');
+                $updates->{unickname_error} = getData('modal_mail_readonly', { note_type => 'modal_error' }, 'login');
                 $updates->{error} = 1;
         } elsif ($slashdb->checkMaxMailPasswords($user_send)) {
-                $updates->{unickname_error} = getData('modal_mail_toooften', {}, 'login');
+                $updates->{unickname_error} = getData('modal_mail_toooften', { note_type => 'modal_error' }, 'login');
                 $updates->{error} = 1;
         }
 

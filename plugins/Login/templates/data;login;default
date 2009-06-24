@@ -235,11 +235,14 @@ and you'll have to send yourself another one.
 	Error: unknown error trying to verify OpenID.
 
 [% CASE 'hc_error' %]
-        <p id="hc_error"><b>[% error %]</b></p>
+        <p id="hc_error"><span id="[% note_type %]"></span><b>[% error %]</b></p>
 
 [% CASE 'hc_invalid_error' %]
-        <br><p[% IF centered %] align="center"[% END %] id="hc_error"><b>You failed to confirm you are a human. Please start from the beginning<br>
-        and try again.  If you are a human, we apologize for the inconvenience.</b></p>
+        <p[% IF centered %] align="center"[% END %] id="hc_error">
+		<br>
+		<span id="[% note_type %]"></span><b>You failed to confirm you are a human. Please start from the beginning
+		and try again.  If you are a human, we apologize for the inconvenience.</b>
+	</p>
 
 [% CASE 'submit_to_close' %]
         <p[% IF centered %] align="center"[% END %]><input id="modal_submit" type="button" value="Close" onclick="hide_modal_box()"></p>
@@ -250,40 +253,40 @@ and you'll have to send yourself another one.
 [% CASE 'modal_mail_nonickname' %]
         <p[% IF centered %] align="center"[% END %] id="unickname_error">
                 <br>
-                <b>User was not found.</b>
+                <span id="[% note_type %]"></span><b>User was not found.</b>
         </p>
 
 [% CASE 'modal_mail_acl_nopasswd' %]
         <p[% IF centered %] align="center"[% END %] id="unickname_error">
                 <br>
-                <b>This account is not allowed to log in normally.</b>
+                <span id="[% note_type %]"></span><b>This account is not allowed to log in normally.</b>
         </p>
 
 [% CASE 'modal_mail_readonly' %]
         <p[% IF centered %] align="center"[% END %] id="unickname_error">
                 <br>
-                <b>Sorry, you cannot use the "mail password" function from your<br>
-                IP number or subnet. If you don't think you should be seeing<br>
-                this error, please email [% constants.adminmail_ban %]<br>
-                with your IPID, which is "[% user.ipid %]";<br>
-                a note that this is regarding an attempt to mail your password;<br>
+                <span id="[% note_type %]"></span><b>Sorry, you cannot use the "mail password" function from your
+                IP number or subnet. If you don't think you should be seeing
+                this error, please email [% constants.adminmail_ban %]
+                with your IPID, which is "[% user.ipid %]";
+                a note that this is regarding an attempt to mail your password;
                 and the name, uid, and email address of the account in question.</b>
         </p>
 
 [% CASE 'modal_mail_toooften' %]
         <p[% IF centered %] align="center"[% END %] id="unickname_error">
                 <br>
-                <b>[% constants.sitename %] limits you to [% constants.mailpass_max_num || 2 %]<br>
-                password[% IF constants.mailpass_max_num > 1 %]s[% END %] sent to you every<br>
-                [% constants.mailpass_max_hours || 48 %] hours. You're over your limit and<br>
-                we're cutting you off. If you really are that forgetful and need another one,<br>
+                <span id="[% note_type %]"></span><b>[% constants.sitename %] limits you to [% constants.mailpass_max_num || 2 %]
+                password[% IF constants.mailpass_max_num > 1 %]s[% END %] sent to you every
+                [% constants.mailpass_max_hours || 48 %] hours. You're over your limit and
+                we're cutting you off. If you really are that forgetful and need another one,
                 try the human at [% constants.adminmail %].</b>
         </p>
 
 [% CASE 'modal_mail_mailed_note' %]
         <p[% IF centered %] align="center"[% END %] id="unickname_error">
                 <br>
-                <b>The password for [% name %] was emailed to its registered email address.<br>
+                <span id="[% note_type %]"></span><b>The password for [% name %] was emailed to its registered email address.<br>
                 It will remain valid for [% constants.mailpass_valid_days %] days.</b>
         </p>
 

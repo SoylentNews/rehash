@@ -2119,11 +2119,11 @@ sub saveModalPrefs {
 			$rkey->use;
 
 			if ($rkey->failure) {
-				$updates->{hc_error} = getData('hc_error', { error => $rkey->errstr }, 'login');
+				$updates->{hc_error} = getData('hc_error', { error => $rkey->errstr, note_type => 'modal_warn' }, 'login');
 				$updates->{unickname_error} = getData('modal_mail_reset_error', {}, 'login');
 			} elsif ($user->{state}{hcinvalid}) {
 				$updates->{hc_form} = '';
-				$updates->{hc_error} = getData('hc_invalid_error', { centered => 1 }, 'login');
+				$updates->{hc_error} = getData('hc_invalid_error', { centered => 1, note_type => 'modal_error' }, 'login');
 				$updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
 			} else {
 				$login_reader->sendMailPasswd($validated_uid);
@@ -2131,7 +2131,7 @@ sub saveModalPrefs {
 				$updates->{hc_error} = '';
 				$updates->{unickname} = '';
 				$updates->{unickname_label} = '';
-				$updates->{unickname_error} = getData('modal_mail_mailed_note', { centered => 1, name => $validated_nick }, 'login');
+				$updates->{unickname_error} = getData('modal_mail_mailed_note', { centered => 1, name => $validated_nick, note_type => 'modal_ok' }, 'login');
 				$updates->{sendpass_submit} = getData('submit_to_close', { centered => 1 }, 'login');
 			}
 		}
