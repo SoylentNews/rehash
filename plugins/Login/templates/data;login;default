@@ -293,6 +293,51 @@ and you'll have to send yourself another one.
 [% CASE 'modal_createacct_nickname_message' %]
         <span id="nickname_error">The nickname '[% nickname %]' [% nickname_available %]</span>
 
+[% CASE 'modal_createacct_duplicate_user' %]
+        <p id="submit_error">
+                <b>The nickname '[% nick %]', or another similar to it, is already in use. Please choose another.</b>
+        </p>
+
+[% CASE 'modal_createacct_nick_invalid' %]
+        <p id="submit_error">
+                <b>The user name "[% form.newusernick | strip_literal %]" is not valid.</b>
+        </p>
+
+[% CASE 'modal_createacct_email_invalid' %]
+        <p id="submit_error">
+                <b>The email address "[% email | strip_literal %]" is
+                not a valid email address. Please try again, with a properly
+                formatted email address.</b>
+        </p>
+
+[% CASE 'modal_createacct_email_do_not_match' %]
+        <p id="submit_error">
+                <b>The email addresses you've entered do not match. Please re-enter your email address information again.</b>
+        </p>
+
+[% CASE 'modal_createacct_email_exists' %]
+        <p id="submit_error">
+                <b>The email address "[% email | strip_literal %]"
+                already exists in our user database. If you've forgotten your password
+                to an existing account, you can
+                <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
+                password mailed to you</a>.</b>
+        </p>
+
+[% CASE 'modal_createacct_new_user_open_proxy' %]
+        <p id="submit_error">
+                <b>
+                According to our tests, you are trying to create an account
+                from an HTTP proxy that is open to the world.  Please close the proxy or
+                ask your sysadmin to do so, because open proxies are used to spam web
+                sites like this one.
+
+                <p>
+                Feel free to contact [% constants.adminmail_ban %] if you have questions.
+                Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+                </b>
+        </p>
+
 [% END %]
 
 __seclev__

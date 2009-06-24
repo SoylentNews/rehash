@@ -2164,13 +2164,19 @@ sub saveModalPrefs {
 		if (!keys %$returned_updates) {
 			# Run HC here
 			# $rkey->use;
-			$returned_updates = $login_reader->createNewUser(\%params);
+			$returned_updates = $login_reader->createNewUser($user, \%params);
 		}
 
+		foreach my $update (keys %$returned_updates) {
+                        $updates->{$update} = $returned_updates->{$update};
+                }
+
 		# XXX Forcing an error for testing
-		$updates = { test => 'test' };
-                my $ret = setModalUpdates($updates);
-                return $ret;
+		$updates->{test} = 'test';
+                if (keys %$updates) {
+                        my $ret = setModalUpdates($updates);
+                        return $ret;
+                }
 	}
 
 	if ($params{'formname'} ne "sectional"         &&

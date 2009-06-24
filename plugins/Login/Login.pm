@@ -209,15 +209,13 @@ sub validateNewUserInfo {
 	my $newnick = nickFix($form->{newusernick});
         my $matchname;
         if (!$newnick) {
-		# XXX fix
-                $updates->{submit_error} = 'nick_invalid';
+		$updates->{submit_error} = getData('modal_createacct_nick_invalid', {}, 'login');
                 $error = 1;
         } else {
                 $matchname = nick2matchname($newnick);
                 if ($slashdb->getUserUIDWithMatchname($form->{newusernick})) {
-			# XXX fix
-                        $updates->{submit_error} = 'duplicate_user';
-                        $error = 1;
+                        $updates->{submit_error} = getData('modal_createacct_duplicate_user', { nick => $newnick }, 'login');
+			$error = 1;
                 }
         }
 
@@ -225,17 +223,14 @@ sub validateNewUserInfo {
 
 	# Check if email address is invalid or taken.
 	if (!$form->{email} || !emailValid($form->{email})) {
-		# XXX fix
-                $updates->{submit_error} = 'email_invalid';
-                $error = 1;
+                $updates->{submit_error} = getData('modal_createacct_email_invalid', { email => $form->{email} }, 'login');
+		$error = 1;
         } elsif ($form->{email} ne $form->{email2}) {
-		# XXX fix
-                $updates->{submit_error} = 'email_do_not_match';
-                $error = 1;
+                $updates->{submit_error} = getData('modal_createacct_email_do_not_match', {}, 'login');
+		$error = 1;
         } elsif ($slashdb->existsEmail($form->{email})) {
-		# XXX fix
-                $updates->{submit_error} = 'email_exists';
-                $error = 1;
+                $updates->{submit_error} = getData('modal_createacct_email_exists', { email => $form->{email} }, 'login');
+		$error = 1;
         }
 
         return $updates if $error;
@@ -246,9 +241,15 @@ sub validateNewUserInfo {
                 if (!$is_trusted) {
                         my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
                         if ($is_proxy) {
-				# XXX fix
-                                $updates->{submit_error} = 'new_user_open_proxy';
-                                $error = 1;
+				$updates->{submit_error} =
+                                	getData('modal_createacct_new_user_open_proxy',
+						{
+							unencoded_ip => $ENV{REMOTE_ADDR},
+							port => $is_proxy
+						},
+						'login'
+					);
+				$error = 1;
                         }
                 }
 
@@ -263,7 +264,12 @@ sub validateNewUserInfo {
 }
 
 sub createNewUser {
-        my ($self, $form) = @_;
+        my ($self, $user, $form) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $updates = {};
+
 }
 
 sub ajaxCheckNickAvailability {

@@ -92,6 +92,7 @@ Select your current local time.
 [% IF hc; hc; END %]
 
 <p id="hc_error" style="display: none;"></p>
+<p id="submit_error" style="display: none"></p>
 
 <br>
 

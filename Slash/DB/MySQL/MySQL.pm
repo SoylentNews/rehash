@@ -2246,6 +2246,21 @@ sub getUserUIDWithMatchname {
 	return $uid;
 }
 
+sub getOtherUserParams {
+        my($self, $data) = @_;
+
+        my $user    = getCurrentUser();
+        my $form    = getCurrentForm();
+        my $params  = $self->getDescriptions('otherusersparam');
+
+	for my $param (keys %$params) {
+		# set user too for output in this request
+		$data->{$param} = $user->{$param} = defined($form->{$param})
+                        ? $form->{$param}
+                        : $params->{$param};
+        }
+}
+
 ########################################################
 # Get user info from the users table with email address.
 # May be worth it to cache this at some point
