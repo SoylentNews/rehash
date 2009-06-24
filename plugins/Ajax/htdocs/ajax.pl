@@ -1482,11 +1482,11 @@ sub getModalPrefs {
 
 	} elsif ($form->{'section'} eq 'sendPasswdModal') {
 		my $login_reader = getObject("Slash::Login");
-		$login_reader->displaySendPassword();
+		$login_reader->displaySendPassword($form);
 
 	} elsif ($form->{'section'} eq 'newUserModal') {
 		my $login_reader = getObject("Slash::Login");
-		$login_reader->displayNewUser();
+		$login_reader->displayNewUser($form);
 
 	} else {
 		return

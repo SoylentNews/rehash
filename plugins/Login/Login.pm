@@ -80,12 +80,12 @@ sub getLoginData {
 }
 
 sub displaySendPassword {
-	my ($self) = @_;
+	my ($self, $form) = @_;
 
 	my $user = getCurrentUser();
 
 	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
-	return slashDisplay('sendPasswdModal', { hc => $hc }, { Return => 1, Page => 'login' });
+	return slashDisplay('sendPasswdModal', { tabbed => $form->{tabbed}, hc => $hc }, { Return => 1, Page => 'login' });
 }
 
 sub sendPassword {
@@ -181,7 +181,7 @@ sub sendMailPasswd {
 }
 
 sub displayNewUser {
-        my ($self) = @_;
+        my ($self, $form) = @_;
 
         my $user = getCurrentUser();
 
@@ -192,7 +192,7 @@ sub displayNewUser {
 
 	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
 
-	return slashDisplay('newUserModal', { nick_rkey => $rkey, hc => $hc }, { Return => 1, Page => 'login' });
+	return slashDisplay('newUserModal', { tabbed => $form->{tabbed}, nick_rkey => $rkey, hc => $hc }, { Return => 1, Page => 'login' });
 }
 
 sub validateNewUserInfo {
