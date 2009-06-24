@@ -79,11 +79,11 @@ sub deleteOpenID {
 
 	my $claimed_uid = $slashdb->getUIDByOpenID($claimed_identity);
 	if (!$claimed_uid || $claimed_uid != $user->{uid}) {
-		return getLoginData("openid_not_yours", { claimed_identity => $claimed_identity });
+		return getLoginData("openid_not_yours", { claimed_identity => normalizeOpenID($claimed_identity) });
 	}
 
 	if ($slashdb->deleteOpenID($user->{uid}, $claimed_identity)) {
-		return getLoginData("openid_verify_delete", { claimed_identity => $claimed_identity });
+		return getLoginData("openid_verify_delete", { claimed_identity => normalizeOpenID($claimed_identity) });
 	} else {
 		return getLoginData("openid_error");
 	}
@@ -180,7 +180,7 @@ sub sendPassword {
 }
 
 sub sendMailPasswd {
-	my ($self, $uid) = @_;
+	my($self, $uid) = @_;
 
 	return if isAnon($uid);
 
@@ -216,7 +216,7 @@ sub sendMailPasswd {
 }
 
 sub displayNewUser {
-        my ($self, $form) = @_;
+        my($self, $form) = @_;
 
         my $user = getCurrentUser();
 
@@ -231,7 +231,7 @@ sub displayNewUser {
 }
 
 sub validateNewUserInfo {
-        my ($self, $form) = @_;
+        my($self, $form) = @_;
 
         my $slashdb = getCurrentDB();
         my $constants = getCurrentStatic();
@@ -300,7 +300,7 @@ sub validateNewUserInfo {
 }
 
 sub createNewUser {
-        my ($self, $user, $form) = @_;
+        my($self, $user, $form) = @_;
 
 	my $slashdb = getCurrentDB();
         my $constants = getCurrentStatic();

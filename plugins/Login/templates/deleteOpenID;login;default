@@ -12,7 +12,7 @@ en_US
 __name__
 deleteOpenID
 __template__
-Do you really want to delete <b>[% openid_url | strip_literal %]</b>?
+Do you really want to delete <b>[% Slash.normalizeOpenID(openid_url) | strip_literal %]</b>?
 
 <form method="POST" action="[% constants.real_rootdir %]/login.pl">
 <input type="submit" value="Yup, I'm positive">
