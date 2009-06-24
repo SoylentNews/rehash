@@ -42,7 +42,7 @@ chars = chars.replace('0123456789', '0-9');
 
 <br><br>
 
-<label><b>Nick Name</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
+<label><b>Nickname</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 <br>
 <input type="text" id="newusernick" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
 <input type="button" value="Check Availability" onclick="createacct_check_nick(); return false;">

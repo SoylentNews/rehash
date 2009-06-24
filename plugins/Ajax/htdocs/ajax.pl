@@ -2154,6 +2154,23 @@ sub saveModalPrefs {
 	}
 
 	if ($params{'formname'} eq 'newUserModal') {
+		my $updates = {};
+                my $returned_updates = {};
+
+                my $login_reader = getObject("Slash::Login");
+                $returned_updates = $login_reader->validateNewUserInfo(\%params);
+
+		# New user info validated. Create.
+		if (!keys %$returned_updates) {
+			# Run HC here
+			# $rkey->use;
+			$returned_updates = $login_reader->createNewUser(\%params);
+		}
+
+		# XXX Forcing an error for testing
+		$updates = { test => 'test' };
+                my $ret = setModalUpdates($updates);
+                return $ret;
 	}
 
 	if ($params{'formname'} ne "sectional"         &&

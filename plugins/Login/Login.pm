@@ -195,15 +195,100 @@ sub displayNewUser {
 	return slashDisplay('newUserModal', { nick_rkey => $rkey, hc => $hc }, { Return => 1, Page => 'login' });
 }
 
+sub validateNewUserInfo {
+        my ($self, $form) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+        my $user = $slashdb->getUser($form->{uid});
+
+        my $updates = {};
+        my $error = 0;
+
+	# Check if the nick is invalid or taken.
+	my $newnick = nickFix($form->{newusernick});
+        my $matchname;
+        if (!$newnick) {
+		# XXX fix
+                $updates->{submit_error} = 'nick_invalid';
+                $error = 1;
+        } else {
+                $matchname = nick2matchname($newnick);
+                if ($slashdb->getUserUIDWithMatchname($form->{newusernick})) {
+			# XXX fix
+                        $updates->{submit_error} = 'duplicate_user';
+                        $error = 1;
+                }
+        }
+
+        return $updates if $error;
+
+	# Check if email address is invalid or taken.
+	if (!$form->{email} || !emailValid($form->{email})) {
+		# XXX fix
+                $updates->{submit_error} = 'email_invalid';
+                $error = 1;
+        } elsif ($form->{email} ne $form->{email2}) {
+		# XXX fix
+                $updates->{submit_error} = 'email_do_not_match';
+                $error = 1;
+        } elsif ($slashdb->existsEmail($form->{email})) {
+		# XXX fix
+                $updates->{submit_error} = 'email_exists';
+                $error = 1;
+        }
+
+        return $updates if $error;
+
+	# Check for an open proxy.
+	if ($constants->{newuser_portscan}) {
+                my $is_trusted = $slashdb->checkAL2($user->{srcids}, 'trusted');
+                if (!$is_trusted) {
+                        my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
+                        if ($is_proxy) {
+				# XXX fix
+                                $updates->{submit_error} = 'new_user_open_proxy';
+                                $error = 1;
+                        }
+                }
+
+                return $updates if $error;
+        }
+
+        $form->{matchname} = $matchname;
+        $form->{newnick} = $newnick;
+
+	# No errors. This should be clean.
+	return $updates;
+}
+
+sub createNewUser {
+        my ($self, $form) = @_;
+}
+
 sub ajaxCheckNickAvailability {
         my ($slashdb, $constants, $user, $form, $options) = @_;
 
         my $updates = {};
 
         if ($slashdb->getUserUIDWithMatchname($form->{nickname})) {
-                $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is not available' }, 'login');
+                $updates->{'nickname_error'} =
+			getData('modal_createacct_nickname_message',
+				{
+					nickname => $form->{nickname},
+					nickname_available => 'is not available'
+				},
+				'login'
+			);
         } else {
-                $updates->{'nickname_error'} = getData('modal_createacct_nickname_message', { nickname => $form->{nickname}, nickname_available => 'is available' }, 'login');
+                $updates->{'nickname_error'} =
+			getData('modal_createacct_nickname_message',
+				{
+					nickname => $form->{nickname},
+					nickname_available => 'is available'
+				},
+				'login'
+			);
         }
 
         my $reskey = getObject('Slash::ResKey');
@@ -211,7 +296,15 @@ sub ajaxCheckNickAvailability {
         my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
         $rkey->create;
 
-        $updates->{nick_rkey} = getData('replace_rkey', { rkey_id => 'nick_rkey', rkey_name => 'nick_rkey', rkey => $rkey->reskey }, 'login');
+        $updates->{nick_rkey} =
+		getData('replace_rkey',
+			{
+				rkey_id => 'nick_rkey',
+				rkey_name => 'nick_rkey',
+				rkey => $rkey->reskey
+			},
+			'login'
+		);
 
         return Data::JavaScript::Anon->anon_dump({ updates => $updates });
 }
