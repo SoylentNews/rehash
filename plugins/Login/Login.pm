@@ -293,7 +293,7 @@ sub ajaxCheckNickAvailability {
 			getData('modal_createacct_nickname_message',
 				{
 					nickname => $form->{nickname},
-					nickname_available => 'is available'
+					nickname_available => 'is available',
 					note_type => 'modal_ok',
 				},
 				'login'
