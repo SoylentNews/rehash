@@ -190,7 +190,9 @@ sub displayNewUser {
         my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
         $rkey->create;
 
-	return slashDisplay('newUserModal', { nick_rkey => $rkey }, { Return => 1, Page => 'login' });
+	my $hc = slashDisplay('hc_modal', {}, { Return => 1, Page => 'login' });
+
+	return slashDisplay('newUserModal', { nick_rkey => $rkey, hc => $hc }, { Return => 1, Page => 'login' });
 }
 
 sub ajaxCheckNickAvailability {

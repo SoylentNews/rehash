@@ -87,7 +87,13 @@ Slash.createSelect('tzcode', these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsor
 <br>
 Select your current local time.
 
-<br><br>
+<br>
+
+[% IF hc; hc; END %]
+
+<p id="hc_error" style="display: none;"></p>
+
+<br>
 
 <input id="modal_submit" type="button" value="Create Account" onclick="saveModalPrefs()">
 
