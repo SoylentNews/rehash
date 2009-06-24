@@ -351,7 +351,7 @@ sub createNewUser {
 }
 
 sub ajaxCheckNickAvailability {
-        my ($slashdb, $constants, $user, $form, $options) = @_;
+        my($slashdb, $constants, $user, $form, $options) = @_;
 
         my $updates = {};
 
