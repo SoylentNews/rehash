@@ -114,7 +114,7 @@ sub getLoginData {
 }
 
 sub displaySendPassword {
-	my ($self, $form) = @_;
+	my($self, $form) = @_;
 
 	my $user = getCurrentUser();
 
@@ -123,7 +123,7 @@ sub displaySendPassword {
 }
 
 sub sendPassword {
-	my ($self, $params, $validated_uid, $validated_nick) = @_;
+	my($self, $params, $validated_uid, $validated_nick) = @_;
 
 	my $slashdb = getCurrentDB();
         my $constants = getCurrentStatic();

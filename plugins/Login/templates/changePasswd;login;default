@@ -88,7 +88,6 @@ END; note %]
 	<label for="openid_url" class="openid_url">
 	<input type="text" name="openid_url" size="32" maxlength="255" value="http://">
 	</label>
-	<input type="hidden" name="slash_returnto" value="[% constants.real_rootdir %]/my/password">
 	<input type="hidden" name="op" value="claim_openid">
 	<input type="submit" value="Claim ID" class="button">
 	</fieldset>
