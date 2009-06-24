@@ -54,7 +54,7 @@ sub main {
 	my $login = getObject('Slash::Login');
 
 	$ops{$op}[FUNCTION]->($slashdb, $reader, $constants, $user, $form, $login);
-	writeLog($user->{nickname});
+	writeLog($user->{nickname}, $op);
 }
 
 #################################################################
@@ -111,9 +111,7 @@ sub newUser {
 			}
 		}
 	} else {
-		push @note, getData('duplicate_user', { 
-			nick => $newnick,
-		});
+		push @note, getData('nick_invalid');
 		$error = 1;
 	}
 
