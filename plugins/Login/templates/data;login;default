@@ -291,33 +291,33 @@ and you'll have to send yourself another one.
         <input type="hidden" id="[% rkey_id %]" name="[% rkey_name %]" value="[% rkey %]">
 
 [% CASE 'modal_createacct_nickname_message' %]
-        <span id="nickname_error">The nickname '[% nickname %]' [% nickname_available %]</span>
+        <span id="nickname_error"><span id="[% note_type %]"></span>The nickname '[% nickname %]' [% nickname_available %]</span>
 
 [% CASE 'modal_createacct_duplicate_user' %]
         <p id="submit_error">
-                <b>The nickname '[% nick %]', or another similar to it, is already in use. Please choose another.</b>
+                <span id="[% note_type %]"></span><b>The nickname '[% nick %]', or another similar to it, is already in use. Please choose another.</b>
         </p>
 
 [% CASE 'modal_createacct_nick_invalid' %]
         <p id="submit_error">
-                <b>The user name "[% form.newusernick | strip_literal %]" is not valid.</b>
+                <span id="[% note_type %]"></span><b>The user name "[% form.newusernick | strip_literal %]" is not valid.</b>
         </p>
 
 [% CASE 'modal_createacct_email_invalid' %]
         <p id="submit_error">
-                <b>The email address "[% email | strip_literal %]" is
+                <span id="[% note_type %]"></span><b>The email address "[% email | strip_literal %]" is
                 not a valid email address. Please try again, with a properly
                 formatted email address.</b>
         </p>
 
 [% CASE 'modal_createacct_email_do_not_match' %]
         <p id="submit_error">
-                <b>The email addresses you've entered do not match. Please re-enter your email address information again.</b>
+                <span id="[% note_type %]"></span><b>The email addresses you've entered do not match. Please re-enter your email address information again.</b>
         </p>
 
 [% CASE 'modal_createacct_email_exists' %]
         <p id="submit_error">
-                <b>The email address "[% email | strip_literal %]"
+                <span id="[% note_type %]"></span><b>The email address "[% email | strip_literal %]"
                 already exists in our user database. If you've forgotten your password
                 to an existing account, you can
                 <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
@@ -326,7 +326,7 @@ and you'll have to send yourself another one.
 
 [% CASE 'modal_createacct_new_user_open_proxy' %]
         <p id="submit_error">
-                <b>
+                <span id="[% note_type %]"></span><b>
                 According to our tests, you are trying to create an account
                 from an HTTP proxy that is open to the world.  Please close the proxy or
                 ask your sysadmin to do so, because open proxies are used to spam web

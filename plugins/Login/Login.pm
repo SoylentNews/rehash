@@ -209,12 +209,12 @@ sub validateNewUserInfo {
 	my $newnick = nickFix($form->{newusernick});
         my $matchname;
         if (!$newnick) {
-		$updates->{submit_error} = getData('modal_createacct_nick_invalid', {}, 'login');
+		$updates->{submit_error} = getData('modal_createacct_nick_invalid', { note_type => 'modal_error' }, 'login');
                 $error = 1;
         } else {
                 $matchname = nick2matchname($newnick);
                 if ($slashdb->getUserUIDWithMatchname($form->{newusernick})) {
-                        $updates->{submit_error} = getData('modal_createacct_duplicate_user', { nick => $newnick }, 'login');
+                        $updates->{submit_error} = getData('modal_createacct_duplicate_user', { note_type => 'modal_error', nick => $newnick }, 'login');
 			$error = 1;
                 }
         }
@@ -223,13 +223,13 @@ sub validateNewUserInfo {
 
 	# Check if email address is invalid or taken.
 	if (!$form->{email} || !emailValid($form->{email})) {
-                $updates->{submit_error} = getData('modal_createacct_email_invalid', { email => $form->{email} }, 'login');
+                $updates->{submit_error} = getData('modal_createacct_email_invalid', { note_type => 'modal_error', email => $form->{email} }, 'login');
 		$error = 1;
         } elsif ($form->{email} ne $form->{email2}) {
-                $updates->{submit_error} = getData('modal_createacct_email_do_not_match', {}, 'login');
+                $updates->{submit_error} = getData('modal_createacct_email_do_not_match', { note_type => 'modal_error' }, 'login');
 		$error = 1;
         } elsif ($slashdb->existsEmail($form->{email})) {
-                $updates->{submit_error} = getData('modal_createacct_email_exists', { email => $form->{email} }, 'login');
+                $updates->{submit_error} = getData('modal_createacct_email_exists', { note_type => 'modal_error', email => $form->{email} }, 'login');
 		$error = 1;
         }
 
@@ -245,7 +245,8 @@ sub validateNewUserInfo {
                                 	getData('modal_createacct_new_user_open_proxy',
 						{
 							unencoded_ip => $ENV{REMOTE_ADDR},
-							port => $is_proxy
+							port => $is_proxy,
+							note_type => 'modal_error',
 						},
 						'login'
 					);
@@ -282,7 +283,8 @@ sub ajaxCheckNickAvailability {
 			getData('modal_createacct_nickname_message',
 				{
 					nickname => $form->{nickname},
-					nickname_available => 'is not available'
+					nickname_available => 'is not available',
+					note_type => 'modal_error',
 				},
 				'login'
 			);
@@ -292,6 +294,7 @@ sub ajaxCheckNickAvailability {
 				{
 					nickname => $form->{nickname},
 					nickname_available => 'is available'
+					note_type => 'modal_ok',
 				},
 				'login'
 			);
