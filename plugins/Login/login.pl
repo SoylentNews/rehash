@@ -527,7 +527,7 @@ sub deleteOpenID {
 	}
 
 	my $return = $login->deleteOpenID($claimed_identity) or return;
-	changePrefs(@_, $return . getData("returnto_prefs"));
+	changePrefs(@_, $return);
 }
 
 sub claimOpenID {
@@ -571,9 +571,9 @@ sub claimOpenID {
 		# OpenID anyway, so it might not match anything in the DB even if
 		# it's already been added -- pudge
 		if ($claimed_uid == $user->{uid}) {
-			printOpenID(getData("openid_already_claimed_self", { claimed_identity => $claimed_identity }));
+			printOpenID(getData("openid_already_claimed_self", { claimed_identity => normalizeOpenID($claimed_identity) }));
 		} else {
-			printOpenID(getData("openid_already_claimed_other", { claimed_identity => $claimed_identity }));
+			printOpenID(getData("openid_already_claimed_other", { claimed_identity => normalizeOpenID($claimed_identity) }));
 		}
 		return;
 	}
@@ -610,6 +610,7 @@ sub claimOpenID {
 
 sub verifyOpenID {
 	my($slashdb, $reader, $constants, $user, $form, $login) = @_;
+	my @args = @_;
 
 	return unless $login->allowOpenID;
 
@@ -672,9 +673,8 @@ sub verifyOpenID {
 			} else {
 				# XXX we do need error checking here ...
 				$slashdb->setOpenID($user->{uid}, $openid_url);
-				changePrefs(@_,
-					getData("openid_verify_attach", { normalized_openid_url => $normalized_openid_url }) .
-					getData("returnto_prefs")				
+				changePrefs(@args,
+					getData("openid_verify_attach", { normalized_openid_url => $normalized_openid_url })
 				);
 			}
 		},
@@ -688,7 +688,6 @@ sub verifyOpenID {
 			printOpenID(getData("openid_openid_error", { err => $err }));
 		},
 	);
-	
 }
 
 createEnvironment();

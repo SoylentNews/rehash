@@ -219,10 +219,6 @@ and you'll have to send yourself another one.
 	Verified with <b>[% normalized_openid_url %]</b>.
 	Identity is attached to your account.
 
-[% CASE 'returnto_prefs' # we need to have ability to place msg on passwd page, until then, we link back %]
-	[% returnme.data_constant = 1 %]
-	See your <a href="/my/password">login preferences</a>.
-
 [% CASE 'openid_not_openid' %]
 	[% returnme.data_constant = 1 %]
 	Error: not an OpenID message.
