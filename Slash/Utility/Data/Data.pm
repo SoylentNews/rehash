@@ -89,6 +89,7 @@ our @EXPORT  = qw(
 	email_to_domain
 	encryptPassword
 	findWords
+	fixStory
 	fixHref
 	fixint
 	fixparam
@@ -111,6 +112,7 @@ our @EXPORT  = qw(
 	revertQuote
 	parseDayBreakLevel
 	prepareQuoteReply
+	processSub
 	root2abs
 	roundrand
 	set_rootdir
@@ -4708,6 +4710,62 @@ sub validUrl {
 	}		
 	return ($fudgedurl && $scheme && $allowed_schemes{$scheme});
 }
+
+
+#################################################################
+sub fixStory {
+	my($str, $opts) = @_; 
+
+	if ($opts->{sub_type} && $opts->{sub_type} eq 'plain') {
+		$str = strip_plaintext(url2html($str));
+	} else {
+		$str = strip_html(url2html($str));
+	}
+
+	# remove leading and trailing whitespace
+	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+
+	# and let's just get rid of these P tags; we don't need them, and they
+	# cause too many problems in submissions
+	unless (getCurrentStatic('submit_keep_p')) {
+		$str =~ s|</p>||g;
+		$str =~ s|<p(?: /)?>|<br><br>|g;
+	}
+
+	# smart conversion of em dashes to real ones
+	# leave if - has nonwhitespace on either side, otherwise, convert
+	unless (getCurrentStatic('submit_keep_dashes')) {
+		$str =~ s/(\s+-+\s+)/ &mdash; /g;
+	}
+
+	$str = balanceTags($str, { deep_nesting => 1 });
+
+	# do it again, just in case balanceTags added more ...
+	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+
+	return $str;
+}
+
+#################################################################
+sub processSub {
+	my($home, $known_to_be) = @_;
+
+	my $proto = qr[^(?:mailto|http|https|ftp|gopher|telnet):];
+
+	if 	($home =~ /\@/	&& ($known_to_be eq 'mailto' || $home !~ $proto)) {
+		$home = "mailto:$home";
+	} elsif	($home ne ''	&& ($known_to_be eq 'http'   || $home !~ $proto)) {
+		$home = "http://$home";
+	}
+
+	return $home;
+}
+
+
+
+
 
 
 1;

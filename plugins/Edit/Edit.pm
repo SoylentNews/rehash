@@ -66,6 +66,12 @@ sub getOrCreatePreview {
 			}
 		}
 
+		if ($type eq 'submission') {
+			my $email_known = "mailto";
+			$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
+			$fh_data->{name} = $user->{nickname};
+		}
+
 		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
 		$p_data->{src_fhid} = $src_item->{id};
