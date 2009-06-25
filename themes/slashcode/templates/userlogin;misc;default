@@ -55,11 +55,10 @@ __template__
 
 
 <p>
-	[ <b>
-		<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">
-			Create a new account
-		</a>
-	</b> ]
+<b>
+<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create Account</a>
+[% IF extra_modals %]&nbsp;|&nbsp;<a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform" onclick="javascript:getModalPrefs('sendPasswdModal', 'Retrieve Password'); return false;">Retrieve Password</a>[% END %]
+</b>
 </p>
 
 __seclev__

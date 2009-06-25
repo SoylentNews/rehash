@@ -82,7 +82,7 @@ sub displaySlashboxes {
 		} elsif ($bid eq 'userlogin' && $user->{is_anon}) {
 			$return .= $boxcache->{$bid} ||= portalsidebox(
 				$boxBank->{$bid}{title},
-				slashDisplay('userlogin', 0, { Return => 1, Nocomm => 1 }),
+				slashDisplay('userlogin', { extra_modals => 1 }, { Return => 1, Nocomm => 1 }),
 				$boxBank->{$bid}{bid},
 				$boxBank->{$bid}{url},
 				$getblocks,
