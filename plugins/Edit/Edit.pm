@@ -48,6 +48,7 @@ sub getOrCreatePreview {
 		foreach (qw(introtext bodytext media title dept tid primaryskid uid)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
+		$fh_data->{srcid} = $src_item->{srcid};
 
 		$p_data->{submitter} = $src_item->{uid};
 
@@ -61,7 +62,7 @@ sub getOrCreatePreview {
 			$p_data->{neverdisplay} = 1 if $story->{neverdisplay};
 			if ($story->{discussion}) {
 				my $disc = $self->getDiscussion($story->{discussion});
-				$preview->{commentstatus} = $disc->{commentstatus};
+				$p_data->{commentstatus} = $disc->{commentstatus};
 			}
 		}
 
@@ -237,12 +238,14 @@ sub saveItem {
 
 	my $fhitem = $fh->getFireHose($preview->{preview_fhid});
 	my $create_retval = 0;
+	my $save_type = 'new';
 
 	if ($fhitem && $fhitem->{id}) {
 		# creating a new story
 		if ($fhitem->{type} eq "story") {
 			if ($preview->{src_fhid}) {
-			
+				$create_retval = $self->editUpdateStory($preview, $fhitem);
+				$save_type = 'update';
 			} else {
 				$create_retval = $self->editCreateStory($preview, $fhitem);
 			}
@@ -260,13 +263,14 @@ sub saveItem {
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
-	return ($create_retval, $fhitem->{type});
+	return ($create_retval, $fhitem->{type}), $save_type;
 }
 
 sub editUpdateStory {
 	my($self, $preview, $fhitem) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $admindb = getObject("Slash::Admin");
 	my $data;
 
 	my $story = $self->getStory($fhitem->{src_fhid});
@@ -278,7 +282,7 @@ sub editUpdateStory {
 		#section
 		submitter	=> $preview->{submitter},
 		dept		=> $fhitem->{dept},
-		'time'		=> $admindb->findTheTime($fhitem->{createtime}, $preview->{fastforward}),
+		'time'		=> $fhitem->{createtime},
 		bodytext 	=> $preview->{bodytext},
 		introtext 	=> $preview->{introtext},
 		#relatedtext
@@ -312,7 +316,8 @@ sub editUpdateStory {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
 
-	my $sid =  $self->updateStory($story, $data);
+	$self->updateStory($story, $data);
+	return $story->{sid};
 	
 	
 }

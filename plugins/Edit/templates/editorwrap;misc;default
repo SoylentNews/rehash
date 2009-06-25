@@ -33,8 +33,9 @@ __template__
 	[% IF editor %]
 		[% editor %]
 	[% ELSIF id && type %]
+		[% id %] [% type %] [% save_type%]<br>
 		[% IF type == "story" %]
-			<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">New Story Created ([% id %])<br>
+			<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updateed[% END %] ([% id %])<br>
 		[% ELSIF type == "submission" %]
 			<a href="[% constants.real_rootdir %]/submission/[% id %]">New Submission Created ([% id %])<br>
 		[% END %]
