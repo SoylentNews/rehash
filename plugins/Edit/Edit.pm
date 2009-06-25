@@ -167,17 +167,21 @@ sub savePreview {
 
 	$fh_data->{title} 	= $form->{title};
 	$fh_data->{introtext}	= $form->{introtext};
-	
-	for my $field (qw( introtext bodytext media)) {
-		local $Slash::Utility::Data::approveTag::admin = 2;
 
-	# XXXEdit check this
-	#	$fh_data->{$field} = $slashdb->autoUrl($form->{section}, $fh_data->{$field});
-		$fh_data->{$field} = cleanSlashTags($fh_data->{$field});
-		$fh_data->{$field} = strip_html($fh_data->{$field});
-		$fh_data->{$field} = slashizeLinks($fh_data->{$field});
-		$fh_data->{$field} = parseSlashizedLinks($fh_data->{$field});
-		$fh_data->{$field} = balanceTags($fh_data->{$field});
+	if ($p_item->{type} eq 'story') {	
+		for my $field (qw( introtext bodytext media)) {
+			local $Slash::Utility::Data::approveTag::admin = 2;
+
+		# XXXEdit check this
+		#	$fh_data->{$field} = $slashdb->autoUrl($form->{section}, $fh_data->{$field});
+			$fh_data->{$field} = cleanSlashTags($fh_data->{$field});
+			$fh_data->{$field} = strip_html($fh_data->{$field});
+			$fh_data->{$field} = slashizeLinks($fh_data->{$field});
+			$fh_data->{$field} = parseSlashizedLinks($fh_data->{$field});
+			$fh_data->{$field} = balanceTags($fh_data->{$field});
+		}
+	} elsif ($p_item->{type} eq 'submission') {
+		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $form->{sub_type} });
 	}
 
 
