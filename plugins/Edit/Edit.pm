@@ -33,6 +33,14 @@ sub getOrCreatePreview {
 			$type = $form->{type} if $user->{is_admin} && $form->{type};
 
 			my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
+
+			my $fh_data = {};
+			if ($type eq 'submission') {
+				my $email_known = "mailto";
+				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
+				$fh_data->{name} = $user->{nickname};
+			}
+			$fh->setFireHose($fhid, $fh_data) if keys %$fh_data > 0;
 			$self->setPreview($id, { preview_fhid => $fhid });
 			return $id;
 		}
@@ -66,11 +74,6 @@ sub getOrCreatePreview {
 			}
 		}
 
-		if ($type eq 'submission') {
-			my $email_known = "mailto";
-			$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
-			$fh_data->{name} = $user->{nickname};
-		}
 
 		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
@@ -153,8 +156,10 @@ sub savePreview {
 	}
 
 	if ($p_item->{type} eq 'submission') {
+		my $email_known = "";
+		$email_known = "mailto" if $form->{email} eq $user->{fakeemail};
+		$fh_data->{email} = processSub($form->{email}, $email_known);
 		$fh_data->{name} = $form->{name};
-		$fh_data->{email} = $form->{email};
 		$fh_data->{mediatype} = $form->{mediatype};
 		$p_data->{url_text} = $form->{url};
 		$p_data->{sub_type} = $form->{sub_type};
