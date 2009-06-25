@@ -18,11 +18,7 @@ __template__
 <input type="hidden" name="formname" value="sendPasswdModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
 
-<h3>Forget your password? Enter your nickname, UID, or email address here to have the system mail your password to you.</h3>
-
-<br>
-
-<label id="unickname_label"><b>Nickname/UID/Email</b></label>
+<label id="unickname_label"><b>Retrieve Nickname/UID/Email</b></label>
 <input type="text" id="unickname" name="unickname" size="20" value="">
 
 <p id="unickname_error" style="display: none;"></p>

@@ -2185,6 +2185,8 @@ sub saveModalPrefs {
                         $updates->{$update} = $returned_updates->{$update};
                 }
 
+		$updates->{nickname_error} = getData('modal_createacct_reset_nickname_error', {}, 'login');
+
 		# XXX Forcing an error for testing
 		$updates->{test} = 'test';
                 if (keys %$updates) {

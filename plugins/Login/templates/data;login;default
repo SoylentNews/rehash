@@ -344,6 +344,9 @@ and you'll have to send yourself another one.
 [% CASE 'modal_createacct_reset_error' %]
         <p id="submit_error"></p>
 
+[% CASE 'modal_createacct_reset_nickname_error' %]
+        <span id="nickname_error"></span>
+
 [% END %]
 
 __seclev__
