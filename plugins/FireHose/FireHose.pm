@@ -2699,19 +2699,21 @@ sub setSectionTopicsFromTagstring {
 		)
 	);
 
-	foreach (@tags) {
-		my $skid = $self->getSkidFromName($_);
-		my $tid = $self->getTidByKeyword($_);
-		if ($skid) {
+	for my $tagname (@tags) {
+		my $emphasized = $tagname =~ /^\^/;
+		my($tagname_unemph) = $tagname =~ /^\^?(.+)/;
+		my $skid = $self->getSkidFromName($tagname_unemph);
+		my $tid = $self->getTidByKeyword($tagname_unemph);
+		if ($skid && (!$data->{primaryskid} || $emphasized)) {
 			$data->{primaryskid} = $skid;
 		}
-		if ($tid) {
+		if ($tid && (!$data->{tid} || $emphasized)) {
 			$data->{tid} = $tid;
 		}
-		my($prefix, $cat) = $_ =~ /(!)?(.*)$/;
+		my($bang, $cat) = $tagname_unemph =~ /^(!)?(.+)/;
 		$cat = lc($cat);
 		if ($categories{$cat}) {
-			if ($prefix eq "!") {
+			if ($bang) {
 				$data->{category} = "";
 			} else {
 				$data->{category} = $cat;

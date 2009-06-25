@@ -6384,3 +6384,7 @@ INSERT INTO reskey_vars VALUES (110, 'acl_no', 'reskey_no_ajax', 'If this ACL pr
 INSERT INTO reskey_vars VALUES (110, 'duration_max-uses', 10, 'how many uses per timeframe');
 
 INSERT INTO ajax_ops VALUES(NULL, 'createacct_check_nick', 'Slash::Login', 'ajaxCheckNickAvailability', 'ajax_base_modal_misc', 'use');
+
+# for plugins/Tags
+UPDATE tagcommand_adminlog SET cmdtype='\\' WHERE cmdtype='^';
+

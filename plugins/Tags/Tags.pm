@@ -185,6 +185,16 @@ sub createTag {
 		}
 	}
 
+	# If it was requested to add this tag with 'emphasis', do so.
+	if ($hr->{emphasis}) {
+		my $count = $self->sqlInsert('tag_params', {
+			tagid =>	$tagid,
+			name =>		'emphasis',
+			value =>	1,
+		});
+		$rows = 0 if $count < 1;
+	}
+
 	# If it passed all the tests, commit it.  Otherwise rollback.
 	if ($rows) {
 		$self->sqlDo('COMMIT');
@@ -240,6 +250,44 @@ sub deactivateTag {
 		$tagboxdb->logDeactivatedTags($previously_active_tagids);
 	}
 	return $count;
+}
+
+# Pass { foo => 3 } to set the 'foo' param for $tagid to 3.
+# Pass { foo => undef } to delete the 'foo' param.
+# XXX error-checking would be good.
+
+sub updateTagParams {
+	my($self, $tagid, $update_hr) = @_;
+	my $rows = 0;
+	$self->sqlDo('START TRANSACTION');
+	my $old_hr = $self->sqlSelectAllKeyValue('name, value',
+		'tag_params', "tagid=$tagid");
+	for my $name (keys %$update_hr) {
+		my $def_new = defined $update_hr->{$name};
+		my $def_old = defined $old_hr->{$name};
+		if ($def_new && !$def_old) {
+			$rows += $self->sqlInsert('tag_params', {
+				tagid => $tagid,
+				name => $name,
+				value => $update_hr->{$name},
+			});
+		} elsif ($def_old && !$def_new) {
+			my $name_q = $self->sqlQuote($name);
+			$rows += $self->sqlDelete('tag_params', "tagid=$tagid AND name=$name_q");
+		} elsif ($def_old && $def_new) {
+			if ($update_hr->{$name} ne $old_hr->{$name}) {
+				$rows += $self->sqlReplace('tag_params', {
+					tagid => $tagid,
+					name => $name,
+					value => $update_hr->{$name},
+				});
+			}
+		}
+		# If neither is defined, no change is necessary (no NULL
+		# is different from any other NULL).
+	}
+	$self->sqlDo('COMMIT');
+	return $rows;
 }
 
 # Given a tagname, create it if it does not already exist.
@@ -1029,10 +1077,6 @@ sub sfnetadminPseudotagnameSyntaxOK {
 	return $self->tagnameSyntaxOK($tagname);
 }
 
-# XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
-# similar soon, and after I've had time to test -- vroom 2006/03/21
-# XXX Tim, I need you to look this over. - Jamie 2006/09/19
-
 sub setTagsForGlobj {
 	my($self, $id, $table, $tag_string, $options) = @_;
 	my $tags = getObject('Slash::Tags'); # XXX isn't this the same as $self? -Jamie
@@ -1043,6 +1087,25 @@ sub setTagsForGlobj {
 	my $priv_tagnames = $self->getPrivateTagnames();
 
 	$tag_string ||= $form->{tags} || '';
+
+	# Convert ^emphasized tagnames to their regular form.
+
+	my $emphasized_hr = { };
+	if ($user->{is_admin}) {
+		# Tags prefixed with "^" are important and get "emphasis"
+		# set in their tag_param.
+		my @strings =
+			map { lc }
+			split /[\s,]+/,
+			$tag_string;
+		$emphasized_hr = {(
+			map {( $_, 1 )}
+			map { substr($_, 1) }
+			grep /^\^/,
+			@strings
+		)};
+		$tag_string = join ' ', grep { !$emphasized_hr->{$_} } @strings;
+	}
 
 	if ($user->{is_admin}) {
 		my @admin_commands =
@@ -1110,13 +1173,18 @@ sub setTagsForGlobj {
 				name =>		$tagname,
 				table =>	$table,
 				id =>		$id,
-				private =>	$private
+				private =>	$private,
+				emphasis =>	$emphasized_hr->{$tagname} || 0,
 			});
 	}
 
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id,
 		{ uid => $uid, include_private => $options->{include_private} }); # don't list private tags unless forced
-	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
+	my $newtagspreloadtext = join ' ',
+		map { $emphasized_hr->{$_} ? "^$_" : $_ }
+		sort
+		map { $_->{tagname} }
+		@$now_tags_ar;
 	return $newtagspreloadtext;
 }
 
@@ -1249,14 +1317,14 @@ sub setGetCombinedTags {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
-	my $options = {
-		'key'		=> $key,
-		'key_type'	=> $key_type,
+	my $fakeform = {
+		key => $key,
+		key_type => $key_type,
 	};
-	$options->{global_tags_only} = 1 unless $user;
-	$options->{tags} = $commands if $commands;
+	$fakeform->{global_tags_only} = 1 unless $user;
+	$fakeform->{tags} = $commands if $commands;
 
-	my @tuples = split /<([\w:]*)>/, ajaxSetGetCombinedTags($slashdb, $constants, $user, $options);
+	my @tuples = split /<([\w:]*)>/, ajaxSetGetCombinedTags($slashdb, $constants, $user, $fakeform);
 	shift @tuples; # bogus empty first elem when capturing separators
 
 	my $response = {};
@@ -1447,7 +1515,7 @@ sub processAdminCommand {
 		# Right-paren means admin is labelling this tagname as
 		# descriptive.  Mnemonic: ")" looks like "D"
 		$self->setTagname($tagnameid, { descriptive => 1 });
-	} elsif ($type eq '^') {
+	} elsif ($type eq '\\') {
 		# Set individual clouts to 0 for tags of this name
 		# (and its opposite) on this story that have already
 		# been applied.  Future tags of this name (or its
@@ -1599,7 +1667,7 @@ sub sfuserIsAdminOnProject {
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
-	my($type, $tagname) = $c =~ /^(\^|\*|\)|\$?\_|\$?\#{1,5})(.+)$/;
+	my($type, $tagname) = $c =~ /^(\\|\*|\)|\$?\_|\$?\#{1,5})(.+)$/;
 #print STDERR scalar(gmtime) . " get c '$c' type='$type' tagname='$tagname'\n";
 	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
 	return($type, $tagname);
@@ -2638,6 +2706,38 @@ sub getNegativeTags {
 sub getPositiveTags {
 	my($self) = @_;
 	return $self->getTagnamesByParam('posneg', '+');
+}
+
+sub extractChosenFromTags {
+	my($self, $globjid, $uid) = @_;
+
+	# For now let's just allow one user... we will want to allow
+	# multiple editors' opinions to be considered eventually.
+	$uid ||= getCurrentUser('uid');
+
+	# Exclude inactivated and private tags by default.
+	my $ar = $self->getTagsByGlobjid($globjid, { uid => $uid });
+
+	# Convert tagnames to topics.
+	my $tree = $self->getTopicTree();
+	my $keyword_to_tid_hr = { map {( $_->{keyword}, $_ )} keys %$tree };
+
+	# Hard-code the tagnames we're changing manually.
+	# Old: "slashdot"   New: "meta"
+	# Old: "mainpage"   New: "slashdot"
+	$keyword_to_tid_hr->{meta}     = $keyword_to_tid_hr->{slashdot};
+	$keyword_to_tid_hr->{slashdot} = $keyword_to_tid_hr->{mainpage};
+	delete $keyword_to_tid_hr->{mainpage};
+
+	my $chosen_hr = { };
+	for my $tag_hr (@$ar) {
+		my $tagname = $tag_hr->{tagname};
+		my $tid = $keyword_to_tid_hr->{$tagname} || 0;
+		next unless $tid;
+		$chosen_hr->{$tid} = $tag_hr->{emphasis} ? 20 : 10;
+	}
+
+	$chosen_hr;
 }
 
 #################################################################
