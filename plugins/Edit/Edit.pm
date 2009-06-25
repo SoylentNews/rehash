@@ -363,26 +363,7 @@ sub editCreateStory {
 	my $tagsdb = getObject("Slash::Tags");
 	my $admindb = getObject("Slash::Admin");
 
-	my $current_tags_array = $tagsdb->getTagsByNameAndIdArrayref(
-                        'preview', $preview->{preview_id}, { uid => $user->{uid}, include_private => 1 });
-        my @user_tags = sort map { $_->{tagname} } @$current_tags_array;
-
-	foreach (@user_tags) {
-		my $tid = $self->getTidByKeyword($_);
-		push @topics, $tid if $tid;
-	}
-
-	if ($fhitem->{primaryskid}) {
-		my $nexus = $self->getNexusFromSkid($fhitem->{primaryskid});
-		push @topics, $nexus if $nexus;
-	}
-	for my $tid (@topics) {
-		$chosen_hr->{$tid} =
-			$tid == $constants->{mainpage_nexus_tid}
-			? 30
-			: $constants->{topic_popup_defaultweight} || 10;
-	}
-	
+	$chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
 
 	$data = {
 		uid 		=> $fhitem->{uid},
