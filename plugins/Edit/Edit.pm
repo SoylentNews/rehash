@@ -53,8 +53,13 @@ sub getOrCreatePreview {
 
 		my ($fh_data, $p_data);
 		
-		foreach (qw(introtext bodytext media title dept tid primaryskid uid createtime)) {
+		foreach (qw(introtext bodytext media title dept tid primaryskid createtime)) {
 			$fh_data->{$_} = $src_item->{$_};
+		}
+		if ($src_item->{type} eq 'story') {
+			$fh_data->{$uid} = $src_item->{$uid};
+		} else {
+			$fh_data->{uid} = $user->{uid};
 		}
 		$fh_data->{srcid} = $src_item->{srcid};
 
@@ -73,7 +78,6 @@ sub getOrCreatePreview {
 				$p_data->{commentstatus} = $disc->{commentstatus};
 			}
 		}
-
 
 		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
@@ -267,11 +271,16 @@ sub saveItem {
 
 	if ($fhitem && $fhitem->{id}) {
 		# creating a new story
+
 		if ($fhitem->{type} eq "story") {
-			if ($preview->{src_fhid}) {
+			my $src_item;
+			$src_item = $fh->getFireHose($preview->{src_fhid}) if $preview->{src_fhid};
+
+			# preview based on story so save edits when done
+			if ($preview->{src_fhid} && $src_item && $src_item->{type} eq 'story') {
 				$create_retval = $self->editUpdateStory($preview, $fhitem);
 				$save_type = 'update';
-			} else {
+			} else {   # not based on story save new
 				$create_retval = $self->editCreateStory($preview, $fhitem);
 			}
 		
@@ -300,7 +309,6 @@ sub editUpdateStory {
 	use Data::Dumper;
 
 	my $story = $self->getStory($fhitem->{srcid});
-	print STDERR "GOING TO UPDATE: ".Dumper($story);
 
 
 	$data = {
