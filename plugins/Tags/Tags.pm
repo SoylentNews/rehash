@@ -2720,7 +2720,7 @@ sub extractChosenFromTags {
 
 	# Convert tagnames to topics.
 	my $tree = $self->getTopicTree();
-	my $keyword_to_tid_hr = { map {( $_->{keyword}, $_ )} keys %$tree };
+	my $keyword_to_tid_hr = { map {( $tree->{$_}{keyword}, $_ )} keys %$tree };
 
 	# Hard-code the tagnames we're changing manually.
 	# Old: "slashdot"   New: "meta"
