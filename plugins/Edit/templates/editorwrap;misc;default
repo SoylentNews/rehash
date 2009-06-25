@@ -39,6 +39,9 @@ __template__
 		[% ELSIF type == "submission" %]
 			<a href="[% constants.real_rootdir %]/submission/[% id %]">New Submission Created ([% id %])<br>
 		[% END %]
+	[% ELSE %]
+	ID	[% id %] TYPE [% type %] SAVE TYPE [% save_type%]<br>
+
 	[% END %]
 
 </div>

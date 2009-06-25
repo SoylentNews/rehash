@@ -87,7 +87,7 @@ sub save {
 	} else { 
 		$editor = $edit->showEditor();
 	}
-	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type });
+	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type, type => $type });
 
 }
 

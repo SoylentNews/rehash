@@ -263,7 +263,7 @@ sub saveItem {
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
-	return ($create_retval, $fhitem->{type}), $save_type;
+	return ($create_retval, $fhitem->{type}, $save_type);
 }
 
 sub editUpdateStory {
@@ -272,8 +272,11 @@ sub editUpdateStory {
 	my $user = getCurrentUser();
 	my $admindb = getObject("Slash::Admin");
 	my $data;
+	use Data::Dumper;
 
-	my $story = $self->getStory($fhitem->{src_fhid});
+	my $story = $self->getStory($fhitem->{srcid});
+	print STDERR "GOING TO UPDATE: ".Dumper($story);
+
 
 	$data = {
 		uid 		=> $fhitem->{uid},
@@ -316,7 +319,7 @@ sub editUpdateStory {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
 
-	$self->updateStory($story, $data);
+	$self->setStory($story->{stoid}, $data);
 	return $story->{sid};
 	
 	
