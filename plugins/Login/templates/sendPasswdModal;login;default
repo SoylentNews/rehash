@@ -19,13 +19,14 @@ __template__
 <input type="hidden" name="uid" value="[% user.uid %]">
 
 <label id="unickname_label"><b>Retrieve Nickname/UID/Email</b></label>
-<input type="text" id="unickname" name="unickname" size="20" value="">
+<input type="text" id="unickname" name="unickname" size="20" value="">&nbsp;&nbsp;<span id="unickname_error" style="display: none;"></span>
 
-<p id="unickname_error" style="display: none;"></p>
+<br><br>
 
 [% IF hc; hc; END %]
 
 <p id="hc_error" style="display: none;"></p>
+<p id="submit_error" style="display: none"></p>
 
 <br>
 

@@ -2127,13 +2127,15 @@ sub saveModalPrefs {
 				$updates->{hc_error} = getData('hc_invalid_error', { centered => 1, note_type => 'modal_error' }, 'login');
 				$updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
 			} else {
+				# Mail here
 				$login_reader->sendMailPasswd($validated_uid);
 				$updates->{hc_form} = '';
 				$updates->{hc_error} = '';
+				$updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
 				$updates->{unickname} = '';
 				$updates->{unickname_label} = '';
-				$updates->{unickname_error} = getData('modal_mail_mailed_note', { centered => 1, name => $validated_nick, note_type => 'modal_ok' }, 'login');
-				$updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
+				$updates->{unickname_error} = '';
+				$updates->{submit_error} = getData('modal_mail_mailed_note', { centered => 1, name => $validated_nick, note_type => 'modal_ok' }, 'login');
 			}
 		}
 
