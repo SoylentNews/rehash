@@ -626,19 +626,27 @@ sub getTagsByGlobjid {
 		 $inactivated_where $private_where $uid_where $days_where $tagnameid_where",
 		'ORDER BY tagid');
 	if (@$ar) {
+		my $param_hr = { };
 		my @tagids = sort { $a <=> $b } map {( $_->{tagid} )} @$ar;
 		my $splice_count = 2000;
 		while (@tagids) {
 			my @tagid_chunk = splice @tagids, 0, $splice_count;
 			my $tagids_in_str = join(',', @tagid_chunk);
-			my $tag_param_hr = $self->sqlSelectAllHashref(
+			my $tagchunk_param_hr = $self->sqlSelectAllHashref(
 				[qw( tagid name )],
 				'tagid, name, value', 'tag_params',
 				"tagid IN ($tagids_in_str)");
-			for my $tagid (keys %$tag_param_hr) {
-				for my $name (keys %{ $tag_param_hr->{$tagid} }) {
-					$param_hr->{$tagid}{$name} = $tag_param_hr->{$tagid}{$name}{value};
+			for my $tagid (keys %$tagchunk_param_hr) {
+				for my $name (keys %{ $tagchunk_param_hr->{$tagid} }) {
+					$param_hr->{$tagid}{$name} = $tagchunk_param_hr->{$tagid}{$name}{value};
 				}
+			}
+		}
+		for my $tag_hr (@$ar) {
+			my $tagid = $tag_hr->{tagid};
+			next unless $param_hr->{$tagid};
+			for my $name (keys %{ $param_hr->{$tagid} }) {
+				$tag_hr->{$tagid}{$name} = $param_hr->{$tagid}{$name};
 			}
 		}
 	}
@@ -2752,6 +2760,41 @@ sub extractChosenFromTags {
 	}
 
 	$chosen_hr;
+}
+
+# Options are:  src_uid, if different from current user;
+# dest_uid, if different from current user;
+# leave_old_activated, if caller does not want to deactivate old tags.
+
+sub transferTags {
+        my($self, $src_globjid, $dest_globjid, $options) = @_;
+
+	my $src_uid =  $options->{src_uid}  || getCurrentUser('uid');
+	my $dest_uid = $options->{dest_uid} || getCurrentUser('uid');
+
+	my $tags_ar = $self->getTagsByGlobjid($src_globjid, { uid => $src_uid });
+
+	# Deactivate the old.
+	if (!$options->{leave_old_activated}) {
+		for my $tag_hr (@$tags_ar) {
+			$self->deactivateTag({
+				tagnameid => $tag_hr->{tagnameid},
+				globjid => $src_globjid,
+				uid => $src_uid,
+			});
+		}
+	}
+
+	# Activate the new.
+	for my $tag_hr (@$tags_ar) {
+		$self->createTag({
+			tagnameid => $tag_hr->{tagnameid},
+			globjid => $dest_globjid,
+			uid => $dest_uid,
+			private => $tag_hr->{private} eq 'yes' ? 1 : 0,
+			emphasis => $tag_hr->{emphasis},
+		});
+	}
 }
 
 #################################################################
