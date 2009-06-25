@@ -45,7 +45,7 @@ sub getOrCreatePreview {
 
 		my ($fh_data, $p_data);
 		
-		foreach (qw(introtext bodytext media title dept tid primaryskid uid)) {
+		foreach (qw(introtext bodytext media title dept tid primaryskid uid createtime)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
 		$fh_data->{srcid} = $src_item->{srcid};
@@ -135,7 +135,7 @@ sub savePreview {
 		$fh_data->{uid}		= $form->{uid};
 		
 		# XXXEdit maybe only use findTheTime for story type?
-		$fh_data->{createtime} 	= $admindb->findTheTime();
+		$fh_data->{createtime} 	= $admindb->findTheTime($form->{createtime}, $form->{fastforward});
 		$fh_data->{media} 	= $form->{media};
 		$fh_data->{dept} 	= $form->{dept};
 		$fh_data->{bodytext}	= $form->{bodytext};
