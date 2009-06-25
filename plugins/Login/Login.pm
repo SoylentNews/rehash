@@ -427,3 +427,16 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
+
+
+--- /Users/pudge/Desktop/untitled text 6	2009-06-25 12:37:14.000000000 -0700
++++ /usr/local/lib/perl5/site_perl/5.10.0/Net/OpenID/URIFetch.pm	2009-06-25 12:33:38.000000000 -0700
+@@ -84,7 +84,7 @@
+             $req->header('If-None-Match', $etag);
+         }
+         if (my $ts = ($ref->{Headers}->{'last-modified'})) {
+-            $req->if_modified_since($ts);
++            $req->if_modified_since(HTTP::Date::str2time($ts));
+         }
+     }
+ 
