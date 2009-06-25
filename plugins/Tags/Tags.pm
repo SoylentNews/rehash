@@ -583,11 +583,6 @@ sub getTagnameDataFromIds {
 # The columns in the tags table are returned, plus two bonus
 # fields: created_at_ut, the unix timestamp of the created_at
 # column, and tagname, the text string for the tagnameid column.
-#
-# Note that tag_params are not returned:  see e.g.
-# addCloutsToTagArrayref().  At the moment (Sept. 2006) we are not doing
-# anything with tag_params except clouts so we're getting a performance
-# advantage by basically ignoring them.  Eventually this should change.
 
 sub getTagsByNameAndIdArrayref {
 	my($self, $name, $target_id, $options) = @_;
@@ -630,6 +625,23 @@ sub getTagsByGlobjid {
 		"globjid=$globjid
 		 $inactivated_where $private_where $uid_where $days_where $tagnameid_where",
 		'ORDER BY tagid');
+	if (@$ar) {
+		my @tagids = sort { $a <=> $b } map {( $_->{tagid} )} @$ar;
+		my $splice_count = 2000;
+		while (@tagids) {
+			my @tagid_chunk = splice @tagids, 0, $splice_count;
+			my $tagids_in_str = join(',', @tagid_chunk);
+			my $tag_param_hr = $self->sqlSelectAllHashref(
+				[qw( tagid name )],
+				'tagid, name, value', 'tag_params',
+				"tagid IN ($tagids_in_str)");
+			for my $tagid (keys %$tag_param_hr) {
+				for my $name (keys %{ $tag_param_hr->{$tagid} }) {
+					$param_hr->{$tagid}{$name} = $tag_param_hr->{$tagid}{$name}{value};
+				}
+			}
+		}
+	}
 
 	$self->dataConversionForHashrefArray($ar);
 	$self->addTagnameDataToHashrefArray($ar);
@@ -730,6 +742,8 @@ sub addCloutsToTagArrayref {
 	my $splice_count = 2000;
 
 	# Pull values from tag params named 'tag_clout'
+	# XXX this *may* be unnecessary now that getTagsByGlobjid
+	# is pulling in tag_params, but maybe not.
 	my @tagids = sort { $a <=> $b } map { $_->{tagid} } @$ar;
 	my $tag_clout_hr = { };
 	while (@tagids) {

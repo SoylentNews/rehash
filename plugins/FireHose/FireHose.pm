@@ -2086,12 +2086,12 @@ sub ajaxSaveOneTopTagFirehose {
 	my $firehose = getObject("Slash::FireHose");
 	my $item = $firehose->getFireHose($id);
 	if ($item) {
-		$firehose->setSectionTopicsFromTagstring($id, $tag);
 		my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
 		my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
 		my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
 		push @tags, $tag;
 		my $tagsstring = join ' ', @tags;
+		$firehose->setSectionTopicsFromTagstring($id, $tagsstring);
 		my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 	}
 }
