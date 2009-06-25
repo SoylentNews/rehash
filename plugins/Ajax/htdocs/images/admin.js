@@ -90,11 +90,9 @@ function tagsHistory( selector_fragment, context ) {
 //
 
 function firehose_admin_context( display ){
-	var additions = 'extras history';
+	var additions = 'extras history betaedit';
 	if ( $(display).is('.fhitem-story .tag-display') ) {
-		additions += ' info';
-	} else {
-		additions += ' betaedit';
+		additions += ' info ';
 	}
 	display.update_tags(additions, { order: 'prepend', classes: 'b' });
 }

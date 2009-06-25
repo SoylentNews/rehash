@@ -24,7 +24,7 @@ __template__
 			[% IF constants.plugin.FireHose %]
 				[% PROCESS formLabel value => "Url"  %]
 				<input type="text" name="url" value="[% preview.url_text | strip_attribute %]" size="50"> Url type:
-				[% Slash.createSelect('mediatype', Slash.db.getDescriptions('mediatypes'), { default => form.mediatype || "none" , return => 1 }) %]
+				[% Slash.createSelect('mediatype', Slash.db.getDescriptions('mediatypes'), { default => preview.mediatype || "none" , return => 1 }) %]
 				[% PROCESS formNote note => "Main url of submission (optional but if provided must be unique) " %]
 			[% END %]
 		[% END %]

@@ -45,7 +45,7 @@ sub getOrCreatePreview {
 
 		my ($fh_data, $p_data);
 		
-		foreach (qw(introtext bodytext media title dept tid primaryskid)) {
+		foreach (qw(introtext bodytext media title dept tid primaryskid uid)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
 
@@ -54,8 +54,18 @@ sub getOrCreatePreview {
 		if ($src_item->{type} ne "story" && $type eq "story") {
 			my $url 	= $self->getUrl($src_item->{url_id});
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1, url => $url }, { Return => 1 });
-			$p_data->{introtext} =  $fh_data->{introtext};
+		} 
+
+		if ($src_item->{type} eq 'story') {
+			my $story = $self->getStory($src_item->{srcid});
+			$p_data->{neverdisplay} = 1 if $story->{neverdisplay};
+			if ($story->{discussion}) {
+				my $disc = $self->getDiscussion($story->{discussion});
+				$preview->{commentstatus} = $disc->{commentstatus};
+			}
 		}
+
+		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
 		$p_data->{src_fhid} = $src_item->{id};
 		$p_data->{subid} = $src_item->{srcid} if $src_item->{type} eq 'submission';
@@ -231,7 +241,14 @@ sub saveItem {
 	if ($fhitem && $fhitem->{id}) {
 		# creating a new story
 		if ($fhitem->{type} eq "story") {
-			$create_retval = $self->editCreateStory($preview, $fhitem);
+			if ($preview->{src_fhid}) {
+			
+			} else {
+				$create_retval = $self->editCreateStory($preview, $fhitem);
+			}
+		
+			
+
 		} elsif ($fhitem->{type} eq 'submission') {
 			$create_retval = $self->editCreateSubmission($preview, $fhitem);
 		}
@@ -244,6 +261,60 @@ sub saveItem {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
 	return ($create_retval, $fhitem->{type});
+}
+
+sub editUpdateStory {
+	my($self, $preview, $fhitem) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $data;
+
+	my $story = $self->getStory($fhitem->{src_fhid});
+
+	$data = {
+		uid 		=> $fhitem->{uid},
+		#sid
+		title		=> $fhitem->{title},
+		#section
+		submitter	=> $preview->{submitter},
+		dept		=> $fhitem->{dept},
+		'time'		=> $admindb->findTheTime($fhitem->{createtime}, $preview->{fastforward}),
+		bodytext 	=> $preview->{bodytext},
+		introtext 	=> $preview->{introtext},
+		#relatedtext
+		media	 	=> $fhitem->{media},
+		commentstatus	=> $preview->{commentstatus},
+		#thumb
+		-rendered	=> 'NULL',
+		neverdisplay	=> $preview->{neverdisplay},
+	};
+	
+	$data->{subid} = $preview->{subid} if $preview->{subid};
+	$data->{fhid} = $preview->{src_fhid} if $preview->{fhid};
+	
+	for (qw(dept bodytext relatedtext)) {
+		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
+	}
+		
+	for my $field (qw( introtext bodytext media)) {
+		local $Slash::Utility::Data::approveTag::admin = 2;
+
+	# XXXEdit check this
+	#	$data->{$field} = $slashdb->autoUrl($form->{section}, $data->{$field});
+		$data->{$field} = cleanSlashTags($data->{$field});
+		$data->{$field} = strip_html($data->{$field});
+		$data->{$field} = slashizeLinks($data->{$field});
+		$data->{$field} = parseSlashizedLinks($data->{$field});
+		$data->{$field} = balanceTags($data->{$field});
+	}
+	
+	for (qw(dept bodytext relatedtext)) {
+		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
+	}
+
+	my $sid =  $self->updateStory($story, $data);
+	
+	
 }
 
 sub editCreateStory {
