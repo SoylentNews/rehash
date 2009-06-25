@@ -68,7 +68,7 @@ chars = chars.replace('0123456789', '0-9');
 
 <br>
 
-<input id="modal_submit" type="button" value="Create Account" onclick="saveModalPrefs()">
+<input id="modal_submit" type="button" value="Create Account" onclick="saveModalPrefs()">&nbsp;&nbsp;&nbsp;<span id="faq_link"><a href="/faq/accounts.shtml" style="text-decoration: none;"><b>User Account FAQ</b></a></span>
 
 </form>
 
