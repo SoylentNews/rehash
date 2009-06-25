@@ -341,6 +341,9 @@ and you'll have to send yourself another one.
                 </b>
         </p>
 
+[% CASE 'modal_createacct_reset_error' %]
+        <p id="submit_error"></p>
+
 [% END %]
 
 __seclev__

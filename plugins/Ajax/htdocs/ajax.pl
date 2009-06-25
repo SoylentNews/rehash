@@ -2163,9 +2163,22 @@ sub saveModalPrefs {
 
 		# New user info validated. Create.
 		if (!keys %$returned_updates) {
-			# Run HC here
-			# $rkey->use;
-			$returned_updates = $login_reader->createNewUser($user, \%params);
+			# Run HC
+			$rkey->use;
+			if ($rkey->failure) {
+                                my $rkey_info = $rkey->get();
+                                my $note_type = $rkey_info->{failures} ? 'modal_error' : 'modal_warn';
+                                $updates->{hc_error} = getData('hc_error', { error => $rkey->errstr, note_type => $note_type }, 'login');
+                                $updates->{submit_error} = getData('modal_createacct_reset_error', {}, 'login');
+                         } elsif ($user->{state}{hcinvalid}) {
+                                $updates->{hc_form} = '';
+                                $updates->{hc_error} = getData('hc_invalid_error', { centered => 1 }, 'login');
+                                $updates->{submit_error} = getData('modal_createacct_reset_error', {}, 'login');
+                                $updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
+                         } else {
+				# HC was successful. Attempt create.
+				#$returned_updates = $login_reader->createNewUser($user, \%params);
+			}
 		}
 
 		foreach my $update (keys %$returned_updates) {
