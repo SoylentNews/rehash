@@ -271,6 +271,22 @@ sub createNewUser {
 	my $constants = getCurrentStatic();
 	my $updates = {};
 
+	#my $uid = $slashdb->createUser($form->{matchname}, $form->{email}, $form->{newnick});
+
+	#if (!$uid) {
+		#$updates->{submit_error} = getData('modal_createacct_duplicate_user', { note_type => 'modal_error', nick => $form->{newnick} }, 'login');
+		#return $updates;
+	#}
+
+	my $data = {};
+	$slashdb->getOtherUserParams($data);
+	$data->{creation_ipid} = $user->{ipid};
+	#$slashdb->setUser($uid, $data) if keys %$data;
+
+	#$self->sendMailPasswd($uid);
+	
+	# This should be clean on success.
+	return $updates;
 }
 
 sub ajaxCheckNickAvailability {
