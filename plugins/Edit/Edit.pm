@@ -163,6 +163,16 @@ sub savePreview {
 		$fh_data->{mediatype} = $form->{mediatype};
 		$p_data->{url_text} = $form->{url};
 		$p_data->{sub_type} = $form->{sub_type};
+		if ($form->{url} && $form->{title}) {
+			if (validUrl($form->{url})) {
+				my $url_data = {
+					url		=> fudgeurl($form->{url}),
+					initialtitle	=> strip_notags($form->{subj})
+				};
+
+				$fh_data->{url_id} = $self->getUrlCreate($url_data);
+			}
+		}
 	}
 
 	$fh_data->{title} 	= $form->{title};
@@ -456,7 +466,7 @@ sub editCreateSubmission {
 		
 	};
 	# XXXEdit add url_id handling
-	# $submission->{url_id} = 0;
+	 $submission->{url_id} = $fhitem->{url_id} if $fhitem->{url_id};
 	return $self->createSubmission($submission);
 }
 
