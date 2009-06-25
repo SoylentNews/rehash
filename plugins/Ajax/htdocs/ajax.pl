@@ -2172,13 +2172,13 @@ sub saveModalPrefs {
                                 my $note_type = $rkey_info->{failures} ? 'modal_error' : 'modal_warn';
                                 $updates->{hc_error} = getData('hc_error', { error => $rkey->errstr, note_type => $note_type }, 'login');
                                 $updates->{submit_error} = getData('modal_createacct_reset_error', {}, 'login');
-                         } elsif ($user->{state}{hcinvalid}) {
+                        } elsif ($user->{state}{hcinvalid}) {
                                 $updates->{hc_form} = '';
                                 $updates->{hc_error} = getData('hc_invalid_error', { centered => 1 }, 'login');
                                 $updates->{submit_error} = getData('modal_createacct_reset_error', {}, 'login');
 				$updates->{faq_link} = '';
                                 $updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
-                         } else {
+			} else {
 				# HC was successful. Attempt create.
 				$returned_updates = $login_reader->createNewUser($user, \%params);
 			}

@@ -52,7 +52,7 @@ chars = chars.replace('0123456789', '0-9');
 
 <br>
 
-<label><b>Email Address</b></label>&nbsp;&nbsp;<span id="email_error" style="display: none"></span>
+<label><b>Email Address</b></label>
 <br>
 <input type="text" id="email" name="email" value="" size="40">
 <input type="text" id="email2" name="email2" value="" size="40">
