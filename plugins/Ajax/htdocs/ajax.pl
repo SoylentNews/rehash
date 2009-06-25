@@ -2088,10 +2088,6 @@ sub saveModalPrefs {
                 }
 
                 if ($error_message && $error) {
-                        #my $ret = Data::JavaScript::Anon->anon_dump({message => $error_message, message_container => 'modal_message_feedback'});
-                        #return $ret;
-
-			# Improved way to do the above
 			my $updates = {
 				'modal_message_feedback' => $error_message,
 			};
@@ -2119,7 +2115,12 @@ sub saveModalPrefs {
 			$rkey->use;
 
 			if ($rkey->failure) {
-				$updates->{hc_error} = getData('hc_error', { error => $rkey->errstr, note_type => 'modal_warn' }, 'login');
+				# This seems like a good way to determine if this is an HC retry, but is only
+				# valid for 2 failures.
+				my $rkey_info = $rkey->get();
+				my $note_type = $rkey_info->{failures} ? 'modal_error' : 'modal_warn';
+
+				$updates->{hc_error} = getData('hc_error', { error => $rkey->errstr, note_type => $note_type }, 'login');
 				$updates->{unickname_error} = getData('modal_mail_reset_error', {}, 'login');
 			} elsif ($user->{state}{hcinvalid}) {
 				$updates->{hc_form} = '';
@@ -2132,7 +2133,7 @@ sub saveModalPrefs {
 				$updates->{unickname} = '';
 				$updates->{unickname_label} = '';
 				$updates->{unickname_error} = getData('modal_mail_mailed_note', { centered => 1, name => $validated_nick, note_type => 'modal_ok' }, 'login');
-				$updates->{sendpass_submit} = getData('submit_to_close', { centered => 1 }, 'login');
+				$updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
 			}
 		}
 
