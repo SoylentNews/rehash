@@ -2176,10 +2176,11 @@ sub saveModalPrefs {
                                 $updates->{hc_form} = '';
                                 $updates->{hc_error} = getData('hc_invalid_error', { centered => 1 }, 'login');
                                 $updates->{submit_error} = getData('modal_createacct_reset_error', {}, 'login');
+				$updates->{faq_link} = '';
                                 $updates->{modal_submit} = getData('submit_to_close', { centered => 1 }, 'login');
                          } else {
 				# HC was successful. Attempt create.
-				#$returned_updates = $login_reader->createNewUser($user, \%params);
+				$returned_updates = $login_reader->createNewUser($user, \%params);
 			}
 		}
 
@@ -2189,8 +2190,6 @@ sub saveModalPrefs {
 
 		$updates->{nickname_error} = getData('modal_createacct_reset_nickname_error', {}, 'login');
 
-		# XXX Forcing an error for testing
-		$updates->{test} = 'test';
                 if (keys %$updates) {
                         my $ret = setModalUpdates($updates);
                         return $ret;

@@ -1,0 +1,61 @@
+__section__
+default
+__description__
+New user modal form
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+newUserModalSuccess
+__template__
+
+        [% IF tabbed == 1 %]
+        <div class="pref">
+                <span class="preftab active">Create Account</a></span>
+                <span class="preftab"><a href="" onclick="getModalPrefs('sendPasswdModal', 'Retrieve Password', 1); return false;">Retrieve Password</a></span>
+        </div>
+        [% END %]
+
+<br><br>
+
+<div align="center">
+        <span id="modal_ok"></span><b>You have successfully created your account.</b>
+        <br>
+        <table>
+                <tr>
+                        <td><b>Email:</b></td>
+                        <td>[% email | strip_literal %]</td>
+                </tr>
+
+                <tr>
+                        <td><b>User UID:</b></td>
+                        <td>[% uid %]</td>
+                </tr>
+
+                <tr>
+                        <td><b>Nickname:</b></td>
+                        <td>[% nick | strip_literal %]</td>
+                </tr>
+
+                <tr>
+                        <td><b>Password:</b></td>
+                        <td>Mailed to [% email | strip_literal %]</td>
+                </tr>
+        </table>
+
+        <br>
+
+        <b>Once you receive your password, you can <a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a></b>
+
+        <br><br>
+
+        <input id="modal_submit" type="button" value="Close" onclick="hide_modal_box()">
+</div>
+
+__seclev__
+500
+__version__

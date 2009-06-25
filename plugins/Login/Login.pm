@@ -29,6 +29,7 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Slash::Constants qw(:web :messages);
 
 use base 'Slash::Plugin';
 
@@ -178,6 +179,7 @@ sub sendMailPasswd {
 	}, 'login');
 
 	doEmail($uid, $subject, $msg);
+	$slashdb->setUserMailPasswd($user);
 }
 
 sub displayNewUser {
@@ -268,25 +270,51 @@ sub createNewUser {
         my ($self, $user, $form) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
+        my $constants = getCurrentStatic();
 	my $updates = {};
 
-	#my $uid = $slashdb->createUser($form->{matchname}, $form->{email}, $form->{newnick});
+	my $uid = $slashdb->createUser($form->{matchname}, $form->{email}, $form->{newnick});
 
-	#if (!$uid) {
-		#$updates->{submit_error} = getData('modal_createacct_duplicate_user', { note_type => 'modal_error', nick => $form->{newnick} }, 'login');
-		#return $updates;
-	#}
+        if (!$uid) {
+                $updates->{submit_error} = getData('modal_createacct_duplicate_user', { note_type => 'modal_error', nick => $form->{newnick} }, 'login');
+                return $updates;
+        }
 
-	my $data = {};
-	$slashdb->getOtherUserParams($data);
-	$data->{creation_ipid} = $user->{ipid};
-	#$slashdb->setUser($uid, $data) if keys %$data;
+        my $data = {};
+        $slashdb->getOtherUserParams($data);
 
-	#$self->sendMailPasswd($uid);
-	
-	# This should be clean on success.
-	return $updates;
+        $data->{creation_ipid} = $user->{ipid};
+
+        $slashdb->setUser($uid, $data) if keys %$data;
+
+        my $messages = getObject('Slash::Messages');
+        my %params;
+        my @default_types = (
+                'Comment Moderation',
+                'Comment Reply',
+                'Journal Entry by Friend',
+                'Subscription Running Low',
+                'Subscription Expired',
+                'Achievement',
+                'Relationship Change'
+        );
+
+        foreach my $type (@default_types) {
+                my $code = $messages->getDescription('messagecodes', $type);
+                $params{$code} = MSG_MODE_WEB() if $code;
+        }
+
+        $messages->setPrefs($uid, \%params);
+
+        $self->sendMailPasswd($uid);
+
+        $updates->{modal_prefs} = slashDisplay('newUserModalSuccess', {
+                nick      => $form->{newnick},
+                email     => $form->{email},
+                uid       => $uid,
+        }, { Page => 'login', Return => 1 });
+
+        return $updates;
 }
 
 sub ajaxCheckNickAvailability {
