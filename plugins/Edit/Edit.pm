@@ -57,7 +57,7 @@ sub getOrCreatePreview {
 			$fh_data->{$_} = $src_item->{$_};
 		}
 		if ($src_item->{type} eq 'story') {
-			$fh_data->{$uid} = $src_item->{$uid};
+			$fh_data->{uid} = $src_item->{uid};
 		} else {
 			$fh_data->{uid} = $user->{uid};
 		}
