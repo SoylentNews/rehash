@@ -64,7 +64,15 @@ sub newUserForm {
 	_validFormkey('generate_formkey') or return;
 
 	header(getData('newuserformhead')) or return;
-	slashDisplay('newUserForm', { note => $note });
+	
+	# This reskey is for the form's nickname availability button.
+	my $reskey = getObject('Slash::ResKey');
+	my $reskey_resource = 'ajax_base_modal_misc';
+	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
+	$rkey->create;
+
+	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey });
+	
 	footer();
 }
 

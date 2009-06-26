@@ -28,8 +28,9 @@ __template__
 			<fieldset>
 			<legend></legend>
 			[% PROCESS formkey_tag %]
+			[% PROCESS reskey_tag reskey_label => 'nick_rkey', rkey => nick_rkey %]
 				<label>
-					Nick Name
+					Nickname&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 				</label>
 				<input type="text" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
 				<div class="note">
