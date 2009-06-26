@@ -1126,7 +1126,7 @@ sub setTagsForGlobj {
 			grep /^\^/,
 			@strings
 		)};
-		$tag_string = join ' ', grep { !$emphasized_hr->{$_} } @strings;
+		$tag_string = join ' ', map { /^\^/ ? substr($_, 1) : $_ } @strings;
 	}
 
 	if ($user->{is_admin}) {
