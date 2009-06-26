@@ -2754,9 +2754,12 @@ sub extractChosenFromTags {
 	my $chosen_hr = { };
 	for my $tag_hr (@$ar) {
 		my $tagname = $tag_hr->{tagname};
+		print STDERR "ECFT: $tagname\n";
 		my $tid = $keyword_to_tid_hr->{$tagname} || 0;
 		next unless $tid;
+		print STDERR "    ECFT: tid $tid\n";
 		$chosen_hr->{$tid} = $tag_hr->{emphasis} ? 20 : 10;
+		print STDERR "    ECFT: tid $chosen_hr->{tid} EMPH: |$tag_hr->{emphasis}|\n";
 	}
 
 	$chosen_hr;
