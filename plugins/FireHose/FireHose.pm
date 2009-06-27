@@ -2088,7 +2088,9 @@ sub ajaxSaveOneTopTagFirehose {
 	if ($item) {
 		my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
 		my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
-		my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
+		my @tags = sort Slash::Tags::tagnameorder
+			map { $_->{emphasis} ? "^$_->{tagname}" : $_->{tagname} }
+			@$now_tags_ar;
 		push @tags, $tag;
 		my $tagsstring = join ' ', @tags;
 		$firehose->setSectionTopicsFromTagstring($id, $tagsstring);
