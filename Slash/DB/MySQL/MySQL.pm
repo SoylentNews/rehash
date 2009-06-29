@@ -2210,12 +2210,12 @@ sub convertNamedTZToSlashTZ {
 	my $offset = $dt->offset or return;
 
 	my $column = $dt->is_dst ? 'dst_off_set' : 'off_set';
-	my $tz = $self->sqlSelect('tz', 'tzcodes', "$column=$offset");
-	if (!$tz && $column eq 'dst_off_set') {
+	my $new_tz = $self->sqlSelect('tz', 'tzcodes', "$column=$offset");
+	if (!$new_tz && $column eq 'dst_off_set') {
 		# could be that we are in DST but the TZ has no DST offset ...
-		$tz = $self->sqlSelect('tz', 'tzcodes', "off_set=$offset");
+		$new_tz = $self->sqlSelect('tz', 'tzcodes', "off_set=$offset");
 	}
-	return $tz;
+	return $new_tz;
 }
 
 
