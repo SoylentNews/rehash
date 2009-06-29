@@ -151,11 +151,14 @@ sub formkeyError {
 	
 	} elsif ($value eq 'invalid'
 		|| $value eq 'invalidhc'
-		|| $value eq 'invalidhcretry') {
+		|| $value eq 'invalidhcretry'
+		|| $value eq 'invalid-bare'
+		|| $value eq 'invalidhc-bare'
+		|| $value eq 'invalidhcretry-bare') {
 		$hashref->{formkey} = $form->{formkey};
 		$hashref->{value} = $value;
 
-	} elsif ($value eq 'maxposts') {
+	} elsif ($value eq 'maxposts' || $value eq 'maxposts-bare') {
 		$hashref->{limit} = $limit;	
 		$hashref->{interval} = intervalString($constants->{formkey_timeframe});
 		$hashref->{value} = $formname . "_" . $value;

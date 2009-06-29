@@ -95,6 +95,9 @@ sub newUser {
 	if (!$newnick) {
 		push @note, getData('nick_invalid');
 		$error = 1;
+	} elsif ($slashdb->getUserUIDWithMatchname($form->{newusernick})) {
+		push @note, getData('duplicate_user', { nick => $newnick });
+		$error = 1;
 	} elsif (!$form->{email} || !emailValid($form->{email})) {
 		push @note, getData('email_invalid');
 		$error = 1;
@@ -428,6 +431,8 @@ sub _validFormkey {
 	}
 
 	Slash::Utility::Anchor::getSkinColors();
+
+	$options->{fk_bare_errors} = 1;
 
 	my $error;
 	for (@checks) {
