@@ -16,9 +16,6 @@ __template__
 <div id="users" class="wide">
 	[% PROCESS titlebar title="Create Account" %]
 		<div class="generalbody">
-			[% IF note %]
-				[% note %]
-			[% END %]
 			[% chars = constants.nick_chars;
 			   chars = chars.replace('abcdefghijklmnopqrstuvwxyz', 'a-z');
 			   chars = chars.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z');
@@ -56,11 +53,11 @@ __template__
                 	[% user.state.hchtml %]
                 	<input type="text" name="hcanswer" value="" size=8 maxlength=8>
 		</label>
-		<p>Click the button to create your account and be mailed a password.</p>
         [% END %]
 [% END %]
 
 	<br>
+	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
 	<input type="submit" name="newuser" value="Create Account">
 
 </fieldset>

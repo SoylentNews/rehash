@@ -11,8 +11,6 @@ en_US
 __name__
 sendPasswdForm
 __template__
-[% IF note %][% note %][% END %]
-
 [% PROCESS titlebar title="Mail Password" %]
 <div class="generalbody">
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
@@ -43,6 +41,7 @@ __template__
 [% END %]
 
 	<br>
+	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
 	<input type="submit" name="mailpasswd" value="Mail Password">
 
 </fieldset>
