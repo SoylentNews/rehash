@@ -43,14 +43,8 @@ __template__
 				<input type="text" name="email" value="" size="40">
 				<input type="text" name="email2" value="" size="40">
 				<div class="note">
-					Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %] without you setting your preferences to display it.
+					Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.
 				</div>
-				<label>
-					<input type="checkbox" name="newsletter" value="1"> Send me the newsletter
-				</label>
-				<label>
-					<input type="checkbox" name="headlines" value="1"> Send me the daily headlines
-				</label>
 				<label>
 					My timezone
 				</label> 
