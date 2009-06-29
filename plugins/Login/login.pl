@@ -134,9 +134,7 @@ sub newUser {
 			my $data = {};
 			getOtherUserParams($data);
 
-			for (qw(tzcode)) {
-				$data->{$_} = $form->{$_} if defined $form->{$_};
-			}
+			$data->{tzcode} = $form->{tzcode} if defined $form->{tzcode};
 			$data->{creation_ipid} = $user->{ipid};
 
 			$slashdb->setUser($uid, $data) if keys %$data;
