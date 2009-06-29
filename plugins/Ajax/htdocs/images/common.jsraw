@@ -739,7 +739,7 @@ $(function(){
 function page_click_handler( event ) {
 	var	$target	= $(event.target),
 		$fhitem	= $target.closest('.fhitem'),
-		leaving	= !!$target.closest('a[href]:not([href=#],[onclick])').length,
+		leaving	= !!$target.closest('a[href]:not([href=#],[onclick]),.advertisement').length,
 		intent	= !leaving && 'interest',
 		command, $menu, click_handled = false;
 
@@ -2420,7 +2420,7 @@ function inlineAdFirehose($article) {
 						+ (topic ? '&topic='+topic : '')
 						+ (is_combined ? '&pos=84&cat=medrec' : ''),
 		height		= is_combined ? 250 : 300,
-		ad_content	= '<iframe src="' + adUrl + '" height="' + height + '" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
+		ad_content	= '<iframe class="advertisement" src="' + adUrl + '" height="' + height + '" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
 
 	Ad($article, ad_content);
 
