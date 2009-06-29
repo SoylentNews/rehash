@@ -115,6 +115,12 @@ sub createInitialTagsForPreview {
 		push @tids, $nexus if $nexus;
 	}
 
+	if ($item->{type} eq 'story') {
+		my $tids = $self->getTopiclistForStory($item->{srcid});
+		foreach (@$tids) {
+			push @tids, $_;
+		}
+	}
 	my $tree = $self->getTopicTree();
 	my $tagsdb = getObject('Slash::Tags');
 	my %tt = ( ); # topic tagnames
