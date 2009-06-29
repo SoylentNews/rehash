@@ -646,7 +646,7 @@ sub getTagsByGlobjid {
 			my $tagid = $tag_hr->{tagid};
 			next unless $param_hr->{$tagid};
 			for my $name (keys %{ $param_hr->{$tagid} }) {
-				$tag_hr->{$tagid}{$name} = $param_hr->{$tagid}{$name};
+				$tag_hr->{$name} = $param_hr->{$tagid}{$name};
 			}
 		}
 	}
