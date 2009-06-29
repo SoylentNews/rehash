@@ -42,11 +42,18 @@ and try again.
 (Assuming you actually <em>are</em> a human, your text appears below
 so you can copy and paste it for another try. Sorry about the
 inconvenience.)</p>
+
+[% CASE "invalidhc-bare" %]
+You failed to confirm you are a human. (Assuming you actually <em>are</em> a human, your text appears below
+so you can copy and paste it for another try. Sorry about the inconvenience.)
  
 [% CASE "invalidhcretry" %]
 [% PROCESS titlebar width="100%" title="Wrong image text, try again" %]
 <br><p><b>You failed to confirm you are a human. Please double-check
 the image and make sure you typed in what it says.</b></p>
+
+[% CASE "invalidhcretry-bare" %]
+You failed to confirm you are a human. Please double-check the image and make sure you typed in what it says.
  
 [% CASE "users_maxreads" %]
 [% PROCESS titlebar width="100%" title="Maximum Users Viewings Exceeded" %]
@@ -84,6 +91,9 @@ The authors can only read so many submissions in a day.
 [% PROCESS titlebar width="100%" title="Maximum Login Forms Exceeded" %]
 <br><p><b>You've reached your maximum number of login forms you can submit: [% limit %] forms over [% interval %].
 </b></p>
+
+[% CASE "login_maxposts-bare" %]
+You've reached your maximum number of login forms you can submit: [% limit %] forms over [% interval %].
 
 [% CASE "comments_response" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
@@ -187,7 +197,7 @@ We are apparently having a problem with our human-confirmation code.
 An unexpected error has occurred.<br><b>[% value %]</b><br>
 [% END %]
 
-[% IF value != "invalidhcretry" %]
+[% IF value != "invalidhcretry" && value != "invalidhcretry-bare" %]
 <p>Chances are, you're behind a firewall or proxy, or clicked the
 Back button to accidentally reuse a form.  Please try again.
 If the problem persists, and all other options have been tried, contact the
