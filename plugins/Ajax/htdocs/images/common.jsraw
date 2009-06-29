@@ -2623,7 +2623,7 @@ function combined_mode( enable ){
 
 		padding = CROWN_HEIGHT ? ''+CROWN_HEIGHT+'px' : '';
 		($slashboxes||$([])).css({
-			paddingTop:		padding,
+			marginTop:		padding,
 			paddingBottom:	padding
 		});
 		COMBINED_MODE = enable;
