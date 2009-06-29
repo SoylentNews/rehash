@@ -19,6 +19,7 @@ sub getOrCreatePreview {
 	return if $user->{is_anon};
 
 	my $fh = getObject("Slash::FireHose");
+	my $tagsdb = getObject("Slash::Tags");
 
 	if (!$form->{from_id}) {
 		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid} and active='yes'");
@@ -48,6 +49,14 @@ sub getOrCreatePreview {
 		my $src_item = $fh->getFireHose($form->{from_id}); 
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
+		my $preview = $self->getPreview($id);
+		
+		# Transfer primaryskid / tid as tags
+		$self->createInitialTagsForPreview($src_item, $preview);
+		
+		# Transfer actual tags
+		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { src_uid => $src_item->{uid}, leave_old_activated => 1 });
+
 		my $type = $user->{is_admin} && $form->{type} ne "submission" ? "story" : "submission";
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
@@ -88,8 +97,7 @@ sub getOrCreatePreview {
 		$fh->setFireHose($fhid, $fh_data);
 
 		$self->setPreview($id, $p_data);
-		my $preview = $self->getPreview($id);
-		$self->createInitialTagsForPreview($src_item, $preview);
+		$preview = $self->getPreview($id);
 		return $id;
 			
 	}
@@ -98,7 +106,7 @@ sub getOrCreatePreview {
 sub createInitialTagsForPreview {
 	my($self, $item, $preview) = @_;
 	my $user = getCurrentUser();
-	return if $user->{is_anon} || !$preview || !$item || !$item->{id} || !$preview->{id};
+	return if $user->{is_anon} || !$preview || !$item || !$item->{id} || !$preview->{preview_id};
 
 	my @tids;
 	push @tids, $item->{tid} if $item->{tid};
@@ -126,6 +134,8 @@ sub savePreview {
 	my $form = getCurrentForm();
 	my $fh = getObject("Slash::FireHose");
 	my $admindb = getObject("Slash::Admin");
+	my $tagsdb = getObject("Slash::Tags");
+
 	return if $user->{is_anon} || !$form->{id};
 	
 	my $preview = $self->getPreview($form->{id});
@@ -197,6 +207,17 @@ sub savePreview {
 	} elsif ($p_item->{type} eq 'submission') {
 		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $form->{sub_type} });
 	}
+	
+	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
+	my $rendered_hr = $self->renderTopics($chosen_hr);
+	my $primaryskid = $self->getPrimarySkidFromRendered($rendered_hr);
+	my $tids = $self->getTopiclistForStory('',
+		{ topics_chosen => $chosen_hr });
+
+	my $tid = $tids->[0];
+
+	$fh_data->{tid} = $tid;
+	$fh_data->{primaryskid} = $primaryskid;
 
 
 	$self->setPreview($preview->{preview_id}, $p_data);
@@ -363,13 +384,14 @@ sub editCreateStory {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $data;
+	
+	my $tagsdb = getObject("Slash::Tags");
+	my $admindb = getObject("Slash::Admin");
 
 	my $chosen_hr = { };
 	my @topics;
 	push @topics, $fhitem->{tid} if $fhitem->{tid};
 
-	my $tagsdb = getObject("Slash::Tags");
-	my $admindb = getObject("Slash::Admin");
 
 	$chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
 
@@ -423,6 +445,10 @@ sub editCreateStory {
 		#$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		slashHook('admin_save_story_success', { story => $data });
 		my $stoid = $st->{stoid};
+		my $story_globjid = $self->getGlobjidCreate('stories', $stoid); 
+
+		# XXXEdit Do we have to worry about user editing vs author uid on transfer
+		$tagsdb->transferTags($fhitem->{globjid}, $story_globjid);
 		$self->createSignoff($st->{stoid}, $data->{uid}, "saved");
 		
 		#XXXEdit Tags Auto save?
@@ -442,6 +468,9 @@ sub editCreateSubmission {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
+	my $tagsdb = getObject("Slash::Tags");
+
+
 	my $submission = {
 		email		=> $fhitem->{email},
 		#XXXEdit check handling of uid / post anon
@@ -456,7 +485,11 @@ sub editCreateSubmission {
 	};
 	# XXXEdit add url_id handling
 	 $submission->{url_id} = $fhitem->{url_id} if $fhitem->{url_id};
-	return $self->createSubmission($submission);
+	my $subid = $self->createSubmission($submission);
+	my $sub_globjid = $self->getGlobjidCreate('submissions', $subid); 
+	$tagsdb->transferTags($fhitem->{globjid}, $sub_globjid);
+
+	return $subid;
 }
 
 sub DESTROY {
