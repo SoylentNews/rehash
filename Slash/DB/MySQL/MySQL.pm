@@ -12,6 +12,7 @@ use Encode 'encode_utf8';
 use Time::HiRes;
 use Date::Calc qw(Add_Delta_Days Add_Delta_DHMS Add_Delta_YM Monday_of_Week Week_of_Year);
 use Date::Format qw(time2str);
+use DateTime ();
 use Data::Dumper;
 use Storable qw(thaw nfreeze);
 use URI ();
@@ -2197,6 +2198,24 @@ sub checkOpenIDResKey {
 	);
 
 	return $openid_url;
+}
+
+sub convertNamedTZToSlashTZ {
+	my($self, $tz) = @_;
+	my $dt;
+
+	eval { $dt = DateTime->now( time_zone => $tz ) };
+	return unless $dt;
+
+	my $offset = $dt->offset or return;
+
+	my $column = $dt->is_dst ? 'dst_off_set' : 'off_set';
+	my $tz = $self->sqlSelect('tz', 'tzcodes', "$column=$offset");
+	if (!$tz && $column eq 'dst_off_set') {
+		# could be that we are in DST but the TZ has no DST offset ...
+		$tz = $self->sqlSelect('tz', 'tzcodes', "off_set=$offset");
+	}
+	return $tz;
 }
 
 

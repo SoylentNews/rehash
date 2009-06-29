@@ -64,12 +64,18 @@ sub newUserForm {
 	_validFormkey('generate_formkey') or return;
 
 	header(getData('newuserformhead')) or return;
-	
+
 	# This reskey is for the form's nickname availability button.
 	my $reskey = getObject('Slash::ResKey');
 	my $reskey_resource = 'ajax_base_modal_misc';
 	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;
+
+	if ($form->{sreg}) {
+		$form->{newusernick} = $form->{sreg}{nickname};
+		$form->{email} = $form->{email2} = $form->{sreg}{email};
+		$form->{tzcode} = $form->{sreg}{tz};
+	}
 
 	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey, params => $form });
 	
@@ -544,6 +550,7 @@ sub claimOpenID {
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
+	my $new_user = $form->{new_user} ? '&new_user=1' : 0;
 	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
 	if ($openid_login && !$user->{is_anon}) {
 		printOpenID(getData("openid_already_logged_in"));
@@ -602,7 +609,7 @@ sub claimOpenID {
 	);
 	my $check_url = $identity->check_url(
 		delayed_return => 1,
-		return_to      => "$abs/login.pl?op=verify_openid$openid_login$slash_returnto&reskey=$reskey_text",
+		return_to      => "$abs/login.pl?op=verify_openid$openid_login$new_user$slash_returnto&reskey=$reskey_text",
 		trust_root     => "$abs/"
 	);
 
@@ -623,6 +630,7 @@ sub verifyOpenID {
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
+	my $new_user = $form->{new_user} ? '&new_user=1' : 0;
 	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
 	if ($openid_login && !$user->{is_anon}) {
 		printOpenID(getData("openid_already_logged_in"));
@@ -666,6 +674,7 @@ sub verifyOpenID {
 				printOpenID(getData("openid_verify_no_match", { openid_url => $openid_url }));
 				return;
 			}
+
 			if ($openid_login) {
 				my $claimed_uid = $slashdb->getUIDByOpenID($openid_url);
 				if ($claimed_uid) {
@@ -677,6 +686,27 @@ sub verifyOpenID {
 					# XXX find way to attach this OpenID automatically after logging in? for now, no.
 					printOpenID(getData("openid_verify_no_login", { normalized_openid_url => $normalized_openid_url }));
 				}
+			} elsif ($new_user) {
+				# XXX we do need error checking here ...
+
+				my $sreg = $vident->signed_extension_fields('http://openid.net/extensions/sreg/1.1');
+				if (!$sreg || !keys(%$sreg)) {
+					$sreg = $vident->signed_extension_fields('http://openid.net/extensions/sreg/1.1');
+				}
+				$form->{sreg} = $sreg || {};
+				if ($form->{sreg}{timezone}) {
+					my $tz = $reader->convertNamedTZToSlashTZ($form->{sreg}{timezone});
+					$form->{sreg}{tz} = $tz if $tz;
+				}
+
+				my $rkey = $reskey->key('openid', { nostate => 1 });
+				$rkey->create;
+				$form->{openid_reskey} = $rkey->reskey;
+				$slashdb->setOpenIDResKey($openid_url, $form->{openid_reskey});
+
+				newUserForm(@args,
+					getData("openid_verify_new_user", { normalized_openid_url => $normalized_openid_url })
+				);
 			} else {
 				# XXX we do need error checking here ...
 				$slashdb->setOpenID($user->{uid}, $openid_url);

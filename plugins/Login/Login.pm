@@ -303,7 +303,7 @@ sub createNewUser {
         my($self, $user, $form) = @_;
 
 	my $slashdb = getCurrentDB();
-        my $constants = getCurrentStatic();
+	my $constants = getCurrentStatic();
 	my $updates = {};
 
 	my $uid = $slashdb->createUser($form->{matchname}, $form->{email}, $form->{newnick});

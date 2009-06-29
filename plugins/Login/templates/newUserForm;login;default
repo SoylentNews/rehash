@@ -22,6 +22,7 @@ __template__
 			   chars = chars.replace('0123456789', '0-9');
 			%]
 			<form action="[% constants.real_rootdir %]/login.pl" method="post">
+			[%- IF form.openid_reskey %]<input type="hidden" name="openid_reskey" value="[% form.openid_reskey | strip_attribute %]">[% END %]
 			<fieldset>
 			<legend></legend>
 			[% PROCESS formkey_tag %]

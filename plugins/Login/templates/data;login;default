@@ -219,6 +219,11 @@ and you'll have to send yourself another one.
 	Verified with <b>[% normalized_openid_url %]</b>.
 	Identity is attached to your account.
 
+[% CASE 'openid_verify_new_user' %]
+	Verified with <b>[% normalized_openid_url %]</b>.
+	Please continue with user creation process.  Your OpenID identity
+	will be attached to the new account once it is created.
+
 [% CASE 'openid_not_openid' %]
 	[% returnme.data_constant = 1 %]
 	Error: not an OpenID message.
