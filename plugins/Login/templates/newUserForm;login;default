@@ -16,9 +16,6 @@ __template__
 <div id="users" class="wide">
 	[% PROCESS titlebar title="Create Account" %]
 		<div class="generalbody">
-			[% IF note %]
-				[% note %]
-			[% END %]
 			[% chars = constants.nick_chars;
 			   chars = chars.replace('abcdefghijklmnopqrstuvwxyz', 'a-z');
 			   chars = chars.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z');
@@ -32,7 +29,7 @@ __template__
 				<label>
 					Nickname&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 				</label>
-				<input type="text" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
+				<input type="text" name="newusernick" value="[% params.newusernick %]" maxlength="[% constants.nick_maxlen %]"><input type="button" value="Check Availability" onclick="createacct_check_nick(this.form); return false;">
 				<div class="note">
 					(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
 				</div>
@@ -40,33 +37,13 @@ __template__
 					Email Address
 				</label>
 				<input type="hidden" name="op" value="newuser">
-				<input type="text" name="email" value="" size="40">
-				<input type="text" name="email2" value="" size="40">
+				<input type="hidden" name="tzcode" value="EST">
+				<input type="text" name="email" value="[% params.email %]" size="40">
+				<input type="text" name="email2" value="[% params.email2 %]" size="40">
 				<div class="note">
 					Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.
 				</div>
-				<label>
-					My timezone
-				</label> 
-			[%
-			USE this_format = format('%+0.4d %s');
-			this_tzdescs = Slash.db.getDescriptions('tzdescription');
-			this_tzcodes = Slash.db.getDescriptions('tzcodes');
-        	        these_tzdescs = {};
-			FOREACH tz = this_tzcodes.keys;
-				this_num = this_tzcodes.$tz / 36;
-				this_num = this_num.replace('50$', '30');
-				these_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
-			END;
 
-			this_tzcode = user.tzcode_orig || user.tzcode;
-			Slash.createSelect('tzcode',
-				these_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
-			);
-		%]
-		<div class="note">
-			Select your current local time.
-		</div>
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_newuser && user.state.hc %]
         [% IF user.state.hcinvalid %]
                 [% user.state.hcerror %]
@@ -76,12 +53,13 @@ __template__
                 	[% user.state.hchtml %]
                 	<input type="text" name="hcanswer" value="" size=8 maxlength=8>
 		</label>
-		<p>Click the button to create your account and be mailed a password.</p>
-		<input type="submit" name="newuser" value="Create Account">
         [% END %]
-[% ELSE %]
-		<input type="submit" name="newuser" value="Create Account">
 [% END %]
+
+	<br>
+	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
+	<input type="submit" name="newuser" value="Create Account">
+
 </fieldset>
 </form>
 		<p>

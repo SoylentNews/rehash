@@ -115,6 +115,12 @@ sub createInitialTagsForPreview {
 		push @tids, $nexus if $nexus;
 	}
 
+	if ($item->{type} eq 'story') {
+		my $tids = $self->getTopiclistForStory($item->{srcid});
+		foreach (@$tids) {
+			push @tids, $_;
+		}
+	}
 	my $tree = $self->getTopicTree();
 	my $tagsdb = getObject('Slash::Tags');
 	my %tt = ( ); # topic tagnames
@@ -149,6 +155,7 @@ sub savePreview {
 	my($p_data, $fh_data);
 
 	$p_data->{introtext} 		= $form->{introtext};
+	$fh_data->{createtime} 		= $form->{createtime};
 
 	if ($p_item->{type} eq 'story') {
 		$p_data->{bodytext} 		= $form->{bodytext};
@@ -158,6 +165,7 @@ sub savePreview {
 		$fh_data->{uid}		= $form->{uid};
 		
 		# XXXEdit maybe only use findTheTime for story type?
+
 		$fh_data->{createtime} 	= $admindb->findTheTime($form->{createtime}, $form->{fastforward});
 		$fh_data->{media} 	= $form->{media};
 		$fh_data->{dept} 	= $form->{dept};
@@ -191,8 +199,6 @@ sub savePreview {
 
 	$fh_data->{title} 	= $form->{title};
 
-	# XXXEdit maybe only use findTheTime for story type?
-	$fh_data->{createtime} 	= $admindb->findTheTime();
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{dept} 	= $form->{dept};
 	$fh_data->{introtext}	= $form->{introtext};
@@ -331,13 +337,12 @@ sub editUpdateStory {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $admindb = getObject("Slash::Admin");
+	my $tagsdb = getObject("Slash::Tags");
 	my $data;
 	use Data::Dumper;
 
 	my $story = $self->getStory($fhitem->{srcid});
 
-	my $tagsdb = getObject("Slash::Tags");
-	my $admindb = getObject("Slash::Admin");
 
 	$data = {
 		uid 		=> $fhitem->{uid},

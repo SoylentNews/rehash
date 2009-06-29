@@ -69,24 +69,24 @@ __template__
 	Preferences changed.
 
 [% CASE 'nick_invalid' %]
-	The user name "[% form.newusernick | strip_literal %]" is not valid.
+	<span id="modal_error"></span>The user name "[% form.newusernick | strip_literal %]" is not valid.
 
 [% CASE 'email_invalid' %]
-	The email address "[% (form.realemail || form.email) | strip_literal %]" is
+	<span id="modal_error"></span>The email address "[% (form.realemail || form.email) | strip_literal %]" is
 	not a valid email address. Please try again, with a properly
 	formatted email address.
 
 [% CASE 'email_do_not_match' %]
 	[% returnme.data_constant = 1 %]
-	The email addresses you've entered do not match.  Please re-enter
+	<span id="modal_error"></span>The email addresses you've entered do not match.  Please re-enter
 	your email address information again.
 
 [% CASE 'duplicate_user' %]
-	The nickname '[% nick %]', or another similar to it, is already in use.
+	<span id="modal_error"></span>The nickname '[% nick %]', or another similar to it, is already in use.
 	Please choose another.
 
 [% CASE 'new_user_open_proxy' %]
-	According to our tests, you are trying to create an account 
+	<span id="modal_error"></span>According to our tests, you are trying to create an account 
 	from an HTTP proxy that is open to the world.  Please close the proxy or
 	ask your sysadmin to do so, because open proxies are used to spam web
 	sites like this one. 
@@ -95,7 +95,7 @@ __template__
 	Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 
 [% CASE 'email_exists' %]
-	The email address "[% (form.realemail || form.email) | strip_literal %]"
+	<span id="modal_error"></span>The email address "[% (form.realemail || form.email) | strip_literal %]"
 	already exists in our user database. If you've forgotten your password
 	to an existing account, you can
 	<a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
@@ -104,14 +104,14 @@ __template__
 
 [% CASE 'mail_acl_nopasswd' %]
 	[% returnme.data_constant = 1 %]
-	This account is not allowed to log in normally.  No password was mailed.
+	<span id="modal_error"></span>This account is not allowed to log in normally.  No password was mailed.
 
 [% CASE 'mail_nonickname' %]
 	[% returnme.data_constant = 1 %]
-	User was not found.  No password was mailed.
+	<span id="modal_error"></span>User was not found.  No password was mailed.
 
 [% CASE 'mail_readonly' %]
-	Sorry, you cannot use the "mail password" function from your
+	<span id="modal_error"></span>Sorry, you cannot use the "mail password" function from your
 	IP number or subnet. If you don't think you should be seeing
 	this error, please email [% constants.adminmail_ban %]
 	with your IPID, which is "[% user.ipid %]";
@@ -119,7 +119,7 @@ __template__
 	and the name, uid, and email address of the account in question.
 
 [% CASE 'mail_toooften' %]
-	To prevent you from being harassed with email,
+	<span id="modal_error"></span>To prevent you from being harassed with email,
 	[% constants.sitename %] limits you to
 	[% constants.mailpass_max_num || 2 %]
 	password[% IF constants.mailpass_max_num > 1 %]s[% END %]
@@ -130,7 +130,7 @@ __template__
 	[% constants.adminmail %].
 
 [% CASE 'mail_mailed_note' %]
-	The password for [% name %] was emailed to its registered
+	<span id="modal_ok"></span>The password for [% name %] was emailed to its registered
 	email address. It will remain valid for
 	[% constants.mailpass_valid_days %] days.
 

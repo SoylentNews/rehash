@@ -151,11 +151,14 @@ sub formkeyError {
 	
 	} elsif ($value eq 'invalid'
 		|| $value eq 'invalidhc'
-		|| $value eq 'invalidhcretry') {
+		|| $value eq 'invalidhcretry'
+		|| $value eq 'invalid-bare'
+		|| $value eq 'invalidhc-bare'
+		|| $value eq 'invalidhcretry-bare') {
 		$hashref->{formkey} = $form->{formkey};
 		$hashref->{value} = $value;
 
-	} elsif ($value eq 'maxposts') {
+	} elsif ($value eq 'maxposts' || $value eq 'maxposts-bare') {
 		$hashref->{limit} = $limit;	
 		$hashref->{interval} = intervalString($constants->{formkey_timeframe});
 		$hashref->{value} = $formname . "_" . $value;
@@ -258,19 +261,26 @@ sub formkeyHandler {
                 }
 	} elsif ($formkey_op eq 'max_post_check') {
 		if (my $limit = $slashdb->checkMaxPosts($formname)) {
-			$msg = formkeyError('maxposts', $formname, $limit);
+			if ($options->{fk_bare_errors}) {
+				$msg = formkeyError('maxposts-bare', $formname, $limit);
+			} else {
+				$msg = formkeyError('maxposts', $formname, $limit);
+			}
 			$error_flag = 1;
 		}
 	} elsif ($formkey_op eq 'update_formkeyid') {
 		$slashdb->updateFormkeyId($formname, $formkey, $user->{uid}, $form->{rlogin}, $form->{upasswd});
 	} elsif ($formkey_op eq 'valid_check') {
 		my $valid = $slashdb->validFormkey($formname, $options);
-#print STDERR "formkeyHandler valid_check valid '$valid'\n";
 		if ($valid eq 'ok') {
 			# All is well.
 		} else {
-			$msg = formkeyError($valid, $formname);
-#print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg '$msg'\n";
+			if ($options->{fk_bare_errors}) {
+				$msg = formkeyError($valid . '-bare', $formname);
+			} else {
+				$msg = formkeyError($valid, $formname);
+			}
+
 			if ($valid eq 'invalidhcretry'
 				|| $valid eq 'invalidhc') {
 				# It's OK, the user can retry.
@@ -294,8 +304,12 @@ sub formkeyHandler {
 		}
 	} elsif ($formkey_op eq 'formkey_check') {
 		# check if form already used
-		unless (my $increment_val = $slashdb->updateFormkeyVal($formname, $formkey)) {	
-			$msg = formkeyError('usedform', $formname);
+		unless (my $increment_val = $slashdb->updateFormkeyVal($formname, $formkey)) {
+			if ($options->{fk_bare_errors}) {
+				$msg = formkeyError('usedform-bare', $formname);
+			} else {
+				$msg = formkeyError('usedform', $formname);
+			}
 			$error_flag = 1;
 		}
 	} elsif ($formkey_op =~ m{^(?:generate|regen)_formkey}) {

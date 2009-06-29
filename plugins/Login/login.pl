@@ -71,7 +71,7 @@ sub newUserForm {
 	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;
 
-	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey });
+	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey, params => $form });
 	
 	footer();
 }
@@ -94,6 +94,9 @@ sub newUser {
 	my $matchname = nick2matchname($newnick);
 	if (!$newnick) {
 		push @note, getData('nick_invalid');
+		$error = 1;
+	} elsif ($slashdb->getUserUIDWithMatchname($form->{newusernick})) {
+		push @note, getData('duplicate_user', { nick => $newnick });
 		$error = 1;
 	} elsif (!$form->{email} || !emailValid($form->{email})) {
 		push @note, getData('email_invalid');
@@ -131,9 +134,7 @@ sub newUser {
 			my $data = {};
 			getOtherUserParams($data);
 
-			for (qw(tzcode)) {
-				$data->{$_} = $form->{$_} if defined $form->{$_};
-			}
+			$data->{tzcode} = $form->{tzcode} if defined $form->{tzcode};
 			$data->{creation_ipid} = $user->{ipid};
 
 			$slashdb->setUser($uid, $data) if keys %$data;
@@ -428,6 +429,8 @@ sub _validFormkey {
 	}
 
 	Slash::Utility::Anchor::getSkinColors();
+
+	$options->{fk_bare_errors} = 1;
 
 	my $error;
 	for (@checks) {
