@@ -70,7 +70,7 @@ sub main {
 	my $title;
 	$title = "$constants->{sitename} - $constants->{slogan}";
 	$form->{'index'} = 1;
-	$noindex = 1 if $form->{view} eq "recent";
+	$noindex = 1 if $form->{view} && $form->{view} eq "recent";
 
 	header($title, '', { noindex => $noindex }) or return;
 
