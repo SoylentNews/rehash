@@ -190,6 +190,11 @@ sub savePreview {
 	}
 
 	$fh_data->{title} 	= $form->{title};
+
+	# XXXEdit maybe only use findTheTime for story type?
+	$fh_data->{createtime} 	= $admindb->findTheTime();
+	$fh_data->{media} 	= $form->{media};
+	$fh_data->{dept} 	= $form->{dept};
 	$fh_data->{introtext}	= $form->{introtext};
 
 	if ($p_item->{type} eq 'story') {	
@@ -331,6 +336,8 @@ sub editUpdateStory {
 
 	my $story = $self->getStory($fhitem->{srcid});
 
+	my $tagsdb = getObject("Slash::Tags");
+	my $admindb = getObject("Slash::Admin");
 
 	$data = {
 		uid 		=> $fhitem->{uid},
