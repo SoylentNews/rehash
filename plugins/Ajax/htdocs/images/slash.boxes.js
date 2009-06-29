@@ -22,19 +22,21 @@ function save_slashboxes(){
 $(function(){ // on document ready:
 
 $('#slashboxes').
+	prepend($('#slug-Crown')).
+	append($('#slug-Top')).
 	sortable({			// make slashboxes sortable...
 		axis: 'y',
 		containment: 'parent',
 		handle: '.title',
-		items: '>:not(".nosort")',
+		items: '>:not(.nosort)',
 		opacity: 0.8,
 		update: save_slashboxes	// ...and save their new order
 	}).
-	find('> div.block:not(".nosort") > div.title > h4').	// add closeboxes...
+	find('> div.block:not(.nosort) > div.title > h4').	// add closeboxes...
 		append('<span class="closebox">x</span>');
 
 // .live() requires a selector ... no context, and so no $(...).find()
-$('#slashboxes .block:not(".nosort") h4 span.closebox').
+$('#slashboxes .block:not(.nosort) h4 span.closebox').
 	live('click', function(){
 		$(this).closest('div.block').remove();
 		save_slashboxes();

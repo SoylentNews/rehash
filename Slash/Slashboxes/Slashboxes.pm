@@ -155,6 +155,9 @@ sub displaySlashboxes {
 		}
 	}
 
+	my $slug = '<div id="slug-%s" class="block nosort slug"><div class="content"></div></div>';
+	$return .= sprintf($slug . $slug, 'Crown', 'Top');
+
 	return $return;
 }
 
