@@ -292,7 +292,7 @@ function savePreviewBlock() {
 		$block.find('div.content').attr('id', $avail.val() + '-content');
 		$block.attr("id", $avail.val() );
 		var new_content = "<div class='block' id='newslashbox-create'>" + create_button + "</div>";
-		$('#slashboxes').find('div.block:last').after( new_content );
+		$('#slashboxes').find('div.block:not(.nosort):last').after( new_content );
         	$('#newslashbox-title a').one('click', function(){ getModalPrefs('new_slashboxes','Slashboxes', 0 ); return false; });
 		$('newslashbox-content').hide();
 		$("input#slashbox-filter").val( "" );

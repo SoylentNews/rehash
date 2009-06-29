@@ -2440,15 +2440,13 @@ function inlineAdFirehose($article) {
 //
 
 
-var	AD_HEIGHT=300, AD_WIDTH=300,
-	CROWN_HEIGHT=0, CROWN_PADDING=12,
+var	AD_HEIGHT=300,
 	COMBINED_MODE=false,
 
-	$ad_position,		// 300x300 div that holds the current (if any) ad
+	$ad_position,		// div that holds the current (if any) ad
 	ad_target_article,	// the article to which that ad is attached
 	$ad_offset_parent,	// the container in which the ad _position_ floats (between articles)
 	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child)
-	$footer,
 
 	is_ad_locked;		// ad must be shown for at least 30 seconds
 
@@ -2457,8 +2455,9 @@ $(function(){
 	$ad_position = $([]);
 	ad_target_article = null;
 
-	$footer = $any('ft');
 	$slashboxes = $('#slashboxes, #userboxes').eq(0);
+
+	$('#slug-Top,#slug-Bottom').show();
 
 	$(document).
 		bind('firehose-setting-noslashboxes', fix_ad_position);
@@ -2493,7 +2492,7 @@ function insert_ad( $article, ad ){
 
 	ad_target_article = $article[0];
 	$ad_position = $article.
-		before('<div id="floating-slashbox-ad" class="No" />').
+		before('<div id="floating-slashbox-ad" class="Empty" />').
 		prev().
 			append(ad);
 
@@ -2510,15 +2509,21 @@ function insert_ad( $article, ad ){
 	}
 
 	fix_ad_position();
-	$ad_position.fadeIn('fast');
+	$ad_position.filter(':not(.Empty)').fadeIn('fast');
 }
 
 function verticalAdSpace(){
-	var bounds = Bounds.y($slashboxes);
-	bounds.top	= bounds.bottom;
-	COMBINED_MODE && (bounds.top += CROWN_HEIGHT);
-	bounds.bottom	= Position($footer).top;
+	var bounds = Bounds.y('#slug-Bottom');
+	bounds.top = Position('#slug-Top').top;
 	return bounds;
+}
+
+function pin_ad(){
+	var new_top='';
+	$('#slug-' + ($ad_position.is('.Crown') ? 'Crown' : $ad_position.attr('className'))).each(function(){
+		new_top = Position(this).top - Position($ad_offset_parent).top;
+	});
+	$ad_position.css('top', new_top);
 }
 
 var NO_SPACE	= 0,
@@ -2531,32 +2536,23 @@ var NO_SPACE	= 0,
 	];
 
 
-function fix_crown( would_recurse ){
-	var	was_crown=$ad_position.is('.Crown'), now_crown=false, crown_top;
-
-	if ( COMBINED_MODE ) {
-		crown_top = $slashboxes.offset().top;
-		now_crown = $(window).scrollTop() < crown_top+AD_HEIGHT;
-	}
-
-	if ( was_crown !== now_crown ) {
-		$ad_position.toggleClass('Crown', now_crown);
-
-		if ( now_crown ) {
-			$ad_position.css('top', crown_top - Position($ad_offset_parent).top);
-		} else if ( !would_recurse ) {
-			fix_ad_position(would_recurse=true);
-		}
-	}
-
-	return now_crown;
+function should_crown(){
+	var answer = false;
+	COMBINED_MODE && $('#slug-Crown:visible').each(function(){
+		answer = Bounds.intersect(window, this);
+	});
+	return answer;
 }
 
 function scroll_crown(){
-	COMBINED_MODE && fix_crown();
+	var now_crown = should_crown();
+	if ( now_crown !== $ad_position.is('.Crown') ) {
+		$ad_position.toggleClass('Crown', now_crown);
+		pin_ad();
+	}
 }
 
-function fix_ad_position( would_recurse ){
+function fix_ad_position(){
 	if ( $ad_position.length ) {
 		var space = verticalAdSpace();
 		if ( !TypeOf.number(space.top) ||  !TypeOf.number(space.bottom) ) {
@@ -2572,28 +2568,20 @@ function fix_ad_position( would_recurse ){
 		}
 
 		var	pinning		= $slashboxes.is(':visible') && between(space.top, natural_top, space.bottom)+NOT_PINNED || NO_SPACE,
-			now_pinned	= pinning !== NOT_PINNED,
 			now_empty	= pinning === NO_SPACE,
-			was_pinned	= $ad_position.is('.Top, .Bottom, .Empty'),
+			now_crown	= !now_empty && should_crown(),
 			was_empty	= $ad_position.is('.Empty');
 
-		var new_top = '';
-		if ( was_empty && now_empty ) {
-			return;
-		} else if ( !would_recurse && fix_crown(would_recurse=true) ) {
-			new_top = false;
-		} else if ( now_pinned && !now_empty ) {
-			new_top = pin_between(space.top, natural_top, space.bottom) - Position($ad_offset_parent).top;
+		if ( !(was_empty && now_empty ) ) {
+			$ad_position.setClass(pinClasses[pinning] + (now_crown ? ' Crown' : ''));
+			pin_ad();
 		}
-
-		new_top!==false && $ad_position.css('top', new_top);
-		$ad_position.setClass(pinClasses[pinning] + ($ad_position.is('.Crown') ? ' Crown' : ''));
 	}
 }
 
 function ad_message( e ){
 	var match = /^p(.+):height=(\d+)$/.exec(e.data);
-	if ( match && match[1]==='6' ) {
+	if ( match && match[1]==='84' ) {
 		$ad_position.children('iframe:first').attr('height', match[2]);
 	}
 }
@@ -2604,29 +2592,11 @@ function combined_mode( enable ){
 	}
 
 	enable = enable && fh_adTimerUrl && !$('#fad1,#fad2').length;
-	if ( COMBINED_MODE !== enable ) {
-		var suffix, padding;
-
-		if ( enable ) {
-			AD_HEIGHT = 250;
-			CROWN_HEIGHT = AD_HEIGHT + CROWN_PADDING;
-			$(window).
-				bind('scroll', scroll_crown).
-				bind('message', ad_message);
-		} else {
-			AD_HEIGHT = 300;
-			CROWN_HEIGHT = 0;
-			$(window).
-				unbind('message', ad_message).
-				unbind('scroll', scroll_crown);
-		}
-
-		padding = CROWN_HEIGHT ? ''+CROWN_HEIGHT+'px' : '';
-		($slashboxes||$([])).css({
-			marginTop:		padding,
-			paddingBottom:	padding
-		});
-		COMBINED_MODE = enable;
+	if ( COMBINED_MODE != enable ) {
+		COMBINED_MODE = !!enable;
+		$('#slug-Crown').toggle(COMBINED_MODE);
+		$('#slug-Bottom, div.slug .content').css('height', AD_HEIGHT = COMBINED_MODE ? 250 : 300);
+		$(window)[ COMBINED_MODE ? 'bind' : 'unbind' ]('scroll', scroll_crown);
 		fix_ad_position();
 	}
 }
