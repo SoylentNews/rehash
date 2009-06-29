@@ -6388,3 +6388,5 @@ INSERT INTO ajax_ops VALUES(NULL, 'createacct_check_nick', 'Slash::Login', 'ajax
 # for plugins/Tags
 UPDATE tagcommand_adminlog SET cmdtype='\\' WHERE cmdtype='^';
 
+# 2009-06-18
+UPDATE vars SET value = 'T_2_5_0_262' WHERE name = 'cvs_tag_currentcode';
