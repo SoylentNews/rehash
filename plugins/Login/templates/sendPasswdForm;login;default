@@ -40,9 +40,11 @@ __template__
 		</tr></table>
 		<input type="submit" name="mailpasswd" value="Mail Password">
 	[% END %]
-[% ELSE %]
-		<input type="submit" name="mailpasswd" value="Mail Password">
 [% END %]
+
+	<br>
+	<input type="submit" name="mailpasswd" value="Mail Password">
+
 </fieldset>
 </form>
 [% IF user.is_anon %]

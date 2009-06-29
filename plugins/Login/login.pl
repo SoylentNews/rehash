@@ -71,7 +71,7 @@ sub newUserForm {
 	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;
 
-	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey });
+	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey, params => $form });
 	
 	footer();
 }
