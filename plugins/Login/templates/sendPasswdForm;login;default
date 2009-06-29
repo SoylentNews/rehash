@@ -25,7 +25,9 @@ __template__
 		<b>Nickname/UID/Email</b>
 		<input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
 		<br>
+
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_mailpasswd && user.state.hc %]
+	<br>
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
 	[% ELSE %]
@@ -36,7 +38,6 @@ __template__
 			value=""
 			size=8 maxlength=8></td>
 		</tr></table>
-		<input type="submit" name="mailpasswd" value="Mail Password">
 	[% END %]
 [% END %]
 
@@ -49,8 +50,7 @@ __template__
 [% IF user.is_anon %]
 <p>
 <a href="[% constants.real_rootdir %]/login.pl?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
-<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a>
-if you don't have one already.
+<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a> if you don't have one already.
 </p>
 [% END %]
 </div>
