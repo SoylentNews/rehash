@@ -16,3 +16,4 @@ template=templates/sendPasswdForm;login;default
 template=templates/sendPasswdModal;login;default
 template=templates/logout;login;default
 template=templates/hc_modal;login;default
+template=templates/userlogin;login;default

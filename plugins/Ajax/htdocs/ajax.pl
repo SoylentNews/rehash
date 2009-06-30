@@ -1488,6 +1488,18 @@ sub getModalPrefs {
 		my $login_reader = getObject("Slash::Login");
 		$login_reader->displayNewUser($form);
 
+	} elsif ($form->{'section'} eq 'userlogin') {
+		my $return_to;
+		($return_to = $form->{return_to}) =~ s/https?\://;
+		$return_to = strip_urlattr($return_to);
+
+		return
+			slashDisplay('userlogin', {
+				is_modal  => 1,
+				return_to => $return_to,
+				tabbed    => $form->{'tabbed'},
+			}, { Return => 1, Page => 'login'});
+
 	} else {
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {

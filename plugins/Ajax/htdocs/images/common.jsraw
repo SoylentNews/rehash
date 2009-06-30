@@ -2060,8 +2060,12 @@ function getModalPrefs(section, title, tabbed, params){
 
 	var formname = section;
 	var this_op = 'getModalPrefs';
-	if (formname === 'sendPasswdModal' || formname === 'newUserModal') {
+	var return_to = '';
+	if (formname === 'sendPasswdModal' || formname === 'newUserModal' || formname === 'userlogin') {
 		this_op = 'getModalPrefsAnonHC';
+		if (formname === 'userlogin') {
+			return_to = location.toString();
+		}
 	} else if ( !reskey_static ) {
 		return show_login_box();
 	}
@@ -2079,7 +2083,8 @@ function getModalPrefs(section, title, tabbed, params){
 			op:		this_op,
 			section:	section,
 			reskey:		reskey_static,
-			tabbed:		tabbed
+			tabbed:		tabbed,
+			return_to:	return_to
 		}, params||null),
 
 		function( response, status, transport ){

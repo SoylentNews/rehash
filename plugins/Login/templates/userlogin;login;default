@@ -1,0 +1,105 @@
+__section__
+default
+__description__
+The block that has the login fields for the user
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+userlogin
+__template__
+
+[% IF form.unickname; user_uid = Slash.db.getUserUID(form.unickname); END %]
+
+                [% IF is_modal && tabbed == 1 %]
+                        <div class="pref">
+                                <span class="preftab active">Log In</span>
+                                <span class="preftab"><a href="" onclick="getModalPrefs('newUserModal', 'Create Account', 1); return false;">Create Account</a></span>
+                                <span class="preftab"><a href="" onclick="getModalPrefs('sendPasswdModal', 'Retrieve Password', 1); return false;">Retrieve Password</a></span>
+                        </div>
+                [% END %]
+
+[% IF is_modal %]
+        <div id="loginform" style="padding: 1em">
+[% ELSE %]
+        <div class="generalbody">
+[% END %]
+
+<form action="[% constants.real_rootdir %]/login.pl" method="post">
+                <input type="hidden" name="returnto" value="[% return_to || form.returnto | strip_urlattr %]">
+                <input type="hidden" name="op" value="userlogin">
+
+                <label>Nickname</label>
+                [% IF is_modal %]<br>[% END %]
+                <input type="text" name="unickname" size="20" value="[% form.unickname | strip_literal %]">
+
+                [% IF is_modal %]<br><br>[% END %]
+
+                <label>Password</label>
+                [% IF is_modal %]<br>[% END %]
+                <input type="password" name="upasswd" size="20">
+                <br>
+                <div class="modal_note">(6-20 characters long)</div>
+
+                [% IF is_modal %]<br>[% END %]
+
+                <label class="checkbox">
+                <input type="checkbox" name="login_temp" value="yes">&nbsp;Public Terminal
+                </label>
+
+                [% IF is_modal %]<br>[% END %]
+
+                [% IF !is_modal && form.unickname %]
+                <br>
+                <div id="error_message">
+                        <span id="modal_error"></span>
+                        [% IF user.state.login_failed_reason == 'nopost' %]
+                                This IP address or network has been used to abuse the system and logins from it have been disabled.  If you feel that this is unwarranted, feel free to include your IP address (<b>[% env.remote_addr %]</b>) in the subject of an email to <a href="mailto:[% constants.adminmail_ban | strip_attribute %]">[% constants.adminmail_ban %]</a>, and we will examine why there is a ban. If you fail to include the IP address (again, <em>in the subject!</em>), then your message will be deleted and ignored. I mean come on, we're good, we're not psychic.
+                        [% ELSE %]
+                                Danger, Will Robinson! You didn't log in! You apparently put in the wrong password, or the wrong nickname. Either try again, or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your password mailed to you</a> if you forgot your password.
+                        [% END %]
+                </div>
+
+                <div id="warn_message">
+                        <span id="modal_warn"></span>
+                        [% IF constants.allow_anonymous %]
+                                Logging in will allow you to post comments as yourself. If you don't log in, you will only be able to post as [% Slash.getCurrentAnonymousCoward("nickname") %].
+                        [% ELSE %]
+                                You can only post comments if you have a valid account.
+                        [% END %]
+                </div>
+                <br>
+                [% END %]
+
+                <input type="submit" name="userlogin" value="Log in" class="button">
+</form>
+
+<br>
+
+<form action="[% constants.real_rootdir %]/login.pl" method="post">
+                <input type="hidden" name="slash_returnto" value="[% return_url | strip_urlattr %]">
+                <input type="hidden" name="op" value="claim_openid">
+                <input type="hidden" name="openid_login" value="1">
+
+                <label for="openid_url" class="openid_url">
+                <input type="text" name="openid_url" value="http://" size="32" maxlength="255">
+                </label>
+
+                [% IF is_modal %]<br>[% END %]
+
+                <input type="submit" value="Log in with OpenID" class="button">
+</form>
+
+[% IF is_modal %]
+        </div>
+[% ELSE %]
+        </div>
+[% END %]
+
+__seclev__
+10000
+__version__
