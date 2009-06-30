@@ -63,7 +63,11 @@ __template__
                                 Danger, Will Robinson! You didn't log in! You apparently put in the wrong password, or the wrong nickname. Either try again, or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your password mailed to you</a> if you forgot your password.
                         [% END %]
                 </div>
+		<br>
+		[% END %]
 
+		[% IF !form.unickname %]
+		<br>
                 <div id="warn_message">
                         <span id="modal_warn"></span>
                         [% IF constants.allow_anonymous %]
@@ -78,6 +82,7 @@ __template__
                 <input type="submit" name="userlogin" value="Log in" class="button">
 </form>
 
+[% IF constants.openid_consumer_allow %]
 <br>
 
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
@@ -93,6 +98,7 @@ __template__
 
                 <input type="submit" value="Log in with OpenID" class="button">
 </form>
+[% END %]
 
 [% IF is_modal %]
         </div>
