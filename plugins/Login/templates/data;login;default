@@ -287,11 +287,11 @@ and you'll have to send yourself another one.
         <input type="hidden" id="[% rkey_id %]" name="[% rkey_name %]" value="[% rkey %]">
 
 [% CASE 'modal_createacct_nickname_message' %]
-        <span id="nickname_error"><span id="[% note_type %]"></span>The nickname '[% nickname %]' [% nickname_available %]</span>
+        <span id="nickname_error"><span id="[% note_type %]"></span>The nickname '[% nickname | strip_literal %]' [% nickname_available %]</span>
 
 [% CASE 'modal_createacct_duplicate_user' %]
         <p id="submit_error">
-                <span id="[% note_type %]"></span><b>The nickname '[% nick %]', or another similar to it, is already in use. Please choose another.</b>
+                <span id="[% note_type %]"></span><b>The nickname '[% nick | strip_literal %]', or another similar to it, is already in use. Please choose another.</b>
         </p>
 
 [% CASE 'modal_createacct_nick_invalid' %]
