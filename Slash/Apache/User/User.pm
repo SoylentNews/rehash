@@ -613,6 +613,15 @@ my %ops_u2 = (
 );
 $ops_u2{$_}{uri} ||= 'users2.pl' for (keys %ops_u2);
 
+my %ops_my_ac = (
+	newuser         => { args => 'op=newuserform' },
+	mailpassword    => { args => 'op=mailpasswdform' },
+	login           => { args => 'op=userlogin' },
+
+	default         => { args => 'op=userlogin' }
+);
+$ops_my_ac{$_}{uri} ||= 'login.pl' for (keys %ops_my_ac);
+
 ########################################################
 # XXX May want to rename this, since it's being used for a user's
 # prefs/info pages (/my/foo) and for the global handlers too (/foo).
@@ -728,8 +737,13 @@ sub userdir_handler {
 			}
 
 		} else {
-			undef $r_args;
-			$r_uri = 'login.pl';
+			# XXX I'll remove these soon -cbrown
+			#undef $r_args;
+			#$r_uri = 'login.pl';
+
+			my $r_op = $ops_my_ac{$op};
+			$r_op ||= $ops_my_ac{default};
+			($r_args, $r_uri) = @{$r_op}{qw(args uri)};			
 		}
 
 		$r->args($r_args) if defined($r_args);
