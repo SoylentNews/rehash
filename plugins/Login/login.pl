@@ -177,6 +177,18 @@ sub newUser {
 
 			my $user_send = $slashdb->getUser($uid);
 			_sendMailPasswd(@_, $user_send);
+
+			if ($form->{openid_reskey}) {
+				my $openid_url = $slashdb->checkOpenIDResKey($form->{openid_reskey});
+				if ($openid_url) {
+					$slashdb->setOpenID($uid, $openid_url);
+				}
+
+				my $reskey = getObject('Slash::ResKey');
+				my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{openid_reskey} });
+				$rkey->use; # we're done with it, clean up
+			}
+
 			header(getData('newuserhead')) or return;
 			my $thanksblock = $slashdb->getBlock('subscriber_plug', 'block');
 			slashDisplay('newuser_msg', { thanksblock => $thanksblock });
@@ -550,7 +562,7 @@ sub claimOpenID {
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
-	my $new_user = $form->{new_user} ? '&new_user=1' : 0;
+	my $new_user = $form->{new_user} ? '&new_user=1' : '';
 	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
 	if ($openid_login && !$user->{is_anon}) {
 		printOpenID(getData("openid_already_logged_in"));
@@ -630,7 +642,7 @@ sub verifyOpenID {
 
 	# slightly different behavior if we are logging in rather than
 	# merely claiming an OpenID
-	my $new_user = $form->{new_user} ? '&new_user=1' : 0;
+	my $new_user = $form->{new_user} ? '&new_user=1' : '';
 	my $openid_login = $form->{openid_login} ? '&openid_login=1' : '';
 	if ($openid_login && !$user->{is_anon}) {
 		printOpenID(getData("openid_already_logged_in"));

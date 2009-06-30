@@ -20,12 +20,6 @@ __template__
         </div>
         [% END %]
 
-<form id="modal_prefs" onsubmit="return false">
-[% PROCESS reskey_tag %]
-[% PROCESS reskey_tag reskey_label => 'nick_rkey', rkey => nick_rkey %]
-<input type="hidden" name="formname" value="newUserModal">
-<input type="hidden" name="uid" value="[% user.uid %]">
-
 [%
 chars = constants.nick_chars;
 chars = chars.replace('abcdefghijklmnopqrstuvwxyz', 'a-z');
@@ -33,14 +27,26 @@ chars = chars.replace('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'A-Z');
 chars = chars.replace('0123456789', '0-9');
 %]
 
+[% IF constants.openid_consumer_allow %]
+<form action="[% constants.real_rootdir %]/login.pl" method="post">
+<input type="hidden" name="op" value="claim_openid">
+<input type="hidden" name="new_user" value="1">
 <label><b>OpenID (optional)</b></label>&nbsp;&nbsp;<span id="openid_error" style="display: none"></span>
 <br>
 <label for="openid_url" class="openid_url">
 <input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
 </label>
-<input type="button" value="Validate">
+<input type="submit" value="Create User with OpenID" class="button">
+</form>
+[% END %]
 
 <br><br>
+
+<form id="modal_prefs" onsubmit="return false">
+[% PROCESS reskey_tag %]
+[% PROCESS reskey_tag reskey_label => 'nick_rkey', rkey => nick_rkey %]
+<input type="hidden" name="formname" value="newUserModal">
+<input type="hidden" name="uid" value="[% user.uid %]">
 
 <label><b>Nickname</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 <br>
