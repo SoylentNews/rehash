@@ -239,6 +239,7 @@ sub savePreview {
 sub showEditor {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
+	$options ||= {};
 
 	my $preview_id = $self->getOrCreatePreview();
 	my $editor;
@@ -278,10 +279,61 @@ sub showEditor {
 		item 			=> $p_item,
 		author_select 		=> $author_select,
 		commentstatus_select 	=> $commentstatus_select,
-		display_check		=> $display_check
+		display_check		=> $display_check,
+		errors			=> $options->{errors}
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
+}
+
+sub validate {
+	my($self, $preview, $item) = @_;
+	my $constants = getCurrentStatic();
+	my @messages;
+	
+	if ($item->{type} eq 'submission') {
+		if (length($item->{title}) < 2) {
+			push @messages, getData('badsubject');
+		}
+		my $message;
+
+		my %keys_to_check = ( story => $preview->{introtext}, subj => $item->{title} );
+
+		for (keys %keys_to_check) {
+			next unless $keys_to_check{$_};
+			# run through filters
+			if (! filterOk('submissions', $_, $keys_to_check{$_}, \$message)) {
+				push @messages, $message;
+			}
+			# run through compress test
+			if (! compressOk($keys_to_check{$_})) {
+				my $err = getData('compresserror');
+				push @messages, $err;
+			}
+		}
+		if ($preview->{url_text}) {
+			if(!validUrl($preview->{url_text})) {
+				push @messages, getData("invalidurl");
+			}
+			if ($item->{url_id}) {
+				if ($constants->{plugin}{FireHose}) {
+					my $firehose = getObject("Slash::FireHose");
+					if (!$firehose->allowSubmitForUrl($item->{url_id})) {
+						my $submitted_items = $firehose->getFireHoseItemsByUrl($item->{url_id});
+						push @messages, getData("duplicateurl", { submitted_items => $submitted_items });
+					}
+				}
+			}
+		}
+		if (!$item->{title} && !$preview->{introtext}) {
+			push @messages, "Missing title or text";
+		}
+		# XXXEdit Check Nexus Extras eventually
+		# XXXEdit test reskey success / failure here? or in saveItem?
+	}
+	use Data::Dumper;
+	print STDERR Dumper(\@messages);
+	return \@messages;	
 }
 
 sub saveItem {
@@ -298,10 +350,13 @@ sub saveItem {
 	return if $user->{uid} != $preview->{uid};
 
 	my $fhitem = $fh->getFireHose($preview->{preview_fhid});
+
+	my $errors = $self->validate($preview,$fhitem);
+
 	my $create_retval = 0;
 	my $save_type = 'new';
 
-	if ($fhitem && $fhitem->{id}) {
+	if ($fhitem && $fhitem->{id} && !@$errors) {
 		# creating a new story
 
 		if ($fhitem->{type} eq "story") {
@@ -321,6 +376,7 @@ sub saveItem {
 		} elsif ($fhitem->{type} eq 'submission') {
 			$create_retval = $self->editCreateSubmission($preview, $fhitem);
 		}
+		push @$errors, "Save failed" if !$create_retval;
 	}
 
 	# XXXEdit eventually make sure this is ours before setting inactive
@@ -329,7 +385,7 @@ sub saveItem {
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
-	return ($create_retval, $fhitem->{type}, $save_type);
+	return ($create_retval, $fhitem->{type}, $save_type, $errors);
 }
 
 sub editUpdateStory {

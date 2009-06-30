@@ -4,5 +4,6 @@ name=Edit
 mysql_dump=dump
 pg_dump=dump
 htdoc=edit.pl
+template=templates/data;edit;default
 template=templates/editor;edit;default
 template=templates/editorwrap;misc;default

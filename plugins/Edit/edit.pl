@@ -80,12 +80,12 @@ sub save {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
-	my ($retval, $type, $save_type) = $edit->saveItem();
+	my ($retval, $type, $save_type, $errors) = $edit->saveItem();
 	my ($editor, $id);
 	if ($retval) {
 		$id = $retval;
 	} else { 
-		$editor = $edit->showEditor();
+		$editor = $edit->showEditor({ errors => $errors });
 	}
 	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type, type => $type });
 

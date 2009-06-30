@@ -1905,10 +1905,10 @@ sub allowSubmitForUrl {
 	my $url_id_q = $self->sqlQuote($url_id);
 
 	if ($user->{is_anon}) {
-		return !$self->sqlCount("firehose", "url_id=$url_id_q");
+		return !$self->sqlCount("firehose", "url_id=$url_id_q AND preview='no'")
 	} else {
 		my $uid_q = $self->sqlQuote($user->{uid});
-		return !$self->sqlCount("firehose", "url_id=$url_id_q AND uid != $uid_q");
+		return !$self->sqlCount("firehose", "url_id=$url_id_q AND uid != $uid_q AND preview='no'");
 	}
 }
 

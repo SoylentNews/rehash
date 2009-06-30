@@ -11,6 +11,16 @@ __name__
 editor
 __template__
 <div id="editor" class="admin">
+
+[% IF errors.size %]
+<div class="error">
+	Errors:<br>
+	[% FOREACH error=errors %]
+		[% error %]<br>
+	[% END %]
+</div>
+[% END %]
+
 	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 

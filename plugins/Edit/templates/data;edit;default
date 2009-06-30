@@ -1,0 +1,64 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+edit
+__lang__
+en_US
+__name__
+data
+__seclev__
+10000
+__template__
+[% SWITCH value %]
+[% CASE 'maxallowed' %]
+	[% returnme.data_constant = 1 %]
+	<p><b>Warning! you've exceeded max allowed submissions for the day : 
+	[% constants.max_submissions_allowed %]</b></p>
+
+[% CASE 'max_submissionsize_title' %]
+	[% returnme.data_constant = 1 %]
+	<b>Submission too large!</b>
+
+[% CASE 'max_submissionsize_err' %]
+	<p><b>Warning! You submission has exceeded the max allowable size 
+	that can be inserted into the system: [% size %] bytes.</b></p>
+	<p>If you try to save your submission as it is, it could be truncated</p>
+
+[% CASE 'error' %]
+	[% returnme.data_constant = 1 %]
+	Error
+
+[% CASE 'filtererror' %]
+	<p>Lameness filter: <b>[% err_message %]</b></p>
+
+[% CASE 'compresserror' %]
+	[% returnme.data_constant = 1 %]
+	<b>compression has detected something wrong with your submission</b>
+
+[% CASE 'badsubject' %]
+	[% returnme.data_constant = 1 %]
+	Please enter a reasonable subject.
+
+[% CASE 'invalidurl' %]
+	[% returnme.data_constant = 1 %]
+	You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)
+
+[% CASE 'duplicateurl' %]
+	[% returnme.data_constant = 1 %]
+	<div class="message error">
+	The url you've attempted to submit has already been submitted.  A url if provided in the url field must be unique.
+	</div>
+	<p>Links to already submitted items on this url below:</p>
+	<ul>
+		[% FOREACH item = submitted_items %]
+			<li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">[% item.title | strip_literal %] ([% item.type | strip_literal %])</a></li>
+		[% END %]
+	</ul>
+
+[% END %]
+__seclev__
+10000
