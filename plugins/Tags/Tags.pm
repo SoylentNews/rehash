@@ -212,7 +212,7 @@ sub createTag {
 			$dynamic_blocks->setUserBlock('tags', $tag->{uid});
 		}
 
-		if ($hr->{table} eq 'stories') {
+		if ($hr->{table} && $hr->{table} eq 'stories') {
 			my $achievements = getObject('Slash::Achievements');
 			if ($achievements) {
 				$achievements->setUserAchievement('the_tagger', $tag->{uid}, { ignore_lookup => 1, exponent => 0 });
