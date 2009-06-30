@@ -345,6 +345,17 @@ sub createNewUser {
 
         $self->sendMailPasswd($uid);
 
+	if ($form->{openid_reskey}) {
+		my $openid_url = $slashdb->checkOpenIDResKey($form->{openid_reskey});
+		if ($openid_url) {
+			$slashdb->setOpenID($uid, $openid_url);
+		}
+
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('openid', { nostate => 1, reskey => $form->{openid_reskey} });
+		$rkey->use; # we're done with it, clean up
+	}
+
         $updates->{modal_prefs} = slashDisplay('newUserModalSuccess', {
                 nick      => $form->{newnick},
                 email     => $form->{email},

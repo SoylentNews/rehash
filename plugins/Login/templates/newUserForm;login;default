@@ -30,7 +30,7 @@ __template__
 				<label>
 					Nickname&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 				</label>
-				<input type="text" name="newusernick" value="[% params.newusernick | strip_attribute %]" maxlength="[% constants.nick_maxlen %]"><input type="button" value="Check Availability" onclick="createacct_check_nick(this.form); return false;">
+				<input type="text" name="newusernick" value="[% form.newusernick | strip_attribute %]" maxlength="[% constants.nick_maxlen %]"><input type="button" value="Check Availability" onclick="createacct_check_nick(this.form); return false;">
 				<div class="note">
 					(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
 				</div>
@@ -38,11 +38,11 @@ __template__
 					Email Address
 				</label>
 				<input type="hidden" name="op" value="newuser">
-				<input type="hidden" name="tzcode" value="EST">
-				<input type="text" name="email" value="[% params.email | strip_attribute %]" size="40">
-				<input type="text" name="email2" value="[% params.email2 | strip_attribute %]" size="40">
+				<input type="hidden" name="tzcode" value="[% form.tzcode | strip_attribute %]">
+				<input type="text" name="email" value="[% form.email | strip_attribute %]" size="40">
+				<input type="text" name="email2" value="[% form.email2 | strip_attribute %]" size="40">
 				<div class="note">
-					Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.
+					Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %] without you setting your preferences to display it.
 				</div>
 
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_newuser && user.state.hc %]

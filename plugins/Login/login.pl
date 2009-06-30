@@ -77,7 +77,7 @@ sub newUserForm {
 		$form->{tzcode} = $form->{sreg}{tz};
 	}
 
-	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey, params => $form });
+	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey });
 	
 	footer();
 }
