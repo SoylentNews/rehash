@@ -57,8 +57,9 @@ __template__
 
 <p>
 <b>
-<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create Account</a>
-[% IF extra_modals %]&nbsp;|&nbsp;<a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform" onclick="javascript:getModalPrefs('sendPasswdModal', 'Retrieve Password'); return false;">Retrieve Password</a>[% END %]
+<a href="[% constants.real_rootdir %]/my/newuser"[% IF extra_modals %] onclick="javascript:getModalPrefs('newUserModal', 'Create Account', 1); return false;"[% END %]>Create Account</a>
+&nbsp;|&nbsp;
+<a href="[% constants.real_rootdir %]/my/mailpassword"[% IF extra_modals %] onclick="javascript:getModalPrefs('sendPasswdModal', 'Retrieve Password', 1); return false;"[% END %]>Retrieve Password</a>
 </b>
 </p>
 

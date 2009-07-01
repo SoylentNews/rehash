@@ -215,7 +215,8 @@ sub loginForm {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
 	header(getData('loginhead')) or return;
-	slashDisplay('loginForm');
+	#slashDisplay('loginForm');
+	slashDisplay('userlogin', {}, { Page => 'login' });
 	footer();
 }
 
