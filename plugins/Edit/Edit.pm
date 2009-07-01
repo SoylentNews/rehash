@@ -569,13 +569,13 @@ sub editCreateSubmission {
 	$tagsdb->transferTags($fhitem->{globjid}, $sub_globjid);
 	
 	if ($submission->{url_id}) {
-		my $globjid = $slashdb->getGlobjidCreate("submissions", $messagesub->{subid});
+		my $globjid = $self->getGlobjidCreate("submissions", $messagesub->{subid});
 		$self->addUrlForGlobj($submission->{url_id}, $globjid);
 	}
 	
-	if ($messagesub->{subid} && ($uid != getCurrentStatic('anonymous_coward_uid'))) {
+	if ($messagesub->{subid} && ($fhitem->{uid} != getCurrentStatic('anonymous_coward_uid'))) {
 		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
-		$dynamic_blocks->setUserBlock('submissions', $uid) if $dynamic_blocks;
+		$dynamic_blocks->setUserBlock('submissions', $fhitem->{uid}) if $dynamic_blocks;
 	}
 	
 	my $messages = getObject('Slash::Messages');
