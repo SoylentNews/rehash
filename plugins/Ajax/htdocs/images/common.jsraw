@@ -2041,7 +2041,8 @@ function hide_modal_box(){
 }
 
 function get_login_parts(){ return cached_parts('#login_cover, #login_box'); }
-function show_login_box(){ get_login_parts().show(); $('#login_box_content form input[name=unickname]').focus(); }
+//function show_login_box(){ get_login_parts().show(); $('#login_box_content form input[name=unickname]').focus(); }
+function show_login_box(){ getModalPrefs('userlogin', 'Log In', 1); }
 function hide_login_box(){ get_login_parts().hide(); }
 
 var logged_in = 1;
