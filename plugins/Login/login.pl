@@ -436,6 +436,7 @@ sub _validFormkey {
 	# eventually change s/users/login/g
 	my $formname = $op =~ /^mailpasswd(?:form)?$/ ? 'login/mp'
 		     : $op =~ /^newuser(?:form)?$/ ? 'login/nu'
+		     : $form->{new_user} ? 'login/nu' # for OpenID
 		     : 'login'; 
 
 	my $options = {};
