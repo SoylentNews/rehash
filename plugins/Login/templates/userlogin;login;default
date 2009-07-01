@@ -32,7 +32,7 @@ __template__
                 [% END %]
 
 [% IF is_modal %]
-        <div id="loginform" style="padding: 1em">
+        <div id="loginform">
 [% ELSE %]
         <div class="generalbody">
 [% END %]
