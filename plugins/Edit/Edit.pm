@@ -197,6 +197,9 @@ sub savePreview {
 				$fh_data->{url_id} = $self->getUrlCreate($url_data);
 			}
 		}
+		my $fh_data->{uid} ||= $form->{name}
+			? getCurrentUser('uid')
+			: getCurrentStatic('anonymous_coward_uid');
 	}
 
 	$fh_data->{title} 	= $form->{title};
