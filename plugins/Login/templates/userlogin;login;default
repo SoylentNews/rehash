@@ -76,8 +76,8 @@ __template__
 
 		[% IF !form.unickname %]
 		<br>
-                <div id="warn_message">
-                        <span id="modal_warn"></span>
+                <div id="tip_message">
+                        <span id="modal_tip"></span>
                         [% IF constants.allow_anonymous %]
                                 Logging in will allow you to post comments as yourself. If you don't log in, you will only be able to post as [% Slash.getCurrentAnonymousCoward("nickname") %].
                         [% ELSE %]
