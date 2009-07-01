@@ -2,6 +2,7 @@ package Slash::Edit;
 
 use strict;
 use Slash;
+use Slash::Constants qw(:messages :web);
 use Slash::Utility;
 use Slash::Display;
 use Slash::Hook;
@@ -552,11 +553,39 @@ sub editCreateSubmission {
 		mediatype	=> $fhitem->{mediatype}
 		
 	};
+	
+	my $messagesub = { %$submission };
+
 	# XXXEdit add url_id handling
 	 $submission->{url_id} = $fhitem->{url_id} if $fhitem->{url_id};
 	my $subid = $self->createSubmission($submission);
+
+	$messagesub->{subid} = $subid;
+
 	my $sub_globjid = $self->getGlobjidCreate('submissions', $subid); 
 	$tagsdb->transferTags($fhitem->{globjid}, $sub_globjid);
+	
+	if ($submission->{url_id}) {
+		my $globjid = $slashdb->getGlobjidCreate("submissions", $messagesub->{subid});
+		$self->addUrlForGlobj($submission->{url_id}, $globjid);
+	}
+	
+	if ($messagesub->{subid} && ($uid != getCurrentStatic('anonymous_coward_uid'))) {
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		$dynamic_blocks->setUserBlock('submissions', $uid) if $dynamic_blocks;
+	}
+	
+	my $messages = getObject('Slash::Messages');
+	if ($messages) {
+		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
+		my $data  = {
+			template_name	=> 'messagenew',
+			subject		=> { template_name => 'messagenew_subj' },
+			submission	=> $messagesub,
+		};
+		$messages->create($users, MSG_CODE_NEW_SUBMISSION, $data) if @$users;
+	}
+
 
 	return $subid;
 }
