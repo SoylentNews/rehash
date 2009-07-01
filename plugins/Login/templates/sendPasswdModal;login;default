@@ -13,6 +13,14 @@ __name__
 sendPasswdModal
 __template__
 
+[% IF tabbed == 1 %]
+	<div class="pref">
+		<span class="preftab"><a href="" onclick="getModalPrefs('userlogin', 'Log In', 1); return false;">Log In</a></span>
+		<span class="preftab"><a href="" onclick="getModalPrefs('newUserModal', 'Create Account', 1); return false;">Create Account</a></span>
+		<span class="preftab active">Retrieve Password</a></span>
+	</div>
+[% END %]
+
 <form id ="modal_prefs" onsubmit="return false">
 [% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="sendPasswdModal">

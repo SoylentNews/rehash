@@ -11,18 +11,20 @@ en_US
 __name__
 sendPasswdForm
 __template__
-[% PROCESS titlebar title="Mail Password" %]
+<div id="formtabs">
+        <ul>
+                <li><a href="[% constants.real_rootdir %]/my/login">Log In</li>
+                <li><a href="[% constants.real_rootdir %]/my/newuser">Create Account</li>
+                <li class="active">Retrieve Password</a></li>
+        </ul>
+</div>
 <div class="generalbody">
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <fieldset>
 <legend> </legend>
 <input type="hidden" name="op" value="mailpasswd">
 [% PROCESS formkey_tag %]
-		<p>
-		Forget your password? Enter your nickname, UID, or email address
-		here to have the system mail your password to you.
-		</p>
-		<b>Nickname/UID/Email</b>
+		<b>Retrieve Nickname/UID/Email</b>
 		<input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
 		<br>
 
@@ -47,12 +49,6 @@ __template__
 
 </fieldset>
 </form>
-[% IF user.is_anon %]
-<p>
-<a href="[% constants.real_rootdir %]/login.pl?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
-<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a> if you don't have one already.
-</p>
-[% END %]
 </div>
 
 __seclev__

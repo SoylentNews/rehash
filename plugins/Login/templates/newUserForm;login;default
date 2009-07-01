@@ -14,7 +14,13 @@ __name__
 newUserForm
 __template__
 <div id="users" class="wide">
-	[% PROCESS titlebar title="Create Account" %]
+	<div id="formtabs">
+                <ul>
+                <li><a href="[% constants.real_rootdir %]/my/login">Log In</li>
+                <li class="active">Create Account</li>
+                <li><a href="[% constants.real_rootdir %]/my/mailpassword">Retrieve Password</a></li>
+                </ul>
+        </div>
 		<div class="generalbody">
 			[% chars = constants.nick_chars;
 			   chars = chars.replace('abcdefghijklmnopqrstuvwxyz', 'a-z');
@@ -54,7 +60,7 @@ __template__
 				<input type="text" name="email" value="[% form.email | strip_attribute %]" size="40">
 				<input type="text" name="email2" value="[% form.email2 | strip_attribute %]" size="40">
 				<div class="note">
-					Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %] without you setting your preferences to display it.
+					Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.
 				</div>
 
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_newuser && user.state.hc %]
@@ -75,9 +81,6 @@ __template__
 
 </fieldset>
 </form>
-		<p>
-			<a href="[% constants.real_rootdir %]/login.pl?op=userlogin">Log in to [% constants.sitename %]</a>.<br> Forget your password? <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">Have your password mailed to you</a> by entering your nickname, uid, or email address.
-		</p>
 	</div>
 </div>
 __seclev__
