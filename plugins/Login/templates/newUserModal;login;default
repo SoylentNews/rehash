@@ -29,6 +29,7 @@ chars = chars.replace('0123456789', '0-9');
 %]
 
 [% IF constants.openid_consumer_allow %]
+<div id="openidform" style="padding: 1em">
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <input type="hidden" name="op" value="claim_openid">
 <input type="hidden" name="new_user" value="1">
@@ -39,9 +40,8 @@ chars = chars.replace('0123456789', '0-9');
 </label>
 <input type="submit" value="Create User with OpenID" class="button">
 </form>
+</div>
 [% END %]
-
-<br><br>
 
 <form id="modal_prefs" onsubmit="return false">
 [% PROCESS reskey_tag %]
