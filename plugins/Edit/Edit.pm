@@ -56,6 +56,7 @@ sub getOrCreatePreview {
 		
 		# Transfer actual tags
 		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { src_uid => $src_item->{uid}, leave_old_activated => 1 });
+		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { leave_old_activated => 1 });
 
 		my $type = $user->{is_admin} && $form->{type} ne "submission" ? "story" : "submission";
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
