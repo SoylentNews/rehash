@@ -13,9 +13,9 @@ sendPasswdForm
 __template__
 <div id="formtabs">
         <ul>
-                <li><a href="[% constants.real_rootdir %]/my/login">Log In</li>
-                <li><a href="[% constants.real_rootdir %]/my/newuser">Create Account</li>
-                <li class="active">Retrieve Password</a></li>
+                <li><a href="[% constants.real_rootdir %]/my/login">Log In</a></li>
+                <li><a href="[% constants.real_rootdir %]/my/newuser">Create Account</a></li>
+                <li class="active">Retrieve Password</li>
         </ul>
 </div>
 <div class="generalbody">

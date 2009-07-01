@@ -16,7 +16,7 @@ __template__
 <div id="users" class="wide">
 	<div id="formtabs">
                 <ul>
-                <li><a href="[% constants.real_rootdir %]/my/login">Log In</li>
+                <li><a href="[% constants.real_rootdir %]/my/login">Log In</a></li>
                 <li class="active">Create Account</li>
                 <li><a href="[% constants.real_rootdir %]/my/mailpassword">Retrieve Password</a></li>
                 </ul>
