@@ -15,6 +15,7 @@ __template__
 
         [% IF tabbed == 1 %]
         <div class="pref">
+                <span class="preftab"><a href="" onclick="getModalPrefs('userlogin', 'Log In', 1); return false;">Log In</a></span>
                 <span class="preftab active">Create Account</a></span>
                 <span class="preftab"><a href="" onclick="getModalPrefs('sendPasswdModal', 'Retrieve Password', 1); return false;">Retrieve Password</a></span>
         </div>
@@ -49,7 +50,7 @@ __template__
 
         <br>
 
-        <b>Once you receive your password, you can <a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a></b>
+        <b>Once you receive your password, you can <a href="[% constants.real_rootdir %]/my/login">log in and set your account up.</a></b>
 
         <br><br>
 
