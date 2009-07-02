@@ -37,7 +37,7 @@ __template__
         <div class="generalbody">
 [% END %]
 
-<form action="[% constants.real_rootdir %]/login.pl" method="post">
+<form action="[% constants.real_rootdir %]/my/login" method="post">
                 <input type="hidden" name="returnto" value="[% return_to || form.returnto | strip_urlattr %]">
                 <input type="hidden" name="op" value="userlogin">
 
