@@ -183,7 +183,7 @@ sub savePreview {
 		my $email_known = "";
 		$email_known = "mailto" if $form->{email} eq $user->{fakeemail};
 		$fh_data->{email} = processSub(strip_attribute($form->{email}), $email_known);
-		$fh_data->{name} = stirp_html($form->{name});
+		$fh_data->{name} = strip_html($form->{name});
 		$fh_data->{mediatype} = $form->{mediatype};
 		$p_data->{url_text} = $form->{url};
 		$p_data->{sub_type} = $form->{sub_type};
