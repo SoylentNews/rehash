@@ -59,6 +59,19 @@ __template__
 				<input type="text" name="createtime" value="[% item.createtime %]" size="19">
 			<label>
 		[% END %]
+
+		[% FOR extra = extras %]
+			[% PROCESS formLabel value => extra.0, comment => "" %]
+			[% IF extra.2 == 'text' %]
+				<input type="text" name="[% extra.1 %]" value="[% preview.${extra.1} | strip_attribute %]" size="50">
+			[% ELSIF extra.2 == 'textarea' %]
+				<textarea wrap="VIRTUAL" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% preview.${extra.1} | strip_literal %]</textarea><br>
+			[% ELSIF extra.2 == 'list' %]
+				[% pulldown = "$extra.1" %]
+				[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), preview.${extra.1}, 1, 1) %]
+			[% END %]
+		[% END %]
+		
 		<label>
 			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 		</label>
@@ -84,6 +97,10 @@ __template__
 				<input type="hidden" name="url_id" value="[% preview.url_id | strip_attribute %]">
 			[% END %]
 		[% END %]
+		<br>
+
+
+
 		<p>
 
 		[% IF user.state.hc && !user.state.hcinvalid %]

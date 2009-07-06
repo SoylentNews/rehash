@@ -226,7 +226,9 @@ sub savePreview {
 	
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $rendered_hr = $self->renderTopics($chosen_hr);
+	print STDERR "RENDERED: ".Dumper($rendered_hr);
 	my $primaryskid = $self->getPrimarySkidFromRendered($rendered_hr);
+	print STDERR "PRIMARYSKID: $primaryskid\n";;
 	my $tids = $self->getTopiclistForStory('',
 		{ topics_chosen => $chosen_hr });
 
@@ -234,8 +236,13 @@ sub savePreview {
 
 	$fh_data->{tid} = $tid;
 	$fh_data->{primaryskid} = $primaryskid;
+	
+	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
-
+	foreach my $extra (@$extracolumns) {
+		$p_data->{$extra->[1]} = strip_nohtml($form->{$extra->[1]}) if $form->{$extra->[1]};
+	}
+	
 	$self->setPreview($preview->{preview_id}, $p_data);
 	$fh->setFireHose($preview->{preview_fhid}, $fh_data);
 
@@ -253,7 +260,9 @@ sub showEditor {
 	my $preview = $self->getPreview($preview_id);
 	
 
-	my $fh = getObject("Slash::FireHose");
+	my $fh		 = getObject("Slash::FireHose");
+	my $tagsdb 	= getObject("Slash::Tags");
+
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
 	if ($p_item && $p_item->{title} && $preview->{introtext}) {
@@ -277,6 +286,9 @@ sub showEditor {
 
 	my $description = $self->getDescriptions('commentcodes_extended');
 	my $commentstatus_select = createSelect('commentstatus', $description, $preview->{commentstatus}, 1);
+	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
+	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
+
 	
 	$editor .= slashDisplay('editor', { 
 		id 			=> $preview_id,
@@ -285,6 +297,7 @@ sub showEditor {
 		author_select 		=> $author_select,
 		commentstatus_select 	=> $commentstatus_select,
 		display_check		=> $display_check,
+		extras			=> $extracolumns,
 		errors			=> $options->{errors}
 	 }, { Page => 'edit', Return => 1 });
 
@@ -452,6 +465,18 @@ sub editUpdateStory {
 	
 }
 
+sub getExtrasToSaveForChosen {
+	my($self, $chosen_hr, $preview) = @_;
+	my $extras = $self->getNexusExtrasForChosen($chosen_hr) || [];
+	
+	my $save_extras = {};
+
+	foreach my $extra(@$extras) {
+		$save_extras->{$extra->[1]} = strip_nohtml($preview->{$extra->[1]}) if $preview->{$extra->[1]};
+	}
+	return $save_extras;
+}
+
 sub editCreateStory {
 	my($self, $preview, $fhitem) = @_;
 	my $constants = getCurrentStatic();
@@ -467,6 +492,7 @@ sub editCreateStory {
 
 
 	$chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
+	my $save_extras = $self->getExtrasToSaveForChosen($chosen_hr, $preview);
 
 	$data = {
 		uid 		=> $fhitem->{uid},
@@ -486,6 +512,10 @@ sub editCreateStory {
 		-rendered	=> 'NULL',
 		neverdisplay	=> $preview->{neverdisplay},
 	};
+
+	foreach my $key (keys %$save_extras) {
+		$data->{$key} = $save_extras->{$key};
+	}
 	
 	$data->{subid} = $preview->{subid} if $preview->{subid};
 	$data->{fhid} = $preview->{src_fhid} if $preview->{fhid};
@@ -542,6 +572,8 @@ sub editCreateSubmission {
 	my $user = getCurrentUser();
 
 	my $tagsdb = getObject("Slash::Tags");
+	my $chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
+	my $save_extras = $self->getExtrasToSaveForChosen($chosen_hr, $preview);
 
 
 	my $submission = {
@@ -556,6 +588,10 @@ sub editCreateSubmission {
 		mediatype	=> $fhitem->{mediatype}
 		
 	};
+	
+	foreach my $key (keys %$save_extras) {
+		$submission->{$key} = $save_extras->{$key};
+	}
 	
 	my $messagesub = { %$submission };
 
