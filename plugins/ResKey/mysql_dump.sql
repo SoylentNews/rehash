@@ -44,6 +44,7 @@ INSERT INTO reskey_resources VALUES (8, 'bookmark', 'no');
 INSERT INTO reskey_resources VALUES (9, 'comments-moderation-ajax', 'yes');
 INSERT INTO reskey_resources VALUES (10, 'misc', 'no');
 INSERT INTO reskey_resources VALUES (11, 'openid', 'no');
+INSERT INTO reskey_resources VALUES (12, 'edit-submit', 'no');
 
 ##### comments
 ### checks
@@ -259,4 +260,28 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 11, 'all', 'Slash::ResKey::Chec
 INSERT INTO reskey_vars VALUES (11, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (11, 'acl_no', 'reskey_no_openid', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (11, 'duration_max-uses',  20, 'how many uses per timeframe');
+
+
+##### edit-submit
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::Spammer',        531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::NoSubmit',       551);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::Duration',            601);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::HumanConf',           701);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::ProxyScan',           801);
+
+### vars
+INSERT INTO reskey_vars VALUES (12, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (12, 'acl_no', 'reskey_no_edit', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (12, 'duration_max-uses',       5, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (12, 'duration_max-failures',  10, 'how many failures per reskey');
+INSERT INTO reskey_vars VALUES (12, 'duration_uses',         300, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (12, 'duration_creation-use',  20, 'min duration (in seconds) between creation and use');
+
 

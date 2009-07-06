@@ -22,6 +22,7 @@ __template__
 [% END %]
 
 	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
+		[% PROCESS reskey_tag %]
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 
 		[% IF item.type == 'submission' %]
@@ -84,6 +85,12 @@ __template__
 			[% END %]
 		[% END %]
 		<p>
+
+		[% IF user.state.hc && !user.state.hcinvalid %]
+		<p>[% user.state.hcquestion; user.state.hchtml %]
+		[% PROCESS hc_tag %]
+		[% END %]
+
 		<input type="submit" name="op" value="preview">
 		<input type="submit" name="op" value="save">
 	

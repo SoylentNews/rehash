@@ -1,0 +1,19 @@
+__section__
+default
+__description__
+ 
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+hc_tag
+__template__
+[% hcname = hcname || "hcanswer" %]
+<input type="text" id="[% hcname %]" name="[% hcname %]" value="[% form.hcanswer | strip_attribute %]" size="8" maxlength="8">
+__seclev__
+1000
+__version__
+$Id$

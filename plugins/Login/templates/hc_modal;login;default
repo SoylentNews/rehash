@@ -18,7 +18,7 @@ __template__
 
 <table>
         <tr>
-                <td>[% user.state.hcquestion %]<br><input type="text" id="hcanswer" name="hcanswer" value="[% form.hcanswer | strip_attribute %]" size="8" maxlength="8"></td>
+                <td>[% user.state.hcquestion %]<br>[% PROCESS hc_tag %]</td>
                 <td>[% user.state.hchtml %]</td>
         </tr>
 </table>

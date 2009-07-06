@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 data
-__seclev__
-10000
 __template__
 [% SWITCH value %]
 [% CASE 'maxallowed' %]

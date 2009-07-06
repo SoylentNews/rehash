@@ -32,7 +32,7 @@ sub main {
 	my $ops = {
 		edit	=> {
 			function	=> \&edit,
-			seclev		=> 100,
+			seclev		=> 100
 		},
 		preview => {
 			function 	=> \&preview,
@@ -62,6 +62,14 @@ sub main {
 
 sub edit {
 	my($form, $slashdb, $user, $constants) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
+	unless ($rkey->create) {
+		errorLog($rkey->errstr);
+		return;
+	}
+
 	my $edit = getObject("Slash::Edit");
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
@@ -69,26 +77,40 @@ sub edit {
 
 sub preview {
 	my($form, $slashdb, $user, $constants) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
+	unless ($rkey->touch) {
+		errorLog($rkey->errstr);
+		return;
+	}
+
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
-	
 }
 
 sub save {
 	my($form, $slashdb, $user, $constants) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
+	unless ($rkey->use) {
+		errorLog($rkey->errstr);
+		return;
+	}
+
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
-	my ($retval, $type, $save_type, $errors) = $edit->saveItem();
-	my ($editor, $id);
+	my($retval, $type, $save_type, $errors) = $edit->saveItem();
+	my($editor, $id);
 	if ($retval) {
 		$id = $retval;
 	} else { 
 		$editor = $edit->showEditor({ errors => $errors });
 	}
 	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type, type => $type });
-
 }
 
 
