@@ -570,12 +570,20 @@ firehose_set_options = function(name, value, context) {
 
 	// Set values in params and firehose_settings; mostly table-driven...
 	var params={};
+
+	// hardcoding because i am lazy and stupid -- pudge
+	if (name==='setfhfilter searchfu') {
+		name = 'setfhfilter';
+		params.searchtriggered = 1;
+	}
+
 	uses_setfield[name]	&& (params.setfield = 1);
 	sets_param[name]	&& (params[name] = value);
 	flags_param[name]	&& (params[flags_param[name]] = 1);
 	sets_directly[name]	&& (firehose_settings[name] = value);
 	sets_indirectly[name]	&& (firehose_settings[sets_indirectly[name]] = value);
 	resets_pagemore[name]	&& (firehose_settings.page = firehose_settings.more_num = 0);
+
 	// ...and a few exceptions "by hand".
 	switch ( name ) {
 		case 'fhfilter':		set_fhfilter_from('form[name=firehoseform] input[name=fhfilter]'); break;

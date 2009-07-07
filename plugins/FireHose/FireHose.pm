@@ -3584,7 +3584,7 @@ sub getAndSetOptions {
 			$options->{fhfilter} = $fhfilter;
 			$options->{base_filter} = $fhfilter;
 
-			if ($search_trigger) {
+			if ($search_trigger && !$f_change) {
 				$form->{view} = 'search';
 			}
 
