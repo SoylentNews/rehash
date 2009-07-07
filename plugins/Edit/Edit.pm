@@ -11,13 +11,10 @@ use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-
 sub getOrCreatePreview {
 	my($self) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-
-	return if $user->{is_anon};
 
 	my $fh = getObject("Slash::FireHose");
 	my $tagsdb = getObject("Slash::Tags");
@@ -108,7 +105,7 @@ sub getOrCreatePreview {
 sub createInitialTagsForPreview {
 	my($self, $item, $preview) = @_;
 	my $user = getCurrentUser();
-	return if $user->{is_anon} || !$preview || !$item || !$item->{id} || !$preview->{preview_id};
+	return !$preview || !$item || !$item->{id} || !$preview->{preview_id};
 
 	my @tids;
 	push @tids, $item->{tid} if $item->{tid};
@@ -144,7 +141,7 @@ sub savePreview {
 	my $admindb = getObject("Slash::Admin");
 	my $tagsdb = getObject("Slash::Tags");
 
-	return if $user->{is_anon} || !$form->{id};
+	return if !$form->{id};
 	
 	my $preview = $self->getPreview($form->{id});
 	return if !$preview && $preview->{preview_id};
@@ -383,7 +380,7 @@ sub saveItem {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $fh = getObject("Slash::FireHose");
-	return if $user->{is_anon} || !$form->{id};
+	return if !$form->{id};
 	
 	my $preview = $self->getPreview($form->{id});
 	return if !$preview && $preview->{preview_id};

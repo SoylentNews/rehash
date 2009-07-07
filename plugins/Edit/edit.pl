@@ -36,19 +36,13 @@ sub main {
 		},
 		preview => {
 			function 	=> \&preview,
-			seclev		=> 100
+			seclev		=> 0
 		},
 		save	=> {
 			function	=> \&save,
-			seclev		=> 100
+			seclev		=> 0
 		}
 	};
-
-	# redirect for non-admin users for now 
-	if ($user->{seclev} < 100) {
-		redirect("$gSkin->{rootdir}/users.pl");
-		return;
-	}
 
 	header("Edit", '') or return;
 
