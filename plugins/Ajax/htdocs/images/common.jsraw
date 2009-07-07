@@ -1382,7 +1382,7 @@ function user_wants_updates( when ){
 	when && check_logged_in() && apply_updates_when(when);
 }
 
-var apply_updates_when, apply_updates, updates_available, debug_ask;
+var apply_updates_when, apply_updates, updates_available, debug_ask, slashCMfn;
 (function(){
 var	$FHL,
 	INSERT_SX='div.data-add-ready', REMOVE_SX='div.data-remove-ready:not(.currfh)',
@@ -1708,8 +1708,14 @@ function firehose_toggle_simpledesign_mode(force_sd, is_anon) {
 	}
 }
 
+function setSlashCMCallback( callback ) {
+	slashCMfn = callback;
+}
+
 function slashCM(params) {
-	alert("You made a '" + params.updateType + "' search with terms '" + params.updateTerms + "' that returned " + params.updateNum + " results.");
+	if( slashCMfn ) {
+		slashCMfn(params);
+	}
 }
 
 function firehose_get_updates_handler(transport) {
