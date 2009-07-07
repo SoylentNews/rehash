@@ -46,6 +46,8 @@ __template__
 		[% PROCESS formLabel value => "Title" %]
 
 		<input type="text" name="title" value="[% item.title | strip_attribute %]" size="50">
+		<div class="notes">[% ispell_comments.title %]</div>
+
 		[% IF item.type == 'story' %]
 			[% IF constants.use_dept %]
 				[% PROCESS formLabel value => "Dept" %]
@@ -76,6 +78,7 @@ __template__
 			Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 		</label>
 		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% preview.introtext | strip_literal %]</textarea>
+		<div class="notes">[% ispell_comments.introtext %]</div>
 
 		[% IF item.type == 'story' %]
 		<a name="bodytext"></a>
@@ -83,6 +86,7 @@ __template__
 				<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 			</label>
 			<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
+			<div class="notes">[% ispell_comments.bodytext %]</div>
 	
 			<label>
 				<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>

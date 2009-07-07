@@ -5,7 +5,6 @@
 # $Id$
 
 use strict;
-use File::Temp 'tempfile';
 use Image::Size;
 use Time::HiRes;
 use LWP::UserAgent;
@@ -1131,6 +1130,7 @@ sub importText {
 # Story Editing
 sub editStory {
 	my($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $admindb = getObject('Slash::Admin');
 
 	my($stoid, $sid, $storylinks);
 
@@ -1228,7 +1228,6 @@ sub editStory {
 		# not normally set here, so we force it to be safe
 		$storyref->{tid} = $storyref->{topiclist};
 			
-		my $admindb = getObject('Slash::Admin');
 		$storyref->{'time'} = $admindb->findTheTime();
 
 		# Get wordcounts
@@ -1408,9 +1407,9 @@ sub editStory {
 	});
 
 	# Run a spellcheck on introtext, bodytext, and title if they're set.
-	my %introtext_spellcheck = get_ispell_comments($storyref->{introtext}) if $storyref->{introtext};
-	my %bodytext_spellcheck  = get_ispell_comments($storyref->{bodytext})  if $storyref->{bodytext};
-	my %title_spellcheck     = get_ispell_comments($storyref->{title})     if $storyref->{title};
+	my %introtext_spellcheck = $admindb->get_ispell_comments($storyref->{introtext}) if $storyref->{introtext};
+	my %bodytext_spellcheck  = $admindb->get_ispell_comments($storyref->{bodytext})  if $storyref->{bodytext};
+	my %title_spellcheck     = $admindb->get_ispell_comments($storyref->{title})     if $storyref->{title};
 
 	# Set up our spellcheck template. Output is either a table (if errors were found) or an empty string.	
 	my $ispell_comments = {
@@ -1448,7 +1447,6 @@ sub editStory {
 		}
 	}
 
-	my $admindb = getObject('Slash::Admin');
 	my $authortext = $admindb->showStoryAdminBox($storyref);
 	my $slashdtext = $admindb->showSlashdBox();
 	
@@ -1744,97 +1742,6 @@ sub getDescForTopicsRendered {
 	return "<b>$desc</b>";
 }
 
-##################################################################
-sub write_to_temp_file {
-	my($data) = @_;
-	my($fh, $file) = tempfile();
-	binmode $fh, ':utf8' if getCurrentStatic('utf8');
-	print $fh $data;
-	close $fh;
-	return $file;
-
-#	local *TMP;
-#	my $tmp;
-#	do {
-#		# Note: don't mount /tmp over NFS, it's a security risk
-#		# See Camel3, p. 574
-#		$tmp = tmpnam();
-#	} until sysopen(TMP, $tmp, O_RDWR|O_CREAT|O_EXCL, 0600);
-#	print TMP $data;
-#	close TMP;
-#	$tmp;
-}
-
-##################################################################
-sub get_ispell_comments {
-	my($text) = @_;
-	my $constants = getCurrentStatic();
-
-	$text = strip_nohtml($text);
-	return "" unless $text && $text =~ /\S/;
-
-	# don't split to scalar context, it clobbers @_
-	my $n_text_words = scalar(my @junk = split /\W+/, $text);
-	my $slashdb = getCurrentDB();
-
-	my $ispell = $slashdb->getVar("ispell", "value");
-	return "" if !$ispell;
-	return "bad ispell var '$ispell'"
-		unless $ispell eq 'ispell' or $ispell =~ /^\//;
-	return "insecure ispell var '$ispell'" if $ispell =~ /\s/;
-	if ($ispell ne 'ispell') {
-		return "no file, not readable, or not executable '$ispell'"
-			if !-e $ispell or !-f _ or !-r _ or !-x _;
-	}
-
-	# Get the contents of the 'ispellok' template, separate it out to
-	# one word per line, and add a short header if aspell requires.
-	my $ok = $slashdb->getTemplateByName('ispellok', { cache_flag => 1, ignore_errors => 1 });
-	$ok = $ok ? ($ok->{template} || "") : "";
-	$ok =~ s/\s+/\n/g;
-	if ($constants->{ispell_is_really_aspell_with_lang}) {
-		my $n_lines = $ok =~ tr/\n/\n/;
-		$ok = "personal_ws-1.1 $constants->{ispell_is_really_aspell_with_lang} $n_lines\n$ok";
-	}
-
-	my $ispell_fh;
-	my $tmptext = write_to_temp_file($text);
-	my $tmpok = "";
-	$tmpok = write_to_temp_file($ok) if $ok;
-	rename($tmpok, lc($tmpok));
-	$tmpok = lc($tmpok);
-	my $tmpok_flag = "";
-	$tmpok_flag = " -p $tmpok" if $tmpok;
-	
-	if (!open($ispell_fh, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
-		errorLog("could not pipe to $ispell from $tmptext, $!");
-		return "could not pipe to $ispell from $tmptext, $!";
-	}
-
-	my %misspelled_suggestion = ( );
-	while (defined(my $line = <$ispell_fh>)) {
-		# Grab all ispell's flagged words and put them in the hash
-		# If this is a "&" line, there may be one or more suggestions
-		# separated by commas and terminated by newlines;  they may
-		# contain spaces.
-		$misspelled_suggestion{$1} = ($2 || '')
-			if    $line =~ /^\& (.+) \d+ \d+: (.+)/
-			   || $line =~ /^\# (.+) \d+/;
-	}
-	close $ispell_fh;
-	unlink $tmptext, $tmpok;
-
-	my %misspelled_words = ();
-	foreach my $mWord (keys %misspelled_suggestion) {
-		# Inititally set reference empty in case there are no suggestions.
-		$misspelled_words{$mWord} = [];
-		foreach my $suggestion (split(/,\s?/, $misspelled_suggestion{$mWord})) {
-			push(@{$misspelled_words{$mWord}}, $suggestion);
-		}
-	}	
-	
-	return(%misspelled_words);
-}
 
 ##################################################################
 sub listStories {

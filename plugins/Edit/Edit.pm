@@ -251,19 +251,42 @@ sub savePreview {
 sub showEditor {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	$options ||= {};
+
+	my $admindb = getObject('Slash::Admin');
 
 	my $preview_id = $self->getOrCreatePreview();
 	my $editor;
 	$editor .=  "PREVIEW ID: $preview_id<br>";
 
 	my $preview = $self->getPreview($preview_id);
-	
 
 	my $fh		 = getObject("Slash::FireHose");
 	my $tagsdb 	= getObject("Slash::Tags");
 
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
+
+	my (%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
+
+	if ($p_item->{type} eq 'story' && !$user->{nospell}) {
+		%introtext_spellcheck = $admindb->get_ispell_comments($preview->{introtext}) if $preview->{introtext};
+		%bodytext_spellcheck  = $admindb->get_ispell_comments($p_item->{bodytext})  if $p_item->{bodytext};
+		%title_spellcheck     = $admindb->get_ispell_comments($p_item->{title})     if $p_item->{title};
+
+		$ispell_comments = {
+		introtext => (scalar keys %introtext_spellcheck)
+			? slashDisplay("spellcheck", { words => \%introtext_spellcheck, form_element => "introtext" }, { Page => "admin", Return => 1})
+			: "",
+		bodytext  => (scalar keys %bodytext_spellcheck)
+			? slashDisplay("spellcheck", { words => \%bodytext_spellcheck, form_element => "bodytext" }, { Page => "admin", Return => 1 })
+			: "",
+		title     => (scalar keys %title_spellcheck)
+			? slashDisplay("spellcheck", { words => \%title_spellcheck, form_element => "title" }, { Page => "admin", Return => 1 })
+			: "",
+		}
+	}
+
 	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
 	if ($p_item && $p_item->{title} && $preview->{introtext}) {
 		$editor .= "<div id='editpreview'>";
@@ -298,7 +321,8 @@ sub showEditor {
 		commentstatus_select 	=> $commentstatus_select,
 		display_check		=> $display_check,
 		extras			=> $extracolumns,
-		errors			=> $options->{errors}
+		errors			=> $options->{errors},
+		ispell_comments		=> $ispell_comments,
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
