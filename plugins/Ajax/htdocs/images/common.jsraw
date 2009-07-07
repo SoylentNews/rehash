@@ -588,6 +588,7 @@ firehose_set_options = function(name, value, context) {
 
 	if ( start_over[name] ) {
 		view($('body'), { speed:0 });
+		params.start_over = 1;
 	}
 	// We own #firehoselist and its contents; no need to pull _this_ UI code out into an event handler.
 	if ( removes_all[name] ) {
@@ -1707,6 +1708,10 @@ function firehose_toggle_simpledesign_mode(force_sd, is_anon) {
 	}
 }
 
+function slashCM(params) {
+	alert("You made a '" + params.updateType + "' search with terms '" + params.updateTerms + "' that returned " + params.updateNum + " results.");
+}
+
 function firehose_get_updates_handler(transport) {
 	var response = eval_response(transport);
 	if ( !response ){
@@ -1730,10 +1735,19 @@ function firehose_get_updates_handler(transport) {
 		});
 	}
 
-	response.dynamic_blocks &&	dynamic_blocks_update(response.dynamic_blocks);
-	response.html &&			json_update(response);
-	response.sprite_rules &&	sprite_rules(response.sprite_rules);
-	response.updates &&			firehose_handle_update(response.updates, response.ordered);
+	response.dynamic_blocks && dynamic_blocks_update(response.dynamic_blocks);
+	response.html           && json_update(response);
+	response.sprite_rules   && sprite_rules(response.sprite_rules);
+	response.updates        && firehose_handle_update(response.updates, response.ordered);
+
+	if (firehose_settings.updateTypeCM) {
+		slashCM({
+			updateType:  firehose_settings.updateTypeCM,
+			updateTerms: (firehose_settings.updateTermsCM || ''),
+			updateNum:   (response.count || 0)
+		});
+		firehose_settings.updateTypeCM = firehose_settings.updateTermsCM = '';
+	}
 }
 
 function firehose_get_item_idstring() {

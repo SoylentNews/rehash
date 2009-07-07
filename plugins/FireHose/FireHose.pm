@@ -2177,6 +2177,17 @@ sub genSetOptionsReturn {
 		}
 	}
 
+	if ($form->{start_over}) {
+		# handle updateNumCM in next call, firehose_get_updates
+		# XXX this only handles clicking the 'Search' button not the view button next to the search field
+		my $updateType  = $form->{searchtriggered} ? 'search' : 'view';
+		my $updateTerms = $form->{fhfilter} || '';
+		$data->{eval_first} .= "firehose_settings.updateTypeCM  = " . Data::JavaScript::Anon->anon_dump($updateType) . ';';
+		$data->{eval_first} .= "firehose_settings.updateTermsCM = " . Data::JavaScript::Anon->anon_dump($updateTerms) . ';';
+	} else {
+		$data->{eval_first} .= "firehose_settings.updateTypeCM = firehose_settings.updateTermsCM = '';";
+	}
+
 	return $data;
 }
 
@@ -2513,6 +2524,7 @@ sub ajaxFireHoseGetUpdates {
 		events          => $events,
 		dynamic_blocks  => $dynamic_blocks,
 		sprite_rules    => $sprite_rules,
+		count           => $count
 	});
 	my $reskey_dump = "";
 	my $update_time_dump;
