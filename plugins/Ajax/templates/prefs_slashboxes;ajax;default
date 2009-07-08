@@ -69,6 +69,11 @@ __template__
 	<p>
 		<input type="button" value="Save" onclick="saveModalPrefs()">
 	</p>
+
+	[% FOREACH extra_block = extra_blocks %]
+                <input type="hidden" name="dynamic_[% extra_block %]" value="on">
+        [% END %]
+
 </form>
 __seclev__
 500

@@ -719,11 +719,20 @@ sub getModalPrefs {
 			$section_descref->{$bid}{title} = $title;
 		}
 
+		my $dynamic_blocks = getObject("Slash::DynamicBlocks");
+		my $extra_blocks = [];
+		if ($dynamic_blocks) {
+			my $userblocks = $dynamic_blocks->getUserBlocks("name", $user->{uid});
+                	my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user->{uid});
+			push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
+		}
+
 		return
 			slashDisplay('prefs_slashboxes', {
 				box_order	  => $box_order,
 				section_descref	  => $section_descref,
 				userspace	  => $userspace,
+				extra_blocks      => $extra_blocks,
 				tabbed		  => $form->{'tabbed'},
 			},
 			{ Return => 1 }
