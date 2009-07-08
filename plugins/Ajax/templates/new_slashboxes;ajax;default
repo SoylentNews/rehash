@@ -240,6 +240,7 @@ function savePreviewBlock() {
 	{
 		case 0:
 			$avail = $('select#slashboxes-available-public');
+			new_prefix = 'showbox';
 			break;
 		case 1:
 			$avail = $('select#slashboxes-available-user');
