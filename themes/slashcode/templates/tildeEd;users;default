@@ -247,6 +247,10 @@ __template__
 		</tr>
 	</table>
 
+	[% FOREACH extra_block = extra_blocks %]
+                <input type="hidden" name="dynamic_[% extra_block %]" value="on">
+        [% END %]
+
 	[% tilded_customize_msg %]
 	[% tilded_box_msg %]
 </div>

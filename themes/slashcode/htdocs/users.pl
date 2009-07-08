@@ -1899,14 +1899,18 @@ sub tildeEd {
 		$section_descref->{$bid}{title} = $title;
 	}
 
-#print STDERR scalar(localtime) . " tildeEd story023_default: " . Dumper(\%story023_default);
+	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
+        my $extra_blocks = [];
+        if ($dynamic_blocks) {
+                my $userblocks = $dynamic_blocks->getUserBlocks("name", $user_edit->{uid});
+                my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user_edit->{uid});
+                push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
+        }
 
 	# Userspace.
-
 	my $userspace = $user_edit->{mylinks} || "";
 
 	# Titles of stuff.
-
 	my $tildeEd_title = getTitle('tildeEd_title');
 	my $criteria_msg = getMessage('tilded_criteria_msg');
 	my $customize_title = getTitle('tildeEd_customize_title');
@@ -1934,6 +1938,7 @@ sub tildeEd {
 		box_order		=> $box_order,
 
 		userspace		=> $userspace,
+		extra_blocks            => $extra_blocks,
 	}, 1);
 
 	return $tilde_ed;
@@ -2941,6 +2946,15 @@ sub saveHome {
 		for my $bid (@slashboxes) {
 			delete $slashboxes{$bid} unless $form->{"showbox_$bid"};
 		}
+
+		for my $key (sort grep /^dynamic_/, keys %$form) {
+                        my($bid) = $key =~ /^dynamic_(.+)$/;
+                        next if length($bid) < 1;
+                        if (! exists $slashboxes{$bid}) {
+                                $slashboxes{$bid} = 999;
+                        }
+                }
+
 		@slashboxes = sort {
 			$slashboxes{$a} <=> $slashboxes{$b}
 			||
