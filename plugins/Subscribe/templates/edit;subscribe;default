@@ -208,6 +208,15 @@ If your question is about your daily headlines email, you can edit that at
 For a list of subscriber-only benefits, see
 <a href="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1600">the FAQ</a>.
 </div>
+<script type="text/javascript">
+(function() {
+// coremetrics
+	if( window.location.hostname === 'slashdot.org' ) {
+		cmSetProduction();
+	}
+	cmCreateConversionEventTag( 'Account Subscription', '1', 'subscription', '5' );
+})();
+</script>
 __seclev__
 10000
 __version__
