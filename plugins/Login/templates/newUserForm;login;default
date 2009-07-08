@@ -83,6 +83,15 @@ __template__
 </form>
 	</div>
 </div>
+<script type="text/javascript">
+(function() {
+// coremetrics
+        if( window.location.hostname === 'slashdot.org' ) {
+                cmSetProduction();
+        }
+        cmCreatePageviewTag && cmCreatePageviewTag('CREATE ACCOUNT') && (cmCreatePageviewTag = null);
+})();
+</script>
 __seclev__
 10000
 __version__

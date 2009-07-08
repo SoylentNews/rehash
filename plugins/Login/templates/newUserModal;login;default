@@ -78,6 +78,15 @@ chars = chars.replace('0123456789', '0-9');
 
 </form>
 
+<script type="text/javascript">
+(function() {
+// coremetrics
+        if( window.location.hostname === 'slashdot.org' ) {
+                cmSetProduction();
+        }
+        cmCreatePageviewTag && cmCreatePageviewTag('CREATE ACCOUNT') && (cmCreatePageviewTag = null);
+})();
+</script>
 __seclev__
 500
 __version__
