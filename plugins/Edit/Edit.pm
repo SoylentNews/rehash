@@ -137,7 +137,7 @@ sub detectSubType {
 	my($self, $text) = @_;
 
 	my $html_count;
-	$html_count++ while $text =~ /<[^a]/ig;
+	$html_count++ while $text =~ /<[^a\/]/ig;
 
 	return $html_count ? 'html' : 'plain';
 }
@@ -227,7 +227,8 @@ sub savePreview {
 			$fh_data->{$field} = balanceTags($fh_data->{$field});
 		}
 	} elsif ($p_item->{type} eq 'submission') {
-		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $self->detectSubType($form->{introtext}) });
+		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $p_data->{sub_type} } );
+		print STDERR "SUB TYPE: $p_data->{sub_type}\n";
 	}
 	
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
