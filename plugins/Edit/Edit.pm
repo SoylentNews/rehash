@@ -133,6 +133,15 @@ sub createInitialTagsForPreview {
 	}
 }
 
+sub detectSubType {
+	my($self, $text) = @_;
+
+	my $html_count;
+	$html_count++ while $text =~ /<[^a]/ig;
+
+	return $html_count ? 'html' : 'plain';
+}
+
 sub savePreview {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
@@ -183,7 +192,7 @@ sub savePreview {
 		$fh_data->{name} = strip_html($form->{name});
 		$fh_data->{mediatype} = $form->{mediatype};
 		$p_data->{url_text} = $form->{url};
-		$p_data->{sub_type} = $form->{sub_type};
+		$p_data->{sub_type} = $self->detectSubType($form->{introtext});
 		if ($form->{url} && $form->{title}) {
 			if (validUrl($form->{url})) {
 				my $url_data = {
@@ -218,7 +227,7 @@ sub savePreview {
 			$fh_data->{$field} = balanceTags($fh_data->{$field});
 		}
 	} elsif ($p_item->{type} eq 'submission') {
-		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $form->{sub_type} });
+		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $self->detectSubType($form->{introtext}) });
 	}
 	
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
