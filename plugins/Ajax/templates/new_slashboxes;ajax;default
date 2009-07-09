@@ -14,6 +14,7 @@ __template__
 <!-- ######################################################################################### -->
 
 <form id="modal_prefs" name="myform" method="post" action="" onsubmit="savePreviewBlock(); false">
+[% PROCESS reskey_tag %]
 
 <div class="block_name"><input type="hidden" name="block_name" value="" class="block_name" id="blockname"></div>
 <input type="hidden" name="formname" value="slashboxes">
@@ -24,11 +25,6 @@ __template__
 
 	<div class="yui-g slashboxselector"> 
 		<div id="slashbox-first" class="yui-u first">
-<!--
-			<div class="slashbox-tabs">
-				<span class="slashboxes-public"><p>Public</p></span>
-			</div>
--->
         			<div id="slashbox-tabs">
 			                <ul>
 						<li><span class="slashboxes-public"><a href="#fragment-1"><span>Public</span></a></span></li>
@@ -308,8 +304,9 @@ function savePreviewBlock() {
 		var params = {};
 		params['op']		= 'saveModalPrefs';
 		params['reskey']	= reskey_static;
-		params['data']		= 'formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + $avail.val() + '=on';
+		params['data']		= 'reskey=' + reskey_static + '&formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + $avail.val() + '=on';
 		params['blocks']	= blocks;
+//		saveModalPrefs( params['op'], params['data'], params['reskey'] );
 		ajax_update(params);
 		var $block = $('#newslashbox-create');
 		$block.find('div.title').attr('id', $avail.val() + '-title');
