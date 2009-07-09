@@ -310,7 +310,7 @@ function savePreviewBlock() {
 		params['data']		= 'formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + bidval + '=on';
 		params['blocks']	= blocks;
 //		saveModalPrefs( params['op'], params['data'], params['reskey'] );
-		ajax_update(params);
+		ajax_update(params, '', { onComplete: json_handler });
 		var $block = $('#newslashbox-create');
 		$block.find('div.title').attr('id', bidval + '-title');
 		$block.find('div.content').attr('id', bidval + '-content');

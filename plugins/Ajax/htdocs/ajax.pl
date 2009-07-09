@@ -1900,7 +1900,9 @@ sub saveModalPrefs {
 		), { deep_nesting => 2, length => 255 });
 
 		$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
+		$slashdb->setUser($params{uid}, $user_edits_table);
 
+		return setModalUpdates();
 	}
 
 	if ($params{'formname'} eq "authors" || $params{'formname'} eq 'fhexclusions') {

@@ -1100,6 +1100,11 @@ function json_update(response) {
 			append(new_html);
 	});
 
+	// ...replace with new content (and display it)
+	$.each(response.updates||[], function(elem_id, new_html) {
+		$any(elem_id).replaceWith(new_html).show();
+	});
+
 	// ...replace the specially marked "tail-end" (or else append) content of these elements
 	$.each(response.html_append_substr||[], function(elem_id, new_html){
 		$any(elem_id).
@@ -2213,11 +2218,7 @@ function saveModalPrefs(formname, this_data, this_reskey) {
 		onComplete: function(transport) {
 			var response = eval_response(transport);
 			if (response !== undefined && response.updates !== undefined) {
-				 $.each(response.updates,
-					function(id, update) {
-						$any(id).replaceWith(update).show();
-					}
-				);
+				json_update(response);
 			} else {
 				hide_modal_box();
 				if (document.forms.modal_prefs.refreshable && document.forms.modal_prefs.refreshable.value) {
