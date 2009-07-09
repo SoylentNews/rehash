@@ -86,7 +86,7 @@ sub main {
 		$slashdb, $constants, $user, $form, $options
 	);
 
-#	print STDERR "AJAX7 $$: $user->{uid}, $op ($retval)\n";
+#	my $litval = strip_literal($retval); print STDERR "AJAX7 $$: $user->{uid}, $op ($litval)\n";
 
 	http_send($options);
 	if ($retval && length $retval) {
@@ -1858,8 +1858,8 @@ sub saveModalPrefs {
 		}
 
 		for my $key (sort grep /^showbox_/, keys %params) {
-			my($bid) = $key =~ /^showbox_(\w+)$/;
-			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
+			my($bid) = $key =~ /^showbox_(.+)$/;
+			next if length($bid) < 1 || length($bid) > 30;
 			if (! exists $slashboxes{$bid}) {
 				$slashboxes{$bid} = 999;
 			}

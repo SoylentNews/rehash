@@ -14,12 +14,12 @@ __template__
 <!-- ######################################################################################### -->
 
 <form id="modal_prefs" name="myform" method="post" action="" onsubmit="savePreviewBlock(); false">
-[% PROCESS reskey_tag %]
 
 <div class="block_name"><input type="hidden" name="block_name" value="" class="block_name" id="blockname"></div>
 <input type="hidden" name="formname" value="slashboxes">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">
+[% PROCESS reskey_tag %]
 
 <div id="dialog" title="Add New Slashbox">
 
@@ -273,13 +273,16 @@ function savePreviewBlock() {
 	}
 
 	var $option = $avail.find('option[selected]');
+	var bidval = '';
 	if( $option.length == 1 ) {
 		is_selected = true;
+		bidval = $option.val();
 		$option.addClass('added');
 		$option.remove();
 	}
 
 	if( $avail.attr('length') == 1 || is_selected == true ) {
+		bidval = bidval || $avail.val();
 		var	blocks = "";
 		$('#slashboxes').find('div.block:not(.nosort)').each(function(){
 			var blockdiv = $( this ).find('.title').attr('id');
@@ -287,12 +290,12 @@ function savePreviewBlock() {
 				blockdiv = blockdiv.replace(/-title/i,'');
 				if( blockdiv != "newslashbox" && blockdiv != "userbio_self" ) {
 					var old_prefix = 'showbox';
-					$('select#slashboxes-available-user').find('option').each( function(){
+					getSlashboxLists('user').each( function(){
 						if( $(this).val() == blockdiv ) {
 							old_prefix = 'dynamic';
 						}
 					});
-					$('select#slashboxes-available-friend').find('option').each( function(){
+					getSlashboxLists('friend').each( function(){
 						if( $(this).val() == blockdiv ) {
 							old_prefix = 'dynamic';
 						}
@@ -304,7 +307,7 @@ function savePreviewBlock() {
 		var params = {};
 		params['op']		= 'saveModalPrefs';
 		params['reskey']	= $dom('modal_prefs').elements.reskey.value;
-		params['data']		= 'reskey=' + params['reskey'] + '&formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + $avail.val() + '=on';
+		params['data']		= 'formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + bidval + '=on';
 		params['blocks']	= blocks;
 //		saveModalPrefs( params['op'], params['data'], params['reskey'] );
 		ajax_update(params);
