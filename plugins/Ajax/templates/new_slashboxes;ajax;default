@@ -303,8 +303,8 @@ function savePreviewBlock() {
 		});
 		var params = {};
 		params['op']		= 'saveModalPrefs';
-		params['reskey']	= reskey_static;
-		params['data']		= 'reskey=' + reskey_static + '&formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + $avail.val() + '=on';
+		params['reskey']	= $dom('modal_prefs').elements.reskey.value;
+		params['data']		= 'reskey=' + params['reskey'] + '&formname=slashboxes&uid=[% user.uid %]&refreshable=&useslashboxes=on' + blocks + '&' + new_prefix + '_' + $avail.val() + '=on';
 		params['blocks']	= blocks;
 //		saveModalPrefs( params['op'], params['data'], params['reskey'] );
 		ajax_update(params);
