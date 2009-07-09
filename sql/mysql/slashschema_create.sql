@@ -481,7 +481,7 @@ CREATE TABLE discussions (
 	sid char(16) DEFAULT '' NOT NULL,
 	title varchar(128) NOT NULL,
 	url varchar(255) NOT NULL,
-	topic smallint UNSIGNED NOT NULL,
+	topic int UNSIGNED NOT NULL,
 	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	type ENUM("open","recycle","archived") DEFAULT 'open' NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
@@ -950,7 +950,7 @@ CREATE TABLE site_info (
 DROP TABLE IF EXISTS skins;
 CREATE TABLE skins (
 	skid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	nexus SMALLINT UNSIGNED NOT NULL,
+	nexus INT UNSIGNED NOT NULL,
 	artcount_min MEDIUMINT UNSIGNED DEFAULT '10' NOT NULL,
 	artcount_max MEDIUMINT UNSIGNED DEFAULT '30' NOT NULL,
 	older_stories_max MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
@@ -1060,7 +1060,7 @@ CREATE TABLE stories (
 	hits MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
 	discussion MEDIUMINT UNSIGNED,
 	primaryskid SMALLINT UNSIGNED,
-	tid SMALLINT UNSIGNED,
+	tid INT UNSIGNED,
 	submitter MEDIUMINT UNSIGNED NOT NULL,
 	commentcount SMALLINT UNSIGNED DEFAULT '0' NOT NULL,
 	hitparade VARCHAR(64) DEFAULT '0,0,0,0,0,0,0' NOT NULL,
@@ -1139,7 +1139,7 @@ CREATE TABLE story_param (
 DROP TABLE IF EXISTS story_topics_chosen;
 CREATE TABLE story_topics_chosen (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
-	tid SMALLINT(5) UNSIGNED NOT NULL,
+	tid INT(5) UNSIGNED NOT NULL,
 	weight FLOAT DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
@@ -1152,7 +1152,7 @@ CREATE TABLE story_topics_chosen (
 DROP TABLE IF EXISTS story_topics_rendered;
 CREATE TABLE story_topics_rendered (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
-	tid SMALLINT(5) UNSIGNED NOT NULL,
+	tid INT(5) UNSIGNED NOT NULL,
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
@@ -1202,7 +1202,7 @@ CREATE TABLE submissions (
 	time datetime NOT NULL,
 	subj varchar(50) NOT NULL,
 	story text NOT NULL,
-	tid smallint NOT NULL,
+	tid int unsigned NOT NULL,
 	note varchar(30) DEFAULT '' NOT NULL,
 	primaryskid SMALLINT UNSIGNED,
 	comment varchar(255) NOT NULL,
@@ -1265,7 +1265,7 @@ CREATE TABLE templates (
 
 DROP TABLE IF EXISTS topics;
 CREATE TABLE topics (
-	tid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	tid INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	keyword VARCHAR(20) NOT NULL,
 	textname VARCHAR(80) NOT NULL,
 	series ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
@@ -1276,7 +1276,8 @@ CREATE TABLE topics (
 	searchable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	storypickable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	usesprite ENUM("no","yes") DEFAULT "no" NOT NULL,
-	PRIMARY KEY (tid)
+	PRIMARY KEY (tid),
+	UNIQUE (keyword)
 ) TYPE=InnoDB;
 
 #
@@ -1285,7 +1286,7 @@ CREATE TABLE topics (
 
 DROP TABLE IF EXISTS topic_nexus;
 CREATE TABLE topic_nexus (
-	tid SMALLINT UNSIGNED NOT NULL,
+	tid INT UNSIGNED NOT NULL,
 	current_qid MEDIUMINT UNSIGNED DEFAULT NULL,
 	PRIMARY KEY (tid)
 ) TYPE=InnoDB;
@@ -1296,7 +1297,7 @@ CREATE TABLE topic_nexus (
 
 DROP TABLE IF EXISTS topic_nexus_dirty;
 CREATE TABLE topic_nexus_dirty (
-	tid SMALLINT UNSIGNED NOT NULL,
+	tid INT UNSIGNED NOT NULL,
 	PRIMARY KEY (tid)
 ) TYPE=InnoDB;
 
@@ -1307,7 +1308,7 @@ CREATE TABLE topic_nexus_dirty (
 DROP TABLE IF EXISTS topic_nexus_extras;
 CREATE TABLE topic_nexus_extras (
 	extras_id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	tid SMALLINT UNSIGNED NOT NULL,
+	tid INT UNSIGNED NOT NULL,
 	extras_keyword VARCHAR(100) NOT NULL,
 	extras_textname VARCHAR(100) NOT NULL,
 	type ENUM('text', 'list') NOT NULL DEFAULT 'text',
@@ -1325,7 +1326,7 @@ CREATE TABLE topic_nexus_extras (
 DROP TABLE IF EXISTS topic_param;
 CREATE TABLE topic_param (
 	param_id mediumint UNSIGNED NOT NULL auto_increment,
-	tid SMALLINT UNSIGNED NOT NULL,
+	tid INT UNSIGNED NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
 	value text NOT NULL,
 	UNIQUE topic_key (tid,name),
@@ -1338,8 +1339,8 @@ CREATE TABLE topic_param (
 
 DROP TABLE IF EXISTS topic_parents;
 CREATE TABLE topic_parents (
-	tid SMALLINT UNSIGNED NOT NULL,
-	parent_tid SMALLINT UNSIGNED NOT NULL,
+	tid INT UNSIGNED NOT NULL,
+	parent_tid INT UNSIGNED NOT NULL,
 	min_weight FLOAT DEFAULT 10 NOT NULL,
 	UNIQUE child_and_parent (tid, parent_tid),
 	INDEX parent_tid (parent_tid)

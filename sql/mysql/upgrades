@@ -6394,3 +6394,32 @@ UPDATE vars SET value = 'T_2_5_0_262' WHERE name = 'cvs_tag_currentcode';
 # 2009-07-01
 UPDATE vars SET value = 'T_2_5_0_263' WHERE name = 'cvs_tag_currentcode';
 
+# apply themes/slashdot/sql/mysql/upgrades 2009-07-02 here
+# if this ADD UNIQUE fails, resolve manually before continuing
+ALTER TABLE topics ADD UNIQUE (keyword);
+ALTER TABLE discussions MODIFY topic INT UNSIGNED;
+ALTER TABLE pollquestions MODIFY topic INT UNSIGNED NOT NULL;
+ALTER TABLE skins MODIFY nexus INT UNSIGNED NOT NULL;
+ALTER TABLE stories MODIFY tid INT UNSIGNED;
+ALTER TABLE story_topics_chosen MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE story_topics_rendered MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE submissions MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE topics MODIFY tid INT UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE topic_nexus MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE topic_nexus_dirty MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE topic_nexus_extras MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE topic_param MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE topic_parents MODIFY tid INT UNSIGNED NOT NULL, MODIFY parent_tid INT UNSIGNED NOT NULL;
+UPDATE stories SET tid=NULL WHERE tid=0;
+DELETE FROM story_topics_chosen WHERE tid=0;
+DELETE FROM story_topics_rendered WHERE tid=0;
+SELECT @news := tid FROM topics WHERE keyword='news';
+UPDATE pollquestions SET topic=@news WHERE topic=0;
+UPDATE submissions SET tid=@news WHERE tid=0;
+UPDATE discussions SET topic=NULL WHERE topic=0;
+# run utils/convertTidToTagnameid here
+UPDATE skins SET last_rewrite=DATE_SUB(NOW(), INTERVAL 7 DAY);
+# for plugins/Sphinx
+UPDATE sphinx_index SET laststart=DATE_SUB(NOW(), INTERVAL 7 DAY);
+UPDATE sphinx_counter SET last_seen=DATE_SUB(NOW(), INTERVAL 7 DAY) WHERE src <= 1 AND completion <= 1;
+
