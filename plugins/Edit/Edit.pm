@@ -44,6 +44,7 @@ sub getOrCreatePreview {
 			return $id;
 		}
 	} else {
+		my ($fh_data, $p_data);
 		my $src_item = $fh->getFireHose($form->{from_id}); 
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
@@ -52,6 +53,15 @@ sub getOrCreatePreview {
 		# Transfer primaryskid / tid as tags
 		$self->createInitialTagsForPreview($src_item, $preview);
 		
+		my $chosen_hr = $tagsdb->extractChosenFromTags($preview_globjid);
+		my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
+
+		my $src_object = $src_item->{type} eq 'story' ? $self->getStory($src_item->{srcid}) : $self->getSubmission($src_item->{srcid});
+
+		foreach my $extra (@$extracolumns) {
+			$p_data->{$extra->[1]} = $src_object->{$extra->[1]} if $src_object->{$extra->[1]};
+		}
+
 		# Transfer actual tags
 		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { src_uid => $src_item->{uid}, leave_old_activated => 1 });
 		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { leave_old_activated => 1 });
@@ -59,7 +69,6 @@ sub getOrCreatePreview {
 		my $type = $user->{is_admin} && $form->{type} ne "submission" ? "story" : "submission";
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
-		my ($fh_data, $p_data);
 		
 		foreach (qw(introtext bodytext media title dept tid primaryskid createtime)) {
 			$fh_data->{$_} = $src_item->{$_};
