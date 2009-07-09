@@ -25,11 +25,15 @@ sub main {
 	my $gSkin = getCurrentSkin();
 	# lc just in case
 	my $op = lc($form->{op});
-	$op ||= 'edit';
+	$op ||= 'start';
 
 	my $tbtitle = '';
 
 	my $ops = {
+		start	=> {
+			function	=> \&start,
+			seclev		=> 100
+		},
 		edit	=> {
 			function	=> \&edit,
 			seclev		=> 100
@@ -54,7 +58,7 @@ sub main {
 }
 
 
-sub edit {
+sub start {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
@@ -69,7 +73,7 @@ sub edit {
 	slashDisplay('editorwrap', { editor => $editor });
 }
 
-sub preview {
+sub edit {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
@@ -82,6 +86,24 @@ sub preview {
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
 	my $editor = $edit->showEditor();
+	slashDisplay('editorwrap', { editor => $editor });
+}
+
+
+
+sub preview {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
+	unless ($rkey->touch) {
+		errorLog($rkey->errstr);
+		return;
+	}
+
+	my $edit = getObject("Slash::Edit");
+	$edit->savePreview();
+	my $editor = $edit->showEditor({ previewing => 1});
 	slashDisplay('editorwrap', { editor => $editor });
 }
 

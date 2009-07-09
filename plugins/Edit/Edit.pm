@@ -273,6 +273,7 @@ sub showEditor {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 	$options ||= {};
 
 	my $admindb = getObject('Slash::Admin');
@@ -287,6 +288,8 @@ sub showEditor {
 	my $tagsdb 	= getObject("Slash::Tags");
 
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
+
+	$options->{errors} = $self->validate($preview, $p_item) if defined $form->{title} && !defined($options->{errors});
 
 	my (%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
 
@@ -309,8 +312,15 @@ sub showEditor {
 	}
 
 	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
+
+	my $showing_preview = 0;
+
 	if ($p_item && $p_item->{title} && $preview->{introtext}) {
-		$editor .= "<div id='editpreview'>";
+		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
+
+		$showing_preview = 1 if $options->{previewing};
+
+		$editor .= "<div id='editpreview' $preview_hide>";
 		$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
 		$editor .= "</div>";
 		$editor .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
@@ -344,6 +354,7 @@ sub showEditor {
 		extras			=> $extracolumns,
 		errors			=> $options->{errors},
 		ispell_comments		=> $ispell_comments,
+		preview_shown		=> $showing_preview,
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;

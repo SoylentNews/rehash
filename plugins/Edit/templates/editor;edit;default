@@ -21,9 +21,7 @@ __template__
 </div>
 [% END %]
 
-	<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
-		[% PROCESS reskey_tag %]
-		<input type="hidden" name="id" value="[% id | strip_attribute %]">
+
 
 <script type="text/javascript">
 
@@ -55,7 +53,16 @@ $(document).ready(function(){
 </script>
 
 <form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
+	[% PROCESS reskey_tag %]
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
+		[% IF preview_shown %]
+		<div class="preactionbuttons">
+			<input type="submit" name="op" value="edit">
+			<input type="submit" name="op" value="save">
+		</div>
+		[% END %]
+
+	[% IF preview_shown %]<div class="hide">[% END %]
 
 	<div class="subtitle">
 		[% PROCESS formLabel value => "Title" %]
@@ -163,13 +170,16 @@ $(document).ready(function(){
 		[% PROCESS hc_tag %]
 		[% END %]
 
+	[% IF preview_shown %]</div>[% END %]
+
+			[% IF !preview_shown %]
 			<div class="subactionbuttons">
 				<input type="submit" name="op" value="preview">
-				<input type="submit" name="op" value="save">
 			</div>
+			[% END %]
 
 
-			<span class="button collapse"></span>submission
+			[% IF !preview_shown %] <span class="button collapse"></span>submission [% END %]
 		</div>
 	[% END %]
 
