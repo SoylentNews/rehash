@@ -12,9 +12,7 @@ user_slashboxes
 __template__
 
 [% FOREACH block = blocks_order %]
-	[% IF block.title != 'Messages' %]
-		<option value="[% block.name %]">[% block.title || block.name %]</option>
-	[% END %]
+	<option value="[% block.name %]">[% block.title || block.name %]</option>
 [% END %]
 
 __seclev__

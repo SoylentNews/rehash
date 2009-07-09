@@ -753,7 +753,7 @@ sub getModalPrefs {
 		my $blocks_order;
 		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
 		if ($dynamic_blocks) {
-			$blocks = $dynamic_blocks->getPortalBlocks( 'name' );
+			$blocks = $dynamic_blocks->getPortalBlocks( 'name', { filter => 'basic' });
 			if ($blocks) {
 				my $blocks_unsort;
 				foreach my $keyb (keys %$blocks) {
@@ -781,7 +781,7 @@ sub getModalPrefs {
 		my $blocks_order;
 		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
 		if ($dynamic_blocks) {
-			$blocks = $dynamic_blocks->getUserBlocks( 'name', $user->{uid} );
+			$blocks = $dynamic_blocks->getUserBlocks( 'name', $user->{uid}, { filter => 'basic' });
 			if ($blocks) {
 				my $blocks_unsort;
 				foreach my $keyb (keys %$blocks) {

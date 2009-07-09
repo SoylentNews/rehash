@@ -511,8 +511,19 @@ sub getPortalBlocks {
                 $where_clause .= " and uid = '0'";
         }
 
+	my @filter = ('^.+_more$', '^rand$', '^userlogin$', '^emailsponsor$', '^vendor_intel$', '^vendor_amd$');
+
         my $blocks = $slashdb->sqlSelectAllHashref($keyed_on, '*', 'dynamic_user_blocks', $where_clause);
-        foreach my $block (keys %$blocks) {
+        BLOCKS: foreach my $block (keys %$blocks) {
+		if ($options->{filter} eq 'basic') {
+			foreach my $filter_regex (@filter) {
+				if ($blocks->{$block}{name} =~ /$filter_regex/) {
+					delete $blocks->{$block};
+					next BLOCKS;
+				}
+			}
+		}
+
                 $blocks->{$block}{type} = $block_definition->{type};
                 $blocks->{$block}{private} = $block_definition->{private};
 
@@ -583,6 +594,11 @@ sub getUserBlocks {
         }
 
         foreach my $user_block (keys %$user_blocks) {
+		if (($options->{filter} eq 'basic') and ($user_blocks->{$user_block}{name} =~ /^messages-$uid/)) {
+			delete $user_blocks->{$user_block};
+			next;
+		}
+
                 my $block_definition = $self->getBlockDefinition($user_blocks->{$user_block}{type_id});
                 $user_blocks->{$user_block}{type} = $block_definition->{type};
                 $user_blocks->{$user_block}{private} = $block_definition->{private};
