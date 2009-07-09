@@ -1283,11 +1283,14 @@ sub ajaxSetGetCombinedTags {
 	my $user_tags = '';
 	if ( $form->{tags} ) {
 		my $tags_writer = getObject('Slash::Tags');
-		$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
-			deactivate_by_operator => 1,
-			tagname_required => 1,
-			include_private => 1
-		});
+		if (!$user->{is_anon} || ($user->{is_anon} && $table eq 'preview')) {
+			$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
+				deactivate_by_operator => 1,
+				tagname_required => 1,
+				include_private => 1
+			});
+		}
+
 		if ( $user->{is_admin} && $firehose_id ) {
 			my $added_tags =
 				join ' ',
