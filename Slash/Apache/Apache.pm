@@ -464,6 +464,13 @@ sub IndexHandler {
 			}
 		}
 
+		if ($constants->{plugin}{Edit}) {
+			if ($key eq 'submit') {
+				$r->uri('/edit.pl');
+				return OK;
+			}
+		}
+
 		my $new_skin = $slashdb->getSkin($key);
 		my $new_skid = $new_skin->{skid} || $constants->{mainpage_skid};
 #print STDERR scalar(localtime) . " $$ IndexHandler B new_skid=$new_skid\n";

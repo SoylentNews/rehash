@@ -21,8 +21,7 @@ __template__
 </div>
 [% END %]
 
-
-	<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
+	<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 		[% PROCESS reskey_tag %]
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 
