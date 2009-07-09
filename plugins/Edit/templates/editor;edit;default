@@ -48,6 +48,16 @@ $(document).ready(function(){
 		}
 		tmphldr='';
 	});
+
+
+	$("form#slashstoryform div.subactionbuttons input").click(function() {
+		$("form#slashstoryform .default").attr('value', '');
+	});
+
+
+
+
+
 });
 
 </script>
@@ -84,7 +94,7 @@ $(document).ready(function(){
 			<div class="b">
 				[% IF constants.plugin.FireHose %]
 					[% PROCESS formLabel value => "Url"  %]
-					<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;ELSE;'Optional URL';END; %]" size="50" [% IF !item.url;' class="default" ';END; %]>
+					<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;ELSE;'Optional URL';END; %]" size="50" [% IF !preview.url_text;' class="default" ';END; %]>
 					[% PROCESS formNote note => "Main url of submission (optional but if provided must be unique) " %]
 				[% END %]
 			</div>
@@ -162,13 +172,12 @@ $(document).ready(function(){
 	[% IF item.type == 'submission' %]
 		<div class="subarticle-foot">
 
-
-		<p>
-
-		[% IF user.state.hc && !user.state.hcinvalid %]
-		<p>[% user.state.hcquestion; user.state.hchtml %]
-		[% PROCESS hc_tag %]
-		[% END %]
+		<div class="captcha">
+			[% IF user.state.hc && !user.state.hcinvalid %]
+			[% user.state.hcquestion; user.state.hchtml %]
+			[% PROCESS hc_tag %]
+			[% END %]
+		</div>
 
 	[% IF preview_shown %]</div>[% END %]
 
@@ -178,8 +187,8 @@ $(document).ready(function(){
 			</div>
 			[% END %]
 
-
 			[% IF !preview_shown %] <span class="button collapse"></span>submission [% END %]
+
 		</div>
 	[% END %]
 

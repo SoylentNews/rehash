@@ -323,11 +323,11 @@ sub addPool {
 			$filename_mp3 = write_mp3_file($answer, $dir, $hcpid, $encoded_name);
 			if ($filename_mp3) {
 				$html .= join('',
-					qq{ [<a href="},
+					qq{<span class="mp3"><a href="},
 					$self->{questioncache}{$question}{urlprefix},
 					"/",
 					$filename_mp3,
-					qq{" target="_new">mp3</a>]}
+					qq{" target="_new">mp3</a></span>}
 				);
 			}
 		}
