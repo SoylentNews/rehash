@@ -626,6 +626,7 @@ sub editCreateSubmission {
 	my($self, $preview, $fhitem) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 
 	my $tagsdb = getObject("Slash::Tags");
 	my $chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
@@ -640,11 +641,11 @@ sub editCreateSubmission {
 		story		=> $fhitem->{introtext},
 		subj		=> $fhitem->{title},
 		tid		=> $fhitem->{tid},
-		primaryskid 	=> $fhitem->{primaryskid},
+		primaryskid 	=> $fhitem->{primaryskid} || $gSkin->{skid},
 		mediatype	=> $fhitem->{mediatype}
 		
 	};
-	
+
 	foreach my $key (keys %$save_extras) {
 		$submission->{$key} = $save_extras->{$key};
 	}
