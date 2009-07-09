@@ -62,10 +62,29 @@ __template__
 </form>
 
 <script type="text/javascript">
-var	create_button	= "<div class='title collapsed' id='newslashbox-title'><h4><a href='#' id='newslashbox-edit'>Add Slashbox<span class='addbox'>+</span></a></h4></div><div class='content' id='newslashbox-content'></div>";
-var	ploaded = false;
-var	uloaded = false;
-var	floaded = false;
+var create_button	= "<div class='title collapsed' id='newslashbox-title'><h4><a href='#' id='newslashbox-edit'>Add Slashbox<span class='addbox'>+</span></a></h4></div><div class='content' id='newslashbox-content'></div>";
+var ploaded = false;
+var uloaded = false;
+var floaded = false;
+
+var sba = {};
+function getSlashboxLists(type) {
+	var $avail = $('select#slashboxes-available-' + type);
+	if (sba[type])
+		return(sba[type]);
+
+	var $options = $avail.find('option');
+	if ($options && $options.length)
+		sba[type] = $options;
+
+	return($options);
+}
+
+function resetSlashboxLists(type) {
+	var $avail = $('select#slashboxes-available-' + type);
+	$avail.append(sba[type]);
+	return($avail);
+}
 
 function formatSlashboxSelectorUI() {
         var	$block          = $('#newslashbox-create'),
@@ -190,13 +209,15 @@ function getFriendBoxes() {
 function markAdded( $avail ) {
 	$('#slashboxes').find('div.block:not(.nosort)').each( function() {
 		var block = $( this ).find('.title').attr('id');
-		block = block.replace(/-title/i,'');
-		$avail.find('option').each( function() {
-			if ( block == $(this).val() ) {
-				$(this).addClass( "added" );
-				$(this).css('display','none');
-			}
-		});
+		if (block) {
+			block = block.replace(/-title/i,'');
+			$avail.find('option').each( function() {
+				if ( block == $(this).val() ) {
+					$(this).addClass( "added" );
+					$(this).css('display','none');
+				}
+			});
+		}
 	});
 }
 
@@ -259,27 +280,29 @@ function savePreviewBlock() {
 	if( $option.length == 1 ) {
 		is_selected = true;
 		$option.addClass('added');
-		$option.css('display','none');
+		$option.remove();
 	}
 
 	if( $avail.attr('length') == 1 || is_selected == true ) {
 		var	blocks = "";
 		$('#slashboxes').find('div.block:not(.nosort)').each(function(){
 			var blockdiv = $( this ).find('.title').attr('id');
-			blockdiv = blockdiv.replace(/-title/i,'');
-			if( blockdiv != "newslashbox" && blockdiv != "userbio_self" ) {
-				var old_prefix = 'showbox';
-				$('select#slashboxes-available-user').find('option').each( function(){
-					if( $(this).val() == blockdiv ) {
-						old_prefix = 'dynamic';
-					}
-				});
-				$('select#slashboxes-available-friend').find('option').each( function(){
-					if( $(this).val() == blockdiv ) {
-						old_prefix = 'dynamic';
-					}
-				});
-				blocks = blocks + "&" + old_prefix + "_" + blockdiv + "=on";
+			if (blockdiv) {
+				blockdiv = blockdiv.replace(/-title/i,'');
+				if( blockdiv != "newslashbox" && blockdiv != "userbio_self" ) {
+					var old_prefix = 'showbox';
+					$('select#slashboxes-available-user').find('option').each( function(){
+						if( $(this).val() == blockdiv ) {
+							old_prefix = 'dynamic';
+						}
+					});
+					$('select#slashboxes-available-friend').find('option').each( function(){
+						if( $(this).val() == blockdiv ) {
+							old_prefix = 'dynamic';
+						}
+					});
+					blocks = blocks + "&" + old_prefix + "_" + blockdiv + "=on";
+				}
 			}
 		});
 		var params = {};
@@ -325,6 +348,7 @@ function updatePreview( $avail ) {
 }
 
 (function() {
+	var $sba_public, $sba_user, $sba_friend;
 
 	$('form#modal_prefs').submit(function(){return false;})
 
@@ -388,27 +412,33 @@ function updatePreview( $avail ) {
 			currtab = $('#slashbox-tabs').tabs('option', 'selected'),
 			regexp,
 			$avail,
-			$options;
-		if ( currtab == 0 ) {
-			$avail = $('#slashboxes-available-public');
-		}
-		if ( currtab == 1 ) {
-			$avail = $('#slashboxes-available-user');
-		}
-		if ( currtab == 2 ) {
-			$avail = $('#slashboxes-available-friend');
-		}
-		$options = $avail.find('option');
-		if ( new_filter !== old_filter ) {
-			regexp = new RegExp(new_filter, 'i');
-			$options.each(function(){
-				var $opt=$(this);
-				$opt.css('display', regexp.test($opt.text()) && !$opt.hasClass('added') ? '' : 'none');
-			});
-			old_filter = new_filter;
-		}
-		var $choose = $avail.find('option').filter(':visible');
-		if( $choose.length == 1 ) {
+			$options,
+			type;
+
+		if (new_filter === old_filter)
+			return false;
+
+		if ( currtab == 0 )
+			type = 'public';
+		if ( currtab == 1 )
+			type = 'user';
+		if ( currtab == 2 )
+			type = 'friend';
+
+		$options = getSlashboxLists(type);
+		$avail = resetSlashboxLists(type);
+
+		regexp = new RegExp(new_filter, 'i');
+		$options.each(function(){
+			var $opt=$(this);
+			if (!regexp.test($opt.text()) || $opt.hasClass('added')) {
+				$opt.remove();
+			}
+		});
+		old_filter = new_filter;
+
+		var $choose = $avail.find('option');
+		if ( $choose.length == 1 ) {
 			$choose.attr('selected',true);
 			populatePreview( $choose.val(), $choose.text() );
 		}
