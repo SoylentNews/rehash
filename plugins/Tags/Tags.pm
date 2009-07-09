@@ -95,8 +95,9 @@ sub createTag {
 	my $tag = $self->_setuptag($hr);
 	return 0 if !$tag;
 
-	# Anonymous users cannot tag.
-	return 0 if isAnon($tag->{uid});
+	# Anonymous users can now tag in limited circumstances where they're shown
+	# a functional tag widget on previewed items, and on transferTags calls that
+	# pass their tags along behind the scenes
 
 	# I'm not sure why a duplicate or opposite tag would ever be "OK"
 	# in the tags table, but for now let's keep our options open in
