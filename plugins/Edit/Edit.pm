@@ -163,7 +163,7 @@ sub savePreview {
 	my($p_data, $fh_data);
 
 	$p_data->{introtext} 		= $form->{introtext};
-	$fh_data->{createtime} 		= $form->{createtime};
+	$fh_data->{createtime} 		= $form->{createtime} if $form->{createtime};
 
 	if ($p_item->{type} eq 'story') {
 		$p_data->{bodytext} 		= $form->{bodytext};
@@ -207,6 +207,7 @@ sub savePreview {
 			? getCurrentUser('uid')
 			: getCurrentStatic('anonymous_coward_uid');
 	}
+	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
 
 	$fh_data->{title} 	= $form->{title};
 
