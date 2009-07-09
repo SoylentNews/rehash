@@ -1900,12 +1900,12 @@ sub tildeEd {
 	}
 
 	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
-        my $extra_blocks = [];
-        if ($dynamic_blocks) {
-                my $userblocks = $dynamic_blocks->getUserBlocks("name", $user_edit->{uid});
-                my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user_edit->{uid});
-                push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
-        }
+	my $extra_blocks = [];
+	if ($dynamic_blocks) {
+		my $userblocks = $dynamic_blocks->getUserBlocks("name", $user_edit->{uid});
+		my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user_edit->{uid});
+		push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
+	}
 
 	# Userspace.
 	my $userspace = $user_edit->{mylinks} || "";
@@ -2948,12 +2948,12 @@ sub saveHome {
 		}
 
 		for my $key (sort grep /^dynamic_/, keys %$form) {
-                        my($bid) = $key =~ /^dynamic_(.+)$/;
-                        next if length($bid) < 1;
-                        if (! exists $slashboxes{$bid}) {
-                                $slashboxes{$bid} = 999;
-                        }
-                }
+			my($bid) = $key =~ /^dynamic_(.+)$/;
+			next if length($bid) < 1;
+			if (! exists $slashboxes{$bid}) {
+				$slashboxes{$bid} = 999;
+			}
+		}
 
 		@slashboxes = sort {
 			$slashboxes{$a} <=> $slashboxes{$b}

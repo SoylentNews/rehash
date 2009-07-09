@@ -6423,3 +6423,28 @@ UPDATE skins SET last_rewrite=DATE_SUB(NOW(), INTERVAL 7 DAY);
 UPDATE sphinx_index SET laststart=DATE_SUB(NOW(), INTERVAL 7 DAY);
 UPDATE sphinx_counter SET last_seen=DATE_SUB(NOW(), INTERVAL 7 DAY) WHERE src <= 1 AND completion <= 1;
 
+##### edit-submit
+INSERT INTO reskey_resources VALUES (12, 'edit-submit', 'no');
+
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::Spammer',        531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::AL2::NoSubmit',       551);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::Duration',            601);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::HumanConf',           701);
+INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Checks::ProxyScan',           801);
+
+### vars
+INSERT INTO reskey_vars VALUES (12, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (12, 'acl_no', 'reskey_no_edit', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (12, 'duration_max-uses',       5, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (12, 'duration_max-failures',  10, 'how many failures per reskey');
+INSERT INTO reskey_vars VALUES (12, 'duration_uses',         300, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (12, 'duration_creation-use',  20, 'min duration (in seconds) between creation and use');
+
+
