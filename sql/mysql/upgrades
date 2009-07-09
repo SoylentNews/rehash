@@ -6447,4 +6447,6 @@ INSERT INTO reskey_vars VALUES (12, 'duration_max-failures',  10, 'how many fail
 INSERT INTO reskey_vars VALUES (12, 'duration_uses',         300, 'min duration (in seconds) between uses');
 INSERT INTO reskey_vars VALUES (12, 'duration_creation-use',  20, 'min duration (in seconds) between creation and use');
 
+#For plugins/Tags
+UPDATE ajax_ops SET reskey_name="ajax_base_static" WHERE  op="tags_setget_combined";
 
