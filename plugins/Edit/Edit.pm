@@ -200,7 +200,10 @@ sub savePreview {
 		$email_known = "mailto" if $form->{email} eq $user->{fakeemail};
 		$fh_data->{email} = processSub(strip_attribute($form->{email}), $email_known);
 		$fh_data->{name} = strip_html($form->{name});
-		$fh_data->{mediatype} = $form->{mediatype};
+
+		# XXXEdit eventually perhaps look for video tag when setting this too
+		$fh_data->{mediatype} = $form->{url_text} =~ /youtube.com|video.google.com/ ? "video" : "none";
+
 		$p_data->{url_text} = $form->{url};
 		$p_data->{sub_type} = $self->detectSubType($form->{introtext});
 		if ($form->{url} && $form->{title}) {
