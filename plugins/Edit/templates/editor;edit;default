@@ -54,12 +54,13 @@ $(document).ready(function(){
 
 </script>
 
-<form action="[% gSkin.rootdir %]/edit.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
+<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
 
 	<div class="subtitle">
 		[% PROCESS formLabel value => "Title" %]
 		<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;ELSE;'Title Your Story';END; %]" size="50" [% IF !item.title;' class="default" ';END; %]>
+		<div class="notes">[% ispell_comments.title %]</div>
 	</div>
 
 	<div class="subdetails">
@@ -88,11 +89,6 @@ $(document).ready(function(){
 		[% IF item.type == 'story' %]
 		<input type="checkbox" name="display" [% display_check %]><b>Display</b>
 		[% END %]
-		[% PROCESS formLabel value => "Title" %]
-
-		<input type="text" name="title" value="[% item.title | strip_attribute %]" size="50">
-		<div class="notes">[% ispell_comments.title %]</div>
-
 
 		[% IF item.type == 'story' %]
 			[% IF constants.use_dept %]
