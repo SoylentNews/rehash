@@ -74,7 +74,7 @@ function formatSlashboxSelectorUI() {
 		$dialog         = get_modal_parts('#modal_box')
 		$edit_field     = $dialog.find('input#slashbox-filter'),
 		new_classname   = 'newslashbox-edit' + ($block.is('.active') ? ' active' : '')
-		$style		= $('#slashboxes').find('div.block:first');
+		$style		= $('#slashboxes').find('div.block:not(.nosort):first');
 
 	$dialog.anchor_width	= $block.width() / 3 * 2;
 	$dialog.anchor_height	= $block.height();
@@ -188,7 +188,7 @@ function getFriendBoxes() {
 }
 
 function markAdded( $avail ) {
-	$('#slashboxes').find('div.block').each( function() {
+	$('#slashboxes').find('div.block:not(.nosort)').each( function() {
 		var block = $( this ).find('.title').attr('id');
 		block = block.replace(/-title/i,'');
 		$avail.find('option').each( function() {
@@ -264,7 +264,7 @@ function savePreviewBlock() {
 
 	if( $avail.attr('length') == 1 || is_selected == true ) {
 		var	blocks = "";
-		$('#slashboxes').find('.block').each(function(){
+		$('#slashboxes').find('div.block:not(.nosort)').each(function(){
 			var blockdiv = $( this ).find('.title').attr('id');
 			blockdiv = blockdiv.replace(/-title/i,'');
 			if( blockdiv != "newslashbox" && blockdiv != "userbio_self" ) {
