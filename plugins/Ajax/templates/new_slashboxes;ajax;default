@@ -210,7 +210,7 @@ function markAdded( $avail ) {
 			$avail.find('option').each( function() {
 				if ( block == $(this).val() ) {
 					$(this).addClass( "added" );
-					$(this).css('display','none');
+					$(this).remove();
 				}
 			});
 		}
@@ -312,9 +312,9 @@ function savePreviewBlock() {
 //		saveModalPrefs( params['op'], params['data'], params['reskey'] );
 		ajax_update(params);
 		var $block = $('#newslashbox-create');
-		$block.find('div.title').attr('id', $avail.val() + '-title');
-		$block.find('div.content').attr('id', $avail.val() + '-content');
-		$block.attr("id", $avail.val() );
+		$block.find('div.title').attr('id', bidval + '-title');
+		$block.find('div.content').attr('id', bidval + '-content');
+		$block.attr("id", bidval);
 		var new_content = "<div class='block' id='newslashbox-create'>" + create_button + "</div>";
 		$('#slashboxes').find('div.block:not(.nosort):last').after( new_content );
         	$('#newslashbox-title a').one('click', function(){ getModalPrefs('new_slashboxes','Slashboxes', 0 ); return false; });
