@@ -11,9 +11,9 @@ Slash::ResKey::Session - Resource management for Slash
 
 =head1 SYNOPSIS
 
-	my $session = getObject('Slash::ResKey::Session');
-	my $skey = $session->new; # creates/uses existing session
-	$skey->session;       # returns session key
+	my $reskey = getObject('Slash::ResKey');
+	my $skey = $reskey->session; # creates/uses existing session
+	$skey->sessionkey;    # returns session key
 	$skey->expire;        # expire the session
 	$skey->params;        # returns hashref of params for this session key
 	$skey->param($p);     # set or get a param
@@ -25,25 +25,32 @@ Slash::ResKey::Session - Resource management for Slash
 use warnings;
 use strict;
 
+use Slash;
+use Slash::Utility;
+
+use base 'Slash::Plugin';
+
+our($AUTOLOAD);
+our $VERSION = $Slash::Constants::VERSION;
+
 #========================================================================
 sub new {
-	my($class, $opts) = @_;
+	my($class, $reskey, $opts) = @_;
 
 	my $skey = bless { _opts => $opts }, $class;
-	my $sessionkey = $skey->session;
+	my $sessionkey = $skey->sessionkey;
 
-	my $reskey = getObject('Slash::ResKey') or return 0;
 	my $rkey = $reskey->key('session', { nostate => 1, reskey => $sessionkey }) or return 0;
 	($rkey->create && $rkey->touch) or return 0;
 
-	$skey->session($rkey->reskey);
+	$skey->sessionkey($rkey->reskey);
 
 	$skey->{_rkey} = $rkey;
 	return $skey;
 }
 
 #========================================================================
-sub session {
+sub sessionkey {
 	my($self, $newkey) = @_;
 	my $cookie = getCurrentCookie();
 	if (defined $newkey) {
@@ -56,13 +63,13 @@ sub session {
 sub expire {
 	my($self) = @_;
 	$self->{_rkey}->use;
-	$self->session('');
+	$self->sessionkey('');
 }
 
 #========================================================================
 sub set_cookie {
 	my($self) = @_;
-	setCookie('sessionkey', $self->session, "+24h"); # XXX might change time later ...
+	setCookie('sessionkey', $self->sessionkey, "+24h"); # XXX might change time later ...
 }
 
 #========================================================================
@@ -82,18 +89,18 @@ sub param {
 			$slashdb->sqlReplace('reskey_sessions', {
 				name   => $name,
 				value  => $value,
-				reskey => $self->session
+				reskey => $self->sessionkey
 			});
 		} else {
 			$slashdb->sqlDelete('reskey_sessions',
-				'reskey=' . $reader->sqlQuote($self->session)
+				'reskey=' . $slashdb->sqlQuote($self->sessionkey)
 			);
 		}
 	} else {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		$reader->sqlSelect('value', 'reskey_sessions',
 			'name='   . $reader->sqlQuote($name) . ' AND ' .
-			'reskey=' . $reader->sqlQuote($self->session)
+			'reskey=' . $reader->sqlQuote($self->sessionkey)
 		);
 	}
 }
@@ -103,7 +110,7 @@ sub params {
 	my($self) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	return $reader->sqlSelectHashref('name,value', 'reskey_sessions',
-		'reskey=' . $reader->sqlQuote($self->session)
+		'reskey=' . $reader->sqlQuote($self->sessionkey)
 	) || {};
 }
 

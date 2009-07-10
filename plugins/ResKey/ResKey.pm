@@ -42,6 +42,7 @@ use Slash;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 use Slash::ResKey::Key;
+use Slash::ResKey::Session;
 
 use base 'Slash::Plugin';
 
@@ -49,6 +50,11 @@ our($AUTOLOAD);
 our $VERSION = $Slash::Constants::VERSION;
 
 our $DEBUG = 0;
+
+#========================================================================
+sub session {
+	return Slash::ResKey::Session->new(@_);
+}
 
 #========================================================================
 sub key {
