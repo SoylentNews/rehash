@@ -50,13 +50,15 @@ __template__
                 <label>Password</label>
                 [% IF is_modal %]<br>[% END %]
                 <input type="password" name="upasswd" size="20">
+				<!--
                 <br>
                 <div class="modal_note">(6-20 characters long)</div>
+                -->
 
                 [% IF is_modal %]<br>[% END %]
 
                 <label class="checkbox">
-                <input type="checkbox" name="login_temp" value="yes">&nbsp;Public Terminal
+                <input type="checkbox" name="login_temp" value="yes"> Public Terminal
                 </label>
 
                 [% IF is_modal %]<br>[% END %]
@@ -75,7 +77,6 @@ __template__
 		[% END %]
 
 		[% IF !form.unickname %]
-		<br>
                 <div id="tip_message">
                         <span id="modal_tip"></span>
                         [% IF constants.allow_anonymous %]
@@ -84,7 +85,6 @@ __template__
                                 You can only post comments if you have a valid account.
                         [% END %]
                 </div>
-                <br>
                 [% END %]
 
                 <input type="submit" name="userlogin" value="Log in" class="button">
