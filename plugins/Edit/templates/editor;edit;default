@@ -179,20 +179,17 @@ $(document).ready(function(){
 			[% END %]
 		</div>
 
-	[% IF preview_shown %]</div>[% END %]
-
-			[% IF !preview_shown %]
-			<div class="subactionbuttons">
-				<input type="submit" name="op" value="preview">
-			</div>
-			[% END %]
-
-			[% IF !preview_shown %] <span class="button collapse"></span>submission [% END %]
-
 		</div>
 	[% END %]
+	[% IF preview_shown %]</div>[% END %]
 
+	[% IF !preview_shown %]
+	<div class="subactionbuttons">
+		<input type="submit" name="op" value="preview">
+	</div>
+	[% END %]
 
+	[% IF !preview_shown %] <span class="button collapse"></span>submission [% END %]
 
 </form>
 
