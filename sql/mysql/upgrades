@@ -6410,6 +6410,7 @@ ALTER TABLE topic_nexus_dirty MODIFY tid INT UNSIGNED NOT NULL;
 ALTER TABLE topic_nexus_extras MODIFY tid INT UNSIGNED NOT NULL;
 ALTER TABLE topic_param MODIFY tid INT UNSIGNED NOT NULL;
 ALTER TABLE topic_parents MODIFY tid INT UNSIGNED NOT NULL, MODIFY parent_tid INT UNSIGNED NOT NULL;
+ALTER TABLE firehose_topics_rendered MODIFY tid INT UNSIGNED NOT NULL;
 UPDATE stories SET tid=NULL WHERE tid=0;
 DELETE FROM story_topics_chosen WHERE tid=0;
 DELETE FROM story_topics_rendered WHERE tid=0;
