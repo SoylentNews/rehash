@@ -33,7 +33,7 @@ chars = chars.replace('0123456789', '0-9');
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <input type="hidden" name="op" value="claim_openid">
 <input type="hidden" name="new_user" value="1">
-<label><b>OpenID (optional)</b></label>&nbsp;&nbsp;<span id="openid_error" style="display: none"></span>
+<label>OpenID (optional)</label>&nbsp;&nbsp;<span id="openid_error" style="display: none"></span>
 <br>
 <label for="openid_url" class="openid_url">
 <input type="text" name="openid_url" id="openid_url" size="32" maxlength="255" value="http://">
@@ -49,7 +49,7 @@ chars = chars.replace('0123456789', '0-9');
 <input type="hidden" name="formname" value="newUserModal">
 <input type="hidden" name="uid" value="[% user.uid %]">
 
-<label><b>Nickname</b></label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
+<label>Nickname</label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 <br>
 <input type="text" id="newusernick" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
 <input type="button" value="Check Availability" onclick="createacct_check_nick(this.form); return false;">
@@ -58,12 +58,12 @@ chars = chars.replace('0123456789', '0-9');
 
 <br>
 
-<label><b>Email Address</b></label>
+<label>Email Address</label>
 <br>
 <input type="text" id="email" name="email" value="" size="40">
 <input type="text" id="email2" name="email2" value="" size="40">
 <br>
-<div class="modal_note">Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.</div>
+<div class="modal_note">Enter a valid email address <strong>twice</strong> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.</div>
 
 <br>
 

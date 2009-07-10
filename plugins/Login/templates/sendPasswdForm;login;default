@@ -24,7 +24,7 @@ __template__
 <legend> </legend>
 <input type="hidden" name="op" value="mailpasswd">
 [% PROCESS formkey_tag %]
-		<b>Retrieve Nickname/UID/Email</b>
+		Retrieve Nickname/UID/Email
 		<input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
 		<br>
 
