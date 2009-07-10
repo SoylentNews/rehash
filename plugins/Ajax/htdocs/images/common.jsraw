@@ -1101,7 +1101,7 @@ function json_update(response) {
 	});
 
 	// ...replace with new content (and display it)
-	$.each(response.updates||[], function(elem_id, new_html) {
+	$.each(response.html_replace||[], function(elem_id, new_html) {
 		$any(elem_id).replaceWith(new_html).show();
 	});
 
@@ -2217,7 +2217,7 @@ function saveModalPrefs(formname, this_data, this_reskey) {
 	}, '', {
 		onComplete: function(transport) {
 			var response = eval_response(transport);
-			if (response !== undefined && response.updates !== undefined) {
+			if (response !== undefined && response.html_replace !== undefined) {
 				json_update(response);
 			} else {
 				hide_modal_box();
@@ -2245,12 +2245,8 @@ function createacct_check_nick(this_form) {
 		{
 			onComplete: function(transport) {
 				var response = eval_response(transport);
-				if (response !== undefined && response.updates !== undefined) {
-					$.each(response.updates,
-						function(id, update) {
-							$any(id).replaceWith(update).show();
-						}
-					);
+				if (response !== undefined && response.html_replace !== undefined) {
+					json_update(response);
 				}
 			}
 		}

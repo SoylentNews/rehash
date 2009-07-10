@@ -6411,6 +6411,7 @@ ALTER TABLE topic_nexus_extras MODIFY tid INT UNSIGNED NOT NULL;
 ALTER TABLE topic_param MODIFY tid INT UNSIGNED NOT NULL;
 ALTER TABLE topic_parents MODIFY tid INT UNSIGNED NOT NULL, MODIFY parent_tid INT UNSIGNED NOT NULL;
 ALTER TABLE firehose_topics_rendered MODIFY tid INT UNSIGNED NOT NULL;
+ALTER TABLE firehose MODIFY tid INT UNSIGNED;
 UPDATE stories SET tid=NULL WHERE tid=0;
 DELETE FROM story_topics_chosen WHERE tid=0;
 DELETE FROM story_topics_rendered WHERE tid=0;
@@ -6418,6 +6419,7 @@ SELECT @news := tid FROM topics WHERE keyword='news';
 UPDATE pollquestions SET topic=@news WHERE topic=0;
 UPDATE submissions SET tid=@news WHERE tid=0;
 UPDATE discussions SET topic=NULL WHERE topic=0;
+UPDATE firehose SET tid=NULL WHERE tid=0;
 # run utils/convertTidToTagnameid here
 UPDATE skins SET last_rewrite=DATE_SUB(NOW(), INTERVAL 7 DAY);
 # for plugins/Sphinx

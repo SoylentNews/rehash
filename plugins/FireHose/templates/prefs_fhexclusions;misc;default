@@ -14,7 +14,7 @@ __seclev__
 10000
 __template__
 <form id ="modal_prefs" class="fh" method="post">
-
+[% PROCESS reskey_tag %]
 <input type="hidden" name="formname" value="fhexclusions">
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">

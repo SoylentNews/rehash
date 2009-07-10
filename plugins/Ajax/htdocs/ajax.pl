@@ -2255,7 +2255,7 @@ sub setModalUpdates {
 	# Refresh the reskey
 	$updates->{reskey} = slashDisplay('reskey_tag', {}, { Return => 1 });
 
-	return Data::JavaScript::Anon->anon_dump({ updates => $updates });
+	return Data::JavaScript::Anon->anon_dump({ html_replace => $updates });
 }
 
 sub getModalPrefsAnon {

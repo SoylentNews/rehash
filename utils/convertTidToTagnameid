@@ -86,6 +86,7 @@ my @fks = qw(
 	submissions.tid		topic_nexus.tid		topic_nexus_dirty.tid
 	topic_nexus_extras.tid	topic_param.tid		topic_parents.tid
 	topic_parents.parent_tid			firehose_topics_rendered.tid
+	firehose.tid
 );
 my $fk_num = 0;
 ADDFK: for my $fk (@fks) {
