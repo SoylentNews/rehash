@@ -41,7 +41,9 @@ sub new {
 	my $sessionkey = $skey->sessionkey;
 
 	my $rkey = $reskey->key('session', { nostate => 1, reskey => $sessionkey }) or return 0;
-	($rkey->create && $rkey->touch) or return 0;
+	unless ($rkey->reskey && $rkey->touch) {
+		$rkey->create or return 0;
+	}
 
 	$skey->sessionkey($rkey->reskey);
 
@@ -54,9 +56,14 @@ sub sessionkey {
 	my($self, $newkey) = @_;
 	my $cookie = getCurrentCookie();
 	if (defined $newkey) {
-		$cookie->{sessionkey} = $self->{_sessionkey} = $newkey;
+		$self->{_sessionkey} = $newkey;
 	}
-	return $self->{_sessionkey} ||= ($cookie->{sessionkey} || '');
+	unless ($self->{_sessionkey}) {
+		my $cookie = getCurrentCookie('sessionkey');
+		$self->{_sessionkey} = $cookie->value if $cookie;
+	}
+
+	return $self->{_sessionkey} ||= '';
 }
 
 #========================================================================
@@ -69,7 +76,11 @@ sub expire {
 #========================================================================
 sub set_cookie {
 	my($self) = @_;
-	setCookie('sessionkey', $self->sessionkey, "+24h"); # XXX might change time later ...
+	my $sessionkey = $self->sessionkey;
+	my $cookie = getCurrentCookie('sessionkey');
+	unless ($cookie && $cookie->value eq $sessionkey) {
+		setCookie('sessionkey', $sessionkey, "+24h"); # XXX might change time later ...
+	}
 }
 
 #========================================================================
