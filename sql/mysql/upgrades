@@ -6454,3 +6454,5 @@ UPDATE ajax_ops SET reskey_name="ajax_base_static" WHERE  op="tags_setget_combin
 ### captcha mod
 UPDATE humanconf_questions SET question="To confirm you're not a script, please type the word in this image:" WHERE hcqid=1;
 
+# 2009-07-09
+UPDATE vars SET value = 'T_2_5_0_264' WHERE name = 'cvs_tag_currentcode';
