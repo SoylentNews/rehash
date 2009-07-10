@@ -12,11 +12,11 @@ Slash::ResKey::Key - Resource management for Slash
 =head1 SYNOPSIS
 
 	my $reskey = getObject('Slash::ResKey');
-	my $key = $reskey->key('zoo');
-	if ($key->create) { ... }
-	if ($key->touch)  { ... }
-	if ($key->use) { ... }
-	else { print $key->errstr }
+	my $rkey = $reskey->key('zoo');
+	if ($rkey->create) { ... }
+	if ($rkey->touch)  { ... }
+	if ($rkey->use) { ... }
+	else { print $rkey->errstr }
 
 
 =head1 DESCRIPTION

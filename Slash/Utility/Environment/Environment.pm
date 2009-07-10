@@ -2827,6 +2827,7 @@ sub createEnvironment {
 		$virtual_user = $form{'virtual_user'};
 	}
 
+	createCurrentCookie();
 	createCurrentVirtualUser($virtual_user);
 	createCurrentForm(filter_params(\%form));
 

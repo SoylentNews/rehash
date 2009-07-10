@@ -70,3 +70,15 @@ CREATE TABLE reskey_hourlysalt (
     salt        VARCHAR(20) DEFAULT '' NOT NULL,
     UNIQUE ts (ts)
 ) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS reskey_sessions;
+CREATE TABLE reskey_sessions (
+    sessid int UNSIGNED NOT NULL auto_increment,
+    reskey CHAR(20) DEFAULT '' NOT NULL,
+    name   VARCHAR(48) DEFAULT '' NOT NULL,
+    value  TEXT,
+    PRIMARY KEY (sessid),
+    INDEX (reskey),
+    UNIQUE reskey_name (reskey, name)
+) TYPE=InnoDB;
+

@@ -45,6 +45,7 @@ INSERT INTO reskey_resources VALUES (9, 'comments-moderation-ajax', 'yes');
 INSERT INTO reskey_resources VALUES (10, 'misc', 'no');
 INSERT INTO reskey_resources VALUES (11, 'openid', 'no');
 INSERT INTO reskey_resources VALUES (12, 'edit-submit', 'no');
+INSERT INTO reskey_resources VALUES (13, 'session', 'no');
 
 ##### comments
 ### checks
@@ -283,5 +284,15 @@ INSERT INTO reskey_vars VALUES (12, 'duration_max-uses',       5, 'how many uses
 INSERT INTO reskey_vars VALUES (12, 'duration_max-failures',  10, 'how many failures per reskey');
 INSERT INTO reskey_vars VALUES (12, 'duration_uses',         300, 'min duration (in seconds) between uses');
 INSERT INTO reskey_vars VALUES (12, 'duration_creation-use',  20, 'min duration (in seconds) between creation and use');
+
+
+##### session
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 13, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 13, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+
+### vars
+INSERT INTO reskey_vars VALUES (13, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (13, 'acl_no', 'reskey_no_session', 'If this ACL present, can\'t use resource');
 
 
