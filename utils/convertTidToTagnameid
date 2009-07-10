@@ -173,3 +173,5 @@ $slashdb->sqlDo('COMMIT');
 # probably want to DROP TABLE topics_changetid here
 # but I'll save that for a later upgrades file, "just in case"
 
+# fix mainpage_nexus_tid, mainpage_displayable_nexuses
+
