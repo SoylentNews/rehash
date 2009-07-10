@@ -407,7 +407,7 @@ sub ajaxCheckNickAvailability {
 			'login'
 		);
 
-        return Data::JavaScript::Anon->anon_dump({ updates => $updates });
+        return Data::JavaScript::Anon->anon_dump({ html_replace => $updates });
 }
 
 
