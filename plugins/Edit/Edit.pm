@@ -11,21 +11,39 @@ use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
+
+sub getPreviewIdSessionUid {
+	my($self, $session, $uid) = @_;
+	my $user = getCurrentUser();
+	$uid ||= $user->{uid};
+
+	my $uid_q = $self->sqlQuote($uid);
+	my $session_q = $self->sqlQuote($session);
+
+	if (isAnon($uid)) {
+		return $self->sqlSelect("MAX(preview_id)", "preview", "uid = $uid_q AND session = $session_q  and active='yes'");
+	} else {
+		return $self->sqlSelect("MAX(preview_id)", "preview", "uid = $uid_q and active='yes'");
+	}
+}
+
+
 sub getOrCreatePreview {
-	my($self) = @_;
+	my($self, $session) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
 	my $fh = getObject("Slash::FireHose");
 	my $tagsdb = getObject("Slash::Tags");
 
+
 	if (!$form->{from_id}) {
-		my $id = $self->sqlSelect("MAX(preview_id)", "preview", "uid = $user->{uid} and active='yes'");
+		my $id = $self->getPreviewIdSessionUid($session, $user->{uid});
 	
 		if ($id && !$form->{new}) {
 			return $id;
 		} else {
-			my $id = $self->createPreview({ uid => $user->{uid} });
+			my $id = $self->createPreview({ uid => $user->{uid}, session => $session });
 			my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 
 			my $type = $user->{is_admin} ? "story" : "submission";
@@ -276,9 +294,14 @@ sub showEditor {
 	my $form = getCurrentForm();
 	$options ||= {};
 
+	my $reskey = getObject('Slash::ResKey');
+	my $skey = $reskey->session;
+
+	my $session = $form->{session} || $skey->sessionkey();
+
 	my $admindb = getObject('Slash::Admin');
 
-	my $preview_id = $self->getOrCreatePreview();
+	my $preview_id = $self->getOrCreatePreview($session);
 	my $editor;
 	$editor .=  "PREVIEW ID: $preview_id<br>";
 
@@ -355,6 +378,7 @@ sub showEditor {
 		errors			=> $options->{errors},
 		ispell_comments		=> $ispell_comments,
 		preview_shown		=> $showing_preview,
+		session			=> $session
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;

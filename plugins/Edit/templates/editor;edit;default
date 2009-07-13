@@ -12,6 +12,7 @@ editor
 __template__
 <div id="editor" class="admin">
 
+Session: [% session %]
 <script type="text/javascript">
 
 $(document).ready(function(){
@@ -72,6 +73,7 @@ $(document).ready(function(){
 <form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 	[% PROCESS reskey_tag %]
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
+	<input type="hidden" name="session" value="[% session | strip_attribute %]">
 		[% IF preview_shown %]
 		<div class="preactionbuttons">
 			<input type="submit" name="op" value="edit">

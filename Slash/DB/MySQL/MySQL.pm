@@ -13114,6 +13114,9 @@ sub createPreview {
 	return unless $preview && $preview->{uid};
 	
 	my $data;
+
+	$data->{'-createtime'} 	= 'NOW()';
+
 	$data->{uid} 		= delete $preview->{uid};
 	$data->{introtext} 	= delete $preview->{introtext} || '';
 	$data->{bodytext} 	= delete $preview->{bodytext} || '';
