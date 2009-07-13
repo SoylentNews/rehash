@@ -346,7 +346,7 @@ sub showEditor {
 		$showing_preview = 1 if $options->{previewing};
 
 		$previewed_item = $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
-		$previewed_item = slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
+		$previewed_item .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
 	}
 	
 	my $authors = $self->getDescriptions('authors', '', 1);
