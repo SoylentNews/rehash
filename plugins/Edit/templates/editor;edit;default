@@ -78,12 +78,6 @@ $(document).ready(function(){
 	[% PROCESS reskey_tag %]
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
 	<input type="hidden" name="session" value="[% session | strip_attribute %]">
-		[% IF preview_shown %]
-		<div class="preactionbuttons">
-			<input type="submit" name="op" value="edit">
-			<input type="submit" name="op" value="save">
-		</div>
-		[% END %]
 
 	[% IF preview_shown %]<div class="hide">[% END %]
 
