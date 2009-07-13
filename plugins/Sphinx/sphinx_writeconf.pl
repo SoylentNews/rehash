@@ -750,19 +750,19 @@ index idx_firehose_dist
 
 indexer
 {
-	mem_limit		= 512M
-	max_iops		= 40
+	mem_limit		= __SPHINX_01_MEM_LIMIT__
+	max_iops		= __SPHINX_01_MAX_IOPS__
 	max_iosize		= 1048576
 }
 
 searchd
 {
-	listen			= 3312
+	listen			= __SPHINX_01_PORT__
 	log			= __SPHINX_01_VARDIR__/log/searchd.log
 	query_log		= __SPHINX_01_VARDIR__/log/query.log
-	max_children		= 100
+	max_children		= __SPHINX_01_MAX_CHILDREN__
 	pid_file		= __SPHINX_01_VARDIR__/log/searchd.pid
-	max_matches		= 10000
+	max_matches		= __SPHINX_01_MAX_MATCHES__
 	ondisk_dict_default	= __SPHINX_01_ONDISK_DICT__
 }
 EOF
