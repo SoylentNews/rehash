@@ -140,7 +140,7 @@ function firehose_handle_admin_commands( commands ){
 			case 'betaedit':
 				var loc = document.location + '';
 				match = loc.match('https?://[^/]*');
-				document.location = match + '/edit.pl?from_id=' + id;
+				openInWindow(match + '/edit.pl?from_id=' + id);
 				break;
 			case 'binspam':
 				if ( $entry.is('.fhitem-feed') )

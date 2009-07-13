@@ -71,6 +71,10 @@ $(document).ready(function(){
 	<p>[% errors.compresserror %]</p>
 [% END %]
 <form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
+	<div id="editpreview">
+		[% previewed_item %]
+	</div>
+
 	[% PROCESS reskey_tag %]
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
 	<input type="hidden" name="session" value="[% session | strip_attribute %]">

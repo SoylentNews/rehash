@@ -337,16 +337,16 @@ sub showEditor {
 	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
 
 	my $showing_preview = 0;
+	my $init_sprites = 0;
+	my $previewed_item;
 
 	if ($p_item && $p_item->{title} && $preview->{introtext}) {
 		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
 
 		$showing_preview = 1 if $options->{previewing};
 
-		$editor .= "<div id='editpreview' $preview_hide>";
-		$editor .= $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
-		$editor .= "</div>";
-		$editor .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
+		$previewed_item = $fh->dispFireHose($p_item, { view_mode => 1, mode => "full" });
+		$previewed_item = slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
 	}
 	
 	my $authors = $self->getDescriptions('authors', '', 1);
@@ -378,6 +378,7 @@ sub showEditor {
 		errors			=> $options->{errors},
 		ispell_comments		=> $ispell_comments,
 		preview_shown		=> $showing_preview,
+		previewed_item		=> $previewed_item,
 		session			=> $session
 	 }, { Page => 'edit', Return => 1 });
 
