@@ -366,6 +366,17 @@ sub showEditor {
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
+
+	my $tag_widget = slashDisplay('tag_widget', {
+		id 		=> $p_item->{id},
+		top_tags 	=> $options->{top_tags},
+		system_tags 	=> $options->{system_tags},
+		vote 		=> $options->{vote},
+		options 	=> $options->{options},
+		item 		=> $p_item,
+		skipvote 	=> 1
+	}, { Return => 1, Page => 'firehose'});
+
 	
 	$editor .= slashDisplay('editor', { 
 		id 			=> $preview_id,
@@ -379,7 +390,8 @@ sub showEditor {
 		ispell_comments		=> $ispell_comments,
 		preview_shown		=> $showing_preview,
 		previewed_item		=> $previewed_item,
-		session			=> $session
+		session			=> $session,
+		tag_widget		=> $tag_widget
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;

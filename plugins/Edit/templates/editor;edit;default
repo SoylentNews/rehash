@@ -82,6 +82,8 @@ $(document).ready(function(){
 	[% IF preview_shown %]<div class="hide">[% END %]
 
 	<div class="subtitle">
+		[% tag_widget %]
+		<p>
 		[% PROCESS formLabel value => "Title Your Story" for => "title"  %]
 
 		<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;ELSE;'Title Your Story';END; %]" size="50" class="[% IF !item.title;' default ';END; IF errors.badsubject; ' fiterror '; END; %]">
