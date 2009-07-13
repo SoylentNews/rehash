@@ -17,9 +17,7 @@ __name__
 formLabel
 __template__
 [% UNLESS nobreak %]<p>[% END %]
-<label [% IF class %]class="[% class %]"[% END %]>
-	[% value | strip_html %]
-</label>
+<label [% IF class %]class="[% class %]"[% END %] [% IF for %]for="[% for %]"[% END %] [% IF class %]class="[% class %]"[% END %]>[% value | strip_html %]</label>
  [% IF comment %]([% comment | strip_html %])[% END %][% UNLESS nobreak %]</p>[% END; nobreak = 0 %]
 __seclev__
 10000
