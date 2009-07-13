@@ -1902,8 +1902,8 @@ sub tildeEd {
 	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
 	my $extra_blocks = [];
 	if ($dynamic_blocks) {
-		my $userblocks = $dynamic_blocks->getUserBlocks("name", $user_edit->{uid});
-		my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user_edit->{uid});
+		my $userblocks = $dynamic_blocks->getUserBlocks("name", $user_edit->{uid}) || {};
+		my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user_edit->{uid}) || {};
 		push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
 	}
 

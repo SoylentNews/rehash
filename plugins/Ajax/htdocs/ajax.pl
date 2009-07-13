@@ -722,8 +722,8 @@ sub getModalPrefs {
 		my $dynamic_blocks = getObject("Slash::DynamicBlocks");
 		my $extra_blocks = [];
 		if ($dynamic_blocks) {
-			my $userblocks = $dynamic_blocks->getUserBlocks("name", $user->{uid});
-                	my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user->{uid});
+			my $userblocks = $dynamic_blocks->getUserBlocks("name", $user->{uid}) || {};
+			my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user->{uid}) || {};
 			push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
 		}
 
