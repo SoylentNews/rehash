@@ -13,6 +13,7 @@ INSERT INTO vars (name, value, description) VALUES ('sphinx_01_max_matches', '10
 INSERT INTO vars (name, value, description) VALUES ('sphinx_01_mem_limit', '512M', 'mem_limit value for the sphinx01 indexer');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_01_port', '3312', 'Port the sphinx01 instance listens on');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_01_vardir', '/srv/sphinx/var', 'The path to the var directory for the sphinx01 instance');
+INSERT INTO vars (name, value, description) VALUES ('sphinx_01_ondisk_dict', '0', 'set "ondisk_dict_default" option for sphinx searchd');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_stopwords', 'the to of and http in that is com for www it on with this be as you are an writes has from have at html but by they or will not can about org was we news new their', 'Space-sep list of stopwords');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_se', '0', 'Use SphinxSE instead of the API directly?');
 INSERT INTO vars (name, value, description) VALUES ('sphinx_match_mode', 'all', 'all, any, phrase, boolean, extended2');

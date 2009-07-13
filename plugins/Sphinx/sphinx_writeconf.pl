@@ -41,6 +41,7 @@ $task{$me}{code} = sub {
 	my $max_matches =  $constants->{sphinx_01_max_matches}  || 10000;
 	my $mem_limit =    $constants->{sphinx_01_mem_limit}    || '512M';
 	my $vardir =       $constants->{sphinx_01_vardir}       || '/srv/sphinx/var';
+	my $ondisk_dict =  $constants->{sphinx_01_ondisk_dict}  || 0;
 
 	my $stopwordsfile = catfile($vardir, 'data', 'stopwords.txt');
 	my @stopwords = $sphinxdb->getSphinxStopwords();
@@ -67,6 +68,7 @@ $task{$me}{code} = sub {
 	$filedata =~ s/ __SPHINX_${num}_MAX_MATCHES__  /$max_matches/gx;
 	$filedata =~ s/ __SPHINX_${num}_MEM_LIMIT__    /$mem_limit/gx;
 	$filedata =~ s/ __SPHINX_${num}_VARDIR__       /$vardir/gx;
+	$filedata =~ s/ __SPHINX_${num}_ONDISK_DICT__  /$ondisk_dict/gx;
 
 	# XXX considering indexer is running frequently and reading this
 	# file, should write it to a new file and mv it into place.
@@ -761,6 +763,7 @@ searchd
 	max_children		= 100
 	pid_file		= __SPHINX_01_VARDIR__/log/searchd.pid
 	max_matches		= 10000
+	ondisk_dict_default	= __SPHINX_01_ONDISK_DICT__
 }
 EOF
 
