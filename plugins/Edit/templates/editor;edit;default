@@ -93,8 +93,8 @@ $(document).ready(function(){
                 [% ELSIF errors.subj_filter_error %]
                         <p><span id="subject_filter_error"><span id="modal_error"></span><b>[% errors.subj_filter_error %]</b></span></p>
                 [% END %]
-		[% IF ispell_comments.title %]<div class="notes">[% ispell_comments.title %]</div>[% END; %]
 	</div>
+	<div class="notes">[% ispell_comments.title %]</div>
 
 	<div class="subdetails">
 		[% IF item.type == 'submission' %]
@@ -150,6 +150,7 @@ $(document).ready(function(){
 			[% END %]
 		[% END %]
 
+<<<<<<< HEAD:plugins/Edit/templates/editor;edit;default
 
 	</div>
 
@@ -172,7 +173,10 @@ $(document).ready(function(){
 
 		[% PROCESS formLabel value => str_icp for => "introtext"  %]
 		[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
+=======
+>>>>>>> Move spell check results out of title slot where they were hidden, and rearrange other spellcheck items for better placement:plugins/Edit/templates/editor;edit;default
 		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10" [% IF !preview.introtext;' class="default" ';END; %]>[% IF preview.introtext;preview.introtext | strip_literal;ELSE;'Describe your scoop';END; %]</textarea>
+		<div class="notes">[% ispell_comments.introtext %]</div>
 
 
 		[% IF item.type == 'story' %]
