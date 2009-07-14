@@ -74,15 +74,28 @@ $(document).ready(function(){
 	<div id="editpreview">
 		[% previewed_item %]
 	</div>
+	[% tag_widget %]
+	<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 
 	[% PROCESS reskey_tag %]
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
 	<input type="hidden" name="session" value="[% session | strip_attribute %]">
 
-	[% IF preview_shown %]<div class="hide">[% END %]
+
+        [% IF preview_shown %]
+
+	<div class="preactionbuttons">
+		<input type="submit" name="op" value="edit">
+		<input type="submit" name="op" value="save">
+	</div>
+
+
+	<div class="hide">
+	[% END %]
+
+
 
 	<div class="subtitle">
-		[% tag_widget %]
 		<p>
 		[% PROCESS formLabel value => "Title Your Story" for => "title"  %]
 
