@@ -1003,6 +1003,9 @@ sub getModalPrefs {
 			{ Return => 1}
 		);
 
+	} elsif ($form->{section} eq 'submit') {
+		my $edit = getObject("Slash::Edit");
+		return $edit->showEditor();
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
 
