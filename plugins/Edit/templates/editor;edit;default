@@ -12,15 +12,6 @@ editor
 __template__
 <div id="editor" class="admin">
 
-[% IF errors.size %]
-<div class="error">
-	Errors:<br>
-	[% FOREACH error=errors %]
-		[% error %]<br>
-	[% END %]
-</div>
-[% END %]
-
 <script type="text/javascript">
 
 $(document).ready(function(){
@@ -73,6 +64,11 @@ $(document).ready(function(){
 });
 </script>
 
+[% IF errors.save_error %]
+	<p>[% errors.save_error %]</p>
+[% ELSIF errors.compresserror %]
+	<p>[% errors.compresserror %]</p>
+[% END %]
 <form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 	[% PROCESS reskey_tag %]
 	<input type="hidden" name="id" value="[% id | strip_attribute %]">
@@ -89,6 +85,11 @@ $(document).ready(function(){
 		[% PROCESS formLabel value => "Title Your Story" for => "title"  %]
 
 		<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;ELSE;'Title Your Story';END; %]" size="50" class="[% IF !item.title;' default ';END; %]">
+		[% IF errors.badsubject %]
+                        <p>[% errors.badsubject %]</p>
+                [% ELSIF errors.subj_filter_error %]
+                        <p><span id="subject_filter_error"><span id="modal_error"></span><b>[% errors.subj_filter_error %]</b></span></p>
+                [% END %]
 		[% IF ispell_comments.title %]<div class="notes">[% ispell_comments.title %]</div>[% END; %]
 	</div>
 
@@ -106,6 +107,13 @@ $(document).ready(function(){
 				[% IF constants.plugin.FireHose %]
 					[% PROCESS formLabel value => "Main url of submission (optional but if provided must be unique)" for => "url"  %]
 					<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;ELSE;'Optional URL';END; %]" size="50" [% IF !preview.url_text;' class="default" ';END; %]>
+
+				[% IF errors.invalidurl %]
+                        		<p>[% errors.invalidurl %]</p>
+		                [% ELSIF errors.duplicateurl %]
+                		        <p>[% errors.duplicateurl %]</p>
+				[% END %]
+
 				[% END %]
 			</div>
 		[% END %]
@@ -154,6 +162,15 @@ $(document).ready(function(){
 				END;
 			str_icp = str_icp _ ")</em>";
 		END; %]
+
+		[% IF errors.badintrotext %]
+                        <br>
+                        <p>[% errors.badintrotext %]</p>
+                [% ELSIF errors.story_filter_error %]
+                        <br>
+                        <p><span id="story_filter_error"><span id="modal_error"></span><b>[% errors.story_filter_error %]</b></span></p>
+                [% END %]
+
 		[% PROCESS formLabel value => str_icp for => "introtext"  %]
 		[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
 		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10" [% IF !preview.introtext;' class="default" ';END; %]>[% IF preview.introtext;preview.introtext | strip_literal;ELSE;'Describe your scoop';END; %]</textarea>

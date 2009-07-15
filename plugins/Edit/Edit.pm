@@ -363,51 +363,62 @@ sub showEditor {
 sub validate {
 	my($self, $preview, $item) = @_;
 	my $constants = getCurrentStatic();
-	my @messages;
-	
+	#my @messages;
+	my %messages;	
+
 	if ($item->{type} eq 'submission') {
 		if (length($item->{title}) < 2) {
-			push @messages, getData('badsubject');
+			#push @messages, getData('badsubject');
+			$messages{badsubject} = getData('badsubject');
 		}
+
 		my $message;
-
 		my %keys_to_check = ( story => $preview->{introtext}, subj => $item->{title} );
-
 		for (keys %keys_to_check) {
 			next unless $keys_to_check{$_};
 			# run through filters
 			if (! filterOk('submissions', $_, $keys_to_check{$_}, \$message)) {
-				push @messages, $message;
+				#push @messages, $message;
+				$messages{$_ . '_filter_error'} = $message;
 			}
 			# run through compress test
 			if (! compressOk($keys_to_check{$_})) {
-				my $err = getData('compresserror');
-				push @messages, $err;
+				#my $err = getData('compresserror');
+				#push @messages, $err;
+				$messages{compresserror} = getData('compresserror');
 			}
 		}
+
 		if ($preview->{url_text}) {
 			if(!validUrl($preview->{url_text})) {
-				push @messages, getData("invalidurl");
+				#push @messages, getData("invalidurl");
+				$messages{invalidurl} = getData("invalidurl");
 			}
 			if ($item->{url_id}) {
 				if ($constants->{plugin}{FireHose}) {
 					my $firehose = getObject("Slash::FireHose");
 					if (!$firehose->allowSubmitForUrl($item->{url_id})) {
 						my $submitted_items = $firehose->getFireHoseItemsByUrl($item->{url_id});
-						push @messages, getData("duplicateurl", { submitted_items => $submitted_items });
+						#push @messages, getData("duplicateurl", { submitted_items => $submitted_items });
+						$messages{duplicateurl} = getData("duplicateurl", { submitted_items => $submitted_items });
 					}
 				}
 			}
 		}
-		if (!$item->{title} && !$preview->{introtext}) {
-			push @messages, "Missing title or text";
+
+		if (!$preview->{introtext}) {
+			#push @messages, "Missing title or text";
+			$messages{badintrotext} = getData('badintrotext');
 		}
 		# XXXEdit Check Nexus Extras eventually
 		# XXXEdit test reskey success / failure here? or in saveItem?
 	}
+
 	use Data::Dumper;
-	print STDERR Dumper(\@messages);
-	return \@messages;	
+	#print STDERR Dumper(\@messages);
+	print STDERR Dumper(\%messages);
+	#return \@messages;
+	return \%messages;	
 }
 
 sub saveItem {
@@ -430,7 +441,7 @@ sub saveItem {
 	my $create_retval = 0;
 	my $save_type = 'new';
 
-	if ($fhitem && $fhitem->{id} && !@$errors) {
+	if ($fhitem && $fhitem->{id} && !(keys %$errors)) {
 		# creating a new story
 
 		if ($fhitem->{type} eq "story") {
@@ -450,7 +461,9 @@ sub saveItem {
 		} elsif ($fhitem->{type} eq 'submission') {
 			$create_retval = $self->editCreateSubmission($preview, $fhitem);
 		}
-		push @$errors, "Save failed" if !$create_retval;
+		#push @$errors, "Save failed" if !$create_retval;
+		# XXX change to getData()
+		$errors->{save_error} = "Save Failed" if !$create_retval;
 	}
 
 	# XXXEdit eventually make sure this is ours before setting inactive

@@ -35,20 +35,24 @@ __template__
 
 [% CASE 'compresserror' %]
 	[% returnme.data_constant = 1 %]
-	<b>compression has detected something wrong with your submission</b>
+	<span id="compress_error"><span id="modal_error"></span><b>compression has detected something wrong with your submission</b></span>
+
+[% CASE 'badintrotext' %]
+        [% returnme.data_constant = 1 %]
+        <span id="introtext_error"><span id="modal_error"></span><b>Missing introtext.</b></span>
 
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
-	Please enter a reasonable subject.
+	<span id="subject_error"><span id="modal_error"></span><b>Please enter a reasonable subject.</b></span>
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
-	You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)
+	<span id="url_error"><span id="modal_error"></span><b>You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)</b></span>
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
 	<div class="message error">
-	The url you've attempted to submit has already been submitted.  A url if provided in the url field must be unique.
+	<span id="modal_error"></span>The url you've attempted to submit has already been submitted.  A url if provided in the url field must be unique.
 	</div>
 	<p>Links to already submitted items on this url below:</p>
 	<ul>
