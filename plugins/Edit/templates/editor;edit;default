@@ -177,7 +177,7 @@ $(document).ready(function(){
 		<a name="bodytext"></a>
 
 		<div class="wrapextras">
-			<label>
+			<label [% IF preview.bodytext; 'class="p"'; END;%]>
 				<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 				<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
 			</label>
