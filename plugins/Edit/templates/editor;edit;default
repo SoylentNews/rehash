@@ -10,7 +10,9 @@ en_US
 __name__
 editor
 __template__
+[% UNLESS options.nowrap %]
 <div id="editor" class="admin">
+[% END %]
 
 Session: [% session %]
 <script type="text/javascript">
@@ -214,15 +216,6 @@ $(document).ready(function(){
 		[% END %]
 
 
-
-
-
-
-
-<<<<<<< HEAD:plugins/Edit/templates/editor;edit;default
-
-=======
->>>>>>> Move logic for button handling around:plugins/Edit/templates/editor;edit;default
 		<div class="subarticle-foot">
 
 			[% IF item.type == 'submission' %]
@@ -238,26 +231,13 @@ $(document).ready(function(){
 			<div class="subactionbuttons">
 				<input type="submit" name="op" value="preview">
 			</div>
-<<<<<<< HEAD:plugins/Edit/templates/editor;edit;default
-=======
-			<br>
-			[% IF !preview_shown %] <span class="button collapse"></span>submission [% END %]
-			[% END %]
->>>>>>> Move logic for button handling around:plugins/Edit/templates/editor;edit;default
-
 
 		</div>
-<<<<<<< HEAD:plugins/Edit/templates/editor;edit;default
-
-=======
->>>>>>> Move logic for button handling around:plugins/Edit/templates/editor;edit;default
-
-
 
 </form>
-
-
+[% UNLESS options.nowrap %]
 </div>
+[% END %]
 
 __seclev__
 10000

@@ -2276,6 +2276,24 @@ sub saveModalPrefsAnonHC {
 	&saveModalPrefs;
 }
 
+sub editPreview {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
+	unless ($rkey->touch) {
+		errorLog($rkey->errstr);
+		return;
+	}
+
+	my $edit = getObject("Slash::Edit");
+	$edit->savePreview();
+	my $html;
+	$html->{editor} = $edit->showEditor({ previewing => 1, nowrap => 1});
+
+	return Data::JavaScript::Anon->anon_dump($html);
+}
+
 ###################
 
 
@@ -2309,6 +2327,13 @@ sub getOps {
 			reskey_name     => 'comments',
 			reskey_type     => 'touch',
 		},
+
+		edit_preview => {
+			function	=> \&editPreview,
+			reskey_name	=> 'edit-submit',
+			reskey_type	=> 'touch',
+		},
+
 		comments_reply_form     => {
 			function        => \&replyForm,
 			reskey_name     => 'ajax_base',

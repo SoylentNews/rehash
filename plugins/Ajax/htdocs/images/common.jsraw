@@ -2180,6 +2180,20 @@ function serialize_multiple( $form ){
 	);
 }
 
+function editPreview() {
+	var elems = $('#slashstoryform').serializeArray();
+	var params = {};
+
+	$.map( elems,
+		function(el) {
+			console.log(el.name + " " + el.value);
+			params[el.name] = el.value;
+		}
+	);
+	params['op'] = 'edit_preview';
+	ajax_update(params, '', { onComplete: json_handler });
+}
+
 function resetModalPrefs(extra_param) {
 	var params = {
 		op:	'saveModalPrefs',

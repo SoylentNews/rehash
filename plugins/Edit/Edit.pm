@@ -374,7 +374,7 @@ sub showEditor {
 		vote 		=> $options->{vote},
 		options 	=> $options->{options},
 		item 		=> $p_item,
-		skipvote 	=> 1
+		skipvote 	=> 1,
 	}, { Return => 1, Page => 'firehose'});
 
 	
