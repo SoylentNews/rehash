@@ -102,9 +102,7 @@ $(document).ready(function(){
 				<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;ELSE;'Leave blank to be Anonymous';END; %]" size="50" maxlength="50" [% IF !item.name;' class="default" ';END; %]>
 				[% PROCESS formLabel value => "Your Email or Homepage where users can contact you" for => 'email' %]
 				<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;ELSE;'Your email or homepage';END; %]" size="50" maxlength="50" [% IF !item.email;' class="default" ';END; %]>
-			</div>
 
-			<div class="b">
 				[% IF constants.plugin.FireHose %]
 					[% PROCESS formLabel value => "Main url of submission (optional but if provided must be unique)" for => "url"  %]
 					<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;ELSE;'Optional URL';END; %]" size="50" [% IF !preview.url_text;' class="default" ';END; %]>
