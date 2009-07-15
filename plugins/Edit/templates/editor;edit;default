@@ -84,8 +84,9 @@ $(document).ready(function(){
 	<div class="subtitle">
 		[% PROCESS formLabel value => "Title Your Story" for => "title"  %]
 
-		<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;ELSE;'Title Your Story';END; %]" size="50" class="[% IF !item.title;' default ';END; %]">
-		[% IF errors.badsubject %]
+		<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;ELSE;'Title Your Story';END; %]" size="50" class="[% IF !item.title;' default ';END; IF errors.badsubject; ' fiterror '; END; %]">
+
+				[% IF errors.badsubject %]
                         <p>[% errors.badsubject %]</p>
                 [% ELSIF errors.subj_filter_error %]
                         <p><span id="subject_filter_error"><span id="modal_error"></span><b>[% errors.subj_filter_error %]</b></span></p>
@@ -164,10 +165,8 @@ $(document).ready(function(){
 		END; %]
 
 		[% IF errors.badintrotext %]
-                        <br>
                         <p>[% errors.badintrotext %]</p>
                 [% ELSIF errors.story_filter_error %]
-                        <br>
                         <p><span id="story_filter_error"><span id="modal_error"></span><b>[% errors.story_filter_error %]</b></span></p>
                 [% END %]
 

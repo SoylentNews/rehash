@@ -14,16 +14,16 @@ __template__
 [% SWITCH value %]
 [% CASE 'maxallowed' %]
 	[% returnme.data_constant = 1 %]
-	<p><b>Warning! you've exceeded max allowed submissions for the day : 
-	[% constants.max_submissions_allowed %]</b></p>
+	<p><strpng>Warning! you've exceeded max allowed submissions for the day : 
+	[% constants.max_submissions_allowed %]</strong></p>
 
 [% CASE 'max_submissionsize_title' %]
 	[% returnme.data_constant = 1 %]
-	<b>Submission too large!</b>
+	<strong>Submission too large!</strong>
 
 [% CASE 'max_submissionsize_err' %]
-	<p><b>Warning! You submission has exceeded the max allowable size 
-	that can be inserted into the system: [% size %] bytes.</b></p>
+	<p><strong>Warning! You submission has exceeded the max allowable size 
+	that can be inserted into the system: [% size %] bytes.</strong></p>
 	<p>If you try to save your submission as it is, it could be truncated</p>
 
 [% CASE 'error' %]
@@ -31,23 +31,23 @@ __template__
 	Error
 
 [% CASE 'filtererror' %]
-	<p>Lameness filter: <b>[% err_message %]</b></p>
+	<p>Lameness filter: <strong>[% err_message %]</strong></p>
 
 [% CASE 'compresserror' %]
 	[% returnme.data_constant = 1 %]
-	<span id="compress_error"><span id="modal_error"></span><b>compression has detected something wrong with your submission</b></span>
+	<span id="compress_error"><span id="modal_error"></span>compression has detected something wrong with your submission</span>
 
 [% CASE 'badintrotext' %]
         [% returnme.data_constant = 1 %]
-        <span id="introtext_error"><span id="modal_error"></span><b>Missing introtext.</b></span>
+        <span id="introtext_error"><span id="modal_error"></span>Missing introtext.</span>
 
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
-	<span id="subject_error"><span id="modal_error"></span><b>Please enter a reasonable subject.</b></span>
+	<span id="subject_error"><span id="modal_error"></span>Please enter a reasonable subject.</span>
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
-	<span id="url_error"><span id="modal_error"></span><b>You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)</b></span>
+	<span id="url_error"><span id="modal_error"></span>You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)</span>
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
