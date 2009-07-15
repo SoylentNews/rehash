@@ -33,13 +33,11 @@ __template__
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
 	[% ELSE %]
-		<table cellspacing=1 border=0><tr valign="MIDDLE">
-		<td>[% user.state.hcquestion %]</td>
-		<td>[% user.state.hchtml %]</td>
-		<td><input type="text" name="hcanswer"
+		[% user.state.hcquestion %]
+		[% user.state.hchtml %]
+		<input type="text" name="hcanswer"
 			value=""
-			size=8 maxlength=8></td>
-		</tr></table>
+			size=8 maxlength=8>
 	[% END %]
 [% END %]
 
