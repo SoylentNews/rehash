@@ -51,7 +51,7 @@ sub main {
 	my $reskey = getObject('Slash::ResKey');
 	my $skey = $reskey->session;
 	print STDERR "Edit Session $skey for UID: $user->{uid}\n";
-	 $skey->set_cookie;
+	$skey->set_cookie;
 
 	header("Edit", '') or return;
 

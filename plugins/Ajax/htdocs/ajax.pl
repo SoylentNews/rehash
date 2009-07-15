@@ -645,6 +645,8 @@ sub getModalPrefs {
 	my $reskey_resource = 'ajax_user';
 	if ((caller(1))[3] =~ /\bgetModalPrefsAnon(HC)?$/) {
 		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
+	} elsif ($form->{'section'} eq 'submit') {
+		$reskey_resource = 'edit-submit';
 	}
 	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
 	$rkey->create;

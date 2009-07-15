@@ -140,7 +140,8 @@ sub new {
 	if ($reskey) {
 		$reskey =~ s|[^a-zA-Z0-9_]+||g;
 	} elsif (!defined $reskey) {
-		$reskey = getCurrentForm('reskey') unless $opts->{nostate}; # if we already have one
+		# skip if we already have one, or want a new one
+		$reskey = getCurrentForm('reskey') unless $opts->{nostate} || $opts->{override};
 		if (!$reskey) {
 			if ($self->static) {
 				$reskey = $self->makeStaticKey;
