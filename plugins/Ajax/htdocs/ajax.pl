@@ -2291,7 +2291,7 @@ sub editPreview {
 	my $html;
 	$html->{editor} = $edit->showEditor({ previewing => 1, nowrap => 1});
 
-	return Data::JavaScript::Anon->anon_dump($html);
+	return Data::JavaScript::Anon->anon_dump({ html => $html });
 }
 
 ###################
