@@ -28,6 +28,7 @@ __template__
 		<input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
 		<br>
 
+<div class="captcha">
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_mailpasswd && user.state.hc %]
 	<br>
 	[% IF user.state.hcinvalid %]
@@ -40,7 +41,7 @@ __template__
 			size=8 maxlength=8>
 	[% END %]
 [% END %]
-
+</div>
 	<br>
 	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
 	<input type="submit" name="mailpasswd" value="Mail Password">

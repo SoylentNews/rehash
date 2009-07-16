@@ -62,7 +62,7 @@ __template__
 				<div class="note tip">
 					Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.
 				</div>
-
+<div class="captcha">
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_newuser && user.state.hc %]
         [% IF user.state.hcinvalid %]
                 [% user.state.hcerror %]
@@ -74,6 +74,7 @@ __template__
 		</label>
         [% END %]
 [% END %]
+</div>
 
 	<br>
 	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
