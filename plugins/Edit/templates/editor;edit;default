@@ -66,10 +66,9 @@ $(document).ready(function(){
 	});
 
 	// hijack login link to save edit session
-	$('#loginlink').click(function(){
+	$('#loginlink, .loginlink').click(function(){
 		editPreview();
 	});
-
 });
 </script>
 
