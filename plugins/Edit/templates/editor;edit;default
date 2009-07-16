@@ -72,7 +72,6 @@ $(document).ready(function(){
 [% ELSIF errors.compresserror %]
 	<p>[% errors.compresserror %]</p>
 [% END %]
-<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 	<div id="editpreview">
 		[% previewed_item %]
 	</div>
