@@ -2180,6 +2180,14 @@ function serialize_multiple( $form ){
 	);
 }
 
+function show_submit_box(id) {
+	var params = {};
+	if (id) {
+		params['from_id'] = id;
+	}
+	getModalPrefs('submit', 'Submit', 0, params);
+}
+
 function editPreview() {
 	var elems = $('#slashstoryform').serializeArray();
 	var params = {};
