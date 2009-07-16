@@ -126,12 +126,18 @@ sub save {
 	$edit->savePreview();
 	my($retval, $type, $save_type, $errors) = $edit->saveItem();
 	my($editor, $id);
+	my $saved_item;
 	if ($retval) {
 		$id = $retval;
+		my $num_id = $id;
+		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
+		my $fh = getObject("Slash::FireHose");
+		my $item = $fh->getFireHoseByTypeSrcid($type, $num_id);
+		$saved_item = $fh->dispFireHose($item, { view_mode => 1, mode => 'full'});
 	} else { 
 		$editor = $edit->showEditor({ errors => $errors });
 	}
-	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type, type => $type });
+	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item });
 }
 
 
