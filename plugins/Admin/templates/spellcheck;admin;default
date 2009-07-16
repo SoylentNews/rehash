@@ -12,24 +12,24 @@ __name__
 spellcheck
 __template__
 <table border="0" cellpadding="6" cellspacing="0" class="data" id="spellcheck_[% form_element %]" style="width: 230px">
-        <tr style="background: #066;" class="data_head">
-                <td colspan="2"><span id="modal_warn"></span>&nbsp;&nbsp;<span style="color: #fff"><b>Spellcheck</b></span></td>
-        </tr>
+	<tr style="background: #066;" class="data_head">
+		<td colspan="2"><span id="modal_warn"></span>&nbsp;&nbsp;<span style="color: #fff"><b>Spellcheck</b></span></td>
+	</tr>
 [% FOREACH misspelled_word = words.keys %]
-        <tr class="data_hl3" id="[% misspelled_word %]_[% form_element %]_correction" style="background: #ccc;">
-                <td><span style="color: #000;">[% misspelled_word %]</span></td>
+	<tr class="data_hl3" id="[% misspelled_word %]_[% form_element %]_correction" style="background: #ccc;">
+		<td><span style="color: #000;">[% misspelled_word %]</span></td>
 
-                [% escaped_word = misspelled_word.replace("'", "\\'")  %]
+		[% escaped_word = misspelled_word.replace("'", "\\'")  %]
 
-                <td><select style="width: 100%" name="select_[% form_element %]_[% misspelled_word %]" onChange="make_spelling_correction('[% escaped_word %]', '[% form_element %]');">
-                <option value=''>Suggestions
-                <option style="color:#c00;" value=''>- Learn -
-                [% FOREACH correction = words.$misspelled_word %]
-                        <option value="[% correction %]">[% correction %]
-                [% END %]
-                </select>
-                </td>
-        </tr>
+		<td><select style="width: 100%" name="select_[% form_element %]_[% misspelled_word %]" onChange="make_spelling_correction('[% escaped_word %]', '[% form_element %]');">
+		<option value=''>Suggestions
+		<option style="color:#c00;" value=''>- Learn -
+		[% FOREACH correction = words.$misspelled_word %]
+			<option value="[% correction %]">[% correction %]
+		[% END %]
+		</select>
+		</td>
+	</tr>
 [% END %]
 </table>
 __seclev__
