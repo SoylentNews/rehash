@@ -6459,3 +6459,6 @@ UPDATE humanconf_questions SET question="To confirm you're not a script, please 
 
 # 2009-07-09
 UPDATE vars SET value = 'T_2_5_0_264' WHERE name = 'cvs_tag_currentcode';
+
+### another captcha text modification
+UPDATE humanconf_questions SET question="Confirm your humanity by telling us what you see or hear" WHERE hcqid=1;
