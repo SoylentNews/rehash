@@ -2188,6 +2188,12 @@ function show_submit_box(id) {
 	getModalPrefs('submit', 'Submit', 0, params);
 }
 
+function edit_editon(id) {
+	$('#firehose-' + id).hide();
+	$('.editonly').removeClass('hide');
+	$('.previewonly').addClass('hide');
+}
+
 function editPreview() {
 	var elems = $('#slashstoryform').serializeArray();
 	var params = {};
@@ -2969,4 +2975,5 @@ function anchor_fh_pag_menu(modified) {
 		}
 	}
 }
+
 

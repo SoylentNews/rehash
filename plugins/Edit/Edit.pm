@@ -382,6 +382,7 @@ sub showEditor {
 	
 	$editor .= slashDisplay('editor', { 
 		id 			=> $preview_id,
+		fhid			=> $preview->{preview_fhid},
 		preview			=> $preview, 
 		item 			=> $p_item,
 		author_select 		=> $author_select,

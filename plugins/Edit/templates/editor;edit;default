@@ -75,7 +75,9 @@ $(document).ready(function(){
 	<div id="editpreview">
 		[% previewed_item %]
 	</div>
+	<div class="editonly[% IF preview_shown %] hide[% END %]">
 	[% tag_widget %]
+	</div>
 	<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 
 	[% PROCESS reskey_tag %]
@@ -86,7 +88,7 @@ $(document).ready(function(){
         [% IF preview_shown %]
 
 	<div class="preactionbuttons previewonly">
-		<input type="submit" name="op" value="edit" id="edit-edit-button">
+		<input type="submit" name="op" value="edit" id="edit-edit-button" onClick="edit_editon([% fhid %]); return false;">
 		<input type="submit" name="op" value="save" id="edit-edit-save">
 	</div>
 
