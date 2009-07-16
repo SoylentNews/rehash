@@ -463,7 +463,7 @@ sub validate {
 }
 
 sub saveItem {
-	my($self) = @_;
+	my($self, $rkey) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $fh = getObject("Slash::FireHose");
@@ -478,6 +478,13 @@ sub saveItem {
 	my $fhitem = $fh->getFireHose($preview->{preview_fhid});
 
 	my $errors = $self->validate($preview,$fhitem);
+# if you use this, comment *out* the similar call in edit.pl:save()
+# 	if ($rkey && !(keys %$errors)) {
+# 		unless ($rkey->use) {
+# 			errorLog($rkey->errstr);
+# 			return;
+# 		}
+# 	}
 
 	my $create_retval = 0;
 	my $save_type = 'new';
