@@ -21,11 +21,11 @@ $(document).ready(function(){
 
 	var tmphldr='';
 
-    $("div#editor .default").live("click", function(){
+	$("div#editor .default").live("click", function(){
 			$(this).removeClass("default");
 			tmphldr=$(this).val();
 			$(this).attr({ value: '' });
-    });
+	});
 
 /*	$("div#editor .default").focus(function() {
 			$(this).removeClass("default");
@@ -64,6 +64,12 @@ $(document).ready(function(){
 		$("#admin-bodytext").toggle();
 		$(this).parent("label").toggleClass("clearboth");
 	});
+
+	// hijack login link to save edit session
+	$('#loginlink').click(function(){
+		editPreview();
+	});
+
 });
 </script>
 

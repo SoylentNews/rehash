@@ -2100,6 +2100,8 @@ function getModalPrefs(section, title, tabbed, params){
 		if (formname === 'userlogin') {
 			return_to = location.toString();
 		}
+	} else if (formname === 'submit') {
+		this_op = 'getModalPrefsAnon';
 	} else if ( !reskey_static ) {
 		return show_login_box();
 	}
