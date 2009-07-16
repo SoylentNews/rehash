@@ -2326,7 +2326,7 @@ sub editSave {
 	if($editor) {
 		$html->{editor} = $editor;
 	} else {
-		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 1 });
+		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
 	}
 	return Data::JavaScript::Anon->anon_dump({ html => $html });
 }

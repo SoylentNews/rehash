@@ -2202,12 +2202,10 @@ function editPreview(save) {
 
 	$.map( elems,
 		function(el) {
-			console.log(el.name + " " + el.value);
 			params[el.name] = el.value;
 		}
 	);
 	params['op'] = save ? 'edit_save' : 'edit_preview';
-	console.log("OP: "+params['op']);
 	ajax_update(params, '', { onComplete: json_handler });
 }
 
