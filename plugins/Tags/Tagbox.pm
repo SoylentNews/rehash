@@ -479,7 +479,12 @@ sub getTagboxTags {
 	$self->debug_log("getTagboxTags(%d, %d, %d), type=%s",
 		$tbid, $affected_id, $extra_levels, $type);
 	my $hr_ar = [ ];
-	my $colname = ($type eq 'user') ? 'uid' : 'globjid';
+       my $colname =     $type eq 'user'    ? 'uid'
+                       : $type eq 'globj'   ? 'globjid'
+                       : $type eq 'tagname' ? 'tagnameid'
+                       : '';
+       die "bad colname" unless $colname;
+       die "no extra levels allowed for tagname" if $colname eq 'tagnameid' && $extra_levels;
 	my $max_time_clause = '';
 	if ($options->{max_time_noquote}) {
 		$max_time_clause = " AND created_at <= $options->{max_time_noquote}";
@@ -817,7 +822,7 @@ sub feed_newtags_process {
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		my $ret_hr = {
-			affected_id =>  $tag_hr->{globjid},
+                       affected_id =>  $tag_hr->{globjid}, # XXX really? what if affected_type eq user?
 			importance =>   defined($tag_hr->{importance}) ? $tag_hr->{importance} : 1,
 		};
 		# Both new tags and deactivated tags are considered important.
