@@ -85,13 +85,13 @@ $(document).ready(function(){
 
         [% IF preview_shown %]
 
-	<div class="preactionbuttons">
+	<div class="preactionbuttons previewonly">
 		<input type="submit" name="op" value="edit" id="edit-edit-button">
 		<input type="submit" name="op" value="save" id="edit-edit-save">
 	</div>
 
 
-	<div class="hide">
+	<div class="editonly hide">
 	[% END %]
 
 
@@ -208,6 +208,10 @@ $(document).ready(function(){
 		[% END %]
 	</div>
 
+[% IF preview_shown %]
+</div>
+[% END %]
+
 		[% IF item.type == 'submission' %]
 			[% IF preview.url_id %]
 				<input type="hidden" name="url_id" value="[% preview.url_id | strip_attribute %]">
@@ -227,7 +231,7 @@ $(document).ready(function(){
 			[% END %]
 
 
-			<div class="subactionbuttons">
+			<div class="subactionbuttons editonly [% IF preview_shown %]hide[% END %]">
 				<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
 			</div>
 
