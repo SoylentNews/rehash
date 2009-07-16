@@ -60,8 +60,9 @@ __template__
                                         (6-20 characters long)
                                 </div>-->
                                 <label class="checkbox">
-                                	<input type="checkbox" name="login_temp" value="yes" class="checkbox">Public Terminal
-								</label>
+                                	<input type="checkbox" name="login_temp" value="yes" class="checkbox">
+					Public Terminal
+				</label>
                                 <input type="submit" name="userlogin" value="Log in" class="button">
 				</fieldset>
 		</form>

@@ -11108,7 +11108,7 @@ sub getUser {
 					print STDERR scalar(gmtime) . " $$ getUser still_need: '@$cols_still_need' table_hr: " . Dumper($table_hr);
 				}
 				$answer = $self->_getUser_do_selects(
-                                       $uid,
+					$uid,
 					$table_hr->{select_clause},
 					$table_hr->{from_clause},
 					$table_hr->{where_clause},
@@ -11142,7 +11142,7 @@ sub getUser {
 			print STDERR scalar(gmtime) . " $$ getUser miss, about to select: val '$val' all '$gtd->{all}' can '$gtd->{can_use_mcd}'\n";
 		}
 		$answer = $self->_getUser_do_selects(
-                       $uid,
+			$uid,
 			($val ? $gtd->{select_clause} : "*"),
 			$gtd->{from_clause},
 			$gtd->{where_clause},
@@ -11177,7 +11177,7 @@ sub getUser {
 		return undef;
 	}
 
-       # Fill in the uid field (possibly done in _getUser_do_selects already).
+	# Fill in the uid field (possibly done in _getUser_do_selects already).
 	$answer->{uid} ||= $uid;
 
 	if ($mcddebug > 2) {
@@ -11217,8 +11217,8 @@ sub getUser {
 #
 
 sub _getUser_do_selects {
-       my($self, $uid, $select, $from, $where, $params) = @_;
-       my $uid_q = $self->sqlQuote($uid);
+	my($self, $uid, $select, $from, $where, $params) = @_;
+	my $uid_q = $self->sqlQuote($uid);
 	my $mcd = $self->getMCD();
 	my $constants = getCurrentStatic();
 	my $mcddebug = $mcd && $constants->{memcached_debug};
@@ -11227,7 +11227,7 @@ sub _getUser_do_selects {
 	# SELECT foo, bar, baz FROM users, users_blurb, users_snork
 	# WHERE users.uid=123 AND users_blurb.uid=123 AND so on.
 	# Note if we're being asked to get only params, we skip this.
-       my $answer = { uid => $uid };
+	my $answer = { uid => $uid };
 	if ($mcddebug > 1) {
 		print STDERR scalar(gmtime) . " $$ mcd gU_ds selecthashref: '$select' '$from' '$where'\n";
 	}

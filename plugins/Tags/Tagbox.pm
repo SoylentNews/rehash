@@ -822,7 +822,7 @@ sub feed_newtags_process {
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		my $ret_hr = {
-                       affected_id =>  $tag_hr->{globjid}, # XXX really? what if affected_type eq user?
+			affected_id =>  $tag_hr->{globjid}, # XXX really? what if affected_type eq user?
 			importance =>   defined($tag_hr->{importance}) ? $tag_hr->{importance} : 1,
 		};
 		# Both new tags and deactivated tags are considered important.
