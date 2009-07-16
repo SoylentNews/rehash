@@ -2196,7 +2196,7 @@ function edit_editon(id) {
 	$('.previewonly').addClass('hide');
 }
 
-function editPreview() {
+function editPreview(save) {
 	var elems = $('#slashstoryform').serializeArray();
 	var params = {};
 
@@ -2206,9 +2206,15 @@ function editPreview() {
 			params[el.name] = el.value;
 		}
 	);
-	params['op'] = 'edit_preview';
+	params['op'] = save ? 'edit_save' : 'edit_preview';
+	console.log("OP: "+params['op']);
 	ajax_update(params, '', { onComplete: json_handler });
 }
+
+function editSave() {
+	editPreview(1);
+}
+
 
 function resetModalPrefs(extra_param) {
 	var params = {

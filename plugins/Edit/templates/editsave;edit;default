@@ -1,0 +1,30 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+edit
+__lang__
+en_US
+__name__
+editsave
+__seclev__
+10000
+__template__
+[% IF id && type %]
+	[% saved_item %]
+	<p>
+	[% id %] [% type %] [% save_type %]<br>
+	[% IF type == "story" %]
+		<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])<br>
+	[% ELSIF type == "submission" %]
+		<a href="[% constants.real_rootdir %]/submission/[% id %]">New Submission Created</a> ([% id %])<br>
+	[% END %]
+[% ELSE %]
+	ID	[% id %] TYPE [% type %] SAVE TYPE [% save_type %]<br>
+
+[% END %]
+
+</div>

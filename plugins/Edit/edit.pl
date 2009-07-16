@@ -137,7 +137,9 @@ sub save {
 	} else { 
 		$editor = $edit->showEditor({ errors => $errors });
 	}
-	slashDisplay('editorwrap', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item });
+	my $save_result;
+	$save_result = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1 }) if !$editor;
+	slashDisplay('editorwrap', { editor => $editor, save_result => $save_result });
 }
 
 

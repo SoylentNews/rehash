@@ -2294,6 +2294,43 @@ sub editPreview {
 	return Data::JavaScript::Anon->anon_dump({ html => $html });
 }
 
+sub editSave {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $edit = getObject("Slash::Edit");
+	$edit->savePreview();
+	my($retval, $type, $save_type, $errors) = $edit->saveItem();
+
+	if (!keys %$errors > 0) {
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('edit-submit');
+		unless ($rkey->use) {
+			errorLog($rkey->errstr);
+			return;
+		}
+	}
+
+	my($editor, $id);
+	my $saved_item;
+	if ($retval) {
+		$id = $retval;
+		my $num_id = $id;
+		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
+		my $fh = getObject("Slash::FireHose");
+		my $item = $fh->getFireHoseByTypeSrcid($type, $num_id);
+		$saved_item = $fh->dispFireHose($item, { view_mode => 1, mode => 'full'});
+	} else {
+		$editor = $edit->showEditor({ errors => $errors });
+	}
+	my $html;
+	if($editor) {
+		$html->{editor} = $editor;
+	} else {
+		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 1 });
+	}
+	return Data::JavaScript::Anon->anon_dump({ html => $html });
+}
+
 ###################
 
 
@@ -2330,6 +2367,12 @@ sub getOps {
 
 		edit_preview => {
 			function	=> \&editPreview,
+			reskey_name	=> 'edit-submit',
+			reskey_type	=> 'touch',
+		},
+
+		edit_save => {
+			function	=> \&editSave,
 			reskey_name	=> 'edit-submit',
 			reskey_type	=> 'touch',
 		},
