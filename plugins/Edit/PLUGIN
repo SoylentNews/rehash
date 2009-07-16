@@ -7,4 +7,4 @@ htdoc=edit.pl
 template=templates/data;edit;default
 template=templates/editor;edit;default
 template=templates/editorwrap;misc;default
-template=templates/editsave;misc;default
+template=templates/editsave;edit;default
