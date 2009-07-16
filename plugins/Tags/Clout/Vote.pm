@@ -30,7 +30,7 @@ sub init {
 
 sub getUserClout {
 	my($self, $user_stub) = @_;
-
+       return 0 if isAnon($user_stub->{uid});
 	my $clout;
 	my $karma = $user_stub->{karma};
 	if ($karma >= 1) {

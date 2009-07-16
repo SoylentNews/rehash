@@ -16,6 +16,7 @@ sub init {
 
 sub getUserClout {
 	my($class, $user_stub) = @_;
+       return 0 if isAnon($user_stub->{uid});
 	return 1;
 }
 
