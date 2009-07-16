@@ -6467,3 +6467,6 @@ UPDATE humanconf_questions SET question="Confirm your humanity by telling us wha
 ALTER TABLE preview ADD COLUMN session CHAR(20) default '' NOT NULL;
 ALTER TABLE preview ADD COLUMN createtime DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL;
 ALTER TABLE preview ADD INDEX (session);
+
+
+UPDATE humanconf_questions SET question='<span class="humanconf_questions">Confirm your humanity by telling us what you see or hear</span>' WHERE hcqid=1;
