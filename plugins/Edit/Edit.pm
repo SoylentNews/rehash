@@ -303,7 +303,9 @@ sub showEditor {
 
 	my $preview_id = $self->getOrCreatePreview($session);
 	my $editor;
-	$editor .=  "PREVIEW ID: $preview_id<br>";
+	my $preview_info;
+
+	$preview_info .=  "PREVIEW ID: $preview_id";
 
 	my $preview = $self->getPreview($preview_id);
 
@@ -334,7 +336,7 @@ sub showEditor {
 		}
 	}
 
-	$editor .=  "PREVIEW FHID: $preview->{preview_fhid}<br>";
+	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session<br>";
 
 	my $showing_preview = 0;
 	my $init_sprites = 0;
@@ -391,7 +393,8 @@ sub showEditor {
 		preview_shown		=> $showing_preview,
 		previewed_item		=> $previewed_item,
 		session			=> $session,
-		tag_widget		=> $tag_widget
+		tag_widget		=> $tag_widget,
+		preview_info		=> $preview_info
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;

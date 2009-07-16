@@ -14,7 +14,7 @@ __template__
 <div id="editor" class="admin">
 [% END %]
 
-Session: [% session %]
+[% preview_info %]
 <script type="text/javascript">
 
 $(document).ready(function(){
