@@ -2497,6 +2497,7 @@ sub getRecentTagnamesOfInterest {
 		@$tagnameid_recent_ar ]
 		if $max_previously_known_tagnameid > 0;
 	my $tagnameid_str = join(',', map { $self->sqlQuote($_) } @$tagnameid_recent_ar);
+	return [ ] if !$tagnameid_str;
 
 	# Now do the select to find the actually-new tagnameids.
 	my $tagnameid_firstrecent_ar = $self->sqlSelectColArrayref(
