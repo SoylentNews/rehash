@@ -71,6 +71,13 @@ sub init {
 sub init_tagfilters {
 	my($self) = @_;
 	$self->{filter_firehoseonly} = 1;
+
+	my $nontagnametypes = [ ];
+	my $globj_types = $self->getGlobjTypes();
+	for my $key (grep { /^\D/ } keys %$globj_types) {
+		push @$nontagnametypes, $globj_types->{$key} if $key ne 'tagnames';
+	}
+	$self->{filter_gtid} = $nontagnametypes;
 }
 
 sub get_affected_type	{ 'globj' }
