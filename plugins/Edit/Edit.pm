@@ -412,7 +412,7 @@ sub validate {
 	if ($item->{type} eq 'submission') {
 		if (length($item->{title}) < 2) {
 			#push @messages, getData('badsubject');
-			$messages{badsubject} = getData('badsubject');
+			$messages{badsubject} = getData('badsubject','','edit');
 		}
 
 		my $message;
@@ -428,14 +428,14 @@ sub validate {
 			if (! compressOk($keys_to_check{$_})) {
 				#my $err = getData('compresserror');
 				#push @messages, $err;
-				$messages{compresserror} = getData('compresserror');
+				$messages{compresserror} = getData('compresserror','','edit');
 			}
 		}
 
 		if ($preview->{url_text}) {
 			if(!validUrl($preview->{url_text})) {
 				#push @messages, getData("invalidurl");
-				$messages{invalidurl} = getData("invalidurl");
+				$messages{invalidurl} = getData("invalidurl",'','edit');
 			}
 			if ($item->{url_id}) {
 				if ($constants->{plugin}{FireHose}) {
@@ -443,7 +443,7 @@ sub validate {
 					if (!$firehose->allowSubmitForUrl($item->{url_id})) {
 						my $submitted_items = $firehose->getFireHoseItemsByUrl($item->{url_id});
 						#push @messages, getData("duplicateurl", { submitted_items => $submitted_items });
-						$messages{duplicateurl} = getData("duplicateurl", { submitted_items => $submitted_items });
+						$messages{duplicateurl} = getData("duplicateurl", { submitted_items => $submitted_items }, 'edit');
 					}
 				}
 			}
@@ -451,7 +451,7 @@ sub validate {
 
 		if (!$preview->{introtext}) {
 			#push @messages, "Missing title or text";
-			$messages{badintrotext} = getData('badintrotext');
+			$messages{badintrotext} = getData('badintrotext','','edit');
 		}
 		# XXXEdit Check Nexus Extras eventually
 		# XXXEdit test reskey success / failure here? or in saveItem?
