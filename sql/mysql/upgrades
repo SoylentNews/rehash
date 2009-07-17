@@ -6495,3 +6495,6 @@ INSERT INTO reskey_vars VALUES (13, 'adminbypass', 1, 'If admin, bypass checks f
 INSERT INTO reskey_vars VALUES (13, 'acl_no', 'reskey_no_session', 'If this ACL present, can\'t use resource');
 
 
+# 2009-07-16
+UPDATE vars SET value = 'T_2_5_0_265' WHERE name = 'cvs_tag_currentcode';
+
