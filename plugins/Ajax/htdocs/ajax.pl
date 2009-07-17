@@ -2222,6 +2222,7 @@ sub saveModalPrefs {
                 }
 
 		$updates->{nickname_error} = getData('modal_createacct_reset_nickname_error', {}, 'login');
+		$updates->{openidform} = '';
 
                 if (keys %$updates) {
                         my $ret = setModalUpdates($updates);
