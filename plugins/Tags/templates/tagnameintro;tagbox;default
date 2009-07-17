@@ -12,13 +12,12 @@ en_US
 __name__
 tagnameintro
 __template__
-<p>Tagname '[% tagname %]' seen [% total_count %] times,
-by [% uid_count %] users on [% globjid_count %] objects,
-since [% first_time %].
+<p>Seen [% total_count %] times,
+by [% uid_count %] users on [% globjid_count %] objects.
 
-[% IF last_n_tags %]<p>Last [% last_n_tags.size %] tags:
-[% FOREACH tag IN last_n_tags %]<br>[% tag.created_at %]:
-<a href="[% constants.real_rootdir %]/~[% tag.nickname | strip_paramattr %]/">[% tag.nickname | strip_literal %] ([% tag.uid %])</a>
+[% IF last_n_tags %]
+[% FOREACH tag IN last_n_tags %]
+<br><a href="[% constants.real_rootdir %]/~[% tag.nickname | strip_paramattr %]/">[% tag.nickname | strip_literal %] ([% tag.uid %])</a>
 applied to
 <a href="[% constants.real_rootdir %]/firehose.pl?op=view&amp;id=[% tag.fhid %]">[% tag.fhtitle | strip_notags %]</a>
 [% END %][% END %]
