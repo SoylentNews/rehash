@@ -20,7 +20,7 @@ since [% first_time %].
 [% FOREACH tag IN last_n_tags %]<br>[% tag.created_at %]:
 <a href="[% constants.real_rootdir %]/~[% tag.nickname | strip_paramattr %]/">[% tag.nickname | strip_literal %] ([% tag.uid %])</a>
 applied to
-<a href="/firehose.pl?op=view&amp;id=[% tag.fhid %]">[% tag.fhtitle | strip_notags %]</a>
+<a href="[% constants.real_rootdir %]/firehose.pl?op=view&amp;id=[% tag.fhid %]">[% tag.fhtitle | strip_notags %]</a>
 [% END %][% END %]
 
 __seclev__
