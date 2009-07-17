@@ -1007,6 +1007,11 @@ sub getModalPrefs {
 
 	} elsif ($form->{section} eq 'submit') {
 		my $edit = getObject("Slash::Edit");
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('edit-submit');
+		unless ($rkey->create) {
+			errorLog($rkey->errstr);
+		}
 		return $edit->showEditor();
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
