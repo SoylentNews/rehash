@@ -342,7 +342,9 @@ sub showEditor {
 	my $init_sprites = 0;
 	my $previewed_item;
 
-	if ($p_item && $p_item->{title} && $preview->{introtext}) {
+	$options->{previewing} = 0 if $options->{errors} && keys %{$options->{errors}} > 0;
+
+	if ($p_item && $p_item->{title} && $preview->{introtext} && $options->{previewing}) {
 		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
 
 		$showing_preview = 1 if $options->{previewing};
