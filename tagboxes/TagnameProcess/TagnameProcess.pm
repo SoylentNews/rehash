@@ -88,7 +88,7 @@ sub run_process {
 		$self->info_log("logic error, globjid $affected_id not valid tagname");
 		return ;
 	}
-	my $retval = $self->setTagname($id, {( map {( $_, 1 )} @params )});
+	my $retval = $tagsdb->setTagname($id, {( map {( $_, 1 )} @params )});
 	$self->info_log("set '$tagname' to '@params': $retval");
 }
 
