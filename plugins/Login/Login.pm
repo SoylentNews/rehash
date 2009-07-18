@@ -339,7 +339,6 @@ sub createNewUser {
         }
 
 	$params{MSG_CODE_NEWSLETTER()} = MSG_MODE_EMAIL();
-	$params{MSG_CODE_HEADLINES()} = MSG_MODE_EMAIL();
 
         $messages->setPrefs($uid, \%params);
 
