@@ -13,7 +13,6 @@ list
 __seclev__
 10000
 __template__
-[% PROCESS "init_ad6" %]
 [%
    hide_topic_icons = 0;
    IF user.noicons || user.simpledesign || user.lowbandwidth || user.pda;
@@ -166,7 +165,7 @@ cmdrtaco dot net but be forgiving of beta code!
 </p>
 [% END %]
 [% END # form.skipmenu %]
-[% PROCESS "ad6" %]
+[% Slash.getAd(6) %]
 [% IF form.index %]
 <script type="text/javascript">
 	//<![CDATA[
@@ -186,6 +185,7 @@ cmdrtaco dot net but be forgiving of beta code!
 [% itemstext %]
 [% page = page || "0" %]
 </div>
+[% Slash.getAd(84) IF show_slashboxes %]
 <span id="itemsreturned">
 	[% IF itemnum == 0; Slash.getData('noitems', { options => options }, 'firehose'); END %]
 </span>

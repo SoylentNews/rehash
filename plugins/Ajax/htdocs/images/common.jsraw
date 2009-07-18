@@ -2508,19 +2508,16 @@ function inlineAdFirehose($article) {
 
 var	AD_HEIGHT=300,
 	COMBINED_MODE=false,
+	generation=0,
 
-	$ad_position,		// div that holds the current (if any) ad
-	ad_target_article,	// the article to which that ad is attached
-	$ad_offset_parent,	// the container in which the ad _position_ floats (between articles)
-	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child)
+	$ad_position=$([]),		// div that holds the current (if any) ad
+	ad_target_article=null,	// the article to which that ad is attached
+	$ad_offset_parent,		// the container in which the ad _position_ floats (between articles)
+	$slashboxes,			// the container (sort of) in which the ad content actually appears (though not as a child)
 
-	is_ad_locked;		// ad must be shown for at least 30 seconds
+	is_ad_locked=false;		// ad must be shown for at least 30 seconds
 
 $(function(){
-	is_ad_locked = false;
-	$ad_position = $([]);
-	ad_target_article = null;
-
 	$slashboxes = $('#slashboxes, #userboxes').eq(0);
 
 	$('#slug-Top,#slug-Bottom').show();
@@ -2555,6 +2552,9 @@ function insert_ad( $article, ad ){
 	if ( !ad || !$article || $article.length != 1 || !remove_ad() ) {
 		return;
 	}
+
+	++generation;
+	ad = ad.replace(/&pos=84&/, '&pos=84&gen='+generation+'&');
 
 	ad_target_article = $article[0];
 	$ad_position = $article.
@@ -2653,19 +2653,25 @@ function ad_message( e ){
 }
 
 function combined_mode( enable ){
-	if ( enable===void(0) ) {
-		return COMBINED_MODE;
-	}
-
-	enable = enable && fh_adTimerUrl && !$('#fad1,#fad2').length;
-	if ( COMBINED_MODE != enable ) {
-		COMBINED_MODE = !!enable;
+	if ( enable!==void(0) && enable!=COMBINED_MODE ) {
+		COMBINED_MODE = !COMBINED_MODE;
 		$('#slug-Crown').toggle(COMBINED_MODE);
 		$('#slug-Bottom, div.slug .content').css('height', AD_HEIGHT = COMBINED_MODE ? 250 : 300);
 		$(window)[ COMBINED_MODE ? 'bind' : 'unbind' ]('scroll', scroll_crown);
 		fix_ad_position();
 	}
+	return COMBINED_MODE;
 }
+
+(function(){
+	function once( event, adPos, enable ){
+		if ( enable && adPos==84 ) {
+			$(document).unbind('falk', once);
+			$(function(){ combined_mode(true) && inlineAdFirehose(); });
+		}
+	}
+	$(document).bind('falk', once);
+})();
 
 (function(){
 var M = Slash.Firehose.floating_slashbox_ad = insert_ad;
