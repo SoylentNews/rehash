@@ -32,6 +32,7 @@ sub init {
 	return 0 if ! $self->SUPER::init();
 	my $tagsdb = getObject('Slash::Tags');
 	$self->{maybeid}	= $tagsdb->getTagnameidCreate('maybe');
+	$self->{descriptiveid}	= $tagsdb->getTagnameidCreate('descriptive');
 	$self->{metanodid}	= $tagsdb->getTagnameidCreate('metanod');
 	$self->{metanixid}	= $tagsdb->getTagnameidCreate('metanix');
 	$self->{nodornixid}	= {(
@@ -148,6 +149,11 @@ sub run_process {
 		} else {
 			$color_level = 8;
 		}
+	} elsif ($type eq 'tagname') {
+		# Tagname items (firehose items of type=tagname) start out at
+		# this color.  They get their score manually set to -50 below
+		# once they have been nodded/nixed by an editor.
+		$color_level = $constants->{tagbox_tni_initial_color} || 5;
 	}
 
 	# Lose a color level if bayesian analysis suggests spam.
@@ -252,12 +258,13 @@ sub run_process {
 		$popularity = $max if $popularity > $max;
 	}
 
-	# If this is a comment item that's been nodded/nixed by an editor,
+	# If this is a comment or tagname item that's been nodded/nixed by an editor,
 	# its score goes way down (so no other editors have to bother with it).
-	if ($fhitem->{type} eq 'comment') {
+	if ($fhitem->{type} eq 'comment' || $fhitem->{type} eq 'tagname') {
 		for my $tag_hr (@$tags_ar) {
-			if (	   $self->{admins}{ $tag_hr->{uid} }
-				&& $self->{nodornixid}{ $tag_hr->{tagnameid} }
+			next unless $self->{admins}{ $tag_hr->{uid} };
+			if ($self->{nodornixid}{ $tag_hr->{tagnameid} }
+				|| ($fhitem->{type} eq 'tagname' && $tag_hr->{tagnameid} == $self->{descriptiveid})
 			) {
 				$popularity = -50 if $popularity > -50;
 				last;

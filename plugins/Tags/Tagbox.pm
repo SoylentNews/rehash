@@ -479,12 +479,12 @@ sub getTagboxTags {
 	$self->debug_log("getTagboxTags(%d, %d, %d), type=%s",
 		$tbid, $affected_id, $extra_levels, $type);
 	my $hr_ar = [ ];
-       my $colname =     $type eq 'user'    ? 'uid'
-                       : $type eq 'globj'   ? 'globjid'
-                       : $type eq 'tagname' ? 'tagnameid'
-                       : '';
-       die "bad colname" unless $colname;
-       die "no extra levels allowed for tagname" if $colname eq 'tagnameid' && $extra_levels;
+	my $colname =     $type eq 'user'    ? 'uid'
+			: $type eq 'globj'   ? 'globjid'
+			: $type eq 'tagname' ? 'tagnameid'
+			: '';
+	die "bad colname" unless $colname;
+	die "no extra levels allowed for tagname" if $colname eq 'tagnameid' && $extra_levels;
 	my $max_time_clause = '';
 	if ($options->{max_time_noquote}) {
 		$max_time_clause = " AND created_at <= $options->{max_time_noquote}";
@@ -496,7 +496,7 @@ sub getTagboxTags {
 		'tags.*, tagname, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags, tagnames',
 		"tags.tagnameid=tagnames.tagnameid
-		 AND $colname=$affected_id $max_time_clause",
+		 AND tags.$colname=$affected_id $max_time_clause",
 		'ORDER BY tagid');
 	$self->debug_log("colname=%s pre_filter hr_ar=%d",
 		$colname, scalar(@$hr_ar));
@@ -819,10 +819,16 @@ sub feed_newtags_process {
 	# If a subclass calling up to this method has set an {importance} field for
 	# any tag, use that instead.
 
+	my $type = $self->get_affected_type();
+	my $colname =     $type eq 'user'    ? 'uid'
+			: $type eq 'globj'   ? 'globjid'
+			: $type eq 'tagname' ? 'tagnameid'
+			: '';
+	die "no type" unless $colname;
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		my $ret_hr = {
-			affected_id =>  $tag_hr->{globjid}, # XXX really? what if affected_type eq user?
+			affected_id =>  $tag_hr->{$colname},
 			importance =>   defined($tag_hr->{importance}) ? $tag_hr->{importance} : 1,
 		};
 		# Both new tags and deactivated tags are considered important.

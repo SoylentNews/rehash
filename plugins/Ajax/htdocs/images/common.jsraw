@@ -2197,6 +2197,7 @@ function edit_editon(id) {
 }
 
 function editPreview(save) {
+	$("form#slashstoryform .default").attr('value', '');
 	var elems = $('#slashstoryform').serializeArray();
 	var params = {};
 

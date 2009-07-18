@@ -281,6 +281,10 @@ sub getStartingColorLevel {
 			# temporary measure
 			$color_level = 8;
 		}
+	} elsif ($type eq 'tagnames') {
+		# Regular users don't really care about tagname items, they
+		# get a score of black.
+		$color_level = 8;
 	}
 	return($color_level, $extra_pop);
 }
