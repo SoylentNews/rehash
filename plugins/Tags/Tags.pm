@@ -996,7 +996,14 @@ sub getAllObjectsTagname {
 		: $firehose_db->getMinPopularityForColorLevel( $constants->{tags_active_mincare} || 5 );
 	# 117K rows unjoined, 7 seconds ; 10K rows unjoined, 3 seconds ; 10K rows joined, 18 seconds
 	my $hr_ar = $self->sqlSelectAllHashrefArray(
-		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
+		'tags.*, UNIX_TIMESTAMP(tags.created_at) AS created_at_ut,
+		 id, firehose.uid AS firehose_uid, discussion, type,
+		 createtime, popularity, editorpop, neediness, activity,
+		 accepted, rejected, public, attention_needed, is_spam,
+		 primaryskid, tid, srcid, url_id, toptags, email,
+		 emaildomain, ipid, subnetid, category, nexuslist,
+		 last_update, signoffs, stoid, body_length, word_count,
+		 srcname, medianame, thumb, offmainpage',
 		'tags, firehose',
 		"tags.globjid=firehose.globjid AND popularity >= $min_pop
 		 AND tagnameid=$id AND inactivated IS NULL $private_clause",
