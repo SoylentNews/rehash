@@ -129,7 +129,7 @@ Last Modified: 3/13/09</small></em></p>
         
 <h2><a name="ui400" id="ui400">Important Note To NoScript Users about fsdn.com</h2>
 
-<p>Obviously, whitelisting slashdot.org is necessary for all the fancy parts of the site to function. However, <b>you'll need to whitelist fsdn.com too.</b> That's our CDN, and if you block it, many things will break.</p>
+<p>Obviously, whitelisting slashdot.org is necessary for all the fancy parts of the site to function. However, <b>you'll need to whitelist fsdn.com too.</b> That's our CDN, and if you block it, many things may break.</p>
 
         <p><em><small>
                 Answered by: <a href="mailto:soulskill@slashdot.org">Soulskill</a><br>
