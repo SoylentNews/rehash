@@ -1,5 +1,5 @@
 /*
- * jQuery UI Draggable 1.7.1
+ * jQuery UI Draggable 1.7.2
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -10,7 +10,7 @@
  * Depends:
  *	ui.core.js
  */
-;(function($) {
+(function($) {
 
 $.widget("ui.draggable", $.extend({}, $.ui.mouse, {
 
@@ -400,7 +400,7 @@ $.widget("ui.draggable", $.extend({}, $.ui.mouse, {
 }));
 
 $.extend($.ui.draggable, {
-	version: "1.7.1",
+	version: "1.7.2",
 	eventPrefix: "drag",
 	defaults: {
 		addClasses: true,
@@ -500,12 +500,12 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 		};
 
 		$.each(inst.sortables, function(i) {
-
+			
 			//Copy over some variables to allow calling the sortable's native _intersectsWith
 			this.instance.positionAbs = inst.positionAbs;
 			this.instance.helperProportions = inst.helperProportions;
 			this.instance.offset.click = inst.offset.click;
-
+			
 			if(this.instance._intersectsWith(this.instance.containerCache)) {
 
 				//If it intersects, we use a little isOver variable and set it once, so our move-in stuff gets fired only once
@@ -548,13 +548,13 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 
 					this.instance.isOver = 0;
 					this.instance.cancelHelperRemoval = true;
-
+					
 					//Prevent reverting on this forced stop
 					this.instance.options.revert = false;
-
+					
 					// The out event needs to be triggered independently
 					this.instance._trigger('out', event, this.instance._uiHash(this.instance));
-
+					
 					this.instance._mouseStop(event, true);
 					this.instance.options.helper = this.instance.options._helper;
 
