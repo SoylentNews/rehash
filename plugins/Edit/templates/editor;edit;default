@@ -21,6 +21,9 @@ $(document).ready(function(){
 
 
 
+	$('textarea').elastic();
+
+
 
 	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
 		$(this).siblings("label").hide();
@@ -35,9 +38,6 @@ $(document).ready(function(){
 		if($(this).val()==="")
 			$(this).siblings("label").show();
 	});
-
-
-
 
 	var tmphldr='';
 
@@ -185,7 +185,7 @@ $(document).ready(function(){
 			[% IF extra.2 == 'text' %]
 				<input type="text" name="[% extra.1 %]" value="[% preview.${extra.1} | strip_attribute %]" size="50">
 			[% ELSIF extra.2 == 'textarea' %]
-				<textarea wrap="VIRTUAL" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% preview.${extra.1} | strip_literal %]</textarea><br>
+				<textarea wrap="VIRTUAL" name="[% extra.1 %]">[% preview.${extra.1} | strip_literal %]</textarea><br>
 			[% ELSIF extra.2 == 'list' %]
 				[% pulldown = "$extra.1" %]
 				[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), preview.${extra.1}, 1, 1) %]
@@ -216,7 +216,7 @@ $(document).ready(function(){
 
 			<span class="[% IF !preview.introtext;'dyn';END;%]label">
 				<label for="introtext">Describe your scoop</label>
-				<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
+				<textarea wrap="virtual" name="introtext" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
 			</span>
 		<div class="notes">[% ispell_comments.introtext %]</div>
 
@@ -227,13 +227,13 @@ $(document).ready(function(){
 		<div class="wrapextras">
 			<label [% IF preview.bodytext; 'class="p"'; END;%]>
 				<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
-				<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
+				<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
 			</label>
 			[% IF ispell_comments.bodytext %]<div class="notes">[% ispell_comments.bodytext %]</div>[% END %]
 			<label>
 				<a href="#" class="tgmedia">Media</a>
 				<a name="media"></a>
-				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
+				<textarea name="media" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
 			</label>
 		</div>
 
