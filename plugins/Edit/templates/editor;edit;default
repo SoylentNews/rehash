@@ -115,6 +115,7 @@ $(document).ready(function(){
 	<div class="preactionbuttons previewonly">
 		<input type="submit" name="op" value="edit" id="edit-edit-button" onclick="edit_editon([% fhid %]); return false;">
 		<input type="submit" name="op" value="save" id="edit-edit-save" onclick="editSave(); return false;">
+		<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="#; return false;">
 	</div>
 
 
