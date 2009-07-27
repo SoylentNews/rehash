@@ -64,15 +64,15 @@ __template__
 				</div>
 <div class="captcha">
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_newuser && user.state.hc %]
-        [% IF user.state.hcinvalid %]
-                [% user.state.hcerror %]
-        [% ELSE %]
+	[% IF user.state.hcinvalid %]
+		[% user.state.hcerror %]
+	[% ELSE %]
 		<label>
 			[% user.state.hcquestion %]
-                	[% user.state.hchtml %]
-                	<input type="text" name="hcanswer" value="" size=8 maxlength=8>
+			[% user.state.hchtml %]
+			<input type="text" name="hcanswer" value="" size=8 maxlength=8>
 		</label>
-        [% END %]
+	[% END %]
 [% END %]
 </div>
 

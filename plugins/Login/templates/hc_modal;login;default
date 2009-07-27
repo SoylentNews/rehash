@@ -13,14 +13,7 @@ __name__
 hc_modal
 __template__
 
-<div class="captcha">
-	[% IF user.state.hc && !user.state.hcinvalid %]
-
-	[% user.state.hcquestion %]
-	[% user.state.hchtml %][% PROCESS hc_tag %]
-</div>
-
-[% END %]
+[% PROCESS hc_form %]
 
 __seclev__
 1000

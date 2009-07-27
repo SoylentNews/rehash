@@ -147,6 +147,8 @@ sub reloadFormkeyHC {
 		$user->{state}{hcinvalid} = 0;
 		$user->{state}{hcquestion} = $question;
 		$user->{state}{hchtml} = $html;
+		# just so we know if they are *trying* to answer it
+		$user->{state}{hcanswered} = 1 if defined($form->{hcanswer}) && length($form->{hcanswer});
 	} else {
 		$user->{state}{hcinvalid} = 1;
 		$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');

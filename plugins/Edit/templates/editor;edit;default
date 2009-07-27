@@ -260,12 +260,7 @@ $(document).ready(function(){
 		<div class="subarticle-foot">
 
 			[% IF item.type == 'submission' %]
-			<div class="captcha">
-				[% IF user.state.hc && !user.state.hcinvalid %]
-				[% user.state.hcquestion; user.state.hchtml %]
-				[% PROCESS hc_tag %]
-				[% END %]
-			</div>
+				[% PROCESS hc_form %]
 			[% END %]
 
 			<div class="subactionbuttons">
