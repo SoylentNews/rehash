@@ -1003,7 +1003,7 @@ sub getAllObjectsTagname {
 		 primaryskid, tid, srcid, url_id, toptags, email,
 		 emaildomain, ipid, subnetid, category, nexuslist,
 		 last_update, signoffs, stoid, body_length, word_count,
-		 srcname, medianame, thumb, offmainpage',
+		 srcname, mediatype, thumb, offmainpage',
 		'tags, firehose',
 		"tags.globjid=firehose.globjid AND popularity >= $min_pop
 		 AND tagnameid=$id AND inactivated IS NULL $private_clause",
