@@ -991,7 +991,7 @@ sub getAllObjectsTagname {
 	return [ ] if !$id;
 	# XXX make this degrade gracefully if plugins/FireHose not installed
 	my $firehose_db = getObject('Slash::FireHose');
-	my $min_pop = length($options->{min_pop})
+	my $min_pop = defined($options->{min_pop}) && length($options->{min_pop})
 		? $options->{min_pop}
 		: $firehose_db->getMinPopularityForColorLevel( $constants->{tags_active_mincare} || 5 );
 	# 117K rows unjoined, 7 seconds ; 10K rows unjoined, 3 seconds ; 10K rows joined, 18 seconds

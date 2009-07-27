@@ -287,7 +287,7 @@ sub sqlConnect {
 				#In the future we should have a backupdatabase
 				#connection in here. For now, we die
 				print STDERR "Major Mojo Bad things (virtual user: $self->{virtual_user})\n";
-				print STDERR "unable to connect to MySQL: $@ : $DBI::errstr\n";
+				print STDERR "unable to connect to MySQL: $@ : " . ($DBI::errstr || '') . "\n";
 				#die "Database would not let us connect $DBI::errstr";	 # The Suicide Die
 				return 0;
 			}# else {

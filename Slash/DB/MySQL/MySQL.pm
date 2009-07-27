@@ -12345,6 +12345,7 @@ sub getGlobjidCreate {
 
 sub getGlobjidFromTargetIfExists {
 	my($self, $name, $target_id) = @_;
+	return 0 if !$name || !$target_id;
 	my $globjtypes = $self->getGlobjTypes();
 	my $gtid = $globjtypes->{$name};
 	return 0 if !$gtid;

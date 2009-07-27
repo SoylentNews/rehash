@@ -17,7 +17,7 @@ use vars qw( %task $me
 
 # Change this var to change how often the task runs.  Sandboxes
 # run it every half-hour, other sites every 10 minutes.
-$minutes_run = ($ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 10 : 30);
+$minutes_run = ($ENV{SF_SYSTEM_FUNC} && $ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 10 : 30);
 
 # Process the non-mainpage skins less often.  Sandboxes run them
 # every 5 invocations, other sites every other invocation.
