@@ -532,7 +532,7 @@ sub linkStory {
 			$urlkey = 'tid' if $urlkey eq 'tids';
 			if (ref $params{$key} eq 'ARRAY') {
 				$url .= "$urlkey=$_&" for @{$params{$key}};
-			} else {
+			} elsif (defined($params{$key})) {
 				$url .= "$urlkey=$params{$key}&";
 			}
 		}
