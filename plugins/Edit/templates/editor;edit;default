@@ -19,6 +19,26 @@ __template__
 
 $(document).ready(function(){
 
+
+
+
+	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
+		$(this).siblings("label").hide();
+	});
+
+	$("span.dynlabel label").click(function() {
+		$(this).hide();
+		$(this).siblings("input").focus();
+	});
+
+	$("span.dynlabel input,span.dynlabel textarea").blur(function() {
+		if($(this).val()==="")
+			$(this).siblings("label").show();
+	});
+
+
+
+
 	var tmphldr='';
 
 	$("div#editor .default").live("click", function(){
@@ -104,11 +124,10 @@ $(document).ready(function(){
 
 
 	<div class="subtitle">
-		<p>
-		[% PROCESS formLabel value => "Title Your Story" for => "title"  %]
-
-		<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;ELSE;'Title Your Story';END; %]" size="50" class="[% IF !item.title;' default ';END; IF errors.badsubject; ' fiterror '; END; %]">
-
+		<span class="[% IF !item.title;'dyn';END;%]label">
+			<label for="title">Title Your Story</label>
+			<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50" class="[% IF errors.badsubject; ' fiterror '; END; %]">
+		</span>
 				[% IF errors.badsubject %]
                         <p>[% errors.badsubject %]</p>
                 [% ELSIF errors.subj_filter_error %]
@@ -121,15 +140,19 @@ $(document).ready(function(){
 		[% IF item.type == 'submission' %]
 			<div class="a">
 				[% PROCESS formLabel value => "Submitted by" %]
-				[% PROCESS formLabel value => "Your Name (leave blank to be anonymous)" for => 'name' %]
-				<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;ELSE;'Leave blank to be Anonymous';END; %]" size="50" maxlength="50" [% IF !item.name;' class="default" ';END; %]>
-				[% PROCESS formLabel value => "Your Email or Homepage where users can contact you" for => 'email' %]
-				<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;ELSE;'Your email or homepage';END; %]" size="50" maxlength="50" [% IF !item.email;' class="default" ';END; %]>
-
+				<span class="[% IF !item.name;'dyn';END;%]label">
+					<label for="name">Your Name: Leave blank to be Anonymous</label>
+					<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
+				</span>
+				<span class="[% IF !item.email;'dyn';END;%]label">
+					<label for="email">Your Email or Homepage where users can contact you</label>
+					<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
+				</span>
 				[% IF constants.plugin.FireHose %]
-					[% PROCESS formLabel value => "Main url of submission (optional but if provided must be unique)" for => "url"  %]
-					<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;ELSE;'Optional URL';END; %]" size="50" [% IF !preview.url_text;' class="default" ';END; %]>
-
+					<span class="[% IF !preview.url_text;'dyn';END;%]label">
+						<label for="url">Main url of submission (optional but if provided must be unique)</label>
+						<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
+					</span>
 				[% IF errors.invalidurl %]
                         		<p>[% errors.invalidurl %]</p>
 		                [% ELSIF errors.duplicateurl %]
@@ -140,15 +163,12 @@ $(document).ready(function(){
 			</div>
 		[% END %]
 
-
-
-
-
-
 		[% IF item.type == 'story' %]
 			[% IF constants.use_dept %]
-				[% PROCESS formLabel value => "Dept" for => "dept" %]
-				<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;ELSE;'Dept';END; %]" size="50" [% IF !item.dept;' class="default" ';END; %]>
+			<span class="[% IF !item.dept;'dyn';END;%]label">
+				<label for="dept">Dept</label>
+				<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
+			</span>
 			[% END %]
 				[% PROCESS formLabel value => "Author" for => 'uid' %]
 				[% author_select %]
@@ -192,7 +212,11 @@ $(document).ready(function(){
 
 		[% PROCESS formLabel value => str_icp for => "introtext"  %]
 		[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
-		<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10" [% IF !preview.introtext;' class="default" ';END; %]>[% IF preview.introtext;preview.introtext | strip_literal;ELSE;'Describe your scoop';END; %]</textarea>
+
+			<span class="[% IF !preview.introtext;'dyn';END;%]label">
+				<label for="introtext">Describe your scoop</label>
+				<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
+			</span>
 		<div class="notes">[% ispell_comments.introtext %]</div>
 
 
