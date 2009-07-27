@@ -43,6 +43,8 @@ sub get_affected_type	{ 'globj' }
 # This is basically irrelevant, I'm just picking something.
 sub get_clid		{ 'describe' }
 
+sub get_nosy_gtids	{ 'tagnames' }
+
 sub init_tagfilters {
 	my($self) = @_;
 
