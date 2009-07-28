@@ -138,7 +138,7 @@ function firehose_handle_admin_commands( commands ){
 				firehose_collapse_entry(id);
 				break;
 			case 'betaedit':
-				show_submit_box(id);
+				show_submit_box_after(id);
 				break;
 			case 'binspam':
 				if ( $entry.is('.fhitem-feed') )
