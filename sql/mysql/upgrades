@@ -6502,3 +6502,5 @@ UPDATE vars SET value = 'T_2_5_0_265' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO globj_types VALUES (NULL, 'tagnames');
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion","project","tagname") default 'submission';
 
+# Captcha text modification
+UPDATE humanconf_questions SET question="<span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span>" WHERE hcqid=1;
