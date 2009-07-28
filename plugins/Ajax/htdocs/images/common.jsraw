@@ -1094,13 +1094,13 @@ function json_update(response) {
 			});
 	});
 
-	5// ...append content to these elements
+	// ...append content to these elements
 	$.each(response.html_append||[], function(elem_id, new_html){
 		$any(elem_id).
 			append(new_html);
 	});
 
-	5// ...append content to these elements
+	// ...append content to these elements
 	$.each(response.html_add_after||[], function(elem_id, add_html){
 		$any(elem_id).
 			after(add_html);

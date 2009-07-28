@@ -767,8 +767,6 @@ sub ajaxEditorAfter {
 	my $html_add_after->{$form->{after_id}} = $edit->showEditor();
 
 	return Data::JavaScript::Anon->anon_dump({ html_add_after => $html_add_after });
-
-
 }
 
 sub DESTROY {
