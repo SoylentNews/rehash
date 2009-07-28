@@ -88,6 +88,7 @@ $(document).ready(function(){
 	// hijack login link to save edit session
 	$('#loginlink, .loginlink').click(function(){
 		editPreview();
+		global_returnto = '[% gSkin.rootdir %]/submit';
 	});
 });
 </script>
