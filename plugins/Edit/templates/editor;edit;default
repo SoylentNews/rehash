@@ -139,16 +139,26 @@ $(document).ready(function(){
 
 	<div class="subdetails">
 		[% IF item.type == 'submission' %]
-			<div class="a">
-				[% PROCESS formLabel value => "Submitted by" %]
-				<span class="[% IF !item.name;'dyn';END;%]label">
-					<label for="name">Your Name: Leave blank to be Anonymous</label>
-					<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50"> [% IF user.is_anon %]<a onclick="show_login_box(); return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
-				</span>
-				<span class="[% IF !item.email;'dyn';END;%]label">
-					<label for="email">Your Email or Homepage where users can contact you</label>
-					<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
-				</span>
+
+
+				<div class="yui-g">
+
+					<div class="yui-u first">
+						[% PROCESS formLabel value => "Submitted by" %]
+						<span class="[% IF !item.name;'dyn';END;%]label">
+							<label for="name">Your Name: Leave blank to be Anonymous</label>
+							<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50"> [% IF user.is_anon %]<a onclick="show_login_box(); return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
+						</span>
+					</div>
+
+					<div class="yui-u">
+						<span class="[% IF !item.email;'dyn';END;%]label">
+							<label for="email">Your Email or Homepage where users can contact you</label>
+							<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
+						</span>
+					</div>
+				</div>
+
 				[% IF constants.plugin.FireHose %]
 					<span class="[% IF !preview.url_text;'dyn';END;%]label">
 						<label for="url">Main url of submission (optional but if provided must be unique)</label>
@@ -161,7 +171,9 @@ $(document).ready(function(){
 				[% END %]
 
 				[% END %]
-			</div>
+
+
+
 		[% END %]
 
 		[% IF item.type == 'story' %]
