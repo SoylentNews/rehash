@@ -87,7 +87,7 @@ __template__
                 </div>
                 [% END %]
 
-                <input type="submit" name="userlogin" value="Log in" class="button">
+                <input type="submit" name="userlogin" value="Log in" class="button" onsubmit="if (global_returnto) { this.form.returnto = global_returnto }">
 </form>
 
 [% IF constants.openid_consumer_allow %]

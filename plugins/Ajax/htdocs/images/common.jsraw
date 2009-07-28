@@ -20,6 +20,7 @@ window.Slash || (window.Slash = {});
 Slash.Firehose || (Slash.Firehose = {});
 
 var reskey_static = '';
+var global_returnto = '';
 
 // Global settings, but a firehose might use a local settings object instead
 var firehose_settings = {

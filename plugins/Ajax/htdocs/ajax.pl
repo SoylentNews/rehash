@@ -1012,6 +1012,11 @@ sub getModalPrefs {
 		unless ($rkey->create) {
 			errorLog($rkey->errstr);
 		}
+
+		my $skey = $reskey->session;
+		print STDERR "Edit Session $skey for UID: $user->{uid} (ajax)\n";
+		$skey->set_cookie;
+
 		return $edit->showEditor();
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
@@ -2284,13 +2289,6 @@ sub saveModalPrefsAnonHC {
 
 sub editPreview {
 	my($slashdb, $constants, $user, $form, $options) = @_;
-
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
-	unless ($rkey->touch) {
-		errorLog($rkey->errstr);
-		return;
-	}
 
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
