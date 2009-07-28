@@ -1094,11 +1094,20 @@ function json_update(response) {
 			});
 	});
 
-	// ...append content to these elements
+	5// ...append content to these elements
 	$.each(response.html_append||[], function(elem_id, new_html){
 		$any(elem_id).
 			append(new_html);
 	});
+
+	5// ...append content to these elements
+	$.each(response.html_add_after||[], function(elem_id, add_html){
+		$any(elem_id).
+			after(add_html);
+	});
+
+
+
 
 	// ...replace with new content (and display it)
 	$.each(response.html_replace||[], function(elem_id, new_html) {
@@ -2188,6 +2197,22 @@ function show_submit_box(id) {
 		params['from_id'] = id;
 	}
 	getModalPrefs('submit', 'Submit', 0, params);
+}
+
+function show_submit_box_after(after_id, from_id) {
+	var params = {
+		op:  'edit_submit_box_after',
+		reskey:	reskey_static
+	};
+
+	if (from_id) {
+		params['from_id'] = from_id;
+	}
+	if (after_id) {
+		params['after_id'] = after_id;
+	}
+
+	ajax_update(params, '',  { onComplete: json_handler });
 }
 
 function edit_editon(id) {

@@ -6,11 +6,21 @@ use Slash::Constants qw(:messages :web);
 use Slash::Utility;
 use Slash::Display;
 use Slash::Hook;
+use Data::JavaScript::Anon;
 
 use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
+sub initEditor {
+	my($self) = @_;
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
+	unless ($rkey->create) {
+		errorLog($rkey->errstr);
+		return;
+	}
+}
 
 sub getPreviewIdSessionUid {
 	my($self, $session, $uid) = @_;
@@ -747,6 +757,18 @@ sub editCreateSubmission {
 
 
 	return $subid;
+}
+
+sub ajaxEditorAfter {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $edit = getObject("Slash::Edit");
+	$edit->initEditor();
+	my $html_add_after = {};
+	my $html_add_after->{$form->{after_id}} = $edit->showEditor();
+
+	return Data::JavaScript::Anon->anon_dump({ html_add_after => $html_add_after });
+
+
 }
 
 sub DESTROY {
