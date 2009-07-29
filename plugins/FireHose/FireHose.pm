@@ -988,7 +988,7 @@ sub getFireHoseCount {
 {
 my %cat_types = ('', 0, 'back', 1, 'hold', 2, 'quik', 3);
 
-my %gtid_types = (
+my %firehose_types = (
 	story      => 1,
 	submission => 3,
 	journal    => 4,
@@ -999,6 +999,7 @@ my %gtid_types = (
 	feed       => 13,
 	vendor     => 14,
 	misc       => 15,
+	tagname    => 17,
 );
 
 my %sphinx_orderby = (
@@ -1162,10 +1163,10 @@ sub getFireHoseEssentialsParams {
 			my $time_filter = [ range => createtime_ut => 0, $time_back, 1 ];
 			if (!$options->{type} && (!$options->{not_type} || $options->{not_type} ne 'story')) {
 				getFireHoseEssentialsPushMulti(\@sphinx_opts_multi, [[
-					[ filter => gtid => [$gtid_types{story}] ],
+					[ filter => type => [$firehose_types{story}] ],
 					$time_filter
 				], [
-					[ filter => gtid => [$gtid_types{story}], 1 ],
+					[ filter => type => [$firehose_types{story}], 1 ],
 				]]);
 			} elsif ($options->{type} eq 'story') {
 				push @sphinx_opts, $time_filter;
@@ -1248,7 +1249,7 @@ sub getFireHoseEssentialsParams {
 				my $newbase = $base;
 				my @new_opt = @$cur_opt;
 				if ($base eq 'type') {
-					$_ = $gtid_types{$_} || 9999 for @new_opt;
+					$_ = $firehose_types{$_} || 9999 for @new_opt;
 					$newbase = 'gtid';
 				}
 				push @sphinx_opts, [ filter => $newbase => \@new_opt, ($not ? 1 : 0) ];
@@ -3015,7 +3016,7 @@ sub getOptionsValidator {
 
 	my $valid = {
 		mode 		=> { full => 1, fulltitle => 1, mixed => 1 },
-		type 		=> { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1, project => 1 },
+		type 		=> { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1, project => 1, tagname => 1 },
 		orderdir 	=> { ASC => 1, DESC => 1},
 		orderby 	=> { createtime => 1, popularity => 1, editorpop => 1, neediness => 1 },
 		pagesizes 	=> { "tiny" => 1, "small" => 1, "large" => 1 },

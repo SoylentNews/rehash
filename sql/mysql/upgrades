@@ -6494,7 +6494,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 13, 'all', 'Slash::ResKey::Chec
 INSERT INTO reskey_vars VALUES (13, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (13, 'acl_no', 'reskey_no_session', 'If this ACL present, can\'t use resource');
 
-
 # 2009-07-16
 UPDATE vars SET value = 'T_2_5_0_265' WHERE name = 'cvs_tag_currentcode';
 
@@ -6504,3 +6503,6 @@ ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","
 
 # Captcha text modification
 UPDATE humanconf_questions SET question="<span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span>" WHERE hcqid=1;
+
+# process themes/slashdot/sql/mysql/upgrades additions
+

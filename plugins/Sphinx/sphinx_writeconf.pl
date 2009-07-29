@@ -319,8 +319,9 @@ source src_firehose_main
 		  IF(	firehose.type='feed',       13,						\
 		  IF(	firehose.type='vendor',     14,						\
 		  IF(	firehose.type='misc',       15,						\
+		  IF(	firehose.type='tagname',    17,						\
 			                          9999						\
-		)))))))))) AS type,								\
+		))))))))))) AS type,								\
 		FLOOR(popularity + 1000000) AS popularity,					\
 		FLOOR(editorpop + 1000000) AS editorpop,					\
 		FLOOR(neediness + 1000000) AS neediness,					\
@@ -482,8 +483,9 @@ source src_firehose_delta1 : src_firehose_main
 		  IF(	firehose.type='feed',       13,						\
 		  IF(	firehose.type='vendor',     14,						\
 		  IF(	firehose.type='misc',       15,						\
+		  IF(	firehose.type='tagname',    17,						\
 			                          9999						\
-		)))))))))) AS type,								\
+		))))))))))) AS type,								\
 		FLOOR(popularity + 1000000) AS popularity,					\
 		FLOOR(editorpop + 1000000) AS editorpop,					\
 		FLOOR(neediness + 1000000) AS neediness,					\
@@ -627,8 +629,9 @@ source src_firehose_delta2 : src_firehose_main
 		  IF(	firehose.type='feed',       13,						\
 		  IF(	firehose.type='vendor',     14,						\
 		  IF(	firehose.type='misc',       15,						\
+		  IF(	firehose.type='tagname',    17,						\
 			                          9999						\
-		)))))))))) AS type,								\
+		))))))))))) AS type,								\
 		FLOOR(popularity + 1000000) AS popularity,					\
 		FLOOR(editorpop + 1000000) AS editorpop,					\
 		FLOOR(neediness + 1000000) AS neediness,					\
