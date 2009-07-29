@@ -847,6 +847,8 @@ function firehose_handle_context_triggers( commands ){
 
 function firehose_handle_nodnix( commands ){
 	if ( commands.length ) {
+		var prefix = $(this).is('.fhitem-tagname') ? 'tag' : '';
+
 		var $reasons = $('.nod-nix-reasons', this);
 		var nodnix_context = function( ctx ){
 			$('#firehoselist div.nod-nix-reasons>.tag-display:visible').parent().each(function(){
@@ -860,7 +862,7 @@ function firehose_handle_nodnix( commands ){
 		var tag_server=this, context_not_set=true;
 		$.each(commands.slice(0).reverse(), function(i, cmd){
 			if ( cmd=='nod' || cmd=='nix' ) {
-				nodnix_context(cmd);
+				nodnix_context(prefix+cmd);
 				context_not_set = false;
 				firehose_fix_up_down(
 					tag_server.getAttribute('tag-server'),

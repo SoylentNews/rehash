@@ -28,7 +28,9 @@ var suggestions_for_context = {
 [% IF user.is_admin %]
 	story: 'neverdisplay',
 	'default': 'hold quik back typo dupe',
+	tagnix: '$_ $# $## $### $#### $#####',
 [% END %]
+	tagnod: 'descriptive',
 	feedback: 'typo dupe error',
 	metanod: 'insightful interesting informative funny underrated',
 	metanix: 'offtopic flamebait troll redundant overrated'
