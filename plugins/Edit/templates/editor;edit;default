@@ -127,7 +127,7 @@ $(document).ready(function(){
 	<div class="subtitle">
 		<span class="[% IF !item.title;'dyn';END;%]label">
 			<label for="title">Title Your Story</label>
-			<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50" class="[% IF errors.badsubject; ' fiterror '; END; %]">
+			<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50" [% IF errors.badsubject; 'class="fiterror"'; END; %]>
 		</span>
 				[% IF errors.badsubject %]
                         <p>[% errors.badsubject %]</p>
@@ -162,7 +162,7 @@ $(document).ready(function(){
 				[% IF constants.plugin.FireHose %]
 					<span class="[% IF !preview.url_text;'dyn';END;%]label">
 						<label for="url">Main url of submission (optional but if provided must be unique)</label>
-						<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
+						<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50" [% IF errors.invalidurl; 'class="fiterror"'; END; %]>
 					</span>
 				[% IF errors.invalidurl %]
                         		<p>[% errors.invalidurl %]</p>
