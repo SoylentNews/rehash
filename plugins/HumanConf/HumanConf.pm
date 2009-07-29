@@ -136,19 +136,36 @@ sub reloadFormkeyHC {
 	my $formkey = $options->{frkey} || $form->{formkey};
 	my $formkey_quoted = $slashdb->sqlQuote($formkey);
 
-	my($hcid, $html, $question, $tries_left) = $slashdb->sqlSelect(
-		"hcid, html, question, tries_left",
+	my($hcid, $html, $question, $tries_left, $answer) = $slashdb->sqlSelect(
+		"hcid, html, question, tries_left, answer",
 		"humanconf, humanconf_pool, humanconf_questions",
 		"humanconf.formkey = $formkey_quoted
 		 AND humanconf_pool.hcpid = humanconf.hcpid
 		 AND humanconf_questions.hcqid = humanconf_pool.hcqid"
 	);
+
+	my $hcanswer = $form->{hcanswer};
+	my $hclastanswer = $form->{hclastanswer};
+	my $success = 0;
+	if ($options->{check_answer} && $hcid && $hcanswer) {
+		if ($hclastanswer && $hcanswer eq $hclastanswer) {
+			$success = $form->{hcsuccess};
+		} else {
+			if ($self->_checkFormkeyHC($hcid, $hcanswer, $answer)) {
+				$success = 1;
+			} else {
+				$tries_left--;
+			}
+		}
+	}
+
 	if ($tries_left) {
 		$user->{state}{hcinvalid} = 0;
 		$user->{state}{hcquestion} = $question;
 		$user->{state}{hchtml} = $html;
-		# just so we know if they are *trying* to answer it
-		$user->{state}{hcanswered} = 1 if defined($form->{hcanswer}) && length($form->{hcanswer});
+
+		$user->{state}{hcsuccess} = 1 if $success;
+		$user->{state}{hclastanswer} = $hclastanswer if $hclastanswer;
 	} else {
 		$user->{state}{hcinvalid} = 1;
 		$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');
@@ -189,17 +206,26 @@ sub validFormkeyHC {
 		# wasted by previous incorrect answers.
                 return 'invalidhc';
         }
-        if ($form->{hcanswer} && lc($form->{hcanswer}) eq lc($answer)) {
+        return 'ok' if $self->_checkFormkeyHC($hcid, $form->{hcanswer}, $answer);
+	return $tries_left > 1 ? 'invalidhcretry' : 'invalidhc';
+}
+
+
+sub _checkFormkeyHC {
+	my($self, $hcid, $hcanswer, $answer) = @_;
+        if ($hcanswer && lc($hcanswer) eq lc($answer)) {
 		# Correct answer submitted.
-                return 'ok';
+                return 1;
         }
+
+	my $slashdb = getCurrentDB();
 	# Incorrect answer, but user may be able to keep trying.
 	$slashdb->sqlUpdate(
 		"humanconf",
 		{ -tries_left => "tries_left - 1" },
 		"hcid=$hcid"
 	);
-	return $tries_left > 1 ? 'invalidhcretry' : 'invalidhc';
+	return 0;
 }
 
 1;

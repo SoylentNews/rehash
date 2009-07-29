@@ -14,7 +14,7 @@ hc_form
 __template__
 
 [% IF user.state.hc && !user.state.hcinvalid;
-	IF !user.state.hcanswered %]<div class="captcha">
+	IF !user.state.hcsuccess %]<div class="captcha">
 		[% user.state.hcquestion; user.state.hchtml %]
 		[% PROCESS hc_tag %]
 	</div>[% ELSE;

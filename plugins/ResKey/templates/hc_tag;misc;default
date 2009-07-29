@@ -11,8 +11,11 @@ en_US
 __name__
 hc_tag
 __template__
-[% hcname = hcname || "hcanswer"; IF user.state.hcanswered %]
+[% hcname = hcname || "hcanswer"; IF user.state.hclastanswer %]
+<input type="hidden" name="hclastanswer" value="[% user.state.hclastanswer | strip_attribute %]">
+[%- END; IF user.state.hcsuccess %]
 <input type="hidden" id="[% hcname %]" name="[% hcname %]" value="[% form.hcanswer | strip_attribute %]">
+<input type="hidden" name="hcsuccess" value="1">
 [%- ELSE %]
 <input type="text" id="[% hcname %]" name="[% hcname %]" value="[% form.hcanswer | strip_attribute %]" size="8" maxlength="8">
 [%- END %]

@@ -761,6 +761,12 @@ sub editCreateSubmission {
 
 sub ajaxEditorAfter {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $skey = $reskey->session;
+	print STDERR "Edit Session $skey for UID: $user->{uid} (ajax)\n";
+	$skey->set_cookie;
+
 	my $edit = getObject("Slash::Edit");
 	$edit->initEditor();
 	my $html_add_after = {};
