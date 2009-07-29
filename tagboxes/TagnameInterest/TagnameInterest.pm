@@ -72,10 +72,10 @@ sub get_affected_type	{ 'tagname' }
 sub get_clid		{ 'vote' }
 sub get_nosy_gtids { [qw( tagnames )] }
 
-sub feed_newtags_filter {
+sub _do_filter_tagnameid {
 	my($self, $tags_ar) = @_;
 	$tags_ar = [ grep { !$self->{tagnameid_unwanted}{ $_->{tagnameid} } } @$tags_ar ];
-	return $self->SUPER::feed_newtags_filter($tags_ar);
+	return $self->SUPER::_do_filter_tagnameid($tags_ar);
 }
 
 sub run_process {
