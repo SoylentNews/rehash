@@ -104,8 +104,14 @@ sub getOrCreatePreview {
 				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
 				$fh_data->{name} = $user->{nickname};
 			}
+			my $p_data = { preview_fhid => $fhid };
+			if ($form->{new}) {
+				$fh_data->{title} 	= strip_attribute($form->{title});
+				$p_data->{url_text} 	= $form->{url};
+				$p_data->{introtext} 	= $form->{introtext};
+			}
 			$fh->setFireHose($fhid, $fh_data) if keys %$fh_data > 0;
-			$self->setPreview($id, { preview_fhid => $fhid });
+			$self->setPreview($id, $p_data);
 			return $id;
 		}
 	} else {
@@ -267,7 +273,7 @@ sub savePreview {
 		$fh_data->{name} = strip_html($form->{name});
 
 		# XXXEdit eventually perhaps look for video tag when setting this too
-		$fh_data->{mediatype} = $form->{url_text} =~ /youtube.com|video.google.com/ ? "video" : "none";
+		$fh_data->{mediatype} = $form->{url} =~ /youtube.com|video.google.com/ ? "video" : "none";
 
 		$p_data->{url_text} = $form->{url};
 		$p_data->{sub_type} = $self->detectSubType($form->{introtext});
@@ -287,7 +293,7 @@ sub savePreview {
 	}
 	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
 
-	$fh_data->{title} 	= $form->{title};
+	$fh_data->{title} 	= strip_attribute($form->{title});
 
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{dept} 	= $form->{dept};
