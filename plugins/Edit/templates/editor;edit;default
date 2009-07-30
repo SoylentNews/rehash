@@ -219,14 +219,11 @@ $(document).ready(function(){
                 [% END %]
 
 		[% PROCESS formLabel value => str_icp for => "introtext"  %]
-		[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
-
 			<span class="[% IF !preview.introtext;'dyn';END;%]label">
 				<label for="introtext">Describe your scoop</label>
 				<textarea wrap="virtual" name="introtext" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
 			</span>
-		<div class="notes">[% ispell_comments.introtext %]</div>
-
+		[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
 
 		[% IF item.type == 'story' %]
 		<a name="bodytext"></a>

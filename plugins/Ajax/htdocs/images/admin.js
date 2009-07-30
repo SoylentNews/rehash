@@ -276,44 +276,34 @@ function firehose_usage() {
 }
 
 function make_spelling_correction(misspelled_word, form_element) {
-	var selected_key   = "select_" + form_element + '_' + misspelled_word;
+	var selected_key = "select_" + form_element + '_' + misspelled_word;
 	var selected_index = document.forms.slashstoryform.elements[selected_key].selectedIndex;
-	
+
 	if (selected_index === 0) {
 		return(0);
 	}
 
-	// Either learning a word or making a correction.
 	if (selected_index >= 1) {
-		if (selected_index == 1) {
+		if (selected_index === 1) {
 			var params = {};
 			params.op = 'admin_learnword';
 			params.word = misspelled_word;
 			ajax_update(params);
-		}
-		else {
-                        // Try to weed out HREFs and parameters
-                        var pattern = misspelled_word + "(?![^<]*>)";
-                        var re = new RegExp(pattern, "g");
+		} else {
+			var pattern = misspelled_word + "(?![^<]*>)";
+			var re = new RegExp(pattern, "g");
 			var correction = document.forms.slashstoryform.elements[selected_key].value;
-			document.forms.slashstoryform.elements[form_element].value =
-				document.forms.slashstoryform.elements[form_element].value.replace(re, correction);
+			document.forms.slashstoryform.elements[form_element].value = document.forms.slashstoryform.elements[form_element].value.replace(re,correction);
 		}
 
-		// Remove this row from the table.
-		var rowname = misspelled_word + '_' + form_element + '_correction';
-		var row = document.getElementById(rowname);
-		row.parentNode.removeChild(row);
-
+		var corrected_id = misspelled_word + '_' + form_element+'_correction';
+		$('#' + corrected_id).remove();
 	}
 
-	// Remove the table if we're done.
-	var tablename = "spellcheck_" + form_element;
-	var table = document.getElementById(tablename);
-	var numrows = table.getElementsByTagName("TR");
-	if (numrows.length == 1) {
-		table.parentNode.removeChild(table);
-	}	
+	var correction_parent = "spellcheck_" + form_element;
+	if ($('#' + correction_parent).children().length === 1) {
+		$('#' + correction_parent).remove();
+	}
 }
 
 function firehose_reject (el) {
