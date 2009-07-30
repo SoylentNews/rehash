@@ -102,6 +102,9 @@ $(document).ready(function(){
 	<div id="editpreview">
 		[% previewed_item %]
 	</div>
+
+	<div class="fhitem" id="editor-[% fhid %]">
+
 	<div class="editonly[% IF preview_shown %] hide[% END %]">
 	[% tag_widget %]
 	</div>
@@ -170,8 +173,7 @@ $(document).ready(function(){
 
 
 
-		[% END %]
-
+		[% END %]IF
 		[% IF item.type == 'story' %]
 			[% IF constants.use_dept %]
 			<span class="[% IF !item.dept;'dyn';END;%]label">
@@ -281,6 +283,7 @@ $(document).ready(function(){
 		[% END %]
 
 </form>
+<div> [%- #fhitem editor- -%]
 <script type="text/javascript">
 	firehose_init_tag_ui($('#editor'));
 </script>

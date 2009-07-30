@@ -74,7 +74,7 @@ var	fh_adTimerSecsMax   = 15,
 	fh_adTimerUrl       = '';
 	//fh_adTimerUrl		= '/images/iframe/firehose.html'; // testing
 
-var FHID_PREFIX=/^firehose-/;
+var FHID_PREFIX=/^(firehose|editor)-/;
 
 var view;
 (function(){ // function view( what, how ): smoothly, minimally scroll what entirely into view
