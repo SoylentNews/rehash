@@ -13,6 +13,7 @@ editorwrap
 __seclev__
 10000
 __template__
+[% IF !form.bare %]
 <div class="nav">
   [% firehosedb = Slash.getObject('Slash::FireHose');
      IF firehosedb;
@@ -30,14 +31,17 @@ __template__
 </div>
 
 <div class="yui-u maincol faq" style="padding:1em">
+[% END #form.bare %]
 	[% IF editor %]
 		[% editor %]
 	[% ELSE %]
 		[% save_result %]
 	[% END %]
 
-</div>
+[% IF !form.bare %]
 
 </div>
 
+</div>
 
+[% END # form.bare %]
