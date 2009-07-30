@@ -119,18 +119,8 @@ ELSE;
 	END;
         title = pop_str _ title;
 END;
-
-IF item.type == "journal";
-	IF options.user_view_uid == user.uid;
-		title = title _ '<span class="journal_edit"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit&amp;id=' _ item.srcid _ '" title="Edit">Edit</a></span> ';
-		title = title _ '<span class="journal_delete"><a href="' _ gSkin.rootdir _ '/journal.pl?op=removemeta&amp;id=' _ item.srcid _ '" title="Delete">Delete</a></span>';
-	END;
-END;
 	%]
 
-	[% IF user.is_admin;
-		title = title _ '<span class="journal_firehoseedit"><a href="' _ gSkin.rootdir _ '/firehose.pl?op=edit&amp;id=' _ item.id _ '" title="Edit Firehose Entry">Edit Firehose Entry</a></span>';
-	END %]
 [% IF showtitle; title; END; %]
 __seclev__
 10000
