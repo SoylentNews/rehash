@@ -13,8 +13,9 @@ __template__
 [% UNLESS options.nowrap %]
 <div id="editor" class="admin fhroot">
 [% END %]
-
-[% preview_info %]
+[% IF user.edit_debuginfo %]
+	[% preview_info %]
+[% END %]
 <script type="text/javascript">
 
 $(document).ready(function(){
