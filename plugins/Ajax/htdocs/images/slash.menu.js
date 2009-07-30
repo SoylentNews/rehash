@@ -5,11 +5,13 @@
 $.widget("slash.menu", $.extend({}, $.ui.mouse, {
 
 /* Events:
-	start	ui => { over: item }
-	over	ui => { over: new_item, out: old_item }
-	select	ui => { select: selected_item, out: selected_item }
-	out	ui => { over: new_item, out: old_item }, or else { select: selected_item, out: selected_item }
-	stop	ui => { select: selected_item, out: selected_item }
+	start	ui => { over:item }
+	over	ui => { over:new_item, out:old_item }
+	select	ui => { select:selected_item, out:selected_item }
+	out	ui => { over:new_item, out:old_item }, or else { select:selected_item, out:selected_item }
+	stop	ui => { select:selected_item, out:selected_item }
+
+Additionally, ui always includes { trigger:el }
 */
 
 _init: function(){			// called for $(...).menu()
@@ -30,6 +32,10 @@ _init: function(){			// called for $(...).menu()
 
 	(this.options.cssNamespace && (this._hoverClass=this.options.cssNamespace + '-hover'));
 	this._mouseStarted = false;
+},
+
+context: function( e, trigger ){
+	return this._menuMouseDown(e, { trigger: trigger });
 },
 
 destroy: function(){			// called for $(...).menu('destroy|remove')
@@ -124,7 +130,7 @@ _mouseStart: function( e ){
 },
 
 _item: function( action, e, ui ){
-	// Do everything needed when leaving and item or entering a new one
+	// Do everything needed when leaving an item or entering a new one
 	// (manage highlighting, and trigger the over/out events that run client
 	// code).  This function is bound to mouseenter/mouseleave, and will be
 	// called more often than any other top-level menu function.
@@ -172,7 +178,7 @@ _menuMouseDown: function( e, ui ){
 	// ...intercepts events that would otherwise have gone directly to ui.mouse._mouseDown
 	// to prevent ui.mouse._mouseDown from closing the menu when we've decided to hover.
 
-	var is_trigger = ui.trigger && this.triggers.index(ui.trigger)>=0;
+	var is_trigger = ui.trigger && ui.trigger!==document && (this.options.liveTriggers || this.triggers.index(ui.trigger)>=0);
 
 	if ( !is_trigger ) {
 		var ui_stop = this._uiHash(e, 'stop');
@@ -296,6 +302,7 @@ _uiHash: function( event_or_type, event_type, ui ){
 	$.each(map_event_to_ui, function(to, from){
 		ui[to] = event_items[from];
 	});
+	ui.trigger = this._startTarget;
 	return ui;
 },
 
@@ -311,7 +318,8 @@ $.extend($.slash.menu, {
 	defaults: {
 		distance: 1,		// ...in pixels that starts a drag
 		clickToHover: true,
-		clickDuration: 300	// time in milliseconds at which point a click becomes a press
+		clickDuration: 300,	// time in milliseconds at which point a click becomes a press
+		liveTriggers: false
 	}
 });
 
