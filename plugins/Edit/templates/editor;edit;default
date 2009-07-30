@@ -275,6 +275,9 @@ $(document).ready(function(){
 			</div>
 
 		</div>
+		[% IF form.bare %]
+		<input type="hidden" name="bare" value="1">
+		[% END %]
 
 </form>
 [% UNLESS options.nowrap %]
