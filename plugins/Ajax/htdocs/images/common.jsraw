@@ -990,7 +990,7 @@ function firehose_init_tag_ui( $fhitems ){
 		? $fhitems.filter(':not([tag-server])')
 		: $('div.fhroot>div.fhitem:not([tag-server])');
 
-	have_nodnix = $fhitems.is(':has(>[id^=updown-])');
+	have_nodnix = $fhitems.is(':has(> h3 [id^=updown-])');
 
 	$fhitems.each(function(){
 		install_tag_server(this, this.id.replace(FHID_PREFIX, ''));
