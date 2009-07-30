@@ -105,8 +105,8 @@ END %]
 
 [% IF !form.skipvote && !options.nothumbs && !skipvote && !featured %]
 	<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
-	  <a href="[% PROCESS nojslink %]" class="up" title="Vote this item up">+</a>
-	  <a href="[% PROCESS nojslink %]" class="down" title="Vote this item down">-</a>
+	  <a href="[% PROCESS nojslink %]" onclick="return false" class="up" title="Vote this item up">+</a>
+	  <a href="[% PROCESS nojslink %]" onclick="return false" class="down" title="Vote this item down">-</a>
 	</span>
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url featured = featured mode=mode view_mode=view_mode %]

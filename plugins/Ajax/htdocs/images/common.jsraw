@@ -2410,6 +2410,15 @@ function getSeconds () {
 	return new Date().getTime()/1000;
 }
 
+function nojscall(f) {
+	try {
+		f();
+	} catch (e) {
+		// nothing for now
+	}
+	return false;
+}
+
 
 // ads!  ads!  ads!
 var adTimerSeen   = {};
