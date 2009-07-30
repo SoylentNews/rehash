@@ -112,12 +112,6 @@ $(document).ready(function(){
 
         [% IF preview_shown %]
 
-	<div class="preactionbuttons previewonly">
-		<input type="submit" name="op" value="edit" id="edit-edit-button" onclick="edit_editon([% fhid %]); return false;">
-		<input type="submit" name="op" value="save" id="edit-edit-save" onclick="editSave(); return false;">
-		<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="#; return false;">
-	</div>
-
 
 	<div class="editonly hide">
 	[% END %]
@@ -274,9 +268,17 @@ $(document).ready(function(){
 			</div>
 			[% END %]
 
-
-			<div class="subactionbuttons editonly [% IF preview_shown %]hide[% END %]">
-				<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
+			<div class="subactionbuttons">
+				[% IF preview_shown %]
+					<div class="preactionbuttons previewonly">
+						<input type="submit" name="op" value="edit" id="edit-edit-button" onclick="edit_editon([% fhid %]); return false;">
+						<input type="submit" name="op" value="save" id="edit-edit-save" onclick="editSave(); return false;">
+						<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="#; return false;">
+					</div>
+				[% END %]
+					<div class="editonly [% IF preview_shown %]hide[% END %]">
+						<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
+					</div>
 			</div>
 
 		</div>
