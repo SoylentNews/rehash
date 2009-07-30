@@ -165,7 +165,7 @@ sub reloadFormkeyHC {
 		$user->{state}{hchtml} = $html;
 
 		$user->{state}{hcsuccess} = 1 if $success;
-		$user->{state}{hclastanswer} = $hclastanswer if $hclastanswer;
+		$user->{state}{hclastanswer} = $hcanswer if $hcanswer;
 	} else {
 		$user->{state}{hcinvalid} = 1;
 		$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');
