@@ -6506,3 +6506,5 @@ UPDATE humanconf_questions SET question = '<span class="humanconf_questions">Con
 
 # process themes/slashdot/sql/mysql/upgrades additions
 
+UPDATE firehose SET public='yes' WHERE type='tagname';
+

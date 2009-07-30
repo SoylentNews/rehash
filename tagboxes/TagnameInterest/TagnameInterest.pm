@@ -172,6 +172,7 @@ sub run_process {
 		introtext => $introtext,
 		type => 'tagname',
 		uid => $constants->{tagbox_tni_submitter_uid} || getCurrentAnonymousCoward('uid'),
+		public => 'yes',
 	};
 use Data::Dumper; $self->info_log("affid=$affected_id creating: " . Dumper($fh_data) . "from " . Dumper($template_data));
 	my $fhid = $firehosedb->createFireHose($fh_data);
