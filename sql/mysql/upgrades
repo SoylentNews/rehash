@@ -6502,7 +6502,7 @@ INSERT INTO globj_types VALUES (NULL, 'tagnames');
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion","project","tagname") default 'submission';
 
 # Captcha text modification
-UPDATE humanconf_questions SET question="<span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span>" WHERE hcqid=1;
+UPDATE humanconf_questions SET question = '<span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span>' WHERE hcqid=1;
 
 # process themes/slashdot/sql/mysql/upgrades additions
 
