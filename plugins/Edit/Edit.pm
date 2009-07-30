@@ -49,14 +49,18 @@ sub migrateAnonPreviewToUser {
 	my ($self, $preview_id, $uid) = @_;
 	my $p = $self->getPreview($preview_id);
 	if (isAnon($p->{uid})) {
-		$self->setPreview($preview_id, { uid => $uid });
+		my $p_data = { uid => $uid };
 
 		my $anon_uid = getCurrentStatic('anonymous_coward_uid');
 
 		my $fh_data = {};
-		$fh_data->{uid} = $uid if $fh_data->{name};
 		my $fh = getObject("Slash::FireHose");
 		my $fh_item = $fh->getFireHose($p->{preview_fhid});
+
+		if ($fh_item->{name}) {
+			$fh_data->{uid} = $uid;
+			$p_data->{submitter} = $uid;
+		}
 
 		my $user_nick = $self->getUser($uid, 'nickname');
 		my $anon_nick = $self->getUser($anon_uid, 'nickname');
@@ -65,6 +69,7 @@ sub migrateAnonPreviewToUser {
 			$fh_data->{name} = $user_nick;
 		}
 
+		$self->setPreview($preview_id, $p_data);
 		$fh->setFireHose($p->{preview_fhid}, $fh_data) if keys %$fh_data > 0 ;
 	}
 }
