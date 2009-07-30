@@ -35,19 +35,19 @@ __template__
 
 [% CASE 'compresserror' %]
 	[% returnme.data_constant = 1 %]
-	<span id="compress_error"><span id="modal_error"></span>compression has detected something wrong with your submission</span>
+	<span id="compress_error" style="font-weight: bold"><span id="modal_error"></span>Compression has detected something wrong with your submission</span>
 
 [% CASE 'badintrotext' %]
         [% returnme.data_constant = 1 %]
-        <span id="introtext_error"><span id="modal_error"></span>Missing introtext.</span>
+        <span id="introtext_error" style="font-weight: bold"><span id="modal_error"></span>Missing introtext.</span>
 
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
-	<span id="subject_error"><span id="modal_error"></span>Please enter a reasonable subject.</span>
+	<span id="subject_error" style="font-weight: bold"><span id="modal_error"></span>Please enter a reasonable subject.</span>
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
-	<span id="url_error"><span id="modal_error"></span>You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)</span>
+	<span id="url_error" style="font-weight: bold"><span id="modal_error"></span>You've provided an incorrectly formatted url.  Make sure your url begins with a scheme (http:// or https://)</span>
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
