@@ -173,7 +173,7 @@ $(document).ready(function(){
 
 
 
-		[% END %]IF
+		[% END %]
 		[% IF item.type == 'story' %]
 			[% IF constants.use_dept %]
 			<span class="[% IF !item.dept;'dyn';END;%]label">
