@@ -29,11 +29,19 @@ sub getPreviewIdSessionUid {
 
 	my $uid_q = $self->sqlQuote($uid);
 	my $session_q = $self->sqlQuote($session);
+	my $anon_uid = getCurrentStatic('anonymous_coward_uid');
+
 
 	if (isAnon($uid)) {
 		return $self->sqlSelect("MAX(preview_id)", "preview", "uid = $uid_q AND session = $session_q  and active='yes'");
 	} else {
-		return $self->sqlSelect("MAX(preview_id)", "preview", "uid = $uid_q and active='yes'");
+		my $user_pid = $self->sqlSelect("MAX(preview_id)", "preview", "(uid = $uid_q and active='yes')") || 0;
+		my $anon_session_pid = $self->sqlSelect("MAX(preview_id)", "preview", "uid=$anon_uid and active='yes' AND session=$session_q");
+		if ($anon_session_pid > $user_pid) {
+			$self->setPreview($anon_session_pid, { uid => $uid });
+			$user_pid = $anon_session_pid;
+		}
+		return $user_pid;
 	}
 }
 
