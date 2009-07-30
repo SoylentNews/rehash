@@ -38,10 +38,34 @@ sub getPreviewIdSessionUid {
 		my $user_pid = $self->sqlSelect("MAX(preview_id)", "preview", "(uid = $uid_q and active='yes')") || 0;
 		my $anon_session_pid = $self->sqlSelect("MAX(preview_id)", "preview", "uid=$anon_uid and active='yes' AND session=$session_q");
 		if ($anon_session_pid > $user_pid) {
-			$self->setPreview($anon_session_pid, { uid => $uid });
+			$self->migrateAnonPreviewToUser($anon_session_pid, $uid);
 			$user_pid = $anon_session_pid;
 		}
 		return $user_pid;
+	}
+}
+
+sub migrateAnonPreviewToUser {
+	my ($self, $preview_id, $uid) = @_;
+	my $p = $self->getPreview($preview_id);
+	if (isAnon($p->{uid})) {
+		$self->setPreview($preview_id, { uid => $uid });
+
+		my $anon_uid = getCurrentStatic('anonymous_coward_uid');
+
+		my $fh_data = {};
+		$fh_data->{uid} = $uid if $fh_data->{name};
+		my $fh = getObject("Slash::FireHose");
+		my $fh_item = $fh->getFireHose($p->{preview_fhid});
+
+		my $user_nick = $self->getUser($uid, 'nickname');
+		my $anon_nick = $self->getUser($anon_uid, 'nickname');
+
+		if ($fh_item->{name} eq $anon_nick) {
+			$fh_data->{name} = $user_nick;
+		}
+
+		$fh->setFireHose($p->{preview_fhid}, $fh_data) if keys %$fh_data > 0 ;
 	}
 }
 
