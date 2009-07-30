@@ -281,6 +281,9 @@ $(document).ready(function(){
 		[% END %]
 
 </form>
+<script type="text/javascript">
+	firehose_init_tag_ui($('#editor'));
+</script>
 [% UNLESS options.nowrap %]
 </div>
 [% END %]
