@@ -104,6 +104,11 @@ $(document).ready(function(){
 	</div>
 
 	<div class="fhitem" id="editor-[% fhid %]">
+	<span class="sd-info-block" style="display: none">
+		<span class="sd-key-firehose-id">[% fhid %]</span>
+		<span class="type">[% p_item.type %]</span>
+		[% IF user.is_admin %]<span class="stoid">[% p_item.srcid %]</span>[% END %]
+	</span>
 
 	<div class="editonly[% IF preview_shown %] hide[% END %]">
 	[% tag_widget %]
