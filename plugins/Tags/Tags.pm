@@ -1513,7 +1513,7 @@ sub ajaxListTagnames {
 my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  ); # should be a var
 
 sub processAdminCommand {
-	my($self, $c, $id, $table) = @_;
+	my($self, $c, $id, $table, $options) = @_;
 
 	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($c);
 	return 0 if !$type;
@@ -1614,7 +1614,7 @@ sub processAdminCommand {
 		}
 	}
 
-	$self->logAdminCommand($type, $tagname, $globjid);
+	$self->logAdminCommand($type, $tagname, $globjid, $options);
 
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $tagboxes = $tagboxdb->getTagboxes();
@@ -1711,13 +1711,14 @@ sub getTypeAndTagnameFromAdminCommand {
 # omitted (or false) when the type indicates a system-wide
 # command.
 sub logAdminCommand {
-	my($self, $type, $tagname, $globjid) = @_;
+	my($self, $type, $tagname, $globjid, $options) = @_;
 	my $tagnameid = $self->getTagnameidFromNameIfExists($tagname);
+	my $uid = $options->{adminuid} || getCurrentUser('uid');
 	$self->sqlInsert('tagcommand_adminlog', {
 		cmdtype =>	$type,
 		tagnameid =>	$tagnameid,
 		globjid =>	$globjid || undef,
-		adminuid =>	getCurrentUser('uid'),
+		adminuid =>	$uid,
 		-created_at =>	'NOW()',
 	});
 }

@@ -28,7 +28,7 @@ var suggestions_for_context = {
 [% IF user.is_admin %]
 	story: 'neverdisplay',
 	'default': 'hold quik back typo dupe',
-	tagnix: '$_ $# $## $### $#### $#####',
+	tagnix: 'pound0 pound1 pound2 pound3 pound4 pound5',
 [% END %]
 	tagnod: 'descriptive',
 	feedback: 'typo dupe error',

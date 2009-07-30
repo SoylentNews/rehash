@@ -32,6 +32,9 @@ sub init {
 
 	my $tagsdb = getObject('Slash::Tags');
 	$self->{descriptiveid} = $tagsdb->getTagnameidCreate('descriptive');
+	for my $i (0..5) {
+		$self->{"pound${i}id"} = $tagsdb->getTagnameidCreate("pound$i");
+	}
 
 	1;
 }
@@ -52,9 +55,13 @@ sub init_tagfilters {
 	$self->{filter_activeonly} = 1;
 	$self->{filter_firehoseonly} = 1;
 
-	# Only care about two tags at present: "descriptive" and "nod".
+	# Only care about, at present, "descriptive" and "nod" as positive tags,
+	# "pound0" thru "pound5" as negative.
 	# These are the only tags that affect a tagname item.
 	$self->{filter_tagnameid} = [ $self->{descriptiveid}, $self->{nodid} ];
+	for my $i (0..5) {
+		push @{ $self->{filter_tagnameid} }, $self->{"pound${i}id"};
+	}
 
 	# Only care about tags on tagname items.
 	$self->{filter_gtid} = $self->getGlobjTypes()->{tagnames};
@@ -71,13 +78,32 @@ sub run_process {
 	my $constants = getCurrentStatic();
 	return if !$constants->{tagbox_tnp_enable};
 
+	# Decide what to do with the tagname specified by this globjid.
+	# Note that descriptive overrides admin_ok, and both override
+	# any punishments.
+	my $done = 0;
+	my $admin_command = '';
+	my $admin_command_uid = 0;
 	my @params = ( );
 	if (grep { $_->{tagnameid} == $self->{descriptiveid} } @$tags_ar) {
 		push @params, 'descriptive';
 	} elsif (grep { $_->{tagnameid} == $self->{nodid} } @$tags_ar) {
 		push @params, 'admin_ok';
+	} else {
+		for my $i (0..5) {
+			my @pounds = grep { $_->{tagnameid} == $self->{"pound{$i}id"} } @$tags_ar;
+			if (@pounds) {
+				if ($i == 0) {
+					$admin_command = '$_';
+				} else {
+					$admin_command = '$' . ('#' x $i);
+				}
+				$admin_command_uid = $pounds[0]{uid};
+			}
+		}
+		$done = 1 unless $admin_command;
 	}
-	return unless @params;
+	return if $done;
 
 	my($table, $id) = $self->getGlobjTarget($affected_id);
 	if ($table ne 'tagnames') {
@@ -90,8 +116,15 @@ sub run_process {
 		$self->info_log("logic error, globjid $affected_id not valid tagname");
 		return ;
 	}
-	my $retval = $tagsdb->setTagname($id, {( map {( $_, 1 )} @params )});
-	$self->info_log("set '$tagname' to '@params': $retval");
+	if (@params) {
+		my $retval = $tagsdb->setTagname($id, {( map {( $_, 1 )} @params )});
+		$self->info_log("set '$tagname' to '@params': $retval");
+	}
+	if ($admin_command) {
+		my $c = "$admin_command$tagname";
+		my $tagnameid = $tagsdb->processAdminCommand($c, undef, undef, { adminuid => $admin_command_uid });
+		$self->info_log("set '$tagname' admin_command '$c' from uid=$admin_command_uid: $tagnameid");
+	}
 }
 
 1;
