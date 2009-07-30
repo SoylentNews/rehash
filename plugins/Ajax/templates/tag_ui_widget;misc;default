@@ -32,8 +32,8 @@ __template__
 
 	[%# the disclosure triangle %]
 	<a class="edit-toggle"
-	[%  IF user.tags_canwrite_stories	%] href="[% PROCESS nojslink %]" onclick="var foo=this; return nojscall(function(){foo.blur(); foo.parentNode.toggle_widget(foo);});"
-	[%- ELSIF user.is_anon			%] href="[% PROCESS nojslink %]" onclick="var foo=this; return nojscall(function(){foo.blur(); show_login_box();});"
+	[%  IF user.tags_canwrite_stories	%] href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){self.blur(); self.parentNode.toggle_widget(self);});"
+	[%- ELSIF user.is_anon			%] href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){self.blur(); show_login_box();});"
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]>
 		<span class="button collapse"></span>
