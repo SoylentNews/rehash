@@ -6510,3 +6510,6 @@ UPDATE firehose SET public='yes' WHERE type='tagname';
 
 # 2009-07-30
 UPDATE vars SET value = 'T_2_5_0_266' WHERE name = 'cvs_tag_currentcode';
+
+#For plugins/Edit
+INSERT INTO ajax_ops VALUES (NULL, 'edit_submit_box_after', 'Slash::Edit', 'ajaxEditorAfter', 'ajax_user_static', 'createuse');
