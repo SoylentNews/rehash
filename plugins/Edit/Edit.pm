@@ -321,8 +321,7 @@ sub savePreview {
 	print STDERR "RENDERED: ".Dumper($rendered_hr);
 	my $primaryskid = $self->getPrimarySkidFromRendered($rendered_hr);
 	print STDERR "PRIMARYSKID: $primaryskid\n";;
-	my $tids = $self->getTopiclistForStory('',
-		{ topics_chosen => $chosen_hr });
+	my $tids = $self->getTopiclistFromChosen($chosen_hr);
 
 	my $tid = $tids->[0];
 
