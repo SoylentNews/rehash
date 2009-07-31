@@ -324,8 +324,8 @@ function firehose_init_note_flags( $items ){
 				has_note		= $note.length && !$note.is('.no-note'),
 				text			= has_note ? $.trim($note.find('.admin-note a').text()) : '';
 
-			$('<span class="note-flag">note</span>').
-				appendTo($flag_parent).
+			$('<span class="note-flag">note</a>').
+				prependTo($flag_parent).
 				attr('title', text).
 				toggleClass('no-note', !has_note).
 				click(firehose_open_note);
