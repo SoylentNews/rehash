@@ -6508,3 +6508,5 @@ UPDATE humanconf_questions SET question = '<span class="humanconf_questions">Con
 
 UPDATE firehose SET public='yes' WHERE type='tagname';
 
+# 2009-07-30
+UPDATE vars SET value = 'T_2_5_0_266' WHERE name = 'cvs_tag_currentcode';
