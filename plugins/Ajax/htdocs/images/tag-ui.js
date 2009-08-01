@@ -161,7 +161,6 @@ function install_tag_server( selector, item_id ) {
 	return $(selector).
 		attr('tag-server', item_id||'*').
 		each(function(){
-			$.extend(this, tag_server_fns);
 			this.busy_depth = 0;
 			this.command_pipeline = [ normalize_nodnix ];
 		});
@@ -415,7 +414,6 @@ function $init_tag_displays( $stubs, options ){
 
 			$.extend(
 				this,
-				tag_display_fns,
 				{
 					tag_display_data: {
 						menu_template:	menu_template,
@@ -780,7 +778,6 @@ function $init_tag_widgets( $stubs, options ){
 
 			T2.init($.extend(
 				this,
-				tag_widget_fns,
 				local_state,
 				options ));
 		}).
