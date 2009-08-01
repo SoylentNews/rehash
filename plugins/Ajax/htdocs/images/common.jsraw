@@ -695,9 +695,9 @@ function firehose_toggle_tag_ui_to( want_expanded, el, dont_next ){
 		}
 
 		setFirehoseAction();
-		want_expanded && $fhitem[0].fetch_tags();
+		want_expanded && T2.fetch_tags($fhitem[0]);
 
-		$fhitem.find('.tag-widget').each(function(){ this.set_context(); });
+		$fhitem.find('.tag-widget').each(function(){ T2.set_context(this); });
 		tag_ui.widget.toggleClass('expanded', !!want_expanded);
 		tag_ui.widget.find('a.edit-toggle .button').setClass(applyToggle({expand:want_expanded, collapse:!want_expanded}));
 		$fhitem.find('#toggletags-body-'+fhid).setClass(applyToggle({tagbody:want_expanded, tagshide:!want_expanded}));
@@ -809,7 +809,7 @@ function page_click_handler( event ) {
 				});
 		} else { // otherwise, send it the server to be processed
 			$fhitem.each(function(){
-				this.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
+				T2.submit_tags(this, command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
 		}
 	}
@@ -838,7 +838,7 @@ function firehose_handle_context_triggers( commands ){
 
 	$('.tag-widget:not(.nod-nix-reasons)', this).
 		each(function(){
-			this.set_context(context);
+			T2.set_context(this, context);
 		});
 
 	return commands;
@@ -852,10 +852,10 @@ function firehose_handle_nodnix( commands ){
 		var $reasons = $('.nod-nix-reasons', this);
 		var nodnix_context = function( ctx ){
 			$('#firehoselist div.nod-nix-reasons>.tag-display:visible').parent().each(function(){
-				this.set_context();
+				T2.set_context(this);
 			});
 			$reasons.each(function(){
-				this.set_context(ctx);
+				T2.set_context(this, ctx);
 			});
 		};
 
@@ -900,7 +900,7 @@ function firehose_handle_comment_nodnix( commands ){
 		}).reverse();
 
 		$('.nod-nix-reasons', this).each(function(){
-			this.set_context(undefined);
+			T2.set_context(this, undefined);
 		});
 	}
 
@@ -939,7 +939,7 @@ $('#firehoselist > div.fhitem').
 		$fhitem.removeData('blur-closes-item').
 			removeData('blur-closes-tags').
 			find('.tag-widget').
-				each(function(){ this.set_context(); });
+				each(function(){ T2.set_context(this); });
 	}).
 	live('focus-article', function(){
 		var $fhitem = $(this);
@@ -1760,7 +1760,7 @@ function firehose_get_updates_handler(transport) {
 			if ( tags.top_tags !== undefined )	{ updates += '<top>' + tags.top_tags; }
 			if ( updates ) {
 				$tag_servers.filter('[tag-server='+id+']').each(function(){
-					this.broadcast_tag_lists(updates);
+					T2.broadcast_tag_lists(this, updates);
 				});
 			}
 		});
@@ -2878,12 +2878,12 @@ $(function(){
 
 		if (keyo.tag && el) {
 			firehose_toggle_tag_ui_to(true, el);
-			if (keyo.nod)     { el.submit_tags('nod') }
-			if (keyo.nix)     { el.submit_tags('nix') }
+			if (keyo.nod)     { T2.submit_tags(el, 'nod') }
+			if (keyo.nix)     { T2.submit_tags(el, 'nix') }
 		}
 
 		if (keyo.signoff && el && tag_admin) {
-			el.submit_tags('signoff');
+			T2.submit_tags(el, 'signoff');
 			// we either call set_cur($(el)) as above,
 			// or just pass $(el) to go_next()
 			firehose_go_next($(el));

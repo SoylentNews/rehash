@@ -29,9 +29,7 @@ var tag_server_fns = {
 				var context_name = context.split(':')[0];
 
 				$listeners.filter('[context*=' + context_name + ']').each(function(){
-					if ( this.receive_broadcast ) {
-						this.receive_broadcast(data, context, options);
-					}
+					T2.receive_broadcast(this, data, context, options);
 				});
 			}
 			recompute_css_classes(this, $listeners);
@@ -77,7 +75,7 @@ var tag_server_fns = {
 
 		if ( tag_cmds ) {
 			tag_cmds = normalize_tag_commands(
-				this.preprocess_commands(Qw(tag_cmds), options),
+				T2.preprocess_commands(this, Qw(tag_cmds), options),
 				this );
 
 			// if caller wanted to execute some commands,
@@ -92,7 +90,7 @@ var tag_server_fns = {
 			// tags in the response from the server will wipe-out 'not-saved'
 			var $user_displays = $('.tag-display.ready[context*=user]', this);
 			$user_displays.each(function(){
-				this.update_tags(tag_cmds, feedback_options);
+				T2.update_tags(this, tag_cmds, feedback_options);
 			});
 
 			// Just for fun...
@@ -109,7 +107,7 @@ var tag_server_fns = {
 		}
 
 
-		var tag_server = this.mark_busy(true);
+		var tag_server = T2.mark_busy(this, true);
 		$.ajax($.extend(
 			{},
 			{
@@ -119,10 +117,10 @@ var tag_server_fns = {
 				data:		server_params,
 				success: 	function( server_response ){
 							// console.log('RECEIVED: '+server_response);
-							tag_server.broadcast_tag_lists(server_response, options);
+							T2.broadcast_tag_lists(tag_server, server_response, options);
 						},
 				complete: 	function(){
-							tag_server.mark_busy(false);
+							T2.mark_busy(tag_server, false);
 						}
 			},
 			options && options.ajax ));
@@ -131,12 +129,12 @@ var tag_server_fns = {
 
 
 	fetch_tags: function( options ){
-		return this._ajax_request('', options);
+		return T2._ajax_request(this, '', options);
 	},
 
 
 	submit_tags: function( tag_cmds, options ){
-		return this._ajax_request(tag_cmds, options);
+		return T2._ajax_request(this, tag_cmds, options);
 	},
 
 
@@ -197,7 +195,7 @@ function form_submit_tags( form, options ){
 		each(function(){
 			var tag_cmds = $input.val();
 			$input.val('');
-			this.submit_tags(tag_cmds, options);
+			T2.submit_tags(this, tag_cmds, options);
 		});
 }
 
@@ -254,7 +252,7 @@ var tag_display_fns = {
 		// no other call adds tags (except by calling _me_)
 
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
-		var update_map = this.map_tags(tags = Qw(tags))[0];
+		var update_map = T2.map_tags(this, tags = Qw(tags))[0];
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags_seen = {};
@@ -281,7 +279,7 @@ var tag_display_fns = {
 			// add in a list of the actual .tag elements we created from scratch
 			$changed_tags = $changed_tags.add( $new_elems.find('.tag') );
 
-			this.$mark_empty(false);
+			T2.$mark_empty(this, false);
 		}
 
 		// for every .tag we added/changed, fix parent <li>'s css class(es)
@@ -310,7 +308,7 @@ var tag_display_fns = {
 		//   tags to remove may be specified by string, an array, or the result of a previous call to map_tags
 		var if_remove_all;
 		if ( !tags || tags.length ) {
-			var mapped = this.map_tags(tags);
+			var mapped = T2.map_tags(this, tags);
 			tags = mapped[0];
 			if_remove_all = mapped[1];
 		}
@@ -324,12 +322,12 @@ var tag_display_fns = {
 				.queue(function(){
 					$(this).remove().dequeue();
 					if ( if_remove_all ) {
-						display.$mark_empty();
+						T2.$mark_empty(display);
 					}
 				});
 		} else {
 			$remove_li.remove();
-			this.$mark_empty(if_remove_all);
+			T2.$mark_empty(this, if_remove_all);
 		}
 
 		return this;
@@ -339,13 +337,13 @@ var tag_display_fns = {
 	// like remove_tags() followed by update_tags(tags) except order preserving for existing tags
 	set_tags: function( tags, options ){
 		var allowed_tags = Qw.as_set(tags = Qw(tags), bare_tag);
-		var removed_tags = this.map_tags(function(bt){
+		var removed_tags = T2.map_tags(this, function(bt){
 			return !(bt in allowed_tags);
 		})[0];
 
-		return this.
-			remove_tags(removed_tags, options).
-			update_tags(tags, options);
+		T2.remove_tags(this, removed_tags, options);
+		T2.update_tags(this, tags, options);
+		return this;
 	},
 
 
@@ -364,7 +362,7 @@ var tag_display_fns = {
 
 
 	receive_broadcast: function( tags, context, options ){
-		return this.set_tags(tags, options);
+		return T2.set_tags(this, tags, options);
 	}
 
 }; // tag_display_fns
@@ -431,7 +429,7 @@ function $init_tag_displays( $stubs, options ){
 			}));
 
 			if ( tags ) {
-				this.set_tags(tags);
+				T2.set_tags(this, tags);
 			}
 		});
 
@@ -685,7 +683,7 @@ var tag_widget_fns = {
 							// if display had no tags before, $display.hide() would silently fail, because it's already hidden
 							// so hide the widget itself while we make the changes
 							$parent.hide();
-							display.set_tags(context_tags, { classes: 'suggestion b' });
+							T2.set_tags(display, context_tags, { classes: 'suggestion b' });
 							if ( widget.modify_context ) {
 								widget.modify_context(display, context);
 							}
@@ -727,7 +725,7 @@ var tag_widget_fns = {
 		// if there's a context to hide, and hiding on a timeout is requested...
 		if ( context && this.tag_widget_data.context_timeout ) {
 			this._context_timeout = setTimeout(function(){
-				widget.set_context();
+				T2.set_context(widget);
 			}, this.tag_widget_data.context_timeout);
 		}
 
@@ -744,7 +742,7 @@ var tag_widget_fns = {
 			$tag_widget.
 				closest('[tag-server]').
 					each(function(){
-						this.fetch_tags();
+						T2.fetch_tags(this);
 					});
 		}
 	}
@@ -780,12 +778,11 @@ function $init_tag_widgets( $stubs, options ){
 				local_state.tag_widget_data.context_timeout = init_data.context_timeout;
 			}
 
-			$.extend(
+			T2.init($.extend(
 				this,
 				tag_widget_fns,
 				local_state,
-				options ).
-				init();
+				options ));
 		}).
 		setClass(applyMap({'tag-widget-stub': 'tag-widget'}));
 

@@ -32,7 +32,7 @@ __template__
 
 	[%# the disclosure triangle %]
 	<a class="edit-toggle"
-	[%  IF user.tags_canwrite_stories	%] href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){self.blur(); self.parentNode.toggle_widget(self);});"
+	[%  IF user.tags_canwrite_stories	%] href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){self.blur(); T2.toggle_widget(self.parentNode, self);});"
 	[%- ELSIF user.is_anon			%] href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){self.blur(); show_login_box();});"
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]>

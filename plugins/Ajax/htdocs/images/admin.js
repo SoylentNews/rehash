@@ -94,7 +94,7 @@ function firehose_admin_context( display ){
 	if ( $(display).is('.fhitem-story .tag-display') ) {
 		additions += ' info ';
 	}
-	display.update_tags(additions, { order: 'prepend', classes: 'b' });
+	T2.update_tags(display, additions, { order: 'prepend', classes: 'b' });
 }
 
 function firehose_handle_admin_commands( commands ){
@@ -118,7 +118,7 @@ function firehose_handle_admin_commands( commands ){
 			case 'neverdisplay':
 				if ( confirm("Set story to neverdisplay?") ) {
 					non_admin_commands.push('neverdisplay');
-					entry._ajax_request('', {
+					T2._ajax_request(entry, '', {
 						op:	'admin_neverdisplay',
 						stoid:	'',
 						fhid:	id,
@@ -130,7 +130,7 @@ function firehose_handle_admin_commands( commands ){
 			case 'signed':
 			case 'signoff':
 			case 'unsigned':
-				entry._ajax_request('', {
+				T2._ajax_request(entry, '', {
 					op:	'admin_signoff',
 					stoid:	fhitem_info($entry, 'stoid'),
 					ajax:	{ success: function(){ $('[context=signoff]', entry).remove(); } }
