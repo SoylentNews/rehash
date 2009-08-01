@@ -1,6 +1,6 @@
 ; // tag-ui.js
 
-var context_triggers, well_known_tags, tag_admin=false;
+var T2={}, context_triggers, well_known_tags, tag_admin=false;
 
 function animate_wiggle( $selector ){
 	$selector.
@@ -750,6 +750,20 @@ var tag_widget_fns = {
 	}
 
 }; // tag_widget_fns
+
+(function(){
+var slice=Array.prototype.slice;
+
+function globalize( fn_name, fn ){
+	T2[fn_name] = function( self ){
+		return fn.apply(self, slice.call(arguments, 1));
+	};
+}
+
+$.each(tag_server_fns, globalize);
+$.each(tag_display_fns, globalize);
+$.each(tag_widget_fns, globalize);
+})();
 
 function $init_tag_widgets( $stubs, options ){
 	options = options || {};
