@@ -1567,7 +1567,7 @@ Slash.busy = function( k, more ){
 
 //
 // Slash.markBusy --- ignore the logical depth maintained by Slash.busy, e.g.,
-//	when you're calls to busy(..., true) and busy(..., false) don't balance.
+//	when your calls to busy(..., true) and busy(..., false) don't balance.
 //
 Slash.markBusy = function( k, state ){
 	var	was_busy = ($B||($B=$('body'))).is('.busy-'+k),
