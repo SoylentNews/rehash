@@ -71,9 +71,6 @@ $(document).ready(function(){
 			[% IF user.is_admin %]<span class="stoid">[% p_item.srcid %]</span>[% END %]
 		</span>
 
-		<div class="editonly[% IF preview_shown %] hide[% END %]">
-			[% tag_widget %]
-		</div>
 		<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 
 		[% PROCESS reskey_tag %]
@@ -213,10 +210,14 @@ $(document).ready(function(){
 				[% END %]
 			[% END %]
 
+
+
 		<div class="subarticle-foot">
+
 			[% IF item.type == 'submission' %]
 				[% PROCESS hc_form %]
 			[% END %]
+
 			<div class="subactionbuttons">
 				[% IF preview_shown %]
 					<div class="preactionbuttons previewonly">
@@ -229,7 +230,15 @@ $(document).ready(function(){
 						<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
 					</div>
 			</div>
+
+			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
+				[% tag_widget %]
+			</div>
+
+
 		</div>
+
+
 		[% IF form.bare %]
 		<input type="hidden" name="bare" value="1">
 		[% END %]
