@@ -69,6 +69,7 @@ sub init_tagfilters {
 
 sub get_affected_type	{ 'globj' }
 sub get_clid		{ 'vote' }
+sub get_nosy_gtids	{ 'tagnames' }
 sub get_userkeyregex	{ qr{^tag_clout$} }
 
 # XXX handle
