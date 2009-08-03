@@ -1272,10 +1272,13 @@ sub ajaxKeyTypeToGlobjid {
 	return $globjid;
 }
 
-sub ajaxSetGetCombinedTags {
-	my($slashdb, $constants, $user, $form) = @_;
+sub setGetDisplayTags { # T2
+	my($self, $key, $key_type, $user, $commands, $global_tags_only) = @_;
 
-	my $globjid = ajaxKeyTypeToGlobjid($form->{key}, $form->{key_type});
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $globjid = ajaxKeyTypeToGlobjid($key, $key_type);
 	return getData('error', {}, 'tags') if !$globjid;
 
 	my $firehose_reader = getObject('Slash::FireHose', { db_type => 'reader' });
@@ -1290,7 +1293,7 @@ sub ajaxSetGetCombinedTags {
 
 	# if we have to execute commands, do them _before_ we fetch any tag lists
 	my $user_tags = '';
-	if ( $form->{tags} ) {
+	if ( $commands ) {
 		my $tags_writer = getObject('Slash::Tags');
 		if (!$user->{is_anon} || ($user->{is_anon} && $table eq 'preview')) {
 			$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
@@ -1305,21 +1308,21 @@ sub ajaxSetGetCombinedTags {
 				join ' ',
 				grep { !/^-/ }
 				split /\s+/,
-				lc $form->{tags};
+				lc $commands;
 
 			my $firehose = getObject('Slash::FireHose');
 			$firehose->setSectionTopicsFromTagstring($firehose_id , $added_tags);
 			$firehose_item = $firehose->getFireHose($firehose_id);
 		};
-	} elsif ( ! $form->{global_tags_only} ) {
+	} elsif ( ! $global_tags_only ) {
 		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref(
 			$table, $item_id, { uid => $uid, include_private => 1 });
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
-	my ($datatype_tag, $top_tags, $section_tag, $topic_tags);
+	my ($datatype, $top_tags, $section_tag, $topic_tags);
 	if ( $firehose_item ) {
-		$datatype_tag = $firehose_item->{type};
+		$datatype = $firehose_item->{type};
 		$top_tags = $firehose_item->{toptags};
 
 		my $skid = $firehose_item->{primaryskid};
@@ -1337,38 +1340,61 @@ sub ajaxSetGetCombinedTags {
 		}
 	}
 
-	my $system_tags = $section_tag . ' ' . $topic_tags;
+	my $tags = {
+		user_tags	=> $user_tags,
+		top_tags	=> $top_tags,
+		topic_tags	=> $topic_tags,
+		section_tag	=> $section_tag,
+		datatype	=> $datatype,
+	};
 
-	my $response = '<datatype>' . ($datatype_tag || 'unknown') . '<system>' . $system_tags . '<top>'. $top_tags;
-	$response .= '<user>' . $user_tags unless $form->{global_tags_only};
+	return $tags;
+}
+
+sub ajaxSetGetDisplayTags { # T2
+	my($slashdb, $constants, $user, $form) = @_;
+
+	my $tag_reader = getObject("Slash::Tags", { db_type => 'reader' });
+	my $tags = $tag_reader->setGetDisplayTags(
+		$form->{key},
+		$form->{key_type},
+		$user,
+		$form->{tags},
+		$form->{global_tags_only}
+	);
+	slashDisplay('tagbar', $tags, { Return => 1 });
+}
+
+sub ajaxSetGetCombinedTags { # deprecated, moving to T2: ajaxSetGetDisplayTags
+	my($slashdb, $constants, $user, $form) = @_;
+
+	my $tag_reader = getObject("Slash::Tags", { db_type => 'reader' });
+	my $tags = $tag_reader->setGetDisplayTags(
+		$form->{key},
+		$form->{key_type},
+		$user,
+		$form->{tags},
+		$form->{global_tags_only}
+	);
+
+	my $system_tags = $tags->{section_tag} . ' ' . $tags->{topic_tags};
+
+	my $response = '<datatype>' . ($tags->{datatype} || 'unknown') . '<system>' . $system_tags . '<top>'. $tags->{top_tags};
+	$response .= '<user>' . $tags->{user_tags} unless $form->{global_tags_only};
 
 	return $response;
 }
 
-sub setGetCombinedTags {
+sub setGetCombinedTags { # deprecated, moving to T2: setGetDisplayTags
 	my($self, $key, $key_type, $user, $commands) = @_;
+	my $tags = $self->setGetDisplayTags($key, $key_type, $user, $commands, !$user);
 
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-
-	my $fakeform = {
-		key => $key,
-		key_type => $key_type,
+	my $response = {
+		datatype	=> $tags->{datatype} || 'unknown',
+		'system'	=> $tags->{section_tag} . ' ' . $tags->{topic_tags},
+		top		=> $tags->{top_tags},
 	};
-	$fakeform->{global_tags_only} = 1 unless $user;
-	$fakeform->{tags} = $commands if $commands;
-
-	my @tuples = split /<([\w:]*)>/, ajaxSetGetCombinedTags($slashdb, $constants, $user, $fakeform);
-	shift @tuples; # bogus empty first elem when capturing separators
-
-	my $response = {};
-	while ( @tuples ) {
-		my $k = shift @tuples;
-		$response->{$k} = shift @tuples || '' if $k;
-#print STDERR "key => $key; value => $response->{$key}\n";
-	}
-#print STDERR "---------\n";
-
+	$response->{user} = $tags->{user_tags} if $user;
 	return $response;
 }
 
