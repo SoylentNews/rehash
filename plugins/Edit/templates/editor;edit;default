@@ -20,11 +20,7 @@ __template__
 
 $(document).ready(function(){
 
-
-
 	$('textarea').elastic();
-
-
 
 	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
 		$(this).siblings("label").hide();
@@ -38,41 +34,6 @@ $(document).ready(function(){
 	$("span.dynlabel input,span.dynlabel textarea").blur(function() {
 		if($(this).val()==="")
 			$(this).siblings("label").show();
-	});
-
-	var tmphldr='';
-
-	$("div#editor .default").live("click", function(){
-			$(this).removeClass("default");
-			tmphldr=$(this).val();
-			$(this).attr({ value: '' });
-	});
-
-/*	$("div#editor .default").focus(function() {
-			$(this).removeClass("default");
-			tmphldr=$(this).val();
-			$(this).attr({ value: '' });
-	});*/
-
-	$("div#editor .default").blur(function() {
-		var thisValue=$(this).val();
-		var thisName=$(this).attr('name');
-
-		if(thisName==='name')
-			tmphldr='Anonymous Coward';
-
-		if(!thisValue || thisValue==='') {
-			$(this).attr('value', tmphldr);
-			$(this).addClass("default");
-		} else {
-			$(this).addClass("dirty");
-		}
-
-		tmphldr='';
-	});
-
-	$("form#slashstoryform div.subactionbuttons input").click(function() {
-		$("form#slashstoryform .default").attr('value', '');
 	});
 
 	$("a.tgmedia").click(function() {
