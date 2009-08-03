@@ -150,7 +150,7 @@ sub run_process {
 		} else {
 			$color_level = 8;
 		}
-	} elsif ($type eq 'tagname') {
+	} elsif ($type eq 'tagnames') {
 		# Tagname items (firehose items of type=tagname) start out at
 		# this color.  They get their score manually set to -50 below
 		# once they have been nodded/nixed by an editor.
