@@ -1279,14 +1279,20 @@ sub setGetDisplayTags { # T2
 	my $constants = getCurrentStatic();
 
 	my $globjid = ajaxKeyTypeToGlobjid($key, $key_type);
-	return getData('error', {}, 'tags') if !$globjid;
+	if (!$globjid) {
+		#return getData('error', {}, 'tags');
+		return {};
+	}
 
 	my $firehose_reader = getObject('Slash::FireHose', { db_type => 'reader' });
 	my $firehose_item = $firehose_reader->getFireHoseByGlobjid($globjid);
 	my $firehose_id = $firehose_item->{id};
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	return getData('error', {}, 'tags') if !$tags_reader;
+	if (!$tags_reader) {
+		#return getData('error', {}, 'tags');
+		return {};
+	}
 	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
 
 	my $uid = $user && $user->{uid} || 0;
