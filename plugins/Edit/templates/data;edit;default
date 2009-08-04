@@ -41,6 +41,18 @@ __template__
         [% returnme.data_constant = 1 %]
         <span id="introtext_error" style="font-weight: bold"><span id="modal_error"></span>Missing introtext.</span>
 
+[% CASE 'introtext_origsource' %]
+        [% returnme.data_constant = 1 %]
+        <div style="padding:1em 0">
+                <div class="message error" style="display: inline;"><span id="modal_error"></span>Introtext cannot contain 'Link to Original Source'.</div>
+        </div>
+
+[% CASE 'baddept' %]
+        [% returnme.data_constant = 1 %]
+        <div style="padding:1em 0">
+                <div class="message error" style="display: inline;"><span id="modal_error"></span>Department cannot be left blank.</div>
+        </div>
+
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
 	<span id="subject_error" style="font-weight: bold"><span id="modal_error"></span>Please enter a reasonable subject.</span>

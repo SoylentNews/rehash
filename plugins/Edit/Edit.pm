@@ -360,6 +360,7 @@ sub showEditor {
 	$preview_info .=  "PREVIEW ID: $preview_id";
 
 	my $preview = $self->getPreview($preview_id);
+	$preview->{dept} = $form->{dept};
 
 	my $fh		 = getObject("Slash::FireHose");
 	my $tagsdb 	= getObject("Slash::Tags");
@@ -507,6 +508,15 @@ sub validate {
 		}
 		# XXXEdit Check Nexus Extras eventually
 		# XXXEdit test reskey success / failure here? or in saveItem?
+	} elsif ($item->{type} eq 'story') {
+		# Admin-specific errors
+		if ($preview->{introtext} =~ /link to original source/i) {
+			$messages{orig_source} = getData('introtext_origsource', '', 'edit');
+		}
+
+		if (!$preview->{dept}) {
+			$messages{baddept} = getData('baddept', '', 'edit');
+		}
 	}
 
 	use Data::Dumper;
@@ -531,6 +541,7 @@ sub saveItem {
 
 	my $fhitem = $fh->getFireHose($preview->{preview_fhid});
 
+	$preview->{dept} = $form->{dept};
 	my $errors = $self->validate($preview,$fhitem);
 # if you use this, comment *out* the similar call in edit.pl:save()
 # 	if ($rkey && !(keys %$errors)) {

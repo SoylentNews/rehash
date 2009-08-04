@@ -133,6 +133,9 @@ $(document).ready(function(){
 					<label for="dept">Dept</label>
 					<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
 				</span>
+				[% IF errors.baddept %]
+					<p>[% errors.baddept %]</p>
+				[% END %]
 				[% END %]
 					[% PROCESS formLabel value => "Author" for => 'uid' %]
 					[% author_select %]
@@ -153,8 +156,8 @@ $(document).ready(function(){
 					[% pulldown = "$extra.1" %]
 					[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), preview.${extra.1}, 1, 1) %]
 				[% END %]
-			[% END %]
 
+			[% END %]
 		</div>
 
 
@@ -170,9 +173,11 @@ $(document).ready(function(){
 
 			[% IF errors.badintrotext %]
 							<p>[% errors.badintrotext %]</p>
-					[% ELSIF errors.story_filter_error %]
+			[% ELSIF errors.story_filter_error %]
 							<p><span id="story_filter_error"><span id="modal_error"></span><b>[% errors.story_filter_error %]</b></span></p>
-					[% END %]
+			[% ELSIF errors.orig_source %]
+							<p>[% errors.orig_source %]</p>
+			[% END %]
 
 			[% PROCESS formLabel value => str_icp for => "introtext"  %]
 				<span class="[% IF !preview.introtext;'dyn';END;%]label">
@@ -197,7 +202,9 @@ $(document).ready(function(){
 				</label>
 			</div>
 
+
 			[% END %]
+
 		</div>
 
 		[% IF preview_shown %]
