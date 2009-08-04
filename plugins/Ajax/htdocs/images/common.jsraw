@@ -968,7 +968,7 @@ function inject_reasons( expr, init ){
 	// expr is an element, selector, or $selection.
 	var $selection = $any(expr);
 	$selection.
-		find('>h3').
+		find('>h3:not(:has(div.nod-nix-reasons))').
 			append(inject_reasons.template).
 			find('.tag-display-stub').
 				click(firehose_click_nodnix_reason);
