@@ -53,6 +53,7 @@ $(document).ready(function(){
 		global_returnto = '[% gSkin.rootdir %]/submit';
 	});
 });
+
 </script>
 
 [% IF errors.save_error %]
@@ -101,53 +102,79 @@ $(document).ready(function(){
 		<div class="subdetails">
 			[% IF item.type == 'submission' %]
 						<div class="d">
-							<div class="f">
+							<div class="txt">
 								Submitted by
 							</div>
-							<div class="s">
+							<div class="input w120">
 								<span class="[% IF !item.name;'dyn';END;%]label">
 									<label for="name">Your Name: Leave blank to be Anonymous</label>
 									<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
 								</span>
 							</div>
-							<div class="t">
+							<div class="input">
 								<span class="[% IF !item.email;'dyn';END;%]label">
 									<label for="email">Your Email or Homepage where users can contact you</label>
 									<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
 								</span>
 							</div>
 						</div>
-					<div class="u">
-					[% IF constants.plugin.FireHose %]
-						<span class="[% IF !preview.url_text;'dyn';END;%]label">
-							<label for="url">Main url of submission (optional but if provided must be unique)</label>
-							<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
-						</span>
-							[% IF errors.invalidurl %]
-									<p>[% errors.invalidurl %]</p>
-							[% ELSIF errors.duplicateurl %]
-									<p>[% errors.duplicateurl %]</p>
-							[% END %]
-					[% END %]
+					<div class="d">
+						<div class="input w380">
+						[% IF constants.plugin.FireHose %]
+							<span class="[% IF !preview.url_text;'dyn';END;%]label">
+								<label for="url">Main url of submission (optional but if provided must be unique)</label>
+								<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
+							</span>
+								[% IF errors.invalidurl %]
+										<p>[% errors.invalidurl %]</p>
+								[% ELSIF errors.duplicateurl %]
+										<p>[% errors.duplicateurl %]</p>
+								[% END %]
+						[% END %]
+						</div>
 					</div>
 			[% END %]
 			[% IF item.type == 'story' %]
-				[% IF constants.use_dept %]
-				<span class="[% IF !item.dept;'dyn';END;%]label">
-					<label for="dept">Dept</label>
-					<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
-				</span>
-				[% IF errors.baddept %]
-					<p>[% errors.baddept %]</p>
-				[% END %]
-				[% END %]
-					[% PROCESS formLabel value => "Author" for => 'uid' %]
-					[% author_select %]
-					[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
-					[% commentstatus_select %]
-					[% PROCESS formLabel value => "Create time" for => 'createtime' %]
-					<input type="text" name="createtime" value="[% item.createtime %]" size="19">
-					<label for="display" class="display visible"><input type="checkbox" name="display" [% display_check %]> Display</label>
+					<div class="d">
+						<div class="txt">
+							Posted by
+						</div>
+						<div class="input">
+							[% PROCESS formLabel value => "Author" for => 'uid' %]
+							[% author_select %]
+						</div>
+						<div class="txt">
+							on
+						</div>
+						<div class="input">
+							[% PROCESS formLabel value => "Create time" for => 'createtime' %]
+							<input type="text" name="createtime" value="[% item.createtime %]" size="19">
+						</div>
+						<div class="input">
+							[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
+							[% commentstatus_select %]
+						</div>
+						<div class="input">
+							<label for="display" class="display visible"><input type="checkbox" name="display" [% display_check %]> Display</label>
+						</div>
+					</div>
+
+					[% IF constants.use_dept %]
+					<div class="d">
+						<div class="txt">
+							form the
+						</div>
+						<div class="input w120">
+							<span class="[% IF !item.dept;'dyn';END;%]label">
+								<label for="dept">Dept</label>
+								<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
+							</span>
+						</div>
+					</div>
+						[% IF errors.baddept %]
+							<p>[% errors.baddept %]</p>
+						[% END %]
+					[% END %]
 			[% END %]
 
 			[% FOR extra = extras %]
