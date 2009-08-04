@@ -211,12 +211,13 @@ $(document).ready(function(){
 			[% END %]
 
 
-
-		<div class="subarticle-foot">
-
+		<div class="subxtras">
 			[% IF item.type == 'submission' %]
 				[% PROCESS hc_form %]
 			[% END %]
+		</div>
+
+		<div class="subarticle-foot">
 
 			<div class="subactionbuttons">
 				[% IF preview_shown %]
