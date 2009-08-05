@@ -3266,9 +3266,10 @@ sub saveTopic {
 	# so we can't just take additional params and put them in
 	# the param table; for now, put them in $options -- pudge
 	my($self, $topic, $options) = @_;
-	my $tid = $topic->{tid} || 0;
 
-	my $rows = $self->sqlCount('topics', "tid=$tid");
+	# Used to not require this.  Make sure it's passed in.
+	my $tid = $topic->{tid};
+	return 0 if !$tid;
 
 	my $image = $topic->{image2} || $topic->{image};
 	my $submittable = $topic->{submittable} || 'no';
@@ -3287,42 +3288,11 @@ sub saveTopic {
 		storypickable	=> $storypickable eq 'no' ? 'no' : 'yes',
 	};
 
+	my $rows = $self->sqlCount('topics', "tid=$tid");
 	if ($rows == 0) {
-		### tids under 10000 are reserved for "normal" tids, where > 10000
-		### are for tids where we want to have a specific tid, such as
-		### for topics groups that might be moved between sites
-		### XXXSECTIONTOPICS
-		my $where = 'tid < 10000';
-		my $default_tid = 0;
-		if ($options->{lower_limit}) {
-			$where = "tid > $options->{lower_limit}";
-			if ($options->{upper_limit}) {
-				$where .= " AND tid < $options->{upper_limit}";
-			}
-			$default_tid = $options->{lower_limit};
-		}
-
-		# we could do a LOCK TABLE, because this will be used so seldom, but
-		# OTOH, if tasks use this to dump a lot of data, it could mean a lot
-		# of locks.  this is a little bit trickier, but should be fine. -- pudge
-		my $tries = 0;
-		RETRY: {
-			$self->sqlDo("SET AUTOCOMMIT=0");
-			$tid = $self->sqlSelect('MAX(tid)', 'topics', $where);
-			$tid ||= $default_tid;
-			$data->{tid} = ++$tid;
-			if ($self->sqlInsert('topics', $data)) {
-				$self->sqlDo("COMMIT");
-				$self->sqlDo("SET AUTOCOMMIT=1");
-			} else {
-				$self->sqlDo("ROLLBACK");
-				$self->sqlDo("SET AUTOCOMMIT=1");
-				errorLog("$DBI::errstr");
-				# only try a few times before giving up
-				return 0 if ++$tries > 5;
-				goto RETRY;
-			}
-		}
+		$data->{tid} = $tid;
+		my $inserted = $self->sqlInsert('topics', $data);
+		return 0 if !$inserted;
 	} else {
 		$self->sqlUpdate('topics', $data, "tid=$tid");
 	}
