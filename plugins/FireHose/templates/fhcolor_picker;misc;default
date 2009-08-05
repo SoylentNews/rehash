@@ -92,7 +92,7 @@ $menu.menu({
 		swatch_color('color-saved', 'color-shown');
 	},
 	out: function( e, ui ){
-		!ui.over && !ui.select && swatch_color('color-shown', 'color-saved');
+		ui.over || swatch_color('color-shown', 'color-saved');
 	},
 	stop: function(){
 		$menu.hide();
