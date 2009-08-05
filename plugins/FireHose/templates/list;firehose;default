@@ -169,11 +169,11 @@ cmdrtaco dot net but be forgiving of beta code!
 [% IF form.index %]
 <script type="text/javascript">
 	//<![CDATA[
-	$(document).ready(function(){
-		if (typeof(ad6) != "undefined" && ad6 == "active") {
+	$(function(){
+		if (ad6 === "active") {
 			$('.article:first, #firehoselist div:first').css('margin-right','110px');
 			$('#firehose #message').css('margin-right','355px');
-			$('#fad6').css("position","absolute").css("top","0").css("right","0").css("z-index","10000");
+			$('#fad6').css({ position:"absolute", top:0, right:0, zIndex:10000 });
 			$('#slashboxes').css("margin-top","320px");
 		}
 	});
