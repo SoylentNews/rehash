@@ -193,13 +193,13 @@ $(document).ready(function(){
 			[% IF item.type == 'story' %]
 			<a name="bodytext"></a>
 
-			<div class="wrapextras">
-				<label [% IF preview.bodytext; 'class="p"'; END;%]>
+			<div class="wrapextras"
+				<label class="[% IF preview.bodytext; 'clearboth nodivider'; END; %]">
 					<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 					<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
 				</label>
 				[% IF ispell_comments.bodytext %]<div class="notes">[% ispell_comments.bodytext %]</div>[% END %]
-				<label>
+				<label class="[% IF item.media; 'clearboth'; END; %]">
 					<a href="#" class="tgmedia">Media</a>
 					<a name="media"></a>
 					<textarea name="media" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
