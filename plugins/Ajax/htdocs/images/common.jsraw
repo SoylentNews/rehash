@@ -2203,7 +2203,7 @@ function show_submit_box(id) {
 }
 
 function show_submit_box_after(from_id) {
-	$('#firehose-'+from_id).hide();
+	$('#firehose-'+from_id).hide().addClass('edithidden');
 	var params = {
 		op:  'edit_submit_box_after',
 		reskey:	reskey_static
@@ -2215,6 +2215,11 @@ function show_submit_box_after(from_id) {
 	}
 
 	ajax_update(params, '',  { onComplete: json_handler });
+}
+
+function close_inline_editor() {
+	$('.edithidden').show().removeClass('edithidden');
+	$('#editor').hide('slow').remove();
 }
 
 function edit_editon(id) {
