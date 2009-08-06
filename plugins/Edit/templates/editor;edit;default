@@ -10,7 +10,7 @@ en_US
 __name__
 editor
 __template__
-[% UNLESS options.nowrap %]
+[% UNLESS nowrap %]
 <div id="editor" class="admin fhroot">
 [% END %]
 [% IF user.edit_debuginfo %]
@@ -307,7 +307,7 @@ $(document).ready(function(){
 <script type="text/javascript">
 	firehose_init_tag_ui($('#editor'));
 </script>
-[% UNLESS options.nowrap %]
+[% UNLESS nowrap %]
 </div>
 [% END %]
 
