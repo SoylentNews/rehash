@@ -15,6 +15,7 @@ __template__
 [% orig_title = title %]
 [% isa_fhroot = firehose_marquee.defined && firehose_marquee && firehose_marquee.id %]
 
+[% PROCESS tag_menus %]
 [% IF main_view %]
 <div class="head[% IF isa_fhroot %] fhroot[% END %]">
 	<div class="yui-b">

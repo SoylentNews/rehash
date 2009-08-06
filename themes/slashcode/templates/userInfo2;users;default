@@ -13,6 +13,7 @@ __name__
 userInfo2
 __template__
 [% orig_title = title %]
+[% PROCESS tag_menus %]
 
         <div class="head fhroot">
                 <div class="yui-b">

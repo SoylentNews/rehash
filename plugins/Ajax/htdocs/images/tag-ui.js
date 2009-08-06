@@ -271,7 +271,6 @@ var tag_display_fns = {
 
 		if ( $new_elems.length ) {
 			// construct all the completely new tag entries and associated machinery
-			$new_elems.append(this.tag_display_data.menu_template);
 			this.tag_display_data.$list_el[options.order]($new_elems);
 			$new_elems.after(' ');
 
@@ -367,22 +366,6 @@ var tag_display_fns = {
 }; // tag_display_fns
 
 
-function markup_menu( label ){
-	var css_class;
-	if ( label in css_classes_for_prefix ) {
-		css_class = css_classes_for_prefix[label];
-	} else if ( label[0] in css_classes_for_prefix ) {
-		css_class = css_classes_for_prefix[ label[0] ];
-	} else if ( label == 'x' ) {
-		css_class = css_classes_for_prefix['-'];
-	} else {
-		css_class = label;
-	}
-
-	return '<li class="'+css_class+'"><span>'+label+'</span></li>';
-}
-
-
 function $init_tag_displays( $stubs, options ){
 	options = options || {};
 
@@ -393,20 +376,6 @@ function $init_tag_displays( $stubs, options ){
 			var init_data = $this.metadata({type:'attr', name:'init'});
 			$this.removeAttr('init');
 
-			var menu_items = '';
-			if ( init_data.menu === undefined || init_data.menu === true ) {
-				menu_items = $init_tag_displays.default_menu;
-			} else if ( init_data.menu ) {
-				menu_items = init_data.menu;
-			}
-
-			var menu_template = menu_items ? (
-					'<ul class="tmenu">' +
-					$.map(Qw(menu_items), function(label){
-						return markup_menu(label);
-					}).join('') +
-					'</ul>' ) : '';
-
 			var legend = init_data.legend ? '<h1 class="legend">' + init_data.legend + '</h1>' : '';
 
 			var tags = $this.text();
@@ -416,7 +385,6 @@ function $init_tag_displays( $stubs, options ){
 				this,
 				{
 					tag_display_data: {
-						menu_template:	menu_template,
 						$list_el:	$this.find('ul')
 					}
 				},
@@ -434,15 +402,6 @@ function $init_tag_displays( $stubs, options ){
 	return $stubs;
 }
 
-$init_tag_displays.default_menu = 'x !';
-
-$(function(){
-	if ( tag_admin ) {
-		$init_tag_displays.default_menu = 'x ! # ## _ ^';
-	}
-});
-
-
 function cached_user_tags( selector ){
 	return $(selector).
 		find('.tag-display.ready[context=user] span.tag').
@@ -450,18 +409,6 @@ function cached_user_tags( selector ){
 				return $(this).text();
 			}).
 			get();
-}
-
-function normalize_tag_menu_command( tag, op ){
-	if ( op == "x" ) {
-		return '-' + tag;
-	} else if ( tag.length > 1 && op.length == 1 && op == tag[0] ) {
-		return tag.slice(1);
-	} else if ( op != tag ) {
-		return op + tag;
-	} else {
-		return tag;
-	}
 }
 
 

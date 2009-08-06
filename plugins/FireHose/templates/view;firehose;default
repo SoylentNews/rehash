@@ -13,6 +13,7 @@ view
 __seclev__
 10000
 __template__
+[% PROCESS tag_menus %]
 <div class="view">
 	[% IF user.is_anon;
 	   	this_fhid = form.id | fixparam;

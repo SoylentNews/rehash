@@ -10,6 +10,7 @@ en_US
 __name__
 editor
 __template__
+[% PROCESS tag_menus %]
 [% UNLESS nowrap %]
 <div id="editor" class="admin fhroot">
 [% END %]

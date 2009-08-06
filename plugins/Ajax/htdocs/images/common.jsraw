@@ -771,14 +771,14 @@ function page_click_handler( event ) {
 		} else {
 			command = tag;
 		}
-	} else if ( ($menu = $target.closest('.tmenu')).length ) {
+/*	} else if ( ($menu = $target.closest('.tmenu')).length ) {
 		var op = $target.text();
 		var $tag = $target.closest(':has(span.tag)').find('.tag');
 		$related_trigger = $tag;
 
 		var tag = $tag.text();
 		command = normalize_tag_menu_command(tag, op);
-	} else {
+*/	} else {
 		$related_trigger = $([]);
 	}
 

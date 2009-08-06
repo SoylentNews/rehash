@@ -1,0 +1,117 @@
+__name__
+tag_menus
+__page__
+misc
+__section__
+default
+__description__
+The context menus for tags and pseudo-tags in the firehose and elsewhere.
+__template__
+<style type="text/css">
+menu, menu * {
+	user-select: none;
+	-moz-user-select:none;
+	-webkit-user-select:none;
+	color:inherit;
+	text-decoration:none;
+	font-family:sans-serif;
+}
+menu[type=context] {
+	display:none;
+	position:absolute;
+	z-index:10000;
+	background-color:white;
+	padding:0.5em;
+	border:1px solid black;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+}
+#tag-menu a {
+	display:list-item;
+	list-style:none;
+	text-align:right;
+	padding:0.1em 0.5em;
+	margin:-0.1em -0.5em;
+}
+#tag-menu span { color:darkgray; }
+.tag-menu a.slash-hover,
+.tag-display span.tag:hover,
+.tag-display span.tag.trigger {
+	color:white;
+	background-color:rgb(0, 85, 85);
+}
+</style>
+<menu id="tag-menu" class="tag-menu" type="context">
+	<a href="#" data-op="-">remove <span></span></a>
+	<a href="#" data-op="!">disagree <span></span></a>
+[% IF user.is_admin %]
+	<a href="#" data-op="#">#<span></span></a>
+	<a href="#" data-op="##">##<span></span></a>
+	<a href="#" data-op="_">_<span></span></a>
+	<a href="#" data-op="^">^<span></span></a>
+[% END %]
+</menu>
+<script>
+$(function(){
+var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
+
+$('span.tag-display:not([context=signoff],[context=datatype],[context=related]) span.tag').
+	live('mousedown', function( e ){
+		return $TAG_MENU.menu('context', e, e.originalEvent.target);
+	}).
+	live('click', function( e ){
+		// TO DO...
+	});
+
+$TAG_MENU.menu({
+	cssNamespace: 'slash',
+	liveTriggers: true,
+	clickDuration: 200,
+	clickToHover: false,
+
+	start: function( e, ui ){
+		$TAG_MENU.appendTo(document.body);
+
+		var	$tag	= $(ui.trigger).addClass('trigger'),
+			align	= $tag.offset(),
+			adjust	= $TAG_MENU.offsetParent().offset();
+
+		$TAG_MENU.find('span').text($tag.text());
+
+		[% IF !user.is_admin %]
+		// Non-admins may only remove their own tags.
+		$TAG_MENU.find('a:[data-op=-]').toggle(!!$tag.parent('li.u').length);
+		[% END %]
+
+		$TAG_MENU.
+			css({
+				position: 'absolute',
+				top: align.top - adjust.top + $tag.height(),
+				left: align.left - adjust.left
+			}).
+			show();
+	},
+
+	select: function( e, ui ){
+		var	$tag	= $(ui.trigger),
+			fhitem	= $tag.closest('div.fhitem')[0],
+			op	= $(ui.select).attr('data-op'),
+			tag	= $tag.text(),
+			command	= (op + tag).replace(NOTNOT, '');
+		T2.submit_tags(fhitem, command);
+	},
+
+	stop: function( e, ui ){
+		$TAG_MENU.hide();
+		$(ui.trigger).removeClass('trigger');
+	}
+});
+});
+</script>
+__seclev__
+10000
+__lang__
+en_US
+__version__
+__title__
+Useless title to template
