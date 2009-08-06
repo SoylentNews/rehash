@@ -386,7 +386,10 @@ sub showEditor {
 		title     => (scalar keys %title_spellcheck)
 			? slashDisplay("spellcheck", { words => \%title_spellcheck, form_element => "title" }, { Page => "admin", Return => 1 })
 			: "",
-		}
+		};
+
+		$options->{errors}{warnings}{ispellwarning} = getData('ispellwarning','','edit')
+                        if keys %introtext_spellcheck || keys %bodytext_spellcheck || keys %title_spellcheck;
 	}
 
 	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session<br>";
@@ -395,7 +398,7 @@ sub showEditor {
 	my $init_sprites = 0;
 	my $previewed_item;
 
-	$options->{previewing} = 0 if $options->{errors} && keys %{$options->{errors}} > 0;
+	$options->{previewing} = 0 if $options->{errors}{critical} && keys %{$options->{errors}{critical}} > 0;
 
 	if ($p_item && $p_item->{title} && $preview->{introtext} && $options->{previewing}) {
 		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
@@ -459,13 +462,11 @@ sub showEditor {
 sub validate {
 	my($self, $preview, $item) = @_;
 	my $constants = getCurrentStatic();
-	#my @messages;
-	my %messages;	
+	my $messages;	
 
 	if ($item->{type} eq 'submission') {
 		if (length($item->{title}) < 2) {
-			#push @messages, getData('badsubject');
-			$messages{badsubject} = getData('badsubject','','edit');
+			$messages->{critical}{badsubject} = getData('badsubject','','edit');
 		}
 
 		my $message;
@@ -474,56 +475,56 @@ sub validate {
 			next unless $keys_to_check{$_};
 			# run through filters
 			if (! filterOk('submissions', $_, $keys_to_check{$_}, \$message)) {
-				#push @messages, $message;
-				$messages{$_ . '_filter_error'} = $message;
+				$messages->{critical}{$_ . '_filter_error'} = $message;
 			}
 			# run through compress test
 			if (! compressOk($keys_to_check{$_})) {
-				#my $err = getData('compresserror');
-				#push @messages, $err;
-				$messages{compresserror} = getData('compresserror','','edit');
+				$messages->{critical}{compresserror} = getData('compresserror','','edit');
 			}
 		}
 
 		if ($preview->{url_text}) {
 			if(!validUrl($preview->{url_text})) {
-				#push @messages, getData("invalidurl");
-				$messages{invalidurl} = getData("invalidurl",'','edit');
+				$messages->{critical}{invalidurl} = getData("invalidurl",'','edit');
 			}
 			if ($item->{url_id}) {
 				if ($constants->{plugin}{FireHose}) {
 					my $firehose = getObject("Slash::FireHose");
 					if (!$firehose->allowSubmitForUrl($item->{url_id})) {
 						my $submitted_items = $firehose->getFireHoseItemsByUrl($item->{url_id});
-						#push @messages, getData("duplicateurl", { submitted_items => $submitted_items });
-						$messages{duplicateurl} = getData("duplicateurl", { submitted_items => $submitted_items }, 'edit');
+						$messages->{critical}{duplicateurl} = getData("duplicateurl", { submitted_items => $submitted_items }, 'edit');
 					}
 				}
 			}
 		}
 
 		if (!$preview->{introtext}) {
-			#push @messages, "Missing title or text";
-			$messages{badintrotext} = getData('badintrotext','','edit');
+			$messages->{critical}{badintrotext} = getData('badintrotext','','edit');
 		}
 		# XXXEdit Check Nexus Extras eventually
 		# XXXEdit test reskey success / failure here? or in saveItem?
 	} elsif ($item->{type} eq 'story') {
 		# Admin-specific errors
 		if ($preview->{introtext} =~ /link to original source/i) {
-			$messages{orig_source} = getData('introtext_origsource', '', 'edit');
+			$messages->{critical}{orig_source} = getData('introtext_origsource', '', 'edit');
 		}
 
 		if (!$preview->{dept}) {
-			$messages{baddept} = getData('baddept', '', 'edit');
+			$messages->{critical}{baddept} = getData('baddept', '', 'edit');
 		}
 	}
 
-	use Data::Dumper;
+	# I'm using getTagsByGlobjid() to get the tag count because we'll
+	# eventually want to examine each tag.
+	my $tagsdb = getObject("Slash::Tags");
+        my $applied_tags = $tagsdb->getTagsByGlobjid($item->{globjid});
+        $messages->{warnings}{tagwarning} = getData('tagwarning', { type => $item->{type} }, 'edit') if (!@$applied_tags);
+
+	#use Data::Dumper;
 	#print STDERR Dumper(\@messages);
-	print STDERR Dumper(\%messages);
+	#print STDERR Dumper(\%messages);
 	#return \@messages;
-	return \%messages;	
+	return $messages;	
 }
 
 sub saveItem {
@@ -554,7 +555,7 @@ sub saveItem {
 	my $create_retval = 0;
 	my $save_type = 'new';
 
-	if ($fhitem && $fhitem->{id} && !(keys %$errors)) {
+	if ($fhitem && $fhitem->{id} && !(keys %{$errors->{critical}})) {
 		# creating a new story
 
 		if ($fhitem->{type} eq "story") {
@@ -574,9 +575,9 @@ sub saveItem {
 		} elsif ($fhitem->{type} eq 'submission') {
 			$create_retval = $self->editCreateSubmission($preview, $fhitem);
 		}
-		#push @$errors, "Save failed" if !$create_retval;
+
 		# XXX change to getData()
-		$errors->{save_error} = "Save Failed" if !$create_retval;
+		$errors->{critical}{save_error} = "Save Failed" if !$create_retval;
 	}
 
 	# XXXEdit eventually make sure this is ours before setting inactive

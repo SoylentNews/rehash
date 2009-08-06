@@ -56,10 +56,14 @@ $(document).ready(function(){
 
 </script>
 
-[% IF errors.save_error %]
-	<p>[% errors.save_error %]</p>
-[% ELSIF errors.compresserror %]
-	<p>[% errors.compresserror %]</p>
+[% IF errors.critical.save_error %]
+        <p>
+        <div style="padding:1em 0">
+                <div class="message error" style="display: inline;"><span id="modal_error"></span>[% errors.critical.save_error %]</div>
+        </div>
+        </p>
+[% ELSIF errors.critical.compresserror %]
+        <p>[% errors.critical.compresserror %]</p>
 [% END %]
 	<div id="editpreview">
 		[% previewed_item %]
@@ -86,13 +90,17 @@ $(document).ready(function(){
 		<div class="subtitle">
 			<span class="[% IF !item.title;'dyn';END;%]label">
 				<label for="title">Title Your Story</label>
-				<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50" [% IF errors.badsubject; 'class="fiterror"'; END; %]>
+				<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50">
 			</span>
-				[% IF errors.badsubject %]
-						<p>[% errors.badsubject %]</p>
-				[% ELSIF errors.subj_filter_error %]
-						<p><span id="subject_filter_error"><span id="modal_error"></span><b>[% errors.subj_filter_error %]</b></span></p>
-				[% END %]
+			[% IF errors.critical.badsubject %]
+                        	<p>[% errors.critical.badsubject %]</p>
+                	[% ELSIF errors.critical.subj_filter_error %]
+                        	<p>
+                        	<div style="padding:1em 0">
+                              		<div class="message error" style="display: inline;"><span id="modal_error"></span>[% errors.critical.subj_filter_error %]</div>
+                        	</div>
+                        	</p>
+                	[% END %]
 		</div>
 
 		<div class="notes">[% ispell_comments.title %]</div>
@@ -125,11 +133,11 @@ $(document).ready(function(){
 								<label for="url">Main url of submission (optional but if provided must be unique)</label>
 								<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
 							</span>
-								[% IF errors.invalidurl %]
-										<p>[% errors.invalidurl %]</p>
-								[% ELSIF errors.duplicateurl %]
-										<p>[% errors.duplicateurl %]</p>
-								[% END %]
+							[% IF errors.critical.invalidurl %]
+                                        			<p>[% errors.critical.invalidurl %]</p>
+                                			[% ELSIF errors.critical.duplicateurl %]
+                                        			<p>[% errors.critical.duplicateurl %]</p>
+                                			[% END %]
 						[% END %]
 						</div>
 					</div>
@@ -171,8 +179,8 @@ $(document).ready(function(){
 							</span>
 						</div>
 					</div>
-						[% IF errors.baddept %]
-							<p>[% errors.baddept %]</p>
+						[% IF errors.critical.baddept %]
+							<p>[% errors.critical.baddept %]</p>
 						[% END %]
 					[% END %]
 			[% END %]
@@ -202,19 +210,24 @@ $(document).ready(function(){
 				str_icp = str_icp _ ")</em>";
 			END; %]
 
-			[% IF errors.badintrotext %]
-							<p>[% errors.badintrotext %]</p>
-			[% ELSIF errors.story_filter_error %]
-							<p><span id="story_filter_error"><span id="modal_error"></span><b>[% errors.story_filter_error %]</b></span></p>
-			[% ELSIF errors.orig_source %]
-							<p>[% errors.orig_source %]</p>
-			[% END %]
-
 			[% PROCESS formLabel value => str_icp for => "introtext"  %]
 				<span class="[% IF !preview.introtext;'dyn';END;%]label">
 					<label for="introtext">Describe your scoop</label>
 					<textarea wrap="virtual" name="introtext" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
 				</span>
+
+			[% IF errors.critical.badintrotext %]
+                                <p>[% errors.critical.badintrotext %]</p>
+                        [% ELSIF errors.critical.story_filter_error %]
+                                <p>
+                                <div style="padding:1em 0">
+                                        <div class="message error" style="display: inline;"><span id="modal_error"></span>[% errors.critical.story_filter_error %]</div>
+                                </div>
+                                </p>
+                        [% ELSIF errors.critical.orig_source %]
+                                <p>[% errors.orig_source %]</p>
+                        [% END %]
+
 			[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
 
 			[% IF item.type == 'story' %]
@@ -260,6 +273,14 @@ $(document).ready(function(){
 			<div class="subactionbuttons">
 				[% IF preview_shown %]
 					<div class="preactionbuttons previewonly">
+						[% IF errors.warnings %]
+							<div id="preview_warnings">
+								[% FOREACH warning = errors.warnings.keys;
+                                                                	'<p>' _ errors.warnings.$warning _ '</p><br>';
+                                                        	END %]
+							</div>
+							<br>
+						[% END %]
 						<input type="submit" name="op" value="edit" id="edit-edit-button" onclick="edit_editon([% fhid %]); return false;">
 						<input type="submit" name="op" value="save" id="edit-edit-save" onclick="editSave(); return false;">
 						<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="#; return false;">

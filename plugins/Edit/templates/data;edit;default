@@ -35,11 +35,15 @@ __template__
 
 [% CASE 'compresserror' %]
 	[% returnme.data_constant = 1 %]
-	<span id="compress_error" style="font-weight: bold"><span id="modal_error"></span>Compression has detected something wrong with your submission</span>
+	<div style="padding:1em 0">
+                <div class="message error" style="display: inline;"><span id="modal_error"></span>Compression has detected something wrong with your submission.</div>
+        </div>
 
 [% CASE 'badintrotext' %]
         [% returnme.data_constant = 1 %]
-        <span id="introtext_error" style="font-weight: bold"><span id="modal_error"></span>Missing introtext.</span>
+	<div style="padding:1em 0">
+                <div class="message error" style="display: inline;"><span id="modal_error"></span>Missing introtext.</div>
+        </div>
 
 [% CASE 'introtext_origsource' %]
         [% returnme.data_constant = 1 %]
@@ -55,7 +59,17 @@ __template__
 
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
-	<span id="subject_error" style="font-weight: bold"><span id="modal_error"></span>Please enter a reasonable subject.</span>
+	<div style="padding:1em 0">
+                <div class="message error" style="display: inline;"><span id="modal_error"></span>Please enter a reasonable subject.</div>
+        </div>
+
+[% CASE 'ispellwarning' %]
+        [% returnme.data_constant = 1 %]
+        <span id="modal_error"></span>Some fields may have spelling errors.
+
+[% CASE 'tagwarning' %]
+        [% returnme.data_constant = 1 %]
+        <span id="modal_error"></span>You didn't apply any tags. You should include at least 1 tag for this [% type %].
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
