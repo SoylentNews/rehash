@@ -454,7 +454,8 @@ sub showEditor {
 		session			=> $session,
 		tag_widget		=> $tag_widget,
 		preview_info		=> $preview_info,
-		nowrap			=> $options->{nowrap}
+		nowrap			=> $options->{nowrap},
+		state			=> $options->{state},
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;

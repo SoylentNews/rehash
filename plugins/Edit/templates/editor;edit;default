@@ -17,6 +17,8 @@ __template__
 [% IF user.edit_debuginfo %]
 	[% preview_info %]
 [% END %]
+[% state = state || form.state || 'fullpage' %]
+
 <script type="text/javascript">
 
 function loginEdit() {
@@ -65,6 +67,9 @@ $(document).ready(function(){
 	[% END %]
 });
 </script>
+[% IF state == "inline" %]
+<div style="align:right"><a href="#" onclick="close_inline_editor();">Close Editor</a>
+[% END %]
 
 [% IF errors.critical.save_error %]
         <p>
@@ -91,6 +96,7 @@ $(document).ready(function(){
 		[% PROCESS reskey_tag %]
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 		<input type="hidden" name="session" value="[% session | strip_attribute %]">
+		<input type="hidden" name="state" value=[% state | strip_attribute %]">
 
 
         [% IF preview_shown %]
