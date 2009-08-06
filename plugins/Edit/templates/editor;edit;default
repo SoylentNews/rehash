@@ -96,7 +96,7 @@ $(document).ready(function(){
 		[% PROCESS reskey_tag %]
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 		<input type="hidden" name="session" value="[% session | strip_attribute %]">
-		<input type="hidden" name="state" value=[% state | strip_attribute %]">
+		<input type="hidden" name="state" value="[% state | strip_attribute %]">
 
 
         [% IF preview_shown %]

@@ -2316,23 +2316,29 @@ sub editSave {
 
 	my($editor, $id);
 	my $saved_item;
+	my $item;
 	if ($retval) {
 		$id = $retval;
 		my $num_id = $id;
 		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
 		my $fh = getObject("Slash::FireHose");
-		my $item = $fh->getFireHoseByTypeSrcid($type, $num_id);
+		$item = $fh->getFireHoseByTypeSrcid($type, $num_id);
 		$saved_item = $fh->dispFireHose($item, { view_mode => 1, mode => 'full'});
 	} else {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });
 	}
 	my $html;
+	my ($eval_first, $eval_last) = ('','');
 	if($editor) {
 		$html->{editor} = $editor;
 	} else {
 		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
+		if ($form->{state} eq 'inline') {
+			$eval_first = "\$('#firehose-$item->{id}').remove(); \$('.edithidden').show().removeClass('edithidden');";
+			$eval_last = "\$('#firehose-$item->{id}').insertBefore('#editor');";
+		}
 	}
-	return Data::JavaScript::Anon->anon_dump({ html => $html });
+	return Data::JavaScript::Anon->anon_dump({ html => $html, eval_first => $eval_first, eval_last => $eval_last });
 }
 
 ###################
