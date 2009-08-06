@@ -367,7 +367,7 @@ sub showEditor {
 
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 
-	$options->{errors} = $self->validate($preview, $p_item) if defined $form->{title} && !defined($options->{errors});
+	$options->{errors} = $self->validate($preview, $p_item) if defined $form->{title} && !$form->{new} &&  !defined($options->{errors});
 
 	my (%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
 
