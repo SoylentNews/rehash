@@ -13,6 +13,9 @@ editsave
 __seclev__
 10000
 __template__
+[% IF state == "inline" %]
+<div style="text-align:right"><a href="#" onclick="close_inline_editor();">Close Editor</a></div>
+[% END %]
 [% IF id && type %]
 	[% saved_item %]
 	<p>
