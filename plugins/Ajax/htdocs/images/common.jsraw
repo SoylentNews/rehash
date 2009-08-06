@@ -2203,6 +2203,7 @@ function show_submit_box(id) {
 }
 
 function show_submit_box_after(from_id) {
+	$('#firehose-'+from_id).hide();
 	var params = {
 		op:  'edit_submit_box_after',
 		reskey:	reskey_static
