@@ -453,7 +453,8 @@ sub showEditor {
 		previewed_item		=> $previewed_item,
 		session			=> $session,
 		tag_widget		=> $tag_widget,
-		preview_info		=> $preview_info
+		preview_info		=> $preview_info,
+		nowrap			=> $options->{nowrap}
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
