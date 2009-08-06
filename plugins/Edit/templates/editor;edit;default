@@ -19,8 +19,18 @@ __template__
 [% END %]
 <script type="text/javascript">
 
-$(document).ready(function(){
+function loginEdit() {
+	editPreview();
+	[% global_returnto = gSkin.rootdir _ '/submit' %]
+	global_returnto = '[% global_returnto %]';
+}
 
+function loginOpen() {
+	editPreview();
+	window.open('[% gSkin.rootdir %]/login.pl?returnto=[% global_returnto | fixparam %]', '_blank');
+}
+
+$(document).ready(function(){
 	$('textarea').elastic();
 
 	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
@@ -48,11 +58,10 @@ $(document).ready(function(){
 		$(this).parent("label").toggleClass("clearboth");
 	});
 
+	[% IF !form.bare %]
 	// hijack login link to save edit session
-	$('#loginlink, .loginlink').click(function(){
-		editPreview();
-		global_returnto = '[% gSkin.rootdir %]/submit';
-	});
+	$('#loginlink, .loginlink').click(loginEdit);
+	[% END %]
 });
 
 </script>
@@ -106,7 +115,7 @@ $(document).ready(function(){
 
 		<div class="notes">[% ispell_comments.title %]</div>
 
-[% IF user.is_anon %]<a onclick="show_login_box(); return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
+[% IF user.is_anon %]<a onclick="[% IF form.bare %]loginOpen();[% ELSE %]show_login_box();[% END %] return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
 
 		<div class="subdetails">
 			[% IF item.type == 'submission' %]
