@@ -12,7 +12,7 @@ editor
 __template__
 [% PROCESS tag_menus %]
 [% UNLESS nowrap %]
-<div id="editor" class="admin fhroot">
+<div id="editor" class="admin fhroot" style="text-align:left">
 [% END %]
 [% IF user.edit_debuginfo %]
 	[% preview_info %]
@@ -26,8 +26,9 @@ function loginEdit() {
 }
 
 function loginOpen() {
-	editPreview();
+	loginEdit();
 	window.open('[% gSkin.rootdir %]/login.pl?returnto=[% global_returnto | fixparam %]', '_blank');
+	$('#editor').html('<div style="text-align:center;font-size:1.5em">Please close this window now.<\/div>');
 }
 
 $(document).ready(function(){
@@ -63,7 +64,6 @@ $(document).ready(function(){
 	$('#loginlink, .loginlink').click(loginEdit);
 	[% END %]
 });
-
 </script>
 
 [% IF errors.critical.save_error %]
@@ -115,7 +115,7 @@ $(document).ready(function(){
 
 		<div class="notes">[% ispell_comments.title %]</div>
 
-[% IF user.is_anon %]<a onclick="[% IF form.bare %]loginOpen();[% ELSE %]show_login_box();[% END %] return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
+[% IF user.is_anon %]<a onclick="[% IF form.bare %]loginOpen();[% ELSE %]show_login_box();[% END %] return false;" class="loginlink" style="margin-left:150px" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
 
 		<div class="subdetails">
 			[% IF item.type == 'submission' %]
