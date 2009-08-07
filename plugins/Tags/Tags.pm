@@ -2857,6 +2857,26 @@ sub extractChosenFromTags {
 	$chosen_hr;
 }
 
+# $uid is optional, and if omitted deactivates all tags on the globj.
+# Note: non-transactional, so if a tag is added while this runs, it
+# may return with that tag still active.
+
+sub deactivateAllTagsByGlobjid {
+	my($self, $globjid, $uid) = @_;
+
+	my $options = { };
+	$options->{uid} = $uid if $uid;
+
+	my $tags_ar = $self->getTagsByGlobjid($globjid, $options);
+	for my $tag_hr (@$tags_ar) {
+		$self->deactivateTag({
+			tagnameid => $tag_hr->{tagnameid},
+			globjid =>   $globjid,
+			uid =>       $tag_hr->{uid},
+		});
+	}
+}
+
 # Options are:  src_uid, if different from current user;
 # dest_uid, if different from current user;
 # leave_old_activated, if caller does not want to deactivate old tags.
@@ -2871,13 +2891,7 @@ sub transferTags {
 
 	# Deactivate the old.
 	if (!$options->{leave_old_activated}) {
-		for my $tag_hr (@$tags_ar) {
-			$self->deactivateTag({
-				tagnameid => $tag_hr->{tagnameid},
-				globjid => $src_globjid,
-				uid => $src_uid,
-			});
-		}
+		$self->deactivateAllTagsByGlobjid($src_globjid, $src_uid);
 	}
 
 	# Activate the new.
