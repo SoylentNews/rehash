@@ -61,6 +61,13 @@ $(document).ready(function(){
 		$(this).parent("label").toggleClass("clearboth");
 	});
 
+	$("a.acdetais").click(function() {
+		$(this).parent().siblings("div.input").toggleClass('hide');
+		$(this).siblings("span").toggleClass('hide');
+		$(this).hide();
+		return false;
+	});
+
 	[% IF !form.bare %]
 	// hijack login link to save edit session
 	$('#loginlink, .loginlink').click(loginEdit);
@@ -121,11 +128,43 @@ $(document).ready(function(){
 
 		<div class="notes">[% ispell_comments.title %]</div>
 
-[% IF user.is_anon %]<a onclick="[% IF form.bare %]loginOpen();[% ELSE %]show_login_box();[% END %] return false;" class="loginlink" style="margin-left:150px" href="[% constants.rootdir %]/my/login">Log In</a>[% END %]
-
 		<div class="subdetails">
 			[% IF item.type == 'submission' %]
-						<div class="d">
+					<div class="d">
+						[% IF user.is_anon %]
+								[% IF !item.name || item.name=='Anonymous Coward';
+								isACsubm=1;
+								END;
+								IF item.email;
+								isACsubm=1;
+								END; %]
+							<div class="txt">
+								Submitted by [%
+									IF isACsubm=='1';
+										'<span>Anonymous Coward</span>';
+									ELSE;
+										'<span>';
+											item.name | strip_attribute;
+										'</span>';
+									END;
+									%] <a class="acdetais" href="#">+</a>
+							</div>
+							<div class="input w120 hide">
+								<span class="[% IF !item.name;'dyn';END;%]label">
+									<label for="name">Your Name: Leave blank to be Anonymous</label>
+									<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
+								</span>
+							</div>
+							<div class="input hide">
+								<span class="[% IF !item.email;'dyn';END;%]label">
+									<label for="email">Your Email or Homepage where users can contact you</label>
+									<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
+								</span>
+							</div>
+							<div class="txt">
+								<a onclick="[% IF form.bare %]loginOpen();[% ELSE %]show_login_box();[% END %] return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>
+							</div>
+						[% ELSE %]
 							<div class="txt">
 								Submitted by
 							</div>
@@ -141,7 +180,13 @@ $(document).ready(function(){
 									<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
 								</span>
 							</div>
-						</div>
+
+						[% END %]
+					</div>
+
+
+
+
 					<div class="d">
 						<div class="input w380">
 						[% IF constants.plugin.FireHose %]
