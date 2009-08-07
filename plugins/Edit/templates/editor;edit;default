@@ -186,13 +186,16 @@ $(document).ready(function(){
 					[% IF constants.use_dept %]
 					<div class="d">
 						<div class="txt">
-							form the
+							from the
 						</div>
 						<div class="input w120">
 							<span class="[% IF !item.dept;'dyn';END;%]label">
 								<label for="dept">Dept</label>
 								<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
 							</span>
+						</div>
+						<div class="txt">
+							dept.
 						</div>
 					</div>
 						[% IF errors.critical.baddept %]
