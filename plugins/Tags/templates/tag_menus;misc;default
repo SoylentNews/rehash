@@ -10,6 +10,7 @@ __template__
 <style type="text/css">
 menu, menu * {
 	user-select: none;
+	cursor:pointer;
 	-moz-user-select:none;
 	-webkit-user-select:none;
 	color:inherit;
@@ -21,6 +22,7 @@ menu[type=context] {
 	position:absolute;
 	z-index:10000;
 	background-color:white;
+	margin:0.4em 0 0;
 	padding:0.5em;
 	border:1px solid black;
 	-moz-border-radius:5px;
@@ -29,12 +31,18 @@ menu[type=context] {
 #tag-menu a {
 	display:list-item;
 	list-style:none;
-	text-align:right;
+	text-align:left;
+	font-weight:bold;
+	color:black;
 	padding:0.1em 0.5em;
 	margin:-0.1em -0.5em;
 }
-#tag-menu span { color:darkgray; }
-.tag-menu a.slash-hover,
+[% IF user.is_admin %]
+#tag-menu span.op { display:inline-block; min-width:1em; text-align:right; }
+#tag-menu a.group { border-bottom:1px solid darkgray; padding-bottom:0.5em; margin-bottom:0.75em; }
+[% END %]
+#tag-menu span.var-tag { font-style:italic; font-weight:normal; }
+#tag-menu a.slash-hover,
 .tag-display span.tag:hover,
 .tag-display span.tag.trigger {
 	color:white;
@@ -42,14 +50,15 @@ menu[type=context] {
 }
 </style>
 <menu id="tag-menu" class="tag-menu" type="context">
-	<a href="#" data-op="-">remove <span></span></a>
-	<a href="#" data-op="!">disagree <span></span></a>
 [% IF user.is_admin %]
-	<a href="#" data-op="#">#<span></span></a>
-	<a href="#" data-op="##">##<span></span></a>
-	<a href="#" data-op="_">_<span></span></a>
-	<a href="#" data-op="^">^<span></span></a>
+	<a href="#" data-op="#" class="admin"><span class="op">#</span><span class="var-tag"></span></a>
+	<a href="#" data-op="##" class="admin"><span class="op">##</span><span class="var-tag"></span></a>
+	<a href="#" data-op="_" class="admin"><span class="op">_</span><span class="var-tag"></span></a>
+	<a href="#" data-op="^" class="group admin"><span class="op">^</span><span class="var-tag"></span></a>
 [% END %]
+	<a href="#" data-op="-">delete <span class="var-tag"></span></a>
+	<a href="#" data-op="!">not <span class="var-tag"></span></a>
+	<a href="#" data-op="="><span class="var-tag"></span> in <span class="var-view"></span></a>
 </menu>
 <script>
 $(function(){
@@ -58,30 +67,31 @@ var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
 $('span.tag-display:not([context=signoff],[context=datatype],[context=related]) span.tag').
 	live('mousedown', function( e ){
 		return $TAG_MENU.menu('context', e, e.originalEvent.target);
-	}).
-	live('click', function( e ){
-		// TO DO...
 	});
 
 $TAG_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	clickDuration: 200,
-	clickToHover: false,
+	clickToHover: true,
 
 	start: function( e, ui ){
 		$TAG_MENU.appendTo(document.body);
 
 		var	$tag	= $(ui.trigger).addClass('trigger'),
 			align	= $tag.offset(),
-			adjust	= $TAG_MENU.offsetParent().offset();
+			adjust	= $TAG_MENU.offsetParent().offset(),
+			context	= search_eligible($tag) && firehose_settings && firehose_settings.viewtitle;
 
-		$TAG_MENU.find('span').text($tag.text());
+		// Insert the tagname into the menu items where needed.
+		$TAG_MENU.find('span.var-tag').text($tag.text());
 
-		[% IF !user.is_admin %]
-		// Non-admins may only remove their own tags.
+		[% IF !user.is_admin %] // delete *tagname*: non-admins may only delete their own tags
 		$TAG_MENU.find('a:[data-op=-]').toggle(!!$tag.parent('li.u').length);
 		[% END %]
+
+		// *tagname* in *viewtitle*
+		$TAG_MENU.find('a:[data-op==]').toggle(!!context);
+		context && $TAG_MENU.find('span.var-view').text(context);
 
 		$TAG_MENU.
 			css({
@@ -94,11 +104,25 @@ $TAG_MENU.menu({
 
 	select: function( e, ui ){
 		var	$tag	= $(ui.trigger),
-			fhitem	= $tag.closest('div.fhitem')[0],
-			op	= $(ui.select).attr('data-op'),
 			tag	= $tag.text(),
-			command	= (op + tag).replace(NOTNOT, '');
-		T2.submit_tags(fhitem, command);
+			op	= $(ui.select).attr('data-op'),
+			fhitem,
+			command;
+
+		// Global for positioning other things.
+		$related_trigger = $tag;
+
+		switch ( op ) {
+			case '=':
+				addfhfilter(tag);
+				break;
+
+			default:
+				fhitem = $tag.closest('div.fhitem')[0];
+				command = (op + tag).replace(NOTNOT, '');
+				T2.submit_tags(fhitem, command);
+				break;
+		}
 	},
 
 	stop: function( e, ui ){
