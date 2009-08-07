@@ -762,23 +762,9 @@ function page_click_handler( event ) {
 	} else if ( $target.is('.sodify,.skin,.topic *') ) {
 		// mostly already handled by its own click-handler, but...
 		intent = 'search';
-/*	} else if ( $target.is('.tag') ) {
-		var tag = $target.text();
-		if ( !event.shiftKey && search_eligible($target) ) {
-			// Even anonymous readers may click tags to refine the current search/filter.
-			addfhfilter(tag);
-			leaving = intent = 'search';
-		} else {
-			command = tag;
-		}
-	} else if ( ($menu = $target.closest('.tmenu')).length ) {
-		var op = $target.text();
-		var $tag = $target.closest(':has(span.tag)').find('.tag');
-		$related_trigger = $tag;
-
-		var tag = $tag.text();
-		command = normalize_tag_menu_command(tag, op);
-*/	} else {
+	} else if ( $target.is('.b .tag,[context=related] .tag') ) {
+		command = $target.text();
+	} else {
 		$related_trigger = $([]);
 	}
 
