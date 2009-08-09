@@ -10469,6 +10469,63 @@ sub setStoryTopicsChosen {
 }
 
 ########################################################
+
+sub breakTopicParent {
+	my($self, $child_tid, $parent_tid) = @_;
+
+	my $min_weight = $self->sqlSelect('min_weight', 'topic_parents',
+		"tid=$child_tid AND parent_tid=$parent_tid");
+	if (!$min_weight) {
+		warn "breakTopicParent called for $child_tid -> $parent_tid which has no min_weight";
+		return undef;
+	}
+
+	# stc = child topic chosen for a story, with
+	#   weight >= min_weight for this link
+	# str = parent topic rendered for that story
+	# stc2 = parent topic _not_ chosen for that story
+	# If that is the case, this child->parent link may be the sole reason that
+	# the parent topic is rendered, and so we set it manually.
+
+	my $stoid_weight = $self->sqlSelectAllKeyValue('str.stoid, stc.weight',
+		'story_topics_chosen AS stc,
+		 story_topics_rendered AS str LEFT JOIN story_topics_chosen AS stc2
+			ON (str.stoid=stc2.stoid AND str.tid=stc2.tid)',
+		'stc.stoid=str.stoid
+		 AND stc.weight >= $min_weight
+		 AND stc.tid=$child_tid
+		 AND str.tid=$parent_tid
+		 AND stc2.tid IS NULL');
+
+	my @stoids = sort { $a <=> $b } keys %$stoid_weight;
+	if (@stoids) {
+		$self->sqlDo('SET AUTOCOMMIT=0');
+		for my $stoid (@stoids) {
+			$self->sqlInsert('story_topics_chosen', {
+				stoid => $stoid,
+				tid => $parent_tid,
+				weight => $stoid_weight->{$stoid},
+			}, { ignore => 1, delayed => 1 });
+		}
+		$self->sqlDo('COMMIT');
+		$self->sqlDo('SET AUTOCOMMIT=1');
+		$self->markStoriesRenderDirty(\@stoids);
+	}
+	$self->sqlDelete('topic_parents', "tid=$child_tid AND parent_tid=$parent_tid");
+
+	return scalar @stoids;
+}
+
+sub addTopicParent {
+	my($self, $child_tid, $parent_tid, $min_weight) = @_;
+	return $self->sqlInsert('topic_parents', {
+		tid => $child_tid,
+		parent_tid => $parent_tid,
+		min_weight => $min_weight,
+	});
+}
+
+########################################################
 sub getTemplates {
 	my $answer = _genericGetsCache('templates', 'tpid', '', @_);
 	return $answer;
@@ -10807,6 +10864,9 @@ sub setUser {
 	# I should look into that. (REPLACE is faster) -Brian
 	for my $param_ar (@param) {
 		my($name, $value) = @$param_ar;
+		# XXX $name can start with '-' here and if so any update should
+		# reflect that.  This is why our DB has users_param entries for
+		# name="-deletedsubmissions".
 		my $name_q = $self->sqlQuote($name);
 		if (!defined($value) || $value eq "") {
 			if (exists $old_values{$name}) {
