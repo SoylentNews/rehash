@@ -6517,3 +6517,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'edit_submit_box_after', 'Slash::Edit', 'ajax
 # 2009-08-06
 UPDATE vars SET value = 'T_2_5_0_267' WHERE name = 'cvs_tag_currentcode';
 
+# 2009-08-09
+# for plugins/FireHose
+ALTER TABLE firehose MODIFY url_id int(8) unsigned NOT NULL default '0';
+
