@@ -398,7 +398,7 @@ sub showEditor {
 	my $init_sprites = 0;
 	my $previewed_item;
 
-	$options->{previewing} = 0 if $options->{errors}{critical} && keys %{$options->{errors}{critical}} > 0;
+	$options->{previewing} = 0 if ($options->{errors}{critical} && keys %{$options->{errors}{critical}} > 0) || $form->{'new'};
 
 	if ($p_item && $p_item->{title} && $preview->{introtext} && $options->{previewing}) {
 		my $preview_hide = $options->{previewing} ? "" : " class='hide'";

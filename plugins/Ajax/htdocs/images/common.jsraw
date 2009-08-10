@@ -2232,6 +2232,19 @@ function editSave() {
 	editPreview(1);
 }
 
+function submit_reset(id) {
+	var params = {
+		'op': 'edit_reset',
+		'new' : 1
+	};
+
+	if (id) {
+		params['from_id'] = id;
+	}
+
+	ajax_update(params, '', { onComplete: json_handler });
+}
+
 function submit_cancel() {
 	hide_modal_box();
 	close_inline_editor();

@@ -2298,6 +2298,19 @@ sub editPreview {
 	return Data::JavaScript::Anon->anon_dump({ html => $html });
 }
 
+sub editReset {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $edit = getObject("Slash::Edit");
+	$edit->initEditor();
+
+	my $html;
+	$html->{editor} = $edit->showEditor({ previewing => 1, nowrap => 1});
+
+	return Data::JavaScript::Anon->anon_dump({ html => $html });
+}
+
+
 sub editSave {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
@@ -2381,6 +2394,12 @@ sub getOps {
 			reskey_type	=> 'touch',
 		},
 
+		edit_reset => {
+			function	=> \&editReset,
+			reskey_name	=> 'ajax_base',
+			reskey_type	=> 'createuse',
+		},
+
 		edit_save => {
 			function	=> \&editSave,
 			reskey_name	=> 'edit-submit',
@@ -2392,6 +2411,7 @@ sub getOps {
 			reskey_name     => 'ajax_base',
 			reskey_type     => 'createuse',
 		},
+
 		comments_read_rest      => {
 			function        => \&readRest,
 			reskey_name     => 'ajax_base',
