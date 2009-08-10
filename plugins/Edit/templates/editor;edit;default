@@ -14,6 +14,12 @@ __template__
 [% UNLESS nowrap %]
 <div id="editor" class="admin fhroot" style="text-align:left">
 [% END %]
+
+
+<a href="/submit?new=1" onclick="submit_reset();return false;">Reset</a> | <a href="/submit?new=1" onclick="submit_cancel(); return false;">Cancel</a>
+<br>
+
+
 [% IF user.edit_debuginfo %]
 	[% preview_info %]
 [% END %]

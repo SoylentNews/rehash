@@ -2232,6 +2232,11 @@ function editSave() {
 	editPreview(1);
 }
 
+function submit_cancel() {
+	hide_modal_box();
+	close_inline_editor();
+}
+
 
 function resetModalPrefs(extra_param) {
 	var params = {
