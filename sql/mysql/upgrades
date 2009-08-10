@@ -6523,3 +6523,6 @@ ALTER TABLE firehose MODIFY url_id int(8) unsigned NOT NULL default '0';
 UPDATE firehose, globjs SET firehose.url_id = globjs.target_id WHERE firehose.globjid=globjs.globjid AND gtid=2 AND firehose.url_id = 16777215 AND target_id > 16777215;
 UPDATE firehose, globjs SET firehose.url_id = 0 WHERE firehose.globjid=globjs.globjid AND type='submission' AND gtid=3 AND firehose.url_id = 16777215;
 
+# Captcha text modification
+UPDATE humanconf_questions SET question = '<div class="yui-u first"><span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span></div>' WHERE hcqid=1;
+
