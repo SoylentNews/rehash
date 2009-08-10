@@ -51,14 +51,14 @@ menu[type=context] {
 </style>
 <menu id="tag-menu" class="tag-menu" type="context">
 [% IF user.is_admin %]
-	<a href="#" data-op="#" class="admin"><span class="op">#</span><span class="var-tag"></span></a>
-	<a href="#" data-op="##" class="admin"><span class="op">##</span><span class="var-tag"></span></a>
-	<a href="#" data-op="_" class="admin"><span class="op">_</span><span class="var-tag"></span></a>
-	<a href="#" data-op="^" class="group admin"><span class="op">^</span><span class="var-tag"></span></a>
+	<a data-op="#" class="admin"><span class="op">#</span><span class="var-tag"></span></a>
+	<a data-op="##" class="admin"><span class="op">##</span><span class="var-tag"></span></a>
+	<a data-op="_" class="admin"><span class="op">_</span><span class="var-tag"></span></a>
+	<a data-op="^" class="group admin"><span class="op">^</span><span class="var-tag"></span></a>
 [% END %]
-	<a href="#" data-op="-">delete <span class="var-tag"></span></a>
-	<a href="#" data-op="!">not <span class="var-tag"></span></a>
-	<a href="#" data-op="="><span class="var-tag"></span> in <span class="var-view"></span></a>
+	<a data-op="-">delete <span class="var-tag"></span></a>
+	<a data-op="!">not <span class="var-tag"></span></a>
+	<a data-op="="><span class="var-tag"></span> in <span class="var-view"></span></a>
 </menu>
 <script>
 $(function(){
