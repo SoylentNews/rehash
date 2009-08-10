@@ -289,7 +289,7 @@ $(document).ready(function(){
                                 </div>
                                 </p>
                         [% ELSIF errors.critical.orig_source %]
-                                <p>[% errors.orig_source %]</p>
+                                <p>[% errors.critical.orig_source %]</p>
                         [% END %]
 
 			[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
