@@ -7,6 +7,7 @@ default
 __description__
 The context menus for tags and pseudo-tags in the firehose and elsewhere.
 __template__
+[% UNLESS user.is_anon %]
 <style type="text/css">
 menu, menu * {
 	user-select: none;
@@ -51,10 +52,10 @@ menu[type=context] {
 </style>
 <menu id="tag-menu" class="tag-menu" type="context">
 [% IF user.is_admin %]
-	<a data-op="#" class="admin"><span class="op">#</span><span class="var-tag"></span></a>
-	<a data-op="##" class="admin"><span class="op">##</span><span class="var-tag"></span></a>
-	<a data-op="_" class="admin"><span class="op">_</span><span class="var-tag"></span></a>
-	<a data-op="^" class="group admin"><span class="op">^</span><span class="var-tag"></span></a>
+	<a data-op="#"><span class="op">#</span><span class="var-tag"></span></a>
+	<a data-op="##"><span class="op">##</span><span class="var-tag"></span></a>
+	<a data-op="_"><span class="op">_</span><span class="var-tag"></span></a>
+	<a data-op="^" class="group"><span class="op">^</span><span class="var-tag"></span></a>
 [% END %]
 	<a data-op="-">delete <span class="var-tag"></span></a>
 	<a data-op="!">not <span class="var-tag"></span></a>
@@ -132,6 +133,7 @@ $TAG_MENU.menu({
 });
 });
 </script>
+[% END %]
 __seclev__
 10000
 __lang__
