@@ -1956,11 +1956,11 @@ Hashref of cleaned-up data.
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
-		approved artcount art_offset bseclev
+		approved artcount art_offset after_id bseclev
 		buymore cid clbig clsmall cm_offset
 		commentlimit commentsort commentspill
 		del displaystatus limit
-		filter_id firehose_default_section hbtm height highlightthresh
+		filter_id firehose_default_section hbtm from_id height highlightthresh
 		issue last maillist max
 		maxcommentsize maximum_length maxstories
 		min min_comment minimum_length minimum_match next
@@ -1977,7 +1977,7 @@ Hashref of cleaned-up data.
 		url_id spider_id miner_id keyword_id
 		st_main_select stc_main_select
 		parent_topic child_topic
-		skid primaryskid d2_comment_q d2_comment_order
+		skid primaryskid d2_comment_q d2_comment_order f
 	),
 	# Survey
 	qw(
