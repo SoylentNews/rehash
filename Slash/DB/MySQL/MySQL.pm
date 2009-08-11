@@ -10470,12 +10470,28 @@ sub setStoryTopicsChosen {
 
 ########################################################
 
+# returns undef on error, else the number of stories that were
+# marked dirty as a result of the change.
+
 sub breakTopicParent {
 	my($self, $child_tid, $parent_tid) = @_;
 
 	my $min_weight = $self->sqlSelect('min_weight', 'topic_parents',
 		"tid=$child_tid AND parent_tid=$parent_tid");
+
+	if ($min_weight == -1) {
+		# This child->parent link exists only to _prevent_ stories
+		# with the child from existing in the parent, unless
+		# explicitly asked otherwise;  thus, nothing need be done
+		# for old stories on breaking the link.
+		$self->sqlDelete('topic_parents', "tid=$child_tid AND parent_tid=$parent_tid");
+		$slashdb->setVar("topic_tree_lastchange", time);
+		return 0;
+	}
+
 	if (!$min_weight) {
+		# Apparently we were asked to break a link which does
+		# not exist.
 		warn "breakTopicParent called for $child_tid -> $parent_tid which has no min_weight";
 		return undef;
 	}
@@ -10512,6 +10528,8 @@ sub breakTopicParent {
 		$self->markStoriesRenderDirty(\@stoids);
 	}
 	$self->sqlDelete('topic_parents', "tid=$child_tid AND parent_tid=$parent_tid");
+
+	$slashdb->setVar("topic_tree_lastchange", time);
 
 	return scalar @stoids;
 }
