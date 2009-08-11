@@ -60,11 +60,13 @@ $(document).ready(function(){
 		$("#admin-media").toggle();
 		$(this).parent("label").toggleClass("clearboth");
 		$(this).parent().siblings("label").toggleClass("nodivider");
+		return false;
 	});
 
 	$("a.tgbodytext").click(function() {
 		$("#admin-bodytext").toggle();
 		$(this).parent("label").toggleClass("clearboth");
+		return false;
 	});
 
 	$("a.acdetais").click(function() {
