@@ -35,61 +35,45 @@ __template__
 
 [% CASE 'compresserror' %]
 	[% returnme.data_constant = 1 %]
-	<div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>Compression has detected something wrong with your submission.</div>
-        </div>
+                <div class="message error"><span id="modal_error"></span>Compression has detected something wrong with your submission.</div>
 
 [% CASE 'badintrotext' %]
         [% returnme.data_constant = 1 %]
-	<div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>Missing introtext.</div>
-        </div>
+                <div class="message error block"><span id="modal_error"></span>Missing introtext.</div>
 
 [% CASE 'introtext_origsource' %]
         [% returnme.data_constant = 1 %]
-        <div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>Introtext cannot contain 'Link to Original Source'.</div>
-        </div>
+                <div class="message error block"><span id="modal_error"></span>Introtext cannot contain 'Link to Original Source'.</div>
 
 [% CASE 'baddept' %]
         [% returnme.data_constant = 1 %]
-        <div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>Department cannot be left blank.</div>
-        </div>
+                <div class="message error"><span id="modal_error"></span>Department cannot be left blank.</div>
 
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
-	<div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>Please enter a reasonable subject.</div>
-        </div>
+                <div class="message error block"><span id="modal_error"></span>Please enter a reasonable subject.</div>
 
 [% CASE 'ispellwarning' %]
         [% returnme.data_constant = 1 %]
-        <span id="modal_error"></span>Some fields may have spelling errors.
+        <div class="message error"><span id="modal_error"></span>Some fields may have spelling errors.</div>
 
 [% CASE 'tagwarning' %]
         [% returnme.data_constant = 1 %]
-        <span id="modal_error"></span>You didn't apply any tags. You should include at least 1 tag for this [% type %].
+        <div class="message error"><span id="modal_error"></span>You didn't apply any tags. You should include at least 1 tag for this [% type %].</div>
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
-	<div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://)</div>
-        </div>
+                <div class="message error block"><span id="modal_error"></span>You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://)</div>
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
-		<div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>The url you've attempted to submit has already been submitted. A url if provided in the url field must be unique.</div>
-        </div>
-        <div style="padding-left: 15px">
-                <span style="font-weight: bold">Links to already submitted items on this url below:</span>
+                <div class="message error block"><span id="modal_error"></span>The url you've attempted to submit has already been submitted. A url if provided in the url field must be unique.</div>
+                <span>Links to already submitted items on this url below:</span>
                 <ul>
                         [% FOREACH item = submitted_items %]
                                 <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">[% item.title | strip_literal %] ([% item.type | strip_literal %])</a></li>
                         [% END %]
                 </ul>
-        </div>
 [% END %]
 __seclev__
 10000

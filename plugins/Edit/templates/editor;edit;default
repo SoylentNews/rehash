@@ -79,13 +79,9 @@ $(document).ready(function(){
 [% END %]
 
 [% IF errors.critical.save_error %]
-        <p>
-        <div style="padding:1em 0">
-                <div class="message error" style="display: inline;"><span id="modal_error"></span>[% errors.critical.save_error %]</div>
-        </div>
-        </p>
+                <div class="message error"><span id="modal_error"></span>[% errors.critical.save_error %]</div>
 [% ELSIF errors.critical.compresserror %]
-        <p>[% errors.critical.compresserror %]</p>
+        [% errors.critical.compresserror %]
 [% END %]
 	<div id="editpreview">
 		[% previewed_item %]
@@ -116,13 +112,9 @@ $(document).ready(function(){
 				<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50">
 			</span>
 			[% IF errors.critical.badsubject %]
-                        	<p>[% errors.critical.badsubject %]</p>
+                        	[% errors.critical.badsubject %]
                 	[% ELSIF errors.critical.subj_filter_error %]
-                        	<p>
-                        	<div style="padding:1em 0">
-                              		<div class="message error" style="display: inline;"><span id="modal_error"></span>[% errors.critical.subj_filter_error %]</div>
-                        	</div>
-                        	</p>
+							<div class="message error"><span id="modal_error"></span>[% errors.critical.subj_filter_error %]</div>
                 	[% END %]
 		</div>
 
@@ -195,9 +187,9 @@ $(document).ready(function(){
 								<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
 							</span>
 							[% IF errors.critical.invalidurl %]
-                                        			<p>[% errors.critical.invalidurl %]</p>
+                                        			[% errors.critical.invalidurl %]<
                                 			[% ELSIF errors.critical.duplicateurl %]
-                                        			<p>[% errors.critical.duplicateurl %]</p>
+                                        			[% errors.critical.duplicateurl %]
                                 			[% END %]
 						[% END %]
 						</div>
@@ -244,7 +236,7 @@ $(document).ready(function(){
 						</div>
 					</div>
 						[% IF errors.critical.baddept %]
-							<p>[% errors.critical.baddept %]</p>
+							[% errors.critical.baddept %]
 						[% END %]
 					[% END %]
 			[% END %]
@@ -278,19 +270,14 @@ $(document).ready(function(){
 				<span class="[% IF !preview.introtext;'dyn';END;%]label">
 					<label for="introtext">Describe your scoop</label>
 					<textarea wrap="virtual" name="introtext" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
-				</span>
-
-			[% IF errors.critical.badintrotext %]
-                                <p>[% errors.critical.badintrotext %]</p>
+						[% IF errors.critical.badintrotext %]
+                                [% errors.critical.badintrotext %]
                         [% ELSIF errors.critical.story_filter_error %]
-                                <p>
-                                <div style="padding:1em 0">
-                                        <div class="message error" style="display: inline;"><span id="modal_error"></span>[% errors.critical.story_filter_error %]</div>
-                                </div>
-                                </p>
+                                        <div class="message error"><span id="modal_error"></span>[% errors.critical.story_filter_error %]</div>
                         [% ELSIF errors.critical.orig_source %]
-                                <p>[% errors.critical.orig_source %]</p>
+                                [% errors.critical.orig_source %]
                         [% END %]
+				</span>
 
 			[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
 
