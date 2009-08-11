@@ -10485,7 +10485,7 @@ sub breakTopicParent {
 		# explicitly asked otherwise;  thus, nothing need be done
 		# for old stories on breaking the link.
 		$self->sqlDelete('topic_parents', "tid=$child_tid AND parent_tid=$parent_tid");
-		$slashdb->setVar("topic_tree_lastchange", time);
+		$self->setVar("topic_tree_lastchange", time);
 		return 0;
 	}
 
@@ -10529,7 +10529,7 @@ sub breakTopicParent {
 	}
 	$self->sqlDelete('topic_parents', "tid=$child_tid AND parent_tid=$parent_tid");
 
-	$slashdb->setVar("topic_tree_lastchange", time);
+	$self->setVar("topic_tree_lastchange", time);
 
 	return scalar @stoids;
 }
