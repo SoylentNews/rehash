@@ -1302,7 +1302,7 @@ sub setGetDisplayTags { # T2
 	if ( $commands ) {
 		my $tags_writer = getObject('Slash::Tags');
 		if (!$user->{is_anon} || ($user->{is_anon} && $table eq 'preview')) {
-			$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
+			$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, $commands, {
 				deactivate_by_operator => 1,
 				tagname_required => 1,
 				include_private => 1
@@ -1317,6 +1317,7 @@ sub setGetDisplayTags { # T2
 				lc $commands;
 
 			my $firehose = getObject('Slash::FireHose');
+			# FIX ME!: Need to set watchlist and topics through Jamie, not Firehose.
 			$firehose->setSectionTopicsFromTagstring($firehose_id , $added_tags);
 			$firehose_item = $firehose->getFireHose($firehose_id);
 		};
@@ -1326,16 +1327,20 @@ sub setGetDisplayTags { # T2
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
-	my ($datatype, $top_tags, $section_tag, $topic_tags);
+	# FIX ME! ...BEGIN...
+	# Here I use Firehose functions to get the watchlist and topic tags;
+	#	but I need to get these directly Jamie, who knows that there
+	#	can be more than one of each.
+	my ($datatype, $popular_tags, $main_watchlist_tag, $topic_tags);
 	if ( $firehose_item ) {
 		$datatype = $firehose_item->{type};
-		$top_tags = $firehose_item->{toptags};
+		$popular_tags = $firehose_item->{toptags};
 
 		my $skid = $firehose_item->{primaryskid};
 		if ( $skid ) {
 			if ( $skid != $constants->{mainpage_skid} ) {
 				my $skin = $firehose_reader->getSkin($skid);
-				$section_tag = $skin->{name};
+				$main_watchlist_tag = $skin->{name};
 			}
 		}
 
@@ -1345,20 +1350,35 @@ sub setGetDisplayTags { # T2
 			$topic_tags = $topic->{keyword};
 		}
 	}
+	# FIX ME! ...END...
 
 	my $tags = {
-		user_tags	=> $user_tags,
-		top_tags	=> $top_tags,
-		topic_tags	=> $topic_tags,
-		section_tag	=> $section_tag,
-		datatype	=> $datatype,
+		domain_tag		=> 'slashdot',
+		datatype		=> $datatype || 'unknown',
+		main_watchlist_tag	=> $main_watchlist_tag,
+		topic_tags		=> $main_watchlist_tag . ' ' . $topic_tags,  # includes all watchlist tags as well
+		popular_tags		=> $popular_tags,
+		user_tags		=> $user_tags,
 	};
 
 	return $tags;
 }
 
+sub update_class_map {
+	my($map, $order, $tags, $classes, $base_class) = @_;
+	for my $tag (split /\s+/, lc $tags) {
+		my $current = $map->{$tag};
+		if ( !$current ) {
+			push @$order, $tag;
+			$current = $base_class || 'tag';
+		}
+		$map->{$tag} = $classes . ' ' . $current;
+	}
+}
+
 sub ajaxSetGetDisplayTags { # T2
 	my($slashdb, $constants, $user, $form) = @_;
+	my $result='';
 
 	my $tag_reader = getObject("Slash::Tags", { db_type => 'reader' });
 	my $tags = $tag_reader->setGetDisplayTags(
@@ -1368,7 +1388,21 @@ sub ajaxSetGetDisplayTags { # T2
 		$form->{tags},
 		$form->{global_tags_only}
 	);
-	slashDisplay('tagbar', $tags, { Return => 1 });
+
+	my $class={};
+	my $order=[];
+	update_class_map($class, $order, $tags->{domain_tag},		'domain');
+	update_class_map($class, $order, $tags->{datatype},		'datatype', 'pseudo-tag');
+	update_class_map($class, $order, $tags->{main_watchlist_tag},	'main');
+	update_class_map($class, $order, $tags->{topic_tags},		'topic');
+	update_class_map($class, $order, $tags->{popular_tags},		'popular');
+	update_class_map($class, $order, $tags->{user_tags},		'my');
+
+	for my $tagname (@$order) {
+		# FIX ME!: add image for topic tags if $form->{include_topic_images}
+		$result .= '<a rel="tag" menu="tag-menu" class="' . $class->{$tagname} . '" href="/tag/' . $tagname . '">' . $tagname . "</a>\n";
+	}
+	return $result;
 }
 
 sub ajaxSetGetCombinedTags { # deprecated, moving to T2: ajaxSetGetDisplayTags
@@ -1383,9 +1417,7 @@ sub ajaxSetGetCombinedTags { # deprecated, moving to T2: ajaxSetGetDisplayTags
 		$form->{global_tags_only}
 	);
 
-	my $system_tags = $tags->{section_tag} . ' ' . $tags->{topic_tags};
-
-	my $response = '<datatype>' . ($tags->{datatype} || 'unknown') . '<system>' . $system_tags . '<top>'. $tags->{top_tags};
+	my $response = '<datatype>' . $tags->{datatype} . '<system>' . $tags->{topic_tags} . '<top>'. $tags->{popular_tags};
 	$response .= '<user>' . $tags->{user_tags} unless $form->{global_tags_only};
 
 	return $response;
@@ -1396,9 +1428,9 @@ sub setGetCombinedTags { # deprecated, moving to T2: setGetDisplayTags
 	my $tags = $self->setGetDisplayTags($key, $key_type, $user, $commands, !$user);
 
 	my $response = {
-		datatype	=> $tags->{datatype} || 'unknown',
-		'system'	=> $tags->{section_tag} . ' ' . $tags->{topic_tags},
-		top		=> $tags->{top_tags},
+		datatype	=> $tags->{datatype},
+		'system'	=> $tags->{topic_tags},
+		top		=> $tags->{popular_tags},
 	};
 	$response->{user} = $tags->{user_tags} if $user;
 	return $response;

@@ -56,6 +56,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_history', 'Slash::Tags', 'ajaxTagHistor
 INSERT INTO ajax_ops VALUES (NULL, 'tags_list_tagnames', 'Slash::Tags', 'ajaxListTagnames', 'ajax_tags_read', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_deactivate', 'Slash::Tags', 'ajaxDeactivateTag', 'ajax_tags_write', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_combined', 'Slash::Tags', 'ajaxSetGetCombinedTags', 'ajax_base_static', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_display', 'Slash::Tags', 'ajaxSetGetDisplayTags', 'ajax_base_static', 'createuse');
 
 INSERT INTO globj_types VALUES (NULL, 'tagnames');
 

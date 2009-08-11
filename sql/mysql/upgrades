@@ -6526,3 +6526,5 @@ UPDATE firehose, globjs SET firehose.url_id = 0 WHERE firehose.globjid=globjs.gl
 # Captcha text modification
 UPDATE humanconf_questions SET question = '<div class="yui-u first"><span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span></div>' WHERE hcqid=1;
 
+# 2009-08-11
+INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_display', 'Slash::Tags', 'ajaxSetGetDisplayTags', 'ajax_base_static', 'createuse');
