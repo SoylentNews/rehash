@@ -10507,11 +10507,11 @@ sub breakTopicParent {
 		'story_topics_chosen AS stc,
 		 story_topics_rendered AS str LEFT JOIN story_topics_chosen AS stc2
 			ON (str.stoid=stc2.stoid AND str.tid=stc2.tid)',
-		'stc.stoid=str.stoid
+		"stc.stoid=str.stoid
 		 AND stc.weight >= $min_weight
 		 AND stc.tid=$child_tid
 		 AND str.tid=$parent_tid
-		 AND stc2.tid IS NULL');
+		 AND stc2.tid IS NULL");
 
 	my @stoids = sort { $a <=> $b } keys %$stoid_weight;
 	if (@stoids) {
