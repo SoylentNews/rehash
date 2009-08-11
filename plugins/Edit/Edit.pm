@@ -296,9 +296,7 @@ sub savePreview {
 	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
 
 	$fh_data->{title} 	= strip_attribute($form->{title});
-
 	$fh_data->{media} 	= $form->{media};
-	$fh_data->{dept} 	= $form->{dept};
 	$fh_data->{introtext}	= $form->{introtext};
 
 	if ($p_item->{type} eq 'story') {	
