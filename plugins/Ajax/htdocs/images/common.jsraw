@@ -2196,7 +2196,6 @@ function show_submit_box_after(from_id) {
 
 	if (from_id) {
 		params['from_id'] = from_id;
-		params['after_id'] = 'firehose-'+ from_id;
 	}
 
 	ajax_update(params, '',  { onComplete: json_handler });
