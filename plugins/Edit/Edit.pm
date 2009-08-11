@@ -737,7 +737,9 @@ sub editCreateStory {
 
 		# XXXEdit Do we have to worry about user editing vs author uid on transfer
 		$tagsdb->transferTags($fhitem->{globjid}, $story_globjid);
-		$self->createSignoff($st->{stoid}, $data->{uid}, "saved");
+
+		#Don't automatically signoff with new editor, this makes it automatically disapper for an admin on first refresh
+		#$self->createSignoff($st->{stoid}, $data->{uid}, "saved");
 		
 		#XXXEdit Tags Auto save?
 		my $admindb = getObject("Slash::Admin");
