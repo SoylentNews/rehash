@@ -1,3 +1,7 @@
+body {
+  font-size: 100%;
+}
+
 a,
 div#footer a,
 div.btmnav a
@@ -56,7 +60,7 @@ div.briefarticles,
 #usermenu ul.menu,
 #usermenu,  #wrapper
 {
-	color: #000 !important; background: transparent !important; border: none; font-family: serif;
+	color: #000 !important; background: transparent !important; border: none; font-family: arial, sans-serif;
 }
 div#slashboxes div.block div.content ul li ul li
 {
