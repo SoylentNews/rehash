@@ -82,6 +82,7 @@ sub getOrCreatePreview {
 
 	my $fh = getObject("Slash::FireHose");
 	my $tagsdb = getObject("Slash::Tags");
+	my $admindb = getObject("Slash::Admin");
 
 
 	if (!$form->{from_id}) {
@@ -157,6 +158,7 @@ sub getOrCreatePreview {
 		if ($src_item->{type} ne "story" && $type eq "story") {
 			my $url 	= $self->getUrl($src_item->{url_id});
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1, url => $url }, { Return => 1 });
+			$fh_data->{createtime} = $admindb->findTheTime('','');
 		} 
 
 		if ($src_item->{type} eq 'story') {
