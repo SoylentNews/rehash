@@ -39,7 +39,7 @@ $task{$me}{code} = sub {
 	my $messages_obj = getObject("Slash::Messages");
 	my $sysmessage_code = $messages_obj->getDescription("messagecodes", "System Messages");
 	my $admins = $slashdb->getAdmins();
-	my $sidprefix = "$constants->{absolutedir_secure}/article.pl?sid=";
+	my $fh_reader = getObject("Slash::FireHose");
 
 	my $online = 0;
 	my $oscar = Net::OSCAR->new();
@@ -102,8 +102,9 @@ $task{$me}{code} = sub {
 				# Admin
 				if ($message_type eq "remarks") {
 					if ($messages{$message_type}->{$id}{'stoid'}) {
-						my $story = $slashdb->getStory($messages{$message_type}->{$id}{'stoid'});
-						$messages{$message_type}->{$id}{'remark'} .= " $sidprefix$story->{sid}";
+						my $fh_item = $fh_reader->getFireHoseBySidOrStoid($messages{$message_type}->{$id}{'stoid'});
+                                                my $fh_link = $fh_reader->linkFireHose($fh_item);
+                                                $messages{$message_type}->{$id}{'remark'} .= " " . url2abs($fh_link, $constants->{absolutedir_secure});
 					}
 
 					foreach my $admin (keys %$admins) {
