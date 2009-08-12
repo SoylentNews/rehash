@@ -22,13 +22,25 @@ menu[type=context] {
 	display:none;
 	position:absolute;
 	z-index:10000;
-	background-color:white;
+	background-color:#dfdfdf;
 	margin:0;
-	padding:0.5em;
-	border:1px solid black;
-	-moz-border-radius:5px;
-	-webkit-border-radius:5px;
+	padding:2px 0.5em;
+	border-style:solid;
+	border-width:1px;
+	border-color:#eeeeee #aaaaaa #aaaaaa #eeeeee;
 }
+
+menu[type=context] {
+	-moz-border-radius-topright:.7em;
+	-webkit-border-top-right-radius: 0.7em 0.7em;
+}
+
+menu[type=context] > a.slash-hover:first-child {
+	-moz-border-radius-topright:.6em;
+	-webkit-border-top-right-radius: 0.6em 0.6em;
+}
+
+
 #tag-menu a {
 	display:list-item;
 	list-style:none;
@@ -42,12 +54,20 @@ menu[type=context] {
 #tag-menu span.op { display:inline-block; min-width:1em; text-align:right; }
 #tag-menu a.group { border-bottom:1px solid darkgray; padding-bottom:0.5em; margin-bottom:0.75em; }
 [% END %]
-#tag-menu span.var-tag { font-style:italic; font-weight:normal; }
+#tag-menu span.var-tag {
+font-weight:normal;
+color:#444444;
+}
+
 #tag-menu a.slash-hover,
 .tag-display span.tag:hover,
 .tag-display span.tag.trigger {
 	color:white;
 	background-color:rgb(0, 85, 85);
+}
+
+#tag-menu a.slash-hover span.var-tag {
+	color:#eee;
 }
 </style>
 <menu id="tag-menu" class="tag-menu" type="context">
