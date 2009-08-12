@@ -1,3 +1,39 @@
+/* T2 CSS */
+
+.edit-bar { padding-right:0.5em; }
+.edit-bar .domain.tag, .edit-bar .signoff-button, .edit-bar a[rel=tag][href=/tag/nod], .edit-bar a[rel=tag][href=/tag/nix], .edit-bar .hide, .edit-bar .hide * { display:none; }
+div.note-wrapper, .adminmode .domain.tag, .adminmode .signoff-button { display:inline };
+.adminmode .edit-bar .topic.tag { position:relative; font-weight:bold; font-variant:small-caps; }
+
+.edit-bar a.tag, .edit-bar a.pseudo-tag {
+	cursor:arrow;
+	user-select:none;
+	-moz-user-select:none;
+	font-family: arial, sans serif;
+	color: #666;
+	text-decoration:none !important;
+
+	border: 0 solid transparent;
+	-moz-border-radius: 0.4em;
+	-webkit-border-radius: 0.4em;
+
+	padding: 0.1em 0.5em;
+	margin: -0.1em -0.5em;
+}
+.edit-bar a.tag:hover, .edit-bar a.pseudo-tag:hover { color: white; background-color: #066; }
+.edit-bar a.feedback-button, .edit-bar a.signoff-button { background-color: #ff4949; }
+.edit-bar a.feedback-button:hover, .edit-bar a.signoff-button:hover { background-color: #f00; }
+
+
+
+
+
+
+
+
+
+
+/* Original tag CSS ---- most of this needs to go away */
 
 .tag-widget, .tag-entry {
 	user-select: text;

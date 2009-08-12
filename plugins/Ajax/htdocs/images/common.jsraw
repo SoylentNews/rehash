@@ -1744,19 +1744,9 @@ function firehose_get_updates_handler(transport) {
 	firehose_future = response.future;
 
 	var updated_tags = response.update_data.updated_tags;
-	if ( updated_tags ) {
-		var $tag_servers = $('[tag-server]');
-		$.each(updated_tags, function( id, tags ){
-			var updates = '';
-			if ( tags.system_tags !== undefined )	{ updates += '<system>' + tags.system_tags; }
-			if ( tags.top_tags !== undefined )	{ updates += '<top>' + tags.top_tags; }
-			if ( updates ) {
-				$tag_servers.filter('[tag-server='+id+']').each(function(){
-					T2.broadcast_tag_lists(this, updates);
-				});
-			}
-		});
-	}
+	updated_tags && $.each(updated_tags, function( id, content ){
+		$('#tagbar-'+id).html(content);
+	});
 
 	response.dynamic_blocks && dynamic_blocks_update(response.dynamic_blocks);
 	response.html           && json_update(response);

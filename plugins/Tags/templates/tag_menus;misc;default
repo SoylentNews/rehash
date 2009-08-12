@@ -81,11 +81,38 @@ color:#444444;
 	<a data-op="!">not <span class="var-tag"></span></a>
 	<a data-op="="><span class="var-tag"></span> in <span class="var-view"></span></a>
 </menu>
+<menu id="feedback-menu" class="tag-menu" type="context">
+	<a class="tag">typo</a>
+	<a class="tag">dupe</a>
+	<a class="tag">error</a>
+</menu>
+[% IF user.is_admin %]
+<menu id="datatype-menu" class="tag-menu" type="context">
+	<a>...</a>
+</menu>
+[% END %]
 <script>
 $(function(){
-var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
+var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
 
-$('span.tag-display:not([context=signoff],[context=datatype],[context=related]) span.tag').
+function show_menu( $trigger, $menu ){
+	$menu.appendTo(document.body);
+
+	var align=$trigger.offset(), adjust=$menu.offsetParent().offset();
+	$menu.css({
+		position:'absolute',
+		top:align.top - adjust.top + $trigger.height(),
+		left:align.left - adjust.left
+	}).show();
+}
+
+
+
+/* T2 tag context-menu */
+
+var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
+
+$('a[rel=tag]').
 	live('mousedown', function( e ){
 		return $TAG_MENU.menu('context', e, e.originalEvent.target);
 	});
@@ -96,11 +123,7 @@ $TAG_MENU.menu({
 	clickToHover: true,
 
 	start: function( e, ui ){
-		$TAG_MENU.appendTo(document.body);
-
 		var	$tag	= $(ui.trigger).addClass('trigger'),
-			align	= $tag.offset(),
-			adjust	= $TAG_MENU.offsetParent().offset(),
 			context	= search_eligible($tag) && firehose_settings && firehose_settings.viewtitle;
 
 		// Insert the tagname into the menu items where needed.
@@ -114,13 +137,7 @@ $TAG_MENU.menu({
 		$TAG_MENU.find('a:[data-op==]').toggle(!!context);
 		context && $TAG_MENU.find('span.var-view').text(context);
 
-		$TAG_MENU.
-			css({
-				position: 'absolute',
-				top: align.top - adjust.top + $tag.height(),
-				left: align.left - adjust.left
-			}).
-			show();
+		show_menu($tag, $TAG_MENU);
 	},
 
 	select: function( e, ui ){
@@ -151,6 +168,57 @@ $TAG_MENU.menu({
 		$(ui.trigger).removeClass('trigger');
 	}
 });
+
+
+
+
+/* T2 feedback context-menu */
+
+var $FEEDBACK_MENU=$('#feedback-menu');
+
+$('a.feedback-button.pseudo-tag').
+	live('mousedown', function( e ){
+		return $FEEDBACK_MENU.menu('context', e, e.originalEvent.target);
+	});
+
+$FEEDBACK_MENU.menu({
+	cssNamespace: 'slash',
+	liveTriggers: true,
+	clickToHover: true,
+
+	start: function( e, ui ) { show_menu($(ui.trigger).addClass('trigger'), $FEEDBACK_MENU); },
+
+	select: function( e, ui ) { T2.submit_tags($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+
+	stop: function( e, ui ) { $FEEDBACK_MENU.hide(); $(ui.trigger).removeClass('trigger'); }
+});
+
+
+
+
+/* T2 datatype context-menu (admin-only) */
+
+[% IF user.is_admin %]
+var $DATATYPE_MENU=$('#datatype-menu');
+$('a.datatype.pseudo-tag').
+	live('mousedown', function( e ){
+		return $DATATYPE_MENU.menu('context', e, e.originalEvent.target);
+	});
+
+$DATATYPE_MENU.menu({
+	cssNamespace: 'slash',
+	liveTriggers: true,
+	clickToHover: true,
+
+	start: function( e, ui ) { show_menu($(ui.trigger).addClass('trigger'), $DATATYPE_MENU); },
+
+	select: function( e, ui ) { /*...*/ },
+
+	stop: function( e, ui ) { $DATATYPE_MENU.hide(); $(ui.trigger).removeClass('trigger'); }
+});
+[% END %]
+
+
 });
 </script>
 [% END %]

@@ -2375,8 +2375,8 @@ sub ajaxFireHoseGetUpdates {
 					$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
 					$html->{"topic-$_->{id}"} = slashDisplay("dispTopicFireHose", { item => $item, adminmode => $adminmode }, { Return => 1});
 
-					$update_data->{updated_tags}{$_->{id}}{top_tags} = $item->{toptags};
-					$update_data->{updated_tags}{$_->{id}}{system_tags} = $firehose->getFireHoseSystemTags($item);
+					my $tag_reader = getObject("Slash::Tags", { db_type => 'reader' });
+					$update_data->{updated_tags}{$_->{id}} = $tag_reader->updateDisplayTagMarkup($_->{id}, 'firehose-id', $user);
 					$update_data->{updates}++;
 					# updated
 				}
@@ -2920,14 +2920,14 @@ sub dispFireHose {
 		}
 	}
 
-	my $tag_widget = slashDisplay('tag_widget', {
-		id 		=> $item->{id},
-		top_tags 	=> $options->{top_tags},
-		system_tags 	=> $options->{system_tags},
-		vote 		=> $options->{vote},
-		options 	=> $options->{options},
+	my $tag_widget = slashDisplay('edit_bar', {
 		item 		=> $item,
-		skipvote 	=> 1
+		id 		=> $item->{id},
+		key		=> $item->{id},
+		key_type	=> 'firehose-id',
+		options 	=> $options->{options},
+		skipvote 	=> 1,
+		vote 		=> $options->{vote},
 	}, { Return => 1, Page => 'firehose'});
 
 	my $atstorytime;

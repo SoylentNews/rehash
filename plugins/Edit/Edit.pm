@@ -427,14 +427,15 @@ sub showEditor {
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
 
-	my $tag_widget = slashDisplay('tag_widget', {
-		id 		=> $p_item->{id},
-		top_tags 	=> $options->{top_tags},
-		system_tags 	=> $options->{system_tags},
-		vote 		=> $options->{vote},
-		options 	=> $options->{options},
+	my $tag_widget = slashDisplay('edit_bar', {
 		item 		=> $p_item,
+		id 		=> $p_item->{id},
+		key		=> $preview->{preview_fhid},
+		key_type	=> 'firehose-id',
+		options 	=> $options->{options},
+		edit_mode	=> 1,
 		skipvote 	=> 1,
+		vote 		=> $options->{vote},
 	}, { Return => 1, Page => 'firehose'});
 
 	

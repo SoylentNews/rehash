@@ -2,6 +2,24 @@
 
 var T2={}, context_triggers, well_known_tags, tag_admin=false;
 
+
+(function(){
+var CLASS={ 'true':'expand', 'false':'collapse' };
+
+$('a.edit-toggle').live('click', function( e ){
+	var	$button	= $(e.originalEvent.target),
+		expand	= $button.is('.collapse'),
+		$input	= $button.closest('menu.barlet').find('input.tag-entry');
+
+	$input.toggle(expand);
+	$button.removeClass(CLASS[!expand]).addClass(CLASS[expand]);
+});
+})();
+
+
+
+
+
 function animate_wiggle( $selector ){
 	$selector.
 		animate({left: '-=3px'}, 20).
@@ -351,11 +369,6 @@ var tag_display_fns = {
 			if_empty = ! $this.is(':has(span.tag)');
 		}
 		return $this.toggleClass('no-tags', !!if_empty);
-	},
-
-
-	$mark_dirty: function( if_dirty ){
-		return $(this).toggleClass('dirty', !!if_dirty);
 	},
 
 

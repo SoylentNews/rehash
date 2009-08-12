@@ -1,0 +1,32 @@
+__name__
+editor_note
+__page__
+misc
+__section__
+default
+__description__
+admin note button and note text
+__template__
+<span class="admin-buttons">
+	[%# the note %]
+	<div class="note-wrapper[% IF !item.note %] no-note[% END %]">
+		[%# the note edit field (hidden by default) %]
+		<span id="note-form-[% item.id %]" class="hide">
+			<input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')">
+			<input type="button" value="save" onclick="firehose_save_note('[% item.id %]')">
+		</span>
+		[%# the note button %]
+		<span class="admin-note">
+			<a id="note-text-[% item.id %]" href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){firehose_open_note(self);});">[%- IF !item.note  %]<img src="[% constants.imagedir %]/sic_notes.png" alt="Note">[% END -%][% item.note | strip_literal -%]</a>
+		</span>
+	</div>
+</span>
+__seclev__
+10000
+__lang__
+en_US
+__version__
+__title__
+Useless title to template
+
+

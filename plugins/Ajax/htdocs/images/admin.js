@@ -97,6 +97,19 @@ function firehose_admin_context( display ){
 	T2.update_tags(display, additions, { order: 'prepend', classes: 'b' });
 }
 
+function signoff( $fhitem, id ){
+	T2._ajax_request($fhitem[0], '', {
+		op:	'admin_signoff',
+		stoid:	fhitem_info($fhitem, 'stoid'),
+		ajax:	{ success: function(){ $fhitem.find('a.signoff-button').remove(); } }
+	});
+	firehose_collapse_entry(id || $fhitem.attr('tag-server'));
+}
+
+$('a.signoff-button').live('click', function( e ){
+	signoff($(e.originalEvent.target).closest('.fhitem'));
+});
+
 function firehose_handle_admin_commands( commands ){
 	var entry=this, $entry=$(entry), id=$entry.attr('tag-server');
 
@@ -130,12 +143,7 @@ function firehose_handle_admin_commands( commands ){
 			case 'signed':
 			case 'signoff':
 			case 'unsigned':
-				T2._ajax_request(entry, '', {
-					op:	'admin_signoff',
-					stoid:	fhitem_info($entry, 'stoid'),
-					ajax:	{ success: function(){ $('[context=signoff]', entry).remove(); } }
-				});
-				firehose_collapse_entry(id);
+				signoff($entry, id);
 				break;
 			case 'betaedit':
 				show_submit_box_after(id);

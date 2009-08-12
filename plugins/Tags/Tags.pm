@@ -1371,6 +1371,8 @@ sub update_class_map {
 		if ( !$current ) {
 			push @$order, $tag;
 			$current = $base_class || 'tag';
+		} elsif ( $classes =~ /datatype/ ) {
+			push @$order, $tag;
 		}
 		$map->{$tag} = $classes . ' ' . $current;
 	}
@@ -1378,7 +1380,11 @@ sub update_class_map {
 
 sub updateDisplayTagMarkup { # T2
 	my($self, $key, $key_type, $user, $options) = @_;
-	my $result='';
+
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $image_prefix = $constants->{imagedir} . '/topics/';
 
 	my $commands = $options && $options->{tags} || '';
 	my $global_tags_only = $options && $options->{global_tags_only} || 0;
@@ -1388,17 +1394,19 @@ sub updateDisplayTagMarkup { # T2
 	my $class={};
 	my $order=[];
 	update_class_map($class, $order, $tags->{domain_tag},		'domain');
-	update_class_map($class, $order, $tags->{datatype},		'datatype', 'pseudo-tag');
 	update_class_map($class, $order, $tags->{main_watchlist_tag},	'main');
 	update_class_map($class, $order, $tags->{topic_tags},		'topic');
 	update_class_map($class, $order, $tags->{popular_tags},		'popular');
 	update_class_map($class, $order, $tags->{user_tags},		'my');
+	update_class_map($class, $order, $tags->{datatype},		'datatype', 'pseudo-tag');
 
+	my $result='';
 	for my $tagname (@$order) {
-		$result .= '<a rel="tag" menu="tag-menu" class="' . $class->{$tagname} . '" href="/tag/' . $tagname . '">' . $tagname;
+		$result .= '<a class="' . $class->{$tagname} . '"';
+		$result .= ' rel="tag" href="/tag/' . $tagname . '"' unless $class->{$tagname} =~ /pseudo-tag/;
+		$result .= '>' . $tagname;
 		if ( $options->{include_topic_images} && $class->{$tagname} =~ /topic/ ) {
-			# FIX ME!: add topic image
-			$result .= '<image alt="topic image here">';
+			$result .= '<img src="' . $image_prefix . $self->sqlSelect('image', 'topics', "keyword=\"$tagname\"") . '">';
 		}
 		$result .= "</a>\n";
 	}
