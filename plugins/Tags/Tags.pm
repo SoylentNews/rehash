@@ -1376,18 +1376,14 @@ sub update_class_map {
 	}
 }
 
-sub ajaxSetGetDisplayTags { # T2
-	my($slashdb, $constants, $user, $form) = @_;
+sub updateDisplayTagMarkup { # T2
+	my($self, $key, $key_type, $user, $options) = @_;
 	my $result='';
 
-	my $tag_reader = getObject("Slash::Tags", { db_type => 'reader' });
-	my $tags = $tag_reader->setGetDisplayTags(
-		$form->{key},
-		$form->{key_type},
-		$user,
-		$form->{tags},
-		$form->{global_tags_only}
-	);
+	my $commands = $options && $options->{tags} || '';
+	my $global_tags_only = $options && $options->{global_tags_only} || 0;
+
+	my $tags = $self->setGetDisplayTags($key, $key_type, $user, $commands, $global_tags_only);
 
 	my $class={};
 	my $order=[];
@@ -1399,10 +1395,20 @@ sub ajaxSetGetDisplayTags { # T2
 	update_class_map($class, $order, $tags->{user_tags},		'my');
 
 	for my $tagname (@$order) {
-		# FIX ME!: add image for topic tags if $form->{include_topic_images}
-		$result .= '<a rel="tag" menu="tag-menu" class="' . $class->{$tagname} . '" href="/tag/' . $tagname . '">' . $tagname . "</a>\n";
+		$result .= '<a rel="tag" menu="tag-menu" class="' . $class->{$tagname} . '" href="/tag/' . $tagname . '">' . $tagname;
+		if ( $options->{include_topic_images} && $class->{$tagname} =~ /topic/ ) {
+			# FIX ME!: add topic image
+			$result .= '<image alt="topic image here">';
+		}
+		$result .= "</a>\n";
 	}
 	return $result;
+}
+
+sub ajaxSetGetDisplayTags {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $tag_reader = getObject("Slash::Tags", { db_type => 'reader' });
+	return $tag_reader->updateDisplayTagMarkup($form->{key}, $form->{key_type}, $user, $form);
 }
 
 sub ajaxSetGetCombinedTags { # deprecated, moving to T2: ajaxSetGetDisplayTags
