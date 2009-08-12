@@ -10,10 +10,11 @@ en_US
 __name__
 editor
 __template__
-[% PROCESS tag_menus %]
 [% UNLESS nowrap %]
 <div id="editor" class="admin fhroot" style="text-align:left">
 [% END %]
+
+[% PROCESS tag_menus %]
 
 
 <a href="/submit?new=1" onclick="submit_reset([% IF preview.src_fhid; "'" _ preview.src_fhid _ "'"; END %]);return false;">Reset</a> | <a href="/submit?new=1" onclick="submit_cancel(); return false;">Cancel</a>
