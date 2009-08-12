@@ -2316,7 +2316,7 @@ sub editSave {
 
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
-	my($retval, $type, $save_type, $errors) = $edit->saveItem();
+	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem();
 
 	if (!keys %$errors > 0) {
 		my $reskey = getObject('Slash::ResKey');
@@ -2341,20 +2341,28 @@ sub editSave {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });
 	}
 	my $html;
-	my ($eval_first, $eval_last, $html_add_after, $html_add_before) = ('','',{},{});
+	my ($eval_first, $eval_last, $html_add_after, $html_add_before, $html_append) = ('','',{},{}, {});
 	if($editor) {
 		$html->{editor} = $editor;
 	} else {
 		if ($form->{state} eq 'inline') {
-			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1 }, { Return => 1, Page => 'edit' });
+			if ($preview->{src_fhid}) {
+				$html_append->{"title-$preview->{src_fhid}"} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1 }, { Return => 1, Page => 'edit' });
+			}
 			$eval_first = "\$('#firehose-$item->{id}').remove(); \$('.edithidden').show().removeClass('edithidden');";
 			$html_add_before->{editor} = $saved_item;
+			$eval_last = "\$('#editor').remove()";
 		} else {
 			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
 		}
 	}
-	return Data::JavaScript::Anon->anon_dump({ html => $html, eval_first => $eval_first, eval_last => $eval_last, html_add_before => $html_add_before
- });
+	return Data::JavaScript::Anon->anon_dump({
+			html => $html,
+			eval_first => $eval_first,
+			eval_last => $eval_last,
+			html_add_before => $html_add_before,
+			html_append => $html_append
+	});
 }
 
 ###################

@@ -124,7 +124,7 @@ sub save {
 
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
-	my($retval, $type, $save_type, $errors) = $edit->saveItem();
+	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem();
 	my($editor, $id);
 	my $saved_item;
 	if ($retval) {

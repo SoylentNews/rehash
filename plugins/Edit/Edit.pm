@@ -588,7 +588,7 @@ sub saveItem {
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
-	return ($create_retval, $fhitem->{type}, $save_type, $errors);
+	return ($create_retval, $fhitem->{type}, $save_type, $errors, $preview);
 }
 
 sub editUpdateStory {
