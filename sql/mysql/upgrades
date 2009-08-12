@@ -6502,16 +6502,18 @@ INSERT INTO globj_types VALUES (NULL, 'tagnames');
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion","project","tagname") default 'submission';
 
 # Captcha text modification
+# for plugins/HumanConf
 UPDATE humanconf_questions SET question = '<span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span>' WHERE hcqid=1;
 
 # process themes/slashdot/sql/mysql/upgrades additions
 
+# for plugins/FireHose
 UPDATE firehose SET public='yes' WHERE type='tagname';
 
 # 2009-07-30
 UPDATE vars SET value = 'T_2_5_0_266' WHERE name = 'cvs_tag_currentcode';
 
-#For plugins/Edit
+# for plugins/Edit
 INSERT INTO ajax_ops VALUES (NULL, 'edit_submit_box_after', 'Slash::Edit', 'ajaxEditorAfter', 'ajax_user_static', 'createuse');
 
 # 2009-08-06
@@ -6524,9 +6526,11 @@ UPDATE firehose, globjs SET firehose.url_id = globjs.target_id WHERE firehose.gl
 UPDATE firehose, globjs SET firehose.url_id = 0 WHERE firehose.globjid=globjs.globjid AND type='submission' AND gtid=3 AND firehose.url_id = 16777215;
 
 # Captcha text modification
+# for plugins/HumanConf
 UPDATE humanconf_questions SET question = '<div class="yui-u first"><span class="humanconf_questions">Confirm your humanity by telling us what you see or hear:</span></div>' WHERE hcqid=1;
 
 # 2009-08-11
+# for plugins/Ajax
 INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_display', 'Slash::Tags', 'ajaxSetGetDisplayTags', 'ajax_base_static', 'createuse');
 
 
