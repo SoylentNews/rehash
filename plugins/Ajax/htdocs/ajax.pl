@@ -2341,17 +2341,20 @@ sub editSave {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });
 	}
 	my $html;
-	my ($eval_first, $eval_last) = ('','');
+	my ($eval_first, $eval_last, $html_add_after, $html_add_before) = ('','',{},{});
 	if($editor) {
 		$html->{editor} = $editor;
 	} else {
-		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
+		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1 }, { Return => 1, Page => 'edit' });
 		if ($form->{state} eq 'inline') {
+			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
 			$eval_first = "\$('#firehose-$item->{id}').remove(); \$('.edithidden').show().removeClass('edithidden');";
-			$eval_last = "\$('#firehose-$item->{id}').insertBefore('#editor');";
+			$html_add_before->{editor} = $saved_item;
+		} else {
 		}
 	}
-	return Data::JavaScript::Anon->anon_dump({ html => $html, eval_first => $eval_first, eval_last => $eval_last });
+	return Data::JavaScript::Anon->anon_dump({ html => $html, eval_first => $eval_first, eval_last => $eval_last, html_add_before => $html_add_before
+ });
 }
 
 ###################

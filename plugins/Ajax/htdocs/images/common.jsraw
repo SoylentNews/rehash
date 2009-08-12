@@ -1089,10 +1089,16 @@ function json_update(response) {
 			append(new_html);
 	});
 
-	// ...append content to these elements
+	// ...append content after these elements
 	$.each(response.html_add_after||[], function(elem_id, add_html){
 		$any(elem_id).
 			after(add_html);
+	});
+
+	// ...append content after these elements
+	$.each(response.html_add_before||[], function(elem_id, add_html){
+		$any(elem_id).
+			before(add_html);
 	});
 
 

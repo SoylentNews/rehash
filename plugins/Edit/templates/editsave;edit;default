@@ -17,7 +17,7 @@ __template__
 <div style="text-align:right"><a href="#" onclick="close_inline_editor();">Close Editor</a></div>
 [% END %]
 [% IF id && type %]
-	[% saved_item %]
+	[% UNLESS no_display_item; saved_item; END %]
 	<p>
 	[% id %] [% type %] [% save_type %]<br>
 	[% IF type == "story" %]
