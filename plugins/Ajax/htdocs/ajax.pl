@@ -2345,12 +2345,12 @@ sub editSave {
 	if($editor) {
 		$html->{editor} = $editor;
 	} else {
-		$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1 }, { Return => 1, Page => 'edit' });
 		if ($form->{state} eq 'inline') {
-			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
+			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1 }, { Return => 1, Page => 'edit' });
 			$eval_first = "\$('#firehose-$item->{id}').remove(); \$('.edithidden').show().removeClass('edithidden');";
 			$html_add_before->{editor} = $saved_item;
 		} else {
+			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
 		}
 	}
 	return Data::JavaScript::Anon->anon_dump({ html => $html, eval_first => $eval_first, eval_last => $eval_last, html_add_before => $html_add_before

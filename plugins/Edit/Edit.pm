@@ -829,8 +829,8 @@ sub ajaxEditorAfter {
 	$edit->initEditor();
 	my $html_add_after = {};
 	$html_add_after->{"firehose-$form->{from_id}"} = $edit->showEditor({state => 'inline'});
-	my $eval_first = "\$('#firehose-$form->{from_id}').hide().addClass('edithidden').fadeTo('',1);";
-
+	my $eval_first = "\$('#firehose-$form->{from_id}').hide().addClass('edithidden').fadeTo('',1);\n";
+	$eval_first .= "firehose_collapse_entry($form->{from_id});";
 	return Data::JavaScript::Anon->anon_dump({
 		eval_first	=> $eval_first,
 		html_add_after	=> $html_add_after
