@@ -1017,7 +1017,7 @@ sub getModalPrefs {
 		print STDERR "Edit Session $skey for UID: $user->{uid} (ajax)\n";
 		$skey->set_cookie;
 
-		return $edit->showEditor();
+		return $edit->showEditor({ state => 'modal'});
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
 
