@@ -90,7 +90,7 @@ function tagsHistory( selector_fragment, context ) {
 //
 
 function firehose_admin_context( display ){
-	var additions = 'extras history betaedit';
+	var additions = 'extras history betaedit oldedit';
 	if ( $(display).is('.fhitem-story .tag-display') ) {
 		additions += ' info ';
 	}
@@ -147,6 +147,13 @@ function firehose_handle_admin_commands( commands ){
 				break;
 			case 'betaedit':
 				show_submit_box_after(id);
+				break;
+			case 'oldedit':
+				var loc = document.location + '';
+				var match = loc.match('https?://[^/]*');
+				openInWindow(match + '/firehose.pl?op=edit&amp;id=' + id);
+                                break;
+
 				break;
 			case 'binspam':
 				if ( $entry.is('.fhitem-feed') )
