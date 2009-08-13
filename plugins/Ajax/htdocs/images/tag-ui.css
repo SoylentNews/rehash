@@ -1,8 +1,17 @@
 /* T2 CSS */
 
 .edit-bar { padding-right:0.5em; }
-.edit-bar .domain.tag, .edit-bar .signoff-button, .edit-bar a[rel=tag][href=/tag/nod], .edit-bar a[rel=tag][href=/tag/nix], .edit-bar .hide, .edit-bar .hide * { display:none; }
-div.note-wrapper, .adminmode .domain.tag, .adminmode .signoff-button { display:inline };
+
+.edit-bar .domain.tag,
+.edit-bar .signoff-button,
+.edit-bar a[rel="tag"][href='\/tag\/nix'],
+.edit-bar a[rel="tag"][href='\/tag\/nod'],
+.edit-bar .hide,
+.edit-bar .hide * {
+display:none;
+}
+
+div.note-wrapper, .adminmode .domain.tag, .adminmode .signoff-button { display:inline }
 .adminmode .edit-bar .topic.tag { position:relative; font-weight:bold; font-variant:small-caps; }
 
 .edit-bar a.tag, .edit-bar a.pseudo-tag {
