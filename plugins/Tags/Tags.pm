@@ -1288,6 +1288,7 @@ sub setGetDisplayTags { # T2
 	my $firehose_item = $firehose_reader->getFireHoseByGlobjid($globjid);
 	my $firehose_id = $firehose_item->{id};
 
+	my $tags_writer = getObject('Slash::Tags');
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	if (!$tags_reader) {
 		#return getData('error', {}, 'tags');
@@ -1300,7 +1301,6 @@ sub setGetDisplayTags { # T2
 	# if we have to execute commands, do them _before_ we fetch any tag lists
 	my $user_tags = '';
 	if ( $commands ) {
-		my $tags_writer = getObject('Slash::Tags');
 		if (!$user->{is_anon} || ($user->{is_anon} && $table eq 'preview')) {
 			$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, $commands, {
 				deactivate_by_operator => 1,
@@ -1317,8 +1317,7 @@ sub setGetDisplayTags { # T2
 				lc $commands;
 
 			my $firehose = getObject('Slash::FireHose');
-			# FIX ME!: Need to set watchlist and topics through Jamie, not Firehose.
-			$firehose->setSectionTopicsFromTagstring($firehose_id , $added_tags);
+			$firehose->setSectionTopicsFromTagstring($firehose_id, $added_tags);
 			$firehose_item = $firehose->getFireHose($firehose_id);
 		};
 	} elsif ( ! $global_tags_only ) {
@@ -1327,33 +1326,36 @@ sub setGetDisplayTags { # T2
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
-	# FIX ME! ...BEGIN...
-	# Here I use Firehose functions to get the watchlist and topic tags;
-	#	but I need to get these directly Jamie, who knows that there
-	#	can be more than one of each.
-	my ($datatype, $popular_tags, $main_watchlist_tag, $topic_tags);
+	my $domain_tag = 'slashdot'; # XXX should be a var
+	my $datatype = '';
+	my $popular_tags = '';
+	my $main_watchlist_tag = '';
+	my $topic_tags = '';
 	if ( $firehose_item ) {
 		$datatype = $firehose_item->{type};
 		$popular_tags = $firehose_item->{toptags};
 
 		my $skid = $firehose_item->{primaryskid};
 		if ( $skid ) {
-			if ( $skid != $constants->{mainpage_skid} ) {
-				my $skin = $firehose_reader->getSkin($skid);
-				$main_watchlist_tag = $skin->{name};
-			}
+			my $skin = $firehose_reader->getSkin($skid);
+			$main_watchlist_tag = $skin->{name};
+			$main_watchlist_tag = '' if $main_watchlist_tag eq $domain_tag;
 		}
 
-		my $tid = $firehose_item->{tid};
-		if ( $tid ) {
-			my $topic = $firehose_reader->getTopic($tid);
-			$topic_tags = $topic->{keyword};
+		my $tree = $self->getTopicTree();
+		my $chosen_hr = $tags_writer->extractChosenFromTags($firehose_item->{globjid}, $uid);
+		my @tids = ( );
+		for my $tid (sort { $chosen_hr->{$b} <=> $chosen_hr->{$a} || $a cmp $b } keys %$chosen_hr) {
+			my $keyword = $tree->{$tid}{keyword};
+			next if $keyword eq $domain_tag;
+			next if $keyword eq $main_watchlist_tag;
+			push @tids, $tid;
 		}
+		$topic_tags = join ' ', map { $tree->{$_}{keyword} } @tids;
 	}
-	# FIX ME! ...END...
 
 	my $tags = {
-		domain_tag		=> 'slashdot',
+		domain_tag		=> $domain_tag,
 		datatype		=> $datatype || 'unknown',
 		main_watchlist_tag	=> $main_watchlist_tag,
 		topic_tags		=> $main_watchlist_tag . ' ' . $topic_tags,  # includes all watchlist tags as well
@@ -1400,13 +1402,22 @@ sub updateDisplayTagMarkup { # T2
 	update_class_map($class, $order, $tags->{user_tags},		'my');
 	update_class_map($class, $order, $tags->{datatype},		'datatype', 'pseudo-tag');
 
+	my $tree = $slashdb->getTopicTree();
 	my $result='';
 	for my $tagname (@$order) {
 		$result .= '<a class="' . $class->{$tagname} . '"';
 		$result .= ' rel="tag" href="/tag/' . $tagname . '"' unless $class->{$tagname} =~ /pseudo-tag/;
 		$result .= '>' . $tagname;
 		if ( $options->{include_topic_images} && $class->{$tagname} =~ /topic/ ) {
-			$result .= '<img src="' . $image_prefix . $self->sqlSelect('image', 'topics', "keyword=\"$tagname\"") . '">';
+			my $tid = 0;
+			for my $tidkey (keys %$tree) {
+				next unless $tree->{$tidkey}{image};
+				$tid = $tidkey, last if $tree->{$tidkey}{keyword} eq $tagname;
+			}
+			if ($tid) {
+				my $image = $tree->{$tid}{image};
+				$result .= qq{<img src="$image_prefix$image">};
+			}
 		}
 		$result .= "</a>\n";
 	}
@@ -2835,13 +2846,6 @@ sub extractChosenFromTags {
 	# Convert tagnames to topics.
 	my $tree = $self->getTopicTree();
 	my $keyword_to_tid_hr = { map {( $tree->{$_}{keyword}, $_ )} keys %$tree };
-
-	# Hard-code the tagnames we're changing manually.
-	# Old: "slashdot"   New: "meta"
-	# Old: "mainpage"   New: "slashdot"
-	$keyword_to_tid_hr->{meta}     = $keyword_to_tid_hr->{slashdot};
-	$keyword_to_tid_hr->{slashdot} = $keyword_to_tid_hr->{mainpage};
-	delete $keyword_to_tid_hr->{mainpage};
 
 	my $chosen_hr = { };
 	for my $tag_hr (@$ar) {
