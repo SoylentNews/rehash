@@ -656,7 +656,7 @@ sub userdir_handler {
 		$uri =~ s/^\Q$path//;
 	}
 	# URIs like /tags and /tags/foo and /tags/foo?type=bar are special cases.
-	if ($uri =~ m[^/tags (?: /([^?]*) | /? ) (?: \?(.*) )? $]x) {
+	if ($uri =~ m[^/tags? (?: /([^?]*) | /? ) (?: \?(.*) )? $]x) {
 		my($word, $query) = ($1, $2);
 		my @args = ( );
 		if ($word =~ /^(active|recent|all)$/) {
