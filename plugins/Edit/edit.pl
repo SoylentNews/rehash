@@ -45,7 +45,15 @@ sub main {
 		save	=> {
 			function	=> \&save,
 			seclev		=> 0
-		}
+		},
+		cancel => {
+			function 	=> \&cancel,
+			seclev		=> 0
+		},
+		'reset' => {
+			function 	=> \&cancel,
+			seclev		=> 0
+		},
 	};
 
 	my $reskey = getObject('Slash::ResKey');
@@ -74,6 +82,18 @@ sub start {
 	}
 
 	my $edit = getObject("Slash::Edit");
+	my $editor = $edit->showEditor();
+	slashDisplay('editorwrap', { editor => $editor });
+}
+
+sub cancel {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $edit = getObject("Slash::Edit");
+	$edit->initEditor();
+	$form->{'new'} = 1;
+	$form->{'url_text'} 	= 1;
+	$form->{'title'} 	= '';
+	$form->{'introtext'} 	= '';
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
 }
