@@ -42,7 +42,7 @@ menu[type=context] > a.slash-hover:first-child {
 
 
 #tag-menu a {
-	display:list-item;
+	display:list-item !important;
 	list-style:none;
 	text-align:left;
 	font-weight:bold;
