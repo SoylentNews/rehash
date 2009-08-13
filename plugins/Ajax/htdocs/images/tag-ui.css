@@ -521,6 +521,10 @@ a.edit-toggle {
 	text-decoration:none;
 }
 
+a.edit-toggle {
+display:inline-block;
+}
+
 
 
 span.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
