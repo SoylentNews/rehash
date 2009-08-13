@@ -16,11 +16,7 @@ __template__
 
 [% PROCESS tag_menus %]
 
-
-<a href="/submit?new=1" onclick="submit_reset([% IF preview.src_fhid; "'" _ preview.src_fhid _ "'"; END %]);return false;">Reset</a> | <a href="/submit?new=1" onclick="submit_cancel(); return false;">Cancel</a>
 <br>
-
-
 [% IF user.edit_debuginfo %]
 	[% preview_info %]
 [% END %]
