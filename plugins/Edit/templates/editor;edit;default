@@ -20,7 +20,7 @@ __template__
 [% IF user.edit_debuginfo %]
 	[% preview_info %]
 [% END %]
-[% state = state || form.state || form.bare ? 'widget' : 'fullpage' %]
+[% state = state || form.state || (form.bare ? 'widget' : 'fullpage') %]
 
 <script type="text/javascript">
 
