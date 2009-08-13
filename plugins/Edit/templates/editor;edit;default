@@ -186,7 +186,7 @@ $(document).ready(function(){
 								<input type="text" name="url" value="[% IF preview.url_text;preview.url_text | strip_attribute;END; %]" size="50">
 							</span>
 							[% IF errors.critical.invalidurl %]
-                                        			[% errors.critical.invalidurl %]<
+                                        			[% errors.critical.invalidurl %]
                                 			[% ELSIF errors.critical.duplicateurl %]
                                         			[% errors.critical.duplicateurl %]
                                 			[% END %]
