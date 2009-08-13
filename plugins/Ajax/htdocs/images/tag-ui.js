@@ -4,7 +4,9 @@ var T2={}, context_triggers, well_known_tags, tag_admin=false;
 
 
 (function(){
-var CLASS={ 'true':'expand', 'false':'collapse' };
+var	CLASS={ 'true':'expand', 'false':'collapse' },
+	ESC=27, SPACE=32, ENTER=13, LEFT_ARROW=37, DOWN_ARROW=40,
+	HANDLED_KEYS={ 27:1, 32:1, 13:1, 37:1, 40:1 };
 
 $('a.edit-toggle').live('click', function( e ){
 	var	$button	= $(e.originalEvent.target),
@@ -14,6 +16,32 @@ $('a.edit-toggle').live('click', function( e ){
 	$input.toggle(expand);
 	$button.removeClass(CLASS[!expand]).addClass(CLASS[expand]);
 });
+
+$('input.tag-entry').live('keydown', function( event ){
+	var $this=$(event.originalEvent.target), code=event.which||event.keyCode;
+	switch (code) {
+		case ESC: case LEFT_ARROW: case DOWN_ARROW: case SPACE: case ENTER:
+			if (code == ESC) {
+				$this.val('');
+			}
+			if (code == LEFT_ARROW || code == DOWN_ARROW) {
+				if ($this.val() != '')
+					return true;
+			}
+			if (code == SPACE || code == ENTER) {
+				T2.submit_tags($this.closest('.fhitem')[0], $this.val());
+				$this.val('')
+				if (code == SPACE)
+					return true;
+			}
+			$this.blur();
+			firehose_toggle_tag_ui_to(false, $this);
+			return false;
+		default:
+			return true;
+	}
+});
+
 })();
 
 
@@ -208,7 +236,7 @@ function markup_tag( t ) {
 function form_submit_tags( form, options ){
 	var $input = $('.tag-entry:input', form);
 	$related_trigger = $input;
-	$(form).closest('[tag-server]').
+	$(form).closest('.fhitem').
 		each(function(){
 			var tag_cmds = $input.val();
 			$input.val('');
@@ -698,7 +726,7 @@ var tag_widget_fns = {
 
 		if ( $tag_widget.is('.expanded') ) {
 			$tag_widget.
-				closest('[tag-server]').
+				closest('fhitem').
 					each(function(){
 						T2.fetch_tags(this);
 					});
@@ -720,6 +748,24 @@ $.each(tag_server_fns, globalize);
 $.each(tag_display_fns, globalize);
 $.each(tag_widget_fns, globalize);
 })();
+
+T2.submit_tags = function( fhitem, tag_cmds ){
+	var key = fhitem_key(fhitem);
+	$.ajax({
+		type:'POST',
+		dataType:'text',
+		data:{
+			op:'tags_setget_display',
+			key:key.key,
+			key_type:key.key_type,
+			reskey:reskey_static,
+			limit_fetch:''
+		},
+		success: function( server_response ){
+			$(fhitem).find('.tag-bar').html(server_response);
+		}
+	});
+};
 
 function $init_tag_widgets( $stubs, options ){
 	options = options || {};
