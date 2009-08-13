@@ -114,7 +114,11 @@ var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
 
 $('a[rel=tag]').
 	live('mousedown', function( e ){
-		return $TAG_MENU.menu('context', e, e.originalEvent.target);
+		$TAG_MENU.menu('context', e, e.originalEvent.target);
+	}).
+	live('click', function( e ){
+		e.preventDefault();
+		return false;
 	});
 
 $TAG_MENU.menu({
@@ -178,7 +182,11 @@ var $FEEDBACK_MENU=$('#feedback-menu');
 
 $('a.feedback-button.pseudo-tag').
 	live('mousedown', function( e ){
-		return $FEEDBACK_MENU.menu('context', e, e.originalEvent.target);
+		$FEEDBACK_MENU.menu('context', e, e.originalEvent.target);
+	}).
+	live('click', function( e ){
+		e.preventDefault();
+		return false;
 	});
 
 $FEEDBACK_MENU.menu({
@@ -202,7 +210,11 @@ $FEEDBACK_MENU.menu({
 var $DATATYPE_MENU=$('#datatype-menu');
 $('a.datatype.pseudo-tag').
 	live('mousedown', function( e ){
-		return $DATATYPE_MENU.menu('context', e, e.originalEvent.target);
+		$DATATYPE_MENU.menu('context', e, e.originalEvent.target);
+	}).
+	live('click', function( e ){
+		e.preventDefault();
+		return false;
 	});
 
 $DATATYPE_MENU.menu({
