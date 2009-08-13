@@ -74,6 +74,7 @@ $(document).ready(function(){
 		$(this).parent().siblings("div.input").toggleClass('hide');
 		$(this).siblings("span").toggleClass('hide');
 		$(this).hide();
+		$("label[for=email]").css('padding-left','1px !important');/*this is to satisfy webkit*/
 		return false;
 	});
 
