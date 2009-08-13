@@ -1991,7 +1991,7 @@ Hashref of cleaned-up data.
 	my %alphas = map {($_ => 1)} qw(
 		commentstatus comments_control content_type
 		fieldname filter formkey hcanswer id
-		mode op reskey section thisname type
+		mode op reskey section state thisname type
 	),
 	# Survey
 	qw(

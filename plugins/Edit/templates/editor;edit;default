@@ -326,7 +326,7 @@ $(document).ready(function(){
 						<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
 					</span>
 					<input type="submit" name="op" value="cancel" id="edit-edit-cancel" [% IF state != 'fullpage' %] onclick="submit_cancel(); return false;"[% END %]>
-					<input type="submit" name="op" value="reset" id="edit-edit-reset" [% IF state != 'fullpage' %]onclick="submit_reset([% IF preview.src_fhid; "'" _ preview.src_fhid _ "'"; END %]);return false;"[% END %]>
+					<input type="submit" name="op" value="reset" id="edit-edit-reset" [% IF state != 'fullpage' %]onclick="submit_reset([% IF preview.src_fhid; "'" _ preview.src_fhid _ "'"; ELSE; 0; END %], '[% state %]');return false;"[% END %]>
 			</div>
 
 			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">

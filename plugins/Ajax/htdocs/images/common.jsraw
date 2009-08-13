@@ -2243,7 +2243,7 @@ function editSave() {
 	editPreview(1);
 }
 
-function submit_reset(id) {
+function submit_reset(id,state) {
 	var params = {
 		'op': 'edit_reset',
 		'new' : 1
@@ -2251,6 +2251,9 @@ function submit_reset(id) {
 
 	if (id) {
 		params['from_id'] = id;
+	}
+	if (state) {
+		params['state'] = state;
 	}
 
 	ajax_update(params, '', { onComplete: json_handler });
