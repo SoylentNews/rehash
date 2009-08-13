@@ -9,7 +9,7 @@ var CLASS={ 'true':'expand', 'false':'collapse' };
 $('a.edit-toggle').live('click', function( e ){
 	var	$button	= $(e.originalEvent.target),
 		expand	= $button.is('.collapse'),
-		$input	= $button.closest('menu.barlet').find('input.tag-entry');
+		$input	= $button.closest('menu.edit-bar').find('input.tag-entry');
 
 	$input.toggle(expand);
 	$button.removeClass(CLASS[!expand]).addClass(CLASS[expand]);
