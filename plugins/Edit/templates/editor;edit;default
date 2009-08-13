@@ -70,7 +70,7 @@ $(document).ready(function(){
 		return false;
 	});
 
-	$("a.acdetais").click(function() {
+	$("a.acdetails").click(function() {
 		$(this).parent().siblings("div.input").toggleClass('hide');
 		$(this).siblings("span").toggleClass('hide');
 		$(this).hide();
@@ -140,15 +140,15 @@ $(document).ready(function(){
 								isACsubm=1;
 								END; %]
 							<div class="txt">
-								Submitted by [%
+								Submitted by <a class="acdetails" href="#">[%
 									IF isACsubm=='1';
-										'<span>Anonymous Coward</span>';
+										'<span>Anonymous Coward</span><span class="more">+</span>';
 									ELSE;
 										'<span>';
 											item.name | strip_attribute;
-										'</span>';
+										'</span><span class="more">+</span>';
 									END;
-									%] <a class="acdetais" href="#">+</a>
+									%]</a>
 							</div>
 							<div class="input w120 hide">
 								<span class="[% IF !item.name;'dyn';END;%]label">
