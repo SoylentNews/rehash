@@ -356,25 +356,27 @@ sub showEditor {
 	my $preview_id = $self->getOrCreatePreview($session);
 	my $editor;
 	my $preview_info;
+	my $similar_stories;
+	my $storyref = {};
 
 	$preview_info .=  "PREVIEW ID: $preview_id";
 
 	my $preview = $self->getPreview($preview_id);
 	$preview->{dept} = $form->{dept};
 
-	my $fh		 = getObject("Slash::FireHose");
-	my $tagsdb 	= getObject("Slash::Tags");
+	my $fh     = getObject("Slash::FireHose");
+	my $tagsdb = getObject("Slash::Tags");
 
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 
 	$options->{errors} = $self->validate($preview, $p_item) if defined $form->{title} && !$form->{new} &&  !defined($options->{errors});
 
-	my (%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
+	my(%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
 
 	if ($p_item->{type} eq 'story' && !$user->{nospell}) {
 		%introtext_spellcheck = $admindb->get_ispell_comments($preview->{introtext}) if $preview->{introtext};
-		%bodytext_spellcheck  = $admindb->get_ispell_comments($p_item->{bodytext})  if $p_item->{bodytext};
-		%title_spellcheck     = $admindb->get_ispell_comments($p_item->{title})     if $p_item->{title};
+		%bodytext_spellcheck  = $admindb->get_ispell_comments($p_item->{bodytext})   if $p_item->{bodytext};
+		%title_spellcheck     = $admindb->get_ispell_comments($p_item->{title})      if $p_item->{title};
 
 		$ispell_comments = {
 		introtext => (scalar keys %introtext_spellcheck)
@@ -389,7 +391,10 @@ sub showEditor {
 		};
 
 		$options->{errors}{warnings}{ispellwarning} = getData('ispellwarning','','edit')
-                        if keys %introtext_spellcheck || keys %bodytext_spellcheck || keys %title_spellcheck;
+			if keys %introtext_spellcheck || keys %bodytext_spellcheck || keys %title_spellcheck;
+
+		$similar_stories = $self->getSimilar($preview, $p_item);
+		$self->setRelated(0, $storyref);
 	}
 
 	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session<br>";
@@ -428,35 +433,37 @@ sub showEditor {
 
 
 	my $tag_widget = slashDisplay('edit_bar', {
-		item 		=> $p_item,
-		id 		=> $p_item->{id},
-		key		=> $preview->{preview_fhid},
-		key_type	=> 'firehose-id',
-		options 	=> $options->{options},
-		edit_mode	=> 1,
-		skipvote 	=> 1,
-		vote 		=> $options->{vote},
+		item         => $p_item,
+		id           => $p_item->{id},
+		key          => $preview->{preview_fhid},
+		key_type     => 'firehose-id',
+		options      => $options->{options},
+		edit_mode    => 1,
+		skipvote     => 1,
+		vote         => $options->{vote},
 	}, { Return => 1, Page => 'firehose'});
 
 	
 	$editor .= slashDisplay('editor', { 
-		id 			=> $preview_id,
-		fhid			=> $preview->{preview_fhid},
-		preview			=> $preview, 
-		item 			=> $p_item,
-		author_select 		=> $author_select,
-		commentstatus_select 	=> $commentstatus_select,
-		display_check		=> $display_check,
-		extras			=> $extracolumns,
-		errors			=> $options->{errors},
-		ispell_comments		=> $ispell_comments,
-		preview_shown		=> $showing_preview,
-		previewed_item		=> $previewed_item,
-		session			=> $session,
-		tag_widget		=> $tag_widget,
-		preview_info		=> $preview_info,
-		nowrap			=> $options->{nowrap},
-		state			=> $options->{state},
+		id                      => $preview_id,
+		fhid                    => $preview->{preview_fhid},
+		preview                 => $preview, 
+		item                    => $p_item,
+		author_select           => $author_select,
+		commentstatus_select    => $commentstatus_select,
+		display_check           => $display_check,
+		extras                  => $extracolumns,
+		errors                  => $options->{errors},
+		ispell_comments         => $ispell_comments,
+		preview_shown           => $showing_preview,
+		previewed_item          => $previewed_item,
+		session                 => $session,
+		tag_widget              => $tag_widget,
+		preview_info            => $preview_info,
+		nowrap                  => $options->{nowrap},
+		state                   => $options->{state},
+		similar_stories         => $similar_stories,
+		storyref                => $storyref,
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
@@ -585,7 +592,7 @@ sub saveItem {
 
 	# XXXEdit eventually make sure this is ours before setting inactive
 
-        # XXXEdit Turn all users previews inactive at this poin? 
+	# XXXEdit Turn all users previews inactive at this poin? 
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
@@ -647,8 +654,6 @@ sub editUpdateStory {
 
 	$self->setStory($story->{stoid}, $data);
 	return $story->{sid};
-	
-	
 }
 
 sub getExtrasToSaveForChosen {
@@ -726,12 +731,11 @@ sub editCreateStory {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
 
-	my $sid =  $self->createStory($data);
+	my $sid = $self->createStory($data);
 	
 	if ($sid) {
 		my $st = $self->getStory($sid);
-		#XXXEdit add this later
-		#$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
+		$self->setRelated($sid);
 		slashHook('admin_save_story_success', { story => $data });
 		my $stoid = $st->{stoid};
 		my $story_globjid = $self->getGlobjidCreate('stories', $stoid); 
@@ -748,9 +752,8 @@ sub editCreateStory {
 			$admindb->grantStoryPostingAchievements($data->{uid}, $data->{submitter});
 			$admindb->addSpriteForSid($_);
 		}
-
-		
 	}
+
 	return $sid;
 }
 
@@ -836,6 +839,53 @@ sub ajaxEditorAfter {
 		eval_first	=> $eval_first,
 		html_add_after	=> $html_add_after
 	});
+}
+
+sub getSimilar {
+	my($self, $preview, $fh_item, $num) = @_;
+	my $story = {
+		introtext  => $preview->{introtext},
+		title      => $fh_item->{title},
+		bodytext   => $fh_item->{bodytext},
+		
+	}; # XXX: sid?
+
+	$num ||= getCurrentStatic('similarstorynumshow') || 5;
+	my $similar_stories = $self->getSimilarStories($story, $num);
+	if ($similar_stories && @$similar_stories) { # XXX dupe code
+		for my $sim (@$similar_stories) {
+			# Display a max of five words reported per story.
+			$#{$sim->{words}} = 4 if $#{$sim->{words}} > 4;
+			for my $word (@{$sim->{words}}) {
+				# Max of 12 chars per word.
+				$word = substr($word, 0, 12);
+			}
+			# Max of 35 char title.
+			$sim->{title} = chopEntity($sim->{title}, 35);
+		}
+	}
+	return $similar_stories;
+}
+
+sub setRelated {
+	my($self, $sid, $storyref) = @_;
+	my $admindb = getObject('Slash::Admin');
+	my($related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr)
+		= $admindb->extractRelatedStoriesFromForm(getCurrentForm());
+
+	if ($storyref) {
+		$storyref->{related_sids_hr}     = $related_sids_hr;
+		$storyref->{related_urls_hr}     = $related_urls_hr;
+		$storyref->{related_cids_hr}     = $related_cids_hr;
+		$storyref->{related_firehose_hr} = $related_firehose_hr;
+	}
+
+	if ($sid) {
+		$self->setRelatedStoriesForStory($sid,
+			$related_sids_hr, $related_urls_hr,
+			$related_cids_hr, $related_firehose_hr
+		);
+	}
 }
 
 sub DESTROY {

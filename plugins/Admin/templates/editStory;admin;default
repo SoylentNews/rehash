@@ -61,7 +61,7 @@ __template__
 				<tr class="data_head">
 					<td colspan="3"><b>Similar & Related Stories</b></td><td>Related</td><td>Ignore</td>
 				</tr>
-				[% seen_related %]
+				[% seen_related = {} %]
 				[% dispclass = { "1" => "story_sec", "0" => "story_main" , "-1" => "story_nd" } %]	
 				[% FOREACH story = similar_stories %]
 				<tr class="[% dispclass.${story.displaystatus} %]">

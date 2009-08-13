@@ -2341,8 +2341,8 @@ sub editSave {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });
 	}
 	my $html;
-	my ($eval_first, $eval_last, $html_add_after, $html_add_before, $html_append) = ('','',{},{}, {});
-	if($editor) {
+	my($eval_first, $eval_last, $html_add_after, $html_add_before, $html_append) = ('','',{},{}, {});
+	if ($editor) {
 		$html->{editor} = $editor;
 	} else {
 		if ($form->{state} eq 'inline') {

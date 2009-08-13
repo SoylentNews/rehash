@@ -127,8 +127,9 @@ sub preview {
 	}
 
 	my $edit = getObject("Slash::Edit");
-	$edit->savePreview();
-	my $editor = $edit->showEditor({ previewing => 1});
+	$edit->savePreview;
+	$edit->setRelated;
+	my $editor = $edit->showEditor({ previewing => 1 });
 	slashDisplay('editorwrap', { editor => $editor });
 }
 
@@ -143,17 +144,18 @@ sub save {
 	}
 
 	my $edit = getObject("Slash::Edit");
-	$edit->savePreview();
-	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem();
+	$edit->savePreview;
+	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem;
 	my($editor, $id);
 	my $saved_item;
 	if ($retval) {
-		$id = $retval;
-		my $num_id = $id;
+		my $num_id = $id = $retval;
 		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
 		my $fh = getObject("Slash::FireHose");
 		my $item = $fh->getFireHoseByTypeSrcid($type, $num_id);
 		$saved_item = $fh->dispFireHose($item, { view_mode => 1, mode => 'full'});
+
+		$slashdb->setCommonStoryWords;
 	} else { 
 		$editor = $edit->showEditor({ errors => $errors });
 	}

@@ -103,6 +103,81 @@ sub getAccesslogAbusersByID {
 	return $ar;
 }
 
+##################################################################
+sub extractRelatedStoriesFromForm {
+	my($self, $form, $cur_sid) = @_;
+	$cur_sid ||= '';
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my %related_urls;
+
+	my %related_urls_hr;
+	my %related_cids_hr;
+
+use Data::Dumper; print STDERR Dumper $form;
+
+	my($related, $related_cids);
+	if (ref($form->{_multi}{related_story}) eq 'ARRAY') {
+		$related = $form->{_multi}{related_story};
+	} elsif ($form->{related_story}) {
+		$related = [ $form->{related_story} ];
+	}
+	
+	if (ref($form->{_multi}{related_comment}) eq 'ARRAY') {
+		$related_cids = $form->{_multi}{related_comment};
+	} elsif ($form->{related_comment}) {
+		$related_cids = [ $form->{related_comment} ];
+	}
+
+# XXX this is broken because regexSid() matches things other than sid
+# but in theory, should use regexSid() ...
+#	my $regexsid = regexSid();
+
+	my $match = qr/(?:$constants->{basedomain})?\S*(\d\d\/\d\d\/\d\d\/\d+)/;
+	my $match_cid = qr/(?:$constants->{basedomain})?\S*cid=(\d+)/;
+
+	if ($form->{add_related}) {
+		my @add_related = split('\n', $form->{add_related});
+		foreach (@add_related) {
+			s/^\s+|\s+$//g;
+			next if !$_;
+			
+			if ($_ =~ /cid=(\d+)/) {
+				push @$related_cids, $1;
+			} elsif ($_ =~ $match) {
+				# XXX should use regexSid()
+				push @$related, $1;
+			} else {
+				my($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
+				$related_urls{$url} = $title;
+			}
+		}
+	}
+
+
+	# Extract sids from urls in introtext and bodytext
+	foreach ($form->{introtext}, $form->{bodytext}) {
+		next unless $_;
+		push @$related, $1 while /$match/g;
+		push @$related_cids, $1 while /$match_cid/g;
+	}
+
+	# should probably filter and check that they're actually sids, etc...
+	my %related_cids = map { $_ => $slashdb->getComment($_) } grep { $_ }                   @$related_cids;
+	my %related_sids = map { $_ => $slashdb->getStory($_)   } grep { $_ && $_ ne $cur_sid } @$related;
+	my %related_firehose;
+	if ($constants->{plugin}{FireHose} && $constants->{firehose_add_related}) {
+		my $firehose = getObject("Slash::FireHose");
+		my $story = $slashdb->getStory($cur_sid);
+		my $fhid = $story && $story->{fhid} ? $story->{fhid} : $form->{fhid};
+		if ($fhid) {
+			%related_firehose = ( $fhid => $firehose->getFireHose($fhid) );
+		}
+	}
+
+	return(\%related_sids, \%related_urls, \%related_cids, \%related_firehose);
+}
 
 ##################################################################
 # Generates the 'Related Links' for Stories

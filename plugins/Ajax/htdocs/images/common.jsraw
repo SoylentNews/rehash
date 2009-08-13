@@ -2213,12 +2213,28 @@ function editPreview(save) {
 	$("form#slashstoryform .default").attr('value', '');
 	var elems = $('#slashstoryform').serializeArray();
 	var params = {};
+	var multi = {};
 
-	$.map( elems,
+	$.map(elems, function(el) {
+		if (multi[el.name]===undefined) {
+			multi[el.name] = 0;
+		} else {
+			multi[el.name]++;
+		}
+	});
+
+	$.map(elems,
 		function(el) {
-			params[el.name] = el.value;
+			if (multi[el.name]) {
+				if (!params[el.name])
+					params[el.name] = [];
+				params[el.name].push(el.value);
+			} else {
+				params[el.name] = el.value;
+			}
 		}
 	);
+
 	params['op'] = save ? 'edit_save' : 'edit_preview';
 	ajax_update(params, '', { onComplete: json_handler });
 }
