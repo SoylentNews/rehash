@@ -321,15 +321,16 @@ $(document).ready(function(){
 		<div class="subarticle-foot">
 			<div class="subactionbuttons">
 				[% IF preview_shown %]
-					<div class="preactionbuttons previewonly">
+					<span class="preactionbuttons previewonly">
 						<input type="submit" name="op" value="edit" id="edit-edit-button" onclick="edit_editon([% fhid %]); return false;">
 						<input type="submit" name="op" value="save" id="edit-edit-save" onclick="editSave(); return false;">
-						<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="#; return false;">
-					</div>
+					</span>
 				[% END %]
-					<div class="editonly [% IF preview_shown %]hide[% END %]">
+					<span class="editonly [% IF preview_shown %]hide[% END %]">
 						<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
-					</div>
+					</span>
+					<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="submit_cancel(); return false;">
+					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="submit_reset([% IF preview.src_fhid; "'" _ preview.src_fhid _ "'"; END %]);return false;">
 			</div>
 
 			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
