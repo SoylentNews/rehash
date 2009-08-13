@@ -1,6 +1,6 @@
 /* T2 CSS */
 
-.edit-bar { padding-right:0.5em; }
+.edit-bar { padding-right:0.5em; margin:0;}
 
 .edit-bar .domain.tag,
 .edit-bar .signoff-button,
