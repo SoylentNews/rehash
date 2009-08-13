@@ -168,21 +168,10 @@ $(document).ready(function(){
 							</div>
 						[% ELSE %]
 							<div class="txt">
-								Submitted by
+								Submitted by <a href="[% IF user.realemail; 'mailto:' _ user.realemail | strip_attribute ; ELSE; constants.rootdir _ '/~' _ item.name | strip_attribute; END;  %]">[% item.name | strip_attribute; %]</a>
+								<input type="hidden" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
+								<input type="hidden" name="email" value="[% IF user.realemail;user.realemail | strip_attribute;END; %]" size="50" maxlength="50">
 							</div>
-							<div class="input w120">
-								<span class="[% IF !item.name;'dyn';END;%]label">
-									<label for="name">Your Name: Leave blank to be Anonymous</label>
-									<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
-								</span>
-							</div>
-							<div class="input">
-								<span class="[% IF !item.email;'dyn';END;%]label">
-									<label for="email">Your Email or Homepage where users can contact you</label>
-									<input type="text" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
-								</span>
-							</div>
-
 						[% END %]
 					</div>
 
