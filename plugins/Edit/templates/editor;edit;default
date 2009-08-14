@@ -351,6 +351,7 @@ $(document).ready(function(){
 		<input type="hidden" name="bare" value="1">
 		[% END %]
 
+				[% IF item.type == 'story' && user.is_admin %]
 				<div style="margin-top:100px"><table border="0" cellpadding="3" cellspacing="0" class="data" id="simstories">
 				<tr class="data_head">
 					<td colspan="3"><b>Similar & Related Stories</b></td><td>Related</td><td>Ignore</td>
@@ -396,7 +397,7 @@ $(document).ready(function(){
 				<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td>
 				</tr>
 				<tr><td colspan="5"> include sid or title URL one per line!</td></tr>
-				</table></div>
+				</table></div>[% END %]
 
 </form>
 [%- #fhitem editor- -%]
