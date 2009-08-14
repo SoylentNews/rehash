@@ -41,7 +41,8 @@ menu[type=context] > a.slash-hover:first-child {
 }
 
 
-#tag-menu a {
+/* #tag-menu a, #feedback-menu a [% IF user.is_admin %], #datatype-menu a[% END %] { */
+menu.tag-menu a {
 	display:list-item !important;
 	list-style:none;
 	text-align:left;
@@ -52,7 +53,7 @@ menu[type=context] > a.slash-hover:first-child {
 }
 [% IF user.is_admin %]
 #tag-menu span.op { display:inline-block; min-width:1em; text-align:right; }
-#tag-menu a.group { border-bottom:1px solid darkgray; padding-bottom:0.5em; margin-bottom:0.75em; }
+.tag-menu a.group { border-bottom:1px solid darkgray; padding-bottom:0.5em; margin-bottom:0.75em; }
 [% END %]
 #tag-menu span.var-tag {
 font-weight:normal;
@@ -60,6 +61,8 @@ color:#444444;
 }
 
 #tag-menu a.slash-hover,
+#feedback-menu a.slash-hover,
+[% IF user.is_admin %]#datatype-menu a.slash-hover,[% END %]
 .tag-display span.tag:hover,
 .tag-display span.tag.trigger {
 	color:white;
@@ -88,7 +91,16 @@ color:#444444;
 </menu>
 [% IF user.is_admin %]
 <menu id="datatype-menu" class="tag-menu" type="context">
-	<a>...</a>
+	<a>extras</a>
+	<a>history</a>
+	<a class="group">info</a>
+
+	<a>betaedit</a>
+	<a class="group">oldedit</a>
+
+	<a class="tag">binspam</a>
+	<a class="tag">hold</a>
+	<a class="pseudo-tag">neverdisplay</a>
 </menu>
 [% END %]
 <script>
@@ -231,7 +243,13 @@ $DATATYPE_MENU.menu({
 
 	start: function( e, ui ) { show_menu($(ui.trigger).addClass('trigger'), $DATATYPE_MENU); },
 
-	select: function( e, ui ) { /*...*/ },
+	select: function( e, ui ) {
+		var	fhitem		= $(ui.trigger).closest('.fhitem')[0],
+			command		= $(ui.select).text(),
+			command_tag	= firehose_handle_admin_commands.call(fhitem, [ command ])[0];
+
+		command_tag && T2.submit_tags(fhitem, command_tag);
+	},
 
 	stop: function( e, ui ) { $DATATYPE_MENU.hide(); $(ui.trigger).removeClass('trigger'); }
 });
