@@ -2250,7 +2250,7 @@ function submit_reset(id,state) {
 		'new' : 1
 	};
 
-	if (id) {
+	if (id && state == 'inline' ) {
 		params['from_id'] = id;
 	}
 	if (state) {
