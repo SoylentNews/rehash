@@ -108,7 +108,7 @@ sub getOrCreatePreview {
 			my $p_data = { preview_fhid => $fhid };
 			if ($form->{new}) {
 				$fh_data->{title} 	= strip_attribute($form->{title});
-				$p_data->{url_text} 	= $form->{url};
+				$p_data->{url_text} 	= $form->{url} if $form->{url};
 				$p_data->{introtext} 	= $form->{introtext};
 			}
 			$fh->setFireHose($fhid, $fh_data) if keys %$fh_data > 0;
@@ -277,7 +277,7 @@ sub savePreview {
 		# XXXEdit eventually perhaps look for video tag when setting this too
 		$fh_data->{mediatype} = $form->{url} =~ /youtube.com|video.google.com/ ? "video" : "none";
 
-		$p_data->{url_text} = $form->{url};
+		$p_data->{url_text} = $form->{url} if $form->{url};
 		$p_data->{sub_type} = $self->detectSubType($form->{introtext});
 		if ($form->{url} && $form->{title}) {
 			if (validUrl($form->{url})) {
