@@ -761,14 +761,15 @@ function page_click_handler( event ) {
 		$fhitem	= $target.closest('.fhitem'),
 		leaving	= !!$target.closest('a[href]:not([href=#],[onclick]),.advertisement').length,
 		intent	= !leaving && 'interest',
+		nod_nix	= false,
 		command, $menu, click_handled = false;
 
 	$related_trigger = $target;
 
 	if ( $target.is('a.up') ) {
-		command = 'nod';
+		nod_nix = command = 'nod';
 	} else if ( $target.is('a.down') ) {
-		command = 'nix';
+		nod_nix = command = 'nix';
 	} else if ( $target.is('.sodify,.skin,.topic *') ) {
 		// mostly already handled by its own click-handler, but...
 		intent = 'search';
@@ -776,6 +777,11 @@ function page_click_handler( event ) {
 		command = $target.text();
 	} else {
 		$related_trigger = $([]);
+	}
+
+	if ( nod_nix ) {
+		var nod_nix_handler = $fhitem.is('.fhitem-comment') ? firehose_handle_comment_nodnix : firehose_handle_nodnix;
+		nod_nix_handler.call($fhitem[0], [ nod_nix ]);
 	}
 
 	if ( command && (click_handled=true) && check_logged_in() ) {

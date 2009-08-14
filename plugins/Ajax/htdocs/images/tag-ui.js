@@ -704,10 +704,11 @@ var tag_widget_fns = {
 		$previous_context_trigger = $related_trigger;
 
 		// if there's a context to hide, and hiding on a timeout is requested...
-		if ( context && this.tag_widget_data.context_timeout ) {
+		var context_timeout = this.tag_widget_data ? this.tag_widget_data.context_timeout : 15000;
+		if ( context && context_timeout ) {
 			this._context_timeout = setTimeout(function(){
 				T2.set_context(widget);
-			}, this.tag_widget_data.context_timeout);
+			}, context_timeout);
 		}
 
 		return this;

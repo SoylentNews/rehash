@@ -15,7 +15,7 @@ div.note-wrapper,
 .adminmode .edit-bar .domain.tag,
 .fhitem-editor .edit-bar .domain.tag,
 .adminmode .edit-bar .signoff-button {
-display:inline;
+display:inline !important;
 }
 .adminmode .edit-bar .topic.tag,
 .adminmode .edit-bar .domain.tag,
