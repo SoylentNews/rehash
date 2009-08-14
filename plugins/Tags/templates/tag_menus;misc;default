@@ -96,14 +96,21 @@ $(function(){
 var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
 
 function show_menu( $trigger, $menu ){
-	$menu.appendTo(document.body);
+	$menu.appendTo(document.body).css({ opacity:0 }).show();
 
-	var align=$trigger.offset(), adjust=$menu.offsetParent().offset();
+	var 	$fhitem	= $trigger.closest('.fhitem'),
+		right	= $fhitem.offset().left + $fhitem.width(),
+		global	= $trigger.offset(),
+		local	= $menu.offsetParent().offset();
+
+	global.left = Math.min(global.left, right-$menu.width());
+
 	$menu.css({
-		position:'absolute',
-		top:align.top - adjust.top + $trigger.height(),
-		left:align.left - adjust.left
-	}).show();
+		position:	'absolute',
+		top:		global.top - local.top + $trigger.height(),
+		left:		global.left - local.left,
+		opacity:	1
+	});
 }
 
 
