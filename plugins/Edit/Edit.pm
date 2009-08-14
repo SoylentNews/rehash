@@ -395,6 +395,7 @@ sub showEditor {
 
 		$similar_stories = $self->getSimilar($preview, $p_item);
 		$self->setRelated(0, $storyref);
+use Data::Dumper; print STDERR Dumper $storyref;
 	}
 
 	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session<br>";
@@ -464,7 +465,7 @@ sub showEditor {
 		state                   => $options->{state},
 		similar_stories         => $similar_stories,
 		storyref                => $storyref,
-		add_related             => $form->{add_related}
+		add_related_text        => $form->{add_related}
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;

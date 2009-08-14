@@ -123,7 +123,7 @@ use Data::Dumper; print STDERR Dumper $form;
 	} elsif ($form->{related_story}) {
 		$related = [ $form->{related_story} ];
 	}
-	
+
 	if (ref($form->{_multi}{related_comment}) eq 'ARRAY') {
 		$related_cids = $form->{_multi}{related_comment};
 	} elsif ($form->{related_comment}) {
