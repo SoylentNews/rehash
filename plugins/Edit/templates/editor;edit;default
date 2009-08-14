@@ -225,7 +225,7 @@ $(document).ready(function(){
 								<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
 							</span>
 						</div>
-						<div class="txt">
+						<div class="txt" style="padding-left:.5em">
 							dept.
 						</div>
 					</div>
@@ -351,7 +351,7 @@ $(document).ready(function(){
 		[% END %]
 
 		[% IF item.type == 'story' && user.is_admin %]
-		<div style="margin-top:100px">[% PROCESS relatedui %]</div>
+		<div>[% PROCESS relatedui %]</div>
 		[% END %]
 
 </form>
