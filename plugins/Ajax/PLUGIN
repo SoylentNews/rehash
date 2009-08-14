@@ -17,6 +17,7 @@ htdoc=htdocs/images/admin.js
 htdoc=htdocs/images/common.jsraw
 htdoc=htdocs/images/jquery/jquery-1.3.2.js
 htdoc=htdocs/images/jquery/jquery.metadata.js
+htdoc=htdocs/images/jquery/jquery.elastic-1.6.js
 htdoc=htdocs/images/slash.util.js
 htdoc=htdocs/images/slash.geometry.js
 htdoc=htdocs/images/jquery/jquery.textselection.js
