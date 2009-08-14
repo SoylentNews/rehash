@@ -111,7 +111,9 @@ $(document).ready(function(){
 		<div class="editonly hide">
 		[% END %]
 
-		<span onclick="firehose_set_options('color', 'indigo')" title="Filter Firehose to entries rated indigo or better" class="soda fake"><span>0</span></span>
+		[% IF state == 'inline' %]
+			<span onclick="firehose_set_options('color', 'indigo')" title="Filter Firehose to entries rated indigo or better" class="soda fake"><span>0</span></span>
+		[% END %]
 
 		<div class="subtitle" [% IF state == 'inline' %]style="-moz-border-radius-topleft:0.8em;-webkit-border-top-left-radius: 0.8em;margin-left:0.375em;"[% END %]>
 			<span class="[% IF !item.title;'dyn';END;%]label">
