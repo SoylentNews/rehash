@@ -16,7 +16,6 @@ __template__
 
 [% PROCESS tag_menus %]
 
-<br>
 [% IF user.edit_debuginfo %]
 	[% preview_info %]
 [% END %]
@@ -81,7 +80,7 @@ $(document).ready(function(){
 });
 </script>
 [% IF state == "inline" %]
-<div style="text-align:right"><a href="#" onclick="close_inline_editor();">Close Editor</a></div>
+<div class="hdbuttons"><a href="#" onclick="close_inline_editor();">Close Editor</a></div>
 [% END %]
 
 [% IF errors.critical.save_error %]
