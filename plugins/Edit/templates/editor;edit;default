@@ -215,23 +215,23 @@ $(document).ready(function(){
 					</div>
 
 					[% IF constants.use_dept %]
-					<div class="d">
+					<div class="d" [% IF errors.critical.baddept %]style="height:3.5em"[% END %]>
 						<div class="txt">
 							from the
 						</div>
-						<div class="input w120">
+						<div class="input w130">
 							<span class="[% IF !item.dept;'dyn';END;%]label">
 								<label for="dept">Dept</label>
 								<input type="text" name="dept" value="[% IF item.dept;item.dept | strip_attribute;END; %]" size="50">
+								[% IF errors.critical.baddept %]
+									[% errors.critical.baddept %]
+								[% END %]
 							</span>
 						</div>
 						<div class="txt" style="padding-left:.5em">
 							dept.
 						</div>
 					</div>
-						[% IF errors.critical.baddept %]
-							[% errors.critical.baddept %]
-						[% END %]
 					[% END %]
 			[% END %]
 
