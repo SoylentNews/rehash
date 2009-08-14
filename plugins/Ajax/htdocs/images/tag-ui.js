@@ -759,6 +759,7 @@ T2.submit_tags = function( fhitem, tag_cmds ){
 			key:key.key,
 			key_type:key.key_type,
 			reskey:reskey_static,
+			tags:tag_cmds,
 			limit_fetch:''
 		},
 		success: function( server_response ){
