@@ -2589,7 +2589,7 @@ var	AD_HEIGHT=300,
 $(function(){
 	$slashboxes = $('#slashboxes, #userboxes').eq(0);
 
-	$('#slug-Top,#slug-Bottom').show();
+	$slashboxes.length && $('#slug-Top,#slug-Bottom').show();
 
 	$(document).
 		bind('firehose-setting-noslashboxes', fix_ad_position);
