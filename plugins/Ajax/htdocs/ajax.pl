@@ -2351,7 +2351,7 @@ sub editSave {
 			}
 			$eval_first = "\$('#firehose-$item->{id}').remove(); \$('.edithidden').show().removeClass('edithidden');";
 			$html_add_before->{editor} = $saved_item;
-			$eval_last = "\$('#editor').remove()";
+			$eval_last = "\$('#editor').remove(); use_sprites('#firehoselist')";
 		} else {
 			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1, Page => 'edit' });
 		}
