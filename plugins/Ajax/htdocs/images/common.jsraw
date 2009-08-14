@@ -676,15 +676,20 @@ var $related_trigger = $().filter();
 var kExpanded=true, kCollapsed=false;
 
 function tag_ui_in( $fhitem ){
-	var $W = $fhitem.find('.tag-widget.body-widget');
-	return { widget:$W, expanded:$W.is('.expanded') };
+	var $toolbar=$fhitem.find('menu.edit-bar'), $twisty=$toolbar.find('a.edit-toggle span.button');
+	return {
+		$toolbar:	$toolbar,
+		$input:		$toolbar.find('input.tag-entry'),
+		$toggle:	$twisty,
+		is_expanded:	$twisty.is('.expand')
+	};
 }
 
 function firehose_toggle_tag_ui_to( want_expanded, el, dont_next ){
 	var	$fhitem		= $(el).closest('.fhitem'), // assert($fhitem.length)
 		fhid		= $fhitem.attr('id').replace(FHID_PREFIX, ''),
 		tag_ui		= tag_ui_in($fhitem),
-		toggle		= tag_ui.expanded == !want_expanded; // force boolean conversion
+		toggle		= tag_ui.is_expanded == !want_expanded; // force boolean conversion
 
 	if ( toggle ) {
 		if (want_expanded) { // need to expand
@@ -697,9 +702,13 @@ function firehose_toggle_tag_ui_to( want_expanded, el, dont_next ){
 		setFirehoseAction();
 		want_expanded && T2.fetch_tags($fhitem[0]);
 
-		$fhitem.find('.tag-widget').each(function(){ T2.set_context(this); });
-		tag_ui.widget.toggleClass('expanded', !!want_expanded);
-		tag_ui.widget.find('a.edit-toggle .button').setClass(applyToggle({expand:want_expanded, collapse:!want_expanded}));
+		tag_ui.$toolbar.toggleClass('expanded', !!want_expanded);
+		tag_ui.$input.toggle(!!want_expanded);
+		tag_ui.$toggle.setClass(applyToggle({
+			expand:	want_expanded,
+			collapse: !want_expanded
+		}));
+
 		$fhitem.find('#toggletags-body-'+fhid).setClass(applyToggle({tagbody:want_expanded, tagshide:!want_expanded}));
 
 		if (!want_expanded && $fhitem.data('tags-opened-body')) { // is expanded, and parent was expanded by us
@@ -711,13 +720,13 @@ function firehose_toggle_tag_ui_to( want_expanded, el, dont_next ){
 	}
 
 	// always focus for expand request, even if already expanded
-	want_expanded && view(tag_ui.widget.find('.tag-entry:visible:first'), { hint:$fhitem, focus:true, speed:50 });
-	return tag_ui.widget;
+	want_expanded && view(tag_ui.$input, { hint:$fhitem, focus:true, speed:50 });
+	return tag_ui.$toolbar;
 }
 
 function firehose_toggle_tag_ui( el ) {
 	var $fhitem = $(el).closest('.fhitem');
-	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).expanded, $fhitem);
+	firehose_toggle_tag_ui_to(!tag_ui_in($fhitem).is_expanded, $fhitem);
 }
 
 var search_eligible;
@@ -930,7 +939,7 @@ $('#firehoselist > div.fhitem').
 	}).
 	live('focus-article', function(){
 		var $fhitem = $(this);
-		$fhitem.data('blur-closes-tags', !tag_ui_in($fhitem).expanded).
+		$fhitem.data('blur-closes-tags', !tag_ui_in($fhitem).is_expanded).
 			data('blur-closes-item', $fhitem.find('[id^=fhbody-]').is('.empty,.hide'));
 	});
 

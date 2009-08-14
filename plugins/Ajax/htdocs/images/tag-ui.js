@@ -9,15 +9,7 @@ var	CLASS={ 'true':'expand', 'false':'collapse' },
 	HANDLED_KEYS={ 27:1, 32:1, 13:1, 37:1, 40:1 };
 
 $('a.edit-toggle').live('click', function( e ){
-	if ( !check_logged_in() ) { return; }
-
-	var	$button	= $(e.originalEvent.target),
-		expand	= $button.is('.collapse'),
-		$input	= $button.closest('menu.edit-bar').find('input.tag-entry');
-
-	expand && T2.fetch_tags($button.closest('.fhitem'));
-	$input.toggle(expand);
-	$button.removeClass(CLASS[!expand]).addClass(CLASS[expand]);
+	check_logged_in() && firehose_toggle_tag_ui(e.originalEvent.target);
 });
 
 $('input.tag-entry').live('keydown', function( event ){
