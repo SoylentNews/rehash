@@ -611,6 +611,13 @@ sub editUpdateStory {
 
 	my $story = $self->getStory($fhitem->{srcid});
 
+	my $chosen_hr = { };
+	my @topics;
+	push @topics, $fhitem->{tid} if $fhitem->{tid};
+
+
+	$chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
+
 
 	$data = {
 		uid 		=> $fhitem->{uid},
@@ -628,6 +635,7 @@ sub editUpdateStory {
 		#thumb
 		-rendered	=> 'NULL',
 		neverdisplay	=> $preview->{neverdisplay},
+		topics_chosen	=> $chosen_hr
 	};
 	
 	$data->{subid} = $preview->{subid} if $preview->{subid};
