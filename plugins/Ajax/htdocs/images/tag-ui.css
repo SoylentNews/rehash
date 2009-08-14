@@ -18,6 +18,8 @@ div.note-wrapper, .adminmode .domain.tag, .adminmode .signoff-button { display:i
 	cursor:arrow;
 	user-select:none;
 	-moz-user-select:none;
+	-webkit-user-select:none;
+
 	font-family: arial, sans serif;
 	color: #666;
 	text-decoration:none !important;
