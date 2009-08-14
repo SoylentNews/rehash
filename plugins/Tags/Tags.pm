@@ -89,6 +89,9 @@ sub _setuptag {
 	return $tag;
 }
 
+{
+my $nodid = 0;
+my $nixid = 0;
 sub createTag {
 	my($self, $hr, $options) = @_;
 
@@ -109,6 +112,20 @@ sub createTag {
 	my $opp_tagnameids = [ ];
 	if ($check_opp) {
 		$opp_tagnameids = $self->getOppositeTagnameids($tag->{tagnameid});
+		# getOppositeTagnameids demands a clid to identify the
+		# non-natural opposite of nod and nix.  To ensure those
+		# two are never allowed to exist at the same time,
+		# hardcode them as opposites here.
+		# XXX should fix this by rethinking what "opposite" means for "all clout types"
+		# XXX this closure will break for multiple Slash sites that have different tagnameids for nod/nix
+		my $constants = getCurrentStatic();
+		$nodid ||= $self->getTagnameidIfExists($constants->{tags_upvote_tagname}   || 'nod');
+		$nixid ||= $self->getTagnameidIfExists($constants->{tags_downvote_tagname} || 'nix');
+		if ($tag->{tagnameid} == $nodid) {
+			push @$opp_tagnameids, $nixid unless grep { $_ == $nixid } @$opp_tagnameids;
+		} elsif ($tag->{tagnameid} == $nixid) {
+			push @$opp_tagnameids, $nodid unless grep { $_ == $nodid } @$opp_tagnameids;
+		}
 	}
 
 	$self->sqlDo('SET AUTOCOMMIT=0');
@@ -226,6 +243,7 @@ sub createTag {
 	}
 
 	return $rows ? $tagid : 0;
+}
 }
 
 sub deactivateTag {
