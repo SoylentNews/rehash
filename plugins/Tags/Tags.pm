@@ -1377,7 +1377,7 @@ sub setGetDisplayTags { # T2
 		datatype		=> $datatype || 'unknown',
 		main_watchlist_tag	=> $main_watchlist_tag,
 			# topic_tags includes all watchlist tags as well
-		topic_tags		=> join(' ', grep { $_ } $main_watchlist_tag, @topic_tags)
+		topic_tags		=> join(' ', grep { $_ } $main_watchlist_tag, @topic_tags),
 		popular_tags		=> $popular_tags,
 		user_tags		=> $user_tags,
 	};
