@@ -743,6 +743,7 @@ $(function(){
 	$(document).
 		bind('user-intent-interest', function( e, item ){
 			item && firehose_set_cur($(item));
+			setTimeout(function(){ inlineAdFirehose(); }, 0);
 		});
 });
 
