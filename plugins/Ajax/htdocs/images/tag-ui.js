@@ -751,7 +751,7 @@ $.each(tag_widget_fns, globalize);
 })();
 
 T2._ajax_request = function( fhitem, tag_cmds ){
-	var key = fhitem_key(fhitem);
+	var key=fhitem_key(fhitem), $spinner=$('span.tag-server-busy', fhitem).show();
 	$.ajax({
 		type:'POST',
 		dataType:'text',
@@ -765,6 +765,9 @@ T2._ajax_request = function( fhitem, tag_cmds ){
 		},
 		success: function( server_response ){
 			$(fhitem).find('.tag-bar').html(server_response);
+		},
+		complete: function(){
+			$spinner.hide();
 		}
 	});
 };
