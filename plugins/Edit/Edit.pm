@@ -464,6 +464,7 @@ sub showEditor {
 		state                   => $options->{state},
 		similar_stories         => $similar_stories,
 		storyref                => $storyref,
+		add_related             => $form->{add_related}
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
