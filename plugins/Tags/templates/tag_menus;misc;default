@@ -108,10 +108,12 @@ $(function(){
 var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
 
 function show_menu( $trigger, $menu ){
+	var $fhitem=$trigger.closest('.fhitem');
+	$fhitem.length && user_intent('interest', $fhitem[0]);
+
 	$menu.appendTo(document.body).css({ opacity:0 }).show();
 
-	var 	$fhitem	= $trigger.closest('.fhitem'),
-		right	= $fhitem.offset().left + $fhitem.width(),
+	var 	right	= $fhitem.offset().left + $fhitem.width(),
 		global	= $trigger.offset(),
 		local	= $menu.offsetParent().offset();
 
