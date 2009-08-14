@@ -11,8 +11,18 @@
 display:none;
 }
 
-div.note-wrapper, .adminmode .domain.tag, .adminmode .signoff-button { display:inline }
-.adminmode .edit-bar .topic.tag { position:relative; font-weight:bold; font-variant:small-caps; }
+div.note-wrapper,
+.adminmode .edit-bar .domain.tag,
+.fhitem-editor .edit-bar .domain.tag,
+.adminmode .edit-bar .signoff-button {
+display:inline;
+}
+.adminmode .edit-bar .topic.tag,
+.adminmode .edit-bar .domain.tag,
+.fhitem-editor .edit-bar .domain.tag {
+	position:relative; font-weight:bold; font-variant:small-caps;
+}
+.fhitem-editor .main.topic.tag { font-style:italic; }
 
 .edit-bar a.tag, .edit-bar a.pseudo-tag {
 	cursor:arrow;
