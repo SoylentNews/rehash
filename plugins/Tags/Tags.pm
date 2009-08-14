@@ -119,8 +119,8 @@ sub createTag {
 		# XXX should fix this by rethinking what "opposite" means for "all clout types"
 		# XXX this closure will break for multiple Slash sites that have different tagnameids for nod/nix
 		my $constants = getCurrentStatic();
-		$nodid ||= $self->getTagnameidIfExists($constants->{tags_upvote_tagname}   || 'nod');
-		$nixid ||= $self->getTagnameidIfExists($constants->{tags_downvote_tagname} || 'nix');
+		$nodid ||= $self->getTagnameidFromNameIfExists($constants->{tags_upvote_tagname}   || 'nod');
+		$nixid ||= $self->getTagnameidFromNameIfExists($constants->{tags_downvote_tagname} || 'nix');
 		if ($tag->{tagnameid} == $nodid) {
 			push @$opp_tagnameids, $nixid unless grep { $_ == $nixid } @$opp_tagnameids;
 		} elsif ($tag->{tagnameid} == $nixid) {
