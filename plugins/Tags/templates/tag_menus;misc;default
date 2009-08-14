@@ -7,7 +7,7 @@ default
 __description__
 The context menus for tags and pseudo-tags in the firehose and elsewhere.
 __template__
-[% UNLESS user.is_anon %]
+[% UNLESS tag_menus_are_already_installed || user.is_anon %]
 <style type="text/css">
 menu, menu * {
 	user-select: none;
@@ -260,6 +260,7 @@ $DATATYPE_MENU.menu({
 
 });
 </script>
+[% tag_menus_are_already_installed = 1 %]
 [% END %]
 __seclev__
 10000
