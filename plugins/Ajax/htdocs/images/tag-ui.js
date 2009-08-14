@@ -13,6 +13,7 @@ $('a.edit-toggle').live('click', function( e ){
 		expand	= $button.is('.collapse'),
 		$input	= $button.closest('menu.edit-bar').find('input.tag-entry');
 
+	expand && T2.fetch_tags($button.closest('.fhitem'));
 	$input.toggle(expand);
 	$button.removeClass(CLASS[!expand]).addClass(CLASS[expand]);
 });
@@ -749,7 +750,7 @@ $.each(tag_display_fns, globalize);
 $.each(tag_widget_fns, globalize);
 })();
 
-T2.submit_tags = function( fhitem, tag_cmds ){
+T2._ajax_request = function( fhitem, tag_cmds ){
 	var key = fhitem_key(fhitem);
 	$.ajax({
 		type:'POST',
