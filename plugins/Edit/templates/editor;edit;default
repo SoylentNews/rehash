@@ -93,7 +93,7 @@ $(document).ready(function(){
 		[% previewed_item %]
 	</div>
 
-	<div class="fhitem" id="editor-[% fhid %]">
+	<div class="fhitem fhitem-editor" id="editor-[% fhid %]">
 		<span class="sd-info-block" style="display: none">
 			<span class="sd-key-firehose-id">[% fhid %]</span>
 			<span class="type">[% p_item.type %]</span>

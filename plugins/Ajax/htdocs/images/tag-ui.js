@@ -753,7 +753,7 @@ $.each(tag_widget_fns, globalize);
 })();
 
 T2._ajax_request = function( fhitem, tag_cmds ){
-	var key=fhitem_key(fhitem), $spinner=$('span.tag-server-busy', fhitem).show();
+	var $fhitem=$(fhitem), key=fhitem_key(fhitem), $spinner=$('span.tag-server-busy', fhitem).show();
 	$.ajax({
 		type:'POST',
 		dataType:'text',
@@ -763,10 +763,11 @@ T2._ajax_request = function( fhitem, tag_cmds ){
 			key_type:key.key_type,
 			reskey:reskey_static,
 			tags:tag_cmds,
-			limit_fetch:''
+			limit_fetch:'',
+			include_topic_images:sign($fhitem.is('.fhitem-editor'))
 		},
 		success: function( server_response ){
-			$(fhitem).find('.tag-bar').html(server_response);
+			$fhitem.find('.tag-bar').html(server_response);
 		},
 		complete: function(){
 			$spinner.hide();

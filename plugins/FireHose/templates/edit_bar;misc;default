@@ -23,8 +23,13 @@ __template__
 	<span class="tag-server-busy" style="display:none"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% END %].gif"></span>
 
 	<span id="tagbar-[% id %]" class="tag-bar">[%
+		IF edit_mode;
+			markup_options={ include_topic_images=>1 };
+		ELSE;
+			markup_options={ global_tags_only=>1 };
+		END;
 		tags_reader = Slash.getObject('Slash::Tags');
-		tags_reader.updateDisplayTagMarkup(key, key_type, user, { global_tags_only => 1 });
+		tags_reader.updateDisplayTagMarkup(key, key_type, user, markup_options);
 	%]</span>
 
 	[%- IF options.view == "usersubmission" %]<a class="submission-status pseudo-tag">[%
