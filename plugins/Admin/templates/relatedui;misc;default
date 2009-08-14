@@ -1,0 +1,81 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+relatedui
+__template__
+<table border="0" cellpadding="3" cellspacing="0" class="data" id="simstories">
+	<tr class="data_head">
+		<td colspan="3"><b>Similar & Related Stories</b></td><td>Related</td><td>Ignore</td>
+	</tr>
+	[% seen_related = {};
+	   dispclass = { "1" => "story_sec", "0" => "story_main" , "-1" => "story_nd" };
+	   FOREACH story = similar_stories %]
+	<tr class="[% dispclass.${story.displaystatus} %]">
+		<td>[% story.weight %]</td>
+		<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a></td>
+		<td>[% Slash.timeCalc(story.time) %]</td>
+		<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]"[% constants.markup_checked_attribute IF storyref.related_sids_hr.${story.sid} %]></td>
+		<td>[% FOREACH word = story.words %]
+			[%- word -%][% UNLESS words_seen.$word %]<input type="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
+			[% words_seen.$word = 1 %]
+		[% END %]</td>
+		[% seen_related.${story.sid} = 1 %]
+	</tr>
+	[% END %]
+
+	[% FOREACH rel_sid = storyref.related_sids_hr.keys;
+		IF seen_related.$rel_sid; NEXT; END;
+		story = storyref.related_sids_hr.$rel_sid;
+		dispstatus = -1;
+		IF Slash.db.checkStoryViewable(story.stoid, constants.mainpage_nexus_tid);
+			dispstatus = 0;
+		ELSIF Slash.db.checkStoryViewable(story.stoid, ""); 
+			dispstatus = 1;
+		END %]
+	<tr class="[% dispclass.$dispstatus %]">
+		<td>[% story.weight %]</td>
+		<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a></td>
+		<td>[% Slash.timeCalc(story.time) %]</td>
+		<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]"[% constants.markup_checked_attribute IF storyref.related_sids_hr.${story.sid} %]></td>
+		<td>[% FOREACH word = story.words %]
+			[%- word -%][% UNLESS words_seen.$word %]<INPUT TYPE="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
+			[% words_seen.$word = 1; %]
+		[% END %]</td>
+		[% seen_related.${story.sid} = 1 %]
+	</tr>
+	[% END %]
+
+	[% IF storyref.related_cids_hr.keys.size > 0 %]<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>[% END %]
+	[% FOREACH cid = storyref.related_cids_hr.keys %]
+	<tr class="data_hl1">
+		<td></td>
+		<td><a href="[% gSkin.rootdir %]"/comments.pl?sid=[% storyref.related_cids_hr.$cid.sid %]&amp;cid=[% cid %]">[% storyref.related_cids_hr.$cid.subject %]</a></td>
+		<td></td>
+		<td><input type="checkbox" name="related_comment" value="[% cid | strip_attribute %]"[% constants.markup_checked_attribute %]></td>
+		<td></td>
+	</tr>
+	[% END %]
+
+	[% IF storyref.related_urls_hr.keys.size > 0 %]<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>[% END %]
+	[% FOREACH rel_url = storyref.related_urls_hr.keys %]
+	<tr class="data_hl1">
+		<td colspan="1"></td>
+		<td>Offsite: <a href="[% rel_url %]">[% storyref.related_urls_hr.$rel_url %]</a></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	[% END %]
+
+	<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td></tr>
+	<tr><td colspan="5"> include sid or title URL one per line!</td></tr>
+</table>
+__seclev__
+10000
