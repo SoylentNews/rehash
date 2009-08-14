@@ -128,7 +128,7 @@ $TAG_MENU.menu({
 
 	start: function( e, ui ){
 		var	$tag	= $(ui.trigger).addClass('trigger'),
-			context	= search_eligible($tag) && firehose_settings && firehose_settings.viewtitle;
+			context	= firehose_settings && firehose_settings.viewtitle;
 
 		// Insert the tagname into the menu items where needed.
 		$TAG_MENU.find('span.var-tag').text($tag.text());
