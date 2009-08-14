@@ -1348,7 +1348,7 @@ sub setGetDisplayTags { # T2
 	my $datatype = '';
 	my $popular_tags = '';
 	my $main_watchlist_tag = '';
-	my $topic_tags = '';
+	my @topic_tags = ( );
 	if ( $firehose_item ) {
 		$datatype = $firehose_item->{type};
 		$popular_tags = $firehose_item->{toptags};
@@ -1369,14 +1369,15 @@ sub setGetDisplayTags { # T2
 			next if $keyword eq $main_watchlist_tag;
 			push @tids, $tid;
 		}
-		$topic_tags = join ' ', map { $tree->{$_}{keyword} } @tids;
+		push @topic_tags, map { $tree->{$_}{keyword} } @tids;
 	}
 
 	my $tags = {
 		domain_tag		=> $domain_tag,
 		datatype		=> $datatype || 'unknown',
 		main_watchlist_tag	=> $main_watchlist_tag,
-		topic_tags		=> $main_watchlist_tag . ' ' . $topic_tags,  # includes all watchlist tags as well
+			# topic_tags includes all watchlist tags as well
+		topic_tags		=> join(' ', grep { $_ } $main_watchlist_tag, @topic_tags)
 		popular_tags		=> $popular_tags,
 		user_tags		=> $user_tags,
 	};
