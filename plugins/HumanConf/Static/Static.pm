@@ -312,7 +312,7 @@ sub addPool {
 		}
 		my $alt = getData('imgalttext', {}, 'humanconf');
 		$html = join('',
-			qq{<div class="yui-u"><img src="},
+			qq{<div class="yui-ge"><div class="yui-u first"><img src="},
 			$self->{questioncache}{$question}{urlprefix},
 			"/",
 			$filename_img,
@@ -327,7 +327,7 @@ sub addPool {
 					$self->{questioncache}{$question}{urlprefix},
 					"/",
 					$filename_mp3,
-					qq{" target="_new">mp3</a></span></div>}
+					qq{" target="_new">mp3</a></span></div></div>}
 				);
 			}
 		}

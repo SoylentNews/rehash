@@ -6528,3 +6528,8 @@ UPDATE humanconf_questions SET question = '<div class="yui-u first"><span class=
 
 # 2009-08-11
 INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_display', 'Slash::Tags', 'ajaxSetGetDisplayTags', 'ajax_base_static', 'createuse');
+
+
+# Captcha text modification
+# for plugins/HumanConf
+UPDATE humanconf_questions SET question = '<span class="humanconf_questions">Prove yourself: </span>' WHERE hcqid=1;
