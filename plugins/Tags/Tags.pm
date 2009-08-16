@@ -1230,7 +1230,7 @@ sub setTagsForGlobj {
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id,
 		{ uid => $uid, include_private => $options->{include_private} }); # don't list private tags unless forced
 	my $newtagspreloadtext = join ' ',
-		map { $emphasized_hr->{$_} ? "^$_" : $_ }
+#		map { $emphasized_hr->{$_} ? "^$_" : $_ }
 		sort
 		map { $_->{tagname} }
 		@$now_tags_ar;
