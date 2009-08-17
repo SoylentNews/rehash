@@ -18,7 +18,7 @@ __template__
 
 
         <form action="[% gSkin.rootdir %]/submit.pl" method="post">
-        <table class="data submissionmemory" width="100%">
+        <table class="data submissionmemory invisible" width="100%">
         <tr class="data_head">
                 <th colspan="4"><a class="submissionmemory" rel="[% item.id %]" href="#">Submissions Memory</a></th>
         </tr>
@@ -78,7 +78,8 @@ __template__
 $('a.submissionmemory').
 live('click', function(){ 
 			var smid = $(this).attr("rel");
-			$('tr#sm-'+smid+'.submissionmemory').toggle();
+			$('tr#sm-'+smid+'.submissionmemory').parent().parent().toggleClass('invisible');
+/*			$('tr#sm-'+smid+'.submissionmemory').toggle().addClass('x').css('border','1px solid red');*/
 			return false;
 });
 </script>
