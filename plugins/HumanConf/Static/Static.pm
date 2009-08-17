@@ -312,12 +312,12 @@ sub addPool {
 		}
 		my $alt = getData('imgalttext', {}, 'humanconf');
 		$html = join('',
-			qq{<div class="yui-ge"><div class="yui-u first"><img src="},
+			qq{<div class="yui-ge"><div class="yui-u first"><div><img src="},
 			$self->{questioncache}{$question}{urlprefix},
 			"/",
 			$filename_img,
 			qq{" width=$width height=$height border=0 },
-			qq{alt="$alt"></div>}
+			qq{alt="$alt"></div></div>}
 		);
 		if ($constants->{hc_cepstral}) {
 			$filename_mp3 = write_mp3_file($answer, $dir, $hcpid, $encoded_name);
