@@ -38,6 +38,8 @@ function loginOpen() {
 $(document).ready(function(){
 	$('textarea').elastic();
 
+	$("div.captcha span.mp3 a").css('margin-top',(($('div.captcha div.yui-ge div.yui-u.first img').height())/2)-14); /* because captcha img isn't constant, using js to align mp3 icon*/
+
 	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
 		$(this).siblings("label").hide();
 	});
