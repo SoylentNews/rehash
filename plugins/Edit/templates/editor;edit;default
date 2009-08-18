@@ -306,6 +306,11 @@ $(document).ready(function(){
 					</div>
 				[% END %]
 			</div>
+
+			[% IF item.type == 'story' && user.is_admin %]
+				<div>[% PROCESS relatedui %]</div>
+			[% END %]
+
 		</div>
 
 		[% IF preview_shown %]
@@ -351,11 +356,6 @@ $(document).ready(function(){
 		[% IF form.bare %]
 		<input type="hidden" name="bare" value="1">
 		[% END %]
-
-		[% IF item.type == 'story' && user.is_admin %]
-		<div>[% PROCESS relatedui %]</div>
-		[% END %]
-
 </form>
 [%- #fhitem editor- -%]
 <script type="text/javascript">
