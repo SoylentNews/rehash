@@ -41,7 +41,7 @@ __template__
               </td>
         </tr>
 		<tr>
-			<td colspan="2" id="sub_mem_message-[% item.id %]"></td>
+			<td colspan="2" class="nopadding" id="sub_mem_message-[% item.id %]"></td>
 		</tr>
 		</table>
 		</form>
