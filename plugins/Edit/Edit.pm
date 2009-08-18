@@ -529,6 +529,12 @@ sub validate {
 		if (!$preview->{dept}) {
 			$messages->{critical}{baddept} = getData('baddept', '', 'edit');
 		}
+
+		my $topic = $self->getTopic($item->{tid});
+		if ((!$topic || !$topic->{image}) && !$item->{thumb}) {
+			$messages->{critical}{noicon} = getData('noicon','','edit');
+		}
+
 	}
 
 	# I'm using getTagsByGlobjid() to get the tag count because we'll
