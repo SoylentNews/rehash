@@ -11,20 +11,20 @@ en_US
 __name__
 spellcheck
 __template__
-<div style="width: auto; padding: 0.5em;" class="data" id="spellcheck_[% form_element %]">
-                <span style="background: #066; padding: 0.5em 1em 0.5em 0.5em; -moz-border-radius-topleft: 1em; -moz-border-radius-topright: 1em; -moz-border-radius-bottomleft: 1em; -moz-border-radius-bottomright: 1em;" class="data_head"><span id="modal_warn"></span>&nbsp;&nbsp;<span style="color: #fff"><b>Spellcheck</b></span></span>
-[% FOREACH misspelled_word = words.keys %]
-                [% escaped_word = misspelled_word.replace("'", "\\'")  %]
-                <span id="[% misspelled_word %]_[% form_element %]_correction">
-                        <select style="width: auto;" name="select_[% form_element %]_[% misspelled_word %]" onChange="make_spelling_correction('[% escaped_word %]', '[% form_element %]');">
-                                <option value=''>[% misspelled_word %]
-                                <option style="color:#c00;" value=''>- Learn -
-                                [% FOREACH correction = words.$misspelled_word %]
-                                        <option value="[% correction %]">[% correction %]
-                                [% END %]
-                        </select>
-                </span>
-[% END %]
+<div class="data spelling" id="spellcheck_[% form_element %]">
+	<span class="data_head widget"><span id="modal_warn"></span> <span>Spellcheck</span></span>
+		[% FOREACH misspelled_word = words.keys %]
+			[% escaped_word = misspelled_word.replace("'", "\\'")  %]
+			<span id="[% misspelled_word %]_[% form_element %]_correction">
+				<select style="width: auto;" name="select_[% form_element %]_[% misspelled_word %]" onChange="make_spelling_correction('[% escaped_word %]', '[% form_element %]');">
+						<option value=''>[% misspelled_word %]
+						<option style="color:#c00;" value=''>- Learn -
+						[% FOREACH correction = words.$misspelled_word %]
+								<option value="[% correction %]">[% correction %]
+						[% END %]
+				</select>
+			</span>
+		[% END %]
 </div>
 __seclev__
 10000
