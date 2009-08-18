@@ -18,16 +18,13 @@ __template__
 [% END %]
 [% IF id && type %]
 	[% UNLESS no_display_item; saved_item; END %]
-	<p>
-	[% id %] [% type %] [% save_type %]<br>
+	<!--[% id %] [% type %] [% save_type %]-->
 	[% IF type == "story" %]
-		<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])<br>
+		<div class="message error block"><span id="modal_ok"></span><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</div>
 	[% ELSIF type == "submission" %]
-		<a href="[% constants.real_rootdir %]/submission/[% id %]">New Submission Created</a> ([% id %])<br>
+		<div class="message error block"><span id="modal_ok"></span><a href="[% constants.real_rootdir %]/submission/[% id %]">Submission Created</a> ([% id %])</div>
 	[% END %]
 [% ELSE %]
-	ID	[% id %] TYPE [% type %] SAVE TYPE [% save_type %]<br>
+	ID	[% id %] TYPE [% type %] SAVE TYPE [% save_type %]
 
 [% END %]
-
-</div>
