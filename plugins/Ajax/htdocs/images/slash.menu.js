@@ -32,8 +32,9 @@ _init: function(){			// called for $(...).menu()
 	this._mouseStarted = false;
 },
 
-context: function( e, trigger ){
-	return this._menuMouseDown(e, { trigger: trigger });
+context: function( e ){
+	var target = e.originalEvent && e.originalEvent.target || e.originalTarget || e.target;
+	return this._menuMouseDown(e, { trigger: target });
 },
 
 destroy: function(){			// called for $(...).menu('destroy|remove')
