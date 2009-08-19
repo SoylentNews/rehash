@@ -287,9 +287,12 @@ $(document).ready(function(){
 					<textarea name="media" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
 				</label>
 			</div>
-
-
 			[% END %]
+
+			[% IF item.type == 'story' && user.is_admin %]
+				<div>[% PROCESS relatedui %]</div>
+			[% END %]
+
 			<div class="previewonly">
 				[% IF errors.warnings %]
 					<div id="preview_warnings">
@@ -299,10 +302,6 @@ $(document).ready(function(){
 					</div>
 				[% END %]
 			</div>
-
-			[% IF item.type == 'story' && user.is_admin %]
-				<div>[% PROCESS relatedui %]</div>
-			[% END %]
 
 		</div>
 
