@@ -359,10 +359,6 @@ $(document).ready(function(){
 		<input type="hidden" name="bare" value="1">
 		[% END %]
 
-		[% IF item.type == 'story' && user.is_admin %]
-		<div class="editonly[% IF preview_shown %]hide[% END %]">[% PROCESS relatedui %]</div>
-		[% END %]
-
 </form>
 [%- #fhitem editor- -%]
 <script type="text/javascript">
