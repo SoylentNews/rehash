@@ -7,7 +7,18 @@ default
 __description__
 The context menus for tags and pseudo-tags in the firehose and elsewhere.
 __template__
-[% UNLESS tag_menus_are_already_installed || user.is_anon %]
+[% UNLESS tag_menus_are_already_installed %]
+	[% IF user.is_anon %]
+<script type="text/javascript">
+$('a[rel=tag]').live('click', function( e ){
+	var	target	= e.originalEvent && e.originalEvent.target || e.originalTarget || e.target,
+		tag	= $(target).text();
+	addfhfilter(tag);
+	e.preventDefault();
+	return false;
+});
+</script>
+	[% ELSE %]
 <style type="text/css">
 menu, menu * {
 	cursor:pointer;
@@ -109,7 +120,7 @@ color:#444444;
 	<a class="pseudo-tag">neverdisplay</a>
 </menu>
 [% END %]
-<script>
+<script type="text/javascript">
 $(function(){
 var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
 
@@ -266,7 +277,8 @@ $DATATYPE_MENU.menu({
 
 });
 </script>
-[% tag_menus_are_already_installed = 1 %]
+	[% END %]
+	[% tag_menus_are_already_installed = 1 %]
 [% END %]
 __seclev__
 10000
