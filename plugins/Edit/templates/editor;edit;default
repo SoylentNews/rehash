@@ -209,13 +209,6 @@ $(document).ready(function(){
 							[% PROCESS formLabel value => "Create time" for => 'createtime' %]
 							<input type="text" name="createtime" value="[% item.createtime %]" size="19">
 						</div>
-						<div class="input">
-							[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
-							[% commentstatus_select %]
-						</div>
-						<div class="input">
-							<label for="display" class="display visible"><input type="checkbox" name="display" [% display_check %]> Display</label>
-						</div>
 					</div>
 
 					[% IF constants.use_dept %]
@@ -346,6 +339,13 @@ $(document).ready(function(){
 					%]
 					<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="[% IF state == "fullpage"; reset_js;  ELSE %]submit_cancel();[% END %]return false;">
 					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;">
+					<div class="input">
+						[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
+						[% commentstatus_select %]
+					</div>
+					<div class="input">
+						<label for="display" class="display visible"><input type="checkbox" name="display" [% display_check %]> Display</label>
+					</div>
 			</div>
 			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
 				[% tag_widget %]
