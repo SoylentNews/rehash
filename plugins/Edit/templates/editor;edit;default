@@ -293,15 +293,7 @@ $(document).ready(function(){
 				<div>[% PROCESS relatedui %]</div>
 			[% END %]
 
-			<div class="previewonly">
-				[% IF errors.warnings %]
-					<div id="preview_warnings">
-						[% FOREACH warning = errors.warnings.keys;
-							'<p>' _ errors.warnings.$warning _ '</p>';
-						END %]
-					</div>
-				[% END %]
-			</div>
+
 
 		</div>
 
@@ -319,6 +311,16 @@ $(document).ready(function(){
 		<div class="subxtras">
 			[% IF item.type == 'submission' %]
 				[% PROCESS hc_form %]
+			[% END %]
+
+			[% IF errors.critical.noicon %]
+		                [% errors.critical.noicon %]
+			[% END %]
+
+			[% IF errors.warnings %]
+					[% FOREACH warning = errors.warnings.keys;
+						errors.warnings.$warning;
+					END %]
 			[% END %]
 		</div>
 
@@ -349,10 +351,6 @@ $(document).ready(function(){
 			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
 				[% tag_widget %]
 			</div>
-			[% IF errors.critical.noicon %]
-		                [% errors.critical.noicon %]
-			[% END %]
-
 
 		[% IF form.bare %]
 		<input type="hidden" name="bare" value="1">
