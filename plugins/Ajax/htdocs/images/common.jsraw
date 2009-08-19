@@ -2286,7 +2286,7 @@ function resetModalPrefs(extra_param) {
 		op:	'saveModalPrefs',
 		data: 	serialize_multiple($any('modal_prefs')),
 		reset:  1,
-		reskey:	reskey_static
+		reskey:	(document.forms.modal_prefs && document.forms.modal_prefs.reskey   && document.forms.modal_prefs.reskey.value) || reskey_static
 	};
 
 	if (extra_param) {
