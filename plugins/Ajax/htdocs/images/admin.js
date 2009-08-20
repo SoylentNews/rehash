@@ -98,10 +98,16 @@ function firehose_admin_context( display ){
 }
 
 function signoff( $fhitem, id ){
-	T2._ajax_request($fhitem[0], '', {
-		op:	'admin_signoff',
-		stoid:	fhitem_info($fhitem, 'stoid'),
-		ajax:	{ success: function(){ $fhitem.find('a.signoff-button').remove(); } }
+	$.ajax({type:'POST',
+		dataType:'text',
+		data:{	op:'admin_signoff',
+			stoid:fhitem_info($fhitem, 'stoid'),
+			reskey:reskey_static,
+			limit_fetch:''
+		},
+		success: function( server_response ){
+			$fhitem.find('a.signoff-button').remove();
+		}
 	});
 	firehose_collapse_entry(id || $fhitem.attr('tag-server'));
 }
@@ -130,12 +136,18 @@ function firehose_handle_admin_commands( commands ){
 
 			case 'neverdisplay':
 				if ( confirm("Set story to neverdisplay?") ) {
-					non_admin_commands.push('neverdisplay');
-					T2._ajax_request(entry, '', {
-						op:	'admin_neverdisplay',
-						stoid:	'',
-						fhid:	id,
-						ajax:	{ success: function(){ firehose_remove_entry(id); } }
+					user_cmd = cmd;
+					$.ajax({type:'POST',
+						dataType:'text',
+						data:{	op:'admin_neverdisplay',
+							stoid:'',
+							fhid:id,
+							reskey:reskey_static,
+							limit_fetch:''
+						},
+						success: function( server_response ){
+							firehose_remove_entry(id);
+						}
 					});
 				}
 				break;
