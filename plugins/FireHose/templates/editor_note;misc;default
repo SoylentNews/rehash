@@ -16,7 +16,7 @@ __template__
 			<input type="button" value="save" onclick="firehose_save_note('[% item.id %]')">
 		</span>
 		[%# the note button %]
-		<span class="admin-note"><span class></span>
+		<span class="admin-note">
 			<a id="note-text-[% item.id %]" href="[% PROCESS nojslink %]" onclick="var self=this; return nojscall(function(){firehose_open_note(self);});">[%- IF !item.note  %]<img src="[% constants.imagedir %]/sic_notes.png" alt="Note">[% END -%][% item.note | strip_literal -%]</a>
 		</span>
 	</div>
