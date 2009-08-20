@@ -18,6 +18,7 @@ code = msg.code;
 pref = msg.user.prefs.$code;
 %]
 [% IF pref != mobile_code %]
+[%
 fh_reader = Slash.getObject('Slash::FireHose');
 fh_item = fh_reader.getFireHoseBySidOrStoid(sid);
 fh_link = fh_reader.linkFireHose(fh_item);
