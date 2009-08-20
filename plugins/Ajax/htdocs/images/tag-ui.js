@@ -708,7 +708,7 @@ var tag_widget_fns = {
 		if ( context && context_timeout ) {
 			this._context_timeout = setTimeout(function(){
 				T2.set_context(widget);
-			}, context_timeout);
+			}, context_timeout/4);
 		}
 
 		return this;
