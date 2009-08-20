@@ -543,6 +543,7 @@ display:inline-block;
 
 span.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
 border-top:1px solid transparent !important;
+max-height:1.15em;
 }
 
 
