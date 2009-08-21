@@ -63,7 +63,7 @@ __template__
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error">You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://)</span></div>
+                <div class="message error block roundbottom"><span id="modal_error">You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://).</span></div>
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
@@ -76,7 +76,7 @@ __template__
                 </ul>
 [% CASE 'noicon' %]
 	[% returnme.data_constant = 1 %]
-        <div class="message error roundall"><span id="modal_error">Need to specify a topic with an image, or a thumbnail</span></div>
+        <div class="message error roundall"><span id="modal_error">Need to specify a topic with an image, or a thumbnail.</span></div>
 [% END %]
 __seclev__
 10000
