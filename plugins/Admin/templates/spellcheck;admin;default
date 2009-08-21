@@ -13,7 +13,7 @@ spellcheck
 __template__
 <div class="data spelling" id="spellcheck_[% form_element %]">
 	<div class="message error nowrap block roundbottom">
-		<span class="data_head widget"><span id="modal_warn"></span>Spellcheck</span>
+		<span class="data_head widget"><span id="modal_warn">Spellcheck</span></span>
 			[% FOREACH misspelled_word = words.keys %]
 				[% escaped_word = misspelled_word.replace("'", "\\'")  %]
 				<span id="[% misspelled_word %]_[% form_element %]_correction">
