@@ -136,12 +136,22 @@ function show_menu( $trigger, $menu ){
 
 	global.left = Math.min(global.left, right-$menu.width());
 
-	$menu.css({
-		position:	'absolute',
-		top:		global.top - local.top + $trigger.height(),
-		left:		global.left - local.left,
-		opacity:	1
-	});
+	if($.browser.msie && jQuery.browser.version.substr(0,3)=="7.0") {
+		$('menu.tag-menu').css({
+			position:	'absolute',
+			top:		global.top+18,
+			left:		global.left - local.left,
+			opacity:	1
+		});
+	} else {
+		$menu.css({
+			position:	'absolute',
+			top:		global.top - local.top + $trigger.height(),
+			left:		global.left - local.left,
+			opacity:	1
+		});
+	}
+
 }
 
 
