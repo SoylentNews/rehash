@@ -351,9 +351,7 @@ $(document).ready(function(){
 			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
 				[% tag_widget %]
 			</div>
-			[% IF errors.critical.noicon %]
-		                [% errors.critical.noicon %]
-			[% END %]
+
 		</div>
 
 		[% IF form.bare %]
