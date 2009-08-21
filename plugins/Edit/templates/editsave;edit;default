@@ -20,9 +20,9 @@ __template__
 	[% UNLESS no_display_item; saved_item; END %]
 	<!--[% id %] [% type %] [% save_type %]-->
 	[% IF type == "story" %]
-		<div class="message error block"><span id="modal_ok"></span><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</div>
+		<div class="message error block"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
 	[% ELSIF type == "submission" %]
-		<div class="message error block"><span id="modal_ok"></span><a href="[% constants.real_rootdir %]/submission/[% id %]">Submission Created</a> ([% id %])</div>
+		<div class="message error block"><span id="modal_ok"><a href="[% constants.real_rootdir %]/submission/[% id %]">Submission Created</a> ([% id %])</span></div>
 	[% END %]
 [% ELSE %]
 	ID	[% id %] TYPE [% type %] SAVE TYPE [% save_type %]

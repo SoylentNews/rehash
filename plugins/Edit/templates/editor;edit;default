@@ -84,7 +84,7 @@ $(document).ready(function(){
 [% END %]
 
 [% IF errors.critical.save_error %]
-                <div class="message error"><span id="modal_error"></span>[% errors.critical.save_error %]</div>
+                <div class="message error"><span id="modal_error">[% errors.critical.save_error %]</span></div>
 [% ELSIF errors.critical.compresserror %]
         [% errors.critical.compresserror %]
 [% END %]
@@ -123,7 +123,7 @@ $(document).ready(function(){
 			[% IF errors.critical.badsubject %]
                         	[% errors.critical.badsubject %]
                 	[% ELSIF errors.critical.subj_filter_error %]
-							<div class="message error"><span id="modal_error"></span>[% errors.critical.subj_filter_error %]</div>
+							<div class="message error"><span id="modal_error">[% errors.critical.subj_filter_error %]</span></div>
                 	[% END %]
 		</div>
 
@@ -262,7 +262,7 @@ $(document).ready(function(){
 						[% IF errors.critical.badintrotext %]
                                 [% errors.critical.badintrotext %]
                         [% ELSIF errors.critical.story_filter_error %]
-                                        <div class="message error"><span id="modal_error"></span>[% errors.critical.story_filter_error %]</div>
+                                        <div class="message error"><span id="modal_error">[% errors.critical.story_filter_error %]</span></div>
                         [% ELSIF errors.critical.orig_source %]
                                 [% errors.critical.orig_source %]
                         [% END %]
