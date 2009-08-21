@@ -6,6 +6,8 @@
 .edit-bar .signoff-button,
 .edit-bar a[rel="tag"][href='\/tag\/nix'],
 .edit-bar a[rel="tag"][href='\/tag\/nod'],
+.edit-bar a[rel="tag"][href='\/tag\/mainpage'],
+.edit-bar a[rel="tag"][href='\/tag\/signoff'],
 .edit-bar .hide,
 .edit-bar .hide * {
 display:none;
