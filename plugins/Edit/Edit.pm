@@ -46,7 +46,9 @@ sub getPreviewIdSessionUid {
 }
 
 sub migrateAnonPreviewToUser {
-	my ($self, $preview_id, $uid) = @_;
+	my($self, $preview_id, $uid) = @_;
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 	my $p = $self->getPreview($preview_id);
 	if (isAnon($p->{uid})) {
 		my $p_data = { uid => $uid };
@@ -70,7 +72,13 @@ sub migrateAnonPreviewToUser {
 		}
 
 		$self->setPreview($preview_id, $p_data);
-		$fh->setFireHose($p->{preview_fhid}, $fh_data) if keys %$fh_data > 0 ;
+		$fh->setFireHose($p->{preview_fhid}, $fh_data) if keys %$fh_data > 0;
+		if ($p->{reskey} && $p->{hcanswer}) {
+			$form->{hcanswer} = $p->{hcanswer};
+			my $reskey = getObject('Slash::ResKey');
+			my $rkey = $reskey->key('edit-submit', { reskey => $p->{reskey} });
+			$rkey->touch;
+		}
 	}
 }
 
@@ -250,8 +258,13 @@ sub savePreview {
 
 	my($p_data, $fh_data);
 
-	$p_data->{introtext} 		= $form->{introtext};
-	$fh_data->{createtime} 		= $form->{createtime} if $form->{createtime};
+	$p_data->{introtext}      = $form->{introtext};
+	$fh_data->{createtime}    = $form->{createtime} if $form->{createtime};
+
+	if ($user->{is_anon} && $form->{hcanswer} && $form->{reskey}) {
+		$p_data->{hcanswer} = $form->{hcanswer};
+		$p_data->{reskey}   = $form->{reskey};
+	}
 
 	if ($p_item->{type} eq 'story') {
 		$p_data->{bodytext} 		= $form->{bodytext};
@@ -567,7 +580,7 @@ sub saveItem {
 
 	$preview->{dept} = $form->{dept};
 	my $errors = $self->validate($preview,$fhitem);
-# if you use this, comment *out* the similar call in edit.pl:save()
+# XXX if you use this, comment *out* the similar call in edit.pl:save()
 # 	if ($rkey && !(keys %$errors)) {
 # 		unless ($rkey->use) {
 # 			errorLog($rkey->errstr);

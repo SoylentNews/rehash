@@ -4282,15 +4282,15 @@ sub listView {
 
 		}
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
-		my $item =  $firehose_reader->getFireHose($_->{id});
-		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
 		if ($_->{day}) {
 			my $day = $_->{day};
 			$day =~ s/ \d{2}:\d{2}:\d{2}$//;
 			$itemstext .= slashDisplay("daybreak", { options => $options, cur_day => $day, last_day => $_->{last_day}, id => "firehose-day-$day", fh_page => $base_page }, { Return => 1, Page => "firehose" });
 		} else {
-	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
+			my $item =  $firehose_reader->getFireHose($_->{id});
+			my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
+			my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
+			$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 			slashProf("firehosedisp");
 			$itemstext .= $self->dispFireHose($item, {
 				mode			=> $curmode,
