@@ -115,8 +115,6 @@ sub extractRelatedStoriesFromForm {
 	my %related_urls_hr;
 	my %related_cids_hr;
 
-use Data::Dumper; print STDERR Dumper $form;
-
 	my($related, $related_cids);
 	if (ref($form->{_multi}{related_story}) eq 'ARRAY') {
 		$related = $form->{_multi}{related_story};
