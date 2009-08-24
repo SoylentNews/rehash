@@ -102,6 +102,7 @@ $(document).ready(function(){
 		<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
 
 		[% PROCESS reskey_tag %]
+		<input type="hidden" name="fhid" value="[% fhid | strip_attribute %]">
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 		<input type="hidden" name="session" value="[% session | strip_attribute %]">
 		<input type="hidden" name="state" value="[% state | strip_attribute %]">
