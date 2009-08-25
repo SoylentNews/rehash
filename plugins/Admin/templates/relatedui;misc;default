@@ -75,7 +75,6 @@ __template__
 	[% END %]
 
 	<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td></tr>
-	<tr><td colspan="5" style="padding-top:0;"><div class="message error nowrap block roundbottom" style="top:-.35em"><span id="modal_tip"/>Include sid or title URL one per line!</div></td></tr>
 </table>
 __seclev__
 10000

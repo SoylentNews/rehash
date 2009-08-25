@@ -318,6 +318,7 @@ $(document).ready(function(){
 
 			[% IF errors.warnings %]
 					[% FOREACH warning = errors.warnings.keys;
+						NEXT IF warning == 'ispellwarning' && !preview_shown;
 						errors.warnings.$warning;
 					END %]
 			[% END %]

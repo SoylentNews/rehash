@@ -55,7 +55,7 @@ __template__
 
 [% CASE 'ispellwarning' %]
         [% returnme.data_constant = 1 %]
-        <div class="message error roundall"><span id="modal_error">Some fields may have spelling errors.</span></div>
+        <div class="message error roundall"><span id="modal_warn">Some fields may have spelling errors.</span></div>
 
 [% CASE 'tagwarning' %]
         [% returnme.data_constant = 1 %]
