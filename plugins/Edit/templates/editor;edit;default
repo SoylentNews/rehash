@@ -138,9 +138,13 @@ $(document).ready(function(){
                 	[% END %]
 		</div>
 
-		<div class="notes">[% ispell_comments.title %]</div>
+		[% IF ispell_comments.title; %]
+			<div style="position:absolute;">
+				[% ispell_comments.title %]
+			</div>
+		[% END; %]
 
-		<div class="subdetails">
+		<div class="subdetails" [% IF errors.critical.badsubject || ispell_comments.title %]style="padding-top:1.75em"[% END; %]>
 			[% IF item.type == 'submission' %]
 					<div class="d">
 						[% IF user.is_anon %]
@@ -279,7 +283,9 @@ $(document).ready(function(){
                         [% END %]
 				</span>
 
-			[% IF ispell_comments.introtext %]<div class="notes">[% ispell_comments.introtext %]</div>[% END; %]
+			[% IF ispell_comments.introtext %]
+				[% ispell_comments.introtext %]
+			[% END; %]
 
 			[% IF item.type == 'story' %]
 			<a name="bodytext"></a>
@@ -289,7 +295,9 @@ $(document).ready(function(){
 					<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 					<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
 				</label>
-				[% IF ispell_comments.bodytext %]<div class="notes">[% ispell_comments.bodytext %]</div>[% END %]
+				[% IF ispell_comments.bodytext %]
+					[% ispell_comments.bodytext %]
+				[% END %]
 				<label class="[% IF item.media; 'clearboth'; END; %]">
 					<a href="#" class="tgmedia">Media</a>
 					<a name="media"></a>
