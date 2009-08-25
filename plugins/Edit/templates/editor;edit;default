@@ -329,6 +329,10 @@ $(document).ready(function(){
 				[% PROCESS hc_form %]
 			[% END %]
 
+			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
+				[% tag_widget %]
+			</div>
+
 			[% IF errors.critical.noicon %]
 		                [% errors.critical.noicon %]
 			[% END %]
@@ -371,10 +375,6 @@ $(document).ready(function(){
 						</div>
 					[% END %]
 			</div>
-			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
-				[% tag_widget %]
-			</div>
-
 		</div>
 
 		[% IF form.bare %]
