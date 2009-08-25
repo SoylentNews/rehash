@@ -316,6 +316,10 @@ $(document).ready(function(){
 		                [% errors.critical.noicon %]
 			[% END %]
 
+			[% IF errors.critical.no_domaintag %]
+				[% errors.critical.no_domaintag %]
+			[% END %]
+
 			[% IF errors.warnings %]
 					[% FOREACH warning = errors.warnings.keys;
 						NEXT IF warning == 'ispellwarning' && !preview_shown;

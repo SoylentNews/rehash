@@ -494,6 +494,8 @@ sub validate {
 	my $constants = getCurrentStatic();
 	my $messages;	
 
+	my $tagsdb = getObject("Slash::Tags");
+
 	if ($item->{type} eq 'submission') {
 		if (length($item->{title}) < 2) {
 			$messages->{critical}{badsubject} = getData('badsubject','','edit');
@@ -548,11 +550,13 @@ sub validate {
 			$messages->{critical}{noicon} = getData('noicon','','edit');
 		}
 
+		my $other_tags = $tagsdb->setGetDisplayTags($item->{id}, 'firehose-id');
+		if (!$other_tags->{domain_tag}) {
+			$messages->{critical}{no_domaintag} = getData('no_domaintag', '', 'edit');
+		}
 	}
 
-	# I'm using getTagsByGlobjid() to get the tag count because we'll
-	# eventually want to examine each tag.
-	my $tagsdb = getObject("Slash::Tags");
+	# XXX This is wrong. Will fix. -cbrown
         my $applied_tags = $tagsdb->getTagsByGlobjid($item->{globjid});
         $messages->{warnings}{tagwarning} = getData('tagwarning', { type => $item->{type} }, 'edit') if (!@$applied_tags);
 

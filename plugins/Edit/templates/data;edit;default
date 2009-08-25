@@ -61,6 +61,10 @@ __template__
         [% returnme.data_constant = 1 %]
         <div class="message error roundall"><span id="modal_error">You didn't apply any tags. You should include at least 1 tag for this [% type %].</span></div>
 
+[% CASE 'no_domaintag' %]
+        [% returnme.data_constant = 1 %]
+        <div class="message error roundall"><span id="modal_error">No domain tag was applied.</span></div>
+
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
                 <div class="message error block roundbottom"><span id="modal_error">You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://).</span></div>
