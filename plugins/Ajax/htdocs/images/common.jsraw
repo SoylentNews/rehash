@@ -453,10 +453,11 @@ function display(){
 	best!==DISPLAYED && $DISPLAY.html((DISPLAYED=best).content);
 }
 Slash.message = function( o ){
+	// Public.  Show a new message (if it is important enough) in the firehose message-tray.
 	// Call with the content you want to display: html (string), DOM element, or jQuery selection
 	//	OR, an object with a content member (same rules as above) which also allows you to specify a key and/or rank
 	// Returns the message key for use in Slash.clear_message.
-	$DISPLAY || (DISPLAYED=new Message({ rank:0, key:'default', content:($DISPLAY=$('div.message')).children() }));
+	$DISPLAY || (DISPLAYED=new Message({ rank:0, key:'default', content:($DISPLAY=$('#firehose-message-tray')).children() }));
 	return o && (o=new Message(o)) && (display(), o.key);
 };
 Slash.clear_message = function( key ){
@@ -487,14 +488,14 @@ function setfhfilter(text) {
 }
 
 function view_change_hide_show(view) {
-	var hide = { 	'daddypants': 'div.message',
-			'search': 'div.message'
+	var hide = { 	'daddypants': '#firehose-message-tray',
+			'search': '#firehose-message-tray'
 		   };
 	if (hide[view]) {
 		$(hide[view]).hide();
 	}
 	if (view != 'daddypants' && view!= 'search') {
-		$('div.message').show();
+		$('#firehose-message-tray').show();
 	}
 
 }
@@ -1464,7 +1465,7 @@ function ask( about ){
 '</p>'
 		});
 
-		$('div.message').show(); // ...temporary fix for Daddypants
+		$('#firehose-message-tray').show(); // ...temporary fix for Daddypants
 	}
 }
 
