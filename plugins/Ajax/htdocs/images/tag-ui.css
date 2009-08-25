@@ -13,6 +13,11 @@
 display:none;
 }
 
+.edit-bar .tag-bar a.trigger {
+background-color:#006666;
+color:#FFFFFF;
+}
+
 menu.tag-menu {z-index:100001 !important;}
 
 menu.tag-menu a {cursor:hand;}
