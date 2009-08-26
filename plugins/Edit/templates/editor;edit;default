@@ -38,6 +38,10 @@ function loginOpen() {
 $(document).ready(function(){
 	$('textarea').elastic();
 
+	var $offsettop;
+	$offsettop=$('span.tag-bar a:last-child').attr('offsetLeft');
+	$("a.topic.main.tag img").css({'position':'absolute','left':$offsettop+100});
+
 	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
 		$(this).siblings("label").hide();
 	});
