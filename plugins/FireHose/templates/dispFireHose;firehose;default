@@ -95,7 +95,7 @@ END %]
    link_url = firehose.linkFireHose(item);
  %]
 [% IF divwrapper %]
-<div id="firehose-[% item.id %]" class="fhitem[% IF item.type %] fhitem-[% item.type %][% END %][% IF mode == "full" %] article[% ELSE %] briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %][% IF !form.skipvote && !options.nothumbs && !skipvote && !featured %] thumbs[% END %]">
+<div id="firehose-[% item.id %]" data-fhid="[% item.id %]"[% IF item.type %] data-fhtype="[% item.type %]"[% END %] class="fhitem[% IF item.type %] fhitem-[% item.type %][% END %][% IF mode == "full" %] article[% ELSE %] briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %][% IF !form.skipvote && !options.nothumbs && !skipvote && !featured %] thumbs[% END %]">
 <span class="sd-info-block" style="display: none">
 	<span class="sd-key-firehose-id">[% item.id %]</span>
 	<span class="type">[% item.type %]</span>
