@@ -644,6 +644,16 @@ function firehose_fix_up_down( id, new_state ){
 	}
 }
 
+(function(){
+// Fix the nod/nix capsule when the server reports a changed vote.
+var CLASS_FOR_VOTE={ nod:'votedup', metanod:'votedup', nix:'voteddown', metanix:'voteddown', none:'vote' };
+
+$(document).bind('vote-assigned', function( event, vote ){
+	firehose_fix_up_down($(event.target).attr('id').replace(FHID_PREFIX, ''), CLASS_FOR_VOTE[vote||'none']);
+});
+})();
+
+
 function firehose_click_nodnix_reason( event ) {
 	var	$fhitem	= $(event.target).closest('.fhitem'),
 		fhid	= $fhitem.attr('id').replace(FHID_PREFIX, '');
