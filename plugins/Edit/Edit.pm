@@ -171,6 +171,8 @@ sub getOrCreatePreview {
 		if ($src_item->{type} ne "story" && $type eq "story") {
 			my $url 	= $self->getUrl($src_item->{url_id});
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1, url => $url }, { Return => 1, Nocomm => 1 });
+			$fh_data->{title} = titleCaseConvert($src_item->{title});
+			$fh_data->{introtext} = quoteFixIntrotext($fh_data->{introtext});
 			$fh_data->{createtime} = $admindb->findTheTime('','');
 		} 
 

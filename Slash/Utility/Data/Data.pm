@@ -113,6 +113,7 @@ our @EXPORT  = qw(
 	parseDayBreakLevel
 	prepareQuoteReply
 	processSub
+	quoteFixIntrotext
 	root2abs
 	roundrand
 	set_rootdir
@@ -133,6 +134,7 @@ our @EXPORT  = qw(
 	strip_urlattr
 	submitDomainAllowed
 	timeCalc
+	titleCaseConvert
 	url2html
 	url2abs
 	urlizeTitle
@@ -717,6 +719,36 @@ sub timeCalc {
 
 	# return the new pretty date
 	return $date;
+}
+
+sub titleCaseConvert {
+	my($title) = @_;
+	my @words = split / /, $title;
+	my @newwords;
+
+	for (my $i = 0; $i < @words; $i++) {
+		my $word = $words[$i];
+		if ($i == 0) {
+			$word = ucfirst $word;
+		} elsif ($word =~ m/^a(n|nd)?$|^the$|^of$/i) {
+			$word = lcfirst $word;
+		} else {
+			$word = ucfirst $word;
+		}
+
+		push @newwords, $word;
+	}
+
+	$title = join(' ', @newwords);
+	return $title;
+}
+
+sub quoteFixIntrotext {
+	my ($text) = @_;
+	if ($text =~ m/^[^"]*"[^"]*"[^"]*$/s) {
+		$text =~ s/"/'/g;
+	}
+	return $text;
 }
 
 sub getFormatFromDays {
