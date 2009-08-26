@@ -1,0 +1,42 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+__page__
+misc
+__lang__
+en_US
+__name__
+imgupload
+__template__
+
+<script type="text/javascript">
+
+function createUpload() {
+
+        $('#upload_progress').show();
+        document.getElementById('file_upload_form').target = 'upload_target';
+        //document.getElementById('file_upload_form').submit();
+        $('#upload_target').show();
+        $('#upload_target').load(function() {
+                $('#upload_progress').hide();
+        });
+}
+
+</script>
+
+<div id="mediaupload" style="display: none">
+<form id="file_upload_form" method="post" enctype="multipart/form-data" action="[% constants.real_rootdir %]/imgupload.pl">
+        <input type="file" class="input" name="fileToUpload" size="45" id="fileToUpload"/>
+        <input type="button" onclick="return createUpload();" id="buttonUpload" value="Upload">
+        <span id="upload_progress" style="display: none"><b>Uploading...</b>&nbsp;<img src="[% constants.imagedir %]/spinner.gif"></span>
+        <input type="hidden" name="fhid" value="[% fhid %]">
+</form>
+<iframe id="upload_target" name="upload_target" style="display: none; height: 5em; width: 65%; border: none;">
+</iframe>
+</div>
+
+__seclev__
+10000
+__version__

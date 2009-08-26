@@ -8,4 +8,5 @@ template=templates/data;edit;default
 template=templates/editor;edit;default
 template=templates/editorwrap;misc;default
 template=templates/editsave;edit;default
+template=templates/imgupload;misc;default
 task=delete_stale_previews.pl

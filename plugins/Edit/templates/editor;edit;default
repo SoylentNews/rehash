@@ -52,6 +52,16 @@ $(document).ready(function(){
 			$(this).siblings("label").show();
 	});
 
+	$("a.upload").click(function() {
+		$("#uploadfk").toggle();
+                var $getcrdt,$getcrdl;
+                $getcrdt=$('div#uploadfk').attr('offsetTop');
+                $getcrdl=$('div#uploadfk').attr('offsetLeft');
+                $("#mediaupload").css({'position':'absolute','top':$getcrdt,'left':$getcrdl});
+                $("#mediaupload").toggle();
+                return false;
+        });
+
 	$("a.tgmedia").click(function() {
 		$("#admin-media").toggle();
 		$(this).parent("label").toggleClass("clearboth");
@@ -285,6 +295,13 @@ $(document).ready(function(){
 					<a name="media"></a>
 					<textarea name="media" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
 				</label>
+				[% IF user.is_admin %]
+                                <label>
+                                        <a href="#" class="upload">Upload</a>
+                                        <div id="uploadfk" style="display:none;  border:1px solid red;height: 5em; width: 65%;">&nbsp;</div>
+                                </label>
+                                [% END %]
+
 			</div>
 			[% END %]
 
@@ -365,6 +382,7 @@ $(document).ready(function(){
 		[% END %]
 
 </form>
+[% IF user.is_admin; PROCESS imgupload fhid = fhid; END; %]
 [%- #fhitem editor- -%]
 <script type="text/javascript">
 	firehose_init_tag_ui($('#editor'));
