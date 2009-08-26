@@ -77,6 +77,17 @@ font-weight:normal;
 color:#444444;
 }
 
+
+menu.reasons-menu {
+	display:none;
+	margin:0.5em 0 0 0.75em;
+	padding:0;
+}
+menu.reasons-menu a {
+	display:inline-block;
+	margin:-0.1em -0.25em;
+}
+
 #tag-menu a.slash-hover,
 #feedback-menu a.slash-hover,
 [% IF user.is_admin %]#datatype-menu a.slash-hover,[% END %]
@@ -90,6 +101,32 @@ color:#444444;
 	color:#eee;
 }
 </style>
+[% MACRO tag_item BLOCK %]<a class="tag">[% tag %]</a>[% END -%]
+[% tags_reader = Slash.getObject('Slash::Tags', { db_type => 'reader' }); %]
+<menu id="nodnix-menu" class="reasons-menu"></menu>
+<menu id="nix-reasons" style="display:none">
+	[% FOREACH tag IN tags_reader.getNegativePopupTags.sort; tag_item(tag);  END %]
+</menu>
+<menu id="nod-reasons" style="display:none">
+	[% FOREACH tag IN tags_reader.getPositivePopupTags.sort; tag_item(tag); END %]
+</menu>
+<menu id="comment-nix-reasons" style="display:none">
+	[% FOREACH tag IN ['offtopic', 'flamebait', 'troll', 'redundant', 'overrated']; tag_item(tag); END %]
+</menu>
+<menu id="comment-nod-reasons" style="display:none">
+	[% FOREACH tag IN ['insightful', 'interesting', 'informative', 'funny', 'underrated']; tag_item(tag); END %]
+</menu>
+[% IF user.is_admin %]
+<menu id="tag-nix-reasons" style="display:none">
+	[% FOREACH tag IN ['pound0', 'pound1', 'pound2', 'pound3', 'pound4', 'pound5']; tag_item(tag); END %]
+</menu>
+[% END %]
+<menu id="tag-nod-reasons" style="display:none">
+	[% tag_item(tag='descriptive') %]
+</menu>
+<menu id="feedback-menu" class="tag-menu" type="context">
+	[% FOREACH tag IN ['typo', 'dupe', 'error']; tag_item(tag); END %]
+</menu>
 <menu id="tag-menu" class="tag-menu" type="context">
 [% IF user.is_admin %]
 	<a data-op="#"><span class="op">#</span><span class="var-tag"></span></a>
@@ -101,11 +138,6 @@ color:#444444;
 	<a data-op="!">not <span class="var-tag"></span></a>
 	<a data-op="="><span class="var-tag"></span> in <span class="var-view"></span></a>
 </menu>
-<menu id="feedback-menu" class="tag-menu" type="context">
-	<a class="tag">typo</a>
-	<a class="tag">dupe</a>
-	<a class="tag">error</a>
-</menu>
 [% IF user.is_admin %]
 <menu id="datatype-menu" class="tag-menu" type="context">
 	<a>extras</a>
@@ -115,17 +147,17 @@ color:#444444;
 	<a>betaedit</a>
 	<a class="group">oldedit</a>
 
-	<a class="tag">binspam</a>
-	<a class="tag">hold</a>
+	[% tag_item(tag='binspam') %]
+	[% tag_item(tag='hold') %]
 	<a class="pseudo-tag">neverdisplay</a>
 </menu>
 [% END %]
 <script type="text/javascript">
 $(function(){
-var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
+var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/;
 
-function show_menu( $trigger, $menu ){
-	var $fhitem=$trigger.closest('.fhitem');
+function open_menu( trigger, $menu ){
+	var $trigger=$(trigger), $fhitem=$trigger.closest('.fhitem');
 	$fhitem.length && user_intent('interest', $fhitem[0]);
 
 	$menu.appendTo(document.body).css({ opacity:0 }).show();
@@ -134,27 +166,41 @@ function show_menu( $trigger, $menu ){
 		global	= $trigger.offset(),
 		local	= $menu.offsetParent().offset();
 
+	// Ugly IE position hack required:
+	$.browser.msie && IE7.test($.browser.version) && (local.top = 0);
+
+	// pin the menu (horizontally) on-screen
 	global.left = Math.min(global.left, right-$menu.width());
 
-	if($.browser.msie && jQuery.browser.version.substr(0,3)=="7.0") {
-		local.top=0;
-	}
-
+	$trigger.addClass('trigger');
 	$('menu.tag-menu').css({
 		position:	'absolute',
 		top:		global.top - local.top + $trigger.height(),
 		left:		global.left - local.left,
 		opacity:	1
 	});
+}
 
+function close_menu( trigger, $menu ){
+	$menu.hide();
+	$(trigger).removeClass('trigger');
+}
+
+function open_reasons( trigger, $menu ){
+	var $trigger=$(trigger).addClass('trigger');
+	$menu.appendTo($trigger.closest('h3')).slideDown();
+}
+
+function close_reasons( trigger, $menu ){
+	$menu.slideUp();
+	$(trigger).removeClass('trigger');
 }
 
 
 
 /* T2 tag context-menu */
 
-var $TAG_MENU=$('#tag-menu'), $FEEDBACK_MENU=$('#feedback-menu'), NOTNOT=/^!!/;
-
+var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
 $('a[rel=tag]').
 	live('mousedown', function( e ){
 		$TAG_MENU.menu('context', e);
@@ -170,7 +216,7 @@ $TAG_MENU.menu({
 	clickToHover: true,
 
 	start: function( e, ui ){
-		var	$tag	= $(ui.trigger).addClass('trigger'),
+		var	$tag	= $(ui.trigger),
 			context	= firehose_settings && firehose_settings.viewtitle;
 
 		// Insert the tagname into the menu items where needed.
@@ -184,7 +230,7 @@ $TAG_MENU.menu({
 		$TAG_MENU.find('a:[data-op==]').toggle(!!context);
 		context && $TAG_MENU.find('span.var-view').text(context);
 
-		show_menu($tag, $TAG_MENU);
+		open_menu($tag, $TAG_MENU);
 	},
 
 	select: function( e, ui ){
@@ -205,15 +251,12 @@ $TAG_MENU.menu({
 			default:
 				fhitem = $tag.closest('div.fhitem')[0];
 				command = (op + tag).replace(NOTNOT, '');
-				T2.submit_tags(fhitem, command);
+				Tags.submit(fhitem, command);
 				break;
 		}
 	},
 
-	stop: function( e, ui ){
-		$TAG_MENU.hide();
-		$(ui.trigger).removeClass('trigger');
-	}
+	stop: function( e, ui ){ close_menu(ui.trigger, $TAG_MENU); }
 });
 
 
@@ -222,7 +265,6 @@ $TAG_MENU.menu({
 /* T2 feedback context-menu */
 
 var $FEEDBACK_MENU=$('#feedback-menu');
-
 $('a.feedback-button.pseudo-tag').
 	live('mousedown', function( e ){
 		$FEEDBACK_MENU.menu('context', e);
@@ -237,11 +279,9 @@ $FEEDBACK_MENU.menu({
 	liveTriggers: true,
 	clickToHover: true,
 
-	start: function( e, ui ) { show_menu($(ui.trigger).addClass('trigger'), $FEEDBACK_MENU); },
-
-	select: function( e, ui ) { T2.submit_tags($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
-
-	stop: function( e, ui ) { $FEEDBACK_MENU.hide(); $(ui.trigger).removeClass('trigger'); }
+	start:	function( e, ui ){ open_menu(ui.trigger, $FEEDBACK_MENU); },
+	select:	function( e, ui ){ Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+	stop:	function( e, ui ){ close_menu(ui.trigger, $FEEDBACK_MENU); }
 });
 
 
@@ -265,20 +305,57 @@ $DATATYPE_MENU.menu({
 	liveTriggers: true,
 	clickToHover: true,
 
-	start: function( e, ui ) { show_menu($(ui.trigger).addClass('trigger'), $DATATYPE_MENU); },
-
-	select: function( e, ui ) {
-		var	fhitem		= $(ui.trigger).closest('.fhitem')[0],
-			command		= $(ui.select).text(),
-			command_tag	= firehose_handle_admin_commands.call(fhitem, [ command ])[0];
-
-		command_tag && T2.submit_tags(fhitem, command_tag);
-	},
-
-	stop: function( e, ui ) { $DATATYPE_MENU.hide(); $(ui.trigger).removeClass('trigger'); }
+	start:	function( e, ui ){ open_menu(ui.trigger, $DATATYPE_MENU); },
+	select:	function( e, ui ){ Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+	stop:	function( e, ui ){ close_menu(ui.trigger, $DATATYPE_MENU); }
 });
 [% END %]
 
+
+
+
+/* T2 reasons menus */
+
+var	$NODNIX_MENU=$('#nodnix-menu'),
+
+	$NIX_REASONS=$('#nix-reasons'),			$NOD_REASONS=$('#nod-reasons'),
+	$COMMENT_NIX_REASONS=$('#comment-nix-reasons'),	$COMMENT_NOD_REASONS=$('#comment-nod-reasons'),
+	$TAG_NIX_REASONS=$('#tag-nix-reasons'),		$TAG_NOD_REASONS=$('#tag-nod-reasons');
+$('a.up, a.down').
+	live('mousedown', function( e ){
+		var	$trigger	= $(e.originalEvent && e.originalEvent.target || e.originalTarget || e.target),
+			which		= sign($trigger.is('.up')),
+			$fhitem		= $trigger.closest('div.fhitem'),
+			reasons, $reasons;
+
+		if ( $fhitem.is('.fhitem-comment') ) {
+			reasons = [ $COMMENT_NIX_REASONS, $COMMENT_NOD_REASONS ];
+		} else if ( $fhitem.is('.fhitem-tag') ) {
+			reasons = [ $TAG_NIX_REASONS, $TAG_NOD_REASONS ];
+		} else {
+			reasons = [ $NIX_REASONS, $NOD_REASONS ];
+		}
+		($reasons=reasons[which].children().clone())
+			&& $reasons.length
+			&& $NODNIX_MENU.hide().html($reasons).menu('context', e);
+	}).
+	live('click', function( e ){
+		e.preventDefault();
+		return true;
+	});
+
+$NODNIX_MENU.menu({
+	cssNamespace: 'slash',
+	liveTriggers: true,
+	clickToHover: true,
+	clickDuration: 750,
+	hoverTimeout: 15000,
+	clickThrough: true,
+
+	start:	function( e, ui ){ open_reasons(ui.trigger, $NODNIX_MENU); },
+	select:	function( e, ui ){ Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+	stop:	function( e, ui ){ close_reasons(ui.trigger, $NODNIX_MENU); }
+});
 
 });
 </script>

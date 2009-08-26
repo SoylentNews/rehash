@@ -4,10 +4,10 @@
 
 .edit-bar .domain.tag,
 .edit-bar .signoff-button,
-.edit-bar a[rel="tag"][href='\/tag\/nix'],
-.edit-bar a[rel="tag"][href='\/tag\/nod'],
+.edit-bar a[rel="tag"][href='\/tag\/nod'], .edit-bar a[rel="tag"][href='\/tag\/metanod'],
+.edit-bar a[rel="tag"][href='\/tag\/nix'], .edit-bar a[rel="tag"][href='\/tag\/metanix'],
 .edit-bar a[rel="tag"][href='\/tag\/mainpage'],
-.edit-bar a[rel="tag"][href='\/tag\/signoff'],
+.edit-bar a[rel="tag"][href='\/tag\/signed'], .edit-bar a[rel="tag"][href='\/tag\/unsigned'], .edit-bar a[rel="tag"][href='\/tag\/signoff'],
 .edit-bar .hide,
 .edit-bar .hide * {
 display:none;
@@ -28,7 +28,7 @@ display:inline !important;
 }
 .fhitem-editor .main.topic.tag { font-style:italic; }
 
-.edit-bar a.tag, .edit-bar a.pseudo-tag {
+.edit-bar a.tag, .edit-bar a.pseudo-tag, .reasons-menu a.tag {
 	cursor:arrow;
 	user-select:none;
 	-moz-user-select:none;
@@ -43,9 +43,12 @@ display:inline !important;
 	-webkit-border-radius: 0.4em;
 
 	padding: 0.1em 0.5em;
+}
+.edit-bar a.tag, .edit-bar a.pseudo-tag {
 	margin: -0.1em -0.5em;
 }
 .edit-bar a.tag:hover, .edit-bar a.pseudo-tag:hover { color: white; background-color: #066; }
+.reasons-menu a.tag:hover, .reasons-menu a.slash-hover { background-color:black; }
 .edit-bar a.feedback-button, .edit-bar a.signoff-button { background-color: #ff4949; }
 .edit-bar a.feedback-button:hover, .edit-bar a.signoff-button:hover { background-color: #f00; }
 
