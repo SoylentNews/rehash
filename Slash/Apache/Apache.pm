@@ -468,6 +468,18 @@ sub IndexHandler {
 			if ($key eq 'submit') {
 				$r->uri('/edit.pl');
 				return OK;
+			} elsif ($key eq 'submission') {
+				$r->uri('/edit.pl');
+				$r->args('type=submission');
+				return OK;
+			} elsif ($key eq 'story') {
+				$r->uri('/edit.pl');
+				$r->args('type=submission');
+				return OK;
+			} elsif ($key eq 'journal') {
+				$r->uri('/edit.pl');
+				$r->args('type=submission');
+				return OK;
 			}
 		}
 
