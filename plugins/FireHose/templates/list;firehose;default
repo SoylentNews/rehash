@@ -270,9 +270,7 @@ $(function(){
 			}
 		});
 
-	if ( fh_is_admin ) {
-		firehose_init_note_flags();
-	}
+	fh_is_admin && firehose_init_note_flags();
 });
 
 

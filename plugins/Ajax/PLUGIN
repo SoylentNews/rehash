@@ -61,4 +61,3 @@ template=templates/prefs_admin;ajax;default
 template=templates/prefs_adminblock;ajax;default
 template=templates/sectionpref;ajax;default
 template=templates/init_tag_ui;misc;default
-template=templates/tag_ui_widget;misc;default

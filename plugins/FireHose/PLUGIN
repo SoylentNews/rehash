@@ -42,7 +42,6 @@ template=templates/prefs_fhexclusions;misc;default
 template=templates/prefs_fhview;misc;default
 template=templates/portalmap;firehose;default
 template=templates/reject_firehose;misc;default
-template=templates/tag_widget;firehose;default
 template=templates/view_book;firehose;default
 template=templates/format_sprite_info;firehose;default
 task=firehose_reject_old.pl

@@ -711,7 +711,7 @@ function firehose_toggle_tag_ui_to( want_expanded, el, dont_next ){
 		}
 
 		setFirehoseAction();
-		want_expanded && T2.fetch_tags($fhitem[0]);
+		want_expanded && Tags.fetch($fhitem[0]);
 
 		tag_ui.$toolbar.toggleClass('expanded', !!want_expanded);
 		tag_ui.$input.toggle(!!want_expanded);
@@ -822,7 +822,7 @@ function page_click_handler( event ) {
 				});
 		} else { // otherwise, send it the server to be processed
 			$fhitem.each(function(){
-				T2.submit_tags(this, command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
+				Tags.submit(this, command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
 		}
 	}
@@ -839,54 +839,17 @@ function page_click_handler( event ) {
 }
 
 
-function firehose_handle_context_triggers( commands ){
-	var context;
-	commands = $.map(commands, function(cmd){
-		if ( cmd in context_triggers ) {
-			context = cmd;
-			cmd = null;
-		}
-		return cmd;
-	});
-
-	$('.tag-widget:not(.nod-nix-reasons)', this).
-		each(function(){
-			T2.set_context(this, context);
-		});
-
-	return commands;
-}
-
-
 function firehose_handle_nodnix( commands ){
 	if ( commands.length ) {
-		var prefix = $(this).is('.fhitem-tagname') ? 'tag' : '';
-
-		var $reasons = $('.nod-nix-reasons', this);
-		var nodnix_context = function( ctx ){
-			$('#firehoselist div.nod-nix-reasons>.tag-display:visible').parent().each(function(){
-				T2.set_context(this);
-			});
-			$reasons.each(function(){
-				T2.set_context(this, ctx);
-			});
-		};
-
-		var tag_server=this, context_not_set=true;
+		var fhitem=this;
 		$.each(commands.slice(0).reverse(), function(i, cmd){
 			if ( cmd=='nod' || cmd=='nix' ) {
-				nodnix_context(prefix+cmd);
-				context_not_set = false;
 				firehose_fix_up_down(
-					tag_server.getAttribute('tag-server'),
+					fhitem.getAttribute('data-fhid'),
 					{ nod:'votedup', nix:'voteddown' }[cmd] );
 				return false;
 			}
 		});
-
-		if ( context_not_set ) {
-			nodnix_context(undefined);
-		}
 	}
 
 	return commands;
@@ -894,14 +857,14 @@ function firehose_handle_nodnix( commands ){
 
 function firehose_handle_comment_nodnix( commands ){
 	if ( commands.length ) {
-		var tag_server=this, handled_underlying=false;
+		var fhitem=this, handled_underlying=false;
 		commands = $.map(commands.reverse(), function( cmd ){
 			var match = /^([\-!]*)(nod|nix)$/.exec(cmd);
 			if ( match ) {
 				var modifier = match[1], vote = match[2];
 				cmd = modifier + 'meta' + vote;
 				if ( !handled_underlying && !modifier ) {
-					var id = tag_server.getAttribute('tag-server');
+					var id = fhitem.getAttribute('data-fhid');
 					firehose_fix_up_down(
 						id,
 						{ nod:'votedup', nix:'voteddown' }[vote] );
@@ -911,10 +874,6 @@ function firehose_handle_comment_nodnix( commands ){
 			}
 			return cmd;
 		}).reverse();
-
-		$('.nod-nix-reasons', this).each(function(){
-			T2.set_context(this, undefined);
-		});
 	}
 
 	return commands;
@@ -934,12 +893,7 @@ $.browser.chrome = $.browser.safari && /chrome/.test( navigator.userAgent.toLowe
 $('#fhsearch').show();
 
 var $roots = $('div.fhroot');
-if ( $roots.length ) {
-	firehose_init_tag_ui();
-	$roots.click(page_click_handler);
-} else {
-	firehose_init_tag_ui($('div.article').click(page_click_handler));
-}
+($roots.length ? $roots : $('div.article')).click(page_click_handler);
 
 // .live() binds these handlers to all current _and_ future firehose items
 $('#firehoselist > div.fhitem').
@@ -950,9 +904,7 @@ $('#firehoselist > div.fhitem').
 		}
 		// optional, will focus before next blur
 		$fhitem.removeData('blur-closes-item').
-			removeData('blur-closes-tags').
-			find('.tag-widget').
-				each(function(){ T2.set_context(this); });
+			removeData('blur-closes-tags');
 	}).
 	live('focus-article', function(){
 		var $fhitem = $(this);
@@ -974,62 +926,6 @@ $('#firehoselist a.more').
 	}
 
 });
-
-
-
-function inject_reasons( expr, init ){
-	// expr is an element, selector, or $selection.
-	var $selection = $any(expr);
-	$selection.
-		find('>h3:not(:has(div.nod-nix-reasons))').
-			append(inject_reasons.template).
-			find('.tag-display-stub').
-				click(firehose_click_nodnix_reason);
-
-	// Unless caller _explicitly_ tells me _not_ to init, e.g., inject_reasons(..., false)...
-	if ( init || init===undefined ) {
-		$init_tag_widgets($selection.find('.tag-widget-stub'));
-	}
-}
-inject_reasons.template = (
-'<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-	'<span class="tag-display-stub" context="related" init="menu:false" />' +
-'</div>'
-);
-
-
-function firehose_init_tag_ui( $fhitems ){
-	var COMMENT_RE=/\bfhitem-comment\b/, have_nodnix, $widgets;
-
-	$fhitems = $fhitems
-		? $fhitems.filter(':not([tag-server])')
-		: $('div.fhroot>div.fhitem:not([tag-server])');
-
-	have_nodnix = $fhitems.is(':has(> h3 [id^=updown-])');
-
-	$fhitems.each(function(){
-		install_tag_server(this, this.id.replace(FHID_PREFIX, ''));
-
-		tag_admin && this.command_pipeline.push(firehose_handle_admin_commands);
-		this.command_pipeline.push(firehose_handle_context_triggers);
-
-		if ( have_nodnix ) {
-			// install nod/nix handling only if I see the nod/nix buttons
-			this.command_pipeline.push(
-				COMMENT_RE.test(this.className) ?
-					firehose_handle_comment_nodnix :
-					firehose_handle_nodnix);
-			inject_reasons(this, false);
-		}
-	});
-
-	$widgets = $init_tag_widgets($fhitems.find('.tag-widget-stub'));
-	tag_admin && $widgets.filter('.body-widget').each(function(){
-		this.modify_context = firehose_admin_context;
-	});
-
-	return init_tag_ui_styles($fhitems);
-}
 // firehose functions end
 
 // helper functions
@@ -1397,19 +1293,14 @@ update_firehose_content = function( updates, sequence ){
 var INIT_INTERVAL=400, $fhroots, timer;
 
 function step(){
-	var $item = $fhroots.children('div.fhitem:visible:not([tag-server]):first');
-
-	if ( $item.length ) {
-		firehose_init_tag_ui($item);
-		fh_idle_skin	&& firehose_init_idle($item);
-		fh_is_admin		&& firehose_init_note_flags($item);
-	} else {
+	var $items = firehose_init_note_flags(1);
+	if ( !$item.length ) {
 		clearInterval(timer);
 		timer = 0;
 	}
 }
 
-$(document).bind('firehose-content-end', function(){
+fh_is_admin && $(document).bind('firehose-content-end', function(){
 	timer || (timer=setInterval(step, INIT_INTERVAL));
 });
 
@@ -2929,12 +2820,12 @@ $(function(){
 
 		if (keyo.tag && el) {
 			firehose_toggle_tag_ui_to(true, el);
-			if (keyo.nod)     { T2.submit_tags(el, 'nod') }
-			if (keyo.nix)     { T2.submit_tags(el, 'nix') }
+			if (keyo.nod)     { Tags.submit(el, 'nod') }
+			if (keyo.nix)     { Tags.submit(el, 'nix') }
 		}
 
 		if (keyo.signoff && el && tag_admin) {
-			T2.submit_tags(el, 'signoff');
+			Tags.submit(el, 'signoff');
 			// we either call set_cur($(el)) as above,
 			// or just pass $(el) to go_next()
 			firehose_go_next($(el));

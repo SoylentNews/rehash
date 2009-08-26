@@ -281,20 +281,6 @@ sub displayStory {
 				. timeCalc($story->{'time'}, $df, undef, { is_old => $is_old });
 		}
 		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
-
-		#if ($constants->{plugin}{Tags}
-		#	&&  $user->{tags_canread_stories}
-		#	&& !$user->{tags_turnedoff}
-		#	&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
-
-		#	$return .= slashDisplay('tag_ui_widget', {
-		#		user		=> $user,
-		#		item		=> $story,
-		#		key		=> $stoid,
-		#		key_type	=> 'stoid',
-		#	}, { Return => 1 });
-
-		#}
 	}
 
 	return $return;

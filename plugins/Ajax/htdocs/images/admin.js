@@ -23,7 +23,7 @@ function storyInfo( selector_fragment ) {
 	// Pop-up, admin-only, the signoff history for this story.
 
 	// Where on the page shall we place the new pop-up?
-	var $where, $item=$('[tag-server='+selector_fragment+']');
+	var $where, $item=$('[data-fhid='+selector_fragment+']');
 		// hang the pop-up from the first available of:
 	var $W = $item.find('div.tag-widget.body-widget:first');
 	$where = $related_trigger.		// whatever you clicked
@@ -52,7 +52,7 @@ function tagsHistory( selector_fragment, context ) {
 	// Pop-up, admin-only, the history of tags applied to this item.
 
 	// Where on the page shall we place the new pop-up?
-	var $where, $item=$('[tag-server='+selector_fragment+']');
+	var $where, $item=$('[data-fhid='+selector_fragment+']');
 	if ( context == 'firehose' ) {
 		// hang the pop-up from the first available of:
 		var $W = $item.find('div.tag-widget.body-widget:first');
@@ -89,14 +89,6 @@ function tagsHistory( selector_fragment, context ) {
 // firehose + admin + tag_ui
 //
 
-function firehose_admin_context( display ){
-	var additions = 'extras history betaedit oldedit';
-	if ( $(display).is('.fhitem-story .tag-display') ) {
-		additions += ' info ';
-	}
-	T2.update_tags(display, additions, { order: 'prepend', classes: 'b' });
-}
-
 function signoff( $fhitem, id ){
 	$.ajax({type:'POST',
 		dataType:'text',
@@ -109,7 +101,7 @@ function signoff( $fhitem, id ){
 			$fhitem.find('a.signoff-button').remove();
 		}
 	});
-	firehose_collapse_entry(id || $fhitem.attr('tag-server'));
+	firehose_collapse_entry(id || $fhitem.attr('data-fhid'));
 }
 
 $('a.signoff-button').live('click', function( e ){
@@ -117,7 +109,7 @@ $('a.signoff-button').live('click', function( e ){
 });
 
 function firehose_handle_admin_commands( commands ){
-	var entry=this, $entry=$(entry), id=$entry.attr('tag-server');
+	var entry=this, $entry=$(entry), id=$entry.attr('data-fhid');
 
 	return $.map(commands, function( cmd ){
 		var user_cmd = null;
@@ -342,8 +334,11 @@ function firehose_reject (el) {
 	firehose_remove_entry(el.value);
 }
 
-function firehose_init_note_flags( $items ){
-	return ($items || $('div.fhitem:not(:has(>h3>span.note-flag))')).
+function firehose_init_note_flags( limit ){
+	var $items = $('div.fhitem:not(:has(>h3>span.note-flag))');
+	limit && ($items = $items.filter(':lt('+limit+')'));
+
+	return $items.
 		each(function(){
 			var	$item			= $(this),
 				$flag_parent	= $item.find('>h3:first'),
