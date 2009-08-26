@@ -129,9 +129,9 @@ $(document).ready(function(){
 		<span onclick="firehose_set_options('color', 'indigo')" title="Filter Firehose to entries rated indigo or better" class="soda fake"><span> </span></span>
 
 		<div class="subtitle" [% IF state == 'inline' %]style="-moz-border-radius-topleft:0.8em;-webkit-border-top-left-radius: 0.8em;margin-left:0.475em;"[% END %]>
-			<span class="[% IF !item.title;'dyn';END;%]label">
+			<span class="[% IF !preview.title;'dyn';END;%]label">
 				<label for="title">Title Your Story</label>
-				<input type="text" name="title" value="[% IF item.title;item.title | strip_attribute;END; %]" size="50">
+				<input type="text" name="title" value="[% IF preview.title;preview.title | strip_attribute;END; %]" size="50">
 			</span>
 			[% IF errors.critical.badsubject %]
                         	[% errors.critical.badsubject %]

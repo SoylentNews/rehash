@@ -115,6 +115,7 @@ sub getOrCreatePreview {
 			}
 			my $p_data = { preview_fhid => $fhid };
 			if ($form->{new}) {
+				$p_data->{title}	= $form->{title};
 				$fh_data->{title} 	= strip_attribute($form->{title});
 				$p_data->{url_text} 	= $form->{url} if $form->{url};
 				$p_data->{introtext} 	= $form->{introtext};
@@ -184,7 +185,7 @@ sub getOrCreatePreview {
 				$p_data->{commentstatus} = $disc->{commentstatus};
 			}
 		}
-
+		$p_data->{title} = $fh_data->{title};
 		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
 		$p_data->{src_fhid} = $src_item->{id};
@@ -260,8 +261,9 @@ sub savePreview {
 
 	my($p_data, $fh_data);
 
-	$p_data->{introtext}      = $form->{introtext};
-	$fh_data->{createtime}    = $form->{createtime} if $form->{createtime};
+	$p_data->{title}	= $form->{title};
+	$p_data->{introtext}	= $form->{introtext};
+	$fh_data->{createtime}	= $form->{createtime} if $form->{createtime};
 
 	if ($user->{is_anon} && $form->{hcanswer} && $form->{reskey}) {
 		$p_data->{hcanswer} = $form->{hcanswer};
