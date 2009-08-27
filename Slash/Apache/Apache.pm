@@ -474,11 +474,11 @@ sub IndexHandler {
 				return OK;
 			} elsif ($key eq 'story') {
 				$r->uri('/edit.pl');
-				$r->args('type=submission');
+				$r->args('type=story');
 				return OK;
 			} elsif ($key eq 'journal') {
 				$r->uri('/edit.pl');
-				$r->args('type=submission');
+				$r->args('type=story');
 				return OK;
 			}
 		}
