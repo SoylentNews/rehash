@@ -450,6 +450,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
+	my $sfids = $self->sqlSelect('value', 'preview_param', "preview_id = $preview_id and name = 'sfid'");
 
 	my $tag_widget = slashDisplay('edit_bar', {
 		item         => $p_item,
@@ -483,7 +484,8 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		state                   => $options->{state},
 		similar_stories         => $similar_stories,
 		storyref                => $storyref,
-		add_related_text        => $form->{add_related}
+		add_related_text        => $form->{add_related},
+		sfids                   => $sfids,
 	 }, { Page => 'edit', Return => 1 });
 
 	return $editor;
@@ -924,6 +926,56 @@ sub setRelated {
 			$related_cids_hr, $related_firehose_hr
 		);
 	}
+}
+
+sub ajaxUploadShowPreview {
+        my ($slashdb, $constants, $user, $form, $options) = @_;
+
+        return if (!$user->{is_admin} || !$form->{fhid});
+
+        my $fhid_q = $slashdb->sqlQuote($form->{fhid});
+        my $preview_id = $slashdb->sqlSelect('preview_id', 'preview', "preview_fhid = $fhid_q");
+
+        my $sfid = $slashdb->sqlSelect('value', 'preview_param', "name = 'sfid' and preview_id = " . $preview_id);
+        my @sfids = split(',', $sfid);
+        my %sfid_data;
+
+        foreach my $id (@sfids) {
+                $sfid_data{$id} = $slashdb->sqlSelectHashref('*', 'static_files', "sfid = $id and fhid = $fhid_q");
+                my $filename = $sfid_data{$id}->{name};
+                my $lg_filename = $filename;
+                my ($suffix) = $filename =~ /^.+(\..+)$/;
+                $lg_filename =~ s/$suffix/-thumblg$suffix/;
+                $sfid_data{$id}->{lg_name} = $lg_filename;
+
+                my $md_filename = $filename;
+                $md_filename =~ s/$suffix/-thumb$suffix/;
+                $sfid_data{$id}->{md_filename} = $md_filename;
+                $sfid_data{$id}->{md_sfid} = $slashdb->sqlSelect('sfid', 'static_files', "fhid = $fhid_q and name = '$md_filename'");
+        }
+
+        my $preview = slashDisplay('imgupload_preview', { preview_data => \%sfid_data, fhid => $form->{fhid} }, { Page => 'misc', Return => 1 });
+        return Data::JavaScript::Anon->anon_dump({
+                preview => $preview,
+        });
+}
+
+sub ajaxUploadSetThumb {
+        my ($slashdb, $constants, $user, $form, $options) = @_;
+
+        return if (!$user->{is_admin});
+        return if (!$form->{fhid});
+        return if (!$form->{sfid} && !$form->{clear});
+
+        my $sfid = $form->{sfid} || 0;
+        my $sfid_q = $slashdb->sqlQuote($sfid);
+        my $fhid_q = $slashdb->sqlQuote($form->{fhid});
+
+        $slashdb->sqlUpdate(
+                'firehose',
+                { -thumb => $sfid_q },
+                "id = $fhid_q and preview = 'yes'"
+        );
 }
 
 sub DESTROY {
