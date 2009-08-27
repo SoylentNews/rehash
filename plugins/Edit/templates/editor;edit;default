@@ -248,7 +248,7 @@ $(document).ready(function(){
 			[% END %]
 
 			[% FOR extra = extras %]
-				[% PROCESS formLabel value => extra.0, comment => "" %]
+				[% PROCESS formLabel value => extra.0, comment => "", style => "display:block" %]
 				[% IF extra.2 == 'text' %]
 					<input type="text" name="[% extra.1 %]" value="[% preview.${extra.1} | strip_attribute %]" size="50">
 				[% ELSIF extra.2 == 'textarea' %]
