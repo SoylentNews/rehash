@@ -729,8 +729,10 @@ EOT
 
 			return sidebox('Advertisement', qq'<div class="ad$num advertisement">' . $user->{state}{ad}{$num} . "</div>", "advertisement", 1);
 		} else { return ''; }
-	} else {
+	} elsif ($num) {
 		return $user->{state}{ad}{$num} ? qq'<div class="ad$num advertisement">$user->{state}{ad}{$num}</div>': '';
+	} else {
+		return '';
 	}
 }
 
