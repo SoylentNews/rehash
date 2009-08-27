@@ -1353,12 +1353,12 @@ sub setGetDisplayTags { # T2
 		$datatype = $firehose_item->{type};
 		$popular_tags = $firehose_item->{toptags};
 
-		my $default_main_watchlist_tag = undef;
+		my $default_main_watchlist_tag = '';
 		my $skid = $firehose_item->{primaryskid};
 		if ( $skid ) {
 			my $skin = $firehose_reader->getSkin($skid);
 			$default_main_watchlist_tag = $skin->{name};
-			$default_main_watchlist_tag = '' if $default_main_watchlist_tag eq $domain_tag;
+#			$default_main_watchlist_tag = '' if $default_main_watchlist_tag eq $domain_tag;
 		}
 
 		my $tree = $self->getTopicTree();
@@ -1368,29 +1368,23 @@ sub setGetDisplayTags { # T2
 		# Find the primary skin; that determines our main watchlist tagname.
 		my $rendered_hr = $self->renderTopics($chosen_hr);
 		my $primary_skid = $self->getPrimarySkidFromRendered($rendered_hr);
-		my $primary_nexus = $self->getNexusFromSkid($primary_skid);
-		$main_watchlist_tag = $tree->{$primary_nexus}{keyword};
+		my $primary_nexus = $self->getNexusFromSkid($primary_skid) if $primary_skid;
+		$main_watchlist_tag = $tree->{$primary_nexus}{keyword} if $primary_nexus;
+		$main_watchlist_tag ||= $default_main_watchlist_tag;
 
 		# Get the tagnames of the other topics as well.
 		my @tids = ( );
 		for my $tid (sort { $chosen_hr->{$b} <=> $chosen_hr->{$a} || $a cmp $b } keys %$chosen_hr) {
 			my $keyword = $tree->{$tid}{keyword};
-			next if $keyword eq $domain_tag;
-			next if $keyword eq $main_watchlist_tag;
 			push @tids, $tid;
 		}
 		push @topic_tags, map { $tree->{$_}{keyword} } @tids;
 	}
 
-	# FIX ME: a given tag should be returned in _all_ appropriate members, e.g., a
-	# popular tag that is also a topic should be present in $tags->{topic_tags} _and_
-	# $tags->popular_tags --- and in $tags->{user_tags} as well if it was tagged by
-	# the user.
 	my $tags = {
 		domain_tag		=> $domain_tag,
 		datatype		=> $datatype || 'unknown',
 		main_watchlist_tag	=> $main_watchlist_tag,
-			# topic_tags includes all watchlist tags as well
 		topic_tags		=> join(' ', grep { $_ } $main_watchlist_tag, @topic_tags),
 		popular_tags		=> $popular_tags,
 		user_tags		=> $user_tags,
