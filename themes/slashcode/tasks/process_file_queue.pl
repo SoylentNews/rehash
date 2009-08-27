@@ -238,7 +238,36 @@ sub uploadFile {
 				name => "$destpath/$name"
 			};
 			slashdLog("Add firehose item: $data->{name}");
-			addFile($data);
+			my $sfid = addFile($data);
+
+			# The following populates preview_param with a list of sfids associated with the preview.
+			# XXX Move this to Edit.pm
+			my $preview_id = $slashdb->sqlSelect(
+                                        'preview_id',
+                                        'preview',
+                                        "preview_fhid = " . $cmd->{fhid}
+                        );
+
+			if ($preview_id) {
+                                my $preview_sfids = $slashdb->sqlSelect(
+                                        'value',
+                                        'preview_param',
+                                        "name = 'sfid' and preview_id = " . $preview_id
+                                );
+
+                                my $preview_data = {
+                                        preview_id => $preview_id,
+                                        name => 'sfid',
+                                };
+
+                                if (!$preview_sfids) {
+                                        $preview_data->{value} = $sfid;
+                                        $slashdb->sqlInsert('preview_param', $preview_data);
+                                } else {
+                                        $preview_data->{value} = $preview_sfids . ",$sfid";
+                                        $slashdb->sqlUpdate('preview_param', $preview_data, "name = 'sfid' and preview_id = " . $preview_id);
+                                }
+                        }
 		}
 	}
 	return \@files;
