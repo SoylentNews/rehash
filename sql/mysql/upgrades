@@ -6546,4 +6546,4 @@ INSERT INTO ajax_ops VALUES (NULL, 'imgupload_show_preview', 'Slash::Edit', 'aja
 INSERT INTO ajax_ops VALUES (NULL, 'imgupload_set_thumbnail', 'Slash::Edit', 'ajaxUploadSetThumb', 'ajax_user_static', 'createuse');
 
 
-ALTER TABLE preview ADD title VARCHAR(255) NOT NULL DEFAULT 0;
+ALTER TABLE preview ADD title VARCHAR(255) NOT NULL DEFAULT '';
