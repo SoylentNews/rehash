@@ -13,15 +13,47 @@ __template__
 
 <script type="text/javascript">
 
-function createUpload() {
+function toggle_preview() {
+        $('#upload_preview').toggle();
+        $('#preview_toggle').toggle();
+        $('#uploadfk').height('5em');
+}
 
-        $('#upload_progress').show();
+function createUpload(fhid) {
+
+        $('#preview_toggle').hide();
+        $('#upload_feedback').html('Uploading...</b>&nbsp;<img src="[% constants.imagedir %]/spinner.gif">');
+        $('#upload_feedback').show();
         document.getElementById('file_upload_form').target = 'upload_target';
-        //document.getElementById('file_upload_form').submit();
-        $('#upload_target').show();
+        document.getElementById('file_upload_form').submit();
         $('#upload_target').load(function() {
-                $('#upload_progress').hide();
+                $('#upload_feedback').html('<a href="" onclick="imgupload_show_preview(' + fhid + '); return false;">Refresh Media Preview</a>');
         });
+}
+
+function imgupload_show_preview(fhid) {
+
+        var params = {};
+        params.op = 'imgupload_show_preview';
+        params.reskey = reskey_static;
+        params.fhid = fhid;
+        ajax_update(
+                params,
+                '',
+                {
+                        onComplete: function(transport) {
+                                var response = eval_response(transport);
+                                var preview = '';
+                                if (response !== undefined) {
+                                        preview = response.preview;
+                                        $('#uploadfk').height('13em');
+                                        $('#upload_preview').html(preview);
+                                        $('#upload_preview').show();
+                                        $('#preview_toggle').show();
+                                }
+                        }
+                }
+        );
 }
 
 </script>
@@ -29,10 +61,13 @@ function createUpload() {
 <div id="mediaupload" style="display: none">
 <form id="file_upload_form" method="post" enctype="multipart/form-data" action="[% constants.real_rootdir %]/imgupload.pl">
         <input type="file" class="input" name="fileToUpload" size="45" id="fileToUpload"/>
-        <input type="button" onclick="return createUpload();" id="buttonUpload" value="Upload">
-        <span id="upload_progress" style="display: none"><b>Uploading...</b>&nbsp;<img src="[% constants.imagedir %]/spinner.gif"></span>
+        <input type="button" onclick="return createUpload([% fhid %]);" id="buttonUpload" value="Upload">
+        <span id="preview_toggle" style="display: none"><a href="" style="text-decoration: none;" onclick="toggle_preview(); return false;">[-]</a></span>
+        <span id="upload_feedback"[% IF !sfids %] style="display: none"[% END %]><a href="" onclick="imgupload_show_preview([% fhid %]); return false;">Refresh Media Preview</a></span>
+
         <input type="hidden" name="fhid" value="[% fhid %]">
 </form>
+<div id="upload_preview" style="display: none"></div>
 <iframe id="upload_target" name="upload_target" style="display: none; height: 5em; width: 65%; border: none;">
 </iframe>
 </div>
