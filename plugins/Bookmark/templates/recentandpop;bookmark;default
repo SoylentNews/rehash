@@ -40,7 +40,7 @@ Want to know more about bookmarks? See the <a href="[% gSkin.rootdir %]/faq/tags
 <script type="text/javascript">
 (function() {
 // coremetrics
-if( window.location.hostname === 'slashdot.org' ) {
+if( window.location.hostname.indexOf('slashdot.org') >= 0 ) {
 	cmSetProduction();
 }
 cmCreatePageviewTag && cmCreatePageviewTag('POPULAR BOOKMARKS') && (cmCreatePageviewTag = null);

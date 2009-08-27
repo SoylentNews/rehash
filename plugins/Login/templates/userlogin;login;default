@@ -113,6 +113,16 @@ __template__
 [% ELSE %]
         </div>
 [% END %]
+<script type="text/javascript">
+(function() {
+// coremetrics
+	if( window.location.hostname.indexOf('slashdot.org') >= 0 ) {
+		cmSetProduction();
+	}
+	cmCreatePageviewTag && cmCreatePageviewTag('LOG IN') && (cmCreatePageviewTag = null);
+	cmCreateRegistrationTag( '[% user.nickname %]' );
+})();
+</script>
 
 __seclev__
 10000
