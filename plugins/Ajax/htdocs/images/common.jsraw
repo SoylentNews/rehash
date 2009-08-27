@@ -2905,7 +2905,7 @@ function shorten_fh_pag_menu() {
 }
 
 function shorten_fh_pag_menu_check() {
-	var $firstitem = $('#fh-pag-div div:.currcolor');
+	var $firstitem = $('#fh-pag-div div.currcolor');
 	var $lastitem  = $('#fh-paginate span:last');
 
 	if (!$firstitem.length || !$lastitem.length) {
