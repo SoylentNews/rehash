@@ -13171,6 +13171,7 @@ sub createPreview {
 	$data->{bodytext} 	= delete $preview->{bodytext} || '';
 	$data->{preview_fhid} 	= delete $preview->{preview_fhid} || '';
 	$data->{src_fhid} 	= delete $preview->{src_fhid} || '';
+	$data->{title} 		= delete $preview->{title} || '';
 
 	$self->sqlInsert('preview', $data);
 	my $preview_id = $self->getLastInsertId();
