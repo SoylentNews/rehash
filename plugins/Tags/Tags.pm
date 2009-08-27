@@ -1424,19 +1424,21 @@ sub updateDisplayTagMarkup { # T2
 	my $tree = $slashdb->getTopicTree();
 	my $result='';
 	for my $tagname (@$order) {
+		my $tid = 0;
 		$result .= '<a class="' . $class->{$tagname} . '"';
 		$result .= ' rel="tag" href="/tag/' . $tagname . '"' unless $class->{$tagname} =~ /pseudo-tag/;
-		$result .= '>' . $tagname;
+		$result .= '>';
 		if ( $options->{include_topic_images} && $class->{$tagname} =~ /topic/ ) {
-			my $tid = 0;
 			for my $tidkey (keys %$tree) {
 				next unless $tree->{$tidkey}{image};
 				$tid = $tidkey, last if $tree->{$tidkey}{keyword} eq $tagname;
 			}
-			if ($tid) {
-				my $image = $tree->{$tid}{image};
-				$result .= qq{<img src="$image_prefix$image">};
-			}
+		}
+		if ($tid) {
+			my $image = $tree->{$tid}{image};
+			$result .= qq{<img src="$image_prefix$image"><span>$tagname</span>};
+		} else {
+			$result .= $tagname;
 		}
 		$result .= "</a>\n";
 	}
