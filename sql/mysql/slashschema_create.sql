@@ -765,6 +765,7 @@ CREATE TABLE preview (
 	uid mediumint UNSIGNED NOT NULL,
 	src_fhid mediumint UNSIGNED NOT NULL DEFAULT 0,
 	preview_fhid mediumint UNSIGNED NOT NULL DEFAULT 0,
+	title VARCHAR(255) NOT NULL DEFAULT '',
 	introtext text NOT NULL,
 	bodytext text NOT NULL,
 	active ENUM("no","yes") DEFAULT "yes",
