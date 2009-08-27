@@ -40,10 +40,10 @@ sub getPreviewIdSessionUid {
 	}
 
 	if (isAnon($uid)) {
-		return $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "uid = $uid_q AND session = $session_q  and active='yes' $where_extra");
+		return $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "preview.uid = $uid_q AND session = $session_q  and active='yes' $where_extra");
 	} else {
-		my $user_pid = $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "(uid = $uid_q and active='yes') $where_extra") || 0;
-		my $anon_session_pid = $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "uid=$anon_uid and active='yes' AND session=$session_q $where_extra") || 0;
+		my $user_pid = $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "(preview.uid = $uid_q and active='yes') $where_extra") || 0;
+		my $anon_session_pid = $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "preview.uid=$anon_uid and active='yes' AND session=$session_q $where_extra") || 0;
 		if ($anon_session_pid > $user_pid) {
 			$self->migrateAnonPreviewToUser($anon_session_pid, $uid);
 			$user_pid = $anon_session_pid;
