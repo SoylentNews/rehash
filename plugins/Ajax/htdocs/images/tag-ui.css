@@ -16,7 +16,7 @@ display:none;
 menu.tag-menu {z-index:100001 !important;}
 
 div.note-wrapper,
-.adminmode .edit-bar .domain.tag,
+.adminmode .edit-bar.expanded .domain.tag,
 .fhitem-editor .edit-bar .domain.tag,
 .adminmode .edit-bar .signoff-button {
 display:inline !important;
