@@ -23,20 +23,27 @@ sub initEditor {
 }
 
 sub getPreviewIdSessionUid {
-	my($self, $session, $uid) = @_;
+	my($self, $session, $uid, $type) = @_;
 	my $user = getCurrentUser();
 	$uid ||= $user->{uid};
 
 	my $uid_q = $self->sqlQuote($uid);
+	my $type_q = $self->sqlQuote($type);
 	my $session_q = $self->sqlQuote($session);
 	my $anon_uid = getCurrentStatic('anonymous_coward_uid');
 
+	my $table_extra = "";
+	my $where_extra = "";
+	if ($type) {
+		$table_extra = ",firehose";
+		$where_extra = " AND preview.preview_fhid=firehose.id AND firehose.type = $type_q";
+	}
 
 	if (isAnon($uid)) {
-		return $self->sqlSelect("MAX(preview_id)", "preview", "uid = $uid_q AND session = $session_q  and active='yes'");
+		return $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "uid = $uid_q AND session = $session_q  and active='yes' $where_extra");
 	} else {
-		my $user_pid = $self->sqlSelect("MAX(preview_id)", "preview", "(uid = $uid_q and active='yes')") || 0;
-		my $anon_session_pid = $self->sqlSelect("MAX(preview_id)", "preview", "uid=$anon_uid and active='yes' AND session=$session_q");
+		my $user_pid = $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "(uid = $uid_q and active='yes') $where_extra") || 0;
+		my $anon_session_pid = $self->sqlSelect("MAX(preview_id)", "preview $table_extra", "uid=$anon_uid and active='yes' AND session=$session_q $where_extra") || 0;
 		if ($anon_session_pid > $user_pid) {
 			$self->migrateAnonPreviewToUser($anon_session_pid, $uid);
 			$user_pid = $anon_session_pid;
@@ -94,7 +101,7 @@ sub getOrCreatePreview {
 
 
 	if (!$form->{from_id}) {
-		my $id = $self->getPreviewIdSessionUid($session, $user->{uid});
+		my $id = $self->getPreviewIdSessionUid($session, $user->{uid}, $form->{type});
 	
 		if ($id && !$form->{new}) {
 			return $id;
