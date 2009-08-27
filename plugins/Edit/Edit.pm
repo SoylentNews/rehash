@@ -99,7 +99,6 @@ sub getOrCreatePreview {
 	my $tagsdb = getObject("Slash::Tags");
 	my $admindb = getObject("Slash::Admin");
 
-
 	if (!$form->{from_id}) {
 		my $id;
 
@@ -118,8 +117,7 @@ sub getOrCreatePreview {
 			my $id = $self->createPreview({ uid => $user->{uid}, session => $session });
 			my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 
-			my $type = $user->{is_admin} ? "story" : "submission";
-			$type = $form->{type} if $user->{is_admin} && $form->{type};
+			my $type = $self->determineType;
 
 			my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
@@ -169,7 +167,7 @@ sub getOrCreatePreview {
 		}
 
 
-		my $type = $user->{is_admin} && $form->{type} ne "submission" ? "story" : "submission";
+		my $type = $self->determineType;
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
 		
@@ -185,7 +183,7 @@ sub getOrCreatePreview {
 
 		$p_data->{submitter} = $src_item->{uid};
 
-		if ($src_item->{type} ne "story" && $type eq "story") {
+		if ($src_item->{type} ne 'story' && $type eq 'story') {
 			my $url 	= $self->getUrl($src_item->{url_id});
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1, url => $url }, { Return => 1, Nocomm => 1 });
 			$fh_data->{title} = titleCaseConvert($src_item->{title});
@@ -300,18 +298,18 @@ sub savePreview {
 	}
 
 	if ($p_item->{type} eq 'story') {
-		$p_data->{bodytext} 		= $form->{bodytext};
-		$p_data->{commentstatus} 	= $form->{commentstatus};
-		$p_data->{neverdisplay} 	= $form->{display} ? '' : 1;
+		$p_data->{bodytext}      = $form->{bodytext};
+		$p_data->{commentstatus} = $form->{commentstatus};
+		$p_data->{neverdisplay}  = $form->{display} ? '' : 1;
 		
-		$fh_data->{uid}		= $form->{uid};
+		$fh_data->{uid}          = $form->{uid};
 		
 		# XXXEdit maybe only use findTheTime for story type?
 
-		$fh_data->{createtime} 	= $admindb->findTheTime($form->{createtime}, $form->{fastforward});
-		$fh_data->{media} 	= $form->{media};
-		$fh_data->{dept} 	= $form->{dept};
-		$fh_data->{bodytext}	= $form->{bodytext};
+		$fh_data->{createtime}   = $admindb->findTheTime($form->{createtime}, $form->{fastforward});
+		$fh_data->{media}        = $form->{media};
+		$fh_data->{dept}         = $form->{dept};
+		$fh_data->{bodytext}     = $form->{bodytext};
 		
 		$fh_data->{dept} =~ s/[-\s]+/-/g;
 		$fh_data->{dept} =~ s/^-//;
@@ -340,9 +338,7 @@ sub savePreview {
 			last_action	=> 'editing',
 		});
 
-	}
-
-	if ($p_item->{type} eq 'submission') {
+	} elsif ($p_item->{type} eq 'submission') {
 		my $email_known = "";
 		$email_known = "mailto" if $form->{email} eq $user->{fakeemail};
 		$fh_data->{email} = processSub(strip_attribute($form->{email}), $email_known);
@@ -366,7 +362,12 @@ sub savePreview {
 		my $fh_data->{uid} ||= $form->{name}
 			? getCurrentUser('uid')
 			: getCurrentStatic('anonymous_coward_uid');
+
+	} elsif ($p_item->{type} eq 'journal') {
+		$p_data->{commentstatus} = $form->{commentstatus};
+		$p_data->{posttype}      = $form->{posttype};
 	}
+
 	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
 
 	$fh_data->{title}	= $p_item->{type} eq 'story' ? $form->{title} : strip_attribute($form->{title});
@@ -385,9 +386,14 @@ sub savePreview {
 			$fh_data->{$field} = parseSlashizedLinks($fh_data->{$field});
 			$fh_data->{$field} = balanceTags($fh_data->{$field});
 		}
+
 	} elsif ($p_item->{type} eq 'submission') {
 		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $p_data->{sub_type} } );
 		print STDERR "SUB TYPE: $p_data->{sub_type}\n";
+
+	} elsif ($p_item->{type} eq 'journal') {
+		#my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+
 	}
 	
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
@@ -502,14 +508,11 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		
 	my $display_check = $preview->{neverdisplay} ? '' : $constants->{markup_checked_attribute};
 
-	
-	if (!$preview->{commentstatus}) {
-		$preview->{commentstatus} = $constants->{defaultcommentstatus};
-	}
+	$preview->{commentstatus} ||= $constants->{defaultcommentstatus};
+	$preview->{posttype}      ||= $user->{posttype};
 
-
-	my $description = $self->getDescriptions('commentcodes_extended');
-	my $commentstatus_select = createSelect('commentstatus', $description, $preview->{commentstatus}, 1);
+	my $commentstatuses = $self->getDescriptions($user->{is_subscriber} || $user->{is_admin} ? 'commentcodes_extended' : 'commentcodes');
+	my $commentstatus_select = createSelect('commentstatus', $commentstatuses, $preview->{commentstatus}, 1);
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
@@ -517,6 +520,12 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		$self->setExistingImagePreview($preview_id, $preview->{src_fhid});
 	}
 	my $sfids = $self->sqlSelect('value', 'preview_param', "preview_id = $preview_id and name = 'sfid'");
+
+	my $posttypes = $self->getDescriptions('postmodes');
+	if ($user->{is_admin} || $user->{acl}{journal_admin_tags}) {
+		$posttypes->{77} = 'Full HTML Mode';
+	}
+	my $posttype_select = createSelect('posttype', $posttypes, $preview->{posttype}, 1);
 
 	my $tag_widget = slashDisplay('edit_bar', {
 		item         => $p_item,
@@ -537,6 +546,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		item                    => $p_item,
 		author_select           => $author_select,
 		commentstatus_select    => $commentstatus_select,
+		format_select           => $posttype_select,
 		display_check           => $display_check,
 		extras                  => $extracolumns,
 		errors                  => $options->{errors},
@@ -668,7 +678,7 @@ sub saveItem {
 	if ($fhitem && $fhitem->{id} && !(keys %{$errors->{critical}})) {
 		# creating a new story
 
-		if ($fhitem->{type} eq "story") {
+		if ($fhitem->{type} eq 'story') {
 			my $src_item;
 			$src_item = $fh->getFireHose($preview->{src_fhid}) if $preview->{src_fhid};
 
@@ -1052,6 +1062,7 @@ sub ajaxUploadSetThumb {
         );
 }
 
+
 sub setExistingImagePreview {
         my ($self, $preview_id, $src_fhid) = @_;
 
@@ -1085,6 +1096,27 @@ sub setExistingImagePreview {
         };
         $slashdb->sqlInsert('preview_param', $data);
 }
+
+{
+my %types = map { $_ => 1 } qw(story submission journal);
+sub determineType {
+	my($self) = @_;
+	my $user = getCurrentUser();
+	my $form  = getCurrentForm();
+
+	my $type = 'submission';
+	if ($form->{type} && $types{$form->{type}}) {
+		if (!$user->{is_admin} && $form->{type} eq 'story') {
+			# $type = $type; # leave default
+		} else {
+			$type = $form->{type};
+		}
+	} elsif ($user->{is_admin}) {
+		$type = 'story';
+	}
+
+	return $type;
+} }
 
 sub DESTROY {
 	my($self) = @_;

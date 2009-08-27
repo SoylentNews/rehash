@@ -143,7 +143,7 @@ $(document).ready(function(){
 
 		<div class="subtitle" [% IF state == 'inline' %]style="-moz-border-radius-topleft:0.8em;-webkit-border-top-left-radius: 0.8em;margin-left:0.475em;"[% END %]>
 			<span class="[% IF !preview.title;'dyn';END;%]label">
-				<label for="title">Title Your Story</label>
+				<label for="title">Title Your [% item.type == 'journal' ? 'Journal Entry' : 'Story' %]</label>
 				<input type="text" name="title" value="[% IF preview.title;preview.title | strip_attribute;END; %]" size="50">
 			</span>
 			[% IF errors.critical.badsubject %]
@@ -377,6 +377,16 @@ $(document).ready(function(){
 			[% END %]
 		</div>
 
+[%# needed for journal:
+* subject
+* topic
+x comments
+? "comments may not be disabled" note
+* entry
+x HTML type
+? publish/post/publicize
+%]
+
 		<div class="subarticle-foot">
 			<div class="subactionbuttons">
 				[% IF preview_shown %]
@@ -395,11 +405,17 @@ $(document).ready(function(){
 					<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="[% IF state == "fullpage"; reset_js;  ELSE %]submit_cancel();[% END %]return false;">
 					[% END %]
 					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;"><img id="edit-busy" class="hide" src="[% constants.imagedir %]/spinner2.gif">
-					[% IF item.type == 'story' %]
+					[% IF item.type == 'journal' %]
+						<div class="input">
+							[% PROCESS formLabel value => "HTML format" for => 'posttype' %]
+							[% format_select %]
+						</div>
+					[% END; IF item.type == 'story' || item.type == 'journal' %]
 						<div class="input">
 							[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
 							[% commentstatus_select %]
 						</div>
+					[% END; IF item.type == 'story' %]
 						<div class="input">
 							<label for="display" class="display visible"><input type="checkbox" name="display" [% display_check %]> Display</label>
 						</div>
