@@ -537,18 +537,19 @@ sub getData {
 	my $opts_getname = $opts; $opts_getname->{GetName} = 1;
 
 	my $name = slashDisplayName('data', $hashref, $opts_getname);
-	return undef if !$name || !$name->{tempdata} || !defined($name->{tempdata}{tpid});
-	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} } ||= { };
-
-	if (defined $var->{$value}) {
+	return undef unless $name;
+	if ($name->{origSkin} && $name->{origPage}) {
 		# restore our original values; this is done if
 		# slashDisplay is called, but it is not called here -- pudge
 		my $user = getCurrentUser();
 		$user->{currentSkin}	= $name->{origSkin};
 		$user->{currentPage}	= $name->{origPage};
-
-		return $var->{$value};
 	}
+
+	return undef if !$name->{tempdata} || !defined($name->{tempdata}{tpid});
+	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} } ||= { };
+
+	return $var->{$value} if defined $var->{$value};
 
 	my $str = slashDisplay($name, $hashref, $opts);
 	return undef if !defined($str);
