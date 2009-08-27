@@ -371,7 +371,7 @@ $(document).ready(function(){
 						<input type="submit" name="op" value="preview" id="edit-preview-button" onclick="editPreview(); return false;">
 					</span>
 					[% 	reset_id = preview.src_fhid || 0;
-						reset_js = 'submit_reset(' _ reset_id _ ',"' _ state _ ");";
+						reset_js = 'submit_reset(' _ reset_id _ ',"' _ state _ "\");";
 					%]
 					<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="[% IF state == "fullpage"; reset_js;  ELSE %]submit_cancel();[% END %]return false;">
 					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;">
