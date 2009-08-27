@@ -1372,6 +1372,10 @@ sub setGetDisplayTags { # T2
 		push @topic_tags, map { $tree->{$_}{keyword} } @tids;
 	}
 
+	# FIX ME: a given tag should be returned in _all_ appropriate members, e.g., a
+	# popular tag that is also a topic should be present in $tags->{topic_tags} _and_
+	# $tags->popular_tags --- and in $tags->{user_tags} as well if it was tagged by
+	# the user.
 	my $tags = {
 		domain_tag		=> $domain_tag,
 		datatype		=> $datatype || 'unknown',

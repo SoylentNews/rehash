@@ -60,7 +60,7 @@ menu[type=context] > a.slash-hover:first-child {
 
 /* #tag-menu a, #feedback-menu a [% IF user.is_admin %], #datatype-menu a[% END %] { */
 menu.tag-menu a {
-	display:list-item !important;
+	display:list-item;
 	list-style:none;
 	text-align:left;
 	font-weight:bold;
@@ -222,12 +222,14 @@ $TAG_MENU.menu({
 		// Insert the tagname into the menu items where needed.
 		$TAG_MENU.find('span.var-tag').text($tag.text());
 
-		[% IF !user.is_admin %] // delete *tagname*: non-admins may only delete their own tags
-		$TAG_MENU.find('a:[data-op=-]').toggle(!!$tag.parent('li.u').length);
+		[% IF user.is_admin %]	// admins don't want to # topics
+		$TAG_MENU.find('a:[data-op^="#"],a:[data-op="_"]').toggle(!$tag.is('.topic'));
+		[% ELSE %]		// non-admins may only delete their own tags
+		$TAG_MENU.find('a:[data-op="-"]').toggle($tag.is('.my'));
 		[% END %]
 
 		// *tagname* in *viewtitle*
-		$TAG_MENU.find('a:[data-op==]').toggle(!!context);
+		$TAG_MENU.find('a:[data-op="="]').toggle(!!context);
 		context && $TAG_MENU.find('span.var-view').text(context);
 
 		open_menu($tag, $TAG_MENU);
