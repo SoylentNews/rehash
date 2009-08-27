@@ -193,7 +193,7 @@ sub view {
 		my $book_info = '';
 		if (($item->{type} eq 'story') && $item->{primaryskid}) {
 			my $skins = $slashdb->getSkins();
-			if ($skins->{$item->{primaryskid}}{name} eq 'books') {
+			if ($skins->{$item->{primaryskid}}{name} eq 'bookreview') {
 				my $sid = $slashdb->getStorySidFromDiscussion($item->{discussion});
 				my $story = $slashdb->getStory($sid) if $sid;
 				$book_info = slashDisplay("view_book", { story => $story }, { Return => 1 }) if $story->{book_title};
