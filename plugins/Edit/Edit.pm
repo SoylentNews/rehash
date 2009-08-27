@@ -816,6 +816,12 @@ sub editCreateStory {
 			$admindb->grantStoryPostingAchievements($data->{uid}, $data->{submitter});
 			$admindb->addSpriteForSid($_);
 		}
+
+		#XXX Move this to Slash::DB
+		my $sfids = $self->sqlSelect('value', 'preview_param', "name = 'sfid' and preview_id = " . $preview->{preview_id});
+                if ($sfids && $stoid) {
+                        $self->sqlUpdate('static_files', { stoid => $stoid, fhid => 0 }, 'fhid = ' . $preview->{preview_fhid});
+                }
 	}
 
 	return $sid;
