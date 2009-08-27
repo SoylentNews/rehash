@@ -14,7 +14,6 @@ __template__
 <script type="text/javascript">
 
 function imgupload_set_thumbnail(fhid, sfid) {
-
         if (!fhid && !sfid) {
                 return false;
         }
@@ -27,10 +26,7 @@ function imgupload_set_thumbnail(fhid, sfid) {
 
         if (!sfid) {
                 params.clear = 1;
-                alert('debug: clear thumbnail');
-        } else {
-                alert('debug: set thumbnail');
-        }
+        } 
 
         ajax_update(params, '', {});
 }
@@ -42,8 +38,6 @@ function imgupload_set_bodytext(name) {
         var $text = $('#admin-bodytext');
         var old_text= $text.val();
         $text.val(old_text + html);
-
-        alert('debug html: ' + html);
 }
 
 function imgupload_set_media(name, lg_name) {
@@ -54,8 +48,6 @@ function imgupload_set_media(name, lg_name) {
         var $text = $('#admin-media');
         var old_text= $text.val();
         $text.val(old_text + html);
-
-        alert('debug html: ' + html);
 }
 
 </script>
