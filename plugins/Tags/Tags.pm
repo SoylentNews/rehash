@@ -1353,15 +1353,25 @@ sub setGetDisplayTags { # T2
 		$datatype = $firehose_item->{type};
 		$popular_tags = $firehose_item->{toptags};
 
+		my $default_main_watchlist_tag = undef;
 		my $skid = $firehose_item->{primaryskid};
 		if ( $skid ) {
 			my $skin = $firehose_reader->getSkin($skid);
-			$main_watchlist_tag = $skin->{name};
-			$main_watchlist_tag = '' if $main_watchlist_tag eq $domain_tag;
+			$default_main_watchlist_tag = $skin->{name};
+			$default_main_watchlist_tag = '' if $default_main_watchlist_tag eq $domain_tag;
 		}
 
 		my $tree = $self->getTopicTree();
 		my $chosen_hr = $tags_writer->extractChosenFromTags($firehose_item->{globjid}, $uid);
+#print STDERR "sGDT: chosen_hr: " . Dumper($chosen_hr);
+
+		# Find the primary skin; that determines our main watchlist tagname.
+		my $rendered_hr = $self->renderTopics($chosen_hr);
+		my $primary_skid = $self->getPrimarySkidFromRendered($rendered_hr);
+		my $primary_nexus = $self->getNexusFromSkid($primary_skid);
+		$main_watchlist_tag = $tree->{$primary_nexus}{keyword};
+
+		# Get the tagnames of the other topics as well.
 		my @tids = ( );
 		for my $tid (sort { $chosen_hr->{$b} <=> $chosen_hr->{$a} || $a cmp $b } keys %$chosen_hr) {
 			my $keyword = $tree->{$tid}{keyword};
