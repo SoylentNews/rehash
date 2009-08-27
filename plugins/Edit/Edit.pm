@@ -100,6 +100,7 @@ sub getOrCreatePreview {
 	my $admindb = getObject("Slash::Admin");
 
 	if (!$form->{from_id}) {
+		my $type = $self->determineType;
 		my $id;
 
 		if ($form->{id}) {
@@ -108,8 +109,9 @@ sub getOrCreatePreview {
 		}
 
 		if (!$id) {
-			$id = $self->getPreviewIdSessionUid($session, $user->{uid}, $form->{type});
+			$id = $self->getPreviewIdSessionUid($session, $user->{uid}, $type);
 		}
+
 	
 		if ($id && !$form->{new}) {
 			return $id;
@@ -117,17 +119,19 @@ sub getOrCreatePreview {
 			my $id = $self->createPreview({ uid => $user->{uid}, session => $session });
 			my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 
-			my $type = $self->determineType;
-
 			my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
 			my $fh_data = {};
+			my $p_data = { preview_fhid => $fhid };
+
 			if ($type eq 'submission') {
 				my $email_known = "mailto";
 				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
 				$fh_data->{name} = $user->{nickname};
+			} elsif ($type eq 'journal') {
+				$p_data->{posttype} = $user->{posttype};
 			}
-			my $p_data = { preview_fhid => $fhid };
+
 			if ($form->{new}) {
 				$p_data->{title}	= $form->{title};
 				$fh_data->{title} 	= strip_attribute($form->{title});
@@ -144,7 +148,7 @@ sub getOrCreatePreview {
 			return $id;
 		}
 	} else {
-		my ($fh_data, $p_data);
+		my($fh_data, $p_data);
 		my $src_item = $fh->getFireHose($form->{from_id}); 
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
@@ -160,7 +164,15 @@ sub getOrCreatePreview {
 		my $chosen_hr = $tagsdb->extractChosenFromTags($preview_globjid);
 		my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
-		my $src_object = $src_item->{type} eq 'story' ? $self->getStory($src_item->{srcid}) : $self->getSubmission($src_item->{srcid});
+		my $src_object;
+		if ($src_item->{type} eq 'story') {
+			$src_object = $self->getStory($src_item->{srcid});
+		} elsif ($src_item->{type} eq 'journal') {
+			my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+			$src_object = $journal_reader->get($src_item->{srcid});
+		} else {
+			$src_object = $self->getSubmission($src_item->{srcid});
+		}
 
 		foreach my $extra (@$extracolumns) {
 			$p_data->{$extra->[1]} = $src_object->{$extra->[1]} if $src_object->{$extra->[1]};
@@ -174,7 +186,8 @@ sub getOrCreatePreview {
 		foreach (qw(introtext bodytext media title dept tid primaryskid createtime)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
-		if ($src_item->{type} eq 'story') {
+
+		if ($src_item->{type} eq 'story' || $src_item->{type} eq 'journal') {
 			$fh_data->{uid} = $src_item->{uid};
 		} else {
 			$fh_data->{uid} = $user->{uid};
@@ -184,7 +197,7 @@ sub getOrCreatePreview {
 		$p_data->{submitter} = $src_item->{uid};
 
 		if ($src_item->{type} ne 'story' && $type eq 'story') {
-			my $url 	= $self->getUrl($src_item->{url_id});
+			my $url = $self->getUrl($src_item->{url_id});
 			$fh_data->{introtext} = slashDisplay('formatHoseIntro', { forform =>1, introtext => $fh_data->{introtext}, item => $src_item, return_intro => 1, url => $url }, { Return => 1, Nocomm => 1 });
 			$fh_data->{title} = titleCaseConvert($src_item->{title});
 			$fh_data->{introtext} = quoteFixIntrotext($fh_data->{introtext});
@@ -192,19 +205,29 @@ sub getOrCreatePreview {
 		} 
 
 		if ($src_item->{type} eq 'story') {
-			my $story = $self->getStory($src_item->{srcid});
+			# XXXEdit same getStory call as above?  do we need to do it twice?
+			#my $story = $self->getStory($src_item->{srcid});
+			my $story = $src_object;
 			$p_data->{neverdisplay} = 1 if $story->{neverdisplay};
-			if ($story->{discussion}) {
-				my $disc = $self->getDiscussion($story->{discussion});
+
+		} elsif ($src_item->{type} eq 'submission') {
+			$p_data->{subid} = $src_item->{srcid};
+
+		} elsif ($src_item->{type} eq 'journal') {
+			$p_data->{posttype} = $src_object->{posttype};
+		}
+
+		if ($src_item->{type} eq 'story' || $src_item->{type} eq 'journal') {
+			if ($src_object->{discussion}) {
+				my $disc = $self->getDiscussion($src_object->{discussion});
 				$p_data->{commentstatus} = $disc->{commentstatus};
 			}
 		}
+
 		$p_data->{title} = $fh_data->{title} || "";
 		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
 		$p_data->{src_fhid} = $src_item->{id};
-		$p_data->{subid} = $src_item->{srcid} if $src_item->{type} eq 'submission';
-
 
 		$fh->setFireHose($fhid, $fh_data);
 
@@ -249,14 +272,29 @@ sub createInitialTagsForPreview {
 sub determineAllowedTypes {
 	my $user = getCurrentUser();
 	my @types = ('submission');
-	push @types, "journal" if !$user->{is_anon};
-	push @types, "story" if $user->{is_admin};
-	return @types;
+	push @types, 'journal' if !$user->{is_anon} && $user->{is_admin}; # XXXJournal admin-only for testing
+	push @types, 'story' if $user->{is_admin};
+	return @types; # XXX return hashref?
 }
 
 sub determineDefaultType {
 	my $user = getCurrentUser();
-	$user->{is_admin} ? 'story' : 'submission';
+	return $user->{is_admin} ? 'story' : 'submission';
+}
+
+sub determineType {
+	my($self) = @_;
+	my $user = getCurrentUser();
+	my $form  = getCurrentForm();
+
+	my %types = map { $_ => 1 } determineAllowedTypes();
+	my $type = determineDefaultType();
+
+	if ($form->{type} && $types{$form->{type}}) {
+		$type = $form->{type};
+	}
+
+	return $type;
 }
 
 sub detectSubType {
@@ -391,9 +429,10 @@ sub savePreview {
 		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $p_data->{sub_type} } );
 		print STDERR "SUB TYPE: $p_data->{sub_type}\n";
 
-	} elsif ($p_item->{type} eq 'journal') {
-		#my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
-
+	} elsif ($p_item->{type} eq 'journal') { # XXXJournal
+		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+		$fh_data->{introtext} = $journal_reader->fixJournalText($form->{introtext}, $form->{posttype});
+		#$fh_data->{title} = strip_notags($form->{title}); # XXXJournal do we need this?
 	}
 	
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
@@ -546,7 +585,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		item                    => $p_item,
 		author_select           => $author_select,
 		commentstatus_select    => $commentstatus_select,
-		format_select           => $posttype_select,
+		posttype_select         => $posttype_select,
 		display_check           => $display_check,
 		extras                  => $extracolumns,
 		errors                  => $options->{errors},
@@ -629,6 +668,8 @@ sub validate {
 		if ((!$topic || !$topic->{image}) && !$item->{thumb}) {
 			$messages->{critical}{noicon} = getData('noicon','','edit');
 		}
+	} elsif ($item->{type} eq 'journal') { # XXXJournal
+		# check journal.pl:doSaveArticle()
 	}
 
 	# Errors and warnings for both types
@@ -678,19 +719,25 @@ sub saveItem {
 	if ($fhitem && $fhitem->{id} && !(keys %{$errors->{critical}})) {
 		# creating a new story
 
-		if ($fhitem->{type} eq 'story') {
+		if ($fhitem->{type} eq 'story' || $fhitem->{type} eq 'journal') {
 			my $src_item;
 			$src_item = $fh->getFireHose($preview->{src_fhid}) if $preview->{src_fhid};
 
 			# preview based on story so save edits when done
-			if ($preview->{src_fhid} && $src_item && $src_item->{type} eq 'story') {
-				$create_retval = $self->editUpdateStory($preview, $fhitem);
+			if ($preview->{src_fhid} && $src_item) {
+				if ($src_item->{type} eq 'story') {
+					$create_retval = $self->editUpdateStory($preview, $fhitem);
+				} elsif ($fhitem->{type} eq 'journal') {
+					$create_retval = $self->editUpdateJournal($preview, $fhitem);
+				}
 				$save_type = 'update';
 			} else {   # not based on story save new
-				$create_retval = $self->editCreateStory($preview, $fhitem);
+				if ($src_item->{type} eq 'story') {
+					$create_retval = $self->editCreateStory($preview, $fhitem);
+				} elsif ($fhitem->{type} eq 'journal') {
+					$create_retval = $self->editCreateJournal($preview, $fhitem);
+				}
 			}
-		
-			
 
 		} elsif ($fhitem->{type} eq 'submission') {
 			$create_retval = $self->editCreateSubmission($preview, $fhitem);
@@ -706,7 +753,7 @@ sub saveItem {
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
-	return ($create_retval, $fhitem->{type}, $save_type, $errors, $preview);
+	return($create_retval, $fhitem->{type}, $save_type, $errors, $preview);
 }
 
 sub editUpdateStory {
@@ -879,6 +926,24 @@ sub editCreateStory {
 	}
 
 	return $sid;
+}
+
+# XXXJournal
+sub editCreateJournal {
+	my($self, $preview, $fhitem) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
+
+}
+
+# XXXJournal
+sub editUpdateJournal {
+	my($self, $preview, $fhitem) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
+
 }
 
 sub editCreateSubmission {

@@ -377,16 +377,6 @@ $(document).ready(function(){
 			[% END %]
 		</div>
 
-[%# needed for journal:
-* subject
-* topic
-x comments
-? "comments may not be disabled" note
-* entry
-x HTML type
-? publish/post/publicize
-%]
-
 		<div class="subarticle-foot">
 			<div class="subactionbuttons">
 				[% IF preview_shown %]
@@ -408,7 +398,7 @@ x HTML type
 					[% IF item.type == 'journal' %]
 						<div class="input">
 							[% PROCESS formLabel value => "HTML format" for => 'posttype' %]
-							[% format_select %]
+							[% posttype_select %]
 						</div>
 					[% END; IF item.type == 'story' || item.type == 'journal' %]
 						<div class="input">
