@@ -16,7 +16,7 @@ __template__
 	</span>
 </div>
 [% END %]
-<menu type="toolbar" class="edit-bar">
+<menu type="toolbar" class="edit-bar[% IF edit_mode %] expanded[% END %]">
 	[% PROCESS editor_note IF user.is_admin && !options.usermode %]
 	[% UNLESS edit_mode %]<a class="edit-toggle"><span class="button collapse"></span></a>[% END %]
 	<input class="tag-entry" type="text" size="10"[% UNLESS edit_mode %] style="display:none"[% END %]>
