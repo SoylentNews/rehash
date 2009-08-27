@@ -1778,7 +1778,7 @@ sub prepareUser {
 		$user->{maker_mode_adless} = $val;
 	}
 	if ($user->{maker_mode_adless} && $user->{maker_mode_adless} =~ /^\d+$/
-		&& time < $user->{maker_mode_adless} + ($constants->{ach_maker_adlesstime} || 259200)) {
+		&& time < $user->{maker_mode_adless} + ($constants->{ach_maker_adlesstime} || 259200) + (86400*90)) {
 		$user->{state}{page_adless} = 1;
 	}
 	if (!$user->{is_subscriber} && $constants->{daypass}) {
