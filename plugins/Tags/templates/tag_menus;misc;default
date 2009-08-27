@@ -131,8 +131,9 @@ menu.reasons-menu a {
 [% IF user.is_admin %]
 	<a data-op="#"><span class="op">#</span><span class="var-tag"></span></a>
 	<a data-op="##"><span class="op">##</span><span class="var-tag"></span></a>
+	<a data-op="^"><span class="op">^</span><span class="var-tag"></span></a>
 	<a data-op="_"><span class="op">_</span><span class="var-tag"></span></a>
-	<a data-op="^" class="group"><span class="op">^</span><span class="var-tag"></span></a>
+	<a data-op="\" class="group"><span class="op">\</span><span class="var-tag"></span></a>
 [% END %]
 	<a data-op="-">delete <span class="var-tag"></span></a>
 	<a data-op="!">not <span class="var-tag"></span></a>
@@ -223,7 +224,8 @@ $TAG_MENU.menu({
 		$TAG_MENU.find('span.var-tag').text($tag.text());
 
 		[% IF user.is_admin %]	// admins don't want to # topics
-		$TAG_MENU.find('a:[data-op^="#"],a:[data-op="_"]').toggle(!$tag.is('.topic'));
+		$TAG_MENU.find('a:[data-op^="#"],a:[data-op="_"]').toggle(!$tag.is('.topic,.domain'));
+		$TAG_MENU.find('a:[data-op^="^"]').toggle($tag.is('.fhitem-editor .topic'));
 		[% ELSE %]		// non-admins may only delete their own tags
 		$TAG_MENU.find('a:[data-op="-"]').toggle($tag.is('.my'));
 		[% END %]
