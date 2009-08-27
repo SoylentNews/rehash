@@ -390,9 +390,6 @@ $(document).ready(function(){
 </form>
 [% IF user.is_admin; PROCESS imgupload fhid = fhid sfids = sfids; END; %]
 [%- #fhitem editor- -%]
-<script type="text/javascript">
-	firehose_init_tag_ui($('#editor'));
-</script>
 
 [% UNLESS nowrap %]
 </div>
