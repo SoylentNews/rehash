@@ -2128,6 +2128,7 @@ function edit_editon(id) {
 	$('#firehose-' + id).hide();
 	$('.editonly').removeClass('hide');
 	$('.previewonly').addClass('hide');
+	$('#editor').removeClass('step1').addClass('step2');
 }
 
 function editPreview(save) {
