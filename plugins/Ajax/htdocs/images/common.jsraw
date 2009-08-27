@@ -2094,10 +2094,13 @@ function serialize_multiple( $form ){
 	);
 }
 
-function show_submit_box(id) {
+function show_submit_box(id,type) {
 	var params = {};
 	if (id) {
 		params['from_id'] = id;
+	}
+	if (type) {
+		params['type'] = type;
 	}
 	getModalPrefs('submit', 'Submit', 0, params);
 }
