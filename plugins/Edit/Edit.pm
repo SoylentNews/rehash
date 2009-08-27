@@ -427,7 +427,7 @@ sub showEditor {
 use Data::Dumper; print STDERR Dumper $storyref;
 	}
 
-	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session<br>";
+	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session Item Type: $p_item->{type}<br>";
 
 	my $showing_preview = 0;
 	my $init_sprites = 0;
