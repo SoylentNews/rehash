@@ -192,7 +192,7 @@ sub getOrCreatePreview {
 				$p_data->{commentstatus} = $disc->{commentstatus};
 			}
 		}
-		$p_data->{title} = $fh_data->{title};
+		$p_data->{title} = $fh_data->{title} || "";
 		$p_data->{introtext} =  $fh_data->{introtext};
 		$p_data->{preview_fhid} = $fhid;
 		$p_data->{src_fhid} = $src_item->{id};
@@ -237,6 +237,19 @@ sub createInitialTagsForPreview {
 	for my $tagname (sort keys %tt) {
 		$tagsdb->createTag({ name => $tagname, table => 'preview', id => $preview->{preview_id} });
 	}
+}
+
+sub determineAllowedTypes {
+	my $user = getCurrentUser();
+	my @types = ('submission');
+	push @types, "journal" if !$user->{is_anon};
+	push @types, "story" if $user->{is_admin};
+	return @types;
+}
+
+sub determineDefaultType {
+	my $user = getCurrentUser();
+	$user->{is_admin} ? 'story' : 'submission';
 }
 
 sub detectSubType {
