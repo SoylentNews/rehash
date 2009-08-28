@@ -6551,3 +6551,6 @@ ALTER TABLE preview ADD title VARCHAR(255) NOT NULL DEFAULT '';
 SELECT @abbrtnid := tagnameid FROM tagnames where tagname='abbreviated';
 INSERT INTO tagname_params (tagnameid, name, value) VALUES (@abbrtnid, 'exclude', 1);
 
+# 2009-08-27
+UPDATE vars SET value = 'T_2_5_0_269' WHERE name = 'cvs_tag_currentcode';
+
