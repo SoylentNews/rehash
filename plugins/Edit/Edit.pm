@@ -677,7 +677,7 @@ sub editUpdateStory {
 	$data = {
 		uid 		=> $fhitem->{uid},
 		#sid
-		title		=> $fhitem->{title},
+		title		=> $preview->{title},
 		#section
 		submitter	=> $preview->{submitter},
 		dept		=> $fhitem->{dept},
@@ -752,7 +752,7 @@ sub editCreateStory {
 	$data = {
 		uid 		=> $fhitem->{uid},
 		#sid
-		title		=> $fhitem->{title},
+		title		=> $preview->{title},
 		#section
 		submitter	=> $preview->{submitter},
 		topics_chosen	=> $chosen_hr,
