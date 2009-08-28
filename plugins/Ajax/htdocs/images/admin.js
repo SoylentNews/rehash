@@ -320,7 +320,7 @@ function make_spelling_correction(misspelled_word, form_element) {
 	}
 
 	var correction_parent = "spellcheck_" + form_element;
-	if ($('#' + correction_parent).children().length === 1) {
+	if ($('#' + correction_parent).children().children().length === 1) {
 		$('#' + correction_parent).remove();
 	}
 }
