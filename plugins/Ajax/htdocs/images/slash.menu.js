@@ -177,6 +177,8 @@ _menuMouseDown: function( e, ui ){
 	// ...intercepts events that would otherwise have gone directly to ui.mouse._mouseDown
 	// to prevent ui.mouse._mouseDown from closing the menu when we've decided to hover.
 
+	this._mouseDownEvent = e;
+
 	var is_trigger = ui.trigger && ui.trigger!==document && (this.options.liveTriggers || this.triggers.index(ui.trigger)>=0);
 
 	if ( !is_trigger ) {
