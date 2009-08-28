@@ -308,6 +308,29 @@ sub savePreview {
 		$fh_data->{dept} =~ s/^-//;
 		$fh_data->{dept} =~ s/-$//;
 		$fh_data->{dept} =~ s/ /-/gi;
+
+		# Set session info for author activity box
+		my $last_admin_text = $self->getLastSessionText($user->{uid});
+
+		my $src_item;
+		$src_item = $fh->getFireHose($preview->{src_fhid}) if $preview->{src_fhid};
+		my($fhid, $sid);
+		if ($src_item->{type} eq 'story') {
+			my $story =$self->getStory($src_item->{srcid});
+			$sid = $story->{sid};
+			$fhid = $preview->{src_fhid} if $sid;
+		}
+
+		my $lasttime = $self->getTime();
+		$self->setUser($user->{uid}, { adminlaststorychange => $lasttime }) if $last_admin_text ne $form->{title};
+		$self->setSession($user->{uid}, {
+			lasttitle	=> $form->{title},
+			last_sid	=> $sid,
+			last_subid	=> '',
+			last_fhid	=> $fhid,
+			last_action	=> 'editing',
+		});
+
 	}
 
 	if ($p_item->{type} eq 'submission') {
