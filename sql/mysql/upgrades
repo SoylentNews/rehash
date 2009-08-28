@@ -6545,5 +6545,9 @@ UPDATE vars SET value = 'T_2_5_0_268' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO ajax_ops VALUES (NULL, 'imgupload_show_preview', 'Slash::Edit', 'ajaxUploadShowPreview', 'ajax_user_static', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'imgupload_set_thumbnail', 'Slash::Edit', 'ajaxUploadSetThumb', 'ajax_user_static', 'createuse');
 
-
 ALTER TABLE preview ADD title VARCHAR(255) NOT NULL DEFAULT '';
+
+# for plugins/Tags
+SELECT @abbrtnid := tagnameid FROM tagnames where tagname='abbreviated';
+INSERT INTO tagname_params (tagnameid, name, value) VALUES (@abbrtnid, 'exclude', 1);
+

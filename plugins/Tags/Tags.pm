@@ -2864,6 +2864,7 @@ sub getPositiveTags {
 
 sub extractChosenFromTags {
 	my($self, $globjid, $uid) = @_;
+	my $constants = getCurrentStatic();
 
 	# For now let's just allow one user... we will want to allow
 	# multiple editors' opinions to be considered eventually.
@@ -2877,14 +2878,26 @@ sub extractChosenFromTags {
 	my $keyword_to_tid_hr = { map {( $tree->{$_}{keyword}, $_ )} keys %$tree };
 
 	my $chosen_hr = { };
+	my $is_abbreviated = 0;
 	for my $tag_hr (@$ar) {
 		my $tagname = $tag_hr->{tagname};
+		$is_abbreviated = 1 if $tagname eq 'abbreviated'; # XXX should be a var
 		print STDERR "ECFT: $tagname\n";
 		my $tid = $keyword_to_tid_hr->{$tagname} || 0;
 		next unless $tid;
 		print STDERR "    ECFT: tid $tid\n";
 		$chosen_hr->{$tid} = $tag_hr->{emphasis} ? 20 : 10;
 		print STDERR "    ECFT: tid $chosen_hr->{tid} EMPH: |$tag_hr->{emphasis}|\n";
+	}
+
+	# Handle "abbreviated".  If "abbreviated" is _not_ present, auto-add
+	# a chosen tid for the mainpage ("slashdot").
+	my $mainpage_tid = $constants->{mainpage_nexus_tid};
+	if (!$chosen_hr->{$mainpage_tid}) {
+		my $abbr_tagnameid = $self->getTagnameidFromNameIfExists('abbreviated'); # XXX should be a var
+		if (! grep { $_->{tagnameid} == $abbr_tagnameid } @$ar) {
+			$chosen_hr->{$mainpage_tid} = 10;
+		}
 	}
 
 	$chosen_hr;
