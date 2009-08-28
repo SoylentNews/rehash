@@ -11,7 +11,7 @@ __template__
 	[% IF user.is_anon %]
 <script type="text/javascript">
 $('a[rel=tag]').live('click', function( e ){
-	var	target	= e.originalEvent && e.originalEvent.target || e.originalTarget || e.target,
+	var	target	= original_target(e),
 		tag	= $(target).text();
 	addfhfilter(tag);
 	e.preventDefault();
@@ -174,7 +174,7 @@ function open_menu( trigger, $menu ){
 	global.left = Math.min(global.left, right-$menu.width());
 
 	$trigger.addClass('trigger');
-	$('menu.tag-menu').css({
+	$menu.css({
 		position:	'absolute',
 		top:		global.top - local.top + $trigger.height(),
 		left:		global.left - local.left,
@@ -204,7 +204,7 @@ function close_reasons( trigger, $menu ){
 var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
 $('a[rel=tag]').
 	live('mousedown', function( e ){
-		$TAG_MENU.menu('context', e);
+		return $(original_target(e, 'a[rel=tag]')).is('.trigger') || $TAG_MENU.menu('context', e);
 	}).
 	live('click', function( e ){
 		e.preventDefault();
@@ -214,7 +214,9 @@ $('a[rel=tag]').
 $TAG_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	clickToHover: true,
+	// clickToHover: true,
+	clickToHover: false,
+	clickDuration: 100,
 
 	start: function( e, ui ){
 		var	$tag	= $(ui.trigger),
@@ -223,12 +225,16 @@ $TAG_MENU.menu({
 		// Insert the tagname into the menu items where needed.
 		$TAG_MENU.find('span.var-tag').text($tag.text());
 
-		[% IF user.is_admin %]	// admins don't want to # topics
+	[% IF user.is_admin %]	// admins don't want to # topics
 		$TAG_MENU.find('a:[data-op^="#"],a:[data-op="_"]').toggle(!$tag.is('.topic,.domain'));
-		$TAG_MENU.find('a:[data-op^="^"]').toggle($tag.is('.fhitem-editor .topic'));
-		[% ELSE %]		// non-admins may only delete their own tags
+
+		// FIX ME: until we know all topic tags get marked as .topic, don't hide ^
+	     // $TAG_MENU.find('a:[data-op^="^"]').toggle($tag.is('.fhitem-editor .topic'));
+		$TAG_MENU.find('a:[data-op^="^"]').toggle($tag.is('.fhitem-editor *'));
+
+	[% ELSE %]		// non-admins may only delete their own tags
 		$TAG_MENU.find('a:[data-op="-"]').toggle($tag.is('.my'));
-		[% END %]
+	[% END %]
 
 		// *tagname* in *viewtitle*
 		$TAG_MENU.find('a:[data-op="="]').toggle(!!context);
@@ -255,7 +261,7 @@ $TAG_MENU.menu({
 			default:
 				fhitem = $tag.closest('div.fhitem')[0];
 				command = (op + tag).replace(NOTNOT, '');
-				Tags.submit(fhitem, command);
+				try { Tags.submit(fhitem, command); } catch ( err ) {  }
 				break;
 		}
 	},
@@ -281,10 +287,12 @@ $('a.feedback-button.pseudo-tag').
 $FEEDBACK_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	clickToHover: true,
+	// clickToHover: true,
+	clickToHover: false,
+	clickDuration: 100,
 
 	start:	function( e, ui ){ open_menu(ui.trigger, $FEEDBACK_MENU); },
-	select:	function( e, ui ){ Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
 	stop:	function( e, ui ){ close_menu(ui.trigger, $FEEDBACK_MENU); }
 });
 
@@ -307,10 +315,12 @@ $('a.datatype.pseudo-tag').
 $DATATYPE_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	clickToHover: true,
+	// clickToHover: true,
+	clickToHover: false,
+	clickDuration: 100,
 
 	start:	function( e, ui ){ open_menu(ui.trigger, $DATATYPE_MENU); },
-	select:	function( e, ui ){ Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
 	stop:	function( e, ui ){ close_menu(ui.trigger, $DATATYPE_MENU); }
 });
 [% END %]
@@ -327,7 +337,7 @@ var	$NODNIX_MENU=$('#nodnix-menu'),
 	$TAG_NIX_REASONS=$('#tag-nix-reasons'),		$TAG_NOD_REASONS=$('#tag-nod-reasons');
 $('a.up, a.down').
 	live('mousedown', function( e ){
-		var	$trigger	= $(e.originalEvent && e.originalEvent.target || e.originalTarget || e.target),
+		var	$trigger	= $(original_target(e)),
 			which		= sign($trigger.is('.up')),
 			$fhitem		= $trigger.closest('div.fhitem'),
 			reasons, $reasons;
@@ -351,13 +361,15 @@ $('a.up, a.down').
 $NODNIX_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	clickToHover: true,
+	// clickToHover: true,
+	clickToHover: false,
 	clickDuration: 750,
 	hoverTimeout: 15000,
 	clickThrough: true,
+	clickDuration: 100,
 
 	start:	function( e, ui ){ open_reasons(ui.trigger, $NODNIX_MENU); },
-	select:	function( e, ui ){ Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); },
+	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
 	stop:	function( e, ui ){ close_reasons(ui.trigger, $NODNIX_MENU); }
 });
 

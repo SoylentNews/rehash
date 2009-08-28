@@ -32,9 +32,13 @@ _init: function(){			// called for $(...).menu()
 	this._mouseStarted = false;
 },
 
+_reset: function(){
+	this.hoverTimeoutExceeded = this._hoverStarted = this._mouseStarted = this._menuStarted = false;
+},
+
 context: function( e ){
-	var target = e.originalEvent && e.originalEvent.target || e.originalTarget || e.target;
-	return this._menuMouseDown(e, { trigger: target });
+	this._reset();
+	return this._menuMouseDown(e, { trigger: original_target(e) });
 },
 
 destroy: function(){			// called for $(...).menu('destroy|remove')
@@ -45,7 +49,6 @@ destroy: function(){			// called for $(...).menu('destroy|remove')
 },
 
 tracking: function( action, e, ui ){	// called for $(...).menu('enable|disable|toggle'), and internally
-
 	// Typically called once to enable tracking when a single "use" of a menu
 	// begins; and again when that use ends, to disable tracking.
 
@@ -92,17 +95,17 @@ _mouseCapture: function( e ){
 	// ...my "menuStart".  Called once per menu "use", beginning that use.
 
 	// Start a timer to distinguish between a click and a press.
-	this.clickDurationExceded = (this.options.clickDuration||0)<=0;
-	if ( !this.clickDurationExceded ) {
+	this.clickDurationExceeded = (this.options.clickDuration||0)<=0;
+	if ( !this.clickDurationExceeded ) {
 		var self = this;
 		this._clickDurationTimer = setTimeout(function(){
-			self.clickDurationExceded = true;
+			self.clickDurationExceeded = true;
 			self._mouseStart(e);
 		}, this.options.clickDuration);
 	}
 
 	this._overTarget = this._tracking = undefined;
-	this._hoverStarted = this.hoverTimeoutExceded = false;
+	this._hoverStarted = this.hoverTimeoutExceeded = false;
 	this._menuStarted = (this.options.clickToHover && this._mouseStart(e));
 
 	// Tell ui.mouse: "Yes, start us up."
@@ -154,12 +157,12 @@ _mouseStop: function( e, ui ){
 	// ...my "menuStop".  Called once per menu "use", ending that use.
 
 	if ( this._menuStarted ) {
-		this.hoverTimeoutExceded || this._item('select', e, ui||this._uiHash(e, 'select'));
+		this.hoverTimeoutExceeded || this._item('select', e, ui||this._uiHash(e, 'select'));
 		ui || (ui=this._uiHash(e, 'stop'));
 		this.tracking('stop', e, ui);
 		this._trigger('stop', e, ui); // Hey, client-code!  Close the menu!
-		this.hoverTimeoutExceded = this._hoverStarted = this._mouseStarted = this._menuStarted = false;
 	}
+	this._reset();
 
 	// We were watching mouseup/down on the document to notice we should stop.
 	// Now that we _are_ stopping, we can stop noticing.
@@ -173,19 +176,24 @@ _mouseStop: function( e, ui ){
 	// Note: we _are_ still bound to mousedown in the triggers and menu.
 },
 
+_inheritMouseUp: function( e, ui ){
+	this._mouseDownEvent || (this._mouseDownEvent = this._menuMouseDownEvent || {});
+	this._mouseStarted = true; // force _mouseUp to call my _mouseStop
+	return this._mouseUp(e, ui);
+},
+
 _menuMouseDown: function( e, ui ){
 	// ...intercepts events that would otherwise have gone directly to ui.mouse._mouseDown
 	// to prevent ui.mouse._mouseDown from closing the menu when we've decided to hover.
 
-	this._mouseDownEvent = e;
+	this._menuMouseDownEvent = e;
 
 	var is_trigger = ui.trigger && ui.trigger!==document && (this.options.liveTriggers || this.triggers.index(ui.trigger)>=0);
 
 	if ( !is_trigger ) {
 		var ui_stop = this._uiHash(e, 'stop');
 		if ( !ui_stop.out ) {
-			this._mouseStarted = true; // force _mouseUp to call my _mouseStop
-			return this._mouseUp(e, ui);
+			return this._inheritMouseUp(e, ui);
 		}
 	}
 
@@ -209,6 +217,7 @@ _menuMouseDown: function( e, ui ){
 	$(document).one('mouseup.'+this.widgetName, function( e ){
 		return self._menuMouseUp(e);
 	});
+	return true;
 },
 
 _menuMouseUp: function( e ){
@@ -220,8 +229,8 @@ _menuMouseUp: function( e ){
 	this._clickDurationTimer = undefined;
 
 	if ( this._startTarget && !this._menuStarted ) {
-		this._mouseStarted = true;
-		this._mouseUp(e);
+		this._inheritMouseUp(e);
+		// FIX ME: what if I don't want click?
 		this._trigger('click', e, { click: this._startTarget });
 		return false;
 	}
@@ -231,10 +240,9 @@ _menuMouseUp: function( e ){
 	if ( this._hoverStarted				// ...we were already hovering
 		|| this._mouseStarted			// ...we were already dragging
 		|| (this._tracking && (ui=this._uiHash(e, 'stop')).select)	// ...mouseup over an item
-		|| this._clickDurationExceded(e) ) {	// ...we were already "pressing"
+		|| this._clickDurationExceeded(e) ) {	// ...we were already "pressing"
 
-		this._mouseStarted = true; // force _mouseUp to call my _mouseStop
-		return this._mouseUp(e, ui);
+		return this._inheritMouseUp(e, ui);
 	}
 
 	// Otherwise, this mouseup ended a click; the user is now "hovering"---using the menu without dragging.
@@ -246,8 +254,8 @@ _menuMouseUp: function( e ){
 			var e = $.Event('mouseup');
 			e.target = self._overTarget;
 
-			self._mouseStarted = self.hoverTimeoutExceded = true;
-			self._mouseUp(e);
+			self.hoverTimeoutExceeded = true;
+			self._inheritMouseUp(e);
 		}, this.options.hoverTimeout);
 	}
 
@@ -322,8 +330,8 @@ _uiHash: function( event_or_type, event_type, ui ){
 	return ui;
 },
 
-_clickDurationExceded: function( e ){
-	return this.clickDurationExceded;
+_clickDurationExceeded: function( e ){
+	return this.clickDurationExceeded;
 }
 
 }));

@@ -170,3 +170,11 @@ function $any( expr ){
 }
 function elemAny( expr ){ return $any(expr)[0]; }
 var $dom = elemAny;
+
+
+function original_target( e, selector ){
+	var	old_target = e.originalTarget || e.originalEvent && e.originalEvent.target || e.target,
+		new_target = selector ? $(old_target).closest(selector)[0] : old_target;
+	old_target!==new_target && (e.originalTarget = new_target);
+	return new_target;
+}

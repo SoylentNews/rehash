@@ -770,61 +770,28 @@ $(function(){
 function page_click_handler( event ) {
 	var	$target	= $(event.target),
 		$fhitem	= $target.closest('.fhitem'),
-		leaving	= !!$target.closest('a[href]:not([href=#],[onclick]),.advertisement').length,
+		leaving	= !!$target.closest('a[href]:not([href=#],[onclick],[rel=tag]),.advertisement').length,
 		intent	= !leaving && 'interest',
-		nod_nix	= false,
-		command, $menu, click_handled = false;
+		command, click_handled = false;
 
 	$related_trigger = $target;
 
 	if ( $target.is('a.up') ) {
-		nod_nix = command = 'nod';
+		command = 'nod';
 	} else if ( $target.is('a.down') ) {
-		nod_nix = command = 'nix';
+		command = 'nix';
 	} else if ( $target.is('.sodify,.skin,.topic *') ) {
 		// mostly already handled by its own click-handler, but...
 		intent = 'search';
-	} else if ( $target.is('.b .tag,[context=related] .tag') ) {
-		command = $target.text();
 	} else {
 		$related_trigger = $([]);
 	}
 
-	if ( nod_nix ) {
-		var nod_nix_handler = $fhitem.is('.fhitem-comment') ? firehose_handle_comment_nodnix : firehose_handle_nodnix;
-		nod_nix_handler.call($fhitem[0], [ nod_nix ]);
-	}
-
 	if ( command && (click_handled=true) && check_logged_in() ) {
 
-		// Make sure the user sees some feedback...
-		// the menu is hover css, you did the command, so the menu should go away
-		// but you're still hovering
-		if ( $menu ) {
-			// so explicitly hide the menu
-			$menu.hide();
-			// Yikes! that makes it permanently gone; so undo at our earliest convenience
-			setTimeout(function(){ $menu.removeAttr('style'); });
-			// it can't immediately re-pop because you no longer qualify for the hover
-		}
-
-		if ( event.shiftKey ) { // if the shift key is down, append the tag to the edit field
-			// for a menu command or copying a tag into edit field, open the tag_ui
-			firehose_toggle_tag_ui_to(kExpanded, $fhitem).
-				find('input.tag-entry:first').each(function(){
-					if ( this.value ) {
-						var last_char = this.value[ this.value.length-1 ];
-						if ( '-^#!)_ '.indexOf(last_char) == -1 ) {
-							this.value += ' ';
-						}
-					}
-					this.value += command;
-				});
-		} else { // otherwise, send it the server to be processed
-			$fhitem.each(function(){
-				Tags.submit(this, command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
-			});
-		}
+		$fhitem.each(function(){
+			Tags.submit(this, command);
+		});
 	}
 
 	if ( leaving ) {

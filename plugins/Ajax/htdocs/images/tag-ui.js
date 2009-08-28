@@ -72,11 +72,11 @@ var	CLASS={ 'true':'expand', 'false':'collapse' },
 	HANDLED_KEYS={ 27:1, 32:1, 13:1, 37:1, 40:1 };
 
 $('a.edit-toggle').live('click', function( e ){
-	check_logged_in() && firehose_toggle_tag_ui(e.originalEvent.target);
+	check_logged_in() && firehose_toggle_tag_ui(original_target(e));
 });
 
 $('input.tag-entry').live('keydown', function( event ){
-	var $this=$(event.originalEvent.target), code=event.which||event.keyCode;
+	var $this=$(original_target(event)), code=event.which||event.keyCode;
 	switch (code) {
 		case ESC: case LEFT_ARROW: case DOWN_ARROW: case SPACE: case ENTER:
 			if (code == ESC) {
