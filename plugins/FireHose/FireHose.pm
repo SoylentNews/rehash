@@ -1264,12 +1264,10 @@ sub getFireHoseEssentialsParams {
 	}
 
 	if ($options->{filter}) {
-		if ($options->{filter}) {
-			my $query;
-			$sphinx->{mode} = $constants->{sphinx_match_mode} || 'boolean';
-			($query, $sphinx->{mode}) = sphinxFilterQuery($options->{filter}, $sphinx->{mode});
-			push @sphinx_terms, $query;
-		}
+		my $query;
+		$sphinx->{mode} = $constants->{sphinx_match_mode} || 'boolean';
+		($query, $sphinx->{mode}) = sphinxFilterQuery($options->{filter}, $sphinx->{mode});
+		push @sphinx_terms, $query;
 	}
 
 	return(\@sphinx_opts, \@sphinx_opts_multi, \@sphinx_terms, \@sphinx_where, \@sphinx_tables);
@@ -3229,7 +3227,8 @@ sub applyViewOptions {
 
 	my $viewfilter = "$view->{filter}";
 	$viewfilter .= " $view->{datafilter}" if $view->{datafilter};
-	$viewfilter .= " unsigned" if $user->{is_admin} && $view->{admin_unsigned} eq "yes";
+	$viewfilter .= " unsigned" if $user->{is_admin} && $view->{admin_unsigned} eq "yes"
+		&& $options->{fhfilter} !~ /\bsigned\b/; # allow fhfilter to override
 
 	if ($viewfilter =~ /{nickname}/) {
 		my $the_user = $self->getUser($form->{user_view_uid}) || $user;
