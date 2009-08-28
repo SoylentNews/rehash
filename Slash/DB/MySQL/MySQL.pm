@@ -6140,6 +6140,7 @@ sub getStorySidFromDiscussion {
 # admin.pl only
 sub getStoryByTimeAdmin {
 	my($self, $sign, $story, $limit, $options) = @_;
+	my $constants = getCurrentStatic();
 	my $where = "";
 	my $user = getCurrentUser();
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
@@ -6171,6 +6172,11 @@ sub getStoryByTimeAdmin {
 	);
 	foreach my $story (@$returnable) {
 		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1 });
+		if ($constants->{plugin}{FireHose}) {
+			my $fh = getObject("Slash::FireHose");
+			my $item = $fh->getFireHoseByTypeSrcid("story", $story->{stoid});
+			$story->{fhid} = $item->{id};
+		}
 	}
 	return $returnable;
 }
