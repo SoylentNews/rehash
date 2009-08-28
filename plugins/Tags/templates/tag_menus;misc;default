@@ -88,6 +88,14 @@ menu.reasons-menu a {
 	margin:-0.1em -0.25em;
 }
 
+div.fhitem h3 menu.reasons-menu {
+margin:0.25em 0 0;
+}
+
+div.fhitem h3 menu.reasons-menu a.tag {
+font-size:.8em;
+}
+
 #tag-menu a.slash-hover,
 #feedback-menu a.slash-hover,
 [% IF user.is_admin %]#datatype-menu a.slash-hover,[% END %]

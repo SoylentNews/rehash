@@ -59,11 +59,30 @@ display:inline !important;
 	margin: -0.1em -0.5em;
 }
 .edit-bar a.tag:hover, .edit-bar a.pseudo-tag:hover { color: white; background-color: #066; }
-.reasons-menu a.tag:hover, .reasons-menu a.slash-hover { background-color:black; }
 .edit-bar a.feedback-button, .edit-bar a.signoff-button { background-color: #ff4949; }
 .edit-bar a.feedback-button:hover, .edit-bar a.signoff-button:hover { background-color: #f00; }
 
 
+h3.firehose .reasons-menu a.slash-hover {
+background-color:#555;
+}
+
+h3.firehose .reasons-menu a.slash-hover {
+color:#eee !important
+}
+
+
+h3.story .reasons-menu a.slash-hover {
+background-color:#000;
+}
+
+h3.story .reasons-menu a.slash-hover {
+color:#fff !important
+}
+
+h3.story .reasons-menu a.tag {
+color:#fff;
+}
 
 
 
