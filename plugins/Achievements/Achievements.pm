@@ -515,7 +515,6 @@ sub ajaxEnableMakerAdless {
 		$return->{eval_first} = '$(\'.advertisement\').hide();' if $val;
 	}
 	return Data::JavaScript::Anon->anon_dump($return);
-	
 }
 
 sub DESTROY {
