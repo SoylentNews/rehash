@@ -360,7 +360,7 @@ sub savePreview {
 	}
 	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
 
-	$fh_data->{title} 	= strip_attribute($form->{title}) if $p_item->{type} ne 'story';
+	$fh_data->{title}	= $p_item->{type} eq 'story' ? $form->{title} : strip_attribute($form->{title});
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{introtext}	= $form->{introtext};
 
