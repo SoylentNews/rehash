@@ -2136,7 +2136,7 @@ function editSave() {
 	editPreview(1);
 }
 
-function submit_reset(id,state) {
+function submit_reset(id,state,type) {
 	var params = {
 		'op': 'edit_reset',
 		'new' : 1
@@ -2147,6 +2147,9 @@ function submit_reset(id,state) {
 	}
 	if (state) {
 		params['state'] = state;
+	}
+	if (type) {
+		params['type'] = type;
 	}
 
 	ajax_update(params, '', { onComplete: json_handler });
