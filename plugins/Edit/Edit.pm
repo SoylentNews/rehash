@@ -448,9 +448,16 @@ sub showEditor {
 	my(%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
 
 	if ($p_item->{type} eq 'story' && !$user->{nospell}) {
+		my $src_fh = $fh->getFireHose($preview->{src_fhid}) if ($preview->{src_fhid});
+		my $src_nick = $src_fh->{name};
+
 		%introtext_spellcheck = $admindb->get_ispell_comments($preview->{introtext}) if $preview->{introtext};
 		%bodytext_spellcheck  = $admindb->get_ispell_comments($p_item->{bodytext})   if $p_item->{bodytext};
 		%title_spellcheck     = $admindb->get_ispell_comments($p_item->{title})      if $p_item->{title};
+
+		delete $introtext_spellcheck{$src_nick} if (($src_nick) && (keys %introtext_spellcheck));
+		delete $bodytext_spellcheck{$src_nick}  if (($src_nick) && (keys %bodytext_spellcheck));
+		delete $title_spellcheck{$src_nick}     if (($src_nick) && (keys %title_spellcheck));
 
 		$ispell_comments = {
 		introtext => (scalar keys %introtext_spellcheck)
