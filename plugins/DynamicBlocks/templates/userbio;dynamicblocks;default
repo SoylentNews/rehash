@@ -12,7 +12,7 @@ en_US
 __name__
 userbio
 __template__
-<div class="block" id="userbio_self">
+[% IF !only_inner_html %]<div class="block" id="userbio_self">[% END %]
         <div class="title" id="userbio_self-title">
                 <h4>
                         <a href="[% gSkin.rootdir %]/~[% user.nickname | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
@@ -63,7 +63,7 @@ __template__
 			[% IF user.mylinks; '<li>'; user.mylinks; '</li>'; END; %]
                 </ul>
                 </div>
-</div>
+[% IF !only_inner_html %]</div>[% END %]
 __seclev__
 500
 __version__

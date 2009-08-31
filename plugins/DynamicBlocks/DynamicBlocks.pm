@@ -724,6 +724,10 @@ sub getBlocksEligibleForUpdate {
 		# Need better use of an exclusion list here.
 		next if ($block eq 'poll');
 
+		if (($options->{uid}) && ($options->{uid} != $constants->{anonymous_coward_uid}) && ($block eq 'userbio_self')) {
+			$block = 'messages-' . $options->{uid};
+		}
+
 		my ($bid, $portal_id, $type_id) =
                         $slashdb->sqlSelect(
                                 'bid, portal_id, type_id',
@@ -731,22 +735,27 @@ sub getBlocksEligibleForUpdate {
                                 "name = '$block' and last_update BETWEEN '$min_time' and NOW()"
                         );
                 if ($bid) {
-                        my $block_definition = $self->getBlockDefinition($type_id);
-
-                        my ($block_data, $block_title, $block_url);
-                        if ($block_definition->{type} eq "portal") {
-                                ($block_data, $block_title, $block_url) =
-                                        $self->getPortalBlockContent($portal_id);
+			if (($options->{uid}) && ($block eq 'messages-' . $options->{uid})) {
+				my $user = $slashdb->getUser($options->{uid});
+				$dynamic_blocks->{'userbio_self'}{block} = $self->getUserBioBlock($user, { only_inner_html => 1 } );
 			} else {
-                                ($block_data, $block_title, $block_url) =
-                                        $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "bid = $bid");
-                        }
+	                        my $block_definition = $self->getBlockDefinition($type_id);
 
-                        if ($block_data) {
-                                $dynamic_blocks->{$block}{block} = $block_data;
-                                $dynamic_blocks->{$block}{title} = $block_title;
-                                $dynamic_blocks->{$block}{url}   = $block_url;
-                        }
+        	                my ($block_data, $block_title, $block_url);
+                	        if ($block_definition->{type} eq "portal") {
+                        	        ($block_data, $block_title, $block_url) =
+                                	        $self->getPortalBlockContent($portal_id);
+				} else {
+        	                        ($block_data, $block_title, $block_url) =
+                	                        $slashdb->sqlSelect('block, title, url', 'dynamic_user_blocks', "bid = $bid");
+				}
+
+        	                if ($block_data) {
+                	                $dynamic_blocks->{$block}{block} = $block_data;
+                        	        $dynamic_blocks->{$block}{title} = $block_title;
+                                	$dynamic_blocks->{$block}{url}   = $block_url;
+				}
+			}
                 }
         }
 
@@ -754,7 +763,7 @@ sub getBlocksEligibleForUpdate {
 }
 
 sub getUserBioBlock {
-        my ($self, $user) = @_;
+        my ($self, $user, $options) = @_;
 
         my $slashdb = getCurrentDB();
         my $constants = getCurrentStatic();
@@ -775,10 +784,13 @@ sub getUserBioBlock {
                 $expiry_date = sprintf("%4d-%02d-%02d", $year+1900,$mon + 1,$mday, undef, undef, undef);
         }
 
+	my $only_inner = $options->{only_inner_html} || 0;
+
         my $biobox = slashDisplay('userbio', {
-                        user       => $user,
-                        expirydate => $expiry_date,
-                        messages   => $block,
+                        user       	=> $user,
+                        expirydate 	=> $expiry_date,
+                        messages   	=> $block,
+			only_inner_html => $only_inner,
                      }, { Page => 'dynamicblocks', Skin => 'default', Return => 1 });
 
         return $biobox;

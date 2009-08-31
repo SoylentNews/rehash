@@ -2502,7 +2502,7 @@ sub ajaxFireHoseGetUpdates {
 	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
 	my $dynamic_blocks;
 	if ($dynamic_blocks_reader) {
-		$dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time });
+		$dynamic_blocks = $dynamic_blocks_reader->getBlocksEligibleForUpdate($form->{dynamic_blocks}, { min_time => $update_time, uid => $user->{uid} });
 	}
 
 	my $sprite_rules = $firehose->getSpriteInfoByFHID($update_sprite_id);
