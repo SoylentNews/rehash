@@ -174,7 +174,7 @@ sub run_process {
 
 	# Eliminate the domaintag for (XXX) this website.
 	my $domain_tnid = $constants->{mainpage_nexus_tid};
-	$scores->{$tnid} &&= 0;
+	$scores->{$domain_tnid} &&= 0;
 
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
