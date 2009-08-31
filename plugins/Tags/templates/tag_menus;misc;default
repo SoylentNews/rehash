@@ -165,10 +165,13 @@ font-size:.8em;
 $(function(){
 var $CURRENT_MENU, $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/;
 
-function trigger_menu( e, selector, $menu ){
+function trigger_menu( e, selector, $menu, menu_content ){
 	var $target=$(original_target(e, selector)), in_use=$target.is('.trigger');
 	$CURRENT_MENU && $CURRENT_MENU.menu('cancel', e);
-	in_use || ($CURRENT_MENU=$menu).menu('context', e);
+	if ( !in_use ) {
+		menu_content && $menu.stop(true, true).hide().html(menu_content);
+		($CURRENT_MENU=$menu).menu('context', e);
+	}
 }
 
 function open_menu( trigger, $menu ){
@@ -360,7 +363,7 @@ $('a.up, a.down').
 		}
 		($reasons=reasons[which].children().clone())
 			&& $reasons.length
-			&& $NODNIX_MENU.hide().html($reasons).menu('context', e);
+			&& trigger_menu(e, 'a.up, a.down', $NODNIX_MENU, $reasons);
 	}).
 	live('click', function( e ){
 		e.preventDefault();
