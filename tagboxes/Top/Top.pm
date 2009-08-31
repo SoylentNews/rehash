@@ -172,6 +172,10 @@ sub run_process {
 		$scores->{$tnid} *= $length_mod;
 	}
 
+	# Eliminate the domaintag for (XXX) this website.
+	my $domain_tnid = $constants->{mainpage_nexus_tid};
+	$scores->{$tnid} &&= 0;
+
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
 	# XXX the "4" below (aka "top 5") is hardcoded currently, should be a var
@@ -187,6 +191,7 @@ sub run_process {
 		my @top = ( );
 		if ($fhid) {
 			@top =  map { $tndata->{$_}{tagname} }
+				grep { $scores->{$_} >= 0 }
 				grep { $scores->{$_} >= $minscore1 }
 				sort {
 					$scores->{$b} <=> $scores->{$a}
@@ -203,6 +208,7 @@ sub run_process {
 	if ($type eq 'stories') {
 
 		my @top = map { $tndata->{$_}{tagname} }
+			grep { $scores->{$_} >= 0 }
 			grep { $scores->{$_} >= $minscore2 }
 			sort {
 				$scores->{$b} <=> $scores->{$a}
