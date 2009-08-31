@@ -41,6 +41,10 @@ context: function( e ){
 	return this._menuMouseDown(e, { trigger: original_target(e) });
 },
 
+cancel: function( e ){
+	return this._inheritMouseUp(e);
+},
+
 destroy: function(){			// called for $(...).menu('destroy|remove')
 	if ( this.element.data('menu') ) {
 		this.element.removeData('menu').unbind('.menu');
@@ -93,6 +97,9 @@ tracking: function( action, e, ui ){	// called for $(...).menu('enable|disable|t
 
 _mouseCapture: function( e ){
 	// ...my "menuStart".  Called once per menu "use", beginning that use.
+
+	// End current menu interaction before starting a new one.
+	this._menuStarted && this._inheritMouseUp(e);
 
 	// Start a timer to distinguish between a click and a press.
 	this.clickDurationExceeded = (this.options.clickDuration||0)<=0;

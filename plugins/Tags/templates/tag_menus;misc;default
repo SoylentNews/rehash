@@ -163,7 +163,13 @@ font-size:.8em;
 [% END %]
 <script type="text/javascript">
 $(function(){
-var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/;
+var $CURRENT_MENU, $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/;
+
+function trigger_menu( e, selector, $menu ){
+	var $target=$(original_target(e, selector)), in_use=$target.is('.trigger');
+	$CURRENT_MENU && $CURRENT_MENU.menu('cancel', e);
+	in_use || ($CURRENT_MENU=$menu).menu('context', e);
+}
 
 function open_menu( trigger, $menu ){
 	var $trigger=$(trigger), $fhitem=$trigger.closest('.fhitem');
@@ -193,6 +199,7 @@ function open_menu( trigger, $menu ){
 function close_menu( trigger, $menu ){
 	$menu.hide();
 	$(trigger).removeClass('trigger');
+	($CURRENT_MENU===$menu) && ($CURRENT_MENU=false);
 }
 
 function open_reasons( trigger, $menu ){
@@ -212,7 +219,7 @@ function close_reasons( trigger, $menu ){
 var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
 $('a[rel=tag]').
 	live('mousedown', function( e ){
-		return $(original_target(e, 'a[rel=tag]')).is('.trigger') || $TAG_MENU.menu('context', e);
+		return trigger_menu(e, 'a[rel=tag]', $TAG_MENU);
 	}).
 	live('click', function( e ){
 		e.preventDefault();
@@ -222,9 +229,7 @@ $('a[rel=tag]').
 $TAG_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	// clickToHover: true,
-	clickToHover: false,
-	clickDuration: 100,
+	clickDuration: 300,
 
 	start: function( e, ui ){
 		var	$tag	= $(ui.trigger),
@@ -285,7 +290,7 @@ $TAG_MENU.menu({
 var $FEEDBACK_MENU=$('#feedback-menu');
 $('a.feedback-button.pseudo-tag').
 	live('mousedown', function( e ){
-		$FEEDBACK_MENU.menu('context', e);
+		return trigger_menu(e, 'a.feedback-button.pseudo-tag', $FEEDBACK_MENU);
 	}).
 	live('click', function( e ){
 		e.preventDefault();
@@ -295,9 +300,7 @@ $('a.feedback-button.pseudo-tag').
 $FEEDBACK_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	// clickToHover: true,
-	clickToHover: false,
-	clickDuration: 100,
+	clickDuration: 300,
 
 	start:	function( e, ui ){ open_menu(ui.trigger, $FEEDBACK_MENU); },
 	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
@@ -313,7 +316,7 @@ $FEEDBACK_MENU.menu({
 var $DATATYPE_MENU=$('#datatype-menu');
 $('a.datatype.pseudo-tag').
 	live('mousedown', function( e ){
-		$DATATYPE_MENU.menu('context', e);
+		return trigger_menu(e, 'a.datatype.pseudo-tag', $DATATYPE_MENU);
 	}).
 	live('click', function( e ){
 		e.preventDefault();
@@ -323,9 +326,7 @@ $('a.datatype.pseudo-tag').
 $DATATYPE_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	// clickToHover: true,
-	clickToHover: false,
-	clickDuration: 100,
+	clickDuration: 300,
 
 	start:	function( e, ui ){ open_menu(ui.trigger, $DATATYPE_MENU); },
 	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
@@ -369,12 +370,9 @@ $('a.up, a.down').
 $NODNIX_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	// clickToHover: true,
-	clickToHover: false,
-	clickDuration: 750,
+	clickDuration: 300,
 	hoverTimeout: 15000,
 	clickThrough: true,
-	clickDuration: 100,
 
 	start:	function( e, ui ){ open_reasons(ui.trigger, $NODNIX_MENU); },
 	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
