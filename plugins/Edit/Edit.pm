@@ -553,6 +553,8 @@ sub validate {
 	my $messages;	
 
 	my $tagsdb = getObject("Slash::Tags");
+	my $other_tags = $tagsdb->setGetDisplayTags($item->{id}, 'firehose-id');
+	my $applied_tags = $tagsdb->getTagsByGlobjid($item->{globjid});
 
 	if ($item->{type} eq 'submission') {
 		if (length($item->{title}) < 2) {
@@ -607,16 +609,16 @@ sub validate {
 		if ((!$topic || !$topic->{image}) && !$item->{thumb}) {
 			$messages->{critical}{noicon} = getData('noicon','','edit');
 		}
-
-		my $other_tags = $tagsdb->setGetDisplayTags($item->{id}, 'firehose-id');
-		if (!$other_tags->{domain_tag}) {
-			$messages->{critical}{no_domaintag} = getData('no_domaintag', '', 'edit');
-		}
 	}
 
-	# XXX This is wrong. Will fix. -cbrown
-        my $applied_tags = $tagsdb->getTagsByGlobjid($item->{globjid});
-        $messages->{warnings}{tagwarning} = getData('tagwarning', { type => $item->{type} }, 'edit') if (!@$applied_tags);
+	# Errors and warnings for both types
+	if (!$other_tags->{domain_tag}) {
+		$messages->{critical}{no_domaintag} = getData('no_domaintag', '', 'edit');
+	}
+
+	if (($other_tags->{domain_tag}) && (!$messages->{critical}{no_domaintag}) && (@$applied_tags == 1)) {
+		$messages->{warnings}{tagwarning} = getData('tagwarning', { type => $item->{type} }, 'edit');
+	}
 
 	#use Data::Dumper;
 	#print STDERR Dumper(\@messages);
