@@ -24,7 +24,6 @@ menu.tag-menu a {cursor:hand;}
 
 div.note-wrapper,
 .adminmode .edit-bar.expanded .domain.tag,
-.fhitem-editor .edit-bar .domain.tag,
 .adminmode .edit-bar .signoff-button {
 display:inline !important;
 }
