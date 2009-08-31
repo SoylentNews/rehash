@@ -95,6 +95,7 @@ sub init {
 	my($self) = @_;
 	$self->SUPER::init() if $self->can('SUPER::init');
 
+	my $constants = getCurrentStatic();
 	my $class = ref $self;
 	if ($class ne 'Slash::Tagbox') {
 		my($tagbox_name) = $class =~ /(\w+)$/;
@@ -102,14 +103,16 @@ sub init {
 		for my $key (keys %self_hash) {
 			$self->{$key} = $self_hash{$key};
 		}
+		my $lc_name = lc $tagbox_name;
+		$self->{debug} = 1 if $constants->{"tags_tagbox_debug_$lc_name"};
 	}
+	$self->{debug} ||= 1 if $constants->{tags_tagbox_debug};
 
 	# Because 'nod' and 'nix' are used so often, their tagnameid's
 	# are pre-loaded into every tagbox object for convenience, as
 	# $self->{nodid} and $self->{nixid}.  Subclasses are encouraged
 	# to use $self->{fooid} to store the tagnameid for any 'foo'
 	# which is commonly used..
-	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	$self->{nodid} = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	$self->{nixid} = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
