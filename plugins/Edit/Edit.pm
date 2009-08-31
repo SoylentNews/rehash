@@ -101,7 +101,16 @@ sub getOrCreatePreview {
 
 
 	if (!$form->{from_id}) {
-		my $id = $self->getPreviewIdSessionUid($session, $user->{uid}, $form->{type});
+		my $id;
+
+		if ($form->{id}) {
+			my $p = $self->getPreview($form->{id});
+			$id =  $p->{id} if $p && $p->{uid} == $user->{uid};
+		}
+
+		if (!$id) {
+			$id = $self->getPreviewIdSessionUid($session, $user->{uid}, $form->{type});
+		}
 	
 		if ($id && !$form->{new}) {
 			return $id;
