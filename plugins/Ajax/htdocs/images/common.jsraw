@@ -2103,6 +2103,7 @@ function edit_editon(id) {
 }
 
 function editPreview(save) {
+	$('#edit-busy').removeClass('hide');
 	$("form#slashstoryform .default").attr('value', '');
 	var elems = $('#slashstoryform').serializeArray();
 	var params = {};
@@ -2137,6 +2138,7 @@ function editSave() {
 }
 
 function submit_reset(id,state,type) {
+	$('#edit-busy').removeClass('hide');
 	var params = {
 		'op': 'edit_reset',
 		'new' : 1
@@ -2156,6 +2158,7 @@ function submit_reset(id,state,type) {
 }
 
 function submit_cancel() {
+	$('#edit-busy').removeClass('hide');
 	hide_modal_box();
 	close_inline_editor();
 }

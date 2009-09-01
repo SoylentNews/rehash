@@ -372,7 +372,7 @@ $(document).ready(function(){
 					[% IF state != "fullpage" %]
 					<input type="submit" name="op" value="cancel" id="edit-edit-cancel" onclick="[% IF state == "fullpage"; reset_js;  ELSE %]submit_cancel();[% END %]return false;">
 					[% END %]
-					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;">
+					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;"><img id="edit-busy" class="hide" src="[% constants.imagedir %]/spinner2.gif">
 					[% IF item.type == 'story' %]
 						<div class="input">
 							[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
