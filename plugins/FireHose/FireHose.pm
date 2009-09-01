@@ -1925,6 +1925,10 @@ sub getURLsForItem {
 
 sub itemHasSpamURL {
 	my($self, $item) = @_;
+
+	# These firehose item types can never be considered to have a spam URL.
+	return 0 if $item->{type} =~ /^(story|tagname)$/;
+
 	my @spamurlregexes = grep { $_ } split /\s+/, ($self->getBlock('spamurlregexes', 'block') || '');
 	return 0 unless @spamurlregexes;
 	my @urls = $self->getURLsForItem($item);
