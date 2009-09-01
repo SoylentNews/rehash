@@ -171,6 +171,15 @@ _mouseStop: function( e, ui ){
 	}
 	this._reset();
 
+	if ( this._clickDurationTimer ) {
+		clearTimeout(this._clickDurationTimer);
+		this._clickDurationTimer = undefined;
+	}
+	if ( this._hoverDurationTimer ) {
+		clearTimeout(this._hoverDurationTimer);
+		this._hoverDurationTimer = undefined;
+	}
+
 	// We were watching mouseup/down on the document to notice we should stop.
 	// Now that we _are_ stopping, we can stop noticing.
 	$(document).

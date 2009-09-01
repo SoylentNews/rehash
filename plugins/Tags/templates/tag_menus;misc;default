@@ -172,6 +172,7 @@ function trigger_menu( e, selector, $menu, menu_content ){
 		menu_content && $menu.stop(true, true).hide().html(menu_content);
 		($CURRENT_MENU=$menu).menu('context', e);
 	}
+	return !in_use;
 }
 
 function open_menu( trigger, $menu ){
@@ -364,21 +365,23 @@ $('a.up, a.down').
 		($reasons=reasons[which].children().clone())
 			&& $reasons.length
 			&& trigger_menu(e, 'a.up, a.down', $NODNIX_MENU, $reasons);
-	}).
-	live('click', function( e ){
-		e.preventDefault();
-		return true;
 	});
 
 $NODNIX_MENU.menu({
 	cssNamespace: 'slash',
 	liveTriggers: true,
-	clickDuration: 300,
+	clickDuration: 750,
 	hoverTimeout: 15000,
 	clickThrough: true,
 
 	start:	function( e, ui ){ open_reasons(ui.trigger, $NODNIX_MENU); },
-	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
+	select:	function( e, ui ){
+		var	$trigger	= $(ui.trigger),
+			fhitem		= $trigger.closest('div.fhitem')[0],
+			vote		= $trigger.is('.up') ? 'nod ' : 'nix ',
+			tags		= vote + $(ui.select).text();
+		Tags.submit(fhitem, tags);
+	},
 	stop:	function( e, ui ){ close_reasons(ui.trigger, $NODNIX_MENU); }
 });
 
