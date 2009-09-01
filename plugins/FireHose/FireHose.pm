@@ -2715,11 +2715,23 @@ sub setSectionTopicsFromTagstring {
 		)
 	);
 
+	my %datatypes;
+	if ($constants->{plugin}{Edit}) {
+		my $ed = getObject("Slash::Edit");
+		my @types = $ed->determineAllowedTypes();
+		%datatypes = map { $_ => 1 } @types;
+
+	}
+	my $item = $self->getFireHose($id);
+
 	for my $tagname (@tags) {
 		my $emphasized = $tagname =~ /^\^/;
 		my($tagname_unemph) = $tagname =~ /^\^?(.+)/;
 		my $skid = $self->getSkidFromName($tagname_unemph);
 		my $tid = $self->getTidByKeyword($tagname_unemph);
+		if ($item->{preview} eq "yes" && $datatypes{$tagname}) {
+			$data->{type} = $tagname;
+		}
 		if ($skid && (!$data->{primaryskid} || $emphasized)) {
 			$data->{primaryskid} = $skid;
 		}
