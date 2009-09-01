@@ -105,7 +105,7 @@ sub getOrCreatePreview {
 
 		if ($form->{id}) {
 			my $p = $self->getPreview($form->{id});
-			$id =  $p->{id} if $p && $p->{uid} == $user->{uid};
+			$id =  $p->{preview_id} if $p && $p->{uid} == $user->{uid};
 		}
 
 		if (!$id) {
