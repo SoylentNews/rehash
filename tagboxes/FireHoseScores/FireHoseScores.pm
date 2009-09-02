@@ -126,6 +126,7 @@ sub run_process {
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my($color_level, $extra_pop) = $self->getStartingColorLevel($type, $target_id);
+	my $min_pop = $self->getMinimumPopularity($type, $target_id);
 
         # Lose a color level if bayesian analysis suggests spam.
         for my $tag_hr (@$tags_ar) {
@@ -137,6 +138,7 @@ sub run_process {
         }
 
 	my $popularity = $firehose_db->getEntryPopularityForColorLevel($color_level) + $extra_pop;
+	$popularity = $min_pop if $popularity < $min_pop;
 
 	if ($options->{starting_only}) {
 		return $popularity if $options->{return_only};
@@ -216,6 +218,8 @@ sub run_process {
 		$popularity = $max if $popularity > $max;
 	}
 
+	$popularity = $min_pop if $popularity < $min_pop;
+
 	# Set the corresponding firehose row to have this popularity.
 	if ($options->{return_only}) {
 		return $popularity;
@@ -288,6 +292,15 @@ sub getStartingColorLevel {
 		$color_level = 8;
 	}
 	return($color_level, $extra_pop);
+}
+
+sub getMinimumPopularity {
+	my($self, $type, $target_id) = @_;
+	# Stories can never be nixed below the color green.
+	# All other data types can be nixed all the way to black.
+	my $level = $type eq 'stories' ? 4 : 0;
+	my $firehose_db = getObject('Slash::FireHose');
+	return $firehose_db->getEntryPopularityForColorLevel($level);
 }
 
 { # closure

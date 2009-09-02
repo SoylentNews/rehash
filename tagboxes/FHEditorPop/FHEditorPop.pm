@@ -97,6 +97,7 @@ sub run_process {
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my $target_id_q = $self->sqlQuote($target_id);
+	my $min_pop = $self->getMinimumPopularity($type, $target_id);
 
 	my($color_level, $extra_pop) = (0, 0);
 	if ($type eq "submissions") {
@@ -273,6 +274,8 @@ sub run_process {
 		}
 	}
 
+	$popularity = $min_pop if $popularity < $min_pop;
+
 	# Set the corresponding firehose row to have this popularity.
 	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose'" if !$fhid || !$firehose;
 	if ($options->{return_only}) {
@@ -280,6 +283,15 @@ sub run_process {
 	}
 	$self->info_log("setting %d (%d) to %.6f", $fhid, $affected_id, $popularity);
 	$firehose->setFireHose($fhid, { editorpop => $popularity });
+}
+
+sub getMinimumPopularity {
+	my($self, $type, $target_id) = @_;
+	# Stories can never be nixed below the color green.
+	# All other data types can be nixed all the way to black.
+	my $level = $type eq 'stories' ? 4 : 0;
+	my $firehose_db = getObject('Slash::FireHose');
+	return $firehose_db->getEntryPopularityForColorLevel($level);
 }
 
 # XXX hex_percent should be a library function, it's used by CommentScoreReason too
