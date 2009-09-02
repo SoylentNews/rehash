@@ -59,7 +59,7 @@ __template__
 
 [% CASE 'tagwarning' %]
         [% returnme.data_constant = 1 %]
-        <div class="message error roundall"><span id="modal_error">You didn't apply any tags. You should include at least 1 tag for this [% type %].</span></div>
+        <div class="message error roundall"><span id="modal_warn">Please tag your [% type %] with something to help us stay organized.</span></div>
 
 [% CASE 'no_domaintag' %]
         [% returnme.data_constant = 1 %]
