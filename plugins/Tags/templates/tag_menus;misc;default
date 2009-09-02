@@ -111,7 +111,6 @@ font-size:.8em;
 </style>
 [% MACRO tag_item BLOCK %]<a class="tag">[% tag %]</a>[% END -%]
 [% tags_reader = Slash.getObject('Slash::Tags', { db_type => 'reader' }); %]
-<menu id="nodnix-menu" class="reasons-menu"></menu>
 <menu id="nix-reasons" style="display:none">
 	[% FOREACH tag IN tags_reader.getNegativePopupTags.sort; tag_item(tag);  END %]
 </menu>
@@ -167,7 +166,11 @@ var $CURRENT_MENU, $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/;
 
 function trigger_menu( e, selector, $menu, menu_content ){
 	var $target=$(original_target(e, selector)), in_use=$target.is('.trigger');
-	$CURRENT_MENU && $CURRENT_MENU.menu('cancel', e);
+	if ( $CURRENT_MENU ) {
+		$CURRENT_MENU.menu('cancel', e);
+		$CURRENT_MENU = null;
+	}
+
 	if ( !in_use ) {
 		menu_content && $menu.stop(true, true).hide().html(menu_content);
 		($CURRENT_MENU=$menu).menu('context', e);
@@ -204,16 +207,6 @@ function close_menu( trigger, $menu ){
 	$menu.hide();
 	$(trigger).removeClass('trigger');
 	($CURRENT_MENU===$menu) && ($CURRENT_MENU=false);
-}
-
-function open_reasons( trigger, $menu ){
-	var $trigger=$(trigger).addClass('trigger');
-	$menu.appendTo($trigger.closest('h3')).slideDown();
-}
-
-function close_reasons( trigger, $menu ){
-	$menu.slideUp();
-	$(trigger).removeClass('trigger');
 }
 
 
@@ -343,18 +336,26 @@ $DATATYPE_MENU.menu({
 
 /* T2 reasons menus */
 
-var	$NODNIX_MENU=$('#nodnix-menu'),
-
-	$NIX_REASONS=$('#nix-reasons'),			$NOD_REASONS=$('#nod-reasons'),
+var	$NIX_REASONS=$('#nix-reasons'),			$NOD_REASONS=$('#nod-reasons'),
 	$COMMENT_NIX_REASONS=$('#comment-nix-reasons'),	$COMMENT_NOD_REASONS=$('#comment-nod-reasons'),
 	$TAG_NIX_REASONS=$('#tag-nix-reasons'),		$TAG_NOD_REASONS=$('#tag-nod-reasons');
-$('a.up, a.down').
-	live('mousedown', function( e ){
-		var	$trigger	= $(original_target(e)),
-			which		= sign($trigger.is('.up')),
-			$fhitem		= $trigger.closest('div.fhitem'),
-			reasons, $reasons;
 
+var NODNIX='a.up,a.down';
+$(NODNIX).live('mousedown', function( e ){
+	var	$target	= $(original_target(e, NODNIX)),
+		in_use	= $target.is('.trigger'),
+		is_up	= $target.is('.up'),
+		$fhitem	= $target.closest('div.fhitem'),
+		$title	= $target.closest('h3'),
+		$menu	= $title.children('menu.reasons-menu'),
+		reasons, $reasons;
+
+	if ( $CURRENT_MENU ) {
+		$CURRENT_MENU.menu('cancel', e);
+		$CURRENT_MENU = null;
+	}
+
+	if ( !in_use ){
 		if ( $fhitem.is('.fhitem-comment') ) {
 			reasons = [ $COMMENT_NIX_REASONS, $COMMENT_NOD_REASONS ];
 		} else if ( $fhitem.is('.fhitem-tag') ) {
@@ -362,28 +363,40 @@ $('a.up, a.down').
 		} else {
 			reasons = [ $NIX_REASONS, $NOD_REASONS ];
 		}
-		($reasons=reasons[which].children().clone())
-			&& $reasons.length
-			&& trigger_menu(e, 'a.up, a.down', $NODNIX_MENU, $reasons);
-	});
+		$reasons = reasons[sign(is_up)].children().clone();
 
-$NODNIX_MENU.menu({
-	cssNamespace: 'slash',
-	liveTriggers: true,
-	clickDuration: 750,
-	hoverTimeout: 15000,
-	clickThrough: true,
+		if ( $menu.length ) {
+			$menu.stop(true, true);
+		} else {
+			$menu = $('<menu class="reasons-menu">').hide().appendTo($title);
+			$menu.menu({
+				cssNamespace:'slash',
+				liveTriggers:true,
+				clickDuration:300,
+				hoverTimeout:15000,
 
-	start:	function( e, ui ){ open_reasons(ui.trigger, $NODNIX_MENU); },
-	select:	function( e, ui ){
-		var	$trigger	= $(ui.trigger),
-			fhitem		= $trigger.closest('div.fhitem')[0],
-			vote		= $trigger.is('.up') ? 'nod ' : 'nix ',
-			tags		= vote + $(ui.select).text();
-		Tags.submit(fhitem, tags);
-	},
-	stop:	function( e, ui ){ close_reasons(ui.trigger, $NODNIX_MENU); }
+				start: function( e, ui ){
+					$(ui.trigger).addClass('trigger');
+					$menu.slideDown();
+				},
+
+				select: function( e, ui ){
+					Tags.submit($fhitem[0], (is_up ? 'nod ' : 'nix ') + $(ui.select).text());
+				},
+
+				stop: function( e, ui ){
+					$menu.slideUp();
+					$(ui.trigger).removeClass('trigger');
+				}
+			});
+		}
+		$menu.html($reasons);
+
+		($CURRENT_MENU=$menu).menu('context', e);
+	}
+	return !in_use;
 });
+
 
 });
 </script>
