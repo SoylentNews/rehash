@@ -153,7 +153,7 @@ sub save {
 		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
 		my $fh = getObject("Slash::FireHose");
 		my $item = $fh->getFireHoseByTypeSrcid($type, $num_id);
-		$saved_item = $fh->dispFireHose($item, { view_mode => 1, mode => 'full'});
+		$saved_item = $fh->dispFireHose($item, { mode => 'full'});
 
 		$slashdb->setCommonStoryWords;
 	} else { 
