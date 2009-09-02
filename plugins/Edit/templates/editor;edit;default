@@ -45,7 +45,11 @@ function loginOpen() {
 }
 
 $(document).ready(function(){
-	$('textarea').elastic();
+
+	$('textarea[name=introtext],textarea[name=media],textarea[name=bodytext],textarea[name=add_related]').autogrow({
+		minHeight: 30,
+		lineHeight: 16
+	});
 
 	$("div#mediaupload input[type=file]").change(function() {
 		$(this).next().show();
@@ -76,14 +80,14 @@ $(document).ready(function(){
         });
 
 	$("a.tgmedia").click(function() {
-		$("#admin-media").toggle();
+		$(this).next("span.auto_grow_wrap").toggle();
 		$(this).parent("label").toggleClass("clearboth");
 		$(this).parent().siblings("label").toggleClass("nodivider");
 		return false;
 	});
 
 	$("a.tgbodytext").click(function() {
-		$("#admin-bodytext").toggle();
+		$(this).next("span.auto_grow_wrap").toggle();
 		$(this).parent("label").toggleClass("clearboth");
 		return false;
 	});
@@ -304,15 +308,18 @@ $(document).ready(function(){
 			<div class="wrapextras"
 				<label class="[% IF preview.bodytext; 'clearboth nodivider'; END; %]">
 					<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
-					<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="[% item.bodytext ? "show" : "hide" %]">[% preview.bodytext | strip_literal %]</textarea>
+					<span class="auto_grow_wrap [% item.bodytext ? "show" : "hide" %]">
+						<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="">[% preview.bodytext | strip_literal %]</textarea>
+					</span>
 				</label>
 				[% IF ispell_comments.bodytext %]
 					[% ispell_comments.bodytext %]
 				[% END %]
 				<label class="[% IF item.media; 'clearboth'; END; %]">
 					<a href="#" class="tgmedia">Media</a>
-					<a name="media"></a>
-					<textarea name="media" wrap="virtual" id="admin-media" class="[% item.media ? "show" : "hide" %]">[% item.media | strip_literal %]</textarea>
+					<span class="auto_grow_wrap [% item.media ? "show" : "hide" %]">
+						<textarea name="media" wrap="virtual" id="admin-media" class="">[% item.media | strip_literal %]</textarea>
+					</span>
 				</label>
 				[% IF user.is_admin %]
                                 <label>
