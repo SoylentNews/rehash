@@ -11,7 +11,7 @@ __name__
 editor
 __template__
 [% UNLESS nowrap %]
-<div id="editor" class="[% IF form.bare == '1' %]slashdotthis [% END %]admin fhroot [% IF preview_shown; "step2"; ELSE; "step1"; END %]" style="text-align:left">
+<div id="editor" class="[% IF item.type == 'submission' %]submission [% END %][% IF item.type == 'story' %]story [% END %][% IF form.bare == '1' %]slashdotthis [% END %]admin fhroot [% IF preview_shown; "step2"; ELSE; "step1"; END %]" style="text-align:left">
 [% END %]
 
 [% PROCESS tag_menus %]
