@@ -47,6 +47,10 @@ function loginOpen() {
 $(document).ready(function(){
 	$('textarea').elastic();
 
+	$("div#mediaupload input[type=file]").change(function() {
+		$(this).next().show();
+	});
+
 	$("span.dynlabel input,span.dynlabel textarea").focus(function() {
 		$(this).siblings("label").hide();
 	});
