@@ -29,7 +29,13 @@ display:inline !important;
 }
 .tag-bar, .tag-bar a { position:relative; }
 .fhitem-editor .tag-bar a img { position:relative; top:-1em; z-index:100; margin:0.75em 0 0;}
-.fhitem-editor .tag-bar .topic span { position:absolute; top:0.1em; left:0.5em }
+.fhitem-editor .tag-bar .topic span {
+left:0.5em;
+position:absolute;
+text-align:center;
+top:0.1em;
+width:80%;
+}
 
 .adminmode .edit-bar .topic.tag,
 .adminmode .edit-bar .domain.tag,
