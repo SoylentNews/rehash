@@ -2099,7 +2099,7 @@ function edit_editon(id) {
 	$('#firehose-' + id).hide();
 	$('.editonly').removeClass('hide');
 	$('.previewonly').addClass('hide');
-	$('#editor').removeClass('step1').addClass('step2');
+	$('#editor').removeClass('step2').addClass('step1');
 }
 
 function editPreview(save) {

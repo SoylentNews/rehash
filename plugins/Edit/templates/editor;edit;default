@@ -27,7 +27,11 @@ __template__
 [% state = state || form.state || (form.bare ? 'widget' : 'fullpage') %]
 
 <script type="text/javascript">
-
+[% IF preview_shown %]
+	$('#editor').removeClass('step1').addClass('step2');
+[% ELSE %]
+	$('#editor').removeClass('step2').addClass('step1');
+[% END %]
 function loginEdit() {
 	editPreview();
 	[% global_returnto = gSkin.rootdir _ '/submit' %]
