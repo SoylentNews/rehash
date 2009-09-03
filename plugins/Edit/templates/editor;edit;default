@@ -70,6 +70,7 @@ $(document).ready(function(){
 	});
 
 	$("a.upload").click(function() {
+		$(this).parent("label").toggleClass("pipe").toggleClass("clearboth");
 		$("#uploadfk").toggle();
                 var $getcrdt,$getcrdl;
                 $getcrdt=$('div#uploadfk').attr('offsetTop');
@@ -77,18 +78,17 @@ $(document).ready(function(){
                 $("#mediaupload").css({'position':'absolute','top':$getcrdt,'left':$getcrdl});
                 $("#mediaupload").toggle();
                 return false;
-        });
+	});
 
 	$("a.tgmedia").click(function() {
 		$(this).next("span.auto_grow_wrap").toggle();
-		$(this).parent("label").toggleClass("clearboth");
-		$(this).parent().siblings("label").toggleClass("nodivider");
+		$(this).parent("label").toggleClass("clearboth").toggleClass("pipe");
 		return false;
 	});
 
 	$("a.tgbodytext").click(function() {
 		$(this).next("span.auto_grow_wrap").toggle();
-		$(this).parent("label").toggleClass("clearboth");
+		$(this).parent("label").toggleClass("clearboth").toggleClass("pipe");
 		return false;
 	});
 
@@ -306,7 +306,7 @@ $(document).ready(function(){
 			<a name="bodytext"></a>
 
 			<div class="wrapextras"
-				<label class="[% IF preview.bodytext; 'clearboth nodivider'; END; %]">
+				<label class="[% IF preview.bodytext %]clearboth[% ELSE %]pipe[% END %]">
 					<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 					<span class="auto_grow_wrap [% item.bodytext ? "show" : "hide" %]">
 						<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="">[% preview.bodytext | strip_literal %]</textarea>
@@ -315,18 +315,20 @@ $(document).ready(function(){
 				[% IF ispell_comments.bodytext %]
 					[% ispell_comments.bodytext %]
 				[% END %]
-				<label class="[% IF item.media; 'clearboth'; END; %]">
+
+				<label class="[% IF item.media %]clearboth[% ELSE %]pipe[% END %]">
 					<a href="#" class="tgmedia">Media</a>
 					<span class="auto_grow_wrap [% item.media ? "show" : "hide" %]">
 						<textarea name="media" wrap="virtual" id="admin-media" class="">[% item.media | strip_literal %]</textarea>
 					</span>
 				</label>
+
 				[% IF user.is_admin %]
-                                <label>
-                                        <a href="#" class="upload">Upload</a>
-                                        <div id="uploadfk" style="display:none;  border:1px solid red;height: 5em; width: 65%;">&nbsp;</div>
-                                </label>
-                                [% END %]
+					<label class="pipe">
+						<a href="#" class="upload">Upload</a>
+						<div id="uploadfk" style="display:none;  border:1px solid red;height: 5em; width: 65%;">&nbsp;</div>
+					</label>
+				[% END %]
 
 			</div>
 			[% END %]
