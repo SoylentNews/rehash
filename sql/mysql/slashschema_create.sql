@@ -956,6 +956,7 @@ CREATE TABLE skins (
 	artcount_max MEDIUMINT UNSIGNED DEFAULT '30' NOT NULL,
 	older_stories_max MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
 	name VARCHAR(30) NOT NULL,
+	othername VARCHAR(30) NOT NULL DEFAULT '',
 	title VARCHAR(64) DEFAULT '' NOT NULL,
 	issue ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
 	submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,

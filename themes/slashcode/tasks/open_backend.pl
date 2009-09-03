@@ -99,13 +99,13 @@ sub _do_rss {
 
 	my @items = map { { story => $_ } } @$stories;
 	if ($constants->{rss_no_public_static}) {
-		my $newurl = $redirects{$filename} || "(none for $filename)";
+		my $newurl = $redirects{$filename} || '';#"(none for $filename)";
 		unshift @items, {
 			introtext	=> sprintf('This URL is no longer valid.  Please update your bookmarks to the new URL: %s', $newurl),
 			title		=> 'Please Update Your Bookmarks',
 			'link'		=> $newurl,
 			'time'		=> '2006-12-13 00:00:00',
-		};
+		} if $newurl;
 	}
 
 	my $rss = xmlDisplay($type, {
@@ -178,6 +178,7 @@ sub load_redirects {
 	'apple.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotApple',
 	'askslashdot.rss'   => 'http://rss.slashdot.org/Slashdot/slashdotAskSlashdot',
 	'awards.rss'        => 'http://rss.slashdot.org/Slashdot/slashdotThe2000Beanies',
+	'bookreview.rss'    => 'http://rss.slashdot.org/Slashdot/slashdotBookReviews',
 	'books.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotBookReviews',
 	'bsd.rss'           => 'http://rss.slashdot.org/Slashdot/slashdotBsd',
 	'developers.rss'    => 'http://rss.slashdot.org/Slashdot/slashdotDevelopers',
@@ -200,6 +201,7 @@ sub load_redirects {
 	'apple.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotApple/to',
 	'askslashdot.rdf'   => 'http://rss.slashdot.org/Slashdot/slashdotAskSlashdot/to',
 	'awards.rdf'        => 'http://rss.slashdot.org/Slashdot/slashdotThe2000Beanies/to',
+	'bookreview.rdf'    => 'http://rss.slashdot.org/Slashdot/slashdotBookReviews/to',
 	'books.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotBookReviews/to',
 	'bsd.rdf'           => 'http://rss.slashdot.org/Slashdot/slashdotBsd/to',
 	'developers.rdf'    => 'http://rss.slashdot.org/Slashdot/slashdotDevelopers/to',
@@ -222,6 +224,7 @@ sub load_redirects {
 	'apple.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotAppleatom',
 	'askslashdot.atom'  => 'http://rss.slashdot.org/Slashdot/slashdotAskslashdotatom',
 	'awards.atom'       => 'http://rss.slashdot.org/Slashdot/slashdotAwardsatom',
+	'bookreview.atom'   => 'http://rss.slashdot.org/Slashdot/slashdotBooksatom',
 	'books.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotBooksatom',
 	'bsd.atom'          => 'http://rss.slashdot.org/Slashdot/slashdotBsdatom',
 	'developers.atom'   => 'http://rss.slashdot.org/Slashdot/slashdotDevelopersatom',
