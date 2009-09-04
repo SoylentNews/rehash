@@ -22,7 +22,7 @@ __template__
 	[% IF type == "story" %]
 		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
 	[% ELSIF type == "submission" %]
-		[% fh = getObject("Slash::FireHose");
+		[% fh = Slash.getObject("Slash::FireHose");
 		   new_item = fh.getFireHoseByTypeSrcid("submission",$id);
 		   link_url = fh.linkFireHose(new_item);
 		%]
