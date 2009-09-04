@@ -22,7 +22,16 @@ __template__
 	[% IF type == "story" %]
 		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
 	[% ELSIF type == "submission" %]
-		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/submission/[% id %]">Submission Created</a> ([% id %])</span></div>
+		[% fh = getObject("Slash::FireHose");
+		   new_item = fh.getFireHoseByTypeSrcid("submission",$id);
+		   link_url = fh.linkFireHose(new_item);
+		%]
+		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% link_url %]">Submission Created</a> ([% id %])</span></div>
+		Thanks for taking the time to submit<br>
+		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/recent">View and vote on recent submissions</a></span></div>
+		[% IF !user.is_anon %]
+		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submission">View your recent submissions</a></span></div>
+		[% END %]
 	[% END %]
 [% ELSE %]
 	ID	[% id %] TYPE [% type %] SAVE TYPE [% save_type %]
