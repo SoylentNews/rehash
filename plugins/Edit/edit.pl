@@ -61,7 +61,13 @@ sub main {
 	print STDERR "Edit Session $skey for UID: $user->{uid}\n";
 	$skey->set_cookie;
 
-	header("Edit", '') or return;
+	my $ed = getObject("Slash::Editor");
+	my $type = $ed->determineDefaultType();
+	my %types = map { $_ => 1} $ed->determineAllowedTypes();
+	$type = $form->{type} if $form->{type} && $types{$form->{type}};
+	$type = uc($type);
+
+	header("$constants->{sitename} - $type", '') or return;
 
 	# it'd be nice to have a legit retval
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
