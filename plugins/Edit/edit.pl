@@ -61,11 +61,11 @@ sub main {
 	print STDERR "Edit Session $skey for UID: $user->{uid}\n";
 	$skey->set_cookie;
 
-	my $ed = getObject("Slash::Editor");
+	my $ed = getObject("Slash::Edit");
 	my $type = $ed->determineDefaultType();
 	my %types = map { $_ => 1} $ed->determineAllowedTypes();
 	$type = $form->{type} if $form->{type} && $types{$form->{type}};
-	$type = uc($type);
+	$type = ucfirst($type);
 
 	header("$constants->{sitename} - $type", '') or return;
 
