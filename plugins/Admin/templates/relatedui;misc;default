@@ -10,7 +10,7 @@ en_US
 __name__
 relatedui
 __template__
-<table border="0" cellpadding="3" cellspacing="0" class="data" id="simstories">
+<table border="0" cellpadding="3" cellspacing="0" class="data[% ' empty' IF !similar_stories.size %]" id="simstories">
 	<tr class="data_head">
 		<td colspan="3"><b>Similar & Related Stories</b></td><td>Related</td><td>Ignore</td>
 	</tr>
