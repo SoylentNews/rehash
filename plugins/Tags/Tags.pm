@@ -1200,8 +1200,21 @@ sub setTagsForGlobj {
 		# Deactivate any tags that are supplied as "-tag"
 		@deactivate_tagnames =
 			map { $1 if /^-(.+)/ }
+			grep { $_ }
 			split /[\s,]+/,
 			lc $tag_string;
+	}
+	# Also deactivate any tags whose now-specified emphasis is not
+	# the same as the emphasis status of the currently applied tag.
+	for my $tagname (sort keys %new_tagnames) {
+		my $is_emph = $emphasized_hr->{$tagname} ? 1 : 0;
+		my($old_tag_hr) = grep { $_->{tagname} eq $tagname } @$old_tags_ar;
+		next unless $old_tag_hr;
+		my $was_emph = $old_tag_hr->{emphasis} ? 1 : 0;
+		if ($is_emph xor $was_emph) {
+			push @deactivate_tagnames, $tagname;
+			push @create_tagnames, $tagname;
+		}
 	}
 	for my $tagname (@deactivate_tagnames) {
 		$tags->deactivateTag({
