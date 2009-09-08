@@ -288,8 +288,8 @@ $(document).ready(function(){
 			[% PROCESS formLabel value => str_icp for => "introtext"  %]
 				<span class="[% IF !preview.introtext;'dyn';END;%]label">
 					<label for="introtext">Describe your scoop</label>
-					<textarea wrap="virtual" name="introtext" class="growable" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
-						[% IF errors.critical.badintrotext %]
+					<textarea wrap="virtual" name="introtext" class="growable">[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
+			[% IF errors.critical.badintrotext %]
                                 [% errors.critical.badintrotext %]
                         [% ELSIF errors.critical.story_filter_error %]
                                         <div class="message error"><span id="modal_error">[% errors.critical.story_filter_error %]</span></div>

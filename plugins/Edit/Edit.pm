@@ -132,10 +132,9 @@ sub getOrCreatePreview {
 			}
 
 			if ($form->{new}) {
-				$p_data->{title}	= $form->{title};
-				$fh_data->{title} 	= strip_attribute($form->{title});
-				$p_data->{url_text} 	= $form->{url} if $form->{url};
-				$p_data->{introtext} 	= $form->{introtext};
+				$p_data->{title} = $fh_data->{title} = strip_notags($form->{title});
+				$p_data->{url_text}                  = $form->{url} if $form->{url};
+				$p_data->{introtext}                 = $form->{introtext};
 			}
 			$fh->setFireHose($fhid, $fh_data) if keys %$fh_data > 0;
 			$self->setPreview($id, $p_data);
@@ -296,6 +295,7 @@ sub determineType {
 	return $type;
 }
 
+# XXXJournal
 sub detectSubType {
 	my($self, $text) = @_;
 
@@ -325,9 +325,11 @@ sub savePreview {
 
 	my($p_data, $fh_data);
 
-	$p_data->{title}	= $form->{title};
-	$p_data->{introtext}	= $form->{introtext};
-	$fh_data->{createtime}	= $form->{createtime} if $form->{createtime};
+	
+	$form->{title} =~ s/[\r\n].*$//s;  # strip anything after newline
+	$p_data->{title} = $fh_data->{title} = strip_notags($form->{title});
+	$p_data->{introtext}                 = $form->{introtext};
+	$fh_data->{createtime}               = $form->{createtime} if $form->{createtime};
 
 	if ($user->{is_anon} && $form->{hcanswer} && $form->{reskey}) {
 		$p_data->{hcanswer} = $form->{hcanswer};
@@ -378,7 +380,7 @@ sub savePreview {
 	} elsif ($p_item->{type} eq 'submission') {
 		my $email_known = "";
 		$email_known = "mailto" if $form->{email} eq $user->{fakeemail};
-		$fh_data->{email} = processSub(strip_attribute($form->{email}), $email_known);
+		$fh_data->{email} = processSub($form->{email}, $email_known);
 		$fh_data->{name} = strip_html($form->{name});
 
 		# XXXEdit eventually perhaps look for video tag when setting this too
@@ -407,7 +409,6 @@ sub savePreview {
 
 	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
 
-	$fh_data->{title}	= $p_item->{type} eq 'story' ? $form->{title} : strip_attribute($form->{title});
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{introtext}	= $form->{introtext};
 
@@ -428,10 +429,9 @@ sub savePreview {
 		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $p_data->{sub_type} } );
 		print STDERR "SUB TYPE: $p_data->{sub_type}\n";
 
-	} elsif ($p_item->{type} eq 'journal') { # XXXJournal
+	} elsif ($p_item->{type} eq 'journal') {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
-		$fh_data->{introtext} = $journal_reader->fixJournalText($form->{introtext}, $form->{posttype});
-		#$fh_data->{title} = strip_notags($form->{title}); # XXXJournal do we need this?
+		$fh_data->{introtext} = $journal_reader->fixJournalText($form->{introtext}, $p_data->{posttype});
 	}
 	
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
@@ -653,6 +653,7 @@ sub validate {
 		}
 		# XXXEdit Check Nexus Extras eventually
 		# XXXEdit test reskey success / failure here? or in saveItem?
+
 	} elsif ($item->{type} eq 'story') {
 		# Admin-specific errors
 		if ($preview->{introtext} =~ /link to original source/i) {
@@ -667,8 +668,16 @@ sub validate {
 		if ((!$topic || !$topic->{image}) && !$item->{thumb}) {
 			$messages->{critical}{noicon} = getData('noicon','','edit');
 		}
-	} elsif ($item->{type} eq 'journal') { # XXXJournal
-		# check journal.pl:doSaveArticle()
+
+	} elsif ($item->{type} eq 'journal') {
+		for ($preview->{title}, $preview->{introtext}) {
+			my $d = decode_entities($_);
+			$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
+			if ($d !~ /\S/) {		# require SOME non-whitespace
+				$messages->{critical}{badintrotext} = getData('no_text', '', 'edit');
+			}
+		}
+
 	}
 
 	# Errors and warnings for both types
@@ -703,7 +712,7 @@ sub saveItem {
 	my $fhitem = $fh->getFireHose($preview->{preview_fhid});
 
 	$preview->{dept} = $form->{dept};
-	my $errors = $self->validate($preview,$fhitem);
+	my $errors = $self->validate($preview, $fhitem);
 # XXX if you use this, comment *out* the similar call in edit.pl:save()
 # 	if ($rkey && !(keys %$errors)) {
 # 		unless ($rkey->use) {
@@ -927,22 +936,101 @@ sub editCreateStory {
 	return $sid;
 }
 
-# XXXJournal
 sub editCreateJournal {
 	my($self, $preview, $fhitem) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 
+	my $introtext   = $form->{introtext};
+	my $tid         = $fhitem->{tid};
+	my $promotetype = 'publish'; # XXXJournal
+	my $discuss     = $form->{journal_discuss};
+	my $posttype    = $preview->{posttype};
+
+	my $journal = getObject('Slash::Journal');
+	my $id = $journal->create($preview->{title}, $introtext, $posttype, $tid, $promotetype);
+
+	#XXXJournal XXXEdit url_id handling?
+
+	if ($constants->{journal_comments} && $discuss ne 'disabled') {
+		my $did = $self->_createJournalDiscussion($preview->{title}, $tid, $discuss, $id);
+		$journal->set($id, { discussion => $did });
+	}
+
+	slashHook('journal_save_success', { id => $id });
+
+	# create messages
+	my $messages = getObject('Slash::Messages');
+	if ($messages) {
+		my $zoo = getObject('Slash::Zoo');
+		my $friends = $zoo->getFriendsForMessage;
+
+		my $data = {
+			template_name	=> 'messagenew',
+			subject		=> { template_name => 'messagenew_subj' },
+			journal		=> {
+				description	=> $preview->{title},
+				article		=> $introtext,
+				posttype	=> $posttype,
+				id		=> $id,
+				uid		=> $user->{uid},
+				nickname	=> $user->{nickname},
+			}
+		};
+
+		$messages->create($friends, MSG_CODE_JOURNAL_FRIEND, $data) if @$friends;
+	}
+
+	return $id;
 }
 
-# XXXJournal
 sub editUpdateJournal {
 	my($self, $preview, $fhitem) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 
+	my %update;
+	my $introtext   = $form->{introtext};
+	my $tid         = $fhitem->{tid};
+	my $promotetype = 'publish'; # XXXJournal
+	my $discuss     = $form->{journal_discuss};
+	my $posttype    = $preview->{posttype};
+
+	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+	my $article = $journal_reader->get($fhitem->{srcid});
+
+	if ($constants->{journal_comments} && $discuss && $discuss ne 'disabled' && !$article->{discussion}) {
+		my $did = $self->_createJournalDiscussion($preview->{title}, $tid, $discuss, $fhitem->{srcid});
+		$update{discussion} = $did;
+	}
+
+	$update{article}     = $introtext;
+	$update{tid}         = $tid;
+	$update{promotetype} = $promotetype;
+	$update{posttype}    = $tid;
+	$update{description} = $preview->{title};
+
+	my $journal = getObject('Slash::Journal');
+	$journal->set($fhitem->{srcid}, \%update);
+
+	slashHook('journal_save_success', { id => $fhitem->{srcid} });
+}
+
+sub _createJournalDiscussion {
+	my($self, $title, $tid, $discuss, $id, $user) = @_;
+	$user ||= getCurrentUser();
+	my $did = $self->createDiscussion({
+		kind          => 'journal',
+		title         => $title,
+		topic         => $tid,
+		commentstatus => $discuss,
+		url           => getCurrentSkin('rootdir') . '/~' . fixparam($user->{nickname}) . "/journal/$id",
+	});
+	return $did;	
 }
 
 sub editCreateSubmission {
@@ -976,7 +1064,7 @@ sub editCreateSubmission {
 	my $messagesub = { %$submission };
 
 	# XXXEdit add url_id handling
-	 $submission->{url_id} = $fhitem->{url_id} if $fhitem->{url_id};
+	$submission->{url_id} = $fhitem->{url_id} if $fhitem->{url_id};
 	my $subid = $self->createSubmission($submission);
 
 	$messagesub->{subid} = $subid;

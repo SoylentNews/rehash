@@ -45,6 +45,10 @@ __template__
         [% returnme.data_constant = 1 %]
                 <div class="message error block roundbottom"><span id="modal_error">Introtext cannot contain 'Link to Original Source'.</span></div>
 
+[% CASE 'no_text' %]
+        [% returnme.data_constant = 1 %]
+                <div class="message error block roundbottom"><span id="modal_error">Introtext and title cannot be empty.</span></div>
+
 [% CASE 'baddept' %]
         [% returnme.data_constant = 1 %]
                 <div class="message error nowrap roundbottom"><span id="modal_error">cannot be left blank.</span></div>
