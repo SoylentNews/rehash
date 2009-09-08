@@ -37,6 +37,8 @@ top:0.1em;
 width:80%;
 }
 
+a.skin[rel="tag"]:after { content:":" }
+
 .adminmode .edit-bar .topic.tag,
 .adminmode .edit-bar .domain.tag,
 .fhitem-editor .edit-bar .domain.tag {
