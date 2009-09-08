@@ -6560,3 +6560,8 @@ UPDATE skins SET othername=name;
 
 # 2009-09-03
 UPDATE vars SET value = 'T_2_5_0_270' WHERE name = 'cvs_tag_currentcode';
+
+DROP TABLE IF EXISTS user_event_blocks;
+DROP TABLE IF EXISTS user_event_types;
+DROP TABLE IF EXISTS user_events;
+DROP TABLE IF EXISTS dynamic_user_blocks_oldschema;
