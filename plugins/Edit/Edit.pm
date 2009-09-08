@@ -111,7 +111,7 @@ sub getOrCreatePreview {
 		if (!$id) {
 			$id = $self->getPreviewIdSessionUid($session, $user->{uid}, $type);
 		}
-	
+
 		if ($id && !$form->{new}) {
 			return $id;
 		} else {
@@ -147,14 +147,14 @@ sub getOrCreatePreview {
 		}
 	} else {
 		my($fh_data, $p_data);
-		my $src_item = $fh->getFireHose($form->{from_id}); 
+		my $src_item = $fh->getFireHose($form->{from_id});
 		my $id = $self->createPreview({ uid => $user->{uid} });
 		my $preview_globjid = $self->getGlobjidCreate('preview', $id);
 		my $preview = $self->getPreview($id);
-		
+
 		# Transfer primaryskid / tid as tags
 		$self->createInitialTagsForPreview($src_item, $preview);
-		
+
 		# Transfer actual tags
 		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { src_uid => $src_item->{uid}, leave_old_activated => 1 });
 		$tagsdb->transferTags($src_item->{globjid}, $preview_globjid, { leave_old_activated => 1 });
@@ -180,7 +180,7 @@ sub getOrCreatePreview {
 		my $type = $self->determineType;
 		my $fhid = $fh->createFireHose({ uid => $user->{uid}, preview => "yes", type => $type, globjid => $preview_globjid });
 
-		
+
 		foreach (qw(introtext bodytext media title dept tid primaryskid createtime)) {
 			$fh_data->{$_} = $src_item->{$_};
 		}
@@ -200,7 +200,7 @@ sub getOrCreatePreview {
 			$fh_data->{title} = titleCaseConvert($src_item->{title});
 			$fh_data->{introtext} = quoteFixIntrotext($fh_data->{introtext});
 			$fh_data->{createtime} = $admindb->findTheTime('','');
-		} 
+		}
 
 		if ($src_item->{type} eq 'story') {
 			# XXXEdit same getStory call as above?  do we need to do it twice?
@@ -232,7 +232,6 @@ sub getOrCreatePreview {
 		$self->setPreview($id, $p_data);
 		$preview = $self->getPreview($id);
 		return $id;
-			
 	}
 }
 
@@ -314,10 +313,10 @@ sub savePreview {
 	my $tagsdb = getObject("Slash::Tags");
 
 	return if !$form->{id};
-	
+
 	my $preview = $self->getPreview($form->{id});
 	return if !$preview && $preview->{preview_id};
-	
+
 	my $p_item = $fh->getFireHose($preview->{preview_fhid});
 
 	#XXXEdit check if user / or eventually session has access to this preview
@@ -325,7 +324,7 @@ sub savePreview {
 
 	my($p_data, $fh_data);
 
-	
+
 	$form->{title} =~ s/[\r\n].*$//s;  # strip anything after newline
 	$p_data->{title} = $fh_data->{title} = strip_notags($form->{title});
 	$p_data->{introtext}                 = $form->{introtext};
@@ -340,16 +339,16 @@ sub savePreview {
 		$p_data->{bodytext}      = $form->{bodytext};
 		$p_data->{commentstatus} = $form->{commentstatus};
 		$p_data->{neverdisplay}  = $form->{display} ? '' : 1;
-		
+
 		$fh_data->{uid}          = $form->{uid};
-		
+
 		# XXXEdit maybe only use findTheTime for story type?
 
 		$fh_data->{createtime}   = $admindb->findTheTime($form->{createtime}, $form->{fastforward});
 		$fh_data->{media}        = $form->{media};
 		$fh_data->{dept}         = $form->{dept};
 		$fh_data->{bodytext}     = $form->{bodytext};
-		
+
 		$fh_data->{dept} =~ s/[-\s]+/-/g;
 		$fh_data->{dept} =~ s/^-//;
 		$fh_data->{dept} =~ s/-$//;
@@ -412,8 +411,8 @@ sub savePreview {
 	$fh_data->{media} 	= $form->{media};
 	$fh_data->{introtext}	= $form->{introtext};
 
-	if ($p_item->{type} eq 'story') {	
-		for my $field (qw( introtext bodytext media)) {
+	if ($p_item->{type} eq 'story') {
+		for my $field (qw( introtext bodytext media )) {
 			local $Slash::Utility::Data::approveTag::admin = 2;
 
 		# XXXEdit check this
@@ -426,14 +425,14 @@ sub savePreview {
 		}
 
 	} elsif ($p_item->{type} eq 'submission') {
-		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $p_data->{sub_type} } );
+		$fh_data->{introtext} = fixStory($form->{introtext}, { sub_type => $p_data->{sub_type} });
 		print STDERR "SUB TYPE: $p_data->{sub_type}\n";
 
 	} elsif ($p_item->{type} eq 'journal') {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
 		$fh_data->{introtext} = $journal_reader->fixJournalText($form->{introtext}, $p_data->{posttype});
 	}
-	
+
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $rendered_hr = $self->renderTopics($chosen_hr);
 	print STDERR "RENDERED: ".Dumper($rendered_hr);
@@ -445,13 +444,13 @@ sub savePreview {
 
 	$fh_data->{tid} = $tid;
 	$fh_data->{primaryskid} = $primaryskid;
-	
+
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
 	foreach my $extra (@$extracolumns) {
 		$p_data->{$extra->[1]} = strip_nohtml($form->{$extra->[1]}) if $form->{$extra->[1]};
 	}
-	
+
 	$self->setPreview($preview->{preview_id}, $p_data);
 	$fh->setFireHose($preview->{preview_fhid}, $fh_data);
 
@@ -539,11 +538,11 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		$previewed_item = $fh->dispFireHose($p_item, { mode => "full" });
 		$previewed_item .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
 	}
-	
+
 	my $authors = $self->getDescriptions('authors', '', 1);
 	$authors->{$p_item->{uid}} = $self->getUser($p_item->{uid}, 'nickname') if $p_item->{uid} && !defined($authors->{$p_item->{uid}});
 	my $author_select = createSelect('uid', $authors, $p_item->{uid}, 1);
-		
+
 	my $display_check = $preview->{neverdisplay} ? '' : $constants->{markup_checked_attribute};
 
 	$preview->{commentstatus} ||= $constants->{defaultcommentstatus};
@@ -576,11 +575,11 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		vote         => $options->{vote},
 	}, { Return => 1, Page => 'firehose'});
 
-	
-	$editor .= slashDisplay('editor', { 
+
+	$editor .= slashDisplay('editor', {
 		id                      => $preview_id,
 		fhid                    => $preview->{preview_fhid},
-		preview                 => $preview, 
+		preview                 => $preview,
 		item                    => $p_item,
 		author_select           => $author_select,
 		commentstatus_select    => $commentstatus_select,
@@ -600,7 +599,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		storyref                => $storyref,
 		add_related_text        => $form->{add_related},
 		sfids                   => $sfids,
-	 }, { Page => 'edit', Return => 1 });
+	}, { Page => 'edit', Return => 1 });
 
 	return $editor;
 }
@@ -608,7 +607,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 sub validate {
 	my($self, $preview, $item) = @_;
 	my $constants = getCurrentStatic();
-	my $messages;	
+	my $messages;
 
 	my $tagsdb = getObject("Slash::Tags");
 	my $other_tags = $tagsdb->setGetDisplayTags($item->{id}, 'firehose-id');
@@ -693,7 +692,7 @@ sub validate {
 	#print STDERR Dumper(\@messages);
 	#print STDERR Dumper(\%messages);
 	#return \@messages;
-	return $messages;	
+	return $messages;
 }
 
 sub saveItem {
@@ -702,7 +701,7 @@ sub saveItem {
 	my $form = getCurrentForm();
 	my $fh = getObject("Slash::FireHose");
 	return if !$form->{id};
-	
+
 	my $preview = $self->getPreview($form->{id});
 	return if !$preview && $preview->{preview_id};
 
@@ -757,7 +756,7 @@ sub saveItem {
 
 	# XXXEdit eventually make sure this is ours before setting inactive
 
-	# XXXEdit Turn all users previews inactive at this poin? 
+	# XXXEdit Turn all users previews inactive at this point?
 	if ($create_retval) {
 		$self->setPreview($preview->{preview_id}, { active => 'no'});
 	}
@@ -801,15 +800,15 @@ sub editUpdateStory {
 		neverdisplay	=> $preview->{neverdisplay},
 		topics_chosen	=> $chosen_hr
 	};
-	
+
 	$data->{subid} = $preview->{subid} if $preview->{subid};
 	$data->{fhid} = $preview->{src_fhid} if $preview->{fhid};
-	
+
 	for (qw(dept bodytext relatedtext)) {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
-		
-	for my $field (qw( introtext bodytext media)) {
+
+	for my $field (qw( introtext bodytext media )) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 
 	# XXXEdit check this
@@ -820,7 +819,7 @@ sub editUpdateStory {
 		$data->{$field} = parseSlashizedLinks($data->{$field});
 		$data->{$field} = balanceTags($data->{$field});
 	}
-	
+
 	for (qw(dept bodytext relatedtext)) {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
@@ -832,7 +831,7 @@ sub editUpdateStory {
 sub getExtrasToSaveForChosen {
 	my($self, $chosen_hr, $preview) = @_;
 	my $extras = $self->getNexusExtrasForChosen($chosen_hr) || [];
-	
+
 	my $save_extras = {};
 
 	foreach my $extra(@$extras) {
@@ -846,7 +845,7 @@ sub editCreateStory {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $data;
-	
+
 	my $tagsdb = getObject("Slash::Tags");
 	my $admindb = getObject("Slash::Admin");
 
@@ -880,15 +879,15 @@ sub editCreateStory {
 	foreach my $key (keys %$save_extras) {
 		$data->{$key} = $save_extras->{$key};
 	}
-	
+
 	$data->{subid} = $preview->{subid} if $preview->{subid};
 	$data->{fhid} = $preview->{src_fhid} if $preview->{fhid};
-	
+
 	for (qw(dept bodytext relatedtext)) {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
-		
-	for my $field (qw( introtext bodytext media)) {
+
+	for my $field (qw( introtext bodytext media )) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 
 	# XXXEdit check this
@@ -899,26 +898,26 @@ sub editCreateStory {
 		$data->{$field} = parseSlashizedLinks($data->{$field});
 		$data->{$field} = balanceTags($data->{$field});
 	}
-	
+
 	for (qw(dept bodytext relatedtext)) {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
 
 	my $sid = $self->createStory($data);
-	
+
 	if ($sid) {
 		my $st = $self->getStory($sid);
 		$self->setRelated($sid);
 		slashHook('admin_save_story_success', { story => $data });
 		my $stoid = $st->{stoid};
-		my $story_globjid = $self->getGlobjidCreate('stories', $stoid); 
+		my $story_globjid = $self->getGlobjidCreate('stories', $stoid);
 
 		# XXXEdit Do we have to worry about user editing vs author uid on transfer
 		$tagsdb->transferTags($fhitem->{globjid}, $story_globjid);
 
 		#Don't automatically signoff with new editor, this makes it automatically disapper for an admin on first refresh
 		#$self->createSignoff($st->{stoid}, $data->{uid}, "saved");
-		
+
 		#XXXEdit Tags Auto save?
 		my $admindb = getObject("Slash::Admin");
 		if ($admindb) {
@@ -928,9 +927,9 @@ sub editCreateStory {
 
 		#XXX Move this to Slash::DB
 		my $sfids = $self->sqlSelect('value', 'preview_param', "name = 'sfid' and preview_id = " . $preview->{preview_id});
-                if ($sfids && $stoid) {
-                        $self->sqlUpdate('static_files', { stoid => $stoid, fhid => 0 }, 'fhid = ' . $preview->{preview_fhid});
-                }
+		if ($sfids && $stoid) {
+			$self->sqlUpdate('static_files', { stoid => $stoid, fhid => 0 }, 'fhid = ' . $preview->{preview_fhid});
+		}
 	}
 
 	return $sid;
@@ -1030,7 +1029,7 @@ sub _createJournalDiscussion {
 		commentstatus => $discuss,
 		url           => getCurrentSkin('rootdir') . '/~' . fixparam($user->{nickname}) . "/journal/$id",
 	});
-	return $did;	
+	return $did;
 }
 
 sub editCreateSubmission {
@@ -1054,13 +1053,12 @@ sub editCreateSubmission {
 		tid		=> $fhitem->{tid},
 		primaryskid 	=> $fhitem->{primaryskid} || $gSkin->{skid},
 		mediatype	=> $fhitem->{mediatype}
-		
 	};
 
 	foreach my $key (keys %$save_extras) {
 		$submission->{$key} = $save_extras->{$key};
 	}
-	
+
 	my $messagesub = { %$submission };
 
 	# XXXEdit add url_id handling
@@ -1069,19 +1067,19 @@ sub editCreateSubmission {
 
 	$messagesub->{subid} = $subid;
 
-	my $sub_globjid = $self->getGlobjidCreate('submissions', $subid); 
+	my $sub_globjid = $self->getGlobjidCreate('submissions', $subid);
 	$tagsdb->transferTags($fhitem->{globjid}, $sub_globjid);
-	
+
 	if ($submission->{url_id}) {
 		my $globjid = $self->getGlobjidCreate("submissions", $messagesub->{subid});
 		$self->addUrlForGlobj($submission->{url_id}, $globjid);
 	}
-	
+
 	if ($messagesub->{subid} && ($fhitem->{uid} != getCurrentStatic('anonymous_coward_uid'))) {
 		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
 		$dynamic_blocks->setUserBlock('submissions', $fhitem->{uid}) if $dynamic_blocks;
 	}
-	
+
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
@@ -1123,7 +1121,6 @@ sub getSimilar {
 		introtext  => $preview->{introtext},
 		title      => $fh_item->{title},
 		bodytext   => $fh_item->{bodytext},
-		
 	}; # XXX: sid?
 
 	$num ||= getCurrentStatic('similarstorynumshow') || 5;
@@ -1165,110 +1162,89 @@ sub setRelated {
 }
 
 sub ajaxUploadShowPreview {
-        my ($slashdb, $constants, $user, $form, $options) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
 
-        return if (!$user->{is_admin} || !$form->{fhid});
+	return if (!$user->{is_admin} || !$form->{fhid});
 
-        my $fhid_q = $slashdb->sqlQuote($form->{fhid});
-        my $preview_id = $slashdb->sqlSelect('preview_id', 'preview', "preview_fhid = $fhid_q");
+	my $fhid_q = $slashdb->sqlQuote($form->{fhid});
+	my $preview_id = $slashdb->sqlSelect('preview_id', 'preview', "preview_fhid = $fhid_q");
 
-        my $sfid = $slashdb->sqlSelect('value', 'preview_param', "name = 'sfid' and preview_id = " . $preview_id);
-        my @sfids = split(',', $sfid);
-        my %sfid_data;
+	my $sfid = $slashdb->sqlSelect('value', 'preview_param', "name = 'sfid' and preview_id = " . $preview_id);
+	my @sfids = split(',', $sfid);
+	my %sfid_data;
 
-        foreach my $id (@sfids) {
-                $sfid_data{$id} = $slashdb->sqlSelectHashref('*', 'static_files', "sfid = $id");
-                my $filename = $sfid_data{$id}->{name};
-                my $lg_filename = $filename;
-                my ($suffix) = $filename =~ /^.+(\..+)$/;
-                $lg_filename =~ s/$suffix/-thumblg$suffix/;
-                $sfid_data{$id}->{lg_name} = $lg_filename;
+	foreach my $id (@sfids) {
+		$sfid_data{$id} = $slashdb->sqlSelectHashref('*', 'static_files', "sfid = $id");
+		my $filename = $sfid_data{$id}->{name};
+		my $lg_filename = $filename;
+		my($suffix) = $filename =~ /^.+(\..+)$/;
+		$lg_filename =~ s/$suffix/-thumblg$suffix/;
+		$sfid_data{$id}->{lg_name} = $lg_filename;
 
-                my $md_filename = $filename;
-                $md_filename =~ s/$suffix/-thumb$suffix/;
-                $sfid_data{$id}->{md_filename} = $md_filename;
-                $sfid_data{$id}->{md_sfid} = $slashdb->sqlSelect('sfid', 'static_files', "fhid = $fhid_q and name = '$md_filename'");
-        }
+		my $md_filename = $filename;
+		$md_filename =~ s/$suffix/-thumb$suffix/;
+		$sfid_data{$id}->{md_filename} = $md_filename;
+		$sfid_data{$id}->{md_sfid} = $slashdb->sqlSelect('sfid', 'static_files', "fhid = $fhid_q and name = '$md_filename'");
+	}
 
-        my $preview = slashDisplay('imgupload_preview', { preview_data => \%sfid_data, fhid => $form->{fhid} }, { Page => 'misc', Return => 1 });
-        return Data::JavaScript::Anon->anon_dump({
-                preview => $preview,
-        });
+	my $preview = slashDisplay('imgupload_preview', { preview_data => \%sfid_data, fhid => $form->{fhid} }, { Page => 'misc', Return => 1 });
+	return Data::JavaScript::Anon->anon_dump({
+		preview => $preview,
+	});
 }
 
 sub ajaxUploadSetThumb {
-        my ($slashdb, $constants, $user, $form, $options) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
 
-        return if (!$user->{is_admin});
-        return if (!$form->{fhid});
-        return if (!$form->{sfid} && !$form->{clear});
+	return if (!$user->{is_admin});
+	return if (!$form->{fhid});
+	return if (!$form->{sfid} && !$form->{clear});
 
-        my $sfid = $form->{sfid} || 0;
-        my $sfid_q = $slashdb->sqlQuote($sfid);
-        my $fhid_q = $slashdb->sqlQuote($form->{fhid});
+	my $sfid = $form->{sfid} || 0;
+	my $sfid_q = $slashdb->sqlQuote($sfid);
+	my $fhid_q = $slashdb->sqlQuote($form->{fhid});
 
-        $slashdb->sqlUpdate(
-                'firehose',
-                { -thumb => $sfid_q },
-                "id = $fhid_q and preview = 'yes'"
-        );
+	$slashdb->sqlUpdate(
+		'firehose',
+		{ -thumb => $sfid_q },
+		"id = $fhid_q and preview = 'yes'"
+	);
 }
 
 
 sub setExistingImagePreview {
         my ($self, $preview_id, $src_fhid) = @_;
 
-        return unless ($preview_id && $src_fhid);
+	return unless ($preview_id && $src_fhid);
 
-        my $slashdb = getCurrentDB();
+	my $slashdb = getCurrentDB();
 
-        my $src_fhid_q = $slashdb->sqlQuote($src_fhid);
+	my $src_fhid_q = $slashdb->sqlQuote($src_fhid);
 
-        my $srcid = $slashdb->sqlSelect('srcid', 'firehose', "id = $src_fhid_q");
-        return unless $srcid;
+	my $srcid = $slashdb->sqlSelect('srcid', 'firehose', "id = $src_fhid_q");
+	return unless $srcid;
 
-        my $sfid_h = $slashdb->sqlSelectAllHashref('sfid', "*", "static_files", "stoid = $srcid");
-        return unless keys %$sfid_h;
+	my $sfid_h = $slashdb->sqlSelectAllHashref('sfid', "*", "static_files", "stoid = $srcid");
+	return unless keys %$sfid_h;
 
-        my @sfids_a;
-        foreach my $sfid (keys %$sfid_h) {
-                my $name = $sfid_h->{$sfid}{name};
-                next if ($name =~ /thumb/);
-                push(@sfids_a, $sfid_h->{$sfid}{sfid});
-        }
-
-        return unless @sfids_a;
-
-        my $sfids = join(',', @sfids_a);
-        my $preview_id_q = $slashdb->sqlQuote($preview_id);
-        my $data = {
-                -preview_id => $preview_id_q,
-                name       => 'sfid',
-                value      => $sfids,
-        };
-        $slashdb->sqlInsert('preview_param', $data);
-}
-
-{
-my %types = map { $_ => 1 } qw(story submission journal);
-sub determineType {
-	my($self) = @_;
-	my $user = getCurrentUser();
-	my $form  = getCurrentForm();
-
-	my $type = 'submission';
-	if ($form->{type} && $types{$form->{type}}) {
-		if (!$user->{is_admin} && $form->{type} eq 'story') {
-			# $type = $type; # leave default
-		} else {
-			$type = $form->{type};
-		}
-	} elsif ($user->{is_admin}) {
-		$type = 'story';
+	my @sfids_a;
+	foreach my $sfid (keys %$sfid_h) {
+		my $name = $sfid_h->{$sfid}{name};
+		next if ($name =~ /thumb/);
+		push(@sfids_a, $sfid_h->{$sfid}{sfid});
 	}
 
-	return $type;
-} }
+	return unless @sfids_a;
+
+	my $sfids = join(',', @sfids_a);
+	my $preview_id_q = $slashdb->sqlQuote($preview_id);
+	my $data = {
+		-preview_id => $preview_id_q,
+		name       => 'sfid',
+		value      => $sfids,
+	};
+	$slashdb->sqlInsert('preview_param', $data);
+}
 
 sub DESTROY {
 	my($self) = @_;
