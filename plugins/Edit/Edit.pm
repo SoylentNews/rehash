@@ -513,6 +513,9 @@ use Data::Dumper; print STDERR Dumper $storyref;
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
+	if ($preview->{src_fhid}) {
+		$self->setExistingImagePreview($preview_id, $preview->{src_fhid});
+	}
 	my $sfids = $self->sqlSelect('value', 'preview_param', "preview_id = $preview_id and name = 'sfid'");
 
 	my $tag_widget = slashDisplay('edit_bar', {
@@ -1012,7 +1015,7 @@ sub ajaxUploadShowPreview {
         my %sfid_data;
 
         foreach my $id (@sfids) {
-                $sfid_data{$id} = $slashdb->sqlSelectHashref('*', 'static_files', "sfid = $id and fhid = $fhid_q");
+                $sfid_data{$id} = $slashdb->sqlSelectHashref('*', 'static_files', "sfid = $id");
                 my $filename = $sfid_data{$id}->{name};
                 my $lg_filename = $filename;
                 my ($suffix) = $filename =~ /^.+(\..+)$/;
@@ -1047,6 +1050,40 @@ sub ajaxUploadSetThumb {
                 { -thumb => $sfid_q },
                 "id = $fhid_q and preview = 'yes'"
         );
+}
+
+sub setExistingImagePreview {
+        my ($self, $preview_id, $src_fhid) = @_;
+
+        return unless ($preview_id && $src_fhid);
+
+        my $slashdb = getCurrentDB();
+
+        my $src_fhid_q = $slashdb->sqlQuote($src_fhid);
+
+        my $srcid = $slashdb->sqlSelect('srcid', 'firehose', "id = $src_fhid_q");
+        return unless $srcid;
+
+        my $sfid_h = $slashdb->sqlSelectAllHashref('sfid', "*", "static_files", "stoid = $srcid");
+        return unless keys %$sfid_h;
+
+        my @sfids_a;
+        foreach my $sfid (keys %$sfid_h) {
+                my $name = $sfid_h->{$sfid}{name};
+                next if ($name =~ /thumb/);
+                push(@sfids_a, $sfid_h->{$sfid}{sfid});
+        }
+
+        return unless @sfids_a;
+
+        my $sfids = join(',', @sfids_a);
+        my $preview_id_q = $slashdb->sqlQuote($preview_id);
+        my $data = {
+                -preview_id => $preview_id_q,
+                name       => 'sfid',
+                value      => $sfids,
+        };
+        $slashdb->sqlInsert('preview_param', $data);
 }
 
 sub DESTROY {
