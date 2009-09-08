@@ -162,7 +162,11 @@ font-size:.8em;
 [% END %]
 <script type="text/javascript">
 $(function(){
-var $CURRENT_MENU, $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/;
+var $CURRENT_MENU, $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/, IE7=/^7\.0/, TAG_PREFIX=/^\/tag\//;
+
+function get_tag_name( $tag ){
+	return ($tag.attr('href') || '').replace(TAG_PREFIX, '') || $tag.text().toLowerCase();
+}
 
 function trigger_menu( e, selector, $menu, menu_content ){
 	var $target=$(original_target(e, selector)), in_use=$target.is('.trigger');
@@ -230,10 +234,11 @@ $TAG_MENU.menu({
 
 	start: function( e, ui ){
 		var	$tag	= $(ui.trigger),
+			tag	= get_tag_name($tag),
 			context	= firehose_settings && firehose_settings.viewtitle;
 
 		// Insert the tagname into the menu items where needed.
-		$TAG_MENU.find('span.var-tag').text($tag.text());
+		$TAG_MENU.find('span.var-tag').text(tag);
 
 	[% IF user.is_admin %]	// admins don't want to # topics
 		$TAG_MENU.find('a:[data-op^="#"],a:[data-op="_"]').toggle(!$tag.is('.topic,.domain'));
@@ -255,7 +260,7 @@ $TAG_MENU.menu({
 
 	select: function( e, ui ){
 		var	$tag	= $(ui.trigger),
-			tag	= $tag.text(),
+			tag	= get_tag_name($tag),
 			op	= $(ui.select).attr('data-op'),
 			fhitem,
 			command;
