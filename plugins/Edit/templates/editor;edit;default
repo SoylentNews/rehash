@@ -46,7 +46,7 @@ function loginOpen() {
 
 $(document).ready(function(){
 
-	$('textarea[name=introtext],textarea[name=media],textarea[name=bodytext],textarea[name=add_related]').autogrow({
+	$('textarea.growable').autogrow({
 		minHeight: 30,
 		lineHeight: 16
 	});
@@ -288,7 +288,7 @@ $(document).ready(function(){
 			[% PROCESS formLabel value => str_icp for => "introtext"  %]
 				<span class="[% IF !preview.introtext;'dyn';END;%]label">
 					<label for="introtext">Describe your scoop</label>
-					<textarea wrap="virtual" name="introtext" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
+					<textarea wrap="virtual" name="introtext" class="growable" >[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
 						[% IF errors.critical.badintrotext %]
                                 [% errors.critical.badintrotext %]
                         [% ELSIF errors.critical.story_filter_error %]
@@ -309,7 +309,7 @@ $(document).ready(function(){
 				<label class="[% IF preview.bodytext %]clearboth[% ELSE %]pipe[% END %]">
 					<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 					<span class="auto_grow_wrap [% item.bodytext ? "show" : "hide" %]">
-						<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="">[% preview.bodytext | strip_literal %]</textarea>
+						<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="growable">[% preview.bodytext | strip_literal %]</textarea>
 					</span>
 				</label>
 				[% IF ispell_comments.bodytext %]
@@ -319,7 +319,7 @@ $(document).ready(function(){
 				<label class="[% IF item.media %]clearboth[% ELSE %]pipe[% END %]">
 					<a href="#" class="tgmedia">Media</a>
 					<span class="auto_grow_wrap [% item.media ? "show" : "hide" %]">
-						<textarea name="media" wrap="virtual" id="admin-media" class="">[% item.media | strip_literal %]</textarea>
+						<textarea name="media" wrap="virtual" id="admin-media" class="growable">[% item.media | strip_literal %]</textarea>
 					</span>
 				</label>
 
