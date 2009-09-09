@@ -22,27 +22,36 @@ __template__
 	[% IF type == "story" %]
 		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
 	[% ELSIF type == "submission" %]
+
+		<script type="text/javascript">
+                        $(document).ready(function() {
+                                $("a.badgelink").click(function() {
+                                        $("#badgeinfo").toggle();
+                                        return false;
+                                });
+                        });
+                </script>
+
 		[% fh = Slash.getObject("Slash::FireHose");
                    new_item = fh.getFireHoseByTypeSrcid("submission",id);
                    link_url = fh.linkFireHose(new_item);
                 %]
 
-		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% link_url %]">Submission Created</a> ([% id %])</span></div>
-                <br>
-                Thanks for taking the time to submit<br>
-
-                <a href="[% constants.real_rootdir %]/recent">View and vote on recent submissions</a><br>
+		<div class="message error block roundbottom">
+                        <span id="modal_ok">Thanks for <a href="[% link_url %]">your submission to Slashdot</a> ([% id %]) Help us <a href="[% constants.real_rootdir %]/recent">evaluate other recent submissions</a> if you have some spare time.</span>
+                </div>
 
 		[% IF !user.is_anon %]
                         <a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submissions">View your recent submissions</a><br>
                 [% END %]
 
-                <div>
+		<a href="#" class="badgelink">Slashdot Badge</a>
+                <div id="badgeinfo" style="display: none">
 		<br>
                 [% IF new_item.url_id; new_item_url = Slash.db.getUrl(new_item.url_id); %]
                         <img src="[% constants.imagedir %]/sdit4n.png"> By including this HTML, you can add a badge to your page to easily allow your readers to submit it to Slashdot for consideration.
                         <br>
-                        <textarea name="badgecode" id="badgecode" rows="5" cols="50" wrap="off" readonly="yes">
+                        <textarea rows="5" cols="50" wrap="off" readonly="yes">
 <script type="text/javascript">
 	slashdot_url="[% new_item_url.url %]";
 </script>
