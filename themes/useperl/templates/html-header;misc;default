@@ -36,7 +36,6 @@ __template__
 <script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% PROCESS after_jquery %]
 <script src="[% constants.imagedir %]/jquery/jquery.metadata.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.elastic-1.6.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/slash.util.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/slash.geometry.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
