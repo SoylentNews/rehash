@@ -1425,7 +1425,10 @@ sub updateDisplayTagMarkup { # T2
 	update_class_map($class, $order, $tags->{domain_tag},		'domain');
 	update_class_map($class, $order, $tags->{main_watchlist_tag},	'main');
 	update_class_map($class, $order, $tags->{topic_tags},		'topic');
-	update_class_map($class, $order, $tags->{popular_tags},		'popular');
+
+	# no top-tags if we're in the editor
+	update_class_map($class, $order, $tags->{popular_tags},		'popular') unless $options->{include_topic_images};
+
 	update_class_map($class, $order, $tags->{user_tags},		'my');
 	update_class_map($class, $order, $tags->{datatype},		'datatype', 'pseudo-tag');
 
