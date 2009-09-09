@@ -8,6 +8,7 @@
 .edit-bar a[rel="tag"][href='\/tag\/nix'], .edit-bar a[rel="tag"][href='\/tag\/metanix'],
 .edit-bar a[rel="tag"][href='\/tag\/mainpage'],
 .edit-bar a[rel="tag"][href='\/tag\/signed'], .edit-bar a[rel="tag"][href='\/tag\/unsigned'], .edit-bar a[rel="tag"][href='\/tag\/signoff'],
+.fhitem-story .edit-bar .main.tag,
 .edit-bar .hide,
 .edit-bar .hide * {
 display:none;
@@ -24,6 +25,7 @@ menu.tag-menu a {cursor:hand;}
 
 div.note-wrapper,
 .adminmode .edit-bar.expanded .domain.tag,
+.fhitem-story.adminmode .edit-bar.expanded .main.tag,
 .adminmode .edit-bar .signoff-button {
 display:inline !important;
 }
