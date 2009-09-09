@@ -2717,28 +2717,6 @@ Slash.Firehose.choose_article_for_next_ad = function(){
 
 })(Slash.jQuery);
 
-(function(){
-var IS_AUTOCOMPLETE_READY='ac-ready';
-
-$('input.tag-entry').live('keydown', function( e ){
-	var $input = $(this);
-	if ( ! $input.data(IS_AUTOCOMPLETE_READY) ) {
-		$input.
-			autocomplete('/ajax.pl', {
-				loadingClass:'working',
-				minChars:3,
-				autoFill:true,
-				max:25,
-				extraParams:{
-					op:'tags_list_tagnames'
-				}
-			}).
-			data(IS_AUTOCOMPLETE_READY, true);
-	}
-	return true;
-});
-})();
-
 
 function openInWindow(mylink, samewin) {
 	if (!samewin && window.open(mylink, '_blank')) {

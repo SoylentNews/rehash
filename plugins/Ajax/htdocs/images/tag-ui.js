@@ -66,38 +66,46 @@ Tags.submit = function( fhitem, tags ){
 Tags.fetch = function( fhitem ){ Tags.submit(fhitem); };
 })();
 
+
 (function(){
-var	CLASS={ 'true':'expand', 'false':'collapse' },
-	ESC=27, SPACE=32, ENTER=13, LEFT_ARROW=37, DOWN_ARROW=40,
-	HANDLED_KEYS={ 27:1, 32:1, 13:1, 37:1, 40:1 };
+var	IS_AUTOCOMPLETE_READY='ac-ready',
+	ENTER=13, ESC=27, SPACE=32, SUBMIT_FOR={}, CLEAR_FOR={}, CLOSE_FOR={};
+
+(function(){
+	SUBMIT_FOR[ENTER] = SUBMIT_FOR[SPACE] = true;
+	CLEAR_FOR[ENTER] = CLEAR_FOR[ESC] = CLEAR_FOR[SPACE] = true;
+	CLOSE_FOR[ENTER] = CLOSE_FOR[ESC] = true;
+})();
+
+$('input.tag-entry').
+	live('keydown', function( event ){ // install autocomplete if not yet installed
+		var $this=$(original_target(event));
+
+		if ( !$this.data(IS_AUTOCOMPLETE_READY) ) {
+			$this.	autocomplete('/ajax.pl', {
+					loadingClass:'working',
+					minChars:3,
+					autoFill:true,
+					max:25,
+					extraParams:{
+						op:'tags_list_tagnames'
+					}
+				}).
+				data(IS_AUTOCOMPLETE_READY, true);
+		}
+		return true;
+	}).
+	live('keyup', function( event ){
+		var $this=$(original_target(event)), key=event.which || event.keyCode;
+
+		SUBMIT_FOR[key]	&& Tags.submit($this.closest('.fhitem')[0], $this.val());
+		CLEAR_FOR[key]	&& $this.val('');
+		CLOSE_FOR[key]	&& firehose_toggle_tag_ui_to(false, $this);
+		return true;
+	});
 
 $('a.edit-toggle').live('click', function( e ){
 	check_logged_in() && firehose_toggle_tag_ui(original_target(e));
-});
-
-$('input.tag-entry').live('keydown', function( event ){
-	var $this=$(original_target(event)), code=event.which||event.keyCode;
-	switch (code) {
-		case ESC: case LEFT_ARROW: case DOWN_ARROW: case SPACE: case ENTER:
-			if (code == ESC) {
-				$this.val('');
-			}
-			if (code == LEFT_ARROW || code == DOWN_ARROW) {
-				if ($this.val() != '')
-					return true;
-			}
-			if (code == SPACE || code == ENTER) {
-				Tags.submit($this.closest('.fhitem')[0], $this.val());
-				$this.val('')
-				if (code == SPACE)
-					return true;
-			}
-			$this.blur();
-			firehose_toggle_tag_ui_to(false, $this);
-			return false;
-		default:
-			return true;
-	}
 });
 
 })();
