@@ -44,6 +44,11 @@ function loginOpen() {
 	$('#editor').html('<div style="text-align:center;font-size:1.5em">Please close this window now.<\/div>');
 }
 
+function repos(tp,bt) { /* positions tp on top of bt */
+	var pos=$(bt).offset();
+	$(tp).css({'position':'absolute','top':pos.top-90,'left':pos.left+5});
+}
+
 $(document).ready(function(){
 
 	$('textarea.growable').autogrow({
@@ -71,24 +76,22 @@ $(document).ready(function(){
 
 	$("a.upload").click(function() {
 		$(this).parent("label").toggleClass("pipe").toggleClass("clearboth");
-		$("#uploadfk").toggle();
-                var $getcrdt,$getcrdl;
-                $getcrdt=$('div#uploadfk').attr('offsetTop');
-                $getcrdl=$('div#uploadfk').attr('offsetLeft');
-                $("#mediaupload").css({'position':'absolute','top':$getcrdt,'left':$getcrdl});
-                $("#mediaupload").toggle();
-                return false;
+		$("#uploadfk,#mediaupload").toggle();
+		repos('#mediaupload','#uploadfk');
+		return false;
 	});
 
 	$("a.tgmedia").click(function() {
 		$(this).next("span.auto_grow_wrap").toggle();
 		$(this).parent("label").toggleClass("clearboth").toggleClass("pipe");
+		repos('#mediaupload','#uploadfk');
 		return false;
 	});
 
 	$("a.tgbodytext").click(function() {
 		$(this).next("span.auto_grow_wrap").toggle();
 		$(this).parent("label").toggleClass("clearboth").toggleClass("pipe");
+		repos('#mediaupload','#uploadfk');
 		return false;
 	});
 
@@ -326,7 +329,7 @@ $(document).ready(function(){
 				[% IF user.is_admin %]
 					<label class="pipe">
 						<a href="#" class="upload">Upload</a>
-						<div id="uploadfk" style="display:none;  border:1px solid red;height: 5em; width: 65%;">&nbsp;</div>
+						<div id="uploadfk" style="display:none;height: 5em;">&nbsp;</div>
 					</label>
 				[% END %]
 
