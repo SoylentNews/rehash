@@ -2882,12 +2882,12 @@ sub extractChosenFromTags {
 	for my $tag_hr (@$ar) {
 		my $tagname = $tag_hr->{tagname};
 		$is_abbreviated = 1 if $tagname eq 'abbreviated'; # XXX should be a var
-		print STDERR "ECFT: $tagname\n";
+		# print STDERR "ECFT: $tagname\n";
 		my $tid = $keyword_to_tid_hr->{$tagname} || 0;
 		next unless $tid;
-		print STDERR "    ECFT: tid $tid\n";
+		# print STDERR "    ECFT: tid $tid\n";
 		$chosen_hr->{$tid} = $tag_hr->{emphasis} ? 20 : 10;
-		print STDERR "    ECFT: tid $chosen_hr->{tid} EMPH: |$tag_hr->{emphasis}|\n";
+		#print STDERR "    ECFT: tid $chosen_hr->{tid} EMPH: |$tag_hr->{emphasis}|\n";
 	}
 
 	# Handle "abbreviated".  If "abbreviated" is _not_ present, auto-add
