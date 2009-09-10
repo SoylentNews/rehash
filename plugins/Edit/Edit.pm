@@ -1046,6 +1046,7 @@ sub editCreateSubmission {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
 
 	my $tagsdb = getObject("Slash::Tags");
 	my $chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
@@ -1063,6 +1064,8 @@ sub editCreateSubmission {
 		primaryskid 	=> $fhitem->{primaryskid} || $gSkin->{skid},
 		mediatype	=> $fhitem->{mediatype}
 	};
+
+	$submission->{nojs} = 1 if $form->{nojs};
 
 	foreach my $key (keys %$save_extras) {
 		$submission->{$key} = $save_extras->{$key};
