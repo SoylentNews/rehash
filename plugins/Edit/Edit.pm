@@ -615,6 +615,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 sub validate {
 	my($self, $preview, $item) = @_;
 	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
 	my $messages;
 
 	my $tagsdb = getObject("Slash::Tags");
@@ -692,7 +693,7 @@ sub validate {
 		$messages->{critical}{no_domaintag} = getData('no_domaintag', '', 'edit');
 	}
 
-	if (($other_tags->{domain_tag}) && (!$messages->{critical}{no_domaintag}) && (@$applied_tags == 1)) {
+	if (!$form->{nojs} && ($other_tags->{domain_tag}) && (!$messages->{critical}{no_domaintag}) && (@$applied_tags == 1)) {
 		$messages->{warnings}{tagwarning} = getData('tagwarning', { type => $item->{type} }, 'edit');
 	}
 

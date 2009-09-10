@@ -133,6 +133,9 @@ $(document).ready(function(){
 
 		[% PROCESS reskey_tag %]
 		<input type="hidden" name="fhid" value="[% fhid | strip_attribute %]">
+		<noscript>
+		<input type="hidden" name="nojs" value="1">
+		</noscript>
 		<input type="hidden" name="id" value="[% id | strip_attribute %]">
 		<input type="hidden" name="session" value="[% session | strip_attribute %]">
 		<input type="hidden" name="state" value="[% state | strip_attribute %]">
@@ -360,9 +363,10 @@ $(document).ready(function(){
 				[% PROCESS hc_form %]
 			[% END %]
 
-			<div class="tag_widget editonly[% IF preview_shown %] hide[% END %]">
+			<div class="tag_widget editonly hide">
 				[% tag_widget %]
 			</div>
+			[% IF !preview_shown %]<script type="text/javascript">$('.tag_widget').removeClass('hide');</script> [% END %]
 
 			[% IF errors.critical.noicon %]
 		                [% errors.critical.noicon %]
