@@ -45,23 +45,24 @@ __template__
                         <a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submissions">View your recent submissions</a><br>
                 [% END %]
 
-		<a href="#" class="badgelink">Slashdot Badge</a>
-                <div id="badgeinfo" style="display: none">
-		<br>
+		<div>
+                <br>
+                <img src="[% constants.imagedir %]/sdit4n.png">&nbsp;
                 [% IF new_item.url_id; new_item_url = Slash.db.getUrl(new_item.url_id); %]
-                        <img src="[% constants.imagedir %]/sdit4n.png"> By including this HTML, you can add a badge to your page to easily allow your readers to submit it to Slashdot for consideration.
-                        <br>
+                        By <a href="#" class="badgelink">including this HTML</a>, you can add a badge to your page to easily allow your readers to submit it to Slashdot for consideration.
+                        <div id="badgeinfo" style="display: none">
                         <textarea rows="5" cols="50" wrap="off" readonly="yes">
 <script type="text/javascript">
-	slashdot_url="[% new_item_url.url %]";
+        slashdot_url="[% new_item_url.url %]";
 </script>
 <script src="http://slashdot.org/slashdot-it.js" type="text/javascript"></script>
-			</textarea>
+                        </textarea>
+                        </div>
+                [% ELSE %]
+                        By including a URL in your submission, you can add a badge to your page and easily allow your readers to submit it to Slashdot for consideration.
+                [% END %]
                         <br>
                         Read the <a href="/faq/badges.shtml">badge FAQ</a> to learn more.
-                [% ELSE %]
-                        <img src="[% constants.imagedir %]/sdit4n.png"> By including a URL in your submission, you can add a badge to your page and easily allow your readers to submit it to Slashdot for consideration.<br>Read the <a href="/faq/badges.shtml">badge FAQ</a> to learn more.
-                [% END %]
                 </div>
 	[% END %]
 [% ELSE %]
