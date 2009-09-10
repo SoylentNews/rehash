@@ -956,8 +956,8 @@ sub editCreateJournal {
 
 	my $introtext   = $form->{introtext};
 	my $tid         = $fhitem->{tid};
-	my $promotetype = 'publish'; # XXXJournal
-	my $discuss     = $form->{journal_discuss};
+	my $promotetype = $self->_getJournalPubType;
+	my $discuss     = $form->{commentstatus};
 	my $posttype    = $preview->{posttype};
 
 	my $journal = getObject('Slash::Journal');
@@ -1007,8 +1007,8 @@ sub editUpdateJournal {
 	my %update;
 	my $introtext   = $form->{introtext};
 	my $tid         = $fhitem->{tid};
-	my $promotetype = 'publish'; # XXXJournal
-	my $discuss     = $form->{journal_discuss};
+	my $promotetype = $self->_getJournalPubType;
+	my $discuss     = $form->{commentstatus};
 	my $posttype    = $preview->{posttype};
 
 	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
@@ -1029,6 +1029,22 @@ sub editUpdateJournal {
 	$journal->set($fhitem->{srcid}, \%update);
 
 	slashHook('journal_save_success', { id => $fhitem->{srcid} });
+}
+
+sub _getJournalPubType {
+	my($self, $form) = @_;
+	$form ||= getCurrentForm();
+
+	my $promotetype = 'publish';
+
+	if ($form->{promotetype} && $form->{promotetype} eq 'publicize') {
+		$promotetype = $form->{promotetype};
+	}
+
+	if ($form->{commentstatus} && $form->{commentstatus} ne 'enabled') { # if you don't want commenters, then we don't want your post!  nyah!
+		$promotetype = 'post';
+	}
+	return $promotetype;
 }
 
 sub _createJournalDiscussion {
