@@ -66,6 +66,7 @@ sub setUserBlock {
         my $user = $slashdb->getUser($uid);
         my ($block, $data, $id);
 
+        $block = $self->setUserGameBlock($user)        if ($name eq 'game');
         $block = $self->setUserCommentBlock($user)     if ($name eq 'comments');
         $block = $self->setUserJournalBlock($user)     if ($name eq 'journal');
         $block = $self->setUserAchievementBlock($user) if ($name eq 'achievements');
@@ -113,6 +114,68 @@ sub setUserBlock {
 		# since it's stale.
 		$slashdb->sqlDelete('dynamic_user_blocks', "bid = $id and name = '$name-$uid' and $uid = $uid") if $id;
 	}
+}
+
+sub setUserGameBlock {
+#        my ($self, $user) = @_;
+#
+#	return 0 if !$user->{uid};
+#
+#        my $constants = getCurrentStatic();
+#        my $slashdb = getCurrentDB();
+#
+#	my $uid = $user->{uid};
+#	my $characters = $slashdb->sqlSelectAllHashrefArray( "*", "GAME_Characters", "UID = '$uid'" );
+##	my $gamestuff = $slashdb->sqlSelectAllHashrefArray( "*", "GAME_Characters", "UID = '$user->{uid}'" );
+#
+#        my $block;
+#                my $game_block =
+#                        slashDisplay('gameblock', {
+#                                characters => $characters,
+#                        }, { Page => 'dynamicblocks', Return => 1 });
+#
+#                $block->{block} = $game_block;
+#                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/game';
+#                $block->{title} =  strip_literal($user->{nickname}) . "'s Game";
+#		$block->{description} = 'Gameblock';
+#	return (keys %$block) ? $block : 0;
+        my ($self, $user) = @_;
+
+	return 0 if !$user->{uid};
+
+        my $slashdb = getCurrentDB();
+
+        my $achievements_reader = getObject("Slash::Achievements");
+        my $ach_obtained = $achievements_reader->getAchievement('achievement_obtained');
+        my $obtained_aid = $ach_obtained->{'achievement_obtained'}{aid};
+
+        my $achievements =
+                $slashdb->sqlSelectAllHashrefArray(
+                        'aid, createtime',
+                        'user_achievements',
+                        "uid = " . $user->{uid} . " and aid != " . $obtained_aid . " order by createtime desc limit 3"
+                );
+	my $char = $slashdb->sqlSelectHashref( "*", "GAME_Characters", "UID = '$user->{uid}'" );
+
+        foreach my $achievement (@$achievements) {
+                $achievement->{description} = $slashdb->sqlSelect('description', 'achievements', 'aid = ' . $achievement->{aid});
+        }
+
+        my $block;
+        if (scalar @$achievements) {
+                my $achievements_block =
+                        slashDisplay('creategame', {
+                                achievements => $achievements,
+                                char => $char,
+                        }, { Page => 'dynamicblocks', Return => 1 });
+
+                $block->{block} = $achievements_block;
+                $block->{url} = '~' . strip_paramattr($user->{nickname}) . '/hack';
+                $block->{title} = strip_literal($user->{nickname}) . "'s SlashHack Character";
+		$block->{description} = 'SlashHack';
+        }
+
+        return (keys %$block) ? $block : 0;
 }
 
 sub setUserCommentBlock {
