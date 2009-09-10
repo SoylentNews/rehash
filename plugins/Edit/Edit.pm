@@ -1041,9 +1041,11 @@ sub _getJournalPubType {
 		$promotetype = $form->{promotetype};
 	}
 
-	if ($form->{commentstatus} && $form->{commentstatus} ne 'enabled') { # if you don't want commenters, then we don't want your post!  nyah!
+	# if you don't want commenters, then we don't want your post!  nyah!
+	if ($form->{commentstatus} && $form->{commentstatus} ne 'enabled') {
 		$promotetype = 'post';
 	}
+
 	return $promotetype;
 }
 
