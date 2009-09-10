@@ -79,7 +79,7 @@ var	IS_AUTOCOMPLETE_READY='ac-ready',
 
 $('input.tag-entry').
 	live('keydown', function( event ){ // install autocomplete if not yet installed
-		var $this=$(original_target(event));
+		var $this=$(original_target(event)), key=event.which || event.keyCode;
 
 		if ( !$this.data(IS_AUTOCOMPLETE_READY) ) {
 			$this.	autocomplete('/ajax.pl', {
@@ -93,6 +93,13 @@ $('input.tag-entry').
 				}).
 				data(IS_AUTOCOMPLETE_READY, true);
 		}
+
+		if ( key===ESC ) {
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			return false;
+		}
+
 		return true;
 	}).
 	live('keyup', function( event ){
