@@ -22,17 +22,9 @@ $('a[rel=tag]').live('click', function( e ){
 <style type="text/css">
 menu, menu * {
 	cursor:pointer;
-	user-select: none;
-	-moz-user-select:none;
-	-webkit-user-select:none;
 	color:inherit;
 	text-decoration:none;
 	font-family:sans-serif;
-}
-menu input[type=text] {
-	user-select:text !important;
-	-moz-user-select:text !important;
-	-webkit-user-select:text !important;
 }
 
 menu[type=context] {
