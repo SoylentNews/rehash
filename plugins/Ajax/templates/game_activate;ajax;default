@@ -1,0 +1,85 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+game_activate
+__template__
+<!-- ######################################################################################### -->
+<form id="modal_prefs" name="myform" method="post" action="" onsubmit="saveActivate(); false">
+
+<div class="block_name"><input type="hidden" name="block_name" value="" class="block_name" id="blockname"></div>
+<input type="hidden" name="formname" value="activate">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
+[% PROCESS reskey_tag %]
+
+<div id="dialog" title="Activate SlashHack Character">
+	<div id="select-char">
+	</div>
+	<div class="closedialog">
+		<input type="button" value="Save" onclick="saveActivate()">
+		<input type="button" value="Cancel" onclick="cancelActivate(); return false;">
+	</div>
+</div>
+</form>
+
+<script type="text/javascript">
+function activate() {
+	var x = 0;
+}
+
+function loadSelectChar() {
+	var	params		= {};
+	var	options		= {};
+	params['op']		= 'arenaselectchar';
+	params['arena']		= '1';
+	params['reskey']	= reskey_static;
+	options['request_url']	= '/game.pl';
+	ajax_update(params, 'select-char', { onComplete: activate }, options);
+}
+
+function saveActivate() {
+	var	params		= {};
+	var	options		= {};
+	params['op']		= 'activate';
+	params['arena']		= '1';
+	params['reskey']	= reskey_static;
+	options['request_url']	= '/game.pl';
+	ajax_update(params, 'select-char', { onComplete: activate }, options);
+//	ajax_update(params, '', { onComplete: json_handler });
+}
+
+function cancelActivate() {
+	$('div#slashhack-activate-content').removeClass('preview');
+	$('div#slashhack-activate').removeClass('expanded');
+	$('slashhack-activate-content').hide();
+	hide_modal_box();
+}
+
+(function() {
+	$('form#modal_prefs').submit(function(){return false;})
+
+	$(document).one('hide.modal', function(){
+		cancelActivate();
+	});
+
+	$(document).keydown(function(event){
+		if (event.keyCode == 27) {
+			cancelActivate();
+		}
+	});
+
+	loadSelectChar();
+})();
+</script>
+<!-- ######################################################################################### -->
+__seclev__
+500
+__version__
+$Id$
