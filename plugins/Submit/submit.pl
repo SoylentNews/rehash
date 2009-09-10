@@ -20,6 +20,23 @@ sub main {
 	my $form = getCurrentForm();
 	
 	slashProfInit();
+
+	my @redirect_ops;
+
+	push @redirect_ops, "title=" . strip_attribute($form->{subj}) if $form->{subj};
+	push @redirect_ops, "url=" . strip_attribute($form->{url}) if $form->{url};
+	if ($form->{subj} || $form->{url}) {
+		push @redirect_ops, "new=1";
+	}
+
+	if (!$user->{is_anon}) {
+		my $redirect_loc = "/submission";
+		if (@redirect_ops) {
+			$redirect_loc .= "?" . join('&', @redirect_ops);
+		}
+		redirect($redirect_loc);
+	}
+
 	my $submiss_view = $constants->{submiss_view} || $user->{is_admin};
 
 	my %ops = (
