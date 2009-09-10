@@ -62,10 +62,7 @@ sub main {
 	$skey->set_cookie;
 
 	my $ed = getObject("Slash::Edit");
-	my $type = $ed->determineDefaultType();
-	my %types = map { $_ => 1} $ed->determineAllowedTypes();
-	$type = $form->{type} if $form->{type} && $types{$form->{type}};
-	$type = ucfirst($type);
+	my $type = ucfirst $ed->determineType;
 
 	header("$constants->{sitename} - $type", '') or return;
 
