@@ -465,20 +465,21 @@ sub IndexHandler {
 		}
 
 		if ($constants->{plugin}{Edit}) {
-			if ($key eq 'submit') {
+			if ($key =~ /^(submit|submission|story|journal)$/) {
 				$r->uri('/edit.pl');
-				return OK;
-			} elsif ($key eq 'submission') {
+				my $type;
+				if ($key ne 'submit') {
+					$type = $key;
+				}
 				$r->uri('/edit.pl');
-				$r->args('type=submission');
-				return OK;
-			} elsif ($key eq 'story') {
-				$r->uri('/edit.pl');
-				$r->args('type=story');
-				return OK;
-			} elsif ($key eq 'journal') {
-				$r->uri('/edit.pl');
-				$r->args('type=story');
+				my %args = $r->args();
+				$args{type} = $type if $type;
+				my @add_args;
+
+				foreach (qw(url title type bare new introtext)) {
+					push @add_args, "$_=". strip_paramattr($args{$_}) if defined $args{$_};
+				}
+				$r->args(join('&',@add_args)) if @add_args;
 				return OK;
 			}
 		}
