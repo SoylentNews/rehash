@@ -532,10 +532,18 @@ use Data::Dumper; print STDERR Dumper $storyref;
 
 	if ($p_item && $p_item->{title} && $preview->{introtext} && $options->{previewing}) {
 		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
+		my $book_info = '';
+
+		if (($p_item->{type} eq 'story') && $p_item->{primaryskid}) {
+			my $skins = $self->getSkins();
+			if ($skins->{$p_item->{primaryskid}}{name} eq 'bookreview') {
+				$book_info = slashDisplay("view_book", { story => $preview }, { Page => 'firehose', Return => 1 }) if $preview->{book_title};
+			}
+		}
 
 		$showing_preview = 1 if $options->{previewing};
 
-		$previewed_item = $fh->dispFireHose($p_item, { mode => "full" });
+		$previewed_item = $fh->dispFireHose($p_item, { mode => "full", book_info => $book_info });
 		$previewed_item .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
 	}
 
