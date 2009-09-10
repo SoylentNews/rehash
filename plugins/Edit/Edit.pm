@@ -128,7 +128,8 @@ sub getOrCreatePreview {
 				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail} && $user->{emaildisplay};
 				$fh_data->{name} = $user->{nickname};
 			} elsif ($type eq 'journal') {
-				$p_data->{posttype} = $user->{posttype};
+				$p_data->{posttype}    = $user->{posttype};
+				$p_data->{promotetype} = $self->_getJournalPubType;
 			}
 
 			if ($form->{new}) {
@@ -213,7 +214,8 @@ sub getOrCreatePreview {
 			$p_data->{subid} = $src_item->{srcid};
 
 		} elsif ($src_item->{type} eq 'journal') {
-			$p_data->{posttype} = $src_object->{posttype};
+			$p_data->{posttype}    = $src_object->{posttype};
+			$p_data->{promotetype} = $src_object->{promotetype};
 		}
 
 		if ($src_item->{type} eq 'story' || $src_item->{type} eq 'journal') {
@@ -405,6 +407,7 @@ sub savePreview {
 	} elsif ($p_item->{type} eq 'journal') {
 		$p_data->{commentstatus} = $form->{commentstatus};
 		$p_data->{posttype}      = $form->{posttype};
+		$p_data->{promotetype}   = $self->_getJournalPubType;
 	}
 
 	$fh_data->{'-createtime'} = "NOW()" if !$fh_data->{createtime};
