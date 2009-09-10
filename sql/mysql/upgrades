@@ -6565,3 +6565,6 @@ DROP TABLE IF EXISTS user_event_blocks;
 DROP TABLE IF EXISTS user_event_types;
 DROP TABLE IF EXISTS user_events;
 DROP TABLE IF EXISTS dynamic_user_blocks_oldschema;
+
+# For plugins/Submit
+INSERT INTO vars (name, value, description) VALUES ('submit_redirect_submit2', '0', 'Redirect submit to submit2');

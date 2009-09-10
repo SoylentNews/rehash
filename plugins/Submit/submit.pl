@@ -29,7 +29,8 @@ sub main {
 		push @redirect_ops, "new=1";
 	}
 
-	if (!$user->{is_anon}) {
+
+	if ($constants->{submit_redirect_submit2} && !$user->{is_anon}) {
 		my $redirect_loc = "/submission";
 		if (@redirect_ops) {
 			$redirect_loc .= "?" . join('&', @redirect_ops);
