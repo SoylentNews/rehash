@@ -1371,7 +1371,6 @@ sub setGetDisplayTags { # T2
 		if ( $skid ) {
 			my $skin = $firehose_reader->getSkin($skid);
 			$default_main_watchlist_tag = $skin->{name};
-#			$default_main_watchlist_tag = '' if $default_main_watchlist_tag eq $domain_tag;
 		}
 
 		my $tree = $self->getTopicTree();
@@ -1384,14 +1383,14 @@ sub setGetDisplayTags { # T2
 		my $primary_nexus = $self->getNexusFromSkid($primary_skid) if $primary_skid;
 		$main_watchlist_tag = $tree->{$primary_nexus}{keyword} if $primary_nexus;
 		$main_watchlist_tag ||= $default_main_watchlist_tag;
+		push @topic_tags, $main_watchlist_tag;
 
 		# Get the tagnames of the other topics as well.
-		my @tids = ( );
 		for my $tid (sort { $chosen_hr->{$b} <=> $chosen_hr->{$a} || $a cmp $b } keys %$chosen_hr) {
 			my $keyword = $tree->{$tid}{keyword};
-			push @tids, $tid;
+			next if $keyword eq $main_watchlist_tag;
+			push @topic_tags, $keyword;
 		}
-		push @topic_tags, map { $tree->{$_}{keyword} } @tids;
 	}
 
 	my $tags = {
