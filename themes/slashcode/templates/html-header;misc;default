@@ -38,6 +38,7 @@ __template__
 <script src="[% constants.imagedir %]/slash.util.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/slash.geometry.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/ui.accordion.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/ui.draggable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/ui.tabs.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
