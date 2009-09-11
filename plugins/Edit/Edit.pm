@@ -741,14 +741,12 @@ sub saveItem {
 
 			# Editing or creating a story
 			if ($fhitem->{type} eq 'story') {
-				if ($preview->{src_fhid} && $src_item) {
-					# Thing we're creating from is a story so save it back to a story
-					if ($src_item->{type} eq 'story') {
-						$create_retval = $self->editUpdateStory($preview, $fhitem);
-					} else {
+				if ($preview->{src_fhid} && $src_item && $src_item->{type} eq 'story') {
+					# Story we're working on is based on a story so update existing story on save
+					$create_retval = $self->editUpdateStory($preview, $fhitem);
+				} else {
 					# Creating story from some other data type so resulting item is a new story, or not from an item at all
-						$create_retval = $self->editCreateStory($preview, $fhitem);
-					}
+					$create_retval = $self->editCreateStory($preview, $fhitem);
 				}
 			} elsif ($fhitem->{type} eq 'journal') {
 				if ($preview->{src_fhid} && $src_item) {
