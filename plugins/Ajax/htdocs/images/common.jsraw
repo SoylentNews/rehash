@@ -2072,7 +2072,7 @@ function show_submit_box(id,type) {
 	getModalPrefs('submit', 'Submit', 0, params);
 }
 
-function show_submit_box_after(from_id) {
+function show_submit_box_after(from_id,type) {
 	var params = {
 		op:  'edit_submit_box_after',
 		reskey:	reskey_static
@@ -2080,6 +2080,9 @@ function show_submit_box_after(from_id) {
 
 	if (from_id) {
 		params['from_id'] = from_id;
+	}
+	if (type) {
+		params['type'] = type;
 	}
 	$('#firehose-'+from_id).fadeTo("slow", 0.5);
 

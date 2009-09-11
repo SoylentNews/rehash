@@ -136,8 +136,8 @@ $(document).ready(function(){
 	<div class="fhitem fhitem-editor" id="editor-[% fhid %]" data-fhid="[% fhid %]" data-fhtype="editor">
 		<span class="sd-info-block" style="display: none">
 			<span class="sd-key-firehose-id">[% fhid %]</span>
-			<span class="type">[% p_item.type %]</span>
-			[% IF user.is_admin %]<span class="stoid">[% p_item.srcid %]</span>[% END %]
+			<span class="type">[% item.type %]</span>
+			[% IF user.is_admin %]<span class="stoid">[% item.srcid %]</span>[% END %]
 		</span>
 
 		<form action="[% gSkin.rootdir %]/submit" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform">
@@ -448,10 +448,10 @@ END;
 					[% END %]
 					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;"><img id="edit-busy" class="hide" src="[% constants.imagedir %]/spinner2.gif">
 					[% IF item.type == 'journal' %]
-						[% IF !p_item.srcid # XXXJournal maybe later allow to change after-the-fact %]
+						[% IF !item.srcid # XXXJournal maybe later allow to change after-the-fact %]
 							<div class="input">
-								<input type="checkbox" name="promotetype" value="publicize" [% constants.markup_checked_attribute IF p_item.promotetype == "publicize" %]>
-								[% PROCESS formLabel value => "Publicize Your Journal to the Rest of $constants.sitename" for => 'promotetype' %]
+								<input type="checkbox" name="promotetype" value="publicize" [% constants.markup_checked_attribute IF preview.promotetype == "publicize" %]>
+								[% PROCESS formLabel value => "Publicize Your Journal to the Rest of $constants.sitename ($preview.promotetype)" for => 'promotetype' %]
 							</div>
 						[% END %]
 						<div class="input">
