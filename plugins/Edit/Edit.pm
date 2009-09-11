@@ -739,18 +739,21 @@ sub saveItem {
 			my $src_item;
 			$src_item = $fh->getFireHose($preview->{src_fhid}) if $preview->{src_fhid};
 
-			# preview based on story so save edits when done
-			if ($preview->{src_fhid} && $src_item) {
-				if ($src_item->{type} eq 'story') {
-					$create_retval = $self->editUpdateStory($preview, $fhitem);
-				} elsif ($fhitem->{type} eq 'journal') {
-					$create_retval = $self->editUpdateJournal($preview, $fhitem);
+			# Editing or creating a story
+			if ($fhitem->{type} eq 'story') {
+				if ($preview->{src_fhid} && $src_item) {
+					# Thing we're creating from is a story so save it back to a story
+					if ($src_item->{type} eq 'story') {
+						$create_retval = $self->editUpdateStory($preview, $fhitem);
+					} else {
+					# Creating story from some other data type so resulting item is a new story, or not from an item at all
+						$create_retval = $self->editCreateStory($preview, $fhitem);
+					}
 				}
-				$save_type = 'update';
-			} else {   # not based on story save new
-				if ($src_item->{type} eq 'story') {
-					$create_retval = $self->editCreateStory($preview, $fhitem);
-				} elsif ($fhitem->{type} eq 'journal') {
+			} elsif ($fhitem->{type} eq 'journal') {
+				if ($preview->{src_fhid} && $src_item) {
+					$create_retval = $self->editUpdateJournal($preview, $fhitem);
+				} else {
 					$create_retval = $self->editCreateJournal($preview, $fhitem);
 				}
 			}
