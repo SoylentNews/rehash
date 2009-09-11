@@ -106,6 +106,10 @@ color:#fff;
 	cursor: text !important;
 }
 
+input.tag-entry.default {
+color:#aaa;
+}
+
 /* firehose-specific [to the end of the file] */
 
 .tag-widget .note-wrapper {

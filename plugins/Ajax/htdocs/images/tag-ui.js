@@ -118,4 +118,8 @@ $('a.edit-toggle').live('click', function( e ){
 	check_logged_in() && firehose_toggle_tag_ui(original_target(e));
 });
 
+$('input.tag-entry.default').live('click', function(){
+	$(this).removeClass('default').val('');
+});
+
 })();
