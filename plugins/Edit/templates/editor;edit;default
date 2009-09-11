@@ -114,7 +114,7 @@ $(document).ready(function(){
 [% END %]
 
 [% IF errors.critical.save_error %]
-                <div class="message error"><span id="modal_error">[% errors.critical.save_error %]</span></div>
+                <div class="message error roundall"><span id="modal_error">[% errors.critical.save_error %]</span></div>
 [% ELSIF errors.critical.compresserror %]
         [% errors.critical.compresserror %]
 [% END %]
