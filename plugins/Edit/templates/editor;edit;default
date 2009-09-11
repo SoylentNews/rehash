@@ -203,9 +203,9 @@ $(document).ready(function(){
 							</div>
 						[% ELSE %]
 							<div class="txt">
-								Submitted by <a href="[% IF user.realemail; 'mailto:' _ user.realemail | strip_attribute ; ELSE; constants.rootdir _ '/~' _ item.name | strip_attribute; END;  %]">[% item.name | strip_attribute; %]</a>
+								Submitted by <a href="[% IF item.email; 'mailto:' _ item.email | strip_attribute ; ELSE; constants.rootdir _ '/~' _ item.name | strip_attribute; END;  %]">[% item.name | strip_attribute; %]</a>
 								<input type="hidden" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
-								<input type="hidden" name="email" value="[% IF user.realemail;user.realemail | strip_attribute;END; %]" size="50" maxlength="50">
+								<input type="hidden" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
 							</div>
 						[% END %]
 					</div>

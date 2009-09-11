@@ -125,7 +125,7 @@ sub getOrCreatePreview {
 
 			if ($type eq 'submission') {
 				my $email_known = "mailto";
-				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
+				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail} && $user->{emaildisplay};
 				$fh_data->{name} = $user->{nickname};
 			} elsif ($type eq 'journal') {
 				$p_data->{posttype} = $user->{posttype};
