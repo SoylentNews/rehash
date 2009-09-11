@@ -74,13 +74,10 @@ $(document).ready(function(){
 			$(this).siblings("label").show();
 	});
 
-	$("textarea.growable").change(function(){
-		repos('#mediaupload','#uploadfk');
-	});
 
 	$("a.upload").click(function() {
 		$(this).parent("label").toggleClass("pipe").toggleClass("clearboth");
-		$("#uploadfk,#mediaupload").toggle();
+		$("#uploadfk,#mediaupload").toggleClass('hide');
 		repos('#mediaupload','#uploadfk');
 		return false;
 	});
@@ -88,15 +85,25 @@ $(document).ready(function(){
 	$("a.tgmedia").click(function() {
 		$(this).next("span.auto_grow_wrap").toggle();
 		$(this).parent("label").toggleClass("clearboth").toggleClass("pipe");
-		repos('#mediaupload','#uploadfk');
+		if(!$("#mediaupload").hasClass("hide")) {
+			repos('#mediaupload','#uploadfk');
+		}
 		return false;
 	});
 
 	$("a.tgbodytext").click(function() {
 		$(this).next("span.auto_grow_wrap").toggle();
 		$(this).parent("label").toggleClass("clearboth").toggleClass("pipe");
-		repos('#mediaupload','#uploadfk');
+		if(!$("#mediaupload").hasClass("hide")) {
+			repos('#mediaupload','#uploadfk');
+		}
 		return false;
+	});
+
+	$("textarea.growable").change(function(){
+		if(!$("#mediaupload").hasClass("hide")) {
+			repos('#mediaupload','#uploadfk');
+		}
 	});
 
 	$("a.acdetails").click(function() {
@@ -336,7 +343,7 @@ $(document).ready(function(){
 				[% IF user.is_admin %]
 					<label class="pipe">
 						<a href="#" class="upload">Upload</a>
-						<div id="uploadfk" style="display:none;height: 5em;">&nbsp;</div>
+						<div id="uploadfk" style="height: 5em;" class="hide">&nbsp;</div>
 					</label>
 				[% END %]
 

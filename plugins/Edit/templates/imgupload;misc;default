@@ -58,7 +58,7 @@ function imgupload_show_preview(fhid) {
 
 </script>
 
-<div id="mediaupload" style="display: none">
+<div id="mediaupload" class="hide">
 <form id="file_upload_form" method="post" enctype="multipart/form-data" action="[% constants.real_rootdir %]/imgupload.pl">
         <input type="file" class="input" name="fileToUpload" size="45" id="fileToUpload"/>
         <input type="button" onclick="return createUpload([% fhid %]);" id="buttonUpload" value="Upload">
