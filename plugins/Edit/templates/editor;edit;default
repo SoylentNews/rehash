@@ -74,6 +74,10 @@ $(document).ready(function(){
 			$(this).siblings("label").show();
 	});
 
+	$("textarea.growable").change(function(){
+		repos('#mediaupload','#uploadfk');
+	});
+
 	$("a.upload").click(function() {
 		$(this).parent("label").toggleClass("pipe").toggleClass("clearboth");
 		$("#uploadfk,#mediaupload").toggle();
