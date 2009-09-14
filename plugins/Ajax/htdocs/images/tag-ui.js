@@ -83,10 +83,13 @@ $('input.tag-entry').
 
 		if ( !$this.data(IS_AUTOCOMPLETE_READY) ) {
 			$this.	autocomplete('/ajax.pl', {
-					loadingClass:'working',
+					autoFill:false,
+					delay:750,
 					minChars:3,
-					autoFill:true,
+					selectFirst:false,
+
 					max:25,
+					loadingClass:'working',
 					extraParams:{
 						op:'tags_list_tagnames'
 					}
