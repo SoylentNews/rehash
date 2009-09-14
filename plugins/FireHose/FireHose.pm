@@ -4570,7 +4570,7 @@ sub getOlderMonthsFromDay {
 sub getFireHoseItemsByUrl {
 	my($self, $url_id) = @_;
 	my $url_id_q = $self->sqlQuote($url_id);
-	return $self->sqlSelectAllHashrefArray("*", "firehose, firehose_text", "firehose.id=firehose_text.id AND url_id = $url_id_q");
+	return $self->sqlSelectAllHashrefArray("*", "firehose, firehose_text", "firehose.id=firehose_text.id AND url_id = $url_id_q AND preview='no'");
 }
 
 sub ajaxFireHoseUsage {

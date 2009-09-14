@@ -75,13 +75,17 @@ __template__
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'url'); return false;">The url you've attempted to submit has already been submitted. A url if provided in the url field must be unique.</a></span></div>
-                <span>Links to already submitted items on this url below:</span>
-                <ul>
+                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'url'); return false;">The url you've attempted to submit has already been submitted as. 
+		[% fh = Slash.getObject("Slash::FireHose") %]
                         [% FOREACH item = submitted_items %]
-                                <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">[% item.title | strip_literal %] ([% item.type | strip_literal %])</a></li>
+				[% IF !loop.first %], [% IF loop.last %] and [% END %][% END %]
+				[%
+					link_url = fh.linkFireHose(item.id);
+				%]
+                                <a href="[% link_url %]">[% item.title | strip_literal %]</a>
+				[% IF loop.last %].[% END %]
                         [% END %]
-                </ul>
+		A url if provided in the url field must be unique.</a></span></div>
 [% CASE 'noicon' %]
 	[% returnme.data_constant = 1 %]
         <div class="message error roundall"><span id="modal_error">Need to specify a topic with an image, or a thumbnail.</span></div>
