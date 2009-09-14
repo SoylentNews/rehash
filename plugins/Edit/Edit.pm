@@ -207,6 +207,7 @@ sub getOrCreatePreview {
 			#my $story = $self->getStory($src_item->{srcid});
 			my $story = $src_object;
 			$p_data->{neverdisplay} = 1 if $story->{neverdisplay};
+			$p_data->{bodytext} = $fh_data->{bodytext} || "";
 
 		} elsif ($src_item->{type} eq 'submission') {
 			$p_data->{subid} = $src_item->{srcid};
