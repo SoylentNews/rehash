@@ -21,11 +21,11 @@ __template__
 [% IF form.index; day_page = "index2.pl"; END %]
 [% submit_plug = "";
    IF options.view.match('^userjournal');
-	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit" >Write in Journal</a></span>';
+	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/journal">Write in Journal</a></span>';
    ELSIF gSkin.name == "idle";
-	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" >Submit Idle Story</a></span>';
+	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></span>';
    ELSE; #ELSIF options.view == "usersubmission";
-	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" >Submit Story</a></span>';
+	submit_plug = '<span class="submit"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Story</a></span>';
    END;
 
 %]

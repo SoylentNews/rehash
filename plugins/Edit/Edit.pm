@@ -494,6 +494,12 @@ sub showEditor {
 
 	my(%introtext_spellcheck, %bodytext_spellcheck, %title_spellcheck, $ispell_comments);
 
+	if ($p_item->{type} eq 'journal') {
+		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+		my $article = $journal_reader->get($p_item->{srcid});
+		$preview->{introtext} = $article->{article} unless $form->{introtext};
+	}
+
 	if ($p_item->{type} eq 'story' && !$user->{nospell}) {
 		my $src_fh = $fh->getFireHose($preview->{src_fhid}) if ($preview->{src_fhid});
 		my $src_nick = $src_fh->{name};
