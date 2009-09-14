@@ -1,3 +1,6 @@
 [% MACRO image(path) BLOCK %][% constants.imagedir %]/[% path %]?[% constants.cvs_tag_currentcode %][% END %]
+[% MACRO absoluteimage(path) BLOCK %][% constants.absolutedir %]/[% path %]?[% constants.cvs_tag_currentcode %][% END %]
 [% sprite_img_chrome = image('cs_sic_controls_new.png') %]
 [% sprite_img_gradient = image('cs_i2_gradients.png') %]
+[% absolute_sprite_img_chrome = absoluteimage('cs_sic_controls_new.png') %]
+[% absolute_sprite_img_gradient = absoluteimage('cs_i2_gradients.png') %]

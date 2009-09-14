@@ -125,7 +125,7 @@ sub getOrCreatePreview {
 
 			if ($type eq 'submission') {
 				my $email_known = "mailto";
-				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail};
+				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail} && $user->{emaildisplay};
 				$fh_data->{name} = $user->{nickname};
 			} elsif ($type eq 'journal') {
 				$p_data->{posttype} = $user->{posttype};
@@ -207,6 +207,7 @@ sub getOrCreatePreview {
 			#my $story = $self->getStory($src_item->{srcid});
 			my $story = $src_object;
 			$p_data->{neverdisplay} = 1 if $story->{neverdisplay};
+			$p_data->{bodytext} = $fh_data->{bodytext} || "";
 
 		} elsif ($src_item->{type} eq 'submission') {
 			$p_data->{subid} = $src_item->{srcid};
@@ -741,14 +742,12 @@ sub saveItem {
 
 			# Editing or creating a story
 			if ($fhitem->{type} eq 'story') {
-				if ($preview->{src_fhid} && $src_item) {
-					# Thing we're creating from is a story so save it back to a story
-					if ($src_item->{type} eq 'story') {
-						$create_retval = $self->editUpdateStory($preview, $fhitem);
-					} else {
+				if ($preview->{src_fhid} && $src_item && $src_item->{type} eq 'story') {
+					# Story we're working on is based on a story so update existing story on save
+					$create_retval = $self->editUpdateStory($preview, $fhitem);
+				} else {
 					# Creating story from some other data type so resulting item is a new story, or not from an item at all
-						$create_retval = $self->editCreateStory($preview, $fhitem);
-					}
+					$create_retval = $self->editCreateStory($preview, $fhitem);
 				}
 			} elsif ($fhitem->{type} eq 'journal') {
 				if ($preview->{src_fhid} && $src_item) {
