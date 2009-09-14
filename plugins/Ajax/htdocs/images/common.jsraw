@@ -2140,6 +2140,10 @@ function editPreview(save) {
 			}
 		}
 	);
+	if (save) {
+		var d = new Date;
+		params['submit_time'] = d.getTime();
+	}
 
 	params['op'] = save ? 'edit_save' : 'edit_preview';
 	ajax_update(params, '', { onComplete: json_handler });

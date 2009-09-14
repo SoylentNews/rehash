@@ -1099,7 +1099,7 @@ sub editCreateSubmission {
 		submit2		=> 1
 	};
 
-	$submission->{nojs} = 1 if $form->{nojs};
+	$submission->{submit_time} = $form->{submit_time} if $form->{submit_time};
 
 	foreach my $key (keys %$save_extras) {
 		$submission->{$key} = $save_extras->{$key};
