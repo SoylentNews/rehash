@@ -27,6 +27,7 @@ htdoc=htdocs/images/jquery/ui.core.js
 htdoc=htdocs/images/jquery/ui.accordion.js
 htdoc=htdocs/images/jquery/ui.draggable.js
 htdoc=htdocs/images/jquery/ui.sortable.js
+htdoc=htdocs/images/jquery/jquery.autogrow.js
 htdoc=htdocs/images/slash.menu.js
 htdoc=htdocs/images/jquery/ui.tabs.js
 htdoc=htdocs/images/slash.boxes.js
