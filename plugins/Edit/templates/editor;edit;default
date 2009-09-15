@@ -106,7 +106,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$("a.acdetails").click(function() {
+	$("a.acdetails, a.udetails").click(function() {
 		$(this).parent().siblings("div.input").toggleClass('hide');
 		$(this).siblings("span").toggleClass('hide');
 		$(this).hide();
@@ -213,11 +213,36 @@ $(document).ready(function(){
 								<a onclick="[% IF form.bare %]loginOpen();[% ELSE %]show_login_box();[% END %] return false;" class="loginlink" href="[% constants.rootdir %]/my/login">Log In</a>
 							</div>
 						[% ELSE %]
+
+
 							<div class="txt">
-								Submitted by <a href="[% IF item.email; 'mailto:' _ item.email | strip_attribute ; ELSE; constants.rootdir _ '/~' _ item.name | strip_attribute; END;  %]">[% item.name | strip_attribute; %]</a>
-								<input type="hidden" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
-								<input type="hidden" name="email" value="[% IF item.email;item.email | strip_attribute;END; %]" size="50" maxlength="50">
+								Submitted by <a class="udetails" href="[%
+								IF item.email; item.email | strip_attribute;
+								ELSIF user.realemail; 'mailto:' _ user.realemail | strip_attribute ; ELSE; constants.rootdir _ '/~' _ item.name | strip_attribute; END;
+								%]">[% item.name | strip_attribute; %]<span class="more">+</span></a>
+
 							</div>
+							<div class="input w120 hide">
+								<span class="[% IF !item.name;'dyn';END;%]label">
+									<label for="name">Your Name: Leave blank to be Anonymous</label>
+									<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
+								</span>
+							</div>
+							<div class="input hide">
+								<span class="[% IF !item.email;'dyn';END;%]label">
+									<label for="email">Your Email or Homepage where users can contact you</label>
+									<input type="text" name="email" value="[%
+
+IF item.email;item.email | strip_attribute;
+ELSE;
+user.realemail | strip_attribute;
+END;
+
+									%]" size="50" maxlength="50">
+								</span>
+							</div>
+
+
 						[% END %]
 					</div>
 
