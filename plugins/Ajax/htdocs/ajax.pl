@@ -2346,7 +2346,9 @@ sub editSave {
 		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
 		my $fh = getObject("Slash::FireHose");
 		$item = $fh->getFireHoseByTypeSrcid($type, $num_id);
-		$saved_item = $fh->dispFireHose($item, { mode => 'full'});
+		my $options = { mode => 'full' };
+		$options->{options} = { user_view_uid => $item->{uid} } if $type eq 'journal';
+		$saved_item = $fh->dispFireHose($item, $options);
 	} else {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });
 	}

@@ -1031,13 +1031,15 @@ sub editUpdateJournal {
 	$update{article}     = $introtext;
 	$update{tid}         = $tid;
 	$update{promotetype} = $promotetype;
-	$update{posttype}    = $tid;
+	$update{posttype}    = $posttype;
 	$update{description} = $preview->{title};
 
 	my $journal = getObject('Slash::Journal');
 	$journal->set($fhitem->{srcid}, \%update);
 
 	slashHook('journal_save_success', { id => $fhitem->{srcid} });
+
+	return $fhitem->{srcid};
 }
 
 sub _getJournalPubType {
