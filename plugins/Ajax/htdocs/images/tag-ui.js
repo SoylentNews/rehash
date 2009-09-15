@@ -122,4 +122,8 @@ $('input.tag-entry.default').live('click', function(){
 	$(this).removeClass('default').val('');
 });
 
+$('input.tag-entry.default').live('keydown', function(){
+	$(this).removeClass('default').val('');
+});
+
 })();
