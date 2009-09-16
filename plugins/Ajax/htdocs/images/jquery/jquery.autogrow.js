@@ -128,7 +128,14 @@
 					this.textarea.css('overflow-y', 'hidden');
 					if (this.textarea.height() < this.dummy.height() + this.line_height || (this.dummy.height() < this.textarea.height()))
 					{
-						this.textarea.animate({height: (this.dummy.height() + this.line_height) + 'px'}, 100);
+						var	new_height	= this.dummy.height() + this.line_height,
+							self		= this;
+
+						this.textarea.
+							trigger('autogrow-will-grow', [new_height]).
+							animate({height:new_height+'px'}, 100, function(){
+								self.textarea.trigger('autogrow-did-grow', [new_height]);
+							});
 					}
 				}
 			}
