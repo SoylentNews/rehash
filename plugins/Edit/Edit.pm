@@ -441,6 +441,7 @@ sub savePreview {
 		$fh_data->{introtext} = $journal_reader->fixJournalText($introtext, $posttype);
 	}
 
+	$tagsdb->setTagsForGlobj($preview->{preview_id}, 'preview', $form->{tags}, { deactivate_by_operator => 1, tagname_required => 1}) if ($form->{tags});
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $rendered_hr = $self->renderTopics($chosen_hr);
 	print STDERR "RENDERED: ".Dumper($rendered_hr);
