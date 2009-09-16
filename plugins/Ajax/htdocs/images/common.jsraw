@@ -2091,11 +2091,19 @@ function close_inline_editor() {
 	$('#editor').hide('slow').remove();
 }
 
-function edit_editon(id) {
+function edit_editon(id, type, label) {
 	$('#firehose-' + id).hide();
 	$('.editonly').removeClass('hide');
 	$('.previewonly').addClass('hide');
 	$('#editor').removeClass('step2').addClass('step1');
+	
+	// Hide pending warnings on edit form
+	$('#extra-warnings').addClass('hide');
+
+	// Focus form field from error/warning click
+	if (type !== "" && type !== undefined && label !== "" && label !== undefined) {
+		$(type + "[name='" + label + "']").focus();
+	}
 }
 
 function editPreview(save) {
