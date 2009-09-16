@@ -224,12 +224,12 @@ $(document).ready(function(){
 							</div>
 							<div class="input w120 hide">
 								<span class="[% IF !item.name;'dyn';END;%]label">
-									<label for="name">Your Name: Leave blank to be Anonymous</label>
+									<label for="name">Your Name</label>
 									<input type="text" name="name" value="[% IF item.name;item.name | strip_attribute;END; %]" size="50" maxlength="50">
 								</span>
 							</div>
 							<div class="input hide">
-								<span class="[% IF !item.email;'dyn';END;%]label">
+								<span class="[% IF item.email || user.realemail;'';ELSE;'dyn';END;%]label">
 									<label for="email">Your Email or Homepage where users can contact you</label>
 									<input type="text" name="email" value="[%
 
