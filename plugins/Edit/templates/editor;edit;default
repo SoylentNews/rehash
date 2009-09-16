@@ -448,12 +448,6 @@ END;
 					[% END %]
 					<input type="submit" name="op" value="reset" id="edit-edit-reset" onclick="[% reset_js %] return false;"><img id="edit-busy" class="hide" src="[% constants.imagedir %]/spinner2.gif">
 					[% IF item.type == 'journal' %]
-						[% IF !item.srcid # XXXJournal maybe later allow to change after-the-fact %]
-							<div class="input">
-								<input type="checkbox" name="promotetype" value="publicize" [% constants.markup_checked_attribute IF preview.promotetype == "publicize" %]>
-								[% PROCESS formLabel value => "Publicize Your Journal to the Rest of $constants.sitename ($preview.promotetype)" for => 'promotetype' %]
-							</div>
-						[% END %]
 						<div class="input">
 							[% PROCESS formLabel value => "HTML format" for => 'posttype' %]
 							[% posttype_select %]
@@ -463,6 +457,13 @@ END;
 							[% PROCESS formLabel value => "Comment status" for => 'commentstatus' %]
 							[% commentstatus_select %]
 						</div>
+					[% IF !item.srcid # XXXJournal maybe later allow to change after-the-fact %]
+						<div class="input">
+							<input type="checkbox" name="promotetype" id="promotetype" value="publicize" [% constants.markup_checked_attribute IF preview.promotetype == "publicize" %]>
+							[% PROCESS formLabel value => "Publicize Your Journal to the Rest of $constants.sitename ($preview.promotetype)" for => 'promotetype' %]
+						</div>
+					[% END %]
+
 					[% END; IF item.type == 'story' %]
 						<div class="input">
 							<label for="display" class="display visible"><input type="checkbox" name="display" [% display_check %]> Display</label>
