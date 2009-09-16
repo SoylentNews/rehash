@@ -109,6 +109,7 @@ color:#fff;
 input.tag-entry.default {
 color:#aaa;
 -khtml-user-select: none !important; /* this is for webkit/safari only, prevents background display that indicates all string selected */
+font-size:93%;
 }
 
 /* firehose-specific [to the end of the file] */
