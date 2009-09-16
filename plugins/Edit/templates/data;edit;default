@@ -39,11 +39,11 @@ __template__
 
 [% CASE 'badintrotext' %]
         [% returnme.data_constant = 1 %]
-                <div class="message error roundall"><span id="modal_warn">>Please enter a description or URL for your submission.</span></div>
+                <div class="message error roundall"><span id="modal_warn"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'textarea', 'introtext'); return false;">Please enter a description or URL for your submission.</a></span></div>
 
 [% CASE 'introtext_origsource' %]
         [% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error">Introtext cannot contain 'Link to Original Source'.</span></div>
+                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'textarea', 'introtext'); return false;">Introtext cannot contain 'Link to Original Source'.</a></span></div>
 
 [% CASE 'no_text' %]
         [% returnme.data_constant = 1 %]
@@ -55,7 +55,7 @@ __template__
 
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error">Please enter a reasonable subject.</span></div>
+                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'title'); return false;">Please enter a reasonable subject.</a></span></div>
 
 [% CASE 'ispellwarning' %]
         [% returnme.data_constant = 1 %]
@@ -63,19 +63,19 @@ __template__
 
 [% CASE 'tagwarning' %]
         [% returnme.data_constant = 1 %]
-        <div class="message error roundall"><span id="modal_warn">Please tag your [% type %] with something to help us stay organized.</span></div>
+        <div class="message error roundall"><span id="modal_warn"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'tag-entry-input'); return false;">Please tag your [% type %] with something to help us stay organized.</a></span></div>
 
 [% CASE 'no_domaintag' %]
         [% returnme.data_constant = 1 %]
-        <div class="message error roundall"><span id="modal_error">No domain tag was applied.</span></div>
+        <div class="message error roundall"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'tag-entry-input'); return false;">No domain tag was applied.</a></span></div>
 
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error">You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://).</span></div>
+                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'url'); return false;">You've provided an incorrectly formatted url. Make sure your url begins with a scheme (http:// or https://).</a></span></div>
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error">The url you've attempted to submit has already been submitted. A url if provided in the url field must be unique.</span></div>
+                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'url'); return false;">The url you've attempted to submit has already been submitted. A url if provided in the url field must be unique.</a></span></div>
                 <span>Links to already submitted items on this url below:</span>
                 <ul>
                         [% FOREACH item = submitted_items %]
