@@ -68,6 +68,13 @@ __template__
                         Read the <a href="/faq/badges.shtml">badge FAQ</a> to learn more.
                         </div>
                 </div>
+	[% ELSIF type == "journal" %]
+		<div class="message error block roundbottom">
+			<span id="modal_ok">
+			<a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Journal Created[% ELSE %]Journal Updated[% END %]</a>
+			([% id %])
+			</span>
+		</div>
 	[% END %]
 	
 	[% IF (state == 'fullpage' || state == 'modal') && (!no_display_item); '<br>'; saved_item; END; %]
