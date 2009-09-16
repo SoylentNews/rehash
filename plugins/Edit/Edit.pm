@@ -128,8 +128,12 @@ sub getOrCreatePreview {
 				$fh_data->{email} = processSub($user->{fakeemail}, $email_known) if $user->{fakeemail} && $user->{emaildisplay};
 				$fh_data->{name} = $user->{nickname};
 			} elsif ($type eq 'journal') {
-				$p_data->{posttype}    = $user->{posttype};
 				$p_data->{promotetype} = $self->_getJournalPubType;
+				$tagsdb->createTag({
+					uid     => $user->{uid},
+					name    => 'journal',
+					globjid => $preview_globjid,
+				});
 			}
 
 			if ($form->{new}) {
@@ -140,8 +144,8 @@ sub getOrCreatePreview {
 			$fh->setFireHose($fhid, $fh_data) if keys %$fh_data > 0;
 			$self->setPreview($id, $p_data);
 			$tagsdb->createTag({
-				uid => $user->{uid},
-				name => 'slashdot', # XXX should be a var
+				uid     => $user->{uid},
+				name    => 'slashdot', # XXX should be a var
 				globjid => $preview_globjid,
 			});
 			return $id;
@@ -214,7 +218,6 @@ sub getOrCreatePreview {
 			$p_data->{subid} = $src_item->{srcid};
 
 		} elsif ($src_item->{type} eq 'journal') {
-			$p_data->{posttype}    = $src_object->{posttype};
 			$p_data->{promotetype} = $src_object->{promotetype};
 		}
 
@@ -256,6 +259,7 @@ sub createInitialTagsForPreview {
 			push @tids, $_;
 		}
 	}
+
 	my $tree = $self->getTopicTree();
 	my $tagsdb = getObject('Slash::Tags');
 	my %tt = ( ); # topic tagnames
@@ -406,7 +410,6 @@ sub savePreview {
 
 	} elsif ($p_item->{type} eq 'journal') {
 		$p_data->{commentstatus} = $form->{commentstatus};
-		$p_data->{posttype}      = $form->{posttype};
 		$p_data->{promotetype}   = $self->_getJournalPubType;
 	}
 
@@ -434,7 +437,8 @@ sub savePreview {
 
 	} elsif ($p_item->{type} eq 'journal') {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
-		$fh_data->{introtext} = $journal_reader->fixJournalText($form->{introtext}, $p_data->{posttype});
+		my($introtext, $posttype) = determine_html_format($form->{introtext});
+		$fh_data->{introtext} = $journal_reader->fixJournalText($introtext, $posttype);
 	}
 
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
@@ -564,7 +568,6 @@ use Data::Dumper; print STDERR Dumper $storyref;
 	my $display_check = $preview->{neverdisplay} ? '' : $constants->{markup_checked_attribute};
 
 	$preview->{commentstatus} ||= $constants->{defaultcommentstatus};
-	$preview->{posttype}      ||= $user->{posttype};
 
 	my $commentstatuses = $self->getDescriptions($user->{is_subscriber} || $user->{is_admin} ? 'commentcodes_extended' : 'commentcodes');
 	my $commentstatus_select = createSelect('commentstatus', $commentstatuses, $preview->{commentstatus}, 1);
@@ -575,12 +578,6 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		$self->setExistingImagePreview($preview_id, $preview->{src_fhid});
 	}
 	my $sfids = $self->sqlSelect('value', 'preview_param', "preview_id = $preview_id and name = 'sfid'");
-
-	my $posttypes = $self->getDescriptions('postmodes');
-	if ($user->{is_admin} || $user->{acl}{journal_admin_tags}) {
-		$posttypes->{77} = 'Full HTML Mode';
-	}
-	my $posttype_select = createSelect('posttype', $posttypes, $preview->{posttype}, 1);
 
 	my $tag_widget = slashDisplay('edit_bar', {
 		item         => $p_item,
@@ -602,7 +599,6 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		item                    => $p_item,
 		author_select           => $author_select,
 		commentstatus_select    => $commentstatus_select,
-		posttype_select         => $posttype_select,
 		display_check           => $display_check,
 		extras                  => $extracolumns,
 		errors                  => $options->{errors},
@@ -963,11 +959,10 @@ sub editCreateJournal {
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 
-	my $introtext   = $form->{introtext};
-	my $tid         = $fhitem->{tid};
+	my($introtext, $posttype) = determine_html_format($form->{introtext});
+	my $tid         = $fhitem->{tid} || $self->getTidByKeyword('journal');
 	my $promotetype = $self->_getJournalPubType;
 	my $discuss     = $form->{commentstatus};
-	my $posttype    = $preview->{posttype};
 
 	my $journal = getObject('Slash::Journal');
 	my $id = $journal->create($preview->{title}, $introtext, $posttype, $tid, $promotetype);
@@ -1014,11 +1009,10 @@ sub editUpdateJournal {
 	my $gSkin = getCurrentSkin();
 
 	my %update;
-	my $introtext   = $form->{introtext};
-	my $tid         = $fhitem->{tid};
+	my($introtext, $posttype) = determine_html_format($form->{introtext});
+	my $tid         = $fhitem->{tid} || $self->getTidByKeyword('journal');
 	my $promotetype = $self->_getJournalPubType;
 	my $discuss     = $form->{commentstatus};
-	my $posttype    = $preview->{posttype};
 
 	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
 	my $article = $journal_reader->get($fhitem->{srcid});

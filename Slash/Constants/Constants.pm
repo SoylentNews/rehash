@@ -170,10 +170,11 @@ change Slash::Data::strip_mode() to allow the new value.
 	HTML
 	EXTRANS
 	CODE
+	FULLHTML
 
 =cut
 
-# -4 -3 -2 -1 0 1 2 3 4
+# -4 -3 -2 -1 0 1 2 3 4 77
 
 =head2 people
 

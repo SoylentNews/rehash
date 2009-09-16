@@ -84,6 +84,7 @@ our @EXPORT  = qw(
 	createLogToken
 	createSid
 	decode_entities
+	determine_html_format
 	ellipsify
 	emailValid
 	email_to_domain
@@ -1606,6 +1607,44 @@ sub strip_nohtml	{ stripByMode($_[0], NOHTML,	@_[1 .. $#_]) }
 sub strip_notags	{ stripByMode($_[0], NOTAGS,	@_[1 .. $#_]) }
 sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 
+sub determine_html_format {
+	my($html, $user) = @_;
+	my $posttype = PLAINTEXT;
+
+	my $is_admin = 0;
+	my($match, $admin_text);
+	$user ||= getCurrentUser();
+	$is_admin = isAdmin($user) || $user->{acl}{journal_admin_tags};
+
+	if ($is_admin) {
+		my $constants = getCurrentStatic();
+		my $cache = getCurrentCache();
+		$match = $cache->{approvedtags_admin_alone};
+		if (!$match) {
+			my %tags = map {$_ => 1} @{$constants->{approvedtags_admin}};
+			delete $tags{$_} for @{$constants->{approvedtags}};
+			$match = join '|', map lc, keys %tags;
+			$cache->{approvedtags_admin_alone} = $match = qr/$match/;
+		}
+	}
+
+	# first check to see if the post starts with <pre>
+	if ($html =~ /^\s*<pre>/s) {
+		$posttype = CODE;
+		$html =~ s/<\/?pre>//g;
+
+	# then see if user is an admin, and there's an admin-only tag used
+	} elsif ($is_admin && $html =~ /<(?:$match)\b/) {
+		$posttype = FULLHTML;
+
+	# finally see if there's a line-breaking tag
+	} elsif ($html =~ /<(?:p|br)\b/) {
+		$posttype = HTML;
+	}
+
+	# the HTML can be modified, so need to return the HTML too
+	return($html, $posttype);
+}
 
 #========================================================================
 
