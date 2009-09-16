@@ -44,13 +44,11 @@ __template__
 			<span id="modal_ok">Thanks for <a href="[% link_url %]">your submission to Slashdot</a> ([% id %]).
 								Help us <a href="[% constants.real_rootdir %]/recent">evaluate other recent submissions</a> if you have some spare time.
 								[% IF !user.is_anon %]<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submissions">View your recent submissions</a>.[% END %]</span>
-		</div>
-
-		<div>
-                <a href="#" class="badgelink"><img src="[% constants.imagedir %]/sdit4n.png" style="padding:.5em 0 0 .5em;" >
-				<div class="message error roundall" style="background:none;font-weight:normal;top:-.75em">
-					<span id="modal_tip"><em>Add this badge to your website.</em></span>
-				</div>
+			<div style="margin:.75em">
+				<a href="#" class="badgelink"><img src="[% constants.imagedir %]/sdit4n.png" style="padding:.5em 0 0 .5em;" >
+					<div class="message error roundall" style="background:none;font-weight:normal;top:-.75em">
+						<span id="modal_tip"><em>Add this badge to your website.</em></span>
+					</div>
 				</a>
                         <div id="badgeinfo" style="display: none">
                         [% IF new_item.url_id; new_item_url = Slash.db.getUrl(new_item.url_id); %]
