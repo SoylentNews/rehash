@@ -163,7 +163,7 @@ sub save {
 		$editor = $edit->showEditor({ errors => $errors });
 	}
 	my $save_result;
-	$save_result = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item }, { Return => 1 }) if !$editor;
+	$save_result = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, state => $form->{state} }, { Return => 1 }) if !$editor;
 	slashDisplay('editorwrap', { editor => $editor, save_result => $save_result });
 }
 
