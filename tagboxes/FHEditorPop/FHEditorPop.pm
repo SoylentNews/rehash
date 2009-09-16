@@ -59,7 +59,7 @@ sub init_tagfilters {
 
 sub get_affected_type	{ 'globj' }
 sub get_clid		{ 'vote' }
-sub get_nosy_gtids	{ 'tagnames' }
+sub get_nosy_gtids	{ '*' }
 
 sub feed_newtags_process {
 	my($self, $tags_ar) = @_;

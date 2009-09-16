@@ -240,14 +240,21 @@ sub getTagboxes {
 				# instead of the numeric equivalent.
 				$hr->{clid} = $self->getCloutTypes()->{ $hr->{clid} };
 			}
+			my $globj_types = $self->getGlobjTypes();
 			my $nosy_gtids_ar = $class->get_nosy_gtids() || [ ];
-			$nosy_gtids_ar = [ $nosy_gtids_ar ] if !ref $nosy_gtids_ar;
+			if (!ref $nosy_gtids_ar) {
+				if ($nosy_gtids_ar eq '*') {
+					$nosy_gtids_ar = [ sort keys %$globj_types ];
+				} else {
+					$nosy_gtids_ar = [ $nosy_gtids_ar ];
+				}
+			}
 			if (grep { /^[a-z]/ } @$nosy_gtids_ar) {
 				# Allow subclasses' get_nosy_gtids() class method
 				# to optionally return strings (e.g. 'urls')
 				# instead of the numeric equivalents.
 				$nosy_gtids_ar = [ map {
-					/^[a-z]/	? $self->getGlobjTypes()->{ $_ }
+					/^[a-z]/	? $globj_types->{ $_ }
 							: $_
 				} @$nosy_gtids_ar ];
 			}
