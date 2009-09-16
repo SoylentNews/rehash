@@ -412,13 +412,22 @@ END;
 				[% errors.critical.no_domaintag %]
 			[% END %]
 
+			[% IF errors.warnings.tagwarning %]
+				[% errors.warnings.tagwarning %]
+			[% END %]
+		</div>
+
+		[% IF !errors.critical.keys.size %]
+		<div class="subxtras" id="extra-warnings">
 			[% IF errors.warnings %]
 					[% FOREACH warning = errors.warnings.keys;
 						NEXT IF warning == 'ispellwarning' && !preview_shown;
+						NEXT IF warning == 'tagwarning';
 						errors.warnings.$warning;
 					END %]
 			[% END %]
 		</div>
+		[% END %]
 
 		<div class="subarticle-foot">
 			<div class="subactionbuttons">
