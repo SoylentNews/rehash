@@ -582,6 +582,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 		edit_mode    => 1,
 		skipvote     => 1,
 		vote         => $options->{vote},
+		preview_mode => 1,
 	}, { Return => 1, Page => 'firehose'});
 
 

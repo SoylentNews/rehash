@@ -19,7 +19,7 @@ __template__
 <menu type="toolbar" class="edit-bar[% IF edit_mode %] expanded[% END %]">
 	[% PROCESS editor_note IF user.is_admin && !options.usermode %]
 	[% UNLESS edit_mode %]<a class="edit-toggle"><span class="button collapse"></span></a>[% END %]
-	<input class="tag-entry default" type="text" size="10"[% UNLESS edit_mode %] style="display:none"[% END %] value="apply tags">
+	<input[% IF preview_mode %] name="tag-entry-input"[% END %] class="tag-entry default" type="text" size="10"[% UNLESS edit_mode %] style="display:none"[% END %] value="apply tags">
 	<span class="tag-server-busy" style="display:none"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% END %].gif"></span>
 
 	<span id="tagbar-[% id %]" class="tag-bar">[%
