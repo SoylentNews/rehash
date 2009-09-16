@@ -8,17 +8,6 @@ __description__
 The context menus for tags and pseudo-tags in the firehose and elsewhere.
 __template__
 [% UNLESS tag_menus_are_already_installed %]
-	[% IF user.is_anon %]
-<script type="text/javascript">
-$('a[rel=tag]').live('click', function( e ){
-	var	target	= original_target(e),
-		tag	= $(target).text();
-	addfhfilter(tag);
-	e.preventDefault();
-	return false;
-});
-</script>
-	[% ELSE %]
 <style type="text/css">
 menu, menu * {
 	cursor:pointer;
@@ -212,9 +201,18 @@ function close_menu( trigger, $menu ){
 var $TAG_MENU=$('#tag-menu'), NOTNOT=/^!!/;
 $('a[rel=tag]').
 	live('mousedown', function( e ){
-		return trigger_menu(e, 'a[rel=tag]', $TAG_MENU);
+		var unhandled=true;
+		if ( logged_in || $(original_target(e)).is('div.fhitem-editor *') ) {
+			unhandled = trigger_menu(e, 'a[rel=tag]', $TAG_MENU);
+		}
+		return unhandled;
 	}).
 	live('click', function( e ){
+		if ( !logged_in ) {
+			var	target	= original_target(e),
+				tag	= $(target).text();
+			addfhfilter(tag);
+		}
 		e.preventDefault();
 		return false;
 	});
@@ -280,7 +278,7 @@ $TAG_MENU.menu({
 
 
 /* T2 feedback context-menu */
-
+[% UNLESS user.is_anon %]
 var $FEEDBACK_MENU=$('#feedback-menu');
 $('a.feedback-button.pseudo-tag').
 	live('mousedown', function( e ){
@@ -303,35 +301,7 @@ $FEEDBACK_MENU.menu({
 
 
 
-
-/* T2 datatype context-menu (admin-only) */
-
-[% IF user.is_admin %]
-var $DATATYPE_MENU=$('#datatype-menu');
-$('a.datatype.pseudo-tag').
-	live('mousedown', function( e ){
-		return trigger_menu(e, 'a.datatype.pseudo-tag', $DATATYPE_MENU);
-	}).
-	live('click', function( e ){
-		e.preventDefault();
-		return false;
-	});
-
-$DATATYPE_MENU.menu({
-	cssNamespace: 'slash',
-	liveTriggers: true,
-	clickDuration: 300,
-
-	start:	function( e, ui ){ open_menu(ui.trigger, $DATATYPE_MENU); },
-	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
-	stop:	function( e, ui ){ close_menu(ui.trigger, $DATATYPE_MENU); }
-});
-[% END %]
-
-
-
-
-/* T2 reasons menus */
+/* T2 reasons menus (logged-in only) */
 
 var	$NIX_REASONS=$('#nix-reasons'),			$NOD_REASONS=$('#nod-reasons'),
 	$COMMENT_NIX_REASONS=$('#comment-nix-reasons'),	$COMMENT_NOD_REASONS=$('#comment-nod-reasons'),
@@ -393,12 +363,39 @@ $(NODNIX).live('mousedown', function( e ){
 	}
 	return !in_use;
 });
+[% END %]
+
+
+/* T2 datatype context-menu (admin-only) */
+
+[% IF user.is_admin %]
+var $DATATYPE_MENU=$('#datatype-menu');
+$('a.datatype.pseudo-tag').
+	live('mousedown', function( e ){
+		return trigger_menu(e, 'a.datatype.pseudo-tag', $DATATYPE_MENU);
+	}).
+	live('click', function( e ){
+		e.preventDefault();
+		return false;
+	});
+
+$DATATYPE_MENU.menu({
+	cssNamespace: 'slash',
+	liveTriggers: true,
+	clickDuration: 300,
+
+	start:	function( e, ui ){ open_menu(ui.trigger, $DATATYPE_MENU); },
+	select:	function( e, ui ){ try { Tags.submit($(ui.trigger).closest('div.fhitem')[0], $(ui.select).text()); } catch ( err ) {  } },
+	stop:	function( e, ui ){ close_menu(ui.trigger, $DATATYPE_MENU); }
+});
+[% END %]
+
+
 
 
 });
 </script>
-	[% END %]
-	[% tag_menus_are_already_installed = 1 %]
+[% tag_menus_are_already_installed = 1 %]
 [% END %]
 __seclev__
 10000
