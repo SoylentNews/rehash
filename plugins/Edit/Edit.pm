@@ -137,7 +137,7 @@ sub getOrCreatePreview {
 			}
 
 			if ($form->{new}) {
-				$p_data->{title} = $fh_data->{title} = strip_notags($form->{title});
+				$p_data->{title} = $fh_data->{title} = $type eq 'story'? $form->{title} : strip_notags($form->{title});
 				$p_data->{url_text}                  = $form->{url} if $form->{url};
 				$p_data->{introtext}                 = $form->{introtext};
 			}
@@ -333,7 +333,7 @@ sub savePreview {
 
 
 	$form->{title} =~ s/[\r\n].*$//s;  # strip anything after newline
-	$p_data->{title} = $fh_data->{title} = strip_notags($form->{title});
+	$p_data->{title} = $fh_data->{title} = $p_item->{type} eq 'story' ? $form->{title} : strip_notags($form->{title});
 	$p_data->{introtext}                 = $form->{introtext};
 	$fh_data->{createtime}               = $form->{createtime} if $form->{createtime};
 
