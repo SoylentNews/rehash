@@ -531,7 +531,7 @@ use Data::Dumper; print STDERR Dumper $storyref;
 
 	$options->{previewing} = 0 if ($options->{errors}{critical} && keys %{$options->{errors}{critical}} > 0) || $form->{'new'};
 
-	if ($p_item && $p_item->{title} && $preview->{introtext} && $options->{previewing}) {
+	if ($p_item && $p_item->{title} && $options->{previewing}) {
 		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
 		my $book_info = '';
 
@@ -626,7 +626,7 @@ sub validate {
 
 	if ($item->{type} eq 'submission') {
 		if (length($item->{title}) < 2) {
-			$messages->{critical}{badsubject} = getData('badsubject','','edit');
+			$messages->{critical}{badsubject} = getData('badsubject', { fhid => $preview->{preview_fhid} },'edit');
 		}
 
 		my $message;
@@ -645,21 +645,21 @@ sub validate {
 
 		if ($preview->{url_text}) {
 			if(!validUrl($preview->{url_text})) {
-				$messages->{critical}{invalidurl} = getData("invalidurl",'','edit');
+				$messages->{critical}{invalidurl} = getData("invalidurl", { fhid => $preview->{preview_fhid} }, 'edit');
 			}
 			if ($item->{url_id}) {
 				if ($constants->{plugin}{FireHose}) {
 					my $firehose = getObject("Slash::FireHose");
 					if (!$firehose->allowSubmitForUrl($item->{url_id})) {
 						my $submitted_items = $firehose->getFireHoseItemsByUrl($item->{url_id});
-						$messages->{critical}{duplicateurl} = getData("duplicateurl", { submitted_items => $submitted_items }, 'edit');
+						$messages->{critical}{duplicateurl} = getData("duplicateurl", { fhid => $preview->{preview_fhid}, submitted_items => $submitted_items }, 'edit');
 					}
 				}
 			}
 		}
 
-		if (!$preview->{introtext}) {
-			$messages->{critical}{badintrotext} = getData('badintrotext','','edit');
+		if (!$preview->{introtext} and !$preview->{url_text} and !$messages->{critical}{invalidurl} and !$messages->{critical}{duplicateurl}) {
+			$messages->{warnings}{badintrotext} = getData('badintrotext', { fhid => $preview->{preview_fhid} }, 'edit');
 		}
 		# XXXEdit Check Nexus Extras eventually
 		# XXXEdit test reskey success / failure here? or in saveItem?
@@ -667,7 +667,7 @@ sub validate {
 	} elsif ($item->{type} eq 'story') {
 		# Admin-specific errors
 		if ($preview->{introtext} =~ /link to original source/i) {
-			$messages->{critical}{orig_source} = getData('introtext_origsource', '', 'edit');
+			$messages->{critical}{orig_source} = getData('introtext_origsource', { fhid => $preview->{preview_fhid} }, 'edit');
 		}
 
 		if (!$preview->{dept}) {
@@ -692,11 +692,11 @@ sub validate {
 
 	# Errors and warnings for both types
 	if (!$other_tags->{domain_tag}) {
-		$messages->{critical}{no_domaintag} = getData('no_domaintag', '', 'edit');
+		$messages->{critical}{no_domaintag} = getData('no_domaintag', { fhid => $preview->{preview_fhid} }, 'edit');
 	}
 
 	if (!$form->{nojs} && ($other_tags->{domain_tag}) && (!$messages->{critical}{no_domaintag}) && (@$applied_tags == 1)) {
-		$messages->{warnings}{tagwarning} = getData('tagwarning', { type => $item->{type} }, 'edit');
+		$messages->{warnings}{tagwarning} = getData('tagwarning', { fhid => $preview->{preview_fhid}, type => $item->{type} }, 'edit');
 	}
 
 	#use Data::Dumper;
