@@ -45,27 +45,27 @@ __template__
 								Help us <a href="[% constants.real_rootdir %]/recent">evaluate other recent submissions</a> if you have some spare time.
 								[% IF !user.is_anon %]<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submissions">View your recent submissions</a>.[% END %]</span>
 			<div style="margin:.75em">
-				<a href="#" class="badgelink"><img src="[% constants.imagedir %]/sdit4n.png" style="padding:.5em 0 0 .5em;" >
-					<div class="message error roundall" style="background:none;font-weight:normal;top:-.75em">
-						<span id="modal_tip"><em>Add this badge to your website.</em></span>
-					</div>
-				</a>
+						<a href="#" class="badgelink"><img src="[% constants.imagedir %]/sdit4n.png" style="padding:.5em 0 0 .5em;" >
+							<div class="message error roundall" style="background:none;font-weight:normal;top:-.75em">
+								<span id="modal_tip"><em>Add this badge to your website.</em></span>
+							</div>
+						</a>
                         <div id="badgeinfo" style="display: none">
-                        [% IF new_item.url_id; new_item_url = Slash.db.getUrl(new_item.url_id); %]
-                        By including this HTML, you can add a badge to your page to easily allow your readers to submit it to Slashdot for consideration.
-                        <textarea rows="5" cols="50" wrap="off" readonly="yes" style="display:block;clear:both">
-<script type="text/javascript">
-        slashdot_url="[% new_item_url.url %]";
-</script>
-<script src="http://slashdot.org/slashdot-it.js" type="text/javascript"></script>
-                        </textarea>
-                [% ELSE %]
-                        By including a URL in your submission, you can add a badge to your page and easily allow your readers to submit it to Slashdot for consideration.
-                [% END %]
-
-                        Read the <a href="/faq/badges.shtml">badge FAQ</a> to learn more.
+							[% IF new_item.url_id; new_item_url = Slash.db.getUrl(new_item.url_id); %]
+							By including this HTML, you can add a badge to your page to easily allow your readers to submit it to Slashdot for consideration.
+							<textarea rows="5" cols="50" wrap="off" readonly="yes" style="display:block;clear:both">
+								<script type="text/javascript">
+										slashdot_url="[% new_item_url.url %]";
+								</script>
+								<script src="http://slashdot.org/slashdot-it.js" type="text/javascript"></script>
+							</textarea>
+							[% ELSE %]
+									By including a URL in your submission, you can add a badge to your page and easily allow your readers to submit it to Slashdot for consideration.
+							[% END %]
+							Read the <a href="/faq/badges.shtml">badge FAQ</a> to learn more.
                         </div>
-                </div>
+			</div>
+		</div>
 	[% ELSIF type == "journal" %]
 		<div class="message error block roundbottom">
 			<span id="modal_ok">
