@@ -2331,6 +2331,7 @@ sub editSave {
 		$item = $fh->getFireHoseByTypeSrcid($type, $num_id);
 		my $options = { mode => 'full' };
 		$options->{options} = { user_view_uid => $item->{uid} } if $type eq 'journal';
+		$options->{options}{no_collapse} = 1 if $form->{state} ne 'inline';
 		$saved_item = $fh->dispFireHose($item, $options);
 	} else {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });

@@ -152,7 +152,10 @@ sub save {
 		$num_id = $slashdb->getStoidFromSidOrStoid($id)  if ($type eq 'story');
 		my $fh = getObject("Slash::FireHose");
 		my $item = $fh->getFireHoseByTypeSrcid($type, $num_id);
-		$saved_item = $fh->dispFireHose($item, { mode => 'full'});
+		my $options = { mode => 'full' };
+		$options->{options} = { user_view_uid => $item->{uid} } if $type eq 'journal';
+		$options->{options}{no_collapse} = 1 if $form->{state} ne 'inline';
+		$saved_item = $fh->dispFireHose($item, $options);
 
 		$slashdb->setCommonStoryWords;
 	} else { 

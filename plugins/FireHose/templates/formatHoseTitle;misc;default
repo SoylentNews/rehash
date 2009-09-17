@@ -73,7 +73,7 @@ ELSIF item.type == "journal";
 	END;
 END;
 
-IF !feature && !view_mode;
+IF !feature && !view_mode && !options.no_collapse;
 	onclick = "onclick=\"return toggle_fh_body_wrap_return(this);\"";
 END;
 
