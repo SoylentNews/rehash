@@ -28,8 +28,15 @@ function preprocess( fhitem, tags ){ // catch and handle tag-like commands to be
 	return tags.join(' ');
 }
 
-Tags.submit = function( fhitem, tags ){
-	var $fhitem=$(fhitem), key=fhitem_key(fhitem), $spinner=$('span.tag-server-busy', fhitem).show();
+Tags.submit = function( fhitem_or_tagbar, tags ){
+	var	$target		= $(fhitem_or_tagbar),
+		$tagbar		= $target,
+		$fhitem		= $target.closest('div.fhitem'),
+		fhitem		= $fhitem[0],
+		key		= fhitem_key(fhitem),
+		$spinner	= $('span.tag-server-busy', fhitem).show();
+
+	$tagbar.is('.tag-bar') || ($tagbar = $fhitem.find('span.tag-bar'));
 	tags && (tags=preprocess(fhitem, tags));
 
 	$.ajax({
@@ -45,7 +52,7 @@ Tags.submit = function( fhitem, tags ){
 			include_topic_images:sign($fhitem.is('.fhitem-editor'))
 		},
 		success: function( next_markup ){
-			var $tagbar=$fhitem.find('span.tag-bar'), prev=inspect($tagbar), next=inspect($tagbar.html(next_markup));
+			var prev=inspect($tagbar), next=inspect($tagbar.html(next_markup));
 
 			// Trigger events directly on $fhitem, but bubble up to document (so you only need to .bind() once).
 			// In your handler: event.target is the fhitem.
@@ -63,7 +70,7 @@ Tags.submit = function( fhitem, tags ){
 	});
 };
 
-Tags.fetch = function( fhitem ){ Tags.submit(fhitem); };
+Tags.fetch = function( fhitem_or_tagbar ){ Tags.submit(fhitem_or_tagbar); };
 })();
 
 
@@ -108,7 +115,7 @@ $('input.tag-entry').
 	live('keyup', function( event ){
 		var $this=$(original_target(event)), key=event.which || event.keyCode;
 
-		SUBMIT_FOR[key]	&& Tags.submit($this.closest('.fhitem')[0], $this.val());
+		SUBMIT_FOR[key]	&& Tags.submit($this.siblings('span.tag-bar'), $this.val());
 		CLEAR_FOR[key]	&& $this.val('');
 		CLOSE_FOR[key]	&& firehose_toggle_tag_ui_to(false, $this);
 		return true;
