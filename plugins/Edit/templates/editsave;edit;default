@@ -22,7 +22,7 @@ __template__
 
 	<!--[% id %] [% type %] [% save_type %]-->
 	[% IF type == "story" %]
-		<div class="message error block roundbottom"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
+		<div class="message error block roundall"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
 	[% ELSIF type == "submission" %]
 
 		<script type="text/javascript">
@@ -40,7 +40,7 @@ __template__
                    link_url = fh.linkFireHose(new_item);
                 %]
 
-		<div class="message error block roundbottom">
+		<div class="message error block roundall">
 			<span id="modal_ok">Thanks for <a href="[% link_url %]">your submission to Slashdot</a> ([% id %]).
 								Help us <a href="[% constants.real_rootdir %]/recent">evaluate other recent submissions</a> if you have some spare time.
 								[% IF !user.is_anon %]<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submissions">View your recent submissions</a>.[% END %]</span>
@@ -67,7 +67,7 @@ __template__
 			</div>
 		</div>
 	[% ELSIF type == "journal" %]
-		<div class="message error block roundbottom">
+		<div class="message error block roundall">
 			<span id="modal_ok">
 			<a href="[% constants.real_rootdir %]/journal/[% id %]">[% IF save_type == 'new' %]New Journal Created[% ELSE %]Journal Updated[% END %]</a>
 			([% id %])
