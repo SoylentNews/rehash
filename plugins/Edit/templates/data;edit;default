@@ -75,7 +75,7 @@ __template__
 
 [% CASE 'duplicateurl' %]
 	[% returnme.data_constant = 1 %]
-                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'url'); return false;">The url you've attempted to submit has already been submitted as. 
+                <div class="message error block roundbottom"><span id="modal_error"><a href="" style="text-decoration: none" onclick="edit_editon([% fhid %], 'input', 'url'); return false;">The url you've attempted to submit has already been submitted as  
 		[% fh = Slash.getObject("Slash::FireHose") %]
                         [% FOREACH item = submitted_items %]
 				[% IF !loop.first %], [% IF loop.last %] and [% END %][% END %]
