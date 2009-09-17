@@ -2804,10 +2804,18 @@ sub ajax_recenttagnamesbox {
 
 sub getTagnameidsByParam {
 	my($self, $name, $value) = @_;
-	return $self->sqlSelectColArrayref('tagnameid', 'tagname_params',
-		'name=' . $self->sqlQuote($name),
-		'AND value=' . $self->sqlQuote($value)
-	);
+	my $retval;
+	if (defined($value) && length($value)) {
+		$retval = $self->sqlSelectColArrayref('tagnameid', 'tagname_params',
+			'name=' . $self->sqlQuote($name),
+			'AND value=' . $self->sqlQuote($value)
+		);
+	} else {
+		$retval = $self->sqlSelectColArrayref('tagnameid', 'tagname_params',
+			'name=' . $self->sqlQuote($name)
+		);
+	}
+	return $retval;
 }
 
 sub getTagnamesByParam {
@@ -2822,6 +2830,13 @@ sub getPopupTags {
 	return $self->getTagnamesByParam('popup', '1');
 }
 
+sub getPopupTagnameids {
+	my($self) = @_;
+	return $self->getTagnameidsByParam('popup', '1');
+}
+
+# Modifies argument in place.
+
 sub limitToPopupTags {
 	my($self, $tags) = @_;
 	my $pop = $self->getPopupTags;
@@ -2830,8 +2845,20 @@ sub limitToPopupTags {
 	for (@$pop) {
 		$tags{$_} = 1 if exists $tags{$_};
 	}
-	$tags{$_} or delete $tags{$_} for keys %tags;
-	@$tags = keys %tags;
+	@$tags = grep { $tags{$_} } keys %tags;
+}
+
+# Modifies argument in place.
+
+sub limitToPopupTagnameids {
+	my($self, $tagnameids) = @_;
+	my $pop = $self->getPopupTagnameids;
+
+	my %tagnameids = map { $_ => 0 } @$tagnameids;
+	for (@$pop) {
+		$tagnameids{$_} = 1 if exists $tagnameids{$_};
+	}
+	@$tagnameids = grep { $tagnameids{$_} } keys %tagnameids;
 }
 
 sub getNegativePopupTags {
@@ -2848,14 +2875,25 @@ sub getPositivePopupTags {
 	return $pos;
 }
 
+# Excluded tags are those excluded from the toptags (top 5) list.
+# That list can be manually maintained by adding 'exclude' params
+# but also automatically includes all popup tags and the domain
+# tag ("slashdot").
+
 sub getExcludedTags {
 	my($self) = @_;
-	return $self->getTagnamesByParam('exclude', '1');
+	my $tagnameids = $self->getExcludedTagnameids();
+	my $tagname_hr = $self->getTagnameDataFromIds($tagnameids);
+	return [ map { $tagname_hr->{$_}{tagname} } keys %$tagname_hr ];
 }
 
 sub getExcludedTagnameids {
 	my($self) = @_;
-	return $self->getTagnameidsByParam('exclude', '1');
+	my $manual_ar = $self->getTagnameidsByParam('exclude', '1');
+	my $posneg_ar = $self->getTagnameidsByParam('posneg');
+	$self->limitToPopupTagnameids($posneg_ar);
+	my %exclude = ( map { $_, 1 } @$manual_ar, @$posneg_ar );
+	return [ keys %exclude ];
 }
 
 
