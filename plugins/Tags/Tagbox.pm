@@ -369,6 +369,7 @@ sub getTagboxesNosyForGlobj {
 				push @{ $gtid_to_tbids->{$gtid} }, $tb_hr->{tbid};
 			}
 		}
+		# XXX check gtid_to_tbids on live site, make sure it looks correct
 	}
 	$gtid = $globj_hr->{gtid};
 	return @{ $gtid_to_tbids->{$gtid} };

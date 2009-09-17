@@ -188,6 +188,7 @@ sub update_feederlog {
 
 	# Get list of all new globjs since last update_feederlog, and
 	# insert NULL,NULL,NULL rows for each one wanted.
+	# XXX check tags_tagbox_lastglobjid on live site, make sure it looks valid
 	my $last_globjid_logged = $tagboxdb->getVar('tags_tagbox_lastglobjid', 'value', 1) || 0;
 	my $new_globjs_ar = $tagsdb->sqlSelectAllHashrefArray(
 		'globjid, gtid, target_id', 'globjs',
@@ -215,6 +216,7 @@ sub update_feederlog {
 			}
 			insert_feederlog($tagboxdb->getTagboxes($tbid), $feeder_ar);
 		}
+		# XXX check this on live site, can $new_globjs_ar->[-1]{globjid} be 0 or somesuch?
 		$tagboxdb->setVar('tags_tagbox_lastglobjid', $new_globjs_ar->[-1]{globjid});
 	}
 
