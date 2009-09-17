@@ -2099,6 +2099,7 @@ function edit_editon(id, type, label) {
 	$('.editonly').removeClass('hide');
 	$('.previewonly').addClass('hide');
 	$('#editor').removeClass('step2').addClass('step1');
+	Tags.fetch($('#editor'));
 	
 	// Hide pending warnings on edit form
 	$('#extra-warnings').addClass('hide');
