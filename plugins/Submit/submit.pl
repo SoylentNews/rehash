@@ -30,7 +30,7 @@ sub main {
 	}
 
 
-	if ($constants->{submit_redirect_submit2} && !$user->{is_anon}) {
+	if ($constants->{submit_redirect_submit2}) {
 		my $redirect_loc = "/submission";
 		if (@redirect_ops) {
 			$redirect_loc .= "?" . join('&', @redirect_ops);
