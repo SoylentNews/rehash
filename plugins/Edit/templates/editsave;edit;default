@@ -22,7 +22,7 @@ __template__
 
 	<!--[% id %] [% type %] [% save_type %]-->
 	[% IF type == "story" %]
-		<div class="message error block roundall"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span></div>
+		<div class="message error block roundall"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span>[% IF state == 'inline' %]<a href="#" onclick="$('#editor').remove(); return false">[close]</a>[% END %]</div>
 	[% ELSIF type == "submission" %]
 
 		<script type="text/javascript">

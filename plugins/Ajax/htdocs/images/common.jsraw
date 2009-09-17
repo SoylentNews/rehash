@@ -2077,6 +2077,7 @@ function show_submit_box(id,type) {
 }
 
 function show_submit_box_after(from_id,type) {
+	$('#editor').remove();
 	var params = {
 		op:  'edit_submit_box_after',
 		reskey:	reskey_static

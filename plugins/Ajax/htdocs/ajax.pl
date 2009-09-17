@@ -2343,11 +2343,11 @@ sub editSave {
 	} else {
 		if ($form->{state} eq 'inline') {
 			if ($preview->{src_fhid}) {
-				$html_append->{"title-$preview->{src_fhid}"} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1, state => $form->{state} }, { Return => 1, Page => 'edit' });
+				$html->{"editor"} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, no_display_item => 1, state => $form->{state} }, { Return => 1, Page => 'edit' });
 			}
 			$eval_first = "\$('#firehose-$item->{id}').remove(); \$('.edithidden').show().removeClass('edithidden');";
 			$html_add_before->{editor} = $saved_item;
-			$eval_last = "\$('#editor').remove(); use_sprites('#firehoselist')";
+			$eval_last = "use_sprites('#firehoselist')";
 		} else {
 			$html->{editor} = slashDisplay('editsave', { editor => $editor, id => $id, save_type => $save_type, type => $type, saved_item => $saved_item, state => $form->{state} }, { Return => 1, Page => 'edit' });
 		}
