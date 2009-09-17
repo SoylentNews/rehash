@@ -24,7 +24,7 @@ IF item.type == "submission" || item.type == "submission";
 	ELSIF (item.name == constants.anon_name) && constants.anon_name_alt;
 		IF introtext;
 			introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
-		END;		
+		END;
 	ELSIF item.name;
 		IF introtext;
 			introtext = "$item.name writes <i>\"$introtext\"</i>";
