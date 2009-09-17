@@ -1095,7 +1095,8 @@ sub editCreateSubmission {
 		subj		=> $fhitem->{title},
 		tid		=> $fhitem->{tid},
 		primaryskid 	=> $fhitem->{primaryskid} || $gSkin->{skid},
-		mediatype	=> $fhitem->{mediatype}
+		mediatype	=> $fhitem->{mediatype},
+		submit2		=> 1
 	};
 
 	$submission->{nojs} = 1 if $form->{nojs};
