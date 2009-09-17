@@ -4352,10 +4352,7 @@ sub listView {
 
 	my $sprite_rules = $self->js_anon_dump($self->getSpriteInfoByFHID($items->[0]->{id}));
 
-	my $has_game_character = $slashdb->sqlSelect("CharacterID", "GAME_Characters", "UID = '$user->{uid}'");
-
 	my $ret = slashDisplay("list", {
-		has_game_character	=> $has_game_character,
 		itemstext		=> $itemstext,
 		itemnum			=> $itemnum,
 		page			=> $options->{page},

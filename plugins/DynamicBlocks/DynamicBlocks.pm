@@ -66,7 +66,6 @@ sub setUserBlock {
         my $user = $slashdb->getUser($uid);
         my ($block, $data, $id);
 
-        $block = $self->setUserGameBlock($user)        if ($name eq 'game');
         $block = $self->setUserCommentBlock($user)     if ($name eq 'comments');
         $block = $self->setUserJournalBlock($user)     if ($name eq 'journal');
         $block = $self->setUserAchievementBlock($user) if ($name eq 'achievements');
@@ -114,28 +113,6 @@ sub setUserBlock {
 		# since it's stale.
 		$slashdb->sqlDelete('dynamic_user_blocks', "bid = $id and name = '$name-$uid' and $uid = $uid") if $id;
 	}
-}
-
-sub setUserGameBlock {
-	my ($self, $user) = @_;
-
-	return 0 if !$user->{uid};
-
-	my $slashdb = getCurrentDB();
-
-	my $char = $slashdb->sqlSelectHashref( "*", "GAME_Characters", "UID = '$user->{uid}'" );
-
-	my $block;
-	my $game_block = slashDisplay('creategame', {
-			char => $char,
-		}, { Page => 'dynamicblocks', Return => 1 });
-
-	$block->{block} = $game_block;
-	$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/hack';
-	$block->{title} = strip_literal($user->{nickname}) . "'s SlashHack Character";
-	$block->{description} = 'SlashHack';
-
-        return (keys %$block) ? $block : 0;
 }
 
 sub setUserCommentBlock {

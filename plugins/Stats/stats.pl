@@ -242,10 +242,7 @@ sub list {
 		separate_name_select 	=> $sep_name_select 
 	}) unless $form->{type} && $form->{type} eq 'graphs';
 
-	my $has_game_character = $slashdb->sqlSelect("CharacterID", "GAME_Characters", "UID = '$user->{uid}'");
-
 	slashDisplay('list', {
-		has_game_character	=> $has_game_character,
 		stats_data		=> $stats_data,
 		skins			=> _get_skins(),
 	});

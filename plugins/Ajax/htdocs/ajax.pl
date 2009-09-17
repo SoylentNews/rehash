@@ -740,16 +740,6 @@ sub getModalPrefs {
 			{ Return => 1 }
 		);
 
-	} elsif ($form->{'section'} eq 'game_activate') {
-
-		return
-			slashDisplay('game_activate', {
-				user			=> $user,
-				tabbed			=> $form->{'tabbed'},
-			},
-			{ Return => 1 }
-		);
-
 	} elsif ($form->{'section'} eq 'new_slashboxes') {
 
 		return
