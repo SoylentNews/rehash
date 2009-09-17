@@ -100,7 +100,7 @@ $(document).ready(function(){
 		return false;
 	});
 
-	$("textarea.growable").change(function(){
+	$('textarea.growable').bind('autogrow-did-grow', function(){
 		if(!$("#mediaupload").hasClass("hide")) {
 			repos('#mediaupload','#uploadfk');
 		}
