@@ -63,8 +63,14 @@ ELSIF item.type == "comment";
 
 		title = title _ " <span class='reason'>(Score " _ score _ reason _ ")</span>";
 ELSIF item.type == "journal";
+	IF view_mode;
+		nickname_literal = the_user.nickname | strip_literal;
+		nickname_url     = the_user.nickname | strip_urlattr;
+		nickname_attr    = the_user.nickname | strip_attribute;
+		the_skin_title = '<a href="' _ gSkin.rootdir _ "/~" _ nickname_url _ '/journal" title="' _ nickname_attr _ "'s" _ ' Journal"  class="skin">' _ nickname_literal _ "'s Journal:</a> ";
+	ELSE;
 		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=journal" title="Filter to journal"  class="skin">Journal:</a> ';
-
+	END;
 END;
 
 IF !feature && !view_mode;

@@ -2314,18 +2314,11 @@ sub editReset {
 sub editSave {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('edit-submit');
 	my $edit = getObject("Slash::Edit");
-	$edit->savePreview();
-	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem();
-
-	if (!keys %$errors > 0) {
-		my $reskey = getObject('Slash::ResKey');
-		my $rkey = $reskey->key('edit-submit');
-		unless ($rkey->use) {
-			errorLog($rkey->errstr);
-			return;
-		}
-	}
+	$edit->savePreview;
+	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem($rkey);
 
 	my($editor, $id);
 	my $saved_item;

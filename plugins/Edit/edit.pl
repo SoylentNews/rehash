@@ -141,14 +141,10 @@ sub save {
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('edit-submit');
-	unless ($rkey->use) {
-		errorLog($rkey->errstr);
-		return;
-	}
-
 	my $edit = getObject("Slash::Edit");
 	$edit->savePreview;
-	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem;
+	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem($rkey);
+
 	my($editor, $id);
 	my $saved_item;
 	if ($retval) {

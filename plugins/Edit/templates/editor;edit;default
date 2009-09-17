@@ -455,7 +455,7 @@ END;
 					[% END; IF item.type == 'journal' && !item.srcid # XXXJournal maybe later allow to change after-the-fact %]
 						<div class="input">
 							<input type="checkbox" name="promotetype" id="promotetype" value="publicize" [% constants.markup_checked_attribute IF preview.promotetype == "publicize" %]>
-							[% PROCESS formLabel value => "Publicize Your Journal to the Rest of $constants.sitename ($preview.promotetype)" for => 'promotetype' %]
+							[% PROCESS formLabel value => "Publicize Your Journal to the Rest of $constants.sitename (Comments must be Enabled)" for => 'promotetype' %]
 						</div>
 					[% END; IF item.type == 'story' %]
 						<div class="input">

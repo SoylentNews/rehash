@@ -276,9 +276,11 @@ sub createInitialTagsForPreview {
 sub determineAllowedTypes {
 	my $user = getCurrentUser();
 	my @types = ('submission');
-	push @types, 'journal' if !$user->{is_anon} && $user->{is_admin}; # XXXJournal admin-only for testing
+	push @types, 'journal' if !$user->{is_anon};
 	push @types, 'story' if $user->{is_admin};
-	return @types; # XXX return hashref?
+
+	my %types = map { $_ => 1 } @types;
+	return \%types;
 }
 
 sub determineDefaultType {
@@ -291,10 +293,10 @@ sub determineType {
 	my $user = getCurrentUser();
 	my $form  = getCurrentForm();
 
-	my %types = map { $_ => 1 } determineAllowedTypes();
+	my $types = determineAllowedTypes();
 	my $type = determineDefaultType();
 
-	if ($form->{type} && $types{$form->{type}}) {
+	if ($form->{type} && $types->{$form->{type}}) {
 		$type = $form->{type};
 	}
 
@@ -503,6 +505,7 @@ sub showEditor {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
 		my $article = $journal_reader->get($p_item->{srcid});
 		$preview->{introtext} = $article->{article} unless $form->{introtext};
+		$preview->{commentstatus} ||= $user->{journal_discuss};
 	}
 
 	if ($p_item->{type} eq 'story' && !$user->{nospell}) {
@@ -729,13 +732,12 @@ sub saveItem {
 
 	$preview->{dept} = $form->{dept};
 	my $errors = $self->validate($preview, $fhitem);
-# XXX if you use this, comment *out* the similar call in edit.pl:save()
-# 	if ($rkey && !(keys %$errors)) {
-# 		unless ($rkey->use) {
-# 			errorLog($rkey->errstr);
-# 			return;
-# 		}
-# 	}
+
+	if ($rkey && !(keys %{$errors->{critical}})) {
+		unless ($rkey->use) {
+			$errors->{critical}{save_error} = $rkey->errstr;
+		}
+	}
 
 	my $create_retval = 0;
 	my $save_type = 'new';
@@ -1058,6 +1060,10 @@ sub _getJournalPubType {
 sub _createJournalDiscussion {
 	my($self, $title, $tid, $discuss, $id, $user) = @_;
 	$user ||= getCurrentUser();
+
+	# save pref to be last used
+	$self->setUser($user->{uid}, { journal_discuss => $discuss });
+
 	my $did = $self->createDiscussion({
 		kind          => 'journal',
 		title         => $title,
