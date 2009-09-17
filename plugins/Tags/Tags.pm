@@ -1397,7 +1397,7 @@ sub setGetDisplayTags { # T2
 		domain_tag		=> $domain_tag,
 		datatype		=> $datatype || 'unknown',
 		main_watchlist_tag	=> $main_watchlist_tag,
-		topic_tags		=> join(' ', grep { $_ } $main_watchlist_tag, @topic_tags),
+		topic_tags		=> join(' ', grep { $_ } @topic_tags),
 		popular_tags		=> $popular_tags,
 		user_tags		=> $user_tags,
 	};
