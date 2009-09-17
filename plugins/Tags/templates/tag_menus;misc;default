@@ -313,9 +313,10 @@ $(NODNIX).live('mousedown', function( e ){
 		in_use	= $target.is('.trigger'),
 		is_up	= $target.is('.up'),
 		$fhitem	= $target.closest('div.fhitem'),
+		fhid	= ($fhitem.attr('id') || '').replace(FHID_PREFIX, ''),
 		$title	= $target.closest('h3'),
 		$menu	= $title.children('menu.reasons-menu'),
-		reasons, $reasons;
+		reasons, $reasons, fhid;
 
 	if ( $CURRENT_MENU ) {
 		$CURRENT_MENU.menu('cancel', e);
@@ -354,6 +355,10 @@ $(NODNIX).live('mousedown', function( e ){
 				stop: function( e, ui ){
 					$menu.slideUp();
 					$(ui.trigger).removeClass('trigger');
+					if ( !is_up && fhid ) {
+						firehose_collapse_entry(fhid);
+						($fhitem.is('.currfh') || !firehose_get_cur().length) && firehose_go_next($fhitem);
+					}
 				}
 			});
 		}
