@@ -259,6 +259,7 @@ sub getStartingColorLevel {
 		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id);
 		my $str_hr = $self->renderTopics($chosen_hr);
 		$color_level = 3;
+		# XXX this seems not to be respecting 'abbreviated', test more
 		for my $nexus_tid (keys %$str_hr) {
 			my $this_color_level = 999;
 			my $param = $self->getTopicParam($nexus_tid, 'colorlevel') || undef;

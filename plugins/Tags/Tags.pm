@@ -2962,6 +2962,7 @@ sub extractChosenFromTags {
 	# stories by examining just the domaintag, and in that case,
 	# abbreviated stories should have the domaintag ("slashdot")
 	# added and be displayed as oneliners by some other criterion.
+	# XXX should use topics_sectional_weight here, not hardcoded 10.
 	my $mainpage_tid = $constants->{mainpage_nexus_tid};
 	if ($is_sectiononly) {
 		for my $tid (keys %$chosen_hr) {
