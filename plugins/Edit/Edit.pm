@@ -684,6 +684,15 @@ sub validate {
 			$messages->{critical}{noicon} = getData('noicon','','edit');
 		}
 
+		if ($preview->{src_fhid}) {
+			my $anon_uid = getCurrentStatic('anonymous_coward_uid');
+			my $fhdb = getObject("Slash::FireHose");
+			my $src_fh = $f1hdb->getFireHose($preview->{src_fhid});
+			if ($src_fh && ($src_fh->{uid} == $anon_uid) && $src_fh->{email} && $src_fh->{emaildomain} && ($preview->{introtext} =~ $src_fh->{email})) {
+				$messages->{critical}{ac_linked} = getData('ac_linked', { fhid => $preview->{preview_fhid} } , 'edit');
+			}
+		}
+
 	} elsif ($item->{type} eq 'journal') {
 		for ($preview->{title}, $preview->{introtext}) {
 			my $d = decode_entities($_);

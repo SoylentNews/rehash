@@ -337,6 +337,8 @@ END;
                                         <div class="message error"><span id="modal_error">[% errors.critical.story_filter_error %]</span></div>
                         [% ELSIF errors.critical.orig_source %]
                                 [% errors.critical.orig_source %]
+			[% ELSIF errors.critical.ac_linked %]
+				[% errors.critical.ac_linked %]
                         [% END %]
 				</span>
 
