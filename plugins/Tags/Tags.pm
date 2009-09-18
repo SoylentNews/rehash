@@ -592,7 +592,8 @@ sub getTagnameDataFromIds {
 # Given a name and id, return the arrayref of all tags on that
 # global object.  Options change which tags are returned:
 #
-# uid:			only tags created by that uid
+# uid:			only tags created by that uid.
+#			special: the word 'admin' means any admin
 # include_inactive:	inactivated tags will also be returned
 # include_private:	private tags will also be returned
 # XXX (should we have only_inactive and only_private options? I can't see a need right now)
@@ -615,8 +616,13 @@ sub getTagsByGlobjid {
 
 	my $uid_where = '';
 	if ($options->{uid}) {
-		my $uid_q = $self->sqlQuote($options->{uid});
-		$uid_where = " AND uid=$uid_q";
+		if ($options->{uid} eq 'admin') {
+			my $admin_hr = $self->getAdmins();
+			my @admin_uids = sort { $a <=> $b } keys %$admin_hr;
+			$uid_where = ' AND uid IN (' . join(',', @admin_uids) . ')';
+		} elsif ($options->{uid} =~ /^\d+$/) {
+			$uid_where = " AND uid=$options->{uid}";
+		}
 	}
 	my $inactivated_where = $options && $options->{include_inactive}
 		? ''
@@ -1303,6 +1309,9 @@ sub ajaxKeyTypeToGlobjid {
 	return $globjid;
 }
 
+# XXX If $user is an admin, extractChosenFromTags should be invoked to
+# return all admin tags chosen for this globj.
+
 sub setGetDisplayTags { # T2
 	my($self, $key, $key_type, $user, $commands, $global_tags_only) = @_;
 
@@ -1374,7 +1383,10 @@ sub setGetDisplayTags { # T2
 		}
 
 		my $tree = $self->getTopicTree();
-		my $chosen_hr = $tags_writer->extractChosenFromTags($firehose_item->{globjid}, $uid);
+		my $chosen_uid = $user && $user->{seclev} && $user->{seclev} >= 100
+			? 'admin'
+			: $uid;
+		my $chosen_hr = $tags_writer->extractChosenFromTags($firehose_item->{globjid}, $chosen_uid);
 #print STDERR "sGDT: chosen_hr: " . Dumper($chosen_hr);
 
 		# Find the primary skin; that determines our main watchlist tagname.
@@ -2916,8 +2928,7 @@ sub extractChosenFromTags {
 	my($self, $globjid, $uid) = @_;
 	my $constants = getCurrentStatic();
 
-	# For now let's just allow one user... we will want to allow
-	# multiple editors' opinions to be considered eventually.
+	# If $uid eq 'admin', getTagsByGlobjid will return all admin tags.
 	$uid ||= getCurrentUser('uid');
 
 	# Exclude inactivated and private tags by default.
@@ -2929,9 +2940,13 @@ sub extractChosenFromTags {
 
 	my $chosen_hr = { };
 	my $is_abbreviated = 0;
+	my $is_sectiononly = 0;
 	for my $tag_hr (@$ar) {
 		my $tagname = $tag_hr->{tagname};
-		$is_abbreviated = 1 if $tagname eq 'abbreviated'; # XXX should be a var
+		$is_abbreviated = 1 if $tagname eq  'abbreviated'; # XXX should be a var
+		$is_abbreviated = 0 if $tagname eq '!abbreviated'; # XXX should be a var
+		$is_sectiononly = 1 if $tagname eq  'sectiononly'; # XXX should be a var
+		$is_sectiononly = 0 if $tagname eq '!sectiononly'; # XXX should be a var
 		# print STDERR "ECFT: $tagname\n";
 		my $tid = $keyword_to_tid_hr->{$tagname} || 0;
 		next unless $tid;
@@ -2940,17 +2955,46 @@ sub extractChosenFromTags {
 		#print STDERR "    ECFT: tid $chosen_hr->{tid} EMPH: |$tag_hr->{emphasis}|\n";
 	}
 
-	# Handle "abbreviated".  If "abbreviated" is _not_ present, auto-add
-	# a chosen tid for the mainpage ("slashdot").
+	# If "sectiononly" is present, all weights max out at 5,
+	# i.e., below the topics_sectional_weight var.  If not,
+	# add the mainpage ("slashdot") as a topic (so in future,
+	# a smarter gFHE can select mainpage stories by examining
+	# just the domaintag).
 	my $mainpage_tid = $constants->{mainpage_nexus_tid};
-	if (!$chosen_hr->{$mainpage_tid}) {
-		my $abbr_tagnameid = $self->getTagnameidFromNameIfExists('abbreviated'); # XXX should be a var
-		if (! grep { $_->{tagnameid} == $abbr_tagnameid } @$ar) {
-			$chosen_hr->{$mainpage_tid} = 10;
+	if ($is_sectiononly) {
+		for my $tid (keys %$chosen_hr) {
+			$chosen_hr->{$tid} = 5 if $chosen_hr->{$tid} > 5;
 		}
+	} else {
+		$chosen_hr->{$mainpage_tid} ||= 10;
 	}
 
 	$chosen_hr;
+}
+
+sub isAdminTagged {
+	my($self, $globjid, $tagname) = @_;
+
+	my $tagnameid = $tagname =~ /^\d+$/
+		? $tagname
+		: $self->getTagnameidFromNameIfExists($tagname);
+	return 0 if !$tagnameid;
+	my $opp_tagnameid_ar = $self->getOppositeTagnameids($tagnameid);
+	my %tnid_wanted = ( map {( $_, 1 )} $tagnameid, @$opp_tagnameid_ar );
+
+	my $ar = $self->getTagsByGlobjid($globjid, { uid => 'admin' });
+
+	# Pull out the tags that are active, and are either the
+	# requested tagname or its opposite.
+	$ar = [ grep { $tnid_wanted{ $_->{tagnameid} } && !$_->{inactivated} } @$ar ];
+	return 0 if !@$ar;
+
+	# Most recent tag wins.
+	my $tag = (sort { $a->{created_at_ut} <=> $b->{created_at_ut} } @$ar)[-1];
+
+	# If it's the requested tag, the answer is yes, if not
+	# (i.e. if it's the opposite) the answer is no.
+	return $tag->{tagnameid} == $tagnameid;
 }
 
 # $uid is optional, and if omitted deactivates all tags on the globj.

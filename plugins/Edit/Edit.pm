@@ -446,15 +446,16 @@ sub savePreview {
 	$tagsdb->setTagsForGlobj($preview->{preview_id}, 'preview', $form->{'tag-entry-input'}, { deactivate_by_operator => 1, tagname_required => 1}) if ($form->{'tag-entry-input'});
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $rendered_hr = $self->renderTopics($chosen_hr);
-	print STDERR "RENDERED: ".Dumper($rendered_hr);
 	my $primaryskid = $self->getPrimarySkidFromRendered($rendered_hr);
-	print STDERR "PRIMARYSKID: $primaryskid\n";;
-	my $tids = $self->getTopiclistFromChosen($chosen_hr);
-
-	my $tid = $tids->[0];
-
-	$fh_data->{tid} = $tid;
 	$fh_data->{primaryskid} = $primaryskid;
+	my $tids = $self->getTopiclistFromChosen($chosen_hr);
+	my $tid = $tids->[0];
+	$fh_data->{tid} = $tid;
+	print STDERR "savePreview GLOBJID $p_item->{globjid} PRIMARYSKID $primaryskid TIDS '@$tids' from RENDERED: "
+		. Dumper($rendered_hr);
+
+	$fh_data->{offmainpage} = $tagsdb->isAdminTagged($p_item->{globjid}, 'sectiononly')
+		? 'yes' : 'no';
 
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
@@ -869,13 +870,15 @@ sub editCreateStory {
 	my $tagsdb = getObject("Slash::Tags");
 	my $admindb = getObject("Slash::Admin");
 
-	my $chosen_hr = { };
 	my @topics;
 	push @topics, $fhitem->{tid} if $fhitem->{tid};
 
+	my $chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid}, 'admin');
 
-	$chosen_hr = $tagsdb->extractChosenFromTags($fhitem->{globjid});
 	my $save_extras = $self->getExtrasToSaveForChosen($chosen_hr, $preview);
+
+	my $is_sectiononly = $tagsdb->isAdminTagged($fhitem->{globjid}, 'sectiononly');
+	$save_extras->{offmainpage} = 1 if $is_sectiononly;
 
 	$data = {
 		uid 		=> $fhitem->{uid},
