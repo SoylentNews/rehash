@@ -2333,6 +2333,8 @@ sub editSave {
 		$options->{options} = { user_view_uid => $item->{uid} } if $type eq 'journal';
 		$options->{options}{no_collapse} = 1 if $form->{state} ne 'inline';
 		$saved_item = $fh->dispFireHose($item, $options);
+		$saved_item .= slashDisplay("init_sprites", { sprite_root_id => 'editpreview'}, { Return => 1}) if $constants->{use_sprites};
+
 	} else {
 		$editor = $edit->showEditor({ errors => $errors, nowrap => 1 });
 	}
