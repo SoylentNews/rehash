@@ -65,6 +65,8 @@ sub init_tagfilters {
 	$self->{filter_firehoseonly} = 1;
 	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid )} ];
 	push @{ $self->{filter_tagnameid} }, keys %{ $self->{reason_tagnameid} };
+	push @{ $self->{filter_tagnameid} }, $tagsdb->getTagnameidCreate('abbreviated');
+	push @{ $self->{filter_tagnameid} }, $tagsdb->getTagnameidCreate('sectiononly');
 }
 
 sub get_affected_type	{ 'globj' }

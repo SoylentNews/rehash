@@ -54,7 +54,7 @@ sub init_tagfilters {
 	my($self) = @_;
 	$self->{filter_activeonly} = 1;
 	$self->{filter_firehoseonly} = 1;
-	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid maybeid metanodid metanixid )} ];
+	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid maybeid metanodid metanixid abbreviated sectiononly )} ];
 }
 
 sub get_affected_type	{ 'globj' }
