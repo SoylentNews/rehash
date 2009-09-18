@@ -645,16 +645,17 @@ sub getModalPrefs {
 	my $reskey_resource = 'ajax_user';
 	if ((caller(1))[3] =~ /\bgetModalPrefsAnon(HC)?$/) {
 		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
-	} elsif ($form->{'section'} eq 'submit') {
-		$reskey_resource = 'edit-submit';
 	}
-	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
-	$rkey->create;
-	if ($rkey->failure) {
-		# XXX need to handle errors, esp. for HC
-		return;
-	} else {
-		$user->{state}{reskey} = $rkey->reskey;
+	my $rkey;
+	unless ($form->{'section'} eq 'submit') {
+		$reskey->key($reskey_resource, { nostate => 1 });
+		$rkey->create;
+		if ($rkey->failure) {
+			# XXX need to handle errors, esp. for HC
+			return;
+		} else {
+			$user->{state}{reskey} = $rkey->reskey;
+		}
 	}
 
 	if ($form->{'section'} eq 'messages') {
@@ -1007,17 +1008,18 @@ sub getModalPrefs {
 
 	} elsif ($form->{section} eq 'submit') {
 		my $edit = getObject("Slash::Edit");
-		my $reskey = getObject('Slash::ResKey');
-		my $rkey = $reskey->key('edit-submit');
+		$rkey = $edit->rkey(0, 1);
 		unless ($rkey->create) {
 			errorLog($rkey->errstr);
+			return;
 		}
+		$user->{state}{reskey} = $rkey->reskey;
 
 		my $skey = $reskey->session;
 		print STDERR "Edit Session $skey for UID: $user->{uid} (ajax)\n";
 		$skey->set_cookie;
 
-		return $edit->showEditor({ state => 'modal'});
+		return $edit->showEditor({ state => 'modal' });
 	} elsif ($form->{'section'} eq 'adminblock') {
 		return if !$user->{is_admin};
 
@@ -2291,9 +2293,15 @@ sub editPreview {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
 	my $edit = getObject("Slash::Edit");
-	$edit->savePreview();
+	my $rkey = $edit->rkey;
+	my $errors = {};
+	unless ($rkey->touch) { # XXX show editor on reskey error?
+		$errors->{critical}{save_error} = $rkey->errstr;
+	}
+
+	$edit->savePreview;
 	my $html;
-	$html->{editor} = $edit->showEditor({ previewing => 1, nowrap => 1});
+	$html->{editor} = $edit->showEditor({ errors => $errors, previewing => 1, nowrap => 1});
 
 	return Data::JavaScript::Anon->anon_dump({ html => $html });
 }
@@ -2314,9 +2322,8 @@ sub editReset {
 sub editSave {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
 	my $edit = getObject("Slash::Edit");
+	my $rkey = $edit->rkey;
 	$edit->savePreview;
 	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem($rkey);
 
@@ -2355,11 +2362,11 @@ sub editSave {
 		}
 	}
 	return Data::JavaScript::Anon->anon_dump({
-			html => $html,
-			eval_first => $eval_first,
-			eval_last => $eval_last,
-			html_add_before => $html_add_before,
-			html_append => $html_append
+		html => $html,
+		eval_first => $eval_first,
+		eval_last => $eval_last,
+		html_add_before => $html_add_before,
+		html_append => $html_append
 	});
 }
 
@@ -2399,7 +2406,7 @@ sub getOps {
 
 		edit_preview => {
 			function	=> \&editPreview,
-			reskey_name	=> 'edit-submit',
+			reskey_name	=> 'NA',
 			reskey_type	=> 'touch',
 		},
 
@@ -2411,7 +2418,7 @@ sub getOps {
 
 		edit_save => {
 			function	=> \&editSave,
-			reskey_name	=> 'edit-submit',
+			reskey_name	=> 'NA',
 			reskey_type	=> 'touch',
 		},
 
