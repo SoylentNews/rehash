@@ -687,7 +687,7 @@ sub validate {
 		if ($preview->{src_fhid}) {
 			my $anon_uid = getCurrentStatic('anonymous_coward_uid');
 			my $fhdb = getObject("Slash::FireHose");
-			my $src_fh = $f1hdb->getFireHose($preview->{src_fhid});
+			my $src_fh = $fhdb->getFireHose($preview->{src_fhid});
 			if ($src_fh && ($src_fh->{uid} == $anon_uid) && $src_fh->{email} && $src_fh->{emaildomain} && ($preview->{introtext} =~ $src_fh->{email})) {
 				$messages->{critical}{ac_linked} = getData('ac_linked', { fhid => $preview->{preview_fhid} } , 'edit');
 			}
