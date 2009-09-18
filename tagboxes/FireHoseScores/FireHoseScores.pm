@@ -255,6 +255,7 @@ sub getStartingColorLevel {
 			: 7; # nonfeed
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
+		my $tagsdb = getObject('Slash::Tags');
 		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id);
 		my $str_hr = $self->renderTopics($chosen_hr);
 		$color_level = 3;
