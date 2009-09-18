@@ -28,7 +28,7 @@ sub rkey {
 
 sub initEditor {
 	my($self) = @_;
-	my $rkey = $edit->rkey;
+	my $rkey = $self->rkey;
 	unless ($rkey->create) {
 		errorLog($rkey->errstr);
 		return;
@@ -95,7 +95,7 @@ sub migrateAnonPreviewToUser {
 		$fh->setFireHose($p->{preview_fhid}, $fh_data) if keys %$fh_data > 0;
 		if ($p->{reskey} && $p->{hcanswer}) {
 			$form->{hcanswer} = $p->{hcanswer};
-			my $rkey = $edit->rkey($p->{reskey});
+			my $rkey = $self->rkey($p->{reskey});
 			$rkey->touch;
 		}
 	}
