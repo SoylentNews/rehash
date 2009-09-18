@@ -61,13 +61,13 @@ sub main {
 	print STDERR "Edit Session $skey for UID: $user->{uid}\n";
 	$skey->set_cookie;
 
-	my $ed = getObject("Slash::Edit");
-	my $type = ucfirst $ed->determineType;
+	my $edit = getObject("Slash::Edit");
+	my $type = $edit->determineType;
 
-	header("$constants->{sitename} - $type", '') or return;
+	header("$constants->{sitename} - \u$type", '') or return;
 
 	# it'd be nice to have a legit retval
-	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin, $edit);
 
 	# Display who is logged in right now.
 	footer();
@@ -75,24 +75,21 @@ sub main {
 
 
 sub start {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
+	my $rkey = $edit->rkey;
 	unless ($rkey->create) {
 		errorLog($rkey->errstr);
 		print $rkey->errstr;
 		return;
 	}
 
-	my $edit = getObject("Slash::Edit");
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
 }
 
 sub cancel {
-	my($form, $slashdb, $user, $constants) = @_;
-	my $edit = getObject("Slash::Edit");
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 	$edit->initEditor();
 	$form->{'new'} = 1;
 	$form->{'url_text'} 	= 1;
@@ -103,17 +100,15 @@ sub cancel {
 }
 
 sub edit {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
+	my $rkey = $edit->rkey;
 	unless ($rkey->touch) {
 		errorLog($rkey->errstr);
 		print $rkey->errstr;
 		return;
 	}
 
-	my $edit = getObject("Slash::Edit");
 	$edit->savePreview();
 	my $editor = $edit->showEditor();
 	slashDisplay('editorwrap', { editor => $editor });
@@ -122,17 +117,15 @@ sub edit {
 
 
 sub preview {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
+	my $rkey = $edit->rkey;
 	unless ($rkey->touch) {
 		errorLog($rkey->errstr);
 		print $rkey->errstr;
 		return;
 	}
 
-	my $edit = getObject("Slash::Edit");
 	$edit->savePreview;
 	$edit->setRelated;
 	my $editor = $edit->showEditor({ previewing => 1 });
@@ -140,11 +133,9 @@ sub preview {
 }
 
 sub save {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
-	my $edit = getObject("Slash::Edit");
+	my $rkey = $edit->rkey;
 	$edit->savePreview;
 	my($retval, $type, $save_type, $errors, $preview) = $edit->saveItem($rkey);
 

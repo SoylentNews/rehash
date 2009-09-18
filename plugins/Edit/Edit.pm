@@ -12,10 +12,23 @@ use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
+sub rkey {
+	my($self, $reskey_text, $nostate) = @_;
+	my $type = $self->determineType;
+
+	my $params = {};
+	$params->{reskey}  = $reskey_text if $reskey_text;
+	$params->{nostate} = 1 if $nostate;
+
+	$type = 'submit' if $type eq 'submission';
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key($type, $params) || '';
+	return $rkey;
+}
+
 sub initEditor {
 	my($self) = @_;
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('edit-submit');
+	my $rkey = $self->rkey;
 	unless ($rkey->create) {
 		errorLog($rkey->errstr);
 		return;
@@ -82,8 +95,7 @@ sub migrateAnonPreviewToUser {
 		$fh->setFireHose($p->{preview_fhid}, $fh_data) if keys %$fh_data > 0;
 		if ($p->{reskey} && $p->{hcanswer}) {
 			$form->{hcanswer} = $p->{hcanswer};
-			my $reskey = getObject('Slash::ResKey');
-			my $rkey = $reskey->key('edit-submit', { reskey => $p->{reskey} });
+			my $rkey = $self->rkey($p->{reskey});
 			$rkey->touch;
 		}
 	}
