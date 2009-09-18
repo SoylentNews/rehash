@@ -2956,16 +2956,18 @@ sub extractChosenFromTags {
 	}
 
 	# If "sectiononly" is present, all weights max out at 5,
-	# i.e., below the topics_sectional_weight var.  If not,
-	# add the mainpage ("slashdot") as a topic (so in future,
-	# a smarter gFHE can select mainpage stories by examining
-	# just the domaintag).
+	# i.e., below the topics_sectional_weight var.  If not, and
+	# if the story is not abbreviated, add the mainpage ("slashdot")
+	# as a topic.  In future, a smarter gFHE can select mainpage
+	# stories by examining just the domaintag, and in that case,
+	# abbreviated stories should have the domaintag ("slashdot")
+	# added and be displayed as oneliners by some other criterion.
 	my $mainpage_tid = $constants->{mainpage_nexus_tid};
 	if ($is_sectiononly) {
 		for my $tid (keys %$chosen_hr) {
 			$chosen_hr->{$tid} = 5 if $chosen_hr->{$tid} > 5;
 		}
-	} else {
+	} elsif (!$is_abbreviated) {
 		$chosen_hr->{$mainpage_tid} ||= 10;
 	}
 
