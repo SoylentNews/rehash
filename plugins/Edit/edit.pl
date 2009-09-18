@@ -81,6 +81,7 @@ sub start {
 	my $rkey = $reskey->key('edit-submit');
 	unless ($rkey->create) {
 		errorLog($rkey->errstr);
+		print $rkey->errstr;
 		return;
 	}
 
@@ -108,6 +109,7 @@ sub edit {
 	my $rkey = $reskey->key('edit-submit');
 	unless ($rkey->touch) {
 		errorLog($rkey->errstr);
+		print $rkey->errstr;
 		return;
 	}
 
@@ -126,6 +128,7 @@ sub preview {
 	my $rkey = $reskey->key('edit-submit');
 	unless ($rkey->touch) {
 		errorLog($rkey->errstr);
+		print $rkey->errstr;
 		return;
 	}
 
