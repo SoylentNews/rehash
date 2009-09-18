@@ -13,16 +13,28 @@ editsave
 __seclev__
 10000
 __template__
-[% IF state == "inline" %]
-<div class="hdbuttons"><a href="#" onclick="close_inline_editor();">Close Editor</a></div>
-[% END %]
 [% IF id && type %]
+	[% fh = Slash.getObject("Slash::FireHose");
+	lookup_id = id;
+	IF type == 'story';
+		lookup_id = Slash.db.getStoidFromSidOrStoid(id);
+	END;
+	new_item = fh.getFireHoseByTypeSrcid(type,id);
+	link_url = fh.linkFireHose(new_item);
+         %]
 	
 	[% IF (state != 'fullpage' && state != 'modal') && (!no_display_item); saved_item; END; %]
 
 	<!--[% id %] [% type %] [% save_type %]-->
 	[% IF type == "story" %]
-		<div class="message error block roundall"><span id="modal_ok"><a href="[% constants.real_rootdir %]/admin.pl?op=edit&amp;sid=[% id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])</span>[% IF state == 'inline' %]<a href="#" onclick="$('#editor').remove(); return false">[close]</a>[% END %]</div>
+		[% IF state != 'inline' %]
+			<div class="message error block roundall"><span id="modal_ok">
+		[% END %]
+		[% IF state == 'inline' %]<br>[% END %]
+		<a onclick="show_submit_box([% new_item.id %]);return false;" href="[% constants.real_rootdir %]/edit.pl?from_id=[% new_item.id %]">[% IF save_type == 'new' %]New Story Created[% ELSE %]Story Updated[% END %]</a> ([% id %])
+		[% IF state != 'inline' %]
+			</span></div>
+		[% END %]
 	[% ELSIF type == "submission" %]
 
 		<script type="text/javascript">
