@@ -78,13 +78,13 @@ FOREACH story = storylistref;
 	<tr class="[% class %]">
 		<td align="right">
 		
-		[<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %]</a>]
+		[<a href="[% IF constants.plugins.Edit %]/edit.pl?from_id=[% story.fhid %][% ELSE %][% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %][% END %]</a>]
 		
 
 		</td>
 		<td class="admin_title">
 		
-		<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+		<a href="[% IF constants.firehose_link_article2 %][% story.fh_url %][% ELSE %][% gSkin.rootdir %]/article.pl?sid=[% story.sid %][% END %]">
 		[% IF story.in_trash == 'yes' %]<s>[% END; story.title; IF story.in_trash == 'yes' %]</s>[% END %]&nbsp;</a>
 		
 		</td>
