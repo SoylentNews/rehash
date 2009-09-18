@@ -13,16 +13,16 @@ use base 'Slash::Plugin';
 our $VERSION = $Slash::Constants::VERSION;
 
 sub rkey {
-	my($self, $reskey, $nostate) = @_;
-	my $type = ucfirst $self->determineType;
+	my($self, $reskey_text, $nostate) = @_;
+	my $type = $self->determineType;
 
 	my $params = {};
-	$params->{reskey}  = $reskey if $reskey;
+	$params->{reskey}  = $reskey_text if $reskey_text;
 	$params->{nostate} = 1 if $nostate;
 
 	$type = 'submit' if $type eq 'submission';
 	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key("edit-$type", $params);
+	my $rkey = $reskey->key($type, $params) || '';
 	return $rkey;
 }
 

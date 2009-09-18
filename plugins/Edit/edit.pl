@@ -75,7 +75,7 @@ sub main {
 
 
 sub start {
-	my($form, $slashdb, $user, $constants, $edit) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
 	my $rkey = $edit->rkey;
 	unless ($rkey->create) {
@@ -89,7 +89,7 @@ sub start {
 }
 
 sub cancel {
-	my($form, $slashdb, $user, $constants, $edit) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 	$edit->initEditor();
 	$form->{'new'} = 1;
 	$form->{'url_text'} 	= 1;
@@ -100,7 +100,7 @@ sub cancel {
 }
 
 sub edit {
-	my($form, $slashdb, $user, $constants, $edit) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
 	my $rkey = $edit->rkey;
 	unless ($rkey->touch) {
@@ -117,7 +117,7 @@ sub edit {
 
 
 sub preview {
-	my($form, $slashdb, $user, $constants, $edit) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
 	my $rkey = $edit->rkey;
 	unless ($rkey->touch) {
@@ -133,7 +133,7 @@ sub preview {
 }
 
 sub save {
-	my($form, $slashdb, $user, $constants, $edit) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $edit) = @_;
 
 	my $rkey = $edit->rkey;
 	$edit->savePreview;

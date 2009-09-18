@@ -144,6 +144,7 @@ $(document).ready(function(){
 
 		[% PROCESS reskey_tag %]
 		<input type="hidden" name="fhid" value="[% fhid | strip_attribute %]">
+		<input type="hidden" name="type" value="[% item.type | strip_attribute %]">
 		<noscript>
 		<input type="hidden" name="nojs" value="1">
 		</noscript>
