@@ -6579,3 +6579,6 @@ INSERT INTO tagname_params (tagnameid, name, value) VALUES (@sotnid, 'exclude', 
 SELECT @abbrtnid := tagnameid FROM tagnames where tagname='abbreviated';
 INSERT INTO tagname_params (tagnameid, name, value) VALUES (@abbrtnid, 'fh_exclude', 1);
 
+# 2009-09-17
+UPDATE vars SET value = 'T_2_5_0_272' WHERE name = 'cvs_tag_currentcode';
+
