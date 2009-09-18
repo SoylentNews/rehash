@@ -2967,6 +2967,7 @@ sub extractChosenFromTags {
 		for my $tid (keys %$chosen_hr) {
 			$chosen_hr->{$tid} = 5 if $chosen_hr->{$tid} > 5;
 		}
+		delete $chosen_hr->{$mainpage_tid};
 	} elsif (!$is_abbreviated) {
 		$chosen_hr->{$mainpage_tid} ||= 10;
 	}

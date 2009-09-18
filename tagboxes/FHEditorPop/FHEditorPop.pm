@@ -120,6 +120,14 @@ sub run_process {
 			$color_level = 6;
 		}
 	} elsif ($type eq "stories") {
+		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id);
+		$self->setStoryRenderedFromChosen($chosen_hr);
+		if ($constants->{plugin}{FireHose}) {
+			my $offmainpage = $tagsdb->isAdminTagged($affected_id, 'sectiononly')
+				? 'yes' : 'no';
+			my $firehose = getObject("Slash::FireHose");
+			$firehose->setFireHose($affected_id, { offmainpage => $offmainpage });
+		}
 		my $story = $self->getStory($target_id);
 		my $str_hr = $story->{story_topics_rendered};
 		$color_level = 3;

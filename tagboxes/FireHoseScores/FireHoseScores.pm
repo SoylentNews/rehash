@@ -128,7 +128,7 @@ sub run_process {
 
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
-	my($color_level, $extra_pop) = $self->getStartingColorLevel($type, $target_id);
+	my($color_level, $extra_pop) = $self->getStartingColorLevel($type, $target_id, $affected_id);
 	my $min_pop = $self->getMinimumPopularity($type, $target_id);
 
         # Lose a color level if bayesian analysis suggests spam.
@@ -232,7 +232,7 @@ sub run_process {
 }
 
 sub getStartingColorLevel {
-	my($self, $type, $target_id) = @_;
+	my($self, $type, $target_id, $affected_id) = @_;
 	my $target_id_q = $self->sqlQuote($target_id);
 	my $constants = getCurrentStatic();
 	my($color_level, $extra_pop) = (0, 0);
@@ -255,7 +255,8 @@ sub getStartingColorLevel {
 			: 7; # nonfeed
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
-		my $str_hr = $story->{story_topics_rendered};
+		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id);
+		my $str_hr = $self->renderTopics($chosen_hr);
 		$color_level = 3;
 		for my $nexus_tid (keys %$str_hr) {
 			my $this_color_level = 999;
