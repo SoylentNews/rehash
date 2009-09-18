@@ -143,6 +143,11 @@ sub getOrCreatePreview {
 			}
 			$fh->setFireHose($fhid, $fh_data) if keys %$fh_data > 0;
 			$self->setPreview($id, $p_data);
+			$tagsdb->createTag({
+				uid     => $user->{uid},
+				name    => 'slashdot', # XXX should be a var
+				globjid => $preview_globjid,
+			});
 			return $id;
 		}
 	} else {
