@@ -176,7 +176,7 @@ $(document).ready(function(){
 			</div>
 		[% END; %]
 
-		<div class="subdetails" [% IF errors.critical.badsubject || ispell_comments.title %]style="padding-top:1.75em"[% END; %]>
+		<div class="subdetails" style="[% IF errors.critical.badsubject || ispell_comments.title %]padding-top:1.75em;[% END; %][% IF errors.critical.invalidurl || errors.critical.duplicateurl %]padding-bottom:3.25em;[% END %]" >
 			[% IF item.type == 'submission' %]
 					<div class="d">
 						[% IF user.is_anon %]
