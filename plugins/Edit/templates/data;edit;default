@@ -89,6 +89,11 @@ __template__
 [% CASE 'noicon' %]
 	[% returnme.data_constant = 1 %]
         <div class="message error roundall"><span id="modal_error">Need to specify a topic with an image, or a thumbnail.</span></div>
+
+[% CASE 'ac_linked' %]
+        [% returnme.data_constant = 1 %]
+        <div class="message error roundall"><span id="modal_error">Anonymous submissions cannot contain an 'Anonymous Coward' hyperlink.</span></div>
+
 [% END %]
 __seclev__
 10000

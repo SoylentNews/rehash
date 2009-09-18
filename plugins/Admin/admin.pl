@@ -1706,6 +1706,12 @@ sub listStories {
 		$story->{x}	 = ++$i;
 		$story->{title}  = chopEntity($story->{title}, 50);
 		$story->{tbtitle} = fixparam($story->{title});
+		if ($constants->{plugin}{FireHose}) {
+			my $fh = getObject("Slash::FireHose");
+			my $item = $fh->getFireHoseByTypeSrcid('story',$story->{stoid});
+			$story->{fhid} = $item->{id};
+			$story->{fh_url} = $fh->linkFireHose($item);
+		}
 		push @$stoid_list, $story->{stoid};
 	}
 
