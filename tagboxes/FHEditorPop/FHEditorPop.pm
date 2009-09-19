@@ -54,7 +54,19 @@ sub init_tagfilters {
 	my($self) = @_;
 	$self->{filter_activeonly} = 1;
 	$self->{filter_firehoseonly} = 1;
-	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid maybeid metanodid metanixid abbreviated sectiononly )} ];
+
+	# Now that the tagboxes that calculate scores do so based in part
+	# on admin tags, they need to have getTagboxTags return all tagnames,
+	# not just nod/nix.  If they can't see the admin tagnames, they can't
+	# determine whether a story item is mainpage, abbreviated or
+	# section-only.
+	#
+	# In theory the filter_tagnameid lists could remain if (a) admin tags
+	# on (b) type=story were included... but the gTT filter mechanism
+	# doesn't provide for anything so complex.  So, we comment out the
+	# filter_tagnameid field.
+
+#	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid maybeid metanodid metanixid abbreviated sectiononly )} ];
 }
 
 sub get_affected_type	{ 'globj' }
