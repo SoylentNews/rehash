@@ -642,6 +642,7 @@ sub validate {
 	my $form = getCurrentForm();
 	my $messages;
 
+	my $firehose = getObject("Slash::FireHose");
 	my $tagsdb = getObject("Slash::Tags");
 	my $other_tags = $tagsdb->setGetDisplayTags($item->{id}, 'firehose-id');
 	my $applied_tags = $tagsdb->getTagsByGlobjid($item->{globjid});
@@ -671,7 +672,6 @@ sub validate {
 			}
 			if ($item->{url_id}) {
 				if ($constants->{plugin}{FireHose}) {
-					my $firehose = getObject("Slash::FireHose");
 					if (!$firehose->allowSubmitForUrl($item->{url_id})) {
 						my $submitted_items = $firehose->getFireHoseItemsByUrl($item->{url_id});
 						$messages->{critical}{duplicateurl} = getData("duplicateurl", { fhid => $preview->{preview_fhid}, submitted_items => $submitted_items }, 'edit');
@@ -705,7 +705,7 @@ sub validate {
 			my $anon_uid = getCurrentStatic('anonymous_coward_uid');
 			my $fhdb = getObject("Slash::FireHose");
 			my $src_fh = $fhdb->getFireHose($preview->{src_fhid});
-			if ($src_fh && ($src_fh->{uid} == $anon_uid) && $src_fh->{email} && $src_fh->{emaildomain} && ($preview->{introtext} =~ $src_fh->{email})) {
+			if ($src_fh && ($src_fh->{uid} == $anon_uid) && $src_fh->{email} && $src_fh->{emaildomain} && ($item->{introtext} =~ /anonymous coward/i)) {
 				$messages->{critical}{ac_linked} = getData('ac_linked', { fhid => $preview->{preview_fhid} } , 'edit');
 			}
 		}
