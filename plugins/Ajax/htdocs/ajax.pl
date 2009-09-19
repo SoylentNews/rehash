@@ -641,14 +641,16 @@ sub getModalPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
+	my $rkey;
+
 	# anon calls get normal ajax_base
 	my $reskey_resource = 'ajax_user';
 	if ((caller(1))[3] =~ /\bgetModalPrefsAnon(HC)?$/) {
 		$reskey_resource = $1 ? 'ajax_base_hc' : 'ajax_base';
 	}
-	my $rkey;
+
 	unless ($form->{'section'} eq 'submit') {
-		$reskey->key($reskey_resource, { nostate => 1 });
+		$rkey = $reskey->key($reskey_resource, { nostate => 1 });
 		$rkey->create;
 		if ($rkey->failure) {
 			# XXX need to handle errors, esp. for HC
