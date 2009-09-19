@@ -132,7 +132,7 @@ sub run_process {
 			$color_level = 6;
 		}
 	} elsif ($type eq "stories") {
-		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id);
+		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id, 'admin');
 		$self->setStoryRenderedFromChosen($chosen_hr);
 		if ($constants->{plugin}{FireHose}) {
 			my $offmainpage = $tagsdb->isAdminTagged($affected_id, 'sectiononly')
