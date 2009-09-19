@@ -78,7 +78,7 @@ FOREACH story = storylistref;
 	<tr class="[% class %]">
 		<td align="right">
 		
-		[<a [% IF constants.Edit %]onclick="show_submit_box([% story.fhid %])" [% END %]href="[% IF constants.plugin.Edit %]/edit.pl?from_id=[% story.fhid %][% ELSE %][% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %][% END %]">[% story.x %]</a>]
+		[<a href="[% IF constants.plugin.Edit %]/edit.pl?from_id=[% story.fhid %][% ELSE %][% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %][% END %]">[% story.x %]</a>]
 		
 
 		</td>
