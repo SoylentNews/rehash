@@ -134,6 +134,7 @@ sub run_process {
 	} elsif ($type eq "stories") {
 		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id, 'admin');
 		$self->setStoryRenderedFromChosen($chosen_hr);
+		my $is_abbr = $tagsdb->isAdminTagged($affected_id, 'abbreviated'); # XXX should be a var
 		if ($constants->{plugin}{FireHose}) {
 			my $offmainpage = $tagsdb->isAdminTagged($affected_id, 'sectiononly')
 				? 'yes' : 'no';
@@ -155,7 +156,8 @@ sub run_process {
 				$this_color_level = 2;
 			}
 			# Stories on the mainpage get a color level of 1.
-			$this_color_level = 1 if $nexus_tid == $constants->{mainpage_nexus_tid};
+			$this_color_level = 1 if $nexus_tid == $constants->{mainpage_nexus_tid}
+				&& !$is_abbr;
 			# This firehose entry gets the minimum color level of
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;

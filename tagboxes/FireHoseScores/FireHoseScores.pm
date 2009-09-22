@@ -270,8 +270,8 @@ sub getStartingColorLevel {
 		my $tagsdb = getObject('Slash::Tags');
 		my $chosen_hr = $tagsdb->extractChosenFromTags($affected_id, 'admin');
 		my $str_hr = $self->renderTopics($chosen_hr);
+		my $is_abbr = $tagsdb->isAdminTagged($affected_id, 'abbreviated'); # XXX should be a var
 		$color_level = 3;
-		# XXX this seems not to be respecting 'abbreviated', test more
 		for my $nexus_tid (keys %$str_hr) {
 			my $this_color_level = 999;
 			my $param = $self->getTopicParam($nexus_tid, 'colorlevel') || undef;
@@ -284,7 +284,8 @@ sub getStartingColorLevel {
 				$this_color_level = 2;
 			}
 			# Stories on the mainpage get a color level of 1.
-			$this_color_level = 1 if $nexus_tid == $constants->{mainpage_nexus_tid};
+			$this_color_level = 1 if $nexus_tid == $constants->{mainpage_nexus_tid}
+				&& !$is_abbr;
 			# This firehose entry gets the minimum color level of
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;
