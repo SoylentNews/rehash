@@ -190,6 +190,8 @@ sub run_process {
 	}
 
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
+	$self->debug_log('starting editorpop for %d: %.3f (color level %d)',
+		$affected_id, $popularity, $color_level);
 
 	# Add up nods and nixes.
 

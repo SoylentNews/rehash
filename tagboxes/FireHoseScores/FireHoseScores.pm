@@ -154,6 +154,8 @@ sub run_process {
 
 	my $popularity = $firehose_db->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 	$popularity = $min_pop if $popularity < $min_pop;
+	$self->debug_log('starting popularity for %d: %.3f (color level %d)',
+		$affected_id, $popularity, $color_level);
 
 	if ($options->{starting_only}) {
 		return $popularity if $options->{return_only};
