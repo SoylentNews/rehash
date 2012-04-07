@@ -1,15 +1,8 @@
-#	MySQL dump 8.10
-#
-# Host: localhost	  Database: dump
-#--------------------------------------------------------
-# Server version	3.23.26-beta
-#
-# $Id$
-#
+-- Tweaked to fix syntax errors and work with MySQL 5.1+
 
-#
-# Table structure for table 'abusers'
-#
+--
+-- Table structure for table 'abusers'
+--
 
 DROP TABLE IF EXISTS abusers;
 CREATE TABLE abusers (
@@ -84,12 +77,12 @@ CREATE TABLE accesslog_artcom (
 	INDEX ts (ts)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'al2'
-# (The 'value' column could and should be of type BIT(32), if
-# Slash required MySQL 5.0.5 or later.  Since we don't, the
-# code in MySQL.pm treats the INT UNSIGNED like a bit field.)
-#
+--
+-- Table structure for table 'al2'
+-- (The 'value' column could and should be of type BIT(32), if
+-- Slash required MySQL 5.0.5 or later.  Since we don't, the
+-- code in MySQL.pm treats the INT UNSIGNED like a bit field.)
+--
 
 DROP TABLE IF EXISTS al2;
 CREATE TABLE al2 (
@@ -100,9 +93,9 @@ CREATE TABLE al2 (
 	INDEX value (value)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'al2_log'
-#
+--
+-- Table structure for table 'al2_log'
+--
 
 DROP TABLE IF EXISTS al2_log;
 CREATE TABLE al2_log (
@@ -118,9 +111,9 @@ CREATE TABLE al2_log (
 	INDEX al2tid_val_srcid (al2tid, val, srcid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'al2_log_comments'
-#
+--
+-- Table structure for table 'al2_log_comments'
+--
 
 DROP TABLE IF EXISTS al2_log_comments;
 CREATE TABLE al2_log_comments (
@@ -129,9 +122,9 @@ CREATE TABLE al2_log_comments (
 	PRIMARY KEY (al2lid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'al2_types'
-#
+--
+-- Table structure for table 'al2_types'
+--
 
 DROP TABLE IF EXISTS al2_types;
 CREATE TABLE al2_types (
@@ -144,9 +137,9 @@ CREATE TABLE al2_types (
 	UNIQUE bitpos (bitpos)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'authors_cache'
-#
+--
+-- Table structure for table 'authors_cache'
+--
 
 DROP TABLE IF EXISTS authors_cache;
 CREATE TABLE authors_cache (
@@ -160,9 +153,9 @@ CREATE TABLE authors_cache (
 	PRIMARY KEY (uid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'backup_blocks'
-#
+--
+-- Table structure for table 'backup_blocks'
+--
 
 DROP TABLE IF EXISTS backup_blocks;
 CREATE TABLE backup_blocks (
@@ -171,9 +164,9 @@ CREATE TABLE backup_blocks (
 	PRIMARY KEY (bid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'badpasswords'
-#
+--
+-- Table structure for table 'badpasswords'
+--
 
 DROP TABLE IF EXISTS badpasswords;
 CREATE TABLE badpasswords (
@@ -188,9 +181,9 @@ CREATE TABLE badpasswords (
 	INDEX subnet (subnet)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'blocks'
-#
+--
+-- Table structure for table 'blocks'
+--
 
 DROP TABLE IF EXISTS blocks;
 CREATE TABLE blocks (
@@ -221,9 +214,9 @@ CREATE TABLE blocks (
 	KEY skin (skin)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'classes'
-#
+--
+-- Table structure for table 'classes'
+--
 
 DROP TABLE IF EXISTS classes;
 CREATE TABLE classes (
@@ -235,9 +228,9 @@ CREATE TABLE classes (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'clout_types'
-#
+--
+-- Table structure for table 'clout_types'
+--
 
 DROP TABLE IF EXISTS clout_types;
 CREATE TABLE clout_types (
@@ -248,9 +241,9 @@ CREATE TABLE clout_types (
 	UNIQUE name (name)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'code_param'
-#
+--
+-- Table structure for table 'code_param'
+--
 
 DROP TABLE IF EXISTS code_param;
 CREATE TABLE code_param (
@@ -262,9 +255,9 @@ CREATE TABLE code_param (
 	PRIMARY KEY (param_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'commentmodes'
-#
+--
+-- Table structure for table 'commentmodes'
+--
 
 DROP TABLE IF EXISTS commentmodes;
 CREATE TABLE commentmodes (
@@ -274,9 +267,9 @@ CREATE TABLE commentmodes (
 	PRIMARY KEY (mode)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'comments'
-#
+--
+-- Table structure for table 'comments'
+--
 
 DROP TABLE IF EXISTS comments;
 CREATE TABLE comments (
@@ -314,9 +307,9 @@ CREATE TABLE comments (
 	KEY date_sid (date,sid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'comment_log'
-#
+--
+-- Table structure for table 'comment_log'
+--
 
 DROP TABLE IF EXISTS comment_log;
 
@@ -329,9 +322,9 @@ CREATE TABLE comment_log (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'comment_promote_log'
-#
+--
+-- Table structure for table 'comment_promote_log'
+--
 DROP TABLE IF EXISTS comment_promote_log;
 
 CREATE TABLE comment_promote_log (
@@ -345,9 +338,9 @@ CREATE TABLE comment_promote_log (
 
 
 
-#
-# Table structure for table 'comment_text'
-#
+--
+-- Table structure for table 'comment_text'
+--
 
 DROP TABLE IF EXISTS comment_text;
 CREATE TABLE comment_text (
@@ -356,9 +349,9 @@ CREATE TABLE comment_text (
 	PRIMARY KEY (cid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'content_filters'
-#
+--
+-- Table structure for table 'content_filters'
+--
 
 DROP TABLE IF EXISTS content_filters;
 CREATE TABLE content_filters (
@@ -377,9 +370,9 @@ CREATE TABLE content_filters (
 	KEY field_key (field)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'css_type'
-#
+--
+-- Table structure for table 'css_type'
+--
 DROP TABLE IF EXISTS css_type;
 CREATE TABLE css_type (
 	ctid TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -388,9 +381,9 @@ CREATE TABLE css_type (
 	PRIMARY KEY  (ctid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'css'
-#
+--
+-- Table structure for table 'css'
+--
 
 DROP TABLE IF EXISTS css;
 CREATE TABLE css (
@@ -416,9 +409,9 @@ CREATE TABLE css (
 	KEY layout (layout)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'dateformats'
-#
+--
+-- Table structure for table 'dateformats'
+--
 
 DROP TABLE IF EXISTS dateformats;
 CREATE TABLE dateformats (
@@ -428,9 +421,9 @@ CREATE TABLE dateformats (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'dbs'
-#
+--
+-- Table structure for table 'dbs'
+--
 
 DROP TABLE IF EXISTS dbs;
 CREATE TABLE dbs (
@@ -443,9 +436,9 @@ CREATE TABLE dbs (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'dbs_readerstatus'
-#
+--
+-- Table structure for table 'dbs_readerstatus'
+--
 
 DROP TABLE IF EXISTS dbs_readerstatus;
 CREATE TABLE dbs_readerstatus (
@@ -462,9 +455,9 @@ CREATE TABLE dbs_readerstatus (
 	KEY ts_dbid (ts, dbid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'dbs_readerstatus_queries'
-#
+--
+-- Table structure for table 'dbs_readerstatus_queries'
+--
 
 DROP TABLE IF EXISTS dbs_readerstatus_queries;
 CREATE TABLE dbs_readerstatus_queries (
@@ -474,9 +467,9 @@ CREATE TABLE dbs_readerstatus_queries (
 	KEY text (text)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'discussions'
-#
+--
+-- Table structure for table 'discussions'
+--
 
 DROP TABLE IF EXISTS discussions;
 CREATE TABLE discussions (
@@ -505,9 +498,9 @@ CREATE TABLE discussions (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'discussion_kinds'
-#
+--
+-- Table structure for table 'discussion_kinds'
+--
 
 DROP TABLE IF EXISTS discussion_kinds;
 CREATE TABLE discussion_kinds (
@@ -517,9 +510,9 @@ CREATE TABLE discussion_kinds (
 	UNIQUE name (name)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'dst'
-#
+--
+-- Table structure for table 'dst'
+--
 
 DROP TABLE IF EXISTS dst;
 CREATE TABLE dst (
@@ -537,9 +530,9 @@ CREATE TABLE dst (
 ) ENGINE=InnoDB;
 
 
-#
-# Table structure for table 'file_queue'
-#
+--
+-- Table structure for table 'file_queue'
+--
 DROP TABLE IF EXISTS file_queue;
 CREATE TABLE file_queue (
 	fqid int(10) unsigned NOT NULL auto_increment,
@@ -551,9 +544,9 @@ CREATE TABLE file_queue (
 	PRIMARY KEY  (fqid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'formkeys'
-#
+--
+-- Table structure for table 'formkeys'
+--
 
 DROP TABLE IF EXISTS formkeys;
 CREATE TABLE formkeys (
@@ -580,9 +573,9 @@ CREATE TABLE formkeys (
 	KEY submit_ts (submit_ts)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'globjs' (global objects)
-#
+--
+-- Table structure for table 'globjs' (global objects)
+--
 
 DROP TABLE IF EXISTS globjs;
 CREATE TABLE globjs (
@@ -593,9 +586,9 @@ CREATE TABLE globjs (
 	UNIQUE target (gtid, target_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'globj_adminnotes'
-#
+--
+-- Table structure for table 'globj_adminnotes'
+--
 
 DROP TABLE IF EXISTS globj_adminnotes;
 CREATE TABLE globj_adminnotes (
@@ -604,9 +597,9 @@ CREATE TABLE globj_adminnotes (
 	PRIMARY KEY (globjid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'globj_types'
-#
+--
+-- Table structure for table 'globj_types'
+--
 
 DROP TABLE IF EXISTS globj_types;
 CREATE TABLE globj_types (
@@ -616,9 +609,9 @@ CREATE TABLE globj_types (
 	UNIQUE maintable (maintable)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'globj_urls'
-#
+--
+-- Table structure for table 'globj_urls'
+--
 
 DROP TABLE IF EXISTS globj_urls;
 CREATE TABLE globj_urls (
@@ -629,9 +622,9 @@ CREATE TABLE globj_urls (
 	UNIQUE globjid_url_id (globjid, url_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'hooks'
-#
+--
+-- Table structure for table 'hooks'
+--
 
 DROP TABLE IF EXISTS hooks;
 CREATE TABLE hooks (
@@ -643,9 +636,9 @@ CREATE TABLE hooks (
 	UNIQUE hook_param (param,class,subroutine)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'menus'
-#
+--
+-- Table structure for table 'menus'
+--
 
 DROP TABLE IF EXISTS menus;
 CREATE TABLE menus (
@@ -662,9 +655,9 @@ CREATE TABLE menus (
 	UNIQUE page_labels_un (menu,label)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'misc_user_opts'
-#
+--
+-- Table structure for table 'misc_user_opts'
+--
 
 DROP TABLE IF EXISTS misc_user_opts;
 CREATE TABLE misc_user_opts (
@@ -679,9 +672,9 @@ CREATE TABLE misc_user_opts (
 	PRIMARY KEY (name)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'open_proxies'
-#
+--
+-- Table structure for table 'open_proxies'
+--
 
 DROP TABLE IF EXISTS open_proxies;
 CREATE TABLE open_proxies (
@@ -696,9 +689,9 @@ CREATE TABLE open_proxies (
 	KEY ipid (ipid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'pagemark'
-#
+--
+-- Table structure for table 'pagemark'
+--
 
 DROP TABLE IF EXISTS pagemark;
 CREATE TABLE pagemark (
@@ -712,9 +705,9 @@ CREATE TABLE pagemark (
 	KEY ts (ts)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'pollanswers'
-#
+--
+-- Table structure for table 'pollanswers'
+--
 
 DROP TABLE IF EXISTS pollanswers;
 CREATE TABLE pollanswers (
@@ -725,9 +718,9 @@ CREATE TABLE pollanswers (
 	PRIMARY KEY (qid,aid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'pollquestions'
-#
+--
+-- Table structure for table 'pollquestions'
+--
 
 DROP TABLE IF EXISTS pollquestions;
 CREATE TABLE pollquestions (
@@ -747,9 +740,9 @@ CREATE TABLE pollquestions (
 	KEY discussion (discussion)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'pollvoters'
-#
+--
+-- Table structure for table 'pollvoters'
+--
 
 DROP TABLE IF EXISTS pollvoters;
 CREATE TABLE pollvoters (
@@ -760,9 +753,9 @@ CREATE TABLE pollvoters (
 	KEY qid (qid,id,uid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'preview'
-#
+--
+-- Table structure for table 'preview'
+--
 
 DROP TABLE IF EXISTS preview;
 CREATE TABLE preview (
@@ -779,9 +772,9 @@ CREATE TABLE preview (
 ) ENGINE=InnoDB;
 
 
-#
-# Table structure for table 'preview_param'
-#
+--
+-- Table structure for table 'preview_param'
+--
 
 DROP TABLE IF EXISTS preview_param;
 CREATE TABLE preview_param (
@@ -808,9 +801,9 @@ CREATE TABLE projects (
 	UNIQUE unixname_key (unixname)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'querylog'
-#
+--
+-- Table structure for table 'querylog'
+--
 
 DROP TABLE IF EXISTS querylog;
 CREATE TABLE querylog (
@@ -844,9 +837,9 @@ CREATE TABLE related_stories (
 	KEY stoid (stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'rss_raw'
-#
+--
+-- Table structure for table 'rss_raw'
+--
 
 DROP TABLE IF EXISTS rss_raw;
 CREATE TABLE rss_raw (
@@ -866,9 +859,9 @@ CREATE TABLE rss_raw (
 	KEY processed (processed)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'related_links'
-#
+--
+-- Table structure for table 'related_links'
+--
 
 DROP TABLE IF EXISTS related_links;
 CREATE TABLE related_links (
@@ -880,9 +873,9 @@ CREATE TABLE related_links (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'remarks'
-#
+--
+-- Table structure for table 'remarks'
+--
 
 DROP TABLE IF EXISTS remarks;
 CREATE TABLE remarks (
@@ -900,9 +893,9 @@ CREATE TABLE remarks (
 	INDEX priority (priority)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'sessions'
-#
+--
+-- Table structure for table 'sessions'
+--
 
 DROP TABLE IF EXISTS sessions;
 CREATE TABLE sessions (
@@ -935,9 +928,9 @@ CREATE TABLE signoff (
 	INDEX (stoid)
 ) ENGINE=InnoDB;
 				
-#
-# Table structure for table 'site_info'
-#
+--
+-- Table structure for table 'site_info'
+--
 
 DROP TABLE IF EXISTS site_info;
 CREATE TABLE site_info (
@@ -949,9 +942,9 @@ CREATE TABLE site_info (
 	PRIMARY KEY (param_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'skins'
-#
+--
+-- Table structure for table 'skins'
+--
 
 DROP TABLE IF EXISTS skins;
 CREATE TABLE skins (
@@ -980,9 +973,9 @@ CREATE TABLE skins (
 	UNIQUE name (name)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'skin_colors'
-#
+--
+-- Table structure for table 'skin_colors'
+--
 
 DROP TABLE IF EXISTS skin_colors;
 CREATE TABLE skin_colors (
@@ -992,9 +985,9 @@ CREATE TABLE skin_colors (
 	UNIQUE skid_name (skid, name)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'slashd_status'
-#
+--
+-- Table structure for table 'slashd_status'
+--
 
 DROP TABLE IF EXISTS slashd_status;
 CREATE TABLE slashd_status (
@@ -1008,9 +1001,9 @@ CREATE TABLE slashd_status (
 	PRIMARY KEY (task)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'slashd_errnotes'
-#
+--
+-- Table structure for table 'slashd_errnotes'
+--
 
 DROP TABLE IF EXISTS slashd_errnotes;
 CREATE TABLE slashd_errnotes (
@@ -1023,9 +1016,9 @@ CREATE TABLE slashd_errnotes (
 	INDEX taskname_ts (taskname, ts)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'soap_methods'
-#
+--
+-- Table structure for table 'soap_methods'
+--
 
 DROP TABLE IF EXISTS soap_methods;
 CREATE TABLE soap_methods (
@@ -1039,9 +1032,9 @@ CREATE TABLE soap_methods (
         UNIQUE soap_method(class, method)
 );
 
-#
-# Table structure for table 'spamarmors'
-#
+--
+-- Table structure for table 'spamarmors'
+--
 
 DROP TABLE IF EXISTS spamarmors;
 CREATE TABLE spamarmors (
@@ -1053,9 +1046,9 @@ CREATE TABLE spamarmors (
 ) ENGINE=InnoDB;
 
 
-#
-# Table structure for table 'stories'
-#
+--
+-- Table structure for table 'stories'
+--
 
 DROP TABLE IF EXISTS stories;
 CREATE TABLE stories (
@@ -1090,9 +1083,9 @@ CREATE TABLE stories (
 	INDEX discussion_stoid (discussion, stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'story_dirty'
-#
+--
+-- Table structure for table 'story_dirty'
+--
 
 DROP TABLE IF EXISTS story_dirty;
 CREATE TABLE story_dirty (
@@ -1100,9 +1093,9 @@ CREATE TABLE story_dirty (
 	PRIMARY KEY (stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'story_render_dirty'
-#
+--
+-- Table structure for table 'story_render_dirty'
+--
 
 DROP TABLE IF EXISTS story_render_dirty;
 CREATE TABLE story_render_dirty (
@@ -1110,9 +1103,9 @@ CREATE TABLE story_render_dirty (
 	PRIMARY KEY (stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'story_text'
-#
+--
+-- Table structure for table 'story_text'
+--
 
 DROP TABLE IF EXISTS story_text;
 CREATE TABLE story_text (
@@ -1125,9 +1118,9 @@ CREATE TABLE story_text (
 	PRIMARY KEY (stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'story_param'
-#
+--
+-- Table structure for table 'story_param'
+--
 
 DROP TABLE IF EXISTS story_param;
 CREATE TABLE story_param (
@@ -1139,9 +1132,9 @@ CREATE TABLE story_param (
 	PRIMARY KEY (param_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'story_topics_chosen'
-#
+--
+-- Table structure for table 'story_topics_chosen'
+--
 
 DROP TABLE IF EXISTS story_topics_chosen;
 CREATE TABLE story_topics_chosen (
@@ -1152,9 +1145,9 @@ CREATE TABLE story_topics_chosen (
 	INDEX tid_stoid (tid, stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'story_topics_rendered'
-#
+--
+-- Table structure for table 'story_topics_rendered'
+--
 
 DROP TABLE IF EXISTS story_topics_rendered;
 CREATE TABLE story_topics_rendered (
@@ -1165,9 +1158,9 @@ CREATE TABLE story_topics_rendered (
 ) ENGINE=InnoDB;
 
 
-#
-# Table structure for table 'static_files'
-#
+--
+-- Table structure for table 'static_files'
+--
 
 DROP TABLE IF EXISTS static_files;
 CREATE TABLE static_files(
@@ -1182,9 +1175,9 @@ CREATE TABLE static_files(
 	INDEX stoid(stoid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'string_param'
-#
+--
+-- Table structure for table 'string_param'
+--
 
 DROP TABLE IF EXISTS string_param;
 CREATE TABLE string_param (
@@ -1196,9 +1189,9 @@ CREATE TABLE string_param (
 	PRIMARY KEY (param_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'submissions'
-#
+--
+-- Table structure for table 'submissions'
+--
 
 DROP TABLE IF EXISTS submissions;
 CREATE TABLE submissions (
@@ -1233,9 +1226,9 @@ CREATE TABLE submissions (
 ) ENGINE=InnoDB;
 
 
-#
-# Table structure for table 'submission_param'
-#
+--
+-- Table structure for table 'submission_param'
+--
 
 DROP TABLE IF EXISTS submission_param;
 CREATE TABLE submission_param (
@@ -1247,9 +1240,9 @@ CREATE TABLE submission_param (
 	PRIMARY KEY (param_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'templates'
-#
+--
+-- Table structure for table 'templates'
+--
 DROP TABLE IF EXISTS templates;
 CREATE TABLE templates (
 	tpid mediumint UNSIGNED NOT NULL auto_increment,
@@ -1266,9 +1259,9 @@ CREATE TABLE templates (
 	UNIQUE true_template (name,page,skin,lang)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'topics'
-#
+--
+-- Table structure for table 'topics'
+--
 
 DROP TABLE IF EXISTS topics;
 CREATE TABLE topics (
@@ -1287,9 +1280,9 @@ CREATE TABLE topics (
 	UNIQUE (keyword)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'topic_nexus'
-#
+--
+-- Table structure for table 'topic_nexus'
+--
 
 DROP TABLE IF EXISTS topic_nexus;
 CREATE TABLE topic_nexus (
@@ -1298,9 +1291,9 @@ CREATE TABLE topic_nexus (
 	PRIMARY KEY (tid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'topic_nexus_dirty'
-#
+--
+-- Table structure for table 'topic_nexus_dirty'
+--
 
 DROP TABLE IF EXISTS topic_nexus_dirty;
 CREATE TABLE topic_nexus_dirty (
@@ -1308,9 +1301,9 @@ CREATE TABLE topic_nexus_dirty (
 	PRIMARY KEY (tid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'topic_nexus_extras'
-#
+--
+-- Table structure for table 'topic_nexus_extras'
+--
 
 DROP TABLE IF EXISTS topic_nexus_extras;
 CREATE TABLE topic_nexus_extras (
@@ -1326,9 +1319,9 @@ CREATE TABLE topic_nexus_extras (
 	UNIQUE tid_keyword (tid, extras_keyword)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'topic_param'
-#
+--
+-- Table structure for table 'topic_param'
+--
 
 DROP TABLE IF EXISTS topic_param;
 CREATE TABLE topic_param (
@@ -1340,9 +1333,9 @@ CREATE TABLE topic_param (
 	PRIMARY KEY (param_id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'topic_parents'
-#
+--
+-- Table structure for table 'topic_parents'
+--
 
 DROP TABLE IF EXISTS topic_parents;
 CREATE TABLE topic_parents (
@@ -1353,9 +1346,9 @@ CREATE TABLE topic_parents (
 	INDEX parent_tid (parent_tid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'tzcodes'
-#
+--
+-- Table structure for table 'tzcodes'
+--
 
 DROP TABLE IF EXISTS tzcodes;
 CREATE TABLE tzcodes (
@@ -1368,9 +1361,9 @@ CREATE TABLE tzcodes (
 	PRIMARY KEY (tz)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'urls'
-#
+--
+-- Table structure for table 'urls'
+--
 
 DROP TABLE IF EXISTS urls;
 CREATE TABLE urls (
@@ -1395,9 +1388,9 @@ CREATE TABLE urls (
 	INDEX bfu (believed_fresh_until)
 );
 
-#
-# Table structure for table 'users'
-#
+--
+-- Table structure for table 'users'
+--
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
@@ -1422,11 +1415,11 @@ CREATE TABLE users (
 	KEY seclev (seclev)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_acl'
-# (The redundant key on uid is there for when FOREIGN KEY starts
-# working with InnoDB...)
-#
+--
+-- Table structure for table 'users_acl'
+-- (The redundant key on uid is there for when FOREIGN KEY starts
+-- working with InnoDB...)
+--
 
 DROP TABLE IF EXISTS users_acl;
 CREATE TABLE users_acl (
@@ -1439,9 +1432,9 @@ CREATE TABLE users_acl (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_clout'
-#
+--
+-- Table structure for table 'users_clout'
+--
 
 DROP TABLE IF EXISTS users_clout;
 CREATE TABLE users_clout (
@@ -1454,9 +1447,9 @@ CREATE TABLE users_clout (
 	INDEX clid (clid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_comments'
-#
+--
+-- Table structure for table 'users_comments'
+--
 
 DROP TABLE IF EXISTS users_comments;
 CREATE TABLE users_comments (
@@ -1481,9 +1474,9 @@ CREATE TABLE users_comments (
 	KEY points (points)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_comments_read_log'
-#
+--
+-- Table structure for table 'users_comments_read_log'
+--
 
 DROP TABLE IF EXISTS users_comments_read_log;
 CREATE TABLE users_comments_read_log (
@@ -1494,9 +1487,9 @@ CREATE TABLE users_comments_read_log (
 ) ENGINE=InnoDB;
 
 
-#
-# Table structure for table 'users_hits'
-#
+--
+-- Table structure for table 'users_hits'
+--
 
 DROP TABLE IF EXISTS users_hits;
 CREATE TABLE users_hits (
@@ -1506,9 +1499,9 @@ CREATE TABLE users_hits (
 	PRIMARY KEY (uid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_index'
-#
+--
+-- Table structure for table 'users_index'
+--
 
 DROP TABLE IF EXISTS users_index;
 CREATE TABLE users_index (
@@ -1529,9 +1522,9 @@ CREATE TABLE users_index (
 	PRIMARY KEY (uid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_info'
-#
+--
+-- Table structure for table 'users_info'
+--
 
 DROP TABLE IF EXISTS users_info;
 CREATE TABLE users_info (
@@ -1566,9 +1559,9 @@ CREATE TABLE users_info (
 	KEY tokens (tokens)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_logtokens'
-#
+--
+-- Table structure for table 'users_logtokens'
+--
 
 DROP TABLE IF EXISTS users_logtokens;
 CREATE TABLE users_logtokens (
@@ -1586,9 +1579,9 @@ CREATE TABLE users_logtokens (
 	KEY (public)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_openid'
-#
+--
+-- Table structure for table 'users_openid'
+--
 
 DROP TABLE IF EXISTS users_openid;
 CREATE TABLE users_openid (
@@ -1600,9 +1593,9 @@ CREATE TABLE users_openid (
 	INDEX (uid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_openid_reskeys'
-#
+--
+-- Table structure for table 'users_openid_reskeys'
+--
 
 DROP TABLE IF EXISTS users_openid_reskeys;
 CREATE TABLE users_openid_reskeys (
@@ -1614,9 +1607,9 @@ CREATE TABLE users_openid_reskeys (
 	INDEX (reskey)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_param'
-#
+--
+-- Table structure for table 'users_param'
+--
 
 DROP TABLE IF EXISTS users_param;
 CREATE TABLE users_param (
@@ -1629,9 +1622,9 @@ CREATE TABLE users_param (
 	KEY name (name)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'users_prefs'
-#
+--
+-- Table structure for table 'users_prefs'
+--
 
 DROP TABLE IF EXISTS users_prefs;
 CREATE TABLE users_prefs (
@@ -1646,9 +1639,9 @@ CREATE TABLE users_prefs (
 	PRIMARY KEY (uid)
 ) ENGINE=InnoDB;
 
-#
-# Table structure for table 'vars'
-#
+--
+-- Table structure for table 'vars'
+--
 
 DROP TABLE IF EXISTS vars;
 CREATE TABLE vars (
@@ -1667,54 +1660,54 @@ CREATE TABLE xsite_auth_log (
 ) ENGINE=InnoDB;
 
 
-#ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
-#ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
-#ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
-# This doesn't work, since discussion may be 0.
-#ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
-# This doesn't work, since in the install pollquestions is populated before users, alphabetically
-#ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
-# This doesn't work, makes createStory die
-#ALTER TABLE stories ADD FOREIGN KEY (uid) REFERENCES users(uid);
-# These don't work, should check why...
-#ALTER TABLE stories ADD FOREIGN KEY (tid) REFERENCES topics(tid);
-#ALTER TABLE stories ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
-#ALTER TABLE story_text ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
-#ALTER TABLE story_topics_chosen ADD FOREIGN KEY (tid) REFERENCES topics(tid);
-#ALTER TABLE story_topics_rendered ADD FOREIGN KEY (tid) REFERENCES topics(tid);
-#ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
+-- ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
+-- ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
+-- This doesn't work, since discussion may be 0.
+-- ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
+-- This doesn't work, since in the install pollquestions is populated before users, alphabetically
+-- ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- This doesn't work, makes createStory die
+-- ALTER TABLE stories ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- These don't work, should check why...
+-- ALTER TABLE stories ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+-- ALTER TABLE stories ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+-- ALTER TABLE story_text ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
+-- ALTER TABLE story_topics_chosen ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+-- ALTER TABLE story_topics_rendered ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+-- ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 
-# Commented-out foreign keys are ones which currently cannot be used
-# because they refer to a primary key which is NOT NULL AUTO_INCREMENT
-# and the child's key either has a default value which would be invalid
-# for an auto_increment field, typically NOT NULL DEFAULT '0'.  Or,
-# in some cases, the primary key is e.g. VARCHAR(20) NOT NULL and the
-# child's key will be VARCHAR(20).  The possibility of NULLs negates
-# the ability to add a foreign key.  <-- That's my current theory,
-# but it doesn't explain why discussions.topic SMALLINT UNSIGNED NOT NULL
-# DEFAULT '0' is able to be foreign-keyed to topics.tid SMALLINT UNSIGNED
-# NOT NULL AUTO_INCREMENT.
-# (And note that MySQL 4.0 allows an AUTO_INCREMENT column to be declared
-# with a DEFAULT, but MySQL 4.1 throws an error on that formulation.)
+-- Commented-out foreign keys are ones which currently cannot be used
+-- because they refer to a primary key which is NOT NULL AUTO_INCREMENT
+-- and the child's key either has a default value which would be invalid
+-- for an auto_increment field, typically NOT NULL DEFAULT '0'.  Or,
+-- in some cases, the primary key is e.g. VARCHAR(20) NOT NULL and the
+-- child's key will be VARCHAR(20).  The possibility of NULLs negates
+-- the ability to add a foreign key.  <-- That's my current theory,
+-- but it doesn't explain why discussions.topic SMALLINT UNSIGNED NOT NULL
+-- DEFAULT '0' is able to be foreign-keyed to topics.tid SMALLINT UNSIGNED
+-- NOT NULL AUTO_INCREMENT.
+-- (And note that MySQL 4.0 allows an AUTO_INCREMENT column to be declared
+-- with a DEFAULT, but MySQL 4.1 throws an error on that formulation.)
 
-#ALTER TABLE blocks ADD FOREIGN KEY (rss_template) REFERENCES templates(name);
-#ALTER TABLE discussions ADD FOREIGN KEY (sid) REFERENCES stories(sid);
-#ALTER TABLE discussions ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
-#ALTER TABLE discussions ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE formkeys ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE pollanswers ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
-#ALTER TABLE pollvoters ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE pollvoters ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
-#ALTER TABLE rss_raw ADD FOREIGN KEY (subid) REFERENCES submissions(subid);
-#ALTER TABLE rss_raw ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
-#ALTER TABLE sessions ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE sessions ADD FOREIGN KEY (last_subid) REFERENCES submissions(subid);
-#ALTER TABLE story_topics ADD FOREIGN KEY (sid) REFERENCES stories(sid);
-#ALTER TABLE submissions ADD FOREIGN KEY (tid) REFERENCES topics(tid);
-#ALTER TABLE users_acl ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE users_comments ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE users_index ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE users_info ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE users_param ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE users_prefs ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE blocks ADD FOREIGN KEY (rss_template) REFERENCES templates(name);
+-- ALTER TABLE discussions ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+-- ALTER TABLE discussions ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
+-- ALTER TABLE discussions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE formkeys ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE pollanswers ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+-- ALTER TABLE pollvoters ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE pollvoters ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+-- ALTER TABLE rss_raw ADD FOREIGN KEY (subid) REFERENCES submissions(subid);
+-- ALTER TABLE rss_raw ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
+-- ALTER TABLE sessions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE sessions ADD FOREIGN KEY (last_subid) REFERENCES submissions(subid);
+-- ALTER TABLE story_topics ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+-- ALTER TABLE submissions ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+-- ALTER TABLE users_acl ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE users_comments ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE users_index ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE users_info ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE users_param ADD FOREIGN KEY (uid) REFERENCES users(uid);
+-- ALTER TABLE users_prefs ADD FOREIGN KEY (uid) REFERENCES users(uid);
 
