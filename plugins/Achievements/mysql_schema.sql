@@ -7,7 +7,7 @@ CREATE TABLE achievements (
         increment tinyint(1) unsigned NOT NULL default '0',
         PRIMARY KEY (aid),
 	UNIQUE KEY achievement (name)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS user_achievements;
 CREATE TABLE user_achievements (
@@ -19,7 +19,7 @@ CREATE TABLE user_achievements (
         PRIMARY KEY (id),
         UNIQUE KEY achievement (uid,aid),
 	INDEX aid_exponent (aid,exponent)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS user_achievement_streaks;
 CREATE TABLE user_achievement_streaks (
@@ -30,4 +30,4 @@ CREATE TABLE user_achievement_streaks (
 	last_hit datetime NOT NULL default '0000-00-00 00:00:00',
 	PRIMARY KEY (id),
 	UNIQUE KEY achievement (uid,aid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;

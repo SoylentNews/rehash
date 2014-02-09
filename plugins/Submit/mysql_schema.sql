@@ -10,5 +10,5 @@ CREATE TABLE submissions_notes (
 	subnote text,
 	time datetime default NULL,
 	PRIMARY KEY  (noid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 

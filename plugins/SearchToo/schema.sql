@@ -9,4 +9,4 @@ CREATE TABLE search_index_dump (
     type        VARCHAR(32) DEFAULT '' NOT NULL,
     status      ENUM('new', 'changed', 'deleted') DEFAULT 'new' NOT NULL,
     PRIMARY KEY (iid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;

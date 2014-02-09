@@ -14,5 +14,5 @@ CREATE TABLE email_optout (
 	KEY ipid (ipid),
 	KEY subnetid (subnetid),
 	KEY date_added (added)
-) TYPE = InnoDB;
+) ENGINE=InnoDB;
 

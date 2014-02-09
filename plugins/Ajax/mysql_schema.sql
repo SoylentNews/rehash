@@ -12,5 +12,5 @@ CREATE TABLE ajax_ops (
 	reskey_type VARCHAR(64) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE op (op)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 

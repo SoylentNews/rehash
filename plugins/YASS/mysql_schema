@@ -14,7 +14,7 @@ CREATE TABLE yass_sites (
 	bid char(32) NOT NULL,
 	UNIQUE sidurl (sid, url),
 	PRIMARY KEY (id)
-) TYPE = InnoDB;
+) ENGINE=InnoDB;
 
 # Commented out because target table is necessarily MyISAM,
 # and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM

@@ -15,7 +15,7 @@ CREATE TABLE dilemma_species (
 	PRIMARY KEY (dsid),
 	UNIQUE (name),
 	KEY (uid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_agents;
 CREATE TABLE dilemma_agents (
@@ -29,7 +29,7 @@ CREATE TABLE dilemma_agents (
 	PRIMARY KEY (daid),
 	KEY (dsid),
 	KEY trid_alive (trid, alive)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_tournament_info;
 CREATE TABLE dilemma_tournament_info (
@@ -44,7 +44,7 @@ CREATE TABLE dilemma_tournament_info (
 	max_meets INT UNSIGNED DEFAULT 30 NOT NULL,
 	graph_drawn_tick INT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (trid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 # this will eventually store more interesting numbers than just name='num_alive','sumfood'
 # and probably we need stats on an other-than-just-species basis
@@ -57,14 +57,14 @@ CREATE TABLE dilemma_stats (
 	value FLOAT,
 	UNIQUE ttdd (trid, tick, dsid, dstnmid),
 	KEY tdd (trid, dsid, dstnmid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_stat_names;
 CREATE TABLE dilemma_stat_names (
 	dstnmid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	name CHAR(16) NOT NULL,
 	PRIMARY KEY (dstnmid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_meetlog;
 CREATE TABLE dilemma_meetlog (
@@ -74,7 +74,7 @@ CREATE TABLE dilemma_meetlog (
 	foodsize FLOAT UNSIGNED NOT NULL,
 	PRIMARY KEY (meetid),
 	KEY trid_tick (trid, tick)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_playlog;
 CREATE TABLE dilemma_playlog (
@@ -86,5 +86,5 @@ CREATE TABLE dilemma_playlog (
 	sawdaid INT UNSIGNED NOT NULL,
 	UNIQUE meetid_daid (meetid, daid),
 	KEY daid_meetid (daid, meetid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 

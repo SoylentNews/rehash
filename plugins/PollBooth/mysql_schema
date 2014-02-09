@@ -9,7 +9,7 @@ CREATE TABLE auto_poll (
 	primaryskid SMALLINT UNSIGNED,
 	qid mediumint UNSIGNED,
 	PRIMARY KEY (id)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 # Doesn't work, unsure why.
 # ALTER TABLE auto_poll ADD FOREIGN KEY (section) REFERENCES sections(section);

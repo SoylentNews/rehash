@@ -11,7 +11,7 @@ CREATE TABLE bookmarks (
 	UNIQUE url_id_uid (url_id, uid),
 	INDEX srcid_32 (srcid_32),
 	INDEX srcid_24 (srcid_24)
-);
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS bookmark_feeds;
 CREATE TABLE bookmark_feeds (
@@ -23,4 +23,4 @@ CREATE TABLE bookmark_feeds (
 	nofilter TINYINT UNSIGNED NOT NULL DEFAULT 0,
 	attended ENUM('no', 'yes') NOT NULL DEFAULT 'no',
 	PRIMARY KEY(id)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;

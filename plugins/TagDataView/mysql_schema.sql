@@ -9,5 +9,5 @@ CREATE TABLE firehose_history (
 	userpop float NOT NULL default '0',
 	editorpop float NOT NULL default '0',
 	UNIQUE globjid_secsin (globjid, secsin)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 

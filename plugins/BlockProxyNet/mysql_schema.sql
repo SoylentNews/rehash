@@ -5,5 +5,5 @@ CREATE TABLE bpn_sources (
 	regex		VARCHAR(255) NOT NULL DEFAULT '',
 	al2name		VARCHAR(30) NOT NULL DEFAULT 'nopostanon',
 	PRIMARY KEY name (name)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 

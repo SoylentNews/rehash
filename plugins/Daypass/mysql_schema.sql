@@ -9,7 +9,7 @@ CREATE TABLE daypass_available (
 	endtime		DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	aclreq		VARCHAR(32) DEFAULT NULL,
 	PRIMARY KEY daid (daid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 # Creating rows in this table can mark certain skins or stories as
 # requiring a daypass (or subscription) to read.  Using this is
@@ -30,7 +30,7 @@ CREATE TABLE daypass_needs (
 	data		VARCHAR(255) NOT NULL,
 	starttime	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	endtime		DATETIME DEFAULT NULL
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 # Here is where daypass keys are temporarily stored, while users are
 # looking at the daypass page(s).  Once they have confirmed their key
@@ -48,7 +48,7 @@ CREATE TABLE daypass_keys (
 	PRIMARY KEY dpkid (dpkid),
 	UNIQUE daypasskey (daypasskey),
 	KEY key_given (key_given)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 # Any user with a 'daypass_confcode' cookie in this table where the
 # confcode >= NOW() is considered to have a daypass.  It does not
@@ -58,5 +58,5 @@ CREATE TABLE daypass_confcodes (
 	confcode	CHAR(20) NOT NULL DEFAULT '',
 	gooduntil	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	PRIMARY KEY confcode (confcode)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 

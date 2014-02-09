@@ -86,9 +86,9 @@ sub init {
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_host_addr");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_uidip");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_uid");
-		$self->sqlDo("CREATE TABLE accesslog_temp_host_addr (host_addr char(32) NOT NULL, anon ENUM('no','yes') NOT NULL DEFAULT 'yes', PRIMARY KEY (host_addr, anon)) TYPE = InnoDB");
-		$self->sqlDo("CREATE TABLE accesslog_build_uidip (uidip varchar(32) NOT NULL, op varchar(254) NOT NULL, PRIMARY KEY (uidip, op), INDEX (op)) TYPE = InnoDB");
-		$self->sqlDo("CREATE TABLE accesslog_build_unique_uid ( uid MEDIUMINT UNSIGNED NOT NULL, PRIMARY KEY (uid)) TYPE = InnoDB");
+		$self->sqlDo("CREATE TABLE accesslog_temp_host_addr (host_addr char(32) NOT NULL, anon ENUM('no','yes') NOT NULL DEFAULT 'yes', PRIMARY KEY (host_addr, anon)) ENGINE = InnoDB");
+		$self->sqlDo("CREATE TABLE accesslog_build_uidip (uidip varchar(32) NOT NULL, op varchar(254) NOT NULL, PRIMARY KEY (uidip, op), INDEX (op)) ENGINE = InnoDB");
+		$self->sqlDo("CREATE TABLE accesslog_build_unique_uid ( uid MEDIUMINT UNSIGNED NOT NULL, PRIMARY KEY (uid)) ENGINE = InnoDB");
 
 		# Then, get the schema in its CREATE TABLE statement format.
 		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");

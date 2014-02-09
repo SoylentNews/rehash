@@ -21,7 +21,7 @@ CREATE TABLE journals (
 	KEY tid (tid),
 	KEY srcid_32 (srcid_32),
 	KEY srcid_24 (srcid_24)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS journals_text;
 CREATE TABLE journals_text (
@@ -29,7 +29,7 @@ CREATE TABLE journals_text (
 	article TEXT NOT NULL,
 	introtext TEXT NOT NULL,
 	PRIMARY KEY (id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS journal_themes;
 CREATE TABLE journal_themes (
@@ -37,7 +37,7 @@ CREATE TABLE journal_themes (
 	name VARCHAR(30) NOT NULL,
 	UNIQUE name(name),
 	PRIMARY KEY (id)
-);
+) ENGINE=MyISAM;
 
 #ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 
@@ -49,4 +49,4 @@ CREATE TABLE journal_transfer (
 	updated TINYINT UNSIGNED NOT NULL DEFAULT '0',
 	PRIMARY KEY (id),
 	KEY stoid_updated (stoid, updated)
-);
+) ENGINE=MyISAM;

@@ -16,7 +16,7 @@ CREATE TABLE links (
 	is_alive enum('yes','no') DEFAULT 'yes' NOT NULL,
 	stats_type VARCHAR(24),
 	PRIMARY KEY (id)
-) TYPE = InnoDB;
+) ENGINE=InnoDB;
 
 #
 # Table structure for table 'links_for_stories'
@@ -29,7 +29,7 @@ CREATE TABLE links_for_stories (
 	count INT DEFAULT 0 NOT NULL,
 	PRIMARY KEY (id,stoid),
 	INDEX stoid (stoid)
-) TYPE = InnoDB;
+) ENGINE=InnoDB;
 
 #ALTER TABLE links_for_stories ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
 #ALTER TABLE links_for_stories ADD FOREIGN KEY (sid) REFERENCES stories(sid);

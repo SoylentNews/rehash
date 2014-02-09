@@ -27,14 +27,14 @@ CREATE TABLE reskeys (
     KEY create_ts (create_ts),
     KEY last_ts (last_ts),
     KEY submit_ts (submit_ts)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_failures;
 CREATE TABLE reskey_failures (
     rkid        INT NOT NULL,
     failure     VARCHAR(255) DEFAULT '' NOT NULL,
     PRIMARY KEY (rkid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_resources;
 CREATE TABLE reskey_resources (
@@ -42,7 +42,7 @@ CREATE TABLE reskey_resources (
     name        VARCHAR(64),
     static      ENUM('yes', 'no') DEFAULT 'no' NOT NULL,
     PRIMARY KEY (rkrid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_resource_checks;
 CREATE TABLE reskey_resource_checks (
@@ -53,7 +53,7 @@ CREATE TABLE reskey_resource_checks (
     ordernum    SMALLINT UNSIGNED DEFAULT 0,
     PRIMARY KEY (rkrcid),
     UNIQUE rkrid_name (rkrid, type, class)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_vars;
 CREATE TABLE reskey_vars (
@@ -62,14 +62,14 @@ CREATE TABLE reskey_vars (
     value       TEXT,
     description VARCHAR(255),
     UNIQUE name_rkrid (name, rkrid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_hourlysalt;
 CREATE TABLE reskey_hourlysalt (
     ts          DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
     salt        VARCHAR(20) DEFAULT '' NOT NULL,
     UNIQUE ts (ts)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_sessions;
 CREATE TABLE reskey_sessions (
@@ -80,5 +80,5 @@ CREATE TABLE reskey_sessions (
     PRIMARY KEY (sessid),
     INDEX (reskey),
     UNIQUE reskey_name (reskey, name)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
