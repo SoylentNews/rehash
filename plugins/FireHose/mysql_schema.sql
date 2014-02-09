@@ -49,14 +49,14 @@ CREATE TABLE firehose (
 	KEY uid (uid),
 	KEY last_update (last_update),
 	KEY type_srcid (type, srcid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 # The table giving an Object's Generally Accepted Story Publication Time
 CREATE TABLE firehose_ogaspt (
 	globjid		int(10) unsigned NOT NULL default '0',
 	pubtime		datetime NOT NULL default '0000-00-00 00:00:00',
 	PRIMARY KEY	(globjid)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_topics_rendered;
 CREATE TABLE firehose_topics_rendered (
@@ -64,7 +64,7 @@ CREATE TABLE firehose_topics_rendered (
 	tid SMALLINT(5) UNSIGNED NOT NULL,
 	UNIQUE id_tid (id, tid),
 	INDEX tid_id (tid, id)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_text;
 CREATE TABLE firehose_text (
@@ -74,7 +74,7 @@ CREATE TABLE firehose_text (
 	bodytext text,
 	media text,
 	PRIMARY KEY (id)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_section;
 CREATE TABLE firehose_section (
@@ -116,7 +116,7 @@ CREATE TABLE firehose_tab (
 	mode ENUM("full", "fulltitle") DEFAULT "fulltitle",
 	PRIMARY KEY (tabid),
 	UNIQUE uid_tabname (uid,tabname)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_view;
 CREATE TABLE firehose_view (
@@ -177,7 +177,7 @@ CREATE TABLE firehose_update_log (
 	duration FLOAT DEFAULT 0.0 NOT NULL,
 	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (id)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_setting_log;
 CREATE TABLE firehose_setting_log (
