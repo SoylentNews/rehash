@@ -1407,7 +1407,8 @@ CREATE TABLE users (
 	sig varchar(200),
 	seclev mediumint UNSIGNED DEFAULT '0' NOT NULL,	/* This is set to 0 as a safety factor */
 	matchname varchar(20),
-	newpasswd varchar(8),
+	newpasswd char(32),
+	newpasswd_ts int UNSIGNED,
 	journal_last_entry_date datetime,
 	author tinyint DEFAULT 0 NOT NULL,
 	shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL,
