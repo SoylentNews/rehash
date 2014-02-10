@@ -1,4 +1,0 @@
-slash		ssh://trac.corp.sourceforge.com/srv/git/slash.git		/usr/local/src
-slashcode.com	ssh://a2da.net/srv/git/slashcode.com.git			/usr/local/src/slash/themes
-slashdot	ssh://trac.corp.sourceforge.com/srv/git/slashdot.git		/usr/local/src/slash/themes
-useperl		ssh://a2da.net/srv/git/useperl.git				/usr/local/src/slash/themes

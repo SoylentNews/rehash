@@ -320,6 +320,8 @@ sub _install {
 		htdoc_faq	=> ["htdocs/faq",		0],
 		sbin		=> ["sbin",			1],
 		image		=> ["htdocs/images",		0],
+		imagejs		=> ["htdocs/images",		0],
+		jquery		=> ["htdocs/images/jquery",	0],
 		image_award	=> ["htdocs/images/awards",	0],
 		image_banner	=> ["htdocs/images/banners",	0],
 		image_faq	=> ["htdocs/images/faq",	0],
@@ -649,7 +651,7 @@ sub _getList {
 			$key = lc $key;
 			if ($key =~ /^(
 				css | htdoc | htdoc_code | htdoc_faq | 
-				image | image_award | image_banner | image_faq |
+				jquery | image | imagejs | image_award | image_banner | image_faq |
 				no-template | include_theme | task | template | sbin | misc | topic
 			)s?$/x) {
 				push @{$hash{$dir}{$1}}, $val;
