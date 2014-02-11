@@ -2,6 +2,7 @@ body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img
 {
 	padding: 0;
 	margin: 0;
+	font-family: Helvetica, sans-serif;
 }
 
 body
@@ -62,7 +63,8 @@ span.sd-info-block, span[class^=sd-key-] {
 	height: 100%;
 	z-index: 2;
 	position: relative;
-	margin: 0 15.6em 1em 0;
+	margin: 0 400px 1em 0;
+	min-width: 500px;
 	padding: 0;
 }
 
@@ -782,4 +784,4 @@ div.modalprefhelp {
         width: 300px;
         border-style: solid;
         border-width: 2px;
-}                                
+}
