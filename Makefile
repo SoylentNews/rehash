@@ -277,7 +277,8 @@ clean:
 	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
 	(cd plugins; $(MAKE) clean)
 	(cd tagboxes; $(MAKE) clean)
-	find ./ | grep \# | xargs rm
+	find ./ | grep Makefile.old | xargs rm
+	find ./ | grep .xs.orig | xargs rm
 
 dist: $(DISTVNAME).tar$(SUFFIX)
 
