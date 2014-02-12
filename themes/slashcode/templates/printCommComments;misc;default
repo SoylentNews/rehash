@@ -28,7 +28,7 @@ __template__
 		&& user.is_admin
 		&& user.seclev >= constants.authors_unlimited
 	) || user.acl.candelcomments_always;
-   moderate_form   = (!discussion2 || can_del) && (can_moderate || user.acl.candelcomments_always);
+   moderate_form   = (can_moderate || can_del || user.acl.candelcomments_always);
    moderate_button = (can_moderate
 	&& user.mode != 'archive'
 	&& ( !user.state.discussion_archived || constants.comments_moddable_archived));
