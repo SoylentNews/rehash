@@ -94,10 +94,11 @@ sub main {
 		return;
 	}
 
-	if ($op eq 'setdiscussion2') {
-		setDiscussion2($form, $slashdb, $user, $constants, $gSkin);
-		return;
-	}
+	# MC: Forcibly disabling D2 until we decide what to do with it
+	#if ($op eq 'setdiscussion2') {
+	#	setDiscussion2($form, $slashdb, $user, $constants, $gSkin);
+	#	return;
+	#}
 
 	# This is here to save a function call, even though the
 	# function can handle the situation itself
@@ -793,27 +794,28 @@ sub deleteThread {
 }
 
 
+# MC more D2 neuturing
 ##################################################################
-sub setDiscussion2 {
-	my($form, $slashdb, $user, $constants, $gSkin) = @_;
-	return if $user->{is_anon};
-	$slashdb->setUser($user->{uid}, {
-		discussion2 => $form->{discussion2_slashdot} ? 'slashdot' : 'none'
-	});
-
-	my $referrer = $ENV{HTTP_REFERER};
-	my $url;
-	if ($referrer && $referrer =~ m|https?://(?:[\w.]+.)?$constants->{basedomain}/|) {
-		$url = $referrer;
-	} else {
-		$url = $gSkin->{rootdir} . '/comments.pl';
-		$url .= '?sid=' . $form->{sid};
-		$url .= '&cid=' . $form->{cid} if $form->{cid};
-		$url .= '&pid=' . $form->{pid} if $form->{pid};
-	}
-
-	redirect($url);
-}
+#sub setDiscussion2 {
+#	my($form, $slashdb, $user, $constants, $gSkin) = @_;
+#	return if $user->{is_anon};
+#	$slashdb->setUser($user->{uid}, {
+#		discussion2 => $form->{discussion2_slashdot} ? 'slashdot' : 'none'
+#	});
+#
+#	my $referrer = $ENV{HTTP_REFERER};
+#	my $url;
+#	if ($referrer && $referrer =~ m|https?://(?:[\w.]+.)?$constants->{basedomain}/|) {
+#		$url = $referrer;
+#	} else {
+#		$url = $gSkin->{rootdir} . '/comments.pl';
+#		$url .= '?sid=' . $form->{sid};
+#		$url .= '&cid=' . $form->{cid} if $form->{cid};
+#		$url .= '&pid=' . $form->{pid} if $form->{pid};
+#	}
+#
+#	redirect($url);
+#}
 
 
 ##################################################################

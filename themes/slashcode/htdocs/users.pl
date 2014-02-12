@@ -2810,9 +2810,10 @@ sub saveComm {
 			: $form->{d2_comment_q};
 
 	my $user_edits_table = {
-		discussion2		=> $form->{discussion2} || undef,
-		d2_comment_q		=> $form->{d2_comment_q} || undef,
-		d2_comment_order	=> $form->{d2_comment_order} || undef,
+		# MC: More D2 neutring
+		#discussion2		=> $form->{discussion2} || undef,
+		#d2_comment_q		=> $form->{d2_comment_q} || undef,
+		#d2_comment_order	=> $form->{d2_comment_order} || undef,
 		clsmall			=> $form->{clsmall},
 		clsmall_bonus		=> ($clsmall_bonus || undef),
 		clbig			=> $form->{clbig},

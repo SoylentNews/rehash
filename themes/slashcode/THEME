@@ -147,6 +147,7 @@ css=../../plugins/Ajax/htdocs/images/tag-ui.css
 css=htdocs/comments.cssraw
 css=htdocs/handheld.cssraw
 css=htdocs/print.css
+css=htdocs/firehose.cssraw
 css=htdocs/slashcode.cssraw
 css=htdocs/slashcode_lite.cssraw
 css=htdocs/slashcode_low_bw.css

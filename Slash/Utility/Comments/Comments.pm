@@ -158,6 +158,7 @@ sub selectComments {
 
 #slashProf("sC main sort", "sC setup");
 	my($oldComment, %old_comments);
+	# MC: hack hack hack (force d2 off
 	if ($discussion2 && !$options->{no_d2}) {
 		my $limits = $slashdb->getDescriptions('d2_comment_limits');
 		my $max = $d2_comment_q ? $limits->{ $d2_comment_q } : 0;
@@ -2621,10 +2622,12 @@ sub isTroll {
 
 ########################################################
 # is discussion2 active?
+# MC: D2 is really broken in slashcode, forcibly disable it
 sub discussion2 {
-	my $user = $_[0] || getCurrentUser();
-	return $user->{discussion2} eq 'slashdot'
-		? $user->{discussion2} : 0;
+#	my $user = $_[0] || getCurrentUser();
+#	return $user->{discussion2} eq 'slashdot'
+#		? $user->{discussion2} : 0;
+	return 0;
 }
 
 
