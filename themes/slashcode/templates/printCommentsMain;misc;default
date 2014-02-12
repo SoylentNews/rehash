@@ -25,7 +25,7 @@ __template__
    	horiz = 1;
    END;
    count = count || 0;
-   discussion2 = Slash.discussion2();
+   discussion2 = 0;
    this_title = title;
    spilltext = "Spill at <b>${user.commentspill}</b>!";
    fineprint = 'The following comments are owned by whoever posted them.  We are not responsible for them in any way.';
