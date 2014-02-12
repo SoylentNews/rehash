@@ -1,10 +1,7 @@
 # $Id$
 name=FireHose
 description="FireHose"
-glob=firehosecss:htdocs/firehose.css
-firehosecss=firehose.css
 jquery=../Ajax/htdocs/images/jquery/jquery.autocomplete.css
-css=firehose.cssraw
 htdoc=firehose.pl
 htdoc=index2.pl
 mysql_dump=mysql_dump.sql

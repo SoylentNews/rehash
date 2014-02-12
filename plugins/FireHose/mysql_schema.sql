@@ -52,6 +52,7 @@ CREATE TABLE firehose (
 ) ENGINE=InnoDB;
 
 # The table giving an Object's Generally Accepted Story Publication Time
+DROP TABLE IF EXISTS firehose_ogaspt;
 CREATE TABLE firehose_ogaspt (
 	globjid		int(10) unsigned NOT NULL default '0',
 	pubtime		datetime NOT NULL default '0000-00-00 00:00:00',
@@ -123,6 +124,7 @@ CREATE TABLE firehose_view (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	viewname VARCHAR(24) NOT NULL DEFAULT 'unnamed',
+	viewtitle VARCHAR(24) NOT NULL DEFAULT 'untitled',
 	useparentfilter ENUM("no","yes") DEFAULT "yes",
 	tab_display ENUM("no","yes") DEFAULT "no",
 	options_edit ENUM("no","yes") DEFAULT "no",
@@ -147,7 +149,7 @@ CREATE TABLE firehose_view (
 	link_icon ENUM ("no","yes") DEFAULT "no",
 	placeholder ENUM("no","yes") DEFAULT "no",
 	addable ENUM("no", "yes") DEFAULT "no",
-	removable ENUM("no","yes") DEFAULT "noa",
+	removable ENUM("no","yes") DEFAULT "no",
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 

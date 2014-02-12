@@ -80,6 +80,7 @@ CREATE TABLE tagcommand_adminlog_sfnet (
 
 ALTER TABLE users_info ADD COLUMN tag_clout FLOAT UNSIGNED NOT NULL DEFAULT 1.0 AFTER created_at;
 
+DROP TABLE IF EXISTS tagboxes;
 CREATE TABLE tagboxes (
 	tbid			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
 	name			VARCHAR(32) DEFAULT '' NOT NULL,
@@ -92,6 +93,7 @@ CREATE TABLE tagboxes (
 	UNIQUE name (name)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tagboxlog_feeder;
 CREATE TABLE tagboxlog_feeder (
 	tfid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	created_at	datetime NOT NULL,
@@ -109,6 +111,7 @@ CREATE TABLE tagboxlog_feeder (
 	KEY tbid_affectedid (tbid, affected_id)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_deactivated;
 CREATE TABLE tags_deactivated (
 	tdid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	tagid		int UNSIGNED NOT NULL,
@@ -116,6 +119,7 @@ CREATE TABLE tags_deactivated (
 	KEY tagid (tagid)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_userchange;
 CREATE TABLE tags_userchange (
 	tuid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	created_at	datetime NOT NULL,
@@ -127,6 +131,7 @@ CREATE TABLE tags_userchange (
 	KEY uid (uid)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_peerweight;
 CREATE TABLE tags_peerweight (
 	tpwid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	uid		mediumint UNSIGNED NOT NULL DEFAULT '0',
@@ -138,6 +143,7 @@ CREATE TABLE tags_peerweight (
 	KEY clid_gen_uid (clid, gen, uid)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tagnames_synonyms_chosen;
 CREATE TABLE tagnames_synonyms_chosen (
 	clid		smallint UNSIGNED NOT NULL DEFAULT '0',
 	pref_tnid	int UNSIGNED NOT NULL DEFAULT '0',
@@ -145,6 +151,7 @@ CREATE TABLE tagnames_synonyms_chosen (
 	UNIQUE clid_pref_syn (clid, pref_tnid, syn_tnid)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tagnames_similarity_rendered;
 CREATE TABLE tagnames_similarity_rendered (
 	clid		smallint UNSIGNED NOT NULL DEFAULT '0',
 	syn_tnid	int UNSIGNED NOT NULL DEFAULT '0',
@@ -153,24 +160,28 @@ CREATE TABLE tagnames_similarity_rendered (
 	UNIQUE clid_syn_sim (clid, syn_tnid, similarity)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_udc;
 CREATE TABLE tags_udc (
 	hourtime	datetime NOT NULL,
 	udc		float NOT NULL DEFAULT '0',
 	PRIMARY KEY (hourtime)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_hourofday;
 CREATE TABLE tags_hourofday (
 	hour		tinyint UNSIGNED NOT NULL DEFAULT '0',
 	proportion	float NOT NULL DEFAULT '0',
 	PRIMARY KEY (hour)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_dayofweek;
 CREATE TABLE tags_dayofweek (
 	day		tinyint UNSIGNED NOT NULL DEFAULT '0',
 	proportion	float NOT NULL DEFAULT '0',
 	PRIMARY KEY (day)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS tags_searched;
 CREATE TABLE tags_searched (
 	tseid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	tagnameid	int UNSIGNED NOT NULL,
@@ -181,6 +192,7 @@ CREATE TABLE tags_searched (
 	KEY (searched_at)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS globjs_viewed;
 CREATE TABLE globjs_viewed (
 	gvid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	globjid		int UNSIGNED NOT NULL,
@@ -190,6 +202,7 @@ CREATE TABLE globjs_viewed (
 	UNIQUE globjid_uid (globjid, uid)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS globjs_viewed_archived;
 CREATE TABLE globjs_viewed_archived (
 	gvid		int UNSIGNED NOT NULL,
 	globjid		int UNSIGNED NOT NULL,

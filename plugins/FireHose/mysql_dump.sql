@@ -82,7 +82,7 @@ INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter
 
 INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "userjournalfriends", "Friends Journals", "no", '"authorfriend:{nickname}" journal', "createtime", "DESC", "black", "-1", "full", "no", "no", 20, 20, 0,"1","yes", "yes","no");
 
-INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "search", "Search", "yes", 'story', "createtime", "DESC", "blue, "-1", "fulltitle", "yes", "yes", 30, 30, 0,"","no", "no","yes");
+INSERT INTO firehose_view (id, uid, viewname, viewtitle, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, searchbutton, use_exclusions, editable) VALUES (NULL, 0, "search", "Search", "yes", 'story', "createtime", "DESC", "blue", "-1", "fulltitle", "yes", "yes", 30, 30, 0,"","no", "no","yes");
 
 INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause, use_exclusions, editable) VALUES (NULL, 0, "search", "yes", 'story', "popularity", "DESC", "blue", "7", "fulltitle", "yes", "yes", 50, 30, 0,"", "yes","no");
 
