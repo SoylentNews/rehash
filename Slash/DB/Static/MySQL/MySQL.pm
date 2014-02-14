@@ -1986,13 +1986,13 @@ sub countCommentsInActivePeriod {
 	my($self) = @_;
 
 	my $time = getCurrentStatic('days_to_count_for_modpoints');
-	return 0 if !$days_to_archive;
+	return 0 if !time;
 
 	# Close old discussions
 	my $count = $self->sqlSelect(
 		"SUM(commentcount)",
 		"stories",
-		"where time >= curdate()-$time"
+		"time >= curdate()-$time"
 	);
 
 	return $count;

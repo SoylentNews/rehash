@@ -42,7 +42,7 @@ sub determine_mod_points_to_be_issued {
 	my $dailycomments =  $slashdb->countCommentsInActivePeriod();	
 	my $points_to_issue = 0;
 	
-	moderatordLog("dailycomments: $dayscomments");
+	slashdLog("dailycomments: $dayscomments");
 	
 	return $points_to_issue;
 }
