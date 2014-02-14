@@ -39,7 +39,7 @@ __template__
 			onclick	=> (discussion2 ? "return D2.selectParent($original_pid)" : '')
 		}, 1) %]</b></p></span>[% END %]
 		
-		[% IF can_mod %]
+		[% IF can_moderate %]
 		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, {
 			'return'	=> 1,
 			nsort		=> 1, 
