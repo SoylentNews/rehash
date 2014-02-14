@@ -1594,10 +1594,7 @@ sub prepareUser {
 		# expiration time out, because it was used to authenticate.
 		$user->{logtoken} = bakeUserCookie($uid,
 			$slashdb->getLogToken($uid, 0, 0, 1));
-			
-		# MC: Ok, it's fracking 2014, lets get a real timestamp in our DB
-		$slashdb->updateLastAccessTimestamp($uid);
-	}
+		}
 #print STDERR scalar(localtime) . " $$ prepareUser user->uid=$user->{uid} is_anon=$user->{is_anon}\n";
 
 	# Now store the DB information from above in the user

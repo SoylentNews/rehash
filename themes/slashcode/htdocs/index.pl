@@ -20,6 +20,13 @@ my $start_time = Time::HiRes::time;
 	my $slashdb	= getCurrentDB();
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 
+	# MC: Ok, it's fracking 2014, lets get a real timestamp in our DB
+	#
+	# Bah, this was living in prepareUser, but Apache appears to cache
+	# that function, and this is something I don't want to risk getting
+	# stale. If it becomes a problem, someone can relocate it.
+	$slashdb->updateLastAccessTimestamp($uid);
+
 	return if redirect_home_if_necessary();
 
 	my($stories, $Stories); # could this be MORE confusing please? kthx
