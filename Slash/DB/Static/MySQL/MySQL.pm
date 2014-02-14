@@ -1988,7 +1988,7 @@ sub countCommentsInActivePeriod {
 	my $time = getCurrentStatic('days_to_count_for_modpoints');
 	return 0 if !time;
 
-	# Close old discussions
+	# the comment count variable seems to be kept accurate ...
 	my $count = $self->sqlSelect(
 		"SUM(commentcount)",
 		"stories",
@@ -1996,6 +1996,19 @@ sub countCommentsInActivePeriod {
 	);
 
 	return $count;
+}
+
+sub getTotalModPointsInCirculation {
+	my($self) = @_;
+
+	# really easy, just add up points
+	my $total = $self->sqlSelect(
+		"SUM(points)",
+		"user_comments",
+		""
+	);
+
+	return $total;
 }
 
 1;

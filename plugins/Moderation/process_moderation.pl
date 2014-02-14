@@ -36,13 +36,23 @@ sub moderatordLog {
 	doLog('slashd', \@_);
 }
 
+############################################################
+# Right so, to hand out mod points properly, we need to know
+# how many comments are in our 'active' period, which is by
+# default one day, then work out the number of points currently
+# in the system
+############################################################
+
 sub determine_mod_points_to_be_issued {
 	my($slashdb) = @_;
 
-	my $dailycomments =  $slashdb->countCommentsInActivePeriod();	
+	# So, to the database
+	my $dailycomments =  $slashdb->countCommentsInActivePeriod();
+	my $points_in_circulation = $slashdb->getTotalModPointsInCirculation();
 	my $points_to_issue = 0;
 	
-	slashdLog("dailycomments: $dayscomments");
+	slashdLog("dailycomments: $dailycomments");
+	slashdLog("points_currently_in_circulation: $points_in_circulation");
 	
 	return $points_to_issue;
 }
