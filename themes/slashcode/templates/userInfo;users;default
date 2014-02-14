@@ -55,7 +55,7 @@ __template__
 		</p>
 	[% END %]
 	</div>
-	[% IF admin_flag %]
+	[% IF suadmin_flag %]
 	[% PROCESS titlebar title="Admin options" %]
 		[% admin_block %]
 	[% END %]
