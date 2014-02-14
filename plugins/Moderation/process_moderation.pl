@@ -23,6 +23,7 @@ $task{$me}{code} = sub {
 		return ;
 	}
 
+	determine_mod_points_to_be_issued($slashdb);
 	give_out_points();
 	delete_old_mod_rows();
 
@@ -33,6 +34,17 @@ $task{$me}{code} = sub {
 
 sub moderatordLog {
 	doLog('slashd', \@_);
+}
+
+sub determine_mod_points_to_be_issued {
+	my($slashdb) = @_;
+
+	my $dailycomments =  $slashdb->countCommentsInActivePeriod();	
+	my $points_to_issue = 0;
+	
+	moderatordLog("dailycomments: $dayscomments");
+	
+	return $points_to_issue;
 }
 
 sub give_out_points {
