@@ -49,11 +49,29 @@ sub determine_mod_points_to_be_issued {
 	# So, to the database
 	my $dailycomments =  $slashdb->countCommentsInActivePeriod();
 	my $points_in_circulation = $slashdb->getTotalModPointsInCirculation();
-	my $points_to_issue = 0;
+
+	# This is a bit simple, and I want it smarter, but basically
+	# every comment in the last 24 should be theorically moddable at 
+	# least once.
+	#
+	# So one comment == one modpoint in circulation at a given time
+	#
+	# We double that to insure there are plenty of modpoints in circulation
+	# and to handle issues who are elligable for moderation, but just aren't
+	# active, willing to mod (despite having it checked!).
+	#
+	# Note, it IS possible for too many modpoints to be in circulation, so
+	# in those cases, the system won't try to hand more out until some expire
+	# out of the database
+	#
+	# This is combined with a shorter mod_stir_period which reduces the time
+	# until points go poof to make mod points come and go rapidly in circulation
+	 
+	my $points_to_issue = ($dailycomments-$points_in_circulation)*2;
 	
 	slashdLog("dailycomments: $dailycomments");
 	slashdLog("points_currently_in_circulation: $points_in_circulation");
-	
+	slashdLog("points_to_issue: $points_to_issue")
 	return $points_to_issue;
 }
 
