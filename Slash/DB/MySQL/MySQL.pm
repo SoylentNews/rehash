@@ -13254,8 +13254,8 @@ sub updateLastAccessTimestamp {
 	
 	return $self->sqlUpdate(
 		'users_info',
-		{ lastaccessts => "CURRENT_TIMESTAMP"},
-		"uid=$uid LIMIT 1"
+		{ lastaccess_ts => "CURRENT_TIMESTAMP"},
+		"uid=$uid"
  	);
 }
 
