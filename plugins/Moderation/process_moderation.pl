@@ -23,10 +23,20 @@ $task{$me}{code} = sub {
 		return ;
 	}
 
-	determine_mod_points_to_be_issued($slashdb);
-	give_out_points();
-	delete_old_mod_rows();
-
+	# So, this basically works in a very simple process
+	#
+	# 1. Stir the modpoint pool, which also expires old points out
+	# 2. Work out if we need to issue more points to get the system
+	#    balanaced if we have points
+	# 3. Work out who to give points to, and issue
+	my $points_to_handout;
+	
+	stir_mod_pool();
+	$points_to_handout = determine_mod_points_to_be_issued($slashdb);
+	if ($points_to_handout) {
+		distributeModePoints($points_to_handout)
+	};
+	
 	return ;
 };
 
@@ -34,6 +44,18 @@ $task{$me}{code} = sub {
 
 sub moderatordLog {
 	doLog('slashd', \@_);
+}
+
+sub sitr_mod_pool {
+	my $stirredpoints = $moddb->stirPool();
+	my $recycle_fraction = $constants->{mod_stir_recycle_fraction} || 1.0;
+	$num_tokens += $recycled_tokens;
+
+	# so much simplier without this token shit
+	if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
+		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
+	}
+	
 }
 
 ############################################################
@@ -74,6 +96,113 @@ sub determine_mod_points_to_be_issued {
 	slashdLog("points_to_issue: $points_to_issue")
 	return $points_to_issue;
 }
+
+########################################################
+# For process_moderatord
+#
+# MC: Ok, this is a lot simplier than the old moderation
+# system, and with luck, considerably more effective.
+
+sub distributeModPoints {
+	my $points = @_;
+	
+	# First, we need to know some base information
+	#
+	# * Total users active
+	# * Total number of current moderators
+	# * Desired percentage of moderators
+	# * Current min and max mod points per user
+	# 
+	# A user is considered active if they've logged in within mod_stir_hours
+	# (with the initial implementation setting this to 24 hours). This keeps 
+	# mod points flowing in the system, since at most they can be locked for
+	# 24 hours, and someone who signed in yesterday has a far better chance
+	# of signing in today.
+	#
+	# This is admitly a bit of a crapshoot, but we have no way of reclaiming
+	# points in users that have gone inactive except for waiting for them to
+	# expire. Also, let's call it insentive to be logged in every day :-)
+	
+	# These are either constants, or easy to calculate
+	my $total_mods = $slashdb->getModeratorCount();
+	
+	# These variables directly affect who is eligable via the SELECT query
+	my $user_activity_period = $constants->{mod_stir_hours}          || 24;
+	my $karma_min            = $constants->{mod_elig_minkarma}       || 0;
+	my $age_min              = $constants->{m1_pointgrant_end}       || 1;
+
+	# Hit the DB
+	# We don't want to be selecting a huge data store multiple times, so 
+	# we'll get a list off possible mods, then manipulate it here
+	
+	my potential_moderators =
+		getPotentialModerators($user_activity_period, $karma_min, $age_min);
+
+	# Some basic math
+	my $curent_elligable_count = scalar(keys(%potential_moderators));
+	my $total_users_elligable = $curent_mod_count + $total_mods;
+	my $current_mod_percentage = $curent_elligable_count/$total_users_elligable;
+	
+	slashdLog("current_mod_count: $curent_elligable_count");
+	slashdLog("total_users_elligable: $total_users_elligable");
+	slashdLog("---------------------------------------------")
+	slashdLog("Current percentage of moderators: $curent_elligable_count/$current_mod_percentage")
+
+	# Now lets figure out who's getting what
+	my $mod_percentage       = $constants->{m1_eligible_percentage}  || 0.30;
+	my $mod_points_min       = $constants->{mod_min_points_per_user} || 100;
+	my $mod_points_max       = $constants->{mod_max_points_per_user} || 100;
+	
+	# We need to know the total number of elligable users, then devate from
+	# how many active users have mod points vs. all active, which should
+	# always be around $mod_percentage
+	
+	
+}
+
+
+########################################################
+# So a user is considered a potential moderator if ALL
+# the above is true
+#
+# * User is not CURRENTLY a moderator
+# * User has logged within the activity period
+# * User is not too young (disabled on v1 in the DB)
+# * User has neutral or positive karma (specifics to be decided)
+#
+# Furthermore, the algo weights the following options
+#
+# * How recently was a user a moderator which is why the
+#    tables is sorted by last time modpoints were issues
+########################################################
+
+sub getPotentialModerators {
+	my($self, $user_activity_period, $karma, $age_percentile) = @_;
+
+	# Figure out what the highest UID we can have is
+	my $higest_uid = $slashdb->sqlSelect("MAX(uid)", "users", "");
+	my $highest_mod_uid = $age_min * $age_min;
+	
+	# Had to move columns between tables to make this work well.
+	# JOINS are scary :-)
+	my $mod_candidates = $slashdb->sqlSelectAllHashref("uid,karma,lastgranted,lastaccess_ts",
+		"karma >= $karma",
+		"lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period HOUR)",
+		"points = 0",
+		"uid <= $higest_uid"
+		"ORDER BY lastgranted ASC"
+	);
+	
+	return $mod_candidates;	
+} 
+
+
+
+
+
+
+
+### BLAH
 
 sub give_out_points {
 	my $constants = getCurrentStatic();

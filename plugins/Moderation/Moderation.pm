@@ -1291,91 +1291,10 @@ sub deleteOldModRows {
 	return 0;
 }
 
-########################################################
-# For process_moderatord.pl
-# Slightly new logic.  Now users can accumulate tokens beyond the
-# "trade-in" limit and the token_retention var is obviated.
-# Any user with more than $tokentrade tokens is forced to cash
-# them in for points, but they get to keep any excess tokens.
-# And on 2002/10/23, even newer logic:  the number of desired
-# conversions is passed in and the top that-many token holders
-# get points.
-sub convert_tokens_to_points {
-	my($self, $n_wanted) = @_;
-
-	my $reader = getObject("Slash::DB", { db_type => 'reader' });
-
-	my $constants = getCurrentStatic();
-	my %granted = ( );
-
-	return unless $n_wanted;
-
-	# Sanity check.
-	my $n_users = $reader->countUsers();
-	$n_wanted = int($n_users/10) if $n_wanted > int($n_users)/10;
-
-	my $maxtokens = $constants->{maxtokens} || 60;
-	my $tokperpt = $constants->{tokensperpoint} || 8;
-	my $maxpoints = $constants->{maxpoints} || 5;
-	my $pointtrade = $maxpoints;
-	my $tokentrade = $pointtrade * $tokperpt;
-	$tokentrade = $maxtokens if $tokentrade > $maxtokens; # sanity check
-	my $half_tokentrade = int($tokentrade/2); # another sanity check
-
-	my $uids = $reader->sqlSelectColArrayref(
-		"uid",
-		"users_info",
-		"tokens >= $half_tokentrade",
-		"ORDER BY tokens DESC, RAND() LIMIT $n_wanted",
-	);
-
-	# Locking tables is no longer required since we're doing the
-	# update all at once on just one table and since we're using
-	# + and - instead of using absolute values. - Jamie 2002/08/08
-
-	$self->setModPoints($uids, \%granted, {
-		pointtrade => $pointtrade,
-		maxpoints  => $maxpoints,
-		tokentrade => $tokentrade
-	});
-
-
-	# We used to do some fancy footwork with a cursor and locking
-	# tables.  The only difference between that code and this is that
-	# it only limited points to maxpoints for users with karma >= 0
-	# and seclev < 100.  These aren't meaningful limitations, so these
-	# updates should work as well.  - Jamie 2002/08/08
-	# Actually I don't think these are needed at all. - Jamie 2003/09/09
-	#
-	# 2006/02/09:  I still don't think they're needed, and they are
-	# causing lags in replication...
-	#   Searching rows for update:
-	#   The thread is doing a first phase to find all matching
-	#   rows before updating them. This has to be done if the UPDATE
-	#   is changing the index that is used to find the involved rows.
-	# ...so I'm removing these.  I believe wherever the existing code
-	# increases points or tokens, it updates the oldvalue to
-	# LEAST(newvalue, maxvalue), so these adjustments should never
-	# change anything.
-	# 2006/02/12:  The lag is due to a MySQL bug in 4.1.16 that is
-	# fixed in 4.1.18.  <http://bugs.mysql.com/bug.php?id=15935>
-	# Still, we shouldn't need these.
-#       $self->sqlUpdate(
-#               "users_comments",
-#               { points => $maxpoints },
-#               "points > $maxpoints"
-#       );
-#       $self->sqlUpdate(
-#               "users_info",
-#               { tokens => $maxtokens },
-#               "tokens > $maxtokens"
-#       );
-
-	return \%granted;
-}
 
 ########################################################
 # For process_moderatord
+# MC: Removed all references to tokens
 sub stirPool {
 	my($self) = @_;
 
@@ -1404,16 +1323,9 @@ sub stirPool {
 	for my $user_hr (@$stir_ar) {
 		my $uid = $user_hr->{uid}; 
 		my $pts = $user_hr->{points};
-		my $tokens_pt_chg = $tokens_per_pt * $pts;
 
 		my $change = { };
 		$change->{points} = 0; 
-		$change->{-lastgranted} = "NOW()";
-		$change->{-stirred} = "stirred + $pts";
-		# In taking tokens away, this subtraction itself will not
-		# cause the value to go negative.
-		$change->{-tokens} = "LEAST(tokens, GREATEST(tokens - $tokens_pt_chg, 0))"
-			if $tokens_pt_chg;
 		$self->setUser($uid, $change);
 
 		$n_stirred += $pts;
@@ -1788,37 +1700,6 @@ sub _set_factor {
 	}
 }
 
-########################################################
-# For run_moderatord.pl
-sub updateTokens {
-	my($self, $uid_hr, $options) = @_;
-	my $constants = getCurrentStatic();
-	my $maxtokens = $constants->{maxtokens} || 60;
-	my $splice_count = $options->{splice_count} || 200;
-	my $sleep_time = defined($options->{sleep_time}) ? $options->{sleep_time} : 0.5;
-
-	my %adds = ( map { ($_, 1) } grep /^\d+$/, values %$uid_hr );
-	for my $add (sort { $a <=> $b } keys %adds) {
-		my @uids = sort { $a <=> $b }
-			grep { $uid_hr->{$_} == $add }
-			keys %$uid_hr;
-		# At this points, @uids is the list of uids that need
-		# to have $add tokens added.  Group them into slices
-		# and bulk-add.  This is much more efficient than
-		# calling setUser individually.
-		while (@uids) {
-			my @uid_chunk = splice @uids, 0, $splice_count;
-			my $uids_in = join(",", @uid_chunk);
-			$self->sqlUpdate("users_info",
-				{ -tokens => "LEAST(tokens+$add, $maxtokens)" },
-				"uid IN ($uids_in)");
-			$self->setUser_delete_memcached(\@uid_chunk);
-			# If there is more to do, sleep for a moment so we don't
-			# hit the DB too hard.
-			Time::HiRes::sleep($sleep_time) if @uids && $sleep_time;
-		}
-	}
-}
 
 # placeholders, used only in TagModeration
 sub removeModTags {}
@@ -1831,7 +1712,6 @@ sub setModPoints {
 		next unless $uid;
 		my $rows = $self->setUser($uid, {
 			-lastgranted    => 'NOW()',
-			-tokens         => "GREATEST(0, tokens - $opts->{tokentrade})",
 			-points         => "LEAST(points + $opts->{pointtrade}, $opts->{maxpoints})",
 		});
 		$granted->{$uid} = 1 if $rows;

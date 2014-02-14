@@ -2011,6 +2011,19 @@ sub getTotalModPointsInCirculation {
 	return $total;
 }
 
+sub getModeratorCount {
+	my($self) = @_;
+
+	# Basically the same as above with count vs. sum
+	my $total = $self->sqlSelect(
+		"COUNT(points)",
+		"user_comments",
+		""
+	);
+
+	return $total;
+}
+
 1;
 
 __END__
