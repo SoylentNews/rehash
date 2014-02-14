@@ -5,7 +5,6 @@ mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 # ...until we make getCSS and symlink-tool smarter about css vs. images
 imagejs=htdocs/images/tag-ui.css
-css=htdocs/tag-ui.css
 htdoc=htdocs/ajax.pl
 htdoc=htdocs/preferences.pl
 htdoc=htdocs/images/typeof.js
