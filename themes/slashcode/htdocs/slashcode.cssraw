@@ -20,7 +20,7 @@ body #index #articles
 {
 	width: 115px;
 	height: 80px;
-	background: url("[% constants.imagedir %]/logo.gif") no-repeat;
+	background: url("[% constants.imagedir %]/logo.png") no-repeat;
 }
 
 #slogan h2
