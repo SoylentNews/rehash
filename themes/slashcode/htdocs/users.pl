@@ -933,6 +933,7 @@ sub showInfo {
 
 
 	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
+	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0;
 	my($title, $admin_block, $fieldkey) = ('', '', '');
 	my $comments = undef;
 	my $commentcount = 0;
@@ -1384,6 +1385,7 @@ sub showInfo {
 			karma_flag		=> $karma_flag,
 			admin_block		=> $admin_block,
 			admin_flag 		=> $admin_flag,
+			suadmin_flag 		=> $suadmin_flag,
 			reasons			=> $mod_reader->getReasons(),
 			lastjournal		=> $lastjournal,
 			hr_hours_back		=> $ipid_hoursback,
