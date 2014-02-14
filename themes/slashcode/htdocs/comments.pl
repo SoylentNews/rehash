@@ -671,12 +671,31 @@ sub moderate {
 		} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
 			my($cid, $can_mod, $ret_val, $comment) = (0, 0, 0);
 			$cid = $1;
-			$comment = $moddb->getComment($cid) if $cid;
-			$can_mod = Slash::Utility::Comments::_can_mod($comment) if $comment;
-			$ret_val = $moddb->moderateComment(
-				$sid, $cid, $form->{$key}, { comment => $comment }
-			) if $can_mod;
+			
+			# ugly refactor for debugging code
+			if ($cid) {
+				$comment = $moddb->getComment($cid);
+			} else {
+				print "didn't get CID";
+				#print Slash::Utility::Comments::getError('didnt get a cid');
+			}
 
+			if ($comment) {
+				$can_mod = Slash::Utility::Comments::_can_mod($comment);
+			} else {
+				print "didn't find comment";
+				print Slash::Utility::Comments::getError('cannot find comment');
+			} 
+
+			if ($can_mod) {
+				$ret_val = $moddb->moderateComment(
+					$sid, $cid, $form->{$key}, { comment => $comment }
+				);
+			} else {
+				print "user can't moderate comment";
+				print Slash::Utility::Comments::getError('user cannot moderate');
+			} 
+				
 			# If an error was returned, tell the user what
 			# went wrong.
 			if ($ret_val < 0) {
