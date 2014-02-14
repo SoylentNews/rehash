@@ -28,11 +28,6 @@ sub main {
 		$sid = '';
 	}
 
-	# MC: Ok, it's fracking 2014, lets get a real timestamp in our DB
-	#
-	# this shouldn't be here, see index.pl for the reason why
-	$slashdb->updateLastAccessTimestamp($uid);
-
 	$story = $reader->getStory($sid);
 	if ($story && $story->{primaryskid}
 		&& !($form->{ssi} && $form->{ssi} eq "yes")) {
