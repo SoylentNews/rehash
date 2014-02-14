@@ -13242,6 +13242,23 @@ sub getShillInfo {
 
 }
 
+
+########################################################
+# Ok, it's fucking 2014, we can afford an UPDATE per page
+# view to have accurate login information, and not this shit
+# slash currently does
+########################################################
+
+sub updateLastAccessTimestamp {
+	my ($self, $uid) = @_;
+	
+	return $self->sqlUpdate(
+		'users_info',
+		{ lastaccessts => "NULL"},
+		"uid=$uid LIMIT 1"
+ 	);
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
