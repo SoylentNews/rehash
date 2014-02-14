@@ -6602,4 +6602,4 @@ INSERT INTO reskey_vars VALUES (12, 'acl_no', 'reskey_no_story', 'If this ACL pr
 
 # New variable for use with moderation
 INSERT INTO vars VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
-ALTER TABLE users_info ADD COLUMN lastaccess_ts timestamp;
+ALTER TABLE users_info ADD COLUMN lastaccess_ts timestamp DEFAULT CURRENT_TIMESTAMP;
