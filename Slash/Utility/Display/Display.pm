@@ -1096,6 +1096,7 @@ sub linkComment {
 
 	if (!$options->{noextra}) {
 		%$linkdata = (%$linkdata,
+			a_id		=> "linkcomm_" . $options->{date} 
 			adminflag	=> $adminflag,
 			date		=> $options->{date},
 			threshold	=> defined($linkdata->{threshold}) ? $linkdata->{threshold} : $user->{threshold},

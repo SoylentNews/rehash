@@ -1352,7 +1352,13 @@ sub displayThread {
 		} else {
 			my $pntcmt = @{$comments->{$comment->{pid}}{kids}} > $user->{commentspill};
 			$return .= $const->{commentbegin} .
-				linkComment($comment, $pntcmt, { date => 1 });
+				linkComment($comment, $pntcmt, { date => 1, cid => $cid })
+
+				# If we're an improved thread, we need both of these
+				if ( $user->{mode} eq 'improvedthreaded') {
+					dispComment($comment, { noshow => $noshow, pieces => $pieces, start_invisible => 1 }) .
+				}
+				
 			$finish_list++;
 		}
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
