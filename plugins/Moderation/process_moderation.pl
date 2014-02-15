@@ -138,6 +138,16 @@ sub distributeModPoints {
 	my potential_moderators =
 		getPotentialModerators($user_activity_period, $karma_min, $age_min);
 
+	# Some basic math
+	my $curent_elligable_count = scalar(keys(%potential_moderators));
+	my $total_users_elligable = $curent_mod_count + $total_mods;
+	my $current_mod_percentage = $curent_elligable_count/$total_users_elligable;
+	
+	slashdLog("current_mod_count: $curent_elligable_count");
+	slashdLog("total_users_elligable: $total_users_elligable");
+	slashdLog("---------------------------------------------")
+	slashdLog("Current percentage of moderators: $curent_elligable_count/$current_mod_percentage")
+
 	# Now lets figure out who's getting what
 	my $mod_percentage       = $constants->{m1_eligible_percentage}  || 0.30;
 	my $mod_points_min       = $constants->{mod_min_points_per_user} || 100;
@@ -173,7 +183,9 @@ sub getPotentialModerators {
 	my $higest_uid = $slashdb->sqlSelect("MAX(uid)", "users", "");
 	my $highest_mod_uid = $age_min * $age_min;
 	
-	my $u_hr = $slashdb->sqlSelectAllHashref("uid,karma,lastgranted,lastaccess_ts",
+	# Had to move columns between tables to make this work well.
+	# JOINS are scary :-)
+	my $mod_candidates = $slashdb->sqlSelectAllHashref("uid,karma,lastgranted,lastaccess_ts",
 		"karma >= $karma",
 		"lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period HOUR)",
 		"points = 0",
@@ -181,6 +193,7 @@ sub getPotentialModerators {
 		"ORDER BY lastgranted ASC"
 	);
 	
+	return $mod_candidates;	
 } 
 
 
