@@ -1274,9 +1274,8 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	my $discussion2 = discussion2($user);
-	my $threshold = $discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
-	my $highlightthresh = $discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
+	my $threshold = $user->{threshold};
+	my $highlightthresh = $user->{highlightthresh};
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 	# root comment should have more likelihood to be full
 	$highlightthresh-- if !$pid;
@@ -1311,7 +1310,7 @@ sub displayThread {
 		# ahead more, counting all the visible kids.	--Pater
 		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
-		next if $skipped <= $form->{startat} && !$discussion2;
+		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
 		my $class = 'oneline';
@@ -1319,43 +1318,25 @@ sub displayThread {
 			$class = 'hidden';
 		} elsif ($comment->{points} < $threshold) {
 			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
-				if ($discussion2) {
-					$class = 'hidden';
-					$hidden++;
-				} else {
-					$hidden++;
-					next;
-				}
+				$hidden++;
+				next;
 			}
 		}
 
 		my $highlight = ($comment->{points} >= $highlightthresh && $class ne 'hidden') ? 1 : 0;
 		$class = 'full' if $highlight;
-		if ($discussion2 && $user->{state}{d2_defaultclass}{$cid}) {
-			$class = $user->{state}{d2_defaultclass}{$cid};
-		}
 		$comment->{class} = $class;
 
 		$user->{state}{comments}{totals}{$class}++ unless $comment->{dummy};
 
 		my $finish_list = 0;
 
-		if ($full || $highlight || $discussion2) {
-			if ($discussion2 && $class eq 'oneline' && $comment->{subject_orig} eq 'no') {
-				$comment->{subject} = 'Re:';
-			}
-
+		if ($full || $highlight) {
 			my($noshow, $pieces) = (0, 0);
-			if ($discussion2) { # && $user->{acl}{d2testing}) {
-				if ($class eq 'hidden') {
-					$noshow = 1;
-					$user->{state}{comments}{noshow} ||= [];
-					push @{$user->{state}{comments}{noshow}}, $cid;
-				} elsif ($class eq 'oneline') {
-					$pieces = 1;
-					$user->{state}{comments}{pieces} ||= [];
-					push @{$user->{state}{comments}{pieces}}, $cid;
-				}
+			if ($class eq 'oneline') {
+				$pieces = 1;
+				$user->{state}{comments}{pieces} ||= [];
+				push @{$user->{state}{comments}{pieces}}, $cid;
 			}
 
 			if ($lvl && $indent) {
@@ -1397,7 +1378,7 @@ sub displayThread {
 		last if $displayed >= $user->{commentlimit} && !$discussion2;
 	}
 
-	if ($hidden && ($discussion2 || (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod'))) {
+	if ($hidden && (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod')) {
 		my $link = linkComment({
 			sid		=> $sid,
 			threshold	=> $constants->{comment_minscore},
@@ -1407,14 +1388,6 @@ sub displayThread {
 					   }, ''),
 			subject_only	=> 1,
 		});
-		if ($discussion2) {
-			push @{$user->{state}{comments}{hiddens}}, $pid;
-			$return .= slashDisplay('displayThread', {
-				'link'		=> $link,
-				discussion2	=> $discussion2,
-				pid		=> $pid,
-				hidden		=> $hidden
-			}, { Return => 1, Nocomm => 1 });
 		} else {
 			$return .= $const->{cagebigbegin} if $cagedkids;
 			$return .= slashDisplay('displayThread',
