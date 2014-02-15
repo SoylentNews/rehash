@@ -1389,14 +1389,13 @@ sub displayThread {
 					   }, ''),
 			subject_only	=> 1,
 		});
-		} else {
-			$return .= $const->{cagebigbegin} if $cagedkids;
-			$return .= slashDisplay('displayThread',
-				{ 'link' => $link },
-				{ Return => 1, Nocomm => 1 }
-			);
-			$return .= $const->{cagebigend} if $cagedkids;
-		}
+
+		$return .= $const->{cagebigbegin} if $cagedkids;
+		$return .= slashDisplay('displayThread',
+			{ 'link' => $link },
+			{ Return => 1, Nocomm => 1 }
+		);
+		$return .= $const->{cagebigend} if $cagedkids;
 	}
 #slashProf("", "displayThread");
 
@@ -1887,7 +1886,7 @@ EOT
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, $reasons, $options, $discussion2
+		$can_mod, $reasons, $options
 	) if $constants->{comments_hardcoded};
 
 	if ($options->{show_pieces}) {
@@ -1945,8 +1944,8 @@ sub _hard_dispComment {
 			cid	=> $comment->{cid},
 			pid	=> $comment->{cid},
 			subject	=> $readtext,
-			subject_only => 1,
-		}
+			subject_only => 1
+		}, 1);
 		$comment_to_display .= qq'<div id="comment_shrunk_$comment->{cid}" class="commentshrunk">$link</div>';
 	}
 
