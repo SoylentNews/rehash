@@ -689,7 +689,7 @@ sub syncPortalBlocks {
                                 "uid"         => $block_data->{shill_uid},
                                 "name"        => $name,
                                 "seclev"      => $block_data->{seclev},
-                                "created"     => $block_data->{last_update},
+                                #"created"     => $block_data->{last_update},
                                 "last_update" => $block_data->{last_update},
                         };
                         $slashdb->sqlInsert('dynamic_user_blocks', $data);
