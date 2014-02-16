@@ -65,18 +65,19 @@ html > body .commentwrap table {
 
 .commentTop
 {
-	background: #ddd;
+	background: #ccc;
 	border: 1px solid #ccc;
 	padding: .3em;
 }
 
 .commentSub
 {
-	background: #eee;
-	padding: .3em;
+	background: #fff;
+	padding: .6em;
 	font-size: 80%;
-	border: 1px solid #ddd;
-	margin: 0;
+	border: 1px solid #ccc;
+	border-top: none;
+	margin: 0 0 .2em 0;
 }
 
 .commentTop H4 { display: inline; }
