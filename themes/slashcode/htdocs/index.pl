@@ -573,14 +573,14 @@ sub displayStories {
 	my($today, $x) = ('', 0);
 
 	
-# XXXSKIN I'm turning custom numbers of maxstories off for now, so all
-# users get the same number.  This will improve query cache hit rates and 
-# right now we need all the edge we can get.  Hopefully we can get this 
-# back on soon. - Jamie 2004/07/17
-#       my $user_maxstories = $user->{maxstories};
 # Here, maxstories should come from the skin, and $cnt should be
 # named minstories and that should come from the skin too.
-	my $user_maxstories = getCurrentAnonymousCoward("maxstories");
+	
+	# MC: This used to be disabled by always getting the AC number
+	# due to cache hit/miss reasons. Unless we have traffic issues
+	# re-enable
+	
+    my $user_maxstories = $user->{maxstories};
 	my $cnt = $gSkin->{artcount_min};
 	my($return, $counter);
 
@@ -623,6 +623,14 @@ sub displayStories {
 
 		$other->{dispmode} = $story_to_dispmode_hr->{$story->{stoid}};
 
+		# First, see if a story has reached its signoff quota
+		if ($constants->{'signoff_use'}  == 1) {
+			my $signoff_count = $slashdb->getSignoffCountHashForStoids($story->{'stoid'}, 1);
+			if ($signoff_count le $constants->{'signoffs_per_article'}) {
+				return 0;
+			}
+		}
+		
 		# This user may not be authorized to see future stories;  if so,
 		# skip them.
 		if ($story->{is_future}) {
