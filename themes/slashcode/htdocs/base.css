@@ -704,7 +704,7 @@ pre
 a.ac-source
 {
   color: white;
-  background-color: darkgray;
+  background-color: #666666;
 }
 
 #ac-select-widget
@@ -713,13 +713,13 @@ a.ac-source
   position: absolute;
   z-index: 9050;
   width: 120px;
-  background-color: lightgray;
+  background-color: #dddddd;
 }
 #ac-select-widget.hidden, #ac-select-input.hidden { display: none; }
 
 #ac-select-widget input
 {
-  border: 2px solid lightgray;
+  border: 2px solid #dddddd;
   width: 122px;
   margin: 0;
   padding: 0;
@@ -733,7 +733,7 @@ a.ac-source
   background: #fff;
   overflow: hidden;
   z-index: 9050;
-  border: 1px solid darkgray;
+  border: 1px solid #666666;
 }
 
 #ac-choices ul
@@ -759,7 +759,7 @@ a.ac-source
 
 
 /* modal */
-#modal_cover {background-color: #222; height: 100%; opacity: 0.75; filter: alpha(opacity=75); position: fixed; width: 100%; z-index: 1000000;}
+#modal_cover {background-color: #222; height: 100%; opacity: 0.75; position: fixed; width: 100%; z-index: 1000000;}
 #modal_box .generaltitle .title h3 {background: transparent; margin: 0; padding: .1em .3em 0 .3em;}
 #modal_box .generaltitle .title { margin: 0; border: none;}
 #modal_box {position: fixed; margin: 15% 25%; width: 50%;z-index: 1000001;border: 4px solid #222; overflow: auto; background: #fff; height: 65%;}
