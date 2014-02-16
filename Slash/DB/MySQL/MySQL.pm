@@ -2851,8 +2851,6 @@ sub getCommentPid {
 # MC: If a story hasn't had the required number of signoffs, its not viewable
 sub checkStoryViewable {
 	my($self, $sid, $start_tid, $options) = @_;
-	my $constants = getCurrentStatic();
-
 	return unless $sid;
 
 	my $stoid = $self->getStoidFromSidOrStoid($sid);
@@ -2864,8 +2862,8 @@ sub checkStoryViewable {
 
 	# Does story need signoffs
 	if ($constants->{'signoff_use'}  == 1) {
-		my $signoff_count = $self->getSignoffCountHashForStoids($stoid, 1);
-		if ($signoff_count le $constants->{'signoffs_per_article'}) {
+		my signoff_count = $self->getSignoffCountHashForStoids($stoid, 1);
+		if (signoff_count le $constants->{'signoffs_per_article'}) {
 			return 0;
 		}
 	}
