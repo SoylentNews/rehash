@@ -453,7 +453,7 @@ sub showStoryAdminBox {
 		$storysignoffcnt	= $self->getSignoffCountHashForStoids($stoid_list);
 	}
 
-	my $needed_signoffs = $self->getActiveAdminCount;
+	my $needed_signoffs = 2;
 	my $futurestorybox = slashDisplay('futurestorybox', {
 		pastextras	  => $extras,
 		past		  => $past,

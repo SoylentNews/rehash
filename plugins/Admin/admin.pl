@@ -1718,7 +1718,7 @@ sub listStories {
 	my $usersignoffs 	= $slashdb->getUserSignoffHashForStoids($user->{uid}, $stoid_list);
 	my $storysignoffcnt	= $slashdb->getSignoffCountHashForStoids($stoid_list, 1);
 
-	my $needed_signoffs = $slashdb->getActiveAdminCount;
+	my $needed_signoffs = 2;
 
 	my %unique_tds = map { ($_->{td}, 1) } @$storylist;
 	my $ndays_represented = scalar(keys %unique_tds);

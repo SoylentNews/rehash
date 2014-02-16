@@ -41,7 +41,7 @@ __template__
 
 <hr>
 
-
+[% IF constants.openid_consumer_allow %]
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <fieldset>
 	<input type="hidden" name="slash_returnto" value="[% return_url | strip_urlattr %]">
@@ -53,7 +53,7 @@ __template__
 	<input type="submit" value="Log in with OpenID" class="button">
 </fieldset>
 </form>
-
+[% END %]
 
 <p>
 <b>

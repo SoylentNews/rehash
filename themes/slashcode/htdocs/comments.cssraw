@@ -78,12 +78,11 @@ html > body .commentwrap table {
 
 .commentSub
 {
-	background: #fff;
-	padding: .6em;
+	background: #eee;
+	padding: .3em;
 	font-size: 80%;
-	border: 1px solid #bbb;
-	border-top: none;
-	margin: 0 0 .2em 0;
+	border: 1px solid #ddd;
+	margin: 0;
 }
 
 .commentTop H4 { display: inline; }
