@@ -2847,6 +2847,8 @@ sub getCommentPid {
 # XXXSECTIONTOPICS get rid of this eventually
 # If no $start_tid is passed in, this will return "sectional" stories
 # as viewable, i.e. a story in _any_ nexus will be viewable.
+
+# MC: If a story hasn't had the required number of signoffs, its not viewable
 sub checkStoryViewable {
 	my($self, $sid, $start_tid, $options) = @_;
 	return unless $sid;
@@ -2858,6 +2860,13 @@ sub checkStoryViewable {
 		"story_param",
 		"stoid = '$stoid' AND name='neverdisplay' AND value > 0");
 
+	# Does story need signoffs
+	if ($constants->{'signoff_use'}  == 1) {
+		my signoff_count = $self->getSignoffCountHashForStoids($stoid, 1);
+		if (signoff_count le $constants->{'signoffs_per_article'}) {
+			return 0;
+		}
+	}
 	my @nexuses;
 	if ($start_tid) {
 		push @nexuses, $start_tid;
