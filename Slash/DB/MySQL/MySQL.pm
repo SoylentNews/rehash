@@ -11323,26 +11323,29 @@ sub _getUser_do_selects {
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ mcd gU_ds got all " . scalar(@$acl_ar) . " acls\n";
 		}
-		# Get the clouts from users_clout.  Rows can be missing from
-		# this table and often are, in which case they are filled in
-		# with data from the clout classes' getUserClout methods.
-		my $clout_types = $self->getCloutTypes();
-		my $clout_info = $self->getCloutInfo();
-		my $clout_hr = $self->sqlSelectAllKeyValue(
-			'clid, clout',
-			'users_clout',
-			"uid = $uid_q");
-		for my $clid (grep /^\d+$/, keys %$clout_types) {
-			my $this_clout;
-			if (defined($clout_hr->{$clid})) {
-				$this_clout = $clout_hr->{$clid};
-			} else {
-				my $this_info = $clout_info->{$clid};
-				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' }); warn "no obj for '$this_info->{class}'" unless $clout_obj;
-				$this_clout = $clout_obj->getUserClout($answer) if $clout_obj;
+		
+		if ($constants->{plugin}{Tags}) {
+			# Get the clouts from users_clout.  Rows can be missing from
+			# this table and often are, in which case they are filled in
+			# with data from the clout classes' getUserClout methods.
+			my $clout_types = $self->getCloutTypes();
+			my $clout_info = $self->getCloutInfo();
+			my $clout_hr = $self->sqlSelectAllKeyValue(
+				'clid, clout',
+				'users_clout',
+				"uid = $uid_q");
+			for my $clid (grep /^\d+$/, keys %$clout_types) {
+				my $this_clout;
+				if (defined($clout_hr->{$clid})) {
+					$this_clout = $clout_hr->{$clid};
+				} else {
+					my $this_info = $clout_info->{$clid};
+					my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' }); warn "no obj for '$this_info->{class}'" unless $clout_obj;
+					$this_clout = $clout_obj->getUserClout($answer) if $clout_obj;
+				}
+					$answer->{clout}{ $clout_types->{$clid} } = $this_clout
+					if defined($this_clout);
 			}
-			$answer->{clout}{ $clout_types->{$clid} } = $this_clout
-				if defined($this_clout);
 		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
 		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);
