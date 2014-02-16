@@ -56,9 +56,18 @@ Links:[%
 END %]
 
 [% END %]
-Copyright 1997-2009 [% constants.sitepublisher %].  All rights reserved.
 
-__seclev__
+--------------------------------------------------------------
+You have received this message because you subscribed to it
+on [% constants.sitename %].  To stop receiving this and other
+messages from [% constants.sitename %], or to add more messages
+or change your preferences, please go to your user page.
+
+	[% absolutedir %]/my/messages
+
+You can log in and change your preferences from there.
+
+y__seclev__
 500
 __version__
 $Id$

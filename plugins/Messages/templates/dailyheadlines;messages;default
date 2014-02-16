@@ -28,7 +28,15 @@ fh_link = fh_reader.linkFireHose(fh_item);
     [% Slash.url2abs(fh_link, constants.absolutedir) %]
 [% END %]
 
-Copyright 1997-2009 [% constants.sitepublisher %].  All rights reserved.
+--------------------------------------------------------------
+You have received this message because you subscribed to it
+on [% constants.sitename %].  To stop receiving this and other
+messages from [% constants.sitename %], or to add more messages
+or change your preferences, please go to your user page.
+
+	[% absolutedir %]/my/messages
+
+You can log in and change your preferences from there.
 
 __seclev__
 500
