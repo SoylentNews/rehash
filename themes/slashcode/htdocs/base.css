@@ -299,7 +299,7 @@ span.sd-info-block, span[class^=sd-key-] {
 }
 
 /* General */
-* html .generaltitle,* html .generalbody,* html .article .body,* html .article .details
+html .generaltitle,* html .generalbody,* html .article .body,* html .article .details
 {
 	position: relative;
 }
