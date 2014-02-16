@@ -151,7 +151,7 @@ __template__
 			[% PROCESS formNote note => "Are you sure you included a URL?  Did you test them for typos?" %]
 			[% PROCESS formNote note => "HTML is fine, but double check those URLs and HTML tags!" %]
 			[% PROCESS formLabel value => "Submission format", comment => "" %]
-			[% def_type = form.sub_type || 'html'; sub_types = { "html" => "HTML Formatted", "plain" => "Plain Old Text" }; Slash.createSelect('sub_type', sub_types, def_type, 1) %]
+			[% def_type = form.sub_type || 'plain'; sub_types = { "html" => "HTML Formatted", "plain" => "Plain Old Text" }; Slash.createSelect('sub_type', sub_types, def_type, 1) %]
 			[% IF form.url_id %]
 				<input type="hidden" name="url_id" value="[% form.url_id | strip_attribute %]">
 			[% END %]

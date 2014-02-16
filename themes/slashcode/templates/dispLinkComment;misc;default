@@ -44,7 +44,7 @@ __template__
 			'return'	=> 1,
 			nsort		=> 1, 
 			onchange	=> (discussion2 ? 'return D2.doModerate(this)' : '')
-		}) %]</div>[% END %]
+		}) %]</div><input type="submit" value="Moderate">[% END %]
 
 		[% IF can_del %]
 		<input type="checkbox" name="del_[% cid %]">

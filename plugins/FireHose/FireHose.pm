@@ -2831,7 +2831,7 @@ sub deleteFireHoseCaches {
 	}
 
 	for my $k (keys %cache_key) {
-		$mcd->delete($k, 3);
+		$mcd->delete($k);
 	}
 }
 

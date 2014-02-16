@@ -1918,8 +1918,7 @@ sub _logtoken_delete_memcached {
 			. ":" . ($temp_str   eq 'yes' ? 1 : 0)
 			. ":" . ($public_str eq 'yes' ? 1 : 0)
 			. ":" . $locationid;
-		# The 3 means "don't accept new writes to this key for 3 seconds."
-		$mcd->delete("$mcdkey$lt_str", 3);
+		$mcd->delete("$mcdkey$lt_str");
 #print STDERR scalar(gmtime) . " $$ _lt_delete_mcd deleted lt_str=$lt_str\n";
 	} else {
 		# Not having a temp_str and public_str and locationid passed in
@@ -1938,7 +1937,7 @@ sub _logtoken_delete_memcached {
 				. ":" . ($public_str eq 'yes' ? 1 : 0)
 				. ":" . $locationid;
 			# The 3 means "don't accept new writes to this key for 3 seconds."
-			$mcd->delete("$mcdkey$lt_str", 3);
+			$mcd->delete("$mcdkey$lt_str");
 #print STDERR scalar(gmtime) . " $$ _lt_delete_mcd deleted lt_str=$lt_str\n";
 		}
 	}
@@ -2860,13 +2859,6 @@ sub checkStoryViewable {
 		"story_param",
 		"stoid = '$stoid' AND name='neverdisplay' AND value > 0");
 
-	# Does story need signoffs
-	if ($constants->{'signoff_use'}  == 1) {
-		my signoff_count = $self->getSignoffCountHashForStoids($stoid, 1);
-		if (signoff_count le $constants->{'signoffs_per_article'}) {
-			return 0;
-		}
-	}
 	my @nexuses;
 	if ($start_tid) {
 		push @nexuses, $start_tid;
@@ -3942,9 +3934,7 @@ sub setStory_delete_memcached_by_stoid {
 
 	for my $stoid (@$stoid_list) {
 		for my $mcdkey (@mcdkeys) {
-			# The "3" means "don't accept new writes
-			# to this key for 3 seconds."
-			$mcd->delete("$mcdkey$stoid", 3);
+			$mcd->delete("$mcdkey$stoid");
 			if ($mcddebug > 1) {
 				print STDERR scalar(gmtime) . " $$ setS_deletemcd deleted '$mcdkey$stoid'\n";
 			}
@@ -3967,7 +3957,7 @@ sub setStory_delete_memcached_by_tid {
 			my $mcdkey = "$self->{_mcd_keyprefix}:gse:$tid:$the_minute";
 			# The "3" means "don't accept new writes to this key
 			# for 3 seconds."
-			$mcd->delete($mcdkey, 3);
+			$mcd->delete($mcdkey);
 		}
 		$the_minute += 60;
 	}
@@ -11015,8 +11005,7 @@ sub setUser_delete_memcached {
 	$uid_list = [ $uid_list ] if !ref($uid_list);
 	for my $uid (@$uid_list) {
 		my $mcdkey = "$self->{_mcd_keyprefix}:u:";
-		# The "3" means "don't accept new writes to this key for 3 seconds."
-		$mcd->delete("$mcdkey$uid", 3);
+		$mcd->delete("$mcdkey$uid");
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ setU_deletemcd deleted '$mcdkey$uid'\n";
 		}

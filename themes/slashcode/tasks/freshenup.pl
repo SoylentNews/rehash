@@ -19,7 +19,7 @@ use vars qw( %task $me $task_exit_flag
 
 # Change this var to change how often the task runs.  Sandboxes
 # run it every ten minutes, Slashdot.org every minute.
-$minutes_run = ($ENV{SF_SYSTEM_FUNC} && $ENV{SF_SYSTEM_FUNC} =~ /^slashdot-/ ? 1 : 10);
+$minutes_run = 1;
 
 # Process the non-mainpage skins less often.  Sandboxes run them
 # every 5 invocations, Slashdot.org every 10.

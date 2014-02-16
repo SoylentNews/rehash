@@ -469,7 +469,7 @@ sub setCommentForMod {
 
 	if ($clear_ctp and my $mcd = $self->getMCD()) {
 		my $mcdkey = "$self->{_mcd_keyprefix}:ctp:";
-		$mcd->delete("$mcdkey$cid", 3);
+		$mcd->delete("$mcdkey$cid");
 	}
 
 	return $changed ? $hr : undef;

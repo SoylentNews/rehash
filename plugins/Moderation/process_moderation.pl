@@ -157,7 +157,7 @@ sub distributeModPoints {
 	# Now lets figure out who's getting what
 	my $mod_percentage       = $constants->{m1_eligible_percentage}  || 0.30;
 	my $mod_points_min       = $constants->{mod_min_points_per_user} || 10;
-	my $mod_points_max       = $constants->{mod_max_points_per_user} || 100;
+	my $mod_points_max       = $constants->{mod_max_points_per_user} || 25;
 	
 	# We need to know the total number of elligable users, then devate from
 	# how many active users have mod points vs. all active, which should
@@ -170,16 +170,16 @@ sub distributeModPoints {
 	my $users_to_hand_points_to = int($current_elligable_count*($mod_percentage-$current_mod_percentage));
 	my $points_per_user = int($users_to_hand_points_to/$points_total);
 	
-	if ($points_per_user le $mod_points_min) {
+	if ($points_per_user < $mod_points_min) {
 		# Always want to have SOME modpoints in circulation even if the comment count
 		# is low
 		$points_per_user = $mod_points_min;
 		slashdLog("Bumping modpoints per user up to $mod_points_min");
 		
-	} elsif ($points_per_user ge $mod_points_max) {
+	} elsif ($points_per_user > $mod_points_max) {
 		# In the rare cases we want to hand out more points than
 		# the percentage if we've got THAT many articles that need
-		# it. TBH. I don't expect this logic to ever fire
+		# it. TBH. I don't expect this logic too often
 		
 		my $extra_points = $points_total-($mod_points_max*$users_to_hand_points_to);
 		$users_to_hand_points_to += ($extra_points/$mod_points_max);
@@ -220,13 +220,14 @@ sub getPotentialModerators {
 	# Figure out what the highest UID we can have is
 	my $highest_uid = $slashdb->sqlSelect("MAX(uid)", "users", "");
 	my $highest_elligable_uid = int($age_percentile * $highest_uid);
+	my $anon_uid = $constants->{anonymous_coward_uid};
 
 	# Had to move columns between tables to make this work well.
 	# JOINS are scary :-)
 
 	return $slashdb->sqlSelectMany('uid, karma',
 		"users_info",
-		"karma >= $karma AND lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period HOUR) AND (points = 0) AND (uid <= $highest_elligable_uid) ORDER BY lastgranted ASC"
+		"karma >= $karma AND lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period HOUR) AND (points = 0) AND (uid <= $highest_elligable_uid) AND uid != $anon_uid ORDER BY lastgranted ASC"
 	);
 
 } 

@@ -447,9 +447,7 @@ sub setTag {
 		my $mcd = $self->getMCD();
 		my $mcdkey = "$self->{_mcd_keyprefix}:tagid:" if $mcd;
 		if ($mcd) {
-			# The "3" means "don't accept new writes
-			# to this key for 3 seconds."
-			$mcd->delete("$mcdkey$id", 3);
+			$mcd->delete("$mcdkey$id");
 		}
 	}
 
@@ -488,9 +486,7 @@ sub setTagname {
 		my $mcd = $self->getMCD();
 		my $mcdkey = "$self->{_mcd_keyprefix}:tagdata:" if $mcd;
 		if ($mcd) {
-			# The "3" means "don't accept new writes
-			# to this key for 3 seconds."
-			$mcd->delete("$mcdkey$id", 3);
+			$mcd->delete("$mcdkey$id");
 		}
 	}
 
