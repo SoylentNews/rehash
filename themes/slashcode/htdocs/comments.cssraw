@@ -10,16 +10,16 @@ html>body #comments { margin: 0 auto .2em 0; width: 100%; }
 }
 .commentwrap {
 	background: #fff;
-     	position: relative;
-     	border: 1px solid #aaa;
+        position: relative;
+        border: 1px solid #aaa;
 	clear: right;
 }
 html > body .commentwrap table {
-     	width: 100%;
-     	margin: 0;
+        width: 100%;
+        margin: 0;
 }
 .commentwrap table {
-     	width: 99%;
+        width: 99%;
 	margin: .3em;
 }
 
@@ -42,13 +42,13 @@ html > body .commentwrap table {
 }
 .commentwrap legend
 {
-     	display: none;
+        display: none;
 }
 .commentwrap fieldset, .commentswrap form
 {
-     	margin: 0;
-     	padding: 0;
-     border: none;
+        margin: 0;
+        padding: 0;
+        border: none;
 }
 .linkCommentPage {
 	background: #ccc;
@@ -65,15 +65,9 @@ html > body .commentwrap table {
 
 .commentTop
 {
-	background: #660000;
-	border: 1px solid #660000;
+	background: #ddd;
+	border: 1px solid #ccc;
 	padding: .3em;
-	color: #fff; 
-}
-
-.commentTop a
-{
-	color: #fff;
 }
 
 .commentSub
@@ -89,11 +83,10 @@ html > body .commentwrap table {
 
 .commentBody
 {
-	border: 1px solid #bbb;
+	border: 1px solid #ddd;
 	border-bottom: none;
 	padding: .3em;
 	overflow: hidden;
-	background: #fff;
 }
 
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
@@ -148,7 +141,7 @@ html > body .commentwrap table {
 
 .oldcomment {
 	opacity: .65;
-	filter: alpha(opacity=65);
+	/* filter: alpha(opacity=65); */
 }
 .newcomment {
 }
@@ -240,7 +233,7 @@ html > body .commentwrap table {
 
 .horizontal .loki {display: block;}
 .horizontal #d2act {background: #fff; left: 0 !important; right: 0; opacity: 1; top: 0; z-index: 1000; border: none; border-right: 2px solid #aaa; width: auto; margin:0 1.25em 0 11.75em; text-align: center}
-.horizontal #d2act div.block div.title h4 {background: #ccc !important;}
+.horizontal #d2act div.block div.title h4 {background: #cc; !important}
 .rooted #d2act.rooted { border: 3px solid #555555; }
 .horizontal #d2act .commentControlFooter { display: none; }
 
@@ -345,13 +338,17 @@ div.ccw-panel, #ccw-control,
 
 	/* Cursor Behavior */
 
-#ccw { -khtml-user-select: none; -moz-user-select: none; user-select: none; }
+/* #ccw { -khtml-user-select: none; -moz-user-select: none; user-select: none; } */
 
-#ccw-abbr-bar, #ccw-hide-bar          { cursor: grab; cursor: -moz-grab; }
+/* #ccw-abbr-bar, #ccw-hide-bar          { cursor: grab; cursor: -moz-grab; } */
 
+
+/* 
 #ccw-control.ccw-active,
 .ccw-active #ccw-abbr-bar,
-.ccw-active #ccw-hide-bar             { cursor: grabbing; cursor: -moz-grabbing; }
+.ccw-active #ccw-hide-bar    { cursor: grabbing; cursor: -moz-grabbing; }
+*/
+
 
 
 	/* specifics */
