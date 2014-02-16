@@ -6,6 +6,8 @@ package Slash::HumanConf;
 
 use strict;
 
+use Captcha::reCAPTCHA;
+
 use Slash;
 use Slash::Utility::Environment;
 
@@ -53,52 +55,10 @@ sub createFormkeyHC {
 		"hcqid=$hcqid"
 	);
 
-	# Loop until we successfully get an answer/html pair (one time
-	# in a zillion we'll have to try more than once).
-	my $secs = $constants->{hc_pool_secs_before_use} || 10;
-	my($hcpid, $html) = ('', '');
-	while (1) {
-
-		# Grab a random answer/html for that question.
-		($hcpid, $html) = $slashdb->sqlSelect(
-			"hcpid, html",
-			"humanconf_pool",
-			"hcqid=" . $slashdb->sqlQuote($hcqid)
-				. " AND filename_img != ''"
-				. " AND created_at < DATE_SUB(NOW(), INTERVAL $secs SECOND)"
-				. " AND inuse = 0",
-			"ORDER BY RAND() LIMIT 1"
-		);
-		if (!$hcpid) {
-			warn "HumanConf warning: empty humanconf_pool"
-				. " for question $hcqid";
-			return 0;
-		}
-
-		# Touch that entry in the pool so the task doesn't delete
-		# it while the user is using it.
-		my $touched = $slashdb->sqlUpdate(
-			"humanconf_pool",
-			{ -lastused => 'NOW()' },
-			"hcpid=$hcpid"
-		);
-		last if $touched;
-
-		# If it was deleted between the previous two SQL
-		# statements, repeat the loop (and don't go skydiving
-		# today, geez what terrible luck).
-
-	}
-
-	# Create an entry in the humanconf table associating the
-	# already-created formkey with this answer/html.
-	my $success = $slashdb->sqlInsert("humanconf", {
-		hcpid	=> $hcpid,
-		formkey	=> $formkey,
-	});
-	return 0 unless $success;
-	my $hcid = $slashdb->getLastInsertId();
-
+	my $c = Captcha::reCAPTCHA->new;
+	
+	$html .= $c->get_html("your_public_key");
+	
 	$user->{state}{hcid} = $hcid;
 	$user->{state}{hc} = 1;
 	$user->{state}{hcinvalid} = 0;
