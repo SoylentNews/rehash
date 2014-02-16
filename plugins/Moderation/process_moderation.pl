@@ -105,7 +105,7 @@ sub determine_mod_points_to_be_issued {
 # system, and with luck, considerably more effective.
 
 sub distributeModPoints {
-	my ($constants, $slashdb, $points) = @_;
+	my ($constants, $slashdb, $points_total) = @_;
 	
 	# First, we need to know some base information
 	#
@@ -139,7 +139,7 @@ sub distributeModPoints {
 	slashdLog("Determing current users elligable on following criteria");
 	slashdLog("Karma >= $karma_min");
 	slashdLog("Active Within: $user_activity_period");
-	slashdLog("Account is older than what percentage: %" . int($age_min * 100) );
+	slashdLog("Account is older than what percentage: " . int($age_min * 100) . "%" );
 	my $potential_moderators =
 		getPotentialModerators($constants, $slashdb, $user_activity_period, $karma_min, $age_min);
 
@@ -147,23 +147,52 @@ sub distributeModPoints {
 	my $current_elligable_count = $potential_moderators->rows;
 	my $total_users_elligable = $current_mod_count + $current_elligable_count;
 	my $current_mod_percentage = ($total_users_elligable-$current_elligable_count)/$total_users_elligable;
-	my $human_readable_percentage = int($current_mod_percentage*100);
 
 	slashdLog("---------------------------------------------");
 	slashdLog("Current elligable moderators: $current_elligable_count");
-	slashdLog("Current mod percentage: $human_readable_percentage");
+	slashdLog("Current mod percentage: " . sprintf "%.2f", $current_mod_percentage*100 . "%");
 	slashdLog("Total Active Users: $total_users_elligable");
 
 	# Now lets figure out who's getting what
 	my $mod_percentage       = $constants->{m1_eligible_percentage}  || 0.30;
-	my $mod_points_min       = $constants->{mod_min_points_per_user} || 100;
+	my $mod_points_min       = $constants->{mod_min_points_per_user} || 10;
 	my $mod_points_max       = $constants->{mod_max_points_per_user} || 100;
 	
 	# We need to know the total number of elligable users, then devate from
 	# how many active users have mod points vs. all active, which should
 	# always be around $mod_percentage
 	
+	# We will exceed the current percentage of moderators IF we can't hand out
+	# all our points to
+	my $users_to_hand_points_to = $current_elligable_count*(mod_percantage-current_mod_percentage);
+	my $points_per_user = $users_to_hand_points_to/$points_total;
 	
+	if ($points_per_user le $mod_points_min) {
+		# Always want to have SOME modpoints in circulation even if the comment count
+		# is low
+		$points_per_user = $mod_points_min;
+		slashdLog("Bumping modpoints per user up to $mod_points_min");
+		
+	} elsif ($points_per_user ge $mod_points_max) {
+		# In the rare cases we want to hand out more points than
+		# the percentage if we've got THAT many articles that need
+		# it. TBH. I don't expect this logic to ever fire
+		
+		my $extra_points = $points_total-($mod_points_max*$users_to_hand_points_to);
+		$users_to_hand_points_to += ($extra_points/$mod_points_max);
+		slashdLog("Overflowed number of points to hand out, increasing")
+	}
+	
+	slashdLog("Handling modpoints to " . + $users_to_hand_points_to . + "users");
+	
+	# Do magic
+	my mod_rows = $current_elligable_count>fetchall_arrayref()
+	for my $i ( 0 .. $users_to_hand_points_to ) {
+		$moddb->setUser(mod_rows->[$i]{'uid'}, {
+			-lastgranted    => 'NOW()',
+			-points         => $users_to_hand_points_to,
+		});
+	}
 }
 
 
@@ -192,7 +221,7 @@ sub getPotentialModerators {
 	# Had to move columns between tables to make this work well.
 	# JOINS are scary :-)
 
-	return $slashdb->sqlSelectMany('uid, karma, lastgranted, lastaccess_ts',
+	return $slashdb->sqlSelectMany('uid, karma',
 		"users_info",
 		"karma >= $karma AND lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period HOUR) AND (points = 0) AND (uid <= $highest_elligable_uid) ORDER BY lastgranted ASC"
 	);

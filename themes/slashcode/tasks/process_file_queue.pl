@@ -84,12 +84,12 @@ sub handleFileCmd {
 			};
 			my $sfid = addFile($data);
 
-			if ($cmd->{fhid}) {
-				my $firehose = getObject("Slash::FireHose");
-				if ($firehose) {
-					$firehose->setFireHose($cmd->{fhid}, { thumb => $sfid });
-				}
-			}
+			#if ($cmd->{fhid}) {
+			#	my $firehose = getObject("Slash::FireHose");
+			#	if ($firehose) {
+			#		$firehose->setFireHose($cmd->{fhid}, { thumb => $sfid });
+			#	}
+			#}
 
 			slashdLog("About to create thumbsms $path$thumbsm");
 			system("$convert -size 100x74 $path$name  -resize '50x37>'  -bordercolor transparent -border 18 -gravity center -crop 50x37+0+0 -page +0+0 -colors 256 -depth 8 -compress BZip $path$thumbsm");
@@ -121,11 +121,11 @@ sub handleFileCmd {
 		uploadFile($cmd);
 	}
 
-	if ($cmd->{action} eq 'sprite' && $cmd->{fhid}) {
-		slashdLog("handling sprite\n");
-		my $firehose = getObject("Slash::FireHose");
-		$firehose->createSprite($cmd->{fhid});
-	}
+	#if ($cmd->{action} eq 'sprite' && $cmd->{fhid}) {
+	#	slashdLog("handling sprite\n");
+	#	my $firehose = getObject("Slash::FireHose");
+	#	$firehose->createSprite($cmd->{fhid});
+	#}
 
 	$slashdb->deleteFileQueueCmd($cmd->{fqid});
 
