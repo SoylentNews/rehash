@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+
 use Slash::Utility;
 use Slash::Constants qw( :messages :slashd );
 
@@ -31,11 +32,12 @@ $task{$me}{code} = sub {
 	# 3. Work out who to give points to, and issue
 	my $points_to_handout;
 	
-	#stir_mod_pool();
+	stir_mod_pool();
+	
+	# Note, points to hand out CAN be negative, in that case, the system
+	# only hands out minimium points (as always more modpoints is better)
 	$points_to_handout = determine_mod_points_to_be_issued($slashdb);
-	if ($points_to_handout gt 0) {
-		distributeModPoints($constants, $slashdb, $points_to_handout);
-	};
+	distributeModPoints($constants, $slashdb, $points_to_handout);
 	
 	return ;
 };
@@ -46,16 +48,15 @@ sub moderatordLog {
 	doLog('slashd', \@_);
 }
 
-sub sitr_mod_pool {
+sub stir_mod_pool {
 	my ($constants, $slashdb) = '@_';
 	my $moddb = getObject('Slash::Moderation');
 
 	my $stirredpoints = $moddb->stirPool();
 
-	# so much simplier without this token shit
-	#if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
-	#	$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
-	#}
+	if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
+		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
+	}
 	
 }
 
@@ -106,6 +107,7 @@ sub determine_mod_points_to_be_issued {
 
 sub distributeModPoints {
 	my ($constants, $slashdb, $points_total) = @_;
+	my $moddb = getObject('Slash::Moderation');
 	
 	# First, we need to know some base information
 	#
@@ -164,8 +166,10 @@ sub distributeModPoints {
 	
 	# We will exceed the current percentage of moderators IF we can't hand out
 	# all our points to
-	my $users_to_hand_points_to = $current_elligable_count*(mod_percantage-current_mod_percentage);
-	my $points_per_user = $users_to_hand_points_to/$points_total;
+	# EDIT: Should probably use Math::Round
+
+	my $users_to_hand_points_to = int($current_elligable_count*($mod_percentage-$current_mod_percentage));
+	my $points_per_user = int($users_to_hand_points_to/$points_total);
 	
 	if ($points_per_user le $mod_points_min) {
 		# Always want to have SOME modpoints in circulation even if the comment count
@@ -186,11 +190,11 @@ sub distributeModPoints {
 	slashdLog("Handling modpoints to " . + $users_to_hand_points_to . + "users");
 	
 	# Do magic
-	my mod_rows = $current_elligable_count>fetchall_arrayref()
+	my $mod_rows = $potential_moderators->fetchall_arrayref;
 	for my $i ( 0 .. $users_to_hand_points_to ) {
-		$moddb->setUser(mod_rows->[$i]{'uid'}, {
+		$moddb->setUser($mod_rows->[$i]['uid'], {
 			-lastgranted    => 'NOW()',
-			-points         => $users_to_hand_points_to,
+			-points         => $points_per_user,
 		});
 	}
 }

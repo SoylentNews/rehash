@@ -1312,10 +1312,9 @@ sub stirPool {
 	# and it gets counted twice, later, in stats.  No big whup.
 	
 	my $stir_ar = $self->sqlSelectAllHashrefArray(
-		"users_info.uid AS uid, points",
-		"users_info, users_comments",
-		"users_info.uid = users_comments.uid
-		 AND points > 0
+		"uid, points",
+		"users_info",
+		"points > 0
 		 AND DATE_SUB(NOW(), INTERVAL $stir_hours HOUR) > lastgranted"
 	);
 	
