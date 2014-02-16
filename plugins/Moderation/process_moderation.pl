@@ -49,7 +49,6 @@ sub moderatordLog {
 }
 
 sub stir_mod_pool {
-	my ($constants, $slashdb) = '@_';
 	my $moddb = getObject('Slash::Moderation');
 
 	my $stirredpoints = $moddb->stirPool();
@@ -91,7 +90,7 @@ sub determine_mod_points_to_be_issued {
 	# This is combined with a shorter mod_stir_period which reduces the time
 	# until points go poof to make mod points come and go rapidly in circulation
 	 
-	my $points_to_issue = ($dailycomments-$points_in_circulation)*2;
+	my $points_to_issue = $dailycomments*2-$points_in_circulation;
 	
 	slashdLog("dailycomments: $dailycomments");
 	slashdLog("points_currently_in_circulation: $points_in_circulation");
