@@ -1721,7 +1721,7 @@ sub listStories {
 	# MC: The original was crack
 	#my $needed_signoffs = $self->getActiveAdminCount;
 	my $needed_signoffs = $constants->{'signoffs_per_article'};
-	
+
 	my %unique_tds = map { ($_->{td}, 1) } @$storylist;
 	my $ndays_represented = scalar(keys %unique_tds);
 
