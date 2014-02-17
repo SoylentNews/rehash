@@ -64,7 +64,7 @@ span.sd-info-block, span[class^=sd-key-] {
 	height: 100%;
 	z-index: 2;
 	position: relative;
-	margin: 0 400px 1em 0;
+	margin: 0 250px 1em 0;
 	min-width: 500px;
 	padding: 0;
 }
