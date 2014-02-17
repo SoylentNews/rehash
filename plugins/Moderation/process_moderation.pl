@@ -11,7 +11,7 @@ use Slash::Constants qw( :messages :slashd );
 
 use vars qw( %task $me $task_exit_flag );
 
-$task{$me}{timespec} = '28 0-23 * * *';
+$task{$me}{timespec} = '*/ 0-23 * * *';
 $task{$me}{timespec_panic_1} = '';
 $task{$me}{resource_locks} = { log_slave => 1, moderatorlog => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -129,7 +129,7 @@ sub distributeModPoints {
 	my $current_mod_count = $slashdb->getModeratorCount();
 	
 	# These variables directly affect who is eligable via the SELECT query
-	my $user_activity_period = $constants->{mod_stir_hours}          || 24;
+	my $user_activity_period = $constants->{mod_activity_level}          || 24;
 	my $karma_min            = $constants->{mod_elig_minkarma}       || 0;
 	my $age_min              = $constants->{m1_pointgrant_end}       || 1;
 	
