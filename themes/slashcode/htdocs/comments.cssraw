@@ -10,16 +10,16 @@ html>body #comments { margin: 0 auto .2em 0; width: 100%; }
 }
 .commentwrap {
 	background: #fff;
-        position: relative;
-        border: 1px solid #aaa;
+     	position: relative;
+     	border: 1px solid #aaa;
 	clear: right;
 }
 html > body .commentwrap table {
-        width: 100%;
-        margin: 0;
+     	width: 100%;
+     	margin: 0;
 }
 .commentwrap table {
-        width: 99%;
+     	width: 99%;
 	margin: .3em;
 }
 
@@ -42,13 +42,13 @@ html > body .commentwrap table {
 }
 .commentwrap legend
 {
-        display: none;
+     	display: none;
 }
 .commentwrap fieldset, .commentswrap form
 {
-        margin: 0;
-        padding: 0;
-        border: none;
+     	margin: 0;
+     	padding: 0;
+     border: none;
 }
 .linkCommentPage {
 	background: #ccc;
@@ -56,38 +56,74 @@ html > body .commentwrap table {
 	margin: .3em;
 	padding: .3em;
 }
+
+
+.commentTop 
+{
+	background: url("[% constants.imagedir %]/bg_red.gif") #933 repeat-x;
+	padding: 0;
+}
+
+.commentTop .title { 
+    background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat;
+    display: block;
+    color: #fff;
+
+}
+
+.commentTop a{
+    color: #fff;
+}
+
+
+.commentTop .title h4
+{
+	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
+	color: #fff;
+	display: block;
+	padding: 6px 10px;
+}
+
 .commentTop .details {
 	font-size: 75.5%;
 	margin: 0;
-	padding: 0;
+	padding: 4px 10px;
+	border: 1px solid #aaa;
+	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	color: #000;
 }
 .commentTop .details small {font-size: 100%;}
 
-.commentTop
+
+.commentTop .details a
 {
-	background: #ddd;
-	border: 1px solid #ccc;
-	padding: .3em;
+	color: #600;
 }
 
 .commentSub
 {
-	background: #eee;
-	padding: .3em;
+	background: #fff;
+	padding: .6em;
 	font-size: 80%;
-	border: 1px solid #ddd;
-	margin: 0;
+	border: 1px solid #aaa;
+	border-top: none;
 }
-
-.commentTop H4 { display: inline; }
 
 .commentBody
 {
-	border: 1px solid #ddd;
+	border: 1px solid #aaa;
 	border-bottom: none;
+	border-top: none;
 	padding: .3em;
 	overflow: hidden;
+	background: #fff;
 }
+
+#commentlisting .commentBody ul
+{
+    border-left: none;
+}
+
 
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
@@ -106,7 +142,32 @@ html > body .commentwrap table {
         list-style: none;
 }
 .comment { margin-bottom: 0.5em }
-#commentlisting li.comment { list-style: none; }
+
+
+#commentlisting ul 
+{
+    border-left: 2px solid #aaa;
+    padding-left: 20px;
+    margin-top:0;
+    margin-bottom:0;
+    
+}
+
+ul#commentlisting 
+{
+    margin-bottom: 8px;
+}
+
+#commentlisting li.comment 
+{
+    list-style: none;
+    padding-top: 5px;
+    padding-bottom: 0px;
+    margin-bottom:0;
+}
+
+
+
 .comment_footer { text-align: center; background: #ddd }
 .modsel {
 	display: inline;
@@ -130,7 +191,7 @@ html > body .commentwrap table {
 	margin: 0;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("[% constants.imagedir %]/comm-plus.gif") 0 .2em no-repeat;
+	bbackground: url("[% constants.imagedir %]/comm-plus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 1;
 	cursor: pointer;
@@ -141,7 +202,7 @@ html > body .commentwrap table {
 
 .oldcomment {
 	opacity: .65;
-	/* filter: alpha(opacity=65); */
+	filter: alpha(opacity=65);
 }
 .newcomment {
 }
@@ -233,7 +294,7 @@ html > body .commentwrap table {
 
 .horizontal .loki {display: block;}
 .horizontal #d2act {background: #fff; left: 0 !important; right: 0; opacity: 1; top: 0; z-index: 1000; border: none; border-right: 2px solid #aaa; width: auto; margin:0 1.25em 0 11.75em; text-align: center}
-.horizontal #d2act div.block div.title h4 {background: #cc; !important}
+.horizontal #d2act div.block div.title h4 {background: #ccc !important;}
 .rooted #d2act.rooted { border: 3px solid #555555; }
 .horizontal #d2act .commentControlFooter { display: none; }
 
@@ -338,17 +399,13 @@ div.ccw-panel, #ccw-control,
 
 	/* Cursor Behavior */
 
-/* #ccw { -khtml-user-select: none; -moz-user-select: none; user-select: none; } */
+#ccw { -khtml-user-select: none; -moz-user-select: none; user-select: none; }
 
-/* #ccw-abbr-bar, #ccw-hide-bar          { cursor: grab; cursor: -moz-grab; } */
+#ccw-abbr-bar, #ccw-hide-bar          { cursor: grab; cursor: -moz-grab; }
 
-
-/* 
 #ccw-control.ccw-active,
 .ccw-active #ccw-abbr-bar,
-.ccw-active #ccw-hide-bar    { cursor: grabbing; cursor: -moz-grabbing; }
-*/
-
+.ccw-active #ccw-hide-bar             { cursor: grabbing; cursor: -moz-grabbing; }
 
 
 	/* specifics */
@@ -425,4 +482,3 @@ span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; fon
 .inline_comment .replyto_msg {background: #fdd; border: 1px solid #fbb; padding: .5em; margin: .5em 1em 0; color: #000 }
 .inline_comment .commentload {margin: 0 1em; font-weight: bold; color: #aaa;}
 .inline_comment .contain {margin: 0; padding: 0; border: none}
-
