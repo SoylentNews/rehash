@@ -45,16 +45,35 @@ sub createFormkeyHC {
 	my $formkey = $options->{frkey} || $form->{formkey};
 	return 0 unless $formkey;
 
-	my $c = Captcha::reCAPTCHA->new;
+	# Decide which question we're asking.
+	my $hcqid = $user->{hcqid}
+		|| $constants->{humanconf_default_question}
+		|| 1;
+	my($question) = $slashdb->sqlSelect(
+		"question",
+		"humanconf_questions",
+		"hcqid=$hcqid"
+	);
 
-	# MC: Bah, this crap is annoying, this entire module needs a rewrite
-	# Think some places check for hcid
-	$user->{state}{hcid} = 1;
+	my $c = Captcha::reCAPTCHA->new;
+	
+	$html .= $c->get_html("your_public_key");
+	
+	$user->{state}{hcid} = $hcid;
 	$user->{state}{hc} = 1;
 	$user->{state}{hcinvalid} = 0;
 	$user->{state}{hcquestion} = $question;
-	$user->{state}{hchtml} = $c->get_html("6LcksO4SAAAAAL4eWMr0fB5lSRdvy2xyhciGJhYt");
+	$user->{state}{hchtml} = $html;
 	return 1;
+}
+
+sub updateFormkeyHCValue {
+	my($self, $hcid, $formkey) = @_;
+	my $slashdb = getCurrentDB();
+	return $slashdb->sqlUpdate('humanconf', {
+			formkey => $formkey
+		}, 'hcid=' . $slashdb->sqlQuote($hcid)
+	);
 }
 
 sub reloadFormkeyHC {
@@ -75,8 +94,16 @@ sub reloadFormkeyHC {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $formkey = $options->{frkey} || $form->{formkey};
+	my $formkey_quoted = $slashdb->sqlQuote($formkey);
 
-	my $c = Captcha::reCAPTCHA->new;
+	my($hcid, $html, $question, $tries_left, $answer) = $slashdb->sqlSelect(
+		"hcid, html, question, tries_left, answer",
+		"humanconf, humanconf_pool, humanconf_questions",
+		"humanconf.formkey = $formkey_quoted
+		 AND humanconf_pool.hcpid = humanconf.hcpid
+		 AND humanconf_questions.hcqid = humanconf_pool.hcqid"
+	);
+
 	my $hcanswer = $form->{hcanswer};
 	my $hclastanswer = $form->{hclastanswer};
 	my $success = 0;
@@ -92,22 +119,17 @@ sub reloadFormkeyHC {
 		}
 	}
 
-	# MC: Tries disabled for the moment
-	# Probabl can just let reCAPTCHA handle this 
-	#if ($tries_left) {
+	if ($tries_left) {
+		$user->{state}{hcinvalid} = 0;
+		$user->{state}{hcquestion} = $question;
+		$user->{state}{hchtml} = $html;
 
-	# If we get down here, then we need to redisplay the reCAPTCHA
-	
-	$user->{state}{hcinvalid} = 0;
-	$user->{state}{hcquestion} = $question;
-	$user->{state}{hchtml} = $c->get_html("6LcksO4SAAAAAL4eWMr0fB5lSRdvy2xyhciGJhYt");
-
-	$user->{state}{hcsuccess} = 1 if $success;
-	$user->{state}{hclastanswer} = $hcanswer if $hcanswer;
-	#} else {
-	#	$user->{state}{hcinvalid} = 1;
-	#	$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');
-	#}
+		$user->{state}{hcsuccess} = 1 if $success;
+		$user->{state}{hclastanswer} = $hcanswer if $hcanswer;
+	} else {
+		$user->{state}{hcinvalid} = 1;
+		$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');
+	}
 	return !$user->{state}{hcinvalid};
 }
 

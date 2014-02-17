@@ -14,6 +14,18 @@ use base 'Slash::ResKey::Key';
 
 our $VERSION = $Slash::Constants::VERSION;
 
+sub updateResKey {
+	my($self) = @_;
+	return unless useHumanConf($self);
+
+	my $user = getCurrentUser();
+	return unless $user;
+
+	my $hc = getObject('Slash::HumanConf');
+	return unless $hc;
+
+	$hc->updateFormkeyHCValue($user->{state}{hcid}, $self->reskey);
+}
 
 sub doCheckCreate {
 	my($self) = @_;
