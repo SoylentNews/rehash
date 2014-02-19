@@ -692,7 +692,7 @@ sub moderate {
 					$sid, $cid, $form->{$key}, { comment => $comment }
 				);
 			} else {
-				print "user can't moderate comment";
+				#print "user can't moderate comment";
 				print Slash::Utility::Comments::getError('user cannot moderate');
 			} 
 				
