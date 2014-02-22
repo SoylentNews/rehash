@@ -2,13 +2,25 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-        <title>About Slashcode</title>
-<!--#include virtual="/slashcssbase.inc"-->
-<!--#include virtual="/slashhead-gen-full.inc"-->
+        <title>About SoylentNews</title>
 
-        <h1>About This Site</h1>
-        <p><img src="/images/topics/topicslash.gif" alt="Slash" width="81" height="36" align="right" hspace="10"> Slashcode is the site for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project. Use this site to get the Slash source, read the latest Slash news, and participate in Slash discussions.</p>
-        <p>Slashcode is run by the good folks at <a href="http://www.ostg.com/">OSTG</a>, but like all good open source projects, depends on the community. Thanks for your continued support, and let us know what we can do to make the site better.</p>
+
+<h1>About This Site</h1>
+
+<p>We are building a news aggregation site that delivers what's important - better articles, less fluff, and all the functionality you expect from a good comment moderation system.<p>
+        <p>This is a community driven project and can evolve based on the will of the users and volunteers. The code and database will be open-source (barring any legal issues).<p>
+        <p>Now, go forth and submit stories, comment, moderate, and be free!<p>
+
+Necessary Reading:<br />
+<ul>
+<li><a href=http://soylentnews.org/article.pl?sid=14/02/12/0715245>Welcome to SoylentNews!</a></li>
+<li><a href=http://soylentnews.org/article.pl?sid=14/02/13/0412219>Reworking Moderation Access</a></li>
+<li><a href=http://soylentnews.org/article.pl?sid=14/02/16/1331209>Massive Site Progress - Status for 02/16</a></li>
+<li><a href=http://soylentnews.org/article.pl?sid=14/02/17/0148235>Welcome to the World of Tomorrow... Today!</a></li>
+</ul>
+<h1>Info on Slashcode</h1>
+Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>
+        Good open source projects, depends on the community. Thanks for your continued support, and let us know what we can do to make the site better.</p>
         <p>Slash and Slashcode could not be possible without the use of some great Open Source software.</p>
         <ul>
                 <li><a href="http://www.debian.org/">Debian</a> and <a href="http://www.redhat.com/">Red Hat</a> Linux</li>
@@ -17,6 +29,4 @@
                 <li><a href="http://perl.apache.org/">mod_perl</a></li>
                 <li><a href="http://www.mysql.com/">MySQL</a></li>
         </ul>
-        <p>Slash was originally written by <a href="http://CmdrTaco.net/">CmdrTaco</a> and <a href="http://www.cowboyneal.org/">CowboyNeal</a>. Slashcode is run by <a href="http://tofu.org/">CaptTofu</a>, <a href="http://tangent.org/~brian/">Krow</a> and <a href="http://pudge.net/">pudge</a>.</p>
-
-<!--#include virtual="/slashfoot.inc"-->
+        <p>Slash was originally written by <a href="http://CmdrTaco.net/">CmdrTaco</a> and <a href="http://www.cowboyneal.org/">CowboyNeal</a>.</p>
