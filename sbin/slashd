@@ -526,7 +526,8 @@ EOT
 		$task{$file}{entry} = $cron->add_entry($task{$file}{timespec},
 						       $task{$file}{code});
 	}
-	$cron->build_initial_queue;
+	# Appears to not be needed for latest SChedule::Cron
+	#$cron->build_initial_queue;
 
 }
 
@@ -1147,8 +1148,4 @@ sub FILENO {
 	return fileno($fh);
 }
 
-# hacky hack hack to work with latest Schedule::Cron
-sub build_initial_queue
-{
-}
 1;
