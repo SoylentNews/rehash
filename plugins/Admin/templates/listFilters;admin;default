@@ -12,7 +12,7 @@ __name__
 listFilters
 __template__
 [% PROCESS titlebar width='100%' %]
-
+<div class="generalbody">
 <form action="[% env.script_name %]" method="post">
 <input type="hidden" name="op" value="listfilters">
 <table>
@@ -72,7 +72,7 @@ __template__
 [% END %]
 
 </form>
-
+</div>
 __seclev__
 500
 __version__
