@@ -12,7 +12,7 @@ __name__
 topAbusers
 __template__
 [% PROCESS titlebar title="Top Abusers" width='100%' %]
-
+<div class="generalbody">
 [% IF topabusers %]
 <p><b>Top Abusers:</b></p>
 <table border="0" cellpadding="0">
@@ -36,7 +36,7 @@ __template__
 No abuses logged 
 [% END %]
 
-
+</div>
 __seclev__
 100
 __version__

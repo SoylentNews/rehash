@@ -6,12 +6,12 @@ a:visited { color: #000; }
 /* layout */
 #contents
 {
-	min-width: 37em;
+	min-width: 20em;
 }
 
 body #index #articles
 {
-	margin: 0 235px 0 0;
+	margin: 0 15.6em 0 0;
 	position: relative;
 }
 
@@ -26,9 +26,9 @@ body #index #articles
 #slogan h2
 {
 	color: #555;
-	font-family: sans-serif;
+	
 	font-weight: bold;
-	font-size: 70%;
+	font-size: .70em;
 }
 
 /* links */
@@ -40,20 +40,19 @@ body #index #articles
 {
 	background: url("[% constants.imagedir %]/ctr_grey.gif") top right no-repeat;
 	font-weight: bold;
-	font-size: 80%;
-	font-family: sans-serif;
+	font-size: .813em;
+	
 }
 
 #links div.content
 {
 	background: url("[% constants.imagedir %]/cbr.gif") bottom right no-repeat;
 	padding: .3em .3em .6em .3em;
-	font-size: 75.5%;
-	line-height: 140%;
+	font-size: .755em;
+	line-height: 1.4em;
 	position: relative;
 }
 
-#navigation-content ul ul { border-bottom: 1px #eee solid; }
 
 /* slashboxes */
 #slashboxes { background: #e5e5e5; }
@@ -64,17 +63,73 @@ body #index #articles
 {
 	background: url("[% constants.imagedir %]/ctr_grey.gif") top right no-repeat;
 	font-weight: bold;
-	font-family: sans-serif;
-	font-size: 80%;
+	font-size: .813em;
 	color: #fff;
 }
 
 #slashboxes div.content
 {
 	background: url("[% constants.imagedir %]/cbl.gif") bottom left no-repeat;
-	font-size: 75.5%;
-	line-height: 140%;
+	font-size: .755em;
+	line-height: 1.4em;
 }
+
+.indexhead
+{
+  font-size: .875em;
+}
+
+/* Commnets Pages */
+
+.commentTop 
+{
+	background: url("[% constants.imagedir %]/bg_red.gif") repeat-x;
+}
+
+.commentTop .title { 
+    background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat;
+}
+
+
+.commentTop .title h4
+{
+	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
+}
+
+.commentTop .details {
+	border: 1px solid #aaa;
+	background: url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	color: #000;
+}
+
+.commentSub
+{
+	border: 1px solid #aaa;
+	border-top: none;
+}
+
+.commentBody
+{
+	border: 1px solid #aaa;
+	border-bottom: none;
+	border-top: none;
+
+}
+
+#commentlisting ul 
+{
+    border-left: 2px solid #aaa;
+
+}
+
+fieldset li.comment
+{
+    border-bottom: 1px solid #aaa;
+}
+
+
+.commentBox { background: #600; }
+
 
 /* Quick links content */
 #slashboxes #index_qlinks-content ul, #slashboxes #index_qlinks-content li, #slashboxes #features_qlinks-content ul, #slashboxes #features_qlinks-content li
@@ -92,8 +147,7 @@ body #index #articles
 {
 	background: transparent url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
-	font-family: sans-serif;
-	font-size: 100%;
+	font-size: 1em;
 }
 
 .generalbody
@@ -112,15 +166,14 @@ body #index #articles
 {
 	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
-	font-family: sans-serif;
-	font-size: 100%;
+	font-size: 1em;
 }
 
 .article .details
 {
-	font-size: 70%;
+	font-size: .7em;
 	font-weight: normal;
-	font-family: sans-serif;
+	
 	border: 1px solid #aaa;
 	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
 }
@@ -134,9 +187,7 @@ body #index #articles
 div.storylinks
 {
 	background: #eee url("[% constants.imagedir %]/bg_storylinks.gif") bottom repeat-x;
-	font-size: 80%;
-	font-family: sans-serif;
-	
+	font-size: .813em;
 }
 
 div.storylinks div { background: url("[% constants.imagedir %]/cbr_ltgrey.gif") bottom right no-repeat; }
@@ -146,29 +197,29 @@ div.storylinks div ul
 	padding: .6em 1em; 
 	margin: 0; 
 	background: url("[% constants.imagedir %]/cbl_ltgrey.gif") bottom left no-repeat;
+	line-height: .875em;
 }
 div.storylinks ul li 
 { 
-	padding: .3em; 
+	padding: .3em .5em; 
 	border-left: 1px solid #555; 
 }
 
 /* Footer */
-#footer { font-family: sans-serif; }
+#footer {  }
 
 #footer em
 {
-	font-size: 80%;
+	font-size: .813em;
 	float: right;
 	width: 45%;
 }
 
 #footer .search
 {
-	font-size: 70%;
+	font-size: .7em;
 	width: 50%;
-	text-align: center;
-	padding: 0;
+	padding: 0 .3em;
 	margin: 0;
 }
 
@@ -205,7 +256,7 @@ div.storylinks ul li
 .btmnav
 {
 	color: #600;
-	font-size: 70%;
+	font-size: .7em;
 }
 
 .btmnav ul li a { color: #600; }
@@ -223,15 +274,15 @@ div.storylinks ul li
 #journalgeneric div.storylinks ul li.edit a, #journalgeneric div.storylinks ul li.discussion a, #journalgeneric div.storylinks ul li.journalid a { border: none; }
 #journalslashdot .journaldate {font-weight: bold;}
 #journalslashdot .title { margin: 0 0 0 .6em; padding: 0; float: left;}
-#journalslashdot h3 { font-size: 65%; margin: 0; padding: 0; font-family: geneva,verdana,sans-serif;}
-#journalslashdot .details { float: left; font-style: italic; font-size: 65%; font-family: geneva,verdana,sans-serif; background: transparent; }
+#journalslashdot h3 { font-size: .65em; margin: 0; padding: 0; }
+#journalslashdot .details { float: left; font-style: italic; font-size: 65%; background: transparent; }
 #journalslashdot .intro { padding: 1em 0 2em 3.7em;}
-#journalslashdot div.storylinks { margin: 0; padding: 0; background: transparent;font-size: 65%;}
+#journalslashdot div.storylinks { margin: 0; padding: 0; background: transparent;font-size: .65em;}
 #journalslashdot div.storylinks ul { margin: 0; padding: 0; background: transparent;}
-#journalslashdot div.storylinks ul li { margin: 0; padding: 0; border: none; font-family: geneva,verdana,sans-serif; }
+#journalslashdot div.storylinks ul li { margin: 0; padding: 0; border: none;  }
 #journalslashdot div.storylinks ul li a { padding: 0 .4em 0 1em; border-left: 1px solid #000; }
 #journalslashdot div.storylinks ul li.edit a, #journalslashdot div.storylinks ul li.discussion a, #journalslashdot div.storylinks ul li.journalid a { border: none; }
-#journalslashdot .journalpage {font-size: 65.5%; font-family: geneva,verdana,sans-serif; text-align: right;}
+#journalslashdot .journalpage {font-size: 65em; text-align: right;}
 #journalgrey .journaldate { font-weight: bold; background: #eee; }
 #journalgrey .details { float: left; font-weight: bold; background: #eee; padding: 0 0.6em 0 0; }
 #journalgrey .title { background: #eee; padding: 0 0 0 0.6em; }
@@ -243,14 +294,14 @@ div.storylinks ul li
 #journalblue .journaldate { background: #369; font-weight: bold; padding: 3px; }
 #journalblue { border: 3px solid #000; }
 #journalblue .details { float: left; margin: 0 0.6em 0 0.3em; font-weight: bold; }
-#journalblue .title h3 { margin: 0; padding: 0; font-family: serif; }
+#journalblue .title h3 { margin: 0; padding: 0;  }
 
 /* Forms */
 textarea { width: 80%; }
 #journal input.button, #admin input.button { width: auto; }
 
 /* Misc */
-pre, code { font-size: 80%; }
+pre, code { font-size: .813em; }
 /* Ad */
 .ad1
 {
@@ -295,7 +346,7 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .menuoldstyle li:before { content: "| "; }
 .menuoldstyle li:first-child:before { content: ""; }
 
-.briefarticle { padding: 2px; background: #ccc; font-size: 80%}
+.briefarticle { padding: 2px; background: #ccc; font-size: .813em}
 .briefarticle a { color: #000 }
 .briefarticle .section { color: #333; }
 .briefarticle .storytitle { font-weight: bold; }
@@ -304,12 +355,12 @@ ul.menu a, ul.menu a:visited { color: #000; }
 
 /* Tags */
 
-.tags { width: 100%; font-size: 90%; line-height: 115% }
+.tags { width: 100%; font-size: .9em; line-height: 1.15em }
 .tagname { color: #600; font-weight: bold; padding: 0 }
-.tagtitleopen { background: #600; color: #fff; font-size: 90% }
-.tagtitleopen a { color: #fff; text-decoration: none; font-size: 90% }
-.tagtitleclosed { background: #e5e5e5; font-size: 90% }
-.tagtitleclosed a { text-decoration: none; font-size: 90% }
+.tagtitleopen { background: #600; color: #fff; font-size: .9em }
+.tagtitleopen a { color: #fff; text-decoration: none; font-size: .9em }
+.tagtitleclosed { background: #e5e5e5; font-size: .9em }
+.tagtitleclosed a { text-decoration: none; font-size: .9em }
 .tagmenu a { text-decoration: underline; }
 .tagbody { border: 1px #ccc solid; background: #eee; padding: 8px }
 .tagshide { display: none }
@@ -328,12 +379,12 @@ ul.menu a, ul.menu a:visited { color: #000; }
 	position: absolute;
         right: 0.2em;
 }
-.popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold; font-family: sans-serif; text-decoration: none;}
+.popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold;  text-decoration: none;}
 .popup-title .buttons span { margin: -.3em 0; padding: 0 4px; height: 11px; width: 11px;}
 
 .popup-message { background: #933; color: #fff; }
 .popup-title a, .popup-message a { color: #fff }
-.popup-contents { background: #ccc; font-size: 80%; padding: 5px; }
+.popup-contents { background: #ccc; font-size: .813em; padding: 5px; }
 .popup-message  { background: #933; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
 #sectionprefs-contents { background: #fff }
 

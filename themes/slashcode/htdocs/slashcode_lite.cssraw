@@ -154,6 +154,9 @@ div.article div.body {
 	border: 0px;
 }
 
+/* Comments */
+.commentBox { background: #444; }
+.commentBox a {color:#fff !important;}
 
 div.commentTop div.title { background: #000; }
 .commentBoxForm,
