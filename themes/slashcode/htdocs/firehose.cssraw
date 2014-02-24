@@ -1,7 +1,9 @@
 /* Slashboxes */
 div #slashboxes {
-       width: 23em;
+       width: 15em;
 }
+
+/* not fixed below here may just kill this if not used --paulej72 */
 
 /* Reset */
 .article .title, .article h3, .article .generaltitle, .briefarticle .title, .briefarticle h3, .briefarticle .generaltitle { background: transparent !important; }
