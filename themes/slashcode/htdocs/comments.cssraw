@@ -123,11 +123,17 @@ html > body .commentwrap table {
 	font-size: .875em;
 }
 
-.commentBody p
+.commentBody p, #editComment p, #editComment label
 {
     margin-top:0;
 		margin-bottom:.5em;
  }
+ 
+#editComment
+{
+    font-size:0.875em;
+}
+
 
 #commentlisting .commentBody ul
 {
