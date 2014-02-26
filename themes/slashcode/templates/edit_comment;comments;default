@@ -40,14 +40,14 @@ __template__
         </div>
 [% END %]
 <!-- end error message -->
-<form action="[% gSkin.rootdir %]/comments.pl" method="post">
+<form  action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% IF preview %]                
-	<fieldset>
+	<fieldset id=previewComment>
 		<legend>Preview Comment</legend>
 		[% preview %]   
 	</fieldset>
 [% END %]    
-	<fieldset>
+	<fieldset id=editComment>
 	<legend>Edit Comment</legend>
 	<input type="hidden" name="sid" value="[% form.sid || sid %]">
 	<input type="hidden" name="pid" value="[% form.pid %]">
@@ -198,17 +198,17 @@ IF do_br %]<br>[% END %]
 </p>
 [% END %]
 			<div class="notes">
-				<b>Allowed HTML</b><br>
+				<p><b>Allowed HTML</b><br/>
 				&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
 				[% IF constants.approvedtags.grep("ECODE").0 %]
 					(Use "ECODE" instead of "PRE" or "CODE".)
 				[% END %]
 	
-				<br>	
-				<b>URLs</b><br>
+				</p>	
+				<p><b>URLs</b><br/>
 				<code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
-				<br>
-				<b>Important Stuff</b>
+				</p>
+				<p><b>Important Stuff</b></p>
 				<ul>
 					<li>Please try to keep posts on topic.</li>
 					<li>Try to reply to other people's comments instead of starting new threads.</li>

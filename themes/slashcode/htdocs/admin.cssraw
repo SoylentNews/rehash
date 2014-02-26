@@ -30,7 +30,6 @@ input {width: auto !important;}
 {
 	font-weight: normal;
 	font-size: 80%;
-	font-family: arial, helvetica, sans-serif;
 	border-top: 2px solid #aaa;
 	border-bottom: 2px solid #aaa;
 	background: #ddd;
@@ -68,7 +67,7 @@ html>body #admin { margin: 0 auto .2em 0; }
 	clear: right;
 	z-index: 2;
 	position: relative;
-	margin: 0 -14.4em .2em 0;
+	margin: 0 -15em .2em 0;
 	border: 1px solid #aaa;
 }
 
@@ -146,8 +145,10 @@ html>body #admin { margin: 0 auto .2em 0; }
 .story_main { background: #fff;}
 .story_sec { background: #ccc; }
 .story_nd { background: #999; }
+.gs_story_main { background: #66ff79; color: #000; }
 .ss_story_main { background: #ff6; color: #000; }
 .ns_story_main { background: #f66; color: #000; }
+.gs_story_sec  { background: #33cc44; color: #000; }
 .ss_story_sec  { background: #993; color: #000; }
 .ns_story_sec  { background: #c33; color: #000; }
 .ns_story_main a, .ns_story_sec a { color: #033; }

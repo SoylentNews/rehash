@@ -5,9 +5,16 @@ html>body #comments { margin: 0 auto .2em 0; width: 100%; }
 	clear: right;
 	z-index: 2;
 	position: relative;
-	margin: 0 -15.6em .2em 0;
+	margin: 0 -15em .2em 0;
         width: 98%;
 }
+
+#commentwrap
+{
+  margin-bottom: .6em;
+	background:#ccc;
+}
+
 .commentwrap {
 	background: #fff;
      	position: relative;
@@ -57,39 +64,37 @@ html > body .commentwrap table {
 	padding: .3em;
 }
 
-
 .commentTop 
 {
-	background: url("[% constants.imagedir %]/bg_red.gif") #933 repeat-x;
+	background: #999
 	padding: 0;
 }
 
 .commentTop .title { 
-    background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat;
-    display: block;
     color: #fff;
-
 }
 
 .commentTop a{
     color: #fff;
+    text-decoration: none;
 }
 
 
 .commentTop .title h4
 {
-	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	display: block;
-	padding: 6px 10px;
+	padding: .3em .6em;
+	background:#aaa;
 }
 
+
 .commentTop .details {
-	font-size: 75.5%;
+	font-size: .75em;
 	margin: 0;
-	padding: 4px 10px;
-	border: 1px solid #aaa;
-	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	padding: .4em .8em;
+	border: 1px solid #ddd;
+	background: #ddd;
 	color: #000;
 }
 .commentTop .details small {font-size: 100%;}
@@ -103,27 +108,44 @@ html > body .commentwrap table {
 .commentSub
 {
 	background: #fff;
-	padding: .6em;
-	font-size: 80%;
-	border: 1px solid #aaa;
+	padding: .8em;
+	font-size: .75em;
+	border: 1px solid #ddd;
 	border-top: none;
 }
 
 .commentBody
 {
-	border: 1px solid #aaa;
+	border: 1px solid #ddd;
 	border-bottom: none;
 	border-top: none;
-	padding: .3em;
+	padding: 1em .8em 0 .8em;
 	overflow: hidden;
 	background: #fff;
+	font-size: .875em;
 }
+
+.commentBody p, #editComment p, #editComment label
+{
+    margin-top:0;
+		margin-bottom:.5em;
+ }
+ 
+#editComment
+{
+    font-size:0.875em;
+}
+
 
 #commentlisting .commentBody ul
 {
     border-left: none;
 }
 
+#commentlisting .commentBody ul li
+{
+    list-style:none outside none;
+}
 
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
@@ -143,30 +165,36 @@ html > body .commentwrap table {
 }
 .comment { margin-bottom: 0.5em }
 
+fieldset li.comment
+{
+    border-bottom: 1px solid #ddd;
+}
 
 #commentlisting ul 
 {
-    border-left: 2px solid #aaa;
-    padding-left: 20px;
+    border-left: 1px solid #ddd;
+    padding-left: 1.2em;
     margin-top:0;
     margin-bottom:0;
-    
 }
 
 ul#commentlisting 
 {
-    margin-bottom: 8px;
+    margin-bottom: .5em;
 }
 
-#commentlisting li.comment 
+#commentlisting ul li
 {
     list-style: none;
-    padding-top: 5px;
+    padding-top: .6em;
     padding-bottom: 0px;
     margin-bottom:0;
 }
 
-
+#discussion_buttons
+{
+    padding: .3em 0;
+}
 
 .comment_footer { text-align: center; background: #ddd }
 .modsel {
@@ -464,7 +492,7 @@ div.ccw-panel, #ccw-control,
 span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; font-weight: bold; font-size: 197%;}
 
 .contain {
-	border: .15em solid #d5d5d5;
+/*	border: .15em solid #d5d5d5; */
 	border-top: none;
 }
 
@@ -476,7 +504,7 @@ span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; fon
 .inline_comment .pref a {right: 10px; background-image: url("[% constants.imagedir %]/sic_icons.png"); color: #fff; background-repeat: no-repeat; background-position: 0px -1198px;padding: 5px 10px; position:absolute; text-decoration:none; text-indent:-7000em; top: .8em; }
 .inline_comment .state { display: none }
 .inline_comment .replyto_buttons, .inlinemsg {margin: .5em 1em;}
-.inline_comment .replyto_buttons, #discussion_buttons { font-size: 80% }
+.inline_comment .replyto_buttons, #discussion_buttons { font-size: .813em }
 .inline_comment #commentlisting {padding: 0; margin: 0;}
 .warning {background: #ffd; border: 1px solid #fe6; padding: .5em; margin: .5em 0 1em 0; color: #000;}
 .inline_comment .replyto_msg {background: #fdd; border: 1px solid #fbb; padding: .5em; margin: .5em 1em 0; color: #000 }
