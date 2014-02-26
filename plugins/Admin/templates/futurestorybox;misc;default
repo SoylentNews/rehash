@@ -20,10 +20,12 @@ __template__
    futureclass = "story_main";
    class_prefix = "";
    IF constants.signoff_use;
-   	IF !user_signoffs.${story.stoid} && !user_signoffs.${story.stoid}.cnt;
-		class_prefix = "ns_";
-	ELSIF story_signoffs.${story.stoid}.cnt < needed_signoffs;
+	IF user_signoffs.${story.stoid}.cnt && story_signoffs.${story.stoid}.cnt < needed_signoffs;
 		class_prefix = "ss_";
+	ELSIF story_signoffs.${story.stoid}.cnt < needed_signoffs;
+		class_prefix = "ns_";
+	ELSIF story_signoffs.${story.stoid}.cnt >= needed_signoffs;
+		class_prefix = "gs_";
 	END;
    END;
   
