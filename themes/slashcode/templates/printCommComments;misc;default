@@ -119,7 +119,7 @@ __template__
 <span class="nbutton hide"><p><b><a href="#" onclick="D2.ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
 [% END %]
 
-[% IF discussion2 && !user.state.discussion_archived && !user.state.discussion_future_nopost %]
+[% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
 <span class="nbutton"><p><b>[% Slash.linkComment({
 	sid          => sid,
 	cid          => cid,
