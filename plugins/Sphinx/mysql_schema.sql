@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS sphinx_counter;
 CREATE TABLE `sphinx_counter` (
   `src` smallint(5) unsigned NOT NULL,
   `completion` int(10) unsigned default NULL,
@@ -7,6 +8,7 @@ CREATE TABLE `sphinx_counter` (
   UNIQUE KEY `src_completion` (`src`,`completion`)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS sphinx_counter_archived;
 CREATE TABLE `sphinx_counter_archived` (
   `src` smallint(5) unsigned NOT NULL,
   `completion` int(10) unsigned NOT NULL,
@@ -16,6 +18,7 @@ CREATE TABLE `sphinx_counter_archived` (
   UNIQUE KEY `src_completion` (`src`,`completion`)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS sphinx_search;
 CREATE TABLE IF NOT EXISTS `sphinx_search` (
   `globjid` int(11) NOT NULL,
   `weight` int(11) NOT NULL,
@@ -24,6 +27,7 @@ CREATE TABLE IF NOT EXISTS `sphinx_search` (
   KEY `query` (`query`)
 ) ENGINE=InnoDB;
 
+DROP TABLE IF EXISTS sphinx_index;
 CREATE TABLE `sphinx_index` (
   `src` smallint(5) unsigned NOT NULL,
   `name` varchar(48) NOT NULL,

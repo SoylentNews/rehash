@@ -13244,6 +13244,25 @@ sub getShillInfo {
 }
 
 
+=head2 getDBSchemaVersions 
+
+ Usage     : Dumps a list of known database versions
+ Purpose   : used to determine if an upgrade needs to be run or not
+ Returns   : hashref of master schema version + plugins schemas
+ Argument  : none
+
+See Also   : 
+
+=cut
+
+sub getDBSchemaVersions
+{
+    my ($self) = @_;
+    # Everything has a schema version of 0 if not explicately set
+
+   return $self->sqlSelectHashref('*', 'site_info', 'value=\'db_schema%\''); 
+}
+
 ########################################################
 # Ok, it's fucking 2014, we can afford an UPDATE per page
 # view to have accurate login information, and not this shit
@@ -13259,6 +13278,7 @@ sub updateLastAccessTimestamp {
 		"uid=$uid"
  	);
 }
+
 
 ########################################################
 sub DESTROY {
