@@ -465,29 +465,26 @@ div.ccw-panel, #ccw-control,
 /* Action Buttons */
 
 .nbutton{
-    background: #666 none top left no-repeat;
-    color:#fff;
+    background: none;
     margin:0.25em;
-    padding: .4em 0;
 }
 .nbutton p{
     display:inline;
-    background: transparent none top right no-repeat;
-    padding: .4em 0;
+    padding: 0 0;
 }
-.nbutton p b{
-    display:inline;
-    background: transparent none bottom left no-repeat;
-    padding: .4em 0;
-}
+
 .nbutton p b a {
-    background: transparent none bottom right no-repeat !important;
-    padding: .4em 1em;
+    background: #777;
+    border:1px solid #444;
+    border-radius: .6em;
+    text-align:center;
+    font-weight:bold;
+    padding: .2em .6em;
     color:#fff !important;
-    font-weight:normal;
     text-decoration:none;
 }
-.nbutton:hover {background-color: #444}
+
+.nbutton a:hover {background-color: #444}
 
 span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; font-weight: bold; font-size: 197%;}
 
