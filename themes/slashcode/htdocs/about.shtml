@@ -17,7 +17,7 @@
 <p>We are building a news aggregation site that delivers what's important - better articles, less fluff, and all the functionality you expect from a good comment moderation system.</p>
 <p>This is a community driven project and can evolve based on the will of the users and volunteers. The code and database will be open-source (barring any legal issues).</p>
 <p>Now, go forth and submit stories, comment, moderate, and be free!</p>
-<p><h3>Useful Links:</h3>
+<h3>Useful Links:</h3>
 <ul>
 <li><a href="http://forums.soylentnews.org/" target="blank">The Forums</a></li>
 <li><a href="http://wiki.soylentnews.org/wiki/index.php?title=SoylentNews" target="blank">Wiki</a></li>
@@ -27,15 +27,16 @@
 <li><a href="https://dev.soylentnews.org/tracker/index.php?group_id=6&amp;atid=101" target="blank">Bugs - Main List</a></li>
 <li><a href="https://dev.soylentnews.org/tracker/?func=add&amp;group_id=6&amp;atid=101" target="blank">Bugs - Submit a New Bug</a></li>
 <li><a href="https://github.com/SoylentNews" target="blank">The slashcode repository for SoylentNews on GitHub</a></li>
-</p></ul>
-<p><h3>Suggested Reading</h3><ul>
+</ul>
+<h3>Suggested Reading</h3>
+<ul>
 <li><a href="http://soylentnews.org/article.pl?sid=14/02/12/0715245">Welcome to SoylentNews!</a></li>
 <li><a href="http://soylentnews.org/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow... Today!</a></li>
 <li><a href="http://soylentnews.org/article.pl?sid=14/02/13/0412219">Reworking Moderation Access</a></li>
 <li><a href="http://soylentnews.org/moderation.shtml">Moderation Guide</a></li>
 </ul>
 <h3>Info on Slashcode</h3>
-Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/" target="blank">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>
+<p>Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/" target="blank">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>
 Good open source projects, depends on the community. Thanks for your continued support, and let us know what we can do to make the site better.</p>
 <p>Slash and Slashcode could not be possible without the use of some great Open Source software.</p>
 <ul>

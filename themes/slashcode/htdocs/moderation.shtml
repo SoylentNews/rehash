@@ -39,8 +39,7 @@
  <li><strong>Logged In User</strong> If the system can't keep track, it won't work, so you gotta log in. Sorry if you're paranoid, but this system demands a certain level of accountability.</li>
  <li><strong>Positive Contributors</strong> Slashcode tracks your "Karma" (see the FAQ). If you have non negative Karma, this means you have posted more good comments than bad, and are eligible to moderate. This weeds out spam accounts.</li>
 </ol>
-<p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. Occasionally the system checks the number of comments that have been posted, and gives a proportionate amount of eligible users moderator points. This means that you'll need to be eligible in order to actually gain moderator access. It all works to make sure that everyone takes turns, and nobody can abuse the system, and that only "regular" readers become moderators.
-</p>
+<p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. Occasionally the system checks the number of comments that have been posted, and gives a proportionate amount of eligible users moderator points. This means that you'll need to be eligible in order to actually gain moderator access. It all works to make sure that everyone takes turns, and nobody can abuse the system, and that only "regular" readers become moderators.</p>
 <h3 id="how">How</h3>
 <p>When a moderator is given access, they are given a number of points of influence to play with. Each comment they moderate deducts a point. When they run out of points, they are done moderating until next time it is their turn.</p>
 <p>Moderation takes place by selecting an adjective from a drop down list that appears next to comments. Descriptive words like 'Flamebait' or 'Informative'. Bad words will reduce the comments score by a single point, good words increase a comments score by a single point. All comments are scored on an absolute scale from -1 to 5. Logged in users start at 1 (although this can vary from -1 to 2 based on their overall contribution to discussions) and anonymous users start at 0.</p>
@@ -64,13 +63,15 @@
 </ul>
 <h4>What is Karma?</h4>
 <p>Karma is the sum of all moderation activity done to a user. Karma is used to determine eligibility for moderator status and can affect your comments starting score. Every new user starts with a Karma of 0, and as long as your karma isn't <em>negative</em> you are eligible to become a moderator.</p>
-<h4>Why Don't I get my points back after I post in a discussion I moderated?</h4>Basically because of the following scenario:
+<h4>Why Don't I get my points back after I post in a discussion I moderated?</h4>
+<p>Basically because of the following scenario:</p>
 <ol>
  <li>Bob Moderates a Discussion</li>
  <li>Bob Waits Until later When the Discussion Leaves the Homepage and Activity Dies Off.</li>
  <li>Bob goes into dead discussion, posts and comment, reclaims his moderator points.</li>
  <li>Lather. Rinse. Repeat</li>
-</ol><p>This scenario would make it possible to game the system.</p>
+</ol>
+<p>This scenario would make it possible to game the system.</p>
 <h4>How can I improve my Karma?</h4>
 <p><strong>10 tips for improving your Karma:</strong></p>
 <dl>
@@ -97,9 +98,9 @@
 </dl>
 
 <h3 id="future">Ideas for the Future</h3>
-<p>This is a system in development. Things can change, our goal is to create one of the most comprehensive and well though-out moderation systems in existence. These ideas might help accomplish that goal:
+<p>This is a system in development. Things can change, our goal is to create one of the most comprehensive and well though-out moderation systems in existence. These ideas might help accomplish that goal:</p>
 <ol>
 <li>Integrating <a href="http://spamassassin.apache.org/" targe="new">SpamAssassin</a> into the comment system for ACs</li>
 <li>Integrating a weighting system for ACs (anonymous comments) IP addresses: known ip addresses would be subject to Karma that can affect their initial post score</li>
-</ol></p></div></div>
+</ol></div></div>
 <!--#include virtual="/slashfoot.inc"-->
