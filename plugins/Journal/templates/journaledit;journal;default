@@ -72,9 +72,9 @@ __template__
 					[% IF form.url_id %]
 						<input type="hidden" name="url_id" value="[% form.url_id | strip_attribute %]">
 					[% END %]
-					<input type="submit" name="op" value="preview" class="button">
+					<input type="submit" name="op" value="Preview" class="button">
 				[% IF form.preview || article.id %]
-					<input type="submit" name="op" value="save" class="button">
+					<input type="submit" name="op" value="Save" class="button">
 				[% END %]
 				</fieldset>
 			</form>
