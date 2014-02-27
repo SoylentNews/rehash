@@ -319,6 +319,26 @@ span.sd-info-block, span[class^=sd-key-] {
 	margin: 0;
 }
 
+.logout{
+    background: #777;
+    color:#fff;
+    width:7em;
+    margin:.3em auto 0 auto;
+    padding: .4em 0;
+    text-align:center;
+    font-weight:bold;
+}
+
+.logout  a {
+    padding: .4em 1em;
+    color:#fff !important;
+    background: transparent !important;
+    text-decoration:none;
+}
+.logout:hover {background-color: #444}
+
+#login-block {display: none;}
+
 /* General */
 html .generaltitle,* html .generalbody,* html .article .body,* html .article .details
 {
@@ -356,6 +376,7 @@ html .generaltitle,* html .generalbody,* html .article .body,* html .article .de
 	height: 100%;
 	width: auto;
 	z-index: 2;
+	font-size:0.875em;
 }
 /* articles */
 .article
