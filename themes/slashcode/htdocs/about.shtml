@@ -3,7 +3,8 @@
 <html>
 <head>
         <title>About SoylentNews</title>
-
+-<!--#include virtual="/slashcssbase.inc"-->
+-<!--#include virtual="/slashhead-gen-full.inc"-->
 
 <h1>About This Site</h1>
 
@@ -30,3 +31,4 @@ Slashcode is the code for All Things Slash. Slash is the source code and databas
                 <li><a href="http://www.mysql.com/">MySQL</a></li>
         </ul>
         <p>Slash was originally written by <a href="http://CmdrTaco.net/">CmdrTaco</a> and <a href="http://www.cowboyneal.org/">CowboyNeal</a>.</p>
+-<!--#include virtual="/slashfoot.inc"-->        
