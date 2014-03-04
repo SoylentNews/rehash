@@ -18,7 +18,7 @@ __seclev__
 10000
 __template__
 [% IF updater; updater; END %]
-<div class="block">
+<div class="block" [% IF name %]id="[% name | strip_attribute %]-block"[% END %]>
 	<div class="title" [% IF name %]id="[% name | strip_attribute %]-title"[% END %]>
 		<h4>
 			[% title %]

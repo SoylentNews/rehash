@@ -319,6 +319,27 @@ span.sd-info-block, span[class^=sd-key-] {
 	margin: 0;
 }
 
+.logout{
+    margin:.3em 0;
+    padding: 0;
+    text-align:center;
+}
+
+input[type=submit], .logout  a {
+    background: #777;
+    border:1px solid #444;
+    border-radius: .6em;
+    text-align:center;
+    font-weight:bold;
+    padding: .2em .6em;
+    color:#fff !important;
+    text-decoration:none;
+}
+
+input[type=submit]:hover, .logout a:hover {background-color: #444}
+
+#login-block {display: none;}
+
 /* General */
 html .generaltitle,* html .generalbody,* html .article .body,* html .article .details
 {
@@ -356,6 +377,7 @@ html .generaltitle,* html .generalbody,* html .article .body,* html .article .de
 	height: 100%;
 	width: auto;
 	z-index: 2;
+	font-size:0.875em;
 }
 /* articles */
 .article

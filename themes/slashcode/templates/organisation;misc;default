@@ -13,7 +13,15 @@ en_US
 __name__
 organisation
 __template__
-You should update your organisation template and put some links here linking back to your site.
+<ul>
+		<li><a href="//irc.sylnt.us/"    rel="nofollow"> IRC-Primary </a></li>
+		<li><a href="//webchat.freenode.net/?channels=#%23altslashdot" rel="nofollow"> IRC-Alternate </a></li>
+		<li><a href="//sylnt.us/forum"   rel="nofollow"> Forums </a></li>
+		<li><a href="//dev.soylentnews.org/tracker/index.php?group_id=6&atid=101" rel="nofollow">Bugs-List</a></li>
+		<li><a href="//sylnt.us/bugs"    rel="nofollow"> Bugs-Submit </a></li>
+		<li><a href="//sylnt.us/wiki"    rel="nofollow"> Wiki </a></li>
+		<li><a href="//sylnt.us/whoswho" rel="nofollow"> Who's Who?</a></li>
+</ul>
 __seclev__
 500
 __version__
