@@ -11,7 +11,7 @@ use Slash::Constants qw( :messages :slashd );
 
 use vars qw( %task $me $task_exit_flag );
 
-$task{$me}{timespec} = '*/ 0-23 * * *';
+$task{$me}{timespec} = '*/5 0-23 * * *';
 $task{$me}{timespec_panic_1} = '';
 $task{$me}{resource_locks} = { log_slave => 1, moderatorlog => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -227,7 +227,7 @@ sub getPotentialModerators {
 
 	return $slashdb->sqlSelectMany('uid, karma',
 		"users_info",
-		"karma >= $karma AND lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period HOUR) AND (points = 0) AND (uid <= $highest_elligable_uid) AND uid != $anon_uid ORDER BY lastgranted ASC"
+		"karma >= $karma AND lastaccess_ts > DATE_SUB(CURDATE(), INTERVAL $user_activity_period MINUTE) AND (points = 0) AND (uid <= $highest_elligable_uid) AND uid != $anon_uid ORDER BY lastgranted ASC"
 	);
 
 } 
