@@ -253,30 +253,30 @@ sub ProxyRemoteAddr ($) {
 	my($r) = @_;
 
 	# Set up the variables that are loaded only once.
-	if (!defined($trusted_ip_regex) || !defined($trusted_header)) {
-		my $constants = getCurrentStatic();
-		$trusted_ip_regex = $constants->{clientip_xff_trust_regex};
-		if ($trusted_ip_regex) {
-			# Avoid a little processing each time by doing
-			# the regex parsing just once.
-			$trusted_ip_regex = qr{$trusted_ip_regex};
-		} elsif (!defined($trusted_ip_regex)) {
-			# If not defined, use localhost.
-			$trusted_ip_regex = qr{^127\.0\.0\.1$};
-		} else {
-			# If defined but false, disable.
-			$trusted_ip_regex = '0';
-		}
-		$trusted_header = $constants->{clientip_trust_header} || '';
-	}
+	#if (!defined($trusted_ip_regex) || !defined($trusted_header)) {
+	#	my $constants = getCurrentStatic();
+	#	$trusted_ip_regex = $constants->{clientip_xff_trust_regex};
+	#	if ($trusted_ip_regex) {
+	#		# Avoid a little processing each time by doing
+	#		# the regex parsing just once.
+	#		$trusted_ip_regex = qr{$trusted_ip_regex};
+	#	} elsif (!defined($trusted_ip_regex)) {
+	#		# If not defined, use localhost.
+	#		$trusted_ip_regex = qr{^127\.0\.0\.1$};
+	#	} else {
+	#		# If defined but false, disable.
+	#		$trusted_ip_regex = '0';
+	#	}
+	#	$trusted_header = $constants->{clientip_trust_header} || '';
+	#}
 
 	# If the actual IP the connection came from is not trusted, we
 	# skip the following processing.  An untrusted client could send
 	# any header with any value.
-	if ($trusted_ip_regex eq '0'
-		|| $r->connection->remote_ip !~ $trusted_ip_regex) {
-		return OK;
-	}
+	#if ($trusted_ip_regex eq '0'
+	#	|| $r->connection->remote_ip !~ $trusted_ip_regex) {
+	#	return OK;
+	#}
 
 	# The connection comes from a trusted IP.  Use either the
 	# specified header (which presumably the trusted IP overwrites
