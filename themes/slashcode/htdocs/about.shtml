@@ -19,13 +19,11 @@
 <p>Now, go forth and submit stories, comment, moderate, and be free!</p>
 <h3>Useful Links:</h3>
 <ul>
-<li><a href="http://forums.soylentnews.org/" target="blank">The Forums</a></li>
 <li><a href="http://wiki.soylentnews.org/wiki/index.php?title=SoylentNews" target="blank">Wiki</a></li>
 <li><a href="http://wiki.soylentnews.org/wiki/index.php?title=SoylentNews:IRC" target="blank">IRC - Wiki Page</a></li>
-<li><a href="http://irc.sylnt.us/" target="blank">IRC Web Chat</a></li>
+<li><a href="http://irc.soylentnews.org/" target="blank">IRC Web Chat</a></li>
 <li><a href="http://sylnt.us/whoswho" target="blank">Who's Who?</a></li>
-<li><a href="https://dev.soylentnews.org/tracker/index.php?group_id=6&amp;atid=101" target="blank">Bugs - Main List</a></li>
-<li><a href="https://dev.soylentnews.org/tracker/?func=add&amp;group_id=6&amp;atid=101" target="blank">Bugs - Submit a New Bug</a></li>
+<li><a href="https://github.com/SoylentNews/slashcode/issues" target="blank">Bug List</a></li>
 <li><a href="https://github.com/SoylentNews" target="blank">The slashcode repository for SoylentNews on GitHub</a></li>
 </ul>
 <h3>Suggested Reading</h3>

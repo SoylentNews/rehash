@@ -199,7 +199,7 @@ IF !useredit.is_anon;
 			<b>You have [% user.points %]
 			<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator</a>
 			Point[% user.points == 1 ? "! Use it or lose it!" : "s! Use 'em or lose 'em!" %]</b><br/>
-			[% IF user.is_admin %]<br/>You have accss because you're an admin.<br/>[% END %]
+			[% IF user.is_admin %]<br/>You have access because you're an admin.<br/>[% END %]
 			[%- IF user.points && user.lastgranted %]<br/>Your points expire at [%
 				hours = constants.mod_stir_hours || (constants.stir * 24);
 				hours = hours * 3600;
