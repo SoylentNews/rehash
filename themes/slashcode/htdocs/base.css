@@ -7,7 +7,7 @@ body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img
 
 body
 {
-	min-width: 1024px;
+	min-width: 720px;
 	color: #000;
 	position: relative;
 	font-size:100%;
@@ -47,7 +47,7 @@ span.sd-info-block, span[class^=sd-key-] {
 	z-index: 1;
 	position: relative;
 	padding: 0;
-	margin: 0 0 0 7.2em;
+	margin: 0 0 0 7.8em;
 }
 
 #messages, #submit, #comments, #login, #pollBooth, #wide, #search, #authors, #topics
@@ -144,7 +144,7 @@ span.sd-info-block, span[class^=sd-key-] {
 #links
 {
 	float: left;
-	width: 6.6em;
+	width: 7.2em;
 	z-index: 0;
 	position: relative;
 	padding: 0;
@@ -200,7 +200,7 @@ span.sd-info-block, span[class^=sd-key-] {
 
 #links h2 a, #links h2 { color: #444; }
 #links ul li { list-style: none; }
-#links ul { margin: 0; }
+#links ul { margin: 0 .4em; }
 
 #navigation-content li.user
 {
@@ -325,20 +325,69 @@ span.sd-info-block, span[class^=sd-key-] {
     text-align:center;
 }
 
-input[type=submit], .logout  a {
-    background: #777;
-    border:1px solid #444;
-    border-radius: .6em;
+input[type=submit], select, .logout  a, div.storylinks ul li.more a {
+    background: #888;
+    border:none;
+    border-radius: .3em;
     text-align:center;
     font-weight:bold;
     padding: .2em .6em;
     color:#fff !important;
     text-decoration:none;
+	font-family: Verdana, Geneva, "Bitstream Vera Sans", "DejaVu Sans", sans-serif;
 }
 
-input[type=submit]:hover, .logout a:hover {background-color: #444}
+select{text-align:left;}
+
+select option{
+    background: #fff;
+		color: #000;
+    font-weight:normal;
+}
+
+input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover {background-color: #555;}
+
+input[type=text], input[type=password] {border: 1px solid #555;}
 
 #login-block {display: none;}
+
+/* FORMTABS */
+
+#formtabs {
+    margin:0;
+    padding:.2em 0;
+}
+
+#formtabs ul {
+    margin:0;
+    padding:0;
+    display:inline;
+}
+
+#formtabs ul li{
+    background: #ccc;
+    display:inline;
+    padding: .2em .3em;
+    margin:0;  
+}
+
+#formtabs ul li.active, #formtabs ul li:hover{
+    background: #aaa;
+    color: #fff;
+}
+
+#formtabs ul li a {
+    text-decoration:none;
+    color:#000;
+}
+
+#formtabs ul li a:visited {
+   color:#000;
+}
+#formtabs ul li a:hover {
+    color:#fff;
+}
+
 
 /* General */
 html .generaltitle,* html .generalbody,* html .article .body,* html .article .details
@@ -462,7 +511,7 @@ div.storylinks div
 
 div.storylinks ul
 {
-	padding: .4em .4em .6em .4em;
+	padding: .6em .4em .6em .6em;
 	margin: 0;
 }
 
@@ -489,7 +538,7 @@ div.storylinks ul li.comments a { font-weight: bold; }
 	z-index: 0;
 	position: relative;
 	font-weight: normal;
-	margin-left: 7.2em;
+	margin-left: 7.8em;
   margin-top:.3em;
 }
 
@@ -649,8 +698,8 @@ fieldset
 
 legend
 {
-	color: #aaa;
-	font-size: .755em;
+	color: #555;
+	font-size: .813em;
 	font-weight: bold;
 	margin: 1em 0;
 }

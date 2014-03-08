@@ -154,7 +154,7 @@ html>body #admin { margin: 0 auto .2em 0; }
 .ns_story_main a, .ns_story_sec a { color: #033; }
 .ss_story_main a, .ss_story_sec { color: #066; }
 .admin_story_list, .submit_story_list { font-size: 100%; }
-.user_admin { background: #ccc; }
-body .adminstoryform fieldset {background: #ccc; }
+.user_admin { background: #ffd; border: 1px solid #aaa; padding: 0 .3em; }
+body .adminstoryform fieldset {background: #ffd; }
 body .adminstoryform legend { display: none;}
 #console #remarks_table, #submitframe { margin-right: 15em }

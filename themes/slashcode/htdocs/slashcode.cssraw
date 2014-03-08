@@ -118,7 +118,7 @@ body #index #articles
 
 #commentlisting ul 
 {
-    border-left: 2px solid #aaa;
+    border-left: 1px solid #aaa;
 
 }
 
@@ -129,6 +129,35 @@ fieldset li.comment
 
 
 .commentBox { background: #600; }
+
+
+/* FORMTABS */
+
+#formtabs {
+    border-bottom: 1px solid #aaa;
+}
+
+#formtabs ul li{
+    background: #933;
+    border-radius: .3em .3em 0 0;
+    color: #fff;
+}
+
+#formtabs ul li.active, #formtabs ul li:hover{
+    color: #fff;
+}
+
+#formtabs ul li a {
+    text-decoration:none;
+    color:#fff;
+}
+
+#formtabs ul li a:visited {
+   color:#fff;
+}
+#formtabs ul li a:hover {
+    color:#fff;
+}
 
 
 /* Quick links content */
@@ -194,7 +223,7 @@ div.storylinks div { background: url("[% constants.imagedir %]/cbr_ltgrey.gif") 
 div.storylinks div ul { height: 1em;} 
 div.storylinks div ul 
 {
-	padding: .6em 1em; 
+	padding: .8em 1em .7em; 
 	margin: 0; 
 	background: url("[% constants.imagedir %]/cbl_ltgrey.gif") bottom left no-repeat;
 	line-height: .875em;
