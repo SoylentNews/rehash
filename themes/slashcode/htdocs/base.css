@@ -325,8 +325,8 @@ span.sd-info-block, span[class^=sd-key-] {
     text-align:center;
 }
 
-input[type=submit], select, .logout  a, div.storylinks ul li.more a {
-    background: #888;
+input[type=submit], .logout  a, div.storylinks ul li.more a {
+    background: #555;
     border:none;
     border-radius: .3em;
     text-align:center;
@@ -335,14 +335,6 @@ input[type=submit], select, .logout  a, div.storylinks ul li.more a {
     color:#fff !important;
     text-decoration:none;
 	font-family: Verdana, Geneva, "Bitstream Vera Sans", "DejaVu Sans", sans-serif;
-}
-
-select{text-align:left;}
-
-select option{
-    background: #fff;
-		color: #000;
-    font-weight:normal;
 }
 
 input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover {background-color: #555;}

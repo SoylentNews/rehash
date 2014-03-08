@@ -474,7 +474,7 @@ div.ccw-panel, #ccw-control,
 }
 
 .nbutton p b a {
-    background: #888;
+    background: #555;
     border-radius: .3em;
     text-align:center;
     font-weight:bold;
