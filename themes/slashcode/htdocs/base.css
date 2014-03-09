@@ -326,20 +326,21 @@ span.sd-info-block, span[class^=sd-key-] {
 }
 
 input[type=submit], .logout  a, div.storylinks ul li.more a {
-    background: #555;
-    border:none;
-    border-radius: .3em;
-    text-align:center;
-    font-weight:bold;
-    padding: .2em .6em;
-    color:#fff !important;
-    text-decoration:none;
+	background: #555;
+	border:none;
+	border-radius: .3em;
+	text-align:center;
+	font-weight:bold;
+	padding: .2em .6em;
+	color:#fff !important;
+	text-decoration:none;
+	font-size: 1em;
 	font-family: Verdana, Geneva, "Bitstream Vera Sans", "DejaVu Sans", sans-serif;
 }
 
 input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover {background-color: #555;}
 
-input[type=text], input[type=password] {border: 1px solid #555;}
+input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 
 #login-block {display: none;}
 
