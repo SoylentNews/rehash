@@ -243,18 +243,16 @@ This discussion has been archived; no further changes can be made.
 # additional debug crap
 [% CASE 'didnt get a cid' %]
 No CID received with moderation request. That probably means something interfered with your POST request.
-[% END %]
 
 [% CASE 'cannot find comment' %]
 Can't find the comment in the database. EIther it was deleted (unlikely) or something screwed with the POST request
-[% END %]
 
 [% CASE 'user cannot moderate' %]
 Internal SAN check blew up checking moderation rights. Please let the powers that be know how and where you recieved this error
-[% END %]
 
 [% CASE %]
 An unexpected error has occurred: [% value %]
+
 [% END %]
 
 __seclev__
