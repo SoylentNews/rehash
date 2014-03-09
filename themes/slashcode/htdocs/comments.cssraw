@@ -47,6 +47,9 @@ html > body .commentwrap table {
 	text-align: center;
 	padding-bottom: 0.5em;
 }
+
+.commentBoxForm input[type=submit]{font-size:.813em;}
+
 .commentwrap legend
 {
      	display: none;
