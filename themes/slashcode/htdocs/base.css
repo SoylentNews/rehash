@@ -227,6 +227,7 @@ span.sd-info-block, span[class^=sd-key-] {
 	position: relative;
 	margin: 0 0 0 0;
 	padding: 0;
+	overflow: hidden;
 }
 
 #slashboxes div.block
