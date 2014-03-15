@@ -16,9 +16,8 @@ __name__
 display_prefs
 __template__
 <div id="users-blocks">
-[% prefs_titlebar %]
+[% PROCESS prefs_titlebar tab_selected='messages' title='Configuring Messages' %]
 	<div class="generalbody">
-		[% messages_menu %]
 		[%
 		   userm = userm ? userm : user;
 		   usernick = userm.nickname | strip_literal;
@@ -33,7 +32,7 @@ __template__
 				[% note %]
 			</div>
 		[% END %]
-		From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], [% deliverymodes.$modeweb %], AIM, and Mobile Text.  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>. If you plan on receiving AIM messages, please add [% constants.im_screenname %] to your buddylist.
+		From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Message Preferences</legend>
@@ -60,37 +59,6 @@ __template__
 	
 			[% thresh = userm.message_threshold.defined ? userm.message_threshold : constants.message_threshold; 
 			Slash.createSelect('message_threshold', Slash.db.getDescriptions('threshcodes'), thresh, 1) %]
-
-
-<!--
-[[TR]][[TD]]
-
-[[P]]
-If you have [[B]][%# messagecodes.${Slash.MSG_CODE_INTERUSER} %][[/B]] enabled,
-you can receive messages from other users.  Please select whom you would
-like to be able to receive messages from.  To not receive any interuser
-messages, disable it above.
-[[/P]]
-
-[[/TD]][[/TR]]
-
-	[%# default_ium = user.messages_interuser_receive || Slash.MSG_IUM_FRIENDS %]
-
-	[[TR]][[TD]][[TABLE align="LEFT" bgcolor="[%# user.colors.bg_2 %]"]]
-[[TR]]
-	[[TD]][[B]]Only Your Friends[[/B]][[/TD]]
-	[[TD]][[INPUT type="radio" name="messages_interuser_receive" value="[%# Slash.MSG_IUM_FRIENDS %]"[%# constants.markup_checked_attribute IF default_ium == Slash.MSG_IUM_FRIENDS %]]][[/TD]]
-[[/TR]]
-[[TR]]
-	[[TD]][[B]]Anyone[[/B]][[/TD]]
-	[[TD]][[INPUT type="radio" name="messages_interuser_receive" value="[%# Slash.MSG_IUM_ANYONE %]"[%# constants.markup_checked_attribute IF default_ium == Slash.MSG_IUM_ANYONE %]]][[/TD]]
-[[/TR]]
-[[TR]]
-	[[TD]][[B]]Anyone except for foes[[/B]][[/TD]]
-	[[TD]][[INPUT type="radio" name="messages_interuser_receive" value="[%# Slash.MSG_IUM_NOFOES %]"[%# constants.markup_checked_attribute IF default_ium == Slash.MSG_IUM_NOFOES %]]][[/TD]]
-[[/TR]]
-	[[/TABLE]][[/TD]][[/TR]]
--->
 
 				<input type="hidden" name="uid" value="[% userm.uid %]">
 				<input type="hidden" name="op" value="save_prefs">
