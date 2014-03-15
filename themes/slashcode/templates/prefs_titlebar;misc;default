@@ -17,6 +17,7 @@ __template__
 [%
 thisnickname = user.nickname | strip_literal;
 title = title || "$thisnickname (This is you!)";
+title = "Preferences: $title";
 PROCESS titlebar title=title;
 %]
 
@@ -24,8 +25,17 @@ PROCESS titlebar title=title;
 <div id="usermenu">
 
 [%
-tabs = [ { link = '/help', label = "Return to Help &amp; Preferences", sel_label = "preferences" }, ]
+tabs = [
+		{ link = "$constants.real_rootdir/my/info",	label = "User",		sel_label = "user" },
+		{ link = "$constants.real_rootdir/my/homepage",	label = "Homepage",		sel_label = "home" },
+		{ link = "$constants.real_rootdir/my/comments",	label = "Comments",		sel_label = "comments" },
+	];
+	IF constants.plugin.Messages; tabs.push(
+		{ link = "$constants.real_rootdir/my/messages",		label = "Messages",	sel_label = "messages" },
+	); END;
+	tabs.push({ link = "$constants.real_rootdir/my/password/",	label = "Password",	sel_label = "password" },);
 %]
+
 
 [% PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
 
