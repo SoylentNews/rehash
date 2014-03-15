@@ -353,6 +353,30 @@ pre, code { font-size: .813em; }
 ul.menu a, ul.menu a:visited { color: #000; }
 .generalbody ul.menu li a { color: #600; }
 
+#usermenu ul.menu {
+    border-bottom: 1px solid #aaa;
+    padding: .2em 0;
+}
+
+#usermenu ul.menu  li{
+    padding: .2em;
+}
+
+#usermenu ul.menu li a{
+    background: #933;
+    border-radius: .3em .3em 0 0;
+    padding: .2em .6em;
+    text-decoration: none;
+    color: #fff;
+}
+
+#usermenu ul.menu li.selected a, #usermenu ul.menu li a:hover
+{
+	background: #555;
+	text-decoration: none;
+	color: #fff;
+}
+
 .menuoldstyle li
 {
         display: inline;
