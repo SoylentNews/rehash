@@ -26,7 +26,6 @@ __template__
 				op	=> 'Reply',
 				subject	=> 'Reply to This',
 				subject_only => 1,
-				onclick	=> (discussion2 ? "D2.replyTo($cid); return false;" : '')
 			}) %]</b></p></span>
 		[% END %]
 
@@ -36,18 +35,16 @@ __template__
 			pid	=> original_pid,
 			subject	=> 'Parent',
 			subject_only => 1,
-			onclick	=> (discussion2 ? "return D2.selectParent($original_pid)" : '')
 		}, 1) %]</b></p></span>[% END %]
 		
 		[% IF can_moderate %]
 		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, {
 			'return'	=> 1,
 			nsort		=> 1, 
-			onchange	=> (discussion2 ? 'return D2.doModerate(this)' : '')
 		}) %]</div><input type="submit" value="Moderate">[% END %]
 
 		[% IF can_del %]
-		<input type="checkbox" name="del_[% cid %]">
+		<input type="checkbox" name="del_[% cid %]"> Check to Delete
 		[% END %]
 
 		[% END; IF !options.show_pieces %]</div>

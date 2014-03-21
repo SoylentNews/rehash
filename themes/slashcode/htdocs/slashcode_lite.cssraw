@@ -7,6 +7,11 @@ div#footer a,
 div.btmnav a
 { color: #00E !important; text-decoration: underline !important;}
 
+input[type=submit], .logout  a, div.storylinks ul li.more a, .nbutton p b a {
+    color:#fff !important;
+    text-decoration:none !important;
+}
+
 #articles, #users-blocks, #polls
 {
      margin: 0 15.6em 1em 0;

@@ -23,7 +23,9 @@ __template__
 	<a name="blocks"></a>
 	<div id="slashboxes">
 	[% UNLESS user.noboxes %]
-		[% PROCESS userboxes %]
+		[% UNLESS user.lowbandwidth %] 
+			[% PROCESS userboxes %]
+		[% END %]
 		[% IF boxes;
 			boxes %]
 		[% END %]
