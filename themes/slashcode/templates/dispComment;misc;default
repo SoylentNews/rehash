@@ -25,15 +25,11 @@ __template__
 [% IF !options.noshow_show %]
 <li id="tree_[% cid %]" class="comment[% IF class == 'full' && discussion2 %] contain[% END %]">
 <div id="comment_status_[% cid %]" class="commentstatus"></div>
-<div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
+<div id="comment_[% cid %]" class="commentDiv">
 [% END; IF !options.noshow %]
-	<div id="comment_top_[% cid %]" class="commentTop [% has_read ? 'oldcomment' : 'newcomment' %]">
+	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
-			[% IF discussion2 %]
-			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]" onclick="return D2.setFocusComment([% cid %])">[% subject %]</a>
-			[% ELSE %]
 			<h4><a name="[% cid %]">[% subject %]</a>
-			[%- END %]
 			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]</h4>
 		</div>
 		<div class="details">
@@ -66,17 +62,10 @@ __template__
 	[% END %]
 	</div>
 	[% PROCESS dispLinkComment %]
-[% END; #  IF !options.noshow
-   IF !options.noshow_show %]
+	[% END %]
+[% IF !options.noshow_show %]
 </div>
-
-[% IF discussion2 %]
-<div id="replyto_[% cid %]"></div>
-
-<ul id="group_[% cid %]">
-	<li id="hiddens_[% cid %]" class="hide"></li>
-</ul>
-[% END; END # !options.noshow_show %]
+[% END %]
 
 __seclev__
 10000

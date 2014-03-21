@@ -37,21 +37,7 @@ __template__
 	<form id="commentform" name="commentform" action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
 
-[% IF discussion2 %]
-[% IF !form.printdiv -%]
-	<script src="[% constants.imagedir %]/comments[% UNLESS user.is_admin && user.javascript_debug %]-minified[% END %].js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[%- END %]
-	<script type="text/javascript">
-<!--
-[%- IF gSkin.name != 'idle' %]
-	D2.d2_keybindings_disable()[191] = 1;[% END # turn off '/' key %]
-	D2.boxStatus(1);
-[% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }, gSkin) %]
-//-->
-	</script>
-[% END %]
-
-[% IF cid && !discussion2 %]
+[% IF cid %]
 	<ul id="commentlisting" class="[% user.mode %] d1">
 	[% Slash.dispComment(comment) %]
 	<div class="comment_footer">
@@ -97,27 +83,17 @@ __template__
 	     this_pid = discussion2 ? 0 : pid;
 	     thread = Slash.displayThread(sid, this_pid, lvl, comments);
 	   END %]
-	[% IF thread || discussion2 %]
-		[% IF !cid || discussion2 %]<ul id="commentlisting" class="[% discussion2 ? 'd2' : 'd1' %]">[% END %]
-			[% thread || '' %]
+	[% IF thread %]
+		[% IF !cid %]<ul id="commentlisting" >[% END %]
+			[% thread %]
 			<li id="roothiddens" class="hide"></li>
-		[% IF !cid || discussion2 %]</ul>[% END %]
+		[% IF !cid %]</ul>[% END %]
 	[% END %]
-	[% IF cid && !discussion2 %]</ul>[% END %]
+	[% IF cid %]</ul>[% END %]
 	[% IF lvl; END %]
 	[% lcp %]
 
-[% IF discussion2 %]
-<div class="newcmnt"><div id="replyto_0"></div></div>
-[% END %]
-
-[% IF discussion2 %]<noscript><p><b>There may be more comments in this discussion. Without JavaScript enabled, you might want to <a href="[% gSkin.rootdir %]/users.pl?op=editcomm">turn on Classic Discussion System</a> in your preferences instead.</b></p></noscript>[% END %]
-
 <div id="discussion_buttons">
-
-[% IF discussion2 %]
-<span class="nbutton hide"><p><b><a href="#" onclick="D2.ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
-[% END %]
 
 [% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
 <span class="nbutton"><p><b>[% Slash.linkComment({
@@ -145,39 +121,13 @@ __template__
 		<input type="hidden" name="pid" value="[% pid %]">
 		[% IF can_del %]<a href="#" onclick="$('#commentform').submit(); return false">Delete</a></b></p></span>
 		<a href="#" onclick="displayModalPrefHelp('discussion_delete_help'); return false" title="Click To Expand Help" class="help">?</a>
-	        <div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>
-	        [%- ELSE %]<input type="submit" value="moderate" class="button">
-	        [% END %]
+					<div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>
+					[%- ELSE %]<input type="submit" value="moderate" class="button">
+					[% END %]
 	[% END %]
 [% END %]
 </div>
 [% IF moderate_form %]	</form>[% END %]
-
-[% IF discussion2 %]
-	<script type="text/javascript">
-<!--
-		D2.currents()['hidden']   = [% user.state.comments.totals.hidden  || 0 %];
-		D2.currents()['full']     = [% user.state.comments.totals.full    || 0 %];
-		D2.currents()['oneline']  = [% user.state.comments.totals.oneline || 0 %];
-		// D2.currents_total([% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %]);
-
-		D2.abbrev_comments({});
-		D2.noshow_comments([[% user.state.comments.noshow.join(',') %]]);
-		D2.pieces_comments([[% user.state.comments.pieces.join(',') %]]);
-		D2.init_hiddens([[% user.state.comments.hiddens.join(',') %]]);
-
-		D2.finishLoading();
-
-[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-		if (D2.thresh_totals()[6][6][1] == 0) {
-			D2.replyTo(0, 1);
-		}
-[% END %]
-
-//-->
-	</script>
-[% END %]
-
 __seclev__
 10000
 __version__

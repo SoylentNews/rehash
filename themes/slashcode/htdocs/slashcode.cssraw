@@ -83,7 +83,7 @@ body #index #articles
 
 .commentTop 
 {
-	background: url("[% constants.imagedir %]/bg_red.gif") repeat-x;
+	background: #933 url("[% constants.imagedir %]/bg_red.gif") repeat-x;
 }
 
 .commentTop .title { 
@@ -98,7 +98,7 @@ body #index #articles
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background: url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
 	color: #000;
 }
 

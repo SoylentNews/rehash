@@ -23,12 +23,12 @@ __template__
 	<a name="blocks"></a>
 	<div id="slashboxes">
 	[% UNLESS user.noboxes %]
+		[% PROCESS userboxes %]
 		[% IF boxes;
 			boxes %]
 		[% END %]
 	[% END %]
 	</div>
-	[% PROCESS indexhead %]
 	<a name="main-articles"></a>
 	<div id="articles">
 	[% stories %]

@@ -23,6 +23,7 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
+
 	if ($constants->{journal_soap_enabled}) {
 		my $r = Apache->request;
 		if ($r->header_in('SOAPAction')) {
@@ -90,7 +91,8 @@ sub main {
 	# if section is defined, perhaps. -- pudge
 	Slash::Utility::Anchor::getSkinColors();
 
-	my $op = $form->{op};
+	my $op = lc($form->{op}) || '';
+
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
 		$op = 'default';
 	}
