@@ -14,9 +14,10 @@ __name__
 organisation
 __template__
 <ul>
-		<li><a href="//irc.sylnt.us/"    rel="nofollow"> IRC </a></li>
-		<li><a href="//sylnt.us/wiki"    rel="nofollow"> Wiki </a></li>
-		<li><a href="//sylnt.us/whoswho" rel="nofollow"> Who's Who?</a></li>
+		<li><a href="https://twitter.com/soylentnews/" rel="nofollow">Twitter</a></li>
+		<li><a href="//irc.sylnt.us/"    rel="nofollow">IRC</a></li>
+		<li><a href="//sylnt.us/wiki"    rel="nofollow">Wiki</a></li>
+		<li><a href="//sylnt.us/whoswho" rel="nofollow">Who's Who?</a></li>
 		<li><a href="//github.com/SoylentNews/slashcode/issues?" rel="nofollow">Bug List</a></li>
 </ul>
 __seclev__
