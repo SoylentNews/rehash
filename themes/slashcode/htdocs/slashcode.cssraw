@@ -18,12 +18,12 @@ a:visited { color: #000; }
 	background: url("[% constants.imagedir %]/logo.png") no-repeat;
 }
 
-#slogan h2
+#slogan h2, #slogan #head_message
 {
 	color: #555;
 	
 	font-weight: bold;
-	font-size: .70em;
+	font-size: .813em;
 }
 
 /* links */
