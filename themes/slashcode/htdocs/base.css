@@ -129,12 +129,27 @@ span.sd-info-block, span[class^=sd-key-] {
 	width:19%;
 }
 
+#slogan {
+    clear:both;
+    margin: 0 0 .3em 0;
+}
+
 #slogan h2
 {
-	padding: .3em;
-	margin: 0 0 .3em 0;
-	clear: both;
+    display: inline;
+    padding: .3em;
 }
+
+#slogan #head_message{
+    float:right;
+    display: inline;
+    padding: .3em;
+}
+
+.clear {
+    clear:both;
+}
+
 
 /* links */
 
