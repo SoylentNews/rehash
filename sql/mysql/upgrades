@@ -6607,4 +6607,4 @@ ALTER TABLE users_info ADD COLUMN lastaccess_ts timestamp DEFAULT CURRENT_TIMEST
 ALTER TABLE users_comments DROP points;
 
 # New variables for use with low submissions message
-INSERT INTO vars (name, value, description) VALUES ('subs_level','15','Level at which to not to display low submissions message, set to 0 to diable message');
+INSERT INTO vars (name, value, description) VALUES ('subs_level','15','Level at which to not to display low submissions message, set to 0 to disable message');
