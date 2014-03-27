@@ -53,6 +53,8 @@ __template__
 		<h2>
 			[% constants.slogan %]
 		</h2>
+		[% PROCESS headMessage %]
+		<div class="clear"></div>
 		</div>
 		<div id="links">
 			[% UNLESS user.lowbandwidth %]
