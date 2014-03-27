@@ -159,6 +159,12 @@ div.article div.body {
 	border: 0px;
 }
 
+/* Usermenu */
+#usermenu ul.menu li a, #usermenu ul.menu li a:hover, #usermenu ul.menu li.selected a{
+    background:none;
+    border-radius:0 0 0 0 !important;
+}
+
 /* Comments */
 .commentBox { background: #444; }
 .commentBox a {color:#fff !important;}

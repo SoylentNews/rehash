@@ -46,27 +46,27 @@ __template__
 
 [% CASE 'passnomatch' %]
 	[% returnme.data_constant = 1 %]
-	Passwords don't match.
+	<h3>Passwords don't match</h3>
 
 [% CASE 'passtooshort' %]
 	[% returnme.data_constant = 1 %]
-	Password too short.
+	<h3>Password too short</h3>
 
 [% CASE 'passtoolong' %]
 	[% returnme.data_constant = 1 %]
-	Password too long.
+	<h3>Password too long</h3>
 
 [% CASE 'oldpassbad' %]
 	[% returnme.data_constant = 1 %]
-	Current password is incorrect.
+	<h3>Current password is incorrect</h3>
 
 [% CASE 'notchanged' %]
 	[% returnme.data_constant = 1 %]
-	Preferences not changed.
+	<h3>Preferences not changed</h3>
 
 [% CASE 'passchanged' %]
 	[% returnme.data_constant = 1 %]
-	Preferences changed.
+	<h3>Preferences changed</h3>
 
 [% CASE 'nick_invalid' %]
 	<span id="modal_error"></span>The user name "[% form.newusernick | strip_literal %]" is not valid.
