@@ -194,6 +194,14 @@ ul#commentlisting
     margin-bottom:0;
 }
 
+#commentlisting .commentBody ol li{
+    list-style: decimal;
+}
+
+#commentlisting .commentBody ul li{
+    list-style: disc;
+}
+
 #discussion_buttons
 {
     padding: .3em 0;
