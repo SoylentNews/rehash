@@ -6617,3 +6617,6 @@ UPDATE vars SET value = 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:cl
 
 # Update menus table to remove users menu.  Needed for prefes update.
 DELETE FROM menus WHERE menu='users';
+
+# New variables for use disabling moderate_or_post
+INSERT IGNORE INTO vars (name, value, description) VALUES ('moderator_or_post', '1', 'Can users moderate and post in the same discussion (1=yes, 0=no)');
