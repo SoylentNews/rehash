@@ -6608,3 +6608,6 @@ ALTER TABLE users_comments DROP points;
 
 # New variables for use with low submissions message
 INSERT INTO vars (name, value, description) VALUES ('subs_level','15','Level at which to not to display low submissions message, set to 0 to disable message');
+
+# Update approvedtags_attr to add class to p and div
+UPDATE vars SET value = 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class' where name = 'approvedtags_attr';

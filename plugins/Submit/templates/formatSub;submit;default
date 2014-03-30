@@ -18,16 +18,16 @@ __name__
 formatSub
 __template__
 [% 	IF submission.storyonly || submission.journal_id;
-		subtext = submission.story;
+		subtext = "<p>$submission.story</p>";
 	ELSIF submission.email && submission.name;
 		IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
-		subtext = "<a href=\"$submission.email\"$rnf>$submission.name</a> writes <i>\"$submission.story\"</i>";
+		subtext = "<p class=\"byline\"><a href=\"$submission.email\"$rnf>$submission.name</a> writes:</p> <p>$submission.story</p>";
 	ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
-		subtext = "$constants.anon_name_alt writes <i>\"$submission.story\"</i>";
+		subtext = "<p class=\"byline\">$constants.anon_name_alt writes:</p> <p>$submission.story</p>";
 	ELSIF submission.name;
-		subtext = "$submission.name writes <i>\"$submission.story\"</i>";
+		subtext = "<p class=\"byline\">$submission.name writes:</p> <p>$submission.story</p>";
 	ELSE;
-		subtext = submission.story;
+		subtext = "<p>$submission.story</p>";
 	END;
 %]
 
