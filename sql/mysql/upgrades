@@ -6600,14 +6600,20 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 12, 'all', 'Slash::ResKey::Chec
 INSERT INTO reskey_vars VALUES (12, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (12, 'acl_no', 'reskey_no_story', 'If this ACL present, can\'t use resource');
 
-# New variable for use with moderation
+# New SoylentNews Slashcode updates 2014-04-01.
+UPDATE vars SET value = 'slashcode_04_14' WHERE name = 'cvs_tag_currentcode';
+
+# New variable for use with moderation.
 INSERT INTO vars VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
 ALTER TABLE users_info ADD COLUMN points smallint(5) NOT NULL DEFAULT 0 AFTER bio;
 ALTER TABLE users_info ADD COLUMN lastaccess_ts timestamp DEFAULT CURRENT_TIMESTAMP AFTER lastaccess;
 ALTER TABLE users_comments DROP points;
 
-# New variables for use with low submissions message
+# New variable for use with low submissions message.
 INSERT INTO vars (name, value, description) VALUES ('subs_level','15','Level at which to not to display low submissions message, set to 0 to disable message');
 
-# Update approvedtags_attr to add class to p and div
+# Update approvedtags_attr to add class to p and div.  For formatSub template changes.
 UPDATE vars SET value = 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class' where name = 'approvedtags_attr';
+
+# Update menus table to remove users menu.  Needed for prefes update.
+DELETE FROM menus WHERE menu='users';
