@@ -897,10 +897,12 @@ sub checkDiscussionForUndoModeration {
 	#          to contribute to a discussion after you moderate)
 	#       3) The user has the "always modpoints" ACL
 	#       4) The user has a sufficient seclev
+	#	5) Global variable moderator_or_post is set to zero
 	return if !$constants->{m1}
 		|| $user->{is_anon}
 		|| $user->{acl}{modpoints_always}
-		|| $constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited};
+		|| $constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited}
+		|| !$constants->{moderator_or_post};
 
 	if ($sid !~ /^\d+$/) {
 		$sid = $self->getDiscussionBySid($sid, 'header');
