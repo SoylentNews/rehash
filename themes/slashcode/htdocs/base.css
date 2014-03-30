@@ -423,6 +423,11 @@ html .generaltitle,* html .generalbody,* html .article .body,* html .article .de
 	color: #fff;
 }
 
+.generaltitle h3 a
+{
+	text-decoration: none;
+}
+
 .generaltitle h3 a, .generaltitle h3 a:visited
 {
 	color: #fff;
