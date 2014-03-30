@@ -43,7 +43,7 @@ __template__
 	END;
 	title = title _ thisskin.title _ "</a>: $story.title";
 ELSE;
-	title = story.title;
+	title = "<a href=\"$gSkin.rootdir/article.pl?sid=$story.sid\">story.title</a>";
 END %]
 [% seen_topics = {} %]
 [% PROCESS titlebar future=story.is_future %]
