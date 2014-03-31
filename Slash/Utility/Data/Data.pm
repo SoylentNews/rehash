@@ -332,10 +332,31 @@ rootdir variable, converted to absolute with proper protocol.
 sub root2abs {
 	my $user = getCurrentUser();
 
-	if ($user->{state}{ssl}) {
-		return getCurrentSkin('absolutedir_secure');
+	# Under specific cirmstances which at best remain nuboiusly vague
+	# we don't get values from getCurrentSkin. There's no clear reason
+	# on WHY that is, and no errors in the log to suggest the underlying
+	# cause of the problem. So, in the interests of sanity, if we don't
+	# get valid information from getCurrentSkin(), we'll default to
+	# the site's absolutedir. This MIGHT cause some issues with
+	# nexuses, but its better than having the site 500
+	# - NCommander
+
+	my $constants = getCurrentStatic();
+
+	if (apacheConnectionSSL()) {
+		my $absolutedir_secure = getCurrentSkin('absolutedir_secure');
+		if (!$absolutedir_secure) {
+			$absolutedir_secure = $constants->{'absolutedir_secure'};
+		}		
+		#printf STDERR "Secure: ".$absolutedir_secure."\n";
+		return $absolutedir_secure;
 	} else {
-		return getCurrentSkin('absolutedir');
+		my $absolutedir = getCurrentSkin('absolutedir');
+		if (!$absolutedir) {
+			$absolutedir = $constants->{'absolutedir'};
+		}		
+		#printf STDERR "Nonsecure: ".$absolutedir."\n";
+		return $absolutedir;
 	}
 }
 

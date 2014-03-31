@@ -540,9 +540,10 @@ sub getCSS {
 
 	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond,skin",
 		"css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
-	if ($secure) {
-		for my $hr (@$css) { $hr->{file} =~ s/\.css/.ssl.css/ }
-	}
+	# MC: We don't really need different CSS for SSL do we?
+	#if ($secure) {
+	#	for my $hr (@$css) { $hr->{file} =~ s/\.css/.ssl.css/ }
+	#}
 	
 	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}{$secure} = $css;
 	return $css;

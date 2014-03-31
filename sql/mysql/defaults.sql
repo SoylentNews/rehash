@@ -1127,6 +1127,7 @@ INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total n
 INSERT INTO vars (name, value, description) VALUES ('totalhits','0','Total number of hits the site has had thus far');
 INSERT INTO vars (name, value, description) VALUES ('url_checker_user_agent', '', 'user Agent to use for url checking task, empty string results in lwp user agent being used');
 INSERT INTO vars (name, value, description) VALUES ('use_dept','1','use \"dept.\" field');
+INSERT INTO vars (name, value, description) VALUES ('use_https_for_absolutedir_secure', '1', 'Should we use https as a secure absolutedir for nexuses (YOU PROBABLY WANT THIS!)');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link','1','Boolean where to use next/prev links for articles');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link_series','0','Boolean where to use next/prev links for articles in a series (topic)');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link_section','0','Boolean where to use next/prev links for articles in a section');
