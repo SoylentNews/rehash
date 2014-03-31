@@ -138,7 +138,7 @@ fieldset li.comment
     color: #fff;
 }
 
-#formtabs ul li.active, #formtabs ul li:hover{
+#formtabs ul li.active{
     color: #fff;
 }
 
@@ -370,7 +370,7 @@ ul.menu a, ul.menu a:visited { color: #000; }
     color: #fff;
 }
 
-#usermenu ul.menu li.selected a, #usermenu ul.menu li a:hover
+#usermenu ul.menu li.selected a
 {
 	background: #555;
 	text-decoration: none;
