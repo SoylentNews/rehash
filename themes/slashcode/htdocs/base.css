@@ -374,14 +374,14 @@ input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 }
 
 #formtabs ul li{
-    background: #ccc;
+    background: #888;
     display:inline;
     padding: .2em .3em;
     margin:0;  
 }
 
-#formtabs ul li.active, #formtabs ul li:hover{
-    background: #aaa;
+#formtabs ul li.active{
+    background: #888;
     color: #fff;
 }
 
@@ -648,7 +648,7 @@ ul.menu li a:visited { color: #600; }
 
 ul.menu li.selected a
 {
-	font-weight: bold;
+	font-weight: normal;
 	text-decoration: none;
 	color: #000;
 	padding: 0 .3em;
@@ -685,7 +685,7 @@ ul.menu li.selected a
 
 #usermenu ul.menu li.selected a, .generalbody ul.menu li.selected a, .submenu li.selected a
 {
-	font-weight: bold;
+	font-weight: normal;
 	text-decoration: none;
 	color: #000;
 }
