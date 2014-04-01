@@ -72,7 +72,7 @@ sub handler {
 	my $reader_user = $slashdb->getDB('reader');
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
 
-	my $version_code = "Slash";
+	my $version_code = "slashcode";
 	$version_code .= " $Slash::VERSION";
 	if ($constants->{cvs_tag_currentcode_emit}
 		&& $constants->{cvs_tag_currentcode}
