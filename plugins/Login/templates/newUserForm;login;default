@@ -48,6 +48,7 @@ __template__
 				<label>
 					Nickname&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 				</label>
+				<input type="text" name="newusernick" value="[% form.newusernick | strip_attribute %]" maxlength="[% constants.nick_maxlen %]">
 				<div class="note tip">
 					(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
 				</div>
