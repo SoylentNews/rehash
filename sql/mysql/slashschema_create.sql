@@ -1204,7 +1204,7 @@ CREATE TABLE submissions (
 	emaildomain varchar(255) DEFAULT '' NOT NULL,
 	name varchar(50) NOT NULL,
 	time datetime NOT NULL,
-	subj varchar(50) NOT NULL,
+	subj varchar(100) NOT NULL,
 	story text NOT NULL,
 	tid int unsigned NOT NULL,
 	note varchar(30) DEFAULT '' NOT NULL,
