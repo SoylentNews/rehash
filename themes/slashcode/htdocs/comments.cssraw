@@ -128,6 +128,11 @@ html > body .commentwrap table {
 	font-size: .875em;
 }
 
+.generalbody .commentBody {
+    padding: 1em .8em .4em .8em;
+    font-size: 1em;
+}
+
 .commentBody p, #editComment p, #editComment label
 {
     margin-top:0;
