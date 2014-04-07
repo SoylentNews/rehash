@@ -692,8 +692,10 @@ sub moderate {
 					$sid, $cid, $form->{$key}, { comment => $comment }
 				);
 			} else {
+				# MC: This is useful for debugging general moderation problems, but isn't
+				# so useful in general since overspends will cause this error!
 				#print "user can't moderate comment";
-				print Slash::Utility::Comments::getError('user cannot moderate');
+				#print Slash::Utility::Comments::getError('user cannot moderate');
 			} 
 				
 			# If an error was returned, tell the user what
