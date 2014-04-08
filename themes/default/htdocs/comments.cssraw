@@ -69,12 +69,12 @@ html > body .commentwrap table {
 
 .commentTop 
 {
-	background: #999;
 	padding: 0;
 }
 
 .commentTop .title { 
     color: #fff;
+		background:#aaa;
 }
 
 .commentTop a{
@@ -88,7 +88,6 @@ html > body .commentwrap table {
 	color: #fff;
 	display: block;
 	padding: .3em .6em;
-	background:#aaa;
 }
 
 
@@ -105,7 +104,7 @@ html > body .commentwrap table {
 
 .commentTop .details a
 {
-	color: #600;
+	color: #006;
 }
 
 .commentSub
@@ -288,10 +287,10 @@ ul#commentlisting
 	font-size: 100%;
 }
 
-.comment > .oneline .commentTop .title h4 a { color: #600; }
+.comment > .oneline .commentTop .title h4 a { color: #006; }
 .comment > .oneline .commentTop {
 	background: transparent;
-	color: #600;
+	color: #006;
 }
 
 .comment > .oneline .commentBody {

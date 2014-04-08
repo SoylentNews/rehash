@@ -1,5 +1,3 @@
-__section__
-default
 __description__
 Text that makes up the VERY top of a page (separate from "header" so we can dynamically add stuff between the two)
 
@@ -12,6 +10,8 @@ __lang__
 en_US
 __name__
 html-header
+__skin__
+chillax
 __template__
 [% UNLESS only_css %]
 [% DEFAULT title="$constants.sitename: $constants.slogan" %]
@@ -24,10 +24,13 @@ __template__
 [% IF meta_desc %]<meta name="description" content="[% meta_desc | strip_attribute %]">[% END %]
 <title>[% title | strip_notags %]</title>
 [% END %]
-[% css = Slash.db.getCSS() %]
-[%- FOREACH file = css -%]
-[% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% constants.cssdir %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
-[% END -%]
+[% IF user.is_admin %]
+<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/admin.css?[% constants.cvs_tag_currentcode %]">
+[% END %]
+<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/base.css?[% constants.cvs_tag_currentcode %]">
+<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/comments.css?[% constants.cvs_tag_currentcode %]">
+<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/chillax.css?[% constants.cvs_tag_currentcode %]">
+<link rel="stylesheet" type="text/css" media="print" href="[% constants.rootdir %]/print.css?[% constants.cvs_tag_currentcode %]">
 [%- IF constants.plugin.Ajax %]
 <script src="[% constants.imagedir %]/typeof.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/javascript.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>

@@ -9860,8 +9860,20 @@ sub getTemplateByName {
 		$page = getCurrentUser('currentPage');
 		$page ||= 'misc';
 	}
+	# MC: So ... I don't even get how this works
+	# theorically, getCurrentSkin('name') would
+	# retrieve the skin from the Apache VHOST
+	# configuration, but we don't use that functionalit
+	
+	#unless ($skin) {
+	#	$skin ||= getCurrentSkin('name');
+	#	$skin ||= 'default';
+	#}
+
+	# Instead, we get the skin based on the user
 	unless ($skin) {
-		$skin ||= getCurrentSkin('name');
+		$skin = getCurrentUser('skin');
+		$skin ||= $constants->{'default_skin'};
 		$skin ||= 'default';
 	}
 
