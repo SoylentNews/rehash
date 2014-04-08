@@ -164,10 +164,10 @@ __template__
 		<input type="hidden" name="subid" value="[% subid %]">
 		<input type="hidden" name="topic_source" value="submission">
 		<input type="hidden" name="submitter" value="[% submitter.uid %]">
-		<label>title <input type="text" name="title" value="[% submission.subj %]" size="50" MAXLENGTH="50"></label>
+		<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj %]" size="75" MAXLENGTH="100"></label>
 		[% lockTest %]
 	[% IF constants.use_dept %]
-		<label>Dept&nbsp; <input type="text" name="dept" size="50"></label>
+		<label>Dept&nbsp; <input type="text" name="dept" size="75" MAXLENGTH="100"></label>
 	[% END %]
 	[% FOR extra = extras %]
 		<br>[% extra.1 %]

@@ -98,7 +98,7 @@ __template__
 			[% END %]
 
 			[% PROCESS formLabel value => "Subject"  %]
-			<input type="text" name="subj" value="[% form.subj %]" size="50" maxlength="50">
+			<input type="text" name="subj" value="[% form.subj %]" size="75" maxlength="100">
 			[% PROCESS formNote note => "Be descriptive and concise!" %]
 			[% PROCESS formNote note => "(Nondescriptive subjects like 'Check this out!' usually just get deleted, because we get many every day. For best results, put the important words early.)" %]
 
