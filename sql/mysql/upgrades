@@ -6624,7 +6624,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('moderator_or_post', 
 # Add a missing variable to the database
 INSERT IGNORE INTO vars (name, value, description) VALUES ('use_https_for_absolutedir_secure', '1', 'Should we use https as a secure absolutedir for nexuses (YOU PROBABLY WANT THIS!)');
 
-----
 # Post-slashcode 14.04 release
 # Theme change
 # (ok, this isn't technically a schema edit, *but* this file kinda acts as our general upgrade documentation
@@ -6638,3 +6637,9 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('use_https_for_absolu
 # to control the default skin
 
 INSERT INTO vars (name, value, description) VALUES ('default_skin','chillax','Default skin to use in-case the user hasn't selected one');
+
+# New SoylentNews Slashcode updates 2014-06-01.
+UPDATE vars SET value = 'slashcode_06_14' WHERE name = 'cvs_tag_currentcode';
+
+# Allow submissions to have longer titles. story_text title is set to VARCHAR(100) so match here.
+ALTER TABLE submissions MODIFY subj VARCHAR(100);

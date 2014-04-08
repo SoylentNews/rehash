@@ -415,7 +415,7 @@ sub submissionEd {
 		$sub->{is_anon} = isAnon($sub->{uid});
 
 		my @strs = (
-			chopEntity($sub->{subj}, 35),
+			chopEntity($sub->{subj}, 50),
 			chopEntity($sub->{name}, 20),
 			chopEntity($sub->{email}, 20)
 		);

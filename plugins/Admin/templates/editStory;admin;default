@@ -78,12 +78,12 @@ __template__
 				[% END %]
 				[% shown_in_desc %]
 				[% PROCESS formLabel value => "Title" %]
-				<input type="text" name="title" value="[% storyref.title | strip_attribute %]" size="50">
+				<input type="text" name="title" value="[% storyref.title | strip_attribute %]" size="75" MAXLENGTH="100">
 				<div class="notes">[% ispell_comments.title %]</div>
 
 				[% IF constants.use_dept %]
 					[% PROCESS formLabel value => "Dept" %]
-					<input type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="50">
+					<input type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="75" MAXLENGTH="100">
 				[% END %]
 
 				[% PROCESS formLabel value="Author" %]
