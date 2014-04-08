@@ -1412,6 +1412,7 @@ CREATE TABLE users (
 	journal_last_entry_date datetime,
 	author tinyint DEFAULT 0 NOT NULL,
 	shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL,
+	willing_to_vote TINYINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (uid),
 	KEY login (nickname,uid,passwd),
 	KEY chk4user (realemail,nickname),

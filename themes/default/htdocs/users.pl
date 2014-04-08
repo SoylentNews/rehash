@@ -2135,6 +2135,7 @@ sub editHome {
 	my $sd_check = $user_edit->{simpledesign} ? $constants->{markup_checked_attribute} : '';
 	my $i_check = $user_edit->{noicons}	? $constants->{markup_checked_attribute} : '';
 	my $w_check = $user_edit->{willing}	? $constants->{markup_checked_attribute} : '';
+	my $vote_check = $user_edit->{willing_to_vote}	? $constants->{markup_checked_attribute} : '';
 	my $classic_check = $user_edit->{index_classic} ? $constants->{markup_checked_attribute} : '';
 
 	my $tilde_ed = tildeEd($user_edit);
@@ -2146,6 +2147,7 @@ sub editHome {
 		tzformat_select		=> $tzformat_select,
 		i_check			=> $i_check,
 		w_check			=> $w_check,
+		vote_check		=> $vote_check,
 		lb_check		=> $lb_check,
 		sd_check		=> $sd_check,
 		classic_check		=> $classic_check,
@@ -3082,6 +3084,7 @@ sub saveHome {
 		simpledesign	=> ($form->{simpledesign} ? 1 : 0),
 		noicons		=> ($form->{noicons} ? 1 : 0),
 		willing		=> ($form->{willing} ? 1 : 0),
+		willing_to_vote	=> ($form->{willing_to_vote} ? 1 : 0),
 		index_classic	=> ($form->{index_classic} ? 1 : undef),
 	};
 
@@ -3157,7 +3160,8 @@ sub saveHome {
 				'noboxes' => 1,
 				'light' => 1,
 				'noicons' => 1,
-				'willing' => 1
+				'willing' => 1,
+				'willing_to_vote' => 0
 			}, { slashboxes => "" });
 	}
 

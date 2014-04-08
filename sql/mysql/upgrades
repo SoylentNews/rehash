@@ -6635,7 +6635,7 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('use_https_for_absolu
 #
 # Once deleting the theme out, and installing the new "default" theme which is a giant catch-all, add a variable
 # to control the default skin
-
+ALTER TABLE users_prefs `skin` varchar(255) DEFAULT NULL;
 INSERT INTO vars (name, value, description) VALUES ('default_skin','chillax','Default skin to use in-case the user hasn't selected one');
 
 # New SoylentNews Slashcode updates 2014-06-01.
@@ -6643,3 +6643,8 @@ UPDATE vars SET value = 'slashcode_06_14' WHERE name = 'cvs_tag_currentcode';
 
 # Allow submissions to have longer titles. story_text title is set to VARCHAR(100) so match here.
 ALTER TABLE submissions MODIFY subj VARCHAR(100);
+
+# Add new voting feel
+# NOTE: this shouldn't be in users, but it makes audioguys job easy, and the schema
+# is already fucking ugly as sin so ....
+ALTER TABLE users ADD COLUMN willing_to_vote tinyint UNSIGNED DEFAULT 0 NOT NULL;
