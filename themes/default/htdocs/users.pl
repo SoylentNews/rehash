@@ -3091,6 +3091,10 @@ sub saveHome {
 		$user_edits_table->{dst}    = $form->{dst};
 	}
 
+	if (defined $form->{skin} && defined $form->{skin}) {
+		$user_edits_table->{skin} = $form->{skin};
+	}
+
 	# Force the User Space area to contain only known-good HTML tags.
 	# Unfortunately the cookie login model makes it just too risky
 	# to allow scripts in here;  CSS's steal passwords.  There are
