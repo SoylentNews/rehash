@@ -6643,3 +6643,8 @@ UPDATE vars SET value = 'slashcode_06_14' WHERE name = 'cvs_tag_currentcode';
 
 # Allow submissions to have longer titles. story_text title is set to VARCHAR(100) so match here.
 ALTER TABLE submissions MODIFY subj VARCHAR(100);
+
+# Add new voting feel
+# NOTE: this shouldn't be in users, but it makes audioguys job easy, and the schema
+# is already fucking ugly as sin so ....
+ALTER TABLE users ADD COLUMN willing_to_vote tinyint UNSIGNED DEFAULT 0 NOT NULL;

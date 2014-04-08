@@ -139,6 +139,12 @@ of the UI.
 		<div class="notes">
 			By default all users are willing to Moderate. Uncheck this if you aren't interested.
 		</div>
+		<label>
+			<input type="checkbox" name="willing_to_vote"[% vote_check %]> Willing to Vote 
+		</label>
+		<div class="notes">
+			If you are interested in voting in the next major site issue, check this box.
+		</div>
 		[% tilde_ed %]
 
 		<input type="submit" value="Save" class="button">
