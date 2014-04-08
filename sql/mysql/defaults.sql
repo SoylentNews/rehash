@@ -870,6 +870,7 @@ INSERT INTO vars (name, value, description) VALUES ('debughash_getSkins','','fal
 INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','','false = no debugging; default regex = ^\d+$');
 INSERT INTO vars (name, value, description) VALUES ('default_maxcommentsize','4096','Default user pref value, if you change the schema default for users_comments.maxcommentsize, change this too');
 INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
+INSERT INTO vars (name, value, description) VALUES ('default_skin','chillax','Default skin to use in-case the user hasn't selected one');
 INSERT INTO vars (name, value, description) VALUES ('defaultbytelimit', 5, 'The default setting for comment bytelimit');
 INSERT INTO vars (name, value, description) VALUES ('defaultcommentstatus','enabled','default code for article comments- normally "enabled"');
 INSERT INTO vars (name, value, description) VALUES ('defaultdisplaystatus','0','Default display status ...');
