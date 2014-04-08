@@ -6623,3 +6623,18 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('moderator_or_post', 
 
 # Add a missing variable to the database
 INSERT IGNORE INTO vars (name, value, description) VALUES ('use_https_for_absolutedir_secure', '1', 'Should we use https as a secure absolutedir for nexuses (YOU PROBABLY WANT THIS!)');
+
+----
+# Post-slashcode 14.04 release
+# Theme change
+# (ok, this isn't technically a schema edit, *but* this file kinda acts as our general upgrade documentation
+# We've got two new themes, replacing the old slashcode.com one; chillax which is our default theme, and soylentnews
+# which is the main site (and inherts most the templates via voodoo in THEME file).
+# When updating, the site_info table needs a quick update to point the site from "slashcode" to "soylentnews"
+# then symlink-tool/template-tool should be run. I recommend deleting out all the templates from the database 
+# as well 
+#
+# Once deleting the theme out, and installing the new "default" theme which is a giant catch-all, add a variable
+# to control the default skin
+
+INSERT INTO vars (name, value, description) VALUES ('default_skin','chillax','Default skin to use in-case the user hasn't selected one');

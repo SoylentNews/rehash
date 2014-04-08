@@ -45,6 +45,16 @@ __template__
 <input type="hidden" name="op" value="savehome">
 <input type="hidden" name="uid" value="[% user_edit.uid %]">
 		<label>
+			Select Theme
+		</label>
+		[%
+		Slash.createSelect('skin', {
+			''		=> 'Site Default',
+			'chillax'	=> 'Chillax',
+			'soylentnews'	=> 'SoylentNews'
+		}, user_edit.skin, 1);
+		%]
+		<label>
 			<input type="checkbox" name="index_classic" [% classic_check %]> Use Classic Index
 		</label>
 

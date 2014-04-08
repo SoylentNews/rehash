@@ -1,6 +1,6 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
 body { background: #e5e5e5 url("[% constants.imagedir %]/bg2.gif") repeat-x; }
-a { color: #600; }
+a { color: #006; }
 a:visited { color: #000; }
 
 /* layout */
@@ -76,24 +76,20 @@ a:visited { color: #000; }
 
 /* Commnets Pages */
 
-.commentTop 
-{
-	background: #933 url("[% constants.imagedir %]/bg_red.gif") repeat-x;
-}
-
-.commentTop .title { 
-    background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat;
+.commentTop .title {     
+    background: #339 linear-gradient(#006, #339);
+    border-radius: 10px 10px 0 0;
 }
 
 
 .commentTop .title h4
 {
-	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
+    color: #fff;
 }
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	background: #eee linear-gradient(#ccc, #eee);
 	color: #000;
 }
 
@@ -111,6 +107,7 @@ a:visited { color: #000; }
 
 }
 
+
 #commentlisting ul 
 {
     border-left: 1px solid #aaa;
@@ -123,7 +120,7 @@ fieldset li.comment
 }
 
 
-.commentBox { background: #600; }
+.commentBox { background: #006; }
 
 
 /* FORMTABS */
@@ -133,7 +130,7 @@ fieldset li.comment
 }
 
 #formtabs ul li{
-    background: #933;
+    background: #339;
     border-radius: .3em .3em 0 0;
     color: #fff;
 }
@@ -164,12 +161,9 @@ fieldset li.comment
 }
 
 /* General */
-.generaltitle { background: url("[% constants.imagedir %]/bg_red.gif") #933 repeat-x; }
-.generaltitle div.title { background: transparent url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat; }
 
 .generaltitle h3
 {
-	background: transparent url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	font-size: 1em;
 }
@@ -183,12 +177,14 @@ fieldset li.comment
 
 
 /* articles */
-.article { background: #933 url("[% constants.imagedir %]/bg_red.gif") repeat-x; }
-.article div.title { background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat; }
+
+.generaltitle div.title, .article div.title {     
+    background: #339 linear-gradient(#006, #339);
+    border-radius: 10px 10px 0 0;
+}
 
 #journal .article h3
 {
-	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	font-size: 1em;
 }
@@ -197,30 +193,32 @@ fieldset li.comment
 {
 	font-size: .7em;
 	font-weight: normal;
-	
 	border: 1px solid #aaa;
-	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	background: #eee linear-gradient(#ccc, #eee);
 }
+
 .article .body
 {
 	border: 1px solid #aaa;
 	border-top: none;
-	background: #fff url("[% constants.imagedir %]/bg_white.gif") repeat-x;
+	background: #fff;
 }
 
 div.storylinks
 {
-	background: #eee url("[% constants.imagedir %]/bg_storylinks.gif") bottom repeat-x;
-	font-size: .813em;
+	background: #eee linear-gradient(#ccc, #eee);
+    border: 1px solid #aaa;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    font-size: .813em;
 }
 
-div.storylinks div { background: url("[% constants.imagedir %]/cbr_ltgrey.gif") bottom right no-repeat; }
+
 div.storylinks div ul { height: 1em;} 
 div.storylinks div ul 
 {
 	padding: .8em 1em .7em; 
 	margin: 0; 
-	background: url("[% constants.imagedir %]/cbl_ltgrey.gif") bottom left no-repeat;
 	line-height: .875em;
 }
 div.storylinks ul li 
@@ -271,19 +269,19 @@ div.storylinks ul li
 }
 
 /* Comments */
-.commentBox { background: #600; }
+.commentBox { background: #006; }
 
 /* Poll */
-.barColor { background: #600; }
+.barColor { background: #006; }
 
 /* Bottom Nav */
 .btmnav
 {
-	color: #600;
+	color: #006;
 	font-size: .7em;
 }
 
-.btmnav ul li a { color: #600; }
+.btmnav ul li a { color: #006; }
 
 /* Journal */
 .journaldate { position: relative; }
@@ -347,11 +345,11 @@ pre, code { font-size: .813em; }
 	padding: 0;
 }
 
-.tb_col { background: #600;}
+.tb_col { background: #006;}
 
 /* Usermenu */
 ul.menu a, ul.menu a:visited { color: #000; }
-.generalbody ul.menu li a { color: #600; }
+.generalbody ul.menu li a { color: #006; }
 
 #usermenu ul.menu {
     border-bottom: 1px solid #aaa;
@@ -363,7 +361,7 @@ ul.menu a, ul.menu a:visited { color: #000; }
 }
 
 #usermenu ul.menu li a{
-    background: #933;
+    background: #339;
     border-radius: .3em .3em 0 0;
     padding: .2em .6em;
     text-decoration: none;
@@ -404,8 +402,8 @@ ul.menu a, ul.menu a:visited { color: #000; }
 /* Tags */
 
 .tags { width: 100%; font-size: .9em; line-height: 1.15em }
-.tagname { color: #600; font-weight: bold; padding: 0 }
-.tagtitleopen { background: #600; color: #fff; font-size: .9em }
+.tagname { color: #006; font-weight: bold; padding: 0 }
+.tagtitleopen { background: #006; color: #fff; font-size: .9em }
 .tagtitleopen a { color: #fff; text-decoration: none; font-size: .9em }
 .tagtitleclosed { background: #e5e5e5; font-size: .9em }
 .tagtitleclosed a { text-decoration: none; font-size: .9em }
@@ -414,15 +412,15 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .tagshide { display: none }
 
 .future .briefarticle { background: #c33; }
-.briefarticles { border-top: solid 2px #933; padding-bottom: 0.5em; margin-top: 3px }
-.curstory { border-top: solid 2px #933; }
+.briefarticles { border-top: solid 2px #339; padding-bottom: 0.5em; margin-top: 3px }
+.curstory { border-top: solid 2px #339; }
 .secpref_master td { border-bottom: solid 2px #066;}
 .secpref_nexus_row { color: #aaa; background: #ccc; }
 .ps_23, .ps_22 { display: none; }
 .curstory { border-top: solid 2px #066; }
-.popup { border: solid 2px #933; }
+.popup { border: solid 2px #339; }
 .popup .data { font-size: 100% }
-.popup-title {text-align: left; background: #933; font-size: 100%; color: #fff; padding-right: 4em; }
+.popup-title {text-align: left; background: #339; font-size: 100%; color: #fff; padding-right: 4em; }
 .popup-title .buttons, .title .buttons {
 	position: absolute;
         right: 0.2em;
@@ -430,10 +428,10 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold;  text-decoration: none;}
 .popup-title .buttons span { margin: -.3em 0; padding: 0 4px; height: 11px; width: 11px;}
 
-.popup-message { background: #933; color: #fff; }
+.popup-message { background: #339; color: #fff; }
 .popup-title a, .popup-message a { color: #fff }
 .popup-contents { background: #ccc; font-size: .813em; padding: 5px; }
-.popup-message  { background: #933; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
+.popup-message  { background: #339; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
 #sectionprefs-contents { background: #fff }
 
 .horizontal .ccw-header-links { top: 0pt; }
