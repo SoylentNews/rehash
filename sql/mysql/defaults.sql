@@ -890,6 +890,7 @@ INSERT INTO vars (name, value, description) VALUES ('draconian_charset','1','Con
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset_convert','0','Convert some of high-bit chars to ASCII representations instead (see draconian_charset)');
 INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'example.com', 'space separated list of domains that are not valid for email addresses');
 INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set this to the value in string param for index topic \(something like "topic_4"\)');
+INSERT INTO vars (name, value, description) VALUES ('enable_portscan','0','Enable portscanning of proxys');
 INSERT INTO vars (name, value, description) VALUES ('fancyboxwidth','200','What size should the boxes be in?');
 INSERT INTO vars (name, value, description) VALUES ('feature_story_enabled','0','Simple Boolean to determine if homepage prints feature story');
 INSERT INTO vars (name, value, description) VALUES ('feed_types', 'rss|atom', 'Feed types allowed.');

@@ -6648,3 +6648,7 @@ ALTER TABLE submissions MODIFY subj VARCHAR(100);
 # NOTE: this shouldn't be in users, but it makes audioguys job easy, and the schema
 # is already fucking ugly as sin so ....
 ALTER TABLE users ADD COLUMN willing_to_vote tinyint UNSIGNED DEFAULT 0 NOT NULL;
+
+# Disable portscanning by default
+INSERT INTO vars (name, value, description) VALUES ('enable_portscan','0','Enable portscanning of proxys');
+
