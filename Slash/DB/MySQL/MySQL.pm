@@ -4590,11 +4590,16 @@ sub checkForOpenProxy {
 		my $r = Apache->request;
 		$ip = $r->connection->remote_ip if $r;
 	}
+
 	# If we don't have an IP address, it can't be an open proxy.
 	return 0 if !$ip;
 	# Known secure IPs also don't count as open proxies.
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
+
+	# Don't port scan unless it is explicately enabled it
+	return 0 if ($constants->{enable_portscan} == 1);
+
 	my $secure_ip_regex = $constants->{admin_secure_ip_regex};
 	return 0 if $secure_ip_regex && $ip =~ /$secure_ip_regex/;
 
