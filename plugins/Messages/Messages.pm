@@ -478,6 +478,9 @@ sub send {
 		$content = $contemp ? $self->callTemplate($contemp, $msg) : $msg->{message};
 		$subject = $subtemp ? $self->callTemplate($subtemp, $msg) : $msg->{subject};
 
+		# We want to unconditionally add a footer to emails to comply with CAN-SPAM
+		$content = $self->callTemplate('email_footer', $msg);
+
 		if (sendEmail($addr, $subject, $content, $msg->{priority})) {
 			$self->log($msg, MSG_MODE_EMAIL);
 			return 1;
