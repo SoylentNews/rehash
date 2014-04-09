@@ -38,6 +38,7 @@ or change your preferences, please go to your user page.
 	[% absolutedir %]/my/messages
 
 You can log in and change your preferences from there.
+
 [% END %]
 
 __seclev__
