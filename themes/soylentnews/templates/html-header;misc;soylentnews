@@ -22,6 +22,7 @@ __template__
 [% PROCESS before_content %]
 <meta http-equiv="Content-Type" content="[% constants.content_type_webpage %]">
 [% IF meta_desc %]<meta name="description" content="[% meta_desc | strip_attribute %]">[% END %]
+<link rel="icon" type="image/png" href="[% constants.rootdir %]/favicon-soylentnews.png">
 <title>[% title | strip_notags %]</title>
 [% END %]
 [% IF user.is_admin %]
