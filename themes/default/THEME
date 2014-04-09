@@ -364,8 +364,7 @@ htdoc=htdocs/images/dumper.js
 htdoc=htdocs/badge.pl
 htdoc=htdocs/help.pl
 htdoc=htdocs/imgupload.pl
-htdoc=htdocs/favicon.png
-htdoc=htdocs/favicon.ico
+htdoc=htdocs/favicon-default.png
 glob=badgejs:htdocs/badge.js
 badgejs=htdocs/badge.js
 css=htdocs/admin.cssraw
@@ -384,11 +383,13 @@ mysql_prep=sql/mysql/prep.sql
 
 # chillax theme files go here
 css=../chillax/htdocs/chillax.cssraw
+htdoc=../chillaxhtdocs/favicon-chillax.png
 template=../chillax/templates/html-header;misc;chillax
 image=../chillax/htdocs/images/logo_chillax.png
 
 # soylentnews theme files go here
 css=../soylentnews/htdocs/soylentnews.cssraw
+htdoc=../soylentnews/htdocs/favicon-soylentnews.png
 template=../soylentnews/templates/html-header;misc;soylentnews
 image=../soylentnews/htdocs/images/logo_soylentnews.png
 
