@@ -1,7 +1,8 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
-body { background: #e5e5e5 url("[% constants.imagedir %]/bg2.gif") repeat-x; }
+body { background: #e5e5e5 }
 a { color: #600; }
 a:visited { color: #000; }
+a:hover { color: #800;}
 
 /* layout */
 #contents
@@ -26,22 +27,26 @@ a:visited { color: #000; }
 	font-size: .813em;
 }
 
+
 /* links */
-#links { background: #e5e5e5; }
-#links div.block { background: #fff url("[% constants.imagedir %]/cbl.gif") bottom left no-repeat; }
-#links div.title { background: #b2b2b2 url("[% constants.imagedir %]/ctl_grey.gif") top left no-repeat; }
+#links a, #links a:visited { color: #600; text-decoration:none;}
+#links a:hover { color: #800; text-decoration: underline; }
+
+#links div.title { 
+    background: #b2b2b2;
+    border-radius: 10px 10px 0 0;
+}
 
 #links h4
 {
-	background: url("[% constants.imagedir %]/ctr_grey.gif") top right no-repeat;
 	font-weight: bold;
 	font-size: .813em;
-	
 }
 
 #links div.content
 {
-	background: url("[% constants.imagedir %]/cbr.gif") bottom right no-repeat;
+	background: #fff;
+	border-radius: 0 0 10px 10px;
 	padding: .3em .3em .6em .3em;
 	font-size: .755em;
 	line-height: 1.4em;
@@ -50,21 +55,21 @@ a:visited { color: #000; }
 
 
 /* slashboxes */
-#slashboxes { background: #e5e5e5; }
-#slashboxes div.block { background: #fff url("[% constants.imagedir %]/cbr.gif") bottom right no-repeat; }
-#slashboxes div.title { background: #b2b2b2 url("[% constants.imagedir %]/ctl_grey.gif") top left no-repeat; }
+#slashboxes div.title { 
+    background: #b2b2b2;
+    border-radius: 10px 10px 0 0;
+}
 
 #slashboxes h4
 {
-	background: url("[% constants.imagedir %]/ctr_grey.gif") top right no-repeat;
-	font-weight: bold;
 	font-size: .813em;
 	color: #fff;
 }
 
 #slashboxes div.content
 {
-	background: url("[% constants.imagedir %]/cbl.gif") bottom left no-repeat;
+	background: #fff;
+	border-radius: 0 0 10px 10px;
 	font-size: .755em;
 	line-height: 1.4em;
 }
@@ -74,26 +79,23 @@ a:visited { color: #000; }
   font-size: .875em;
 }
 
+
 /* Commnets Pages */
 
-.commentTop 
-{
-	background: #933 url("[% constants.imagedir %]/bg_red.gif") repeat-x;
-}
-
-.commentTop .title { 
-    background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat;
+.commentTop .title {     
+    background: #933 linear-gradient(#600, #933);
+    border-radius: 10px 10px 0 0;
 }
 
 
 .commentTop .title h4
 {
-	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
+    color: #fff;
 }
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	background: #eee linear-gradient(#ccc, #eee);
 	color: #000;
 }
 
@@ -110,6 +112,7 @@ a:visited { color: #000; }
 	border-top: none;
 
 }
+
 
 #commentlisting ul 
 {
@@ -164,12 +167,9 @@ fieldset li.comment
 }
 
 /* General */
-.generaltitle { background: url("[% constants.imagedir %]/bg_red.gif") #933 repeat-x; }
-.generaltitle div.title { background: transparent url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat; }
 
 .generaltitle h3
 {
-	background: transparent url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	font-size: 1em;
 }
@@ -183,12 +183,14 @@ fieldset li.comment
 
 
 /* articles */
-.article { background: #933 url("[% constants.imagedir %]/bg_red.gif") repeat-x; }
-.article div.title { background: url("[% constants.imagedir %]/ctl_red.gif") top left no-repeat; }
+
+.generaltitle div.title, .article div.title {     
+    background: #933 linear-gradient(#600, #933);
+    border-radius: 10px 10px 0 0;
+}
 
 #journal .article h3
 {
-	background: url("[% constants.imagedir %]/ctr_red.gif") top right no-repeat;
 	color: #fff;
 	font-size: 1em;
 }
@@ -197,30 +199,32 @@ fieldset li.comment
 {
 	font-size: .7em;
 	font-weight: normal;
-	
 	border: 1px solid #aaa;
-	background: #ddd url("[% constants.imagedir %]/bg_details.gif") repeat-x;
+	background: #eee linear-gradient(#ccc, #eee);
 }
+
 .article .body
 {
 	border: 1px solid #aaa;
 	border-top: none;
-	background: #fff url("[% constants.imagedir %]/bg_white.gif") repeat-x;
+	background: #fff;
 }
 
 div.storylinks
 {
-	background: #eee url("[% constants.imagedir %]/bg_storylinks.gif") bottom repeat-x;
-	font-size: .813em;
+	background: #eee linear-gradient(#ccc, #eee);
+    border: 1px solid #aaa;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    font-size: .813em;
 }
 
-div.storylinks div { background: url("[% constants.imagedir %]/cbr_ltgrey.gif") bottom right no-repeat; }
+
 div.storylinks div ul { height: 1em;} 
 div.storylinks div ul 
 {
 	padding: .8em 1em .7em; 
 	margin: 0; 
-	background: url("[% constants.imagedir %]/cbl_ltgrey.gif") bottom left no-repeat;
 	line-height: .875em;
 }
 div.storylinks ul li 
@@ -376,6 +380,8 @@ ul.menu a, ul.menu a:visited { color: #000; }
 	text-decoration: none;
 	color: #fff;
 }
+
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #600; }
 
 .menuoldstyle li
 {
