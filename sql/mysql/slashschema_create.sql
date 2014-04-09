@@ -1559,6 +1559,7 @@ CREATE TABLE users_info (
 	created_at datetime DEFAULT '1970-01-01 00:00' NOT NULL,
 	people MEDIUMBLOB,
 	lastaccess_ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        skin varchar(255) DEFAULT NULL,
 	PRIMARY KEY (uid),
 	KEY (initdomain),
 	KEY (created_ipid),
