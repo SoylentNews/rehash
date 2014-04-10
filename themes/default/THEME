@@ -1,5 +1,5 @@
 # $Id$
-name=all
+name=default
 description="Master THEME file which installs all templates and resources (yes this is a hack)"
 template_preprocess=templates/constants.css.tt2
 
@@ -383,7 +383,7 @@ mysql_prep=sql/mysql/prep.sql
 
 # chillax theme files go here
 css=../chillax/htdocs/chillax.cssraw
-htdoc=../chillaxhtdocs/favicon-chillax.png
+htdoc=../chillax/htdocs/favicon-chillax.png
 template=../chillax/templates/html-header;misc;chillax
 image=../chillax/htdocs/images/logo_chillax.png
 
