@@ -77,7 +77,7 @@ html > body .commentwrap table {
 		background:#aaa;
 }
 
-.commentTop a{
+.commentTop a, .commentTop a:hover{
     color: #fff;
     text-decoration: none;
 }
