@@ -1014,6 +1014,7 @@ INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_perday','1'
 INSERT INTO vars (name, value, description) VALUES ('mod_token_assignment_delay', '2', 'Pause in seconds between batches of assigning token changes');
 INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
 INSERT INTO vars (name, value, description) VALUES ('mod_up_points_needed','','Need more than 1 point to mod up? Hash');
+INSERT INTO vars (name, value, description) VALUES ('moderate_or_post', '1', 'Can users moderate and post in the same discussion (1=yes, 0=no)');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_catchup_count','2','The number of times moderatord will loop if replication is used and is too far behind our threshold.');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_catchup_sleep','2','The number of seconds moderatord will wait each time it loops if replication is behind.');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_debug_info', '1', 'Add in more detailed information into slashd.log for moderation task info. This WILL increase the size by slashd.log quite a bit, so use only if you need to.');

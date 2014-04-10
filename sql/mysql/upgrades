@@ -6619,7 +6619,8 @@ UPDATE vars SET value = 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:cl
 DELETE FROM menus WHERE menu='users';
 
 # New variables for use disabling moderate_or_post
-INSERT IGNORE INTO vars (name, value, description) VALUES ('moderator_or_post', '1', 'Can users moderate and post in the same discussion (1=yes, 0=no)');
+# NOTE: on production this is currently moderator_or_post
+INSERT IGNORE INTO vars (name, value, description) VALUES ('moderate_or_post', '1', 'Can users moderate and post in the same discussion (1=yes, 0=no)');
 
 # Add a missing variable to the database
 INSERT IGNORE INTO vars (name, value, description) VALUES ('use_https_for_absolutedir_secure', '1', 'Should we use https as a secure absolutedir for nexuses (YOU PROBABLY WANT THIS!)');
