@@ -1,5 +1,5 @@
 # $Id$
-name=all
+name=default
 description="Master THEME file which installs all templates and resources (yes this is a hack)"
 template_preprocess=templates/constants.css.tt2
 
