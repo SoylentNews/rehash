@@ -351,6 +351,9 @@ sub main {
 
 	writeLog($form->{sid});
 
+	# Add in magic javascript for dyncomments
+	slashDisplay('collapsibleCommentsJS');
+
 	footer();
 }
 
