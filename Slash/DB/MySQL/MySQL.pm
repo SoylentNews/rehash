@@ -4598,7 +4598,8 @@ sub checkForOpenProxy {
 	my $gSkin = getCurrentSkin();
 
 	# Don't port scan unless it is explicately enabled it
-	return 0 if ($constants->{enable_portscan} == 1);
+	my $enable_portscan = $constants->{enable_portscan} || 0;
+	return 0 unless ($enable_portscan != 0);
 
 	my $secure_ip_regex = $constants->{admin_secure_ip_regex};
 	return 0 if $secure_ip_regex && $ip =~ /$secure_ip_regex/;
