@@ -2541,6 +2541,7 @@ sub validateComment {
 		&& !( $constants->{authors_unlimited}
 			&& $user->{seclev} >= $constants->{authors_unlimited} )
 		&& !$user->{acl}{modpoints_always}
+		&& !$constants->{moderate_or_post}
 		&&  $moddb
 		&&  $moddb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
 	) {
