@@ -1,0 +1,27 @@
+__section__
+default
+__description__
+Block of text for incluzion in header.
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+site_news
+__template__
+<b><a href="//soylentnews.org/article.pl?sid=14/04/08/2216224">Name Voting News</a></b><br/>
+<br/>
+Current name submissions count: <b>41</b><br/>
+<br/>    
+Voting Help:<br/>
+<ul><li><a href="//soylentnews.org/comments.pl?sid=1177&threshold=-1&commentsort=0&mode=flat&cid=30218">Use Plain Text</a></li>
+<li><a href="//soylentnews.org/comments.pl?sid=1177&threshold=-1&commentsort=0&mode=flat&cid=30259">How To Vote</a></li>
+<li><a href="//soylentnews.org/comments.pl?sid=1177&threshold=-1&commentsort=0&mode=flat&cid=30472">Bounces</a></li></ul>
+__seclev__
+500
+__version__
+$Id$
