@@ -27,41 +27,22 @@ __template__
 [% END %]
 [% IF user.is_admin %]
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/admin.css?[% constants.cvs_tag_currentcode %]">
+<script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.metadata.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/ui.draggable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/ui.tabs.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.autogrow.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% PROCESS after_jquery %]
+<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END %]
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/base.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/comments.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/soylentnews.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="print" href="[% constants.rootdir %]/print.css?[% constants.cvs_tag_currentcode %]">
-[%- IF constants.plugin.Ajax %]
-<script src="[% constants.imagedir %]/typeof.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/javascript.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% PROCESS after_jquery %]
-<script src="[% constants.imagedir %]/jquery/jquery.metadata.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/slash.util.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/slash.geometry.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.draggable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.tabs.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% IF user.currentPage == "firehose" || user.currentPage == "console" -%]
-<script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.autogrow.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/slash.menu.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% END -%]
-[% IF user.currentPage == "firehose" -%]
-<script src="[% constants.imagedir %]/slash.boxes.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% END -%]
-<script src="[% constants.imagedir %]/tag-ui.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% IF user.is_admin -%]
-<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% END %]
-[% PROCESS init_tag_ui %]
-[% PROCESS ajax_reskey_tag reskey_label => 'reskey_static', reskey_name => 'ajax_user_static', reskey_tag_js => 2 %]
-[% END # constants.plugin.Ajax %]
 __seclev__
 10000
 __version__
