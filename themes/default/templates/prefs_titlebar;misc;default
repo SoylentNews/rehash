@@ -26,14 +26,17 @@ PROCESS titlebar title=title;
 
 [%
 tabs = [
-		{ link = "$constants.real_rootdir/my/info",	label = "User",		sel_label = "user" },
-		{ link = "$constants.real_rootdir/my/homepage",	label = "Homepage",		sel_label = "home" },
-		{ link = "$constants.real_rootdir/my/comments",	label = "Comments",		sel_label = "comments" },
+		{ link = "$constants.real_rootdir/my/info",	label = "User", sel_label = "user" },
+		{ link = "$constants.real_rootdir/my/password/", label = "Password", sel_label = "password" },
+		{ link = "$constants.real_rootdir/my/homepage", label = "Homepage",	sel_label = "home" },
+		{ link = "$constants.real_rootdir/my/comments", label = "Comments", sel_label = "comments" },
 	];
 	IF constants.plugin.Messages; tabs.push(
-		{ link = "$constants.real_rootdir/my/messages",		label = "Messages",	sel_label = "messages" },
+		{ link = "$constants.real_rootdir/my/messages", label = "Messages", sel_label = "messages" },
 	); END;
-	tabs.push({ link = "$constants.real_rootdir/my/password/",	label = "Password",	sel_label = "password" },);
+	IF constants.plugin.Subscribe; tabs.push(
+		{ link = "$constants.real_rootdir/subscribe.pl", label = "Subscription", sel_label = "subscription" },
+	); END;
 %]
 
 
