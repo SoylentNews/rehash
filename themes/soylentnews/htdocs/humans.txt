@@ -1,0 +1,64 @@
+/* TEAM */
+	Chef / Developer / Sysop / Editor: NCommander
+	Contact: mcasadevall soylentnews org
+	Location: New York, United States of America
+
+	Administration / Editor: mattie_p
+	Contact: mattie_p soylentnews org
+
+	Administration / Community Support / Editor / Wiki: mrcoolbp
+	Contact: mrcoolbp soylentnews org
+
+	Developer / Sysop: Paulej72
+	Contact: paulej72 soylentnews org
+
+	Developer / Sysop: audioguy
+	Contact: audioguy soylentnews org
+
+	Developer: FatPhil
+	Contact: fatphil soylentnews org
+
+	Developer: martyb
+	Contact: martyb soylentnews.org
+
+	Sysop / IRC / Community Support / QA: xlefay
+	Contact: xlefay soylentnews org
+	Location: Near Leeuwarden, The Netherlands
+
+	Sysop: mechanicjay
+	Contact: mechanicjay soylentnews org
+
+	Sysop: robind
+	Contact: robind soylentnews org
+
+	IRC / QA / Style / Editor: MrBluze
+	Contact: mrbluze soylentnews org
+
+	Editor: LaminatorX
+	Contact: laminatorx soylentnews org
+
+	Editor: Dopefish
+	Contact: dopefish soylentnews org
+
+	Editor: janrinok
+	Contact: janrinok soylentnews org
+
+	Wiki-admin / IRC: FunPika
+	Contact: funpika soylentnews org
+
+	Wiki-admin: cosurgi
+	Contact: cosurgi soylentnews org
+
+	IRC: kobach
+	Contact: kobach xlefay org
+	
+	IRC: Landon
+	Contact: landon soylentnews org
+
+/* THANKS */
+
+	The original Slashcode authors.
+	Github contributors: https://github.com/SoylentNews/slashcode/graphs/contributors
+
+/* SITE */
+	Language: English
