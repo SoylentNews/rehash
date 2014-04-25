@@ -1,5 +1,0 @@
-# $Id$
-name=FHPopularity
-description=Keep track of popularity of firehose entries
-mysql_dump=mysql_dump.sql
-requiresplugin=FireHose

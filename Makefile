@@ -45,11 +45,8 @@ BINFILES = `find bin -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\* -
 SBINFILES = `find sbin -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\* -type f -print`
 THEMEFILES = `find themes -name CVS -prune -o -name .git -prune -o -name [a-zA-z]\*.pl -print`
 PLUGINFILES = `find plugins themes/*/plugins -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\*.pl -print`
-TAGBOXFILES = `find tagboxes themes/*/tagboxes -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\*.pl -print`
 PLUGINSTALL = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'plugins/[a-zA-Z0-9]+$$'`
-TAGINSTALL = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'tagboxes/[a-zA-Z]+$$'`
 PLUGINDIRS = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'plugins$$'`
-TAGBOXDIRS = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'tagboxes$$'`
 
 # What do we use to invoke perl?
 REPLACEWITH = `$(PERL) -MConfig -e 'print quotemeta($$Config{startperl})' | sed 's/@/\\@/g'`
@@ -81,7 +78,6 @@ slash:
 pluginsandtagboxes:
 	@echo "=== INSTALLING SLASH PLUGINS AND TAGBOXES ==="
 	@(pluginstall=$(PLUGINSTALL); \
-	taginstall=$(TAGINSTALL); \
 	for f in $$pluginstall $$taginstall; do \
 		(cd $$f; \
 		 echo == $$PWD; \
@@ -109,7 +105,6 @@ install: slash pluginsandtagboxes
 		$(SLASH_PREFIX)/httpd/ \
 		$(SLASH_PREFIX)/themes/ \
 		$(SLASH_PREFIX)/plugins/ \
-		$(SLASH_PREFIX)/tagboxes/ \
 		$(SLASH_PREFIX)/sbin \
 		$(SLASH_PREFIX)/sql/ \
 		$(SLASH_PREFIX)/sql/mysql/
@@ -136,13 +131,9 @@ install: slash pluginsandtagboxes
 	# does not correctly copy special files, symbolic links or FIFOs. 
 	#
 	@(pluginstall=$(PLUGINSTALL); \
-	taginstall=$(TAGINSTALL); \
 	for f in $$pluginstall; do \
 		($(CP) -r $$f $(SLASH_PREFIX)/plugins); \
-	done; \
-	for f in $$taginstall; do \
-		($(CP) -r $$f $(SLASH_PREFIX)/tagboxes); \
-	done)
+	done);
 
 	# Now all the themes
 	$(CP) -r themes/* $(SLASH_PREFIX)/themes
@@ -155,7 +146,6 @@ install: slash pluginsandtagboxes
 	 sbinfiles=$(SBINFILES); \
 	 themefiles=$(THEMEFILES); \
 	 pluginfiles=$(PLUGINFILES); \
-	 tagboxfiles=$(TAGBOXFILES); \
 	 if [ "$$replacewith" != "\#\!\/usr\/bin\/perl" ]; then \
 	 	replace=1; \
 		replacestr='(using $(PERL))'; \
@@ -251,7 +241,6 @@ install: slash pluginsandtagboxes
 	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/bin
 	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/sql
 	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/plugins
-	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/tagboxes
 # Add a @ to suppress output of the echo's
 	@echo "+--------------------------------------------------------+"; \
 	echo "| All done.                                              |"; \
@@ -276,7 +265,6 @@ clean:
 	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; $(MAKE) clean)
 	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
 	(cd plugins; $(MAKE) clean)
-	(cd tagboxes; $(MAKE) clean)
 	find ./ | grep Makefile.old | xargs rm
 	find ./ | grep .xs.orig | xargs rm
 

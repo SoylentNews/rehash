@@ -1,4 +1,0 @@
-# $Id$
-name=Despam
-description=Reduce (firehose) spam
-mysql_dump=mysql_dump.sql

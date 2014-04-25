@@ -1,5 +1,0 @@
-# $Id$
-name=TagnameInterest
-description=Put popular tagnames in the hose
-mysql_dump=mysql_dump.sql
-requiresplugin=Tags
