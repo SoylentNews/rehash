@@ -311,24 +311,6 @@ sub deleteOldDBReaderStatus {
 }
 
 ########################################################
-# For ircslash.pl
-sub getDBsReaderStatus {
-	my($self, $secs_back) = @_;
-	$secs_back ||= 60;
-	return $self->sqlSelectAllHashref(
-		"dbid",
-		"dbid,
-		 MIN(IF(was_alive='yes',1,0)) AS was_alive,
-		 MIN(IF(was_reachable='yes',1,0)) AS was_reachable,
-		 MIN(IF(was_running='yes',1,0)) AS was_running,
-		 AVG(slave_lag_secs) AS lag,
-		 AVG(query_bog_secs) AS bog",
-		"dbs_readerstatus",
-		"ts >= DATE_SUB(NOW(), INTERVAL $secs_back SECOND)",
-		"GROUP BY dbid");
-}
-
-########################################################
 # For dailystuff
 sub deleteRecycledComments {
 	my($self) = @_;
