@@ -1,9 +1,0 @@
-# $Id$
-name=Daypass
-description="Daypass"
-htdoc=daypass.pl
-mysql_dump=mysql_dump.sql
-mysql_schema=mysql_schema.sql
-template=templates/data;daypass;default
-template=templates/main;daypass;default
-

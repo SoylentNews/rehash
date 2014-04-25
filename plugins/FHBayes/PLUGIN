@@ -1,6 +1,0 @@
-# $Id$
-name=FHBayes
-description="FireHose Bayes analysis"
-mysql_dump=mysql_dump.sql
-requiresplugin=FireHose
-task=fhbayes.pl
