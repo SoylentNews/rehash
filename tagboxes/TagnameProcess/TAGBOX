@@ -1,4 +1,0 @@
-# $Id$
-name=TagnameProcess
-description=Process admin tags applied to tagnames
-mysql_dump=mysql_dump.sql

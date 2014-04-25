@@ -1,5 +1,0 @@
-# $Id$
-name=FHBayesPredict
-description=Use Algorithm::NaiveBayes to predict spam
-mysql_dump=mysql_dump.sql
-requiresplugin=FHBayes

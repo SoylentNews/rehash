@@ -1,5 +1,0 @@
-# $Id$
-name=CommentScoreReason
-description=Track comment score and reason
-mysql_dump=mysql_dump.sql
-requiresplugin=TagModeration
