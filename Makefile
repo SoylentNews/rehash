@@ -78,7 +78,6 @@ slash:
 pluginsandtagboxes:
 	@echo "=== INSTALLING SLASH PLUGINS AND TAGBOXES ==="
 	@(pluginstall=$(PLUGINSTALL); \
-	taginstall=$(TAGINSTALL); \
 	for f in $$pluginstall $$taginstall; do \
 		(cd $$f; \
 		 echo == $$PWD; \
@@ -132,10 +131,9 @@ install: slash pluginsandtagboxes
 	# does not correctly copy special files, symbolic links or FIFOs. 
 	#
 	@(pluginstall=$(PLUGINSTALL); \
-	taginstall=$(TAGINSTALL); \
 	for f in $$pluginstall; do \
 		($(CP) -r $$f $(SLASH_PREFIX)/plugins); \
-	done; \
+	done);
 
 	# Now all the themes
 	$(CP) -r themes/* $(SLASH_PREFIX)/themes
@@ -148,7 +146,6 @@ install: slash pluginsandtagboxes
 	 sbinfiles=$(SBINFILES); \
 	 themefiles=$(THEMEFILES); \
 	 pluginfiles=$(PLUGINFILES); \
-	 tagboxfiles=$(TAGBOXFILES); \
 	 if [ "$$replacewith" != "\#\!\/usr\/bin\/perl" ]; then \
 	 	replace=1; \
 		replacestr='(using $(PERL))'; \
