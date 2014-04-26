@@ -707,13 +707,16 @@ sub displayStories {
 			} else {
 				$link = "$story->{word_count} $msg->{words}";
 			}
+
+			#for some reason, this next created a hyperlink for extended copy with 'mode=nocomment'
+			#if this is needed, insert mode => 'nocomment', after tid
+			#mattie_p
 	
 			if (!$constants->{index_readmore_with_bytes}) {
 				push @links, linkStory({
 					'link'		=> $link,
 					sid		=> $story->{sid},
 					tid		=> $story->{tid},
-					mode		=> 'nocomment',
 					skin		=> $story->{primaryskid},
 				}, '', $ls_other) if $story->{body_length};
 			}
