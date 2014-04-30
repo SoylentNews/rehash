@@ -1,4 +1,5 @@
 # $Id$
 name=FAQ
-description="Generic Slash FAQ"
+description="SoylentNews FAQ"
 htdoc=faq.shtml
+htdoc_faq=faq/editorial.shtml

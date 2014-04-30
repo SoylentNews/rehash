@@ -5,47 +5,52 @@
 <title>About SoylentNews</title>
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
-
-<div class="generaltitle">
-	<div class="title">
-		<h3>
-			About SoylentNews
-		</h3>
+<div id="about">
+	<div class="generaltitle">
+		<div class="title">
+			<h3>About SoylentNews</h3>
+		</div>
+	</div>
+	<div class="generalbody">
+		<p>This is a news aggregation site that delivers what's important - articles about technology, science, and general interest. We also deliver all the functionality you expect from a good comment moderation system, and refine that system as we grow and learn.</p>
+		<p>This is a community-driven project and can evolve based on the will of the users and volunteers. The code and database will be open-source (barring any legal issues).</p>
+		<p>Now, go forth and submit stories, comment, moderate, and be free!</p>
+		<h3>Useful Links:</h3>
+		<ul>
+			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" target="blank">Wiki - Main Page</a></li>
+			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved" target="blank">Wiki - Get Involved</a> | Information on the many ways one can contribute to this project.</li>
+			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="blank">Wiki - IRC</a> | Information about how to join and get the most of the realtime discussion on our IRC network.</li>
+			<li><a href="http://chat.soylentnews.org" target="blank">IRC Web Chat</a> | Join the discussion right on your browser, no IRC client needed.</li>
+			<li><a href="http://wiki.soylentnews.org/wiki/WhosWho" target="blank">Who's Who?</a> | A list of team contacts and staff members.</li>
+			<li><a href="https://github.com/SoylentNews/slashcode/issues?labels=&page=1&state=open" target="blank">Bugs</a> | The list of open issues on Github.</li>
+			<li><a href="https://github.com/SoylentNews/slashcode/issues/new" target="blank">Bugs - Submit a New Bug</a> | Please use as much relevant detail as you can (i.e. UID, when, browser and version, OS, error message, and screenshots).</li>
+			<li><a href="https://github.com/SoylentNews" target="blank">The Repo</a> | The slashcode repository for SoylentNews on GitHub.</li>
+			<li><a href="http://status.soylentnews.org" target="blank">Site Status</a> | A static page used to relay information regarding downtime. It will be updated in cases of unexpected downtime.</li>
+		</ul>
+		<h3>Tor .onion Links:</h3>
+		<ul>
+			<li><a href="http://7rmath4ro2of2a42.onion" target="blank">SoylentNews</a></li>
+			<li><a href="http://skgmctqnhyvfava3.onion" target="blank">Development Site</a></li>
+			<li><a href="http://kvs3xgkasyoqd4hx.onion" target="blank">Wiki</a></li>
+		</ul></p>
+		<h3>Suggested Reading</h3>
+		<ul>
+			<li><a href="/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow...Today!</a> | One of the first posts to the site and a quick blurb about the goals of this project.</li>
+			<li><a href="/moderation.shtml">Moderation Guide</a> | Everything you want to know about moderating.</li>
+			<li><a href="/faq/editorial.shtml">Submission Guidelines</a> | Everything you want to know about submitting stories.</li>
+		</ul>
+		<h3>Info on Slashcode</h3>
+		<p>Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/" target="blank">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>
+		<p>Good open source projects, depend on the community. Thanks for your continued support, and let us know what we can do to make the site better.</p>
+		<p>Slash and Slashcode could not be possible without the use of some great Open Source software.</p>
+		<ul>
+			<li><a href="http://www.debian.org/" target="blank">Debian</a> and <a href="http://www.redhat.com/" target="blank">Red Hat</a> Linux</li>
+			<li><a href="http://www.perl.com/CPAN/" target="blank">Perl</a></li>
+			<li><a href="http://apache.org/" target="blank">Apache</a></li>
+			<li><a href="http://perl.apache.org/" target="blank">mod_perl</a></li>
+			<li><a href="http://www.mysql.com/" target="blank">MySQL</a></li>
+		</ul>
+		<p>Slash was originally written by <strong>CmdrTaco</strong> and <a href="http://www.cowboyneal.org/" target="blank">CowboyNeal</a>.</p>
 	</div>
 </div>
-<div class="generalbody">
-<p>We are building a news aggregation site that delivers what's important - better articles, less fluff, and all the functionality you expect from a good comment moderation system.</p>
-<p>This is a community driven project and can evolve based on the will of the users and volunteers. The code and database will be open-source (barring any legal issues).</p>
-<p>Now, go forth and submit stories, comment, moderate, and be free!</p>
-<h3>Useful Links:</h3>
-<ul>
-<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" target="blank">Wiki</a></li>
-<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="blank">IRC - Wiki Page</a></li>
-<li><a href="http://chat.soylentnews.org" target="blank">IRC Web Chat</a></li>
-<li><a href="http://wiki.soylentnews.org/wiki/WhosWho" target="blank">Who's Who?</a></li>
-<li><a href="https://github.com/SoylentNews/slashcode/issues" target="blank">Bug List</a></li>
-<li><a href="https://github.com/SoylentNews" target="blank">The slashcode repository for SoylentNews on GitHub</a></li>
-</ul>
-<h3>Suggested Reading</h3>
-<ul>
-<li><a href="http://soylentnews.org/article.pl?sid=14/02/12/0715245">Welcome to SoylentNews!</a></li>
-<li><a href="http://soylentnews.org/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow... Today!</a></li>
-<li><a href="http://soylentnews.org/article.pl?sid=14/02/13/0412219">Reworking Moderation Access</a></li>
-<li><a href="http://soylentnews.org/moderation.shtml">Moderation Guide</a></li>
-</ul>
-<h3>Info on Slashcode</h3>
-<p>Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/" target="blank">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>
-Good open source projects, depends on the community. Thanks for your continued support, and let us know what we can do to make the site better.</p>
-<p>Slash and Slashcode could not be possible without the use of some great Open Source software.</p>
-<ul>
-<li><a href="http://www.debian.org/" target="blank">Debian</a> and <a href="http://www.redhat.com/" target="blank">Red Hat</a> Linux</li>
-<li><a href="http://www.perl.com/CPAN/" target="blank">Perl</a></li>
-<li><a href="http://apache.org/" target="blank">Apache</a></li>
-<li><a href="http://perl.apache.org/" target="blank">mod_perl</a></li>
-<li><a href="http://www.mysql.com/" target="blank">MySQL</a></li>
-</ul>
-<p>Slash was originally written by <strong>CmdrTaco</strong> and <a href="http://www.cowboyneal.org/" target="blank">CowboyNeal</a>.</p>
-
-<p>(note: credit to martyb (76) for some help with the links.)</p>
-<div></div>
 <!--#include virtual="/slashfoot.inc"-->
