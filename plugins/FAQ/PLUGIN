@@ -3,3 +3,4 @@ name=FAQ
 description="SoylentNews FAQ"
 htdoc=faq.shtml
 htdoc_faq=faq/editorial.shtml
+htdoc_faq=faq/friends.shtml
