@@ -199,7 +199,6 @@ IF !useredit.is_anon;
 			<b>You have [% user.points %]
 			<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator</a>
 			Point[% user.points == 1 ? "! Use it or lose it!" : "s! Use 'em or lose 'em!" %]</b><br/>
-			[% IF user.is_admin %]<br/>You have access because you're an admin.<br/>[% END %]
 			[%- IF user.points && user.lastgranted %]<br/>Your points expire at [%
 				hours = constants.mod_stir_hours || (constants.stir * 24);
 				hours = hours * 3600;
@@ -211,7 +210,7 @@ IF !useredit.is_anon;
 				read the <a href="[% gSkin.rootdir %]/moderation.shtml">moderator guidelines</a>
 				for instructions.
 				<ul>
-					<li>You can't post &amp; moderate the same discussion.</li>
+					<li>You can't moderate after posting in the same discussion.</li>
 					<li>Concentrate on promoting more than demoting.</li>
 					<li>Browse at -1 to keep an eye out for abuses.</li>
 					<li><a href="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</a> URLs showing abuse (the cid link please!).</li>
