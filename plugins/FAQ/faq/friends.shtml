@@ -22,15 +22,15 @@
 		<p>Sure. It's similar to checking your own friends or foes list (http://soylentnews.org/my/friends) except, replace the "/my/friends" with "/~username/friends" Same pattern for checking other users foes list.</p>
 		
 		<h3><a name="f900" id="f900"></a>What are fans / freaks?</h3>
-		<p>When you select someone as a friend, it makes you that users fan. To see people who have chosen you as a friend (your fans): <a href="/my/fans">http://soylentnews.org/my/fans</a>. To see other users fans replace "/my/fans" with "/~username/fans".</p>
+		<p>When you select someone as a friend, it makes you that user's fan. To see people who have chosen you as a friend (your fans): <a href="/my/fans">http://soylentnews.org/my/fans</a>. To see other users fans replace "/my/fans" with "/~username/fans".</p>
 		<p>Freaks work similar to fans, except they are people who have chosen you as their foes. Users who have chosen you as a foe are listed in your freaks list: <a href="/my/freaks">http://soylentnews.org/my/freaks</a>.</p>
 		
 		<h3><a name="f990" id="f990"></a>How do comment modifiers work ?</h3>
-		<p>Comment modifiers are an easy way to filter comments in a story. There are many <a href="/my/comments">comment modifier</a> options. In the case of the Friends / Foes system, you can attach a comment modifier to a friend, foe, fan, freak, friend of friend, or foe of friend. With comment modifiers, you can increase or decrease the comment score 6 points.</p>
-		<p>The reason this is cool: let's say you want to be able to read all your freinds comments. But, many of their comments lie at the threshold of 1, and you read at a threshold of 2. If you go to your <a href="/my/comments">comment preferences</a>, you can make all of your friends comments appear at a score of 5.</p>
+		<p>Comment modifiers are an easy way to filter comments in a story. There are many <a href="/my/comments">comment modifier</a> options. In the case of the Friends / Foes system, you can attach a comment modifier to a friend, foe, fan, freak, friend of friend, or foe of friend. With comment modifiers, you can increase or decrease the comment score 6 up to points.</p>
+		<p>The reason this is cool: let's say you want to be able to read all your friends comments. But, many of their comments lie at the threshold of 1, and you read at a threshold of 2. If you go to your <a href="/my/comments">comment preferences</a>, you can make all of your friends comments appear at a score of 5.</p>
 		
 		<h3><a name="f980" id="f980"></a>What are Friends of Friends / Foes of Friends?</h3>
-		<p>The Friends of Friends system is pretty self explanitory. But, just in case you're confused, I'll go through an example: I, <a href="/~paulej72">paulej72</a>, added <a href="/~NCommander">NCommander</a> as one of my <a href="/~paulej72/friends/">friends</a>. NCommander added <a href="/~combatserver">combatserver</a> as one of his friends. Therefore, combatserver is a <a href="/~paulej72/friends/friends">friend of a friend</a>. To see your friends of friends, see <a href="/my/friends/friends">http://soylentnews.org/my/friends/friends</a>.</p>
+		<p>The Friends of Friends system is pretty self-explanatory. But, just in case you're confused, we'll go through an example: Alice added Bob as one of her friends. Bob added Carol as one of his friends. Therefore, Carol is a friend of a friend for Alice. To see your friends of friends, see <a href="/my/friends/friends">http://soylentnews.org/my/friends/friends</a>.</p>
 		<p>Foes of Friends works the same way as Friends of Friends. If one of your friends adds someone as their foe, their foe becomes one of your <a href="/my/friends/foes">foes of friends</a>.</p>
 		
 		<h3><a name="f1000" id="f1000"></a>How do I add users to my friends / foes list (or remove them)?</h3>
@@ -40,13 +40,13 @@
 		
 		<h3><a name="f1100" id="f1100"></a>What are all of the images?</h3>
 		<ul>
-			<li>Friend&nbsp;<img src="/images/friend.gif" alt="friend"></li>
-			<li>Fan&nbsp;<img src="/images/fan.gif" alt="fan"></li>
-			<li>Neutral&nbsp;<img src="/images/neutral.gif" alt="neutral"></li>
-			<li>Foe&nbsp;<img src="/images/foe.gif" alt="foe"></li>
-			<li>Freak&nbsp;<img src="/images/freak.gif" alt="freak"></li>
-			<li>Friend of Friend&nbsp;<img src="/images/fof.gif" alt="Friend of Friend"></li>
-			<li>Enemy of Friend&nbsp;<img src="/images/eof.gif" alt="Enemy of Friend"></li>
+			<li><img src="/images/friend.gif" alt="friend"> Friend</li>
+			<li><img src="/images/fan.gif" alt="fan"> Fan</li>
+			<li><img src="/images/neutral.gif" alt="neutral"> Neutral</li>
+			<li><img src="/images/foe.gif" alt="foe"> Foe</li>
+			<li><img src="/images/freak.gif" alt="freak"> Freak</li>
+			<li><img src="/images/fof.gif" alt="Friend of Friend"> Friend of Friend</li>
+			<li><img src="/images/eof.gif" alt="Enemy of Friend"> Enemy of Friend</li>
 		</ul>
 	</div>
 </div>
