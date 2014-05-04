@@ -70,14 +70,17 @@
         <ul>
                 <li>The ability to save user preferences from visit to visit.</li>
                 <li>Your own <a href="/journal.pl">Journal</a> in which to share your innermost feelings.</li>
-                <li>The ability to define Friends &amp; Foes to aid in reading discussions.</li>
+                <li>The ability to define Friends and Foes to aid in reading discussions.</li>
                 <li>A chance to participate in the Moderation System.</li>
                 <li>Posting in Discussions at Score:1 instead of Score:0 means twice as many people will see your comments.</li>
         </ul>
         
+        <h3>What are Friends and Foes?</h3>
+        <p>Information on Friends and Foes can be found in the <a href="/faq/friends.shtml">Friends and Foes FAQ</a></p>
+				
         <h3>Why is someone else's User Name appearing on my User Page's Menu?</h3>
         <p>This is not a bug. This is a feature! That name is the last user page (besides your own ;) that you have visited. This is useful when you want to hop around between your user info, and someone else's: to compare friends and foes for example. Your account has not been hacked, this is totally by design.</p>
-        
+				
         <h3>How do I submit bugs?</h3>
         <p>The bugs are tracked on github. You'll need a github account to <a href="https://github.com/SoylentNews/slashcode/issues/new">submit a new bug</a>. You can also email admin@soylentnews.org and we can submit one on your behalf. Either way, please include as much relevant detail as you can (i.e. UID, time, browser and version, OS, error message, and screenshots).</p>
         

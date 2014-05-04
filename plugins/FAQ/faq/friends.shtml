@@ -2,14 +2,14 @@
   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-  <title>Friends FAQ</title>
+  <title>Friends and Foes FAQ</title>
 <!-- $Id$ -->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 <div id="friends">
 	<div class="generaltitle">
 		<div class="title">
-			<h3>Friends FAQ</h3>
+			<h3>Friends and Foes FAQ</h3>
 		</div>
 	</div>
 
