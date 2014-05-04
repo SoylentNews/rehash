@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Submission Guidelines</title>
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+<div id="editorial">
+    <div class="generaltitle">
+        <div class="title">
+            <h3>Submission Guidelines</h3>
+        </div>
+    </div>
+    <div class="generalbody">
+        <p>There are some general things that are recommended when making a story submission which enhance the reader's enjoyment of your submission and increase its chance of being accepted:</p>
+        <ul>
+            <li><b>Be neutral and factual</b> in both Subject and Summary. You can wait until the article is posted or, if you must, include your opinion <b>clearly marked as opinion</b> at the end of the Summary.</li>
+            <li><b>Provide Original Content</b>. Do not copy/paste other people's work.</li>
+            <li><b>Avoid paywalled articles</b> if possible. If a paywalled article <i>must</i> be used then mark it as such: [Paywalled]. This is also true for sites that show an advertisement before loading the article.</li>
+            <li>Use <b>primary sources</b> wherever possible. If an article refers to an original work then link to the original work rather than the article <b>unless the article provides new and relevant information</b>.</li>
+            <li>Use at least <b>two source links</b> if possible. This gives the reader options and helps insulate against other sites' outages or page removals.</li>
+            <li>For controversial issues, use <b>source links from sites with opposing biases</b>. If a wolf says he wants sheep for dinner, don't ask another wolf if that is a good idea, ask a sheep.</li>
+            <li>If there is a <b>study or deeper link listed</b> in one of the articles you are linking to, you should also include that direct link. Some news sites link to study abstracts, and they are the primary source material.</li>
+            <li>If the new articles that you are linking to reference older articles, you may link to them as well to <b>provide background or quotes</b>.</li>
+            <li><b>Explain acronyms</b> for most things. The first time you use it, spell it out.  Then on subsequent uses, use the acronym. With our goal of being a global site, things such as the US FAA or British OfCom may not be obvious to those outside those countries.</li>
+            <li><b>Wikipedia links</b> are a good source of background information and statistics.</li>
+            <li>Check that your <b>links are timely</b>. Nothing is worse than warning about something that Snopes disproved 5 years ago.</li>
+            <li>When <b>quoting a sentence or less, use quotes.</b>  When quoting <b>more than a single sentence, use blockquotes</b>, as this make the text stand out more.</li>
+            <li><b>Double-check your story in preview</b> prior to submission, including opening all links.  The less an editor has to edit, the more chance your submission has of being approved.</li>
+        </ul>
+        <p>There are also some things to avoid:</p>
+        <ul>
+            <li><b>Don't grumble about rejection</b> of your submission.  As the site grows, more people will submit the same story. We are also trying to include a 'reason for rejection' mechanism in the system.</li>
+            <li><b>Avoid unauthorized copying</b>. Don't copy/paste from other similar sites - that is simply setting up your editor for failure, or a mocking on IRC. It will also result in any further stories that you submit being passed over in favor of others because of the increased time it will take for the editor to check your story and sources.</li>
+            <li>While we encourage a global community, the language of the site is English. <b>Avoid links to non-English sources</b> unless you can also provide a link to a good quality translation into English.</li>
+            <li><b>Do not use 'linkbaiting' </b> i.e. the practice of including celebrity names or intentionally misleading subjects to entice people to click through from search engines.</li>
+        </ul>
+        <p>Credit: <a href=/~GungnirSniper>GungnirSniper</a>, who provided most of the content of this page.</p>
+    </div>
+</div>        
+<!--#include virtual="/slashfoot.inc"-->
