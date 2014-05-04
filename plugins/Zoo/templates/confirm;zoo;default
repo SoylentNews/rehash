@@ -54,7 +54,7 @@ __template__
 <ul>
 <li> Your relationships are public information, and visible to other [% constants.sitename %] readers.</li>
 <li> Updates to friends and foes are cached and may take a few minutes to take effect.</li>
-<li> For more infomation on Friends and Foes see the <a href="[% gSkin.rootdir %]/faq/friends.shtml">FAQ</a>.</li>
+<li> For more information see the <a href="[% gSkin.rootdir %]/faq/friends.shtml">Friends and Foes FAQ</a>.</li>
 </ul>
 
 <p><b>Your Friends who ...</b></p>
