@@ -18,60 +18,51 @@ en_US
 __name__
 main
 __template__
-<div class="nav">
-
-  [% firehosedb = Slash.getObject('Slash::FireHose');
-     IF firehosedb;
-       views = firehosedb.getUserViews({ tab_display => 'yes' });
-       PROCESS firehose_tabs views = views article_header = 1;
-     END %]
-  </div>
-
-  <div id="yui-main">
-    <div class="yui-gf" style="position: relative">
-      <div class="yui-u first" id="links">
-  [% PROCESS mainmenu section_menu_type="firehose" %]
-      </div>
-    </div>
-  </div>
-
-  <div class="yui-u maincol faq" style="padding:1em">
-
 <!-- begin generated body -->
 
 <p>[% PROCESS titlebar title => 'Most Active Stories' %]
+<div class="generalbody">
 [% FOREACH item = actives %]
 <b>[% item.3 %]</b>
 [% storylinks = Slash.linkStory({ link => item.1, section => item.2, sid => item.0 }) %]
 <a href="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</a>
 by [% item.4 %]<br>
 [% END %]</p>
-
+</div>
 
 <p>[% PROCESS titlebar title => 'Most Visited Stories' %]
+<div class="generalbody">
 [% FOREACH item = visited %]
 <b>[% item.3 %]</b>
 [% storylinks = Slash.linkStory({ link => item.1, section => item.2, sid => item.0 }) %]
 <a href="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</a>
 by [% item.4 %]<br>
 [% END %]</p>
+</div>
 
 <p>[% PROCESS titlebar title => 'Most Active Authors' %]
+<div class="generalbody">
 [% FOREACH item = activea %]
 <b>[% item.0 %]</b> [% IF item.2 %]<a href="[% item.2 %]">[% END %][% item.1 %][% IF item.2 %]</a>[% END %]<br>
 [% END %]</p>
+</div>
 
 <p>[% PROCESS titlebar title => 'Most Active Submitters' %]
+<div class="generalbody">
 [% FOREACH item = activesub %]
 <b>[% item.0 %]</b> <a href="[% constants.real_rootdir %]/~[% item.1 | strip_paramattr %]/">[% item.1 %]</a><br>
 [% END %]</p>
+</div>
 
 <p>[% PROCESS titlebar title => 'Most Active Poll Topics' %]
+<div class="generalbody">
 [% FOREACH item = activep %]
 <b>[% item.0 %]</b> <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% item.2 %]">[% item.1 %]</a><br>
 [% END %]</p>
+</div>
 
 [% IF topcomments.size > 0 %]
+<div class="generalbody">
 <p>[% PROCESS titlebar title => 'Top 10 Comments' %]
 [% FOREACH top = topcomments %]
 <b>[% top.score %]</b>
@@ -82,6 +73,7 @@ by [% item.4 %]<br>
 <a href="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</a>
 	posted on [% top.sdate %] by [% top.anickname %]<br><br>
 [% END %]</p>
+</div>
 [% END %]
 
 <p><center>generated on [% currtime %]</center></p>
