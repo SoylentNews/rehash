@@ -80,8 +80,7 @@ __template__
 	[% lcp %]
 	[% IF lvl; END %]
 	[% IF comments;
-	     this_pid = discussion2 ? 0 : pid;
-	     thread = Slash.displayThread(sid, this_pid, lvl, comments);
+	     thread = Slash.displayThread(sid, pid, lvl, comments);
 	   END %]
 	[% IF thread %]
 		[% IF !cid %]<ul id="commentlisting" >[% END %]
@@ -102,7 +101,6 @@ __template__
 	op           => 'reply',
 	subject      => 'Reply',
 	subject_only => 1,
-	onclick      => (discussion2 ? "D2.replyTo(0); return false;" : '')
 }) %]</b></p></span>
 [% END %]
 

@@ -20,11 +20,11 @@ __name__
 edit_comment
 __template__
 <div id="wide">
-[% discussion2 = Slash.discussion2() %]
+
 [% IF form.pid %]
         [% PROCESS titlebar title="Reply to: $reply.subject" %]
         <div class="generalbody">
-		<ul id="commentlisting" class="[% discussion2 ? 'd2' : 'd1' %]">
+		<ul id="commentlisting" class="d1">
                 [% Slash.dispComment(reply) %]
 		</li>
 		</ul>
@@ -130,17 +130,6 @@ END %]
 		<a href="[% gSkin.rootdir %]/users.pl">Create an Account!</a>
 		[% END %]
 
-[% IF !user.is_anon && discussion2;
-        prefslink = "<a href=\"" _ gSkin.rootdir _ "/my/comments\" target=\"_blank\"";
-
-        IF constants.modal_prefs_active;
-                prefslink = prefslink _ "  onclick=\"getModalPrefs('d2_posting', 'Discussion 2', 1)\; return false\"";
-        END;
-
-        prefslink = prefslink _ ">Customize Posting Preferences</a><p>&nbsp;<br>";
-
-        prefslink;
-END %]
 
 [% IF !user.is_anon && user.karma > constants.goodkarma %]
 		<input type="hidden" name="nobonus_present" value="1">
@@ -184,15 +173,6 @@ IF do_br %]<br>[% END %]
 	<input type="submit" name="op" value="Preview" class="button">
 	[% IF !user.is_anon || (user.is_anon && preview) %]
 	<input type="submit" name="op" value="Submit" class="button">
-	[% END %]
-	[% IF form.pid && discussion2 %]
-	<script src="[% constants.imagedir %]/comments[% UNLESS user.is_admin && user.javascript_debug %]-minified[% END %].js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-	<script type="text/javascript">
-<!--
-	D2.comment_body_reply()[[% form.pid %]] = '[% pid_reply %]';
-	document.write('<input type="button" name="quotereply" id="quotereply" value="Quote" class="button" onclick="D2.quoteReply([% form.pid %])">');
-//-->
-	</script>
 	[% END %]
 
 </p>

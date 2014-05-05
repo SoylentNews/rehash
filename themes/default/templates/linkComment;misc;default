@@ -29,7 +29,6 @@ IF op.defined                                 %]&amp;op=[% op; END;
 IF threshold.defined                          %]&amp;threshold=[% threshold; END;
 IF commentsort.defined                        %]&amp;commentsort=[% commentsort; END;
 IF mode.defined                               %]&amp;mode=[% mode; END;
-IF (user.state.no_d2 || no_d2)                %]&amp;no_d2=1[% END;
 IF startat                                    %]&amp;startat=[% startat; END;
 IF (user.state.tid && constants.tids_in_urls) %]&amp;tid=[% user.state.tid; END;
 IF comment

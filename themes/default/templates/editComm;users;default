@@ -52,25 +52,7 @@ __template__
 <table width="100%">
 	<tr>
 		<td valign="middle">
-        	<p><!-- <b>Discussion Style</b><p>
-		<blockquote><div>
-        	<input type="radio" name="discussion2" value="none"[% constants.markup_checked_attribute IF !user_edit.discussion2 || (user_edit.discussion2 && user_edit.discussion2 != "slashdot") %]> Slashdot Classic Discussion System<br>
-        	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Slashdot Interactive Discussion System (a.k.a. D2)<br>
-		</div></blockquote> -->
-
-		[% IF user_edit.discussion2 && user_edit.discussion2 == "slashdot" %]
-		<blockquote><div>
-		Retrieve [% comment_q_name = ( Slash.isSubscriber(user_edit) || (user_edit.seclev >= 100) ) ? 'd2_comment_q_all' : 'd2_comment_q';
-		   comment_q = Slash.db.getDescriptions(comment_q_name);
-		   Slash.createSelect('d2_comment_q', comment_q, user_edit.d2_comment_q, 1) %] Comments<br>
-
-                Get [% comment_order = Slash.db.getDescriptions('d2_comment_order');
-		   comment_order_def = user_edit.d2_comment_order || 0;
-		   Slash.createSelect('d2_comment_order', comment_order, comment_order_def, 1) %] Comments First
-		</div></blockquote>
-		[% END %]
-
-        	<p><b>Email Display</b>
+    <p><b>Email Display</b>
 		(currently
 		[%- IF !user_edit.fakeemail; " not displayed";
 		ELSE; ": <tt>"; user_edit.fakeemail | strip_literal; "</tt>";
@@ -282,10 +264,6 @@ __template__
 		</div></blockquote>
 		[% IF user.is_admin %]
 		<label>Show Moderations in User Comment Listing <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></label>
-			[% IF constants.m2 %]
-				<label>Show Metamoderation in User Moderation Listing <input type="checkbox" name="m2_with_mod" [% s_m2_check %]></label>
-				<label>Show Metamoderation in Comment Moderation Listing <input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]></label>
-			[% END %]
 		[% END %]
 		</td>
 	</tr>
