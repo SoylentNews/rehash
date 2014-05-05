@@ -352,6 +352,7 @@ htdoc=htdocs/article.pl
 htdoc=htdocs/authors.pl
 htdoc=htdocs/comments.pl
 htdoc=htdocs/collapsible_comments.js
+htdoc=htdocs/wgxpath.install.js
 htdoc=htdocs/slashguide.shtml
 htdoc=htdocs/index.pl
 htdoc=htdocs/moderation.shtml
