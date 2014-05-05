@@ -99,6 +99,11 @@ a:hover { color: #008; }
 	color: #000;
 }
 
+.commentTop .details a, .commentTop .details a:hover, .commentTop .details a:visited
+{
+	color: #006;
+}
+
 .commentSub
 {
 	border: 1px solid #aaa;
@@ -406,40 +411,3 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
-
-/* Tags */
-
-.tags { width: 100%; font-size: .9em; line-height: 1.15em }
-.tagname { color: #006; font-weight: bold; padding: 0 }
-.tagtitleopen { background: #006; color: #fff; font-size: .9em }
-.tagtitleopen a { color: #fff; text-decoration: none; font-size: .9em }
-.tagtitleclosed { background: #e5e5e5; font-size: .9em }
-.tagtitleclosed a { text-decoration: none; font-size: .9em }
-.tagmenu a { text-decoration: underline; }
-.tagbody { border: 1px #ccc solid; background: #eee; padding: 8px }
-.tagshide { display: none }
-
-.future .briefarticle { background: #c33; }
-.briefarticles { border-top: solid 2px #339; padding-bottom: 0.5em; margin-top: 3px }
-.curstory { border-top: solid 2px #339; }
-.secpref_master td { border-bottom: solid 2px #066;}
-.secpref_nexus_row { color: #aaa; background: #ccc; }
-.ps_23, .ps_22 { display: none; }
-.curstory { border-top: solid 2px #066; }
-.popup { border: solid 2px #339; }
-.popup .data { font-size: 100% }
-.popup-title {text-align: left; background: #339; font-size: 100%; color: #fff; padding-right: 4em; }
-.popup-title .buttons, .title .buttons {
-	position: absolute;
-        right: 0.2em;
-}
-.popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold;  text-decoration: none;}
-.popup-title .buttons span { margin: -.3em 0; padding: 0 4px; height: 11px; width: 11px;}
-
-.popup-message { background: #339; color: #fff; }
-.popup-title a, .popup-message a { color: #fff }
-.popup-contents { background: #ccc; font-size: .813em; padding: 5px; }
-.popup-message  { background: #339; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
-#sectionprefs-contents { background: #fff }
-
-.horizontal .ccw-header-links { top: 0pt; }
