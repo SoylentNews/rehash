@@ -1473,7 +1473,7 @@ CREATE TABLE users_comments (
 	commentspill smallint UNSIGNED DEFAULT '50' NOT NULL,
 	commentsort tinyint DEFAULT '0' NOT NULL,
 	noscores tinyint DEFAULT '0' NOT NULL,
-	mode ENUM('flat', 'nested', 'nocomment', 'thread') DEFAULT 'thread' NOT NULL,
+	mode ENUM('flat', 'nested', 'nocomment', 'thread','improvedthreaded') DEFAULT 'improvedthreaded' NOT NULL,
 	threshold tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
 	KEY points (points)
