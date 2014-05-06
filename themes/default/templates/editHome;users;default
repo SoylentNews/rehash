@@ -51,7 +51,8 @@ __template__
 		Slash.createSelect('skin', {
 			''		=> 'Site Default',
 			'chillax'	=> 'Chillax',
-			'soylentnews'	=> 'SoylentNews'
+			'soylentnews'	=> 'SoylentNews',
+			'night' => 'Night Mode'
 		}, user_edit.skin, 1);
 		%]
 		<label>
