@@ -1639,24 +1639,8 @@ sub prepareUser {
 		delete $user->{state}{smalldevice} if ((exists $params{ss}) && ($params{ss} == 0));
 		delete $user->{state}{simpledesign} if ((exists $params{sd}) && ($params{sd} == 0));
 
-		# Any options we're forcing onto SS/SD users.
-		if ($user->{state}{smalldevice}) {
-			$user->{firehose_pause} = 1;
-
-			if ($user->{is_anon}) {
-				$user->{firehose_noautomore} = 1;
-			}
-		}
-
 		if ($user->{state}{simpledesign}) {
 			$user->{simpledesign} = 1;
-			$user->{firehose_disable_picker_search} = 1;
-			$user->{firehose_noautomore} = 1;
-			$user->{firehose_nobylines} = 1;
-			$user->{firehose_nocolors} = 1;
-			$user->{firehose_nographics} = 1;
-			$user->{tags_turnedoff} = 1;
-			$user->{firehose_pause} = 1;
 		}
 	}
 
@@ -1967,7 +1951,7 @@ Hashref of cleaned-up data.
 		buymore cid clbig clsmall cm_offset
 		commentlimit commentsort commentspill
 		del displaystatus limit
-		filter_id firehose_default_section hbtm from_id height highlightthresh
+		filter_id hbtm from_id height highlightthresh
 		issue last maillist max
 		maxcommentsize maximum_length maxstories
 		min min_comment minimum_length minimum_match next

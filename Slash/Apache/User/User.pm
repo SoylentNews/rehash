@@ -246,8 +246,6 @@ sub handler {
 					||
 				($constants->{plugin}{ScheduleShifts} && $uri =~ m{^/shifts\.pl$})
 					||
-				($constants->{plugin}{FireHose} && $uri =~ m{^/firehose\.pl$})
-					||
 				# hmmm ... journal.pl no work, because can be called as /journal/
 				($constants->{journal_rdfitemdesc_html}
 					&& $form->{content_type} =~ $constants->{feed_types}
@@ -557,7 +555,6 @@ my %ops_my = (
 	misc            => { args => 'op=editmiscopts' },
 	amigos          => { args => 'op=friendview', uri => 'journal.pl' },
 	bookmarks       => { args => 'op=showbookmarks' },
-	firehose        => { args => 'op=userfirehose' },
 	preferences     => { args => 'op=displayprefs', uri => 'preferences.pl' },
 	tags            => { args => 'op=showtags' },
 	journal         => { args => 'op=list', uri => 'journal.pl' },
@@ -578,7 +575,6 @@ my %ops_u = (
 	comments        => { args => 'nick=__NICK__&uid=__UID__&op=usercomments' },
 	amigos          => { args => 'nick=__NICK__&uid=__UID__&op=friendview', uri  => 'journal.pl' },
 	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&op=showbookmarks' },
-	firehose        => { args => 'uid=__UID__&op=userfirehose' },
 	journal         => { args => 'nick=__NICK__&uid=__UID__&op=display', uri => 'journal.pl' },
 	tags            => { args => 'nick=__NICK__&uid=__UID__&op=showtags' },
 
@@ -597,7 +593,6 @@ my %ops_u2 = (
 	comments        => { args => 'nick=__NICK__&uid=__UID__&dp=comments' },
 	amigos          => { args => 'nick=__NICK__&uid=__UID__&dp=journalfriends' },
 	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&dp=bookmarks' },
-	firehose        => { args => 'uid=__UID__&dp=firehose' },
 	admin           => { args => 'nick=__NICK__&uid=__UID__&dp=admin' },
 	journal         => { args => 'nick=__NICK__&uid=__UID__&dp=journal' },
 	tags            => { args => 'nick=__NICK__&uid=__UID__&dp=tags&op=userinfo' },
@@ -844,7 +839,7 @@ sub userdir_handler {
 				$r_args =~ s/dp=tags/dp=usertag/ if $u2 && $extra;
 				# XXX "!" is a 'reserved' char in URI, escape it here?
 				$r_args .= "&tagname=$extra" if $extra;
-			} elsif ($u2 && ($op eq 'submissions' || $op eq 'bookmarks' || $op eq 'firehose' || $op eq 'default' || $op eq 'journal' )) {
+			} elsif ($u2 && ($op eq 'submissions' || $op eq 'bookmarks' || $op eq 'default' || $op eq 'journal' )) {
 				if ($extra && $extra ne "rss") {
 					$r_args .= "&addfilter=$extra" if $extra;
 				}
