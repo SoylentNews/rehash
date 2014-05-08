@@ -395,6 +395,12 @@ htdoc=../soylentnews/htdocs/favicon-soylentnews.png
 template=../soylentnews/templates/html-header;misc;soylentnews
 image=../soylentnews/htdocs/images/logo_soylentnews.png
 
+# soylentnews night theme files go here
+css=../night/htdocs/night.cssraw
+template=../night/templates/html-header;misc;night
+template=../soylentnews/templates/html-header;misc;soylentnews
+image=../night/htdocs/images/logo_night.png
+
 misc=misc/spamarmors
 
 plugin=Admin
@@ -412,5 +418,4 @@ plugin=Search
 plugin=Submit
 plugin=Stats
 plugin=Zoo
-plugin=Users2
 plugin=DynamicBlocks

@@ -1,0 +1,413 @@
+body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
+body, body.admin
+{ 
+    background: #333; 
+    color:#ddd; 
+}
+.user_admin {background: #440;}
+
+a { color: #d00; }
+a:visited { color: #fff; }
+a:hover { color: #800;}
+
+/* layout */
+#contents
+{
+	min-width: 20em;
+}
+
+
+/* Header */
+#logo h1 a
+{
+	width: 115px;
+	height: 80px;
+	background: url("[% constants.imagedir %]/logo_night.png") no-repeat;
+}
+
+#slogan h2, #slogan #head_message
+{
+	color: #ccc;
+	font-weight: bold;
+	font-size: .813em;
+}
+
+#slogan #head_message a { color: #ccc }
+
+/* links */
+#links a, #links a:visited, #slashboxes a  { color: #a00; text-decoration:none;}
+#links a:hover, #slashboxes a:hover { color: #600; text-decoration: underline; }
+
+.comment_count { color: #a00; }
+
+#links div.title { 
+    background: #666;
+    border-radius: 10px 10px 0 0;
+}
+
+#links h4
+{
+	font-weight: bold;
+	font-size: .813em;
+}
+
+#links div.content
+{
+	background: #aaa;
+	border-radius: 0 0 10px 10px;
+	padding: .3em .3em .6em .3em;
+	font-size: .755em;
+	line-height: 1.4em;
+	position: relative;
+}
+
+#navigation-content li.user
+{
+	background: #666;
+	color: #fff;
+}
+
+#navigation-content ul ul
+{
+
+	background: #aaa;
+}
+
+/* slashboxes */
+#slashboxes div.title { 
+    background: #666;
+    border-radius: 10px 10px 0 0;
+}
+
+#slashboxes h4
+{
+	font-size: .813em;
+	color: #fff;
+}
+
+#slashboxes div.content
+{
+    color:#fff;
+	background: #aaa;
+	border-radius: 0 0 10px 10px;
+	font-size: .755em;
+	line-height: 1.4em;
+}
+
+.indexhead
+{
+  font-size: .875em;
+}
+
+
+/* Commnets Pages */
+
+.commentTop .title {     
+    background: #933 linear-gradient(#933, #600);
+    border-radius: 10px 10px 0 0;
+}
+
+
+.commentTop .title h4
+{
+    color: #fff;
+}
+
+.commentTop .details {
+	border: 1px solid #aaa;
+	background: #333 linear-gradient(#555, #333);
+	color: #fff;
+}
+
+.commentTop .details a, .commentTop .details a:hover, .commentTop .details a:visited
+{
+	color: #f00;
+}
+
+.commentSub
+{
+	border: 1px solid #aaa;
+	border-top: none;
+    background:#333
+}
+
+.commentBody
+{
+	border: 1px solid #aaa;
+	border-bottom: none;
+	border-top: none;
+    background:#333;
+}
+
+
+#commentlisting ul 
+{
+    border-left: 1px solid #aaa;
+
+}
+
+fieldset li.comment
+{
+    border-bottom: 1px solid #aaa;
+}
+
+
+.commentBox { background: #a00; }
+
+#commentwrap, .commentBoxForm
+{
+	background: #888;
+
+}
+
+/* FORMTABS */
+
+#formtabs {
+    border-bottom: 1px solid #aaa;
+}
+
+#formtabs ul li{
+    background: #933;
+    border-radius: .3em .3em 0 0;
+    color: #fff;
+}
+
+#formtabs ul li.active{
+    color: #fff;
+}
+
+#formtabs ul li a {
+    text-decoration:none;
+    color:#fff;
+}
+
+#formtabs ul li a:visited {
+   color:#fff;
+}
+#formtabs ul li a:hover {
+    color:#fff;
+}
+
+
+/* Quick links content */
+#slashboxes #index_qlinks-content ul, #slashboxes #index_qlinks-content li, #slashboxes #features_qlinks-content ul, #slashboxes #features_qlinks-content li
+{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+/* General */
+
+.generaltitle h3
+{
+	color: #fff;
+	font-size: 1em;
+}
+
+.generalbody
+{
+	background: #333;
+	border: 1px solid #aaa;
+	border-top: none;
+}
+
+
+/* articles */
+
+.generaltitle div.title, .article div.title {     
+    background: #933 linear-gradient(#933, #600);
+    border-radius: 10px 10px 0 0;
+}
+
+#journal .article h3
+{
+	color: #fff;
+	font-size: 1em;
+}
+
+.article .details
+{
+	font-size: .7em;
+	font-weight: normal;
+	border: 1px solid #aaa;
+	background: #333 linear-gradient(#555, #333);
+}
+
+.article .body
+{
+	border: 1px solid #aaa;
+	border-top: none;
+	background: #333;
+}
+
+div.storylinks
+{
+	background: #333 linear-gradient(#555, #333);
+    border: 1px solid #aaa;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    font-size: .813em;
+}
+
+
+div.storylinks div ul { height: 1em;} 
+div.storylinks div ul 
+{
+	padding: .8em 1em .7em; 
+	margin: 0; 
+	line-height: .875em;
+}
+div.storylinks ul li 
+{ 
+	padding: .3em .5em; 
+	border-left: 1px solid #555; 
+}
+
+/* Footer */
+#footer {  }
+
+#footer em
+{
+	font-size: .813em;
+	float: right;
+	width: 45%;
+}
+
+#footer .search
+{
+	font-size: .7em;
+	width: 50%;
+	padding: 0 .3em;
+	margin: 0;
+}
+
+#footer legend, #footer fieldset, #footer label
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer .search input { margin: 0; }
+
+#footer .copyright
+{
+	font-size: x-small;
+	color: #000;
+}
+
+#footer	.admin li
+{
+	border-left: 1px solid #555;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline;
+}
+
+
+input[type=submit], .logout  a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover 
+{
+    background-color: #666;
+}
+
+input[type=text], input[type=password] {border: 1px solid #666;}
+
+.data, .data_hl1, .data_hl2, .data_hl3
+{
+	background: #aaa;
+    color:#fff;
+}
+
+
+/* Comments */
+.commentBox { background: #600; }
+
+/* Poll */
+.barColor { background: #600; }
+
+/* Bottom Nav */
+.btmnav
+{
+	color: #f00;
+	font-size: .7em;
+}
+
+.btmnav ul li a, .btmnav ul li a:visited { color: #d00; }
+
+/* Journal */
+.journaldate { position: relative; }
+.generalbody #journalgeneric .article
+{
+	height: auto;
+	margin: 0 0 1em 0;
+}
+
+
+
+/* Forms */
+textarea { width: 80%; }
+#journal input.button, #admin input.button { width: auto; }
+
+/* Misc */
+pre, code { font-size: .813em; }
+
+.tb_col { background: #600;}
+
+/* Usermenu */
+#usermenu{
+    background:#333;
+}
+ul.menu a, ul.menu a:visited { color: #000; }
+.generalbody ul.menu li a { color: #f00; }
+
+#usermenu ul.menu {
+    border-bottom: 1px solid #aaa;
+    padding: .2em 0;
+}
+
+#usermenu ul.menu  li{
+    padding: .2em;
+}
+
+#usermenu ul.menu li a{
+    background: #933 linear-gradient(#933, #600);
+    border-radius: .3em .3em 0 0;
+		border: none;
+    padding: .2em .6em;
+    text-decoration: none;
+    color: #fff;
+}
+
+#usermenu ul.menu li.selected a
+{
+	background: #555 linear-gradient(#777, #555);
+	text-decoration: none;
+	color: #fff;
+}
+
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #600; }
+
+.menuoldstyle li
+{
+        display: inline;
+        list-style: none;
+        margin: 0;
+        padding: 0 2px 0 1px;
+}
+
+.menuoldstyle ul
+{       
+        padding: 0; 
+        margin: 0 0 1em 0;
+}
+
+.menuoldstyle li:before { content: "| "; }
+.menuoldstyle li:first-child:before { content: ""; }
+
+.briefarticle { padding: 2px; background: #ccc; font-size: .813em}
+.briefarticle a { color: #000 }
+.briefarticle .section { color: #333; }
+.briefarticle .storytitle { font-weight: bold; }
+.briefarticle .introhide { display : none }
+.briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
