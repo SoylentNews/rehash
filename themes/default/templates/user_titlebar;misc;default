@@ -39,9 +39,6 @@ IF user.uid == uid;
 	IF constants.plugin.Journal; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
 	); END;
-	IF constants.plugin.FirehoseFORCEOFF; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/firehose/",label = "Firehose",	sel_label = "firehose" },
-	); END;
 	IF constants.plugin.Messages; tabs.push(
 		{ link = "$constants.real_rootdir/my/inbox/",		label = "Messages",	sel_label = "messages" },
 	); END;
@@ -54,9 +51,6 @@ IF user.uid == uid;
 	); tabs.push(
 		{ link = "$constants.real_rootdir/my/freaks/",		label = "Freaks",	sel_label = "freaks" },
 	); END;
-	IF constants.plugin.TagsFORCEOFF; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/tags/",		label = "Tags",		sel_label = "tags" },
-	); END;
 	IF constants.plugin.Bookmark; tabs.push(
 		{ link = "$constants.real_rootdir/my/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
 	); END;
@@ -67,9 +61,6 @@ ELSIF user.is_anon;
 	IF constants.plugin.Journal; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
 	); END;
-	IF constants.plugin.FireHoseFORCE; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/firehose/",label = "Firehose",	sel_label = "firehose" },
-	); END;
 	IF constants.plugin.Zoo; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
 	); tabs.push(
@@ -78,9 +69,6 @@ ELSIF user.is_anon;
 		{ link = "$constants.real_rootdir/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
-	); END;
-	IF constants.plugin.TagsFORCE; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
 	); END;
 	IF constants.plugin.Bookmark; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
@@ -95,9 +83,6 @@ ELSE;
 	IF constants.plugin.Journal; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
 	); END;
-	IF constants.plugin.FireHoseFORCEOFF; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/firehose/",label = "Firehose",	sel_label = "firehose" },
-	); END;
 	IF constants.plugin.Zoo; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
 	); tabs.push(
@@ -106,9 +91,6 @@ ELSE;
 		{ link = "$constants.real_rootdir/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
-	); END;
-	IF constants.plugin.TagsFORCEOFF; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
 	); END;
 	IF constants.plugin.Bookmark; tabs.push(
 		{ link = "$constants.real_rootdir/~$url_nick/bookmarks/", label = "Bookmarks",	sel_label = "bookmarks" },

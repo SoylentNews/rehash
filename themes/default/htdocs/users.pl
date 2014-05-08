@@ -67,14 +67,6 @@ sub main {
 			tab_selected_1	=> 'me',
 			tab_selected_2	=> 'info',
 		},
-		userfirehose 	=> {
-			function	=> \&showFireHose,
-			seclev		=> 0,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected_1	=> 'me',
-			tab_selected_2	=> 'firehose'
-		},
 		usersubmissions	=>  {
 			function	=> \&showSubmissions,
 			#I made this change, not all sites are going to care. -Brian
@@ -408,7 +400,7 @@ sub main {
 	# needs to do some stuff before it calls header(), so for
 	# those three, don't bother.
 	my $header;
-	if ($op !~ /^(userinfo|display|saveuseradmin|admin|userfirehose$)/) {
+	if ($op !~ /^(userinfo|display|saveuseradmin|admin$)/) {
 		my $data = {
 			adminmenu => $ops->{$op}{adminmenu} || 'admin',
 			tab_selected => $ops->{$op}{tab_selected},
@@ -880,42 +872,6 @@ sub showComments {
 
 sub noUser {
 	print getData("no_user");
-}
-
-sub showFireHose {
-	my($hr) = @_;
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-
-	my $uid = $form->{uid} || $user->{uid};
-	my $user_edit = $reader->getUser($uid);
-	
-	$user->{state}{firehose_page} = "user";
-	$user->{state}{firehose_user_uid} = $uid;
-
-	my $firehose = getObject("Slash::FireHose");
-	header(getMessage('userfirehose_header', { useredit => $user_edit })) or return;
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $user_edit->{uid} == $user->{uid} ? 'me' : 'otheruser',
-	});
-	
-	$form->{mode} = "full";
-	$form->{color} = "black";
-	$form->{orderby} = "createtime";
-	$form->{orderdir} = "DESC";
-	$form->{skipmenu} = 1;
-	$form->{duration} = -1;
-	$form->{fhfilter} = "\"user:$user_edit->{nickname}\"";
-	$form->{pause} = 1;
-	$form->{listonly} = 1;
-	$form->{legacy} = 1;
-
-	my $fhbox = $firehose->listView({ fh_page => 'users.pl', tab => 'userfirehose', user_view => $user_edit });
-	slashDisplay("userFireHose", { firehosebox => $fhbox, uid => $uid, useredit => $user_edit });
 }
 
 #################################################################
