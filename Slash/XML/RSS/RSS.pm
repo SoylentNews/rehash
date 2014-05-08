@@ -399,12 +399,7 @@ sub rss_story {
 		my $linktitle = $story->{title};
 		$linktitle =~ s/\s+/-/g;
 		$linktitle =~ s/[^A-Za-z0-9\-]//g;
-		
-		if ($constants->{firehose_link_article2}) {
-			$action = "story/$story->{sid}/$linktitle?from=rss";
-		} else {
-			$action = "article.pl?sid=$story->{sid}&from=rss";
-		}
+		$action = "article.pl?sid=$story->{sid}&from=rss";
 
 
 		if ($story->{primaryskid}) {
@@ -412,19 +407,11 @@ sub rss_story {
 				$reader->getSkin($story->{primaryskid})->{rootdir},
 				$channel->{'link'}
 			);
-			if ($constants->{firehose_link_article2}) {
-				$encoded_item->{'link'} = _tag_link("$dir/story/$story->{sid}/$linktitle");
-			} else {
-				$encoded_item->{'link'} = _tag_link("$dir/article.pl?sid=$story->{sid}");
-			}
+			$encoded_item->{'link'} = _tag_link("$dir/article.pl?sid=$story->{sid}");
 			$edit = "$dir/$edit";
 			$action = "$dir/$action";
 		} else {
-			if ($constants->{firehose_link_article2}) {
-				$encoded_item->{'link'} = _tag_link("$channel->{'link'}story/$story->{sid}/$linktitle");
-			} else {
-				$encoded_item->{'link'} = _tag_link("$channel->{'link'}article.pl?sid=$story->{sid}");
-			}
+			$encoded_item->{'link'} = _tag_link("$channel->{'link'}article.pl?sid=$story->{sid}");
 			$edit = "$channel->{'link'}$edit";
 			$action = "$channel->{'link'}$action";
 		}

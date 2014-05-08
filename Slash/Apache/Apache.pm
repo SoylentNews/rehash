@@ -401,22 +401,6 @@ sub IndexHandler {
 			my($base) = split(/\./, $gSkin->{index_handler});
 			my $new_filename = "$base.shtml";
 
-			# If index_anon_index_firehose is set, then anonymous users
-			# get to see the firehose if appropriate -- overriding
-			# the (non-users*) setting in the skin.
-			if ($constants->{index_anon_index_firehose}) {
-				my $ua = $r->header_in('User-Agent') || '';
-				my $ua_type =
-					  $ua =~ /MSIE [2-6]/ ? 'msie6'
-					: $ua =~ /MSIE 7/     ? 'msie7'
-					: $ua =~ /MSIE 8/     ? 'msie8'
-					: $ua =~ /iPhone/     ? 'iphone'
-					: $ua =~ /Firefox/    ? 'firefox'
-					: $ua =~ /Safari/     ? 'safari'
-					                      : 'other';
-				$new_filename = $constants->{"index_anon_for_$ua_type"} || 'index2.pl';
-			}
-
 			my $new_filename_abs       = "$basedir/";
 			my $new_uri                = '/';
 			if ($gSkin->{skid} != $constants->{mainpage_skid}
@@ -445,24 +429,7 @@ sub IndexHandler {
 			return DECLINED;
 		}
 
-		if ($key eq 'firehose') {
-			$r->uri($is_user ? '/firehose.pl' : '/firehose.shtml');
-			return OK;
-		}
-
 		my $slashdb = getCurrentDB();
-
-		if ($constants->{plugin}{FireHose}) {
-			my $fh_reader = getObject("Slash::FireHose", { db_type => 'reader'});
-
-			my $fh_tabs = $fh_reader->getShortcutUserViews();
-
-			if ($fh_tabs->{$key}) {
-				$r->args("view=$key");
-				$r->uri('/index2.pl');
-				return OK;
-			}
-		}
 
 		if ($constants->{plugin}{Edit}) {
 			if ($key =~ /^(submit|submission|story|journal)$/) {
@@ -541,27 +508,6 @@ sub IndexHandler {
 		}
 		$rss = 1 if $rss_or_search && $rss_or_search eq "rss";
 		$search = $rss_or_search if !$rss;
-		
-		if ($constants->{plugin}{FireHose}) {
-			my $fh_reader = getObject("Slash::FireHose", { db_type => 'reader'});
-			my $fh_tabs = $fh_reader->getShortcutUserViews();
-
-			if ($fh_tabs->{$key}) {
-		
-				my @ops;
-				push @ops, "view=$key";
-				push @ops, "op=rss", "content_type=rss" if $rss;
-				push @ops, "fhfilter=$search", "content_type=rss" if $search;
-
-				$r->args(join('&',@ops));
-				if ($rss) {
-					$r->uri('/firehose.pl');
-				} else {
-					$r->uri('/index2.pl');
-				}
-				return OK;
-			}
-		}
 	}
 	
 	# Match /datatype/id /story/sid or datatype/id/Item-title syntax
@@ -572,17 +518,6 @@ sub IndexHandler {
 		if ($rss) {
 			$rss_string = "\&content_type=rss";
 			$op_string = "op=rss";
-		}
-		if ($datatype && $id) {
-			my $idtype = "id";
-			if ($datatype eq "story" && $id =~/\//) {
-				$idtype = "sid";
-			} 
-
-			$r->filename("$basedir/firehose.pl");
-			$r->uri("/firehose.pl");
-			$r->args("$op_string\&type=$datatype\&$idtype=$id$rss_string");
-			return OK;
 		}
 	}
 

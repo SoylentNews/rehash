@@ -196,19 +196,6 @@ sub updateArchivedDiscussions {
 		 AND dkid NOT IN ($skip_dkids)"
 	);
 
-	# Close expired submission discussions
-	$count += $self->sqlUpdate(
-		"firehose, discussions",
-		{ 'discussions.type' => 'archived' },
-		"firehose.type = 'submission'
-		 AND firehose.accepted = 'yes'
-		 AND firehose.discussion IS NOT NULL
-		 AND discussions.id = firehose.discussion
-		 AND discussions.type = 'open'
-		 AND discussions.flags != 'delete'
-		 AND discussions.archivable = 'yes'"
-	);
-
 	return $count;
 }
 
@@ -1910,13 +1897,7 @@ sub getUrlsNeedingFirstCheck {
 	$options ||= {};
 	$options->{limit} ||= 50;
 
-	my($extra_tables,$extra_where) = ('','');
-
-	if ($options->{limit_to_firehose} && $constants->{plugin}{FireHose}) {
-		$extra_tables = ",firehose";
-		$extra_where = "AND urls.url_id=firehose.url_id";
-	}
-	return $self->sqlSelectAllHashrefArray("*", "urls $extra_tables", "last_attempt IS NULL $extra_where", "ORDER BY urls.url_id ASC LIMIT $options->{limit}");
+	return $self->sqlSelectAllHashrefArray("*", "urls", "last_attempt IS NULL", "ORDER BY urls.url_id ASC LIMIT $options->{limit}");
 }
 
 sub getUrlsNeedingRefresh {

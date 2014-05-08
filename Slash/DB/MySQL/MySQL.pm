@@ -434,11 +434,6 @@ sub createComment {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
-	my $firehose = getObject('Slash::FireHose');
-	if ($firehose && !isAnon($comment->{uid})) {
-		$firehose->createUpdateItemFromComment($cid);
-	}
-
 	return $cid;
 }
 
@@ -1209,28 +1204,6 @@ sub createSubmission {
 	# The next line makes sure that we get any section_extras in the DB - Brian
 	$self->setSubmission($subid, $submission) if $subid && keys %$submission;
 
-	if ($constants->{plugin}{FireHose} && $subid) {
-		my $firehose = getObject("Slash::FireHose");
-		my $firehose_id = $firehose->createItemFromSubmission($subid);
-
-		if ($firehose_id) {
-			my $discussion_id = $self->createDiscussion({
-				uid		=> 0,
-				kind		=> 'submission',
-				title		=> $data->{subj},
-				topic		=> $data->{tid},
-				primaryskid 	=> $data->{primaryskid},
-				commentstatus	=> 'logged_in',
-				url		=> "$constants->{rootdir}/firehose.pl?op=view&id=$firehose_id"
-			});
-			if ($discussion_id) {
-				$firehose->setFireHose($firehose_id, {
-					discussion	=> $discussion_id,
-				});
-			}
-		}
-	}
-
 	return $subid;
 }
 
@@ -1337,27 +1310,6 @@ sub createAccessLog {
 	}
 
 	if ( $op eq 'index' && $dat =~ m|^([^/]*)| ) {
-		my $firstword = $1;
-		if ($reader->getSkidFromName($firstword)) {
-			$skin_name = $firstword;
-		}
-	}
-
-	if ($op eq "firehose") {
-		if ($form->{type}) {
-			my $type_to_op = {
-				story => 'article2',
-				journal => 'journal2',
-				submission => 'submission2'
-			};
-			$dat = $form->{sid} || $form->{id};
-			$op = $type_to_op->{$form->{type}} if $type_to_op->{$form->{type}};
-		}
-	}
-
-	if ($op ne "firehose" && $dat =~ /(.*)\/(\d{2}\/\d{2}\/\d{2}\/\d{4,7}).*/) {
-		$dat = $2;
-		$op = 'article';
 		my $firstword = $1;
 		if ($reader->getSkidFromName($firstword)) {
 			$skin_name = $firstword;
@@ -3070,10 +3022,6 @@ sub deleteSubmission {
 		}
 	}
 
-	if ($constants->{plugin}{FireHose} && @subid > 0) {
-		my $firehose = getObject("Slash::FireHose");
-		$firehose->rejectItemBySubid(\@subid);
-	}
 	return @subid;
 }
 
@@ -3630,13 +3578,6 @@ sub markStoryDirty {
 sub deleteStory {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
-	if ($constants->{plugin}{FireHose}) {
-		my $stoid = $self->getStoidFromSidOrStoid($id);
-		my $firehose = getObject("Slash::FireHose");
-		my $globjid = $self->getGlobjidCreate("stories", $stoid);
-		my $fhid = $firehose->getFireHoseIdFromGlobjid($globjid);
-		$firehose->setFireHose($fhid, { public => "no", rejected => "yes"});
-	}
 	return $self->setStory($id, { in_trash => 'yes' });
 }
 
@@ -3904,12 +3845,6 @@ print STDERR scalar(gmtime) . " stoid '$stoid' lu '$lu' options_lu '$options->{l
 	# to make sure nothing incorrect was set while we were
 	# in the middle of updating the DB.
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
-
-	if ($constants->{plugin}{FireHose} && @fh_update_fields > 0) {
-		my $firehose = getObject("Slash::FireHose");
-		$firehose->updateItemFromStory($stoid);
-	}
-
 	return $success;
 }
 
@@ -6180,11 +6115,6 @@ sub getStoryByTimeAdmin {
 	);
 	foreach my $story (@$returnable) {
 		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1 });
-		if ($constants->{plugin}{FireHose}) {
-			my $fh = getObject("Slash::FireHose");
-			my $item = $fh->getFireHoseByTypeSrcid("story", $story->{stoid});
-			$story->{fhid} = $item->{id};
-		}
 	}
 	return $returnable;
 }
@@ -7932,24 +7862,7 @@ sub createStory {
 	my $commentstatus = delete $story->{commentstatus};
 
 	if (!$error) {
-		if ($story->{fhid} && $constants->{plugin}{FireHose}) {
-			my $firehose = getObject("Slash::FireHose");
-			my $item = $firehose->getFireHose($story->{fhid});
-			$firehose->setFireHose($story->{fhid}, { stoid => $stoid });
-			if ($item && $item->{type} eq "journal") {
-				$story->{discussion} = $item->{discussion};
-				$story->{journal_id} = $item->{srcid};
-
-				if ($story->{journal_id}) {
-					if (!$self->sqlCount("journal_transfer", "id = ".$self->sqlQuote($story->{journal_id}))) {
-						$self->sqlInsert("journal_transfer", {
-							id => $story->{journal_id}
-						});
-					}
-				}
-			}
-
-		} elsif ($story->{subid}) {
+		if ($story->{subid}) {
 			if ($self->sqlSelect('id', 'journal_transfer',
 				'subid=' . $self->sqlQuote($story->{subid})
 			)) {
@@ -8054,11 +7967,6 @@ sub createStory {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
-	if ($constants->{plugin}{FireHose}) {
-		my $firehose = getObject("Slash::FireHose");
-		$firehose->createItemFromStory($stoid);
-	}
-
 	return $story->{sid};
 }
 
@@ -8069,31 +7977,16 @@ sub getUrlFromSid {
 	my $storyskin = $self->getSkin($primaryskid || $constants->{mainpage_skid});
 	my $rootdir = $storyskin->{rootdir};
 	
-	if ($constants->{firehose_link_article2}) {
-		my $linktitle = urlizeTitle($title);
-		return "$rootdir/story/$sid/$linktitle";
-	} else {
-		return "$rootdir/article.pl?sid=$sid" .
+	return "$rootdir/article.pl?sid=$sid" .
 			($tid && $constants->{tids_in_urls} ? "&tid=$tid" : '');
-	}
 }
 
 
 sub grantStorySubmissionKarma {
 	my($self, $story) = @_;
 	my $constants = getCurrentStatic();
-	if ($constants->{plugin}{FireHose}) {
-		my $fhid;
-		my $firehose = getObject("Slash::FireHose");
-		if ($story->{fhid}) {
-			$fhid = $story->{fhid};
-		} elsif ($story->{subid}) {
-			my $subid_q = $self->sqlQuote($story->{subid});
-			($fhid) = $self->sqlSelect('id', 'firehose', "type='submission' and srcid=$subid_q");
-		}
-		$firehose->setFireHose($fhid, { accepted => "yes" }) if $fhid;
-	}
 	return 0 unless $story->{subid};
+
 	my($submitter_uid) = $self->sqlSelect(
 		'uid', 'submissions',
 		'subid=' . $self->sqlQuote($story->{subid})
@@ -8249,21 +8142,6 @@ sub createSignoff {
 	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid, signoff_type => $signoff_type });
 	$self->setStory($stoid, { thumb_signoff_needed => 0 });
 
-	if ($constants->{plugin}{FireHose}) {
-		my $firehose = getObject("Slash::FireHose");
-		my $stoid_q = $self->sqlQuote($stoid);
-		my ($id) = $self->sqlSelect("id", "firehose", "type='story' and srcid=$stoid_q");
-		if($id) {
-			my $signoff_label = "sign".$uid."ed";
-			my $item = $firehose->getFireHose($id);
-			if ($item->{signoffs} !~ /$signoff_label/) {
-				$firehose->setFireHose($id, {
-					-signoffs => "CONCAT(signoffs, ' $signoff_label')"
-				});
-			}
-		}
-	}
-
 	if ($send_message) {
 		my $s_user = $self->getUser($uid);
 		my $story = $self->getStory($stoid);
@@ -8323,12 +8201,6 @@ sub deleteSignoffsForStory {
 	my $constants = getCurrentStatic();
 	my $stoid_q = $self->sqlQuote($stoid);
 	$self->sqlDelete("signoff", "stoid=$stoid_q");
-	if ($constants->{plugin}{FireHose}) {
-		my $firehose = getObject("Slash::FireHose");
-		my ($id) = $self->sqlSelect("id", "firehose", "type='story' and srcid=$stoid_q");
-		$firehose->setFireHose($id, { signoffs => '' });
-
-	}
 }
 
 sub getSignoffsInLastMinutes {
@@ -8510,7 +8382,6 @@ sub getSlashConf {
 		charrefs_good_entity =>		[qw( amp lt gt euro pound yen rsquo lsquo rdquo ldquo ndash mdash )],
 		charrefs_good_numeric =>	[ ],
 		cur_performance_stat_ops =>	[ ],
-		firehose_story_ignore_skids =>	[ ],
 		fixhrefs =>			[ ],
 		hc_possible_fonts =>		[ ],
 		lonetags =>			[ ],
@@ -10268,11 +10139,6 @@ sub setStoryRenderedFromChosen {
 
 	my $rendered_tids = [ keys %$rendered_hr ];
 	$self->setStory_delete_memcached_by_tid($rendered_tids);
-
-	if ($constants->{plugin}{FireHose}) {
-		my $firehose = getObject("Slash::FireHose");
-		$firehose->setTopicsRenderedForStory($stoid, $rendered_tids);
-	}
 
 	return($primaryskid, $tids);
 }
@@ -12697,24 +12563,9 @@ sub _addGlobjEssentials_urls {
 			"url_id IN ($id_str)")
 		: { };
 	my $hoseid_hr = { };
-	my $firehose = getObject('Slash::FireHose');
-	if ($firehose) {
-		$hoseid_hr = $id_str
-			? $self->sqlSelectAllKeyValue(
-				'DISTINCT url_id, id',
-				'firehose',
-				"url_id IN ($id_str) AND type='bookmark'")
-			: { };
-	}
 	for my $url_id (@url_ids) {
 		my $globjid = $urls_hr->{$url_id};
-		# If there's a firehose entry for this URL's bookmark,
-		# link to it.  Otherwise, link directly to the URL.
-		# Is this a good idea?  Since there's no way to delete
-		# a firehose entry, I think so.
-		$data_hr->{$globjid}{url} = $hoseid_hr->{$url_id}
-			? "$constants->{rootdir}/firehose.pl?op=view&id=$hoseid_hr->{$url_id}"
-			: $urldata_hr->{$url_id}{url};
+		$data_hr->{$globjid}{url} = $urldata_hr->{$url_id}{url};
 		$data_hr->{$globjid}{title} = $urldata_hr->{$url_id}{validatedtitle}
 			|| $urldata_hr->{$url_id}{initialtitle};
 		$data_hr->{$globjid}{created_at} = $urldata_hr->{$url_id}{createtime};
@@ -12962,18 +12813,6 @@ sub setRelatedStoriesForStory {
 		$i++;
 	}
 
-	if ($constants->{firehose_add_related}) {
-		foreach my $rel_fh (keys %$rel_fh_hr) {
-			$self->sqlInsert("related_stories", {
-				stoid 		=> $stoid,
-				fhid 		=> $rel_fh,
-				title		=> "Firehose: $rel_fh_hr->{$rel_fh}->{title}",
-				ordernum 	=> $i
-			});
-			$i++;
-		}
-	}
-	
 	foreach my $rel_url (keys %$rel_url_hr) {
 		$self->sqlInsert("related_stories", {
 			stoid   => $stoid,
