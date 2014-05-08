@@ -15,7 +15,7 @@ dispLinkComment
 __template__
 [% IF user.mode != 'metamod' && user.mode != 'archive' %]
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
-		[% do_parent = ( original_pid ); #&& !(discussion2 && (!form.cid || form.cid != cid)) );
+		[% do_parent = ( original_pid );
 		   can_del   = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always ) %]
 		[% IF !options.show_pieces %]<div class="commentSub" id="comment_sub_[% cid %]">[% END; IF !options.pieces %]
 

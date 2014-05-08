@@ -112,6 +112,7 @@ INSERT INTO commentmodes (mode, name, description) VALUES ('flat','Flat','');
 INSERT INTO commentmodes (mode, name, description) VALUES ('nested','Nested','');
 INSERT INTO commentmodes (mode, name, description) VALUES ('thread','Threaded','');
 INSERT INTO commentmodes (mode, name, description) VALUES ('nocomment','No Comments','');
+INSERT INTO commentmodes (mode, name, description) VALUES ('improvedthreaded','Impoved Threaded','');
 
 #
 # Dumping data for table 'comments'
