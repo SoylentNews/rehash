@@ -762,7 +762,7 @@ input.button
 }
 
 /* Data tables */
-.data { font-size: .755em; border-spacing: 0px; }
+.data { font-size: .755em; border-spacing: 0px; margin-bottom: 1em; }
 .data_head
 {
 	color: #fff;
