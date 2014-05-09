@@ -29,3 +29,6 @@ INSERT INTO vars (name, value, description) VALUES ('enable_portscan','0','Enabl
 # Setup Imporved Threaded comments
 INSERT INTO commentmodes (mode, name, description) VALUES ('improvedthreaded','Impoved Threaded','');
 ALTER TABLE users_comments CHANGE mode mode ENUM('flat','nested','nocomment','thread','improvedthreaded') DEFAULT 'improvedthreaded';
+
+# Remove slashcode Theme and set to default
+UPDATE site_info SET value='default' WHERE name='theme';
