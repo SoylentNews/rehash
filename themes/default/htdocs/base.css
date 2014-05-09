@@ -610,8 +610,6 @@ div.storylinks ul li.comments a { font-weight: bold; }
 	background: #fff;
 	margin: 0;
 	padding: .3em;
-	border: 1px solid #aaa;
-	border-bottom: none;
 	height: 100%;
 }
 
@@ -673,7 +671,6 @@ ul.menu li.selected a
 .generalbody ul.menu li a, .submemu li a
 {
 	border-left: 1px solid #ccc;
-	border-bottom: none;
 	padding: 0 .3em 0 .3em;
 }
 
@@ -690,8 +687,39 @@ ul.menu li.selected a
 	color: #000;
 }
 
+
 /* Messaging */
-.message { padding: 1em; }
+
+.message_menu{
+	margin: 0;
+	padding: .6em 1em;
+	font-size: .75em;
+	display: block;
+	background: #fff;
+}
+
+.message_subject
+{
+	background: #fff;
+	padding:  .1em 1em .3em 1em;
+	font-size: .75em;
+}
+
+.message_body
+{
+	padding: 1em .8em 0 .8em;
+	overflow: hidden;
+	background: #fff;
+	font-size: .875em;
+}
+
+.message_footer
+{
+	padding: .4em .8em;
+	background: #fff;
+	font-size: .875em;
+}
+
 
 .error
 {
@@ -741,14 +769,13 @@ input.button
 	background: #006;
 }
 
-.data_head th { text-align: left; }
+.data_head th { text-align: left; padding: .3em .6em; }
 .data_head a { color: #fff; }
-.data td { padding: 2px }
+.data td { padding: .3em .6em; }
 .data_hl1
 {
 	background: #ccc;
 }
-
 
 .data_hl2
 {
@@ -762,13 +789,19 @@ input.button
 }
 
 /* Authors */
-#authors h2 { display: inline; }
+#authors .title { margin-top: 1em; }
+
+#authors h3 { display: inline; }
+
+#authors h3 a { color: #fff; }
 
 #authors .intro
 {
 	display: block;
 	margin: .3em;
 }
+
+#authors .notes { margin-top: 1em; }
 
 /* Misc */
 .notes, .note
@@ -798,65 +831,6 @@ pre
 .hide { display: none }
 .buttons { text-align: right }
 
-
-/* rules for the autocomplete machinery */
-.tagmenu a { text-decoration: underline; cursor: pointer; }
-
-a.ac-source
-{
-  color: white;
-  background-color: #666666;
-}
-
-#ac-select-widget
-{
-  display: block;
-  position: absolute;
-  z-index: 9050;
-  width: 120px;
-  background-color: #dddddd;
-}
-#ac-select-widget.hidden, #ac-select-input.hidden { display: none; }
-
-#ac-select-widget input
-{
-  border: 2px solid #dddddd;
-  width: 7.6em;
-  margin: 0;
-  padding: 0;
-}
-
-#ac-choices { width: 100%; }
-
-#ac-choices .yui-ac-content
-{
-  width: 100%;
-  background: #fff;
-  overflow: hidden;
-  z-index: 9050;
-  border: 1px solid #666666;
-}
-
-#ac-choices ul
-{
-  display: block;
-  list-style: none;
-  margin: 0;
-  padding: 4px 0 0 0;
-  width: 100%;
-  
-}
-
-#ac-choices li
-{
-  display: block;
-  margin: 0;
-  padding: 0 4px 0 4px;
-  cursor: default;
-  white-space: nowrap;
-}
-
-#ac-choices li.yui-ac-highlight { background: #ff0; }
 
 
 /* modal */

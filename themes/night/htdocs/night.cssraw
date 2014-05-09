@@ -4,7 +4,7 @@ body, body.admin
     background: #333; 
     color:#ddd; 
 }
-.user_admin {background: #440;}
+.user_admin, body .adminstoryform fieldset {background: #440;}
 
 a { color: #d00; }
 a:visited { color: #fff; }
@@ -92,6 +92,11 @@ a:hover { color: #800;}
 	border-radius: 0 0 10px 10px;
 	font-size: .755em;
 	line-height: 1.4em;
+}
+
+#slashboxes .highlight
+{
+	background: #555;
 }
 
 .indexhead
@@ -209,7 +214,6 @@ fieldset li.comment
 {
 	background: #333;
 	border: 1px solid #aaa;
-	border-top: none;
 }
 
 
@@ -313,6 +317,11 @@ input[type=submit], .logout  a, div.storylinks ul li.more a, input[type=submit]:
 
 input[type=text], input[type=password] {border: 1px solid #666;}
 
+.data_head
+{
+	background: #600;
+}
+
 .data, .data_hl1, .data_hl2, .data_hl3
 {
 	background: #aaa;
@@ -354,12 +363,20 @@ pre, code { font-size: .813em; }
 
 .tb_col { background: #600;}
 
+
 /* Usermenu */
-#usermenu{
-    background:#333;
-}
-ul.menu a, ul.menu a:visited { color: #000; }
+
+ul.menu li a, ul.menu li a:visited { color: #fff; }
+
+ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
+
 .generalbody ul.menu li a { color: #f00; }
+
+#usermenu{
+	border: 1px solid #aaa;
+	border-bottom: none;
+	background:#333;
+}
 
 #usermenu ul.menu {
     border-bottom: 1px solid #aaa;
@@ -411,3 +428,38 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+
+/* Messaging */
+
+.message_menu{
+	border: 1px solid #aaa;
+	background: #333;
+	color: #fff;
+	border-bottom: none;
+}
+.message_menu ul
+{
+	margin: 0;
+}
+
+.message_subject
+{
+	border: 1px solid #aaa;
+	background: #333 linear-gradient(#555, #333);
+	color: #fff;
+}
+
+.message_body
+{
+	border: 1px solid #aaa;
+	border-bottom: none;
+	border-top: none;
+	background: #333;
+}
+
+.message_footer
+{
+	border: 1px solid #aaa;
+	border-top: none;
+	background: #333;
+}
