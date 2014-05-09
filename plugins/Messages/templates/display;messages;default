@@ -13,37 +13,27 @@ display
 __template__
 [% thisnickname = user.nickname | strip_literal;
    PROCESS titlebar title => "$constants.sitename Message for $thisnickname", width => "100%" %]
-[% Slash.createMenu('messages') %]
-
+<div class="message_menu">
+	[% Slash.createMenu('messages') %]
+</div>	
 [% IF message && message.user.uid == user.uid %]
-
-<table width="100%" border="0" cellspacing="1" cellpadding="2">
-  <tr><td bgcolor="[% user.colors.bg_2 %]">
-    <b>[% message.subject %]</b><br>
-    sent by <b>[% constants.sitename %] Message System</b>
-    on [% Slash.timeCalc(message.date) %]<br>
-  </td></tr>
-  <tr><td bgcolor="[% user.colors.bg_1 %]">
-    [% message.message %]
-  </td></tr>
-  <tr><td align="left">
-    <form action="[%gSkin.rootdir %]/messages.pl" method="post">
-    <input type="hidden" name="id" value="[% message.id %]">
-    <input type="hidden" name="op" value="delete_message">
-    <input type="submit" value="Delete Message">
-    </form>
-  </td></tr>
-</table>
-
+	<div class="message_subject" <b>[% message.subject %]</b><br/>
+		sent by <b>[% constants.sitename %] Message System</b> on [% Slash.timeCalc(message.date) %]
+	</div>
+	<div class="message_body"
+		[% message.message %]
+	</div>	
+	<div class="message_footer">
+		<form action="[%gSkin.rootdir %]/messages.pl" method="post">
+		<input type="hidden" name="id" value="[% message.id %]">
+		<input type="hidden" name="op" value="delete_message">
+		<input type="submit" value="Delete Message">
+		</form>
+	</div>
 [% ELSE %]
-
-<p>
-This message was not found on the system.  Either this message
-has been deleted or purged from the system, or it has been sent
-via another delivery method, or it was not sent to you, but
-to another user.
-</p>
-
+	<div class="generalbody"
+		<p>This message was not found on the system.  Either this message has been deleted or purged from the system, or it has been sent via another delivery method, or it was not sent to you, but to another user.</p>
+	</div>
 [% END %]
 
 __seclev__
