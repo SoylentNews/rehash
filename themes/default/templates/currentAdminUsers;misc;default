@@ -17,7 +17,7 @@ __name__
 currentAdminUsers
 __template__
 <table width="100%" border="0" cellpadding="2" cellspacing="0" class="data">
-
+	[% toggle = 0 %]
 [% FOREACH author = ids %]
 	[% id         = author.0;
 	   lastsecs   = author.1;
@@ -27,7 +27,8 @@ __template__
 	   uid        = author.5;
 	%]
 
-	<tr class="data_hl1"><td class="data_bgc1">
+	<tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
+	<td class="data_bgc1">
 		<a href="[% constants.real_rootdir %]/~[% id | strip_paramattr %]/"><b>[% id %]</b></a>
 	</td><td>
 		[% lastsecs %]
@@ -35,7 +36,7 @@ __template__
 		[% END %]
 		&nbsp;
 	</td></tr>
-
+	[% toggle = !toggle %]
 [% END %]
 
 [% IF constants.cur_performance_stats_disp %]
