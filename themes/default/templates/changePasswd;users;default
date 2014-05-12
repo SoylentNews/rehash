@@ -25,17 +25,17 @@ __template__
 		[% admin_block %]
 		[% IF constants.offer_insecure_login_link %]
 			<div class="message">
-				You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page.  This is totally insecure, but very convenient.
+				<p>You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page.  This is totally insecure, but very convenient.</p>
 			</div>
 		[% END %]
 		<form action="[% env.script_name %]" method="post">
 			[% PROCESS formkey_tag %]
 			[% IF admin_flag %]
-				<b>User ID</b> (if admin user) <input type="text" name="uid" value="[% useredit.uid %]"><br>
+				<p><b>User ID</b> (if admin user) <input type="text" name="uid" value="[% useredit.uid %]"></p>
 			[% ELSE %]
 				<input type="hidden" name="uid" value="[% useredit.uid %]">
 			[% END %]
-			My <a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a> [% session %] and [% clocation %]
+			<p>My <a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a> [% session %] and [% clocation %]
 			[% PROCESS formNote note="Currently, to change your login cookie preferences, you must change your password.  This will be fixed in the near future.  You can change your password to whatever your current password is, if you like, so it won't actually change." %]
 			[% PROCESS formNote note="Changing your password or login cookie preferences will disable all cookies for this account, requiring all browsers to reauthenticate." %]
 			</p>
@@ -43,15 +43,11 @@ __template__
 				[% IF got_oldpass %]
 					<input type="hidden" name="oldpass" value="[% form.oldpass | strip_attribute %]">	
 				[% ELSE %]
-					<label>
-						Enter your <b>current</b> password
-					</label>
+					<label>Enter your <b>current</b> password</label>
 					<input type="password" name="oldpass" size="20" maxlength="20" value="">
 				[% END %]
 			[% END %]
-			<label>
-				Password
-			</label>
+			<label>Password</label>
 			<div class="note">
 				Enter a new password twice to change it.
 			</div>
