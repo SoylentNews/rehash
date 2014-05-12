@@ -439,8 +439,12 @@ sub displayArticle {
 		# Don't write user_change.
 		return displayFriends(@_);
 	}
-
-	_printHead('userhead', $head_data, 1) or return;
+	
+	if ($uid == $user->{uid}) {
+		_printHead('myhead', $head_data, 1) or return;
+	} else {
+		_printHead('userhead', $head_data, 1) or return;
+	}
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -807,7 +811,7 @@ sub editPrefs {
 
 	my $nickname	= $user->{nickname};
 	my $uid		= $user->{uid};
-	_printHead('userhead', { nickname => $nickname, uid => $uid, menutype => 'prefs' }) or return;
+	_printHead('myhead', { nickname => $nickname, uid => $uid, menutype => 'prefs' }) or return;
 
 	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $themes	= $journal_reader->themes;
@@ -852,9 +856,12 @@ sub listArticle {
 		? $journal_reader->getUser($form->{uid}, 'nickname')
 		: $user->{nickname};
 
-	_printHead('userhead',
-		{ nickname => $nickname, uid => $form->{uid} || $user->{uid} },
-		1) or return;
+	if ($uid == $user->{uid}) {
+		_printHead('myhead', { nickname => $nickname, uid => $uid }, 1) or return;
+	} else {
+		_printHead('userhead', { nickname => $nickname, uid => $uid }, 1) or return;
+	}		
+		
 
 	if (@$list) {
 		slashDisplay('journallist', {

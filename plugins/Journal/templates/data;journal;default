@@ -20,6 +20,9 @@ __template__
 [% CASE 'mainhead' %]
 	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Journal System
+	
+[% CASE 'myhead' %]
+	Your Journal
 
 [% CASE 'userhead' %]
 [% IF user.lowbandwidth %]
