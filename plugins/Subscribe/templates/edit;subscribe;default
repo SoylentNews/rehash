@@ -24,6 +24,9 @@ edit
 __template__
 <div class="generalbody">
 [% IF !user.is_admin; user_edit = user; END %]
+		[% IF admin_flag %]
+			[% admin_block %]
+		[% END %]
 
 	[% IF (constants.subscribe_allow_gifts && (!constants.subscribe_gift_testing || user.is_admin)) %]
 		<p>You can buy a subscription for yourself or a gift subscription for another user.
