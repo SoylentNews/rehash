@@ -613,6 +613,11 @@ div.storylinks ul li.comments a { font-weight: bold; }
 	height: 100%;
 }
 
+#usermenu + .generalbody{
+	border-top:none;
+	padding-top:.2em;
+}
+
 ul.menu
 {
 	padding: 0;
@@ -702,7 +707,7 @@ ul.menu li.selected a
 {
 	background: #fff;
 	padding:  .1em 1em .3em 1em;
-	font-size: .75em;
+	font-size: .9em;
 }
 
 .message_body
@@ -710,14 +715,14 @@ ul.menu li.selected a
 	padding: 1em .8em 0 .8em;
 	overflow: hidden;
 	background: #fff;
-	font-size: .875em;
 }
 
 .message_footer
 {
 	padding: .4em .8em;
 	background: #fff;
-	font-size: .875em;
+	font-size: .9em;
+	margin-bottom: 1em;
 }
 
 

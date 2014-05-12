@@ -310,7 +310,7 @@ div.storylinks ul li
 }
 
 
-input[type=submit], .logout  a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover 
+input[type=submit], .logout  a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a 
 {
     background-color: #666;
 }
@@ -324,8 +324,12 @@ input[type=text], input[type=password] {border: 1px solid #666;}
 
 .data, .data_hl1, .data_hl2, .data_hl3
 {
-	background: #aaa;
+	background: #888;
     color:#fff;
+}
+
+.data_hl2 {
+    background: #aaa;
 }
 
 
