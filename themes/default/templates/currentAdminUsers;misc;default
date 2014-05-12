@@ -46,11 +46,13 @@ __template__
 [% END %]
 
 [% IF constants.dbsparklines_disp %]
+	[% toggle = 0 %]
 	[% FOR vu = reader_vus %]
-	<tr class="data_hl1">
-		<td valign="top" class="data_bgc1">[% vu %]</td>
-		<td valign="top"><img src="[% gSkin.rootdir %]/images/dbsparklines/[% vu %]_[% constants.dbsparklines_pngsuffix %].png" width="[% constants.dbsparklines_width %]" height="[% constants.dbsparklines_height %]" alt="[% vu %] dbsparkline"></td>
-	</tr>
+		<tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
+			<td valign="top" class="data_bgc1">[% vu %]</td>
+			<td valign="top"><img src="[% gSkin.rootdir %]/images/dbsparklines/[% vu %]_[% constants.dbsparklines_pngsuffix %].png" width="[% constants.dbsparklines_width %]" height="[% constants.dbsparklines_height %]" alt="[% vu %] dbsparkline"></td>
+		</tr>
+		[% toggle = !toggle %]
 	[% END %]
 [% END %]
 
