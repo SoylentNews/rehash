@@ -21,6 +21,7 @@ en_US
 __name__
 subEdTable
 __template__
+<!--
 ##########
 #
 # Code changed Fri May  9 13:18:00 CDT 2014 - TheMightyBuzzard
@@ -30,10 +31,13 @@ __template__
 # There should be no implications for any other code as this is a template
 #  and thus for reading not execution.
 #
+-->
 [% PROCESS titlebar %]
 <div class="generalbody">
+<!--
 #
 ##########
+-->
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Submissions List</legend>
