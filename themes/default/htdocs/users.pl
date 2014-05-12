@@ -323,6 +323,7 @@ sub main {
 	
 	} ;
 
+	
 	# Note this is NOT the default op.  "userlogin" or "userinfo" is
 	# the default op, and it's set either 5 lines down or about 100
 	# lines down, depending.  Yes, that's dumb.  Yes, we should
@@ -332,6 +333,14 @@ sub main {
 	for (qw(newuser newuserform mailpasswd mailpasswdform changepasswd savepasswd userlogin userclose)) {
 		$ops->{$_} = $ops->{default};
 	}
+	
+	if ($op eq 'admin' &&  $form->{messages}){
+    redirect("$constants->{real_rootdir}/messages.pl?op=display_prefs&userfield=$form->{userfield}", "301");
+  }
+	
+	if ($op eq 'admin' &&  $form->{subscription}){
+    redirect("$constants->{real_rootdir}/subscribe.pl?userfield=$form->{userfield}", "301");
+  }
 
 	my $errornote = "";
 	if ($form->{op} && ! defined $ops->{$op}) {
@@ -2080,7 +2089,7 @@ sub editHome {
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
-	$title = getTitle('editHome_title');
+	$title = getTitle('editHome_title', { user_edit => $user_edit});
 
 	return if $user->{seclev} < 100 && isAnon($user_edit->{uid});
 
@@ -2208,7 +2217,7 @@ sub editComm {
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
-	$title = getTitle('editComm_title');
+	$title = getTitle('editComm_title', { user_edit => $user_edit});
 
 	$formats = $slashdb->getDescriptions('commentmodes');
 	$commentmodes_select=createSelect('umode', $formats, $user_edit->{mode}, 1);
