@@ -24,6 +24,7 @@ template=templates/journrep;comments;default
 template=templates/journrep_subj;comments;default
 template=templates/journuserboxes;misc;default
 template=templates/list_messages;messages;default
+template=templates/show_messages;messages;default
 template=templates/messagenew;submit;default
 template=templates/messagenew_subj;submit;default
 template=templates/mod_msg;comments;default
