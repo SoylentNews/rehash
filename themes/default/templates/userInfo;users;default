@@ -49,19 +49,19 @@ __template__
 [% END %]
 [% PROCESS user_titlebar tab_selected='info' %]
 	<div class="generalbody">
+	[% IF suadmin_flag %]
+		[% admin_block %]
+	[% END %]
+
 	[% IF nickmatch_flag %]
 		<p>
 			This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
 		</p>
 	[% END %]
-	</div>
-	[% IF suadmin_flag %]
-	[% PROCESS titlebar title="Admin options" %]
-		[% admin_block %]
-	[% END %]
-	<div class="generalbody">
+ </div>
 	[% IF lastjournal %]
 	[% PROCESS titlebar title="Last Journal Entry" %]
+	<div class="generalbody">
 			[% Slash.createMenu("journal", style => "tabbed") %]
 			<b>
 				<a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">
