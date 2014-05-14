@@ -445,7 +445,7 @@ sub rss_story {
 				if $action;
 			# add poll if any
 			$extra .= pollbooth($story->{qid},1, 0, 1) if $story->{qid};
-			$encoded_item->{description} .= $self->encode($extra) if $extra;
+
 			#Encdoe with CDATA instead
 			#$encoded_item->{description} .= $self->encode($extra) if $extra;
 			$encoded_item->{description} .= $extra if $extra;
