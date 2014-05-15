@@ -58,7 +58,7 @@ __template__
 		[% END %]
 		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
 	</table>
-	<p>Note: grousing about rejected submissions is Offtopic and usuallygets moderated that way. <a href="[% constants.real_rootdir %]/faq/editorial.shtml">It happens</a>, don't take it personally.</p>
+	<p>Note: grousing about rejected submissions is Offtopic and usually gets moderated that way. <a href="[% constants.real_rootdir %]/faq/editorial.shtml">It happens</a>, don't take it personally.</p>
 </div>
 
 __seclev__
