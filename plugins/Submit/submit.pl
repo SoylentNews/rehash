@@ -87,7 +87,6 @@ sub main {
 	# being submit.pl and all
 	header(
 		getData('header', { tbtitle => $tbtitle } ), '', {
-			admin => 1,
 			tab_selected => 'submissions',
 		}
 	) or return;
@@ -150,7 +149,8 @@ sub deleteSubmissions {
 #################################################################
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
-	print getData('submit_body_open');
+
+	
 	slashProf("pendingsubs");
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
 	slashProf("","pendingsubs");
@@ -165,7 +165,7 @@ sub blankForm {
 		print $rkey->errstr;
 	}		
 
-	print getData('submit_body_close');
+
 }
 
 #################################################################
@@ -192,14 +192,14 @@ sub yourPendingSubmissions {
 	my($constants, $slashdb, $user, $form, $options) = @_;
 	$options ||= {};
 	return if $user->{is_anon};
-	print getData("submit_body_open") unless $options->{skip_submit_body};
-	if (my $submissions = $slashdb->getSubmissionsByUID($user->{uid}, "", { limit_days => 365 })) {
+
+	if (my $submissions = $slashdb->getSubmissionsByUID($user->{uid}, "", { limit_days => 90 })) {
 		slashDisplay('yourPendingSubs', {
 			submissions	=> $submissions,
 			width		=> '100%',
 		});
 	}
-	print getData("submit_body_close") unless $options->{skip_submit_body};
+
 }
 
 #################################################################
@@ -302,7 +302,7 @@ sub previewForm {
                     $sub->{subj}  =~ m/$match/i ||
                     $sub->{ipid}  =~ m/$match/i ||
                     $sub->{story} =~ m/$match/i ||
-		    $url =~ m/$match/i ) {
+                    $url =~ m/$match/i ) {
                         push @$subnotes_ref, $memory;
                 }
         }
@@ -712,7 +712,7 @@ sub saveSub {
 	}
 	
 	
-	print getData("submit_body_open");
+
 	slashDisplay('saveSub', {
 		title		=> 'Saving',
 		width		=> '100%',
@@ -720,7 +720,7 @@ sub saveSub {
 		anonsubmit	=> isAnon($uid) && length($form->{name}) < 3 && length($form->{email}) < 3,
 	});
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
-	print getData("submit_body_close");
+
 
 	return(1);
 }
