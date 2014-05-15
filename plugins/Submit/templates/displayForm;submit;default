@@ -21,6 +21,8 @@ en_US
 __name__
 displayForm
 __template__
+
+[% PROCESS titlebar title = "$constants.sitename Story Submissions" %]
 <div class="generalbody">
 [% pending %]
 [% # set the variable 'subtext'
@@ -30,7 +32,7 @@ __template__
    submission.story = fixedstory;
    PROCESS formatSub %]
 
-[% PROCESS titlebar title = "$constants.sitename Story Submissions" %]
+
 [% IF constants.submiss_view %]
 	<p>
 		<strong>
@@ -54,8 +56,7 @@ __template__
 	[% END %]
 [% END %]
 
-	<p>
-	Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or reject the story.
+	<p>Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or reject the story. For more tips see the <a href="[% constants.real_rootdir %]/faq/editorial.shtml">Submissions Guidlines</a>,
 	</p>
 
 [%# username is the only of from, email, subj that needs to be filtered in %]
@@ -165,7 +166,7 @@ __template__
 		[% IF savestory %]
 			<input type="submit" name="op" value="SubmitStory" class="button">
 		[% ELSE %]
-			[% PROCESS formNote note => "You must preview once, provide a subject, some text, and a topic before you can submit" %]
+			[% PROCESS formNote note => "<p>You must preview once, provide a subject, some text, and a topic before you can submit.</p>" %]
 		[% END %]
 		</fieldset>
 	</form>
