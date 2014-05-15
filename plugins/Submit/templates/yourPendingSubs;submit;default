@@ -15,67 +15,50 @@ en_US
 __name__
 yourPendingSubs
 __template__
-<div>
-[% topics = Slash.db.getTopics(); # sigh %]
-[% skins = Slash.db.getSkins(); %]
-[% PROCESS titlebar title = "Your recent submissions" %]
 
-<p>Here are your recent submissions to [% constants.sitename %],
-and their status within the system:</p>
-
-[% IF submissions.size > 0 %]<ul>[% END %]
-[% summary = { };  %]
 [% cur_time = Slash.db.getTime() %]
-[% secs_back = -86400 * 2 %]
-[% cutoff_time = Slash.timeCalc(Slash.db.getTime(), "%Y-%m-%d %T", secs_back) %]
-[% FOREACH submission = submissions %]
-	[%	time    = submission.time
-		subj    = submission.subj
-		section = skins.${submission.primaryskid}.title
-		topic   = topics.${submission.tid}.textname
-		del     = submission.del
-	%]
 
-	<li>[% time %] [% subj %] ([% section %],[% topic %])
-	[% story_viewable = submission.del == 2 and submission.sid and submission.story_time.lt(cur_time) and submission.displaystatus!=-1 %]
-	[% 
-	   submission_del = submission.del;
-	   IF constants.plugin.FireHose && submission_del == 0;
-	   	firehose = Slash.getObject("Slash::FireHose");
-		item = firehose.getFireHoseByTypeSrcid("submission", submission.subid);
-		IF item && item.id;
-			pop_level = firehose.getPopLevelForPopularity(item.popularity);
-			IF time.lt(cutoff_time) && pop_level >= 6;
-				submission_del = 1;
-			END;
-		END;
-	   END;
-	   SWITCH submission_del;
-		CASE 0; 
-			status="pending";
-		CASE 1;
-			status="rejected";
-		CASE 2;
-			status='accepted';
-	END %]
-	([% status %])
-	[% summary.$status = summary.$status.defined ? summary.$status + 1 : 1 %]
-	</li>
-[% END %]
-[% IF submissions.size > 0 %]</ul>[% END %]
+[% PROCESS titlebar title = "Your recent submissions" %]
+<div class="generalbody">
+  <p>Here are your recent submissions to [% constants.sitename %], and their status within the system:</p>
 
-[% IF summary.keys.size > 0 %]
-Summary:&nbsp; 
-<ul>
-[% FOREACH status = summary.keys %]
-	<li>&nbsp; [% status %] ([% summary.$status %])</li>
-[% END %]
-</ul>
-<p>Note: grousing about rejected submissions is Offtopic and usually
-gets moderated that way.
-<a href="[% constants.real_rootdir %]/faq/editorial.shtml#ed200">It happens</a>,
-don't take it personally.
-[% END %]
+	<table width="100%" border=0 cellpadding=3 cellspacing=0 class="data">
+		<tr class="data_head">
+			<th>Title</th>
+			<th>Datestamp</th>
+			<th>State</th>
+		</tr>
+		[% FOREACH sub = submissions %]
+			[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]
+			[% link_sid = sub.del == 2 and sub.sid and story_viewable %]
+			
+			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %] status[% sub.del %]">
+				[% bg_toggle = !bg_toggle %]
+				<td>
+					[%- IF link_sid -%]
+						<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</a>
+					[%- ELSE -%]
+						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</a>
+					[%- END -%]
+				</td>
+				<td>[% Slash.timeCalc(sub.time) %]</td>
+				<td>
+					[% SWITCH sub.del %]
+						[%- CASE 0 -%]
+							Pending
+						[%- CASE 1 -%]
+							Rejected
+						[%- CASE 2 -%]
+							Accepted
+							[% approved = approved + 1; %]	
+					[%- END -%]
+				</td>
+			</tr>
+			[% total = total + 1 %]
+		[% END %]
+		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
+	</table>
+	<p>Note: grousing about rejected submissions is Offtopic and usuallygets moderated that way. <a href="[% constants.real_rootdir %]/faq/editorial.shtml">It happens</a>, don't take it personally.</p>
 </div>
 
 __seclev__
