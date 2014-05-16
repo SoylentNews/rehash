@@ -1,0 +1,65 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+show_messages
+__template__
+<div id="user-blocks">
+	[% user_titlebar %]
+	<div class="generalbody">
+		[% IF user.is_anon %]
+			<p>You are not <a href="[% gSkin.rootdir %]/login.pl">logged in</a> to the system.</p>
+		[% ELSE %]
+	
+			[% IF note %]<h2>[% note %]</h2>[% END %]
+			
+			[% IF message_list.size %]
+				<p>These messages will be kept in the system for only
+				<b>[% constants.message_web_expire || 31 %] days</b>, whether they
+				have been read or not.  After [% constants.message_web_expire || 31 %] days, they
+				<b>will be deleted</b>.</p>
+				
+				<p>Messages marked with "*" are unread.</p>
+				
+				<form action="[% gSkin.rootdir %]/messages.pl" method="post">
+				
+				[% FOREACH message = message_list.reverse %]
+					<div id="msg_[% message.id %]" [% IF !message.readed %]class="unread"[% END %]>
+						[% IF !message.readed;
+							messages = Slash.getObject("Slash::Messages");
+							message.subject = "$message.subject *";
+							messages.setReaded(message.id);
+						END;
+						PROCESS titlebar title => "$message.subject", width => "100%" %]
+						<div class="message_subject">
+							sent by <b>[% constants.sitename %] Message System</b> on [% Slash.timeCalc(message.date) %]
+						</div>
+						<div class="message_body"
+							[% message.message %]
+						</div>	
+						<div class="message_footer">
+							<form id="del_[% message.id %]" action="[%gSkin.rootdir %]/messages.pl" method="post">
+							<input type="hidden" name="id" value="[% message.id %]">
+							<input type="hidden" name="op" value="delete_message">
+							<input type="submit" value="Delete Message">
+							</form>
+						</div>
+					</div>
+				[% END %]
+			[% ELSE %]
+				<p>You have no messages waiting on the system.  Either none have been sent, or they have been deleted or purged from the system, or they have been sent via another delivery method.</p>	
+			[% END %]
+		[% END %]
+	</div>
+</div>
+__seclev__
+500
+__version__
+$Id$

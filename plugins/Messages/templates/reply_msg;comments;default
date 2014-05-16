@@ -11,12 +11,6 @@ en_US
 __name__
 reply_msg
 __template__
-[%
-fh_reader = Slash.getObject('Slash::FireHose');
-fh_item = fh_reader.getFireHoseBySidOrStoid(discussion.sid);
-fh_link = fh_reader.linkFireHose(fh_item);
-fh_url = Slash.url2abs(fh_link, constants.absolutedir_secure);
-%]
 
 [% IF msg.mode == 1 %]
 
@@ -26,7 +20,7 @@ fh_url = Slash.url2abs(fh_link, constants.absolutedir_secure);
 %]">[% reply.subject %]</a></b>, in reply to your comment,
 <b><a href="[% gSkin.rootdir %]/comments.pl?sid=[% parent.sid %]&amp;cid=[% parent.cid
 %]">[% parent.subject %]</a></b>, attached to
-<b><a href="[% fh_url %]">[% discussion.title %]</a></b>.
+<b><a href="[% gSkin.rootdir %]/article.pl?sid=[% discussion.sid %]">[% discussion.title %]</a></b>.
 </p>
 
 [% ELSE %]
@@ -46,7 +40,7 @@ Replied to:
 
 Attached to:
     [% discussion.title | decode_entities %]
-    [% fh_url %]
+		[% absolutedir %]/article.pl?sid=[% discussion.sid %]
 [% END %]
 [% END %]
 
