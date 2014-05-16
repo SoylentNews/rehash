@@ -445,7 +445,11 @@ sub rss_story {
 				if $action;
 			# add poll if any
 			$extra .= pollbooth($story->{qid},1, 0, 1) if $story->{qid};
-			$encoded_item->{description} .= $self->encode($extra) if $extra;
+
+			#Encdoe with CDATA instead
+			#$encoded_item->{description} .= $self->encode($extra) if $extra;
+			$encoded_item->{description} .= $extra if $extra;
+			$encoded_item->{description} = "<![CDATA[" . $encoded_item->{description} . "]]>"
 		}
 	}
 
@@ -554,8 +558,9 @@ sub rss_item_description {
 				$desc .= '...';
 			}
 		}
-
-		$desc = $self->encode($desc);		
+		
+		#Encode with CDATA instead
+		#$desc = $self->encode($desc);		
 	} else {
 		undef $desc;
 	}
