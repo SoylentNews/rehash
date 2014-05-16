@@ -20,6 +20,7 @@ use vars qw($VERSION);
 
 sub main {
 my $start_time = Time::HiRes::time;
+	my $slashdb	= getCurrentDB();
 	my $messages  = getObject('Slash::Messages');
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
@@ -34,6 +35,8 @@ my $start_time = Time::HiRes::time;
 		save_prefs	=> [ $user_ok,		\&save_prefs		],
 		list_messages	=> [ !$user->{is_anon},	\&list_messages		],
 		list		=> [ !$user->{is_anon},	\&list_messages		],
+		show_messages => [ !$user->{is_anon},	\&show_messages		],
+		show => [ !$user->{is_anon},	\&show_messages		],
 		display_message	=> [ !$user->{is_anon},	\&display_message	],
 		display		=> [ !$user->{is_anon},	\&display_message	],
 		delete_message	=> [ $user_ok,		\&delete_message	],
@@ -152,32 +155,45 @@ sub display_prefs {
 		}
 	}
 
-	my $uid = $user->{uid};
-	if ($user->{seclev} >= 1000 && $form->{uid}) {
-		$uid = $form->{uid};
+	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
+	my ($id, $userm, $fieldkey);
+	if ($admin_flag && $form->{userfield}) {
+		$id ||= $form->{userfield};
+		if ($form->{userfield} =~ /^\d+$/) {
+			$userm = $slashdb->getUser($id);
+			$fieldkey = 'uid';
+		} else {
+			$userm = $slashdb->getUser($slashdb->getUserUID($id));
+			$fieldkey = 'nickname';
+		}
+	} else {
+		$userm = $id eq '' ? $user : $slashdb->getUser($id);
+		$fieldkey = 'uid';
+		$id = $userm->{uid};
 	}
+	
 
-	my $prefs = $messages->getPrefs($uid);
-	my $userm = $slashdb->getUser($uid); # so we can modify a different user other than ourself
-
+	my $prefs = $messages->getPrefs($userm->{uid});
+	my $title ='Configuring Messages for '.strip_literal($userm->{nickname}).' ('.$userm->{uid}.')';
 	header(getData('header')) or return;
-	print createMenu('users', {
-		style		=> 'tabbed',
-		justify 	=> 'right',
-		color		=> 'colored',
-		tab_selected	=> 'preferences',
-	});
+	
+	my $admin_block = 	slashDisplay('getUserAdmin', {
+			field=> $userm->{uid},
+			useredit => $userm
+			}, { Return => 1, Page => 'users' }) if $admin_flag;
+
 	slashDisplay('journuserboxes');
 	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
-		nickname	=> $user->{nickname},
-		uid		=> $user->{uid},
-		tab_selected	=> 'messages'
+		tab_selected	=> 'messages',
+		title  => $title
 	}, { Return => 1 });
 	my $messages_menu =  createMenu('messages');
 	slashDisplay('display_prefs', {
 		userm		=> $userm,
 		prefs		=> $prefs,
 		note		=> $note,
+		admin_flag		=> $admin_flag,
+		admin_block   => $admin_block,
 		messagecodes	=> $messagecodes,
 		deliverymodes	=> $deliverymodes,
 		prefs_titlebar	=> $prefs_titlebar,
@@ -248,6 +264,31 @@ sub list_messages {
 		messages_menu 	=> $messages_menu,
 		user_titlebar	=> $user_titlebar,
 	});
+	footer();
+}
+
+sub show_messages {
+	my($messages, $constants, $user, $form, $note) = @_;
+
+	my $messagecodes = $messages->getDescriptions('messagecodes');
+	my $message_list = $messages->getWebByUID();
+
+	header(getData('header')) or return;
+	
+	my $user_titlebar = slashDisplay('user_titlebar', {
+		nickname	=> $user->{nickname},
+		uid		=> $user->{uid},
+		title => 'Your Messages',
+		tab_selected	=> 'messages'
+	}, { Return => 1} );
+
+	slashDisplay('show_messages', {
+		note		=> $note,
+		messagecodes	=> $messagecodes,
+		message_list	=> $message_list,
+		user_titlebar	=> $user_titlebar,
+	});
+	
 	footer();
 }
 

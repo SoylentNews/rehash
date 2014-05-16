@@ -244,7 +244,7 @@ ul#commentlisting
     border-radius: .3em;
     text-align:center;
     font-weight:bold;
-    padding: .2em .6em;
+    padding: .3em .6em;
     color:#fff !important;
     text-decoration:none;
 }

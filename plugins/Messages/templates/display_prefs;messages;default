@@ -16,7 +16,7 @@ __name__
 display_prefs
 __template__
 <div id="users-blocks">
-[% PROCESS prefs_titlebar tab_selected='messages' title='Configuring Messages' %]
+[% prefs_titlebar %]
 	<div class="generalbody">
 		[%
 		   userm = userm ? userm : user;
@@ -32,7 +32,14 @@ __template__
 				[% note %]
 			</div>
 		[% END %]
-		From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.
+		
+		[% IF admin_flag %]
+			[% admin_block %]
+		[% END %]
+		
+		<p>From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.</p>
+
+	
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Message Preferences</legend>

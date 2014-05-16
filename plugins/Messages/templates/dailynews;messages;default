@@ -11,7 +11,6 @@ en_US
 __name__
 dailynews
 __template__
-[% fh_reader = Slash.getObject('Slash::FireHose') %]
 
 [% USE num = format("\n%5d. %s") %]
 [% USE box = format("| %-93.93s|\n") %]
@@ -29,22 +28,14 @@ In this issue:[% FOR story = stories.reverse %]
 		box("  from the $story.dept dept.");
 	END;
 	thisurl = Slash.url2abs(Slash.db.getSection(story.section, 'rootdir'), absolutedir) || absolutedir;
-
 	stime = Slash.timeCalc(story.time, "%A %B %d, @%H:%M");
 	box("  posted by $story.author on $stime ($topicname)");
-	fh_item = fh_reader.getFireHoseBySidOrStoid(story.sid);
-        fh_link = fh_reader.linkFireHose(fh_item);
-        fh_url = Slash.url2abs(fh_link, constants.absolutedir_secure);
-        box("  $fh_url");
+  box("  $thisurl/article.pl?sid=$story.sid");
 %]+----------------------------------------------------------------------------------------------+
 
 [% story.asciitext.replace('\n(?=\n  \* \[\d+\])', '') %]
 
-[% IF !constants.newsletter_body && story.bodytext -%]
-This story continues at:
-	[% fh_url %]
-
-[% END %]Discuss this story at:
+Discuss this story at:
     [% thisurl %]/comments.pl?sid=[% story.sid %][% IF story.refs.size %]
 
 Links:[%

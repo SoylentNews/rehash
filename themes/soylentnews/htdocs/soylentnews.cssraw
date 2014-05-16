@@ -1,5 +1,5 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
-body { background: #e5e5e5 }
+body { background: #e5e5e5; }
 a { color: #600; }
 a:visited { color: #000; }
 a:hover { color: #800;}
@@ -115,7 +115,6 @@ a:hover { color: #800;}
 	border: 1px solid #aaa;
 	border-bottom: none;
 	border-top: none;
-
 }
 
 
@@ -183,7 +182,6 @@ fieldset li.comment
 {
 	background: #fff;
 	border: 1px solid #aaa;
-	border-top: none;
 }
 
 
@@ -279,6 +277,12 @@ div.storylinks ul li
 	display: inline;
 }
 
+.data_head
+{
+	background: #600;
+}
+
+
 /* Comments */
 .commentBox { background: #600; }
 
@@ -292,7 +296,7 @@ div.storylinks ul li
 	font-size: .7em;
 }
 
-.btmnav ul li a { color: #600; }
+.btmnav ul li a, .btmnav ul li a:visited { color: #600; }
 
 /* Journal */
 .journaldate { position: relative; }
@@ -302,32 +306,6 @@ div.storylinks ul li
 	margin: 0 0 1em 0;
 }
 
-#journalgeneric div.storylinks ul li { margin: 0; padding: 0; border: none; }
-#journalgeneric div.storylinks ul li a { padding: 0 .4em 0 1em; border-left: 1px solid #000; }
-#journalgeneric div.storylinks ul li.edit a, #journalgeneric div.storylinks ul li.discussion a, #journalgeneric div.storylinks ul li.journalid a { border: none; }
-#journalslashdot .journaldate {font-weight: bold;}
-#journalslashdot .title { margin: 0 0 0 .6em; padding: 0; float: left;}
-#journalslashdot h3 { font-size: .65em; margin: 0; padding: 0; }
-#journalslashdot .details { float: left; font-style: italic; font-size: 65%; background: transparent; }
-#journalslashdot .intro { padding: 1em 0 2em 3.7em;}
-#journalslashdot div.storylinks { margin: 0; padding: 0; background: transparent;font-size: .65em;}
-#journalslashdot div.storylinks ul { margin: 0; padding: 0; background: transparent;}
-#journalslashdot div.storylinks ul li { margin: 0; padding: 0; border: none;  }
-#journalslashdot div.storylinks ul li a { padding: 0 .4em 0 1em; border-left: 1px solid #000; }
-#journalslashdot div.storylinks ul li.edit a, #journalslashdot div.storylinks ul li.discussion a, #journalslashdot div.storylinks ul li.journalid a { border: none; }
-#journalslashdot .journalpage {font-size: 65em; text-align: right;}
-#journalgrey .journaldate { font-weight: bold; background: #eee; }
-#journalgrey .details { float: left; font-weight: bold; background: #eee; padding: 0 0.6em 0 0; }
-#journalgrey .title { background: #eee; padding: 0 0 0 0.6em; }
-#journalgrey { border: 3px solid #999; padding: 3px;}
-#journalgrey div.storylinks, #journalblue div.storylinks { background: transparent; }
-#journalgrey div.storylinks ul, #journalblue div.storylinks ul { background: transparent; }
-#journalgrey .body, #journalblue .body {min-height: 60px; }
-#journalblue div.storylinks ul li,  #journalgrey div.storylinks ul li { border: none; margin: 0; padding: 0; }
-#journalblue .journaldate { background: #369; font-weight: bold; padding: 3px; }
-#journalblue { border: 3px solid #000; }
-#journalblue .details { float: left; margin: 0 0.6em 0 0.3em; font-weight: bold; }
-#journalblue .title h3 { margin: 0; padding: 0;  }
 
 /* Forms */
 textarea { width: 80%; }
@@ -335,32 +313,24 @@ textarea { width: 80%; }
 
 /* Misc */
 pre, code { font-size: .813em; }
-/* Ad */
-.ad1
-{
-	margin: .3em 0 .5em 0;
-	padding: 0;
-	text-align: center;
-}
 
-.ad2
-{
-	margin: 0;
-	padding: 0;
-	text-align: center;
-}
-
-.ad6
-{
-	margin: .2em .2em .2em 0;
-	padding: 0;
-}
 
 .tb_col { background: #600;}
 
+
 /* Usermenu */
-ul.menu a, ul.menu a:visited { color: #000; }
+
+ul.menu li a, ul.menu li a:visited { color: #000; }
+
+ul.menu li.selected a, ul.menu li a:hover { color: #600; }
+
 .generalbody ul.menu li a { color: #600; }
+
+#usermenu{
+	border: 1px solid #aaa;
+	border-bottom: none;
+	background:#fff;
+}
 
 #usermenu ul.menu {
     border-bottom: 1px solid #aaa;
@@ -411,3 +381,38 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+
+/* Messaging */
+
+.message_menu{
+	border: 1px solid #aaa;
+	background: #fff;
+	color: #000;
+	border-bottom: none;
+}
+.message_menu ul
+{
+	margin: 0;
+}
+
+.message_subject
+{
+	border: 1px solid #aaa;
+	background: #eee linear-gradient(#ccc, #eee);
+	color: #000;
+}
+
+.message_body
+{
+	border: 1px solid #aaa;
+	border-bottom: none;
+	border-top: none;
+	background: #fff;
+}
+
+.message_footer
+{
+	border: 1px solid #aaa;
+	border-top: none;
+	background: #fff;
+}

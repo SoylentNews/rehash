@@ -28,8 +28,8 @@ __template__
 [% FOREACH uid = list %]
 	[% IF uid.0 > 0 %]
 		<div class="title">
-			<a href="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</a>
-			<h2><a href="[% uid.3 %]">[% uid.2 %]</a></h2>
+		<h3><a href="[% gSkin.rootdir %]/~[% uid.2 %]">[% uid.2 %]</a></h3>
+		<a href="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</a>
 		[% IF admin %]
 			[<a href="[% gSkin.rootdir %]/users.pl?uid=[% uid.1 %]">edit</a>]
 		[% END %]

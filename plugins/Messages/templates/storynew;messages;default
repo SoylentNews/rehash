@@ -11,23 +11,9 @@ en_US
 __name__
 storynew
 __template__
-[%
-messages = Slash.getObject('Slash::Messages');
-mobile_code = messages.getMessageDeliveryByName("Mobile");
-code = msg.code;
-pref = msg.user.prefs.$code;
-%]
-[% IF pref != mobile_code %]
-[%
-fh_reader = Slash.getObject('Slash::FireHose');
-fh_item = fh_reader.getFireHoseBySidOrStoid(sid);
-fh_link = fh_reader.linkFireHose(fh_item);
-%]
-[% title %]: [% Slash.url2abs(fh_link, constants.absolutedir_secure) %]
-[% ELSE %]
+
 [% story = Slash.db.getStory(sid) %]
-[% title %]: [% constants.absolutedir_secure %]/palm/[% story.primaryskid %]/[% sid %]_1.shtml
-[% END %]
+[% title %]: [% absolutedir %]/article.pl?sid=[% sid %]
 
 __seclev__
 500

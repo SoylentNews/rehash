@@ -608,6 +608,11 @@ sub getWeb {
 	return $msg;
 }
 
+sub setReaded {
+	my($self, $msg_id) = @_;
+	$self->_set_readed($msg_id);
+}
+
 sub getWebByUID {
 	my($self, $uid) = @_;
 	$uid ||= getCurrentUser('uid');

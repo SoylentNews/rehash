@@ -63,12 +63,6 @@ sub main {
 	$op = 'default' unless $ops->{$op};
 
 	header("subscribe") or return;
-	print createMenu('users', {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	'preferences',
-	});
 
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
 
@@ -80,14 +74,31 @@ sub main {
 # Edit options
 sub edit {
 	my($form, $slashdb, $user, $constants) = @_;
-	my $user_edit;
-	if ($form->{uid}
-		&& $user->{seclev} >= 100
-		&& $form->{uid} =~ /^\d+$/
-		&& !isAnon($form->{uid})) {
-		$user_edit = $slashdb->getUser($form->{uid});
+	
+	
+	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
+	my ($id, $user_edit, $fieldkey);
+	if ($admin_flag && $form->{userfield}) {
+		$id ||= $form->{userfield};
+		if ($form->{userfield} =~ /^\d+$/) {
+			$user_edit = $slashdb->getUser($id);
+			$fieldkey = 'uid';
+		} else {
+			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
+			$fieldkey = 'nickname';
+		}
+	} else {
+		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
+		$fieldkey = 'uid';
+		$id = $user_edit->{uid};
 	}
-	$user_edit ||= $user;
+	
+	my $admin_block = 	slashDisplay('getUserAdmin', {
+			field=> $user_edit->{uid},
+			useredit => $user_edit
+			}, { Return => 1, Page => 'users' }) if $admin_flag;
+
+	my $title ='Configuring Messages for '.strip_literal($user_edit->{nickname}).' ('.$user_edit->{uid}.')';
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my @defpages = sort keys %{$subscribe->{defpage}};
@@ -103,12 +114,14 @@ sub edit {
 		? $user->{hits_bought_today_max}
 		: "";
 
-	titlebar("100%", "Configuring Subscription", {
+	titlebar("100%", $title, {
 		template =>		'prefs_titlebar',
 		tab_selected =>		'subscription',
 	});
 	slashDisplay("edit", {
 		user_edit => $user_edit,
+		admin_flag		=> $admin_flag,
+		admin_block   => $admin_block,
 		user_newvalues => $user_newvalues,
 	});
 	1;

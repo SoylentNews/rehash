@@ -545,7 +545,7 @@ sub userLogin {
 
 {
 my %ops_my = (
-	inbox           => { args => 'op=list', uri => 'messages.pl' },
+	inbox           => { args => 'op=show', uri => 'messages.pl' },
 	# XXX change messages to be same as /inbox, move this to /my/preferences/messages
 	messages        => { args => 'op=display_prefs', uri => 'messages.pl' },
 	comments        => { args => 'op=editcomm' },

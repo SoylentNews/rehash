@@ -245,6 +245,14 @@ sub _get_web {
 	return $data;
 }
 
+sub _set_readed {
+	my($self, $msg_id) = @_;
+	my $id_db = $self->sqlQuote($msg_id);
+	my $table    = $self->{_web_table1};
+	my $prime    = $self->{_web_prime1};
+	$self->sqlUpdate($table, { readed => 1 }, "$prime=$id_db");
+}
+
 sub _get_web_by_uid {
 	my($self, $uid) = @_;
 	my $table = $self->{_web_table};
