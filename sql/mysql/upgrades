@@ -32,3 +32,16 @@ ALTER TABLE users_comments CHANGE mode mode ENUM('flat','nested','nocomment','th
 
 # Remove slashcode Theme and set to default
 UPDATE site_info SET value='default' WHERE name='theme';
+
+# Add in var to set if Newsletters are sent to new users by default
+INSERT INTO vars (name, value, description) VALUES ('newsletter_by_default','0','Turn on newsletter sending by default for new users. 0 = off | 1 = on');
+
+# Update for longer nicknames
+UPDATE vars SET value = '35' WHERE name = 'nick_maxlen';
+UPDATE vars SET value = '^[a-zA-Z_][ a-zA-Z0-9$_.+!*\'(),-]{0,34}$' WHERE name = 'nick_regex';
+ALTER TABLE users CHANGE nickname nickname varchar(35) DEFAULT '' NOT NULL;
+ALTER TABLE users CHANGE matchname matchname varchar(35);
+
+# Add admin only for subscription prefs
+INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_only', 1, 'Subscription prefs only enabled for admins?');
+

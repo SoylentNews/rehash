@@ -1399,14 +1399,14 @@ CREATE TABLE urls (
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
 	uid mediumint UNSIGNED NOT NULL auto_increment,
-	nickname varchar(20) DEFAULT '' NOT NULL,
+	nickname varchar(35) DEFAULT '' NOT NULL,
 	realemail varchar(50) DEFAULT '' NOT NULL,
 	fakeemail varchar(75),
 	homepage varchar(100),
 	passwd char(32) DEFAULT '' NOT NULL,
 	sig varchar(200),
 	seclev mediumint UNSIGNED DEFAULT '0' NOT NULL,	/* This is set to 0 as a safety factor */
-	matchname varchar(20),
+	matchname varchar(35),
 	newpasswd char(32),
 	newpasswd_ts int UNSIGNED,
 	journal_last_entry_date datetime,
