@@ -292,12 +292,11 @@ position: relative;
 
 /* login content */
 #slashboxes #userlogin-content legend,
-#slashboxes #login-content legend,
-#login legend { display: none; }
+#slashboxes #login-content legend
+{ display: none; }
 
 #slashboxes #userlogin-content fieldset,
-#slashboxes #login-content fieldset,
-#login fieldset
+#slashboxes #login-content fieldset
 {
 margin: 0;
 padding: 0;

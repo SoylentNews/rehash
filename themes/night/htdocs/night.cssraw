@@ -6,7 +6,7 @@ body, body.admin
 }
 .user_admin, body .adminstoryform fieldset {background: #440;}
 
-a { color: #d00; }
+a, .error { color: #d00; }
 a:visited { color: #fff; }
 a:hover { color: #800;}
 
