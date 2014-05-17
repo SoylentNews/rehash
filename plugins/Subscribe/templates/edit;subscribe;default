@@ -22,6 +22,11 @@ en_US
 __name__
 edit
 __template__
+<div id="slashboxes">
+	[% PROCESS userboxes %]
+</div>
+<div id="users-blocks">
+[% prefs_titlebar %]
 <div class="generalbody">
 [% IF !user.is_admin; user_edit = user; END %]
 
@@ -195,6 +200,7 @@ If your question is about your daily headlines email, you can edit that at
 	cmCreateConversionEventTag( 'Account Subscription', '1', 'subscription', '5' );
 })();
 </script>
+</div>
 __seclev__
 10000
 __version__

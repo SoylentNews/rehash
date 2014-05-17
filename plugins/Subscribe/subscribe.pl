@@ -113,15 +113,17 @@ sub edit {
 		defined($user->{hits_bought_today_max})
 		? $user->{hits_bought_today_max}
 		: "";
-
-	titlebar("100%", $title, {
-		template =>		'prefs_titlebar',
+	
+	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
 		tab_selected =>		'subscription',
-	});
+		title  => $title
+	}, { Return => 1 });
+		
 	slashDisplay("edit", {
 		note => $note,
 		user_edit => $user_edit,
 		userfield =>$form->{userfield},
+		prefs_titlebar	=> $prefs_titlebar,
 		admin_flag => $admin_flag,
 		admin_block  => $admin_block,
 		user_newvalues => $user_newvalues,
