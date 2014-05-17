@@ -170,7 +170,7 @@ sub newUser {
                                 $params{$code} = MSG_MODE_WEB() if $code;
                         }
 
-			$params{MSG_CODE_NEWSLETTER()} = MSG_MODE_EMAIL();
+			$params{MSG_CODE_NEWSLETTER()} = MSG_MODE_EMAIL() if $constants->{newsletter_by_default};
 
 			$messages->setPrefs($uid, \%params);
 
@@ -339,16 +339,34 @@ sub _sendMailPasswd {
 sub changePrefs {
 	my($slashdb, $reader, $constants, $user, $form, $login, $note) = @_;
 
-	# I am not going to add admin-modification right now,
-	# because they way it is currently done sucks.  we should
-	# handle that in one place only, not duplicate the same
-	# damned code everywhere, and i will not be a party to
-	# such madness. -- pudge
 
 	_validFormkey('generate_formkey') or return;
+	
+	
+	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
+	my ($id, $user_edit, $fieldkey);
+	if ($admin_flag && $form->{userfield}) {
+		$id ||= $form->{userfield};
+		if ($form->{userfield} =~ /^\d+$/) {
+			$user_edit = $slashdb->getUser($id);
+			$fieldkey = 'uid';
+		} else {
+			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
+			$fieldkey = 'nickname';
+		}
+	} else {
+		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
+		$fieldkey = 'uid';
+		$id = $user_edit->{uid};
+	}
+	
+	my $admin_block = 	slashDisplay('getUserAdmin', {
+			field=> $user_edit->{uid},
+			useredit => $user_edit
+			}, { Return => 1, Page => 'users' }) if $admin_flag;
 
 	header(getData('prefshead')) or return;
-	slashDisplay('changePasswd', { note => $note });
+	slashDisplay('changePasswd', { note => $note, user_edit => $user_edit, userfield =>$form->{userfield}, admin_flag => $admin_flag, admin_block => $admin_block });
 	footer();
 }
 
@@ -358,10 +376,19 @@ sub savePrefs {
 
 	_validFormkey(qw(max_post_check valid_check formkey_check regen_formkey))
 		or return;
-
+	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
+	my $user_edit;
+	if ($form->{uid}
+		&& $admin_flag
+		&& $form->{uid} =~ /^\d+$/
+		&& !isAnon($form->{uid})) {
+		$user_edit = $slashdb->getUser($form->{uid});
+	}
+	$user_edit ||= $user;	
+		
 	my $error = 0;
 	my @note;
-	my $uid = $user->{uid};
+	my $uid = $user_edit->{uid};
 
 	my $changepass = 0;
 	if ($form->{pass1} || $form->{pass2} || length($form->{pass1}) || length($form->{pass2})) {
@@ -379,13 +406,14 @@ sub savePrefs {
 			$error = 1;
 		}
 
-		if ($form->{pass1} && length $form->{pass1} > 20) {
-			push @note, getData('passtoolong');
-			$error = 1;
-		}
+#		We hash the pass so they can be as long as the user wants --paulej72		
+#		if ($form->{pass1} && length $form->{pass1} > 20) {
+#			push @note, getData('passtoolong');
+#			$error = 1;
+#		}
 
 		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass}, 1);
-		if (!$return_uid || $return_uid != $uid) {
+		if ($uid == $user->{uid} && (!$return_uid || $return_uid != $uid)) {
 			push @note, getData('oldpassbad');
 			$error = 1;
 		}
@@ -403,10 +431,10 @@ sub savePrefs {
 		$user_save->{cookie_location} = $form->{cookie_location};
 
 		# changed pass, so delete all logtokens
-		$slashdb->deleteLogToken($user->{uid}, 1);
+		$slashdb->deleteLogToken($user_edit->{uid}, 1);
 
-		if ($user->{admin_clearpass}
-			&& !$user->{state}{admin_clearpass_thisclick}) {
+		if ($user_edit->{admin_clearpass}
+			&& !$user_edit->{state}{admin_clearpass_thisclick}) {
 			# User is an admin who sent their password in the clear
 			# some time ago; now that it's been changed, we'll forget
 			# about that incident, unless this click was sent in the
@@ -414,11 +442,12 @@ sub savePrefs {
 			$user_save->{admin_clearpass} = '';
 		}
 
-		$slashdb->setUser($user->{uid}, $user_save);
+		$slashdb->setUser($user_edit->{uid}, $user_save);
 		$note = getData('passchanged');
-
-		my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($uid, 1));
-		setCookie('user', $cookie, $user_save->{session_login});
+		if ($uid == $user->{uid}) {
+			my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($uid, 1));
+			setCookie('user', $cookie, $user_save->{session_login});
+		}
 	}
 	changePrefs(@_, $note);
 }
