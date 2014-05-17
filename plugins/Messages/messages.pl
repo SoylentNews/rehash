@@ -192,6 +192,7 @@ sub display_prefs {
 		userm		=> $userm,
 		prefs		=> $prefs,
 		note		=> $note,
+		userfield =>$form->{userfield},
 		admin_flag		=> $admin_flag,
 		admin_block   => $admin_block,
 		messagecodes	=> $messagecodes,
