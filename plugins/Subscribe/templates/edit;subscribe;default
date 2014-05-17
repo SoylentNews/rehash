@@ -24,16 +24,22 @@ edit
 __template__
 <div class="generalbody">
 [% IF !user.is_admin; user_edit = user; END %]
+
+		[% IF note %]
+			<div class="message">
+				[% note %]
+			</div>
+		[% END %]
 		[% IF admin_flag %]
 			[% admin_block %]
 		[% END %]
 
 	[% IF (constants.subscribe_allow_gifts && (!constants.subscribe_gift_testing || user.is_admin)) %]
 		<p>You can buy a subscription for yourself or a gift subscription for another user.
-		Payment options include PayPal and credit-card.
-		<p>Recipients of gift subscriptions will be notified of your purchase through email.
+		Payment options include PayPal and credit-card.</p>
+		<p>Recipients of gift subscriptions will be notified of your purchase through email.</p>
 
-		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a> [% END %]
+		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a></p> [% END %]
 	
 		<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
 		<fieldset>
@@ -44,16 +50,14 @@ __template__
 		<br>
 			For gift subscriptions only:<br>
 			Who do you want the recipient to be told the gift is from?<br>
-			<input type="text" name="from" size="15" maxlength="30"> (30 character limit, defaults to your username if nothing is entered)
+			<input type="text" name="from" size="15" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)
 		<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue and choose payment type">
 		</fieldset>
 	</form>
 	[% ELSE %]
-		<p>Hit the PayPal or credit-card link below to subscribe to
-		[% constants.sitename %].
-		You will be able to purchase banner-ad-free pages.
+		<p>Hit the PayPal or credit-card link below to subscribe to [% constants.sitename %]. You will be able to purchase banner-ad-free pages.</p>
 		
-		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a> [% END %]
+		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a></p> [% END %]
 
 		[% PROCESS paypalbut %]
 		[% PROCESS ccbut %]
@@ -88,20 +92,30 @@ __template__
 	END;
 %]
 
-[% IF user.is_admin || ( hits_paidfor && (hits_paidfor > hits_bought) );
-	can_buy = 1; ELSE; can_buy = 0; END %]
 
-<p>[% IF user.uid == user_edit.uid %]You have[% ELSE %]User "[% user_edit.nickname | strip_literal %]" has[% END %]
-paid for a total of [% hits_paidfor %] pages
-and so far [% hits_bought %] have been used up
-([% hits_bought_today %] today).
-[% IF hits_paidfor && user.uid == user_edit.uid %]
-	Thank you for supporting [% constants.sitename %]! We appreciate your
-	contribution very much.
-[% END %]
 
+<p>
+	[% IF user.uid == user_edit.uid %]
+		You have
+	[% ELSE %]
+		User "[% user_edit.nickname | strip_literal %]" has
+	[% END %]
+	paid for a total of [% hits_paidfor %] pages	and so far [% hits_bought %] have been used up ([% hits_bought_today %] today).
+
+	[% IF hits_paidfor && user.uid == user_edit.uid %]
+		Thank you for supporting [% constants.sitename %]! We appreciate your contribution very much.
+	[% END %]
+</p>
 <p>(We use Greenwich Mean Time to decide where "today" begins and
-ends. Your day may vary.)
+ends. Your day may vary.)</p>
+
+
+[% IF user.is_admin || ( hits_paidfor && (hits_paidfor > hits_bought) );
+	can_buy = 1;
+ELSE;
+	can_buy = 0;
+END %]
+
 
 [% IF can_buy %]
 
@@ -111,18 +125,10 @@ ends. Your day may vary.)
 	<input type="hidden" name="uid" value="[% user_edit.uid %]">
 	[% END %]
 
-[% END %]
-
-[% IF user.is_admin %]
-
-	<p>Want to buy
-	[% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% END %]
-	some pages? You're an admin, so take as many as you want:
-	<input type="text" name="buymore" value="0" size="6">
-
-[% END %]
-
-[% IF can_buy %]
+	[% IF user.is_admin %]
+		<p>Want to buy [% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% END %]
+		some pages? You're an admin, so take as many as you want: <input type="text" name="buymore" value="0" size="6"></p>
+	[% END %]
 
 	<p>We give you some control over deciding where to suppress ads.
 	New subscribers default to suppressing ads everywhere except on
@@ -135,68 +141,39 @@ ends. Your day may vary.)
 	<th>&nbsp;&nbsp;</th></tr>
 
 	[% FOREACH page = pages %]
-
-	<tr>
-	<td valign="top" align="center"><input type="radio"
-		name="buypage_[% page.pagename %]"
-		value="0"[% constants.markup_checked_attribute IF !page.isbought %]></td>
-	<td valign="top" align="center"><input type="radio"
-		name="buypage_[% page.pagename %]"
-		value="1"[% constants.markup_checked_attribute IF  page.isbought %]></td>
-	<td valign="top" align="left">&nbsp;[% page.descr %]</td>
-	</tr>
-
+		<tr>
+			<td valign="top" align="center"><input type="radio"
+				name="buypage_[% page.pagename %]"
+				value="0"[% constants.markup_checked_attribute IF !page.isbought %]></td>
+			<td valign="top" align="center"><input type="radio"
+				name="buypage_[% page.pagename %]"
+				value="1"[% constants.markup_checked_attribute IF  page.isbought %]></td>
+			<td valign="top" align="left">&nbsp;[% page.descr %]</td>
+		</tr>
 	[% END %]
 
-	<tr><td>&nbsp;</td><td colspan="2" valign="top" align="left"
-	>&nbsp;Set "No Ads" anywhere, and you'll get ads disabled for
+	<tr><td>&nbsp;</td><td colspan="2" valign="top" align="left">Set "No Ads" anywhere, and you'll get ads disabled for
 	free on other pages too.
-	(<a href="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1400">More
-	info</a>.)</td></tr>
+	</td></tr>
 
 	</table>
 
-[% END %]
-
-[% IF can_buy %]
-
-	<p>Optionally, if you want to make sure you don't use up
-	your subscription too quickly, you may set a limit of the
-	maximum number of ads you will suppress per day. Beyond
-	this daily limit, pages will not count against your
-	subscription (and ads will begin to appear again). Enter
-	the value here, or 0 to disable the limit, or blank to
-	use the default value
+	<p>Optionally, if you want to make sure you don't use up your subscription too quickly, you may set a limit of the
+	maximum number of ads you will suppress per day. Beyond this daily limit, pages will not count against your
+	subscription (and ads will begin to appear again). Enter the value here, or 0 to disable the limit, or blank
+	to use the default value
 	[% IF constants.subscribe_hits_btmd %]
-	of [% constants.subscribe_hits_btmd %][% ELSE %]
-	(default is no limit)[% END %]:&nbsp;<INPUT
-	type="TEXT" name="hbtm"
-	value="[% hits_bought_today_max %]"
-	size="6">
+		of [% constants.subscribe_hits_btmd %]
+	[% ELSE %]
+		(default is no limit)
+	[% END %]:&nbsp;<INPUT	type="TEXT" name="hbtm"	value="[% hits_bought_today_max %]" size="6">
 	[% IF constants.subscribe_hits_btmd && constants.subscribe_hits_btmd > 2 %]
-	<br>Note that setting this value between 1 and
-	[% constants.subscribe_hits_btmd - 1 %]
-	will disable some
-	<a href="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1600">plums</a>.
+		<br>Note that setting this value between 1 and [% constants.subscribe_hits_btmd - 1 %] will disable some plums.
 	[% END %]
-
-[% END %]
-
-[% IF can_buy %]
+	</p>
 
 	<p><input type="submit" name="op" value="save">
-</fieldset>
-	</form>
-
-[% END %]
-[% IF user.is_admin %]
-	<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
-<fieldset>
-	<legend>Grant Subscriptions</legend>
-	<p>You're an admin so feel free to grant free pages to deserving users.<br>
-	Number of pages:<input type="text" name="pages" value="0" size="6">
-	User UID:<input type="text" name="uid" value="" size="8">
-	<input type="submit" name="op" value="grant">
+	<input type="hidden" name="userfield" value="[% userfield %]"></p>
 </fieldset>
 	</form>
 
@@ -208,8 +185,6 @@ or other subscription-related issues, please contact
 <a href="mailto:[% constants.subscribe_email %]">[% constants.subscribe_email %]</a>.
 If your question is about your daily headlines email, you can edit that at
 <a href="[% gSkin.rootdir %]/my/messages">[% gSkin.absolutedir %]/my/messages</a>.
-For a list of subscriber-only benefits, see
-<a href="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1600">the FAQ</a>.
 </div>
 <script type="text/javascript">
 (function() {
