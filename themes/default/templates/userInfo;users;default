@@ -59,15 +59,13 @@ __template__
 		[% PROCESS titlebar title="Last Journal Entry" %]
 		<div class="generalbody">
 				[% Slash.createMenu("journal", style => "tabbed") %]
-				<b>
-					<a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">
-						[% lastjournal.description | strip_notags %]
-					</a>
-				</b>,
-				[% Slash.timeCalc(useredit.journal_last_entry_date) %]
-				([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
-				[% IF lastjournal.article_shrunk %]
-					<p>[% lastjournal.article_shrunk %]</p>
+				[% IF lastjournal %]
+					<b><a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">[% lastjournal.description | strip_notags %]</a></b>,
+					[% Slash.timeCalc(useredit.journal_last_entry_date) %]
+					([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
+					[% IF lastjournal.article_shrunk %]
+						<p>[% lastjournal.article_shrunk %]</p>
+					[% END %]
 				[% ELSE %]
 					<p><i>(No journal entries.)</i></p>
 				[% END %]
