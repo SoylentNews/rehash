@@ -13,6 +13,7 @@ INSERT INTO vars (name, value, description) VALUES ('paypal_no_shipping', '1', '
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_pages', '1000', 'How many pages your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('paypal_return', 'http://www.example.com/subscribe.pl?op=pause', 'URL for successful payment completion');
 INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptions enabled?');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_only', 1, 'Subscription prefs only enabled for admins?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_seclev', 1000, 'Min seclev to do subscription admin stuff');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_debug', 0, 'Debug plugins/Subscribe?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_defpages', 'index article', 'Space-separated list of default pages (script names)');
