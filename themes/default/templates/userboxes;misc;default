@@ -182,7 +182,7 @@ IF !useredit.is_anon;
 	END %]
 
 	
-	<div class="logout"><a href="[% gSkin.rootdir %]/my/logout">Log out</a></div>
+	<div class="logout"><a href="[% gSkin.rootdir %]/my/logout">Log Out</a></div>
 
 	[% END;
 	Slash.sidebox(title, contents, "user-info", 1);

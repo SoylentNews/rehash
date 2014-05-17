@@ -22,18 +22,18 @@ __template__
 	<label>
 		Nickname
 	</label>
-	<input type="text" name="unickname" size="20" value="">
+	<input type="text" name="unickname" size="[% constants.nick_maxlen %]" value="" maxlength="[% constants.nick_maxlen %]">
 	<label>
 		Password
 	</label>
 	<input type="hidden" name="returnto" value="[% return_url | strip_urlattr %]">
 	<input type="hidden" name="op" value="userlogin">
-	<input type="password" name="upasswd" size="20">
+	<input type="password" name="upasswd" size="35">
 	<label class="checkbox">
 		<input type="checkbox" name="login_temp" value="yes">
 		Public Terminal
 	</label>
-	<input type="submit" name="userlogin" value="Log in" class="button">
+	<input type="submit" name="userlogin" value="Log In" class="button">
 	</fieldset>
 </form>
 

@@ -27,7 +27,7 @@ __template__
 <input type="hidden" name="uid" value="[% user.uid %]">
 
 <label id="unickname_label">Retrieve Nickname/UID/Email</label>
-<input type="text" id="unickname" name="unickname" size="20" value="">&nbsp;&nbsp;<span id="unickname_error" style="display: none;"></span>
+<input type="text" id="unickname" name="unickname" size="50" value="">&nbsp;&nbsp;<span id="unickname_error" style="display: none;"></span>
 
 <br><br>
 

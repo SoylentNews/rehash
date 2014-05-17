@@ -25,7 +25,7 @@ __template__
 <input type="hidden" name="op" value="mailpasswd">
 [% PROCESS formkey_tag %]
 		Retrieve Nickname/UID/Email
-		<input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+		<input type="text" name="unickname" size="50" value="[% form.unickname | strip_attribute %]">
 		<br>
 
 <div class="captcha">
