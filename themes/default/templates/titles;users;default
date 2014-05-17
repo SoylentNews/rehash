@@ -42,7 +42,7 @@ __template__
   Configuring User for [% user_edit.nickname | strip_literal %] ([% user_edit.uid %])
 
 [% CASE 'changePasswd_title' %]
-	Change password for [% user_edit.nickname | strip_literal %] ( [% user_edit.uid %]) 
+	Change password for [% user_edit.nickname | strip_literal %] ([% user_edit.uid %]) 
 
 [% CASE 'tildeEd_title' %]
 	Customize Stories on the Homepage
