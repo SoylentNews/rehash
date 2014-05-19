@@ -14,14 +14,18 @@ displayblock
 __template__
 [% IF block.block %]
 <div class="block" id="[% block.name %]">
-        <div class="title" id="[% block.name %]-title">
-        	<h4><a href="[% IF !block.portal_id; constants.real_rootdir _ '/'; END %][% block.url %]">[% block.title %]</a></h4>
+    <div class="title" id="[% block.name %]-title">
+			[% IF block.url %]
+				<h4><a href="[% IF !block.portal_id; constants.real_rootdir _ '/'; END %][% block.url %]">[% block.title %]</a></h4>
+			[% ELSE %]
+				<h4>[% block.title %]</h4>
+			[% END %]
 	</div>
 
-        <div class="content" id="[% block.name %]-content">
-                [% block.block %]
+	<div class="content" id="[% block.name %]-content">
+		[% block.block %]
 		[% IF supplement; supplement; END %]
-        </div>
+	</div>
 </div>
 [% END %]
 __seclev__
