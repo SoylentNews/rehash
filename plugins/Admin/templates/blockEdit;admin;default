@@ -40,8 +40,8 @@ __template__
 			<input type="submit" value="Delete Block" name="blockdelete2" class="button">
 		[% END %]
 			<div class="notes">
-        	                <ul>
-				        <li>You can only edit block content in static blocks.</li>
+				<ul>
+					<li>You can only edit block content in static blocks.</li>
 					<li>Portald blocks are dynamicly written and block content changes will usually be written over.</li>
 				</ul>
 			</div>
@@ -51,14 +51,14 @@ __template__
 		</fieldset>
 		<fieldset>
 			<legend>
-                                Edit [% FILTER strip_attribute %][% blockref.title %][% END %] Block
-                        </legend>
-                [% IF blockref.description %]
-                        <label>
-                                Block ID: [% bid %]
-                        </label>
-                        [% blockref.description %]
-                [% END %]
+				Edit [% FILTER strip_attribute %][% blockref.title %][% END %] Block
+			</legend>
+		[% IF blockref.description %]
+			<label>
+				Block ID: [% bid %]
+			</label>
+			[% blockref.description %]
+		[% END %]
 			[% PROCESS formLabel value => "Block ID" %]
 			<input type="text" name="thisbid" value="[% bid %]">
 			[% PROCESS formLabel value => "Title" %]
@@ -74,11 +74,19 @@ __template__
 			<label>
 				All Skins <input type="checkbox" value="1" name="all_skins" [% all_skins_checked %]>
 			</label>
+			<label>
+				Default <input type="checkbox" value="1" name="default_block" [% default_block_checked %]>
+			</label>
+			<label>
+				Hidden <input type="checkbox" value="1" name="hidden" [% hidden_checked %]>
+			</label>
+			<label>
+				Alwasy On (Users can't disable) <input type="checkbox" value="1" name="always_on" [% always_on_checked %]>
+			</label>
 		[% IF blockref.type == 'portald' %]
 			<label>
-				Portal <input type="checkbox" value="1" name="portal" [% portal_checked %]>
+				Portal (Check this if a slashbox)<input type="checkbox" value="1" name="portal" [% portal_checked %]>
 			</label>
-			[% PROCESS formNote note="Check this if a slashbox" %]
 			<label>
 				Retrieve <input type="checkbox" value="1" name="retrieve" [% retrieve_checked %]>
 			</label>

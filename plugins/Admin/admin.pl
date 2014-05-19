@@ -630,7 +630,7 @@ sub blockEdit {
 	}
 
 	my($blockref, $saveflag, $block_select, $retrieve_checked, $all_skins_checked,
-		$portal_checked, $block_select1, $block_select2);
+		$portal_checked, $default_block_checked, $hidden_checked, $always_on_checked, $block_select1, $block_select2);
 	my($blockedit_flag, $blockdelete_flag, $blockform_flag) = (0, 0, 0);
 	$blockref = {};
 
@@ -673,7 +673,10 @@ sub blockEdit {
 
 	my $yes_no = $slashdb->getDescriptions('yes_no', '', 1);
 	my $autosubmit_select = createSelect('autosubmit', $yes_no, $blockref->{autosubmit}, 1);
-
+	$default_block_checked = $constants->{markup_checked_attribute} if $blockref->{default_block} == 1;
+	$hidden_checked = $constants->{markup_checked_attribute} if $blockref->{hidden} == 1;
+	$always_on_checked = $constants->{markup_checked_attribute} if $blockref->{always_on} == 1;
+	
 	# if the pulldown has been selected and submitted
 	# or this is a block save and the block is a portald block
 	# or this is a block edit via sections.pl
@@ -702,6 +705,9 @@ sub blockEdit {
 		block_select2		=> $block_select2,
 		blockform_flag		=> $blockform_flag,
 		portal_checked		=> $portal_checked,
+		default_block_checked		=> $default_block_checked,
+		hidden_checked		=> $hidden_checked,
+		always_on_checked		=> $always_on_checked,
 		retrieve_checked	=> $retrieve_checked,
 		all_skins_checked	=> $all_skins_checked,
 		blocktype_select	=> $blocktype_select,
