@@ -225,16 +225,15 @@ __template__
 		[%- IF loop.index % 3 == 0 -%]
 			<tr valign="top" align="left">
 		[%- END -%]
-			<td><input type="checkbox" name="showbox_[% bid | strip_attribute %]"[% section_descref.$bid.checked %]>
-			<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
-			[% IF bid == 'srandblock' %]
-				Semi-Random Box
-                        [% ELSIF bid == 'srandblock_ostg' %]
-                                Semi-Random OSTG Content
-			[% ELSE %]
-				[% section_descref.$bid.title || bid %]
-			[% END %]
-			</a></td>
+			<td>
+				[%- IF section_descref.$bid.always_on -%]
+					<input type="hidden" name="showbox_[% bid | strip_attribute %]" value="1">
+					<input type="checkbox" disabled="disabled" checked="checked">
+				[%- ELSE -%]
+					<input type="checkbox" name="showbox_[% bid | strip_attribute %]"[% section_descref.$bid.checked %]>
+				[%- END -%]
+				<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">[% section_descref.$bid.title || bid %]</a>
+			</td>
 		[%- IF loop.index % 3 == 2 -%]
 			</tr>
 		[% END -%]
@@ -247,9 +246,6 @@ __template__
 		</tr>
 	</table>
 
-	[% FOREACH extra_block = extra_blocks %]
-                <input type="hidden" name="dynamic_[% extra_block %]" value="on">
-        [% END %]
 
 	[% tilded_customize_msg %]
 	[% tilded_box_msg %]
