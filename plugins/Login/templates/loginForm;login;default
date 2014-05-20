@@ -51,14 +51,11 @@ __template__
                                 <label>
                                         Nickname
                                 </label>
-                                <input type="text" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+                                <input type="text" name="unickname" size="[% constants.nick_maxlen %]" value="[% form.unickname | strip_attribute %]">
                                 <label>
                                         Password
                                 </label>
-                                <input type="password" name="upasswd" size="20" maxlength="20">
-                                <!--<div class="note">
-                                        (6-20 characters long)
-                                </div>-->
+                                <input type="password" name="upasswd" size="35">
                                 <label class="checkbox">
                                 	<input type="checkbox" name="login_temp" value="yes" class="checkbox">
 					Public Terminal

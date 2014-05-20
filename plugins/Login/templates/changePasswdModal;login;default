@@ -62,14 +62,14 @@ to reauthenticate.</p>
 
 <label><b>Current Password</b></label>
 <div style="display: block; [% note_style %]">To change your password, enter your current password.</div>
-<input type="password" name="oldpass" size="20" maxlength="20" value="">
+<input type="password" name="oldpass" size="35"  value="">
 
 <br><br>
 
 <label><b>New Password</b></label>
-<div style="display: block; [% note_style %]">Enter your new password twice, must be 6-20 chars long.</div>
-<input type="password" name="pass1" size="20" maxlength="20">
-<input type="password" name="pass2" size="20" maxlength="20">
+<div style="display: block; [% note_style %]">Enter your new password twice, must at least 6 chars long.</div>
+<input type="password" name="pass1" size="35">
+<input type="password" name="pass2" size="35">
 <input type="button" value="Change Login Prefs" onclick="void(document.forms['modal_prefs'].inputmode.value = 1); saveModalPrefs();">
 
 <p id="modal_message_feedback" style="[% IF !error %]display: none;[% END %][% note_style %]">[% error %]</p>

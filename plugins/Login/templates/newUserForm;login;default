@@ -41,14 +41,12 @@ __template__
 
 			<form action="[% constants.real_rootdir %]/login.pl" method="post">
 			[%- IF form.openid_reskey %]<input type="hidden" name="openid_reskey" value="[% form.openid_reskey | strip_attribute %]">[% END %]
-			<fieldset>
-			<legend></legend>
 			[% PROCESS formkey_tag %]
 			[% PROCESS reskey_tag reskey_label => 'nick_rkey', rkey => nick_rkey %]
 				<label>
 					Nickname&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 				</label>
-				<input type="text" name="newusernick" value="[% form.newusernick | strip_attribute %]" maxlength="[% constants.nick_maxlen %]">
+				<input type="text" name="newusernick" value="[% form.newusernick | strip_attribute %]" size="[% constants.nick_maxlen %] maxlength="[% constants.nick_maxlen %]">
 				<div class="note tip">
 					(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
 				</div>
@@ -57,8 +55,8 @@ __template__
 				</label>
 				<input type="hidden" name="op" value="newuser">
 				<input type="hidden" name="tzcode" value="[% form.tzcode | strip_attribute %]">
-				<input type="text" name="email" value="[% form.email | strip_attribute %]" size="40">
-				<input type="text" name="email2" value="[% form.email2 | strip_attribute %]" size="40">
+				<input type="text" name="email" value="[% form.email | strip_attribute %]" size="50"><br />
+				<input type="text" name="email2" value="[% form.email2 | strip_attribute %]" size="50">
 				<div class="note tip">
 					Enter a valid email address <b>twice</b> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.
 				</div>
@@ -80,7 +78,6 @@ __template__
 	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
 	<input type="submit" name="newuser" value="Create Account">
 
-</fieldset>
 </form>
 	</div>
 </div>

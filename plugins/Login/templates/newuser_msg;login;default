@@ -15,7 +15,7 @@ __template__
 
 [% title = BLOCK %]User [% form.newusernick | strip_literal %] created[% END %]
 [% PROCESS titlebar title=title width="100%" %]
-
+<div class="generalbody">
 <p><b>email</b>=[% form.email | strip_literal %]<br>
 <b>user id</b>=[% uid %]<br>
 <b>nick</b>=[% form.newusernick | strip_literal %]<br>
@@ -24,8 +24,12 @@ __template__
 <p>Once you receive your password, you can
 <a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a>
 
-[% thanksblock %]
+<p>Be sure to also set <a href="[% constants.real_rootdir %]/my/info">your preferences</a> to suit your needs.  Our defaults should work fine for you, but you may want to at least set your time zone.</p>
 
+
+
+[% thanksblock %]
+</div>
 __seclev__
 10000
 __version__

@@ -60,14 +60,13 @@ __template__
 		</select>
 		</label>
 	[% END %]
-                        <p>
-                                You may select a message threshold for when messages for comments (replies to journal entries, replies to comments) are sent to you.
-                        </p>
+      <p>You may select a message threshold for when messages for comments (replies to journal entries, replies to comments) are sent to you.</p>
 	
 			[% thresh = userm.message_threshold.defined ? userm.message_threshold : constants.message_threshold; 
 			Slash.createSelect('message_threshold', Slash.db.getDescriptions('threshcodes'), thresh, 1) %]
 
 				<input type="hidden" name="uid" value="[% userm.uid %]">
+				<input type="hidden" name="userfield" value="[% userfield %]">
 				<input type="hidden" name="op" value="save_prefs">
 				<input type="submit" value="Save Prefs">
 			</fieldset>

@@ -334,10 +334,16 @@ sub main {
 		$ops->{$_} = $ops->{default};
 	}
 	
+	# Setup redirects for admin_block before page draws
+	# Password
+	if ($op eq 'admin' &&  $form->{changepasswd}){
+    redirect("$constants->{real_rootdir}/login.pl?op=changeprefs&userfield=$form->{userfield}", "301");
+  }
+	# Messages
 	if ($op eq 'admin' &&  $form->{messages}){
     redirect("$constants->{real_rootdir}/messages.pl?op=display_prefs&userfield=$form->{userfield}", "301");
   }
-	
+	# Submissions
 	if ($op eq 'admin' &&  $form->{subscription}){
     redirect("$constants->{real_rootdir}/subscribe.pl?userfield=$form->{userfield}", "301");
   }

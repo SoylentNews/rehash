@@ -32,12 +32,11 @@ userInfo
 __template__
 [% orig_title = title %]
 <div id="slashboxes">
-[% PROCESS userboxes %]
+	[% PROCESS userboxes %]
 </div>
 [% title = orig_title %]
 <div id="users-blocks">
-[% IF nickmatch_flag %]
-
+	[% IF nickmatch_flag %]
 		[% IF ! useredit.registered %]
 			<div id="message">
 				<div class="content">
@@ -45,45 +44,32 @@ __template__
 				</div>
 			</div>
 		[% END %]
-
-[% END %]
-[% PROCESS user_titlebar tab_selected='info' %]
-	<div class="generalbody">
-	[% IF suadmin_flag %]
-		[% admin_block %]
 	[% END %]
-
-	[% IF nickmatch_flag %]
-		<p>
-			This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
-		</p>
-	[% END %]
- </div>
-	[% IF lastjournal %]
-	[% PROCESS titlebar title="Last Journal Entry" %]
+	
+	[% PROCESS user_titlebar tab_selected='info' %]
 	<div class="generalbody">
-			[% Slash.createMenu("journal", style => "tabbed") %]
-			<b>
-				<a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">
-					[% lastjournal.description | strip_notags %]
-				</a>
-			</b>,
-			[% Slash.timeCalc(useredit.journal_last_entry_date) %]
-			([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
-			[% IF lastjournal.article_shrunk %]
-				<p>
-					[% lastjournal.article_shrunk; END %]
-				</p>
-			[% ELSE %]
-				<p>
-					<i>
-						(No journal entries.)
-					</i>
-				</p>
-			[% END %]
+		[% IF suadmin_flag %]
+			[% admin_block %]
+		[% END %]
 
-
+		[% IF nickmatch_flag %]
+			<p>This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.</p>
+		[% END %]
 	</div>
+		[% PROCESS titlebar title="Last Journal Entry" %]
+		<div class="generalbody">
+				[% Slash.createMenu("journal", style => "tabbed") %]
+				[% IF lastjournal %]
+					<b><a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">[% lastjournal.description | strip_notags %]</a></b>,
+					[% Slash.timeCalc(useredit.journal_last_entry_date) %]
+					([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
+					[% IF lastjournal.article_shrunk %]
+						<p>[% lastjournal.article_shrunk %]</p>
+					[% END %]
+				[% ELSE %]
+					<p><i>(No journal entries.)</i></p>
+				[% END %]
+		</div>
 </div>
 <div id="users-lists">
 			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]

@@ -14,10 +14,11 @@ en_US
 __name__
 grant
 __template__
+<div class="generalbody">
 [% IF !uid or !pages %]
-	No UID ([% uid %]) given or no pages ([% pages %]) requested.  Cannot complete grant.
+	<p>No UID ([% uid %]) given or no pages ([% pages %]) requested.  Cannot complete grant.</p>
 [% ELSIF uid and !grant_recipient %]
-	No user found for specified UID ([% uid %]).  Cannot complete grant.
+	<p>No user found for specified UID ([% uid %]).  Cannot complete grant.</p>
 [% ELSE %]
 	<p>Granting [% pages %] pages to [% grant_recipient.nickname | strip_literal %] ([% grant_recipient.uid %]).<p>
 	[% IF grant_success %]
@@ -35,6 +36,7 @@ __template__
 		<p><b>Error:</b> Grant did not complete successfully.</p>
 	[% END %]
 [% END %]
+</div>
 __seclev__
 10000
 __version__
