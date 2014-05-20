@@ -26,9 +26,9 @@ __template__
 [% FOR abuse = abuses %]
 	<tr>
 		<td>[% abuse.0 %]</td>
-		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.1 %]">[% abuse.1 %]</td>
-		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.2 %]">[% abuse.2 %]</td>
-		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.3 %]">[% abuse.3 %]</td>
+		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.1 %]">[% abuse.1 %]</a></td>
+		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.2 %]">[% abuse.2 %]</a></td>
+		<td><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.3 %]">[% abuse.3 %]</a></td>
 		<td>[% abuse.4 %]</td>
 	</tr>
 [% END %]
