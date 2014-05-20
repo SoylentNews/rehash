@@ -3379,6 +3379,9 @@ sub saveBlock {
 			all_skins	=> $form->{all_skins},
 			autosubmit	=> $form->{autosubmit},
 			portal		=> $form->{portal},
+			default_block		=> $form->{default_block},
+			hidden		=> $form->{hidden},
+			always_on		=> $form->{always_on},
 		}, 'bid=' . $self->sqlQuote($bid));
 		$self->sqlUpdate('backup_blocks', {
 			block		=> $form->{block},
@@ -3398,6 +3401,9 @@ sub saveBlock {
 			skin		=> $form->{skin},
 			retrieve	=> $form->{retrieve},
 			portal		=> $form->{portal},
+			default_block		=> $form->{default_block},
+			hidden		=> $form->{hidden},
+			always_on		=> $form->{always_on},
 			autosubmit	=> $form->{autosubmit},
 			all_skins	=> $form->{all_skins},
 		}, 'bid=' . $self->sqlQuote($bid));
@@ -3459,10 +3465,10 @@ sub getSectionBlock {
 sub getSectionBlocks {
 	my($self) = @_;
 	return $self->sqlSelectAll(
-		"bid, title, ordernum",
+		"bid, title, always_on",
 		"blocks",
-		"portal=1 AND shill = 'no'",
-		"ORDER BY title");
+		"hidden != 1 AND shill = 'no'",
+		"ORDER BY ordernum");
 }
 
 ########################################################
@@ -5743,16 +5749,16 @@ sub getPortalsCommon {
 
 	my $qlid = $self->_querylog_start("SELECT", "blocks");
 	my $sth = $self->sqlSelectMany(
-			'bid,title,url,skin,portal,ordernum,all_skins',
+			'bid,title,url,skin,portal,ordernum,all_skins,default_block,hidden,always_on',
 			'blocks',
-			"shill = 'no'",
+			"hidden != 1 AND (default_block = 1 OR always_on = 1) AND shill = 'no'",
 			'ORDER BY ordernum ASC'
 	);
 	# We could get rid of tmp at some point
 	my %tmp;
 	while (my $SB = $sth->fetchrow_hashref) {
 		$self->{_boxes}{$SB->{bid}} = $SB;  # Set the Slashbox
-		next unless $SB->{ordernum} && $SB->{ordernum} && $SB->{ordernum} > 0;  # Set the index if applicable
+		# Set the skinBoxes
 		if ($SB->{all_skins}) {
 			for my $skin (keys %$skins) {
 				push @{$tmp{$skin}}, $SB->{bid};

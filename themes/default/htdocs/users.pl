@@ -1854,31 +1854,20 @@ sub tildeEd {
 		my($boxes, $skinBoxes) = $reader->getPortalsCommon();
 		$slashboxes_textlist = join ",", @{$skinBoxes->{$constants->{mainpage_skid}}};
 	}
-	for my $bid (
-		map { /^'?([^']+)'?$/; $1 }
-		split /,/,
-		$slashboxes_textlist
-	) {
+	for my $bid ( map { /^'?([^']+)'?$/; $1 } split /,/, $slashboxes_textlist) {
 		$slashboxes_hr->{$bid} = 1;
 	}
-	for my $ary (sort { lc $a->[1] cmp lc $b->[1]} @$sections_description) {
-		my($bid, $title, $boldflag) = @$ary;
+	for my $ary (@$sections_description) {
+		my($bid, $title, $always_on) = @$ary;
 		push @$box_order, $bid;
-		$section_descref->{$bid}{checked} =
-			$slashboxes_hr->{$bid}
-				? $constants->{markup_checked_attribute}
-				: '';
+		$section_descref->{$bid}{checked} = $slashboxes_hr->{$bid} ? $constants->{markup_checked_attribute} : '';
+		$section_descref->{$bid}{checked} = $constants->{markup_checked_attribute} if $always_on;
 		$title =~ s/<(.*?)>//g;
 		$section_descref->{$bid}{title} = $title;
+		$section_descref->{$bid}{always_on} = $always_on;
 	}
+	
 
-	my $dynamic_blocks = getObject("Slash::DynamicBlocks");
-	my $extra_blocks = [];
-	if ($dynamic_blocks) {
-		my $userblocks = $dynamic_blocks->getUserBlocks("name", $user_edit->{uid}) || {};
-		my $friendblocks = $dynamic_blocks->getFriendBlocks("name", $user_edit->{uid}) || {};
-		push(@$extra_blocks, grep { $slashboxes_textlist =~ $_; } (keys(%$userblocks), keys(%$friendblocks)));
-	}
 
 	# Userspace.
 	my $userspace = $user_edit->{mylinks} || "";
@@ -1911,7 +1900,7 @@ sub tildeEd {
 		box_order		=> $box_order,
 
 		userspace		=> $userspace,
-		extra_blocks            => $extra_blocks,
+
 	}, 1);
 
 	return $tilde_ed;
@@ -2901,44 +2890,25 @@ sub saveHome {
 	# Only go through all this if the user clicked save,
 	# not "Restore Slashbox Defaults"!
 	my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
-	my $default_slashboxes_textlist = join ",",
-		@{$skinBoxes->{$constants->{mainpage_skid}}};
+	my $default_slashboxes_textlist = join ",", @{$skinBoxes->{$constants->{mainpage_skid}}};
+	
+	
 	if (!$form->{restore_slashbox_defaults}) {
-		$slashboxes = $default_slashboxes_textlist if !$slashboxes;
-		my @slashboxes = split /,/, $slashboxes;
-		my %slashboxes = ( );
-		for my $i (0..$#slashboxes) {
-			$slashboxes{$slashboxes[$i]} = $i;
+		my @new_boxes;
+		my @box_order;
+		my $sections_description = $slashdb->getSectionBlocks();
+		for my $ary (@$sections_description) {
+			push @box_order, @$ary[0];
 		}
+	
 		# Add new boxes in.
-		for my $key (sort grep /^showbox_/, keys %$form) {
-			my($bid) = $key =~ /^showbox_(\w+)$/;
-			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
-			if (! exists $slashboxes{$bid}) {
-				$slashboxes{$bid} = 999; # put it at the end
-			}
-		}
-		# Remove any boxes that weren't checked.
-		for my $bid (@slashboxes) {
-			delete $slashboxes{$bid} unless $form->{"showbox_$bid"};
+		for my $bid (@box_order) {
+			my $sb = "showbox_" . $bid;
+			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/ || !$form->{$sb};
+			push @new_boxes, $bid;
 		}
 
-		for my $key (sort grep /^dynamic_/, keys %$form) {
-			my($bid) = $key =~ /^dynamic_(.+)$/;
-			next if length($bid) < 1;
-			if (! exists $slashboxes{$bid}) {
-				$slashboxes{$bid} = 999;
-			}
-		}
-
-		@slashboxes = sort {
-			$slashboxes{$a} <=> $slashboxes{$b}
-			||
-			$a cmp $b
-		} keys %slashboxes;
-		# This probably should be a var (and appear in tilded_customize_msg)
-		$#slashboxes = 19 if $#slashboxes > 19;
-		$slashboxes = join ",", @slashboxes;
+		$slashboxes = join ",", @new_boxes;
 	}
 	# If we're right back to the default, that means the
 	# empty string.
@@ -3111,8 +3081,7 @@ sub saveHome {
 			setToDefaults($user_edits_table, {}, {
 				maxstories	=> 30,
 				tzcode		=> "EST",
-				# XXX shouldn't this reset ALL the defaults,
-				# not just these two?
+				willing => 1
 			});
 		}
 		if ($form->{restore_slashbox_defaults}) {
@@ -3128,6 +3097,7 @@ sub saveHome {
 				'story_full_best_nexus' => 1,
 				'story_brief_best_nexus' => 1,
 				'maxstories' => 1,
+				'tzcode' => 1,
 				'noboxes' => 1,
 				'light' => 1,
 				'noicons' => 1,

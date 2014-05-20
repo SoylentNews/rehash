@@ -53,9 +53,14 @@ sub displaySlashboxes {
 
 	my $dynamic_blocks_reader = getObject("Slash::DynamicBlocks");
 
-	for my $bid (@boxes) {
+
+	
+	my $sb = $reader->getSectionBlocks();
+	for my $ary (@$sb) {
+		my($bid, $title, $always_on) = @$ary;
 		next if $user->{lowbandwidth}  && $constants->{lowbandwidth_bids_regex} eq "NONE";
 		next if $user->{lowbandwidth} && !($bid =~ $constants->{lowbandwidth_bids_regex} );
+		next unless $bid ~~ @boxes || $always_on;
 		if ($bid eq 'mysite') {
 			$return .= portalsidebox(
 				getData('userboxhead', {}, 'index'),
@@ -76,22 +81,6 @@ sub displaySlashboxes {
 				'olderstuff'
 			) if @$older_stories_essentials;
 
-		} elsif ($bid eq 'userlogin' && ! $user->{is_anon}) {
-			# do nothing!
-
-		} elsif ($bid eq 'userlogin' && $user->{is_anon}) {
-			$return .= $boxcache->{$bid} ||= portalsidebox(
-				$boxBank->{$bid}{title},
-				slashDisplay('userlogin', { extra_modals => 1 }, { Return => 1, Nocomm => 1 }),
-				$boxBank->{$bid}{bid},
-				$boxBank->{$bid}{url},
-				$getblocks,
-				'login'
-			);
-
-                } elsif ($bid eq 'index_jobs' && ($user->{is_anon} || !$constants->{use_default_slashboxes})) {
-                        # do nothing!
-                        
 		} elsif ($bid eq 'poll' && !$constants->{poll_cache}) {
 			if ($dynamic_blocks_reader) {
 				# Poll ad (currently disabled)
@@ -108,6 +97,7 @@ sub displaySlashboxes {
 					$getblocks
 				);
 			}
+			
 		} elsif ($bid eq 'friends_journal' && $constants->{plugin}{Journal} && $constants->{plugin}{Zoo}) {
 			my $journal = getObject("Slash::Journal", { db_type => 'reader' });
 			my $zoo = getObject("Slash::Zoo", { db_type => 'reader' });
@@ -125,17 +115,6 @@ sub displaySlashboxes {
 					$getblocks
 				);
 			}
-		# this could grab from the cache in the future, perhaps ... ?
-		} elsif ($bid eq 'rand' || $bid eq 'srandblock') {
-			# don't use cached title/bid/url from getPortalsCommon
-			my $data = $reader->getBlock($bid, [qw(title block bid url)]);
-			$return .= portalsidebox(
-				@{$data}{qw(title block bid url)},
-				$getblocks
-			);
-
-                } elsif ($bid eq 'srandblock_ostg' && !$constants->{use_default_slashboxes}) {
-                        # Don't add this Slashbox at all if the site has it toggled off
 
 		} else {
 			my $block = '';
@@ -154,9 +133,6 @@ sub displaySlashboxes {
 			}
 		}
 	}
-
-	my $slug = '<div id="slug-%s" class="block nosort slug"><div class="content"></div></div>';
-	$return .= sprintf($slug . $slug, 'Crown', 'Top');
 
 	return $return;
 }
