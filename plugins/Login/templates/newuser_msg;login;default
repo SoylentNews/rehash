@@ -24,7 +24,7 @@ __template__
 <p>Once you receive your password, you can
 <a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a>
 
-<p>Be sure to also set <a href="[% constants.real_rootdir %]/my/info">your preferences</a> to suit your needs.  Our defauls should work fine for you, but you may want to at least set your time zone.</p>
+<p>Be sure to also set <a href="[% constants.real_rootdir %]/my/info">your preferences</a> to suit your needs.  Our defaults should work fine for you, but you may want to at least set your time zone.</p>
 
 
 
