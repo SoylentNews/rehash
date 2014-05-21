@@ -14,7 +14,7 @@ __template__
 [% subs = Slash.db.getSubmissionCount() %]
 
 [% IF subs < constants.subs_level %]
-<div id="head_message">[% constants.sitename %] is powered by your submissions, so <a href="[% gSkin.rootdir %]/submit.pl">send in your scoop</a>. Only <b>[% subs %]</b> submission[% IF subs != 1  %]s[% END %] in the queue.</div>
+<div id="head_message">[% constants.sitename %] is powered by your submissions, so <a href="[% gSkin.rootdir %]/submit.pl">send in your scoop</a>. <a href="[% gSkin.rootdir %]/submit.pl?op=list"> Only <b>[% subs %]</b> submission[% IF subs != 1  %]s[% END %] in the queue.</a></div>
 
 [% ELSE %]
 
