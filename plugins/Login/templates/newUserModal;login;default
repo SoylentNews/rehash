@@ -51,7 +51,7 @@ chars = chars.replace('0123456789', '0-9');
 
 <label>Nickname</label>&nbsp;&nbsp;<span id="nickname_error" style="display: none"></span>
 <br>
-<input type="text" id="newusernick" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
+<input type="text" id="newusernick" name="newusernick" value="" size="[% constants.nick_maxlen %]" maxlength="[% constants.nick_maxlen %]">
 <br>
 <div class="modal_note">(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)</div>
 
@@ -59,8 +59,8 @@ chars = chars.replace('0123456789', '0-9');
 
 <label>Email Address</label>
 <br>
-<input type="text" id="email" name="email" value="" size="40">
-<input type="text" id="email2" name="email2" value="" size="40">
+<input type="text" id="email" name="email" value="" size="50"><br />
+<input type="text" id="email2" name="email2" value="" size="50">
 <br>
 <div class="modal_note">Enter a valid email address <strong>twice</strong> to send your registration information to. This address will not be publicly shown unless you enable e-mail display in your user preferences.</div>
 

@@ -31,12 +31,12 @@ tabs = [
 		{ link = "$constants.real_rootdir/my/homepage", label = "Homepage",	sel_label = "home" },
 		{ link = "$constants.real_rootdir/my/comments", label = "Comments", sel_label = "comments" },
 	];
-	IF constants.plugin.Messages; tabs.push(
-		{ link = "$constants.real_rootdir/my/messages", label = "Messages", sel_label = "messages" },
-	); END;
-	IF constants.plugin.Subscribe; tabs.push(
-		{ link = "$constants.real_rootdir/subscribe.pl", label = "Subscription", sel_label = "subscription" },
-	); END;
+	IF constants.plugin.Messages;
+		tabs.push({ link = "$constants.real_rootdir/my/messages", label = "Messages", sel_label = "messages" });
+	END;
+	IF constants.plugin.Subscribe && ((constants.subscribe_admin_only && user.is_admin) || !constants.subscribe_admin_only);
+		tabs.push({ link = "$constants.real_rootdir/subscribe.pl", label = "Subscription", sel_label = "subscription" });
+	END;
 %]
 
 

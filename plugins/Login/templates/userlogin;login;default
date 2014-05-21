@@ -43,16 +43,16 @@ __template__
 
                 <label>Nickname</label>
                 [% IF is_modal %]<br>[% END %]
-                <input type="text" name="unickname" size="20" value="[% form.unickname | strip_literal %]">
+                <input type="text" name="unickname" size="[% constants.nick_maxlen %]" value="[% form.unickname | strip_literal %]">
 
                 [% IF is_modal %]<br><br>[% END %]
 
                 <label>Password</label>
                 [% IF is_modal %]<br>[% END %]
-                <input type="password" name="upasswd" size="20">
+                <input type="password" name="upasswd" size="35">
 				<!--
                 <br>
-                <div class="modal_note">(6-20 characters long)</div>
+                <div class="modal_note">(at least 6 characters long)</div>
                 -->
 
                 [% IF is_modal %]<br>[% END %]

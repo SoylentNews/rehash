@@ -21,8 +21,23 @@ en_US
 __name__
 subEdTable
 __template__
-<div class="generalbody">
+<!--
+##########
+#
+# Code changed Fri May  9 13:18:00 CDT 2014 - TheMightyBuzzard
+#  to fix bug #120, "generalBody and generalTitle backwards and improperly nested."
+# The two somehow got inverted so the titlebar ended up inside generalbody. I
+#  simply put them back in their correct positions.
+# There should be no implications for any other code as this is a template
+#  and thus for reading not execution.
+#
+-->
 [% PROCESS titlebar %]
+<div class="generalbody">
+<!--
+#
+##########
+-->
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Submissions List</legend>

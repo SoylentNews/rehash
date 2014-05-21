@@ -38,7 +38,7 @@ __template__
 
 <form action="[% env.script_name %]" method="post" name="edithome">
 <fieldset>
-<legend>Homepage settings</legend>
+<legend>Homepage Settings</legend>
 [% PROCESS formkey_tag %]
 
 <input type="hidden" name="formname" value="edithome">

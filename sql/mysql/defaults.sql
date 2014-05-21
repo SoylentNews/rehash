@@ -1026,9 +1026,10 @@ INSERT INTO vars (name, value, description) VALUES ('modviewseclev','100','Minim
 INSERT INTO vars (name, value, description) VALUES ('nesting_maxdepth','3','Maximum depth to which <BLOCKQUOTE>-type tags can be nested');
 INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','3','Maximum depth to which <SUP> and <SUB> tags can be nested');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_body','0','Print bodytext, not merely introtext, in newsletter.');
+INSERT INTO vars (name, value, description) VALUES ('newsletter_by_default','0','Turn on newsletter sending by default for new users. 0 = off | 1 = on');
 INSERT INTO vars (name, value, description) VALUES ('nick_chars', ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*\'(),-', 'Characters allowed in user nicknames');
-INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a-zA-Z0-9$_.+!*\'(),-]{0,19}$', 'Regex (case-sensitive) allowed for user nicknames');
-INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '20', 'Max length of nickname, should correspond with schema for users.nickname');
+INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a-zA-Z0-9$_.+!*\'(),-]{0,34}$', 'Regex (case-sensitive) allowed for user nicknames');
+INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '35', 'Max length of nickname, should correspond with schema for users.nickname');
 INSERT INTO vars (name, value, description) VALUES ('no_prerendered_stories','0','Turn off use of prerendered stories in display');
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
 INSERT INTO vars (name, value, description) VALUES ('openid_consumer_allow', '1', 'Allow users to authenticate using OpenID, and manage OpenID identities.');

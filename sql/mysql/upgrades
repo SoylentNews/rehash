@@ -18,6 +18,7 @@ UPDATE vars SET value = 'slashcode_06_14' WHERE name = 'cvs_tag_currentcode';
 # Allow submissions to have longer titles. story_text title is set to VARCHAR(100) so match here.
 ALTER TABLE submissions MODIFY subj VARCHAR(100);
 
+
 # Add new voting feel
 # NOTE: this shouldn't be in users, but it makes audioguys job easy, and the schema
 # is already fucking ugly as sin so ....
@@ -28,4 +29,45 @@ INSERT INTO vars (name, value, description) VALUES ('enable_portscan','0','Enabl
 
 # Setup Imporved Threaded comments
 INSERT INTO commentmodes (mode, name, description) VALUES ('improvedthreaded','Impoved Threaded','');
-ALTER TABLE users_comments CHANGE mode mode ENUM('flat','nested','nocomment','thread','improvedthreaded') DEFAULT 'improvedthreaded';
+ALTER TABLE users_comments CHANGE mode mode ENUM('flat','nested','nocomment','thread','improvedthreaded') DEFAULT 'improvedthreaded' NOT NULL;
+	# Set all users on theraded or nested to improved threaded
+UPDATE users_comments SET mode = 'improvedthreaded' WHERE mode = 'nested' OR mode = 'thread';
+
+# Remove slashcode Theme and set to default
+UPDATE site_info SET value='default' WHERE name='theme';
+
+# Add in var to set if Newsletters are sent to new users by default
+INSERT INTO vars (name, value, description) VALUES ('newsletter_by_default','0','Turn on newsletter sending by default for new users. 0 = off | 1 = on');
+
+# Update for longer nicknames
+UPDATE vars SET value = '35' WHERE name = 'nick_maxlen';
+UPDATE vars SET value = '^[a-zA-Z_][ a-zA-Z0-9$_.+!*\'(),-]{0,34}$' WHERE name = 'nick_regex';
+ALTER TABLE users CHANGE nickname nickname varchar(35) DEFAULT '' NOT NULL;
+ALTER TABLE users CHANGE matchname matchname varchar(35);
+
+# Add admin only for subscription prefs
+INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_only', 1, 'Subscription prefs only enabled for admins?');
+
+# Remove deleted plugins
+DELETE FROM site_info WHERE description LIKE '%Achievements%';
+DELETE FROM site_info WHERE description LIKE '%PubKey%' or value = 'PubKey';
+DELETE FROM site_info WHERE description LIKE '%Sphinx%';
+DELETE FROM site_info WHERE description LIKE '%Users2%' or value = 'Users2';
+DELETE FROM site_info WHERE description LIKE '%FireHose%';
+DELETE FROM site_info WHERE description LIKE '%Tag%';
+
+# Blocks update
+ALTER TABLE blocks ADD COLUMN default_block tinyint UNSIGNED DEFAULT 0 NOT NULL;
+ALTER TABLE blocks ADD COLUMN hidden tinyint UNSIGNED DEFAULT 0 NOT NULL;
+ALTER TABLE blocks ADD COLUMN always_on tinyint UNSIGNED DEFAULT 0 NOT NULL;
+UPDATE blocks SET default_block = 1 WHERE bid = 'poll' OR bid = 'index_more' OR bid = 'index_qlinks' OR bid = 'top10journals';
+UPDATE blocks SET hidden = 1 WHERE bid = 'features_qlinks' OR bid ='recenttopics' OR bid ='spamurlregexes' OR bid ='subscriber_plug' OR bid ='articles_more' OR bid = 'features_more';
+UPDATE blocks SET ordernum = 100 WHERE bid = 'mysite';
+UPDATE blocks SET ordernum = 3 WHERE bid = 'topcomments';
+UPDATE blocks SET seclev = 500 where bid = 'index_qlinks';
+DELETE FROM blocks WHERE bid = 'newestthree';
+  # Insert site news from old site_news template
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, default_block, always_on) VALUES ('site_news','<!-- begin site_news block -->\r\n\r\nYou should put some site news here that your users might enjoy.\r\n\r\n<!-- end quicklinks block -->\r\n\r\n',500,'static',NULL,'mainpage',1,'Site News',1,NULL,NULL,0,1,1);
+	# Delete slashboxes from all users
+UPDATE users_index SET slashboxes = '';
+

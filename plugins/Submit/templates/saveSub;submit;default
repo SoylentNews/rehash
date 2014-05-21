@@ -18,6 +18,7 @@ __name__
 saveSub
 __template__
 [% PROCESS titlebar %]
+	<div class="generalbody">
 [% IF missingemail %]
 	<p>Perhaps you would like to enter an email address or a URL next time.</p>
 [% END %]
@@ -29,7 +30,7 @@ __template__
 	<p>Thanks for the submission.</p>
 
 	[% PROCESS bookmarktext %]
-
+</div>
 __seclev__
 10000
 __version__

@@ -62,7 +62,12 @@ END %]
 		Written by [% story.by | strip_literal %] and [%
 			END;
 		END %]
-		posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
+		posted by
+		[% IF author.homepage %]
+			<a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
+		[% ELSE %]
+			<a href="[% constants.real_rootdir %]/~[% author.nickname | strip_paramattr %]/">	[% author.nickname | strip_literal %]</a>
+		[% END %]
 		[% story.atstorytime %]
 		[% IF constants.plugin.Print %] 
 			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
