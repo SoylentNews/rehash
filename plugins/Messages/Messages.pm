@@ -585,6 +585,7 @@ sub bulksend {
 	};
 
 	my $content = $self->callTemplate('msg_email', $msg);
+	$content = $self->callTemplate('email_footer', $msg);
 	my $subject = $self->callTemplate('msg_email_subj', $msg);
 
 	if (bulkEmail($addrs, $subject, $content)) {
