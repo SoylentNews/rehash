@@ -162,7 +162,7 @@ IF !useredit.is_anon;
 		IF message_count.total
 			%]<br><hr>You have <b>[%
 			IF message_count.unread
-				%]<a href="[% gSkin.rootdir %]/messages.pl?op=list">[%
+				%]<a href="[% gSkin.rootdir %]/my/inbox">[%
 			END;
 			message_count.unread
 			%] new message[% message_count.unread == 1 ? "" : "s";
@@ -171,7 +171,7 @@ IF !useredit.is_anon;
 			END
 			%]</b> waiting for you, and <b>[%
 			IF message_count.read
-				%]<a href="[% gSkin.rootdir %]/messages.pl?op=list">[%
+				%]<a href="[% gSkin.rootdir %]/my/inbox">[%
 			END;
 			message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 			IF message_count.read
