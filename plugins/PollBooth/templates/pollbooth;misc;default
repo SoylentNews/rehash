@@ -23,63 +23,64 @@ en_US
 __name__
 pollbooth
 __template__
-[% IF has_activated or user.is_admin %]
-	[% IF user.is_admin %]
-		[% IF !has_activated %]
-		(Poll not yet active.)<br>
+<div id="pollbody">
+	[% IF has_activated or user.is_admin %]
+		[% IF user.is_admin %]
+			[% IF !has_activated %]
+			(Poll not yet active.)<br>
+			[% END %]
 		[% END %]
-	[% END %]
-
-	[% can_vote = poll_open ? 1 : 0 %]
-
-	[% IF env.script_name && can_vote;
-	      reskey = Slash.getObject('Slash::ResKey');
-	      rkey = reskey.key('pollbooth', { qid => qid });
-	      IF !rkey.create;  # didn't work, bail
-	         can_vote = 0;
-	      END;
-	   ELSE;	
-	      rkey = '';
-	   END;
-	%]
-
-	[% IF !can_vote %]
-		<b>[% question | strip_literal %]</b>
-	   [% FOREACH ans = answers %]
-		<li>[% ans.answer | strip_literal %] <em>([% ans.votes %])</em></li>
-	   [% END %]
-
-		<p><em>[% IF rkey && rkey.errstr %]([% rkey.errstr %])[% ELSIF !poll_open %](Poll is closed.)[% END %]</em><br>
-		[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1[% IF fromrss %]&amp;from=rss[% END %]"><b>Results</b></a> |
-		<a href="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]"><b>Polls</b></a> ] <br>
-		Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
-
-	[% ELSE %]
 	
-		<form action="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]" method="post">
-			<fieldset>
-				<legend>Poll</legend>
-				<input type="hidden" name="qid" value="[% qid | strip_attribute %]">
-			[% IF user.currentSkin %]
-				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">
-			[% END %]
-				<b>[% question | strip_literal %]</b>
-
-			[% FOREACH ans = answers %]
-				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]&amp;from=rss">[% END %][% ans.answer | strip_literal %][% IF fromrss %]</a>[% END %]
-			[% END %]
-
-				<br><input type="submit" value="Vote">
-				[% IF env.gateway_interface; PROCESS reskey_tag; END %]
+		[% can_vote = poll_open ? 1 : 0 %]
+	
+		[% IF env.script_name && can_vote;
+			reskey = Slash.getObject('Slash::ResKey');
+			rkey = reskey.key('pollbooth', { qid => qid });
+			IF !rkey.create;  # didn't work, bail
+				can_vote = 0;
+			END;
+		ELSE;	
+			rkey = '';
+		END;
+		%]
+	
+		[% IF !can_vote %]
+			<p><b>[% question | strip_literal %]</b></p>
+			<ul>
+				[% FOREACH ans = answers %]
+					<li>[% ans.answer | strip_literal %] <em>([% ans.votes %])</em></li>
+				[% END %]
+			</ul>
+			<p>
+				<em>[% IF rkey && rkey.errstr %]([% rkey.errstr %])[% ELSIF !poll_open %](Poll is closed.)[% END %]</em><br>
 				[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1[% IF fromrss %]&amp;from=rss[% END %]"><b>Results</b></a> |
 				<a href="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]"><b>Polls</b></a> ] <br>
-				[% IF !fromrss %]Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>[% END %]
-			</fieldset>
-		</form>
+				Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
+			</p>
+		[% ELSE %]
+			<form action="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]" method="post">
+				<input type="hidden" name="qid" value="[% qid | strip_attribute %]">
+				[% IF user.currentSkin %]
+					<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">
+				[% END %]
+				<p><b>[% question | strip_literal %]</b></p>
+				<ul>
+					[% FOREACH ans = answers %]
+						<li><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]&amp;from=rss">[% END %][% ans.answer | strip_literal %][% IF fromrss %]</a>[% END %]</li>
+					[% END %]
+				</ul>
+				<p>
+					<input type="submit" value="Vote">
+					[% IF env.gateway_interface; PROCESS reskey_tag; END %]
+					[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1[% IF fromrss %]&amp;from=rss[% END %]"><b>Results</b></a> |
+					<a href="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]"><b>Polls</b></a> ] <br>
+					[% IF !fromrss %]Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>[% END %]
+				</p>
+			</form>
+		[% END %]
 	[% END %]
-[% END %]
+</div>
 __seclev__
 10000
 __version__
 $Id$
-
