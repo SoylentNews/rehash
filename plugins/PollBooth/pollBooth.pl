@@ -23,7 +23,7 @@ sub main {
 		default		=> \&default,
 		vote		=> \&vote,
 		get		=> \&poll_booth,
-		preview         => \&editpoll,
+		preview	 => \&editpoll,
 		detach		=> \&detachpoll,
 		linkstory	=> \&link_story_to_poll
 	);
@@ -52,7 +52,15 @@ sub main {
 sub poll_booth {
 	my($form) = @_;
 
-	print sidebox('Poll', pollbooth($form->{'qid'}, 0, 1), 'poll', 1);
+	if ($form->{'display'} eq 'full'){
+		slashDisplay('viewpoll', {
+			title	=> 'Poll',
+			pollboth => pollbooth($form->{'qid'}, 0, 1)
+		});
+	} else {
+		print sidebox('Poll', pollbooth($form->{'qid'}, 0, 1), 'poll', 1);
+	}
+	
 }
 
 #################################################################
@@ -187,7 +195,7 @@ sub editpoll {
 			$question->{primaryskid}	= $story_ref->{primaryskid};
 			$question->{polltype}	= $story_ref->{displaystatus} >= 0 ? "story" : "nodisplay";
 		}
-                
+		
 		$question->{polltype} ||= "section";
  
 		my $disp_answers;
@@ -203,23 +211,17 @@ sub editpoll {
 		$question->{sid} = $form->{sid};
 		$checked = $form->{currentqid};
 
-		my $raw_pollbooth = slashDisplay('pollbooth', {
+		$pollbooth = slashDisplay('pollbooth', {
 			qid		=> -1,
 			voters		=> $question->{voters},
 			poll_open 	=> ($form->{date} le $slashdb->getTime()),
 			question	=> $question->{question},
 			answers		=> $disp_answers,
 			primaryskid	=> $question->{primaryskid},
-                        has_activated   => 1 
+			has_activated   => 1 
 		}, 1);
-		$pollbooth = fancybox(
-			$constants->{fancyboxwidth}, 
-			'Poll', 
-			$raw_pollbooth, 
-			0, 1
-                );
-            
-        } elsif ($qid) {
+	    
+	} elsif ($qid) {
 		$question = $pollbooth_db->getPollQuestion($qid);
 		$question->{sid} = $pollbooth_db->getSidForQid($qid)
 			unless $question->{autopoll} eq "yes";
@@ -241,14 +243,14 @@ sub editpoll {
 				$question->{primaryskid}	= $story_ref->{primaryskid};
 				$question->{polltype}	= $story_ref->{displaystatus} >= 0 ? "story" : "nodisplay";
 			}
-                }
+		}
 		$question->{polltype} ||= "section";
 
 
 		$answers = $pollbooth_db->getPollAnswers(
 			$qid, [qw( answer votes aid )]
 		);
-                $question->{polltype} ||= "section";
+		$question->{polltype} ||= "section";
 		my $current_qid = $pollbooth_db->getCurrentQidForSkid($question->{primaryskid});
 		$checked = ($current_qid == $qid) ? 1 : 0;
 		my $poll_open = $pollbooth_db->isPollOpen($qid);
@@ -256,7 +258,7 @@ sub editpoll {
 		# Just use the DB method, it's too messed up to rebuild the logic
 		# here -Brian
 		my $poll = $pollbooth_db->getPoll($qid);
-		my $raw_pollbooth = slashDisplay('pollbooth', {
+		$pollbooth = slashDisplay('pollbooth', {
 			qid		=> $qid,
 			voters		=> $question->{voters},
 			poll_open 	=> $poll_open,
@@ -264,16 +266,10 @@ sub editpoll {
 			answers		=> $poll->{answers},
 			voters		=> $poll->{pollq}{voters},
 			sect		=> $user->{section} || $question->{section},
-                        has_activated   => $pollbooth_db->hasPollActivated($qid)
+			has_activated   => $pollbooth_db->hasPollActivated($qid)
 		}, 1);
-		$pollbooth = fancybox(
-			$constants->{fancyboxwidth}, 
-			'Poll', 
-			$raw_pollbooth, 
-			0, 1
-		);
 	}
-        
+	
 
 	if ($question) {
 		$question->{voters} ||= 0;
@@ -285,9 +281,9 @@ sub editpoll {
 	}
  	
 	my $date = $question->{date};
-        $date ||= $form->{date};
-        $date ||= $slashdb->getTime();
-        my $topics = $reader->getDescriptions('non_nexus_topics');
+	$date ||= $form->{date};
+	$date ||= $slashdb->getTime();
+	my $topics = $reader->getDescriptions('non_nexus_topics');
 	slashDisplay('editpoll', {
 		title		=> getData('edit_poll_title', { qid=>$qid }),
 		qid		=> $qid,
@@ -295,7 +291,7 @@ sub editpoll {
 		answers		=> $answers,
 		pollbooth	=> $pollbooth,
 		checked		=> $checked,
-                date		=> $date,
+		date		=> $date,
 		story		=> $story_ref,
 		topics		=> $topics,
 		warning		=> $warning
@@ -351,11 +347,12 @@ sub savepoll {
 		}
 	}
 
-	slashDisplay('savepoll');
+
 	#We are lazy, we just pass along $form as a $poll
 	# Correct section for sectional editor first -Brian
 	$form->{section} = $user->{section} if $user->{section};
 	my $qid = $pollbooth_db->savePollQuestion($form);
+	
 
 	# we have a problem here.  if you attach the poll to an SID,
 	# and then unattach it, it will still be attached to that SID
@@ -398,6 +395,11 @@ sub savepoll {
 			if $discussion && $discussion != $poll->{discussion};
 	}
 	$slashdb->setStory($form->{sid}, { qid => $qid }) if $form->{sid};
+	
+	slashDisplay('viewpoll', {
+		title	=> 'Poll Saved',
+		pollboth => pollbooth($qid, 0, 1)
+	});
 }
 
 #################################################################
@@ -507,7 +509,7 @@ sub listpolls {
 		admin		=> getCurrentUser('seclev') >= 100,
 		title		=> "$sitename Polls",
 		width		=> '99%',
-                curtime         => $pollbooth_reader->getTime(),
+		curtime	 => $pollbooth_reader->getTime(),
 		type		=> $type 
 	});
 }
