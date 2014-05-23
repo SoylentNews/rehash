@@ -738,6 +738,57 @@ color: #006;
 font-weight: bold;
 }
 
+
+/* PollBooth */
+
+#pollbody ul {list-style: none; margin: 0; padding: 0;}
+
+#pollbody ul li {padding: .1em 0; margin: 0;}
+
+.bar
+{
+	font-weight: bold;
+	margin: 0 0 1em 0;
+	border: 1px #ddd solid;
+	font-size: .85em
+}
+
+.barAnswer
+{
+	font-size: 1.1em; 
+	text-align: left;
+	margin: .5em 0 0 0;
+}
+
+.barColor
+{
+	background: #aaa;
+	border: 1px #ddd solid;
+	border-bottom: 1px #555 solid;
+	border-right: 1px #555 solid;
+}
+
+.barPercent
+{
+	padding: 0 .6em;
+	background: #eee;
+	color: #555;
+}
+
+.barVotes
+{
+	padding: 0 .6em;
+	background: #eee;
+	color: #555;
+	white-space: nowrap;
+}
+
+.totalVotes { float: right; }
+#polls-wide li { margin: 0 0 1em 0; }
+#pollBooth .generalbody table {width: 90%; margin: 0 0 1em 5%}
+#pollBooth .generalbody caption {margin-bottom: .2em}
+
+
 /* Forms */
 fieldset
 {
