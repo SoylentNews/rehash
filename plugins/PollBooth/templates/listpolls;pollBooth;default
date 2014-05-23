@@ -32,7 +32,7 @@ __template__
 		[% skins = Slash.db.getSkins %]
 		<ul>
 		[% FOREACH question = questions %]
-			<li><b><a href="[% skins.${question.8}.rootdir || gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</a></b> on [% Slash.timeCalc(question.2, '%B %o, %Y') %]<br>
+			<li><b><a href="[% skins.${question.8}.rootdir || gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]&display=full">[% question.1 %]</a></b> on [% Slash.timeCalc(question.2, '%B %o, %Y') %]<br>
 			<small>[% question.3 %] votes and [% question.4 %] comments.
 				[% IF user.is_admin %]
 					[% SWITCH question.5 %]
@@ -62,7 +62,6 @@ __template__
 		<p>
 			<b>
 				<a href="[% gSkin.rootdir %]/search.pl?op=polls">More Polls</a><br>
-				<a href="[% gSkin.rootdir %]/submit.pl">Submit Poll</a>
 			</b>
 		</p>
 	</div>
