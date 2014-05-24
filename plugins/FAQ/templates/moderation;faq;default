@@ -13,7 +13,7 @@ __name__
 moderation
 __template__
 <div id="moderation">
-	[% PROCESS titlebar title => constants.sitename _ 'Moderation' %]
+	[% PROCESS titlebar title => constants.sitename _ ' Moderation' %]
  <div class="generalbody">
   <p>This document will attempt to explain the moderation system that lies underneath this implementation of Slashcode's vast comment section. It was originally written for Slashcode years ago</a>, so the specifics of this moderation system are outlined here. Keep in mind that as this project grows, some aspects can change to better serve the community and improve the overall experience.</p>
  

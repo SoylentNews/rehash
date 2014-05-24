@@ -78,7 +78,7 @@ __template__
 	</ul>
 	
 	<h3>What are Friends and Foes?</h3>
-	<p>Information on Friends and Foes can be found in the <a href="/faq.pl?op=friends>Friends and Foes FAQ</a></p>
+	<p>Information on Friends and Foes can be found in the <a href="/faq.pl?op=friends">Friends and Foes FAQ</a></p>
 				
 	<h3>Why is someone else's User Name appearing on my User Page's Menu?</h3>
 	<p>This is not a bug. This is a feature! That name is the last user page (besides your own ;) that you have visited. This is useful when you want to hop around between your user info, and someone else's: to compare friends and foes for example. Your account has not been hacked, this is totally by design.</p>

@@ -50,7 +50,7 @@ __template__
                                 [% END %]
 
                                 <p></p>
-                                Welcome to those of you just joining: please read the <a href=[% gSkin.rootdir %]/faq.pl?op=moderation>moderator guidelines</a>
+                                Welcome to those of you just joining: please read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a>
                                 for instructions. You can't post & moderate the same discussion. Concentrate on promoting more than demoting. Browse at -1
                                 to keep an eye out for abuses. <a href=mailto:help@slashdot.org>Mail the admin</a> URLs showing abuse (include the cid link please!).
                                 </li>
