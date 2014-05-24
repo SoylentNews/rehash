@@ -6,11 +6,11 @@ FAQ
 __title__
 
 __page__
-faq
+about
 __lang__
 en_US
 __name__
-faq
+about
 __template__
 <div id="about">
 	[% PROCESS titlebar title => 'About ' _ constants.sitename %]
