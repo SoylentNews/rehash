@@ -30,7 +30,7 @@ __template__
                                                 <a href="[% gSkin.rootdir %]/pollBooth.pl">past polls</a>
                                         </li>
                                         <li>
-                                                <a href="[% gSkin.rootdir %]/faq.shtml">faq</a>
+                                                <a href="[% gSkin.rootdir %]/faq.pl">faq</a>
                                         </li>
                                         <li>
                                                 <a href="[% gSkin.rootdir %]/authors.pl">authors</a>

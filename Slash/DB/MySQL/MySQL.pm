@@ -8642,7 +8642,7 @@ sub autoUrl {
 
 	# Assorted Automatic Autoreplacements for Convenience
 	my $nick = strip_literal($user->{nickname});
-	$data =~ s|<disclaimer:(.*)>|<b><a href="/about.shtml#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$nick</a> owns shares in $1</b>|ig;
+	$data =~ s|<disclaimer:(.*)>|<b><a href="/about.pl#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$nick</a> owns shares in $1</b>|ig;
 	$data =~ s|<update>|<b>Update: <date></b> by <author>|ig;
 	$data =~ s|<date>|$now|g;
 	$data =~ s|<author>|<b><a href="$user->{homepage}">$initials</a></b>:|ig;
