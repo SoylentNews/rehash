@@ -19,10 +19,10 @@ __template__
 <p><b>email</b>=[% form.email | strip_literal %]<br>
 <b>user id</b>=[% uid %]<br>
 <b>nick</b>=[% form.newusernick | strip_literal %]<br>
-<b>passwd</b>=mailed to [% form.email | strip_literal %]<br>
+<b>passwd</b>=mailed to [% form.email | strip_literal %]</p>
 
 <p>Once you receive your password, you can
-<a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a>
+<a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a>  Please check your spam folder if you do not see your password email.</p>
 
 <p>Be sure to also set <a href="[% constants.real_rootdir %]/my/info">your preferences</a> to suit your needs.  Our defaults should work fine for you, but you may want to at least set your time zone.</p>
 
