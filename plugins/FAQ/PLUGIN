@@ -1,6 +1,9 @@
 # $Id$
 name=FAQ
 description="SoylentNews FAQ"
-htdoc=faq.shtml
-htdoc_faq=faq/editorial.shtml
-htdoc_faq=faq/friends.shtml
+htdoc=faq.pl
+template=templates/data;faq;default
+template=templates/editorial;faq;default
+template=templates/faq;faq;default
+template=templates/friends;faq;default
+template=templates/moderation;faq;default
