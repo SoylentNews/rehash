@@ -1,16 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<title>About SoylentNews</title>
-<!--#include virtual="/slashcssbase.inc"-->
-<!--#include virtual="/slashhead-gen-full.inc"-->
+__section__
+default
+__description__
+FAQ
+
+__title__
+
+__page__
+faq
+__lang__
+en_US
+__name__
+faq
+__template__
 <div id="about">
-	<div class="generaltitle">
-		<div class="title">
-			<h3>About SoylentNews</h3>
-		</div>
-	</div>
+	[% PROCESS titlebar title => 'About ' _ constants.sitename %]
 	<div class="generalbody">
 		<p>This is a news aggregation site that delivers what's important - articles about technology, science, and general interest. We also deliver all the functionality you expect from a good comment moderation system, and refine that system as we grow and learn.</p>
 		<p>This is a community-driven project and can evolve based on the will of the users and volunteers. The code and database will be open-source (barring any legal issues).</p>
@@ -36,8 +39,8 @@
 		<h3>Suggested Reading</h3>
 		<ul>
 			<li><a href="/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow...Today!</a> | One of the first posts to the site and a quick blurb about the goals of this project.</li>
-			<li><a href="/moderation.shtml">Moderation Guide</a> | Everything you want to know about moderating.</li>
-			<li><a href="/faq/editorial.shtml">Submission Guidelines</a> | Everything you want to know about submitting stories.</li>
+			<li><a href="/faq.pl?op=moderation">Moderation Guide</a> | Everything you want to know about moderating.</li>
+			<li><a href="/faq.pl?op=editorial">Submission Guidelines</a> | Everything you want to know about submitting stories.</li>
 		</ul>
 		<h3>Info on Slashcode</h3>
 		<p>Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/" target="blank">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>
@@ -53,4 +56,8 @@
 		<p>Slash was originally written by <strong>CmdrTaco</strong> and <a href="http://www.cowboyneal.org/" target="blank">CowboyNeal</a>.</p>
 	</div>
 </div>
-<!--#include virtual="/slashfoot.inc"-->
+
+__seclev__
+10000
+__version__
+$Id$
