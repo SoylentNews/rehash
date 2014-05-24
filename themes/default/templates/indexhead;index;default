@@ -27,7 +27,7 @@ Light Mode has been replaced by 2 toggle-able settings.  These are
 
 	[% IF user.points > 0 %]
 	You have <b>[% user.points %]
-	<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator</a>
+	<a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator</a>
 	Point[% user.points == 1 ? "!</b> Use it or lose it!" : "s!</b> Use 'em or lose 'em!" %]<br>
 	[% END %]
 

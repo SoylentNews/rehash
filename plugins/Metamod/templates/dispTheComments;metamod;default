@@ -36,7 +36,7 @@ link.</li>
 
 <li>If you are unsure, feel free to leave it unchanged.</li>
 
-<li>Please read the <a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</a>
+<li>Please read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator Guidelines</a>
 and try to be impartial and fair.  You are not moderating to make your
 opinions heard, you are trying to help promote a rational discussion.
 Play fairly and help make [% constants.sitename %] a little better for everyone.</li>

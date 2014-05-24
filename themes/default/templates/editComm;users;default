@@ -89,7 +89,7 @@ __template__
 
 		<label>Threshold [% uthreshold_select %]</label>
 		<div class="notes">
-			Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/moderation.shtml">Guidelines</a>
+			Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Guidelines</a>
 		</div>
 
 		<label>Highlight Threshold [% highlightthresh_select %]</label>

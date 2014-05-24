@@ -44,13 +44,13 @@ __template__
                                         IF user.points > 1; plural = 's'; END;
                                 %]
                                 [% IF expirydate %]
-					<b>[% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a> expire[% IF !plural; 's'; END %] [% expirydate %].</b>
+					<b>[% user.points %] <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator point[% plural %]</a> expire[% IF !plural; 's'; END %] [% expirydate %].</b>
                                 [% ELSE %]
-					<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">moderator point[% plural %]</a>.</b>
+					<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator point[% plural %]</a>.</b>
                                 [% END %]
 
                                 <p></p>
-                                Welcome to those of you just joining: please read the <a href=[% gSkin.rootdir %]/moderation.shtml>moderator guidelines</a>
+                                Welcome to those of you just joining: please read the <a href=[% gSkin.rootdir %]/faq.pl?op=moderation>moderator guidelines</a>
                                 for instructions. You can't post & moderate the same discussion. Concentrate on promoting more than demoting. Browse at -1
                                 to keep an eye out for abuses. <a href=mailto:help@slashdot.org>Mail the admin</a> URLs showing abuse (include the cid link please!).
                                 </li>

@@ -44,7 +44,7 @@ __template__
 
 [% IF user.points %]
 		| <b>[% user.points %]</b>
-		<a href="[% gSkin.rootdir %]/moderation.shtml">
+		<a href="[% gSkin.rootdir %]/faq.pl?op=moderation">
 		moderator</a>
 		point[% user.points == 1 ? '' : 's' %]
 [% END %]
