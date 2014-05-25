@@ -3099,10 +3099,12 @@ sub saveHome {
 				'maxstories' => 1,
 				'tzcode' => 1,
 				'noboxes' => 1,
-				'light' => 1,
+				'simpledesign' => 1,
+				'lowbandwidth' =>1,
 				'noicons' => 1,
 				'willing' => 1,
-				'willing_to_vote' => 0
+				'willing_to_vote' => 1,
+				'skin' => 1
 			}, { slashboxes => "" });
 	}
 
