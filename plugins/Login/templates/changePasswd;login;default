@@ -50,7 +50,11 @@ END; note %]
    clocation_sel = Slash.createSelect('cookie_location', clocation, user_edit.cookie_location, 1, 0, clocation_order);
 -%]
 
-		<p>Login session [% session_sel %] and [% clocation_sel %]</p>
+		<label>Login Cookie</label>
+		<ul class="nobull">
+			<li>Valid Location: [% clocation_sel %]</li>
+			<li>Expires: [% session_sel %]</li>
+		</ul>
 
 		<p>Note: changing your password or login cookie preferences will disable all
 		other cookies for this account, requiring all other browsers using this account

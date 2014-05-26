@@ -50,9 +50,11 @@ clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_loc
         <br>
 [% END %]
 
-My <b><a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a></b> [% session_sel %] and [% clocation_sel %]
-
-<br>
+<label>Login Cookie</label>
+<ul class="nobull">
+	<li>Valid Location: [% clocation_sel %]</li>
+	<li>Expires: [% session_sel %]</li>
+</ul>
 
 <p><b>Note:</b> changing your password or login cookie preferences will disable all
 other cookies for this account, requiring all other browsers using this account

@@ -131,8 +131,8 @@ __template__
 
 [% CASE 'mail_mailed_note' %]
 	<span id="modal_ok"></span>The password for [% name %] was emailed to its registered
-	email address. It will remain valid for
-	[% constants.mailpass_valid_days %] days.
+	email address. It will remain valid for [% constants.mailpass_valid_days %] days.
+	Please check your spam folder if you do not see your password email.
 
 [% CASE 'mail_subject' %]
 	[% constants.sitename %] User Password for [% nickname %]
