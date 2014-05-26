@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+Display poll
+
+* title = passed to titlebar
+* pollbooth = preprocessed poll
+
+__title__
+
+__page__
+pollBooth
+__lang__
+en_US
+__name__
+viewpoll
+__template__
+<div id="poll">
+  [% PROCESS titlebar %]
+  <div class="generalbody">
+   [% pollboth %]
+  </div>
+</div>
+
+__seclev__
+10000
+__version__
+$Id$

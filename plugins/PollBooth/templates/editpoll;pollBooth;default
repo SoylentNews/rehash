@@ -20,7 +20,7 @@ editpoll
 __template__
 [% IF pollbooth %]
         <div id="slashboxes">
-		[% PROCESS sidebox contents=poll %]
+		[% PROCESS sidebox contents=pollbooth %]
         </div>
 <div id="polls">
 [% ELSE %]
