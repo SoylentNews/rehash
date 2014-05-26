@@ -37,10 +37,10 @@ __template__
 						<a href="[% gSkin.rootdir %]/">Home</a>
 					</li>
 					<li>
-						<a href="[% gSkin.rootdir %]/about.shtml">About</a>
+						<a href="[% gSkin.rootdir %]/about.pl">About</a>
 					</li>
 					<li>
-						<a href="[% gSkin.rootdir %]/faq.shtml">FAQ</a>
+						<a href="[% gSkin.rootdir %]/faq.pl">FAQ</a>
 					</li>
 					<li>
 						<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>

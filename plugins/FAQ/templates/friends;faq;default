@@ -1,18 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-  <title>Friends and Foes FAQ</title>
-<!-- $Id$ -->
-<!--#include virtual="/slashcssbase.inc"-->
-<!--#include virtual="/slashhead-gen-full.inc"-->
-<div id="friends">
-	<div class="generaltitle">
-		<div class="title">
-			<h3>Friends and Foes FAQ</h3>
-		</div>
-	</div>
+__section__
+default
+__description__
+Friends and Foes FAQ
 
+__title__
+
+__page__
+faq
+__lang__
+en_US
+__name__
+friends
+__template__
+<div id="friends">
+	[% PROCESS titlebar title => 'Friends and Foes FAQ' %]
 	<div class="generalbody">
 		<h3><a name="f700" id="f700"></a>Where can I see my friends / foes?</h3>
 		<p><a href="/my/friends">/my/friends</a></p>
@@ -51,4 +52,7 @@
 	</div>
 </div>
 
-<!--#include virtual="/slashfoot.inc"-->
+__seclev__
+10000
+__version__
+$Id$

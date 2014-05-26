@@ -1,16 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<title>Slash Moderation</title>
-<!--#include virtual="/slashcssbase.inc"-->
-<!--#include virtual="/slashhead-gen-full.inc"-->
+__section__
+default
+__description__
+Friends and Foes FAQ
+
+__title__
+
+__page__
+faq
+__lang__
+en_US
+__name__
+moderation
+__template__
 <div id="moderation">
- <div class="generaltitle">
-  <div class="title">
-   <h3>SoylentNews Moderation</h3>
-  </div>
- </div>
+	[% PROCESS titlebar title => constants.sitename _ ' Moderation' %]
  <div class="generalbody">
   <p>This document will attempt to explain the moderation system that lies underneath this implementation of Slashcode's vast comment section. It was originally written for Slashcode years ago</a>, so the specifics of this moderation system are outlined here. Keep in mind that as this project grows, some aspects can change to better serve the community and improve the overall experience.</p>
  
@@ -102,4 +105,8 @@
   </ol>
  </div>
 </div>
-<!--#include virtual="/slashfoot.inc"-->
+
+__seclev__
+10000
+__version__
+$Id$
