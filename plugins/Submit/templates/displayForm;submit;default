@@ -63,7 +63,7 @@ __template__
 
 	<form action="[% env.script_name %]" method="post">
 	[% IF savestory %]
-		<fieldset>
+		<div id="preview">
 			<legend>
 				Preview Submission
 			</legend>
@@ -76,7 +76,7 @@ __template__
 					[% subtext %]
 				</div>
 			</div>
-		</fieldset>
+		</div>
 	[% END %]
 		<fieldset>
 			<legend>

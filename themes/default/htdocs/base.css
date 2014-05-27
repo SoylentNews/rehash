@@ -11,6 +11,8 @@ min-width: 720px;
 color: #000;
 position: relative;
 font-size:100%;
+overflow: wrap;
+word-wrap: break-word;
 }
 
 sup
@@ -52,7 +54,6 @@ margin: 0 0 0 7.8em;
 
 #messages, #submit, #comments, #login, #pollBooth, #wide, #search, #authors, #topics
 {
-overflow: visible;
 height: 100%;
 z-index: 2;
 position: relative;
@@ -62,7 +63,6 @@ padding: 0;
 
 #articles, #polls
 {
-overflow: visible;
 height: 100%;
 z-index: 2;
 position: relative;
@@ -73,7 +73,6 @@ padding: 0;
 
 #users-blocks
 {
-overflow: visible;
 height: 100%;
 z-index: 2;
 position: relative;
@@ -242,7 +241,6 @@ z-index: 0;
 position: relative;
 margin: 0 0 0 0;
 padding: 0;
-overflow: hidden;
 }
 
 #slashboxes div.block
@@ -718,7 +716,6 @@ font-size: .9em;
 .message_body
 {
 padding: 1em .8em 0 .8em;
-overflow: hidden;
 background: #fff;
 }
 

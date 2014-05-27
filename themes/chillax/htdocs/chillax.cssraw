@@ -124,7 +124,7 @@ a:hover { color: #008; }
 
 }
 
-fieldset li.comment
+.preview li.comment
 {
     border-bottom: 1px solid #aaa;
 }

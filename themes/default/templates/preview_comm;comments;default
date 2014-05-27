@@ -13,7 +13,7 @@ en_US
 __name__
 preview_comm
 __template__
-<ul id="commentlisting" class="d1">
+<ul id="commentlisting" class="preview">
 [% Slash.dispComment(preview) %]
 </li>
 </ul>

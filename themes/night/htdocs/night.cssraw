@@ -151,7 +151,7 @@ border-top: none;
 
 }
 
-fieldset li.comment
+.preview li.comment
 {
     border-bottom: 1px solid #aaa;
 }
