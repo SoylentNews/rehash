@@ -83,7 +83,7 @@ a:hover { color: #008; }
 /* Commnets Pages */
 
 .commentTop .title {     
-  background-color: #339;
+  background-color: #006;
 	background: -o-linear-gradient(#006, #339);
 	background: -webkit-linear-gradient(#006, #339);
 	background: -moz-linear-gradient(#006, #339);
@@ -99,7 +99,7 @@ a:hover { color: #008; }
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background-color: #eee;
+	background-color: #ccc;
 	background: -o-linear-gradient(#ccc, #eee);
 	background: -webkit-linear-gradient(#ccc, #eee);
 	background: -moz-linear-gradient(#ccc, #eee);
@@ -192,7 +192,7 @@ a:hover { color: #008; }
 /* articles */
 
 .generaltitle div.title, .article div.title {     
-	background-color: #339;
+	background-color: #006;
 	background: -o-linear-gradient(#006, #339);
 	background: -webkit-linear-gradient(#006, #339);
 	background: -moz-linear-gradient(#006, #339);
@@ -211,7 +211,7 @@ a:hover { color: #008; }
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #aaa;
-	background-color: #eee;
+	background-color: #ccc;
 	background: -o-linear-gradient(#ccc, #eee);
 	background: -webkit-linear-gradient(#ccc, #eee);
 	background: -moz-linear-gradient(#ccc, #eee);
@@ -227,7 +227,7 @@ a:hover { color: #008; }
 
 div.storylinks
 {
-	background-color: #eee;
+	background-color: #ccc;
 	background: -o-linear-gradient(#ccc, #eee);
 	background: -webkit-linear-gradient(#ccc, #eee);
 	background: -moz-linear-gradient(#ccc, #eee);
@@ -414,7 +414,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #006; }
 .message_subject
 {
 	border: 1px solid #aaa;
-	background-color: #eee;
+	background-color: #ccc;
 	background: -o-linear-gradient(#ccc, #eee);
 	background: -webkit-linear-gradient(#ccc, #eee);
 	background: -moz-linear-gradient(#ccc, #eee);

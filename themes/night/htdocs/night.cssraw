@@ -108,7 +108,7 @@ background: #555;
 /* Commnets Pages */
 
 .commentTop .title {
-    background-color: #933;
+    background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
@@ -124,7 +124,7 @@ background: #555;
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background-color: #333;
+	background-color: #555;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
@@ -224,7 +224,7 @@ border: 1px solid #aaa;
 /* articles */
 
 .generaltitle div.title, .article div.title {
-  background-color: #933;
+  background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
@@ -243,7 +243,7 @@ font-size: 1em;
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #aaa;
-	background-color: #333;
+	background-color: #555;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
@@ -259,7 +259,7 @@ background: #333;
 
 div.storylinks
 {
-	background-color: #333;
+	background-color: #555;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
@@ -423,7 +423,7 @@ background:#333;
 }
 
 #usermenu ul.menu li a{
-  background-color: #933;
+  background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
@@ -437,7 +437,7 @@ background:#333;
 
 #usermenu ul.menu li.selected a
 {
-	background-color: #555;
+	background-color: #777;
 	background: -o-linear-gradient(#777, #555);
 	background: -webkit-linear-gradient(#777, #555);
 	background: -moz-linear-gradient(#777, #555);
@@ -488,7 +488,7 @@ margin: 0;
 .message_subject
 {
 	border: 1px solid #aaa;
-	background-color: #333;
+	background-color: #555;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
