@@ -22,13 +22,13 @@ __template__
 	<label>
 		Nickname
 	</label>
-	<input type="text" name="unickname" style="width: 18.4em;" value="" maxlength="[% constants.nick_maxlen %]">
+	<input type="text" name="unickname" style="width: 18em;" value="" maxlength="[% constants.nick_maxlen %]">
 	<label>
 		Password
 	</label>
 	<input type="hidden" name="returnto" value="[% return_url | strip_urlattr %]">
 	<input type="hidden" name="op" value="userlogin">
-	<input type="password" name="upasswd" style="width: 18.4em;">
+	<input type="password" name="upasswd" style="width: 18em;">
 	<label class="checkbox">
 		<input type="checkbox" name="login_temp" value="yes">
 		Public Terminal
