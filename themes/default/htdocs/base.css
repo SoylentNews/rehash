@@ -362,7 +362,7 @@ input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 
 #formtabs {
     margin:0;
-    padding:.2em 0;
+    padding:.2em 0 0 0;
 }
 
 #formtabs ul {
@@ -372,7 +372,7 @@ input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 
 #formtabs ul li{
     background: #888;
-    display:inline-block;;
+    display:inline-block;
     padding: .2em .3em;
     margin:0;
 }
@@ -537,7 +537,7 @@ div.storylinks ul li
 border-left: 1px solid #555;
 padding: 0 .2em 0 .4em;
 list-style: none;
-display: inline-block;;
+display: inline-block;
 }
 
 div.storylinks ul li.more
@@ -589,7 +589,7 @@ position: relative;
 margin: 0;
 padding: 0;
 list-style: none;
-display: inline-block;;
+display: inline-block;
 }
 
 .btmnav ul li a
@@ -633,7 +633,7 @@ ul.menu li
 margin: 0;
 padding: 0;
 list-style: none;
-display: inline-block;;
+display: inline-block;
 }
 
 ul.menu li a

@@ -135,10 +135,6 @@ a:hover { color: #008; }
 
 /* FORMTABS */
 
-#formtabs {
-    border-bottom: 1px solid #aaa;
-}
-
 #formtabs ul li{
     background: #339;
     border-radius: .3em .3em 0 0;
@@ -333,7 +329,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #006; }
 
 #usermenu ul.menu {
     border-bottom: 1px solid #aaa;
-    padding: .2em 0;
+    padding: .2em 0 0 0;
 }
 
 #usermenu ul.menu  li{
