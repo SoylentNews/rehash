@@ -859,11 +859,11 @@ background: #eee;
 
 
 /* Authors */
-#authors .title { margin-top: 1em; }
+#authors .generalbody .title { margin-top: 1em; }
 
-#authors h3 { display: inline; }
+#authors .generalbody h3 { display: inline; }
 
-#authors h3 a { color: #000; }
+#authors .generalbody h3 a { color: #000; }
 
 #authors .intro
 {

@@ -387,7 +387,7 @@ height: auto;
 margin: 0 0 1em 0;
 }
 
-#authors h3 a { color: #fff; }
+#authors .generalbody h3 a { color: #fff; }
 
 /* Forms */
 textarea { width: 80%; }
