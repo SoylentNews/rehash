@@ -250,19 +250,20 @@ background: #333 linear-gradient(#555, #333);
     font-size: .813em;
 }
 
+div.storylinks div ul 
+{
+	padding: .4em 1em .8em; 
+	margin: 0;
+	height: 1em;
+	line-height: .95em;
+}
 
-div.storylinks div ul { height: 1em;}
-div.storylinks div ul
-{
-padding: .8em 1em .7em;
-margin: 0;
-line-height: .875em;
+div.storylinks ul li 
+{ 
+	padding: .3em .5em; 
+	border-left: 1px solid #555; 
 }
-div.storylinks ul li
-{
-padding: .3em .5em;
-border-left: 1px solid #555;
-}
+
 
 /* Footer */
 #footer { }
