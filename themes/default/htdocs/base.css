@@ -368,12 +368,11 @@ input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 #formtabs ul {
     margin:0;
     padding:0;
-    display:inline;
 }
 
 #formtabs ul li{
     background: #888;
-    display:inline;
+    display:inline-block;;
     padding: .2em .3em;
     margin:0;
 }
@@ -538,7 +537,7 @@ div.storylinks ul li
 border-left: 1px solid #555;
 padding: 0 .2em 0 .4em;
 list-style: none;
-display: inline;
+display: inline-block;;
 }
 
 div.storylinks ul li.more
@@ -590,7 +589,7 @@ position: relative;
 margin: 0;
 padding: 0;
 list-style: none;
-display: inline;
+display: inline-block;;
 }
 
 .btmnav ul li a
@@ -634,8 +633,7 @@ ul.menu li
 margin: 0;
 padding: 0;
 list-style: none;
-display: inline;
-white-space: nowrap;
+display: inline-block;;
 }
 
 ul.menu li a
@@ -666,7 +664,6 @@ padding: 0 .3em;
 margin: 1em 0 1em 0;
 padding: 0;
 font-size: .913em;
-display: block;
 }
 
 .generalbody ul.menu li, .submenu li
@@ -674,7 +671,7 @@ display: block;
 margin: 0;
 padding: 0;
 list-style: none;
-display: inline;
+display: inline-block;
 }
 
 .generalbody ul.menu li a, .submemu li a
