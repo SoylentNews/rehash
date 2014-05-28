@@ -48,31 +48,31 @@ __template__
 					</p>
 				[% END %]
 			[% END %]
-                                <label>
-                                        Nickname
-                                </label>
-                                <input type="text" name="unickname" size="[% constants.nick_maxlen %]" value="[% form.unickname | strip_attribute %]">
-                                <label>
-                                        Password
-                                </label>
-                                <input type="password" name="upasswd" size="35">
-                                <label class="checkbox">
-                                	<input type="checkbox" name="login_temp" value="yes" class="checkbox">
+				<label>
+					Nickname
+				</label>
+				<input type="text" name="unickname" size="[% constants.nick_maxlen %]" value="[% form.unickname | strip_attribute %]">
+				<label>
+					Password
+				</label>
+				<input type="password" name="upasswd" size="35">
+				<label class="checkbox">
+					<input type="checkbox" name="login_temp" value="yes" class="checkbox">
 					Public Terminal
 				</label>
-                                <input type="submit" name="userlogin" value="Log in" class="button">
+				<input type="submit" name="userlogin" value="Log in" class="button">
 				</fieldset>
 		</form>
 		<hr>
 [% IF constants.openid_consumer_allow %]
-                <form action="[% constants.real_rootdir %]/login.pl" method="post">
-                <input type="hidden" name="op" value="claim_openid">
-                <input type="hidden" name="openid_login" value="1">
-                <label for="openid_url" class="openid_url">
-                <input type="text" name="openid_url" value="http://" size="32" maxlength="255">
-                </label>
-                <input type="submit" value="Log in with OpenID" class="button">
-                </form>
+		<form action="[% constants.real_rootdir %]/login.pl" method="post">
+		<input type="hidden" name="op" value="claim_openid">
+		<input type="hidden" name="openid_login" value="1">
+		<label for="openid_url" class="openid_url">
+		<input type="text" name="openid_url" value="http://" size="32" maxlength="255">
+		</label>
+		<input type="submit" value="Log in with OpenID" class="button">
+		</form>
 [% END %]
 		<p>
 			Forget your password? <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">Have your password mailed to you</a> by entering your nickname, uid, or email address.

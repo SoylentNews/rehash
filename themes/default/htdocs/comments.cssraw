@@ -142,8 +142,9 @@ html > body .commentwrap table {
 
 .commentBody p, #editComment p, #editComment label
 {
-    margin-top:0;
-		margin-bottom:.5em;
+	margin-top:0;
+	margin-bottom:0;
+	padding-bottom: 0.5em;
  }
  
 #editComment

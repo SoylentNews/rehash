@@ -17,7 +17,7 @@ gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
 data.ipid %]&amp;fieldname=ipid">[% data.ipid_vis %]</a>
 <a href="[%
 gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
-data.subnetid %]&amp;fieldname=subnetid">[% data.subnetid_vis %]]</a></span>
+data.subnetid %]&amp;fieldname=subnetid">[% data.subnetid_vis %]</a>]</span>
 
 __seclev__
 10000

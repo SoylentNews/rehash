@@ -25,15 +25,14 @@ __template__
 %]
 
 
-[% IF search; nickstrip = form.nickname | strip_literal; END %]
-[% PROCESS titlebar
-	title => (search ? "User Search Results for \"$nickstrip\"" : "Your Friends"),
-	width => "100%"
-%]
+[% IF search;
+	title = "User Search Results for " _ form.nickname | strip_literal;
+	PROCESS titlebar title => title, width => "100%";
+END %]
 
 [% IF showform %]<form method="post" action="[% gSkin.rootdir %]/zoo.pl">
 <fieldset>
-	<legend>Latest from your friends</legend>
+	<legend>Latest from Your Friends</legend>
 [% PROCESS reskey_tag %]
 <input type="hidden" name="op" value="delete">
 <input type="hidden" name="type" value="friend">[% END %]
@@ -54,7 +53,6 @@ __template__
 [% IF showform %]<tr><td colspan="3">&nbsp;</td><td align="center"><input type="submit" value="Remove Friends"></td></tr>[% END %]
 </table>
 [% IF showform %]</fieldset></form>[% END %]
-<br><br>
 
 [% PROCESS searchusers %]
 
