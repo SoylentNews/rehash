@@ -46,13 +46,13 @@ __template__
 			[% slashdtext %]
 		</div>
 		<div id="articles">
-			<fieldset>
+			<div id="preview">
 				<legend>
 					Story Preview	
 				</legend>
 				[% storycontent %]
 				[% tagbox_html %]
-			</fieldset>
+			</div>
 				<div class="note">
 					Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
 				</div>

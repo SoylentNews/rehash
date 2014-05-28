@@ -16,6 +16,16 @@ input {width: auto !important;}
 	margin: 0;
 }
 
+#adminfooter
+{
+	padding: 1em;
+	margin: 0;
+}
+
+#adminfooter fieldset
+{
+	margin:0;
+}
 
 #footer	.admin li
 {
@@ -151,8 +161,10 @@ html>body #admin { margin: 0 auto .2em 0; }
 .gs_story_sec  { background: #33cc44; color: #000; }
 .ss_story_sec  { background: #993; color: #000; }
 .ns_story_sec  { background: #c33; color: #000; }
-.ns_story_main a, .ns_story_sec a { color: #033; }
-.ss_story_main a, .ss_story_sec { color: #066; }
+.gs_story_main a, .gs_story_main a:visited, .gs_story_sec a, .gs_story_sec a:visited { color: #066; }
+.ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #033; }
+.ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #066; }
+.admin_story_list a, .admin_story_list a:visited { color: #066; }
 .admin_story_list, .submit_story_list { font-size: 100%; }
 .user_admin { background: #ffd; border: 1px solid #aaa; padding: 0 .3em; }
 body .adminstoryform fieldset {background: #ffd; }

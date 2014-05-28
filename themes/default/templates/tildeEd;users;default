@@ -45,9 +45,8 @@ en_US
 __name__
 tildeEd
 __template__
-<p>
-
 [% PROCESS titlebar title=title %]
+<div class="generalbody">
 <div class="message">
 	[% criteria_msg %]
 </div>	
@@ -209,7 +208,7 @@ __template__
 
 [% END %]
 
-<p>
+</div>
 
 [%-	######################
 	# Slashboxes
@@ -217,7 +216,7 @@ __template__
 -%]
 
 [% PROCESS titlebar title=customize_title %]
-
+<div class="generalbody">
 <input type="checkbox" name="useslashboxes"[% checked IF !user_edit.noboxes %]><strong>Use Slashboxes</strong>
 <div class="uslashboxes">
 	<table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -246,11 +245,15 @@ __template__
 		</tr>
 	</table>
 
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td><p>If you choose '<b>User Space</b>' above, the contents of this box will be inside:<br />
+			<textarea name="mylinks" rows=8 style="width:100%" wrap="VIRTUAL">[% userspace | strip_literal %]</textarea></td>
+		</tr>
+	</table>
 
-	[% tilded_customize_msg %]
-	[% tilded_box_msg %]
 </div>
-
+</div>
 __seclev__
 500
 __version__

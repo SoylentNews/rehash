@@ -42,10 +42,10 @@ __template__
 <!-- end error message -->
 <form  action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% IF preview %]                
-	<fieldset id=previewComment>
+	<div id=previewComment>
 		<legend>Preview Comment</legend>
 		[% preview %]   
-	</fieldset>
+	</div>
 [% END %]    
 	<fieldset id=editComment>
 	<legend>Edit Comment</legend>

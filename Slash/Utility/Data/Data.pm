@@ -1500,7 +1500,6 @@ my %mode_actions = (
 			newline_to_local
 			encode_html_amp
 			encode_html_ltgt
-			breakHtml_ifwhitefix
 			remove_trailing_lts
 			approveTags
 			space_between_tags
@@ -1524,7 +1523,6 @@ my %mode_actions = (
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
-			breakHtml_ifwhitefix
 			whitespace_tagify
 			newline_indent
 			paragraph_wrap			)],
@@ -1539,8 +1537,7 @@ my %mode_actions = (
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
-			approveCharrefs
-			breakHtml_ifwhitefix		)],
+			approveCharrefs )],
 	CODE, [qw(
 			newline_to_local
 			trailing_whitespace
@@ -1548,15 +1545,13 @@ my %mode_actions = (
 			encode_html_amp
 			encode_html_ltgt
 			whitespace_tagify
-			whitespace_and_tt
-			breakHtml_ifwhitefix		)],
+			whitespace_and_tt )],
 	EXTRANS, [qw(
 			newline_to_local
 			trailing_whitespace
 			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
-			breakHtml_ifwhitefix
 			whitespace_tagify
 			newline_indent			)],
 );
@@ -3749,9 +3744,7 @@ sub _url_to_domain_tag {
 
 	if (length($info) == 0) {
 		$info = '?';
-	} elsif (length($info) >= 25) {
-		$info = substr($info, 0, 10) . '...' . substr($info, -10);
-	}
+	} 
 
 	# Add a title tag to make this all friendly for those with vision
 	# and similar issues -Brian
