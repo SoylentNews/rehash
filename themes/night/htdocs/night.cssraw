@@ -124,7 +124,7 @@ background: #555;
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background-color: #555;
+	background-color: #444;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
@@ -243,7 +243,7 @@ font-size: 1em;
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #aaa;
-	background-color: #555;
+	background-color: #444;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
@@ -259,7 +259,7 @@ background: #333;
 
 div.storylinks
 {
-	background-color: #555;
+	background-color: #444;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
@@ -488,7 +488,7 @@ margin: 0;
 .message_subject
 {
 	border: 1px solid #aaa;
-	background-color: #555;
+	background-color: #444;
 	background: -o-linear-gradient(#555, #333);
 	background: -webkit-linear-gradient(#555, #333);
 	background: -moz-linear-gradient(#555, #333);
