@@ -83,19 +83,27 @@ a:hover { color: #800;}
 /* Commnets Pages */
 
 .commentTop .title {     
-    background: #933 linear-gradient(#600, #933);
-    border-radius: 10px 10px 0 0;
+  background-color: #933;
+	background: -o-linear-gradient(#600, #933);
+	background: -webkit-linear-gradient(#600, #933);
+	background: -moz-linear-gradient(#600, #933);
+	background: linear-gradient(#600, #933);
+  border-radius: 10px 10px 0 0;
 }
 
 
 .commentTop .title h4
 {
-    color: #fff;
+  color: #fff;
 }
 
 .commentTop .details {
 	border: 1px solid #aaa;
-	background: #eee linear-gradient(#ccc, #eee);
+	background-color: #eee;
+	background: -o-linear-gradient(#ccc, #eee);
+	background: -webkit-linear-gradient(#ccc, #eee);
+	background: -moz-linear-gradient(#ccc, #eee);
+	background: linear-gradient(#ccc, #eee);
 	color: #000;
 }
 
@@ -184,8 +192,12 @@ a:hover { color: #800;}
 /* articles */
 
 .generaltitle div.title, .article div.title {     
-    background: #933 linear-gradient(#600, #933);
-    border-radius: 10px 10px 0 0;
+	background-color: #933;
+	background: -o-linear-gradient(#600, #933);
+	background: -webkit-linear-gradient(#600, #933);
+	background: -moz-linear-gradient(#600, #933);
+	background: linear-gradient(#600, #933);
+	border-radius: 10px 10px 0 0;
 }
 
 #journal .article h3
@@ -199,7 +211,11 @@ a:hover { color: #800;}
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #aaa;
-	background: #eee linear-gradient(#ccc, #eee);
+	background-color: #eee;
+	background: -o-linear-gradient(#ccc, #eee);
+	background: -webkit-linear-gradient(#ccc, #eee);
+	background: -moz-linear-gradient(#ccc, #eee);
+	background: linear-gradient(#ccc, #eee);
 }
 
 .article .body
@@ -211,11 +227,15 @@ a:hover { color: #800;}
 
 div.storylinks
 {
-	background: #eee linear-gradient(#ccc, #eee);
-    border: 1px solid #aaa;
-    border-top: none;
-    border-radius: 0 0 10px 10px;
-    font-size: .813em;
+	background-color: #eee;
+	background: -o-linear-gradient(#ccc, #eee);
+	background: -webkit-linear-gradient(#ccc, #eee);
+	background: -moz-linear-gradient(#ccc, #eee);
+	background: linear-gradient(#ccc, #eee);
+	border: 1px solid #aaa;
+	border-top: none;
+	border-radius: 0 0 10px 10px;
+	font-size: .813em;
 }
 
 div.storylinks div ul 
@@ -395,7 +415,11 @@ ul.menu li.selected a, ul.menu li a:hover { color: #600; }
 .message_subject
 {
 	border: 1px solid #aaa;
-	background: #eee linear-gradient(#ccc, #eee);
+	background-color: #eee;
+	background: -o-linear-gradient(#ccc, #eee);
+	background: -webkit-linear-gradient(#ccc, #eee);
+	background: -moz-linear-gradient(#ccc, #eee);
+	background: linear-gradient(#ccc, #eee);
 	color: #000;
 }
 
