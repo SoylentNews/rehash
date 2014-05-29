@@ -6,7 +6,6 @@ body.admin
 
 .admin fieldset { margin: 0 0 1em 1em; }
 label.checkbox { display: inline; }
-input {width: auto !important;}
 .contentsadmin
 {
 	width: auto;

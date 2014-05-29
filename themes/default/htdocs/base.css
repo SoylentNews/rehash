@@ -356,6 +356,13 @@ input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover {ba
 
 input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 
+.fullbox{
+	width: 100%;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+}
+
 #login-block {display: none;}
 
 /* FORMTABS */
