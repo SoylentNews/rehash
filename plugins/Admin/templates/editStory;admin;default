@@ -78,12 +78,12 @@ __template__
 				[% END %]
 				[% shown_in_desc %]
 				[% PROCESS formLabel value => "Title" %]
-				<input type="text" name="title" value="[% storyref.title | strip_attribute %]" size="75" MAXLENGTH="100">
+				<input class="fullbox" type="text" name="title" value="[% storyref.title | strip_attribute %]" size="75" MAXLENGTH="100">
 				<div class="notes">[% ispell_comments.title %]</div>
 
 				[% IF constants.use_dept %]
 					[% PROCESS formLabel value => "Dept" %]
-					<input type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="75" MAXLENGTH="100">
+					<input class="fullbox" type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="75" MAXLENGTH="100">
 				[% END %]
 
 				[% PROCESS formLabel value="Author" %]
@@ -96,7 +96,7 @@ __template__
 					[% IF extra.2 == 'text' %]
 						<input type="text" name="[% extra.1 %]" value="[% storyref.${extra.1} | strip_attribute %]" size="50">
 					[% ELSIF extra.2 == 'textarea' %]
-						<textarea wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% storyref.${extra.1} | strip_literal %]</textarea>
+						<textarea class="fullbox" wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% storyref.${extra.1} | strip_literal %]</textarea>
 					[% ELSIF extra.2 == 'list' %]
 						[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), storyref.${extra.1}, 1, 1) %]	
 					[% END %]
@@ -158,7 +158,7 @@ __template__
 				<label>
 					Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 				</label>
-				<textarea wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% storyref.introtext | strip_literal %]</textarea>
+				<textarea class="fullbox" wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="10">[% storyref.introtext | strip_literal %]</textarea>
 				<div class="notes">[% ispell_comments.introtext %]</div>
 
 				[% PROCESS editbuttons %]
@@ -227,12 +227,12 @@ __template__
 				<label>
 					<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 				</label>
-				<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_literal %]</textarea>
+				<textarea class="fullbox" name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_literal %]</textarea>
 				<label>
 					<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
 				</label>
 				<a name="media"></a>
-				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
+				<textarea class="fullbox" name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
 				<div class="notes">[% ispell_comments.bodytext %]</div>
 				[% PROCESS editbuttons %]
 			</fieldset>

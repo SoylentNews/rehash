@@ -240,10 +240,10 @@ div.storylinks
 
 div.storylinks div ul 
 {
-	padding: .4em 1em .8em; 
+	padding: .5em 1em 1em; 
 	margin: 0;
 	height: 1em;
-	line-height: .95em;
+	line-height: .875em;
 }
 
 div.storylinks ul li 

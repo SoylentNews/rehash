@@ -99,7 +99,7 @@ __template__
 			[% END %]
 
 			[% PROCESS formLabel value => "Subject"  %]
-			<input type="text" name="subj" value="[% form.subj %]" size="75" maxlength="100">
+			<input class="fullbox" type="text" name="subj" value="[% form.subj %]" size="75" maxlength="100">
 			[% PROCESS formNote note => "Be descriptive and concise!" %]
 			[% PROCESS formNote note => "(Nondescriptive subjects like 'Check this out!' usually just get deleted, because we get many every day. For best results, put the important words early.)" %]
 
@@ -148,7 +148,7 @@ __template__
 			[% PROCESS formNote note => "In general, submit to $submitToLabel" %]
 
 			[% PROCESS formLabel value => "The Scoop" %]
-			<textarea wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="story">[% form.story | strip_literal %]</textarea><br>
+			<textarea class="fullbox" wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="story">[% form.story | strip_literal %]</textarea><br>
 			[% PROCESS formNote note => "Are you sure you included a URL?  Did you test them for typos?" %]
 			[% PROCESS formNote note => "HTML is fine, but double check those URLs and HTML tags!" %]
 			[% PROCESS formLabel value => "Submission format", comment => "" %]
