@@ -191,7 +191,7 @@ html > body .commentwrap table {
     border-left: 1px solid #ddd;
     padding-left: 1.2em;
     margin-top:0;
-    margin-bottom:0;
+    margin-bottom:.5em;
 }
 
 ul#commentlisting 
