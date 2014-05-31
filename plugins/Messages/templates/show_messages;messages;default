@@ -35,13 +35,13 @@ __template__
 						[% IF !message.readed;
 							messages = Slash.getObject("Slash::Messages");
 							message.subject = "$message.subject *";
-							messages.setReaded(message.id);
+							CALL messages.setReaded(message.id);
 						END;
 						PROCESS titlebar title => "$message.subject", width => "100%" %]
 						<div class="message_subject">
 							sent by <b>[% constants.sitename %] Message System</b> on [% Slash.timeCalc(message.date) %]
 						</div>
-						<div class="message_body"
+						<div class="message_body">
 							[% message.message %]
 						</div>	
 						<div class="message_footer">

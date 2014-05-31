@@ -79,8 +79,11 @@ UPDATE blocks SET ordernum = 3 WHERE bid = 'topcomments';
 UPDATE blocks SET seclev = 500 where bid = 'index_qlinks';
 DELETE FROM blocks WHERE bid = 'newestthree';
 
+# Remove all dynmaic user blocks or new blocks will not show up
+TRUNCATE TABLE dynamic_users_blocks;
+
 # Insert site news from old site_news template (Pull from your current site news rather than using this default if you already have it.)
-INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, default_block, always_on) VALUES ('site_news','<!-- begin site_news block -->\r\n\r\nYou should put some site news here that your users might enjoy.\r\n\r\n<!-- end quicklinks block -->\r\n\r\n',500,'static',NULL,'mainpage',1,'Site News',1,NULL,NULL,0,1,1);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, default_block, always_on) VALUES ('site_news','<!-- begin site_news block -->\r\n\r\nYou should put some site news here that your users might enjoy.\r\n\r\n<!-- end site_news block -->\r\n\r\n',500,'static',NULL,'mainpage',1,'Site News',1,NULL,NULL,0,1,1);
 	
 # Delete slashboxes from all users
 UPDATE users_index SET slashboxes = '';
@@ -88,3 +91,7 @@ UPDATE users_index SET slashboxes = '';
 
 # Delet story_never_author for all users to fix author bug (do this each time until bug fixed)
 UPDATE users_index SET story_never_author = '';
+
+
+# Allow Reltionship Change Messages to get sent for non subscribers
+UPDATE message_codes SET subscribe=0 WHERE code=12;
