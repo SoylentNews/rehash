@@ -724,6 +724,12 @@ padding: 1em .8em 0 .8em;
 background: #fff;
 }
 
+.message_body p
+{
+    margin:0;
+    padding-bottom: 1em;
+}
+
 .message_footer
 {
 padding: .4em .8em;
