@@ -1651,8 +1651,8 @@ sub prepareUser {
 #		{ return_only => [qw( ipid subnetid classbid ip )] });
 
 	my @defaults = (
-		['mode', 'thread'], qw[
-		savechanges commentsort threshold
+		['mode', 'improvedthreaded'], qw[
+		savechanges commentsort highlightthresh threshold
 		posttype noboxes lowbandwidth simpledesign pda
 	]);
 

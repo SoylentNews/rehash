@@ -1039,7 +1039,7 @@ sub displayThread {
 
 	my $threshold = $user->{threshold};
 	my $highlightthresh = $user->{highlightthresh};
-	$highlightthresh = $threshold if ($highlightthresh < $threshold || $user->{mode} eq 'improvedthreaded');
+	$highlightthresh = $threshold if ($highlightthresh < $threshold);
 	# root comment should have more likelihood to be full
 	$highlightthresh-- if !$pid;
 

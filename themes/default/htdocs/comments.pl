@@ -394,6 +394,7 @@ sub displayComments {
 	if (defined $form->{'savechanges'} && !$user->{is_anon}) {
 		$slashdb->setUser($user->{uid}, {
 			threshold	=> $user->{threshold},
+			highlightthresh	=> $user->{highlightthresh},
 			mode		=> $user->{mode},
 			commentsort	=> $user->{commentsort}
 		});

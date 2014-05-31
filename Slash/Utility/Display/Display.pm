@@ -53,6 +53,7 @@ our @EXPORT  = qw(
 	selectSection
 	selectSortcode
 	selectThreshold
+	selectBreakthrough
 	selectTopic
 	sidebox
 	titlebar
@@ -428,6 +429,58 @@ sub selectThreshold  {
 	$options->{nsort}	= 1                  unless defined $options->{nsort};
 
 	createSelect('threshold', \%data, $options);
+}
+
+#========================================================================
+
+=head2 selectBreakthrough(COUNTS[, OPTIONS])
+
+Creates a drop-down list of thresholds in HTML.  Default is the user's
+preference.  Calls C<createSelect()>.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item COUNTS
+
+An arrayref of thresholds -E<gt> counts for that threshold.
+
+=item OPTIONS
+
+Options for C<createSelect()>.
+
+=back
+
+=item Return value
+
+The created list.
+
+
+=back
+
+=cut
+
+sub selectBreakthrough {
+	my($counts, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+
+	my %data;
+	foreach my $c ($constants->{comment_minscore} .. $constants->{comment_maxscore}) {
+		$data{$c} = slashDisplay('selectThreshLabel', {
+			points	=> $c,
+			count	=> $counts->[$c - $constants->{comment_minscore}] || 0,
+		}, { Return => 1, Nocomm => 1 });
+	}
+
+	$options->{default}	= $user->{highlightthresh} unless defined $options->{default};
+	$options->{'return'}	= 1                  unless defined $options->{'return'};
+	$options->{nsort}	= 1                  unless defined $options->{nsort};
+
+	createSelect('highlightthresh', \%data, $options);
 }
 
 #========================================================================
