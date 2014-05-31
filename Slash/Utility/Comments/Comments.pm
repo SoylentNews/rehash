@@ -57,6 +57,7 @@ sub selectComments {
 # print STDERR scalar(gmtime) . " selectComments cid undef for $discussion\n" if !defined($cid);
 	$cid ||= 0;
 
+	my $discussion2 = discussion2($user);
 
 #slashProf("sC setup");
 
@@ -65,7 +66,13 @@ sub selectComments {
 	# selectComments called twice if necessary, the first time doing
 	# print_cchp, then blanking that out so it is not done again -- pudge
 	my $shtml = 0;
-
+	if ($discussion2 && $form->{ssi} && $form->{ssi} eq 'yes' && $form->{cchp}) {
+		$user->{discussion2} = 'none';
+		selectComments($discussion, $cid, $options);
+		$user->{discussion2} = $discussion2;
+		$shtml = 1;
+		delete $form->{cchp};
+	}
 
 	my $comments_read = !$user->{is_anon}
 		? $slashdb->getCommentReadLog($discussion->{id}, $user->{uid})
@@ -101,6 +108,7 @@ sub selectComments {
 		cache_read_only	=> $cache_read_only,
 		one_cid_only	=> $options->{one_cid_only},
 	};
+	$gcfu_opt->{discussion2} = $discussion2;
 #slashProf("sC getCommentsForUser");
 	if ($options->{force_read_from_master}) {
 		$thisComment = $slashdb->getCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
@@ -141,11 +149,76 @@ sub selectComments {
 		$C->{points} = getPoints($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
 	}
 
+	my $d2_comment_q = $user->{d2_comment_q};
+	if ($discussion2 && !$d2_comment_q) {
+		if ($user->{is_anon}) {
+			$d2_comment_q = 5; # medium
+		}
+	}
 
 #slashProf("sC main sort", "sC setup");
 	my($oldComment, %old_comments);
-	
+	# MC: hack hack hack (force d2 off
+	if ($discussion2 && !$options->{no_d2}) {
+		my $limits = $slashdb->getDescriptions('d2_comment_limits');
+		my $max = $d2_comment_q ? $limits->{ $d2_comment_q } : 0;
+		$max = int($max/2) if $shtml;
+		my @new_comments;
+		$options->{existing} ||= {};
+		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
 
+		# we need to filter which comments are descendants of $cid
+		my %cid_seen;
+		if ($cid) {
+			# for display later
+			$user->{state}{d2_defaultclass}{$cid} = 'full';
+			# this only works because we are already in cid order
+			for my $C (@$thisComment) {
+				if ($cid == $C->{cid} || $cid_seen{$C->{pid}}) {
+					$cid_seen{$C->{cid}} = 1;
+				}
+			}
+		}
+
+		my $sort_comments;
+		if (!$user->{d2_comment_order}) { # score
+			$sort_comments = [ sort {
+				$b->{points} <=> $a->{points}
+					||
+				$a->{cid} <=> $b->{cid}
+			} @$thisComment ];
+		} else { # date / cid
+			$sort_comments = $thisComment;
+		}
+
+
+		for my $C (@$sort_comments) {
+			next if $options->{existing}{$C->{cid}};
+
+			if ($max && @new_comments >= $max) {
+				if ($cid) {
+					# still include $cid even if it would
+					# otherwise be excluded (should only
+					# matter if not sorting by date
+					push @new_comments, $C if $cid == $C->{cid};
+				} else {
+					last;
+				}
+			} else {
+				next if $cid && !$cid_seen{$C->{cid}};
+				push @new_comments, $C;
+			}
+		}
+
+		$comments->{0}{d2_seen} = makeCommentBitmap({
+			%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments
+		});
+
+		@new_comments = sort { $a->{cid} <=> $b->{cid} } @new_comments;
+		($oldComment, $thisComment) = ($thisComment, \@new_comments);
+		%old_comments = map { $_->{cid} => $_ } @$oldComment;
+
+	} else {
 		# If we are sorting by highest score we resort to figure in bonuses
 		if ($commentsort == 3) {
 			@$thisComment = sort {
@@ -160,7 +233,7 @@ sub selectComments {
 				$a->{cid} <=> $b->{cid}
 			} @$thisComment;
 		}
-	
+	}
 ##slashProf("sC fudging", "sC main sort");
 #slashProf("", "sC main sort");
 
@@ -232,7 +305,7 @@ sub selectComments {
 	}
 
 	# get the total visible kids for each comment --Pater
-	countTotalVisibleKids($comments);
+	countTotalVisibleKids($comments) unless $discussion2;
 
 ##slashProf("sC d2 fudging", "sC counting");
 	if ($oldComment) {
@@ -285,7 +358,7 @@ sub selectComments {
 
 		# fix d2_seen to include new cids ... these will all be after
 		# the last element in seen, which makes this simpler
-		
+		$comments->{0}{d2_seen} = makeCommentBitmap(\@new_seen, $comments->{0}{d2_seen});
 	}
 
 ##slashProf("", "sC d2 fudging");
@@ -299,7 +372,130 @@ sub selectComments {
 	return($comments, $count);
 }
 
+sub jsSelectComments {
+#slashProf("jsSelectComments");
+	# version 0.9 is broken; 0.6 and 1.00 seem to work -- pudge 2006-12-19
+	require Data::JavaScript::Anon;
+	my($slashdb, $constants, $user, $form, $gSkin) = @_;
+	$slashdb   ||= getCurrentDB();
+	$constants ||= getCurrentStatic();
+	$user      ||= getCurrentUser();
+	$form      ||= getCurrentForm();
+	$gSkin     ||= getCurrentSkin();
 
+	my $id = $form->{sid};
+	return unless $id;
+
+	my $threshold = defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
+	my $highlightthresh = defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
+	for ($threshold, $highlightthresh) {
+		$_ = 6  if $_ > 6;
+		$_ = -1 if $_ < -1;
+	}
+	$highlightthresh = $threshold if $highlightthresh < $threshold;
+
+	# only differences:
+	#    sco: force_read, one_cid_only, threshold (was -1 here, matters?)
+	my($comments) = $user->{state}{selectComments}{comments};
+
+	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
+
+	my @roots = @{$comments->{0}{kids} || []};
+	my %roots_hash = ( map { $_ => 1 } @roots );
+	my $thresh_totals;
+
+	if ($form->{full}) {
+		my $comment_text = $slashdb->getCommentTextCached(
+			$comments, [ grep $_, keys %$comments ],
+		);
+
+		for my $cid (keys %$comment_text) {
+			$comments->{$cid}{comment} = $comment_text->{$cid};
+		}
+	} else {
+		my $comments_new;
+		my @keys = qw(pid points uid);
+		for my $cid (grep $_, keys %$comments) {
+			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
+			$comments_new->{$cid}{read} = $comments->{$cid}{has_read} ? 1 : 0;
+			$comments_new->{$cid}{opid} = $comments->{$cid}{original_pid};
+			$comments_new->{$cid}{kids} = [sort { $a <=> $b } @{$comments->{$cid}{kids}}];
+
+			# we only care about it if it is not original ... we could
+			# in theory guess at what it is and just use a flag, but that
+			# could be complicated, esp. if we are several levels deep -- pudge
+			if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
+				$comments_new->{$cid}{subject} = $comments->{$cid}{subject};
+			}
+		}
+
+		$thresh_totals = commentCountThreshold($comments, 0, \%roots_hash);
+		$comments = $comments_new;
+	}
+
+	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
+	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
+	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
+	my $anon_thresh   = Data::JavaScript::Anon->anon_dump($thresh_totals || {});
+	s/\s+//g for ($anon_thresh, $anon_roots, $anon_rootsh);
+
+	$user->{is_anon}          ||= 0;
+	$user->{is_admin}         ||= 0;
+	$user->{is_subscriber}    ||= 0;
+	$user->{state}{d2asp}     ||= 0;
+	$user->{d2_comment_order} ||= 0;
+	my $root_comment = $user->{state}{selectComments}{cidorpid} || 0;
+
+	my $extra = '';
+	if ($d2_seen_0) {
+		my $total = $slashdb->countCommentsBySid($id);
+		$total -= $d2_seen_0 =~ tr/,//; # total
+		$total--; # off by one
+		$extra .= "D2.d2_seen('$d2_seen_0');\nD2.more_comments_num($total);\n";
+	}
+	if ($user->{d2_keybindings_switch}) {
+		$extra .= "D2.d2_keybindings_off(1);\n";
+	}
+	if ($user->{d2_reverse_switch}) {
+		$extra .= "D2.d2_reverse_shift(1);\n";
+	}
+
+	# maybe also check if this ad should be running with some other var?
+	# from ads table? -- pudge
+	if ( $constants->{run_ads}
+	 && !$user->{state}{page_adless}
+	 && !$user->{state}{page_buying}
+	 &&  $user->{currentSkin} ne 'admin'
+	 &&  $constants->{run_ads_inline_comments}
+	) {
+		(my $url = $constants->{run_ads_inline_comments}) =~ s/<topic>/$gSkin->{name}/g;
+		$extra .= "D2.adTimerUrl('$url');\n";
+	}
+#slashProf("", "jsSelectComments");
+
+	return <<EOT;
+D2.comments($anon_comments);
+
+D2.thresh_totals($anon_thresh);
+
+D2.root_comment($root_comment);
+D2.root_comments($anon_roots);
+D2.root_comments_hash($anon_rootsh);
+
+D2.d2_comment_order($user->{d2_comment_order});
+D2.user_uid($user->{uid});
+D2.user_is_anon($user->{is_anon});
+D2.user_is_admin($user->{is_admin});
+D2.user_is_subscriber($user->{is_subscriber});
+D2.user_threshold($threshold);
+D2.user_highlightthresh($highlightthresh);
+D2.user_d2asp($user->{state}{d2asp});
+
+D2.discussion_id($id);
+
+$extra
+EOT
+}
 
 # save counts of comments at each threshold value
 sub commentCountThreshold {
@@ -617,7 +813,7 @@ sub reparentComments {
 	# when $form->{cid|pid} is set.  And besides, max depth we
 	# display is for display, so it should be based on how much
 	# we're displaying, not on absolute depth of this thread.
-	my $root_cid_or_pid = ($form->{cid} || $form->{pid} || 0);
+	my $root_cid_or_pid = discussion2($user) ? 0 : ($form->{cid} || $form->{pid} || 0);
 	if ($root_cid_or_pid) {
 		my $tmpcid = $root_cid_or_pid;
 		while ($tmpcid) {
@@ -651,7 +847,7 @@ sub reparentComments {
 		# or chronologically precede the root comment, don't reparent it
 		# at all.
 		# XXX either $comments->{$x}{points} or $threshold is sometimes undefined here, not sure which or why
-		if ($user->{reparent} && $comments->{$x}{points} >= $threshold && $user->{mode} ne 'improvedthreaded') {
+		if ($user->{reparent} && $comments->{$x}{points} >= $threshold) {
 			my $tmppid = $pid;
 			while ($tmppid
 				&& $comments->{$tmppid} && defined($comments->{$tmppid}{points})
@@ -820,10 +1016,17 @@ sub printComments {
 		return 0;
 	}
 
+	my $discussion2 = discussion2($user);
 
 #slashProfInit();
+#slashProf("printComments: $discussion2, $discussion->{id}");
 
-
+	if ($discussion2 && $user->{mode} ne 'metamod') {
+		$user->{mode} = $form->{mode} = 'thread';
+		$user->{commentsort} = 0;
+		$user->{reparent} = 0;
+		$user->{state}{max_depth} = $constants->{max_depth} + 3;
+	}
 
 	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
 	$discussion->{type} = isDiscussionOpen($discussion);
@@ -847,7 +1050,13 @@ sub printComments {
 #slashProf("selectComments");
 	my($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 #slashProf("", "selectComments");
-
+	if ($discussion2) {
+		$user->{state}{selectComments} = {
+			cidorpid	=> $cidorpid,
+			comments        => $comments,
+			count           => $count
+		};
+	}
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
 		# No such comment in this discussion.
@@ -864,8 +1073,7 @@ sub printComments {
 	my $cc = 0;
 	$cc = $comments->{$cidorpid}{visiblekids}
 		if $comments->{$cidorpid}
-			&& $comments->{$cidorpid}{visiblekids}
-			&& $user->{mode} ne 'improvedthreaded';
+			&& $comments->{$cidorpid}{visiblekids};
 
 	$lvl++ if $user->{mode} ne 'flat'
 		&& $user->{mode} ne 'archive'
@@ -906,7 +1114,7 @@ sub printComments {
 	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
 	my($comment, $next, $previous);
-	if ($cid) {
+	if ($cid && !$discussion2) {
 		my($next, $previous);
 		$comment = $comments->{$cid};
 		if (my $sibs = $comments->{$comment->{pid}}{kids}) {
@@ -920,14 +1128,16 @@ sub printComments {
 		$previous = $comments->{$previous} if $previous;
 	}
 
-	# Flat and nested mode don't index, even on large stories, so they
+	# Flat and theaded mode don't index, even on large stories, so they
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
 	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
 		? $comments->{$cidorpid}{totalvisiblekids}
 		: $cc;
 
-	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
+	my $lcp = $discussion2
+		? ''
+		: linkCommentPages($discussion->{id}, $pid, $cid, $total);
 
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
@@ -942,7 +1152,13 @@ sub printComments {
 	}
 
 #slashProf("printCommComments");
-	
+	my $anon_dump;
+	if ($discussion2) {
+		require Data::JavaScript::Anon;
+		$anon_dump = \&Data::JavaScript::Anon::anon_dump;
+	}
+
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments->{34}) . "discussion2: " . Dumper($discussion2);
 	my $comment_html = $options->{Return} ?  $pretext : '';
 
 
@@ -958,6 +1174,8 @@ sub printComments {
 		cc		=> $cc,
 		lcp		=> $lcp,
 		lvl		=> $lvl,
+		discussion2	=> $discussion2,
+		anon_dump	=> $anon_dump,
 	}, { Return => 1 });
 
 #slashProf("getCommentTextCached", "printCommComments");
@@ -965,7 +1183,7 @@ sub printComments {
 	# them into the text).
 	my $comment_text = $slashdb->getCommentTextCached(
 		$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
-		{ mode => $form->{mode}, cid => $form->{cid} }
+		{ mode => $form->{mode}, cid => $form->{cid}, discussion2 => $discussion2 }
 	);
 #slashProf("comment regexes", "getCommentTextCached");
 
@@ -973,8 +1191,27 @@ sub printComments {
 	# on the nearly-fully-rendered page will work now.
 	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|$comment_text->{$1}|g;
 
+	# for abbreviated comments, remove some stuff
+	if ($discussion2) {
+		my @abbrev     = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} != -1 } keys %$comments;
+		my @not_abbrev = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} == -1 } keys %$comments;
+		my %abbrev_and_not = map { $_ => 1 } (@abbrev, @not_abbrev);
+		$comment_html =~ s|(<div id="comment_shrunk_(\d+)" class="commentshrunk">.+?</div>)|$abbrev_and_not{$2} ? '' : $1|eg;
+		$comment_html =~ s|((<div id="comment_sig_(\d+)" class="sig) hide">)|$abbrev_and_not{$3} ? qq{$2">} : $1|eg;
+
+#		for my $cid (@abbrev, @not_abbrev) {
+#			$comment_html =~ s|<div id="comment_shrunk_$cid" class="commentshrunk">.+?</div>||;
+#			$comment_html =~ s|<div id="comment_sig_$cid" class="sig hide">|<div id="comment_sig_$cid" class="sig">|;
+#		}
+
+		if (@abbrev) {
+			my $abbrev_comments = join ',', map { "$_:$comments->{$_}{abbreviated}" } @abbrev;
+			$comment_html =~ s|D2\.abbrev_comments\({}\);|D2.abbrev_comments({$abbrev_comments});|;
+		}
+	}
 
 #slashProf("", "comment regexes");
+#slashProf("", "printComments: $discussion2, $discussion->{id}");
 #slashProfEnd();
 	return $comment_html if $options->{Return};
 	print $comment_html;
@@ -1037,9 +1274,10 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	my $threshold = $user->{threshold};
-	my $highlightthresh = $user->{highlightthresh};
-	$highlightthresh = $threshold if ($highlightthresh < $threshold);
+	my $discussion2 = discussion2($user);
+	my $threshold = $discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
+	my $highlightthresh = $discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
+	$highlightthresh = $threshold if $highlightthresh < $threshold;
 	# root comment should have more likelihood to be full
 	$highlightthresh-- if !$pid;
 
@@ -1067,30 +1305,59 @@ sub displayThread {
 
 	for my $cid (@{$comments->{$pid}{kids}}) {
 		my $comment = $comments->{$cid};
+
 		$skipped++;
 		# since nested and threaded show more comments, we can skip
 		# ahead more, counting all the visible kids.	--Pater
 		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
-		next if $skipped <= $form->{startat};
+		next if $skipped <= $form->{startat} && !$discussion2;
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
+
 		my $class = 'oneline';
 		if ($comment->{dummy}) {
 			$class = 'hidden';
 		} elsif ($comment->{points} < $threshold) {
 			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
+				if ($discussion2) {
 					$class = 'hidden';
 					$hidden++;
+				} else {
+					$hidden++;
+					next;
+				}
 			}
 		}
+
 		my $highlight = ($comment->{points} >= $highlightthresh && $class ne 'hidden') ? 1 : 0;
 		$class = 'full' if $highlight;
+		if ($discussion2 && $user->{state}{d2_defaultclass}{$cid}) {
+			$class = $user->{state}{d2_defaultclass}{$cid};
+		}
 		$comment->{class} = $class;
+
 		$user->{state}{comments}{totals}{$class}++ unless $comment->{dummy};
+
 		my $finish_list = 0;
-		
-		if ($full || $highlight) {
+
+		if ($full || $highlight || $discussion2) {
+			if ($discussion2 && $class eq 'oneline' && $comment->{subject_orig} eq 'no') {
+				$comment->{subject} = 'Re:';
+			}
+
 			my($noshow, $pieces) = (0, 0);
+			if ($discussion2) { # && $user->{acl}{d2testing}) {
+				if ($class eq 'hidden') {
+					$noshow = 1;
+					$user->{state}{comments}{noshow} ||= [];
+					push @{$user->{state}{comments}{noshow}}, $cid;
+				} elsif ($class eq 'oneline') {
+					$pieces = 1;
+					$user->{state}{comments}{pieces} ||= [];
+					push @{$user->{state}{comments}{pieces}}, $cid;
+				}
+			}
+
 			if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
 					dispComment($comment, { noshow => $noshow, pieces => $pieces }) .
@@ -1107,6 +1374,7 @@ sub displayThread {
 			$finish_list++;
 		}
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
+
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			if (my $str = displayThread($sid, $cid, $lvl+1, $comments, $const)) {
 				$return .= $const->{cagebegin} if $cagedkids;
@@ -1122,11 +1390,14 @@ sub displayThread {
 			# be shown, so count them.	-- Pater
 			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		}
+
 		$return .= "$const->{commentend}" if $finish_list;
-		$return .= "$const->{fullcommentend}" if (($full || $highlight) && $user->{mode} ne 'flat');
-		last if ($displayed >= $user->{commentlimit} && $user->{mode} ne 'improvedthreaded') ;
+		$return .= "$const->{fullcommentend}" if (($full || $highlight || $discussion2) && $user->{mode} ne 'flat');
+
+		last if $displayed >= $user->{commentlimit} && !$discussion2;
 	}
-	if ($hidden && (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod') && $user->{mode} ne 'improvedthreaded') {
+
+	if ($hidden && ($discussion2 || (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod'))) {
 		my $link = linkComment({
 			sid		=> $sid,
 			threshold	=> $constants->{comment_minscore},
@@ -1136,13 +1407,22 @@ sub displayThread {
 					   }, ''),
 			subject_only	=> 1,
 		});
-		$return .= $const->{cagebigbegin} if $cagedkids;
-		$return .= slashDisplay('displayThread',
-			{ 'link' => $link },
-			{ Return => 1, Nocomm => 1 }
-		);
-		$return .= $const->{cagebigend} if $cagedkids;
-	
+		if ($discussion2) {
+			push @{$user->{state}{comments}{hiddens}}, $pid;
+			$return .= slashDisplay('displayThread', {
+				'link'		=> $link,
+				discussion2	=> $discussion2,
+				pid		=> $pid,
+				hidden		=> $hidden
+			}, { Return => 1, Nocomm => 1 });
+		} else {
+			$return .= $const->{cagebigbegin} if $cagedkids;
+			$return .= slashDisplay('displayThread',
+				{ 'link' => $link },
+				{ Return => 1, Nocomm => 1 }
+			);
+			$return .= $const->{cagebigend} if $cagedkids;
+		}
 	}
 #slashProf("", "displayThread");
 
@@ -1337,7 +1617,7 @@ sub saveComment {
 		$subscriber_bonus = 1 if $constants->{plugin}{Subscribe}
 			&& $user->{is_subscriber}
 			&& (!$comm->{nosubscriberbonus} || $comm->{nosubscriberbonus} ne 'on');
-		}
+	}
 
 #print STDERR scalar(localtime) . " $$ F header_emitted=$header_emitted do_emit_html=$do_emit_html\n";
 
@@ -1409,7 +1689,7 @@ sub saveComment {
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	if ($moddb) {
 		my $text = $moddb->checkDiscussionForUndoModeration($comm->{sid});
-		print $text if $text;
+		print $text if $text && !discussion2($user);
 	}
 
 	my $tc = $slashdb->getVar('totalComments', 'value', 1);
@@ -1631,11 +1911,11 @@ EOT
 
 #use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
 
-
+	my $discussion2 = discussion2($user);
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, $reasons, $options
+		$can_mod, $reasons, $options, $discussion2
 	) if $constants->{comments_hardcoded};
 
 	if ($options->{show_pieces}) {
@@ -1646,6 +1926,7 @@ EOT
 			reasons		=> $reasons,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
+			discussion2	=> $discussion2,
 			options		=> $options
 		}, { Return => 1, Nocomm => 1 });
 		push @return, slashDisplay('dispLinkComment', {
@@ -1654,6 +1935,7 @@ EOT
 			reasons		=> $reasons,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
+			discussion2	=> $discussion2,
 			options		=> $options
 		}, { Return => 1, Nocomm => 1 });
 		return @return;
@@ -1665,6 +1947,7 @@ EOT
 		reasons		=> $reasons,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
+		discussion2	=> $discussion2,
 		options		=> $options
 	}, { Return => 1, Nocomm => 1 });
 }
@@ -1672,7 +1955,7 @@ EOT
 ########################################################
 # this sucks, but it is here for now
 sub _hard_dispComment {
-	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons, $options) = @_;
+	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons, $options, $discussion2) = @_;
 	my $gSkin = getCurrentSkin();
 
 	my($comment_to_display, $score_to_display,
@@ -1688,14 +1971,17 @@ sub _hard_dispComment {
 	if ($comment_shrunk) {
 		my $readtext = 'Read the rest of this comment...';
 		my $link;
-	
-		$link = linkComment({
-			sid	=> $comment->{sid},
-			cid	=> $comment->{cid},
-			pid	=> $comment->{cid},
-			subject	=> $readtext,
-			subject_only => 1,
-		}, 1);
+		if ($discussion2) {
+			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.readRest($comment->{cid})">$readtext</a>';
+		} else {
+			$link = linkComment({
+				sid	=> $comment->{sid},
+				cid	=> $comment->{cid},
+				pid	=> $comment->{cid},
+				subject	=> $readtext,
+				subject_only => 1,
+			}, 1);
+		}
 		$comment_to_display .= qq'<div id="comment_shrunk_$comment->{cid}" class="commentshrunk">$link</div>';
 	}
 
@@ -1813,6 +2099,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
+			onclick	=> ($discussion2 ? "D2.replyTo($comment->{cid}); return false;" : '')
 		}) . $suffix) unless $user->{state}{discussion_archived};
 
 		if (! $is_idle) {
@@ -1826,6 +2113,7 @@ EOT
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
+			onclick	=> ($discussion2 ? "return D2.selectParent($comment->{original_pid})" : '')
 		}, 1) . $suffix) if $comment->{original_pid};
 
 #use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
@@ -1834,6 +2122,7 @@ EOT
 			createSelect("reason_$comment->{cid}", $reasons, {
 				'return'	=> 1,
 				nsort		=> 1, 
+				onchange	=> ($discussion2 ? 'return D2.doModerate(this)' : '')
 			}) . "</div>" if $can_mod
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
@@ -1912,12 +2201,14 @@ EOT
 	}
 
 	my $class = $comment->{class}; 
-	my $classattr = qq[ class="$class"] ;
-	my $contain = $class eq 'full';
+	my $classattr = $discussion2 ? qq[ class="$class"] : '';
+	my $contain = $class eq 'full' && $discussion2 ? ' contain' : '';
 
-	my $head =  <<EOT;
-	<h4><a name="$comment->{cid}">$comment->{subject}</a>
-EOT
+	my $head = $discussion2 ? <<EOT1 : <<EOT2;
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.setFocusComment($comment->{cid})">$comment->{subject}</a>
+EOT1
+			<h4><a name="$comment->{cid}">$comment->{subject}</a>
+EOT2
 
 	my $return = '';
 	$return = <<EOT if !$options->{noshow_show};
@@ -1951,6 +2242,16 @@ EOT
 	$return .= "</div>\n" if !$options->{noshow};
 	$return .= "</div>\n\n" if !$options->{noshow_show};
 
+	if ($discussion2 && !$options->{noshow_show}) {
+		$return .= <<EOT;
+<div id="replyto_$comment->{cid}"></div>
+
+<ul id="group_$comment->{cid}">
+	<li id="hiddens_$comment->{cid}" class="hide"></li>
+</ul>
+
+EOT
+	}
 
 	return $return;
 }
@@ -2339,4 +2640,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
-
