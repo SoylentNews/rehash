@@ -228,8 +228,6 @@ sub main {
 			$reader->getGlobjidCreate('stories', $story->{stoid}));
 	}
 
-	# Add in magic javascript for dyncomments
-	slashDisplay('collapsibleCommentsJS');
 	footer();
 	if ($story) {
 		writeLog($story->{sid} || $sid);
