@@ -54,7 +54,8 @@ sub main {
 	$op = 'pause' if $form->{merchant_return_link};
 	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
-	if ($user->{is_anon} && $op !~ /^(paypal|makepayment|pause)$/) {
+	if (($user->{is_anon} && $op !~ /^(paypal|makepayment|pause)$/) ||
+	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
