@@ -130,7 +130,7 @@ html > body .commentwrap table {
 	border: 1px solid #ddd;
 	border-bottom: none;
 	border-top: none;
-	padding: 1em .8em 0 .8em;
+	padding: 1em .8em .1em .8em;
 	background: #fff;
 	font-size: .875em;
 }
