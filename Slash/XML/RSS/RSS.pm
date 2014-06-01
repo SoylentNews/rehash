@@ -307,7 +307,7 @@ sub create {
 			# story data
 			if ($item->{story}) {
 				# set up story params in $encoded_item ref
-				$self->rss_story($item, $encoded_item, $version, \%channel);
+				$self->rss_story($item, $encoded_item, $version, \%channel, $param->{atom});
 			} else {
 				$encoded_item->{dc}{date} = $self->encode($self->date2iso8601($item->{'time'}))
 					if $item->{'time'};
