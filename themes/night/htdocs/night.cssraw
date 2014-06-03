@@ -173,6 +173,11 @@ background: #888;
 
 }
 
+.linkCommentPage {
+	background: #555;
+}
+
+
 /* FORMTABS */
 
 #formtabs ul li{
@@ -325,6 +330,8 @@ list-style: none;
 display: inline;
 }
 
+.story_main { background: #ccc;}
+
 
 input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a
 {
@@ -464,7 +471,7 @@ background:#333;
 .menuoldstyle li:before { content: "| "; }
 .menuoldstyle li:first-child:before { content: ""; }
 
-.briefarticle { padding: 2px; background: #ccc; font-size: .813em}
+.briefarticle { padding: .3em .6em; background: #ccc; font-size: .813em; color:#000; }
 .briefarticle a { color: #000 }
 .briefarticle .section { color: #333; }
 .briefarticle .storytitle { font-weight: bold; }
