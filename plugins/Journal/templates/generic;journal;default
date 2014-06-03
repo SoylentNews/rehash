@@ -17,59 +17,51 @@ __template__
 		[% FOREACH diatribe = article.article %]
 			<div class="article">
 				<div class="title">
-					<h3>
-						[% diatribe.description %]
-					</h3>
+					<h3>[% diatribe.description %]</h3>
 				</div>
-				<div class="details">
-					[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]
-				</div>   
+				<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>   
 				<div class="body">
 					<div class="topic">
 						<a href="[% gSkin.rootdir %]/search.pl?tid=[% diatribe.topic.tid %]"><img src="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" width="[% diatribe.topic.width %]" height="[% diatribe.topic.height %]" alt="[% diatribe.topic.textname %]"></a>
 					</div>
-					<div class="intro">
-						[% diatribe.article %]
-					</div>
+					<div class="intro">[% diatribe.article %]</div>
 				</div>
-                                        [% IF diatribe.discussion && !show_discussion %]
-                                               <div class="storylinks">
+				[% IF diatribe.discussion && !show_discussion %]
+					<div class="storylinks">
 						<div>
-                                                        <ul>
-                                                        [%- IF !user.is_anon;
-                                                                IF user.uid == uid %]
-                                                                 <li class="edit">
-                                                                    <a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</a>
-                                                                </li>
-                                                                <li class="delete">
-                                                                        <a href="[% gSkin.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</a>
-                                                                  </li>
-                                                             [%- END;
-                                                         END %]
-                                                    [%- IF diatribe.discussion; IF !show_discussion %]
-                                                                <li [% UNLESS user.uid == uid %]class="discussion"[% END %]>
-                                                                        <a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>
-                                                              </li>
-                                                        [%- END; ELSIF user.uid == uid %]
-                                                                <li class="enable">
-                                                                        <a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a>
-                                                                 </li>
-                                                        [%- END %]
-                                                        <li [% IF show_discussion %]class="journalid"[% END %]>
-                                                                <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
-                                                         </li>
-                                                </ul>
+							<ul>
+								[%- IF !user.is_anon;
+									IF user.uid == uid %]
+										<li class="edit"><a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</a></li>
+										<li class="delete"><a href="[% gSkin.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</a></li>
+									[%- END;
+								END %]
+								[%- IF diatribe.discussion;
+									IF !show_discussion %]
+										<li [% UNLESS user.uid == uid %]class="discussion"[% END %]>
+											<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>
+										</li>
+									[%- END;
+								ELSIF user.uid == uid %]
+									<li class="enable">
+										<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a>
+									</li>
+								[%- END %]
+								<li [% IF show_discussion %]class="journalid"[% END %]>
+									<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
+								</li>
+							</ul>
 						</div>
 					</div>
-                                        [% END %]
+				[% END %]
 			</div>			
 		[% END %]
 	[% END %]
 
 	<div class="journalpage">	
-	[% IF !user.is_anon && uid && uid != user.uid && !is_friend %]
-                <a href="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</a>
-        [% END %]
+		[% IF !user.is_anon && uid && uid != user.uid && !is_friend %]
+			<a href="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</a>
+		[% END %]
 		[% PROCESS pagination %]
 	</div>	
 </div>
