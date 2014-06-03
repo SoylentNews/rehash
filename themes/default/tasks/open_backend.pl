@@ -122,6 +122,12 @@ sub _do_rss {
 	}, 1);
 
 	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
+
+    # Now write change the links to https, add an s to the front of the extension, and write it again
+
+    $filename =~ s/\./.s/;
+    $rss =~ s/http:/https:/g;
+    save2file("$constants->{basedir}/$filename", $rss, \&fudge);
 }
 
 sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
