@@ -17,14 +17,11 @@ __template__
 		[% FOREACH diatribe = article.article %]
 			<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>
 			<div class="title">
-				<h3>
-					[% diatribe.description %]
-				</h3>
+				<h3>[% diatribe.description %]</h3>
 			</div>
 			<div class="body">
 				<div class="topic">
-					<a href="[% gSkin.rootdir %]/search.pl?tid=[% diatribe.topic.tid %]"><img src="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" width="[% diatribe.topic.width %]" height="[% diatribe.topic.height %]" 
- alt="[% diatribe.topic.textname %]"></a>
+					<a href="[% gSkin.rootdir %]/search.pl?tid=[% diatribe.topic.tid %]"><img src="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" width="[% diatribe.topic.width %]" height="[% diatribe.topic.height %]" alt="[% diatribe.topic.textname %]"></a>
  				</div>
 				<div class="intro">
 					[% diatribe.article %]
@@ -33,9 +30,7 @@ __template__
 			[% IF diatribe.discussion %]
 				<div class="storylinks">
 					<ul>
-						<li>
-							<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</a>
-						</li>
+						<li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</a></li>
 					</ul>
 				</div>
 			[% END %]
@@ -43,7 +38,7 @@ __template__
 	[% END %]
 	</div>	
 
-[% PROCESS pagination %]
+	[% PROCESS pagination %]
 
 	[% IF !user.is_anon && uid && uid != user.uid && !is_friend %]
 			<td align="right" bgcolor="#FFFFFF"><a href="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</a>

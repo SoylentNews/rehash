@@ -18,11 +18,6 @@ __template__
 			Journal Preferences
 		</legend>
 		<input type="hidden" name="op" value="setprefs">
-		[%- IF themes.size > 1 %]
-			[% PROCESS formLabel value => "Theme" %]
-			[% Slash.createSelect("journal_theme", themes, default, 1) %]
-			[% PROCESS formNote note => "Select how your journal will be viewed" %]
-		[%- END %]
 		[% PROCESS formLabel value => "Comments" %]
 		[% jdcodename = (user.is_subscriber || user.is_admin) ? 'commentcodes_extended' : 'commentcodes';
 		   jds = Slash.db.getDescriptions(jdcodename);

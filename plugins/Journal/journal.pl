@@ -955,8 +955,10 @@ sub _checkTheme {
 	my $themes	= $journal_reader->themes;
 
 	return $constants->{journal_default_theme}
-		unless grep $_ eq $theme, @$themes;
-	return $theme;
+#		unless grep $_ eq $theme, @$themes;
+#	return $theme;
+# Why do we have journal themes that overide what others see.
+# Theme design is now in main themes. Do not need seperate journal theme.
 }
 
 createEnvironment();
