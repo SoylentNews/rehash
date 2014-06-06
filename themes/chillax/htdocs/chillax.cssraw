@@ -240,9 +240,8 @@ div.storylinks
 
 div.storylinks div ul 
 {
-	padding: .5em 1em 1em; 
+	padding: .5em 1em; 
 	margin: 0;
-	height: 1em;
 	line-height: .875em;
 }
 
@@ -391,7 +390,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #006; }
 .menuoldstyle li:before { content: "| "; }
 .menuoldstyle li:first-child:before { content: ""; }
 
-.briefarticle { padding: 2px; background: #ccc; font-size: .813em}
+.briefarticle { padding: .3em .6em; background: #ccc; font-size: .813em; color:#000; }
 .briefarticle a { color: #000 }
 .briefarticle .section { color: #333; }
 .briefarticle .storytitle { font-weight: bold; }

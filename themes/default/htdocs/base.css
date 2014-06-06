@@ -82,6 +82,10 @@ padding: 0;
 }
 #poll-content legend { display: none; }
 
+#users-lists{
+    clear: both;
+}
+
 
 /* Header */
 #logo h1 a
@@ -720,15 +724,10 @@ font-size: .9em;
 
 .message_body
 {
-padding: 1em .8em 0 .8em;
+padding: 1em .8em .1em .8em;
 background: #fff;
 }
 
-.message_body p
-{
-    margin:0;
-    padding-bottom: 1em;
-}
 
 .message_footer
 {
