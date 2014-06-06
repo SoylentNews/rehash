@@ -147,7 +147,7 @@ sub create {
 	my($class, $param) = @_;
 	return unless exists $param->{items};
 
-	my $rss = Slash::XML::RSS->create({%$param, nocreate => 1});
+	my $rss = Slash::XML::RSS->create({%$param, nocreate => 1, atom => 1});
 
 	my $atom = {%$rss};
 	bless $atom, __PACKAGE__;

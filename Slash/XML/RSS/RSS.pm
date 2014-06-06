@@ -307,7 +307,7 @@ sub create {
 			# story data
 			if ($item->{story}) {
 				# set up story params in $encoded_item ref
-				$self->rss_story($item, $encoded_item, $version, \%channel);
+				$self->rss_story($item, $encoded_item, $version, \%channel, $param->{atom});
 			} else {
 				$encoded_item->{dc}{date} = $self->encode($self->date2iso8601($item->{'time'}))
 					if $item->{'time'};
@@ -381,7 +381,7 @@ The encoded item.
 =cut
 
 sub rss_story {
-	my($self, $item, $encoded_item, $version, $channel) = @_;
+	my($self, $item, $encoded_item, $version, $channel, $atom) = @_;
 
 	# delete it so it won't be processed later
 	my $story = delete $item->{story};
@@ -449,7 +449,11 @@ sub rss_story {
 			#Encdoe with CDATA instead
 			#$encoded_item->{description} .= $self->encode($extra) if $extra;
 			$encoded_item->{description} .= $extra if $extra;
-			$encoded_item->{description} = "<![CDATA[" . $encoded_item->{description} . "]]>"
+			if ($atom){
+				$encoded_item->{description} = $self->encode($encoded_item->{description});
+			} else{
+				$encoded_item->{description} = "<![CDATA[" . $encoded_item->{description} . "]]>";
+			}
 		}
 	}
 
