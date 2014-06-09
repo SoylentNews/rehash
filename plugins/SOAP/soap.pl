@@ -9,6 +9,7 @@
 # and the Users code is just there temporarily for testing.
 
 use strict;
+use utf8;
 use Slash;
 use Slash::Utility;
 

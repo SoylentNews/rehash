@@ -33,6 +33,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use HTML::TreeBuilder;
 use Slash;
 use Slash::Display;

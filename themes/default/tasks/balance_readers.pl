@@ -8,6 +8,7 @@
 # later. - Jamie 2004/11/10
 
 use strict;
+use utf8;
 
 use Time::HiRes;
 

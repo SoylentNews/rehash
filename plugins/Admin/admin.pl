@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Image::Size;
 use Time::HiRes;
 use LWP::UserAgent;

@@ -6,6 +6,7 @@
 # table, accesslog_artcom, for fast processing by run_moderatord.
 
 use strict;
+use utf8;
 use vars qw( %task $me $minutes_run );
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::DB;

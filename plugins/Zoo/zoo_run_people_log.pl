@@ -3,6 +3,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Slash::Constants qw( :messages :slashd :people );
 use Slash::Display;
 

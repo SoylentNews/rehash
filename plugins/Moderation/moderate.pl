@@ -10,6 +10,7 @@
 # moderate.pl.
 
 use strict;
+use utf8;
 use Slash;
 use Slash::Constants qw(:messages :strip);
 use Slash::Display;

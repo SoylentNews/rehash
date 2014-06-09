@@ -4,6 +4,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Slash::Constants qw(:messages);
 
 use vars qw( %task $me );

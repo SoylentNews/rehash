@@ -5,6 +5,7 @@
 package Slash::Apache::User;
 
 use strict;
+use utf8;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Apache;

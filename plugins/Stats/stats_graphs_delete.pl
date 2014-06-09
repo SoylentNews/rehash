@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Slash::Utility;
 
 my $me = 'stats_graphs_delete.pl';

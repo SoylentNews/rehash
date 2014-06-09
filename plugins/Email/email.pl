@@ -10,6 +10,7 @@
 # (c) OSTG 2002
 
 use strict;
+use utf8;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Display;
 use Slash::Utility;

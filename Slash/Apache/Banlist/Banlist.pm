@@ -7,6 +7,7 @@
 package Slash::Apache::Banlist;
 
 use strict;
+use utf8;
 use Apache::Constants qw(:common);
 
 use Slash;

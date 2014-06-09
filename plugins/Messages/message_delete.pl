@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use File::Spec::Functions;
 use Slash::Utility;
 

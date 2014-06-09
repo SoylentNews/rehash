@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use File::Path;
 use Slash 2.003;        # require Slash 2.3.x
 use Slash::Constants qw(:messages :web);

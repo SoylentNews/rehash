@@ -8,6 +8,7 @@
 # so i document it here.  yay for me!
 
 use strict;
+use utf8;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:web :messages);
 use Slash::Display;

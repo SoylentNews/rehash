@@ -3,6 +3,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Data::Dumper;
 use SOAP::Lite;
 

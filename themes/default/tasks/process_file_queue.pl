@@ -11,6 +11,7 @@ use Image::Size;
 use Slash::Constants ':slashd';
 
 use strict;
+use utf8;
 
 use vars qw( %task $me $task_exit_flag );
 

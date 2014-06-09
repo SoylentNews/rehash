@@ -3,6 +3,7 @@
 # $Id$
 
 use strict;
+use utf8;
 
 use Slash::Constants ':slashd';
 

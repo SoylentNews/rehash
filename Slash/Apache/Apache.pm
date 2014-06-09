@@ -5,6 +5,7 @@
 package Slash::Apache;
 
 use strict;
+use utf8;
 use Time::HiRes;
 use Apache;
 use Apache::SIG ();

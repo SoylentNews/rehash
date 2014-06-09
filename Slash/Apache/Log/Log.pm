@@ -5,6 +5,7 @@
 package Slash::Apache::Log;
 
 use strict;
+use utf8;
 use Slash::Utility;
 use Apache::Constants qw(:common);
 

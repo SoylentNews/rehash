@@ -4,6 +4,7 @@
 # and COPYING for more information, or see http://slashcode.com/.
 
 use strict;
+use utf8;
 use Slash::Constants qw( :messages :slashd );
 use Slash::Display;
 
