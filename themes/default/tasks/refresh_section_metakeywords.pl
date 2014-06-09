@@ -8,6 +8,7 @@
 # in HTML output.
 
 use strict;
+use utf8;
 
 use Slash::Display;
 

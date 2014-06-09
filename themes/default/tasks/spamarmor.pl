@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use vars qw( %task $me );
 use Slash;
 use Slash::DB;

@@ -8,6 +8,7 @@
 # minimum stoid returned, and writes it to a var.
 
 use strict;
+use utf8;
 use vars qw( %task $me );
 use Time::HiRes;
 use Slash::DB;

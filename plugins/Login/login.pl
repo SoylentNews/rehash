@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Slash 2.003;
 use Slash::Constants qw(:web :messages);
 use Slash::Display;

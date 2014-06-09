@@ -13,6 +13,7 @@ use HTTP::Request;
 use Encode 'encode_utf8';
 
 use strict;
+use utf8;
 
 use vars qw( %task $me $task_exit_flag );
 

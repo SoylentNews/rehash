@@ -24,6 +24,7 @@ exit;
 # of the test code):
 
 use strict;
+use utf8;
 use Slash 2.001;
 use Slash::Utility;
 $ARGV[0] ||= 'virtual_user=slash';

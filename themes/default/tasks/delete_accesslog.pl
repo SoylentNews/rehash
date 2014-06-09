@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 
 use Fcntl;
 use Slash::Constants ':slashd';

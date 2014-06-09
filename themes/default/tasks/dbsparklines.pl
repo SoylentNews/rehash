@@ -7,6 +7,7 @@
 use Slash::Constants ':slashd';
 
 use strict;
+use utf8;
 use Time::HiRes;
 
 use vars qw( %task $me );

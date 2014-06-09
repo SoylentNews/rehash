@@ -7,6 +7,7 @@
 # Counts hits from accesslog and updates stories.hits columns.
 
 use strict;
+use utf8;
 use vars qw( %task $me $minutes_run $maxrows %timehash );
 use Time::HiRes;
 use Slash::DB;

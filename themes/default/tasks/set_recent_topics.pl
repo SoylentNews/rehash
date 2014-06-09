@@ -9,6 +9,7 @@
 # <shane at lottadot dot com>, May 2002.
 
 use strict;
+use utf8;
 use Slash::Constants ':slashd';
 
 use vars qw( %task $me );

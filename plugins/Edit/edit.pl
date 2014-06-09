@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use File::Temp 'tempfile';
 use Image::Size;
 use Time::HiRes;

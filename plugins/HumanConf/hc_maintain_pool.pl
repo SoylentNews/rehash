@@ -5,6 +5,7 @@
 # $Id$
 
 use strict;
+use utf8;
 use Slash::Utility;
 
 use vars qw( %task $me $task_exit_flag );

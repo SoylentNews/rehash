@@ -10,6 +10,7 @@
 # jellicle for suggesting this!  :)
 
 use strict;
+use utf8;
 use vars qw( %task $me );
 use Time::HiRes;
 use Slash::DB;
