@@ -391,10 +391,20 @@ ul.menu li.selected a, ul.menu li a:hover { color: #600; }
 .menuoldstyle li:before { content: "| "; }
 .menuoldstyle li:first-child:before { content: ""; }
 
-.briefarticle { padding: .3em .6em; background: #ccc; font-size: .813em; color:#000; }
-.briefarticle a { color: #000 }
+.briefarticle { 
+	padding: .3em .6em;  
+	color:#fff;
+	margin-bottom: .6em;
+	background-color: #600;
+	background: -o-linear-gradient(#600, #933);
+	background: -webkit-linear-gradient(#600, #933);
+	background: -moz-linear-gradient(#600, #933);
+	background: linear-gradient(#600, #933);
+	border-radius: 10px ;
+}
+
+.briefarticle a { color: #fff; text-decoration: none; font-weight: bold;}
 .briefarticle .section { color: #333; }
-.briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
 
