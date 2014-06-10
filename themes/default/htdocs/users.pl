@@ -2920,6 +2920,15 @@ sub saveHome {
 	# Set the story_never and story_always fields.
 	my $author_hr = $slashdb->getDescriptions('authors');
 	my $tree = $slashdb->getTopicTree();
+
+	my $nexus_tids_ar = $slashdb->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
+	my $nexus_hr = { };
+	
+	for my $tid (@$nexus_tids_ar) {
+		$nexus_hr->{$tid} = $tree->{$tid}{textname};
+	}
+	
+	
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
 	my(@story_always_topic, @story_always_author);
 	my(@story_always_nexus, @story_full_brief_nexus, @story_brief_always_nexus, @story_full_best_nexus, @story_brief_best_nexus);
@@ -2934,7 +2943,7 @@ sub saveHome {
 		for my $tid (
 			sort { $a <=> $b }
 			grep { !$tree->{$_}{nexus} }
-			keys %$tree
+			keys %$nexus_hr
 		) {
 			my $key = "topictid$tid";
 			$story_topic_all++;
