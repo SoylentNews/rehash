@@ -2920,13 +2920,7 @@ sub saveHome {
 	# Set the story_never and story_always fields.
 	my $author_hr = $slashdb->getDescriptions('authors');
 	my $tree = $slashdb->getTopicTree();
-
-	my $nexus_tids_ar = $slashdb->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
-	my $nexus_hr = { };
-	
-	for my $tid (@$nexus_tids_ar) {
-		$nexus_hr->{$tid} = $tree->{$tid}{textname};
-	}
+	my $topic_hr = $slashdb->getDescriptions('non_nexus_topics-storypickable');
 	
 	
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
@@ -2943,7 +2937,7 @@ sub saveHome {
 		for my $tid (
 			sort { $a <=> $b }
 			grep { !$tree->{$_}{nexus} }
-			keys %$nexus_hr
+			keys %$topic_hr
 		) {
 			my $key = "topictid$tid";
 			$story_topic_all++;
@@ -3068,12 +3062,10 @@ sub saveHome {
 	$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
 
 	$error = 1;
-	# must select at least 1/4 of nexuses, topics, authors
-	if      ( scalar(@story_never_author) > ($story_author_all * 3/4) ) {
+	# must select at least 1/4 of topics, authors
+	if      ( scalar(@story_never_author) > ($story_author_all * 1/4) ) {
 		$note = getError('editHome_too_many_disabled');
-	} elsif ( scalar(@story_never_nexus) > ($story_nexus_all * 3/4) ) {
-		$note = getError('editHome_too_many_disabled');
-	} elsif ( scalar(@story_never_topic) > ($story_topic_all * 3/4) ) {
+	} elsif ( scalar(@story_never_topic) > ($story_topic_all * 1/4) ) {
 		$note = getError('editHome_too_many_disabled');
 	} else {
 		$error = 0;
