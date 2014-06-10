@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+Menu for sidebar and bottom (see header template and Slash::horizmenu() function)
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+sections
+__template__
+<ul>
+	<li>
+		<a href="[% gSkin.rootdir %]/">[% constants.sitename %]</a>
+	</li>
+	[% skins = Slash.db.getSkins %]
+	
+	[% FOREACH skid IN skins.keys %]
+		[% NEXT IF skid == 1 %]
+		[% skins.skid.title %]
+		<li>
+			<a href="[% skins.$skid.rootdir %]/">[% skins.$skid.title %]</a>
+		</li>
+	[% END %]
+</ul>
+
+__seclev__
+10000
+__version__
+$Id$
