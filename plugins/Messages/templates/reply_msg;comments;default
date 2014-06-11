@@ -20,7 +20,7 @@ __template__
 %]">[% reply.subject %]</a></b>, in reply to your comment,
 <b><a href="[% gSkin.rootdir %]/comments.pl?sid=[% parent.sid %]&amp;cid=[% parent.cid
 %]">[% parent.subject %]</a></b>, attached to
-<b><a href="[% gSkin.rootdir %]/article.pl?sid=[% discussion.sid %]">[% discussion.title %]</a></b>.
+<b><a href="[% discussion.url %]">[% discussion.title %]</a></b>.
 </p>
 
 [% ELSE %]
@@ -40,7 +40,7 @@ Replied to:
 
 Attached to:
     [% discussion.title | decode_entities %]
-		[% absolutedir %]/article.pl?sid=[% discussion.sid %]
+		[% Slash.url2abs(discussion.url, absolutedir) %]
 [% END %]
 [% END %]
 
