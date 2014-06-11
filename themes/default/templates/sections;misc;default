@@ -15,7 +15,7 @@ sections
 __template__
 <ul>
 	<li>
-		<a href="[% gSkin.rootdir %]/">[% constants.sitename %]</a>
+		<a href="[% constants.rootdir %]/">[% constants.sitename %]</a>
 	</li>
 	[% skins = Slash.db.getSkins %]
 	
