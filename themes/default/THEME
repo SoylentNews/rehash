@@ -130,6 +130,7 @@ template=templates/rsslink;misc;default
 template=templates/security;menu;default
 template=templates/sidebox;misc;default
 template=templates/skinindexd;misc;default
+template=templates/sections;misc;default
 template=templates/select;misc;default
 template=templates/selectThreshLabel;misc;default
 template=templates/sendPasswdForm;users;default

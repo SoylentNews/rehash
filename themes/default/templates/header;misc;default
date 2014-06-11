@@ -59,6 +59,7 @@ __template__
 		<div id="links">
 			[% UNLESS user.lowbandwidth %]
 				[% text = INCLUDE mainmenu; Slash.sidebox("Navigation", text, "navigation", 1) %]
+				[% text = INCLUDE sections; Slash.sidebox("Sections", text, "sections", 1) %]
 				[% text = INCLUDE organisation; Slash.sidebox(constants.sitename, text, "sitebox", 1) %]
 			[% END %]
 		</div>
