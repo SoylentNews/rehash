@@ -13,7 +13,7 @@ messagenew
 __template__
 [% IF msg.mode == 1 %]
 
-<URL:[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]>
+<p>[% journal.nickname %]  has posted a new journal entry: <b><a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a></b></p>
 
 [% ELSE %]
 
