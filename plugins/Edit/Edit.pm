@@ -149,7 +149,12 @@ sub getOrCreatePreview {
 			}
 
 			if ($form->{new}) {
-				$p_data->{title} = $fh_data->{title} = $type eq 'story'? $form->{title} : strip_notags($form->{title});
+                my $q_title = '';
+
+                if($type eq 'story') {$q_title = $form->{title};}
+                else{$q_title = strip_notags($form->{title};}
+
+				$p_data->{title} = $fh_data->{title} = $q_title;
 				$p_data->{url_text}                  = $form->{url} if $form->{url};
 				$p_data->{introtext}                 = $form->{introtext};
 			}
@@ -297,7 +302,11 @@ sub determineAllowedTypes {
 
 sub determineDefaultType {
 	my $user = getCurrentUser();
-	return $user->{is_admin} ? 'story' : 'submission';
+    my $q_type = '';
+
+    if($user->{is_admin}){$q_type = 'story';}
+    else{$q_type = 'submission';}
+	return $q_type;
 }
 
 sub determineType {
@@ -322,7 +331,11 @@ sub detectSubType {
 	my $html_count;
 	$html_count++ while $text =~ /<[^a\/]/ig;
 
-	return $html_count ? 'html' : 'plain';
+    my $type = '';
+    if($html_count){ $type = 'html';}
+    else{$type = 'plain';}
+
+	return $type;
 }
 
 sub savePreview {
@@ -347,7 +360,11 @@ sub savePreview {
 
 
 	$form->{title} =~ s/[\r\n].*$//s;  # strip anything after newline
-	$p_data->{title} = $fh_data->{title} = $p_item->{type} eq 'story' ? $form->{title} : strip_notags($form->{title});
+
+    my $q_title = '';
+    if($p_item->{type} eq 'story'){ $q_title = $form->{title};}
+    else{$q_title = strip_notags($form->{title};}
+	$p_data->{title} = $fh_data->{title} = $q_title;
 	$p_data->{introtext}                 = $form->{introtext};
 	$fh_data->{createtime}               = $form->{createtime} if $form->{createtime};
 
@@ -359,7 +376,10 @@ sub savePreview {
 	if ($p_item->{type} eq 'story') {
 		$p_data->{bodytext}      = $form->{bodytext};
 		$p_data->{commentstatus} = $form->{commentstatus};
-		$p_data->{neverdisplay}  = $form->{display} ? '' : 1;
+
+        my $q_display = 1;
+        if($form->{display}){ $q_display = '';}
+		$p_data->{neverdisplay}  = $q_display;
 
 		$fh_data->{uid}          = $form->{uid};
 
@@ -404,7 +424,10 @@ sub savePreview {
 		$fh_data->{name} = strip_html($form->{name});
 
 		# XXXEdit eventually perhaps look for video tag when setting this too
-		$fh_data->{mediatype} = $form->{url} =~ /youtube.com|video.google.com/ ? "video" : "none";
+        my $q_mediatype = '';
+        if($form->{url} =~ /youtube.com|video.google.com/){ $q_mediatype = "video";}
+        else{ $q_mediatype = "none"; }
+		$fh_data->{mediatype} = $q_mediatype;
 
 		$p_data->{url_text} = $form->{url} if $form->{url};
 		$p_data->{sub_type} = $self->detectSubType($form->{introtext});
@@ -418,9 +441,10 @@ sub savePreview {
 				$fh_data->{url_id} = $self->getUrlCreate($url_data);
 			}
 		}
-		my $fh_data->{uid} ||= $form->{name}
-			? getCurrentUser('uid')
-			: getCurrentStatic('anonymous_coward_uid');
+        my $q_uid = '';
+        if($form->{name}){ $q_uid = getCurrentUser('uid'); }
+        else{ $q_uid = getCurrentStatic('anonymous_coward_uid');
+		my $fh_data->{uid} ||= $q_uid;
 
 	} elsif ($p_item->{type} eq 'journal') {
 		$p_data->{commentstatus} = $form->{commentstatus};
@@ -466,8 +490,10 @@ sub savePreview {
 	print STDERR "savePreview GLOBJID $p_item->{globjid} PRIMARYSKID $primaryskid TIDS '@$tids' from RENDERED: "
 		. Dumper($rendered_hr);
 
-	$fh_data->{offmainpage} = $tagsdb->isAdminTagged($p_item->{globjid}, 'sectiononly')
-		? 'yes' : 'no';
+	my $q_isAdminTagged = '';
+    if($tagsdb->isAdminTagged($p_item->{globjid}, 'sectiononly')){$q_isAdminTagged = 'yes';}
+    else{$q_isAdminTagged = 'no';}
+    $fh_data->{offmainpage} = $q_isAdminTagged;
 
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
 
@@ -533,24 +559,30 @@ sub showEditor {
 		delete $bodytext_spellcheck{$src_nick}  if (($src_nick) && (keys %bodytext_spellcheck));
 		delete $title_spellcheck{$src_nick}     if (($src_nick) && (keys %title_spellcheck));
 
-		$ispell_comments = {
-		introtext => (scalar keys %introtext_spellcheck)
-			? slashDisplay("spellcheck", { words => \%introtext_spellcheck, form_element => "introtext" }, { Page => "admin", Return => 1})
-			: "",
-		bodytext  => (scalar keys %bodytext_spellcheck)
-			? slashDisplay("spellcheck", { words => \%bodytext_spellcheck, form_element => "bodytext" }, { Page => "admin", Return => 1 })
-			: "",
-		title     => (scalar keys %title_spellcheck)
-			? slashDisplay("spellcheck", { words => \%title_spellcheck, form_element => "title" }, { Page => "admin", Return => 1 })
-			: "",
-		};
+		my $q_introtext = "";
+        if((scalar keys %introtext_spellcheck))
+        {$q_introtext = slashDisplay("spellcheck", { words => \%introtext_spellcheck, form_element => "introtext" }, { Page => "admin", Return => 1});}
+
+        my $q_bodytext = "";
+        if((scalar keys %bodytext_spellcheck))
+        {$q_bodytext = slashDisplay("spellcheck", { words => \%bodytext_spellcheck, form_element => "bodytext" }, { Page => "admin", Return => 1 });}
+
+        my $q_title = "";
+        if((scalar keys %title_spellcheck))
+        {$q_title = slashDisplay("spellcheck", { words => \%title_spellcheck, form_element => "title" }, { Page => "admin", Return => 1 });}
+
+        $ispell_comments = {
+		    introtext => $q_introtext,
+		    bodytext  => $q_bodytext,
+    		title     => $q_title
+        };
 
 		$options->{errors}{warnings}{ispellwarning} = getData('ispellwarning','','edit')
 			if keys %introtext_spellcheck || keys %bodytext_spellcheck || keys %title_spellcheck;
 
 		$similar_stories = $self->getSimilar($preview, $p_item);
 		$self->setRelated(0, $storyref);
-use Data::Dumper; print STDERR Dumper $storyref;
+        use Data::Dumper; print STDERR Dumper $storyref;
 	}
 
 	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session Item Type: $p_item->{type}<br>";
@@ -562,7 +594,9 @@ use Data::Dumper; print STDERR Dumper $storyref;
 	$options->{previewing} = 0 if ($options->{errors}{critical} && keys %{$options->{errors}{critical}} > 0) || $form->{'new'};
 
 	if ($p_item && $p_item->{title} && $options->{previewing}) {
-		my $preview_hide = $options->{previewing} ? "" : " class='hide'";
+        # Why the hell were we double checking that $options{previewing} was set?
+        # It's part of the goddamned "if" that we're in.
+		my $preview_hide = ""; #$options->{previewing} ? "" : " class='hide'";
 		my $book_info = '';
 
 		if (($p_item->{type} eq 'story') && $p_item->{primaryskid}) {
@@ -582,11 +616,18 @@ use Data::Dumper; print STDERR Dumper $storyref;
 	$authors->{$p_item->{uid}} = $self->getUser($p_item->{uid}, 'nickname') if $p_item->{uid} && !defined($authors->{$p_item->{uid}});
 	my $author_select = createSelect('uid', $authors, $p_item->{uid}, 1);
 
-	my $display_check = $preview->{neverdisplay} ? '' : $constants->{markup_checked_attribute};
+    my $q_display_check = "";
+    if(!($preview->{neverdisplay}){$q_display_check = $constants->{markup_checked_attribute};}
+
+	my $display_check = $q_display_check;
 
 	$preview->{commentstatus} ||= $constants->{defaultcommentstatus};
 
-	my $commentstatuses = $self->getDescriptions($user->{is_subscriber} || $user->{is_admin} ? 'commentcodes_extended' : 'commentcodes');
+    my $q_description = "";
+    if($user->{is_subscriber} || $user->{is_admin}){ $q_description = 'commentcodes_extended'; }
+    else{ $q_description = 'commentcodes'; }
+
+	my $commentstatuses = $self->getDescriptions($q_description);
 	my $commentstatus_select = createSelect('commentstatus', $commentstatuses, $preview->{commentstatus}, 1);
 	my $chosen_hr = $tagsdb->extractChosenFromTags($p_item->{globjid});
 	my $extracolumns = $self->getNexusExtrasForChosen($chosen_hr) || [ ];
