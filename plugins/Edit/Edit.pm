@@ -443,7 +443,7 @@ sub savePreview {
 		}
         my $q_uid = '';
         if($form->{name}){ $q_uid = getCurrentUser('uid'); }
-        else{ $q_uid = getCurrentStatic('anonymous_coward_uid');
+        else{ $q_uid = getCurrentStatic('anonymous_coward_uid');}
 		my $fh_data->{uid} ||= $q_uid;
 
 	} elsif ($p_item->{type} eq 'journal') {
