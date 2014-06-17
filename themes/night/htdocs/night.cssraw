@@ -1,7 +1,7 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
 body, body.admin
 {
-    background: #333;
+    background: #222;
     color:#ddd;
 }
 .user_admin, body .adminstoryform fieldset {background: #440;}
@@ -125,10 +125,10 @@ background: #555;
 .commentTop .details {
 	border: 1px solid #aaa;
 	background-color: #444;
-	background: -o-linear-gradient(#555, #333);
-	background: -webkit-linear-gradient(#555, #333);
-	background: -moz-linear-gradient(#555, #333);
-	background: linear-gradient(#555, #333);	
+	background: -o-linear-gradient(#444, #222);
+	background: -webkit-linear-gradient(#444, #222);
+	background: -moz-linear-gradient(#444, #222);
+	background: linear-gradient(#444, #222);	
 	color: #fff;
 }
 
@@ -141,7 +141,7 @@ color: #f00;
 {
 border: 1px solid #aaa;
 border-top: none;
-    background:#333
+    background:#222
 }
 
 .commentBody
@@ -149,7 +149,7 @@ border-top: none;
 border: 1px solid #aaa;
 border-bottom: none;
 border-top: none;
-    background:#333;
+    background:#222;
 }
 
 
@@ -221,7 +221,7 @@ font-size: 1em;
 
 .generalbody
 {
-background: #333;
+background: #222;
 border: 1px solid #aaa;
 }
 
@@ -249,26 +249,26 @@ font-size: 1em;
 	font-weight: normal;
 	border: 1px solid #aaa;
 	background-color: #444;
-	background: -o-linear-gradient(#555, #333);
-	background: -webkit-linear-gradient(#555, #333);
-	background: -moz-linear-gradient(#555, #333);
-	background: linear-gradient(#555, #333);
+	background: -o-linear-gradient(#444, #222);
+	background: -webkit-linear-gradient(#444, #222);
+	background: -moz-linear-gradient(#444, #222);
+	background: linear-gradient(#444, #222);
 }
 
 .article .body
 {
 border: 1px solid #aaa;
 border-top: none;
-background: #333;
+background: #222;
 }
 
 div.storylinks
 {
 	background-color: #444;
-	background: -o-linear-gradient(#555, #333);
-	background: -webkit-linear-gradient(#555, #333);
-	background: -moz-linear-gradient(#555, #333);
-	background: linear-gradient(#555, #333);
+	background: -o-linear-gradient(#444, #222);
+	background: -webkit-linear-gradient(#444, #222);
+	background: -moz-linear-gradient(#444, #222);
+	background: linear-gradient(#444, #222);
 	border: 1px solid #aaa;
 	border-top: none;
 	border-radius: 0 0 10px 10px;
@@ -340,6 +340,9 @@ input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:h
 
 input[type=text], input[type=password] {border: 1px solid #666;}
 
+
+#adminmenu a {color:#600}
+
 .data_head
 {
 background: #600;
@@ -369,6 +372,8 @@ background: #888;
 }
 
 .status0 a, .status1 a, .status2 a{ color:#fff; }
+
+.lt_tb_col { background: #222; }
 
 /* Comments */
 .commentBox { background: #600; }
@@ -416,7 +421,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 #usermenu{
 border: 1px solid #aaa;
 border-bottom: none;
-background:#333;
+background:#222;
 }
 
 #usermenu ul.menu {
@@ -484,7 +489,7 @@ background:#333;
 }
 
 .briefarticle a { color: #fff; text-decoration: none; font-weight: bold;}
-.briefarticle .section { color: #333; }
+.briefarticle .section { color: #222; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
 
@@ -492,7 +497,7 @@ background:#333;
 
 .message_menu{
 border: 1px solid #aaa;
-background: #333;
+background: #222;
 color: #fff;
 border-bottom: none;
 }
@@ -505,10 +510,10 @@ margin: 0;
 {
 	border: 1px solid #aaa;
 	background-color: #444;
-	background: -o-linear-gradient(#555, #333);
-	background: -webkit-linear-gradient(#555, #333);
-	background: -moz-linear-gradient(#555, #333);
-	background: linear-gradient(#555, #333);
+	background: -o-linear-gradient(#444, #222);
+	background: -webkit-linear-gradient(#444, #222);
+	background: -moz-linear-gradient(#444, #222);
+	background: linear-gradient(#444, #222);
 	color: #fff;
 }
 
@@ -517,12 +522,12 @@ margin: 0;
 border: 1px solid #aaa;
 border-bottom: none;
 border-top: none;
-background: #333;
+background: #222;
 }
 
 .message_footer
 {
 border: 1px solid #aaa;
 border-top: none;
-background: #333;
+background: #222;
 }
