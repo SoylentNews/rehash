@@ -217,7 +217,7 @@ ul#commentlisting
 
 #discussion_buttons
 {
-		font-size: .875em;
+		font-size: .813em;
     padding: .3em 0;
 }
 
