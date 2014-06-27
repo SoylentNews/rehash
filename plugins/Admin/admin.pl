@@ -1053,64 +1053,6 @@ sub topicSave {
 	$form->{nexttid} = $form->{tid};
 }
 
-##################################################################
-# hmmm, what do we want to do with this sub ? PMG 10/18/00
-sub importImage {
-	# Check for a file upload
-	my $section = $_[0];
-
-	my $rootdir = getCurrentSkin('rootdir');
-
-	my $filename = getCurrentForm('importme');
-	my $tf = getsiddir() . $filename;
-	$tf =~ s|/|~|g;
-	$tf = "$section~$tf";
-
-	if ($filename) {
-		local *IMAGE;
-		system("mkdir /tmp/slash");
-		open(IMAGE, ">>/tmp/slash/$tf");
-		my $buffer;
-		while (read $filename, $buffer, 1024) {
-			print IMAGE $buffer;
-		}
-		close IMAGE;
-	} else {
-		return "<image:not found>";
-	}
-
-	my($w, $h) = imgsize("/tmp/slash/$tf");
-	return qq[<img src="$rootdir/$section/] .  getsiddir() . $filename
-		. qq[" width="$w" height="$h" alt="$section">];
-}
-
-##################################################################
-sub importFile {
-	# Check for a file upload
-	my $section = $_[0];
-
-	my $rootdir = getCurrentSkin('rootdir');
-
-	my $filename = getCurrentForm('importme');
-	my $tf = getsiddir() . $filename;
-	$tf =~ s|/|~|g;
-	$tf = "$section~$tf";
-
-	if ($filename) {
-		system("mkdir /tmp/slash");
-		open(IMAGE, ">>/tmp/slash/$tf");
-		my $buffer;
-		while (read $filename, $buffer, 1024) {
-			print IMAGE $buffer;
-		}
-		close IMAGE;
-	} else {
-		return "<attach:not found>";
-	}
-	return qq[<a href="$rootdir/$section/] . getsiddir() . $filename
-		. qq[">Attachment</a>];
-}
-
 ########################################################
 # Returns the directory (eg YY/MM/DD/) that stories are being written in today
 sub getsiddir {
