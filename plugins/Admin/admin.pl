@@ -1492,9 +1492,8 @@ sub editStory {
 	if ($stoid || $form->{sid}) {
 		my $story = $slashdb->getStory($form->{sid});
 		$stoid ||= $story->{stoid};
-		my $fhid = $form->{fhid} || $story->{fhid};
 		$pending_file_count = $slashdb->numPendingFilesForStory($stoid); 
-		$story_static_files = $slashdb->getStaticFiles($stoid, $fhid);
+		$story_static_files = $slashdb->getStaticFilesForStory($stoid);
 	}
 	slashDisplay('editStory', {
 		stoid			=> $stoid,
