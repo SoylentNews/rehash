@@ -24,6 +24,8 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
+use utf8;
+use Encode qw(encode_utf8 decode_utf8 is_utf8);
 use Image::Size;
 use Slash::Display;
 use Slash::Utility::Data;
@@ -1441,6 +1443,7 @@ sub cleanSlashTags {
 	my $tag_re = join '|', sort keys %$slashTags;
 	$text =~ s#<SLASH-($tag_re)#<SLASH TYPE="\L$1\E"#gis;
 	my $newtext = $text;
+	$text = decode_utf8($text);
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
 		my $type = lc($token->[1]{type});
@@ -1546,6 +1549,7 @@ sub processSlashTags {
 	return unless $text;
 
 	my $newtext = $text;
+	 $text = decode_utf8($text);
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 
 	return $newtext unless $tokens;
@@ -1734,43 +1738,42 @@ package Slash::Custom::TokeParser;
 
 use base 'HTML::TokeParser';
 
-sub get_text
-{
-    my $self = shift;
-    my $endat = shift;
-    my @text;
-    while (my $token = $self->get_token) {
-	my $type = $token->[0];
-	if ($type eq "T") {
-	    my $text = $token->[1];
-# this is the one changed line
-#	    decode_entities($text) unless $token->[2];
-	    push(@text, $text);
-	} elsif ($type =~ /^[SE]$/) {
-	    my $tag = $token->[1];
-	    if ($type eq "S") {
-		if (exists $self->{textify}{$tag}) {
-		    my $alt = $self->{textify}{$tag};
-		    my $text;
-		    if (ref($alt)) {
-			$text = &$alt(@$token);
-		    } else {
-			$text = $token->[2]{$alt || "alt"};
-			$text = "[\U$tag]" unless defined $text;
-		    }
-		    push(@text, $text);
-		    next;
+sub get_text {
+	my $self = shift;
+	my $endat = shift;
+	my @text;
+	while (my $token = $self->get_token) {
+		my $type = $token->[0];
+		if ($type eq "T") {
+			my $text = $token->[1];
+			#	this is the one changed line
+			#	decode_entities($text) unless $token->[2];
+			push(@text, $text);
+		} elsif ($type =~ /^[SE]$/) {
+			my $tag = $token->[1];
+			if ($type eq "S") {
+				if (exists $self->{textify}{$tag}) {
+					my $alt = $self->{textify}{$tag};
+					my $text;
+					if (ref($alt)) {
+						$text = &$alt(@$token);
+					} else {
+						$text = $token->[2]{$alt || "alt"};
+						$text = "[\U$tag]" unless defined $text;
+					}
+					push(@text, $text);
+					next;
+				}
+			} else {
+				$tag = "/$tag";
+			}
+			if (!defined($endat) || $endat eq $tag) {
+				$self->unget_token($token);
+			 last;
+			}
 		}
-	    } else {
-		$tag = "/$tag";
-	    }
-	    if (!defined($endat) || $endat eq $tag) {
-		 $self->unget_token($token);
-		 last;
-	    }
 	}
-    }
-    join("", @text);
+	join("", @text);
 }
 
 1;
