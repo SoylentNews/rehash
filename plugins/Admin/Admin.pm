@@ -382,7 +382,7 @@ sub getSignoffData {
 		"stories.stoid, users.uid, (unix_timestamp(min(signoff_time)) - unix_timestamp(stories.time)) / 60 AS min_to_sign, users.nickname, users.seclev",
 		"stories, story_topics_rendered, signoff, users",
 		"stories.stoid = story_topics_rendered.stoid AND signoff.stoid=stories.stoid AND users.uid = signoff.uid
-	         AND stories.time <= NOW() AND stories.time > DATE_SUB(NOW(), INTERVAL $days_q DAY)",
+		AND stories.time <= NOW() AND stories.time > DATE_SUB(NOW(), INTERVAL $days_q DAY)",
 		"GROUP BY signoff.uid, signoff.stoid ORDER BY users.seclev DESC"
 	);
 	return $signoff_info;
@@ -412,10 +412,10 @@ sub showStoryAdminBox {
 	my ($self, $storyref, $options) = @_;
 	my $user = getCurrentUser();
 	if (!$options->{uid})  {
-                $user = getCurrentUser();
-        } else {
-                $user->{uid} = $options->{uid};
-        }
+		$user = getCurrentUser();
+	} else {
+		$user->{uid} = $options->{uid};
+	}
 	my $constants = getCurrentStatic();
 	$options ||= {};
 	my $updater;
@@ -712,12 +712,12 @@ sub ajax_learnword {
 		errorLog("Spellcheck: personal dictionary not found.");
 		return;
 	}
-    
+	
 	my $template_text = $self->sqlSelect("template", "templates", "tpid = " . $template->{tpid});
 	
 	# Somehow we were called even though the word was found in the personal dictionary. Return.
 	return if ($template_text =~ /\s$form->{'word'}\s/);
-    
+	
 	$template_text .= $form->{'word'} . ' ';
 	my $rows = $self->sqlUpdate("templates", { template => $template_text }, "tpid = " . $template->{tpid});
 
@@ -895,7 +895,7 @@ sub get_ispell_comments {
 sub write_to_temp_file {
 	my($data) = @_;
 	my($fh, $file) = tempfile();
-	binmode $fh, ':utf8' if getCurrentStatic('utf8');
+	binmode $fh, ':encoding(UTF-8)';
 	print $fh $data;
 	close $fh;
 	return $file;

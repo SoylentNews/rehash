@@ -487,8 +487,8 @@ sub savePreview {
 	my $tids = $self->getTopiclistFromChosen($chosen_hr);
 	my $tid = $tids->[0];
 	$fh_data->{tid} = $tid;
-	print STDERR "savePreview GLOBJID $p_item->{globjid} PRIMARYSKID $primaryskid TIDS '@$tids' from RENDERED: "
-		. Dumper($rendered_hr);
+	#print STDERR "savePreview GLOBJID $p_item->{globjid} PRIMARYSKID $primaryskid TIDS '@$tids' from RENDERED: "
+	#	. Dumper($rendered_hr);
 
 	my $q_isAdminTagged = '';
     if($tagsdb->isAdminTagged($p_item->{globjid}, 'sectiononly')){$q_isAdminTagged = 'yes';}
@@ -582,7 +582,7 @@ sub showEditor {
 
 		$similar_stories = $self->getSimilar($preview, $p_item);
 		$self->setRelated(0, $storyref);
-        use Data::Dumper; print STDERR Dumper $storyref;
+        #use Data::Dumper; print STDERR Dumper $storyref;
 	}
 
 	$preview_info .=  " PREVIEW FHID: $preview->{preview_fhid} SESSION: $session Item Type: $p_item->{type}<br>";

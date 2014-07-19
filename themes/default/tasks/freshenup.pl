@@ -12,6 +12,8 @@ use Slash::Constants ':slashd';
 
 use strict;
 use utf8;
+use open ':encoding(UTF-8)';
+use open ':std';
 
 use vars qw( %task $me $task_exit_flag
 	$minutes_run

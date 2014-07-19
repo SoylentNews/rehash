@@ -40,6 +40,7 @@ L<Template> for more information about templates.
 =cut
 
 use strict;
+use utf8;
 use Slash::Display::Provider ();
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
@@ -53,6 +54,8 @@ our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(slashDisplay slashDisplayName);
 our @EXPORT_OK = qw(get_template);
 my(%objects);
+use open ':encoding(UTF-8)';
+use open ":std";
 
 # FRY: That doesn't look like an L at all. Unless you count lowercase.
 
@@ -230,12 +233,13 @@ sub slashDisplay {
 	$show_comm &&= 0 if $opt->{Nocomm} && $constants->{template_show_comments} < 2;
 	# still having some problems with span, disabling for now -- pudge 2008-09-23
 	$out = "\n\n<!-- start template: $TEMPNAME -->\n\n$out\n\n<!-- end template: $TEMPNAME -->\n\n"
-#	$out = "\n\n<span class=\"start-template\"$tmpl_span_attrs></span>\n\n$out\n\n<span class=\"end-template\"$tmpl_span_attrs></span>\n\n"
+	#	$out = "\n\n<span class=\"start-template\"$tmpl_span_attrs></span>\n\n$out\n\n<span class=\"end-template\"$tmpl_span_attrs></span>\n\n"
 		if $show_comm;
 
 	if ($err) {
 		errorLog("$TEMPNAME : $err");
 	} else {
+	binmode STDOUT, ':encoding(UTF-8)';
 		print $out unless $opt->{Return};
 	}
 

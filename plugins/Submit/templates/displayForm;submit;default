@@ -61,7 +61,7 @@ __template__
 
 [%# username is the only of from, email, subj that needs to be filtered in %]
 
-	<form action="[% env.script_name %]" method="post">
+	<form action="[% env.script_name %]" method="post" accept-charset="UTF-8">
 	[% IF savestory %]
 		<div id="preview">
 			<legend>
