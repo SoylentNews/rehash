@@ -11,7 +11,7 @@ CREATE TABLE humanconf (
 	PRIMARY KEY(hcid),
 	KEY hcpid (hcpid),
 	UNIQUE formkey (formkey)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS humanconf_pool;
 CREATE TABLE humanconf_pool (
@@ -27,7 +27,7 @@ CREATE TABLE humanconf_pool (
 	PRIMARY KEY (hcpid),
 	KEY answer (answer),
 	KEY lastused (lastused)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 # If you rewrite HumanConf to store your data in the DB rather than
 # on a static webserver, you might want a table something like this.
@@ -39,7 +39,7 @@ CREATE TABLE humanconf_pool (
 #	hcpid		INT UNSIGNED NOT NULL,
 #	data		BLOB NOT NULL,
 #	PRIMARY KEY(hcpid)
-#) ENGINE=InnoDB;
+#) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS humanconf_questions;
 CREATE TABLE humanconf_questions (
@@ -48,5 +48,5 @@ CREATE TABLE humanconf_questions (
 	urlprefix	CHAR(255) NOT NULL,
 	question	TEXT NOT NULL,
 	PRIMARY KEY(hcqid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

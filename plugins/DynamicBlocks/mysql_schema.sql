@@ -4,7 +4,7 @@ CREATE TABLE dynamic_blocks (
   type enum('portal','admin','user') NOT NULL default 'user',
   private enum('yes','no') NOT NULL default 'no',
   PRIMARY KEY  (type_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS dynamic_user_blocks;
 CREATE TABLE dynamic_user_blocks (
@@ -25,4 +25,4 @@ CREATE TABLE dynamic_user_blocks (
   UNIQUE KEY idx_uid_name (uid, name),
   KEY idx_typeid (type_id),
   KEY idx_portalid (portal_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -12,5 +12,5 @@ CREATE TABLE ajax_ops (
 	reskey_type VARCHAR(64) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE op (op)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -27,7 +27,7 @@ CREATE TABLE abusers (
 	KEY subnetid (subnetid),
 	KEY reason (reason),
 	KEY ts (ts)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS accesslog; 
 CREATE TABLE accesslog (
@@ -53,7 +53,7 @@ CREATE TABLE accesslog (
 	INDEX op_part (op(12), skid),
 	INDEX ts (ts),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS accesslog_admin;
 CREATE TABLE accesslog_admin (
@@ -73,7 +73,7 @@ CREATE TABLE accesslog_admin (
 	INDEX host_addr (host_addr),
 	INDEX ts (ts),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS accesslog_artcom;
 CREATE TABLE accesslog_artcom (
@@ -82,7 +82,7 @@ CREATE TABLE accesslog_artcom (
 	c smallint unsigned NOT NULL DEFAULT '0',
 	INDEX uid (uid),
 	INDEX ts (ts)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'al2'
@@ -98,7 +98,7 @@ CREATE TABLE al2 (
 	updatecount     INT UNSIGNED NOT NULL DEFAULT '0',
 	PRIMARY KEY (srcid),
 	INDEX value (value)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'al2_log'
@@ -115,7 +115,7 @@ CREATE TABLE al2_log (
 	INDEX ts (ts),
 	INDEX srcid_ts (srcid, ts),
 	INDEX al2tid_val_srcid (al2tid, val, srcid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'al2_log_comments'
@@ -125,7 +125,7 @@ CREATE TABLE al2_log_comments (
 	al2lid          INT UNSIGNED NOT NULL DEFAULT '0',
 	comment         TEXT NOT NULL DEFAULT '',
 	PRIMARY KEY (al2lid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'al2_types'
@@ -139,7 +139,7 @@ CREATE TABLE al2_types (
 	PRIMARY KEY (al2tid),
 	UNIQUE name (name),
 	UNIQUE bitpos (bitpos)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'authors_cache'
@@ -155,7 +155,7 @@ CREATE TABLE authors_cache (
 	bio text NOT NULL,
 	author tinyint DEFAULT 0 NOT NULL,
 	PRIMARY KEY (uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'backup_blocks'
@@ -166,7 +166,7 @@ CREATE TABLE backup_blocks (
 	bid varchar(30) DEFAULT '' NOT NULL,
 	block text,
 	PRIMARY KEY (bid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'badpasswords'
@@ -183,7 +183,7 @@ CREATE TABLE badpasswords (
 	INDEX uid (uid),
 	INDEX ip (ip),
 	INDEX subnet (subnet)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'blocks'
@@ -219,7 +219,7 @@ CREATE TABLE blocks (
 	UNIQUE KEY bid (bid),
 	KEY type (type),
 	KEY skin (skin)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'classes'
@@ -233,7 +233,7 @@ CREATE TABLE classes (
 	fallback enum("writer","reader","log","search"),
 	UNIQUE class_key (class),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'clout_types'
@@ -246,7 +246,7 @@ CREATE TABLE clout_types (
 	class		varchar(255) NOT NULL,
 	PRIMARY KEY (clid),
 	UNIQUE name (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'code_param'
@@ -260,7 +260,7 @@ CREATE TABLE code_param (
 	name varchar(32) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'commentmodes'
@@ -272,7 +272,7 @@ CREATE TABLE commentmodes (
 	name varchar(32),
 	description varchar(64),
 	PRIMARY KEY (mode)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'comments'
@@ -312,7 +312,7 @@ CREATE TABLE comments (
 	KEY countreplies (pid,sid),
 	KEY uid_date (uid,date),
 	KEY date_sid (date,sid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'comment_log'
@@ -327,7 +327,7 @@ CREATE TABLE comment_log (
 	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	INDEX ts (ts),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'comment_promote_log'
@@ -340,7 +340,7 @@ CREATE TABLE comment_promote_log (
 	ts datetime NOT NULL default '1970-01-01 00:00:00',
 	PRIMARY KEY  (id),
 	KEY cid (cid)
-) ENGINE=InnoDB; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci; 
 
 
 
@@ -354,7 +354,7 @@ CREATE TABLE comment_text (
 	cid int UNSIGNED NOT NULL,
 	comment text NOT NULL,
 	PRIMARY KEY (cid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'content_filters'
@@ -375,7 +375,7 @@ CREATE TABLE content_filters (
 	KEY form (form),
 	KEY regex (regex),
 	KEY field_key (field)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'css_type'
@@ -386,7 +386,7 @@ CREATE TABLE css_type (
 	name VARCHAR(32) NOT NULL DEFAULT '',
 	ordernum TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	PRIMARY KEY  (ctid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'css'
@@ -414,7 +414,7 @@ CREATE TABLE css (
 	KEY page_skin (page,skin),
 	KEY skin_page (skin,page),
 	KEY layout (layout)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'dateformats'
@@ -426,7 +426,7 @@ CREATE TABLE dateformats (
 	format varchar(64),
 	description varchar(64),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'dbs'
@@ -441,7 +441,7 @@ CREATE TABLE dbs (
 	weight tinyint UNSIGNED NOT NULL DEFAULT 1,
 	weight_adjust float UNSIGNED NOT NULL DEFAULT 1.0,
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'dbs_readerstatus'
@@ -460,7 +460,7 @@ CREATE TABLE dbs_readerstatus (
 	had_weight tinyint UNSIGNED DEFAULT 1,
 	had_weight_adjust float UNSIGNED DEFAULT 1,
 	KEY ts_dbid (ts, dbid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'dbs_readerstatus_queries'
@@ -472,7 +472,7 @@ CREATE TABLE dbs_readerstatus_queries (
 	text varchar(255),
 	PRIMARY KEY (rsqid),
 	KEY text (text)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'discussions'
@@ -503,7 +503,7 @@ CREATE TABLE discussions (
 	KEY (primaryskid,ts),
 	INDEX (type,uid,ts),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'discussion_kinds'
@@ -515,7 +515,7 @@ CREATE TABLE discussion_kinds (
 	name        VARCHAR(30) NOT NULL DEFAULT '',
 	PRIMARY KEY (dkid),
 	UNIQUE name (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'dst'
@@ -534,7 +534,7 @@ CREATE TABLE dst (
 	end_wday      TINYINT       NOT NULL,
 	end_month     TINYINT       NOT NULL,
 	PRIMARY KEY (region)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #
@@ -549,7 +549,7 @@ CREATE TABLE file_queue (
 	action enum('upload','thumbnails','sprite') default NULL,
 	blobid VARCHAR(32) DEFAULT "" NOT NULL,
 	PRIMARY KEY  (fqid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'formkeys'
@@ -578,7 +578,7 @@ CREATE TABLE formkeys (
 	KEY ts (ts),
 	KEY last_ts (ts),
 	KEY submit_ts (submit_ts)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'globjs' (global objects)
@@ -591,7 +591,7 @@ CREATE TABLE globjs (
 	target_id	int UNSIGNED NOT NULL,
 	PRIMARY KEY (globjid),
 	UNIQUE target (gtid, target_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'globj_adminnotes'
@@ -602,7 +602,7 @@ CREATE TABLE globj_adminnotes (
 	globjid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	adminnote	varchar(255) NOT NULL DEFAULT '',
 	PRIMARY KEY (globjid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'globj_types'
@@ -614,7 +614,7 @@ CREATE TABLE globj_types (
 	maintable	VARCHAR(64) NOT NULL,
 	PRIMARY KEY (gtid),
 	UNIQUE maintable (maintable)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'globj_urls'
@@ -627,7 +627,7 @@ CREATE TABLE globj_urls (
 	url_id INT(10) UNSIGNED NOT NULL NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
 	UNIQUE globjid_url_id (globjid, url_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'hooks'
@@ -641,7 +641,7 @@ CREATE TABLE hooks (
 	subroutine varchar(100) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE hook_param (param,class,subroutine)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'menus'
@@ -660,7 +660,7 @@ CREATE TABLE menus (
 	PRIMARY KEY (id),
 	KEY page_labels (menu,label),
 	UNIQUE page_labels_un (menu,label)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'misc_user_opts'
@@ -677,7 +677,7 @@ CREATE TABLE misc_user_opts (
 	long_desc text,
 	opts_html text,
 	PRIMARY KEY (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'open_proxies'
@@ -694,7 +694,7 @@ CREATE TABLE open_proxies (
 	PRIMARY KEY (ip),
 	KEY ts (ts),
 	KEY ipid (ipid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'pagemark'
@@ -710,7 +710,7 @@ CREATE TABLE pagemark (
 	PRIMARY KEY id (id),
 	UNIQUE pagemark (pagemark),
 	KEY ts (ts)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'pollanswers'
@@ -723,7 +723,7 @@ CREATE TABLE pollanswers (
 	answer char(255),
 	votes mediumint,
 	PRIMARY KEY (qid,aid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'pollquestions'
@@ -745,7 +745,7 @@ CREATE TABLE pollquestions (
 	PRIMARY KEY (qid),
 	KEY uid (uid),
 	KEY discussion (discussion)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'pollvoters'
@@ -758,7 +758,7 @@ CREATE TABLE pollvoters (
 	time datetime,
 	uid mediumint UNSIGNED NOT NULL,
 	KEY qid (qid,id,uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'preview'
@@ -776,7 +776,7 @@ CREATE TABLE preview (
 	active ENUM("no","yes") DEFAULT "yes",
 	PRIMARY KEY (preview_id),
 	KEY uid (uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #
@@ -791,7 +791,7 @@ CREATE TABLE preview_param (
 	value text NOT NULL,
 	UNIQUE submission_key (preview_id,name),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 DROP TABLE IF EXISTS projects;
@@ -806,7 +806,7 @@ CREATE TABLE projects (
 	description         TEXT NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	UNIQUE unixname (unixname)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'querylog'
@@ -827,7 +827,7 @@ CREATE TABLE querylog (
 	KEY caller (package, line),
 	KEY ts (ts),
 	KEY type (type)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS related_stories;
 CREATE TABLE related_stories (
@@ -842,7 +842,7 @@ CREATE TABLE related_stories (
 	fhid mediumint(8) unsigned NOT NULL default '0',
 	PRIMARY KEY (id),
 	KEY stoid (stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'rss_raw'
@@ -864,7 +864,7 @@ CREATE TABLE rss_raw (
 	UNIQUE uber_signature (link_signature, title_signature, description_signature),
 	PRIMARY KEY (id),
 	KEY processed (processed)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'related_links'
@@ -878,7 +878,7 @@ CREATE TABLE related_links (
 	link varchar(128) NOT NULL,
 	KEY (keyword),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'remarks'
@@ -898,7 +898,7 @@ CREATE TABLE remarks (
 	INDEX stoid (stoid),
 	INDEX time (time),
 	INDEX priority (priority)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'sessions'
@@ -916,13 +916,13 @@ CREATE TABLE sessions (
 	last_action varchar(16),
 	UNIQUE (uid),
 	PRIMARY KEY (session)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS shill_ids;
 CREATE TABLE shill_ids (
 	shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL PRIMARY KEY,
 	user varchar(16) NOT NULL default ''
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS signoff;
 CREATE TABLE signoff (
@@ -933,7 +933,7 @@ CREATE TABLE signoff (
 	signoff_type	VARCHAR(16) DEFAULT '' NOT NULL,
 	PRIMARY KEY(soid),
 	INDEX (stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 				
 #
 # Table structure for table 'site_info'
@@ -947,7 +947,7 @@ CREATE TABLE site_info (
 	description varchar(255),
 	UNIQUE site_keys (name,value),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'skins'
@@ -978,7 +978,7 @@ CREATE TABLE skins (
 	require_acl VARCHAR(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (skid),
 	UNIQUE name (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'skin_colors'
@@ -990,7 +990,7 @@ CREATE TABLE skin_colors (
 	name VARCHAR(24) NOT NULL,
 	skincolor CHAR(12) NOT NULL,
 	UNIQUE skid_name (skid, name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'slashd_status'
@@ -1006,7 +1006,7 @@ CREATE TABLE slashd_status (
 	summary VARCHAR(255) NOT NULL DEFAULT '',
 	duration float(6,2) DEFAULT '0.00' NOT NULL,
 	PRIMARY KEY (task)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'slashd_errnotes'
@@ -1021,7 +1021,7 @@ CREATE TABLE slashd_errnotes (
 	moreinfo TEXT DEFAULT NULL,
 	INDEX (ts),
 	INDEX taskname_ts (taskname, ts)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'soap_methods'
@@ -1050,7 +1050,7 @@ CREATE TABLE spamarmors (
 	code text,
 	active mediumint default '1',
 	PRIMARY KEY  (armor_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #
@@ -1088,7 +1088,7 @@ CREATE TABLE stories (
 	INDEX day_published (day_published),
 	INDEX skidtid (primaryskid, tid),
 	INDEX discussion_stoid (discussion, stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'story_dirty'
@@ -1098,7 +1098,7 @@ DROP TABLE IF EXISTS story_dirty;
 CREATE TABLE story_dirty (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	PRIMARY KEY (stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'story_render_dirty'
@@ -1108,7 +1108,7 @@ DROP TABLE IF EXISTS story_render_dirty;
 CREATE TABLE story_render_dirty (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	PRIMARY KEY (stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'story_text'
@@ -1123,7 +1123,7 @@ CREATE TABLE story_text (
 	relatedtext text,
 	rendered text,
 	PRIMARY KEY (stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'story_param'
@@ -1137,7 +1137,7 @@ CREATE TABLE story_param (
 	value text NOT NULL,
 	UNIQUE story_key (stoid,name),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'story_topics_chosen'
@@ -1150,7 +1150,7 @@ CREATE TABLE story_topics_chosen (
 	weight FLOAT DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'story_topics_rendered'
@@ -1162,7 +1162,7 @@ CREATE TABLE story_topics_rendered (
 	tid INT(5) UNSIGNED NOT NULL,
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #
@@ -1180,7 +1180,7 @@ CREATE TABLE static_files(
 	height smallint unsigned not null default 0,
 	PRIMARY KEY (sfid),
 	INDEX stoid(stoid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'string_param'
@@ -1194,7 +1194,7 @@ CREATE TABLE string_param (
 	name varchar(64) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'submissions'
@@ -1230,7 +1230,7 @@ CREATE TABLE submissions (
 	KEY primaryskid_tid (primaryskid, tid),
 	KEY tid (tid),
 	KEY time_emaildomain (time, emaildomain)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #
@@ -1245,7 +1245,7 @@ CREATE TABLE submission_param (
 	value text NOT NULL,
 	UNIQUE submission_key (subid,name),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'templates'
@@ -1264,7 +1264,7 @@ CREATE TABLE templates (
 	last_update timestamp NOT NULL,
 	PRIMARY KEY (tpid),
 	UNIQUE true_template (name,page,skin,lang)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'topics'
@@ -1285,7 +1285,7 @@ CREATE TABLE topics (
 	usesprite ENUM("no","yes") DEFAULT "no" NOT NULL,
 	PRIMARY KEY (tid),
 	UNIQUE (keyword)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'topic_nexus'
@@ -1296,7 +1296,7 @@ CREATE TABLE topic_nexus (
 	tid INT UNSIGNED NOT NULL,
 	current_qid MEDIUMINT UNSIGNED DEFAULT NULL,
 	PRIMARY KEY (tid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'topic_nexus_dirty'
@@ -1306,7 +1306,7 @@ DROP TABLE IF EXISTS topic_nexus_dirty;
 CREATE TABLE topic_nexus_dirty (
 	tid INT UNSIGNED NOT NULL,
 	PRIMARY KEY (tid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'topic_nexus_extras'
@@ -1324,7 +1324,7 @@ CREATE TABLE topic_nexus_extras (
 	ordering TINYINT UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (extras_id),
 	UNIQUE tid_keyword (tid, extras_keyword)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'topic_param'
@@ -1338,7 +1338,7 @@ CREATE TABLE topic_param (
 	value text NOT NULL,
 	UNIQUE topic_key (tid,name),
 	PRIMARY KEY (param_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'topic_parents'
@@ -1351,7 +1351,7 @@ CREATE TABLE topic_parents (
 	min_weight FLOAT DEFAULT 10 NOT NULL,
 	UNIQUE child_and_parent (tid, parent_tid),
 	INDEX parent_tid (parent_tid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'tzcodes'
@@ -1366,7 +1366,7 @@ CREATE TABLE tzcodes (
 	dst_tz        CHAR(4),
 	dst_off_set   MEDIUMINT,
 	PRIMARY KEY (tz)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'urls'
@@ -1422,7 +1422,7 @@ CREATE TABLE users (
 	KEY chk4matchname (matchname),
 	KEY author_lookup (author),
 	KEY seclev (seclev)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_acl'
@@ -1439,7 +1439,7 @@ CREATE TABLE users_acl (
 	KEY uid (uid),
 	KEY acl (acl),
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_clout'
@@ -1453,7 +1453,7 @@ CREATE TABLE users_clout (
 	PRIMARY KEY (clout_id),
 	UNIQUE uid_clid (uid, clid),
 	INDEX clid (clid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_comments'
@@ -1480,7 +1480,7 @@ CREATE TABLE users_comments (
 	threshold tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
 	KEY points (points)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_comments_read_log'
@@ -1492,7 +1492,7 @@ CREATE TABLE users_comments_read_log (
 	discussion_id MEDIUMINT UNSIGNED NOT NULL,
 	cid INT UNSIGNED NOT NULL,
 	UNIQUE (discussion_id,uid,cid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #
@@ -1505,7 +1505,7 @@ CREATE TABLE users_hits (
 	lastclick timestamp,
 	hits int DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_index'
@@ -1528,7 +1528,7 @@ CREATE TABLE users_index (
 	maxstories tinyint UNSIGNED DEFAULT '30' NOT NULL,
 	noboxes tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_info'
@@ -1567,7 +1567,7 @@ CREATE TABLE users_info (
 	KEY (initdomain),
 	KEY (created_ipid),
 	KEY tokens (tokens)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_logtokens'
@@ -1587,7 +1587,7 @@ CREATE TABLE users_logtokens (
 	KEY (locationid),
 	KEY (temp),
 	KEY (public)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_openid'
@@ -1601,7 +1601,7 @@ CREATE TABLE users_openid (
 	PRIMARY KEY (openid_id),
 	UNIQUE (openid_url),
 	INDEX (uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_openid_reskeys'
@@ -1615,7 +1615,7 @@ CREATE TABLE users_openid_reskeys (
 	PRIMARY KEY (oprid),
 	INDEX (openid_url),
 	INDEX (reskey)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_param'
@@ -1630,7 +1630,7 @@ CREATE TABLE users_param (
 	PRIMARY KEY (param_id),
 	UNIQUE uid_key (uid,name),
 	KEY name (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'users_prefs'
@@ -1647,7 +1647,7 @@ CREATE TABLE users_prefs (
 	mylinks varchar(255) DEFAULT '' NOT NULL,
 	lang char(5) DEFAULT 'en_US' NOT NULL,
 	PRIMARY KEY (uid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Table structure for table 'vars'
@@ -1659,7 +1659,7 @@ CREATE TABLE vars (
 	value text,
 	description varchar(255),
 	PRIMARY KEY (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS xsite_auth_log;
 CREATE TABLE xsite_auth_log (
@@ -1667,7 +1667,7 @@ CREATE TABLE xsite_auth_log (
 	ts DATETIME DEFAULT '0000-00-00 00:00' NOT NULL,
 	nonce VARCHAR(30) DEFAULT '' NOT NULL,
 	UNIQUE KEY (site,ts,nonce)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 #ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);

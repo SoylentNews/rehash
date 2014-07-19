@@ -19,7 +19,7 @@ CREATE TABLE metamodlog (
 	PRIMARY KEY id (id),
 	INDEX byuser (uid),
 	INDEX mmid (mmid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
 #ALTER TABLE metamodlog ADD FOREIGN KEY (uid) REFERENCES users(uid);

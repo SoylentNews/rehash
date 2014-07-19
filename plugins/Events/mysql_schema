@@ -11,7 +11,7 @@ CREATE TABLE event_dates (
 	PRIMARY KEY (id),
 	INDEX sid (sid),
 	INDEX uidarticle (id,sid)
-) TYPE=InnoDB;
+) TYPE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 # Commented out because target table is necessarily MyISAM,
 # and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM
