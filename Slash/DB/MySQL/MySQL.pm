@@ -2228,7 +2228,7 @@ sub getOtherUserParams {
 
 	for my $param (keys %$params) {
 		# set user too for output in this request
-		data->{$param} = $user->{$param} = defined($form->{$param})
+		$data->{$param} = $user->{$param} = defined($form->{$param})
 			? $form->{$param}
 			: $params->{$param};
 	}
