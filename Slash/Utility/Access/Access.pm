@@ -258,7 +258,7 @@ sub formkeyHandler {
 		if (my $limit = $slashdb->checkMaxReads($formname)) {
 			$msg = formkeyError('maxreads', $formname, $limit);
 			$error_flag = 1;
-                }
+		}
 	} elsif ($formkey_op eq 'max_post_check') {
 		if (my $limit = $slashdb->checkMaxPosts($formname)) {
 			if ($options->{fk_bare_errors}) {
@@ -616,7 +616,11 @@ sub compressOk {
 		# characters being in a comment, but no one should be using
 		# that many wide characters in the standard English
 		# alphabet.  we can adjust filters if necessary. -- pudge
-		$content_slice =~ s/(.)/ord($1) > 2**8-1 ? '_' : $1/ge;
+		##########
+		#	TMB This does not belong here even if it is decided as necessary.
+		#	It belongs with all the other filters.
+		$content_slice =~ s/(.)/ord($1) > 2**8-1 ? ord($1) : $1/ge;
+		##########
 
 		for (sort { $a <=> $b } keys %$limits) {
 			next unless $length >= $limits->{$_}->[0]

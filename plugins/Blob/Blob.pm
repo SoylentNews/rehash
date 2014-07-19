@@ -79,7 +79,7 @@ sub create {
 		my $base = 1024**2;  # 1MB
 		if ($len > $base) {
 			$value = $self->sqlGetVar($var);
-			my $needed = $constants->{utf8} ? ($len*2+2 + $base) : ($len + $base);
+			my $needed = $len*2+2 + $base;
 
 			if ($value < $needed) {
 				return unless $self->sqlSetVar($var, $needed*2);
@@ -104,9 +104,7 @@ sub create {
 					$size = $base >= $value ? $base/2 : $base; 
 					$data = $values->{data};
 					$values->{data} = substr($data, 0, $size, '');
-					if ($constants->{utf8}) {
-						$values->{"-data"} = "0x" . unpack('H*', delete $values->{data});
-					}
+					$values->{"-data"} = "0x" . unpack('H*', delete $values->{data});
 				}
 
 				$self->sqlInsert($table, $values) or return undef;
@@ -114,11 +112,7 @@ sub create {
 				if ($do_chunk) {
 					while (length $data) {
 						my $chunk = substr($data, 0, $size, '');
-						if ($constants->{utf8}) {
-							$chunk = "0x" . unpack('H*', $chunk);
-						} else {
-							$chunk = $self->sqlQuote($chunk);
-						}
+						$chunk = "0x" . unpack('H*', $chunk);
 						my $ok = $self->sqlUpdate($table, {
 								-data => "CONCAT(data, $chunk)"
 							}, $where
@@ -142,10 +136,7 @@ sub create {
 
 		# true $value means we already saved the data
 		unless ($value) {
-			if ($constants->{utf8}) {
-				$values->{"-data"} = "0x" . unpack("H*", delete $values->{data});
-			}
-
+			$values->{"-data"} = "0x" . unpack("H*", delete $values->{data});
 			$self->sqlInsert($table, $values) or return undef;
 		}
 

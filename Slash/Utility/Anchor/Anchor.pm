@@ -164,7 +164,7 @@ sub header {
 	# This is ALWAYS displayed. Let the template handle the title
 	# of the whole webpage itself.
 	my $template_vars = { title => $data->{title}, extra_options => $options };
-        # Other data that the template may want:  the text for the
+	# Other data that the template may want:  the text for the
 	# meta-description tag, and if a story is being displayed,
 	# the title of the story.
 	for my $key (qw( meta_desc story_title )) {
@@ -279,9 +279,10 @@ sub http_send {
 
 	if ($opt->{etag} || $opt->{do_etag}) {
 		if ($opt->{do_etag} && $opt->{content}) {
-			$opt->{etag} = get_etag(
-				getCurrentStatic('utf8') ? encode_utf8($opt->{content}) : $opt->{content}
-			);
+			##########
+			#	TMB This bit is necessary as md5_hex, which get_etag uses, requires an encode first.
+			$opt->{etag} = get_etag( encode_utf8($opt->{content}));
+			##########
 		}
 		$r->header_out('ETag', $opt->{etag});
 
@@ -362,10 +363,10 @@ sub footer {
 
 	my $display;
 
-        if ($form->{ssi} && $form->{ssi} eq 'yes') {
+	if ($form->{ssi} && $form->{ssi} eq 'yes') {
 		ssiHeadFoot('footer', $options);
-                return 1;
-        }
+		return 1;
+	}
 
 	if ($user->{state}{adminheader}) {
 		$display = slashDisplay('footer-admin', '', { Return => $options->{Return}, Page => $options->{Page} });
@@ -430,29 +431,29 @@ sub redirect {
 sub emit404 {
 	my $form = getCurrentForm();
 
-        my $r = Apache->request;
-        $r->status(404);
+	my $r = Apache->request;
+	$r->status(404);
 
 	$ENV{REQUEST_URI} ||= '';
-        my $url = strip_literal(substr($ENV{REQUEST_URI}, 1));
+	my $url = strip_literal(substr($ENV{REQUEST_URI}, 1));
 
-        header('404 File Not Found', $form->{section}) or return;
+	header('404 File Not Found', $form->{section}) or return;
 
-        my($new_url, $errnum) = fixHref($ENV{REQUEST_URI}, 1);
+	my($new_url, $errnum) = fixHref($ENV{REQUEST_URI}, 1);
 
 	my $data = {
 		url => $new_url,
 		origin => $url,
 	};
-        if ($errnum && $errnum !~ /^\d+$/) {
+	if ($errnum && $errnum !~ /^\d+$/) {
 		$data->{message} = $errnum;
-        } else {
+	} else {
 		$data->{error} = $errnum;
-        }
+	}
 	slashDisplay('main', $data, { Page => '404' });
 
-        writeLog($url);
-        footer();
+	writeLog($url);
+  footer();
 }
 
 #========================================================================
@@ -491,7 +492,7 @@ sub ssiHeadFoot {
 	$page = '' unless ($page ne 'misc' && (
 		$slashdb->existsTemplate({
 			name	=> $headorfoot,
-		        skin	=> $gSkin->{name},
+			skin	=> $gSkin->{name},
 			page	=> $user->{currentPage}
 		}) ||
 
