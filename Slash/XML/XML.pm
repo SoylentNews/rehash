@@ -153,7 +153,7 @@ sub xmlDisplay {
 		http_send({
 			content_type	=> $content_type,
 			filename	=> $opt->{filename},
-			etag		=> md5_hex( getCurrentStatic('utf8') ? encode_utf8($temp) : $temp ),
+			etag		=> md5_hex( encode_utf8($temp) ),
 			dis_type	=> 'inline',
 			content		=> $content
 		});

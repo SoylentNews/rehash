@@ -16,7 +16,7 @@ CREATE TABLE message_drop (
         send    ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL,
         message MEDIUMBLOB DEFAULT '' NOT NULL,
         PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS message_web;
 CREATE TABLE message_web (
@@ -30,7 +30,7 @@ CREATE TABLE message_web (
         KEY (fuser),
         KEY (user),
         PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 # As of July 2003 we don't have any reason I can see to ever want
 # to search all message blobs in the system, so we don't need a
@@ -41,7 +41,7 @@ CREATE TABLE message_web_text (
         subject BLOB DEFAULT '' NOT NULL,
         message BLOB DEFAULT '' NOT NULL,
         PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS message_codes;
 CREATE TABLE message_codes (
@@ -54,7 +54,7 @@ CREATE TABLE message_codes (
         acl             VARCHAR(32) DEFAULT '' NOT NULL,
 	delivery_bvalue INT UNSIGNED DEFAULT '0' NOT NULL,
         PRIMARY KEY (code)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS message_log;
 CREATE TABLE message_log (
@@ -64,7 +64,7 @@ CREATE TABLE message_log (
         code    INT(11) DEFAULT '-1' NOT NULL,
         mode    INT(11) NOT NULL,
         date    TIMESTAMP NOT NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS users_messages;
 CREATE TABLE users_messages (
@@ -74,7 +74,7 @@ CREATE TABLE users_messages (
         mode    TINYINT NOT NULL,
         UNIQUE code_key (uid,code),
 	PRIMARY KEY(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS message_deliverymodes;
 CREATE TABLE message_deliverymodes (
@@ -82,7 +82,7 @@ CREATE TABLE message_deliverymodes (
   	name     VARCHAR(32) NOT NULL default '',
   	bitvalue MEDIUMINT unsigned NOT NULL default '0',
   	PRIMARY KEY (code)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 # Commented out because target table is necessarily MyISAM,
 # and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM

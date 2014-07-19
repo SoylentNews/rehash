@@ -300,14 +300,14 @@ True if domain is valid, false otherwise.
 =cut
 
 sub submitDomainAllowed {
-        my($domain) = @_;
+	my($domain) = @_;
 
-        my $constants = getCurrentStatic();
-        return 0 if $constants->{submit_domains_invalid}
-                && ref($constants->{submit_domains_invalid})
-                && $domain =~ $constants->{submit_domains_invalid};
+	my $constants = getCurrentStatic();
+	return 0 if $constants->{submit_domains_invalid}
+	&& ref($constants->{submit_domains_invalid})
+	&& $domain =~ $constants->{submit_domains_invalid};
 
-        return 1;
+	return 1;
 }
 #========================================================================
 
@@ -1008,8 +1008,12 @@ sub encryptPassword {
 	my $slashdb = getCurrentDB();
 	my $vu = $slashdb->{virtual_user};
 	my $salt = Slash::Apache::User::PasswordSalt::getCurrentPwSalt($vu);
-	$passwd = Encode::encode_utf8($passwd) if getCurrentStatic('utf8');
+	##########
+	#	TMB again, encode_utf8 necessary for md5_hex. Specifying the package
+	#	explicitly however is not as we brought it in with a use.
+	$passwd = encode_utf8($passwd);
 	return md5_hex("$salt:$uid:$passwd");
+	##########
 }
 
 #========================================================================
@@ -1335,56 +1339,69 @@ my %ansi_to_utf = (
 sub _ansi_to_ascii { %ansi_to_ascii }
 sub _ansi_to_utf   { %ansi_to_utf }
 
+##########
+# TMB Unlike _charsetConvert, this takes a character not a numeric as an argument.
+# It can do our its processing, thank you very much.
+sub _approveUnicodeChar {
+	my($char, $constants) = @_;
+	$constants ||= getCurrentStatic();
+	
+	my $str = '';
+	my $decimal = ord(decode_utf8($char));
+	
+	if(!$constants->{bad_numeric}{$decimal}) {
+		$str = $char;
+	}
+	##########
+	# For some reason our DB hates 3-4 byte unicode
+	if($decimal > 65535) {
+		$str = approveCharref(sprintf("#x%x", $decimal));
+	}
+	return $str;
+}
+
+##########
+# TMB This should only be called if we're outside the good ascii range
 sub _charsetConvert {
 	my($char, $constants) = @_;
 	$constants ||= getCurrentStatic();
 
 	my $str = '';
-	if ($constants->{draconian_charset_convert}) {
-		if ($constants->{draconian_charrefs}) {
-			if ($constants->{good_numeric}{$char}) {
-				$str = sprintf('&#%u;', $char);
-			} else { # see if char is in %good_entity
-				my $ent = $char2entity{chr $char};
-				if ($ent) {
-					(my $data = $ent) =~ s/^&(\w+);$/$1/;
-					$str = $ent if $constants->{good_entity}{$data};
-				}
-			}
-		}
-		# fall back
-		$str ||= $ansi_to_ascii{$char};
+	if(!$constants->{bad_numeric}{$char}){
+		$str = $char;
 	}
 
 	# fall further back
 	# if the char is a special one we don't recognize in Latin-1,
 	# convert it here.  this does not prevent someone from manually
 	# entering &#147; or some such, if they feel they need to, it is
-	# to help catch it when browsers send non-Latin-1 data even though
+	# to help catch it when browsers send non-utf-8 data even though
 	# they shouldn't
-	$char = $ansi_to_utf{$char} if exists $ansi_to_utf{$char};
-	$str ||= sprintf('&#%u;', $char) if length $char;
+	$str = $ansi_to_utf{$char} if exists $ansi_to_utf{$char};
+	$str = sprintf('&#%u;', $str) if length $str;
 	return $str;
 }
 
 sub _fixupCharrefs {
 	my $constants = getCurrentStatic();
 
-	return if $constants->{bad_numeric};
+	##########
+	#	TMB AKA, we've already done this, don't waste your time or a db call.
+	#return if $constants->{bad_numeric};
 
-	# At the moment, unless the "draconian" rule is set, only
+	##########
+	# TMB
+	#	At the moment, only
 	# entities that change the direction of text are forbidden.
-	# For more information, see
-	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
-	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
+	#	This may be changed by adding entities to charrefs_bad_entity
+	#	and charrefs_bad_numeric in the vars table.
+	#	For more information, see
+	#	<http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
+	#	and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
 	$constants->{bad_numeric}  = { map { $_, 1 } @{$constants->{charrefs_bad_numeric}} };
 	$constants->{bad_entity}   = { map { $_, 1 } @{$constants->{charrefs_bad_entity}} };
-
-	$constants->{good_numeric} = { map { $_, 1 } @{$constants->{charrefs_good_numeric}},
-		grep { $_ < 128 || $_ > 159 } keys %ansi_to_ascii };
-	$constants->{good_entity}  = { map { $_, 1 } @{$constants->{charrefs_good_entity}}, qw(apos quot),
-		grep { s/^&(\w+);$/$1/ } map { $char2entity{chr $_} }
-		grep { $_ < 128 || $_ > 159 } keys %ansi_to_ascii };
+	##########
+	#	TMB not using good_numeric/good_entity anymore
 }
 
 my %action_data = ( );
@@ -1466,36 +1483,29 @@ my %actions = (
 			${$_[0]} =~ s/\n+//g;				},
 	debugprint => sub {
 			print STDERR "stripByMode debug ($_[1]) '${$_[0]}'\n";	},
-
-	encode_high_bits => sub {
-			# !! assume Latin-1 !!
+	approve_unicode => sub {
 			my $constants = getCurrentStatic();
-			if ($constants->{draconian_charset}) {
-				# anything not CRLF tab space or ! to ~ in Latin-1
-				# is converted to entities, where approveCharrefs or
-				# encode_html_amp takes care of them later
-				_fixupCharrefs();
-				${$_[0]} =~ s[([^\n\r\t !-~])][ _charsetConvert(ord($1), $constants)]ge;
-			}						},
+			_fixupCharrefs();
+			${$_[0]} =~ s[([^\n\r\t !-~])][_approveUnicodeChar($1, $constants)]ge;				},
 );
 
 my %mode_actions = (
 	ANCHOR, [qw(
 			newline_to_local
-			remove_newlines			)],
+			remove_newlines
+			approve_unicode		)],
 	NOTAGS, [qw(
 			newline_to_local
-			encode_high_bits
 			remove_tags
 			remove_ltgt
-			encode_html_amp_ifnotent
-			approveCharrefs			)],
+			approveCharrefs
+			approve_unicode		)],
 	ATTRIBUTE, [qw(
 			newline_to_local
-			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
-			encode_html_quote		)],
+			encode_html_quote
+			approve_unicode		)],
 	LITERAL, [qw(
 			newline_to_local
 			encode_html_amp
@@ -1503,57 +1513,56 @@ my %mode_actions = (
 			remove_trailing_lts
 			approveTags
 			space_between_tags
-			encode_html_ltgt_stray		)],
+			encode_html_ltgt_stray
+			approve_unicode		)],
 	NOHTML, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_high_bits
 			remove_tags
 			remove_ltgt
-			encode_html_amp			)],
+			encode_html_amp 
+			approve_unicode		)],
 	PLAINTEXT, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_high_bits
 			processCustomTagsPre
 			remove_trailing_lts
 			approveTags
 			processCustomTagsPost
 			space_between_tags
 			encode_html_ltgt_stray
-			encode_html_amp_ifnotent
 			approveCharrefs
 			whitespace_tagify
 			newline_indent
-			paragraph_wrap			)],
+			paragraph_wrap 
+			approve_unicode		)],
 	HTML, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_high_bits
 			processCustomTagsPre
 			remove_trailing_lts
 			approveTags
 			processCustomTagsPost
 			space_between_tags
 			encode_html_ltgt_stray
-			encode_html_amp_ifnotent
-			approveCharrefs )],
+			approveCharrefs
+			approve_unicode		)],
 	CODE, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
 			whitespace_tagify
-			whitespace_and_tt )],
+			whitespace_and_tt
+			approve_unicode		)],
 	EXTRANS, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
 			whitespace_tagify
-			newline_indent			)],
+			newline_indent
+			approve_unicode		)],
 );
 
 sub stripByMode {
@@ -1975,7 +1984,7 @@ The text.
 sub breakHtml {
 	my($text, $mwl) = @_;
 	return $text if $Slash::Utility::Data::approveTag::admin
-		     && $Slash::Utility::Data::approveTag::admin > 1;
+		 && $Slash::Utility::Data::approveTag::admin > 1;
 
 	my $constants = getCurrentStatic();
 	$mwl = $mwl || $constants->{breakhtml_wordlength} || 50;
@@ -2436,33 +2445,25 @@ sub approveCharref {
 			$ok = 0;
 		}
 
-		# NB: 1114111/10FFFF is highest allowed by Unicode spec,
-		# but 917631/E007F is highest with actual glyph
-		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
-		if ($constants->{draconian_charrefs}) {
-			if (!$constants->{good_numeric}{$decimal}) {
-				$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
-			}
-		} else {
-			$ok = 0 if $constants->{bad_numeric}{$decimal};
-		}
+		##########
+		# TMB Since this is being called on entities, only disallow beyond 0x10FFFF
+		$ok = 0 if $decimal <= 0 || $decimal > 1114111;
+		##########
+		# TMB This check weeds out bad_numeric and sets ok == 2 if it's ansi
+		if($constants->{bad_numeric}{$decimal}){$ok = 0;}
+		else{$ok = $ansi_to_ascii{$decimal} ? 2 : 1;}
 	} elsif ($ok == 1 && $charref =~ /^([a-z0-9]+)$/i) {
 		# Character entity.
-#		my $entity = lc $1;
 		my $entity = $1;  # case matters
-		if ($constants->{draconian_charrefs}) {
-			if (!$constants->{good_entity}{$entity}) {
-				if (defined $entity2char{$entity}) {
-					$decimal = ord $entity2char{$entity};
-					$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
-				} else {
-					$ok = 0;
-				}
-			}
-		} else {
-			$ok = 0 if $constants->{bad_entity}{$entity}
-				|| ($constants->{draconian_charset} && ! exists $entity2char{$entity});
+		##########
+		# TMB check always because people may use them even in utf8 mode
+		if (!$constants->{bad_entity}{$entity}) {
+			if (defined $entity2char{$entity}) {
+				$decimal = ord $entity2char{$entity};
+				$ok = $ansi_to_ascii{$decimal} ? 2 : 1;
+			}else{$ok = 1;}
 		}
+		else {$ok = 0;}
 	} elsif ($ok == 1) {
 		# Unknown character reference type, assume flawed.
 		$ok = 0;
@@ -2474,7 +2475,8 @@ sub approveCharref {
 	} elsif ($ok) {
 		return "&$charref;";
 	} else {
-		return '';
+		if(getCurrentStatic('utf8')){ return "\x{fffd}"; }
+		else{return "&#xfffd";}
 	}
 }
 
@@ -2756,7 +2758,7 @@ Chomped string.
 
 sub chopEntity {
 	my($text, $length, $end) = @_;
-	$text = decode_utf8($text) if (getCurrentStatic('utf8') && !is_utf8($text));
+	$text = decode_utf8($text) if ((!getCurrentStatic('utf8')) && (is_utf8($text)));
 	if ($length && $end) {
 		$text = substr($text, -$length);
 	} elsif ($length) {
@@ -2833,7 +2835,7 @@ sub html2text {
 	1 while chomp($text);
 
 	# restore UTF-8 Flag lost by HTML::TreeBuilder
-	$text = decode_utf8($text) if ($was_utf8);
+	#$text = decode_utf8($text) if ($was_utf8);
 
 	return $text, $refs->get_refs($gSkin->{absolutedir});
 }
@@ -4325,75 +4327,75 @@ sub getRandomWordFromDictFile {
 	my $min_chars = $options->{min_chars} || 1;
 	$min_chars = 1 if $min_chars < 1;
 	my $max_chars = $options->{max_chars} || 99;
-        my $word_regex = $options->{word_regex} || qr{^([a-z]{$min_chars,$max_chars})$};
+	my $word_regex = $options->{word_regex} || qr{^([a-z]{$min_chars,$max_chars})$};
 	my $excl_regexes = $options->{excl_regexes} || [ ];
 
 	return '' if !$filename || !-r $filename;
-        my $filesize = -s $filename;
-        return '' if !$filesize;
-        my $word = '';
+	my $filesize = -s $filename;
+	return '' if !$filesize;
+	my $word = '';
 
-        # Start looking in the dictionary at a random location.
-        my $start_seek = int(rand($filesize-$max_chars));
-        my $fh;
-        if (!open($fh, "<", $filename)) {
-                return '';
-        }
-        if (!seek($fh, $start_seek, 0)) {
-                return '';
-        }
-        my $line = <$fh>;		# throw first (likely partial) line away
-        my $reseeks = 0;		# how many times have we moved the seek point?
-        my $bytes_read_total = 0;	# how much have we read in total?
-        my $bytes_read_thisseek = 0;	# how much read since last reseek?
-        LINE: while ($line = <$fh>) {
-                if (!$line) {
-                        # We just hit the end of the file.  Roll around
-                        # to the beginning.
-                        if (!seek($fh, 0, 0)) {
-                                last LINE;
-                        }
-                        ++$reseeks;
-                        next LINE;
-                }
-                $bytes_read_total += length($line);
-                $bytes_read_thisseek += length($line);
-                if ($bytes_read_thisseek >= $filesize * 0.001) {
-                        # If we've had to read through more than 0.1% of
-                        # the dictionary to find a word of the appropriate
-                        # length, we're obviously in a part of the
-                        # dictionary that doesn't have any acceptable words
-                        # (maybe a section with all-capitalized words).
-                        # Try another section.
-                        if (!seek($fh, int(rand($filesize-$max_chars)), 0)) {
-                                last LINE;
-                        }
-                        $line = <$fh>; # throw likely partial away
-                        ++$reseeks;
-                        $bytes_read_thisseek = 0;
-                }
-                if ($bytes_read_total >= $filesize) {
-                        # If we've read a total of more than the complete
-                        # file and haven't found a word, give up.
-                        last LINE;
-                }
-                chomp $line;
-                if ($line =~ $word_regex) {
-                        $word = $1;
-                        for my $r (@$excl_regexes) {
-                                if ($word =~ /$r/) {
-                                        # Skip this word.
-#print STDERR "word=$word start_seek=$start_seek SKIPPING regex=$r\n";
-                                        $word = '';
-                                        next LINE;
-                                }
-                        }
-                        last LINE;
-                }
-        }
-        close $fh;
-#print STDERR "word=$word start_seek=$start_seek bytes_read_thisseek=$bytes_read_thisseek bytes_read_total=$bytes_read_total\n";
-        return $word;
+	# Start looking in the dictionary at a random location.
+	my $start_seek = int(rand($filesize-$max_chars));
+	my $fh;
+	if (!open($fh, "<", $filename)) {
+		return '';
+	}
+	if (!seek($fh, $start_seek, 0)) {
+		return '';
+	}
+	my $line = <$fh>;		# throw first (likely partial) line away
+	my $reseeks = 0;		# how many times have we moved the seek point?
+	my $bytes_read_total = 0;	# how much have we read in total?
+	my $bytes_read_thisseek = 0;	# how much read since last reseek?
+	LINE: while ($line = <$fh>) {
+		if (!$line) {
+			# We just hit the end of the file.  Roll around
+			# to the beginning.
+			if (!seek($fh, 0, 0)) {
+					last LINE;
+			}
+			++$reseeks;
+			next LINE;
+		}
+		$bytes_read_total += length($line);
+		$bytes_read_thisseek += length($line);
+		if ($bytes_read_thisseek >= $filesize * 0.001) {
+			# If we've had to read through more than 0.1% of
+			# the dictionary to find a word of the appropriate
+			# length, we're obviously in a part of the
+			# dictionary that doesn't have any acceptable words
+			# (maybe a section with all-capitalized words).
+			# Try another section.
+			if (!seek($fh, int(rand($filesize-$max_chars)), 0)) {
+				last LINE;
+			}
+			$line = <$fh>; # throw likely partial away
+			++$reseeks;
+			$bytes_read_thisseek = 0;
+		}
+		if ($bytes_read_total >= $filesize) {
+			# If we've read a total of more than the complete
+			# file and haven't found a word, give up.
+			last LINE;
+		}
+		chomp $line;
+		if ($line =~ $word_regex) {
+			$word = $1;
+			for my $r (@$excl_regexes) {
+				if ($word =~ /$r/) {
+					# Skip this word.
+					#print STDERR "word=$word start_seek=$start_seek SKIPPING regex=$r\n";
+					$word = '';
+					next LINE;
+				}
+			}
+			last LINE;
+		}
+	}
+	close $fh;
+	#	print STDERR "word=$word start_seek=$start_seek bytes_read_thisseek=$bytes_read_thisseek bytes_read_total=$bytes_read_total\n";
+	return $word;
 }
 
 sub getUrlsFromText {
@@ -4401,6 +4403,7 @@ sub getUrlsFromText {
 	my %urls = ( );
 	for my $text (@texts) {
 		next unless $text;
+		$text = decode_utf8($text);
 		my $tokens = HTML::TokeParser->new(\$text);
 		next unless $tokens;
 		while (my $token = $tokens->get_tag('a')) {
@@ -4818,11 +4821,13 @@ sub fixStory {
 		$str =~ s|<p(?: /)?>|<br><br>|g;
 	}
 
-	# smart conversion of em dashes to real ones
-	# leave if - has nonwhitespace on either side, otherwise, convert
-	unless (getCurrentStatic('submit_keep_dashes')) {
-		$str =~ s/(\s+-+\s+)/ &mdash; /g;
-	}
+	##########
+	#	TMB Why? We're not the punctuation police.
+	#	smart conversion of em dashes to real ones
+	#	leave if - has nonwhitespace on either side, otherwise, convert
+	#	unless (getCurrentStatic('submit_keep_dashes')) {
+	#		$str =~ s/(\s+-+\s+)/ &mdash; /g;
+	#	}
 
 	$str = balanceTags($str, { deep_nesting => 1 });
 

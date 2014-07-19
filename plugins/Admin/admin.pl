@@ -10,6 +10,7 @@ use Image::Size;
 use Time::HiRes;
 use LWP::UserAgent;
 use URI;
+use Encode 'decode_utf8';
 
 use Slash;
 use Slash::Display;
@@ -1097,6 +1098,7 @@ sub editStory {
 			my $temp_body;
 			$form->{bodytext} = '';
 			my $fh = $upload->fh;
+			binmode $fh, ':encoding(UTF-8)';
 			while (<$fh>) {
 				$form->{bodytext} .= $_;
 			}
@@ -1555,15 +1557,15 @@ sub getDescForTopicsRendered {
 	my @story_nexuses        = grep { $tree->{$_}{nexus} } keys %$topics_rendered;
 
 	my @sorted_nexuses = 	map { $_->[1] } 
-				sort {
-			     		$b->[0] <=> $a->[0] ||
-					$tree->{$a->[1]}{textname} cmp $tree->{$b->[1]}{textname}
-				} map { 
-			     		my $val = 0;
-					$val = 2 if $_ == $mainpage_nexus_tid;
-					$val = 1 if !$val and $_ == $primary_nexus_tid;
-					[$val, $_]
-				} @story_nexuses;
+	sort {
+		$b->[0] <=> $a->[0] ||
+		$tree->{$a->[1]}{textname} cmp $tree->{$b->[1]}{textname}
+	} map { 
+		my $val = 0;
+		$val = 2 if $_ == $mainpage_nexus_tid;
+		$val = 1 if !$val and $_ == $primary_nexus_tid;
+		[$val, $_]
+	} @story_nexuses;
 
 	my $remove = qq{[<a href="#" onclick="st_main_add_really(%d,'%s',0,1); return false" class="nex_remove">x</a>]};
 

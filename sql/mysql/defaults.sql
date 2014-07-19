@@ -1144,6 +1144,7 @@ INSERT INTO vars (name, value, description) VALUES ('users_count','1','(Approxim
 INSERT INTO vars (name, value, description) VALUES ('users_menu_no_display', '0', 'Hide users menu?');
 INSERT INTO vars (name, value, description) VALUES ('users_show_info_seclev','0','Minimum seclev to view a user\s info');
 INSERT INTO vars (name, value, description) VALUES ('users_speed_limit','20','How fast a user can change their prefs');
+INSERT INTO vars (name, value, description) VALUES ('utf8', '1', '1 = Use end-to-end unicode, 0 = Convert unicode to html entities');
 INSERT INTO vars (name, value, description) VALUES ('writestatus','dirty','Simple Boolean to determine if homepage needs rewriting');
 INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whether we are using XHTML');
 INSERT INTO vars (name, value, description) VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');

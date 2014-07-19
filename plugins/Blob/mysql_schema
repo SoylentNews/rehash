@@ -15,7 +15,7 @@ CREATE TABLE blobs (
 	reference_count MEDIUMINT UNSIGNED NOT NULL DEFAULT '1',
 	data LONGBLOB NOT NULL,
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 # 
 # Table structure for table 'story_files'
@@ -31,5 +31,5 @@ CREATE TABLE story_files (
 	PRIMARY KEY (id),
 	INDEX stoid (stoid),
 	INDEX file_id (file_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS moderatorlog (
 	KEY uid (uid),
 	KEY cuid (cuid),
 	KEY ts_uid_sid (ts,uid,sid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS modreasons (
 	id tinyint UNSIGNED NOT NULL,
@@ -37,5 +37,5 @@ CREATE TABLE IF NOT EXISTS modreasons (
 	fairfrac float DEFAULT '0.5' NOT NULL,
 	unfairname varchar(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

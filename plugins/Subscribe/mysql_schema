@@ -24,7 +24,7 @@ CREATE TABLE subscribe_payments (
 	KEY(ts),
 	UNIQUE(transaction_id),
 	KEY(puid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
 

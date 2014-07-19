@@ -395,7 +395,7 @@ sub jsSelectComments {
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 
 	# only differences:
-	#    sco: force_read, one_cid_only, threshold (was -1 here, matters?)
+	# sco: force_read, one_cid_only, threshold (was -1 here, matters?)
 	my($comments) = $user->{state}{selectComments}{comments};
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
@@ -1435,7 +1435,11 @@ sub preProcessReplyForm {
 	my($form, $reply) = @_;
 	return if !$form->{pid} || !$reply->{subject} || $form->{postersubj};
 
-	$form->{postersubj} = decode_entities($reply->{subject});
+	##########
+	# TMB As a general rule, we want to leave entities alone.
+	#$form->{postersubj} = decode_entities($reply->{subject});
+  $form->{postersubj} = $reply->{subject};
+	##########
 	$form->{postersubj} =~ s/^Re://i;
 	$form->{postersubj} =~ s/\s\s/ /g;
 	$form->{postersubj} = "Re:$form->{postersubj}";
@@ -1585,7 +1589,7 @@ sub saveComment {
 	$comm->{nobonus}  = $user->{nobonus}	unless $comm->{nobonus_present};
 	$comm->{postanon} = $user->{postanon}	unless $comm->{postanon_present};
 	$comm->{nosubscriberbonus} = $user->{nosubscriberbonus}
-						unless $comm->{nosubscriberbonus_present};
+	unless $comm->{nosubscriberbonus_present};
 
 #print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
 
@@ -1603,7 +1607,7 @@ sub saveComment {
 		if ($constants->{karma_posting_penalty_style} == 0) {
 			$pts-- if $user->{karma} < 0;
 			$pts-- if $user->{karma} < $constants->{badkarma};
-                } else {
+		} else {
 			$tweak-- if $user->{karma} < 0;
 			$tweak-- if $user->{karma} < $constants->{badkarma};
 		}
@@ -1724,8 +1728,8 @@ sub saveComment {
 				template_name   => 'reply_msg',
 				template_page   => 'comments',
 				subject         => {
-					template_name => 'reply_msg_subj',
-					template_page => 'comments',
+				template_name 	=> 'reply_msg_subj',
+				template_page 	=> 'comments',
 				},
 				reply           => $reply,
 				parent          => $parent,
@@ -1744,8 +1748,8 @@ sub saveComment {
 				template_name   => 'journrep',
 				template_page   => 'comments',
 				subject         => {
-					template_name => 'journrep_subj',
-					template_page => 'comments',
+				template_name 	=> 'journrep_subj',
+				template_page 	=> 'comments',
 				},
 				reply           => $reply,
 				discussion      => $discussion,
@@ -1764,8 +1768,8 @@ sub saveComment {
 			template_name   => 'commnew',
 			template_page   => 'comments',
 			subject         => {
-				template_name => 'commnew_subj',
-				template_page => 'comments',
+			template_name 	=> 'commnew_subj',
+			template_page 	=> 'comments',
 			},
 			reply           => $reply,
 			discussion      => $discussion,
@@ -2393,7 +2397,7 @@ sub validateComment {
 			$user->{state}{is_troll} = 1;
 		} else {
 			$$error_message = getError('troll message', {
-				unencoded_ip => $ENV{REMOTE_ADDR}      
+				unencoded_ip => $ENV{REMOTE_ADDR}
 			});
 			return;
 		}
@@ -2421,7 +2425,7 @@ sub validateComment {
 			my $logged_in_allowed = !$post_restrictions->{no_post};
 			$$error_message = getError('troll message', {
 				unencoded_ip 		=> $ENV{REMOTE_ADDR},
-				logged_in_allowed 	=> $logged_in_allowed      
+				logged_in_allowed 	=> $logged_in_allowed  
 			});
 			return;
 		}
@@ -2438,16 +2442,20 @@ sub validateComment {
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
 
-	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
+	##########
+	#	TMB Duplicates work done elsewhere. Goodbye to it.
+	#	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
 
-	for ($$comm, $$subj) {
-		my $d = decode_entities($_);
-		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
-		if ($d !~ /\w/) {		# require SOME non-whitespace
-			$$error_message = getError('no body');
-			return;
-		}
-	}
+	##########
+	#	TMB This is duplicating work done elsewhere. Goodbye to it.
+	#	for ($$comm, $$subj) {
+	#		my $d = decode_entities($_);
+	#		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
+	#		if ($d !~ /\w/) {		# require SOME non-whitespace
+	#			$$error_message = getError('no body');
+	#			return;
+	#		}
+	#	}
 
 	unless (defined($$comm = balanceTags($$comm, { deep_nesting => 1 }))) {
 		# only time this should return an error is if the HTML is busted
@@ -2479,7 +2487,10 @@ sub validateComment {
 		# Don't count & or other chars used in entity tags;  don't count
 		# chars commonly used in ascii art.  Not that it matters much.
 		# Do count chars commonly used in source code.
-		my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]+='"@$-//;
+		##########
+		#	TMB Count anything but whitespace as this is NOT unicode happy.
+		#	my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]+='"@$-//;
+		my $num_chars = $check_notags =~ tr/ \t\r\n\f//c;
 
 		# Note that approveTags() has already been called by this point,
 		# so all tags present are legal and uppercased.
@@ -2534,7 +2545,7 @@ sub validateComment {
 		}
 	}
 
-	if (	    $constants->{m1}
+	if ( $constants->{m1}
 		&& !$user->{is_anon}
 		&& !$form->{postanon}
 		&& !$form->{gotmodwarning}

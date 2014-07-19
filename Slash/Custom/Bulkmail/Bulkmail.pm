@@ -640,6 +640,7 @@ use strict;
 		my ($self) = shift || undef;	
 		
 		my $bulk = $self->gen_handle();
+		binmode $bulk, ':encoding(UTF-8)';
 	
 		my ($s_tries, $c_tries) = ($self->Tries, $self->Tries);
 	
@@ -1194,6 +1195,7 @@ sub build_envelope {
 	local $/ = "\015\012";
 
 	my $bulk = $self->BULK();
+	binmode $bulk, ':encoding(UTF-8)';
 	#First thing we're gonna do is reset it in case there's any garbage sitting there.
 
 	print $bulk "RSET";
@@ -1234,7 +1236,8 @@ sub send_to_envelope {
 	local $/ = "\015\012";
 	
 	my $bulk = $self->BULK();
-	
+	binmode $bulk, ':encoding(UTF-8)';
+
 	#Who's the message to?
 	#print "SENDING THE TO ENVELOPE TO: (($email))\n";
 	print $bulk "RCPT TO:<", $email, ">";
@@ -1263,6 +1266,7 @@ sub send_message_data {
 	local $/ = "\015\012";
 	
 	my $bulk = $self->BULK;
+	binmode $bulk, ':encoding(UTF-8)';
 	
 	#Let the server know we're gonna start sending data
 	print $bulk "DATA";
@@ -1286,7 +1290,6 @@ sub send_message_data {
 	# we really should fix it to NOT print UTF, but ASCII; this is a problem
 	# in our code that converts HTML entities to characters -- pudge
 	{
-		no warnings 'utf8';
 		print $bulk $$message;
 	}
 
@@ -1298,7 +1301,7 @@ sub send_message_data {
 		$self->disconnect();
 		return $self->error("Server disconnected: $response");
 	};
-#print "MESSAGE::::SENT DATA\n";
+	#	print "MESSAGE::::SENT DATA\n";
 	$self->log_it($self->log_full_line ? $merge->{"BULK_LINE"} : $merge->{"BULK_EMAIL"}, $self->GOOD) if $self->GOOD && ! $self->use_envelope;
 
 	$message = undef;

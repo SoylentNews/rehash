@@ -10,5 +10,5 @@ CREATE TABLE submissions_notes (
 	subnote text,
 	time datetime default NULL,
 	PRIMARY KEY  (noid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -79,8 +79,8 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectAllHashref('code', 'code,name,bitvalue', 'message_deliverymodes') },
 	'bvmessagecodes'
 		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
-        'bvmessagecodes_slev'
-                => sub { $_[0]->sqlSelectAllHashref('type', 'code,type,seclev,delivery_bvalue', 'message_codes', "code >= 0") },
+  'bvmessagecodes_slev'
+		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,seclev,delivery_bvalue', 'message_codes', "code >= 0") },
 );
 
 sub getDescriptions {
@@ -214,8 +214,11 @@ sub _create {
 		'send'	=> $send || 'now',
 	);
 
-	$insert_data{'-message'} = "0x" . unpack("H*", delete $insert_data{message})
-		if getCurrentStatic('utf8');
+	##########
+	#	TMB commented out for debugging purposes
+	#	Why are we packing and unpacking anyway, the db supports utf8 just fine.
+	#	$insert_data{'-message'} = "0x" . unpack("H*", delete $insert_data{message})
+	#	if getCurrentStatic('utf8');
 
 	$self->sqlInsert($table, \%insert_data);
 
@@ -236,11 +239,13 @@ sub _get_web {
 	$prime    = $self->{_web_prime1};
 	$self->sqlUpdate($table, { readed => 1 }, "$prime=$id_db");
 
-	# force to set UTF8 flag because these fields are 'blob'.
-	if (getCurrentStatic('utf8')) {
-		$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
-		$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
-	}
+	##########
+	#	TMB Unnecessary? UTF8 is the default.
+	#	force to set UTF8 flag because these fields are 'blob'.
+	#	if (getCurrentStatic('utf8')) {
+	#		$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
+	#		$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
+	#	}
 
 	return $data;
 }
@@ -265,13 +270,15 @@ sub _get_web_by_uid {
 		$cols, $table, "$prime=$id_db", $other
 	);
 
+	##########
+	# TMB Commented out for debugging. also, should be unnecessary.
 	# force to set UTF8 flag because these fields are 'blob'.
-	if (getCurrentStatic('utf8')) {
-		for (@$data) {
-			$_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'}));
-			$_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'}));
-		}
-	}
+	#if (getCurrentStatic('utf8')) {
+	#	for (@$data) {
+	#		$_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'}));
+	#		$_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'}));
+	#	}
+	#}
 
 	return $data;
 }

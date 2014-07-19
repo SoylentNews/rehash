@@ -467,20 +467,23 @@ sub getCurrentForm {
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
 		$form = $cfg->{'form'};
-
-        # Forms should always be checked for unicode and have it converted to html encoding.
-        # There are too many ways things could go wrong otherwise. So we do it here.
-        # We are only concerned with unicode though, other fixes are already working elsewhere.
-        foreach my $item (keys %$form)
-        {
-            if( (ref $form->{$item} eq "SCALAR") || (ref $form->{$item} eq '') )
-            {
-                next unless $form->{$item};
-                $form->{$item} = decode_utf8($form->{$item});
-                $form->{$item} =~ s[([^\n\r\t !-~])][ "&#".ord($1).";" ]ge;
-            }
-            else{ next;}
-        }
+		##########
+		# TMB Why we have to do this for forms, I have no idea.
+		# Feel free to find out why and fix it.
+		# EJP Perl sometimes does not know a utf8 srting is utf8.
+		# This process lets it figure it out.
+		foreach my $item (keys %$form)
+		{
+			if( (ref $form->{$item} eq "SCALAR") || (ref $form->{$item} eq '') )
+			{
+				next unless $form->{$item};
+				$form->{$item} = decode_utf8($form->{$item});
+				##########
+				# TMB Combined the two loops. This takes over the job of encode_high_bits.
+				$form->{$item} =~ s[([^\n\r\t !-~])][ "&#".ord($1).";" ]ge unless getCurrentStatic('utf8');
+			}
+			else{ next;}
+		}
 	} else {
 		$form = $static_form;
 	}
@@ -1433,11 +1436,11 @@ sub normalizeOpenID {
 sub getPollVoterHash {
 	my $constants = getCurrentStatic();
 	my $remote_addr = $ENV{REMOTE_ADDR} || '';
-        if ($constants->{poll_fwdfor} && $ENV{HTTP_X_FORWARDED_FOR}) {
-                return md5_hex($remote_addr . $ENV{HTTP_X_FORWARDED_FOR});
-        } else {
-                return md5_hex($remote_addr);
-        }
+	if ($constants->{poll_fwdfor} && $ENV{HTTP_X_FORWARDED_FOR}) {
+		return md5_hex($remote_addr . $ENV{HTTP_X_FORWARDED_FOR});
+	} else {
+		return md5_hex($remote_addr);
+	}
 }
 
 #========================================================================
@@ -1478,14 +1481,14 @@ Returns the AC UID for use in the caller.
 =cut
 
 sub userLogout {
-        my($uid, $cookies, $options) = @_;
-        return if isAnon($uid);
+	my($uid, $cookies, $options) = @_;
+	return if isAnon($uid);
 
 	my $constants = getCurrentStatic();
-        my $slashdb = getCurrentDB();
+	my $slashdb = getCurrentDB();
 
-        $slashdb->deleteLogToken($uid);
-        setCookie('user', '');
+	$slashdb->deleteLogToken($uid);
+	setCookie('user', '');
 
 	# Perhaps cookies were not available in the caller
 	if (!keys %$cookies) {
@@ -1625,15 +1628,15 @@ sub prepareUser {
 
 	# The URI can be reset here.  This must be done before currentPage
 	# is set.
-        if ($uri eq '/index2.pl') {
-                # Under certain circumstances, switch out the URI without
-                # doing an HTTP redirect.
-                if ($user->{index_classic} || $r->header_in('User-Agent') =~ /MSIE [2-6]/) {
-                        $r->uri('/index.pl');
-                        $r->filename($constants->{basedir} . '/index.pl');
+	if ($uri eq '/index2.pl') {
+		# Under certain circumstances, switch out the URI without
+		# doing an HTTP redirect.
+		if ($user->{index_classic} || $r->header_in('User-Agent') =~ /MSIE [2-6]/) {
+			$r->uri('/index.pl');
+			$r->filename($constants->{basedir} . '/index.pl');
 			$uri = $r->uri;
-                }
-        }
+		}
+	}
 
 	if ($r) {
 		my %params = $r->args;
