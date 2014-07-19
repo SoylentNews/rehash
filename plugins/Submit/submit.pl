@@ -72,7 +72,10 @@ sub main {
 	# so leave it here until you really know what you
 	# are doing -- pudge
 	$form->{from}   = strip_attribute($form->{from})  if $form->{from};
-	$form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
+	##########
+	#	TMB This absolutely should not be done to subj. We want to allow entities in subj.
+	#	$form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
+	#
 	$form->{email}  = strip_attribute($form->{email}) if $form->{email};
 	$form->{name}   = strip_nohtml($form->{name})     if $form->{name};
 
@@ -184,7 +187,7 @@ sub previewStory {
 			return 0;
 		}
 	}		
-
+  #	print STDERR Data::Dumper->Dumper($form->{story});
 	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'), '', $error_message);
 }
 
@@ -295,18 +298,18 @@ sub previewForm {
 	my $url = "";
 	$url = $slashdb->getUrl($sub->{url_id}) if $sub->{url_id};
 
-        foreach my $memory (@$sub_memory) {
-                my $match = $memory->{submatch};
+	foreach my $memory (@$sub_memory) {
+		my $match = $memory->{submatch};
 
-                if ($sub->{email} =~ m/$match/i ||
-                    $sub->{name}  =~ m/$match/i ||
-                    $sub->{subj}  =~ m/$match/i ||
-                    $sub->{ipid}  =~ m/$match/i ||
-                    $sub->{story} =~ m/$match/i ||
-                    $url =~ m/$match/i ) {
-                        push @$subnotes_ref, $memory;
-                }
-        }
+		if ($sub->{email} =~ m/$match/i ||
+			$sub->{name}  =~ m/$match/i ||
+			$sub->{subj}  =~ m/$match/i ||
+			$sub->{ipid}  =~ m/$match/i ||
+			$sub->{story} =~ m/$match/i ||
+			$url =~ m/$match/i ) {
+				push @$subnotes_ref, $memory;
+		}
+	}
 
 	slashDisplay('previewForm', {
 		submission			=> $sub,
