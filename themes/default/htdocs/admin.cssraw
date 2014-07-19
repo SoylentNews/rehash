@@ -38,22 +38,23 @@ label.checkbox { display: inline; }
 #adminmenu
 {
 	font-weight: normal;
-	font-size: 80%;
+	font-size: .8125em;
 	border-top: 2px solid #aaa;
 	border-bottom: 2px solid #aaa;
 	background: #ddd;
 	padding: 0 1em;
 	margin: 0;
 	position: relative;
+	color:#000;
 }
-#adminmenu small { font-size: 85%; }
+#adminmenu small { font-size: .923em; }
 
 #adminmenu ul.menu
 {
 	display: inline;
 	margin: 0;
 	padding: 0;
-	font-size: 100%;
+	font-size: 1em;
 }
 
 #adminmenu ul.menu li a {border: none; text-decoration: none; }
@@ -164,7 +165,7 @@ html>body #admin { margin: 0 auto .2em 0; }
 .ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #033; }
 .ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #066; }
 .admin_story_list a, .admin_story_list a:visited { color: #066; }
-.admin_story_list, .submit_story_list { font-size: 100%; }
+.admin_story_list, .submit_story_list { font-size: 1em; }
 .user_admin { background: #ffd; border: 1px solid #aaa; padding: 0 .3em; }
 body .adminstoryform fieldset {background: #ffd; }
 body .adminstoryform legend { display: none;}
