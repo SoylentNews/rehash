@@ -825,10 +825,10 @@ sub getTopComments {
 
 		$num_top_comments = scalar(@$cids);
 		last if $num_top_comments >= $num_wanted;
-                # Didn't get $num_wanted... try again with lower standards.
-                --$max_score;
-                # If this is as low as we can get... take what we have.
-                last if $max_score <= $min_score;
+		# Didn't get $num_wanted... try again with lower standards.
+		--$max_score;
+		# If this is as low as we can get... take what we have.
+		last if $max_score <= $min_score;
 	}
 
 	# if for any reason we don't get any comments, return now
@@ -857,7 +857,7 @@ sub getTopComments {
 			"cid=$cids->[$num_top_comments]->[0]
 				AND stories.stoid = story_text.stoid
 				AND users.uid=comments.uid
-                                AND comments.sid=stories.discussion");
+				AND comments.sid=stories.discussion");
 		push @$comments, $comment if $comment;
 		++$num_top_comments;
 	}
@@ -1070,7 +1070,7 @@ sub getSkinIndex {
 
 # XXXSRCID This needs to actually be, like, written.
 sub recalcAL2 {
-        my($self, $srcid) = @_;
+	my($self, $srcid) = @_;
 	my $log = $self->getAL2Log($srcid);
 	# remember to delete from memcached
 }
@@ -1407,11 +1407,11 @@ sub refreshUncommonStoryWords {
 		my $data = {
 			output_hr	=> $word_hr,
 			title		=> { text => $ar->[0],
-					     weight => $constants->{uncommon_weight_title}	|| 8.0 },
+						 weight => $constants->{uncommon_weight_title}	|| 8.0 },
 			introtext	=> { text => $ar->[1],
-					     weight => $constants->{uncommon_weight_introtext}	|| 2.0 },
+						 weight => $constants->{uncommon_weight_introtext}	|| 2.0 },
 			bodytext	=> { text => $ar->[2],
-					     weight => $constants->{uncommon_weight_bodytext}	|| 1.0 },
+						 weight => $constants->{uncommon_weight_bodytext}	|| 1.0 },
 		};
 		findWords($data);
 	}
@@ -1502,11 +1502,14 @@ sub createRSS {
 	my($self, $bid, $item) = @_;
 #use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "createRSS $bid item: " . Dumper($item);
 	$item->{title} =~ /^(.*)$/;
+	##########
+	#	TMB These encodes are absolutely necessary. md5_hex can't handle unicode without them.
 	my $title_md5 = md5_hex(encode_utf8($1));
 	$item->{description} =~ /^(.*)$/;
 	my $description_md5 = md5_hex(encode_utf8($1));
 	$item->{'link'} =~ /^(.*)$/;
 	my $link_md5 = md5_hex(encode_utf8($1));
+	##########
 
 	my $data_hr = {
 		link_signature		=> $link_md5,
@@ -1580,13 +1583,13 @@ sub countPollQuestion {
 ########################################################
 
 sub setCurrentSectionPolls {
-        my($self) = @_;
-        my $section_polls = $self->sqlSelectAllHashrefArray("primaryskid,max(date) as date", "pollquestions", "date<=NOW() and polltype='section'", "group by primaryskid"); 
+	my($self) = @_;
+	my $section_polls = $self->sqlSelectAllHashrefArray("primaryskid,max(date) as date", "pollquestions", "date<=NOW() and polltype='section'", "group by primaryskid"); 
 	foreach my $p (@$section_polls) {
-                my $poll = $self->sqlSelectHashref("qid,primaryskid", "pollquestions", "primaryskid='$p->{primaryskid}' and date='$p->{date}'");
+		my $poll = $self->sqlSelectHashref("qid,primaryskid", "pollquestions", "primaryskid='$p->{primaryskid}' and date='$p->{date}'");
 		my $nexus_id = $self->getNexusFromSkid($p->{primaryskid});
 		$self->setNexusCurrentQid($nexus_id, $poll->{qid});
-        }
+	}
 }
 
 ########################################################
@@ -1645,7 +1648,7 @@ sub getFirstUIDCreatedDaysBack {
 	my $between_str = '';
 	if ($num_days) {
 		$between_str = "BETWEEN DATE_SUB('$yesterday 00:00',    INTERVAL $num_days DAY)
-				    AND DATE_SUB('$yesterday 23:59:59', INTERVAL $num_days DAY)";
+			AND DATE_SUB('$yesterday 23:59:59', INTERVAL $num_days DAY)";
 	} else {
 		$between_str = "BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	}
