@@ -1212,97 +1212,39 @@ The manipulated string.
 
 { # closure for stripByMode
 
-my %ansi_to_ascii = (
-	131	=> 'f',
-	133	=> '...',
-	138	=> 'S',
-	140	=> 'OE',
-	142	=> 'Z',
-	145	=> '\'',
-	146	=> '\'',
-	147	=> '"',
-	148	=> '"',
-	150	=> '-',
-	151	=> '--',
-	153	=> '(TM)',
-	154	=> 's',
-	156	=> 'oe',
-	158	=> 'z',
-	159	=> 'Y',
-	166	=> '|',
-	169	=> '(C)',
-	174	=> '(R)',
-	177	=> '+/-',
-	188	=> '1/4',
-	189	=> '1/2',
-	190	=> '3/4',
-	192	=> 'A',
-	193	=> 'A',
-	194	=> 'A',
-	195	=> 'A',
-	196	=> 'A',
-	197	=> 'A',
-	198	=> 'AE',
-	199	=> 'C',
-	200	=> 'E',
-	201	=> 'E',
-	202	=> 'E',
-	203	=> 'E',
-	204	=> 'I',
-	205	=> 'I',
-	206	=> 'I',
-	207	=> 'I',
-	208	=> 'D',
-	209	=> 'N',
-	210	=> 'O',
-	211	=> 'O',
-	212	=> 'O',
-	213	=> 'O',
-	214	=> 'O',
-	215	=> 'x',
-	216	=> 'O',
-	217	=> 'U',
-	218	=> 'U',
-	219	=> 'U',
-	220	=> 'U',
-	221	=> 'Y',
-	223	=> 'B',
-	224	=> 'a',
-	225	=> 'a',
-	226	=> 'a',
-	227	=> 'a',
-	228	=> 'a',
-	229	=> 'a',
-	230	=> 'ae',
-	231	=> 'c',
-	232	=> 'e',
-	233	=> 'e',
-	234	=> 'e',
-	235	=> 'e',
-	236	=> 'i',
-	237	=> 'i',
-	238	=> 'i',
-	239	=> 'i',
-	240	=> 'd',
-	241	=> 'n',
-	242	=> 'o',
-	243	=> 'o',
-	244	=> 'o',
-	245	=> 'o',
-	246	=> 'o',
-	247	=> '/',
-	248	=> 'o',
-	249	=> 'u',
-	250	=> 'u',
-	251	=> 'u',
-	252	=> 'u',
-	253	=> 'y',
-	255	=> 'y',
-);
-
 my %ansi_to_utf = (
+	0   => 65533,
+	1   => 65533,
+	2   => 65533,
+	3   => 65533,
+	4   => 65533,
+	5   => 65533,
+	6   => 65533,
+	7   => 65533,
+	8   => 65533,
+	11  => 65533,
+	12  => 65533,
+	14  => 65533,
+	15  => 65533,
+	16  => 65533,
+	17  => 65533,
+	18  => 65533,
+	19  => 65533,
+	20  => 65533,
+	21  => 65533,
+	22  => 65533,
+	23  => 65533,
+	24  => 65533,
+	25  => 65533,
+	26  => 65533,
+	27  => 65533,
+	28  => 65533,
+	29  => 65533,
+	30  => 65533,
+	31  => 65533,
+	127 => 65533,
 	128	=> 8364,
-	129	=> '',
+	129	=> '65533',
 	130	=> 8218,
 	131	=> 402,
 	132	=> 8222,
@@ -1314,10 +1256,10 @@ my %ansi_to_utf = (
 	138	=> 352,
 	139	=> 8249,
 	140	=> 338,
-	141	=> '',
+	141	=> '65533',
 	142	=> 381,
-	143	=> '',
-	144	=> '',
+	143	=> '65533',
+	144	=> '65533',
 	145	=> 8216,
 	146	=> 8217,
 	147	=> 8220,
@@ -1330,13 +1272,12 @@ my %ansi_to_utf = (
 	154	=> 353,
 	155	=> 8250,
 	156	=> 339,
-	157	=> '',
+	157	=> '65533',
 	158	=> 382,
 	159	=> 376,
 );
 
 # protect the hash by just returning it, for external use only
-sub _ansi_to_ascii { %ansi_to_ascii }
 sub _ansi_to_utf   { %ansi_to_utf }
 
 ##########
@@ -1345,40 +1286,25 @@ sub _ansi_to_utf   { %ansi_to_utf }
 sub _approveUnicodeChar {
 	my($char, $constants) = @_;
 	$constants ||= getCurrentStatic();
-	
+	my %ansi_to_utf = _ansi_to_utf();
 	my $str = '';
 	my $decimal = ord(decode_utf8($char));
-	
-	if(!$constants->{bad_numeric}{$decimal}) {
+
+	if(!$constants->{bad_numeric}{$decimal})
+	{
 		$str = $char;
+	}
+
+	if($ansi_to_utf{$decimal})
+	{
+		$str = chr($ansi_to_utf{$decimal});
 	}
 	##########
-	# For some reason our DB hates 3-4 byte unicode
-	if($decimal > 65535) {
+	# TMB For some reason our DB hates 3-4 byte unicode
+	if($decimal > 65535)
+	{
 		$str = approveCharref(sprintf("#x%x", $decimal));
 	}
-	return $str;
-}
-
-##########
-# TMB This should only be called if we're outside the good ascii range
-sub _charsetConvert {
-	my($char, $constants) = @_;
-	$constants ||= getCurrentStatic();
-
-	my $str = '';
-	if(!$constants->{bad_numeric}{$char}){
-		$str = $char;
-	}
-
-	# fall further back
-	# if the char is a special one we don't recognize in Latin-1,
-	# convert it here.  this does not prevent someone from manually
-	# entering &#147; or some such, if they feel they need to, it is
-	# to help catch it when browsers send non-utf-8 data even though
-	# they shouldn't
-	$str = $ansi_to_utf{$char} if exists $ansi_to_utf{$char};
-	$str = sprintf('&#%u;', $str) if length $str;
 	return $str;
 }
 
@@ -2427,7 +2353,6 @@ sub approveCharref {
 	my $ok = 1; # Everything not forbidden is permitted.
 
 	_fixupCharrefs();
-	my %ansi_to_ascii = _ansi_to_ascii();
 	my $ansi_to_utf   = _ansi_to_utf();
 	my $decimal = 0;
 
@@ -2439,7 +2364,7 @@ sub approveCharref {
 			$decimal = hex($1); # always returns a positive integer
 		} elsif ($charref =~ /^#(\d+)$/) {
 			# Decimal encoding.
-			$decimal = $1;
+			$decimal = int($1);
 		} else {
 			# Unknown, assume flawed.
 			$ok = 0;
@@ -2451,7 +2376,7 @@ sub approveCharref {
 		##########
 		# TMB This check weeds out bad_numeric and sets ok == 2 if it's ansi
 		if($constants->{bad_numeric}{$decimal}){$ok = 0;}
-		else{$ok = $ansi_to_ascii{$decimal} ? 2 : 1;}
+		else{$ok = defined $ansi_to_utf{$decimal} ? 2 : 1;}		
 	} elsif ($ok == 1 && $charref =~ /^([a-z0-9]+)$/i) {
 		# Character entity.
 		my $entity = $1;  # case matters
@@ -2460,7 +2385,7 @@ sub approveCharref {
 		if (!$constants->{bad_entity}{$entity}) {
 			if (defined $entity2char{$entity}) {
 				$decimal = ord $entity2char{$entity};
-				$ok = $ansi_to_ascii{$decimal} ? 2 : 1;
+				$ok = defined $ansi_to_utf{$decimal} ? 2 : 1;
 			}else{$ok = 1;}
 		}
 		else {$ok = 0;}
@@ -2469,9 +2394,9 @@ sub approveCharref {
 		$ok = 0;
 	}
 
-	# special case for old-style broken entities we want to convert to ASCII
+	# special case for entities we want to convert to utf8
 	if ($ok == 2 && $decimal) {
-		return $ansi_to_ascii{$decimal};
+		return "&#$ansi_to_utf{$decimal};";
 	} elsif ($ok) {
 		return "&$charref;";
 	} else {
