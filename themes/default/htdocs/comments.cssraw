@@ -166,12 +166,13 @@ html > body .commentwrap table {
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
 .quote {
-    margin-bottom: .75em;
-    padding-left: .75em;
-    color: #555;
-    border-left: 3px solid #ddd;
-    position: relative;
+    margin: 1em 40px;
+    opacity: 0.75;
     display: block;
+}
+
+.commentBody blockquote {
+    opacity: 0.75;
 }
 
 #commentlisting {
