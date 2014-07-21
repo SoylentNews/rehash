@@ -43,6 +43,7 @@ my $start_time = Time::HiRes::time;
 			   $user->{is_admin}
 			|| ($constants->{rss_allow_index} > 1 && $user->{is_subscriber})
 			|| ($constants->{rss_allow_index} > 2 && !$user->{is_anon})
+			|| ($constants->{rss_allow_index} > 3 )
 		);
 
 	# $form->{logtoken} is only allowed if using rss
