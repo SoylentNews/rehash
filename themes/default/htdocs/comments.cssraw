@@ -165,14 +165,10 @@ html > body .commentwrap table {
 
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
-.quote {
-    margin: 1em 40px;
-    opacity: 0.75;
-    display: block;
-}
-
-.commentBody blockquote {
-    opacity: 0.75;
+.commentBody blockquote,  .commentBody quote, .quote {
+  opacity: 0.75;
+	margin: 1em 0 1em 2em;
+	display: block;
 }
 
 #commentlisting {

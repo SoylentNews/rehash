@@ -476,7 +476,11 @@ background:#222;
 .menuoldstyle li:before { content: "| "; }
 .menuoldstyle li:first-child:before { content: ""; }
 
-.briefarticle { 
+#article .briefarticle { padding: .3em .6em; background: #ccc; font-size: .813em; color:#000; }
+#article .briefarticle a { color: #000 }
+#article .briefarticle .storytitle { font-weight: bold; }
+
+#index .briefarticle { 
 	padding: .3em .6em;  
 	color:#fff;
 	margin-bottom: .6em;
@@ -488,7 +492,7 @@ background:#222;
 	border-radius: 10px;
 }
 
-.briefarticle a { color: #fff; text-decoration: none; font-weight: bold;}
+#index .briefarticle a { color: #fff; text-decoration: none; font-weight: bold;}
 .briefarticle .section { color: #222; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
