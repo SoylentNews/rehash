@@ -1,101 +1,128 @@
-How to run your slashsite on UTF-8 mode
-=======================================
-
-NOTE: THIS DOCUMENT IS INCOMPLETE.  More could be required to get it working.
-Caveat coder and all that.
-
-
 UTF-8 slash is based on following software features:
 
  * Unicode support in Perl (see perlunicode(1))
  * MySQL Character Set Support
    (see http://dev.mysql.com/doc/refman/5.0/en/charset.html)
 
-You can use UTF-8 mode only when you are using above correctly.
+For this we require:
 
-Required software versions
---------------------------
+perl >= 5.6
+MySQL >= 5.0
+perl module DBD::MySQL >= 4.001
+perl module Cache::Memcached::Fast >= 0.22
 
- * MySQL 4.1 or later
- * Perl 5.6 or later
- * Perl DBD::mysql 4.001 or later
-
-Required software patches
--------------------------
-
- * Perl Cache::Memcached UTF8 flag patch
-   - cache-memcached-utf8.patch
+Cache::Memcached has issues with utf8, thus it is no longer used for anything but memcached stats.
+Cache::Memcached::Fast is used instead.
 
 In case of creating new slash site
 ----------------------------------
 
 Write your my.cnf (for DB servers) as below:
 
+   [mysql]
+   default-character-set = utf8
+
    [client]
    default-character-set = utf8
 
    [mysqld]
+   character-set-client-handshake = FALSE
    default-character-set = utf8
+   collation-server = utf8_unicode_ci
 
 Restart mysqld and check settings.
 
-% mysql
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-:
-mysql> SHOW GLOBAL VARIABLES LIKE 'character_set\_%';
-+--------------------------+--------+
-| Variable_name            | Value  |
-+--------------------------+--------+
-| character_set_client     | utf8   |
-| character_set_connection | utf8   |
-| character_set_database   | utf8   |
-| character_set_filesystem | binary |
-| character_set_results    | utf8   |
-| character_set_server     | utf8   |
-| character_set_system     | utf8   |
-+--------------------------+--------+
-7 rows in set (0.00 sec)
+mysql> SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_name LIKE 'collation%';
 
-Write your my.cnf (for web servers) as below:
++--------------------------+-----------------+
+| Variable_name            | Value           |
++--------------------------+-----------------+
+| character_set_client     | utf8            |
+| character_set_connection | utf8            |
+| character_set_database   | utf8            |
+| character_set_filesystem | binary          |
+| character_set_results    | utf8            |
+| character_set_server     | utf8            |
+| character_set_system     | utf8            |
+| collation_connection     | utf8_unicode_ci |
+| collation_database       | utf8_unicode_ci |
+| collation_server         | utf8_unicode_ci |
++--------------------------+-----------------+
 
-   [client]
-   default-character-set = utf8
+Change your DBIx::Password setting to reflect the need for utf8. When declaring $virtual set:
 
-Change your DBIx::Password setting to read my.cnf:
+'attributes' => {mysql_enable_utf8 => 1},
 
-   'connect' => 'DBI:mysql:database=mysql;host=localhost;mysql_read_default_file=/your/my.cnf',
+as well as all the other settings necessary to connect to the database you are using.
 
 Run "install-slashsite".
+
+Set the following in the vars table of your new db:
+
+content_type_webpage = text/html; charset=utf-8
+rdfencoding = UTF-8
+utf8 = 1
+
+Restart apache and slashd if they are running.
+
+
 
 In case of changing existing slash site
 ---------------------------------------
 
-The precondition is configuring correct charset at all existing tables.
-Because mysqld will convert charset of request and reply into cliant charset (UTF-8).
-If it has configured incorrect charset, SQL will fail or incorrect data will have returned.
+Alter my.cnf settings as above in fresh install instructions.
 
-You can check the charset settings as below:
-
-mysql> SHOW CREATE TABLE tablename\G
-*************************** 1. row ***************************
-       Table: tablename
-Create Table: CREATE TABLE `tablename` (
-:
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
-1 row in set (0.04 sec)
-
-"DEFAULT CHARSET" value is the configured charset for this table.  You should check
-charset of the contents of this table is the same as configured.  Fix charset when
-it is wrong.
-
-Then, Write your my.cnf (for all servers) as below:
+   [mysql]
+   default-character-set = utf8
 
    [client]
    default-character-set = utf8
 
-And change your DBIx::Password setting to read my.cnf:
+   [mysqld]
+   character-set-client-handshake = FALSE
+   default-character-set = utf8
+   collation-server = utf8_unicode_ci
 
-   'connect' => 'DBI:mysql:database=mysql;host=localhost;mysql_read_default_file=/your/my.cnf',
+Restart mysqld and check settings.
+
+mysql> SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_name LIKE 'collation%';
+
++--------------------------+-----------------+
+| Variable_name            | Value           |
++--------------------------+-----------------+
+| character_set_client     | utf8            |
+| character_set_connection | utf8            |
+| character_set_database   | utf8            |
+| character_set_filesystem | binary          |
+| character_set_results    | utf8            |
+| character_set_server     | utf8            |
+| character_set_system     | utf8            |
+| collation_connection     | utf8_unicode_ci |
+| collation_database       | utf8_unicode_ci |
+| collation_server         | utf8_unicode_ci |
++--------------------------+-----------------+
+
+Alter each and every table. You could do this manually in the later dump but this is a lot quicker and will let you know if there are going to be issues. From a bash prompt:
+
+for table in $(mysql -u YOURUSER YOURDB -N -e 'show tables;' | awk '{print $1}'); do echo ALTER TABLE $table CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci\;>>temp.sql; done; mysql -u YOURUSER <temp.sql
+
+You can then rm temp.sql unless there were errors and you need to address them.
+
+Now dump, drop, and reimport your database.
+
+mysqldump -u USER -p YOURDB >./YOURDB.sql
+mysql -u USER -p -e 'DROP DATABASE YOURDB;'
+mysql -u USER -p -e 'CREATE DATABASE YOURDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;'
+mysql -u USER -p YOURDB <./YOURDB.sql
+
+Change your DBIx::Password setting to reflect the need for utf8. When declaring $virtual set:
+
+'attributes' => {mysql_enable_utf8 => 1},
+
+Set the following in the vars table either through mysql or through the admin panel
+
+content_type_webpage = text/html; charset=utf-8
+rdfencoding = UTF-8
+utf8 = 1
 
 Restart apache and slashd.
-
