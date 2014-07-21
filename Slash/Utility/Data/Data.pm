@@ -2353,7 +2353,7 @@ sub approveCharref {
 	my $ok = 1; # Everything not forbidden is permitted.
 
 	_fixupCharrefs();
-	my $ansi_to_utf   = _ansi_to_utf();
+	my %ansi_to_utf   = _ansi_to_utf();
 	my $decimal = 0;
 
 	if ($ok == 1 && $charref =~ /^#/) {
