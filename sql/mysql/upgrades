@@ -290,3 +290,6 @@ ALTER TABLE xsite_auth_log CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci
 # Add quote to the approved tags list for comments
 UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote' WHERE name = 'approvedtags';
 UPDATE vars SET value = 'p|br|ol|ul|li|dl|dt|dd|blockquote|div|img|hr|h1|h2|h3|h4|h5|h6|quote' WHERE name = 'approvedtags_break';
+
+# Add the ability to serve up anonymous dynamic rss/atom feeds from index.pl rather than only for certain classes of logged in users
+UPDATE vars SET description = 'Allow RSS feeds to be served from index.pl (1 = admins, 2 = subscribers, 3 = all logged-in users, 4 = anonymous connections)' WHERE name = 'rss_allow_index';
