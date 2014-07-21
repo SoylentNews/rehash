@@ -73,7 +73,7 @@ __template__
 		<li>The ability to save user preferences from visit to visit.</li>
 		<li>Your own <a href="/journal.pl">Journal</a> in which to share your innermost feelings.</li>
 		<li>The ability to define Friends and Foes to aid in reading discussions.</li>
-		<li>A chance to participate in the Moderation System.</li>
+		<li>A chance to participate in the <a href="/faq.pl?op=moderation">Moderation System</a>.</li>
 		<li>Posting in Discussions at Score:1 instead of Score:0 means twice as many people will see your comments.</li>
 	</ul>
 	
@@ -90,7 +90,7 @@ __template__
 	<p>The wiki uses a separate account system from the main page, you'll need to create separate accounts on each site.</p>
 	
 	<h3>I have a question that is not answered in this FAQ. What should I do?</h3>
-	<p>Email your questions to <a href="mailto:admin@soylentnews.org">admin@soylentnews.org</a>. We will get you an answer, and if it's a question we've seen before, we'll consider adding it to the FAQ.</p>
+	<p>Join us on <a href="http://chat.soylentnews.org" targe="blank">IRC</a> (webchat) or email your questions to <a href="mailto:admin@soylentnews.org">admin@soylentnews.org</a>. We will get you an answer, and if it's a question we've seen before, we'll consider adding it to the FAQ.</p>
  </div>
 </div>
 
