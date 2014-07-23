@@ -2949,8 +2949,12 @@ sub saveHome {
 	# (There's no way to have an "always" author, at the moment.)
 	for my $aid (sort { $a <=> $b } keys %$author_hr) {
 		my $key = "aid$aid";
+		##########
+		# TMB only add author to story_never_author if they are in the hidden list
+		# and are not in the list of checked authors.
+		my $check = "hid$aid";
 		$story_author_all++;
-		if (!$form->{$key}) {			push @story_never_author, $aid	}
+		if ( (!$form->{$key}) && ($form->{$check}) ) {push @story_never_author, $aid;}
 	}
 	# Nexuses can have value 0, 1, 2, 3, 4, 5.  
 	# 0 means the never list,

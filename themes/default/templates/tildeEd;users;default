@@ -157,7 +157,9 @@ __template__
 	<tr>
 		<td><input type="checkbox" name="aid[% aid %]"
 			[%- checked IF story023_default.author.$aid > 0 %]>
-			[% authorref.$aid | strip_literal %]</td>
+			[% authorref.$aid | strip_literal %]
+			<input type="hidden" name="hid[% aid %]" value="1">
+		</td>
 	</tr>
 [% END %]
 </table>
