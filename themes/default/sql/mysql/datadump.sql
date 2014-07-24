@@ -288,11 +288,11 @@ INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,4);
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (1,'mainpage', 'Main Page', 'no', '', 0,0, 'no');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (2,'features','Features', 'no', '', 0, 0, 'no');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (3,'opensource','Open Source', 'no', '',0, 0, 'no');
-INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36,'yes');
-INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48,'yes');
-INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44,'yes');
-INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (7,'linux', 'Linux', 'no', 'topiclinux.gif',60,70,'yes');
-INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',100,34,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (4,'slash', 'Slash', 'no', 'topicslash.png',81,36,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (5,'code', 'Code', 'no', 'topiccode.gif',40,40,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (6,'news', 'News', 'no', 'topicnews.png',40,40,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (7,'reviews', 'Reviews', 'no', 'topicreviews.gif',40,40,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (8,'soylent', 'Soylent', 'no', 'topicsoylentnews.png',104,40,'yes');
 
 #
 # Dumping data for table 'topic_nexus'

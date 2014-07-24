@@ -20,22 +20,22 @@ __template__
 <div class="generalbody">
 	<table width="100%" cellpadding="0" cellspacing="0">
 		<tr>
-[% x = 0 %]
-		[% FOREACH topic = topics.sort("textname"); %]
-			[%
-			    match_term = "^" _ constants.topiclist_ignore_prefix IF constants.topiclist_ignore_prefix;
-			    NEXT IF match_term && topic.keyword.match(match_term);
-			    x = x + 1; "</tr><tr>" 
-		            IF (x mod 6) == 1 %]
-			<td align="center">
-				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
-				[% IF user.is_admin %]
-					</a> <a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">
-				[% END %]
-				<br>
-				[% topic.textname %]</a>
-			</td>
-[% END %]
+			[% x = 0 %]
+			[% FOREACH topic = topics.sort("textname"); %]
+				[% match_term = "^" _ constants.topiclist_ignore_prefix IF constants.topiclist_ignore_prefix;
+				NEXT IF match_term && topic.keyword.match(match_term);
+				x = x + 1; "</tr><tr>" 
+				IF (x mod 6) == 1 %]
+				
+				<td align="center">
+					<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]"><br />[% topic.textname %]</a>
+					[% IF user.is_admin %]
+						<br /><a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">Edit</a>
+					[% END %]
+					<br/>
+					<br/>
+				</td>
+			[% END %]
 		</tr>
 	</table>
 </div>
