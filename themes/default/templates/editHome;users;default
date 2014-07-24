@@ -53,7 +53,8 @@ __template__
 			'bada55' => 'BadA55',
 			'chillax'	=> 'Chillax',
 			'soylentnews'	=> 'SoylentNews',
-			'night' => 'Night Mode'
+			'night' => 'Night Mode',
+			'icicle' => 'Black IcIcle'
 		}, user_edit.skin, 1);
 		%]
 		<label>
