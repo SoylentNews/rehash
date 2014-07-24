@@ -2,7 +2,7 @@ body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
 body { background: #e5e5e5; }
 a { color: #95ae44; }
 a:visited { color: #000; }
-a:hover { color: #bada55; }
+a:hover { color: #95ae44; }
 
 /* layout */
 #contents
