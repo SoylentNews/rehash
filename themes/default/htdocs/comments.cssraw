@@ -116,6 +116,11 @@ html > body .commentwrap table {
 	color: #006;
 }
 
+.commentTop .details .zooicon img
+{
+	vertical-align: bottom;
+}
+
 .commentSub
 {
 	background: #fff;
