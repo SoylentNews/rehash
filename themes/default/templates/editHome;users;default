@@ -50,6 +50,7 @@ __template__
 		[%
 		Slash.createSelect('skin', {
 			''		=> 'Site Default',
+			'bada55' => 'BadA55',
 			'chillax'	=> 'Chillax',
 			'soylentnews'	=> 'SoylentNews',
 			'night' => 'Night Mode'
