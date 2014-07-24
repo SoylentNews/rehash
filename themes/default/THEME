@@ -259,6 +259,12 @@ css=htdocs/slashcode_low_bw.css
 mysql_dump=sql/mysql/datadump.sql
 mysql_prep=sql/mysql/prep.sql
 
+# bada55 theme files go here
+css=../bada55/htdocs/bada55.cssraw
+htdoc=../bada55/htdocs/favicon-bada55.png
+template=../bada55/templates/html-header;misc;bada55
+image=../bada55/htdocs/images/logo_bada55.png
+
 # chillax theme files go here
 css=../chillax/htdocs/chillax.cssraw
 htdoc=../chillax/htdocs/favicon-chillax.png
