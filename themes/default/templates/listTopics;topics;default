@@ -23,9 +23,9 @@ __template__
 			[% x = 0 %]
 			[% FOREACH topic = topics.sort("textname"); %]
 				[% match_term = "^" _ constants.topiclist_ignore_prefix IF constants.topiclist_ignore_prefix;
-			  NEXT IF match_term && topic.keyword.match(match_term);
-			  x = x + 1; "</tr><tr>" 
-		    IF (x mod 6) == 1 %]
+				NEXT IF match_term && topic.keyword.match(match_term);
+				x = x + 1; "</tr><tr>" 
+				IF (x mod 6) == 1 %]
 				
 				<td align="center">
 					<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]"><br />[% topic.textname %]</a>
