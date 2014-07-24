@@ -1,8 +1,8 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
 body { background: #e5e5e5; }
-a { color: #95ae44; }
+a { color: #708333; }
 a:visited { color: #000; }
-a:hover { color: #bada55; }
+a:hover { color: #95ae44; }
 
 /* layout */
 #contents
@@ -29,8 +29,8 @@ a:hover { color: #bada55; }
 
 
 /* links */
-#links a, #links a:visited { color: #95ae44; text-decoration:none;}
-#links a:hover { color: #bada55; text-decoration: underline; }
+#links a, #links a:visited { color: #708333; text-decoration:none;}
+#links a:hover { color: #95ae44; text-decoration: underline; }
 
 #links div.title { 
     background: #b2b2b2;
@@ -109,7 +109,7 @@ a:hover { color: #bada55; }
 
 .commentTop .details a, .commentTop .details a:hover, .commentTop .details a:visited
 {
-	color: #95ae44;
+	color: #708333;
 }
 
 .commentSub
@@ -308,11 +308,11 @@ div.storylinks ul li
 /* Bottom Nav */
 .btmnav
 {
-	color: #95ae44;
+	color: #708333;
 	font-size: .7em;
 }
 
-.btmnav ul li a, .btmnav ul li a:visited { color: #95ae44; }
+.btmnav ul li a, .btmnav ul li a:visited { color: #708333; }
 
 /* Journal */
 .journaldate { position: relative; }
@@ -337,9 +337,9 @@ pre, code { font-size: .813em; }
 
 ul.menu li a, ul.menu li a:visited { color: #000; }
 
-ul.menu li.selected a, ul.menu li a:hover { color: #95ae44; }
+ul.menu li.selected a, ul.menu li a:hover { color: #708333; }
 
-.generalbody ul.menu li a { color: #95ae44; }
+.generalbody ul.menu li a { color: #708333; }
 
 #usermenu{
 	border: 1px solid #aaa;
@@ -371,7 +371,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #95ae44; }
 	color: #fff;
 }
 
-#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #95ae44; }
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #708333; }
 
 #adminmenu ul.menu li.selected { background: #fff; }
 
