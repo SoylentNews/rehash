@@ -375,6 +375,8 @@ ul.menu li.selected a, ul.menu li a:hover { color: #95ae44; }
 
 #adminmenu ul.menu li.selected { background: #fff; }
 
+.story_nd { background: #ffe; }
+
 .menuoldstyle li
 {
         display: inline;
