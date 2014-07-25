@@ -282,6 +282,12 @@ css=../night/htdocs/night.cssraw
 template=../night/templates/html-header;misc;night
 image=../night/htdocs/images/logo_night.png
 
+# icicle theme files go here
+css=../icicle/htdocs/icicle.cssraw
+htdoc=../icicle/htdocs/favicon-icicle.png
+template=../icicle/templates/html-header;misc;icicle
+image=../icicle/htdocs/images/logo_icicle.png
+
 misc=misc/spamarmors
 
 plugin=Admin
