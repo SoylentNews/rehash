@@ -232,7 +232,7 @@ sub convertDollarsToDays {
 
 # When readers cancel a subscription, how much money to refund?
 sub convertDaysToDollars {
-	my($self, $pages) = @_;
+	my($self, $days) = @_;
 	my $constants = getCurrentStatic();
 	return sprintf("%0.02f", $days*$constants->{paypal_amount}/$constants->{paypal_num_days});
 }

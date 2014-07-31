@@ -651,6 +651,8 @@ sub getPoints {
 		moderations => constrain_score($C->{points} + $C->{tweak}) - constrain_score($C->{pointsorig} + $C->{tweak_orig}),
 	};
 	my $points = $hr->{score_start} || 0;
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	# User can setup to give points based on size.
 	my $len = $C->{len} || length($C->{comment});
@@ -731,7 +733,7 @@ sub getPoints {
 	my $subscriber_bonus;
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		my $commentuser = $reader->getUser($C->{uid}, [qw(hide_subscription)]);
-		if (isSubscriber($comment->{uid}) && !$commentuser->{hide_subscription}) {
+		if (isSubscriber($C->{uid}) && !$commentuser->{hide_subscription}) {
 			$subscriber_bonus = 'yes';
 		}
 	}

@@ -226,7 +226,7 @@ sub paypal {
 	my ($error, $note);
 	
 	
-	if ($pp_pdt) {
+	if (ref($pp_pdt) eq "HASH") {
 		my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross});
 		my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
 		
@@ -234,7 +234,7 @@ sub paypal {
 		if ($pp_pdt->{custom}){
 			$puid = $pp_pdt->{custom};
 			$payment_type = 'gift';
-			$from = pp_pdt->{option_selection1};
+			$from = $pp_pdt->{option_selection1};
 		} else {
 			$puid = $pp_pdt->{item_number};
 			$payment_type = 'user';
@@ -243,7 +243,7 @@ sub paypal {
 		my $payment = {
 			days => $days,
 			uid	=> $pp_pdt->{item_number},
-			payment_net   => $payment-net,
+			payment_net   => $payment_net,
 			payment_gross => $pp_pdt->{payment_gross},
 			payment_type  => $payment_type,
 			transaction_id => $pp_pdt->{txn_id},
@@ -256,9 +256,9 @@ sub paypal {
 		
 		my $rows = $subscribe->insertPayment($payment);
 		if ($rows == 1) {
-			my $result = addDaysToSubscriber($payment->{uid},$days);
+			my $result = addDaysToSubscriber($payment->{uid}, $days);
 			if ($result == 1){
-				send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $form->) if $payment->{payment_type} eq "gift";
+				send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
 			} else {
 				$error = "<p class='error'>Subscription not updated for transaction $txid.</p>";
 			}
@@ -269,13 +269,13 @@ sub paypal {
 		}
 		
 	} else {
-		$error = "<p class='error'>PayPal PDT failed for transaction $txid.</p>"
+		$error = "<p class='error'>PayPal PDT failed for transaction $txid.</p>";
 	}
 	
 	if ($error){
-		$note = $error . "<p class='error'>Transaction may still complete in the background. Please contact $constans->{adminmail} if you do not see your transaction complete.</p>";
+		$note = $error . "<p class='error'>Transaction may still complete in the background. Please contact $constants->{adminmail} if you do not see your transaction complete.</p>";
 	} else {
-		$note = "<p><b>Transaction $txid completed.  Thank you for supporting $constants->{sitename}.</b></p>"
+		$note = "<p><b>Transaction $txid completed.  Thank you for supporting $constants->{sitename}.</b></p>";
 		
 	}
 
@@ -283,9 +283,10 @@ sub paypal {
 }
 
 
-
 sub grant {
 	my($form, $slashdb, $user, $constants) = @_;
+	my $subscribe = getObject('Slash::Subscribe');
+	
 	my $user_edit;
 	if ($form->{uid} && $user->{is_admin} && $form->{uid} =~ /^\d+$/ && !isAnon($form->{uid})) {
 		$user_edit = $slashdb->getUser($form->{uid});
@@ -296,7 +297,8 @@ sub grant {
 		my $note = "<p class='error'>Insufficient permission -- you aren't an admin</p>";
 		edit(@_, $note);
 	}
-	
+
+	my ($error, $note);
 	my $user_update = { };
 	my($days) = $form->{days} =~ /(\d+)/;
 	
@@ -311,7 +313,7 @@ sub grant {
 
 	my $rows = $subscribe->insertPayment($payment);
 	if ($rows == 1) {
-		my $result = addDaysToSubscriber($payment->{uid},$days);
+		my $result = addDaysToSubscriber($payment->{uid}, $days);
 		if ($result != 1){
 			$error = "<p class='error'>Subscription not updated.</p>";
 		}
@@ -324,7 +326,7 @@ sub grant {
 	if ($error){
 		$note = $error;
 	} else {
-		$note = "<p><b>Grant Successful</b></p>"
+		$note = "<p><b>Grant Successful</b></p>";
 	}
 
 	edit(@_, $note);
@@ -344,11 +346,11 @@ sub confirm {
 	}, { Return => 1 });
 	
 	slashDisplay("confirm", {
-		prefs_title => $prefs_title,
-		type        => $type,
-		uid         => $uid,
-		sub_user    => $sub_user,
-		from        => $form->{from}
+		prefs_titlebar => $prefs_titlebar,
+		type           => $type,
+		uid            => $uid,
+		sub_user       => $sub_user,
+		from           => $form->{from}
 	});
 }
 
