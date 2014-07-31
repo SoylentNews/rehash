@@ -7,6 +7,9 @@ package Slash::Subscribe;
 use strict;
 use Slash;
 use Slash::Utility;
+use DateTime;
+use DateTime::Format::MySQL;
+
 
 use base 'Slash::Plugin';
 
@@ -40,9 +43,9 @@ sub init {
 # must be made for each page delivered to someone who has paid for 1
 # or more pages:
 #
-#         - Is this page ad-free?         adlessPage()
-#         - Is this page bought?          buyingThisPage()
-#         - Does this page get plums?     plummyPage()
+#		 - Is this page ad-free?		 adlessPage()
+#		 - Is this page bought?		  buyingThisPage()
+#		 - Does this page get plums?	 plummyPage()
 #
 # The decisions are separate.  But they are related, so the logic is
 # all handled here in _subscribeDecisionPage.  Users get to control
@@ -57,22 +60,22 @@ sub init {
 #
 # So:
 #
-# adless = A && (B || C) && D      && !I
-# buying = A &&  B       && D      && !I
-# plummy = A && (B || C)      && E
+# adless = A && (B || C) && D	  && !I
+# buying = A &&  B	   && D	  && !I
+# plummy = A && (B || C)	  && E
 #
 # Where:
 #
 # [A] User is a subscriber, i.e.:
-#         1. subscription plugin is installed and turned on
-#         2. user is logged in
-#         3. user has more paidfor pages than bought pages
+#		 1. subscription plugin is installed and turned on
+#		 2. user is logged in
+#		 3. user has more paidfor pages than bought pages
 # [B] User has stated they want this type of page bought
-#         EXPLICITLY (it's one of the "big three" types and that
-#         checkbox is checked for this user)
+#		 EXPLICITLY (it's one of the "big three" types and that
+#		 checkbox is checked for this user)
 # [C] User wants this type of page bought IMPLICITLY (it's
-#         not one of the "big three" but the user has at least
-#         one of those checkboxes checked)
+#		 not one of the "big three" but the user has at least
+#		 one of those checkboxes checked)
 # [D] User has pages remaining for today before hitting the max
 # [E] User's max pages per day to buy is set >= the default (10)
 # [I] This hit is an image, not an actual page.
@@ -219,22 +222,52 @@ sub plummyPage {
 # change the logic here.
 # Also, if someone hacks the HTML to purchase a fraction of a 
 # subscription, they get nothing.
-sub convertDollarsToPages {
+sub convertDollarsToDays {
 	my($self, $amount) = @_;
 	my $constants = getCurrentStatic();
 	my $paypal_amt = $constants->{paypal_amount};
 	$amount = 0 if !$paypal_amt || ($amount / $paypal_amt) != int($amount / $paypal_amt);
-	return sprintf("%0.0f", $amount*$constants->{paypal_num_pages}/
-		$constants->{paypal_amount});
+	return int($amount*$constants->{paypal_num_days}/$constants->{paypal_amount});
 }
 
 # When readers cancel a subscription, how much money to refund?
-sub convertPagesToDollars {
+sub convertDaysToDollars {
 	my($self, $pages) = @_;
 	my $constants = getCurrentStatic();
-	return sprintf("%0.02f", $pages*$constants->{paypal_amount}/
-		$constants->{paypal_num_pages});
+	return sprintf("%0.02f", $days*$constants->{paypal_amount}/$constants->{paypal_num_days});
 }
+
+
+sub convertToText{
+	my($self, $hashref) = @_;
+	use Data::Dumper;
+	my $dumped = Dumper($hashref);
+	$dumped =~ s/^\s+//mg; $dumped =~ s/^.VAR1 = {\n//g; $dumped =~ s/};\n//g;
+	return $dumped;
+}
+
+
+sub addDaysToSubscriber {
+	my($self, $uid, $days) = @_;
+	return 0 unless $uid;
+	return 0 unless $days;
+	my $slashdb = getCurrentDB();
+	my $user = $slashdb->getUser($uid, [qw(subscriber_until)]);
+	
+	$days =~ /(\d+)/;
+	if ($days) {
+		my $dt_today   = DateTime->today;
+		my $dt_sub = DateTime::Format::MySQL->parse_date($user->{subscriber_until});
+		if ($dt_sub < $dt_today){$dt_sub = $dt_today};
+		$dt_sub->add( days => $days );
+		my $subscriber_until =	DateTime::Format::MySQL->format_date($dt_sub);
+		return $slashdb->setUser($uid, {subscriber_until => $subscriber_until});
+	}
+
+	return 0	
+	
+}
+
 
 ########################################################
 # Keys expected in the $payment hashref are:
@@ -242,14 +275,14 @@ sub convertPagesToDollars {
 #	email		user email address, or blank
 #	payment_gross	total payment before fees
 #	payment_net	payment received by site after fees
-#	pages		number of pages user will receive
+#	days		number of days user will receive
 #	transaction_id	(optional) any ID you'd use to identify this payment
 #	method		(optional) string representing payment method
 #	data		(optional) any additional data
 #	memo		(optional) subscriber's memo
-#	payment_type    (optional) defaults to "user" 
-#                                  other options are "gift"  or "grant"
-#       puid		(optional) purchaser uid for gifts or grants this
+#	payment_type	(optional) defaults to "user" 
+#					other options are "gift"  or "grant"
+#	puid		(optional) purchaser uid for gifts or grants this
 #				   will be different than the uid.  If
 #				   none is provided it defaults to uid
 
@@ -273,13 +306,8 @@ sub insertPayment {
 	my $num_retries = 10;
 
 	while (1) {
-		if ($create_trans) {    
-			$payment->{transaction_id} = substr(
-				Digest::MD5::md5_hex(join(":",
-					$payment->{uid}, $payment->{data},
-					time, $$, rand(2**30)
-				)), 0, $t_id_len
-			);
+		if ($create_trans) {	
+			$payment->{transaction_id} = substr( Digest::MD5::md5_hex(join(":", $payment->{uid}, $payment->{data}, time, $$, rand(2**30))), 0, $t_id_len);
 		}
 		$success = $slashdb->sqlInsert("subscribe_payments", $payment);
 		last if $success || !$create_trans || --$num_retries <= 0;
@@ -287,27 +315,61 @@ sub insertPayment {
 
 	return $success;
 }
-
-sub grantPagesToUID {
-	my ($self, $pages, $uid) = @_;
+	
+	
+sub ppDoPDT {
+	my($self, $txid) = @_;
+	use LWP::UserAgent;
+	use Encode qw(decode_utf8);
+	my $constants = getCurrentStatic();
+	my $token = $constants->{paypal_token};
 	my $user = getCurrentUser();
-	my $slashdb = getCurrentDB();
-	my $grant = {
-		pages	      => $pages,
-		uid	      => $uid,
-		payment_net   => 0,
-		payment_gross => 0,
-		payment_type  => "grant",
-		puid	      => $user->{uid}		
-
-	};
-	my $rows = $self->insertPayment($grant);
-	if ($rows == 1) {
-		$slashdb->setUser($uid, {
-			"-hits_paidfor" => "hits_paidfor + $pages"
-		});
+	 
+	##########
+	# This is debug. It means we got something at the callback but were unable to read the txid for some reason.
+	# It probably means we wrote getTxId wrong.
+	unless($txid){
+		print STDERR "Transaction id: $txid not found\n";
+		return 0;
 	}
-	return $rows;
+	 
+	my $ua = new LWP::UserAgent;
+	my $req = new HTTP::Request('POST', 'https://www.paypal.com/cgi-bin/webscr');
+	$req->content_type("application/x-www-form-urlencoded");
+	$req->header(Host => 'www.paypal.com');
+	$req->content(
+		'&cmd=_notify-synch'.
+		"&tx=$txid".
+		"&at=$token"
+	);
+
+	my $result = $ua->request($req);
+
+	##########
+	# This is debug. It triggers if we get a 404 or some such from paypal.
+	if($result->is_error){
+		print STDERR $result->error_as_HTML."\n";
+		return -1;
+	}
+
+	my $res_encoded = $result->content;
+	$res_encoded =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+	$res_encoded =~ s/\+/ /g;
+	my @content = split("\n", $res_encoded);
+	my $status = shift(@content);
+
+ my %transaction;
+
+	if($status eq 'SUCCESS'){
+		foreach (@content){
+			my ($key, $value) = split("=", $_);	    
+			$transaction{$key} = decode_utf8($value);
+		}
+		return \%transaction;
+	}
+	else{
+		return -2;
+	}
 }
 
 sub getSubscriptionsForUser {
@@ -315,7 +377,7 @@ sub getSubscriptionsForUser {
 	my $slashdb = getCurrentDB();
 	my $uid_q = $slashdb->sqlQuote($uid);
 	my $sp = $slashdb->sqlSelectAll(
-		"ts, email, payment_gross, pages, method, transaction_id, puid, payment_type",
+		"ts, email, payment_gross, days, method, transaction_id, puid, payment_type",
 		"subscribe_payments",
 		"uid = $uid_q",
 		"ORDER BY spid",
@@ -340,7 +402,7 @@ sub getSubscriptionsPurchasedByUser {
 	}
 	my $puid_q = $slashdb->sqlQuote($puid);
 	my $sp = $slashdb->sqlSelectAll(
-		"ts, email, payment_gross, pages, method, transaction_id, uid, payment_type",
+		"ts, email, payment_gross, days, method, transaction_id, uid, payment_type",
 		"subscribe_payments",
 		"puid = $puid_q $restrict",
 		"ORDER BY spid",
