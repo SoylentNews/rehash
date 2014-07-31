@@ -2,6 +2,7 @@
 name=Subscribe
 description="Subscription system"
 htdoc=subscribe.pl
+image=images/star.png
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema
 task=subscribemail.pl
