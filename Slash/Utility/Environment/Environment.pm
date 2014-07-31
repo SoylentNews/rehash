@@ -1173,11 +1173,18 @@ sub isSubscriber {
 	if ($constants->{subscribe}) {
 		if (! ref $suser) {
 			my $slashdb = getCurrentDB();
-			$suser = $slashdb->getUser($suser, [qw(hits_paidfor hits_bought)]);
+			$suser = $slashdb->getUser($suser, [qw(subscriber_until)]);
 		}
-
-		$subscriber = 1 if $suser->{hits_paidfor} &&
-			$suser->{hits_bought} < $suser->{hits_paidfor};
+		
+		use DateTime;
+		use DateTime::Format::MySQL;
+		my $dt_today   = DateTime->today;
+		my $dt_sub = DateTime::Format::MySQL->parse_date($suser->{subscriber_until});
+		
+		if ( $dt_sub >= $dt_today ){
+			$subscriber = 1;
+		}
+		
 	} else {
 		$subscriber = 1;  # everyone is a subscriber if subscriptions are turned off
 	}
