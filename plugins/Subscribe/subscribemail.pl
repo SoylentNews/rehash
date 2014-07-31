@@ -252,7 +252,7 @@ $task{$me}{code} = sub {
 
 			_do_last30($stats, $statsSave, \@stats, "subscribe_hits_bought");
 			_do_last30($stats, $statsSave, \@stats, "subscribe_dollars_bought",
-				$subscribe->convertPagesToDollars($stats[-1]) );
+				$subscribe->convertDaysToDollars($stats[-1]) );
 			_do_last30($stats, $statsSave, \@stats, "subscribe_runout");
 
 			$monthly_stats = sprintf(<<EOT, @stats);
