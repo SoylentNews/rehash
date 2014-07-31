@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 gift_msg
-__seclev__
-10000
 __template__
 [% receiving_user.nickname %],
 
@@ -19,6 +17,11 @@ This message is to inform you of a gift subscription to [% constants.sitename %]
 The subscription was purchased on your behalf by [% IF from %][% from %][% ELSE %][% purchasing_user.nickname %] ([% purchasing_user.uid %])[% END %].
 
 Subscription Details:
-- [% pages %] Page Gift Subscription to [% constants.sitename %]
+- [% days %] Day Gift Subscription to [% constants.sitename %]
 
 You can configure your subscription preferences by going to [% gSkin.absolutedir %]/subscribe.pl
+
+__seclev__
+10000
+__version__
+$Id$

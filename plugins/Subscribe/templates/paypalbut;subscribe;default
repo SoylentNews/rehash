@@ -27,19 +27,20 @@ en_US
 __name__
 paypalbut
 __template__
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
 <p>
 <input type="hidden" name="cmd" value="_xclick">
 <input type="hidden" name="business" value="[% constants.paypal_business %]">
 <input type="hidden" name="undefined_quantity" value="1">
+<input type="hidden" name="charset" value="[% constants.rdfencoding %]">
 [% IF gift %]
-<input type="hidden" name="item_name" value="[% constants.paypal_num_pages %]-Page Gift Subscription to [% constants.sitename %] for UID [% gift.uid %]">
+<input type="hidden" name="item_name" value="[% constants.paypal_num_days %]-Day Gift Subscription to [% constants.sitename %] for UID [% gift.uid %]">
 <input type="hidden" name="item_number" value="[% gift.uid %]">
 <input type="hidden" name="custom" value="[% gift.puid %]">
 <input type="hidden" name="on0" value="From">
 <input type="hidden" name="os0" value="[% from | strip_attribute %]">
 [% ELSE %]
-<input type="hidden" name="item_name" value="[% constants.paypal_num_pages %]-Page Subscription to [% constants.sitename %]">
+<input type="hidden" name="item_name" value="[% constants.paypal_num_days %]-Page Subscription to [% constants.sitename %]">
 <input type="hidden" name="item_number" value="[% user.uid %]">
 [% END %]
 <input type="hidden" name="amount" value="[% constants.paypal_amount %]">

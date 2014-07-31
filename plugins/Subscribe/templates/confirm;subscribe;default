@@ -17,38 +17,54 @@ __lang__
 en_US
 __name__
 confirm
+__template__
+<div id="slashboxes">
+	[% PROCESS userboxes %]
+</div>
+<div id="users-blocks">
+	[% prefs_titlebar %]
+	<div class="generalbody">
+	
+		[% IF type == "user" || type == "gift" %]
+			[% IF type == "user" %]
+			<p>You've decided to purchase:</p>
+			<ul>
+				<li>A [% constants.sitename %] subscription for [% user.nickname | strip_literal %] ([% user.uid %])
+			</ul>
+			<p>If this is correct select your payment type below:</p>
+				<center>
+					<table border=0 cellpadding=3>
+						<tr>
+							<td>[% PROCESS paypalbut %]</td>
+						</tr>
+					</table>
+				</center>
+			[% ELSIF type == "gift" %]
+				[% IF sub_user %]
+					<p>You've decided to purchase:</p>
+					<ul>
+						<li>A [% constants.sitename %] gift subscription for [% sub_user.nickname | strip_literal %] ([% sub_user.uid %])
+					</ul>
+					<p>If this is correct select your payment type below:</p>
+					[% gift.uid = uid; gift.puid = user.uid %]
+					<center>
+						<table border=0 cellpadding=3>
+							<tr>
+								<td>[% PROCESS paypalbut gift = gift from = from %]</td>
+							</tr>
+						</table>
+					</center>
+				[% ELSE %]
+					<p class='error'>No user was found for the UID ([% uid %]) you specified.  Please <a href="[% gSkin.rootdir %]/subscribe.pl">go back</a> and correct this to continue.</p>
+				[% END %]
+			[% END %]
+		[% ELSE %]
+			<p class='error'>Recognized subscription type not selected.</p>
+		[% END %]
+	</div>
+</div>
+
 __seclev__
 10000
-__template__
-[% IF type == "user" || type == "gift" %]
-	[% IF type == "user" %]
-	<p>You've decided to purchase:
-	<ul>
-	<li>A [% constants.sitename %] subscription for [% user.nickname | strip_literal %] ([% user.uid %])
-	</ul>
-	If this is correct select your payment type below:
-		<center><table border=0 cellpadding=3><tr>
-		<td>[% PROCESS paypalbut %]</td>
-		<td>[% PROCESS ccbut %]</td>
-		</tr></table></center>
-	[% ELSIF type == "gift" %]
-		[% IF sub_user %]
-			<p>You've decided to purchase:
-			<ul>
-				<li>A [% constants.sitename %] gift subscription for [% sub_user.nickname | strip_literal %] ([% sub_user.uid %])
-			</ul>
-			<p>
-			If this is correct select your payment type below:
-			[% gift.uid = uid; gift.puid = user.uid %]
-			<center><table border=0 cellpadding=3><tr>
-			<td>[% PROCESS paypalbut gift = gift from = from %]</td>
-			<td>[% PROCESS ccbut gift = gift from = from %]</td>
-			</tr></table></center>
-		[% ELSE %]
-			<p>No user was found for the UID ([% uid %]) you specified.  Please <a href="[% gSkin.rootdir %]/subscribe.pl">go back</a> and correct this to continue.
-		
-		[% END %]
-	[% END %]
-[% ELSE %]
-Recognized subscription type not selected
-[% END %]
+__version__
+$Id$
