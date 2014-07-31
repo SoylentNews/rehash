@@ -51,7 +51,7 @@ __template__
 		UNLESS messages.checkMessageUser(code, userm);
 			NEXT;
 		END
-	%]
+%]
 		<label>
 		[% type %] <select name="deliverymodes_[% code %]">
 		[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
