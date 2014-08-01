@@ -6688,6 +6688,9 @@ sub getCommentReadLog {
 	my($mcd, $mcdkey);
 	if (!$no_mcd) {
 		$mcd = $self->getMCD;
+		##########
+		# TMB Throws errors all the damned time if memcached isn't being used.
+		$self->{_mcd_keyprefix} ||= '';
 		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
 	}
 

@@ -685,6 +685,11 @@ Returns no value.
 
 sub setCurrentSkin {
 	my($id) = @_;
+	##########
+	# TMB How about we go ahead and return 0 if no $id was passed in.
+	# That way we have a tracable error.
+	return 0 unless $id;
+
 	my $slashdb = getCurrentDB();
 
 	my $current_skin;

@@ -163,7 +163,9 @@ my $start_time = Time::HiRes::time;
 		require Data::Dumper; $Data::Dumper::Sortkeys = 1;
 		my @nd_ids = map { $_->{stoid} } grep { $_->{neverdisplay} } @$stories;
 		my $gse_str = Data::Dumper::Dumper($gse_hr); $gse_str =~ s/\s+/ /g;
-		print STDERR scalar(gmtime) . " index.pl ND story '@nd_ids' returned by gSE called with params: '$gse_str'\n";
+		##########
+		# TMB We don't need this in the logs constantly.
+		#print STDERR scalar(gmtime) . " index.pl ND story '@nd_ids' returned by gSE called with params: '$gse_str'\n";
 		$stories = [ grep { !$_->{neverdisplay} } @$stories ];
 	}
 
