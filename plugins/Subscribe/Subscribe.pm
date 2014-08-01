@@ -230,6 +230,7 @@ sub convertDollarsToDays {
 	return int($amount*$constants->{paypal_num_days}/$constants->{paypal_amount});
 }
 
+
 # When readers cancel a subscription, how much money to refund?
 sub convertDaysToDollars {
 	my($self, $days) = @_;
@@ -252,15 +253,15 @@ sub addDaysToSubscriber {
 	return 0 unless $uid;
 	return 0 unless $days;
 	my $slashdb = getCurrentDB();
-	my $user = $slashdb->getUser($uid, [qw(subscriber_until)]);
+	my $subscriber_until = $slashdb->getUser($uid, 'subscriber_until');
 	
 	$days =~ /(\d+)/;
 	if ($days) {
-		my $dt_today   = DateTime->today;
-		my $dt_sub = DateTime::Format::MySQL->parse_date($user->{subscriber_until});
+		my $dt_today = DateTime->today;
+		my $dt_sub = DateTime::Format::MySQL->parse_date($subscriber_until);
 		if ($dt_sub < $dt_today){$dt_sub = $dt_today};
 		$dt_sub->add( days => $days );
-		my $subscriber_until =	DateTime::Format::MySQL->format_date($dt_sub);
+		$subscriber_until =	DateTime::Format::MySQL->format_date($dt_sub);
 		return $slashdb->setUser($uid, {subscriber_until => $subscriber_until});
 	}
 
@@ -334,9 +335,9 @@ sub ppDoPDT {
 	}
 	 
 	my $ua = new LWP::UserAgent;
-	my $req = new HTTP::Request('POST', 'https://www.paypal.com/cgi-bin/webscr');
+	my $req = new HTTP::Request('POST', "https://$constants->{paypal_host}/cgi-bin/webscr");
 	$req->content_type("application/x-www-form-urlencoded");
-	$req->header(Host => 'www.paypal.com');
+	$req->header(Host => "$constants->{paypal_host}");
 	$req->content(
 		'&cmd=_notify-synch'.
 		"&tx=$txid".
@@ -358,13 +359,15 @@ sub ppDoPDT {
 	my @content = split("\n", $res_encoded);
 	my $status = shift(@content);
 
- my %transaction;
+	 my %transaction;
 
 	if($status eq 'SUCCESS'){
 		foreach (@content){
 			my ($key, $value) = split("=", $_);	    
 			$transaction{$key} = decode_utf8($value);
 		}
+		
+		$self->ppAddLog(\%transaction);
 		return \%transaction;
 	}
 	else{
@@ -388,7 +391,7 @@ sub getSubscriptionsForUser {
 }
 
 sub getSubscriptionsPurchasedByUser {
-	my($self, $puid,$options) = @_;
+	my($self, $puid, $options) = @_;
 	my $slashdb = getCurrentDB();
 	my $restrict;
 	if ($options->{only_types}) {
@@ -413,6 +416,103 @@ sub getSubscriptionsPurchasedByUser {
 }
 
 
+sub paymentExists {
+	my ($self, $txn_id) = @_;
+	my $slashdb = getCurrentDB();
+	my $txn_q = $slashdb->sqlQuote($txn_id);
+	my $txn_count = $slashdb->sqlSelect(
+		'COUNT(transaction_id)',
+		'subscribe_payments',
+		"transaction_id = $txn_q"
+	);
+	return $txn_count;
+}
+
+sub getDaysByTxn {
+	my ($self, $txn_id) = @_;
+	my $slashdb = getCurrentDB();
+	my $txn_q = $slashdb->sqlQuote($txn_id);
+	my $days = $slashdb->sqlSelect(
+		'days',
+		'subscribe_payments',
+		"transaction_id = $txn_q"
+	);
+	return $days;
+}
+
+sub removeDaysFromSubscriber {
+	my ($self, $uid, $days) = @_;
+	return 0 unless $uid && $days;
+  my $slashdb = getCurrentDB();
+  my $subscriber_until = $slashdb->getUser($uid, 'subscriber_until');
+
+  $days =~ /(\d+)/;
+  if ($days) {
+		my $dt_sub = DateTime::Format::MySQL->parse_date($subscriber_until);
+		$dt_sub->subtract( days => $days );
+    $subscriber_until = DateTime::Format::MySQL->format_date($dt_sub);
+		return $slashdb->setUser($uid, {subscriber_until => $subscriber_until});
+	}
+	return 0;
+}
+
+# Simply sets the subscriber_until date to yesterday given $uid
+sub removeSubscription {
+	my ($self, $uid) = @_;
+	return 0 unless $uid;
+	my $slashdb = getCurrentDB();
+	$dt_today = DateTime->today;
+	$dt_today->subtract( days => 1 );
+  my $subscriber_until = DateTime::Format::MySQL->format_date($dt_today);
+	return $slashdb->setUser($uid, {subscriber_until => $subscriber_until});
+}
+
+sub removePayment {
+	my ($self, $txn_id) = @_;
+	my $slashdb = getCurrentDB();
+	my $rows = $slashdb->sqlDelete(
+		"subscribe_payments",
+		"transaction_id = '$txn_id'"
+	);
+	return $rows;
+}
+
+sub txnToUID {
+	my ($self, $txn_id) = @_;
+	my $slashdb = getCurrentDB();
+	my $txn_q = $slashdb->sqlQuote($txn_id);
+	my $uid = $slashdb->sqlSelect(
+		'uid',
+		'subscribe_payments',
+		"transaction_id = $txn_q"
+	);
+	return $uid;
+}
+
+sub ppAddLog {
+	my ($self, $logthis) = @_;
+	my $slashdb = getCurrentDb();
+	my $data = {
+		transaction_id		=> $logthis->{txn_id},
+		transaction_type	=> $logthis->{txn_type},
+		raw_transaction		=> $self->convertToText($logthis),
+	};
+
+	$data->{email} = $logthis->{payer_email} if $logthis->{payer_email};
+	if($logthis->{first_name} && $logthis->{last_name}){$data->{name} = $logthis->{first_name}." ".$logthis->{last_name};}
+	$data->{payment_gross} = $logthis->{payment_gross} if $logthis->{payment_gross};
+	$data->{payment_status} = $logthis->{payment_status} if $logthis->{payment_status};
+	$data->{parent_transaction_id} = $logthis->{parent_txn_id} if $logthis->{parent_txn_id};
+
+	my $txn_id = defined $logthis->{parent_txn_id} ? $logthis->{parent_txn_id} : $logthis->{txn_id};
+	my $uid = txnToUID($txn_id);
+	$data->{uid} = $uid if $uid;
+	
+	$success = $slashdb->sqlInsert('paypal_log', $data);
+	$slashdb->sqlErrorLog unless $success;
+}
+
+
 1;
 
 __END__
@@ -421,7 +521,7 @@ __END__
 
 =head1 NAME
 
-Slash::Subscribe - Let users buy adless pages
+Slash::Subscribe - Let users support the site by purchasing an intangible
 
 =head1 SYNOPSIS
 
@@ -429,14 +529,9 @@ Slash::Subscribe - Let users buy adless pages
 
 =head1 DESCRIPTION
 
-This plugin lets users purchase adless pages at /subscribe.pl, with
+This plugin lets users purchase subscription at /subscribe.pl, with
 built-in (but optional) support for using Paypal.
 
-Understanding its code will be easier after recognizing that one of its
-design goals was to distinguish the act of "paying for" adless pages,
-in which money (probably) trades hands, from the act of "buying," in
-which adless pages are actually viewed.  After "paying for" a page, you
-can still get your money back, but after you "bought" it, no refund.
 
 =head1 AUTHOR
 
