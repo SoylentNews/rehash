@@ -297,3 +297,38 @@ UPDATE vars SET description = 'Allow RSS feeds to be served from index.pl (1 = a
 # Topic Icons Update
 UPDATE topics SET image="topicslash.png" WHERE tid=4;
 UPDATE topics SET width=104 WHERE tid=8;
+
+#Subscriptions Updates
+INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_low_val','14','Number of days before subscripion ends to start sending low subscription message');
+INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','Comment point bonus for subscribers (1 = on | 0 = off)');
+INSERT INTO vars (name, value, description) VALUES ('paypal_host','www.sandbox.paypal.com','Host part of url for PayPal. Change this to to use PayPal sandbox. ');
+INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
+
+
+ALTER TABLE subscribe_payments CHANGE  pages pages mediumint(8) UNSIGNED NULL;
+ALTER TABLE subscribe_payments CHANGE  memo memo varchar(255) NULL;
+ALTER TABLE subscribe_payments CHANGE  email email varchar(255) NULL;
+ALTER TABLE subscribe_payments ADD COLUMN `raw_transaction` text NULL;
+ALTER TABLE subscribe_payments ADD COLUMN days mediumint(8) UNSIGNED NULL;
+
+ALTER TABLE users_info ADD COLUMN subscriber_until date DEFAULT '1970-01-01' NOT NULL;
+ALTER TABLE users_info ADD COLUMN hide_subscription tinyint(3) UNSIGNED DEFAULT 0 NOT NULL;
+
+
+DROP TABLE IF EXISTS `paypal_log`;
+CREATE TABLE `paypal_log` (
+`logid` bigint unsigned NOT NULL AUTO_INCREMENT,
+`ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+`uid` mediumint(8) unsigned NULL DEFAULT NULL,
+`transaction_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+`parent_transaction_id` varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+`transaction_type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+`email` varchar(450) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+`name` varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+`payment_gross` varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+`payment_status` varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+`raw_transaction` text COLLATE utf8_unicode_ci NOT NULL,
+PRIMARY KEY (`logid`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
