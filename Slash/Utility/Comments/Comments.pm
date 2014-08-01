@@ -731,9 +731,9 @@ sub getPoints {
 	
 	
 	my $subscriber_bonus;
-	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
-		my $commentuser = $reader->getUser($C->{uid}, [qw(hide_subscription)]);
-		if (isSubscriber($C->{uid}) && !$commentuser->{hide_subscription}) {
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && $constants->{subscriber_bonus}) {
+		my $hide_subscription = $reader->getUser($C->{uid}, 'hide_subscription');
+		if (isSubscriber($C->{uid}) && !$hide_subscription) {
 			$subscriber_bonus = 'yes';
 		}
 	}
@@ -1599,8 +1599,7 @@ sub saveComment {
 
 	$comm->{nobonus}  = $user->{nobonus}	unless $comm->{nobonus_present};
 	$comm->{postanon} = $user->{postanon}	unless $comm->{postanon_present};
-	$comm->{nosubscriberbonus} = $user->{nosubscriberbonus}
-	unless $comm->{nosubscriberbonus_present};
+
 
 #print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
 
@@ -1890,8 +1889,8 @@ sub dispComment {
 	
 	my $subscriber_bonus;
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
-		my $commentuser = $reader->getUser($comment->{uid}, [qw(hide_subscription)]);
-		if (isSubscriber($comment->{uid}) && !$commentuser->{hide_subscription}) {
+		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
+		if (isSubscriber($comment->{uid}) && !$hide_subscription) {
 			$subscriber_bonus = 'yes';
 		}
 	}
@@ -2045,7 +2044,7 @@ sub _hard_dispComment {
 		my $nick_literal = strip_literal($comment->{nickname});
 		my $nick_param   = strip_paramattr($comment->{nickname});
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
-		my $commentuser = $reader->getUser($comment->{uid}, [qw(hide_subscription)]);
+		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
 
 		my $homepage = $comment->{homepage} || '';
 		$homepage = '' if length($homepage) <= 8;
@@ -2076,7 +2075,7 @@ sub _hard_dispComment {
 		
 
 		$user_nick_to_display = qq{<a href="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</a>};
-		if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && isSubscriber($comment->{uid}) && !$commentuser->{hide_subscription}) {
+		if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && isSubscriber($comment->{uid}) && !$hide_subscription) {
 			if ($constants->{plugin}{FAQSlashdot}) {
 				$user_nick_to_display .= qq{ <a href="/faq/com-mod.shtml#cm2600">*</a>};
 			} else {
