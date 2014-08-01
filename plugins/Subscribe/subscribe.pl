@@ -33,16 +33,8 @@ sub main {
 			function	=> \&save,
 			seclev		=> 1,
 		},
-		paypal		=> {	# deprecated, left in for historical reasons
+		paypal		=> {
 			function	=> \&paypal,
-			seclev		=> 1,
-		},
-		makepayment	=> {
-			function	=> \&makepayment,
-			seclev		=> 1,
-		},
-		pause		=> {
-			function	=> \&pause,
 			seclev		=> 1,
 		},
 		grant		=> {
@@ -58,7 +50,7 @@ sub main {
 	$op = 'pause' if $form->{merchant_return_link};
 	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
-	if (($user->{is_anon} && $op !~ /^(paypal|makepayment|pause)$/) ||
+	if (($user->{is_anon} && $op !~ /^(paypal)$/) ||
 	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
@@ -84,7 +76,7 @@ sub edit {
 	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
 	my ($id, $user_edit, $fieldkey);
 	if ($admin_flag && $form->{userfield}) {
-		$id ||= $form->{userfield};
+		$id = $form->{userfield};
 		if ($form->{userfield} =~ /^\d+$/) {
 			$user_edit = $slashdb->getUser($id);
 			$fieldkey = 'uid';
@@ -248,22 +240,23 @@ sub paypal {
 			payment_type  => $payment_type,
 			transaction_id => $pp_pdt->{txn_id},
 			method => 'paypal',
-			from => $from,
+			email => $from,
 			raw_transaction  => $subscribe->convertToText($pp_pdt),
 			puid => $puid
 		};
 		
 		
-		my $rows = $subscribe->insertPayment($payment);
-		if ($rows == 1) {
-			my $result = addDaysToSubscriber($payment->{uid}, $days);
-			if ($result == 1){
+		my ($rows, $result);
+		$rows = $subscribe->insertPayment($payment);
+		if ($rows && $rows == 1) {
+			$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+			if ($result && $result == 1){
 				send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
 			} else {
 				$error = "<p class='error'>Subscription not updated for transaction $txid.</p>";
 			}
 		} else {
-			my $warning = "DEBUG: Payment accepted but record not added to database! rows='$rows'\n" . Dumper($payment);
+			my $warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
 			print STDERR $warning;
 			$error = "<p class='error'>Payment transaction $txid already recorded or other error.</p>";
 		}
@@ -313,7 +306,7 @@ sub grant {
 
 	my $rows = $subscribe->insertPayment($payment);
 	if ($rows == 1) {
-		my $result = addDaysToSubscriber($payment->{uid}, $days);
+		my $result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
 		if ($result != 1){
 			$error = "<p class='error'>Subscription not updated.</p>";
 		}
@@ -377,4 +370,3 @@ sub send_gift_msg {
 createEnvironment();
 main();
 1;
-
