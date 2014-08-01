@@ -623,12 +623,14 @@ sub getError {
 	# this is a cheap hack to NOT print titlebar in getError if we
 	# are calling from ajax.pl ... easier than reorganizing the code
 	# for now -- pudge 2008/03/04
-	for (0..9) {
-		if ((caller($_))[1] =~ /\bajax\.pl$/) {
-			$hashref->{no_titlebar} = 1;
-			last;
-		}
-	}
+	# turn off for now
+	# not using ajax -- paulej72 2014/07/31
+	# for (0..9) {
+	#	 if ((caller($_))[1] =~ /\bajax\.pl$/) {
+	#	 	$hashref->{no_titlebar} = 1;
+	#	 	last;
+	#	 }
+	# }
 
 	return slashDisplay('errors', $hashref,
 		{ Return => 1, Nocomm => $nocomm, Page => 'comments' });

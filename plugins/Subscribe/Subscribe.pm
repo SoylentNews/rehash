@@ -491,11 +491,11 @@ sub txnToUID {
 
 sub ppAddLog {
 	my ($self, $logthis) = @_;
-	my $slashdb = getCurrentDb();
+	my $slashdb = getCurrentDB();
 	my $data = {
 		transaction_id		=> $logthis->{txn_id},
 		transaction_type	=> $logthis->{txn_type},
-		raw_transaction		=> $self->convertToText($logthis),
+		raw_transaction		=> $self->convertToText($logthis)
 	};
 
 	$data->{email} = $logthis->{payer_email} if $logthis->{payer_email};
