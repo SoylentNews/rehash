@@ -351,12 +351,10 @@ EOT
 			my $users = $messages->checkMessageCodes(
 				MSG_CODE_SUBSCRIPTION_LOW, [$uid]	
 			);
-			my $low_val = int (( getCurrentStatic('paypal_num_pages') || 1000) / 20);
 			if (@$users) {
 				my $data = {
 					template_name 	=> 'sub_low_msg',
 					subject 	=> 'Subscription Running Low',
-					sub_low_value 	=> $low_val
 				};
 				$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_LOW, $data, 0, '', 'now');
 			}
