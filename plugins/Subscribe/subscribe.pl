@@ -74,19 +74,16 @@ sub edit {
 	
 	
 	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
-	my ($user_edit, $fieldkey);
-	if ($admin_flag && $form->{userfield}) 
+	my $user_edit;
+	if ($admin_flag && $form->{userfield}) {
 		my $id = $form->{userfield};
-		if ($form->{userfield} =~ /^\d+$/) {
+		if ($id =~ /^\d+$/) {
 			$user_edit = $slashdb->getUser($id);
-			$fieldkey = 'uid';
 		} else {
 			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
-			$fieldkey = 'nickname';
 		}
 	} else {
 		$user_edit = $user;
-		$fieldkey = 'uid';
 	}
 	
 	my $admin_block = 	slashDisplay('getUserAdmin', {
