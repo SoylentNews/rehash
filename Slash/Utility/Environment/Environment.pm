@@ -1652,12 +1652,12 @@ sub prepareUser {
 
 	if ($r) {
 		my %params = $r->args;
-		if ($params{ss} == 1) {
+		if ((exists $params{ss}) && $params{ss} == 1) {
 			$user->{state}{explicit_smalldevice} = 1;
 			$user->{state}{smalldevice} = 1;
 		}
 
-		if ($params{sd} == 1) {
+		if ((exists $params{sd}) && $params{sd} == 1) {
 			$user->{state}{simpledesign} = 1;
 		}
 
