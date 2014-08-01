@@ -461,7 +461,7 @@ sub removeSubscription {
 	my ($self, $uid) = @_;
 	return 0 unless $uid;
 	my $slashdb = getCurrentDB();
-	$dt_today = DateTime->today;
+	my $dt_today = DateTime->today;
 	$dt_today->subtract( days => 1 );
   my $subscriber_until = DateTime::Format::MySQL->format_date($dt_today);
 	return $slashdb->setUser($uid, {subscriber_until => $subscriber_until});
@@ -508,7 +508,7 @@ sub ppAddLog {
 	my $uid = txnToUID($txn_id);
 	$data->{uid} = $uid if $uid;
 	
-	$success = $slashdb->sqlInsert('paypal_log', $data);
+	my $success = $slashdb->sqlInsert('paypal_log', $data);
 	$slashdb->sqlErrorLog unless $success;
 }
 
