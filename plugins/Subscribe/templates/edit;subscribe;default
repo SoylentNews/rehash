@@ -61,23 +61,25 @@ __template__
 			</fieldset>
 		[% END %]
 	
-		<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
-			<fieldset>
-				<legend>Purchase Subscriptions</legend>
-				You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal.<br />
-				<br />
-				Recipients of gift subscriptions will be notified of your purchase through email.<br />
-				<br />
-				<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
-				<input type="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <input type="text" name="uid" size="10"><br />	
-				<br />
-				For gift subscriptions only:<br />
-				Who do you want the recipient to be told the gift is from?<br />
-				<input type="text" name="from" size="15" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
-				<br />
-				<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue">
-			</fieldset>
-		</form>
+		[% IF user.uid == user_edit.uid %]	
+			<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
+				<fieldset>
+					<legend>Purchase Subscriptions</legend>
+					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal.<br />
+					<br />
+					Recipients of gift subscriptions will be notified of your purchase through email.<br />
+					<br />
+					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
+					<input type="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <input type="text" name="uid" size="10"><br />	
+					<br />
+					For gift subscriptions only:<br />
+					Who do you want the recipient to be told the gift is from?<br />
+					<input type="text" name="from" size="15" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
+					<br />
+					<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue">
+				</fieldset>
+			</form>
+		[% END %]
 	
 		[% IF user.is_admin %]
 			<form action="[% env.script_name %]">
