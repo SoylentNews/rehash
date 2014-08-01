@@ -129,7 +129,7 @@ sub countCurrentRenewingGiftSubs {
 
 sub getLowRunningSubs {
 	my ($self) = @_;
-	my $low_val = int ((getCurrentStatic('paypal_num_days') || 365) / 24);
+	my $low_val = getCurrentStatic('subscribe_low_val');
 	my $dt_today = DateTime->today;
 	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
 	my $dt_low = $dt_today->add( days => $low_val );

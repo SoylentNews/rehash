@@ -14,10 +14,10 @@ __seclev__
 10000
 __template__
 [% IF msg.mode == 1 %]
-	<p>This message is to inform you  that you have less than [% sub_low_value %] pages remaining on your [% constants.sitename %] subscription.</p>
+	<p>This message is to inform you  that you have less than [% constants.subscribe_low_val %] days remaining on your [% constants.sitename %] subscription.</p>
 	<p>To renew your subscription <a href="[% gSkin.rootdir %]/subscribe.pl">click here</a>.
 [% ELSE %]
-	This message is to inform you that you have less than [% sub_low_value %] pages remaining on your [% constants.sitename %] subscription.
+	This message is to inform you that you have less than [% constants.subscribe_low_val %] days remaining on your [% constants.sitename %] subscription.
 
 	You can renew your subscription at [% absolutedir %]/subscribe.pl
 [% END %]
