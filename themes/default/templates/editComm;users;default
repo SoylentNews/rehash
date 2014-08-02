@@ -193,7 +193,7 @@ __template__
 		<p><b><a name="karma_bonus">Karma Bonus</a></b> (modifier assigned to posts where the user has good karma)<br>
 		[% karma_bonus %]<br>
 		
-		[% IF constants.plugin.Subscribe && constants.subscribe && constants.subscriber_bonus. %]
+		[% IF constants.plugin.Subscribe && constants.subscribe && constants.subscriber_bonus %]
 			<p><b><a name="subscriber_bonus">Subscriber Bonus</a></b> (modifier assigned to posts where the user was a subscriber)<br>
 			[% subscriber_bonus %]<br>
 		[% END %]		
