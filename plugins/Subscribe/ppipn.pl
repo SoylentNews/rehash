@@ -4,11 +4,11 @@ use strict;
 use Slash;
 use Slash::Utility;
 use Slash::Subscribe;
-use Business::PayPal::IPN;
+use Slash::Subscribe::IPN;
 
 sub main {
 	my $pp_host = getCurrentStatic('paypal_host');
-	$Business::PayPal::IPN::GTW = "https://$pp_host/cgi-bin/webscr";
+	$Slash::Subscribe::IPN::GTW = "https://$pp_host/cgi-bin/webscr";
 	my $subscribe = getObject('Slash::Subscribe');
 
 	
@@ -16,7 +16,7 @@ sub main {
 	# Variables do not need to be accessed through $ipn->vars()
 	# Each possible response variable will have its own method.
 	# i.e. $ipn->payment_type(), $ipn->first_name(), or $ipn->txn_id()
-	my $ipn = new Business::PayPal::IPN() or print STDERR Business::PayPal::IPN->error() and exit;
+	my $ipn = new Slash::Subscribe::IPN() or print STDERR "IPN Error ".Slash::Subscribe::IPN->error() and exit;
 
 	# may as well log it first. there's no situation where we wouldn't want to.
 	# We use the vars method here because ppAddLog wants a hash.
