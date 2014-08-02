@@ -242,17 +242,19 @@ sub paypal {
 		};
 		
 		
-		my ($rows, $result);
+		my ($rows, $result, $warning);
 		$rows = $subscribe->insertPayment($payment);
 		if ($rows && $rows == 1) {
 			$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
 			if ($result && $result == 1){
 				send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
 			} else {
+				$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+				print STDERR $warning;
 				$error = "<p class='error'>Subscription not updated for transaction $txid.</p>";
 			}
 		} else {
-			my $warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
+			$warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
 			print STDERR $warning;
 			$error = "<p class='error'>Payment transaction $txid already recorded or other error.</p>";
 		}
