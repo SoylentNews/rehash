@@ -298,24 +298,41 @@ UPDATE vars SET description = 'Allow RSS feeds to be served from index.pl (1 = a
 UPDATE topics SET image="topicslash.png" WHERE tid=4;
 UPDATE topics SET width=104 WHERE tid=8;
 
-#Subscriptions Updates
+##### ##### Subscriptions Updates ##### #####
+# Update vars
 INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_low_val','14','Number of days before subscripion ends to start sending low subscription message');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('paypal_host','www.sandbox.paypal.com','Host part of url for PayPal. Change this to to use PayPal sandbox. ');
+INSERT INTO vars (name, value, description) VALUES ('paypal_token','qAMNz6WbvIEUhu4PPkQcZ78Vht3qSSVCleW7A4wUPALbbKRBlHif4RFPzqC','PayPal PDT token. ');
 INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
+INSERT INTO vars (name, value, description) VALUES ('comments_sub_speed_limit','0','Seconds delay before repeat posting for subscriber.');
+INSERT INTO vars (name, value, description) VALUES ('submissions_sub_speed_limit','0','Seconds delay before repeat submission for subscriber.');
+INSERT INTO vars (name, value, description) VALUES ('discussions_sub_speed_limit','0','Seconds delay before repeat discussion for subscriber.');
+INSERT INTO vars (name, value, description) VALUES ('journal_sub_speed_limit','0','Seconds delay before repeat journal posting for subscriber.');
 
+UPDATE vars SET value='2' WHERE name='comments_more_seclev';
+UPDATE vars SET value='20.00' WHERE name='paypal_amount';
 
-ALTER TABLE subscribe_payments CHANGE  pages pages mediumint(8) UNSIGNED NULL;
-ALTER TABLE subscribe_payments CHANGE  memo memo varchar(255) NULL;
-ALTER TABLE subscribe_payments CHANGE  email email varchar(255) NULL;
+##### FOR PRODUCTION ONLY #####
+UPDATE vars SET value='paypal@soylentnews.org' WHERE name='paypal_business'
+UPDATE vars SET value='https://soylentnews.org/subscribe.pl' WHERE name='paypal_cancel_return'
+UPDATE vars SET value='https://soylentnews.org/subscribe.pl?op=paypal' WHERE name='paypal_return'
+UPDATE vars SET value='0' WHERE name='subscribe_admin_only'
+##### FOR PRODUCTION ONLY #####
+
+# Alter subsciber_payments for new PayPal format
+ALTER TABLE subscribe_payments CHANGE pages pages mediumint(8) UNSIGNED NULL;
+ALTER TABLE subscribe_payments CHANGE memo memo varchar(255) NULL;
+ALTER TABLE subscribe_payments CHANGE email email varchar(255) NULL;
 ALTER TABLE subscribe_payments ADD COLUMN raw_transaction text NULL;
 ALTER TABLE subscribe_payments ADD COLUMN days mediumint(8) UNSIGNED NULL;
 
+# Alter users_info to add new subscription 
 ALTER TABLE users_info ADD COLUMN subscriber_until date DEFAULT '1970-01-01' NOT NULL;
 ALTER TABLE users_info ADD COLUMN hide_subscription tinyint(3) UNSIGNED DEFAULT 0 NOT NULL;
 
-
+# Setup PayPal Log Table
 DROP TABLE IF EXISTS paypal_log;
 CREATE TABLE paypal_log (
 logid bigint unsigned NOT NULL AUTO_INCREMENT,
