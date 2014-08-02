@@ -335,17 +335,17 @@ ALTER TABLE users_info ADD COLUMN hide_subscription tinyint(3) UNSIGNED DEFAULT 
 # Setup PayPal Log Table
 DROP TABLE IF EXISTS paypal_log;
 CREATE TABLE paypal_log (
-logid bigint unsigned NOT NULL AUTO_INCREMENT,
-ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-uid mediumint(8) unsigned NULL DEFAULT NULL,
-transaction_id varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-parent_transaction_id varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-transaction_type varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-email varchar(450) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-name varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-payment_gross varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-payment_status varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-raw_transaction text COLLATE utf8_unicode_ci NOT NULL,
-PRIMARY KEY (logid)
+	logid bigint unsigned NOT NULL AUTO_INCREMENT,
+	ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	uid mediumint(8) unsigned NULL DEFAULT NULL,
+	transaction_id varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	parent_transaction_id varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	transaction_type varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	email varchar(450) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	name varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	payment_gross varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	payment_status varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	raw_transaction text COLLATE utf8_unicode_ci NOT NULL,
+	PRIMARY KEY (logid)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
