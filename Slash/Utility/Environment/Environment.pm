@@ -2678,6 +2678,7 @@ sub writeLog {
 sub getOpAndDatFromStatusAndURI {
 	my($status, $uri, $dat) = @_;
 	$dat ||= "";
+	my $req_uri = $ENV{REQUEST_URI} || "";
 
 	# XXX check regexSid()
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
@@ -2696,7 +2697,7 @@ sub getOpAndDatFromStatusAndURI {
 		$dat = $uri;
 		$uri = 'not found';
 	} elsif ($uri =~ /^\/palm/) {
-		($dat = $ENV{REQUEST_URI}) =~ s|\.shtml$||;
+		($dat = $req_uri) =~ s|\.shtml$||;
 		$uri = 'palm';
 	} elsif ($uri eq '/') {
 		$uri = 'index';
@@ -2712,7 +2713,7 @@ sub getOpAndDatFromStatusAndURI {
 		$uri = 'image';
 	} elsif ($uri =~ /\.png$/) {
 		$uri = 'image';
-	} elsif ($uri =~ /\.(?:rss|xml|rdf|atom)$/ || $ENV{QUERY_STRING} =~ /\bcontent_type=(?:rss|xml|rdf|atom)\b/) {
+	} elsif ($uri =~ /\.(?:rss|xml|rdf|atom)$/ || $req_uri =~ /\bcontent_type=(?:rss|xml|rdf|atom)\b/) {
 		$dat = $uri;
 		$uri = 'rss';
 	} elsif ($uri =~ /\.pl$/) {
