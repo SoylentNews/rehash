@@ -4200,7 +4200,7 @@ sub checkPostInterval {
 	my $speedlimit_sub_name = "${formname}_sub_speed_limit";
 	my $speedlimit = $counts_as_anon ? $constants->{$speedlimit_anon_name} : 0;
 	$speedlimit ||= $constants->{$speedlimit_name} || 0;
-	if ($user->{is_subscriber} $$ exists $constants->{$speedlimit_sub_name}){
+	if ($user->{is_subscriber} && exists $constants->{$speedlimit_sub_name}){
 		$speedlimit = $constants->{$speedlimit_sub_name};
 	}
 	
