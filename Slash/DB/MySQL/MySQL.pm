@@ -4197,9 +4197,13 @@ sub checkPostInterval {
 
 	my $speedlimit_name = "${formname}_speed_limit";
 	my $speedlimit_anon_name = "${formname}_anon_speed_limit";
+	my $speedlimit_sub_name = "${formname}_sub_speed_limit";
 	my $speedlimit = $counts_as_anon ? $constants->{$speedlimit_anon_name} : 0;
 	$speedlimit ||= $constants->{$speedlimit_name} || 0;
-
+	if ($user->{is_subscriber} $$ exists $constants->{$speedlimit_sub_name}){
+		$speedlimit = $constants->{$speedlimit_sub_name};
+	}
+	
 	# If this user has access modifiers applied, check for possible
 	# different speed limits based on those.  First match, if any,
 	# wins.
