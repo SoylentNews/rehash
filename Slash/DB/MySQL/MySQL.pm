@@ -4056,7 +4056,7 @@ sub validFormkey {
 	return 'invalid' if !$form->{formkey};
 	my $formkey_quoted = $self->sqlQuote($form->{formkey});
 
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $formkey_earliest = time() - $self->sub getFormkeyTimeframe();
 
 	my $where = $self->_whereFormkey();
 	$where = "($where OR subnetid = '$subnetid')"
@@ -4183,6 +4183,28 @@ sub updateFormkey {
 }
 
 ##################################################################
+sub getFormkeyTimeframe {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
+	my $counts_as_anon =
+		   $user->{is_anon}
+		|| $user->{karma} < $constants->{formkey_minloggedinkarma}
+		|| $form->{postanon};
+
+	my $formkey_timeframe = $counts_as_anon ? $constants->{formkey_timeframe_anon} : 0;
+	$formkey_timeframe ||= $constants->{formkey_timeframe} || 0;
+	if ($user->{is_subscriber} && exists $constants->{formkey_timeframe_sub}){
+		$formkey_timeframe = $constants->{formkey_timeframe_sub};
+	}
+	
+	return $formkey_timeframe ? $formkey_timeframe : 0;
+}
+
+##################################################################
 sub checkPostInterval {
 	my($self, $formname) = @_;
 	$formname ||= getCurrentUser('currentPage');
@@ -4234,7 +4256,7 @@ sub checkPostInterval {
 	}
 
 	my $time = $self->getTime({ unix_format => 1 });
-	my $timeframe = $constants->{formkey_timeframe};
+	my $timeframe = $self->sub getFormkeyTimeframe();
 	$timeframe = $speedlimit if $speedlimit > $timeframe;
 	my $formkey_earliest = $time - $timeframe;
 
@@ -4261,7 +4283,7 @@ sub checkMaxReads {
 	my $constants = getCurrentStatic();
 
 	my $maxreads = $constants->{"max_${formname}_viewings"} || 0;
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $formkey_earliest = time() - $self->sub getFormkeyTimeframe();
 
 	my $where = $self->_whereFormkey();
 	$where .= " AND formname = '$formname'";
@@ -4282,7 +4304,7 @@ sub checkMaxPosts {
 	my $constants = getCurrentStatic();
 	$formname ||= getCurrentUser('currentPage');
 
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $formkey_earliest = time() - $self->sub getFormkeyTimeframe();
 	my $maxposts = 0;
 	if ($constants->{"max_${formname}_allowed"}) {
 		$maxposts = $constants->{"max_${formname}_allowed"};
