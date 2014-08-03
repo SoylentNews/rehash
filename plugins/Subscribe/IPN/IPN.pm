@@ -15,29 +15,29 @@ use base 'Slash::Plugin';
 $SUPPORTEDV = '1.5';
 
 # Gateway to PayPal's validation server as of this writing
-$GTW        = 'https://www.paypal.com/cgi-bin/webscr';
+$GTW = 'https://www.paypal.com/cgi-bin/webscr';
 
 # Revision of the library
-$VERSION  = '1.94';
+$VERSION = '1.94';
 
 # Preloaded methods go here.
 
 # Allows access to PayPal IPN's all the variables as method calls
 sub AUTOLOAD {
-  my $self = shift;
+	my $self = shift;
 
-  unless ( ref($self) ) {
-    croak "Method $AUTOLOAD is not a class method. You should call it on the object";
-  }
-  my ($field) = $AUTOLOAD =~ m/([^:]+)$/;
-  unless ( exists $self->{_PAYPAL_VARS}->{$field} ) {
-    return undef;
-  }
-  no strict 'refs';
-  # Following line is not quite required to get it working,
-  # but will speed-up subsequent accesses to the same method
-  *{$AUTOLOAD} = sub { return $_[0]->{_PAYPAL_VARS}->{$field} };
-  return $self->{_PAYPAL_VARS}->{$field};
+	unless ( ref($self) ) {
+		croak "Method $AUTOLOAD is not a class method. You should call it on the object";
+	}
+	my ($field) = $AUTOLOAD =~ m/([^:]+)$/;
+	unless ( exists $self->{_PAYPAL_VARS}->{$field} ) {
+		return undef;
+	}
+	no strict 'refs';
+	# Following line is not quite required to get it working,
+	# but will speed-up subsequent accesses to the same method
+	*{$AUTOLOAD} = sub { return $_[0]->{_PAYPAL_VARS}->{$field} };
+	return $self->{_PAYPAL_VARS}->{$field};
 }
 
 
@@ -52,22 +52,22 @@ sub DESTROY { }
 
 # constructor method. Initializes and returns Slash::Subscribe::IPN object
 sub new {
-  my $class = shift;
-  $class = ref($class) || $class;
+	my $class = shift;
+	$class = ref($class) || $class;
 
-  my $self = { 
-    _PAYPAL_VARS => {},
-    query        => undef,
-    ua           => undef,
-    @_,
-  };
+	my $self = { 
+		_PAYPAL_VARS => {},
+		#query				=> undef,
+		ua					 => undef,
+		@_,
+	};
 
-  bless $self, $class;
+	bless $self, $class;
 
-  $self->_init()          or return undef;
-  $self->_validate_txn()  or return undef;
+	$self->_init()					or return undef;
+	$self->_validate_txn()	or return undef;
 
-  return $self;
+	return $self;
 }
 
 
@@ -77,18 +77,26 @@ sub new {
 # initializes class object. Mainly, takes all query parameters presumably
 # that came from PayPal, and assigns them as object attributes
 sub _init {
-  my $self = shift;
+	my $self = shift;
 
-  my $request = $self->request() or croak "Couldn't create Apache::Request object";
-  map {
-    $self->{_PAYPAL_VARS}->{$_} = $request->param($_)
-  } ($request->param());
+	#my $request = $self->request() or croak "Couldn't create Apache::Request object";
+	
+	my %formvars = getCurrentForm();
+	foreach(keys(%formvars)){
+	{
+		next if $_ eq 'query_apache';
+		$self->{_PAYPAL_VARS}->{$_} = $formvars{$_};
+	}
+	#map {
+	#	$self->{_PAYPAL_VARS}->{$_} = $request->param($_)
+	#} ($request->param());
 
-  unless ( scalar( keys %{$self->{_PAYPAL_VARS}} > 3 ) ) {
-    $errstr = "Insufficient content from the invoker:\n" . $self->dump();
-    return undef;
-  }
-  return 1;
+	unless ( scalar( keys %{$self->{_PAYPAL_VARS}} > 3 ) ) {
+		$errstr = "Insufficient content from the invoker:\n" . $self->dump();
+		return undef;
+	}
+	print STDERR "Content from the invoker quite sufficient, thanks\n" . $self->dump();
+	return 1;
 }
 
 
@@ -97,35 +105,35 @@ sub _init {
 # validates the transaction by re-submitting it to the PayPal server
 # and reading the response.
 sub _validate_txn {
-  my $self = shift;
+	my $self = shift;
 
-  #my $request = $self->request(); #unused?!
-  my $ua  = $self->user_agent();
+	#my $request = $self->request(); #unused?!
+	my $ua	= $self->user_agent();
 
-  # Adding a new field according to PayPal IPN manual
-  $self->{_PAYPAL_VARS}->{cmd} = "_notify-validate";
+	# Adding a new field according to PayPal IPN manual
+	$self->{_PAYPAL_VARS}->{cmd} = "_notify-validate";
 
-  # making a POST request to the server with all the variables
-  my $responce  = $ua->post( $GTW, $self->{_PAYPAL_VARS} );
+	# making a POST request to the server with all the variables
+	my $responce	= $ua->post( $GTW, $self->{_PAYPAL_VARS} );
 
-  # caching the response object in case anyone needs it
-  $self->{response} = $responce;
-  
-  if ( $responce->is_error() ) {
-    $errstr = "Couldn't connect to '$GTW': " . $responce->status_line();
-    return undef;
-  }
+	# caching the response object in case anyone needs it
+	$self->{response} = $responce;
+	
+	if ( $responce->is_error() ) {
+		$errstr = "Couldn't connect to '$GTW': " . $responce->status_line();
+		return undef;
+	}
 
-  if ( $responce->content() eq 'INVALID' ) {
-    $errstr = "Couldn't validate the transaction. Responce: " . $responce->content();
-    return undef;
-  } elsif ( $responce->content() eq 'VERIFIED' ) {
-    return 1;
-  }
+	if ( $responce->content() eq 'INVALID' ) {
+		$errstr = "Couldn't validate the transaction. Responce: " . $responce->content();
+		return undef;
+	} elsif ( $responce->content() eq 'VERIFIED' ) {
+		return 1;
+	}
 
-  # if we came this far, something is really wrong here:
-  $errstr = "Vague response: " . substr($responce->content(), 0, 255);
-  return undef;
+	# if we came this far, something is really wrong here:
+	$errstr = "Vague response: " . substr($responce->content(), 0, 255);
+	return undef;
 }
 
 
@@ -133,61 +141,61 @@ sub _validate_txn {
 
 # returns all the PayPal's variables in the form of a hash
 sub vars {
-  my $self = shift;
-
-  return %{ $self->{_PAYPAL_VARS} };
-}
-
-sub request {
 	my $self = shift;
 
-	return $self->{query} if defined $self->{query};
-
-	use Apache::Request;
-	my $r = getCurrentForm->{query_apache};
-	my $request = Apache::Request->new($r);
-	$self->{query} = $request;
-
-	return $self->request();
+	return %{ $self->{_PAYPAL_VARS} };
 }
+
+#sub request {
+#	my $self = shift;
+#
+#	return $self->{query} if defined $self->{query};
+#
+#	use Apache::Request;
+#	my $r = getCurrentForm->{query_apache};
+#	my $request = Apache::Request->new($r);
+#	$self->{query} = $request;
+
+#	return $self->request();
+#}
 
 
 # alias to request()
-sub query {
-  my $self = shift;
+#sub query {
+#	my $self = shift;
 
-  return $self->request(@_);
-}
+#	return $self->request(@_);
+#}
 
 
 
 # returns already created response object
 sub response {
-  my $self = shift;
+	my $self = shift;
 
-  if ( defined $self->{response} ) {
-    return $self->{response};
-  }
+	if ( defined $self->{response} ) {
+		return $self->{response};
+	}
 
-  return undef;
+	return undef;
 }
 
 
 
 # returns user agent object
 sub user_agent {
-  my $self = shift;
+	my $self = shift;
 
-  if ( defined $self->{ua} ) {
-    return $self->{ua};
-  }
+	if ( defined $self->{ua} ) {
+		return $self->{ua};
+	}
 
-  require LWP::UserAgent;
-  
-  my $ua = LWP::UserAgent->new();
-  $ua->agent( sprintf("Slash::Subscribe::IPN/%s (%s)", $VERSION, $ua->agent) );
-  $self->{ua} = $ua;
-  return $self->user_agent();
+	require LWP::UserAgent;
+	
+	my $ua = LWP::UserAgent->new();
+	$ua->agent( sprintf("Slash::Subscribe::IPN/%s (%s)", $VERSION, $ua->agent) );
+	$self->{ua} = $ua;
+	return $self->user_agent();
 }
 
 
@@ -197,58 +205,58 @@ sub user_agent {
 
 # The same as payment_status(), but shorter :-).
 sub status {
-  my $self = shift;
-  return $self->{_PAYPAL_VARS}{payment_status};
+	my $self = shift;
+	return $self->{_PAYPAL_VARS}{payment_status};
 }
 
 
 # returns true if the payment status is completed
 sub completed {
-  my $self = shift;
+	my $self = shift;
 
-  unless ( defined $self->status() ) {
-    return undef;
-  }
-  ($self->status() eq 'Completed') and return 1;
-  return 0;
+	unless ( defined $self->status() ) {
+		return undef;
+	}
+	($self->status() eq 'Completed') and return 1;
+	return 0;
 }
 
 
 # returns true if the payment status is failed
 sub failed {
-  my $self = shift;
+	my $self = shift;
 
-  unless ( defined $self->status() ) {
-    return undef;
-  }
-  ($self->status() eq 'Failed') and return 1;
-  return 0;
+	unless ( defined $self->status() ) {
+		return undef;
+	}
+	($self->status() eq 'Failed') and return 1;
+	return 0;
 }
 
 
 # returns the reason for pending if the payment status
 # is pending.
 sub pending {
-  my $self = shift;
-  unless ( defined $self->status() ) {
-    return undef;
-  }
-  if ( $self->status() eq 'Pending' ) {
-    return $self->{_PAYPAL_VARS}{pending_reason};
-  }
-  return 0;
+	my $self = shift;
+	unless ( defined $self->status() ) {
+		return undef;
+	}
+	if ( $self->status() eq 'Pending' ) {
+		return $self->{_PAYPAL_VARS}{pending_reason};
+	}
+	return 0;
 }
 
 
 # returns true if payment status is denied
 sub denied {
-  my $self = shift;
+	my $self = shift;
 
-  unless ( defined $self->status() ) {
-    return undef;
-  }
-  ($self->status() eq 'Denied') and return 1;
-  return 0;
+	unless ( defined $self->status() ) {
+		return undef;
+	}
+	($self->status() eq 'Denied') and return 1;
+	return 0;
 }
 
 
@@ -257,12 +265,12 @@ sub denied {
 # Public interface should use it without any arguments
 # to get the error message
 sub error {
-  my ($self, $msg) = @_;
+	my ($self, $msg) = @_;
 
-  if ( defined $msg ) {
-    $errstr = $msg;
-  }
-  return $errstr;
+	if ( defined $msg ) {
+		$errstr = $msg;
+	}
+	return $errstr;
 }
 
 
@@ -272,20 +280,20 @@ sub error {
 # for debugging purposes only. Returns the whole object
 # as a perl data structure using Data::Dumper
 sub dump {
-  my ($self, $file, $indent) = @_;
+	my ($self, $file, $indent) = @_;
 
-  $indent ||= 1;
+	$indent ||= 1;
 
-  require Data::Dumper;
-  my $d = new Data::Dumper([$self], [ref($self)]);
-  $d->Indent( $indent );
+	require Data::Dumper;
+	my $d = new Data::Dumper([$self], [ref($self)]);
+	$d->Indent( $indent );
 
-  if ( (defined $file) && (not -e $file) ) {
-    open(FH, '>' . $file) or croak "Couldn't dump into $file: $!";    
-    print FH $d->Dump();
-    close(FH) or croak "Object couldn't be dumped into $file: $!";
-  }
-  return $d->Dump();
+	if ( (defined $file) && (not -e $file) ) {
+		open(FH, '>' . $file) or croak "Couldn't dump into $file: $!";		
+		print FH $d->Dump();
+		close(FH) or croak "Object couldn't be dumped into $file: $!";
+	}
+	return $d->Dump();
 }
 
 
@@ -301,13 +309,13 @@ Slash::Subscribe::IPN - Perl extension that implements PayPal IPN v1.5
 
 =head1 SYNOPSIS
 
-  use Slash::Subscribe::IPN;
+	use Slash::Subscribe::IPN;
 
-  my $ipn = new Slash::Subscribe::IPN() or die Slash::Subscribe::IPN->error();
+	my $ipn = new Slash::Subscribe::IPN() or die Slash::Subscribe::IPN->error();
 
-  if ( $ipn->completed ) {
-    # ...
-  }
+	if ( $ipn->completed ) {
+		# ...
+	}
 
 =head1 ABSTRACT
 
@@ -346,23 +354,23 @@ with PayPal and see if such a transaction really happened
 
 Slash::Subscribe::IPN is the library which encapsulates all the above complexity into this compact form:
 
-  my $ipn = new Slash::Subscribe::IPN() or die Slash::Subscribe::IPN->error();
+	my $ipn = new Slash::Subscribe::IPN() or die Slash::Subscribe::IPN->error();
 
-  # if we come this far, we're guaranteed it was a valid transaction.
-  if ( $ipn->completed() ) {
-    # means the funds are already in our paypal account.
+	# if we come this far, we're guaranteed it was a valid transaction.
+	if ( $ipn->completed() ) {
+		# means the funds are already in our paypal account.
 
-  } elsif ( $ipn->pending() ) {
-    # the payment was made to your account, but its status is still pending
-    # $ipn->pending() also returns the reason why it is so.
+	} elsif ( $ipn->pending() ) {
+		# the payment was made to your account, but its status is still pending
+		# $ipn->pending() also returns the reason why it is so.
 
-  } elsif ( $ipn->denied() ) {
-    # the payment denied
+	} elsif ( $ipn->denied() ) {
+		# the payment denied
 
-  } elsif ( $ipn->failed() ) {
-    # the payment failed
+	} elsif ( $ipn->failed() ) {
+		# the payment failed
 
-  }
+	}
 
 =head1 PREREQUISITES
 
@@ -392,17 +400,17 @@ user agent object. If B<ua> is missing, it will use LWP::UserAgent by default. I
 could not be validated, it will return undef and you should check the error() method for a more
 detailed error string:
 
-  $ipn = new Slash::Subscribe::IPN() or die Slash::Subscribe::IPN->error();
+	$ipn = new Slash::Subscribe::IPN() or die Slash::Subscribe::IPN->error();
 
 =item *
 
 C<vars()> - returns all the returned PayPal variables and their respective values in the 
 form of a hash.
 
-  my %paypal = $ipn->vars();
-  if ( $paypal{payment_status} eq 'Completed' ) {
-    print "Payment was made successfully!";
-  }
+	my %paypal = $ipn->vars();
+	if ( $paypal{payment_status} eq 'Completed' ) {
+		print "Payment was made successfully!";
+	}
 
 =item *
 
@@ -425,15 +433,15 @@ Slash::Subscribe::IPN supports all the variables supported by PayPal IPN indepen
 version. To access the value of any variable, use the corresponding method name. For example, 
 if you want to get the first name of the user who made the payment ('first_name' variable):
 
-  my $fname = $ipn->first_name()
+	my $fname = $ipn->first_name()
 
 To get the transaction id ('txn_id' variable)
 
-  my $txn = $ipn->txn_id()
+	my $txn = $ipn->txn_id()
 
 To get payment type ('payment_type' variable)
 
-  $type = $ipn->payment_type()
+	$type = $ipn->payment_type()
 
 and so on. For the list of all the available variables, consult IPN Manual provided by PayPal
 Developer Network. You can find the link at the bottom of http://www.paypal.com.
@@ -471,9 +479,9 @@ C<denied()> - returns true if C<payment_status> is "Denied".
 Methods can return 1, 0 or undefined as well as any other true value. The distinction
 between 0 (which is false) and undefined (which is also false) is important:
 
-  $ipn->completed eq undef and print "Not relevant for this transaction type";
-  $ipn->completed == 1 and print "Transaction was completed";
-  $ipn->completed == 0 and print "Transaction was NOT completed";
+	$ipn->completed eq undef and print "Not relevant for this transaction type";
+	$ipn->completed == 1 and print "Transaction was completed";
+	$ipn->completed == 0 and print "Transaction was NOT completed";
 
 In other words, methods return undef indicating this variable is not relevant for
 this transaction type ("txn_type"). A good example for such transactions is "subscr_signup"
@@ -501,8 +509,8 @@ go ahead and try out for yourself to compare differences.
 
 =back
 
-  Note that the object is dumped only once to the same file. So after investigating the dump,
-  you may need to remove the file or dump to another file instead.
+	Note that the object is dumped only once to the same file. So after investigating the dump,
+	you may need to remove the file or dump to another file instead.
 
 Interpreting the dump file may seem tricky, since it is relatively big file. But you don't
 need to understand everything in it. Simply look for the attribute called "_PAYPAL_VARS".
@@ -518,10 +526,10 @@ Before you do any "dumping" around, include the following lines on top of your I
 if you haven't done so already. This will ensure that when PayPal.com calls your IPN script, 
 all the warnings and error messages, if any, will be saved in this file.
 
-  use CGI::Carp 'carpout';
-  BEGIN {
-    open(LOG, '>>path/to/error.log') && carpout(\*LOG);
-  }
+	use CGI::Carp 'carpout';
+	BEGIN {
+		open(LOG, '>>path/to/error.log') && carpout(\*LOG);
+	}
 
 =head1 VARIABLES
 
