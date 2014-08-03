@@ -4056,7 +4056,7 @@ sub validFormkey {
 	return 'invalid' if !$form->{formkey};
 	my $formkey_quoted = $self->sqlQuote($form->{formkey});
 
-	my $formkey_earliest = time() - $self->sub getFormkeyTimeframe();
+	my $formkey_earliest = time() - $self->getFormkeyTimeframe();
 
 	my $where = $self->_whereFormkey();
 	$where = "($where OR subnetid = '$subnetid')"
@@ -4256,7 +4256,7 @@ sub checkPostInterval {
 	}
 
 	my $time = $self->getTime({ unix_format => 1 });
-	my $timeframe = $self->sub getFormkeyTimeframe();
+	my $timeframe = $self->getFormkeyTimeframe();
 	$timeframe = $speedlimit if $speedlimit > $timeframe;
 	my $formkey_earliest = $time - $timeframe;
 
@@ -4283,7 +4283,7 @@ sub checkMaxReads {
 	my $constants = getCurrentStatic();
 
 	my $maxreads = $constants->{"max_${formname}_viewings"} || 0;
-	my $formkey_earliest = time() - $self->sub getFormkeyTimeframe();
+	my $formkey_earliest = time() - $self->getFormkeyTimeframe();
 
 	my $where = $self->_whereFormkey();
 	$where .= " AND formname = '$formname'";
@@ -4304,7 +4304,7 @@ sub checkMaxPosts {
 	my $constants = getCurrentStatic();
 	$formname ||= getCurrentUser('currentPage');
 
-	my $formkey_earliest = time() - $self->sub getFormkeyTimeframe();
+	my $formkey_earliest = time() - $self->getFormkeyTimeframe();
 	my $maxposts = 0;
 	if ($constants->{"max_${formname}_allowed"}) {
 		$maxposts = $constants->{"max_${formname}_allowed"};
