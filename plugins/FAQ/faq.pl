@@ -14,12 +14,10 @@ use Slash::Utility;
 sub main {
 	my $form	= getCurrentForm();
 	my $constants	= getCurrentStatic();
-	my $form      = getCurrentForm();
 
 	header(getData('head'), '', { Page => 'index2' }) or return;
 
 	my $op = $form->{op} || 'faq';
-
 
 	slashDisplay($op);
 
