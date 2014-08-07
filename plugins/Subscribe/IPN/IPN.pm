@@ -5,11 +5,6 @@ package Slash::Subscribe::IPN;
 use strict;
 use Carp 'croak';
 use vars qw($VERSION $GTW $AUTOLOAD $SUPPORTEDV $errstr);
-use Apache::Request;
-use Slash;
-use Slash::Utility;
-
-use base 'Slash::Plugin';
 
 # Supported version of PayPal's IPN API
 $SUPPORTEDV = '1.5';
@@ -42,35 +37,30 @@ sub AUTOLOAD {
 
 
 
-
 # So that AUTOLOAD does not look for destructor. Expensive!
 sub DESTROY { }
 
 
 
-
-
 # constructor method. Initializes and returns Slash::Subscribe::IPN object
 sub new {
-	my $class = shift;
+	my ($class, $data) = @_;
+	return undef unless $data;
 	$class = ref($class) || $class;
 
 	my $self = { 
 		_PAYPAL_VARS => {},
-		#query				=> undef,
-		ua					 => undef,
-		@_,
+		data => $data,
+		ua => undef,
 	};
 
 	bless $self, $class;
 
-	$self->_init()					or return undef;
-	$self->_validate_txn()	or return undef;
+	$self->_init(); #or return undef;
+	$self->_validate_txn(); #or return undef;
 
 	return $self;
 }
-
-
 
 
 
@@ -79,17 +69,10 @@ sub new {
 sub _init {
 	my $self = shift;
 
-	#my $request = $self->request() or croak "Couldn't create Apache::Request object";
-	
-	my %formvars = getCurrentForm();
-	foreach(keys(%formvars)){
-	{
-		next if $_ eq 'query_apache';
-		$self->{_PAYPAL_VARS}->{$_} = $formvars{$_};
+	foreach(split(/&/, $self->{data})){
+		/^(.*?)=(.*?)$/ or die "$_\n";
+		$self->{_PAYPAL_VARS}->{$1} = $2;
 	}
-	#map {
-	#	$self->{_PAYPAL_VARS}->{$_} = $request->param($_)
-	#} ($request->param());
 
 	unless ( scalar( keys %{$self->{_PAYPAL_VARS}} > 3 ) ) {
 		$errstr = "Insufficient content from the invoker:\n" . $self->dump();
@@ -98,7 +81,6 @@ sub _init {
 	print STDERR "Content from the invoker quite sufficient, thanks\n" . $self->dump();
 	return 1;
 }
-
 
 
 
@@ -111,31 +93,34 @@ sub _validate_txn {
 	my $ua	= $self->user_agent();
 
 	# Adding a new field according to PayPal IPN manual
-	$self->{_PAYPAL_VARS}->{cmd} = "_notify-validate";
+	my $query = 'cmd=_notify-validate&'.$self->{data};
 
 	# making a POST request to the server with all the variables
-	my $responce	= $ua->post( $GTW, $self->{_PAYPAL_VARS} );
-
+	my $responce	= $ua->post( $GTW, $query );
 	# caching the response object in case anyone needs it
 	$self->{response} = $responce;
 	
 	if ( $responce->is_error() ) {
 		$errstr = "Couldn't connect to '$GTW': " . $responce->status_line();
+		print STDERR $errstr;
 		return undef;
 	}
+
+	print $responce->content()."\n";
 
 	if ( $responce->content() eq 'INVALID' ) {
 		$errstr = "Couldn't validate the transaction. Responce: " . $responce->content();
-		return undef;
-	} elsif ( $responce->content() eq 'VERIFIED' ) {
+	}
+	elsif ( $responce->content() eq 'VERIFIED' ) {
 		return 1;
 	}
+	else{
 
-	# if we came this far, something is really wrong here:
-	$errstr = "Vague response: " . substr($responce->content(), 0, 255);
-	return undef;
+		# if we came this far, something is really wrong here:
+		$errstr = "Vague response: " . substr($responce->content(), 0, 255);
+		return undef;
+	}
 }
-
 
 
 
@@ -143,29 +128,8 @@ sub _validate_txn {
 sub vars {
 	my $self = shift;
 
-	return %{ $self->{_PAYPAL_VARS} };
+	return $self->{_PAYPAL_VARS};
 }
-
-#sub request {
-#	my $self = shift;
-#
-#	return $self->{query} if defined $self->{query};
-#
-#	use Apache::Request;
-#	my $r = getCurrentForm->{query_apache};
-#	my $request = Apache::Request->new($r);
-#	$self->{query} = $request;
-
-#	return $self->request();
-#}
-
-
-# alias to request()
-#sub query {
-#	my $self = shift;
-
-#	return $self->request(@_);
-#}
 
 
 
@@ -190,7 +154,7 @@ sub user_agent {
 		return $self->{ua};
 	}
 
-	require LWP::UserAgent;
+	use LWP::UserAgent;
 	
 	my $ua = LWP::UserAgent->new();
 	$ua->agent( sprintf("Slash::Subscribe::IPN/%s (%s)", $VERSION, $ua->agent) );
@@ -200,14 +164,12 @@ sub user_agent {
 
 
 
-
-
-
 # The same as payment_status(), but shorter :-).
 sub status {
 	my $self = shift;
 	return $self->{_PAYPAL_VARS}{payment_status};
 }
+
 
 
 # returns true if the payment status is completed
@@ -222,6 +184,7 @@ sub completed {
 }
 
 
+
 # returns true if the payment status is failed
 sub failed {
 	my $self = shift;
@@ -232,6 +195,7 @@ sub failed {
 	($self->status() eq 'Failed') and return 1;
 	return 0;
 }
+
 
 
 # returns the reason for pending if the payment status
@@ -246,6 +210,7 @@ sub pending {
 	}
 	return 0;
 }
+
 
 
 # returns true if payment status is denied
@@ -275,8 +240,6 @@ sub error {
 
 
 
-
-
 # for debugging purposes only. Returns the whole object
 # as a perl data structure using Data::Dumper
 sub dump {
@@ -295,7 +258,6 @@ sub dump {
 	}
 	return $d->Dump();
 }
-
 
 
 

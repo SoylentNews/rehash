@@ -52,7 +52,7 @@ PLUGINDIRS = `find . -name CVS -prune -o -name .git -prune -o -type d -print | e
 REPLACEWITH = `$(PERL) -MConfig -e 'print quotemeta($$Config{startperl})' | sed 's/@/\\@/g'`
 
 # Scripts that need special treatment for $(SLASH_PREFIX)
-PREFIX_REPLACE_FILES = utils/slash httpd/slash.conf
+PREFIX_REPLACE_FILES = utils/slash utils/ipn httpd/slash.conf
 
 # Used by the RPM build.
 BUILDROOT=/var/tmp/slash-buildroot
@@ -178,7 +178,7 @@ install: slash pluginsandtagboxes
 			perl -i.bak -pe 's{/usr/local/slash}{$(SLASH_PREFIX)}' $$a;	\
 		fi;								\
 		case "$$a" in							\
-	 	'utils/slash')							\
+	 	'utils/slash'|'utils/ipn')							\
 			 if [ "$(INIT)" != "/etc" ]; then			\
 			 	if [ -d $(INIT) ]; then 		\
 			 		init=$(INIT);				\

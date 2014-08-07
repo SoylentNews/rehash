@@ -1,0 +1,184 @@
+#!/usr/bin/perl -w
+
+use strict;
+use File::Basename;
+use Sys::Hostname;
+use Encode qw(encode_utf8 decode_utf8);
+use Data::Dumper;
+use Mojo::Server::Daemon;
+use DateTime;
+use DateTime::Format::MySQL;
+use Carp;
+
+use Slash;
+use Slash::Constants ':slashd';
+use Slash::Display;
+use Slash::Utility;
+use Slash::Subscribe;
+use Slash::Subscribe::IPN;
+
+use vars qw(
+	$PROGNAME $virtual_user $hostname
+);
+
+$virtual_user = $ARGV[0];
+$hostname = $ENV{SF_SYSTEM_FUNC} || hostname();
+
+$PROGNAME = basename($0);
+$0 = "$PROGNAME $virtual_user";
+
+eval {
+	createEnvironment($virtual_user);
+};
+if ($@) {
+	if ($@ =~ /DBIx::Password has no information about the virtual user/
+		&& $virtual_user eq 'start') {
+		die <<"EOT";
+$@
+To be more specific, your error is that, per step 7 of the INSTALLATION
+section in the INSTALL file (please reread), you need to start slashd
+with '/etc/init.d/ipn start', not '/usr/local/slash/sbin/ipnd start'.
+EOT
+	}
+	die $@;
+}
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+my $user = getCurrentUser();
+setCurrentSkin(determineCurrentSkin());
+my $gSkin = getCurrentSkin();
+
+if (!$constants->{plugin}{Subscribe}) {
+	die <<"EOT";
+$@
+Subscribe Plugin not installed.
+EOT
+}	
+
+my $subscribe = getObject('Slash::Subscribe');
+
+
+my $listenConfig = {
+	port => "2626",
+	host => "*",
+	reuse => '1', # same port binding problem: solved
+	ca => '',
+	cert => '',
+	ciphers => '',
+	key => '',
+	verify => '',
+};
+
+my $cbHost = $listenCfg->{host};
+my $cbPort = $listenCfg->{port};
+my $cbTheRest;
+foreach(keys(%$listenCfg)){
+	next if $_ eq 'port';
+	next if $_ eq 'host';
+	push(@$cbTheRest, "$_=".$listenCfg->{$_}) if $listenCfg->{$_} ne '';
+}
+
+
+my $cbServer = Mojo::Server::Daemon->new(listen => ["https://$cbHost:$cbPort?$cbTheRest"]);
+# And a wee bit more config for the daemon
+$cbServer->max_clients(10);
+$cbServer->max_requests(25);
+$cbServer->silent(0);
+$cbServer->inactivity_timeout(5);
+
+$cbServer->unsubscribe('request');
+$cbServer->on(request => sub {
+	my ($daemon, $tx) = @_;
+	
+	#print STDERR Dumper($tx->req);
+	my $content = $tx->req->content;
+	my $gateway = $constants->{paypal_host};
+	$Slash::Subscribe::IPN::GTW = "https://$gateway/cgi-bin/webscr";
+	my $ipn = Slash::Subscribe::IPN->new($content->{asset}->{content});
+	#print Dumper($ipn);
+
+	$subscribe->ppAddLog($ipn->vars);
+	my $paypal = $ipn->vars();
+
+	if($ipn->completed){
+		my $status = $subscribe->paymentExists($ipn->txn_id);
+		if(!$status){
+			my $days = $subscribe->convertDollarsToDays($paypal->{payment_gross});
+			my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
+			
+			my ($puid, $payment_type, $from);
+			if ($paypal->{custom}){
+				$puid = $paypal->{custom};
+				$payment_type = 'gift';
+				$from = $paypal->{option_selection1};
+			} else {
+				$puid = $paypal->{item_number};
+				$payment_type = 'user';
+			}
+			
+			my $payment = {
+				days => $days,
+				uid	=> $paypal->{item_number},
+				payment_net   => $payment_net,
+				payment_gross => $paypal->{payment_gross},
+				payment_type  => $payment_type,
+				transaction_id => $paypal->{txn_id},
+				method => 'paypal',
+				email => $from,
+				raw_transaction  => $subscribe->convertToText($paypal),
+				puid => $puid
+			};
+			
+			
+			my ($rows, $result, $warning);
+			$rows = $subscribe->insertPayment($payment);
+			if ($rows && $rows == 1) {
+				$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+				if ($result && $result == 1){
+					send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+				} else {
+					$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+					print STDERR $warning;
+				}
+			} else {
+				$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
+				print STDERR $warning;
+			}
+		}
+	}
+	# Now for other statuses
+	elsif($ipn->denied || $ipn->failed){
+		# This should probably be brought to the attention of the user. Myabe via email.
+		# Save this for later -- paulej72 2014/08/01
+	}
+	elsif($ipn->expired || $ipn->voided){
+		# This means OUR account key is either expired or has been canceled.
+		# It needs to go to the attention of an admin ASAFP by whatever means necessary.
+		# Save this for later -- paulej72 2014/08/01
+	}
+	elsif($ipn->reversed){
+		# The dillhole reversed payment on us. Remove any previously paid for days and the transaction.
+		my $uid = my $subscribe->txnToUID($ipn->parent_txn_id);
+		my $days = $subscribe->getDaysByTxn($ipn->txn_id);
+		$subscribe->removeDaysFromUID($days, $uid);
+		$subscribe->removePayment($ipn->parent_txn_id);
+	}
+	else{
+		# Do nothing but the logging we've already done.
+	}
+
+	# Request
+	my $method = $tx->req->method;
+	my $path   = $tx->req->url->path;
+
+	# Response
+	$tx->res->code(200);
+	$tx->res->headers->content_type('text/plain');
+	$tx->res->body("");
+
+	# Resume transaction
+	$tx->resume;
+});
+$cbServer->run;
+
+exit 0;
