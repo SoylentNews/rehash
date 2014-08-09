@@ -366,6 +366,7 @@ sub ppDoPDT {
 			my ($key, $value) = split("=", $_);	    
 			$transaction{$key} = decode_utf8($value);
 		}
+		$transaction{remote_address} = 'PDT';
 		
 		$self->ppAddLog(\%transaction);
 		return \%transaction;

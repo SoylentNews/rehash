@@ -205,64 +205,69 @@ sub save {
 sub paypal {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $txid = getCurrentForm('tx');
-	
 	my $subscribe = getObject('Slash::Subscribe');
-	my $pp_pdt = $subscribe->ppDoPDT($txid);
+	my ($error, $note); 
 	
-	# use Data::Dumper; print STDERR Dumper($pp_pdt);
-	
-	my ($error, $note);
-	
-	
-	if (ref($pp_pdt) eq "HASH") {
-		my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross});
-		my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
+	if (!$subscribe->paymentExists($txid)){
+		#	IPN may have gotten the payment first.
 		
-		my ($puid, $payment_type, $from);
-		if ($pp_pdt->{custom}){
-			$puid = $pp_pdt->{custom};
-			$payment_type = 'gift';
-			$from = $pp_pdt->{option_selection1};
-		} else {
-			$puid = $pp_pdt->{item_number};
-			$payment_type = 'user';
-		}
+		my $pp_pdt = $subscribe->ppDoPDT($txid);
+		# use Data::Dumper; print STDERR Dumper($pp_pdt);
 		
-		my $payment = {
-			days => $days,
-			uid	=> $pp_pdt->{item_number},
-			payment_net   => $payment_net,
-			payment_gross => $pp_pdt->{payment_gross},
-			payment_type  => $payment_type,
-			transaction_id => $pp_pdt->{txn_id},
-			method => 'paypal',
-			email => $from,
-			raw_transaction  => $subscribe->convertToText($pp_pdt),
-			puid => $puid
-		};
-		
-		
-		my ($rows, $result, $warning);
-		$rows = $subscribe->insertPayment($payment);
-		if ($rows && $rows == 1) {
-			$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
-			if ($result && $result == 1){
-				send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+		if (ref($pp_pdt) eq "HASH") {
+			my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross});
+			my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
+			
+			my ($puid, $payment_type, $from);
+			if ($pp_pdt->{custom}){
+				$puid = $pp_pdt->{custom};
+				$payment_type = 'gift';
+				$from = $pp_pdt->{option_selection1};
 			} else {
-				$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
-				print STDERR $warning;
-				$error = "<p class='error'>Subscription not updated for transaction $txid.</p>";
+				$puid = $pp_pdt->{item_number};
+				$payment_type = 'user';
+			}
+			
+			my $payment = {
+				days => $days,
+				uid	=> $pp_pdt->{item_number},
+				payment_net   => $payment_net,
+				payment_gross => $pp_pdt->{payment_gross},
+				payment_type  => $payment_type,
+				transaction_id => $pp_pdt->{txn_id},
+				method => 'paypal',
+				email => $from,
+				raw_transaction  => $subscribe->convertToText($pp_pdt),
+				puid => $puid
+			};
+			
+			if (!$subscribe->paymentExists($txid)){
+				#	IPN can be fast so check again.
+				
+				my ($rows, $result, $warning);
+				$rows = $subscribe->insertPayment($payment);
+				if ($rows && $rows == 1) {
+					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+					if ($result && $result == 1){
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+					} else {
+						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+						print STDERR $warning;
+						$error = "<p class='error'>Subscription not updated for transaction $txid.</p>";
+					}
+				} elseif (!$subscribe->paymentExists($txid)){
+					#	IPN can be REAL fast, what have I told you.
+					
+					$warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
+					print STDERR $warning;
+					$error = "<p class='error'>Payment transaction $txid already recorded or other error.</p>";
+				}
 			}
 		} else {
-			$warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
-			print STDERR $warning;
-			$error = "<p class='error'>Payment transaction $txid already recorded or other error.</p>";
+			$error = "<p class='error'>PayPal PDT failed for transaction $txid.</p>";
 		}
+	}	
 		
-	} else {
-		$error = "<p class='error'>PayPal PDT failed for transaction $txid.</p>";
-	}
-	
 	if ($error){
 		$note = $error . "<p class='error'>Transaction may still complete in the background. Please contact $constants->{adminmail} if you do not see your transaction complete.</p>";
 	} else {
