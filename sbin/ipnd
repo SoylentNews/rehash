@@ -111,7 +111,7 @@ $cbServer->on(request => sub {
 	$Slash::Subscribe::IPN::GTW = "https://$gateway/cgi-bin/webscr";
 	my $ipn = Slash::Subscribe::IPN->new($content->{asset}->{content});
 	$logthis = $ipn->vars if $ipn;
-	$logthis->{remote_address} = $tx->{remote_address}
+	$logthis->{remote_address} = $tx->{remote_address};
 	$subscribe->ppAddLog($logthis);
 
 	my $paypal = $ipn->vars();
@@ -158,7 +158,7 @@ $cbServer->on(request => sub {
 						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 						print STDERR $warning;
 					}
-				} elseif (!$subscribe->paymentExists($ipn->txn_id)){
+				} elsif (!$subscribe->paymentExists($ipn->txn_id)){
 					# What did I say about that race condition.
 					
 					$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);

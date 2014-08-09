@@ -255,7 +255,7 @@ sub paypal {
 						print STDERR $warning;
 						$error = "<p class='error'>Subscription not updated for transaction $txid.</p>";
 					}
-				} elseif (!$subscribe->paymentExists($txid)){
+				} elsif (!$subscribe->paymentExists($txid)){
 					#	IPN can be REAL fast, what have I told you.
 					
 					$warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
