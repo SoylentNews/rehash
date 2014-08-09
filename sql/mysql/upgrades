@@ -305,6 +305,17 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe_low_val','14','Nu
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('paypal_host','www.sandbox.paypal.com','Host part of url for PayPal. Change this to to use PayPal sandbox. ');
 INSERT INTO vars (name, value, description) VALUES ('paypal_token','qAMNz6WbvIEUhu4PPkQcZ78Vht3qSSVCleW7A4wUPALbbKRBlHif4RFPzqC','PayPal PDT token. ');
+INSERT INTO vars (name, value, description) VALUES ('pp_ipn_port', '2626', 'Paypal ipn daemon port');
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_host", "http://*", "Paypal ipn daemon listen address host");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_path", "/ipn", "Paypal ipn daemon listener path");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_reuse,", "1", "Paypal ipn daemon reuse daemon threads");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_ca,", "", "Paypal ipn daemon path to TLS certificate authority file.");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_cert,", "", "Paypal ipn daemon path to the TLS server cert file");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_ciphers,", "", "Paypal ipn daemon cipher specification string");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_key,", "", "Paypal ipn daemon path to the TLS server key file");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_verify", "", "Paypal ipn daemon verify hostnames");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_slient", "0", "Paypal ipn daemon disable console messages.");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_debugfile", "", "Paypal ipn daemon debug log file");
 INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('comments_sub_speed_limit','0','Seconds delay before repeat posting for subscriber.');
 INSERT INTO vars (name, value, description) VALUES ('submissions_sub_speed_limit','0','Seconds delay before repeat submission for subscriber.');
@@ -340,14 +351,15 @@ CREATE TABLE paypal_log (
 	logid bigint unsigned NOT NULL AUTO_INCREMENT,
 	ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	uid mediumint(8) unsigned NULL DEFAULT NULL,
-	transaction_id varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	transaction_id varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
 	parent_transaction_id varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-	transaction_type varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	transaction_type varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
 	email varchar(450) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
 	name varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
 	payment_gross varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
 	payment_status varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
 	raw_transaction text COLLATE utf8_unicode_ci NOT NULL,
+	remote_address varchar(255) COLLATE utf8_unicode_ci NOT NULL,
 	PRIMARY KEY (logid)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -19,6 +19,17 @@ INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','Com
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_pages', '1000', 'How many pages your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('paypal_return', 'http://www.example.com/subscribe.pl?op=paypal', 'URL for successful payment completion');
 INSERT INTO vars (name, value, description) VALUES ('paypal_token','qAMNz6WbvIEUhu4PPkQcZ78Vht3qSSVCleW7A4wUPALbbKRBlHif4RFPzqC','PayPal PDT token. ');
+INSERT INTO vars (name, value, description) VALUES ('pp_ipn_port', '2626', 'Paypal ipn daemon port');
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_host", "http://*", "Paypal ipn daemon listen address host");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_path", "/ipn", "Paypal ipn daemon listener path");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_reuse,", "1", "Paypal ipn daemon reuse daemon threads");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_ca,", "", "Paypal ipn daemon path to TLS certificate authority file.");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_cert,", "", "Paypal ipn daemon path to the TLS server cert file");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_ciphers,", "", "Paypal ipn daemon cipher specification string");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_key,", "", "Paypal ipn daemon path to the TLS server key file");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_verify", "", "Paypal ipn daemon verify hostnames");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_slient", "0", "Paypal ipn daemon disable console messages.");
+INSERT INTO vars (name, value, description) VALUES ("pp_ipn_debugfile", "", "Paypal ipn daemon debug log file");
 INSERT INTO vars (name, value, description) VALUES ('submissions_sub_speed_limit','0','Seconds delay before repeat submission for subscriber.');
 INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptions enabled?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_only', 1, 'Subscription prefs only enabled for admins?');
