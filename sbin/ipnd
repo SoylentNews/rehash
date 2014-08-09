@@ -72,9 +72,10 @@ my $cbPort = $constants->{pp_ipn_port};
 my @args = ( 'reuse', 'ca', 'cert', 'ciphers', 'key', 'verify');
 my @cbTheRest;
 foreach(@args){
-	push(@cbTheRest, "$_=".$constants->{"pp_ipn_".$_}) if $constants->{"pp_ipn_".$_} ne '';
+	push(@cbTheRest, "$_=".$constants->{"pp_ipn_".$_}) if !$constants->{"pp_ipn_".$_};
 }
 my $cbArgs = join('&', @cbTheRest);
+print STDOUT "cbArgs: $cbArgs \n";
 
 my $cbServer;
 if ($cbArgs){
@@ -105,8 +106,9 @@ $cbServer->on(request => sub {
 	my $path = $constants->{pp_ipn_path} | "";
 	
 	# Don't even bother trying to process or log requests not to our chosen path
-	unless($tx->req->url->path =~ m/\Q$path/ ){
-		print STDOUT "Request for $path. \n";
+	my $reqPath = $tx->req->url->path;
+	unless( $reqPath =~ m/\Q$path/ ){
+		print STDOUT "Request for $reqPath. \n";
 		$tx->res->code(200);
 	        $tx->res->headers->content_type('text/plain');
         	$tx->res->body("Request for $path. \n");
