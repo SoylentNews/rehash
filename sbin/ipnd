@@ -56,7 +56,7 @@ Subscribe Plugin not installed.
 EOT
 }
 
-my $logfile = $constans->{pp_ipn_debugfile} | devnull();
+my $logfile = $constants->{pp_ipn_debugfile} | devnull();
 
 open(STDOUT, '+>>', $logfile);
 open(STDERR, ">&STDOUT");
@@ -76,10 +76,18 @@ foreach(@args){
 }
 my $cbArgs = join('&', @cbTheRest);
 
+my $cbServer;
 if ($cbArgs){
-	my $cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort?$cbArgs"]);
+	$cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort?$cbArgs"]);
 } else {
-	my $cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort"]);
+	$cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort"]);
+}
+
+if (!$cbServer) {
+	die <<"EOT";
+$@
+Mojo server not initiated.
+EOT
 }
 
 # And a wee bit more config for the daemon
