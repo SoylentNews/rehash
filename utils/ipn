@@ -50,7 +50,7 @@ GRAB_CONFIG=`$WHICH_CAT $SLASHSITE | $WHICH_CUT -d"#" -f1`;
 # FUNCTIONS
 #
 
-start_slashd () {
+start_ipnd () {
 	# There are differing syntaxes of "su" between OSes
 	# and even between different distributions of the same
 	# OS. If you have an OS that isn't listed here (or is
@@ -82,11 +82,11 @@ break_parts () {
 	RUNNINGPID="$DATADIR/site/$SITENAME/logs/$PROGNAME.pid";
 }
 
-stop_slashd () {
+stop_ipnd () {
 	# This will restart and remove any left over PID files
 	# since they can't help anyone. Oh wait, they are useful
-	# to verify is slashd is really running. The keepalive
-	# choice looks for thoses PID files to see if slashd
+	# to verify is ipnd is really running. The keepalive
+	# choice looks for thoses PID files to see if ipnd
 	# is hanging about.
 
 	if [ -f $RUNNINGPID ] ; then
@@ -128,7 +128,8 @@ case "$1" in
 		for server_name in $GRAB_CONFIG; do
 			break_parts;
 			echo -n "Starting $PROGNAME $VIRTUAL_USER_NAME: ";
-			start_slashd;
+			start_ipnd;
+			echo "$!" > ${RUNNINGPID};
 			echo "ok PID = $!";
 		done
 		;;
@@ -136,7 +137,7 @@ case "$1" in
 	stop)
 		for server_name in $GRAB_CONFIG; do
 			break_parts;
-			stop_slashd;
+			stop_ipnd;
 		done
 		;;
 
@@ -145,7 +146,7 @@ case "$1" in
 			break_parts;
 			if [ ! -f $RUNNINGPID ] ;then
 				echo -n "Restarting $PROGNAME $VIRTUAL_USER_NAME, no PID file: ";
-				start_slashd;
+				start_ipnd;
 				echo "ok PID = $!";
 			else
 				# OK, this might not work on every platform since the "ps"
@@ -155,7 +156,7 @@ case "$1" in
 				if ! $WHICH_PS wh -p `$WHICH_CAT $RUNNINGPID` | $WHICH_GREP $PROGNAME > /dev/null ; then
 					echo -n "Restarting $PROGNAME $VIRTUAL_USER_NAME, no valid PID file: ";
 					rm -f $RUNNINGPID;
-					start_slashd;
+					start_ipnd;
 					echo "ok PID = $!";
 				fi
 			fi
