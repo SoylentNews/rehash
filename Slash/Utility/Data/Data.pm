@@ -1369,7 +1369,7 @@ my %actions = (
 			${$_[0]} = url2html(${$_[0]});			},
 	approveCharrefs => sub {
 			${$_[0]} =~ s{
-				&(\#?[a-zA-Z0-9]+);?
+				&(\#?[a-zA-Z0-9]+);
 			}{approveCharref($1)}gex;			},
 	space_between_tags => sub {
 			${$_[0]} =~ s/></> </g;				},
@@ -1688,7 +1688,7 @@ sub stripBadHtml {
 
 	my $ent = qr/#?[a-zA-Z0-9]+/;
 	$str =~ s/&(?!$ent;)/&amp;/g;
-	$str =~ s/&($ent);?/approveCharref($1)/ge;
+	$str =~ s/&($ent);/approveCharref($1)/ge;
 
 	return $str;
 }
@@ -2641,7 +2641,7 @@ sub fudgeurl {
 	$url =~ s/&#(.+?);//g;
 	# we don't like SCRIPT at the beginning of a URL
 	my $decoded_url = decode_entities($url);
-	$decoded_url =~ s{ &(\#?[a-zA-Z0-9]+);? } { approveCharref($1) }gex;
+	$decoded_url =~ s{ &(\#?[a-zA-Z0-9]+); } { approveCharref($1) }gex;
 	return $decoded_url =~ /^[\s\w]*script\b/i ? undef : $url;
 }
 
