@@ -2,6 +2,7 @@
 
 use strict;
 use File::Basename;
+use File::Spec::Functions qw(:DEFAULT devnull);
 use Sys::Hostname;
 use Encode qw(encode_utf8 decode_utf8);
 use Data::Dumper;
@@ -24,8 +25,8 @@ use vars qw(
 $virtual_user = $ARGV[0];
 $hostname = $ENV{SF_SYSTEM_FUNC} || hostname();
 
-$PROGNAME = basename($0);
-$0 = "$PROGNAME $virtual_user";
+#$PROGNAME = basename($0);
+#$0 = "$PROGNAME $virtual_user";
 
 eval {
 	createEnvironment($virtual_user);
@@ -53,56 +54,71 @@ if (!$constants->{plugin}{Subscribe}) {
 $@
 Subscribe Plugin not installed.
 EOT
-}	
+}
+
+my $logfile = $constans->{pp_ipn_debugfile} | devnull();
+
+open(STDOUT, '+>>', $logfile);
+open(STDERR, ">&STDOUT");
+select STDERR; $| = 1;      # make unbuffered
+select STDOUT; $| = 1;      # make unbuffered
+
 
 my $subscribe = getObject('Slash::Subscribe');
 
+my $cbHost = $constants->{pp_ipn_host};
+my $cbPort = $constants->{pp_ipn_port};
 
-my $listenConfig = {
-	port => "2626",
-	host => "*",
-	reuse => '1', # same port binding problem: solved
-	ca => '',
-	cert => '',
-	ciphers => '',
-	key => '',
-	verify => '',
-};
+my @args = ( 'reuse', 'ca', 'cert', 'ciphers', 'key', 'verify');
+my @cbTheRest;
+foreach(@args){
+	push(@cbTheRest, "$_=".$constants->{"pp_ipn_".$_}) if $constants->{"pp_ipn_".$_} ne '';
+}
+my $cbArgs = join('&', @cbTheRest);
 
-my $cbHost = $listenCfg->{host};
-my $cbPort = $listenCfg->{port};
-my $cbTheRest;
-foreach(keys(%$listenCfg)){
-	next if $_ eq 'port';
-	next if $_ eq 'host';
-	push(@$cbTheRest, "$_=".$listenCfg->{$_}) if $listenCfg->{$_} ne '';
+if ($cbArgs){
+	my $cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort?$cbArgs"]);
+} else {
+	my $cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort"]);
 }
 
-
-my $cbServer = Mojo::Server::Daemon->new(listen => ["https://$cbHost:$cbPort?$cbTheRest"]);
 # And a wee bit more config for the daemon
 $cbServer->max_clients(10);
 $cbServer->max_requests(25);
-$cbServer->silent(0);
+$cbServer->silent($constants->{pp_ipn_silent});
 $cbServer->inactivity_timeout(5);
 
 $cbServer->unsubscribe('request');
 $cbServer->on(request => sub {
 	my ($daemon, $tx) = @_;
 	
-	#print STDERR Dumper($tx->req);
+  my $logthis = { remote_address => $tx->{remote_address} };
+
+	my $path = $constants->{pp_ipn_path} | "";
+	
+	# Don't even bother trying to process or log requests not to our chosen path
+	unless($tx->req->url->path =~ m/\Q$path/ ){
+		print STDOUT "Request for $path. \n";
+		$tx->res->code(200);
+	        $tx->res->headers->content_type('text/plain');
+        	$tx->res->body("Request for $path. \n");
+        	$tx->resume;
+		return 0
+	}
+
 	my $content = $tx->req->content;
 	my $gateway = $constants->{paypal_host};
 	$Slash::Subscribe::IPN::GTW = "https://$gateway/cgi-bin/webscr";
 	my $ipn = Slash::Subscribe::IPN->new($content->{asset}->{content});
-	#print Dumper($ipn);
+	$logthis = $ipn->vars if $ipn;
+	$logthis->{remote_address} = $tx->{remote_address}
+	$subscribe->ppAddLog($logthis);
 
-	$subscribe->ppAddLog($ipn->vars);
 	my $paypal = $ipn->vars();
 
 	if($ipn->completed){
-		my $status = $subscribe->paymentExists($ipn->txn_id);
-		if(!$status){
+		if(!$subscribe->paymentExists($ipn->txn_id)){
+			# Check if PDT got transaction first.
 			my $days = $subscribe->convertDollarsToDays($paypal->{payment_gross});
 			my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
 			
@@ -129,20 +145,25 @@ $cbServer->on(request => sub {
 				puid => $puid
 			};
 			
-			
-			my ($rows, $result, $warning);
-			$rows = $subscribe->insertPayment($payment);
-			if ($rows && $rows == 1) {
-				$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
-				if ($result && $result == 1){
-					send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
-				} else {
-					$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+			if (!$subscribe->paymentExists($ipn->txn_id)){
+				# Doulbe check as we have a race condition going on here.
+				
+				my ($rows, $result, $warning);
+				$rows = $subscribe->insertPayment($payment);
+				if ($rows && $rows == 1) {
+					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+					if ($result && $result == 1){
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+					} else {
+						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+						print STDERR $warning;
+					}
+				} elseif (!$subscribe->paymentExists($ipn->txn_id)){
+					# What did I say about that race condition.
+					
+					$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
 					print STDERR $warning;
 				}
-			} else {
-				$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
-				print STDERR $warning;
 			}
 		}
 	}
@@ -167,9 +188,8 @@ $cbServer->on(request => sub {
 		# Do nothing but the logging we've already done.
 	}
 
-	# Request
-	my $method = $tx->req->method;
-	my $path   = $tx->req->url->path;
+	# log to paypal_log
+  $subscribe->ppAddLog($logthis);
 
 	# Response
 	$tx->res->code(200);
