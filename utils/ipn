@@ -95,8 +95,8 @@ stop_ipnd () {
 			echo -n "...using kill -9 to make sure ...";
 			sleep 3;
 			$MYSUDO kill -9 `$WHICH_CAT $RUNNINGPID`;
-			$MYSUDO rm -f $RUNNINGPID;
 		fi
+		$MYSUDO rm -f $RUNNINGPID;
 		echo "ok.";
 	else
 		echo "$PROGNAME $VIRTUAL_USER_NAME has no PID file";
@@ -155,7 +155,7 @@ case "$1" in
 				# check like the one for "su".
 				if ! $WHICH_PS wh -p `$WHICH_CAT $RUNNINGPID` | $WHICH_GREP $PROGNAME > /dev/null ; then
 					echo -n "Restarting $PROGNAME $VIRTUAL_USER_NAME, no valid PID file: ";
-					rm -f $RUNNINGPID;
+					$MYSUDO rm -f $RUNNINGPID;
 					start_ipnd;
 					echo "ok PID = $!";
 				fi

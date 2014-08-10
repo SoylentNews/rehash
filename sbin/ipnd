@@ -56,7 +56,25 @@ Subscribe Plugin not installed.
 EOT
 }
 
-my $logfile = $constants->{pp_ipn_debugfile} | devnull();
+my $pid_file = $constants->{logdir}.'/ipnd.pid';
+local *PIDFILE;
+
+# Check for the PID file's existance
+if (-e $pid_file) {
+  die ("Program already running or ended prematurely. \n");
+}
+
+# Create the PID file
+# Use the 3 argument form of open for safety
+open PIDFILE, ">", $pid_file;
+print PIDFILE "$$";
+close PIDFILE;
+
+
+my $logfile = devnull();
+if ($constants->{pp_ipn_debugfile}){
+	$logfile = $constants->{logdir}.'/ipnd.log';
+}
 
 open(STDOUT, '+>>', $logfile);
 open(STDERR, ">&STDOUT");
@@ -72,10 +90,11 @@ my $cbPort = $constants->{pp_ipn_port};
 my @args = ( 'reuse', 'ca', 'cert', 'ciphers', 'key', 'verify');
 my @cbTheRest;
 foreach(@args){
-	push(@cbTheRest, "$_=".$constants->{"pp_ipn_".$_}) if !$constants->{"pp_ipn_".$_};
+	my $pp_ipn_var = "pp_ipn_".$_;
+	push(@cbTheRest, "$_=".$constants->{$pp_ipn_var}) if $constants->{$pp_ipn_var};
 }
 my $cbArgs = join('&', @cbTheRest);
-print STDOUT "cbArgs: $cbArgs \n";
+print STDOUT "cbArgs: $cbArgs \n" if !$constants->{pp_ipn_silent};
 
 my $cbServer;
 if ($cbArgs){
@@ -111,7 +130,7 @@ $cbServer->on(request => sub {
 		print STDOUT "Request for $reqPath. \n";
 		$tx->res->code(200);
 	        $tx->res->headers->content_type('text/plain');
-        	$tx->res->body("Request for $path. \n");
+        	$tx->res->body("Request for $reqPath. \n");
         	$tx->resume;
 		return 0
 	}
