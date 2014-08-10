@@ -1,15 +1,18 @@
 New Subscribe Plugin.
 
-Allows for PayPal processing using both Payment Data Transfer (PDT) and Instant Payment Notification (IPN). PDT allows for PayPal to send data back to the calling website immediatly after payment processing is competed by the buyer.  Once Slash gets the data, it completes the subscripton buying pocess by logging the purchase and updating the user's subscription.
+Allows for PayPal processing using both Payment Data Transfer (PDT) and Instant Payment Notification (IPN).  PDT allows for PayPal to send data back to the calling website immediately after payment processing is competed by the buyer.  Once Slash gets the data, it completes the subscription buying process by logging the purchase and updating the user's subscription.
 
-This process relies on a proper redirect from PayPal to the Slash site.  Because this may fail, we also use IPN processing.  With IPN, PayPal sends a transaction to a listerner on the Slashe site (ppipn.pl). INP will continue to send the transaction until it is acknowledge by the ppipn.pl listener.  Once a transaction is recieved ppipn.pl will verify the payment has not alrealy been processed by the Slash PDT porcessor, it will add the payment and update the subscription.  
+This process relies on a proper redirect from PayPal to the Slash site.  Because this may fail, we also use IPN processing.  With IPN, PayPal sends a transaction to a listener on the Slash site (ppipn.pl). INP will continue to send the transaction until it is acknowledge by the ppipn.pl listener.  Once a transaction is received ppipn.pl will verify the payment has not already been processed by the Slash PDT processor, it will add the payment and update the subscription.  
 
-You must actvate each of these sysems in your Paypal business account for them to work with Slash.
+You must activate each of these systems in your PayPal business account for them to work with Slash.
 
-Also the Subscribe Plugin requires the following CPAN modlues to be installed in Perl before it can be used:
+Also the Subscribe Plugin requires the following CPAN modules to be installed in Perl before it can be used:
 	DateTime
 	DateTime::Format::MySQL
-	LWP::UserAgent
-	Business::PayPal::IPN
+	Mojo::Server::Daemon
+	
+Mojo::Server::Daemon is used to run a small web server to process the IPN payments from PayPal.  As there is very specific requirements for the vars that PayPal pass in a IPN transaction to be returned for verification, the normal Slash system for getting post variables does not work.  The Mojolicious server is light weight and quickly gets the post vars we need.  Info can be found here on the daemon: http://mojolicio.us/perldoc/Mojo/Server/Daemon.  Many of the web server setup vars are in the Slash vars table with names prefixed with pp_ipn.  The daemon will listen on the port specified by the variable pp_ipn_port, and will listen only at the path specified by the pp_ipn_path var.  Using these two variables you can tailor your ipnd to listen on a unique url to minimize non PayPal hits to the daemon.
+
+The daemon is started in the same manner as the slashd service and uses a start-up script that was derived from the one for slashd.  The Slash Makefile will install the start-up script in the appropriate directory for most Unix-like systems.
 	
 
