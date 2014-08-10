@@ -64,6 +64,9 @@ __template__
 				<li>
 					<a href="[% gSkin.rootdir %]/my/friends">Friends, Foes</a>
 				</li>
+				[% IF constants.plugin.Subscribe && ((constants.subscribe_admin_only && user.is_admin) || !constants.subscribe_admin_only) %]
+					<li><a href="[% gSkin.rootdir %]/subscribe.pl">Subscribe"</a></li>
+				[% END %]
 				<li>
 					<a href="[% gSkin.rootdir %]/my/password">Set Password</a>
 				</li>
