@@ -2,7 +2,6 @@
 name=Subscribe
 description="Subscription system"
 htdoc=subscribe.pl
-htdoc=ppipn.pl
 image=images/star.png
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema

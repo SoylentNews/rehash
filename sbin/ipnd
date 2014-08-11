@@ -37,7 +37,7 @@ if ($@) {
 		die <<"EOT";
 $@
 To be more specific, your error is that, per step 7 of the INSTALLATION
-section in the INSTALL file (please reread), you need to start slashd
+section in the INSTALL file (please reread), you need to start ipnd
 with '/etc/init.d/ipn start', not '/usr/local/slash/sbin/ipnd start'.
 EOT
 	}
@@ -212,9 +212,6 @@ $cbServer->on(request => sub {
 		my $days = $subscribe->getDaysByTxn($ipn->txn_id);
 		$subscribe->removeDaysFromUID($days, $uid);
 		$subscribe->removePayment($ipn->parent_txn_id);
-	}
-	else{
-		# Do nothing but the logging we've already done.
 	}
 
 	# log to paypal_log
