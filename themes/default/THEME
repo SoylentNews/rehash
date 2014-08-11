@@ -166,7 +166,6 @@ template=templates/fileLink;misc;default
 template=templates/imageLink;misc;default
 template=templates/nextStory;article;default
 
-task=tasks/accesslog_artcom.pl
 task=tasks/balance_readers.pl
 task=tasks/counthits.pl
 task=tasks/daily.pl
