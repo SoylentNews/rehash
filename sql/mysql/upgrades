@@ -300,7 +300,6 @@ UPDATE topics SET width=104 WHERE tid=8;
 
 ##### ##### Subscriptions Updates ##### #####
 # Update vars
-INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_low_val','14','Number of days before subscripion ends to start sending low subscription message');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('paypal_host','www.sandbox.paypal.com','Host part of url for PayPal. Change this to to use PayPal sandbox. ');
@@ -328,10 +327,10 @@ UPDATE vars SET value='2' WHERE name='comments_more_seclev';
 UPDATE vars SET value='20.00' WHERE name='paypal_amount';
 
 ##### FOR PRODUCTION ONLY #####
-UPDATE vars SET value='paypal@soylentnews.org' WHERE name='paypal_business'
-UPDATE vars SET value='https://soylentnews.org/subscribe.pl' WHERE name='paypal_cancel_return'
-UPDATE vars SET value='https://soylentnews.org/subscribe.pl?op=paypal' WHERE name='paypal_return'
-UPDATE vars SET value='0' WHERE name='subscribe_admin_only'
+UPDATE vars SET value='paypal@soylentnews.org' WHERE name='paypal_business';
+UPDATE vars SET value='https://soylentnews.org/subscribe.pl' WHERE name='paypal_cancel_return';
+UPDATE vars SET value='https://soylentnews.org/subscribe.pl?op=paypal' WHERE name='paypal_return';
+UPDATE vars SET value='0' WHERE name='subscribe_admin_only';
 ##### FOR PRODUCTION ONLY #####
 
 # Alter subsciber_payments for new PayPal format
