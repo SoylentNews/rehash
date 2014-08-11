@@ -2760,7 +2760,7 @@ sub html2text {
 	1 while chomp($text);
 
 	# restore UTF-8 Flag lost by HTML::TreeBuilder
-	#$text = decode_utf8($text) if ($was_utf8);
+	$text = decode_utf8($text) if ($was_utf8);
 
 	return $text, $refs->get_refs($gSkin->{absolutedir});
 }
