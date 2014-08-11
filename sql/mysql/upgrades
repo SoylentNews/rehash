@@ -92,8 +92,13 @@ UPDATE users_index SET slashboxes = '';
 # Delet story_never_author for all users to fix author bug (do this each time until bug fixed)
 UPDATE users_index SET story_never_author = '';
 
+
+
 ##############################
 # Post-slashcode 14.06 release
+
+# 14_08 RELEASE
+UPDATE vars SET value = 'slashcode_14_08' WHERE name = 'cvs_tag_currentcode';
 
 # Allow Reltionship Change Messages to get sent for non subscribers
 UPDATE message_codes SET subscribe=0 WHERE code=12;
