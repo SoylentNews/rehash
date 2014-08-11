@@ -52,7 +52,7 @@ PLUGINDIRS = `find . -name CVS -prune -o -name .git -prune -o -type d -print | e
 REPLACEWITH = `$(PERL) -MConfig -e 'print quotemeta($$Config{startperl})' | sed 's/@/\\@/g'`
 
 # Scripts that need special treatment for $(SLASH_PREFIX)
-PREFIX_REPLACE_FILES = utils/slash httpd/slash.conf
+PREFIX_REPLACE_FILES = utils/slash utils/ipn httpd/slash.conf
 
 # Used by the RPM build.
 BUILDROOT=/var/tmp/slash-buildroot
@@ -197,7 +197,30 @@ install: slash pluginsandtagboxes
 				if [ $$init ]; then				\
 					echo "***   ('$(INIT)' does not exist)";	\
 				fi;						\
-				echo "*** You will need to look at how to install utils/slashd"; \
+				echo "*** You will need to look at how to install utils/slash"; \
+				echo "*** on your own.";			\
+			 fi;							\
+			 ;;							\
+	 	'utils/ipn')							\
+			 if [ "$(INIT)" != "/etc" ]; then			\
+			 	if [ -d $(INIT) ]; then 		\
+			 		init=$(INIT);				\
+				fi;								\
+			 elif [ -d /etc/init.d ]; then 				\
+	 			init=/etc;					\
+			 elif [ -d /etc/rc.d/init.d ]; then 			\
+		 		init=/etc/rc.d;					\
+			 fi;							\
+			 if [ $$init ]; then					\
+ 			 	$(INSTALL) utils/ipn $$init/init.d/;		\
+				ln -s -f ../init.d/ipn $$init/rc3.d/S99ipn;	\
+				ln -s -f ../init.d/ipn $$init/rc6.d/K99ipn;	\
+			 else 							\
+				echo "*** Makefile can't determine where your init scripts live."; \
+				if [ $$init ]; then				\
+					echo "***   ('$(INIT)' does not exist)";	\
+				fi;						\
+				echo "*** You will need to look at how to install utils/ipn"; \
 				echo "*** on your own.";			\
 			 fi;							\
 			 ;;							\

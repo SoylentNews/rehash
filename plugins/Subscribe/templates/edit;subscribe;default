@@ -26,10 +26,9 @@ __template__
 	[% PROCESS userboxes %]
 </div>
 <div id="users-blocks">
-[% prefs_titlebar %]
-<div class="generalbody">
-[% IF !user.is_admin; user_edit = user; END %]
-
+	[% prefs_titlebar %]
+	<div class="generalbody">
+	
 		[% IF note %]
 			<div class="message">
 				[% note %]
@@ -38,168 +37,93 @@ __template__
 		[% IF admin_flag %]
 			[% admin_block %]
 		[% END %]
-
-	[% IF (constants.subscribe_allow_gifts && (!constants.subscribe_gift_testing || user.is_admin)) %]
-		<p>You can buy a subscription for yourself or a gift subscription for another user.
-		Payment options include PayPal and credit-card.</p>
-		<p>Recipients of gift subscriptions will be notified of your purchase through email.</p>
-
-		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a></p> [% END %]
-	
-		<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
-		<fieldset>
-			<legend>Gift Subscriptions</legend>
-		<input type="radio" name="subscription_type" value="user"> Buy Pages for [% user.nickname | strip_literal %]
-		<input type="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <input type="text" name="uid" size="6">
-
-		<br>
-			For gift subscriptions only:<br>
-			Who do you want the recipient to be told the gift is from?<br>
-			<input type="text" name="from" size="15" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)
-		<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue and choose payment type">
-		</fieldset>
-	</form>
-	[% ELSE %]
-		<p>Hit the PayPal or credit-card link below to subscribe to [% constants.sitename %]. You will be able to purchase banner-ad-free pages.</p>
 		
-		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a></p> [% END %]
-
-		[% PROCESS paypalbut %]
-		[% PROCESS ccbut %]
-	[% END %]
-
-[%
-	pages = [
-		{ pagename => "index",
-		  descr	   => "<b>Homepage</b> (Plum: see the Mysterious Future!)" },
-		{ pagename => "article",
-		  descr	   => "<b>Stories</b> (Plum: reading Mysterious Future stories)" },
-		{ pagename => "comments",
-		  descr	   => "<b>Comments</b>" },
-	];
-%]
-
-[%
-	hits_paidfor          = user_newvalues.hits_paidfor
-		|| user_edit.hits_paidfor          || 0;
-	hits_bought           = user_newvalues.hits_bought
-		|| user_edit.hits_bought           || 0;
-	hits_bought_today     = user_newvalues.hits_bought_today
-		|| user_edit.hits_bought_today     || 0;
-	hits_bought_today_max = user_newvalues.hits_bought_today_max;
-	FOREACH page = pages;
-		thispagename = "buypage_${page.pagename}";
-		IF user_newvalues.$thispagename.defined;
-			page.isbought = user_newvalues.$thispagename;
-		ELSE;
-			page.isbought = user_edit.$thispagename;
-		END;
-	END;
-%]
-
-
-
-<p>
-	[% IF user.uid == user_edit.uid %]
-		You have
-	[% ELSE %]
-		User "[% user_edit.nickname | strip_literal %]" has
-	[% END %]
-	paid for a total of [% hits_paidfor %] pages	and so far [% hits_bought %] have been used up ([% hits_bought_today %] today).
-
-	[% IF hits_paidfor && user.uid == user_edit.uid %]
-		Thank you for supporting [% constants.sitename %]! We appreciate your contribution very much.
-	[% END %]
-</p>
-<p>(We use Greenwich Mean Time to decide where "today" begins and
-ends. Your day may vary.)</p>
-
-
-[% IF user.is_admin || ( hits_paidfor && (hits_paidfor > hits_bought) );
-	can_buy = 1;
-ELSE;
-	can_buy = 0;
-END %]
-
-
-[% IF can_buy %]
-
-	<form action="[% env.script_name %]">
-<fieldset><legend>Buy Subscriptions</legend>
-	[% IF user.uid != user_edit.uid %]
-	<input type="hidden" name="uid" value="[% user_edit.uid %]">
-	[% END %]
-
-	[% IF user.is_admin %]
-		<p>Want to buy [% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% END %]
-		some pages? You're an admin, so take as many as you want: <input type="text" name="buymore" value="0" size="6"></p>
-	[% END %]
-
-	<p>We give you some control over deciding where to suppress ads.
-	New subscribers default to suppressing ads everywhere except on
-	comments pages. For accounting purposes, we'd appreciate if you
-	had at least one type of ad being suppressed.
-
-	<p><table border=0 cellspacing=1 width="100%">
-	<tr><th>&nbsp;&nbsp;Ads&nbsp;&nbsp;</th>
-	<th>&nbsp;&nbsp;No&nbsp;Ads&nbsp;&nbsp;</th>
-	<th>&nbsp;&nbsp;</th></tr>
-
-	[% FOREACH page = pages %]
-		<tr>
-			<td valign="top" align="center"><input type="radio"
-				name="buypage_[% page.pagename %]"
-				value="0"[% constants.markup_checked_attribute IF !page.isbought %]></td>
-			<td valign="top" align="center"><input type="radio"
-				name="buypage_[% page.pagename %]"
-				value="1"[% constants.markup_checked_attribute IF  page.isbought %]></td>
-			<td valign="top" align="left">&nbsp;[% page.descr %]</td>
-		</tr>
-	[% END %]
-
-	<tr><td>&nbsp;</td><td colspan="2" valign="top" align="left">Set "No Ads" anywhere, and you'll get ads disabled for
-	free on other pages too.
-	</td></tr>
-
-	</table>
-
-	<p>Optionally, if you want to make sure you don't use up your subscription too quickly, you may set a limit of the
-	maximum number of ads you will suppress per day. Beyond this daily limit, pages will not count against your
-	subscription (and ads will begin to appear again). Enter the value here, or 0 to disable the limit, or blank
-	to use the default value
-	[% IF constants.subscribe_hits_btmd %]
-		of [% constants.subscribe_hits_btmd %]
-	[% ELSE %]
-		(default is no limit)
-	[% END %]:&nbsp;<INPUT	type="TEXT" name="hbtm"	value="[% hits_bought_today_max %]" size="6">
-	[% IF constants.subscribe_hits_btmd && constants.subscribe_hits_btmd > 2 %]
-		<br>Note that setting this value between 1 and [% constants.subscribe_hits_btmd - 1 %] will disable some plums.
-	[% END %]
-	</p>
-
-	<p><input type="submit" name="op" value="save">
-	<input type="hidden" name="userfield" value="[% userfield %]"></p>
-</fieldset>
-	</form>
-
-[% END %]
-
-
-<p>If you have any questions or concerns about billing, ad&nbsp;display,
-or other subscription-related issues, please contact
-<a href="mailto:[% constants.subscribe_email %]">[% constants.subscribe_email %]</a>.
-If your question is about your daily headlines email, you can edit that at
-<a href="[% gSkin.rootdir %]/my/messages">[% gSkin.absolutedir %]/my/messages</a>.
-</div>
-<script type="text/javascript">
-(function() {
-// coremetrics
-	if( window.location.hostname === 'slashdot.org' ) {
-		cmSetProduction();
-	}
-	cmCreateConversionEventTag( 'Account Subscription', '1', 'subscription', '5' );
-})();
-</script>
+		[% IF was_sub %]
+			<fieldset>
+				<legend>Subscription Info</legend>
+				[% IF user.uid == user_edit.uid %]
+					Your 
+				[% ELSE %]
+					User "[% user_edit.nickname | strip_literal %]" 
+				[% END %]
+				subsrciption
+			
+				[% IF subscriber %]
+					ends
+				[% ELSE %]
+					ended
+				[% END %]
+				[% subscriber_until %] UTC. 
+				
+				[% IF user.uid == user_edit.uid && subscriber %]
+					<br />Thank you for supporting [% constants.sitename %]! We appreciate your contribution very much.
+				[% END %]
+			</fieldset>
+		[% END %]
+	
+		[% IF user.uid == user_edit.uid %]	
+			<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
+				<fieldset>
+					<legend>Purchase Subscriptions</legend>
+					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal.<br />
+					<br />
+					Recipients of gift subscriptions will be notified of your purchase through email.<br />
+					<br />
+					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
+					<input type="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <input type="text" name="uid" size="10"><br />	
+					<br />
+					For gift subscriptions only:<br />
+					Who do you want the recipient to be told the gift is from?<br />
+					<input type="text" name="from" size="15" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
+					<br />
+					<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue">
+				</fieldset>
+			</form>
+		[% END %]
+	
+		[% IF user.is_admin %]
+			<form action="[% env.script_name %]">
+				<fieldset>
+					<legend>Grant Subscriptions</legend>
+					<input type="hidden" name="uid" value="[% user_edit.uid %]">
+					<p>Want to grant [% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% ELSE %]yourslef[% END %]
+					some subscription days? You're an admin, so gran as many as you want: <input type="text" name="days" value="0" size="6"></p>
+					<p><input type="submit" name="op" value="Grant"><input type="hidden" name="userfield" value="[% userfield %]"></p>
+				</fieldset>
+			</form>
+		[% END %]
+	
+		<form action="[% env.script_name %]">
+			<fieldset>
+				<legend>Subscriptions Preferences</legend>
+				[% IF user.uid != user_edit.uid %]
+					<input type="hidden" name="uid" value="[% user_edit.uid %]">
+				[% END %]
+				<label><input name="hide_subscription" type="checkbox" [% hs_check %]> Hide Subscription</label>
+				<div class="note">Hide * beside username in comments that indicates you are a subscriber.</div>
+				<br />
+				<div class="note">Set the delivery mode for subscription related messages:</div>
+				[%
+				messages = Slash.getObject('Slash::Messages');
+				FOREACH type = bvmessagecodes.keys.sort;
+					code = bvmessagecodes.$type.code;
+					UNLESS messages.checkMessageUser(code, user_edit);
+						NEXT;
+					END %]
+					<label>[% type %] <select name="deliverymodes_[% code %]">
+						[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
+							<option value="[% valid_code %]"[% IF prefs.${code} == valid_code %] selected[% END %]>[% bvdeliverymodes.$valid_code.name %]</option>
+						[% END %]
+						</select>
+					</label>
+				[% END %]
+				<br />
+				<p><input type="submit" name="op" value="Save"><input type="hidden" name="userfield" value="[% userfield %]"></p>
+			</fieldset>
+		</form>
+	
+		<p>If you have any questions or concerns about billing, or other subscription-related issues, please contact <a href="mailto:[% constants.subscribe_email %]">[%constants.subscribe_email %]</a>.</p>
+	</div>
 </div>
 __seclev__
 10000

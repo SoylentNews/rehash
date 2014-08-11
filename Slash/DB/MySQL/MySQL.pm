@@ -4055,22 +4055,29 @@ sub validFormkey {
 	undef $form->{formkey} unless $form->{formkey} =~ /^\w{10}$/;
 	return 'invalid' if !$form->{formkey};
 	my $formkey_quoted = $self->sqlQuote($form->{formkey});
+	my $timeframe = $self->getFormkeyTimeframe();
 
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $formkey_earliest = time() - $timeframe;
 
 	my $where = $self->_whereFormkey();
 	$where = "($where OR subnetid = '$subnetid')"
 		if $constants->{lenient_formkeys} && isAnon($uid);
-	my($is_valid) = $self->sqlSelect(
-		'COUNT(*)',
-		'formkeys',
-		"formkey = $formkey_quoted
-		 AND $where
-		 AND ts >= $formkey_earliest AND formname = '$formname'"
-	);
-	print STDERR "ISVALID $is_valid\n" if $constants->{DEBUG};
-	return 'invalid' if !$is_valid;
-
+	
+	my($is_valid);
+	if ($timeframe) {
+		$is_valid = $self->sqlSelect(
+			'COUNT(*)',
+			'formkeys',
+			"formkey = $formkey_quoted
+			 AND $where
+			 AND ts >= $formkey_earliest AND formname = '$formname'"
+		);
+		print STDERR "ISVALID $is_valid\n" if $constants->{DEBUG};
+		return 'invalid' if !$is_valid;
+	} else {
+		$is_valid = 1;
+	}
+	
 	# If we're using the HumanConf plugin, check for its validity
 	# as well.
 	return 'ok' if $options->{no_hc};
@@ -4183,6 +4190,31 @@ sub updateFormkey {
 }
 
 ##################################################################
+sub getFormkeyTimeframe {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
+	my $counts_as_anon;
+	if (($user->{is_anon} || $user->{karma} < $constants->{formkey_minloggedinkarma} || $form->{postanon}) && !$user->{is_subscriber}){
+		$counts_as_anon = 1;
+	} else {
+		$counts_as_anon = 0;
+	}
+
+	my $formkey_timeframe = $counts_as_anon ? $constants->{formkey_timeframe_anon} : 0;
+	$formkey_timeframe ||= $constants->{formkey_timeframe} || 0;
+	if ($user->{is_subscriber} && exists $constants->{formkey_timeframe_sub}){
+		$formkey_timeframe = $constants->{formkey_timeframe_sub};
+	}
+	print STDERR "Timeframe: $formkey_timeframe, caa: $counts_as_anon \n" if $constants->{DEBUG};
+
+	return $formkey_timeframe ? $formkey_timeframe : 0;
+}
+
+##################################################################
 sub checkPostInterval {
 	my($self, $formname) = @_;
 	$formname ||= getCurrentUser('currentPage');
@@ -4190,16 +4222,22 @@ sub checkPostInterval {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 
-	my $counts_as_anon =
-		   $user->{is_anon}
-		|| $user->{karma} < $constants->{formkey_minloggedinkarma}
-		|| $form->{postanon};
+	my $counts_as_anon;
+	if (($user->{is_anon} || $user->{karma} < $constants->{formkey_minloggedinkarma} || $form->{postanon}) && !$user->{is_subscriber}){
+		$counts_as_anon = 1;
+	} else {
+		$counts_as_anon = 0;
+	}
 
 	my $speedlimit_name = "${formname}_speed_limit";
 	my $speedlimit_anon_name = "${formname}_anon_speed_limit";
+	my $speedlimit_sub_name = "${formname}_sub_speed_limit";
 	my $speedlimit = $counts_as_anon ? $constants->{$speedlimit_anon_name} : 0;
 	$speedlimit ||= $constants->{$speedlimit_name} || 0;
-
+	if ($user->{is_subscriber} && exists $constants->{$speedlimit_sub_name}){
+		$speedlimit = $constants->{$speedlimit_sub_name};
+	}
+	
 	# If this user has access modifiers applied, check for possible
 	# different speed limits based on those.  First match, if any,
 	# wins.
@@ -4230,7 +4268,7 @@ sub checkPostInterval {
 	}
 
 	my $time = $self->getTime({ unix_format => 1 });
-	my $timeframe = $constants->{formkey_timeframe};
+	my $timeframe = $self->getFormkeyTimeframe();
 	$timeframe = $speedlimit if $speedlimit > $timeframe;
 	my $formkey_earliest = $time - $timeframe;
 
@@ -4257,7 +4295,7 @@ sub checkMaxReads {
 	my $constants = getCurrentStatic();
 
 	my $maxreads = $constants->{"max_${formname}_viewings"} || 0;
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $formkey_earliest = time() - $self->getFormkeyTimeframe();
 
 	my $where = $self->_whereFormkey();
 	$where .= " AND formname = '$formname'";
@@ -4278,7 +4316,7 @@ sub checkMaxPosts {
 	my $constants = getCurrentStatic();
 	$formname ||= getCurrentUser('currentPage');
 
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $formkey_earliest = time() - $self->getFormkeyTimeframe();
 	my $maxposts = 0;
 	if ($constants->{"max_${formname}_allowed"}) {
 		$maxposts = $constants->{"max_${formname}_allowed"};

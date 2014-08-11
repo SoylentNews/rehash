@@ -75,11 +75,13 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='deliverymodes'") },
 	'messagecodes'
 		=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0") },
+	'messagecodes_sub'
+		=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0 AND type LIKE 'Subscription%'") },	
 	'bvdeliverymodes'
 		=> sub { $_[0]->sqlSelectAllHashref('code', 'code,name,bitvalue', 'message_deliverymodes') },
 	'bvmessagecodes'
 		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
-  'bvmessagecodes_slev'
+	'bvmessagecodes_slev'
 		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,seclev,delivery_bvalue', 'message_codes', "code >= 0") },
 );
 
@@ -140,6 +142,29 @@ sub setPrefs {
 	# First we delete, then we insert, this allows us to remove MSG_MODE_NONE type entries
 	# Basically it keeps defaults out of the DB, and makes it smaller :)
 	$self->sqlDelete($table, "uid = $uid");
+	for my $code (keys %$prefs) {
+		next if $prefs->{$code} == MSG_MODE_NONE;
+		$self->sqlInsert($table, {
+			uid	=> $uid,
+			code	=> $code,
+			mode	=> $prefs->{$code},
+		});
+	}
+}
+
+sub setPrefsSub {
+	my($self, $uid, $prefs) = @_;
+	my $table = $self->{_prefs_table};
+	my $cols  = $self->{_prefs_cols};
+	my $prime = $self->{_prefs_prime1};
+	my $where = $prime . '=' . $self->sqlQuote($uid);
+	my $messagecodes_sub = getDescriptions('messagecodes_sub');
+
+	# First we delete, then we insert, this allows us to remove MSG_MODE_NONE type entries
+	# Basically it keeps defaults out of the DB, and makes it smaller :)
+	for my $scode (keys %$messagecodes_sub) {
+		$self->sqlDelete($table, "uid = $uid AND code=$scode");
+	}	
 	for my $code (keys %$prefs) {
 		next if $prefs->{$code} == MSG_MODE_NONE;
 		$self->sqlInsert($table, {

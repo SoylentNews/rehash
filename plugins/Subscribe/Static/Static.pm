@@ -12,6 +12,8 @@ use Slash::DB::Utility;
 use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
+use DateTime;
+use DateTime::Format::MySQL;
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -34,38 +36,46 @@ sub new {
 
 sub countTotalSubs {
 	my($self) = @_;
-	return $self->sqlCount('users_hits',
-		'hits_paidfor > 0');
+	my $dt_epoch = DateTime->new( year => 1970, month => 1, day => 1 );
+	my $md_epoch = DateTime::Format::MySQL->format_date($dt_epoch);
+	return $self->sqlCount('users_info',
+		"subscriber_until > $md_epoch");
 }
 
 sub countCurrentSubs {
 	my($self) = @_;
-	return $self->sqlCount('users_hits',
-		'hits_paidfor > 0 AND hits_paidfor > hits_bought');
+	my $dt_today = DateTime->today;
+	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
+	return $self->sqlCount('users_info',
+		"subscriber_until >= $md_today");
 }
 
 sub countTotalRenewingSubs {
-        my($self) = @_;
+	my($self) = @_;
+	my $dt_epoch = DateTime->new( year => 1970, month => 1, day => 1 );
+	my $md_epoch = DateTime::Format::MySQL->format_date($dt_epoch);
 	return scalar( @{
-                $self->sqlSelectColArrayref(
-                        'users_hits.uid, COUNT(*) AS c',
-                        'users_hits LEFT JOIN subscribe_payments ON users_hits.uid = subscribe_payments.uid',
-                        'hits_paidfor > 0',
-                        'GROUP BY users_hits.uid HAVING c > 1'
-                )
-        } );
+		$self->sqlSelectColArrayref(
+			'users_info.uid, COUNT(*) AS c',
+			'users_info LEFT JOIN subscribe_payments ON users_info.uid = subscribe_payments.uid',
+			"users_info.subscriber_until > $md_epoch",
+			'GROUP BY users_info.uid HAVING c > 1'
+		)
+	} );
 }
 
 sub countCurrentRenewingSubs {
-        my($self) = @_;
-        return scalar( @{
-                $self->sqlSelectColArrayref(
-                        'users_hits.uid, COUNT(*) AS c',
-                        'users_hits LEFT JOIN subscribe_payments ON users_hits.uid = subscribe_payments.uid',
-                        'hits_paidfor > 0 AND hits_paidfor > hits_bought',
-                        'GROUP BY users_hits.uid HAVING c > 1'
-                )
-        } );
+	my($self) = @_;
+	my $dt_today = DateTime->today;
+	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
+	return scalar( @{
+		$self->sqlSelectColArrayref(
+			'users_info.uid, COUNT(*) AS c',
+			'users_info LEFT JOIN subscribe_payments ON users_info.uid = subscribe_payments.uid',
+			"users_info.subscriber_until >= $md_today",
+			'GROUP BY users_info.uid HAVING c > 1'
+		)
+	} );
 }
 
 sub countTotalGiftSubs {
@@ -79,58 +89,72 @@ sub countCurrentGiftSubs {
 	my($self) = @_;
 	my @gift_uids = $self->_getUidsForPaymentType("gift");
 	return 0 unless @gift_uids;
-	return $self->sqlCount('users_hits',
-		'hits_paidfor > 0 AND hits_paidfor > hits_bought AND uid in('.join(',',@gift_uids).')');
+	my $dt_today = DateTime->today;
+	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
+	return $self->sqlCount('users_info',
+		'subscriber_until >= '.$md_today.' AND uid in('.join(',',@gift_uids).')');
 }
 
 sub countTotalRenewingGiftSubs {
-        my($self) = @_;
+	my($self) = @_;
 	my @gift_uids = $self->_getUidsForPaymentType("gift");
+	my $dt_epoch = DateTime->new( year => 1970, month => 1, day => 1 );
+	my $md_epoch = DateTime::Format::MySQL->format_date($dt_epoch);
 	return 0 unless @gift_uids;
 	return scalar( @{
-                $self->sqlSelectColArrayref(
-                        'users_hits.uid, COUNT(*) AS c',
-                        'users_hits LEFT JOIN subscribe_payments ON users_hits.uid = subscribe_payments.uid AND users_hits.uid in('.join(',',@gift_uids).')',
-                        'hits_paidfor > 0',
-                        'GROUP BY users_hits.uid HAVING c > 1'
-                )
-        } );
+		$self->sqlSelectColArrayref(
+			'users_info.uid, COUNT(*) AS c',
+			'users_info LEFT JOIN subscribe_payments ON users_info.uid = subscribe_payments.uid AND users_info.uid in('.join(',',@gift_uids).')',
+			"users_info.subscriber_until > $md_epoch",
+			'GROUP BY users_info.uid HAVING c > 1'
+		)
+	} );
 }
 
 sub countCurrentRenewingGiftSubs {
-        my($self) = @_;
+	my($self) = @_;
 	my @gift_uids = $self->_getUidsForPaymentType("gift");
 	return 0 unless @gift_uids;
-        return scalar( @{
-                $self->sqlSelectColArrayref(
-                        'users_hits.uid, COUNT(*) AS c',
-                        'users_hits LEFT JOIN subscribe_payments ON users_hits.uid = subscribe_payments.uid',
-                        'hits_paidfor > 0 AND hits_paidfor > hits_bought AND users_hits.uid in('.join(',',@gift_uids).')',
-                        'GROUP BY users_hits.uid HAVING c > 1'
-                )
-        } );
+	my $dt_today = DateTime->today;
+	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
+	return scalar( @{
+		$self->sqlSelectColArrayref(
+			'users_info.uid, COUNT(*) AS c',
+			'users_info LEFT JOIN subscribe_payments ON users_info.uid = subscribe_payments.uid',
+			'users_info.subscriber_until >= '.$md_today.' AND users_info.uid in('.join(',',@gift_uids).')',
+			'GROUP BY users_info.uid HAVING c > 1'
+		)
+	} );
 }
 
 sub getLowRunningSubs {
 	my ($self) = @_;
-	my $low_val = int ((getCurrentStatic('paypal_num_pages') || 1000) / 20);
+	my $low_val = getCurrentStatic('subscribe_low_val');
+	my $dt_today = DateTime->today;
+	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
+	my $dt_low = $dt_today->add( days => $low_val );
+	my $md_low = DateTime::Format::MySQL->format_date($dt_low);
 	print STDERR "low_val: $low_val\n";
 	return $self->sqlSelectColArrayref(
-		'users_hits.uid',
-		'users_hits',
-		"hits_paidfor > 0 and (hits_paidfor - hits_bought) BETWEEN 1 AND $low_val"
+		'users_info.uid',
+		'users_info',
+		"users_info.subscriber_until < $md_low and subscriber_until >= $md_today"
 	);
 }
 
 sub getExpiredSubs {
 	my ($self) = @_;
+	my $dt_today = DateTime->today;
+	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
+	my $dt_epoch = DateTime->new( year => 1970, month => 1, day => 1 );
+	my $md_epoch = DateTime::Format::MySQL->format_date($dt_epoch);
 	return $self->sqlSelectColArrayref(
-		'users_hits.uid',
-		'users_hits',
-		'hits_paidfor > 0 and (hits_paidfor - hits_bought) = 0'
+		'users_info.uid',
+		'users_info',
+		"users_info.subscriber_until > $md_epoch and subscriber_until < $md_today"
 	);
 }
-																		
+
 
 sub _getUidsForPaymentType {
 	my ($self, $type) = @_;
@@ -155,18 +179,18 @@ sub getSubscriberList {
 	) if !$start;
 	$start .= '0' while length($start) < 14;
 	$end = substr($start, 0, 8) . "235959" if !$end;
-	$end   .= '0' while length($end)   < 14;
+	$end .= '0' while length($end) < 14;
 	# Just return all the columns that might be useful;  probably not all
 	# of them will actually be used, oh well.
 	return $slashdb->sqlSelectAllHashref(
 		"spid",
 		"spid,
 		 subscribe_payments.uid as uid,
-		 email, ts, payment_gross, payment_net, pages,
+		 email, ts, payment_gross, payment_net, days,
 		 method, transaction_id, data, memo,
 		 nickname, realemail, seclev, author,
-		 karma, m2fair, m2unfair, upmods, downmods, created_at,
-		 users_hits.hits as hits, hits_bought, hits_paidfor, payment_type, puid",
+		 karma, upmods, downmods, created_at,
+		 users_hits.hits as hits, subscriber_until, payment_type, puid, hide_subscription",
 		"subscribe_payments, users, users_info, users_hits",
 		"ts BETWEEN '$start' AND '$end'
 		 AND subscribe_payments.uid = users.uid

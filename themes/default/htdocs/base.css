@@ -493,6 +493,12 @@ min-height: 4em;
 font-size: 0.875em;
 }
 
+.article blockquote,  .article quote {
+  opacity: 0.83;
+	margin: 1em 0 1em 2em;
+	display: block;
+}
+
 .article .details strong
 {
 font-weight: bold;
@@ -518,6 +524,7 @@ z-index: 10;
 margin: 0 0 1em 0;
 position: relative;
 }
+
 
 .full
 {
@@ -741,7 +748,7 @@ margin-bottom: 1em;
 .error
 {
 padding: 1em;
-color: #006;
+color: #600;
 font-weight: bold;
 }
 

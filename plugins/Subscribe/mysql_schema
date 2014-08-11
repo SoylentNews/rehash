@@ -8,17 +8,19 @@ DROP TABLE IF EXISTS subscribe_payments;
 CREATE TABLE subscribe_payments (
 	spid		MEDIUMINT UNSIGNED AUTO_INCREMENT NOT NULL,
 	uid		MEDIUMINT UNSIGNED NOT NULL,
-	email		VARCHAR(255) NOT NULL,
+	email		VARCHAR(255) NULL,
 	ts		TIMESTAMP,
 	payment_gross	DECIMAL(10,2) NOT NULL,
 	payment_net	DECIMAL(10,2) NOT NULL,
-	pages		MEDIUMINT UNSIGNED NOT NULL,
+	pages		MEDIUMINT UNSIGNED NULL,
 	transaction_id	VARCHAR(255) NOT NULL,
 	method		VARCHAR(6),
-	memo		VARCHAR(255) NOT NULL,
+	memo		VARCHAR(255) NULL,
 	data		BLOB,
 	payment_type	VARCHAR(10),
 	puid		MEDIUMINT UNSIGNED,
+	days mediumint(8) UNSIGNED NULL,
+	raw_transaction text NULL,
 	PRIMARY KEY(spid),
 	KEY(uid),
 	KEY(ts),
@@ -26,5 +28,26 @@ CREATE TABLE subscribe_payments (
 	KEY(puid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
 
+ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
+ALTER TABLE users_info ADD COLUMN subscriber_until date DEFAULT '1970-01-01' NOT NULL;
+ALTER TABLE users_info ADD COLUMN hide_subscription tinyint(3) UNSIGNED DEFAULT 0 NOT NULL;
+
+
+# Setup PayPal Log Table
+DROP TABLE IF EXISTS paypal_log;
+CREATE TABLE paypal_log (
+	logid bigint unsigned NOT NULL AUTO_INCREMENT,
+	ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	uid mediumint(8) unsigned NULL DEFAULT NULL,
+	transaction_id varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	parent_transaction_id varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	transaction_type varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	email varchar(450) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	name varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	payment_gross varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	payment_status varchar(255) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+	raw_transaction text COLLATE utf8_unicode_ci NOT NULL,
+	remote_address varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	PRIMARY KEY (logid)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -1178,11 +1178,18 @@ sub isSubscriber {
 	if ($constants->{subscribe}) {
 		if (! ref $suser) {
 			my $slashdb = getCurrentDB();
-			$suser = $slashdb->getUser($suser, [qw(hits_paidfor hits_bought)]);
+			$suser = $slashdb->getUser($suser, [qw(subscriber_until)]);
 		}
-
-		$subscriber = 1 if $suser->{hits_paidfor} &&
-			$suser->{hits_bought} < $suser->{hits_paidfor};
+		
+		use DateTime;
+		use DateTime::Format::MySQL;
+		my $dt_today   = DateTime->today;
+		my $dt_sub = DateTime::Format::MySQL->parse_date($suser->{subscriber_until});
+		
+		if ( $dt_sub >= $dt_today ){
+			$subscriber = 1;
+		}
+		
 	} else {
 		$subscriber = 1;  # everyone is a subscriber if subscriptions are turned off
 	}
@@ -1645,12 +1652,12 @@ sub prepareUser {
 
 	if ($r) {
 		my %params = $r->args;
-		if ($params{ss} == 1) {
+		if ((exists $params{ss}) && $params{ss} == 1) {
 			$user->{state}{explicit_smalldevice} = 1;
 			$user->{state}{smalldevice} = 1;
 		}
 
-		if ($params{sd} == 1) {
+		if ((exists $params{sd}) && $params{sd} == 1) {
 			$user->{state}{simpledesign} = 1;
 		}
 
@@ -2671,6 +2678,7 @@ sub writeLog {
 sub getOpAndDatFromStatusAndURI {
 	my($status, $uri, $dat) = @_;
 	$dat ||= "";
+	my $req_uri = $ENV{REQUEST_URI} || "";
 
 	# XXX check regexSid()
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
@@ -2689,7 +2697,7 @@ sub getOpAndDatFromStatusAndURI {
 		$dat = $uri;
 		$uri = 'not found';
 	} elsif ($uri =~ /^\/palm/) {
-		($dat = $ENV{REQUEST_URI}) =~ s|\.shtml$||;
+		($dat = $req_uri) =~ s|\.shtml$||;
 		$uri = 'palm';
 	} elsif ($uri eq '/') {
 		$uri = 'index';
@@ -2705,7 +2713,7 @@ sub getOpAndDatFromStatusAndURI {
 		$uri = 'image';
 	} elsif ($uri =~ /\.png$/) {
 		$uri = 'image';
-	} elsif ($uri =~ /\.(?:rss|xml|rdf|atom)$/ || $ENV{QUERY_STRING} =~ /\bcontent_type=(?:rss|xml|rdf|atom)\b/) {
+	} elsif ($uri =~ /\.(?:rss|xml|rdf|atom)$/ || $req_uri =~ /\bcontent_type=(?:rss|xml|rdf|atom)\b/) {
 		$dat = $uri;
 		$uri = 'rss';
 	} elsif ($uri =~ /\.pl$/) {

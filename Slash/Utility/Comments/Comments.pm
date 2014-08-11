@@ -623,12 +623,14 @@ sub getError {
 	# this is a cheap hack to NOT print titlebar in getError if we
 	# are calling from ajax.pl ... easier than reorganizing the code
 	# for now -- pudge 2008/03/04
-	for (0..9) {
-		if ((caller($_))[1] =~ /\bajax\.pl$/) {
-			$hashref->{no_titlebar} = 1;
-			last;
-		}
-	}
+	# turn off for now
+	# not using ajax -- paulej72 2014/07/31
+	# for (0..9) {
+	#	 if ((caller($_))[1] =~ /\bajax\.pl$/) {
+	#	 	$hashref->{no_titlebar} = 1;
+	#	 	last;
+	#	 }
+	# }
 
 	return slashDisplay('errors', $hashref,
 		{ Return => 1, Nocomm => $nocomm, Page => 'comments' });
@@ -651,6 +653,8 @@ sub getPoints {
 		moderations => constrain_score($C->{points} + $C->{tweak}) - constrain_score($C->{pointsorig} + $C->{tweak_orig}),
 	};
 	my $points = $hr->{score_start} || 0;
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	# User can setup to give points based on size.
 	my $len = $C->{len} || length($C->{comment});
@@ -726,9 +730,18 @@ sub getPoints {
 		$hr->{karma_bonus} =
 			$user->{karma_bonus};
 	}
-
+	
+	
+	my $subscriber_bonus;
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && $constants->{subscriber_bonus}) {
+		my $hide_subscription = $reader->getUser($C->{uid}, 'hide_subscription');
+		if (isSubscriber($C->{uid}) && !$hide_subscription) {
+			$subscriber_bonus = 'yes';
+		}
+	}
+	
 	# And, the poster-was-a-subscriber bonus
-	if ($user->{subscriber_bonus} && $C->{subscriber_bonus} eq 'yes') {
+	if ($user->{subscriber_bonus} && $subscriber_bonus eq 'yes') {
 		$hr->{subscriber_bonus} =
 			$user->{subscriber_bonus};
 	}
@@ -1588,8 +1601,7 @@ sub saveComment {
 
 	$comm->{nobonus}  = $user->{nobonus}	unless $comm->{nobonus_present};
 	$comm->{postanon} = $user->{postanon}	unless $comm->{postanon_present};
-	$comm->{nosubscriberbonus} = $user->{nosubscriberbonus}
-	unless $comm->{nosubscriberbonus_present};
+
 
 #print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
 
@@ -1876,6 +1888,14 @@ sub dispComment {
 			$_ = noFollow($_);
 		}
 	}
+	
+	my $subscriber_bonus;
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
+		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
+		if (isSubscriber($comment->{uid}) && !$hide_subscription) {
+			$subscriber_bonus = 'yes';
+		}
+	}
 
 	my $reasons = undef;
 	if ($mod_reader) {
@@ -1952,7 +1972,8 @@ EOT
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
 		discussion2	=> $discussion2,
-		options		=> $options
+		options		=> $options,
+		subscriber_bonus => $subscriber_bonus
 	}, { Return => 1, Nocomm => 1 });
 }
 
@@ -2024,6 +2045,8 @@ sub _hard_dispComment {
 	} else {
 		my $nick_literal = strip_literal($comment->{nickname});
 		my $nick_param   = strip_paramattr($comment->{nickname});
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
 
 		my $homepage = $comment->{homepage} || '';
 		$homepage = '' if length($homepage) <= 8;
@@ -2051,10 +2074,10 @@ sub _hard_dispComment {
 			);
 		}
 		#$userinfo_to_display = "<br>($userinfo_to_display)" if $userinfo_to_display;
+		
 
 		$user_nick_to_display = qq{<a href="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</a>};
-		if ($constants->{plugin}{Subscribe} && $constants->{subscribe}
-			&& $comment->{subscriber_bonus} eq 'yes') {
+		if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && isSubscriber($comment->{uid}) && !$hide_subscription) {
 			if ($constants->{plugin}{FAQSlashdot}) {
 				$user_nick_to_display .= qq{ <a href="/faq/com-mod.shtml#cm2600">*</a>};
 			} else {

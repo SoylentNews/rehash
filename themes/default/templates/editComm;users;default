@@ -192,9 +192,11 @@ __template__
 
 		<p><b><a name="karma_bonus">Karma Bonus</a></b> (modifier assigned to posts where the user has good karma)<br>
 		[% karma_bonus %]<br>
-
-		<p><b><a name="subscriber_bonus">Subscriber Bonus</a></b> (modifier assigned to posts where the user was a subscriber)<br>
-		[% subscriber_bonus %]<br>
+		
+		[% IF constants.plugin.Subscribe && constants.subscribe && constants.subscriber_bonus %]
+			<p><b><a name="subscriber_bonus">Subscriber Bonus</a></b> (modifier assigned to posts where the user was a subscriber)<br>
+			[% subscriber_bonus %]<br>
+		[% END %]		
 
 		<p><b><a name="new_user_bonus">New User Modifier</a></b> (assign modifiers to recently created accounts)<br>
 		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
@@ -229,13 +231,6 @@ __template__
 		<label>No Karma Bonus
 		<input type="hidden" name="nobonus_present" value="1">
 		<input type="checkbox" name="nobonus"[% b_check %]>
-		</label>
-[% END %]
-
-[% IF user.is_subscriber %]
-		<label>No Subscriber Bonus
-		<input type="hidden" name="nosubscriberbonus_present" value="1">
-		<input type="checkbox" name="nosubscriberbonus"[% sb_check %]>
 		</label>
 [% END %]
 

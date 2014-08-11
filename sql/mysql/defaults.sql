@@ -896,6 +896,7 @@ INSERT INTO vars (name, value, description) VALUES ('fancyboxwidth','200','What 
 INSERT INTO vars (name, value, description) VALUES ('feature_story_enabled','0','Simple Boolean to determine if homepage prints feature story');
 INSERT INTO vars (name, value, description) VALUES ('feed_types', 'rss|atom', 'Feed types allowed.');
 INSERT INTO vars (name, value, description) VALUES ('formkey_timeframe','14400','The time frame that we check for a formkey');
+INSERT INTO vars (name, value, description) VALUES ('formkey_timeframe_anon','14400','The time frame that we check for a formkey for anon users');
 INSERT INTO vars (name, value, description) VALUES ('formkey_minloggedinkarma','1','The min karma a user must have to "count" as a logged-in user for some purposes');
 INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');

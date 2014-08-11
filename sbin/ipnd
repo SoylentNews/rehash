@@ -1,0 +1,230 @@
+#!/usr/bin/perl -w
+
+use strict;
+use File::Basename;
+use File::Spec::Functions qw(:DEFAULT devnull);
+use Sys::Hostname;
+use Encode qw(encode_utf8 decode_utf8);
+use Data::Dumper;
+use Mojo::Server::Daemon;
+use DateTime;
+use DateTime::Format::MySQL;
+use Carp;
+
+use Slash;
+use Slash::Constants ':slashd';
+use Slash::Display;
+use Slash::Utility;
+use Slash::Subscribe;
+use Slash::Subscribe::IPN;
+
+use vars qw(
+	$PROGNAME $virtual_user $hostname
+);
+
+$virtual_user = $ARGV[0];
+$hostname = $ENV{SF_SYSTEM_FUNC} || hostname();
+
+#$PROGNAME = basename($0);
+#$0 = "$PROGNAME $virtual_user";
+
+eval {
+	createEnvironment($virtual_user);
+};
+if ($@) {
+	if ($@ =~ /DBIx::Password has no information about the virtual user/
+		&& $virtual_user eq 'start') {
+		die <<"EOT";
+$@
+To be more specific, your error is that, per step 7 of the INSTALLATION
+section in the INSTALL file (please reread), you need to start ipnd
+with '/etc/init.d/ipn start', not '/usr/local/slash/sbin/ipnd start'.
+EOT
+	}
+	die $@;
+}
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+my $user = getCurrentUser();
+setCurrentSkin(determineCurrentSkin());
+my $gSkin = getCurrentSkin();
+
+if (!$constants->{plugin}{Subscribe}) {
+	die <<"EOT";
+$@
+Subscribe Plugin not installed.
+EOT
+}
+
+my $pid_file = $constants->{logdir}.'/ipnd.pid';
+local *PIDFILE;
+
+# Check for the PID file's existance
+if (-e $pid_file) {
+  die ("Program already running or ended prematurely. \n");
+}
+
+# Create the PID file
+# Use the 3 argument form of open for safety
+open PIDFILE, ">", $pid_file;
+print PIDFILE "$$";
+close PIDFILE;
+
+
+my $logfile = devnull();
+if ($constants->{pp_ipn_debugfile}){
+	$logfile = $constants->{logdir}.'/ipnd.log';
+}
+
+open(STDOUT, '+>>', $logfile);
+open(STDERR, ">&STDOUT");
+select STDERR; $| = 1;      # make unbuffered
+select STDOUT; $| = 1;      # make unbuffered
+
+
+my $subscribe = getObject('Slash::Subscribe');
+
+my $cbHost = $constants->{pp_ipn_host};
+my $cbPort = $constants->{pp_ipn_port};
+
+my @args = ( 'reuse', 'ca', 'cert', 'ciphers', 'key', 'verify');
+my @cbTheRest;
+foreach(@args){
+	my $pp_ipn_var = "pp_ipn_".$_;
+	push(@cbTheRest, "$_=".$constants->{$pp_ipn_var}) if $constants->{$pp_ipn_var};
+}
+my $cbArgs = join('&', @cbTheRest);
+print STDOUT "cbArgs: $cbArgs \n" if !$constants->{pp_ipn_silent};
+
+my $cbServer;
+if ($cbArgs){
+	$cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort?$cbArgs"]);
+} else {
+	$cbServer = Mojo::Server::Daemon->new(listen => ["$cbHost:$cbPort"]);
+}
+
+if (!$cbServer) {
+	die <<"EOT";
+$@
+Mojo server not initiated.
+EOT
+}
+
+# And a wee bit more config for the daemon
+$cbServer->max_clients(10);
+$cbServer->max_requests(25);
+$cbServer->silent($constants->{pp_ipn_silent});
+$cbServer->inactivity_timeout(5);
+
+$cbServer->unsubscribe('request');
+$cbServer->on(request => sub {
+	my ($daemon, $tx) = @_;
+	
+  my $logthis = { remote_address => $tx->{remote_address} };
+
+	my $path = $constants->{pp_ipn_path} | "";
+	
+	# Don't even bother trying to process or log requests not to our chosen path
+	my $reqPath = $tx->req->url->path;
+	unless( $reqPath =~ m/\Q$path/ ){
+		print STDOUT "Request for $reqPath. \n";
+		$tx->res->code(200);
+	        $tx->res->headers->content_type('text/plain');
+        	$tx->res->body("Request for $reqPath. \n");
+        	$tx->resume;
+		return 0
+	}
+
+	my $content = $tx->req->content;
+	my $gateway = $constants->{paypal_host};
+	$Slash::Subscribe::IPN::GTW = "https://$gateway/cgi-bin/webscr";
+	my $ipn = Slash::Subscribe::IPN->new($content->{asset}->{content});
+	$logthis = $ipn->vars if $ipn;
+	$logthis->{remote_address} = $tx->{remote_address};
+	$subscribe->ppAddLog($logthis);
+
+	my $paypal = $ipn->vars();
+
+	if($ipn->completed){
+		if(!$subscribe->paymentExists($ipn->txn_id)){
+			# Check if PDT got transaction first.
+			my $days = $subscribe->convertDollarsToDays($paypal->{payment_gross});
+			my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
+			
+			my ($puid, $payment_type, $from);
+			if ($paypal->{custom}){
+				$puid = $paypal->{custom};
+				$payment_type = 'gift';
+				$from = $paypal->{option_selection1};
+			} else {
+				$puid = $paypal->{item_number};
+				$payment_type = 'user';
+			}
+			
+			my $payment = {
+				days => $days,
+				uid	=> $paypal->{item_number},
+				payment_net   => $payment_net,
+				payment_gross => $paypal->{payment_gross},
+				payment_type  => $payment_type,
+				transaction_id => $paypal->{txn_id},
+				method => 'paypal',
+				email => $from,
+				raw_transaction  => $subscribe->convertToText($paypal),
+				puid => $puid
+			};
+			
+			if (!$subscribe->paymentExists($ipn->txn_id)){
+				# Doulbe check as we have a race condition going on here.
+				
+				my ($rows, $result, $warning);
+				$rows = $subscribe->insertPayment($payment);
+				if ($rows && $rows == 1) {
+					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+					if ($result && $result == 1){
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+					} else {
+						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+						print STDERR $warning;
+					}
+				} elsif (!$subscribe->paymentExists($ipn->txn_id)){
+					# What did I say about that race condition.
+					
+					$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
+					print STDERR $warning;
+				}
+			}
+		}
+	}
+	# Now for other statuses
+	elsif($ipn->denied || $ipn->failed){
+		# This should probably be brought to the attention of the user. Myabe via email.
+		# Save this for later -- paulej72 2014/08/01
+	}
+	elsif($ipn->expired || $ipn->voided){
+		# This means OUR account key is either expired or has been canceled.
+		# It needs to go to the attention of an admin ASAFP by whatever means necessary.
+		# Save this for later -- paulej72 2014/08/01
+	}
+	elsif($ipn->reversed){
+		# The dillhole reversed payment on us. Remove any previously paid for days and the transaction.
+		my $uid = my $subscribe->txnToUID($ipn->parent_txn_id);
+		my $days = $subscribe->getDaysByTxn($ipn->txn_id);
+		$subscribe->removeDaysFromUID($days, $uid);
+		$subscribe->removePayment($ipn->parent_txn_id);
+	}
+
+	# log to paypal_log
+  $subscribe->ppAddLog($logthis);
+
+	# Response
+	$tx->res->code(200);
+	$tx->res->headers->content_type('text/plain');
+	$tx->res->body("");
+
+	# Resume transaction
+	$tx->resume;
+});
+$cbServer->run;
+
+exit 0;
