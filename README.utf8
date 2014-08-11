@@ -104,7 +104,7 @@ mysql> SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_n
 
 Alter each and every table. You could do this manually in the later dump but this is a lot quicker and will let you know if there are going to be issues. From a bash prompt:
 
-for table in $(mysql -u YOURUSER YOURDB -N -e 'show tables;' | awk '{print $1}'); do echo ALTER TABLE $table CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci\;>>temp.sql; done; mysql -u YOURUSER <temp.sql
+for table in $(mysql -u YOURUSER YOURDB -N -e 'show tables;' | awk '{print $1}'); do echo ALTER TABLE $table CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci\;>>temp.sql; done; mysql -u YOURUSER YOURDB <temp.sql
 
 You can then rm temp.sql unless there were errors and you need to address them.
 
