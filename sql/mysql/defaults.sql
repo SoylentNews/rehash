@@ -1075,6 +1075,7 @@ INSERT INTO vars (name, value, description) VALUES ('section','index','This is t
 INSERT INTO vars (name, value, description) VALUES ('send_mail','1','Turn On/Off to allow the system to send email messages.');
 INSERT INTO vars (name, value, description) VALUES ("signoff_notify", "0", "Add remark for bot on each signoff / update / save ?");
 INSERT INTO vars (name, value, description) VALUES ("signoff_use", "0", "Use signoff functionalilty?");
+INSERT INTO vars (name, value, description) VALUES ('signoffs_per_article','2','Signoffs Required Per Variable');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin','admin','The admin for the site');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin_name','Slash Admin','The pretty name for the admin for the site');
 INSERT INTO vars (name, value, description) VALUES ('siteid','www.example.com','The unique ID for this site');

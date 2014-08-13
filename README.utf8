@@ -7,8 +7,8 @@ UTF-8 slash is based on following software features:
 For this we require:
 
 perl >= 5.6
-MySQL >= 5.0
-perl module DBD::MySQL >= 4.001
+MySQL >= 5.6
+perl module DBD::MySQL >= 4.026
 perl module Cache::Memcached::Fast >= 0.22
 
 Cache::Memcached has issues with utf8, thus it is no longer used for anything but memcached stats.
@@ -19,16 +19,10 @@ In case of creating new slash site
 
 Write your my.cnf (for DB servers) as below:
 
-   [mysql]
-   default-character-set = utf8
-
-   [client]
-   default-character-set = utf8
-
-   [mysqld]
-   character-set-client-handshake = FALSE
-   default-character-set = utf8
-   collation-server = utf8_unicode_ci
+	[mysqld]
+	character_set_client=utf8
+	character_set_server=utf8
+	collation_server=utf8_unicode_ci
 
 Restart mysqld and check settings.
 
@@ -72,16 +66,10 @@ In case of changing existing slash site
 
 Alter my.cnf settings as above in fresh install instructions.
 
-   [mysql]
-   default-character-set = utf8
-
-   [client]
-   default-character-set = utf8
-
-   [mysqld]
-   character-set-client-handshake = FALSE
-   default-character-set = utf8
-   collation-server = utf8_unicode_ci
+	[mysqld]
+	character_set_client=utf8
+	character_set_server=utf8
+	collation_server=utf8_unicode_ci
 
 Restart mysqld and check settings.
 

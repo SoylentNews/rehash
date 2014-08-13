@@ -15,7 +15,7 @@ INSERT INTO vars (name, value, description) VALUES ('paypal_business', 'yourname
 INSERT INTO vars (name, value, description) VALUES ('paypal_cancel_return', 'http://www.example.com/subscribe.pl', 'URL to go to if payment is cancelled before being made');
 INSERT INTO vars (name, value, description) VALUES ('paypal_image_src', 'http://images.paypal.com/images/x-click-but02.gif', 'URL of button image to click on');
 INSERT INTO vars (name, value, description) VALUES ('paypal_no_shipping', '1', '0=Shipping address reqd (more secure), 1=No shipping address reqd (more convenient)');
-INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','Comment point bonus for subscribers (1 = on | 0 = off)');
+INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','How many days your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_pages', '1000', 'How many pages your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('paypal_return', 'http://www.example.com/subscribe.pl?op=paypal', 'URL for successful payment completion');
 INSERT INTO vars (name, value, description) VALUES ('paypal_token','qAMNz6WbvIEUhu4PPkQcZ78Vht3qSSVCleW7A4wUPALbbKRBlHif4RFPzqC','PayPal PDT token. ');
