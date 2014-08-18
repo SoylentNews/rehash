@@ -69,19 +69,24 @@ ELSIF env.script_name.search('journal\.pl');
 	IF link.uid && link.nickname; tmp = BLOCK -%]
 <link rel="author"    title="[% link.nickname | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.nickname | strip_paramattr %]/">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
+<link rel="alternate" title="[% link.nickname | strip_attribute %]'s Journal Atom" href="[% PROCESS rsslink_journal rsslink_style = 'journal' feed_type = 'atom' %]" type="application/atom+xml">
 <link rel="alternate" title="[% link.nickname | strip_attribute %]'s Journal RSS" href="[% PROCESS rsslink_journal rsslink_style = 'journal' %]" type="application/rss+xml">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
+<link rel="alternate" title="[% link.nickname | strip_attribute %]'s Friends' Journals Atom" href="[% PROCESS rsslink_journal rsslink_style = 'journalfriends' feed_type = 'atom' %]" type="application/atom+xml">
 <link rel="alternate" title="[% link.nickname | strip_attribute %]'s Friends' Journals RSS" href="[% PROCESS rsslink_journal rsslink_style = 'journalfriends' %]" type="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
 
 	IF constants.journal_top;
 		IF constants.journal_top_recent; tmp = BLOCK -%]
+<link rel="alternate" title="Most Recent Journals Atom" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;content_type=atom" type="application/atom+xml">
 <link rel="alternate" title="Most Recent Journals RSS" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;content_type=rss" type="application/rss+xml">
 		[%- END; linkrels.push(tmp); END;
 		    IF constants.journal_top_posters; tmp = BLOCK -%]
+<link rel="alternate" title="Most Active Journals Atom" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=count&amp;content_type=atom" type="application/atom+xml">
 <link rel="alternate" title="Most Active Journals RSS" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=count&amp;content_type=rss" type="application/rss+xml">
 		[%- END; linkrels.push(tmp); END;
 		    IF constants.journal_top_friend; tmp = BLOCK -%]
+<link rel="alternate" title="Most Befriended Journals Atom" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=friends&amp;content_type=atom" type="application/atom+xml">
 <link rel="alternate" title="Most Befriended Journals RSS" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=friends&amp;content_type=rss" type="application/rss+xml">
 		[%- END; linkrels.push(tmp); END;
 	END;
@@ -117,6 +122,7 @@ END %]
 
 
 [% tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Atom" href="[% PROCESS rsslink feed_type='atom' %]" type="application/atom+xml">
 <link rel="alternate" title="[% constants.sitename | strip_attribute %] RSS" href="[% PROCESS rsslink %]" type="application/rss+xml">
 [%- END;
    linkrels.push(tmp) %]

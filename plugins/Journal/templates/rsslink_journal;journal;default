@@ -11,24 +11,25 @@ en_US
 __name__
 rsslink_journal
 __template__
+[% feed_type = feed_type || 'rss' %]
 [%- IF (constants.journal_rdfitemdesc_html && (
 	(constants.journal_rdfitemdesc_html > 1 && (user.is_subscriber || user.is_admin))
 		||
 	(constants.journal_rdfitemdesc_html > 2 && !user.is_anon)
 ));
    IF rsslink_style == 'journal'
-%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/rss/[% Slash.getPublicLogToken() | fixparam %][%
+%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/[% feed_type %]/[% Slash.getPublicLogToken() | fixparam %][%
 
    ELSIF rsslink_style == 'journalfriends'
-%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/friends/rss/[% Slash.getPublicLogToken() | fixparam %][%
+%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/friends/[% feed_type %]/[% Slash.getPublicLogToken() | fixparam %][%
 
    END;
 ELSE;
    IF rsslink_style == 'journal'
-%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/rss[%
+%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/[% feed_type %][%
 
    ELSIF rsslink_style == 'journalfriends'
-%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/friends/rss[%
+%][% Slash.root2abs() %]/~[% link.nickname | fixparam %]/journal/friends/[% feed_type %][%
 
    END;
 END; rsslink_style = '' -%]
