@@ -76,6 +76,7 @@ __template__
 						</li>
 					[%- END %]
 					<li>
+                                               <a href="[% PROCESS rsslink feed_type='atom' %]"><img src="[% constants.imagedir %]/atomicon.gif" width="36" height="14" alt="Atom feed"></a>
 						<a href="[% PROCESS rsslink %]"><img src="[% constants.imagedir %]/rssicon.gif" width="36" height="14" alt="RSS feed"></a>
 					</li>
 				</ul>
