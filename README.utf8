@@ -57,6 +57,10 @@ content_type_webpage = text/html; charset=utf-8
 rdfencoding = UTF-8
 utf8 = 1
 
+Ensure the following is set in your vhost config file:
+
+AddType text/html;charset=utf-8 .shtml
+
 Restart apache and slashd if they are running.
 
 
@@ -112,5 +116,11 @@ Set the following in the vars table either through mysql or through the admin pa
 content_type_webpage = text/html; charset=utf-8
 rdfencoding = UTF-8
 utf8 = 1
+
+Change the following in your vhost config file:
+
+AddType text/html;charset=iso-8859-1 .shtml
+to
+AddType text/html;charset=utf-8 .shtml
 
 Restart apache and slashd.
