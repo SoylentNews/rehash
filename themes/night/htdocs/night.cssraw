@@ -1,8 +1,8 @@
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
 body, body.admin
 {
-    background: #222;
-    color:#ddd;
+background: #222;
+color:#ddd;
 }
 .user_admin, body .adminstoryform fieldset {background: #440;}
 
@@ -13,23 +13,23 @@ a:hover { color: #800;}
 /* layout */
 #contents
 {
-min-width: 20em;
+	min-width: 20em;
 }
 
 
 /* Header */
 #logo h1 a
 {
-width: 115px;
-height: 80px;
-background: url("[% constants.imagedir %]/logo_night.png") no-repeat;
+	width: 115px;
+	height: 80px;
+	background: url("[% constants.imagedir %]/logo_night.png") no-repeat;
 }
 
 #slogan h2, #slogan #head_message
 {
-color: #ccc;
-font-weight: bold;
-font-size: .813em;
+	color: #ccc;
+	font-weight: bold;
+	font-size: .813em;
 }
 
 #slogan #head_message a { color: #ccc }
@@ -41,88 +41,89 @@ font-size: .813em;
 .comment_count { color: #a00; }
 
 #links div.title {
-    background: #666;
-    border-radius: 10px 10px 0 0;
+	background: #666;
+	border-radius: 10px 10px 0 0;
 }
 
 #links h4
 {
-font-weight: bold;
-font-size: .813em;
+	font-weight: bold;
+	font-size: .813em;
 }
 
 #links div.content
 {
-background: #aaa;
-border-radius: 0 0 10px 10px;
-padding: .3em .3em .6em .3em;
-font-size: .755em;
-line-height: 1.4em;
-position: relative;
+	background: #aaa;
+	border-radius: 0 0 10px 10px;
+	padding: .3em .3em .6em .3em;
+	font-size: .755em;
+	line-height: 1.4em;
+	position: relative;
 }
 
 #navigation-content li.user
 {
-background: #666;
-color: #fff;
+	background: #666;
+	color: #fff;
 }
 
 #navigation-content ul ul
 {
-
-background: #aaa;
+	background: #aaa;
 }
 
 /* slashboxes */
-#slashboxes div.title {
-    background: #666;
-    border-radius: 10px 10px 0 0;
+#slashboxes div.title
+{
+	background: #666;
+	border-radius: 10px 10px 0 0;
 }
 
 #slashboxes h4
 {
-font-size: .813em;
-color: #fff;
+	font-size: .813em;
+	color: #fff;
 }
 
 #slashboxes div.content
 {
-    color:#fff;
-background: #aaa;
-border-radius: 0 0 10px 10px;
-font-size: .755em;
-line-height: 1.4em;
+	color:#fff;
+	background: #aaa;
+	border-radius: 0 0 10px 10px;
+	font-size: .755em;
+	line-height: 1.4em;
 }
 
 #slashboxes .highlight
 {
-background: #555;
+	background: #555;
 }
 
 .indexhead
 {
-  font-size: .875em;
+	font-size: .875em;
 }
 
 
 /* Commnets Pages */
 
 .commentTop .title {
-    background-color: #600;
+	background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
-    border-radius: 10px 10px 0 0;
+	border-radius: 10px 10px 0 0;
 }
 
 
 .commentTop .title h4
 {
-    color: #fff;
+	color: #fff;
 }
 
-.commentTop .details {
+.commentTop .details
+{
 	border: 1px solid #aaa;
 	background-color: #444;
 	background: -o-linear-gradient(#444, #222);
@@ -134,43 +135,44 @@ background: #555;
 
 .commentTop .details a, .commentTop .details a:hover, .commentTop .details a:visited
 {
-color: #f00;
+	color: #f00;
 }
 
 .commentSub
 {
-border: 1px solid #aaa;
-border-top: none;
-    background:#222
+	border: 1px solid #aaa;
+	border-top: none;
+	background:#222
 }
 
 .commentBody
 {
-border: 1px solid #aaa;
-border-bottom: none;
-border-top: none;
-    background:#222;
+	border: 1px solid #aaa;
+	border-bottom: none;
+	border-top: none;
+	background:#222;
 }
 
+.commentBody blockquote, .commentBody .quote {
+	background: linear-gradient(to right, rgba(255, 255, 255, 0.07), transparent 40%) repeat scroll 0% 0% transparent;
+	border-left-color: rgba(255,255,255, 0.4);
+}
 
 #commentlisting ul
 {
-    border-left: 1px solid #aaa;
-
+	border-left: 1px solid #aaa;
 }
 
 .preview li.comment
 {
-    border-bottom: 1px solid #aaa;
+	border-bottom: 1px solid #aaa;
 }
-
 
 .commentBox { background: #a00; }
 
 #commentwrap, .commentBoxForm
 {
-background: #888;
-
+	background: #888;
 }
 
 .linkCommentPage {
@@ -181,66 +183,66 @@ background: #888;
 /* FORMTABS */
 
 #formtabs ul li{
-    background: #933;
-    border-radius: .3em .3em 0 0;
-    color: #fff;
+	background: #933;
+	border-radius: .3em .3em 0 0;
+	color: #fff;
 }
 
 #formtabs ul li.active{
-    color: #fff;
+	color: #fff;
 }
 
 #formtabs ul li a {
-    text-decoration:none;
-    color:#fff;
+text-decoration:none;
+	color:#fff;
 }
 
 #formtabs ul li a:visited {
-   color:#fff;
+	color:#fff;
 }
 #formtabs ul li a:hover {
-    color:#fff;
+	color:#fff;
 }
 
 
 /* Quick links content */
 #slashboxes #index_qlinks-content ul, #slashboxes #index_qlinks-content li, #slashboxes #features_qlinks-content ul, #slashboxes #features_qlinks-content li
 {
-list-style: none;
-padding: 0;
-margin: 0;
+	list-style: none;
+	padding: 0;
+	margin: 0;
 }
 
 /* General */
 
 .generaltitle h3
 {
-color: #fff;
-font-size: 1em;
+	color: #fff;
+	font-size: 1em;
 }
 
 .generalbody
 {
-background: #222;
-border: 1px solid #aaa;
+	background: #222;
+	border: 1px solid #aaa;
 }
 
 
 /* articles */
 
 .generaltitle div.title, .article div.title {
-  background-color: #600;
+	background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
-  border-radius: 10px 10px 0 0;
+	border-radius: 10px 10px 0 0;
 }
 
 #journal .article h3
 {
-color: #fff;
-font-size: 1em;
+	color: #fff;
+	font-size: 1em;
 }
 
 .article .details
@@ -257,9 +259,9 @@ font-size: 1em;
 
 .article .body
 {
-border: 1px solid #aaa;
-border-top: none;
-background: #222;
+	border: 1px solid #aaa;
+	border-top: none;
+	background: #222;
 }
 
 div.storylinks
@@ -290,44 +292,42 @@ div.storylinks ul li
 
 
 /* Footer */
-#footer { }
-
 #footer em
 {
-font-size: .813em;
-float: right;
-width: 45%;
+	font-size: .813em;
+	float: right;
+	width: 45%;
 }
 
 #footer .search
 {
-font-size: .7em;
-width: 50%;
-padding: 0 .3em;
-margin: 0;
+	font-size: .7em;
+	width: 50%;
+	padding: 0 .3em;
+	margin: 0;
 }
 
 #footer legend, #footer fieldset, #footer label
 {
-margin: 0;
-padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 #footer .search input { margin: 0; }
 
 #footer .copyright
 {
-font-size: x-small;
-color: #000;
+	font-size: x-small;
+	color: #000;
 }
 
 #footer .admin li
 {
-border-left: 1px solid #555;
-margin: 0;
-padding: 0;
-list-style: none;
-display: inline;
+	border-left: 1px solid #555;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline;
 }
 
 .story_main { background: #ccc;}
@@ -335,7 +335,7 @@ display: inline;
 
 input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a
 {
-    background-color: #666;
+	background-color: #666;
 }
 
 input[type=text], input[type=password] {border: 1px solid #666;}
@@ -345,17 +345,17 @@ input[type=text], input[type=password] {border: 1px solid #666;}
 
 .data_head
 {
-background: #600;
+	background: #600;
 }
 
 .data, .data_hl1, .data_hl2, .data_hl3
 {
-background: #888;
-    color:#fff;
+	background: #888;
+	color:#fff;
 }
 
 .data_hl2 {
-    background: #aaa;
+	background: #aaa;
 }
 
 .data .status0
@@ -384,8 +384,8 @@ background: #888;
 /* Bottom Nav */
 .btmnav
 {
-color: #f00;
-font-size: .7em;
+	color: #f00;
+	font-size: .7em;
 }
 
 .btmnav ul li a, .btmnav ul li a:visited { color: #d00; }
@@ -394,8 +394,8 @@ font-size: .7em;
 .journaldate { position: relative; }
 .generalbody #journalgeneric .article
 {
-height: auto;
-margin: 0 0 1em 0;
+	height: auto;
+	margin: 0 0 1em 0;
 }
 
 #authors .generalbody h3 a { color: #fff; }
@@ -419,27 +419,30 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 .generalbody ul.menu li a { color: #f00; }
 
 #usermenu{
-border: 1px solid #aaa;
-border-bottom: none;
-background:#222;
+	border: 1px solid #aaa;
+	border-bottom: none;
+	background:#222;
 }
 
-#usermenu ul.menu {
-    border-bottom: 1px solid #aaa;
-    padding: .2em 0 0 0;
+#usermenu ul.menu
+{
+	border-bottom: 1px solid #aaa;
+	padding: .2em 0 0 0;
 }
 
-#usermenu ul.menu li{
-    padding: .2em;
+#usermenu ul.menu li
+{
+	padding: .2em;
 }
 
-#usermenu ul.menu li a{
-  background-color: #600;
+#usermenu ul.menu li a
+{
+	background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
-  border-radius: .3em .3em 0 0;
+	border-radius: .3em .3em 0 0;
 	border: none;
 	padding: .2em .6em;
 	text-decoration: none;
@@ -461,16 +464,16 @@ background:#222;
 
 .menuoldstyle li
 {
-        display: inline;
-        list-style: none;
-        margin: 0;
-        padding: 0 2px 0 1px;
+	display: inline;
+	list-style: none;
+	margin: 0;
+	padding: 0 2px 0 1px;
 }
 
 .menuoldstyle ul
 {
-        padding: 0;
-        margin: 0 0 1em 0;
+	padding: 0;
+	margin: 0 0 1em 0;
 }
 
 .menuoldstyle li:before { content: "| "; }
@@ -484,7 +487,7 @@ background:#222;
 	padding: .3em .6em;  
 	color:#fff;
 	margin-bottom: .6em;
-  background-color: #600;
+	background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);
 	background: -moz-linear-gradient(#933, #600);
@@ -493,21 +496,22 @@ background:#222;
 }
 
 #index .briefarticle a { color: #fff; text-decoration: none; font-weight: bold;}
-.briefarticle .section { color: #222; }
-.briefarticle .introhide { display : none }
-.briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+	.briefarticle .section { color: #222; }
+	.briefarticle .introhide { display : none }
+	.briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
 
 /* Messaging */
 
 .message_menu{
-border: 1px solid #aaa;
-background: #222;
-color: #fff;
-border-bottom: none;
+	border: 1px solid #aaa;
+	background: #222;
+	color: #fff;
+	border-bottom: none;
 }
+
 .message_menu ul
 {
-margin: 0;
+	margin: 0;
 }
 
 .message_subject
@@ -523,15 +527,15 @@ margin: 0;
 
 .message_body
 {
-border: 1px solid #aaa;
-border-bottom: none;
-border-top: none;
-background: #222;
+	border: 1px solid #aaa;
+	border-bottom: none;
+	border-top: none;
+	background: #222;
 }
 
 .message_footer
 {
-border: 1px solid #aaa;
-border-top: none;
-background: #222;
+	border: 1px solid #aaa;
+	border-top: none;
+	background: #222;
 }

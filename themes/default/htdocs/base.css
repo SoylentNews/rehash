@@ -278,6 +278,7 @@ z-index: 4;
 margin: 0;
 padding: .3em .6em .6em .6em;
 position: relative;
+overflow-y: hidden;
 }
 
 #slashboxes h4 img.map
@@ -291,6 +292,11 @@ right: .3em;
 padding: 0 .3em;
 margin: 0 1em;
 position: relative;
+}
+
+#slashboxes ul li
+{
+overflow-y: hidden;
 }
 
 /* login content */
@@ -422,6 +428,7 @@ margin: 0;
 background: #999;
 padding: 0;
 margin: 0;
+overflow-y: hidden;
 }
 
 .generaltitle h3
@@ -429,6 +436,7 @@ margin: 0;
 margin: 0;
 padding: .3em .8em .2em .8em;
 color: #fff;
+overflow-y: hidden;
 }
 
 .generaltitle h3 a
@@ -449,6 +457,7 @@ height: 100%;
 width: auto;
 z-index: 2;
 font-size:0.875em;
+overflow-y: hidden;
 }
 
 .generalbody .generalbody, .generalbody .article .body
@@ -474,6 +483,7 @@ margin: 0;
 margin: 0;
 padding: .3em .8em .2em .8em;
 color: #fff;
+overflow-y: hidden;
 }
 
 #journal .article h3 a, #journal .article h3 a:visited { color: #fff; }
@@ -491,6 +501,7 @@ padding: 1em;
 margin: 0;
 min-height: 4em;
 font-size: 0.875em;
+overflow-y: hidden;
 }
 
 .article blockquote,  .article quote {
@@ -846,7 +857,7 @@ background: #006;
 
 .data_head th { text-align: left; padding: .3em .6em; }
 .data_head a { color: #fff; }
-.data td { padding: .3em .6em; }
+.data td { padding: .3em .6em; overflow-y: hidden;}
 .data_hl1
 {
 background: #ccc;
