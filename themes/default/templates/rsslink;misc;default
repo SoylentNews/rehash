@@ -21,7 +21,7 @@ __template__
 	(constants.rss_allow_index > 2 && !user.is_anon)
 ));
 %][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %][%
-		ELSE IF (constants.rss_allow_index == 4);
+		ELSIF (constants.rss_allow_index == 4);
 %][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %][%
     ELSE
 %][% gSkin.rootdir %]/[% Slash.sitename2filename(skinname) %].[% feed_type %][%
