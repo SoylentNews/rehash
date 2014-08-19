@@ -264,6 +264,11 @@ text-decoration:none;
 	background: #222;
 }
 
+.article blockquote,  .article .quote {
+	background: linear-gradient(to right, rgba(255, 255, 255, 0.05), transparent 60%) repeat scroll 0% 0% transparent;
+	border-left-color: rgba(255,255,255, 0.3);
+}
+
 div.storylinks
 {
 	background-color: #444;
