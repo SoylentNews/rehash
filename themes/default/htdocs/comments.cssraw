@@ -6,27 +6,27 @@ html>body #comments { margin: 0 auto .2em 0; width: 100%; }
 	z-index: 2;
 	position: relative;
 	margin: 0 -15em .2em 0;
-        width: 98%;
+	width: 98%;
 }
 
 #commentwrap
 {
-  margin-bottom: .6em;
+	margin-bottom: .6em;
 	background:#ddd;
 }
 
 .commentwrap {
 	background: #fff;
-     	position: relative;
-     	border: 1px solid #aaa;
+	position: relative;
+	border: 1px solid #aaa;
 	clear: right;
 }
 html > body .commentwrap table {
-     	width: 100%;
-     	margin: 0;
+	width: 100%;
+	margin: 0;
 }
 .commentwrap table {
-     	width: 99%;
+	width: 99%;
 	margin: .3em;
 }
 
@@ -51,13 +51,13 @@ html > body .commentwrap table {
 
 .commentwrap legend
 {
-     	display: none;
+	display: none;
 }
 .commentwrap fieldset, .commentswrap form
 {
-     	margin: 0;
-     	padding: 0;
-     border: none;
+	margin: 0;
+	padding: 0;
+	border: none;
 }
 .linkCommentPage {
 	background: #ddd;
@@ -72,17 +72,18 @@ html > body .commentwrap table {
 }
 
 .commentTop .title { 
-    color: #fff;
-		background:#aaa;
+	color: #fff;
+	background:#aaa;
 }
 
 .commentTop a, .commentTop a:hover {
-    color: #fff;
-    text-decoration: none;
+	color: #fff;
+	text-decoration: none;
 }
 
 .sict_closed {
 	padding-left: .6em;
+	overflow-y: hidden;
 }
 
 .sict_closed img, .commentTop .title img {
@@ -90,7 +91,7 @@ html > body .commentwrap table {
 }
 
 .beneth{
-    padding-bottom: .6em;
+	padding-bottom: .6em;
 }
 
 .commentTop .title h4
@@ -98,6 +99,7 @@ html > body .commentwrap table {
 	color: #fff;
 	display: block;
 	padding: .3em .6em;
+	overflow-y: hidden;
 }
 
 .commentTop .details {
@@ -138,11 +140,12 @@ html > body .commentwrap table {
 	padding: 1em .8em .1em .8em;
 	background: #fff;
 	font-size: .875em;
+	overflow-y: hidden;
 }
 
 .generalbody .commentBody {
-    padding: 1em .8em .4em .8em;
-    font-size: 1em;
+	padding: 1em .8em .4em .8em;
+	font-size: 1em;
 }
 
 .commentBody p, #editComment p, #editComment label
@@ -154,77 +157,86 @@ html > body .commentwrap table {
  
 #editComment
 {
-    font-size:0.875em;
+	font-size:0.875em;
 }
 
 
 #commentlisting .commentBody ul
 {
-    border-left: none;
+	border-left: none;
 }
 
 #commentlisting .commentBody ul li
 {
-    list-style:none outside none;
+	list-style:none outside none;
 }
 
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
-.commentBody blockquote,  .commentBody quote, .quote {
-  opacity: 0.75;
-	margin: 1em 0 1em 2em;
+.commentBody blockquote, .commentBody .quote {
 	display: block;
+	padding-left: 0.6em;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	margin: 0.6em;
+	background: linear-gradient(to right, rgba(0, 0, 0, 0.07), transparent 40%) repeat scroll 0% 0% transparent;
+	border-left: 2px solid;
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 5px;
+	border-left-color: rgba(0,0,0, 0.4);
 }
 
 #commentlisting {
-        padding: 0px;
-        margin: 0px;
-        list-style: none;
+	padding: 0px;
+	margin: 0px;
+	list-style: none;
 }
 .comment { margin-bottom: 0.5em }
 
 .preview li.comment
 {
-    border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
 }
 
 #commentlisting ul 
 {
-    border-left: 1px solid #ddd;
-    padding-left: 1.2em;
-    margin-top:0;
-    margin-bottom:.5em;
+	border-left: 1px solid #ddd;
+	padding-left: 1.2em;
+	margin-top:0;
+	margin-bottom:.5em;
 }
 
 ul#commentlisting 
 {
-    margin-bottom: .5em;
+	margin-bottom: .5em;
 }
 
 #commentlisting ul li
 {
-    list-style: none;
-    padding-top: .6em;
-    padding-bottom: 0px;
-    margin-bottom:0;
+	list-style: none;
+	padding-top: .6em;
+	padding-bottom: 0px;
+	margin-bottom:0;
 }
 
 #commentlisting .commentBody ol li{
-    list-style: decimal;
+	list-style: decimal;
 }
 
 #commentlisting .commentBody ul li{
-    list-style: disc;
+	list-style: disc;
 }
 
 #discussion_buttons
 {
-		font-size: .813em;
-    padding: .3em 0;
+	font-size: .813em;
+	padding: .3em 0;
 }
 
 .comment_footer { text-align: center; background: #ddd }
-.modsel {
+
+.modsel
+{
 	display: inline;
 	font-weight: bold;
 	color: black;
@@ -233,22 +245,22 @@ ul#commentlisting
 /* Action Buttons */
 
 .nbutton{
-    background: none;
-    margin:0;
+	background: none;
+	margin:0;
 }
 .nbutton p{
-    display:inline;
-    padding: 0 0;
+	display:inline;
+	padding: 0 0;
 }
 
 .nbutton p b a {
-    background: #555;
-    border-radius: .3em;
-    text-align:center;
-    font-weight:bold;
-    padding: .3em .6em;
-    color:#fff !important;
-    text-decoration:none;
+	background: #555;
+	border-radius: .3em;
+	text-align:center;
+	font-weight:bold;
+	padding: .3em .6em;
+	color:#fff !important;
+	text-decoration:none;
 }
 
 .nbutton a:hover {background-color: #555}
