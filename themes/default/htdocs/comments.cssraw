@@ -233,7 +233,12 @@ ul#commentlisting
 	padding: .3em 0;
 }
 
-.comment_footer { text-align: center; background: #ddd }
+.comment_footer
+{
+	text-align: center;
+	background: #ddd;
+	overflow-y: hidden;
+}
 
 .modsel
 {

@@ -857,7 +857,7 @@ background: #006;
 
 .data_head th { text-align: left; padding: .3em .6em; }
 .data_head a { color: #fff; }
-.data td { padding: .3em .6em; }
+.data td { padding: .3em .6em; overflow-y: hidden;}
 .data_hl1
 {
 background: #ccc;
