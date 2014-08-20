@@ -13,7 +13,9 @@ rsslink
 __template__
 [% skinname = skinname || gSkin.name %]
 [%- feed_type = feed_type || 'rss';
-    IF (constants.rss_allow_index && (
+    IF (constants.rss_allow_index && constants.rss_allow_index == 4);
+%][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %][%
+		ELSIF (constants.rss_allow_index && (
 	user.is_admin
 		||
 	(constants.rss_allow_index > 1 && user.is_subscriber)
@@ -21,8 +23,6 @@ __template__
 	(constants.rss_allow_index > 2 && !user.is_anon)
 ));
 %][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %][%
-		ELSIF (constants.rss_allow_index == 4);
-%][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %][%
     ELSE
 %][% gSkin.rootdir %]/[% Slash.sitename2filename(skinname) %].[% feed_type %][%
     END;
