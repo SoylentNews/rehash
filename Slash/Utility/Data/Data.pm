@@ -1419,6 +1419,7 @@ my %mode_actions = (
 	ANCHOR, [qw(
 			newline_to_local
 			remove_newlines
+			encode_html_quote
 			approve_unicode		)],
 	NOTAGS, [qw(
 			newline_to_local
