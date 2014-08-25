@@ -373,6 +373,11 @@ input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 	box-sizing:border-box;
 }
 
+textarea {
+	font-family: inherit;
+	font-size: inherit;
+}
+
 #login-block {display: none;}
 
 /* FORMTABS */
