@@ -9095,6 +9095,85 @@ sub getRecentComments {
 	return $ar;
 }
 
+sub getDiscussionParent {
+	# $did is the discussion id
+	my ($self, $did) = @_;
+	my $parent = {};
+	my $slashdb = getCurrentDB();
+	if( my $stoid = $self->getStoidByDiscussionId($did) ) {
+		my $story = $self->getStory($stoid);
+		$story->{atstorytime} = " on ".timeCalc($story->{time});
+		$parent->{type} = 'story';
+		$parent->{content} = $story->{introtext};
+		$parent->{story} = $story;
+		$parent->{author} = $slashdb->getAuthor(
+			$story->{uid},
+			[qw( nickname fakeemail homepage )]
+		);
+	}
+	elsif( my $jid = $self->getJidByDiscussionId($did) ) {
+		$parent->{type} = 'journal';
+		$parent->{content} = $self->sqlSelect('article', 'journals_text', "id=$jid");
+	}
+	elsif(undef){
+		$parent->{type} = 'poll';
+	}
+	else{return undef};
+	return $parent;
+}
+
+sub getStoidByDiscussionId {
+	my ($self, $did) = @_;
+	return undef if !$did;
+	return undef unless $did =~ /^\d+$/;
+	if(my $stoid = $self->{_did_conversion_cache}{$did."s"}) {
+		return $stoid;
+	}
+	my($mcd, $mcdkey);
+	if($mcd = $self->getMCD) {
+		$mcdkey = "$self->{_mcd_keyprefix}:dids:";
+		my $answer = $mcd->get("$mcdkey$did");
+		if (defined $answer) {
+			$answer = undef if $answer eq '0';
+			$self->{_did_conversion_cache}{$did."s"} = $answer;
+			return $answer;
+		}
+	}
+	my $did_q = $self->sqlQuote($did);
+	my $stoid = $self->sqlSelect("stoid", "stories", "discussion=$did_q");
+	$self->{_did_conversion_cache}{$did."s"} = $stoid;
+	my $exptime = 86400;
+	$mcd->set("$mcdkey$did", $stoid || 0, $exptime) if $mcd;
+	return $stoid;	
+}
+
+
+
+sub getJidByDiscussionId {
+	my ($self, $did) = @_;
+	return undef if !$did;
+	return undef unless $did =~ /^\d+$/;
+	if(my $jid = $self->{_did_conversion_cache}{$did."j"}) {
+		return $jid;
+	}
+	my($mcd, $mcdkey);
+	if($mcd = $self->getMCD) {
+		$mcdkey = "$self->{_mcd_keyprefix}:didj:";
+		my $answer = $mcd->get("$mcdkey$did");
+		if (defined $answer) {
+			$answer = undef if $answer eq '0';
+			$self->{_did_conversion_cache}{$did."j"} = $answer;
+			return $answer;
+		}
+	}
+	my $did_q = $self->sqlQuote($did);
+	my $jid = $self->sqlSelect("id", "journals", "discussion=$did_q");
+	$self->{_did_conversion_cache}{$did."j"} = $jid;
+	my $exptime = 86400;
+	$mcd->set("$mcdkey$did", $jid || 0, $exptime) if $mcd;
+	return $jid;	
+}
+
 ########################################################
 
 # This method is used to grandfather in old-style sid's,

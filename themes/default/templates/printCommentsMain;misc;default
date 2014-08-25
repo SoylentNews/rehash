@@ -19,6 +19,12 @@ en_US
 __name__
 printCommentsMain
 __template__
+[% IF parent.type == 'journal' %]
+	[% PROCESS titlebar title="$title" %]
+	<div class="generalbody">
+		[% parent.content %]
+	</div>
+[% END %]
 [% horiz = 0; rooted = 0;
    rooted = 1 IF user.comments_control == 'rooted';
    IF gSkin.name == 'idle' || user.lowbandwidth || user.firehose_hide_section_menu;

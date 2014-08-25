@@ -1111,11 +1111,14 @@ sub printComments {
 	}
 
 #slashProf("printCommentsMain");
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $parent = $reader->getDiscussionParent($form->{sid});
 	$pretext .= slashDisplay('printCommentsMain', {
 		comments	=> $comments,
 		title		=> $discussion->{title},
 		'link'		=> $discussion->{url},
 		count		=> $count,
+		parent		=> $parent,
 		sid		=> $discussion->{id},
 		cid		=> $cid,
 		pid		=> $pid,
