@@ -39,6 +39,7 @@ cur_time = Slash.db.getTime();
 			<th>[% IF admin_link_ipid %]<span class="admin_data_label">IPID</span>[% END %]</th>
 			<th>Datestamp</th>
 			<th>[% IF admin_flag || user.uid == submissions.0.uid %]<span class="admin_data_label">State</span>[% END %]</th>
+			<th>Pub Date</th>
 		</tr>
 	
 		[% secs_back = -86400 * 2 %]
@@ -71,6 +72,9 @@ cur_time = Slash.db.getTime();
 							[% approved = approved + 1; %]	
 					[%- END -%]
 			  [%-  END -%]
+			</td>
+			<td>
+			[% sub.story_time ? Slash.timeCalc(sub.story_time) : "" %]
 			</td>
 		</tr>
 		[% total = total + 1 %]
