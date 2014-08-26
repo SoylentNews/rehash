@@ -21,6 +21,37 @@ edit_comment
 __template__
 <div id="wide">
 
+[% IF form.sid %]
+<div class="article">
+	[% PROCESS titlebar title="$discussion.title" %]
+	[% IF parent.story %]
+		<div class="details">
+		[% IF parent.story.by %]
+		Written by [% parent.story.by | strip_literal %]
+		[% END %]
+		posted by
+		[% IF parent.author.homepage %]
+			<a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
+		[% ELSE %]
+			<a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
+		[% END %]
+		[% parent.story.atstorytime %]
+		[% IF constants.plugin.Print %] 
+			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
+		[% END %]
+		[% IF constants.plugin.Email %]
+			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/email.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir -%]/email.gif" height="14" width="20" alt="Email story" ></a>
+		[% END %]<br>
+		[% IF constants.use_dept && parent.story.dept %]<strong>from the <b>[% parent.story.dept %]</b> dept.</strong>[% END %]
+		</div>
+	[% END %]
+	<div class="body">
+		<div class="intro">[% parent.content %]</div>
+	</div>
+</div>
+	<div class="prev-next">&nbsp;</div>
+[% END %]
+
 [% IF form.pid %]
         [% PROCESS titlebar title="Reply to: $reply.subject" %]
         <div class="generalbody">

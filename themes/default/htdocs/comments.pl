@@ -446,6 +446,9 @@ sub editComment {
 		return;
 	}
 
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $parent = $reader->getDiscussionParent($form->{sid});
+
 	# Get the comment we may be responding to. Remember to turn off
 	# moderation elements for this instance of the comment.
 	my $pid = $form->{pid} || 0; # this is guaranteed numeric, from filter_params
@@ -511,6 +514,7 @@ sub editComment {
 		pid_reply	=> $pid_reply,
 		error_message 	=> $error_message,
 		label		=> $label,
+		parent		=> $parent,
 		discussion	=> $discussion,
 		indextype	=> $form->{indextype},
 		preview		=> $preview,
