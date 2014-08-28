@@ -40,7 +40,7 @@ __template__
 <input type="hidden" name="on0" value="From">
 <input type="hidden" name="os0" value="[% from | strip_attribute %]">
 [% ELSE %]
-<input type="hidden" name="item_name" value="[% constants.paypal_num_days %]-Page Subscription to [% constants.sitename %]">
+<input type="hidden" name="item_name" value="[% constants.paypal_num_days %]-Day Subscription to [% constants.sitename %]">
 <input type="hidden" name="item_number" value="[% user.uid %]">
 [% END %]
 <input type="hidden" name="amount" value="[% constants.paypal_amount %]">
