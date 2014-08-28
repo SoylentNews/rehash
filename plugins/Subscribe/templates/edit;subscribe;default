@@ -92,36 +92,38 @@ __template__
 				</fieldset>
 			</form>
 		[% END %]
-	
-		<form action="[% env.script_name %]">
-			<fieldset>
-				<legend>Subscription Preferences</legend>
-				[% IF user.uid != user_edit.uid %]
-					<input type="hidden" name="uid" value="[% user_edit.uid %]">
-				[% END %]
-				<label><input name="hide_subscription" type="checkbox" [% hs_check %]> Hide Subscription Indicator</label>
-				<div class="note">Subscriber's comments are flagged with an indicator after their username. Check this box to hide display of that indicator.</div>
-				<br />
-				<div class="note">Set the delivery mode for subscription related messages:</div>
-				[%
-				messages = Slash.getObject('Slash::Messages');
-				FOREACH type = bvmessagecodes.keys.sort;
-					code = bvmessagecodes.$type.code;
-					UNLESS messages.checkMessageUser(code, user_edit);
-						NEXT;
-					END %]
-					<label>[% type %] <select name="deliverymodes_[% code %]">
-						[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
-							<option value="[% valid_code %]"[% IF prefs.${code} == valid_code %] selected[% END %]>[% bvdeliverymodes.$valid_code.name %]</option>
-						[% END %]
-						</select>
-					</label>
-				[% END %]
-				<br />
-				<p><input type="submit" name="op" value="Save"><input type="hidden" name="userfield" value="[% userfield %]"></p>
-			</fieldset>
-		</form>
-	
+		
+		[% IF subscriber %]
+			<form action="[% env.script_name %]">
+				<fieldset>
+					<legend>Subscription Preferences</legend>
+					[% IF user.uid != user_edit.uid %]
+						<input type="hidden" name="uid" value="[% user_edit.uid %]">
+					[% END %]
+					<label><input name="hide_subscription" type="checkbox" [% hs_check %]> Hide Subscription Indicator</label>
+					<div class="note">Subscriber's comments are flagged with an indicator after their username. Check this box to hide display of your indicator.</div>
+					<br />
+					<div class="note">Set the delivery mode for subscription related messages:</div>
+					[%
+					messages = Slash.getObject('Slash::Messages');
+					FOREACH type = bvmessagecodes.keys.sort;
+						code = bvmessagecodes.$type.code;
+						UNLESS messages.checkMessageUser(code, user_edit);
+							NEXT;
+						END %]
+						<label>[% type %] <select name="deliverymodes_[% code %]">
+							[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
+								<option value="[% valid_code %]"[% IF prefs.${code} == valid_code %] selected[% END %]>[% bvdeliverymodes.$valid_code.name %]</option>
+							[% END %]
+							</select>
+						</label>
+					[% END %]
+					<br />
+					<p><input type="submit" name="op" value="Save"><input type="hidden" name="userfield" value="[% userfield %]"></p>
+				</fieldset>
+			</form>
+		[% END %]
+		
 		<p>If you have any questions or concerns about billing, or other subscription-related issues, please contact <a href="mailto:[% constants.subscribe_email %]">[%constants.subscribe_email %]</a>.</p>
 	</div>
 </div>

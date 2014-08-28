@@ -369,3 +369,6 @@ CREATE TABLE paypal_log (
 
 # Missing var for signoffs
 INSERT INTO vars (name, value, description) VALUES ('signoffs_per_article','2','Signoffs Required Per Variable');
+
+# Fix Subs Messages
+UPDATE message_codes SET delivery_bvalue=1 WHERE type LIKE 'Subscription%';
