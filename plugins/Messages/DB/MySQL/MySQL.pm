@@ -70,23 +70,22 @@ sub init {
 	1;
 }
 
-my %descriptions = (
-	'deliverymodes'
-		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='deliverymodes'") },
-	'messagecodes'
-		=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0") },
-	'messagecodes_sub'
-		=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0 AND type LIKE 'Subscription%'") },	
-	'bvdeliverymodes'
-		=> sub { $_[0]->sqlSelectAllHashref('code', 'code,name,bitvalue', 'message_deliverymodes') },
-	'bvmessagecodes'
-		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
-	'bvmessagecodes_slev'
-		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,seclev,delivery_bvalue', 'message_codes', "code >= 0") },
-);
-
 sub getDescriptions {
 	my($self, $codetype, $optional, $flag) =  @_;
+	my %descriptions = (
+		'deliverymodes'
+			=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='deliverymodes'") },
+		'messagecodes'
+			=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0") },
+		'messagecodes_sub'
+			=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0 AND type LIKE 'Subscription%'") },	
+		'bvdeliverymodes'
+			=> sub { $_[0]->sqlSelectAllHashref('code', 'code,name,bitvalue', 'message_deliverymodes') },
+		'bvmessagecodes'
+			=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
+		'bvmessagecodes_slev'
+			=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,seclev,delivery_bvalue', 'message_codes', "code >= 0") },
+	);
 	# handle in Slash::DB::MySQL (or whatever)
 	return $self->SUPER::getDescriptions($codetype, $optional, $flag, \%descriptions);
 }
