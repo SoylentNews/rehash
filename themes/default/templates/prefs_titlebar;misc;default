@@ -35,7 +35,7 @@ tabs = [
 		tabs.push({ link = "$constants.real_rootdir/my/messages", label = "Messages", sel_label = "messages" });
 	END;
 	IF constants.plugin.Subscribe && ((constants.subscribe_admin_only && user.is_admin) || !constants.subscribe_admin_only);
-		tabs.push({ link = "$constants.real_rootdir/subscribe.pl", label = "Subscription", sel_label = "subscription" });
+		tabs.push({ link = "$constants.real_rootdir/subscribe.pl", label = "Subscriptions", sel_label = "subscription" });
 	END;
 %]
 

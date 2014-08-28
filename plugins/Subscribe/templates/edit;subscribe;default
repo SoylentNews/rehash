@@ -67,14 +67,14 @@ __template__
 					<legend>Purchase Subscriptions</legend>
 					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal.<br />
 					<br />
-					Recipients of gift subscriptions will be notified of your purchase through email.<br />
+					The recipient of a gift subscription will be notified of your purchase through email.<br />
 					<br />
 					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
 					<input type="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <input type="text" name="uid" size="10"><br />	
 					<br />
 					For gift subscriptions only:<br />
 					Who do you want the recipient to be told the gift is from?<br />
-					<input type="text" name="from" size="15" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
+					<input type="text" name="from" size="35" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
 					<br />
 					<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue">
 				</fieldset>
@@ -84,10 +84,10 @@ __template__
 		[% IF user.is_admin %]
 			<form action="[% env.script_name %]">
 				<fieldset>
-					<legend>Grant Subscriptions</legend>
+					<legend>Grant Subscription</legend>
 					<input type="hidden" name="uid" value="[% user_edit.uid %]">
-					<p>Want to grant [% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% ELSE %]yourslef[% END %]
-					some subscription days? You're an admin, so gran as many as you want: <input type="text" name="days" value="0" size="6"></p>
+					<p>Want to grant [% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% ELSE %]yourself[% END %]
+					some subscription days? You're an admin, so grant as many as you want: <input type="text" name="days" value="0" size="6"></p>
 					<p><input type="submit" name="op" value="Grant"><input type="hidden" name="userfield" value="[% userfield %]"></p>
 				</fieldset>
 			</form>
@@ -95,12 +95,12 @@ __template__
 	
 		<form action="[% env.script_name %]">
 			<fieldset>
-				<legend>Subscriptions Preferences</legend>
+				<legend>Subscription Preferences</legend>
 				[% IF user.uid != user_edit.uid %]
 					<input type="hidden" name="uid" value="[% user_edit.uid %]">
 				[% END %]
-				<label><input name="hide_subscription" type="checkbox" [% hs_check %]> Hide Subscription</label>
-				<div class="note">Hide * beside username in comments that indicates you are a subscriber.</div>
+				<label><input name="hide_subscription" type="checkbox" [% hs_check %]> Hide Subscription Indicator</label>
+				<div class="note">Subscriber's comments are flagged with an indicator after their username. Check this box to hide display of that indicator.</div>
 				<br />
 				<div class="note">Set the delivery mode for subscription related messages:</div>
 				[%
