@@ -46,7 +46,7 @@ __template__
 				[% ELSE %]
 					User "[% user_edit.nickname | strip_literal %]" 
 				[% END %]
-				subsrciption
+				subscription
 			
 				[% IF subscriber %]
 					ends
