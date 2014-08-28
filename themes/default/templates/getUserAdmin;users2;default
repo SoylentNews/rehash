@@ -186,7 +186,7 @@ __template__
 			[% IF ! useredit.nonuid %]
 				[% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
 					<label>
-						Subscription
+						Subscriptions
 					</label>
 					[% IF useredit.subscribe_payments.size or useredit.subscribe_purchases.size%]
 					<table cellspacing="0" border="0" class="data">

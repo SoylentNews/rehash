@@ -52,7 +52,7 @@ __template__
 				<input type="submit" name="messages" value="Messages" class="button">
 			[% END %]
 			[% IF constants.plugin.Subscribe %]
-				<input type="submit" name="subscription" value="Subscription" class="button">
+				<input type="submit" name="subscription" value="Subscriptions" class="button">
 			[% END %]
 			
 			[% IF userinfo_flag %]
@@ -187,7 +187,7 @@ __template__
 				</p>
 				[% IF ! useredit.nonuid %]
 					[% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
-						<label>Subscription</label>
+						<label>Subscriptions</label>
 						[% IF useredit.subscribe_payments.size or useredit.subscribe_purchases.size%]
 							<table cellspacing="0" border="0" class="data">
 								<tr class="data_head">
