@@ -36,6 +36,7 @@ __template__
 					<table border=0 cellpadding=3>
 						<tr>
 							<td>[% PROCESS paypalbut %]</td>
+							<td>[% PROCESS bitpaybut uid = user.uid puid = user.uid %]</td>
 						</tr>
 					</table>
 				</center>
@@ -51,6 +52,7 @@ __template__
 						<table border=0 cellpadding=3>
 							<tr>
 								<td>[% PROCESS paypalbut gift = gift from = from %]</td>
+								<td>[% PROCESS bitpaybut gift = gift from = from uid = sub_user.uid puid = user.uid %]</td>
 							</tr>
 						</table>
 					</center>

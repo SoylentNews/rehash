@@ -80,7 +80,7 @@ __template__
 				</fieldset>
 			</form>
 		[% END %]
-	
+
 		[% IF user.is_admin %]
 			<form action="[% env.script_name %]">
 				<fieldset>

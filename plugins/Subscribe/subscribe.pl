@@ -46,7 +46,9 @@ sub main {
 			seclev		=> 1
 		},
 	};
-
+	
+	# Duplicating code because the redirect page needs to skip the
+	# standard header and footer.
 	$op = 'pause' if $form->{merchant_return_link};
 	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
@@ -215,7 +217,7 @@ sub paypal {
 		# use Data::Dumper; print STDERR Dumper($pp_pdt);
 		
 		if (ref($pp_pdt) eq "HASH") {
-			my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross});
+			my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross}, 'paypal');
 			my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
 			
 			my ($puid, $payment_type, $from);
@@ -346,6 +348,7 @@ sub confirm {
 		type           => $type,
 		uid            => $uid,
 		sub_user       => $sub_user,
+		user           => $user,
 		from           => $form->{from}
 	});
 }
@@ -368,7 +371,6 @@ sub send_gift_msg {
 	my $title = "Gift subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
 }
-
 
 createEnvironment();
 main();
