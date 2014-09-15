@@ -1634,6 +1634,7 @@ sub saveComment {
 		$karma_bonus = 1 if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
 			&& !$comm->{nobonus};
 		$subscriber_bonus = 1 if $constants->{plugin}{Subscribe}
+			&& $constants->{subscriber_bonus}
 			&& $user->{is_subscriber}
 			&& (!$comm->{nosubscriberbonus} || $comm->{nosubscriberbonus} ne 'on');
 	}
@@ -1893,7 +1894,7 @@ sub dispComment {
 	}
 	
 	my $subscriber_bonus;
-	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && $constants->{subscriber_bonus}) {
 		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
 		if (isSubscriber($comment->{uid}) && !$hide_subscription) {
 			$subscriber_bonus = 'yes';
