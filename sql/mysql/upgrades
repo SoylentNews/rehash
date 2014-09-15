@@ -372,3 +372,6 @@ INSERT INTO vars (name, value, description) VALUES ('signoffs_per_article','2','
 
 # Fix Subs Messages
 UPDATE message_codes SET delivery_bvalue=1 WHERE type LIKE 'Subscription%';
+
+# Unset subscriber_bonus on comments since it got set due to a bug.
+update comments set subscriber_bonus = 'no' where subscriber_bonus = 'yes';
