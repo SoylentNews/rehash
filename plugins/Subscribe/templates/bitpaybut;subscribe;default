@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Bitpay button to subscribe to this site.
+
+* user
+* constants
+	bitpay_image_src		location of the bitpay button image
+
+	
+* gift	hashref passed if handling a gift subscription.  Should contain values
+        for keys uid, and puid (uid of user receiving subscription, uid of purchaser)
+
+* from  string user wants included in e-mail message 
+
+__title__
+
+__page__
+subscribe
+__lang__
+en_US
+__name__
+bitpaybut
+__template__
+<form method="POST" action="/bitpay.pl">
+<input type="hidden" name="from" value="[% from %]">
+<input type="hidden" name="uid" value="[% uid %]">
+<input type="hidden" name="puid" value="[% puid %]">
+<input type="image" src="[% constants.bitpay_image_src %]" name="submit" alt="Subscribe With Bitpay">
+</form>
+__seclev__
+1
+
+__version__
+$Id$
