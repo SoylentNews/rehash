@@ -13333,9 +13333,7 @@ sub DESTROY {
 #!/usr/bin/perl
 
 ##################################################################
-# TMB This sub returns stories with a pubdate newer than $dtime.
-# Primarily for showing accepted but not yet published stories but
-# use it however you like. $dtime 
+# TMB This sub returns stories with a pubdate newer than NOW().
 sub getStoriesSince {
 	my ($self, $dtime, $limit) = @_;
 
