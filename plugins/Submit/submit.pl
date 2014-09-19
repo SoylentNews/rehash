@@ -397,12 +397,12 @@ sub submissionEd {
 
 	my($submissions);
 	$submissions = $slashdb->getSubmissionForUser;
-	my $countsubs = scalar(@$submissions);
+	my $show_filters = scalar(@$submissions) > $constants->{subs_level} || $user->{is_admin} ? 1 : 0;
 
 	slashDisplay('subEdTable', {
 		cur_skin	=> $cur_skin,
 		cur_note	=> $cur_note,
-		countsubs	=> $countsubs,
+		show_filters	=> $show_filters,
 		def_skin	=> $def_skin,
 		def_note	=> $def_note,
 		skins		=> \@skins,
