@@ -38,6 +38,7 @@ __template__
 #
 ##########
 -->
+[% IF show_filters %]
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Submissions List</legend>
@@ -56,6 +57,7 @@ __template__
 					[% END %]
 					</select>
 
+					
 					Filter
 					<input name="filter" value="[% form.filter %]" size="30">
 
@@ -70,6 +72,7 @@ __template__
 					<input type="submit" value="Filter Submissions">
 		</fieldset>
 	</form>
+[% END %]
 __seclev__
 10000
 __version__

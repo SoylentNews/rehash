@@ -13330,6 +13330,34 @@ sub DESTROY {
 	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY");
 }
 
+#!/usr/bin/perl
+
+##################################################################
+# TMB This sub returns stories with a pubdate newer than NOW().
+sub getStoriesSince {
+	my ($self, $dtime, $limit) = @_;
+
+	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
+	my @nexuses = $self->getNexusTids();
+	my $nexus_clause = join ',', @nexuses, $mp_tid;
+
+	$limit = $limit ? 'LIMIT ' . $limit : '';
+
+	my $answer = $self->sqlSelectAllHashrefArray(
+		'primaryskid, submitter, title, time',
+		'stories, story_text, story_topics_rendered',
+			"stories.stoid = story_topics_rendered.stoid
+			AND stories.stoid = story_text.stoid
+			AND time > NOW()
+			AND story_topics_rendered.tid IN ($nexus_clause)
+			AND in_trash = 'no'",
+		"GROUP BY stories.stoid ORDER by time DESC $limit");
+	formatDate($answer, 'time', 'time', '%m/%d  %H:%M');
+
+	return $answer;
+}
+
+
 
 1;
 

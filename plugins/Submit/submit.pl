@@ -395,9 +395,14 @@ sub submissionEd {
 			map  { [$_, ($_ eq $def_note ? '' : $_)] }
 			keys %all_notes;
 
+	my($submissions);
+	$submissions = $slashdb->getSubmissionForUser;
+	my $show_filters = scalar(@$submissions) > $constants->{subs_level} || $user->{is_admin} ? 1 : 0;
+
 	slashDisplay('subEdTable', {
 		cur_skin	=> $cur_skin,
 		cur_note	=> $cur_note,
+		show_filters	=> $show_filters,
 		def_skin	=> $def_skin,
 		def_note	=> $def_note,
 		skins		=> \@skins,
@@ -407,8 +412,10 @@ sub submissionEd {
 		width		=> '100%',
 	});
 
-	my($submissions);
-	$submissions = $slashdb->getSubmissionForUser;
+	
+	my $pending;
+	$pending = $slashdb->getStoriesSince();
+
 
 	for my $sub (@$submissions) {
 		$sub->{name}  =~ s/<(.*)>//g;
@@ -431,6 +438,13 @@ sub submissionEd {
 		$sub->{skin}   = $skin->{name};
 	}
 
+	for my $pen (@$pending) {
+		my $skin = $slashdb->getSkin($pen->{primaryskid});
+		$pen->{skin}   = $skin->{name};
+		my $name = $slashdb->getUsersNicknamesByUID([$pen->{submitter}]);
+		$pen->{name} = $name->{$pen->{submitter}}->{nickname};
+	}
+
 	# Do we provide a submission list based on a custom sort?
 	my @weighted;
 	if ($constants->{submit_extra_sort_key}) {
@@ -442,9 +456,17 @@ sub submissionEd {
 		@weighted = sort { $b->{$key} <=> $a->{$key} } @{$submissions};
 	}
 
+	my $showpending = 0;
+	if(	($constants->{future_headlines} == 1 && $user->{is_subscriber}) ||
+		($constants->{future_headlines} == 2 && $user->{is_anon} == 0) ||
+		($constants->{future_headlines} == 3)
+	){$showpending = 1;}
+
 	my $template = $user->{is_admin} ? 'Admin' : 'User';
 	slashDisplay('subEd' . $template, {
 		submissions	=> $submissions,
+		pending		=> $pending,
+		showpending	=> $showpending,
 		selection	=> getSubmissionSelections($constants),
 		weighted	=> \@weighted,
 	});

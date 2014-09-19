@@ -17,22 +17,37 @@ __template__
 <table width="95%" cellpadding="0" cellspacing="0" border="0">
 
 [% FOREACH sub = submissions %]
-	<tr><td>[% sub.note | strip_nohtml %]</td>
-
-	<td>[% sub.skin.ucfirst %]</td><td>
+	<tr>
+	<td style="width:8em">[% sub.skin.ucfirst %]</td><td style="width:12em">
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
 	[% END %]
 	</td><td>
 		<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %]"
 		>[% sub.strs.0 %]&nbsp;</a>
-	</td><td>[% sub.strs.1 %]<br>[% sub.strs.2 %]</td></tr>
-	<tr><td colspan="6"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
+	</td><td style="width:16em">[% sub.strs.1 %]<br>[% sub.strs.2 %]</td></tr>
+	<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
 [% END %]
 
 </table>
 
 </div>
+[% IF showpending == 1 %]
+[% PROCESS titlebar title="Pending Stories" %]
+<div class="generalbody">
+	<table width="95%" cellpadding="0" cellspacing="0" border="0">
+		[% FOREACH story = pending %]
+			<tr>
+			<td style="width:8em">[% story.skin | ucfirst %]</td>
+			<td style="width:12em">[% story.time %]</td>
+			<td>[% story.title %]</td>
+			<td style="width:16em">[% story.name %]</td>
+			</tr>
+			<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
+		[% END %]
+			</table>
+</div>
+[% END %]
 __seclev__
 10000
 __version__
