@@ -402,4 +402,4 @@ INSERT INTO vars (name, value, description) VALUES ('bitpay_num_days','365','How
 update comments set subscriber_bonus = 'no' where subscriber_bonus = 'yes';
 
 # Create a variable to decide who gets to see future article titles on /submit.pl?op=list
-INSERT INTO vars (name, value, description) VALUES ('future_headlines','2','Who to show future headlines to on submissions list page. 0=Everyone, 1=Registered Users, 2=Subscribers');
+INSERT INTO vars (name, value, description) VALUES ('future_headlines','1','Who to show future headlines to on submissions list page. 3=Everyone, 2=Registered Users, 1=Subscribers anything else = off');

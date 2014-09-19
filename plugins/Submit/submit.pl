@@ -395,9 +395,14 @@ sub submissionEd {
 			map  { [$_, ($_ eq $def_note ? '' : $_)] }
 			keys %all_notes;
 
+	my($submissions);
+	$submissions = $slashdb->getSubmissionForUser;
+	my $countsubs = scalar(@$submissions);
+
 	slashDisplay('subEdTable', {
 		cur_skin	=> $cur_skin,
 		cur_note	=> $cur_note,
+		countsubs	=> $countsubs,
 		def_skin	=> $def_skin,
 		def_note	=> $def_note,
 		skins		=> \@skins,
@@ -407,8 +412,7 @@ sub submissionEd {
 		width		=> '100%',
 	});
 
-	my($submissions);
-	$submissions = $slashdb->getSubmissionForUser;
+	
 	my $pending;
 	$pending = $slashdb->getStoriesSince();
 
@@ -453,9 +457,9 @@ sub submissionEd {
 	}
 
 	my $showpending = 0;
-	if(	($constants->{future_headlines} == 2 && $user->{is_subscriber}) ||
-		($constants->{future_headlines} == 1 && $user->{is_anon} == 0) ||
-		($constants->{future_headlines} eq 0)
+	if(	($constants->{future_headlines} == 1 && $user->{is_subscriber}) ||
+		($constants->{future_headlines} == 2 && $user->{is_anon} == 0) ||
+		($constants->{future_headlines} == 3)
 	){$showpending = 1;}
 
 	my $template = $user->{is_admin} ? 'Admin' : 'User';

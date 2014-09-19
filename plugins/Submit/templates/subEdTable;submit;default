@@ -56,6 +56,7 @@ __template__
 					[% END %]
 					</select>
 
+					[% IF countsubs > constants.subs_level %]
 					Filter
 					<input name="filter" value="[% form.filter %]" size="30">
 
@@ -68,6 +69,7 @@ __template__
 					</select>
 
 					<input type="submit" value="Filter Submissions">
+					[% END %]
 		</fieldset>
 	</form>
 __seclev__

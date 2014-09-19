@@ -17,8 +17,7 @@ __template__
 <table width="95%" cellpadding="0" cellspacing="0" border="0">
 
 [% FOREACH sub = submissions %]
-	<tr><td>[% sub.note | strip_nohtml %]</td>
-
+	<tr>
 	<td style="width:8em">[% sub.skin.ucfirst %]</td><td style="width:12em">
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
