@@ -33,6 +33,7 @@ sub main {
 		action	=> [ $user_ok,	\&action  ],
 		check	=> [ 1,		\&check   ],
 		all	=> [ 1,		\&people  ],
+		max	=> [ 1,		\&max  ],
 	);
 
 	$ops{$_} = $ops{action} for qw(add delete);
@@ -156,6 +157,23 @@ sub people {
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 
+	return 1;
+}
+
+sub max {
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
+	my $max_uid = $slashdb->countUsers({ max => 1 });
+	
+	my $max_user = $slashdb->getUser($max_uid);
+	
+	my $max_title = "Max User";
+	header($max_title) or return;
+	
+	slashDisplay('max', {
+		max_title		=> $max_title,
+		max_uid	=> $max_uid,
+		max_nick	=> $max_user->{nickname}
+	});
 	return 1;
 }
 
