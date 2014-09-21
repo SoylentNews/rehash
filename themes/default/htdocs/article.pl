@@ -79,7 +79,7 @@ sub main {
 		# XXXSECTIONTOPICS this needs to be updated
 		my $SECT = $reader->getSection($story->{section});
 		# This should be a getData call for title
-		my $title = "$constants->{sitename} | $story->{title}";
+		my $title = "$story->{title} - $constants->{sitename}";
 		if ($gSkin->{name} && $gSkin->{name} eq "idle") {
 			$title = "$gSkin->{hostname} | $story->{title}";
 		}
