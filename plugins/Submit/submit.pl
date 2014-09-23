@@ -152,19 +152,19 @@ sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
 
 	
-	slashProf("pendingsubs");
+	#slashProf("pendingsubs");
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
-	slashProf("","pendingsubs");
+	#slashProf("","pendingsubs");
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('submit');
-	if ($rkey->create) {
-		slashProf("displayForm");
+	#my $reskey = getObject('Slash::ResKey');
+	#my $rkey = $reskey->key('submit');
+	#if ($rkey->create) {
+	#	slashProf("displayForm");
 		displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
-		slashProf("", "displayForm");
-	} else {
-		print $rkey->errstr;
-	}		
+	#	slashProf("", "displayForm");
+	#} else {
+	#	print $rkey->errstr;
+	#}		
 
 
 }
@@ -175,15 +175,15 @@ sub previewStory {
 
 	my $error_message = '';
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('submit');
-	unless ($rkey->touch) {
-		$error_message = $rkey->errstr;
-		if ($rkey->death) {
-			print $error_message;
-			return 0;
-		}
-	}		
+	#my $reskey = getObject('Slash::ResKey');
+	#my $rkey = $reskey->key('submit');
+	#unless ($rkey->touch) {
+	#	$error_message = $rkey->errstr;
+	#	if ($rkey->death) {
+	#		print $error_message;
+	#		return 0;
+	#	}
+	#}		
   #	print STDERR Data::Dumper->Dumper($form->{story});
 	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'), '', $error_message);
 }
@@ -604,8 +604,8 @@ sub displayForm {
 sub saveSub {
 	my($constants, $slashdb, $user, $form) = @_;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('submit');
+	#my $reskey = getObject('Slash::ResKey');
+	#my $rkey = $reskey->key('submit');
 	my $url_id;
 
 	$form->{name} ||= '';
@@ -658,15 +658,15 @@ sub saveSub {
 		}
 	}
 	
-	unless ($rkey->use) {
-		my $error_message = $rkey->errstr;
-		if ($rkey->death) {
-			print $error_message;
-		} else {
-			displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
-		}
-		return 0;
-	}		
+	#unless ($rkey->use) {
+	#	my $error_message = $rkey->errstr;
+	#	if ($rkey->death) {
+	#		print $error_message;
+	#	} else {
+	#		displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
+	#	}
+	#	return 0;
+	#}		
 
 	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
 
