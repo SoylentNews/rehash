@@ -21,7 +21,7 @@ __template__
 			<input type="submit" name="varedit" value="Select Var" class="button">
 			<label>Variable Name</label>
 			<input type="text" name="thisname" value="[% varsref.name %]" size="40">
-			<label>Value</label><input type="text" name="value" value="[% varsref.value %] size="50"">
+			<label>Value</label><input type="text" name="value" value="[% varsref.value %]" size="50">
 			<label>Description</label>
 			<input type="text" name="desc" value="[% FILTER strip_attribute %][% varsref.description %][% END %]" size="100">
 			<input type="submit" name="varsave" value="Save" class="button">
