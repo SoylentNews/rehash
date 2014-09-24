@@ -21,6 +21,11 @@ margin: 0 0 -.3em 0;
 padding: 0;
 }
 
+pre, code, kbd, samp, tt {
+font-family: "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace;
+font-size: 1em;
+}
+
 #top_parent {
 border: 1px solid transparent;
 }
