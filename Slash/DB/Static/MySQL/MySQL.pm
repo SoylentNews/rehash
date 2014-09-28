@@ -179,11 +179,14 @@ sub getNewStoryTopics {
 sub updateArchivedDiscussions {
 	my($self) = @_;
 
-	my $days_to_archive = getCurrentStatic('archive_delay');
+	# Pull archive time from discussion_archive_delay.
+	# Allow for comments to be closed without archiving the
+	# story as an shtml file.
+	my $days_to_archive = getCurrentStatic('discussion_archive_delay');
 	return 0 if !$days_to_archive;
 
 	# discussion types to NOT archive, comma-separated
-	my $skip_dkids = '9'; # XXX this should be in DB
+	my $skip_dkids = getCurrentStatic('discussion_skip_dkids'); 
 
 	# Close old discussions
 	my $count = $self->sqlUpdate(
