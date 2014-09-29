@@ -537,10 +537,12 @@ sub IndexHandler {
 	if ($uri eq '/hof.pl') {
 		my $basedir  = $constants->{basedir};
 
-		$r->uri('/hof.shtml');
-		$r->filename("$basedir/hof.shtml");
-		writeLog('shtml');
-		return OK;
+		if (!$dbon || !$is_user) {
+			$r->uri('/hof.shtml');
+			$r->filename("$basedir/hof.shtml");
+			writeLog('shtml');
+			return OK;
+		}
 	}
 
 	# Moved, 2009-05

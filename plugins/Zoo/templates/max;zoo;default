@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+max
+__template__
+<div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
+[% PROCESS userboxes %]
+[% END %]
+</div>
+
+<div id="users-blocks">
+	[% PROCESS titlebar title=max_title %]
+	<div class="generalbody">
+	 <p class='bender'>The current maximum UID is [% max_uid %], owned by [% max_nick %]</p>
+	</div>
+</div>
+__seclev__
+500
+__version__
+$Id$

@@ -18,7 +18,7 @@ en_US
 __name__
 main
 __template__
-<!-- begin generated body -->
+<div id="hof">
 
 <p>[% PROCESS titlebar title => 'Most Active Stories' %]
 <div class="generalbody">
@@ -76,20 +76,6 @@ by [% item.4 %]<br>
 </div>
 [% END %]
 
-<p><center>generated on [% currtime %]</center></p>
-<script type="text/javascript">
-(function() {
-// coremetrics
-if( window.location.hostname.indexOf('slashdot.org') >= 0 ) {
-	cmSetProduction();
-}
-cmCreatePageviewTag && cmCreatePageviewTag('HALL OF FAME') && (cmCreatePageviewTag = null);
-})();
-</script>
-
-<!-- end generated body -->
-
-  </div>
 </div>
 
 __seclev__
