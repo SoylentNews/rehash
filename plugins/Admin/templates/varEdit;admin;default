@@ -15,15 +15,17 @@ __template__
 <div class="generalbody">
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
-			<legend>Vars editor</legend>
+			<legend>Vars Editor</legend>
 			<input type="hidden" name="op" value="vars">
 			<label>Select Variable Name</label>[% vars_select %]
-			<input type="submit" name="varedit" value="Select Var" class="button"
+			<input type="submit" name="varedit" value="Select Var" class="button">
 			<label>Variable Name</label>
-			<input type="text" name="thisname" value="[% varsref.name %]">
-			<label>Value</label><input type="text" name="value" value="[% varsref.value %]">
+			<input type="text" name="thisname" value="[% varsref.name %]" size="50">
+			<label>Value</label>
+			<input type="text" name="value" value="[% varsref.value %]" size="50">
 			<label>Description</label>
-			<input type="text" name="desc" value="[% FILTER strip_attribute %][% varsref.description %][% END %]" size="60">
+			<input type="text" name="desc" value="[% FILTER strip_attribute %][% varsref.description %][% END %]" size="100">
+			<br/>
 			<input type="submit" name="varsave" value="Save" class="button">
 		</fieldset>
 	</form>

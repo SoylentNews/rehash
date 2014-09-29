@@ -764,7 +764,7 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags','b|i|p|br|a|o
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 'a:href_U,name,title,rel div:id,class,title,style,dir,lang span:id,class,title,style,dir,lang slash:type_R,id,href_U,story,nickname,uid,user,align,width,height,title table:align,bgcolor,border,cellpadding,cellspacing,width tr:align,bgcolor,valign th:align,bgcolor,colspan,height,rowspan,valign,width td:align,bgcolor,colspan,height,rowspan,valign,width', 'inherits from approvedtags_attr');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_break','p|br|ol|ul|li|dl|dt|dd|blockquote|div|img|hr|h1|h2|h3|h4|h5|h6|quote','Tags that break words (see breakHtml())');
-INSERT INTO vars (name, value, description) VALUES ('archive_delay','60','days to wait for story archiving');
+INSERT INTO vars (name, value, description) VALUES ('archive_delay','0','days to wait for story archiving, set to 0 to disable');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay_mod','60','Days before moderator logs are expired');
 INSERT INTO vars (name, value, description) VALUES ('articles_only','0','show only Articles in submission count in admin menu');
 INSERT INTO vars (name, value, description) VALUES ('article_nocomment','0','Show no comments in article.pl');
@@ -880,9 +880,11 @@ INSERT INTO vars (name, value, description) VALUES ('defaulttopic','1','Default 
 INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','This turns off delayed inserts (which you probably want to do)');
 INSERT INTO vars (name, value, description) VALUES ('delete_old_stories', '0', 'Delete stories and discussions that are older than the archive delay.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_approval', '0', 'If this is set to 1, set all user created discussions when created to 0 so that they must be approved');
+INSERT INTO vars (name, value, description) VALUES ('discussion_archive_delay','14','days to wait until disabing further comments, set to 0 to disable');
 INSERT INTO vars (name, value, description) VALUES ('discussion_create_seclev','1','Seclev required to create discussions (yes, this could be an ACL in the future).');
 INSERT INTO vars (name, value, description) VALUES ('discussion_default_topic', '1', 'Default topic of user-created discussions.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_display_limit', '30', 'Number of default discussions to list.');
+INSERT INTO vars (name, value, description) VALUES ('discussion_skip_dkids', '3', 'discussion types to NOT archive, comma-separated, 3 is Journals');
 INSERT INTO vars (name, value, description) VALUES ('discussions_speed_limit','300','seconds delay before repeat discussion');
 INSERT INTO vars (name, value, description) VALUES ('do_expiry','1','Flag which controls whether we expire users.');
 INSERT INTO vars (name, value, description) VALUES ('down_moderations','-6','number of how many comments you can post that get down moderated');

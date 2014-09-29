@@ -170,7 +170,7 @@ a:hover { color: #800;}
 
 .commentBox { background: #a00; }
 
-#commentwrap, .commentBoxForm
+#commentwrap, .commentwrap, .commentBoxForm
 {
 	background: #888;
 }

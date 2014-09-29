@@ -68,18 +68,38 @@ INSERT INTO comment_text (cid, comment) VALUES (1, 'This is the first post put i
 # Dumping data for table 'content_filters'
 #
 
-INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:\\s+)','comments','gi','postersubj',0.0000,7,0,'Lots of space in the subject ... lots of space in the head.');
-INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:\\s+)','comments','gi','postercomment',0.0000,40,0,'Lots of space in the comment ... lots of space in the head.');
-INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:.)$','comments', 'gi','postersubj',0.0000,0,0,'One character. Hmmm. Gee, might this be a troll?');
-INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:.)$','comments', 'gi','postercomment',0.0000,0,0,'One character. Hmmm. Gee, might this be a troll?');
-INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:)$','comments', 'gi','postersubj',0.0000,0,0,'Cat got your tongue? You mean you have nothing to say?');
-INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:)$','comments', 'gi','postercomment',0.0000,0,0,'Cat got your tongue? You mean you have nothing to say?');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:\\s+)','comments','gi','postersubj',0.0000,7,0,'Too much space in Subject.');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:\\s+)','comments','gi','postercomment',0.0000,40,0,'Too much sapce in Comment.');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:.)$','comments', 'gi','postersubj',0.0000,0,0,'Subject too short.');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:.)$','comments', 'gi','postercomment',0.0000,0,0,'Comment too short');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:)$','comments', 'gi','postersubj',0.0000,0,0,'Missing Subject.');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('^(?:)$','comments', 'gi','postercomment',0.0000,0,0,'Missing Comment.');
 INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('feces','submissions', '','subj',0.0000,0,0,'too smelly to submit');
 INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('feces','submissions', '','story',0.0000,0,0,'too smelly to submit');
 INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('feces','submissions', '','email',0.0000,0,0,'too smelly to submit');
 INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('goatse\\.cx','submissions', '','subj',0.0000,0,0,'definitely tired...');
 INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('goatse\\.cx','submissions', '','story',0.0000,0,0,'definitely tired...');
 INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('goatse\\.cx','submissions', '','email',0.0000,0,0,'definitely tired...');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('viagra','comments', 'gi','postersubj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('viagra','comments', 'gi','postercomment',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('cialis','comments', 'gi','postersubj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('cialis','comments', 'gi','postercomment',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('tadalafil','comments', 'gi','postersubj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('tadalafil','comments', 'gi','postercomment',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('sildenafil','comments', 'gi','postersubj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('sildenafil','comments', 'gi','postercomment',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','viagra','gi','subj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','viagra','gi','story',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','viagra','gi','email',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','cialis','gi','subj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','cialis','gi','story',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','cialis','gi','email',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','tadalafil','gi','subj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','tadalafil','gi','story',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','tadalafil','gi','email',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','sildenafil','gi','subj',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','sildenafil','gi','story',0.0000,0,0,'No Spam Please!');
+INSERT INTO content_filters (form, regex, modifier, field, ratio, minimum_match, minimum_length, err_message) VALUES ('submissions','sildenafil','gi','email',0.0000,0,0,'No Spam Please!');
 
 #
 # Dumping data for table 'dateformats'

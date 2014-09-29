@@ -403,3 +403,8 @@ update comments set subscriber_bonus = 'no' where subscriber_bonus = 'yes';
 
 # Create a variable to decide who gets to see future article titles on /submit.pl?op=list
 INSERT INTO vars (name, value, description) VALUES ('future_headlines','1','Who to show future headlines to on submissions list page. 3=Everyone, 2=Registered Users, 1=Subscribers anything else = off');
+
+# Setup to disable comments for older articles
+UPDATE vars SET value=0, description='days to wait for story archiving, set to 0 to disable' where name='archive_delay';
+INSERT INTO vars (name, value, description) VALUES ('discussion_archive_delay','14','days to wait until disabing further comments, set to 0 to disable');
+INSERT INTO vars (name, value, description) VALUES ('discussion_skip_dkids', '3', 'discussion types to NOT archive, comma-separated,  3 is Journals');
