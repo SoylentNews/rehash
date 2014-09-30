@@ -79,7 +79,7 @@ cur_time = Slash.db.getTime();
 		</tr>
 		[% total = total + 1 %]
 		[% END %]
-		[% IF IF admin_flag || user.uid == sub.uid %]
+		[% IF admin_flag || user.uid == sub.uid %]
 		<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>
 		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
 		[% ELSIF user.uid != sub.uid %]
