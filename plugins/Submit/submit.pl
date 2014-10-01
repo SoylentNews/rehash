@@ -72,7 +72,10 @@ sub main {
 	# so leave it here until you really know what you
 	# are doing -- pudge
 	$form->{from}   = strip_attribute($form->{from})  if $form->{from};
-	$form->{subj}   = strip_anchor($form->{subj})  if $form->{subj};
+	##########
+	#	TMB This absolutely should not be done to subj. We want to allow entities in subj.
+	#	$form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
+	#
 	$form->{email}  = strip_attribute($form->{email}) if $form->{email};
 	$form->{name}   = strip_nohtml($form->{name})     if $form->{name};
 
@@ -152,19 +155,19 @@ sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
 
 	
-	#slashProf("pendingsubs");
+	slashProf("pendingsubs");
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
-	#slashProf("","pendingsubs");
+	slashProf("","pendingsubs");
 
-	#my $reskey = getObject('Slash::ResKey');
-	#my $rkey = $reskey->key('submit');
-	#if ($rkey->create) {
-	#	slashProf("displayForm");
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	if ($rkey->create) {
+		slashProf("displayForm");
 		displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
-	#	slashProf("", "displayForm");
-	#} else {
-	#	print $rkey->errstr;
-	#}		
+		slashProf("", "displayForm");
+	} else {
+		print $rkey->errstr;
+	}		
 
 
 }
@@ -175,15 +178,15 @@ sub previewStory {
 
 	my $error_message = '';
 
-	#my $reskey = getObject('Slash::ResKey');
-	#my $rkey = $reskey->key('submit');
-	#unless ($rkey->touch) {
-	#	$error_message = $rkey->errstr;
-	#	if ($rkey->death) {
-	#		print $error_message;
-	#		return 0;
-	#	}
-	#}		
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	unless ($rkey->touch) {
+		$error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+			return 0;
+		}
+	}		
   #	print STDERR Data::Dumper->Dumper($form->{story});
 	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'), '', $error_message);
 }
@@ -395,14 +398,9 @@ sub submissionEd {
 			map  { [$_, ($_ eq $def_note ? '' : $_)] }
 			keys %all_notes;
 
-	my($submissions);
-	$submissions = $slashdb->getSubmissionForUser;
-	my $show_filters = scalar(@$submissions) > $constants->{subs_level} || $user->{is_admin} ? 1 : 0;
-
 	slashDisplay('subEdTable', {
 		cur_skin	=> $cur_skin,
 		cur_note	=> $cur_note,
-		show_filters	=> $show_filters,
 		def_skin	=> $def_skin,
 		def_note	=> $def_note,
 		skins		=> \@skins,
@@ -412,10 +410,8 @@ sub submissionEd {
 		width		=> '100%',
 	});
 
-	
-	my $pending;
-	$pending = $slashdb->getStoriesSince();
-
+	my($submissions);
+	$submissions = $slashdb->getSubmissionForUser;
 
 	for my $sub (@$submissions) {
 		$sub->{name}  =~ s/<(.*)>//g;
@@ -438,13 +434,6 @@ sub submissionEd {
 		$sub->{skin}   = $skin->{name};
 	}
 
-	for my $pen (@$pending) {
-		my $skin = $slashdb->getSkin($pen->{primaryskid});
-		$pen->{skin}   = $skin->{name};
-		my $name = $slashdb->getUsersNicknamesByUID([$pen->{submitter}]);
-		$pen->{name} = $name->{$pen->{submitter}}->{nickname};
-	}
-
 	# Do we provide a submission list based on a custom sort?
 	my @weighted;
 	if ($constants->{submit_extra_sort_key}) {
@@ -456,17 +445,9 @@ sub submissionEd {
 		@weighted = sort { $b->{$key} <=> $a->{$key} } @{$submissions};
 	}
 
-	my $showpending = 0;
-	if(	($constants->{future_headlines} == 1 && $user->{is_subscriber}) ||
-		($constants->{future_headlines} == 2 && $user->{is_anon} == 0) ||
-		($constants->{future_headlines} == 3)
-	){$showpending = 1;}
-
 	my $template = $user->{is_admin} ? 'Admin' : 'User';
 	slashDisplay('subEd' . $template, {
 		submissions	=> $submissions,
-		pending		=> $pending,
-		showpending	=> $showpending,
 		selection	=> getSubmissionSelections($constants),
 		weighted	=> \@weighted,
 	});
@@ -604,8 +585,8 @@ sub displayForm {
 sub saveSub {
 	my($constants, $slashdb, $user, $form) = @_;
 
-	#my $reskey = getObject('Slash::ResKey');
-	#my $rkey = $reskey->key('submit');
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
 	my $url_id;
 
 	$form->{name} ||= '';
@@ -658,15 +639,15 @@ sub saveSub {
 		}
 	}
 	
-	#unless ($rkey->use) {
-	#	my $error_message = $rkey->errstr;
-	#	if ($rkey->death) {
-	#		print $error_message;
-	#	} else {
-	#		displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
-	#	}
-	#	return 0;
-	#}		
+	unless ($rkey->use) {
+		my $error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+		} else {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
+		}
+		return 0;
+	}		
 
 	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
 
