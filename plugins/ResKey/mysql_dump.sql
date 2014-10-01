@@ -199,8 +199,9 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Check
 
 ### vars
 INSERT INTO reskey_vars VALUES (6, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (6, 'subscriberbypass', 1, 'If subscriber, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (6, 'acl_no', 'reskey_no_submit', 'If this ACL present, can\'t use resource');
-INSERT INTO reskey_vars VALUES (6, 'duration_max-uses',       5, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (6, 'duration_max-uses',       12, 'how many uses per timeframe');
 INSERT INTO reskey_vars VALUES (6, 'duration_max-failures',  10, 'how many failures per reskey');
 INSERT INTO reskey_vars VALUES (6, 'duration_uses',         300, 'min duration (in seconds) between uses');
 INSERT INTO reskey_vars VALUES (6, 'duration_creation-use',  20, 'min duration (in seconds) between creation and use');
