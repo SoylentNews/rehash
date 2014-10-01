@@ -410,5 +410,5 @@ INSERT INTO vars (name, value, description) VALUES ('discussion_archive_delay','
 INSERT INTO vars (name, value, description) VALUES ('discussion_skip_dkids', '3', 'discussion types to NOT archive, comma-separated,  3 is Journals');
 
 # Add subscriberbypass for submit reskey
-INSERT INTO reskey_vars VALUES (6, 'subscriberbypass', 1, 'If subscriber, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (6, 'subscriberbypass', 1, 'If subscriber, bypass checks for duration');
 UPDATE reskey_vars SET value = 12 WHERE rkrid = 6 and name = 'duration_max-uses';
