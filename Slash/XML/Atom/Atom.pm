@@ -330,6 +330,10 @@ sub atom_encode {
 		};
 	}
 
+	# This shouldn't be necessary but I can't seem to find what is doing the reencoding to entities.
+	# This is fine though since we're only running it once every 15m.
+	$value =~ s/&#(\d+);/chr($1)/ge if $self->{encoding} eq "UTF-8";
+
 	if ($type eq 'text') {
 		return qq[<$element>$value</$element>\n];
 	} else {
