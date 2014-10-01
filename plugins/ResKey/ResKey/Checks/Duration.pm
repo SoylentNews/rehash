@@ -21,7 +21,8 @@ sub doCheckCreate {
 	my $user = getCurrentUser();
 	my $check_vars = $self->getCheckVars;
 
-	if ($check_vars->{adminbypass} && $user->{is_admin}) {
+	if( ($check_vars->{adminbypass} && $user->{is_admin}) ||
+	($check_vars->{subscriberbypass} && $user->{is_subscriber}) ) {
 		return RESKEY_SUCCESS;
 	}
 
@@ -39,7 +40,8 @@ sub doCheckTouch {
 	my $user = getCurrentUser();
 	my $check_vars = $self->getCheckVars;
 
-	if ($check_vars->{adminbypass} && $user->{is_admin}) {
+	if( ($check_vars->{adminbypass} && $user->{is_admin}) ||
+	($check_vars->{subscriberbypass} && $user->{is_subscriber}) ) {
 		return RESKEY_SUCCESS;
 	}
 
@@ -62,7 +64,8 @@ sub doCheckUse {
 	my $user = getCurrentUser();
 	my $check_vars = $self->getCheckVars;
 
-	if ($check_vars->{adminbypass} && $user->{is_admin}) {
+	if( ($check_vars->{adminbypass} && $user->{is_admin}) ||
+	($check_vars->{subscriberbypass} && $user->{is_subscriber}) ) {
 		return RESKEY_SUCCESS;
 	}
 

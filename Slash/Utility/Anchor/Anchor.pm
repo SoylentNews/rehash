@@ -139,7 +139,7 @@ sub header {
 			# to be used for requests and the RFC doesn't define it to
 			# mean anything for responses) it probably doesn't hurt
 			# anything and allegedly has stopped users from complaining.
-			$r->header_out('Pragma', 'no-cache')
+			$r->header_out('Pragma', 'no-cache');
 		}
 
 # 		unless ($user->{seclev} || $ENV{SCRIPT_NAME} =~ /comments/) {
