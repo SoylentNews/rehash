@@ -1279,6 +1279,7 @@ sub editStory {
 	}
 
 	if ($storyref->{title}) {
+		$storyref->{title} = strip_literal($storyref->{title});
 		my $oldskin = $gSkin->{skid};
 		setCurrentSkin($storyref->{primaryskid});
 		# Do we want to
