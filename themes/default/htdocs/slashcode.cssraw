@@ -323,7 +323,7 @@ textarea { width: 80%; }
 #journal input.button, #admin input.button { width: auto; }
 
 /* Misc */
-pre, code { font-size: .813em; }
+
 /* Ad */
 .ad1
 {
