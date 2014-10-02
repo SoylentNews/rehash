@@ -1133,6 +1133,7 @@ sub editStory {
 	# if that tells us, then sure - pudge
 	
 	if ($form->{title}) {
+		$form->{title} = strip_literal($form->{title});
 
 		my $storyskin = $gSkin;
 		$storyskin = $slashdb->getSkin($form->{skin}) if $form->{skin};
