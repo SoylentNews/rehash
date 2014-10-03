@@ -99,7 +99,7 @@ __template__
 			[% END %]
 
 			[% PROCESS formLabel value => "Title"  %]
-			<input class="fullbox" type="text" name="subj" value="[% form.subj %]" size="75" maxlength="100">
+			<input class="fullbox" type="text" name="subj" value="[% form.subj  | strip_attribute %]" size="75" maxlength="100">
 			[% PROCESS formNote note => "Be descriptive and concise!" %]
 			[% PROCESS formNote note => "(Nondescriptive subjects like 'Check this out!' usually just get deleted, because we get many every day. For best results, put the important words early.)" %]
 

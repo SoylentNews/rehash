@@ -22,6 +22,8 @@ sub main {
 	
 	slashProfInit();
 
+	$form->{subj} = strip_literal($form->{subj}) if $form->{subj};
+	
 	my @redirect_ops;
 
 	push @redirect_ops, "title=" . strip_paramattr($form->{subj}) if $form->{subj};
@@ -226,6 +228,7 @@ sub previewForm {
 	my $admin_flag = $user->{seclev} >= 100 ? 1 : 0;
 
 	my $sub = $slashdb->getSubmission($form->{subid});
+	$sub->{subj} = strip_literal($sub->{subj});
 	
 	$slashdb->updateSubMemory($form->{submatch}, $form->{subnote}) if $form->{submatch} && $user->{is_admin};
 	my($sub_memory, $subnotes_ref);

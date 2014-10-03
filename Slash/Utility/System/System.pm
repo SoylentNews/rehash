@@ -130,7 +130,8 @@ sub sendEmail {
 	my $b_code = $constants->{mail_charset_body} || ($constants->{utf8} ? 'UTF-8' : 'us-ascii');
 	my $h_code = $constants->{mail_charset_header} || 'MIME-Header';
 	if ($constants->{utf8}) {
-		$content = encode($b_code, $content, Encode::FB_PERLQQ);
+		# No need to encode body
+		# $content = encode($b_code, $content, Encode::FB_PERLQQ);
 		$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
 	}
 
@@ -209,7 +210,8 @@ sub bulkEmail {
 	my $b_code = $constants->{mail_charset_body} || ($constants->{utf8} ? 'UTF-8' : 'us-ascii');
 	my $h_code = $constants->{mail_charset_header} || "MIME-Header";
 	if ($constants->{utf8}) {
-		$content = encode($b_code, $content, Encode::FB_PERLQQ);
+		# No need to encode body
+		# $content = encode($b_code, $content, Encode::FB_PERLQQ);
 		$subject = encode($h_code, $subject, Encode::FB_PERLQQ);
 	}
 

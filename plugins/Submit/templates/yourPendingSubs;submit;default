@@ -38,7 +38,7 @@ __template__
 					[%- IF link_sid -%]
 						<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</a>
 					[%- ELSE -%]
-						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</a>
+						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj | strip_literal %]</a>
 					[%- END -%]
 				</td>
 				<td>[% Slash.timeCalc(sub.time) %]</td>
