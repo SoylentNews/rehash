@@ -9113,7 +9113,9 @@ sub getDiscussionParent {
 	}
 	elsif( my $jid = $self->getJidByDiscussionId($did) ) {
 		$parent->{type} = 'journal';
-		$parent->{content} = $self->sqlSelect('article', 'journals_text', "id=$jid");
+		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+		my $article = $journal_reader->get($jid);
+		$parent->{content} = $journal_reader->fixJournalText($article->{article}, $article->{posttype}, $article->{uid});
 	}
 	elsif(undef){
 		$parent->{type} = 'poll';
