@@ -1094,7 +1094,8 @@ sub printComments {
 		&& $cc > $user->{commentspill}
 		&& ( $user->{commentlimit} > $cc ||
 		     $user->{commentlimit} > $user->{commentspill} );
-
+	
+	my $archive_text;
 	if ($discussion->{type} eq 'archived'
 		|| ($discussion->{is_future} && !$constants->{subscribe_future_post})
 		|| ($discussion->{commentstatus} && $discussion->{commentstatus} ne 'enabled')
@@ -1107,7 +1108,7 @@ sub printComments {
 		if ($discussion->{is_future} && !$constants->{subscribe_future_post}) {
 			$user->{state}{discussion_future_nopost} = 1;
 		}
-		$pretext .= slashDisplay('printCommNoArchive', { discussion => $discussion }, { Return => $options->{Return}});
+		$archive_text = slashDisplay('printCommNoArchive', { discussion => $discussion }, { Return => 1 });
 	}
 
 #slashProf("printCommentsMain");
@@ -1124,6 +1125,7 @@ sub printComments {
 		pid		=> $pid,
 		lvl		=> $lvl,
 		options		=> $options,
+		archive_text => $archive_text,
 	}, { Return => $options->{Return}} );
 #slashProf("", "printCommentsMain");
 
