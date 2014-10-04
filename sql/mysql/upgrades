@@ -373,7 +373,13 @@ INSERT INTO vars (name, value, description) VALUES ('signoffs_per_article','2','
 # Fix Subs Messages
 UPDATE message_codes SET delivery_bvalue=1 WHERE type LIKE 'Subscription%';
 
-<<<<<<< HEAD
+
+##############################
+# Post-slashcode 14.08 release
+
+# 14_10 RELEASE
+UPDATE vars SET value = 'slashcode_14_10' WHERE name = 'cvs_tag_currentcode';
+
 # Set up Bitpay Log Table
 DROP TABLE IF EXISTS bitpay_log;
 CREATE TABLE bitpay_log (
@@ -406,7 +412,7 @@ INSERT INTO vars (name, value, description) VALUES ('future_headlines','1','Who 
 
 # Setup to disable comments for older articles
 UPDATE vars SET value=0, description='days to wait for story archiving, set to 0 to disable' where name='archive_delay';
-INSERT INTO vars (name, value, description) VALUES ('discussion_archive_delay','14','days to wait until disabing further comments, set to 0 to disable');
+INSERT INTO vars (name, value, description) VALUES ('discussion_archive_delay','30','days to wait until disabing further comments, set to 0 to disable');
 INSERT INTO vars (name, value, description) VALUES ('discussion_skip_dkids', '3', 'discussion types to NOT archive, comma-separated,  3 is Journals');
 
 # Add subscriberbypass for submit reskey
