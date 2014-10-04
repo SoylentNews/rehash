@@ -193,7 +193,7 @@ IF !useredit.is_anon;
 	
 
 
-	IF user.points || user.seclev >= constants.authors_unlimited;
+	IF user.points || ( constants.authors_unlimited && user.seclev >= constants.authors_unlimited );
 		title = "Moderation";
 		contents = BLOCK %]
 			<b>You have [% user.points %]

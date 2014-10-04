@@ -13,9 +13,7 @@ en_US
 __name__
 printCommNoArchive
 __template__
-<a name="comments"></a>
-<div class="commentwrap">
-<div class="commentBox">
+<div class="commentBox commentNoArchive">
 	[% IF discussion.is_future %]
 		Posting will only be possible
 		[% constants.subscribe_future_name %]
@@ -60,7 +58,6 @@ This discussion was created[% IF discussion.uid %] by <a href="[% constants.real
 			[% msg %] [% type %].
 		[% END %]
 	[% END %]
-</div>
 </div>
 __seclev__
 10000
