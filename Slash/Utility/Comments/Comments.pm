@@ -1979,7 +1979,7 @@ EOT
 		is_anon		=> isAnon($comment->{uid}),
 		discussion2	=> $discussion2,
 		options		=> $options,
-		subscriber_bonus => $subscriber_badge
+		subscriber_badge => $subscriber_badge
 	}, { Return => 1, Nocomm => 1 });
 }
 
