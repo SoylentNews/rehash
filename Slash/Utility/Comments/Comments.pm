@@ -732,16 +732,16 @@ sub getPoints {
 	}
 	
 	
-	my $subscriber_bonus;
+	my $subscriber_bonus = 0;
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && $constants->{subscriber_bonus}) {
 		my $hide_subscription = $reader->getUser($C->{uid}, 'hide_subscription');
 		if (isSubscriber($C->{uid}) && !$hide_subscription) {
-			$subscriber_bonus = 'yes';
+			$subscriber_bonus = 1;
 		}
 	}
 	
 	# And, the poster-was-a-subscriber bonus
-	if ($user->{subscriber_bonus} && $subscriber_bonus eq 'yes') {
+	if ($user->{subscriber_bonus} && $subscriber_bonus) {
 		$hr->{subscriber_bonus} =
 			$user->{subscriber_bonus};
 	}
@@ -1895,11 +1895,11 @@ sub dispComment {
 		}
 	}
 	
-	my $subscriber_bonus;
-	if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && $constants->{subscriber_bonus}) {
+	my $subscriber_badge=0;
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
 		if (isSubscriber($comment->{uid}) && !$hide_subscription) {
-			$subscriber_bonus = 'yes';
+			$subscriber_badge = 1;
 		}
 	}
 
@@ -1979,7 +1979,7 @@ EOT
 		is_anon		=> isAnon($comment->{uid}),
 		discussion2	=> $discussion2,
 		options		=> $options,
-		subscriber_bonus => $subscriber_bonus
+		subscriber_bonus => $subscriber_badge
 	}, { Return => 1, Nocomm => 1 });
 }
 
