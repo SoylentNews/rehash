@@ -1,0 +1,4 @@
+# $Id$
+name=API
+description="Slashcode API"
+htdoc=api.pl
