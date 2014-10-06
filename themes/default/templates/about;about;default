@@ -15,11 +15,13 @@ __template__
 <div id="about">
 	[% PROCESS titlebar title => 'About ' _ constants.sitename %]
 	<div class="generalbody">
-		<p>This is a news aggregation site that delivers what's important - articles about technology, science, and general interest. We also deliver all the functionality you expect from a good comment moderation system, and refine that system as we grow and learn.</p>
-		<p>This is a community-driven project and can evolve based on the will of the users and volunteers. The code and database will be open-source (barring any legal issues).</p>
+		<p>We are a volunteer-powered news aggregation site that deliver articles about technology, science, and general interest. We also host public discussion and utilize a powerful comment moderation system. This is an open-source, community-driven project and evolves based on the will of the community.</p>
+		<p>We've incorporated as a Delaware Public Benefit Corporation (similar to a non-profit) as we feel our mission to provide a platform for news dissemination and relevant discussion is not only essential for mankind, but also a legal right (i.e. freedom of press, freedom of speech) at least in the USA, and these are liberties which we aim to protect.</p>
 		<p>Now, go forth and submit stories, comment, moderate, and be free!</p>
 		<h3>Useful Links:</h3>
 		<ul>
+			<li><a href="/subscribe.pl">Subscriptions - Support Us</a></li>
+			<li><a href="/faq.pl">Frequently Asked Questions</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" target="blank">Wiki - Main Page</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved" target="blank">Wiki - Get Involved</a> | Information on the many ways one can contribute to this project.</li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="blank">Wiki - IRC</a> | Information about how to join and get the most of the realtime discussion on our IRC network.</li>
@@ -39,7 +41,7 @@ __template__
 		<h3>Suggested Reading</h3>
 		<ul>
 			<li><a href="/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow...Today!</a> | One of the first posts to the site and a quick blurb about the goals of this project.</li>
-			<li><a href="/faq.pl?op=moderation">Moderation Guide</a> | Everything you want to know about moderating.</li>
+			<li><a href="/faq.pl?op=moderation">Moderation Guidelines</a> | Everything you want to know about moderating.</li>
 			<li><a href="/faq.pl?op=editorial">Submission Guidelines</a> | Everything you want to know about submitting stories.</li>
 		</ul>
 		<h3>Info on Slashcode</h3>
