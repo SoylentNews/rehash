@@ -44,9 +44,7 @@ sub bitpay {
 					posData			=> "{ \"uid\" : $uid , \"gift\" : $isGift , \"puid\" : $puid , \"from\" : \"$from\" }",
 	);
 
-	slashDisplay("bp_redirect", {
-			url	=> $invoice->{url},
-	});
+	redirect("$invoice->{url}", "302");
 }
 
 
