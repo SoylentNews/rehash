@@ -96,8 +96,71 @@ sub story {
 			function	=> \&getLatestStories,
 			seclev		=> 1,
 		},
+		single	=> {
+			function	=> \&getSingleStory,
+			seclev		=> 1,
+		},
 	};
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants);
+}
+
+sub comment {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $op = lc($form->{op});
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		latest		=> {
+			function	=> \&getLatestComments,
+			seclev		=> 1,
+		},
+		single		=> {
+			function	=> \&getSingleComment,
+			seclev		=> 1,
+		},
+		discussion	=> {
+			function	=> \&getDiscussion,
+			seclev		=> 1,
+		},
+	};
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants);
+}
+
+sub getDiscussion {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $discussion = $slashdb->getDiscussion($form->{id});
+	if (!$discussion || !$discussion->{commentcount} ||  $discussion->{commentstatus} eq 'disabled' ) { return; }
+
+	my($comments, $count) = selectComments($discussion);
+	# Add comment text
+	foreach my $cid (keys %$comments) {
+		next if $cid eq "0";
+		$comments->{$cid}{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid");
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->pretty->encode($comments);
+}
+
+sub getSingleStory {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $story = $slashdb->getStory($form->{sid});
+	if( ($story->{is_future}) || ($story->{in_trash} ne "no") ){return;};
+	return unless $slashdb->checkStoryViewable($story->{stoid});
+	delete $story->{story_topics_rendered};
+	delete $story->{primaryskid};
+	delete $story->{is_future};
+	delete $story->{in_trash};
+	delete $story->{thumb_signoff_needed};
+	delete $story->{rendered};
+	delete $story->{qid};
+	$story->{bodytext} = $story->{introtext} unless $story->{bodytext};
+	$story->{body_length} = length($story->{bodytext});
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($story);
 }
 
 sub getLatestStories {
@@ -113,7 +176,6 @@ sub getLatestStories {
 		delete $story->{hitparade};
 		delete $story->{primaryskid};
 	}
-	print STDERR "\n",scalar(@$stories),"\n";
 	my $json = JSON->new->utf8->allow_nonref;	
 	return $json->encode($stories);
 }
