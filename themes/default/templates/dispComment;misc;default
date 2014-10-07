@@ -35,7 +35,7 @@ __template__
 		<div class="details">
 			by
 			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
-			[% IF !is_anon && subscriber_bonus == "yes" %]
+			[% IF !is_anon && subscriber_badge %]
 				<span class="zooicon"><a href="[% gSkin.rootdir %]/subscribe.pl"><img src="[% constants.imagedir %]/star.png" alt="Subscriber Badge" title="Subscriber Badge" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]"></a></span>
 			[% END %]
 			[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
