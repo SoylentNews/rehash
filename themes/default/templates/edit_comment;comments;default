@@ -61,7 +61,7 @@ __template__
 		</ul>
         </div>
 [% END %]
-
+<div id="post_comment">
 [% PROCESS titlebar title="Post Comment" %]
 	<div class="generalbody">
 <!-- error message -->
@@ -71,7 +71,7 @@ __template__
         </div>
 [% END %]
 <!-- end error message -->
-<form  action="[% gSkin.rootdir %]/comments.pl" method="post">
+<form  action="[% gSkin.rootdir %]/comments.pl#post_comment" method="post">
 [% IF preview %]                
 	<div id=previewComment>
 		<legend>Preview Comment</legend>
@@ -235,6 +235,7 @@ IF do_br %]<br>[% END %]
 		</fieldset>
 		</form>
 	</div>
+</div>	
 </div>
 
 __seclev__

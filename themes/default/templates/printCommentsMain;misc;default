@@ -108,7 +108,7 @@ __template__
 
    <div class="commentBoxForm" id="commentControlBox">
 
-      <form action="[% gSkin.rootdir %]/comments.pl">
+      <form action="[% gSkin.rootdir %]/comments.pl#post_comment">
 	 <fieldset>
 	    <legend>Display Options</legend>
 	    

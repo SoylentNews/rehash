@@ -36,7 +36,8 @@ IF comment
 ELSE;
 	IF pid %]&amp;pid=[% pid; END;
 	IF cid %]#[% cid; END;
-END %]"[% IF onclick %] onclick="[% onclick %]"[% END 
+END;
+IF op.lower == "reply"  %]#post_comment[% END %]"[% IF onclick %] onclick="[% onclick %]"[% END 
 %]>[% subject %]</a>
 
 [% IF !subject_only %]
