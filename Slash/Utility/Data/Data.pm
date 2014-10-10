@@ -2598,9 +2598,8 @@ sub fudgeurl {
 				my $authority = $uri->ihost;
 				if ($uri->can('host_port') && $uri->port != $uri->default_port) {
 					$authority = $uri->host_port;
-				} else {
-					$uri->authority($authority);
 				}
+				$uri->authority($authority);
 				# Now resync them
 				$url = $uri->as_iri;
 			}
