@@ -2199,7 +2199,7 @@ sub approveTag {
 	# knows how to handle multi-line URLs (it removes whitespace).
 	if ($wholetag =~ /^URL:(.+)$/is) {
 		my $url = fudgeurl($1);
-		return qq!<bdo dir="ltr"><a href="$url">$url</a></bdo>!;
+		return qq!<a href="$url">$url</a>!;
 	}
 
 	# Build the hash of approved tags
