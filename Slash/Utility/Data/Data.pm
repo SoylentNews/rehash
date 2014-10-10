@@ -2689,20 +2689,7 @@ sub url2html {
 	return '' if !defined($text) || $text eq '';
 
 	my $scheme_regex = _get_scheme_regex();
-
-	# we know this can break real URLs, but probably will
-	# preserve real URLs more often than it will break them
-	# was ['":=>]
-	# should we parse the HTML instead?  problematic ...
-	#$text =~  s{(?<!\S)((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
-	#	my $url   = fudgeurl($1);
-	#	my $extra = '';
-	#	$extra = $1 if $url =~ s/([?!;:.,']+)$//;
-	#	$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
-	#	print STDERR "url2html s/// url='$url' extra='$extra'\n"; # if !defined($url);
-	#	qq[<a href="$url" rel="url2html-$$">$url</a>$extra];
-	#}ogie;
-	# url2html-$$ is so we can remove the whole thing later for ecode
+	# Had to be neutered as $URI::uric is not remotely utf8-safe and ther is no replacement really possible
 	$text =~ s#(?<!\S)((?:$scheme_regex):/{0,2}\S+)#
 	qq[<a href="$1" rel="url2html-$$">$1</a>];
 	#ogie;
@@ -3660,8 +3647,9 @@ sub _url_to_domain_tag {
 		}
 	}
 
-	# Entities do not belong in URLs.
+	# Entities should never have gotten this far but strip them anyway just in case.
 	$info =~ s/&(.+?);//g;
+	# Warning message for unicode links
 	if($info =~ /[^A-Za-z0-9.-]/){$info = " \x{202d}$info (Warning: Unicode in URL)\x{2069} ";}
 
 	if (length($info) == 0) {
