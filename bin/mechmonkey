@@ -67,8 +67,8 @@ sub init {
 	my $abs = $constants->{absolutedir};
 	my $abs_uri = URI->new($abs);
 	die "no absolute uri from '$constants->{absolutedir}'" if !$abs_uri;
-	$absolutedir = $abs_uri->canonical->as_string;
-	my $host = $abs_uri->host;
+	$absolutedir = $abs_uri->canonical->as_iri;
+	my $host = $abs_uri->ihost;
 	my $host_q = "\\b\Q$host\E\$";
 	$basedomain_regex = qr{$host_q};
 	$url_tilde_regex = qr{\~|\%7e}i;
@@ -169,7 +169,7 @@ sub url_is_within_site {
 	die "no uri_abs from url '$url'" if !$uri_abs;
 	my $uri_scheme = $uri_abs->scheme;
 	return 0 if $uri_scheme ne 'http';
-	my $uri_host = $uri_abs->host;
+	my $uri_host = $uri_abs->ihost;
 	return ($uri_host && $uri_host =~ $basedomain_regex) ? 1 : 0;
 }
 
@@ -192,7 +192,7 @@ sub do_random_action {
 
 sub back_if_error {
 	my $uri = URI->new($mech->uri());
-	return if $uri->host =~ $basedomain_regex && $mech->success;
+	return if $uri->ihost =~ $basedomain_regex && $mech->success;
 	$mech->back();
 }
 
@@ -238,7 +238,7 @@ sub go_home {
 	if (rand(1) < 0.50) {
 		$uri->path('/index.pl');
 	}
-	$mech->get($uri->as_string);
+	$mech->get($uri->as_iri);
 }
 
 sub pick_image_link {
