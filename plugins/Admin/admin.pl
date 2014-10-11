@@ -1771,6 +1771,7 @@ sub updateStory {
 	my $default_set = 0;
 
 	$form->{dept} =~ s/ /-/g;
+	$form->{title}   = strip_attribute($form->{title})  if $form->{title};
 
 	my $story = $slashdb->getStory($form->{sid}, '', 1);
 	$form->{aid} = $story->{aid} unless $form->{aid};
@@ -2207,6 +2208,7 @@ sub saveStory {
 	my $default_set = 0;
 
 	$form->{dept} =~ s/ /-/g;
+	$form->{title}   = strip_attribute($form->{title})  if $form->{title};
 
 	my $admindb = getObject('Slash::Admin');
 
