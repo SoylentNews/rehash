@@ -1429,13 +1429,13 @@ my %mode_actions = (
 			approve_unicode		)],
 	ATTRIBUTE, [qw(
 			newline_to_local
-			encode_html_amp
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			encode_html_quote
 			approve_unicode		)],
 	LITERAL, [qw(
 			newline_to_local
-			encode_html_amp
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			remove_trailing_lts
 			approveTags
@@ -1477,7 +1477,7 @@ my %mode_actions = (
 	CODE, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_html_amp
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			whitespace_tagify
 			whitespace_and_tt
@@ -1485,7 +1485,7 @@ my %mode_actions = (
 	EXTRANS, [qw(
 			newline_to_local
 			trailing_whitespace
-			encode_html_amp
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			whitespace_tagify
 			newline_indent

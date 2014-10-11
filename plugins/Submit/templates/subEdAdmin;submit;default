@@ -103,7 +103,7 @@ BLOCK sub_display -%]
 			IF sub.stitle; sub.stitle | strip_attribute; END;
 			IF form.nowrapper; "&amp;nowrapper=1"; END;
 			IF form.fromconsole; "&amp;fromconsole=1"; END;
-		%]">[% sub.strs.0  | strip_literal %]&nbsp;</a>
+		%]">[% sub.strs.0 | strip_attribute %]&nbsp;</a>
 		[% IF constants.submit_show_weight %]
 			[% IF sub.keywords %]<br>[% sub.keywords %] [% END %]
 			[% IF sub.weight %] ([% sub.weight %])[% END %]

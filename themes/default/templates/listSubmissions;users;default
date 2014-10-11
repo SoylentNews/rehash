@@ -53,7 +53,7 @@ cur_time = Slash.db.getTime();
 				[%- IF link_sid -%]
 					<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</a>
 				[%- ELSE -%]
-					<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj | strip_literal %]</a>
+					<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj | strip_attribute %]</a>
 				[%- END -%]
 			</td>
 			<td>[% IF admin_link_user %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</td>

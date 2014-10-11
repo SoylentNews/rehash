@@ -22,9 +22,11 @@ __template__
 	ELSIF submission.email && submission.name;
 		IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
 		subtext = "<p class=\"byline\"><a href=\"$submission.email\"$rnf>$submission.name</a> writes:</p> <p>$submission.story</p>";
-	ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
+	ELSIF (submission.uid == constants.anonymous_coward_uid) && constants.anon_name_alt;
 		subtext = "<p class=\"byline\">$constants.anon_name_alt writes:</p> <p>$submission.story</p>";
-  ELSIF Slash.db.getUserUID(submission.name) == submission.uid;
+	ELSIF (submission.uid == constants.anonymous_coward_uid);
+		subtext = "<p class=\"byline\">An anonymous coward writes:</p> <p>$submission.story</p>";
+	ELSIF Slash.db.getUserUID(submission.name) == submission.uid;
 	  url_nick = submission.name | strip_paramattr;
 		subtext = "<p class=\"byline\"><a href=\"$constants.real_rootdir/~$url_nick/\">$submission.name</a> writes:</p> <p>$submission.story</p>";
 	ELSIF Slash.db.getUserUID(submission.name);
