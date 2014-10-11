@@ -14,19 +14,22 @@ en_US
 __name__
 subEdUser
 __template__
-<table width="95%" cellpadding="0" cellspacing="0" border="0">
+<table width="95%" cellpadding="2" cellspacing="0" border="0">
+	<colgroup>
+		<col style="width: 6em;">
+		<col style="width: 8em;">
+		<col>
+		<col style="width: 12.5em;">
+	</colgroup>
 
 [% FOREACH sub = submissions %]
 	<tr>
-	<td style="width:8em">[% sub.skin.ucfirst %]</td><td style="width:12em">
-	[% IF constants.submiss_ts %]
-		[% sub.time %]&nbsp;
-	[% END %]
-	</td><td>
-		<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %]"
-		>[% sub.subj | strip_attribute %]&nbsp;</a>
-	</td><td style="width:16em">[% sub.strs.1 %]<br>[% sub.strs.2 %]</td></tr>
-	<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
+		<td>[% sub.skin.ucfirst %]</td>
+		<td>[% IF constants.submiss_ts %][% sub.time %]&nbsp;[% END %]</td>
+		<td><a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %]">[% sub.subj | strip_attribute %]&nbsp;</a></td>
+		<td>[% sub.strs.1 %]<br>[% sub.strs.2 %]</td>
+	</tr>
+	<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="1"></td></tr>
 [% END %]
 
 </table>
@@ -35,17 +38,23 @@ __template__
 [% IF showpending == 1 %]
 [% PROCESS titlebar title="Pending Stories" %]
 <div class="generalbody">
-	<table width="95%" cellpadding="0" cellspacing="0" border="0">
+	<table width="95%" cellpadding="2" cellspacing="0" border="0">
+		<colgroup>
+			<col style="width: 6em;">
+			<col style="width: 8em;">
+			<col>
+			<col style="width: 12.5em;">
+		</colgroup>
 		[% FOREACH story = pending %]
 			<tr>
-			<td style="width:8em">[% story.skin | ucfirst %]</td>
-			<td style="width:12em">[% story.time %]</td>
-			<td>[% story.title %]</td>
-			<td style="width:16em">[% story.name %]</td>
+				<td>[% story.skin | ucfirst %]</td>
+				<td>[% story.time %]</td>
+				<td>[% story.title | strip_attribute %]</td>
+				<td>[% story.name %]</td>
 			</tr>
-			<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
+			<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="1"></td></tr>
 		[% END %]
-			</table>
+	</table>
 </div>
 [% END %]
 __seclev__
