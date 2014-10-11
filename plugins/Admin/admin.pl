@@ -1133,7 +1133,7 @@ sub editStory {
 	# if that tells us, then sure - pudge
 	
 	if ($form->{title}) {
-		$form->{title} = strip_literal($form->{title});
+		$form->{title} = strip_attribute($form->{title});
 
 		my $storyskin = $gSkin;
 		$storyskin = $slashdb->getSkin($form->{skin}) if $form->{skin};
@@ -1279,7 +1279,7 @@ sub editStory {
 	}
 
 	if ($storyref->{title}) {
-		$storyref->{title} = strip_literal($storyref->{title});
+		$storyref->{title} = strip_attribute($storyref->{title});
 		my $oldskin = $gSkin->{skid};
 		setCurrentSkin($storyref->{primaryskid});
 		# Do we want to

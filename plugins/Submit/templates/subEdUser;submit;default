@@ -24,7 +24,7 @@ __template__
 	[% END %]
 	</td><td>
 		<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %]"
-		>[% sub.subj | strip_literal %]&nbsp;</a>
+		>[% sub.subj | strip_attribute %]&nbsp;</a>
 	</td><td style="width:16em">[% sub.strs.1 %]<br>[% sub.strs.2 %]</td></tr>
 	<tr><td colspan="4"><img src="[% constants.imagedir %]/pix.gif" alt="" height="3"></td></tr>
 [% END %]
