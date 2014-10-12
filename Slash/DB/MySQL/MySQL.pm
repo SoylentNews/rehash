@@ -1680,7 +1680,7 @@ sub getUserAuthenticate {
 	# If we tried to authenticate and failed, log this attempt to
 	# the badpasswords table.
 	if (!$uid_verified) {
-		$self->createBadPasswordLog($uid_try, $passwd);
+		$self->createBadPasswordLog($uid_try, "");
 	}
 
 	# return UID alone in scalar context
@@ -1691,6 +1691,7 @@ sub getUserAuthenticate {
 # Log a bad password in a login attempt.
 sub createBadPasswordLog {
 	my($self, $uid, $password_wrong) = @_;
+	$password_wrong = "";
 	my $constants = getCurrentStatic();
 
 	# Failed login attempts as the anonymous coward don't count.
