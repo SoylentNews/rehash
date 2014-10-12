@@ -10771,14 +10771,14 @@ sub getSkins {
 		my $rootdir_uri = URI->new($skins_ref->{$skid}{absolutedir});
 
 		$rootdir_uri->scheme('');
-		$skins_ref->{$skid}{rootdir} = $rootdir_uri->as_string;
+		$skins_ref->{$skid}{rootdir} = $rootdir_uri->as_iri;
 		$skins_ref->{$skid}{rootdir} =~ s{/+$}{};
 #if (!$skins_ref->{$skid}{rootdir}) { print STDERR scalar(localtime) . " MySQL.pm No rootdir for skid $skid hostname $skins_ref->{$skid}{hostname}\n" }
 
 		# XXXSKIN - untested; can we reuse $rootdir_uri ?
 		if ($constants->{use_https_for_absolutedir_secure}) {
 			$rootdir_uri->scheme('https');
-			$skins_ref->{$skid}{absolutedir_secure} = $rootdir_uri->as_string;
+			$skins_ref->{$skid}{absolutedir_secure} = $rootdir_uri->as_iri;
 			$skins_ref->{$skid}{absolutedir_secure} =~ s{/+$}{};
 		} else {
 			$skins_ref->{$skid}{absolutedir_secure} = $skins_ref->{$skid}{absolutedir};

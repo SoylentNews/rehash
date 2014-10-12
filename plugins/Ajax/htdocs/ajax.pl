@@ -1645,7 +1645,7 @@ sub saveModalPrefs {
 		$homepage = fudgeurl($homepage);
 		$homepage = URI->new_abs($homepage, $gSkin->{absolutedir})
 			       ->canonical
-			       ->as_string if $homepage ne '';
+			       ->as_iri if $homepage ne '';
 		$homepage = substr($homepage, 0, 100) if $homepage ne '';
 
 		# Calendar
@@ -1655,7 +1655,7 @@ sub saveModalPrefs {
 			$calendar_url = fudgeurl($calendar_url);
 			$calendar_url = URI->new_abs($calendar_url, $gSkin->{absolutedir})
 					   ->canonical
-					   ->as_string if $calendar_url ne '';
+					   ->as_iri if $calendar_url ne '';
 			$calendar_url =~ s|^http://||i;
 			$calendar_url = substr($calendar_url, 0, 200) if $calendar_url ne '';
 		}

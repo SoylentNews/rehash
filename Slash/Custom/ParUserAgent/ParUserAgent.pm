@@ -35,7 +35,7 @@ sub _need_proxy {
 	}
 	if ($proxy) {
 		if (@{ $self->{'no_proxy'} }) {
-		    if (my $host = eval { $url->host }) {
+		    if (my $host = eval { $url->ihost }) {
 			for my $domain (@{ $self->{'no_proxy'} }) {
 			    if ($host =~ /\Q$domain\E$/) {
 				LWP::Debug::trace("no_proxy configured");

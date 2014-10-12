@@ -235,7 +235,7 @@ sub getRDF {
 				$uri->scheme(undef) if $uri->authority =~ /\b$bd_regex\Z/ && $uri->authority !~ /^rss\./;
 			}
 
-			$item->{link} = $uri->as_string or next;
+			$item->{link} = $uri->as_iri or next;
 
 			# this is if you want a nice numbering 
 			# layout in your block <ol> works, but 
