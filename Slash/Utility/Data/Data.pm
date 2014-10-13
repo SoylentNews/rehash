@@ -1413,28 +1413,35 @@ my %actions = (
 			my $constants = getCurrentStatic();
 			_fixupCharrefs();
 			${$_[0]} =~ s[([^\n\r\t !-~])][_approveUnicodeChar($1, $constants)]ge;				},
+	diacritic_max	=> sub {
+			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
+			${$_[0]} =~ s/\p{NonspacingMark}{$max,}//g;		},
 );
 
 my %mode_actions = (
 	ANCHOR, [qw(
 			newline_to_local
+			diacritic_max
 			remove_newlines
 			encode_html_quote
 			approve_unicode		)],
 	NOTAGS, [qw(
 			newline_to_local
+			diacritic_max
 			remove_tags
 			remove_ltgt
 			approveCharrefs
 			approve_unicode		)],
 	ATTRIBUTE, [qw(
 			newline_to_local
+			diacritic_max
 			encode_html_amp_ifnotent
 			encode_html_ltgt
 			encode_html_quote
 			approve_unicode		)],
 	LITERAL, [qw(
 			newline_to_local
+			diacritic_max
 			encode_html_amp_ifnotent
 			encode_html_ltgt
 			remove_trailing_lts
@@ -1444,6 +1451,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	NOHTML, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			remove_tags
 			remove_ltgt
@@ -1451,6 +1459,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	PLAINTEXT, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			processCustomTagsPre
 			remove_trailing_lts
@@ -1465,6 +1474,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	HTML, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			processCustomTagsPre
 			remove_trailing_lts
@@ -1476,6 +1486,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	CODE, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			encode_html_amp_ifnotent
 			encode_html_ltgt
@@ -1484,6 +1495,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	EXTRANS, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			encode_html_amp_ifnotent
 			encode_html_ltgt
