@@ -1415,7 +1415,7 @@ my %actions = (
 			${$_[0]} =~ s[([^\n\r\t !-~])][_approveUnicodeChar($1, $constants)]ge;				},
 	diacritic_max	=> sub {
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
-			${$_[0]} =~ s/\p{NonspacingMark}{$max,}//g;		},
+			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
 );
 
 my %mode_actions = (
