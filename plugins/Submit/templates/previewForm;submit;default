@@ -51,7 +51,9 @@ __template__
 			<p>This submission comes from <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/">[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])'s journal</a></p>
 		[% END;
 	END %]
-		[% subtext %]
+		[% pretext = Slash.addDomainTags(subtext);
+                   pretext = Slash.parseDomainTags(pretext); %]
+		[% pretext %]
 	</div>
 </div>
 </p>

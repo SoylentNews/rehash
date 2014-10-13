@@ -102,7 +102,14 @@ END %]
 			[% END %]
 		</div>
 		<div class="intro">
-			[% story.introtext %]
+			[% pretext = story.introtext;
+			   pretext = Slash.addDomainTags(pretext);
+			   pretext = Slash.parseDomainTags(pretext); %]
+			[% IF env.script_name == '/admin.pl' %]
+				[% pretext %]
+			[% ELSE %]
+				[% story.introtext %]
+			[% END %]
 		</div>
 
 [% IF full && user.is_admin && !preview && env.script_name != '/admin.pl' %]<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;[% END %]

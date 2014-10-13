@@ -584,6 +584,7 @@ sub displayForm {
 	# don't let preview screen be used to pump up pagerank, if anyone
 	# would waste their time doing so -- pudge
 	$fixedstory = noFollow($fixedstory);
+	#$fixedstory = addDomainTags($fixedstory);
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,
