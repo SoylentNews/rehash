@@ -1775,7 +1775,7 @@ sub getTopBadgeHosts {
 	for my $duple (@$top_ar) {
 		my($uri, $c) = @$duple;
 		my $uri_obj = URI->new($uri);
-		my $host = $uri_obj && $uri_obj->can('host') ? lc($uri_obj->host()) : $uri;
+		my $host = $uri_obj && $uri_obj->can('ihost') ? lc($uri_obj->ihost()) : $uri;
 		$host =~ s/^www\.//;
 		$count{$host} += $c;
 	}

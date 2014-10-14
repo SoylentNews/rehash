@@ -1153,4 +1153,4 @@ INSERT INTO vars (name, value, description) VALUES ('utf8', '1', '1 = Use end-to
 INSERT INTO vars (name, value, description) VALUES ('writestatus','dirty','Simple Boolean to determine if homepage needs rewriting');
 INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whether we are using XHTML');
 INSERT INTO vars (name, value, description) VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
-
+INSERT INTO vars (name, value, desctiption) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');
