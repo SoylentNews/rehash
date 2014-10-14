@@ -102,13 +102,12 @@ END %]
 			[% END %]
 		</div>
 		<div class="intro">
-			[% pretext = story.introtext;
-			   pretext = Slash.addDomainTags(pretext);
-			   pretext = Slash.parseDomainTags(pretext); %]
-
 			[% IF user.domaintags == "3" %]
 				[% story.introtext %]
 			[% ELSE %]
+				[% pretext = story.introtext;
+				   pretext = Slash.addDomainTags(pretext);
+				   pretext = Slash.parseDomainTags(pretext); %]
 				[% pretext %]
 			[% END %]
 		</div>
