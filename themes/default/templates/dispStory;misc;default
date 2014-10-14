@@ -105,10 +105,11 @@ END %]
 			[% pretext = story.introtext;
 			   pretext = Slash.addDomainTags(pretext);
 			   pretext = Slash.parseDomainTags(pretext); %]
-			[% IF env.script_name == '/admin.pl' %]
-				[% pretext %]
-			[% ELSE %]
+
+			[% IF user.domaintags == "3" %]
 				[% story.introtext %]
+			[% ELSE %]
+				[% pretext %]
 			[% END %]
 		</div>
 
