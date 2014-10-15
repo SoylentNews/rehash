@@ -3380,6 +3380,7 @@ sub parseDomainTags {
 			&& $recommended		# and we think the poster has earned tagless posting
 		);
 	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/admin.pl';
+	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/submit.pl' && $user->{is_admin};
 
 	if ($want_tags && !$notags) {
 		$html =~ s{</a ([^<>]+)>}{</a> [$1]}gi;
