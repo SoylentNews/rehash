@@ -2957,9 +2957,7 @@ sub balanceTags {
 			: ($options->{deep_su} || 1);
 	} else {
 		# deprecated 
-		$max_nest_depth = ($options && $options == 1)
-			? $constants->{nesting_maxdepth}
-			: ($options || 0);
+		$max_nest_depth = $options || $constants->{nesting_maxdepth} || 1;
 		$max_su_depth = $constants->{nest_su_maxdepth} || 1;
 	}
 
