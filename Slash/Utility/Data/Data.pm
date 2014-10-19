@@ -2948,17 +2948,19 @@ sub balanceTags {
 
 	my($max_nest_depth, $max_su_depth) = (0, 0);
 	if (ref $options) {
+		# No, I believe we want these defaulted to 1 rather than unlimited.
 		$max_nest_depth = ($options->{deep_nesting} && $options->{deep_nesting} == 1)
 			? $constants->{nesting_maxdepth}
-			: ($options->{deep_nesting} || 0);
+			: ($options->{deep_nesting} || 1);
 		$max_su_depth   = ($options->{deep_su} && $options->{deep_su} == 1)
 			? $constants->{nest_su_maxdepth}
-			: ($options->{deep_su} || 0);
+			: ($options->{deep_su} || 1);
 	} else {
-		# deprecated
+		# deprecated 
 		$max_nest_depth = ($options && $options == 1)
 			? $constants->{nesting_maxdepth}
 			: ($options || 0);
+		$max_su_depth = $constants->{nest_su_maxdepth} || 1;
 	}
 
 	my(%tags, @stack, $tag, $close, $whole, $both, @list, $nesting_level, $su_level);
