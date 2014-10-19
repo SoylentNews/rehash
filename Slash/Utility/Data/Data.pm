@@ -2950,10 +2950,10 @@ sub balanceTags {
 	if (ref $options) {
 		# No, I believe we want these defaulted to 1 rather than unlimited.
 		$max_nest_depth = ($options->{deep_nesting} && $options->{deep_nesting} == 1)
-			? $constants->{nesting_maxdepth}
+			? ($constants->{nesting_maxdepth} || 1)
 			: ($options->{deep_nesting} || 1);
 		$max_su_depth   = ($options->{deep_su} && $options->{deep_su} == 1)
-			? $constants->{nest_su_maxdepth}
+			? ($constants->{nest_su_maxdepth} || 1)
 			: ($options->{deep_su} || 1);
 	} else {
 		# deprecated 
