@@ -24,7 +24,16 @@ __template__
 					<div class="topic">
 						<a href="[% gSkin.rootdir %]/search.pl?tid=[% diatribe.topic.tid %]"><img src="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" width="[% diatribe.topic.width %]" height="[% diatribe.topic.height %]" alt="[% diatribe.topic.textname %]"></a>
 					</div>
-					<div class="intro">[% diatribe.article %]</div>
+					<div class="intro">
+					[% IF user.domaintags == "3" %]
+						[% diatribe.article %]
+					[% ELSE %]
+						[% pretext = diatribe.article;
+						   pretext = Slash.addDomainTags(pretext);
+						   pretext = Slash.parseDomainTags(pretext); %]
+						[% pretext %]
+					[% END %]
+					</div>
 				</div>
 				[% IF diatribe.discussion && !show_discussion %]
 					<div class="storylinks">

@@ -1742,7 +1742,7 @@ sub prepareUser {
 		$user->{slashboxes} = _testExStr($user->{slashboxes});
 	}
 	$user->{points}		= 0 unless $user->{willing}; # No points if you dont want 'em
-	$user->{domaintags}	= 2 if !defined($user->{domaintags}) || $user->{domaintags} !~ /^\d+$/;
+	$user->{domaintags}	= 3 if !defined($user->{domaintags}) || $user->{domaintags} !~ /^\d+$/;
 
 	# This is here so when user selects "6 ish" it
 	# "posted by xxx around 6 ish" instead of "on 6 ish"

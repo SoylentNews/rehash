@@ -3379,6 +3379,8 @@ sub parseDomainTags {
 			$udt == 1		# the user leaves it up to us
 			&& $recommended		# and we think the poster has earned tagless posting
 		);
+	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/admin.pl';
+	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/submit.pl' && $user->{is_admin};
 
 	if ($want_tags && !$notags) {
 		$html =~ s{</a ([^<>]+)>}{</a> [$1]}gi;
@@ -3387,6 +3389,8 @@ sub parseDomainTags {
 	}
 
 	$html =~ s{<a([^>]*) title="([^"]+")>} {<a$1>}gi if $notitle;
+	# Removes link domain for Author [mailto] writes:
+	$html =~ s/\[mailto\] writes/writes/;
 	
 	return $html;
 }

@@ -2785,7 +2785,7 @@ sub saveComm {
 		bytelimit		=> $form->{bytelimit},
 		commentsort		=> $form->{commentsort},
 		commentspill		=> $form->{commentspill},
-		domaintags		=> ($form->{domaintags} != 2 ? $form->{domaintags} : undef),
+		domaintags		=> ($form->{domaintags} != 3 ? $form->{domaintags} : "3"),
 		emaildisplay		=> $form->{emaildisplay} || undef,
 		fakeemail		=> $new_fakeemail,
 		highlightthresh		=> $form->{highlightthresh},

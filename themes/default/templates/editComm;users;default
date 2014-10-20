@@ -242,13 +242,14 @@ __template__
 [% END %]
 
 
-[% UNLESS user_edit.domaintags.defined; user_edit.domaintags=2; END %]
+[% UNLESS user_edit.domaintags.defined; user_edit.domaintags=3; END %]
 [% domaintags.${user_edit.domaintags} = constants.markup_checked_attribute -%]
 		<p><b>Display Link Domains?</b> (shows the actual domain of any link in brackets)<br>
 		<blockquote><div>
 		<input type="radio" name="domaintags" value="0"[% domaintags.0 %]> Never show link domains<br>
 		<input type="radio" name="domaintags" value="1"[% domaintags.1 %]> Show the links domain only in recommended situations<br>
-		<input type="radio" name="domaintags" value="2"[% domaintags.2 %]> Always show link domains
+		<input type="radio" name="domaintags" value="2"[% domaintags.2 %]> Show link domains in comments and stories<br>
+		<input type="radio" name="domaintags" value="3"[% domaintags.3 %]> Link domains for comments only
 		</div></blockquote>
 		<label>User Page Comment Listing</label>
 		<blockquote><div>
