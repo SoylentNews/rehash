@@ -776,6 +776,7 @@ sub fixJournalText {
 
 	my $balanced = balanceTags($stripped, {
 		deep_nesting => 1,
+		deep_su      => 1,
 		admin        => ($admin ? 1 : 0)
 	});
 

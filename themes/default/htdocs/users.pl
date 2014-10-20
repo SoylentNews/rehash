@@ -2577,7 +2577,7 @@ sub saveUser {
 	for my $key (keys %limit) {
 		my $dat = chopEntity($form->{$key}, $limit{$key});
 		$dat = strip_html($dat);
-		$dat = balanceTags($dat, { deep_nesting => 2, length => $limit{$key} });
+		$dat = balanceTags($dat, { deep_nesting => 2, deep_su => 1, length => $limit{$key} });
 		$dat = addDomainTags($dat) if $dat;
 
 		# If the sig becomes too long to fit (domain tagging causes
@@ -3058,7 +3058,7 @@ sub saveHome {
 	my $mylinks_limit = 255;
 	$user_edits_table->{mylinks} = balanceTags(strip_html(
 		chopEntity($form->{mylinks} || '', $mylinks_limit)
-	), { deep_nesting => 2, length => $mylinks_limit });
+	), { deep_nesting => 2, deep_su => 1, length => $mylinks_limit });
 
 	$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
 

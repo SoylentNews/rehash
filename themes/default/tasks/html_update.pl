@@ -214,7 +214,7 @@ sub _html_update_fix {
 		$html = slashizeLinks($html);
 		$html = balanceTags($html);
 	} else {
-		$html = balanceTags(strip_html($html), { deep_nesting => 2, length => $limit });
+		$html = balanceTags(strip_html($html), { deep_nesting => 2, deep_su => 1, length => $limit });
 	}
 
 	if ($html && $field =~ /^(?:sig|bio|comment)$/) {

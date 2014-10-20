@@ -98,7 +98,7 @@ $werder = new Silly::Werder;
 		my $sig = "";
 		$sig = make_werds(5+int(rand(20)), 0.2) if int(rand(2));
 		$sig = strip_html(substr($sig, 0, 120));
-		$sig = balanceTags($sig, { deep_nesting => 1 });
+		$sig = balanceTags($sig, { deep_nesting => 1, deep_su => 1 });
 		$sig = addDomainTags($sig);
 		if (length($sig) <= 160) {
 			$hr->{sig} = $sig;

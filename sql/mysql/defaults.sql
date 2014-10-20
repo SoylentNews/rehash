@@ -1028,7 +1028,7 @@ INSERT INTO vars (name, value, description) VALUES ('moderatord_lastmaxid', '0',
 INSERT INTO vars (name, value, description) VALUES ('moderatord_maxrows', '50000', 'Max number of accesslog rows to process at once in run_moderatord');
 INSERT INTO vars (name, value, description) VALUES ('modviewseclev','100','Minimum seclev to see moderation totals on a comment');
 INSERT INTO vars (name, value, description) VALUES ('nesting_maxdepth','3','Maximum depth to which <BLOCKQUOTE>-type tags can be nested');
-INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','3','Maximum depth to which <SUP> and <SUB> tags can be nested');
+INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','1','Maximum depth to which <SUP> and <SUB> tags can be nested');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_body','0','Print bodytext, not merely introtext, in newsletter.');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_by_default','0','Turn on newsletter sending by default for new users. 0 = off | 1 = on');
 INSERT INTO vars (name, value, description) VALUES ('nick_chars', ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*\'(),-', 'Characters allowed in user nicknames');
