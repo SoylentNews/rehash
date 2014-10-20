@@ -588,7 +588,7 @@ sub journalSearchRSS {
 			},
 			title		=> "$entry->{description} ($time)",
 			'link'		=> ($gSkin->{absolutedir} . '/~' . fixparam($entry->{nickname}) . '/journal/' . $entry->{id}),
-			description	=> balanceTags(strip_mode($entry->{article}, $entry->{posttype}), { deep_nesting => 1 }),
+			description	=> balanceTags(strip_mode($entry->{article}, $entry->{posttype}), { deep_nesting => 1, deep_su => 1 }),
 		};
 	}
 

@@ -2948,7 +2948,8 @@ sub balanceTags {
 
 	my($max_nest_depth, $max_su_depth) = (0, 0);
 	if (ref $options) {
-		# No, I believe we want these defaulted to 1 rather than unlimited.
+		# We now default to 1 aka disabling any nesting rather than unlimited
+		# If you really need a high value, pass one in the call w/ deep_nesting/su => 500 or such
 		$max_nest_depth = ($options->{deep_nesting} && $options->{deep_nesting} == 1)
 			? ($constants->{nesting_maxdepth} || 1)
 			: ($options->{deep_nesting} || 1);
@@ -4749,7 +4750,7 @@ sub fixStory {
 	#		$str =~ s/(\s+-+\s+)/ &mdash; /g;
 	#	}
 
-	$str = balanceTags($str, { deep_nesting => 1 });
+	$str = balanceTags($str, { deep_nesting => 1, deep_su => 1 });
 
 	# do it again, just in case balanceTags added more ...
 	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
