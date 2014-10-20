@@ -110,6 +110,15 @@ sub _do_rss {
 		} if $newurl;
 	}
 
+	# Undo all encoding and let xmlDisplay handle that
+	foreach my $item (@items) {
+		foreach("title","introtext","bodytext"."link"){
+			$item->{story}{$_} =~ s/\&#(\d+);/chr($1)/ge;
+			$item->{story}{$_} =~ s/\&#x([a-fA-F0-9]+);/chr(hex($1))/ge;
+			$item->{story}{$_} =~ s/\&amp;/&/g;
+		}
+	}
+
 	my $rss = xmlDisplay($type, {
 		channel		=> {
 			title		=> $title,
@@ -125,11 +134,11 @@ sub _do_rss {
 
 	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
 
-    # Now write change the links to https, add an s to the front of the extension, and write it again
+	# Now write change the links to https, add an s to the front of the extension, and write it again
 
-    $filename =~ s/\./.s/;
-    $rss =~ s/http:/https:/g;
-    save2file("$constants->{basedir}/$filename", $rss, \&fudge);
+	$filename =~ s/\./.s/;
+	$rss =~ s/http:/https:/g;
+	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
 }
 
 sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
