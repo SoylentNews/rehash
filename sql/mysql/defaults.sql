@@ -757,7 +757,8 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('al2_type_aliases', '
 INSERT INTO vars (name, value, description) VALUES ('allow_anonymous','1','allow anonymous posters');
 INSERT INTO vars (name, value, description) VALUES ('allow_nonadmin_ssl','0','0=users with seclev <= 1 cannot access the site over Secure HTTP; 1=they all can; 2=only if they are subscribers');
 INSERT INTO vars (name, value, description) VALUES ('anonymous_coward_uid', '1', 'UID to use for anonymous coward');
-INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
+INSERT INTO vars (name, value, description) VALUES ('anon_name','Anonymous Coward','Name of anonymous user to be displayed in stories');
+INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An Anonymous Coward','Name of anonymous user (only used in submit.pl)');
 INSERT INTO vars (name, value, description) VALUES ('apache_cache', '3600', 'Default times for the getCurrentCache().');
 INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags','b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote','Tags that you can use');
@@ -1152,4 +1153,4 @@ INSERT INTO vars (name, value, description) VALUES ('utf8', '1', '1 = Use end-to
 INSERT INTO vars (name, value, description) VALUES ('writestatus','dirty','Simple Boolean to determine if homepage needs rewriting');
 INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whether we are using XHTML');
 INSERT INTO vars (name, value, description) VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
-
+INSERT INTO vars (name, value, desctiption) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');

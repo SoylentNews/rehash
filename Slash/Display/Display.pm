@@ -239,7 +239,7 @@ sub slashDisplay {
 	if ($err) {
 		errorLog("$TEMPNAME : $err");
 	} else {
-	binmode STDOUT, ':encoding(UTF-8)';
+		binmode STDOUT, ':encoding(UTF-8)';
 		print $out unless $opt->{Return};
 	}
 

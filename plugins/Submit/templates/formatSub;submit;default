@@ -24,7 +24,9 @@ __template__
 		subtext = "<p class=\"byline\"><a href=\"$submission.email\"$rnf>$submission.name</a> writes:</p> <p>$submission.story</p>";
 	ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
 		subtext = "<p class=\"byline\">$constants.anon_name_alt writes:</p> <p>$submission.story</p>";
-  ELSIF Slash.db.getUserUID(submission.name) == submission.uid;
+	ELSIF (submission.name == constants.anon_name);
+		subtext = "<p class=\"byline\">An anonymous coward writes:</p> <p>$submission.story</p>";
+	ELSIF Slash.db.getUserUID(submission.name) == submission.uid;
 	  url_nick = submission.name | strip_paramattr;
 		subtext = "<p class=\"byline\"><a href=\"$constants.real_rootdir/~$url_nick/\">$submission.name</a> writes:</p> <p>$submission.story</p>";
 	ELSIF Slash.db.getUserUID(submission.name);

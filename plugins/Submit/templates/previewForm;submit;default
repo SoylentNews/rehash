@@ -164,7 +164,7 @@ __template__
 		<input type="hidden" name="subid" value="[% subid %]">
 		<input type="hidden" name="topic_source" value="submission">
 		<input type="hidden" name="submitter" value="[% submitter.uid %]">
-		<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj %]" size="75" MAXLENGTH="100"></label>
+		<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj | strip_attribute %]" size="75" MAXLENGTH="100"></label>
 		[% lockTest %]
 	[% IF constants.use_dept %]
 		<label>Dept&nbsp; <input type="text" name="dept" size="75" MAXLENGTH="100"></label>

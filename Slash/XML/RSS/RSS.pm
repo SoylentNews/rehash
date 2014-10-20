@@ -580,7 +580,7 @@ sub _tag_link {
 	} else {
 		$uri->query("from=rss");
 	}
-	return $uri->as_string;
+	return $uri->as_iri;
 }
 
 1;

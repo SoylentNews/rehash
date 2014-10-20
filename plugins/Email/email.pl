@@ -203,7 +203,7 @@ sub emailStory {
 	# It is wise to not have embedded objects in anything passed to 
 	# Slash::Messages::create() [ala anything used by Storable], so we 
 	# must convert the returned links to strings.
-	$_ = $_->as_string for @{$story->{links}};
+	$_ = $_->as_iri for @{$story->{links}};
 
 	# E-mail story.
 	my $msg_data = {

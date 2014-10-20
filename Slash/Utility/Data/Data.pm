@@ -416,7 +416,7 @@ sub set_rootdir {
 	my $sectionuri = new URI $sectionurl, 'http';
 
 	$sectionuri->scheme($rooturi->scheme || undef);
-	return $sectionuri->as_string;
+	return $sectionuri->as_iri;
 }
 
 
@@ -483,7 +483,7 @@ sub urlFromSite {
 	my $site_domain = @site_domain >= 2 ? join '.', @site_domain[-2, -1] : '';
 	$site_domain =~ s/:.+$//;	# strip port, if available
 
-	my @host = split m/\./, ($clean->can('host') ? $clean->host : '');
+	my @host = split m/\./, ($clean->can('ihost') ? $clean->ihost : '');
 	return 0 if scalar(@host) < 2;
 	my $host = join '.', @host[-2, -1];
 
@@ -559,7 +559,7 @@ sub url2abs {
 	$base ||= root2abs();
 
 	if ($base) {
-		$newurl = URI->new_abs($url, $base)->canonical->as_string;
+		$newurl = URI->new_abs($url, $base)->canonical->as_iri;
 	} elsif ($url !~ m|^https?://|i) {	# no base or rootdir, best we can do
 		$newurl =~ s|^/*|/|;
 	}
@@ -1103,7 +1103,7 @@ sub split_bayes {
 		push @urls, $url;
 		my $uri = URI->new($url);
 		next unless $uri->can('host');
-		my $domain = fullhost_to_domain($uri->host());
+		my $domain = fullhost_to_domain($uri->ihost());
 		next unless $domain;
 		push @domains, $domain;
 	}
@@ -1413,29 +1413,36 @@ my %actions = (
 			my $constants = getCurrentStatic();
 			_fixupCharrefs();
 			${$_[0]} =~ s[([^\n\r\t !-~])][_approveUnicodeChar($1, $constants)]ge;				},
+	diacritic_max	=> sub {
+			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
+			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
 );
 
 my %mode_actions = (
 	ANCHOR, [qw(
 			newline_to_local
+			diacritic_max
 			remove_newlines
 			encode_html_quote
 			approve_unicode		)],
 	NOTAGS, [qw(
 			newline_to_local
+			diacritic_max
 			remove_tags
 			remove_ltgt
 			approveCharrefs
 			approve_unicode		)],
 	ATTRIBUTE, [qw(
 			newline_to_local
-			encode_html_amp
+			diacritic_max
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			encode_html_quote
 			approve_unicode		)],
 	LITERAL, [qw(
 			newline_to_local
-			encode_html_amp
+			diacritic_max
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			remove_trailing_lts
 			approveTags
@@ -1444,6 +1451,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	NOHTML, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			remove_tags
 			remove_ltgt
@@ -1451,6 +1459,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	PLAINTEXT, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			processCustomTagsPre
 			remove_trailing_lts
@@ -1465,6 +1474,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	HTML, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
 			processCustomTagsPre
 			remove_trailing_lts
@@ -1476,16 +1486,18 @@ my %mode_actions = (
 			approve_unicode		)],
 	CODE, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
-			encode_html_amp
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			whitespace_tagify
 			whitespace_and_tt
 			approve_unicode		)],
 	EXTRANS, [qw(
 			newline_to_local
+			diacritic_max
 			trailing_whitespace
-			encode_html_amp
+			encode_html_amp_ifnotent
 			encode_html_ltgt
 			whitespace_tagify
 			newline_indent
@@ -2483,8 +2495,6 @@ The escaped data.
 $allowed .= '#';
 sub fixurl {
 	my($url) = @_;
-	$url = encode_utf8($url) if (getCurrentStatic('utf8') && is_utf8($url));
-	$url =~ s/([^$allowed])/$URI::Escape::escapes{$1}/og;
 	$url =~ s/%(?![a-fA-F0-9]{2})/%25/g;
 	return $url;
 }
@@ -2521,9 +2531,6 @@ The escaped data.
 sub fudgeurl {
 	my($url) = @_;
 
-	### should we just escape spaces, quotes, apostrophes, and <> instead
-	### of removing them? -- pudge
-
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
 	$url =~ s/["\s]//g;
@@ -2537,10 +2544,11 @@ sub fudgeurl {
 	$url = fixurl($url);
 	# run it through the grungy URL miscellaneous-"fixer"
 	$url = fixHref($url) || $url;
+	
+	my $uri = new URI $url;
 
 	my $scheme_regex = _get_scheme_regex();
 
-	my $uri = new URI $url;
 	my $scheme = undef;
 	$scheme = $uri->scheme if $uri && $uri->can("scheme");
 
@@ -2549,21 +2557,27 @@ sub fudgeurl {
 	# clearing work for something like http:/foo.com...@bar.com
 	my $schemes_to_mod = { http => 1, https => 1, ftp => 1 };
 	if ($scheme && $schemes_to_mod->{$scheme}) {
-		$url = $uri->canonical->as_string;
-		$url =~ s|^$scheme:/([^/])|$scheme://$1|;
+		return "" unless $uri->can("ihost") && $uri->ihost;
+		$url =~ s#^$scheme:/([^/])#$scheme://$1#;
+		# Percent encoding does not belong in urls.
+		# There's probably a shorter regex to do this but I can't think of it.
+		my $host = $url;
+		$host = $1 if $host =~ m#($scheme://.*?)/(.*)#;
+		my $extra = $2 || "";
+		$host =~ s/\%..//g;
+		$url = $host."/".$extra;
 		$uri = new URI $url;
 	}
 
 	if ($uri && !$scheme && $uri->can("authority") && $uri->authority) {
 		# The URI has an authority but no scheme, e.g. "//sitename.com/".
-		# URI.pm doesn't always handle this well.  E.g. host() returns
-		# undef.  So give it a scheme.
+		# URI.pm doesn't always handle this well. E.g. host() returns
+		# undef. So give it a scheme.
 		# XXX Rethink this -- it could probably be put lower down, in
-		# the "if" that handles stripping the userinfo.  We don't
+		# the "if" that handles stripping the userinfo. We don't
 		# really need to add the scheme for most URLs. - Jamie
-
 		# and we should only add scheme if not a local site URL
-		my($from_site) = urlFromSite($uri->as_string);
+		my($from_site) = urlFromSite($uri->as_iri);
 		$uri->scheme('http') unless $from_site;
 	}
 
@@ -2573,47 +2587,33 @@ sub fudgeurl {
 		# $url at the end of this function and return it.
 
 	} elsif ($scheme && $scheme !~ /^$scheme_regex$/) {
-
 		$url =~ s/^$scheme://i;
-		$url =~ tr/A-Za-z0-9-//cd; # allow only a few chars, for security
 		$url = "$scheme:$url";
 
 	} elsif ($uri) {
 
-		# Strip the authority, if any.
-		# This prevents annoying browser-display-exploits
-		# like "http://cnn.com%20%20%20...%20@baddomain.com".
-		# In future we may set up a package global or a field like
-		# getCurrentUser()->{state}{fixurlauth} that will allow
-		# this behavior to be turned off.
-
 		if ($uri->can('userinfo') && $uri->userinfo) {
 			$uri->userinfo(undef);
 		}
-		if ($uri->can('host') && $uri->host) {
+
+		if ($uri->can('ihost') && $uri->ihost) {
 			# If this scheme has an authority (which means a
 			# username and/or password and/or host and/or port)
 			# then make sure the host and port are legit, and
 			# zap the port if it's the default port.
-			my $host = $uri->host;
-			# Re the below line, see RFC 1035 and maybe 2396.
-			# Underscore is not recommended and Slash has
-			# disallowed it for some time, but allowing it
-			# is really the right thing to do.
-			$host =~ tr/A-Za-z0-9._-//cd;
-			$uri->host($host);
 			if ($uri->can('authority') && $uri->authority) {
 				# We don't allow anything in the authority except
-				# the host and optionally a port.  This shouldn't
+				# the host and optionally a port. This shouldn't
 				# matter since the userinfo portion was zapped
-				# above.  But this is a bit of double security to
+				# above. But this is a bit of double security to
 				# ensure nothing nasty in the authority.
-				my $authority = $uri->host;
-				if ($uri->can('host_port')
-					&& $uri->port != $uri->default_port) {
+				my $authority = $uri->ihost;
+				if ($uri->can('host_port') && $uri->port != $uri->default_port) {
 					$authority = $uri->host_port;
 				}
 				$uri->authority($authority);
+				# Now resync them
+				$url = $uri->as_iri;
 			}
 		}
 
@@ -2623,8 +2623,7 @@ sub fudgeurl {
 				$uri->query($query);
 			}
 		}
-
-		$url = $uri->canonical->as_string;
+		$url = $uri->canonical->as_iri;
 
 		if ($url =~ /#/) {
 			my $token = ':::INSERT__23__HERE:::';
@@ -2639,11 +2638,12 @@ sub fudgeurl {
 	}
 
 	# These entities can crash browsers and don't belong in URLs.
-	$url =~ s/&#(.+?);//g;
+	# Correction: NO entities belong in URLs. If they can't input the character, tough shit to them.
+	$url =~ s/&(.+?);//g;
 	# we don't like SCRIPT at the beginning of a URL
-	my $decoded_url = decode_entities($url);
-	$decoded_url =~ s{ &(\#?[a-zA-Z0-9]+); } { approveCharref($1) }gex;
-	return $decoded_url =~ /^[\s\w]*script\b/i ? undef : $url;
+	# This can currently never happen though so why do we bother?
+	$url = $url =~ /^[\s\w]*script\b/i ? undef : $url;
+	return $url;
 }
 
 sub _get_scheme_regex {
@@ -2701,20 +2701,10 @@ sub url2html {
 	return '' if !defined($text) || $text eq '';
 
 	my $scheme_regex = _get_scheme_regex();
-
-	# we know this can break real URLs, but probably will
-	# preserve real URLs more often than it will break them
-	# was ['":=>]
-	# should we parse the HTML instead?  problematic ...
-	$text =~  s{(?<!\S)((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
-		my $url   = fudgeurl($1);
-		my $extra = '';
-		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
-		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
-print STDERR "url2html s/// url='$url' extra='$extra'\n" if !defined($url) || !defined($extra);
-		qq[<a href="$url" rel="url2html-$$">$url</a>$extra];
-	}ogie;
-	# url2html-$$ is so we can remove the whole thing later for ecode
+	# Had to be neutered as $URI::uric is not remotely utf8-safe and ther is no replacement really possible
+	$text =~ s#(?<!\S)((?:$scheme_regex):/{0,2}\S+)#
+	qq[<a href="$1" rel="url2html-$$">$1</a>];
+	#ogie;
 
 	return $text;
 }
@@ -3468,7 +3458,7 @@ sub _slashlink_to_link {
 	my $skin_root = $skin->{rootdir};
 	if ($options && $options->{absolute}) {
 		$skin_root = URI->new_abs($skin_root, $options->{absolute})
-			->as_string;
+			->as_iri;
 	}
 	my $frag = delete $attr{frag} || '';
 	# Generate the return value.
@@ -3624,14 +3614,15 @@ sub fullhost_to_domain {
 
 sub _url_to_domain_tag {
 	my($href, $link, $body) = @_;
+
 	my $absolutedir = getCurrentSkin('absolutedir');
 	my $uri = URI->new_abs($link, $absolutedir);
-	my $uri_str = $uri->as_string;
+	my $uri_str = $uri->as_iri;
 
 	my($info, $scheme) = ('', '');
-	if ($uri->can('host')) {
+	if ($uri->can('ihost')) {
 		my $host;
-		unless (($host = $uri->host)
+		unless (($host = $uri->ihost)
 				&&
 			$uri->can('scheme')
 				&&
@@ -3643,8 +3634,8 @@ sub _url_to_domain_tag {
 			# wrongly) treat it.
 			if ($uri_str =~ s|$scheme:///+|$scheme://|) {
 				$uri = URI->new_abs($uri_str, $absolutedir);
-				$uri_str = $uri->as_string;
-				$host = $uri->host;
+				$uri_str = $uri->as_iri;
+				$host = $uri->ihost;
 			}
 		}
 		$info = fullhost_to_domain($host) if $host;
@@ -3668,7 +3659,10 @@ sub _url_to_domain_tag {
 		}
 	}
 
-	$info =~ tr/A-Za-z0-9.-//cd if $info;
+	# Entities should never have gotten this far but strip them anyway just in case.
+	$info =~ s/&(.+?);//g;
+	# Warning message for unicode links
+	if($info =~ /[^A-Za-z0-9.-]/){$info = " \x{202d}$info (Warning: Unicode in URL)\x{2069} ";}
 
 	if (length($info) == 0) {
 		$info = '?';
@@ -3755,7 +3749,7 @@ sub _link_to_slashlink {
 			# XXXSKIN - no, urls are not schemeless, rootdirs are
 			# (and they are generated, at this point, from urls)
 			$new_url->scheme(undef);
-			my $new_url_q = quotemeta($new_url->as_string);
+			my $new_url_q = quotemeta($new_url->as_iri);
 			$all_urls{"(?:https?:)?$new_url"} = 1;
 		}
 		my $any_host = "(?:"
@@ -4335,7 +4329,7 @@ sub getUrlsFromText {
 		while (my $token = $tokens->get_tag('a')) {
 			my $linkurl = $token->[1]{href};
 			next unless $linkurl;
-			my $canon = URI->new($linkurl)->canonical()->as_string();
+			my $canon = URI->new($linkurl)->canonical()->as_iri();
 			$urls{$canon} = 1;
 		}
 	}
@@ -4462,7 +4456,7 @@ sub findWords {
 		foreach my $url (@urls_ahref, @urls_imgsrc) {
 			my $uri = URI->new_abs($url, $gSkin->{absolutedir})
 				->canonical;
-			$url = $uri->as_string;
+			$url = $uri->as_iri;
 			# Tiny URLs don't count.
 			next unless length($url) > 8;
 			# All URLs get a high weight so they are almost
