@@ -33,6 +33,10 @@ sub main {
 			function	=> \&story,
 			seclev		=> 1,
 		},
+		journal		=> {
+			function	=> \&journal,
+			seclev		=> 1,
+		},
 		auth		=> {
 			function	=> \&auth,
 			seclev		=> 1,
@@ -129,6 +133,30 @@ sub comment {
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants);
 }
 
+sub getLatestComments {
+	my ($form, $slashdb, $user, $constants) = @_;
+
+}
+
+sub getSingleComment {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $tables = "comments";
+	my $cid_q = $slashdb->sqlQuote($form->{cid});
+	my $where = "cid=$cid_q ";
+	my $select = "* ";
+	my $comment = $slashdb->sqlSelectHashref($select, $tables, $where);
+	$comment->{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
+
+	delete $comment->{subnetid};
+	delete $comment->{has_read};
+	delete $comment->{time};
+	delete $comment->{ipid};
+	delete $comment->{signature};
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->pretty->encode($comment);
+}
+
 sub getDiscussion {
 	my ($form, $slashdb, $user, $constants) = @_;
 	my $discussion = $slashdb->getDiscussion($form->{id});
@@ -138,7 +166,12 @@ sub getDiscussion {
 	# Add comment text
 	foreach my $cid (keys %$comments) {
 		next if $cid eq "0";
-		$comments->{$cid}{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid");
+		my $cid_q = $slashdb->sqlQuote($cid);
+		$comments->{$cid}{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
+		delete $comments->{$cid}{subnetid};
+		delete $comments->{$cid}{has_read};
+		delete $comments->{$cid}{time};
+		delete $comments->{$cid}{ipid};
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
