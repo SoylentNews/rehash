@@ -1809,6 +1809,25 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
+	if (grep /^sarc$/, @{$constants->{approvedtags}}) {
+		my $sarc = 'sarc';
+		my $long = 'sarcasm';
+		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+
+		$str =~ s/$open/&lt;$long&gt;/g;
+		$str =~ s/$close/&lt;\/$long&gt;/g;
+	}
+
+	if (grep /^sarcasm$/, @{$constants->{approvedtags}}) {
+		my $sarc = 'sarcasm';
+		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+
+		$str =~ s/$open/&lt;$sarc&gt;/g;
+		$str =~ s/$close/&lt;\/$sarc&gt;/g;
+	}
+
 	# just fix the whitespace for blockquote to something that looks
 	# universally good
 	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {

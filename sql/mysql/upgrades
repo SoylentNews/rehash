@@ -427,3 +427,8 @@ INSERT INTO vars (name, value, desctiption) VALUES ('utf8_max_diacritics', '4', 
 
 # Set max sup/sub depth to 1 because screw wavey text
 UPDATE vars SET value = 1 where name = 'nest_su_maxdepth';
+
+# Add new approved tags
+UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|strike|abbr|sarc|sarcasm' WHERE name = 'approvedtags';
+UPDATE vars SET value 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class abbr:title_RU' WHERE name = 'approvedtags_attr';
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_visible', 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|strike|sarc|sarcasm', 'tags that show in the availible list shown to users. for easter-egg purposes mostly.');
