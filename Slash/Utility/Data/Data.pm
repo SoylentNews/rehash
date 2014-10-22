@@ -1845,6 +1845,11 @@ sub processCustomTagsPost {
 		my $close   = qr[<\s* /$utag \s*> \n*]xsio;
 		while($str =~ /$open\s*(.*?)\s*$close/g) {
 			my $nick = $1;
+			my $uid = $1 if $nick =~ /^#(\d+)$/;
+			if($uid) {
+				my $user = $reader->getUser($uid);
+				$nick = $user->{nickname};
+			}
 			my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
 
 			if($reader->nickExists($nick)) {
