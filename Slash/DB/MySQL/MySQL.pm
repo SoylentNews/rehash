@@ -13361,6 +13361,14 @@ sub getStoriesSince {
 	return $answer;
 }
 
+sub nickExists {
+	my ($self, $nick) = @_;
+
+	my $uid = $self->getUserUID($nick);
+	return 0 if (! defined($uid)) || isAnon($uid);
+	return 1;
+}
+
 
 
 1;

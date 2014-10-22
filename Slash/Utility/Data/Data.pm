@@ -1809,20 +1809,20 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
-	if (grep /^sarc$/, @{$constants->{approvedtags}}) {
+	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
 		my $long = 'sarcasm';
-		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
 		$str =~ s/$open/&lt;$long&gt;/g;
 		$str =~ s/$close/&lt;\/$long&gt;/g;
 	}
 
-	if (grep /^sarcasm$/, @{$constants->{approvedtags}}) {
+	if (grep /^sarcasm$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarcasm';
-		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
 		$str =~ s/$open/&lt;$sarc&gt;/g;
 		$str =~ s/$close/&lt;\/$sarc&gt;/g;
@@ -1836,6 +1836,24 @@ sub processCustomTagsPost {
 		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
 
 		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
+	}
+
+	if (grep /^user$/i, @{$constants->{approvedtags}}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $utag = 'user';
+		my $open = qr[<\s*  $utag \s*> \n*]xsio;
+		my $close   = qr[<\s* /$utag \s*> \n*]xsio;
+		while($str =~ /$open\s*(.*?)\s*$close/g) {
+			my $nick = $1;
+			my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
+
+			if($reader->nickExists($nick)) {
+				$str =~ s/$open.*?$close/<a href="$href">$nick<\/a> /;
+			}
+			else {
+				$str =~ s/$open(.*?)$close/$1/;
+			}
+		}
 	}
 
 	return $str;
