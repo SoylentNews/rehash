@@ -1838,6 +1838,7 @@ sub processCustomTagsPost {
 		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
 	}
 
+	# support for <user> tags
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $utag = 'user';
@@ -1845,7 +1846,7 @@ sub processCustomTagsPost {
 		my $close   = qr[<\s* /$utag \s*> \n*]xsio;
 		while($str =~ /$open\s*(.*?)\s*$close/g) {
 			my $nick = $1;
-			my $uid = $1 if $nick =~ /^#(\d+)$/;
+			my $uid = $1 if $nick =~ /^#(\d*)$/;
 			if($uid) {
 				my $user = $reader->getUser($uid);
 				$nick = $user->{nickname};
@@ -1853,10 +1854,10 @@ sub processCustomTagsPost {
 			my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
 
 			if($reader->nickExists($nick)) {
-				$str =~ s/$open.*?$close/<a href="$href">$nick<\/a> /;
+				$str =~ s/$open.*?$close/<a href="$href" class="commentUserLink">$nick<\/a > /;
 			}
 			else {
-				$str =~ s/$open(.*?)$close/$1/;
+				$str =~ s/$open(.*?)$close/$nick/;
 			}
 		}
 	}
