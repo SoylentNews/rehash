@@ -1414,6 +1414,9 @@ my %actions = (
 			_fixupCharrefs();
 			${$_[0]} =~ s[([^\n\r\t !-~])][_approveUnicodeChar($1, $constants)]ge;				},
 	diacritic_max	=> sub {
+			# I hate that we have to do it but all diacritic marks must be in literal
+			# form or mixing entities and literals can bypass our filter.
+			${$_[0]} =~ s/(&#[a-zA-Z0-9]+;)/_diacriticEntities2Literals($1)/ge;
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
 			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
 );
@@ -4797,7 +4800,31 @@ sub processSub {
 	return $home;
 }
 
+sub _diacriticEntities2Literals {
+	my $ent = shift;
+	my $decimal = $1 if $ent =~ /#(.*?);/;
 
+	# make sure we have a decimal number
+	if($decimal =~ /^x(.*?)$/) {
+		$decimal = hex($1);
+	}
+
+	# Now check vs diacritic ranges
+	if(
+		($decimal >= 768 && $decimal <= 879) ||
+		($decimal >= 6832 && $decimal <= 6911) ||
+		($decimal >= 7616 && $decimal <= 7679) ||
+		($decimal >= 8400 && $decimal <= 8447) ||
+		($decimal >= 65056 && $decimal <= 65071)
+	) {
+		# it's a diacritic, return the literal
+		return chr($decimal);
+	}
+	else {
+		# it's not a diacritic, return without alteration
+		return $ent;
+	}
+}
 
 
 
