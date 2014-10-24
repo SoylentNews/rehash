@@ -124,6 +124,7 @@ our @EXPORT  = qw(
 	strip_attribute
 	strip_code
 	strip_extrans
+	strip_textarea
 	strip_html
 	strip_literal
 	strip_mode
@@ -1341,6 +1342,8 @@ my %actions = (
 			${$_[0]} =~ s/&/&amp;/g;			},
 	encode_html_amp_ifnotent => sub {
 			${$_[0]} =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;	},
+	encode_html_amp_ifent => sub {
+			${$_[0]} =~ s/&(#?[a-zA-Z0-9]+;)/&amp;$1/g;	},
 	encode_html_ltgt => sub {
 			${$_[0]} =~ s/</&lt;/g;
 			${$_[0]} =~ s/>/&gt;/g;				},
@@ -1505,6 +1508,12 @@ my %mode_actions = (
 			whitespace_tagify
 			newline_indent
 			approve_unicode		)],
+	TEXTAREA, [qw(
+			newline_to_local
+			encode_html_amp_ifent
+			encode_html_ltgt	)],
+
+	
 );
 
 sub stripByMode {
@@ -1573,6 +1582,7 @@ sub strip_literal	{ stripByMode($_[0], LITERAL,	@_[1 .. $#_]) }
 sub strip_nohtml	{ stripByMode($_[0], NOHTML,	@_[1 .. $#_]) }
 sub strip_notags	{ stripByMode($_[0], NOTAGS,	@_[1 .. $#_]) }
 sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
+sub strip_textarea	{ stripByMode($_[0], TEXTAREA,	@_[1 .. $#_]) }
 
 sub determine_html_format {
 	my($html, $user) = @_;
