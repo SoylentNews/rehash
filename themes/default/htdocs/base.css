@@ -33,9 +33,9 @@ border: 1px solid transparent;
 a { color: #006; text-decoration:underline;}
 a:visited { color: #000; }
 a:hover { color: #008; text-decoration: none; }
-a.commentUserLink {color:inherit;text-decoration:inherit;}
-a.commentUserLink:before {content:"@{";}
-a.commentUserLink:after {content:"}";}
+a.commentUserLink {color:inherit;text-decoration:inherit;font-weight:bold;}
+a.commentUserLink:before {content:"@";}
+a.commentUserLink:after {content:":";}
 
 img { border: none; }
 

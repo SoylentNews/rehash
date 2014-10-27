@@ -1842,27 +1842,36 @@ sub processCustomTagsPost {
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $utag = 'user';
-		my $open = qr[<\s*  $utag \s*> \n*]xsio;
-		my $close   = qr[<\s* /$utag \s*> \n*]xsio;
-		while($str =~ /$open\s*(.*?)\s*$close/g) {
-			my $nick = $1;
-			my $uid = $1 if $nick =~ /^#(\d*)$/;
-			if($uid) {
-				my $user = $reader->getUser($uid);
-				$nick = $user->{nickname};
-			}
-			my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
-
-			if($reader->nickExists($nick)) {
-				$str =~ s/$open.*?$close/<a href="$href" class="commentUserLink">$nick<\/a > /;
-			}
-			else {
-				$str =~ s/$open(.*?)$close/$nick/;
-			}
-		}
+		my $open = qr[<\s* $utag \s*> \n*]xsio;
+		my $close = qr[<\s* /$utag \s*> \n*]xsio;
+		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
+	}
+	# also support @{blah} syntax
+	if (grep /^user$/i, @{$constants->{approvedtags}}) {
+		# The link here is just the nick. any decoration is done in base.css
+		$str =~ s/@\s*(.*?)\s*:/_nick2Link($1,$constants,1)/ge;
 	}
 
 	return $str;
+}
+
+sub _nick2Link {
+	my ($nick, $constants, $alt) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $uid = $1 if $nick =~ /^#(\d*)$/;
+	if($uid) {
+		my $user = $reader->getUser($uid);
+		$nick = $user->{nickname}  || $nick;
+	}
+	my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
+	
+	if($reader->nickExists($nick)) {
+		$nick = "<a href=\"$href\" class=\"commentUserLink\">$nick<\/a >";
+	}
+	elsif($alt) {
+		$nick = "\@$nick:";
+	}
+	return $nick;
 }
 
 # revert div class="quote" back to <quote>, handles nesting
