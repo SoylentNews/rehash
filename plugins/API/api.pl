@@ -135,7 +135,36 @@ sub comment {
 
 sub getLatestComments {
 	my ($form, $slashdb, $user, $constants) = @_;
+	
+	my $select = "* ";
+	my $id = "cid";
+	my $table = "comments ";
+	my $where = "1 = 1 "; # we need a where but this needs to default to always true
+	my $other = "ORDER BY cid DESC LIMIT 50 ";
 
+	if($form->{since} && $form->{since} =~ /^\d+$/) {
+		my $cid_q = $slashdb->sqlQuote($form->{since} - 1);
+		$where = "cid > $cid_q ";
+	}
+
+	my $comments_h = $slashdb->sqlSelectAllHashref($id, $select, $table, $where, $other);
+	my $comments = [];
+	foreach my $cid (sort sort {$a <=> $b} keys %$comments_h) {
+		my $comment = $comments_h->{$cid};		
+		my $cid_q = $slashdb->sqlQuote($cid);
+
+		delete $comment->{subnetid};
+		delete $comment->{has_read};
+		delete $comment->{time};
+		delete $comment->{ipid};
+		delete $comment->{signature};
+
+		$comment->{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
+		push(@$comments, $comment);
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->pretty->encode($comments);
 }
 
 sub getSingleComment {
