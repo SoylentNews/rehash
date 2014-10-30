@@ -761,10 +761,11 @@ INSERT INTO vars (name, value, description) VALUES ('anon_name','Anonymous Cowar
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An Anonymous Coward','Name of anonymous user (only used in submit.pl)');
 INSERT INTO vars (name, value, description) VALUES ('apache_cache', '3600', 'Default times for the getCurrentCache().');
 INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
-INSERT INTO vars (name, value, description) VALUES ('approvedtags','b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote','Tags that you can use');
-INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
+INSERT INTO vars (name, value, description) VALUES ('approvedtags','b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|strike|abbr|sarc|sarcasm','Tags that you can use');
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class abbr:title_RU', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 'a:href_U,name,title,rel div:id,class,title,style,dir,lang span:id,class,title,style,dir,lang slash:type_R,id,href_U,story,nickname,uid,user,align,width,height,title table:align,bgcolor,border,cellpadding,cellspacing,width tr:align,bgcolor,valign th:align,bgcolor,colspan,height,rowspan,valign,width td:align,bgcolor,colspan,height,rowspan,valign,width', 'inherits from approvedtags_attr');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_break','p|br|ol|ul|li|dl|dt|dd|blockquote|div|img|hr|h1|h2|h3|h4|h5|h6|quote','Tags that break words (see breakHtml())');
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_visible', 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|strike|sarc|sarcasm', 'tags that show in the availible list shown to users. for easter-egg purposes mostly.');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay','0','days to wait for story archiving, set to 0 to disable');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay_mod','60','Days before moderator logs are expired');
 INSERT INTO vars (name, value, description) VALUES ('articles_only','0','show only Articles in submission count in admin menu');
@@ -1028,7 +1029,7 @@ INSERT INTO vars (name, value, description) VALUES ('moderatord_lastmaxid', '0',
 INSERT INTO vars (name, value, description) VALUES ('moderatord_maxrows', '50000', 'Max number of accesslog rows to process at once in run_moderatord');
 INSERT INTO vars (name, value, description) VALUES ('modviewseclev','100','Minimum seclev to see moderation totals on a comment');
 INSERT INTO vars (name, value, description) VALUES ('nesting_maxdepth','3','Maximum depth to which <BLOCKQUOTE>-type tags can be nested');
-INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','3','Maximum depth to which <SUP> and <SUB> tags can be nested');
+INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','1','Maximum depth to which <SUP> and <SUB> tags can be nested');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_body','0','Print bodytext, not merely introtext, in newsletter.');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_by_default','0','Turn on newsletter sending by default for new users. 0 = off | 1 = on');
 INSERT INTO vars (name, value, description) VALUES ('nick_chars', ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*\'(),-', 'Characters allowed in user nicknames');

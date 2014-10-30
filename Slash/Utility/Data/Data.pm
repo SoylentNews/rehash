@@ -1809,6 +1809,25 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
+	if (grep /^sarc$/, @{$constants->{approvedtags}}) {
+		my $sarc = 'sarc';
+		my $long = 'sarcasm';
+		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+
+		$str =~ s/$open/&lt;$long&gt;/g;
+		$str =~ s/$close/&lt;\/$long&gt;/g;
+	}
+
+	if (grep /^sarcasm$/, @{$constants->{approvedtags}}) {
+		my $sarc = 'sarcasm';
+		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+
+		$str =~ s/$open/&lt;$sarc&gt;/g;
+		$str =~ s/$close/&lt;\/$sarc&gt;/g;
+	}
+
 	# just fix the whitespace for blockquote to something that looks
 	# universally good
 	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
@@ -2948,17 +2967,18 @@ sub balanceTags {
 
 	my($max_nest_depth, $max_su_depth) = (0, 0);
 	if (ref $options) {
+		# We now default to 1 aka disabling any nesting rather than unlimited
+		# If you really need a high value, pass one in the call w/ deep_nesting/su => 500 or such
 		$max_nest_depth = ($options->{deep_nesting} && $options->{deep_nesting} == 1)
-			? $constants->{nesting_maxdepth}
-			: ($options->{deep_nesting} || 0);
+			? ($constants->{nesting_maxdepth} || 1)
+			: ($options->{deep_nesting} || 1);
 		$max_su_depth   = ($options->{deep_su} && $options->{deep_su} == 1)
-			? $constants->{nest_su_maxdepth}
-			: ($options->{deep_su} || 0);
+			? ($constants->{nest_su_maxdepth} || 1)
+			: ($options->{deep_su} || 1);
 	} else {
-		# deprecated
-		$max_nest_depth = ($options && $options == 1)
-			? $constants->{nesting_maxdepth}
-			: ($options || 0);
+		# deprecated 
+		$max_nest_depth = $options || $constants->{nesting_maxdepth} || 1;
+		$max_su_depth = $constants->{nest_su_maxdepth} || 1;
 	}
 
 	my(%tags, @stack, $tag, $close, $whole, $both, @list, $nesting_level, $su_level);
@@ -3379,6 +3399,8 @@ sub parseDomainTags {
 			$udt == 1		# the user leaves it up to us
 			&& $recommended		# and we think the poster has earned tagless posting
 		);
+	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/admin.pl';
+	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/submit.pl' && $user->{is_admin};
 
 	if ($want_tags && !$notags) {
 		$html =~ s{</a ([^<>]+)>}{</a> [$1]}gi;
@@ -3387,6 +3409,8 @@ sub parseDomainTags {
 	}
 
 	$html =~ s{<a([^>]*) title="([^"]+")>} {<a$1>}gi if $notitle;
+	# Removes link domain for Author [mailto] writes:
+	$html =~ s/\[mailto\] writes/writes/;
 	
 	return $html;
 }
@@ -4749,7 +4773,7 @@ sub fixStory {
 	#		$str =~ s/(\s+-+\s+)/ &mdash; /g;
 	#	}
 
-	$str = balanceTags($str, { deep_nesting => 1 });
+	$str = balanceTags($str, { deep_nesting => 1, deep_su => 1 });
 
 	# do it again, just in case balanceTags added more ...
 	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;

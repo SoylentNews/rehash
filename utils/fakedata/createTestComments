@@ -139,7 +139,7 @@ $werder = new Silly::Werder;
 		elsif ($mode_rand < 0.50)	{ $comment = strip_html     ($comment) }
 		elsif ($mode_rand < 0.75)	{ $comment = strip_extrans  ($comment) }
 		else				{ $comment = strip_code     ($comment) }
-		$comment = balanceTags($comment, { deep_nesting => 1 });
+		$comment = balanceTags($comment, { deep_nesting => 1, deep_su => 1 });
 		$comment = addDomainTags($comment);
 
 		my $score = 1;

@@ -2471,22 +2471,7 @@ sub validateComment {
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
 
-	##########
-	#	TMB Duplicates work done elsewhere. Goodbye to it.
-	#	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
-
-	##########
-	#	TMB This is duplicating work done elsewhere. Goodbye to it.
-	#	for ($$comm, $$subj) {
-	#		my $d = decode_entities($_);
-	#		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
-	#		if ($d !~ /\w/) {		# require SOME non-whitespace
-	#			$$error_message = getError('no body');
-	#			return;
-	#		}
-	#	}
-
-	unless (defined($$comm = balanceTags($$comm, { deep_nesting => 1 }))) {
+	unless (defined($$comm = balanceTags($$comm, { deep_nesting => 1, deep_su => 1 }))) {
 		# only time this should return an error is if the HTML is busted
 		$$error_message = getError('broken html');
 		return ;

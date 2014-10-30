@@ -325,6 +325,8 @@ sub create {
 					my $data = $item->{$key};
 					if ($key eq 'link') {
 						$data = _tag_link($data);
+						$encoded_item->{$key} = $data;
+						next;
 					}
 					$encoded_item->{$key} = $self->encode($data, $key);
 				}
@@ -392,8 +394,9 @@ sub rss_story {
 	my $other_creator;
 	my $action;
 
+	$encoded_item->{title} = $story->{title};
 	$encoded_item->{title}  = $self->encode($story->{title})
-		if $story->{title};
+		if $story->{title} && $atom;
 	if ($story->{sid}) {
 		my $edit = "admin.pl?op=edit&sid=$story->{sid}";
 		my $linktitle = $story->{title};
@@ -556,7 +559,7 @@ sub rss_item_description {
 				$desc =~ s/[\w'-]+$//;  # don't trim in middle of word
 				if ($self->{rdfitemdesc_html}) {
 					$desc =~ s/<[^>]*$//;
-					$desc = balanceTags($desc, { deep_nesting => 1 });
+					$desc = balanceTags($desc, { deep_nesting => 1, deep_su => 1 });
 				}
 				$desc =~ s/\s+$//;
 				$desc .= '...';

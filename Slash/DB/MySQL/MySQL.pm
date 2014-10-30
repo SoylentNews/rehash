@@ -6403,7 +6403,8 @@ sub getCommentTextCached {
 	my $mcd = $self->getMCD();
 	$mcd = undef if
 		   $opt->{mode} && $opt->{mode} eq 'archive'
-		|| $user->{domaintags} != 2;
+		|| $user->{domaintags} eq "0"
+		|| $user->{domaintags} eq "1";
 
 	# loop here, pull what cids we can
 	my($mcd_debug, $mcdkey, $mcdkey_abbrev, $mcdkey_full, $mcdkeylen);
