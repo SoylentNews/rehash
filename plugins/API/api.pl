@@ -201,6 +201,7 @@ sub getDiscussion {
 		delete $comments->{$cid}{has_read};
 		delete $comments->{$cid}{time};
 		delete $comments->{$cid}{ipid};
+		delete $comments->{signature} if $comments->{signature};
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
