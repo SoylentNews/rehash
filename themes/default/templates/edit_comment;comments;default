@@ -148,7 +148,7 @@ END %]
 	[% END %]
 	
 		[% PROCESS formLabel value => 'Comment' %]
-		<textarea class="fullbox" wrap="virtual" name="postercomment" id="postercomment" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</textarea>
+		<textarea class="fullbox" wrap="virtual" name="postercomment" id="postercomment" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_textarea %]</textarea>
 		[% PROCESS formNote note => 'Use the Preview Button! Check those URLs!' %]
 		<br>
 		[% IF user.is_anon %]
