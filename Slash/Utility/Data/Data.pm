@@ -1809,20 +1809,20 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
-	if (grep /^sarc$/, @{$constants->{approvedtags}}) {
+	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
 		my $long = 'sarcasm';
-		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
 		$str =~ s/$open/&lt;$long&gt;/g;
 		$str =~ s/$close/&lt;\/$long&gt;/g;
 	}
 
-	if (grep /^sarcasm$/, @{$constants->{approvedtags}}) {
+	if (grep /^sarcasm$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarcasm';
-		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
 		$str =~ s/$open/&lt;$sarc&gt;/g;
 		$str =~ s/$close/&lt;\/$sarc&gt;/g;
@@ -1838,7 +1838,40 @@ sub processCustomTagsPost {
 		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
 	}
 
+	# support for <user> tags
+	if (grep /^user$/i, @{$constants->{approvedtags}}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $utag = 'user';
+		my $open = qr[<\s* $utag \s*> \n*]xsio;
+		my $close = qr[<\s* /$utag \s*> \n*]xsio;
+		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
+	}
+	# also support @{blah} syntax
+	if (grep /^user$/i, @{$constants->{approvedtags}}) {
+		# The link here is just the nick. any decoration is done in base.css
+		$str =~ s/@\s*(.*?)\s*:/_nick2Link($1,$constants,1)/ge;
+	}
+
 	return $str;
+}
+
+sub _nick2Link {
+	my ($nick, $constants, $alt) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $uid = $1 if $nick =~ /^#(\d*)$/;
+	if($uid) {
+		my $user = $reader->getUser($uid);
+		$nick = $user->{nickname}  || $nick;
+	}
+	my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
+	
+	if($reader->nickExists($nick)) {
+		$nick = "<a href=\"$href\" class=\"commentUserLink\">$nick<\/a >";
+	}
+	elsif($alt) {
+		$nick = "\@$nick:";
+	}
+	return $nick;
 }
 
 # revert div class="quote" back to <quote>, handles nesting
