@@ -732,16 +732,16 @@ sub doEditArticle {
 
 	if ($article->{article}) {
 		my $strip_art = $journal_reader->fixJournalText($article->{article}, $posttype, $user);
-		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}
 			? $journal_reader->getDiscussion($article->{discussion}, 'commentcount')
 			: 0;
 
+		# For preview only, strips are okay as long as we don't do them to $article
 		my $disp_article = {
 			article		=> $strip_art,
 			date		=> $article->{date},
-			description	=> $strip_desc,
+			description	=> $article->{description}, # strip_subject in the template is sufficient
 			topic		=> $journal_reader->getTopic($article->{tid}),
 			id		=> $article->{id},
 			discussion	=> $article->{discussion},
