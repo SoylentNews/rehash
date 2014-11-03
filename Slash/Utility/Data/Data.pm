@@ -124,6 +124,7 @@ our @EXPORT  = qw(
 	strip_attribute
 	strip_code
 	strip_extrans
+	strip_textarea
 	strip_html
 	strip_literal
 	strip_mode
@@ -1341,6 +1342,8 @@ my %actions = (
 			${$_[0]} =~ s/&/&amp;/g;			},
 	encode_html_amp_ifnotent => sub {
 			${$_[0]} =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;	},
+	encode_html_amp_ifent => sub {
+			${$_[0]} =~ s/&(#?[a-zA-Z0-9]+;)/&amp;$1/g;	},
 	encode_html_ltgt => sub {
 			${$_[0]} =~ s/</&lt;/g;
 			${$_[0]} =~ s/>/&gt;/g;				},
@@ -1414,6 +1417,9 @@ my %actions = (
 			_fixupCharrefs();
 			${$_[0]} =~ s[([^\n\r\t !-~])][_approveUnicodeChar($1, $constants)]ge;				},
 	diacritic_max	=> sub {
+			# I hate that we have to do it but all diacritic marks must be in literal
+			# form or mixing entities and literals can bypass our filter.
+			${$_[0]} =~ s/(&#[a-zA-Z0-9]+;)/_diacriticEntities2Literals($1)/ge;
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
 			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
 );
@@ -1502,6 +1508,12 @@ my %mode_actions = (
 			whitespace_tagify
 			newline_indent
 			approve_unicode		)],
+	TEXTAREA, [qw(
+			newline_to_local
+			encode_html_amp_ifent
+			encode_html_ltgt	)],
+
+	
 );
 
 sub stripByMode {
@@ -1570,6 +1582,7 @@ sub strip_literal	{ stripByMode($_[0], LITERAL,	@_[1 .. $#_]) }
 sub strip_nohtml	{ stripByMode($_[0], NOHTML,	@_[1 .. $#_]) }
 sub strip_notags	{ stripByMode($_[0], NOTAGS,	@_[1 .. $#_]) }
 sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
+sub strip_textarea	{ stripByMode($_[0], TEXTAREA,	@_[1 .. $#_]) }
 
 sub determine_html_format {
 	my($html, $user) = @_;
@@ -1809,20 +1822,20 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
-	if (grep /^sarc$/, @{$constants->{approvedtags}}) {
+	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
 		my $long = 'sarcasm';
-		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
 		$str =~ s/$open/&lt;$long&gt;/g;
 		$str =~ s/$close/&lt;\/$long&gt;/g;
 	}
 
-	if (grep /^sarcasm$/, @{$constants->{approvedtags}}) {
+	if (grep /^sarcasm$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarcasm';
-		my $open    = qr[\n* <\s*  $sarc \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$sarc \s*> \n*]xsio;
+		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
+		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
 		$str =~ s/$open/&lt;$sarc&gt;/g;
 		$str =~ s/$close/&lt;\/$sarc&gt;/g;
@@ -1838,7 +1851,40 @@ sub processCustomTagsPost {
 		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
 	}
 
+	# support for <user> tags
+	if (grep /^user$/i, @{$constants->{approvedtags}}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $utag = 'user';
+		my $open = qr[<\s* $utag \s*> \n*]xsio;
+		my $close = qr[<\s* /$utag \s*> \n*]xsio;
+		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
+	}
+	# also support @{blah} syntax
+	if (grep /^user$/i, @{$constants->{approvedtags}}) {
+		# The link here is just the nick. any decoration is done in base.css
+		$str =~ s/@\s*(.*?)\s*:/_nick2Link($1,$constants,1)/ge;
+	}
+
 	return $str;
+}
+
+sub _nick2Link {
+	my ($nick, $constants, $alt) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $uid = $1 if $nick =~ /^#(\d*)$/;
+	if($uid) {
+		my $user = $reader->getUser($uid);
+		$nick = $user->{nickname}  || $nick;
+	}
+	my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
+	
+	if($reader->nickExists($nick)) {
+		$nick = "<a href=\"$href\" class=\"commentUserLink\">$nick<\/a >";
+	}
+	elsif($alt) {
+		$nick = "\@$nick:";
+	}
+	return $nick;
 }
 
 # revert div class="quote" back to <quote>, handles nesting
@@ -4797,7 +4843,31 @@ sub processSub {
 	return $home;
 }
 
+sub _diacriticEntities2Literals {
+	my $ent = shift;
+	my $decimal = $1 if $ent =~ /#(.*?);/;
 
+	# make sure we have a decimal number
+	if($decimal =~ /^x(.*?)$/) {
+		$decimal = hex($1);
+	}
+
+	# Now check vs diacritic ranges
+	if(
+		($decimal >= 768 && $decimal <= 879) ||
+		($decimal >= 6832 && $decimal <= 6911) ||
+		($decimal >= 7616 && $decimal <= 7679) ||
+		($decimal >= 8400 && $decimal <= 8447) ||
+		($decimal >= 65056 && $decimal <= 65071)
+	) {
+		# it's a diacritic, return the literal
+		return chr($decimal);
+	}
+	else {
+		# it's not a diacritic, return without alteration
+		return $ent;
+	}
+}
 
 
 
