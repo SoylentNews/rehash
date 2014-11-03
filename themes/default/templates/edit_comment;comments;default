@@ -133,7 +133,7 @@ END %]
 [% END %]
 
 	[% PROCESS formLabel value => 'Subject' %]
-		<input type="text" name="postersubj" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
+		<input type="text" name="postersubj" value="[% form.postersubj | strip_subject %]" size="50" maxlength="50">
 	[% FOR extra = extras %]
 	
 		<b>[% extra.0 %]
