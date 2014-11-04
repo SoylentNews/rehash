@@ -31,7 +31,8 @@ __template__
 [% END %]
 <p>
 <div class="article">
-	[% PROCESS titlebar title=submission.subj %]
+	[% stripped_title = submission.subj | strip_title %]
+	[% PROCESS titlebar title=stripped_title %]
 	<div class="details">
 	[% UNLESS admin_flag -%]
 	[% submission_state = Slash.db.getDescriptions('submission-state') %]
@@ -166,7 +167,7 @@ __template__
 		<input type="hidden" name="subid" value="[% subid %]">
 		<input type="hidden" name="topic_source" value="submission">
 		<input type="hidden" name="submitter" value="[% submitter.uid %]">
-		<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj | strip_attribute %]" size="75" MAXLENGTH="100"></label>
+		<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj | strip_subject %]" size="75" MAXLENGTH="100"></label>
 		[% lockTest %]
 	[% IF constants.use_dept %]
 		<label>Dept&nbsp; <input type="text" name="dept" size="75" MAXLENGTH="100"></label>
@@ -188,7 +189,7 @@ __template__
 		<input type="submit" name="op" value="preview"><br>
 		<label>Intro Copy</label>
 	<textarea name="introtext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"
->[% subtext | strip_literal %]</textarea><br>
+>[% subtext | strip_textarea %]</textarea><br>
 		[% IF form.fromconsole %]</div>[% END %]
 		<input type="submit" name="op" value="preview"><br>
 [% IF similar_stories.size > 0 %]

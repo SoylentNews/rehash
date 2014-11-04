@@ -68,7 +68,8 @@ __template__
 				Preview Submission
 			</legend>
 			<div class="article">
-				[% PROCESS titlebar width => "100%", title => form.subj %]
+				[% stripped_title = form.subj | strip_title %]
+				[% PROCESS titlebar width => "100%", title => stripped_title %]
 				<div class="body">
 					<div class="topic">
 						<img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
@@ -99,7 +100,7 @@ __template__
 			[% END %]
 
 			[% PROCESS formLabel value => "Title"  %]
-			<input class="fullbox" type="text" name="subj" value="[% form.subj  | strip_attribute %]" size="75" maxlength="100">
+			<input class="fullbox" type="text" name="subj" value="[% form.subj  | strip_subject %]" size="75" maxlength="100">
 			[% PROCESS formNote note => "Be descriptive and concise!" %]
 			[% PROCESS formNote note => "(Nondescriptive subjects like 'Check this out!' usually just get deleted, because we get many every day. For best results, put the important words early.)" %]
 
@@ -108,7 +109,7 @@ __template__
 		[% IF extra.2 == 'text' %]
 			<input type="text" name="[% extra.1 %]" value="[% form.${extra.1} | strip_attribute %]" size="50">
 		[% ELSIF extra.2 == 'textarea' %]
-			<textarea wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% form.${extra.1} | strip_literal %]</textarea><br>
+			<textarea wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% form.${extra.1} | strip_textarea %]</textarea><br>
 		[% ELSIF extra.2 == 'list' %]
 			[% # section:value %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), form.${extra.1}, 1, 1) %]	
@@ -148,7 +149,7 @@ __template__
 			[% PROCESS formNote note => "In general, submit to $submitToLabel" %]
 
 			[% PROCESS formLabel value => "The Scoop" %]
-			<textarea class="fullbox" wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="story">[% form.story | strip_literal %]</textarea><br>
+			<textarea class="fullbox" wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="story">[% form.story | strip_textarea %]</textarea><br>
 			[% PROCESS formNote note => "Are you sure you included a URL?  Did you test them for typos?" %]
 			[% PROCESS formNote note => "HTML is fine, but double check those URLs and HTML tags!" %]
 			[% PROCESS formLabel value => "Submission format", comment => "" %]

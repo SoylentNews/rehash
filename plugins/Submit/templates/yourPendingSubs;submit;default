@@ -36,9 +36,9 @@ __template__
 				[% bg_toggle = !bg_toggle %]
 				<td>
 					[%- IF link_sid -%]
-						<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title | strip_attribute %]</a>
+						<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title | strip_title %]</a>
 					[%- ELSE -%]
-						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj | strip_literal %]</a>
+						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj | strip_title %]</a>
 					[%- END -%]
 				</td>
 				<td>[% Slash.timeCalc(sub.time) %]</td>
