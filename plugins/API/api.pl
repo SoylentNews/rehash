@@ -164,7 +164,7 @@ sub getLatestComments {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->pretty->encode($comments);
+	return $json->encode($comments);
 }
 
 sub getSingleComment {
@@ -183,7 +183,7 @@ sub getSingleComment {
 	delete $comment->{signature};
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->pretty->encode($comment);
+	return $json->encode($comment);
 }
 
 sub getDiscussion {
@@ -205,7 +205,7 @@ sub getDiscussion {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->pretty->encode($comments);
+	return $json->encode($comments);
 }
 
 sub getSingleStory {
@@ -282,6 +282,50 @@ sub uidToName {
 }
 
 sub getPubUserInfo {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $askUser = $slashdb->getUser($form->{uid});
+
+	my @allowed = (
+		'jabber',
+		'fakeemail',
+		'uid',
+		'nickname',
+		'icq',
+		'sig',
+		'homepage',
+		'registered',
+		'realname',
+		'karma',
+		'journal_last_entry_date',
+		'aim',
+		'created_at',
+		'calendar_url',
+		'people',
+		'yahoo',
+		'bio',
+		'totalcomments',
+
+	);
+	my $subscriber = 0;
+	unless($askUser->{hide_subscription}) {
+		use DateTime;
+		use DateTime::Format::MySQL;
+		my $dt_today   = DateTime->today;
+		my $dt_sub = DateTime::Format::MySQL->parse_date($askUser->{subscriber_until});
+		
+		if ( $dt_sub >= $dt_today ){
+			$subscriber = 1;
+		}
+	}
+
+	my $repUser = {};
+	$repUser->{is_subscriber} = $subscriber;
+	foreach my $field (@allowed) {
+		$repUser->{$field} = $askUser->{$field};
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->pretty->encode($repUser);
 }
 
 #createEnvironment();
