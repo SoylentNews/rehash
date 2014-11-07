@@ -230,6 +230,9 @@ sub getLatestStories {
 	my ($form, $slashdb, $user, $constants) = @_;
 	my $options;
 	($options->{limit}, $options->{limit_extra}) = (($form->{limit} || 10), 0);
+	$options->{limit} = 10 unless $options->{limit} =~ /^\d+$/;
+	$options->{limit} = 1 unless $options->{limit} > 1;
+	$options->{limit} = 50 unless $options->{limit} <= 50;
 	my $stories = $slashdb->getStoriesEssentials($options);
 	foreach my $story (@$stories) {
 		($story->{introtext}, $story->{bodytext}, $story->{title}, $story->{relatedtext}) = $slashdb->sqlSelect("introtext, bodytext, title, relatedtext", "story_text", "stoid = $story->{stoid}");
