@@ -15,9 +15,10 @@ sub main {
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
 	my $api = Slash::API->new;
-	# lc just in case
 
+	# lc just in case
 	my $endpoint = lc($form->{m});
 
 	my $endpoints = {
@@ -50,7 +51,7 @@ sub main {
 
 	$endpoint = 'default' unless $endpoints->{$endpoint};
 
-	my $retval = $endpoints->{$endpoint}{function}->($form, $slashdb, $user, $constants);
+	my $retval = $endpoints->{$endpoint}{function}->($form, $slashdb, $user, $constants, $gSkin);
 
 	binmode(STDOUT, ':encoding(utf8)');
 	$api->header;
@@ -58,7 +59,7 @@ sub main {
 }
 
 sub user {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $api = Slash::API->new;
 	my $op = lc($form->{op});
 
@@ -84,11 +85,11 @@ sub user {
 			seclev		=> 1,
 		},
 	};
-	return $ops->{$op}{function}->($form, $slashdb, $user, $constants);
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
 sub story {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $op = lc($form->{op});
 
 	my $ops = {
@@ -105,11 +106,11 @@ sub story {
 			seclev		=> 1,
 		},
 	};
-	return $ops->{$op}{function}->($form, $slashdb, $user, $constants);
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
 sub comment {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $op = lc($form->{op});
 
 	my $ops = {
@@ -130,11 +131,66 @@ sub comment {
 			seclev		=> 1,
 		},
 	};
-	return $ops->{$op}{function}->($form, $slashdb, $user, $constants);
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub journal {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $op = lc($form->{op});
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		latest		=> {
+			function	=> \&getLatestJournals,
+			seclev		=> 1,
+		},
+		single		=> {
+			function	=> \&getSingleJournal,
+			seclev		=> 1,
+		},
+	};
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub getSingleJournal {
+	return;
+}
+
+sub getLatestJournals {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+
+	my $journals = $journal_reader->getRecent($form->{limit}, $form->{uid});
+
+	my $items;
+	for my $id (sort {$b <=> $a} keys %$journals) {
+		delete $journals->{$id}->{srcid_32};
+		delete $journals->{$id}->{srcid_24};
+
+		$journals->{$id}->{nickname} = $slashdb->sqlSelect(
+					'nickname',
+					'users',
+					" uid = $journals->{$id}->{uid} ");
+		$journals->{$id}->{link} = "$gSkin->{absolutedir}/~$journals->{$id}->{nickname}/journal/$id";
+		
+		my $texts = $slashdb->sqlSelectArrayRef(
+					'introtext, article',
+					'journals_text',
+					" id = $id ");
+		($journals->{$id}->{introtext}, $journals->{$id}->{artice}) = @$texts;
+		
+		push @$items, $journals->{$id};
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->pretty->encode($items);
 }
 
 sub getLatestComments {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	
 	my $select = "* ";
 	my $id = "cid";
@@ -168,7 +224,7 @@ sub getLatestComments {
 }
 
 sub getSingleComment {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $tables = "comments";
 	my $cid_q = $slashdb->sqlQuote($form->{cid});
 	my $where = "cid=$cid_q ";
@@ -187,7 +243,7 @@ sub getSingleComment {
 }
 
 sub getDiscussion {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $discussion = $slashdb->getDiscussion($form->{id});
 	if (!$discussion || !$discussion->{commentcount} ||  $discussion->{commentstatus} eq 'disabled' ) { return; }
 
@@ -209,7 +265,7 @@ sub getDiscussion {
 }
 
 sub getSingleStory {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $story = $slashdb->getStory($form->{sid});
 	if( ($story->{is_future}) || ($story->{in_trash} ne "no") ){return;};
 	return unless $slashdb->checkStoryViewable($story->{stoid});
@@ -227,7 +283,7 @@ sub getSingleStory {
 }
 
 sub getLatestStories {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $options;
 	($options->{limit}, $options->{limit_extra}) = (($form->{limit} || 10), 0);
 	$options->{limit} = 10 unless $options->{limit} =~ /^\d+$/;
@@ -251,7 +307,7 @@ sub nullop {
 }
 
 sub maxUid {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $json = JSON->new->utf8->allow_nonref;
 	my $max = {};
 	$max->{max_uid} = $slashdb->sqlSelect(
@@ -261,7 +317,7 @@ sub maxUid {
 }
 
 sub nameToUid {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $json = JSON->new->utf8->allow_nonref;
 	my $nick = $slashdb->sqlQuote($form->{nick});
 	my $uid = {};
@@ -273,7 +329,7 @@ sub nameToUid {
 }
 
 sub uidToName {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $json = JSON->new->utf8->allow_nonref;
 	my $uid = $form->{uid};
 	my $nick = {};
@@ -285,7 +341,7 @@ sub uidToName {
 }
 
 sub getPubUserInfo {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $askUser = $slashdb->getUser($form->{uid});
 
 	my @allowed = (

@@ -348,6 +348,35 @@ EOT
 	return $losers;
 }
 
+sub getRecent {
+	my ($self, $limit, $uid) = @_;
+	my $where = "1 = 1 ";
+
+	unless(
+		(defined $limit) &&
+		($limit =~ /^\d+$/) &&
+		($limit > 0) &&
+		($limit < 51)
+	) {
+		$limit = 20;
+	}
+
+	if( (defined $uid) && ($uid =~ /^\d+$/) ) {
+		my $uid_q = $self->sqlQuote($uid);
+		$where = " uid = $uid_q ";
+	}
+
+	my $journals = $self->sqlSelectAllHashref(
+		"id",
+		"*",
+		"journals",
+		"$where",
+		"ORDER BY date DESC LIMIT $limit"
+	);
+	return { } if !$journals || !%$journals;
+	return $journals;
+}
+
 sub themes {
 	my($self) = @_;
 	my $uid = getCurrentUser('uid');
