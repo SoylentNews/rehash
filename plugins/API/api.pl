@@ -311,7 +311,9 @@ sub getLatestStories {
 }
 
 sub nullop {
-	return "";
+	my $error = { RTFM => 'http://wiki.soylentnews.org/wiki/ApiDocs' }
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($error);
 }
 
 sub maxUid {
