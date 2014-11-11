@@ -156,7 +156,15 @@ sub journal {
 }
 
 sub getSingleJournal {
-	return;
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+
+	my $journal = $journal_reader->get($form->{id});
+	delete $journal->{srcid_32};
+	delete $journal->{srcid_24};
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->pretty->encode($journal);
 }
 
 sub getLatestJournals {
@@ -186,7 +194,7 @@ sub getLatestJournals {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->pretty->encode($items);
+	return $json->encode($items);
 }
 
 sub getLatestComments {
