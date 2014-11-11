@@ -164,7 +164,7 @@ sub getSingleJournal {
 	delete $journal->{srcid_24};
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->pretty->encode($journal);
+	return $json->encode($journal);
 }
 
 sub getLatestJournals {
@@ -392,7 +392,7 @@ sub getPubUserInfo {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->pretty->encode($repUser);
+	return $json->encode($repUser);
 }
 
 #createEnvironment();
