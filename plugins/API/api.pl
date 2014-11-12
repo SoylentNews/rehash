@@ -136,6 +136,10 @@ sub comment {
 			function	=> \&getDiscussion,
 			seclev		=> 1,
 		},
+		post		=> {
+			function	=> \&postComment,
+			seclev		=> 1,
+		},
 	};
 
 	$op = 'default' unless $ops->{$op};
@@ -165,6 +169,37 @@ sub journal {
 	$op = 'default' unless $ops->{$op};
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub postComment {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	$form->{pid} = 0 unless $form->{pid};
+	my $json = JSON->new->utf8->allow_nonref;
+	my ($error_message, $preview);
+
+	return &nullop unless $form->{sid} && $form->{postersubj} && $form->{postercomment} && $form->{posttype};
+
+	my $discussion;
+	if ($form->{sid} !~ /^\d+$/){$discussion = $slashdb->getDiscussionBySid($form->{sid});}
+	else{$discussion = $slashdb->getDiscussion($form->{sid});}
+	return $json->pretty->encode("No such discussion") unless $discussion;
+	return $json->pretty->encode("You can't post to that discussion yet.") if $discussion->{is_future};
+
+	$preview = previewForm(\$error_message, $discussion) if (($form->{preview}) && ($form->{preview} eq 1));
+	return $json->pretty->encode($error_message) if $error_message;
+	return $json->pretty->encode($preview) if $preview;
+
+	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
+
+	if($comment eq '-1' || !$comment){return $json->pretty->encode($error_message);}
+
+	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
+
+	if(!$saved_comment){return $json->pretty->encode($error_message);}
+	delete $saved_comment->{ipid};
+	delete $saved_comment->{subnetid};
+	delete $saved_comment->{signature},
+	return $json->pretty->encode($saved_comment);
 }
 
 sub getSingleJournal {
@@ -408,6 +443,29 @@ sub getPubUserInfo {
 	my $json = JSON->new->utf8->allow_nonref;
 	return $json->encode($repUser);
 }
+
+# Copied over from comments.pl. Wish it'd been in Comments.pm instead.
+sub previewForm {
+	my($error_message, $discussion) = @_;
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $comment = preProcessComment($form, $user, $discussion, $error_message) or return;
+	return $$error_message if $comment eq '-1';
+	my $preview = postProcessComment({ %$user, %$form, %$comment }, 0, $discussion);
+
+	if ($constants->{plugin}{Subscribe}) {
+		$preview->{subscriber_bonus} =
+			$user->{is_subscriber}
+			&& (!$form->{nosubscriberbonus} || $form->{nosubscriberbonus} ne 'on')
+			? 1 : 0;
+	}
+
+	return prevComment($preview, $user);
+}
+
 
 #createEnvironment();
 main();
