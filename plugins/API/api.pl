@@ -85,6 +85,9 @@ sub user {
 			seclev		=> 1,
 		},
 	};
+
+	$op = 'default' unless $ops->{$op};
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -106,6 +109,9 @@ sub story {
 			seclev		=> 1,
 		},
 	};
+
+	$op = 'default' unless $ops->{$op};
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -131,6 +137,9 @@ sub comment {
 			seclev		=> 1,
 		},
 	};
+
+	$op = 'default' unless $ops->{$op};
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -152,6 +161,9 @@ sub journal {
 			seclev		=> 1,
 		},
 	};
+
+	$op = 'default' unless $ops->{$op};
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -311,7 +323,7 @@ sub getLatestStories {
 }
 
 sub nullop {
-	my $error = { RTFM => 'http://wiki.soylentnews.org/wiki/ApiDocs' }
+	my $error = { RTFM => 'http://wiki.soylentnews.org/wiki/ApiDocs' };
 	my $json = JSON->new->utf8->allow_nonref;
 	return $json->encode($error);
 }
