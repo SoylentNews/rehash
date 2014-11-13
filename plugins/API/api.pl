@@ -179,6 +179,9 @@ sub postComment {
 
 	return &nullop unless $form->{sid} && $form->{postersubj} && $form->{postercomment} && $form->{posttype};
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('comments');
+		
 	my $discussion;
 	if ($form->{sid} !~ /^\d+$/){$discussion = $slashdb->getDiscussionBySid($form->{sid});}
 	else{$discussion = $slashdb->getDiscussion($form->{sid});}
@@ -188,10 +191,12 @@ sub postComment {
 	$preview = previewForm(\$error_message, $discussion) if (($form->{preview}) && ($form->{preview} eq 1));
 	return $json->pretty->encode($error_message) if $error_message;
 	return $json->pretty->encode($preview) if $preview;
-
+	
 	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
 
 	if($comment eq '-1' || !$comment){return $json->pretty->encode($error_message);}
+
+	$rkey->createuse || return $json->pretty->encode($rkey->errstr);
 
 	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
 
@@ -199,7 +204,7 @@ sub postComment {
 	delete $saved_comment->{ipid};
 	delete $saved_comment->{subnetid};
 	delete $saved_comment->{signature},
-	return $json->pretty->encode($saved_comment);
+	return $json->encode($saved_comment);
 }
 
 sub getSingleJournal {
