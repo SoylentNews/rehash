@@ -437,3 +437,6 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags_visible', 'b|i
 # Add <user>nick</user> linking
 UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|strike|abbr|sarc|sarcasm|user' WHERE name = 'approvedtags';
 UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|strike|sarc|sarcasm|user' WHERE name = 'approvedtags_visible';
+
+# This switches feeds to https. http was hardcoded if you don't assign a url to a skin.
+UPDATE skins SET url = 'https://soylentnews.org/' where name = 'mainpage';
