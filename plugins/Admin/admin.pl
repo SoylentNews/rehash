@@ -1654,7 +1654,8 @@ sub listStories {
 		$story->{td2}    = timeCalc($time_plain, '%m/%d', 0);
 		$story->{aid}    = $slashdb->getAuthor($story->{uid}, 'nickname');
 		$story->{x}	 = ++$i;
-		$story->{title}  = chopEntity($story->{title}, 50);
+		#$story->{title}  = chopEntity($story->{title}, 50);
+		$story->{title} = strip_title($story->{title});
 		$story->{tbtitle} = fixparam($story->{title});
 		if ($constants->{plugin}{FireHose}) {
 			my $fh = getObject("Slash::FireHose");

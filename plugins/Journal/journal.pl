@@ -553,7 +553,7 @@ sub doSaveArticle {
 	$form->{promotetype} ||= 'publish';
 
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
-	my $description = strip_subject($form->{description});
+	my $description = $form->{description};
 
 	# from comments.pl
 	for ($description, $form->{article}) {

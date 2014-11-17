@@ -2791,10 +2791,9 @@ sub url2html {
 
 sub urlizeTitle {
 	my($title) = @_;
-	$title = strip_notags($title);
+	$title = strip_subject($title);
 	$title =~ s/^\s+|\s+$//g;
 	$title =~ s/\s+/-/g;
-	$title =~ s/[^A-Za-z0-9\-]//g;
 	return $title;
 }
 
