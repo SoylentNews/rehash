@@ -385,7 +385,7 @@ sub displayArticleFriends {
 		push @collection, {
 			article		=> $journal_reader->fixJournalText($article->[1], $article->[4], $article->[7]),
 			date		=> $article->[0],
-			description	=> strip_notags($article->[2]),
+			description	=> strip_subject($article->[2]),
 			topic		=> $topics->{$article->[5]},
 			discussion	=> $article->[6],
 			id		=> $article->[3],
@@ -512,7 +512,7 @@ sub displayArticle {
 		push @{$collection->{article}}, {
 			article		=> $stripped_article,
 			date		=> $article->[0],
-			description	=> strip_notags($article->[2]),
+			description	=> strip_subject($article->[2]),
 			topic		=> $topics->{$article->[5]},
 			discussion	=> $article->[6],
 			id		=> $article->[3],
@@ -553,7 +553,7 @@ sub doSaveArticle {
 	$form->{promotetype} ||= 'publish';
 
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
-	my $description = strip_notags($form->{description});
+	my $description = strip_subject($form->{description});
 
 	# from comments.pl
 	for ($description, $form->{article}) {
