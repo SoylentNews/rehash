@@ -32,7 +32,7 @@ __template__
 		<a href="[% constants.real_rootdir %]/~[% id | strip_paramattr %]/"><b>[% id %]</b></a>
 	</td><td>
 		[% lastsecs %]
-		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;<a href="[% constants.absolutedir_secure %]/[% IF last_subid %]submit.pl?op=viewsub&amp;subid=[% last_subid %][% ELSIF last_sid %]/admin.pl?op=edit&amp;sid=[% last_sid %][% END %]">[% lasttitle %]</a>
+		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;<a href="[% constants.absolutedir_secure %]/[% IF last_subid %]submit.pl?op=viewsub&amp;subid=[% last_subid %][% ELSIF last_sid %]/admin.pl?op=edit&amp;sid=[% last_sid %][% END %]">[% lasttitle | strip_title %]</a>
 		[% END %]
 		&nbsp;
 	</td></tr>
