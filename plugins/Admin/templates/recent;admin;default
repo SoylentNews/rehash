@@ -85,7 +85,7 @@ Show only comments from section:
 		<td align="right">[% comm.num_mods %]</td>
 		<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
 		<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
-		<td align="left">[% comm.subject_vis | strip_literal %]</td>
+		<td align="left">[% comm.subject_vis | strip_title %]</td>
 	</tr>
 	<tr>
 		<td colspan="3" valign="top">[% Slash.createSelect("reason_${comm.sid}_${comm.cid}",

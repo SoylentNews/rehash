@@ -21,7 +21,7 @@ __template__
 			<input type="hidden" name="op" value="remove">
 			<input type="hidden" name="[% name %]" value="1">
 			<div class="message">
-				Alright, before we do this thing, I just want to really make sure that you want to delete your journal entry <b>[% article.description | strip_literal %]</b>.
+				Alright, before we do this thing, I just want to really make sure that you want to delete your journal entry <b>[% article.description | strip_title %]</b>.
 			</div>
 			<input type="submit" value="Yup, I'm positive">
 		</fieldset>
