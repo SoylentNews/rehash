@@ -108,6 +108,14 @@ sub story {
 			function	=> \&getSingleStory,
 			seclev		=> 1,
 		},
+		post	=> {
+			function	=> \&postStory,
+			seclev		=> 1,
+		},
+		reskey		=> {
+			function	=> \&getStoryReskey,
+			seclev		=> 1,
+		},
 	};
 
 	$op = 'default' unless $ops->{$op};
@@ -138,6 +146,10 @@ sub comment {
 		},
 		post		=> {
 			function	=> \&postComment,
+			seclev		=> 1,
+		},
+		reskey		=> {
+			function	=> \&getCommentReskey,
 			seclev		=> 1,
 		},
 	};
@@ -171,16 +183,123 @@ sub journal {
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
+sub getStoryReskey {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	return $json->pretty->encode($rkey->errstr) unless $rkey->create;
+	return $json->pretty->encode( { reskey => $rkey->reskey } );
+}
+
+sub getCommentReskey {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('comments');
+	return $json->pretty->encode($rkey->errstr) unless $rkey->create;
+	return $json->pretty->encode( { reskey => $rkey->reskey } );
+}
+
+sub postStory {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $error_message;
+
+	return &nullop unless $form->{story} && $form->{subj} && $form->{tid} && $form->{sub_type} && $form->{primaryskid} && $form->{reskey};
+
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit', { reskey => $form->{reskey} } );
+	return $json->pretty->encode( { error_here => $rkey->errstr } ) unless $rkey->use;
+
+	$form->{name} ||= 'Anonymous Coward';
+	my $uid;
+	if($form->{name} eq $user->{nickname}) {
+		$uid = $user->{uid};
+	} else {
+		$uid = getCurrentStatic('anonymous_coward_uid');
+	}
+
+	if (length($form->{subj}) < 2) {
+		$error_message = getData('badsubject');
+		return $json->pretty->encode($error_message);
+	}
+
+	my %keys_to_check = ( story => 1, subj => 1 );
+	for (keys %$form) {
+		next unless $keys_to_check{$_};
+		return $json->pretty->encode($error_message) unless filterOk('submissions', $_, $form->{$_}, \$error_message);
+
+		my $compressOK = compressOk($form->{$_});
+		$error_message = getData('compresserror');
+		return $json->pretty->encode($error_message) unless $compressOK;
+	}
+	
+	# This needs to go away once filters are in place for rendering.
+	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
+	#return blah if $form->{preview} == 1;
+
+	my $submission = {
+		email		=> $form->{email},
+		uid		=> $uid,
+		name		=> $form->{name},
+		story		=> $form->{story},
+		subj		=> $form->{subj},
+		tid		=> $form->{tid},
+		primaryskid	=> $form->{primaryskid},
+		mediatype	=> $form->{mediatype},
+	};
+	
+	my @topics = ();
+	my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
+	push @topics, $nexus;
+	push @topics, $form->{tid} if $form->{tid};
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+	my $extras = $slashdb->getNexusExtrasForChosen($chosen_hr) || [];
+	my @missing_required = grep{$_->[4] eq "yes" && !$form->{$_->[1]}} @$extras;
+	return $json->pretty->encode( { missing_required => @missing_required } ) if @missing_required;
+
+	if ($extras && @$extras) {
+		for (@$extras) {
+			my $key = $_->[1];
+			$submission->{$key} = strip_nohtml($form->{$key}) if $form->{$key};
+		}
+	}
+
+	my $messagesub = { %$submission };
+	$messagesub->{subid} = $slashdb->createSubmission($submission);
+	return $json->pretty->encode("Failed to create submission") unless $messagesub->{subid};
+
+	if ($messagesub->{subid} && ($uid != getCurrentStatic('anonymous_coward_uid'))) {
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		$dynamic_blocks->setUserBlock('submissions', $uid) if $dynamic_blocks;
+	}
+
+	my $messages = getObject('Slash::Messages');
+	if ($messages) {
+		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
+		my $data  = {
+			template_name	=> 'messagenew',
+			subject		=> { template_name => 'messagenew_subj' },
+			submission	=> $messagesub,
+		};
+		$messages->create($users, MSG_CODE_NEW_SUBMISSION, $data) if @$users;
+	}
+	
+	return $json->pretty->encode($messagesub);
+}
+
 sub postComment {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	$form->{pid} = 0 unless $form->{pid};
 	my $json = JSON->new->utf8->allow_nonref;
 	my ($error_message, $preview);
 
-	return &nullop unless $form->{sid} && $form->{postersubj} && $form->{postercomment} && $form->{posttype};
+	return &nullop unless $form->{sid} && $form->{postersubj} && $form->{postercomment} && $form->{posttype} && $form->{reskey};
 
 	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('comments');
+	my $rkey = $reskey->key('comments', { reskey => $form->{reskey} } );
 		
 	my $discussion;
 	if ($form->{sid} !~ /^\d+$/){$discussion = $slashdb->getDiscussionBySid($form->{sid});}
@@ -196,7 +315,7 @@ sub postComment {
 
 	if($comment eq '-1' || !$comment){return $json->pretty->encode($error_message);}
 
-	$rkey->createuse || return $json->pretty->encode($rkey->errstr);
+	return $json->pretty->encode($rkey->errstr) unless $rkey->use;
 
 	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
 
@@ -471,6 +590,19 @@ sub previewForm {
 	return prevComment($preview, $user);
 }
 
+# Copied over from submit.pl
+sub genChosenHashrefForTopics {
+	my($topics) = @_;
+	my $constants = getCurrentStatic();
+	my $chosen_hr ={};
+	for my $tid (@$topics) {
+		$chosen_hr->{$tid} = 
+			$tid == $constants->{mainpage_nexus_tid}
+				? 30
+				: $constants->{topic_popup_defaultweight} || 10;
+	}
+	return $chosen_hr;
+}
 
 #createEnvironment();
 main();
