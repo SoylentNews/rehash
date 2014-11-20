@@ -55,6 +55,7 @@ __template__
 			'soylentnews'	=> 'SoylentNews',
 			'night' => 'Night Mode',
 			'icicle' => 'Black IcIcle'
+			'pwnies' => 'OMG PWNIES'
 		}, user_edit.skin, 1);
 		%]
 		<label>

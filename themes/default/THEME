@@ -288,6 +288,12 @@ htdoc=../icicle/htdocs/favicon-icicle.png
 template=../icicle/templates/html-header;misc;icicle
 image=../icicle/htdocs/images/logo_icicle.png
 
+# pwnies theme files go here
+css=../pwnies/htdocs/pwnies.cssraw
+htdoc=../pwnies/htdocs/favicon-pwnies.png
+template=../pwnies/templates/html-header;misc;pwnies
+image=../pwnies/htdocs/images/logo_pwnies.png
+
 misc=misc/spamarmors
 
 plugin=Admin
