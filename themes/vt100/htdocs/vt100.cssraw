@@ -23,7 +23,7 @@ a:hover { color: #0f0; }
 {
 	width: 115px;
 	height: 80px;
-	background: url("[% constants.imagedir %]/logo_pwnies.png") no-repeat;
+	background: url("[% constants.imagedir %]/logo_vt100.png") no-repeat;
 }
 
 #slogan h2, #slogan #head_message
