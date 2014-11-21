@@ -571,3 +571,7 @@ option {
 #authors .generalbody h3 a {
 	color: #0f0;
 }
+
+#slashboxes h4 a, #slashboxes h4 a:visited {
+	color: #0f0;
+}
