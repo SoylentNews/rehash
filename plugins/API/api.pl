@@ -108,6 +108,10 @@ sub story {
 			function	=> \&getSingleStory,
 			seclev		=> 1,
 		},
+		pending	=> {
+			function	=> \&getPendingBoth,
+			seclev		=> 1,
+		},
 		post	=> {
 			function	=> \&postStory,
 			seclev		=> 1,
@@ -181,6 +185,28 @@ sub journal {
 	$op = 'default' unless $ops->{$op};
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub getPendingBoth {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $submissions = $slashdb->getSubmissionForUser;
+	my $pending = $slashdb->getStoriesSince;
+
+	foreach my $sub (@$submissions) {
+		delete $sub->{ipid};
+		delete $sub->{weight};
+		delete $sub->{subnetid};
+		delete $sub->{signature};
+		delete $sub->{note};
+		delete $sub->{del};
+		delete $sub->{email};
+		delete $sub->{emaildomain};
+		delete $sub->{mediatype};
+		delete $sub->{comment};
+	}
+
+	return $json->pretty->encode({ submissions => $submissions, pending_stories => $pending });
 }
 
 sub getStoryReskey {
