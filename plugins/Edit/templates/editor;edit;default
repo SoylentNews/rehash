@@ -331,7 +331,7 @@ END;
 			[% PROCESS formLabel value => str_icp for => "introtext"  %]
 				<span class="[% IF !preview.introtext;'dyn';END;%]label">
 					<label for="introtext">Describe your scoop</label>
-					<textarea wrap="virtual" name="introtext" class="growable">[% IF preview.introtext;preview.introtext | strip_literal;END; %]</textarea>
+					<textarea wrap="virtual" name="introtext" class="growable">[% IF preview.introtext;preview.introtext | strip_textarea;END; %]</textarea>
 			[% IF errors.critical.badintrotext %]
                                 [% errors.critical.badintrotext %]
                         [% ELSIF errors.critical.story_filter_error %]
@@ -354,7 +354,7 @@ END;
 				<label class="[% IF preview.bodytext %]clearboth[% ELSE %]pipe[% END %]">
 					<a href="#" class="tgbodytext">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 					<span class="auto_grow_wrap [% item.bodytext ? "show" : "hide" %]">
-						<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="growable">[% preview.bodytext | strip_literal %]</textarea>
+						<textarea name="bodytext" wrap="virtual" id="admin-bodytext" class="growable">[% preview.bodytext | strip_textarea %]</textarea>
 					</span>
 				</label>
 				[% IF ispell_comments.bodytext %]

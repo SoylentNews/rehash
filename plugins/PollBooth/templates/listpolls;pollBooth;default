@@ -53,7 +53,7 @@ __template__
 			</li>
 			[% IF type == "story" %]
 				<li>
-					<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.9 | strip_paramattr %]">[% question.8 %]</a>
+					<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.9 | strip_paramattr %]">[% question.8 | strip_title %]</a>
 				</li>
 			[% END %]
 		[% END %]

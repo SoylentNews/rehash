@@ -45,10 +45,10 @@ __template__
 		%]
 	
 		[% IF !can_vote %]
-			<p><b>[% question | strip_literal %]</b></p>
+			<p><b>[% question | strip_title %]</b></p>
 			<ul>
 				[% FOREACH ans = answers %]
-					<li>[% ans.answer | strip_literal %] <em>([% ans.votes %])</em></li>
+					<li>[% ans.answer | strip_title %] <em>([% ans.votes %])</em></li>
 				[% END %]
 			</ul>
 			<p>
@@ -63,10 +63,10 @@ __template__
 				[% IF user.currentSkin %]
 					<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">
 				[% END %]
-				<p><b>[% question | strip_literal %]</b></p>
+				<p><b>[% question | strip_title %]</b></p>
 				<ul>
 					[% FOREACH ans = answers %]
-						<li><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]&amp;from=rss">[% END %][% ans.answer | strip_literal %][% IF fromrss %]</a>[% END %]</li>
+						<li><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]&from=rss">[% END %][% ans.answer | strip_title %][% IF fromrss %]</a>[% END %]</li>
 					[% END %]
 				</ul>
 				<p>
