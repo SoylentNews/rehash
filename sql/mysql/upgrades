@@ -437,3 +437,13 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags_visible', 'b|i
 # Add <user>nick</user> linking
 UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|strike|abbr|sarc|sarcasm|user' WHERE name = 'approvedtags';
 UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|strike|sarc|sarcasm|user' WHERE name = 'approvedtags_visible';
+
+# For the moderation rework
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 1;
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 2;
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 3;
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 4;
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (11, 'Spam', 0, 1, -1, -10, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (12, 'Disagree', 0, 1, 0, 0, 0.5);
+DELETE FROM modreasons WHERE id = 9;
+DELETE FROM modreasons WHERE id = 10;
