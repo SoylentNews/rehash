@@ -325,8 +325,9 @@ sub setCommentForMod {
 	my($self, $cid, $val, $newreason, $oldreason) = @_;
 	my $raw_val = $val;
 	$val += 0;
-	return undef if !$val;
-	$val = "+$val" if $val > 0;
+	# Need to allow for +0 moderations
+	return undef if !defined($val);
+	$val = "+$val" if $val >= 0;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
@@ -541,6 +542,7 @@ sub getCommentMostCommonReason {
 	if ($needval) {
 		   if ($needval >  1) { $needval =  1 }
 		elsif ($needval < -1) { $needval = -1 }
+		else { $needval = 0; }
 		my $new_hr = { };
 		for my $reason (keys %$hr) {
 			$new_hr->{$reason} = $hr->{$reason}

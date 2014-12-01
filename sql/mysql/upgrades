@@ -440,3 +440,13 @@ UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|di
 
 # This switches feeds to https. http was hardcoded if you don't assign a url to a skin.
 UPDATE skins SET url = 'https://soylentnews.org/' where name = 'mainpage';
+
+# For the moderation rework
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 1;
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 2;
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 3;
+UPDATE modreasons SET val = 0, karma = 0 WHERE id = 4;
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (11, 'Spam', 0, 1, -1, -10, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (12, 'Disagree', 0, 1, 0, 0, 0.5);
+DELETE FROM modreasons WHERE id = 9;
+DELETE FROM modreasons WHERE id = 10;
