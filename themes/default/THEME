@@ -288,6 +288,18 @@ htdoc=../icicle/htdocs/favicon-icicle.png
 template=../icicle/templates/html-header;misc;icicle
 image=../icicle/htdocs/images/logo_icicle.png
 
+# pwnies theme files go here
+css=../pwnies/htdocs/pwnies.cssraw
+htdoc=../pwnies/htdocs/favicon-pwnies.png
+template=../pwnies/templates/html-header;misc;pwnies
+image=../pwnies/htdocs/images/logo_pwnies.png
+
+# vt100 theme files go here
+css=../vt100/htdocs/vt100.cssraw
+htdoc=../vt100/htdocs/favicon-vt100.png
+template=../vt100/templates/html-header;misc;vt100
+image=../vt100/htdocs/images/logo_vt100.png
+
 misc=misc/spamarmors
 
 plugin=Admin
