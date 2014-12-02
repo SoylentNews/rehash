@@ -22,8 +22,9 @@ __template__
 <div id="wide">
 
 [% IF form.sid %]
+[% stripped_title = discussion.title | strip_title %]
 <div class="article">
-	[% PROCESS titlebar title="$discussion.title" %]
+	[% PROCESS titlebar title="$stripped_title" %]
 	[% IF parent.story %]
 		<div class="details">
 		[% IF parent.story.by %]
@@ -133,7 +134,7 @@ END %]
 [% END %]
 
 	[% PROCESS formLabel value => 'Subject' %]
-		<input type="text" name="postersubj" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
+		<input type="text" name="postersubj" value="[% form.postersubj | strip_subject %]" size="50" maxlength="50">
 	[% FOR extra = extras %]
 	
 		<b>[% extra.0 %]

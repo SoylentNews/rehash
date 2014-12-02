@@ -82,7 +82,7 @@ __template__
 				[%
 					link_url = fh.linkFireHose(item.id);
 				%]
-                                <a href="[% link_url %]">[% item.title | strip_literal %]</a>
+                                <a href="[% link_url %]">[% item.title | strip_title %]</a>
 				[% IF loop.last %].[% END %]
                         [% END %]
 		A url if provided in the url field must be unique.</a></span></div>

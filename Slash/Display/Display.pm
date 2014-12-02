@@ -363,7 +363,9 @@ my $strip_mode = sub {
 	strip_nohtml		=> \&strip_nohtml,
 	strip_notags		=> \&strip_notags,
 	strip_plaintext		=> \&strip_plaintext,
+	strip_subject		=> \&strip_subject,
 	strip_textarea		=> \&strip_textarea,
+	strip_title		=> \&strip_title,
 	strip_mode		=> [ $strip_mode, 1 ],
 	%FILTERS
 );

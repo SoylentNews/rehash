@@ -125,6 +125,8 @@ our @EXPORT  = qw(
 	strip_code
 	strip_extrans
 	strip_textarea
+	strip_subject
+	strip_title
 	strip_html
 	strip_literal
 	strip_mode
@@ -1512,7 +1514,18 @@ my %mode_actions = (
 			newline_to_local
 			encode_html_amp_ifent
 			encode_html_ltgt	)],
-
+	SUBJECT, [qw(
+			newline_to_local
+			diacritic_max
+			encode_html_amp_ifent
+			encode_html_ltgt
+			encode_html_quote
+			approve_unicode		)],
+	TITLE, [qw(
+			newline_to_local
+			diacritic_max
+			encode_html_ltgt
+			approve_unicode		)],
 	
 );
 
@@ -1583,6 +1596,8 @@ sub strip_nohtml	{ stripByMode($_[0], NOHTML,	@_[1 .. $#_]) }
 sub strip_notags	{ stripByMode($_[0], NOTAGS,	@_[1 .. $#_]) }
 sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 sub strip_textarea	{ stripByMode($_[0], TEXTAREA,	@_[1 .. $#_]) }
+sub strip_subject	{ stripByMode($_[0], SUBJECT,	@_[1 .. $#_]) }
+sub strip_title		{ stripByMode($_[0], TITLE,	@_[1 .. $#_]) }
 
 sub determine_html_format {
 	my($html, $user) = @_;
@@ -2776,10 +2791,9 @@ sub url2html {
 
 sub urlizeTitle {
 	my($title) = @_;
-	$title = strip_notags($title);
+	$title = strip_subject($title);
 	$title =~ s/^\s+|\s+$//g;
 	$title =~ s/\s+/-/g;
-	$title =~ s/[^A-Za-z0-9\-]//g;
 	return $title;
 }
 

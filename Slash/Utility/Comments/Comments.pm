@@ -1476,7 +1476,7 @@ sub preProcessComment {
 		return -1;
 	}
 
-	my $tempSubject = strip_notags($comm->{postersubj});
+	my $tempSubject = $comm->{postersubj};
 	my $tempComment = $comm->{postercomment};
 
 	$comm->{anon} = $user->{is_anon};

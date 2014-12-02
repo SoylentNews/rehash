@@ -30,6 +30,7 @@ __template__
 	<span class="type">story</span>
 	[% IF user.is_admin %]<span class="stoid">[% story.stoid %]</span>[% END %]
 </span>
+[% stripped_title = story.title | strip_title %]
 [% IF magic;
 	thisskin = Slash.db.getSkin(story.primaryskid);
 	IF thisskin.rootdir;
@@ -41,9 +42,9 @@ __template__
 			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
 		END;
 	END;
-	title = title _ thisskin.title _ "</a>: <a href=\"$thisskin.rootdir/article.pl?sid=$story.sid\">$story.title</a>";
+	title = title _ thisskin.title _ "</a>: <a href=\"$thisskin.rootdir/article.pl?sid=$story.sid\">$stripped_title</a>";
 ELSE;
-	title = "<a href=\"$gSkin.rootdir/article.pl?sid=$story.sid\">$story.title</a>";
+	title = "<a href=\"$gSkin.rootdir/article.pl?sid=$story.sid\">$stripped_title</a>";
 END %]
 [% seen_topics = {} %]
 [% PROCESS titlebar future=story.is_future %]

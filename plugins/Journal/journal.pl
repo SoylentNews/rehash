@@ -385,7 +385,7 @@ sub displayArticleFriends {
 		push @collection, {
 			article		=> $journal_reader->fixJournalText($article->[1], $article->[4], $article->[7]),
 			date		=> $article->[0],
-			description	=> strip_notags($article->[2]),
+			description	=> strip_subject($article->[2]),
 			topic		=> $topics->{$article->[5]},
 			discussion	=> $article->[6],
 			id		=> $article->[3],
@@ -512,7 +512,7 @@ sub displayArticle {
 		push @{$collection->{article}}, {
 			article		=> $stripped_article,
 			date		=> $article->[0],
-			description	=> strip_notags($article->[2]),
+			description	=> strip_subject($article->[2]),
 			topic		=> $topics->{$article->[5]},
 			discussion	=> $article->[6],
 			id		=> $article->[3],
@@ -553,7 +553,7 @@ sub doSaveArticle {
 	$form->{promotetype} ||= 'publish';
 
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
-	my $description = strip_notags($form->{description});
+	my $description = $form->{description};
 
 	# from comments.pl
 	for ($description, $form->{article}) {
@@ -732,16 +732,16 @@ sub doEditArticle {
 
 	if ($article->{article}) {
 		my $strip_art = $journal_reader->fixJournalText($article->{article}, $posttype, $user);
-		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}
 			? $journal_reader->getDiscussion($article->{discussion}, 'commentcount')
 			: 0;
 
+		# For preview only, strips are okay as long as we don't do them to $article
 		my $disp_article = {
 			article		=> $strip_art,
 			date		=> $article->{date},
-			description	=> $strip_desc,
+			description	=> $article->{description}, # strip_subject in the template is sufficient
 			topic		=> $journal_reader->getTopic($article->{tid}),
 			id		=> $article->{id},
 			discussion	=> $article->{discussion},

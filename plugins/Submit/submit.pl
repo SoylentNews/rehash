@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+	#!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -71,8 +71,9 @@ sub main {
 	# when moved elsewhere and we get double-encoding!
 	# so leave it here until you really know what you
 	# are doing -- pudge
+	# I really know what I am doing. -- TMB
 	$form->{from}   = strip_attribute($form->{from})  if $form->{from};
-	$form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
+	#$form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
 	$form->{email}  = strip_attribute($form->{email}) if $form->{email};
 	$form->{name}   = strip_nohtml($form->{name})     if $form->{name};
 
@@ -226,7 +227,7 @@ sub previewForm {
 	my $admin_flag = $user->{seclev} >= 100 ? 1 : 0;
 
 	my $sub = $slashdb->getSubmission($form->{subid});
-	$sub->{subj} = strip_literal($sub->{subj});
+	#$sub->{subj} = strip_literal($sub->{subj});
 	
 	$slashdb->updateSubMemory($form->{submatch}, $form->{subnote}) if $form->{submatch} && $user->{is_admin};
 	my($sub_memory, $subnotes_ref);
@@ -424,7 +425,7 @@ sub submissionEd {
 		$sub->{is_anon} = isAnon($sub->{uid});
 
 		my @strs = (
-			chopEntity($sub->{subj}, 50),
+			$sub->{subj},
 			chopEntity($sub->{name}, 20),
 			chopEntity($sub->{email}, 20)
 		);

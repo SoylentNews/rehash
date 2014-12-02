@@ -81,7 +81,7 @@ SET txRows = 20 IF txRows < 20  %]
 				[% END %]
 				[% shown_in_desc %]
 				[% PROCESS formLabel value => "Title" %]
-				<input class="fullbox" type="text" name="title" value="[% storyref.title | strip_attribute %]" size="75" MAXLENGTH="100">
+				<input class="fullbox" type="text" name="title" value="[% storyref.title | strip_subject %]" size="75" MAXLENGTH="100">
 				<div class="notes">[% ispell_comments.title %]</div>
 
 				[% IF constants.use_dept %]
@@ -161,7 +161,7 @@ SET txRows = 20 IF txRows < 20  %]
 				<label>
 					Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
 				</label>
-				<textarea class="fullbox" wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="[% txRows %]">[% storyref.introtext | strip_literal %]</textarea>
+				<textarea class="fullbox" wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="[% txRows %]">[% storyref.introtext | strip_textarea %]</textarea>
 				<div class="notes">[% ispell_comments.introtext %]</div>
 
 				[% PROCESS editbuttons %]
@@ -230,7 +230,7 @@ SET txRows = 20 IF txRows < 20  %]
 				<label>
 					<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 				</label>
-				<textarea class="fullbox" name="bodytext" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_literal %]</textarea>
+				<textarea class="fullbox" name="bodytext" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_textarea %]</textarea>
 				<label>
 					<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
 				</label>

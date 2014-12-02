@@ -110,14 +110,14 @@ sub _do_rss {
 		} if $newurl;
 	}
 
-	# Undo all encoding and let xmlDisplay handle that
+	use HTML::Entities ();
 	foreach my $item (@items) {
-		foreach("title","introtext","bodytext"."link"){
-			$item->{story}{$_} =~ s/\&#(\d+);/chr($1)/ge;
-			$item->{story}{$_} =~ s/\&#x([a-fA-F0-9]+);/chr(hex($1))/ge;
-			$item->{story}{$_} =~ s/\&amp;/&/g;
-		}
+		$item->{story}{title} = HTML::Entities::decode($item->{story}{title});
+		$item->{story}{title} =~ s/&#([0-9])+;/chr($1)/eg;
+		$item->{story}{title} =~ s/&#x([a-fA-F0-9])+;/chr(hex($1))/eg;
+		$item->{story}{title} =~ s/[><]//g;
 	}
+
 
 	my $rss = xmlDisplay($type, {
 		channel		=> {
@@ -131,6 +131,8 @@ sub _do_rss {
 		image		=> 1,
 		items		=> \@items,
 	}, 1);
+
+	$rss =~ s/#x26;amp;from/amp;from/g;
 
 	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
 

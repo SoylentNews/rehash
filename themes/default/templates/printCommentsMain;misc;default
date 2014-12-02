@@ -19,15 +19,16 @@ en_US
 __name__
 printCommentsMain
 __template__
+[% stripped_title = title | strip_title %]
 [% IF parent.type == 'journal' %]
-	[% PROCESS titlebar title="$title" %]
+	[% PROCESS titlebar title="$stripped_title" %]
 	<div class="generalbody">
 		[% parent.content %]
 	</div>
 [% END %]
 [% IF parent.type == 'story' %]
 <div class="article">
-	[% PROCESS titlebar title="$title" %]
+	[% PROCESS titlebar title="$stripped_title" %]
 	[% IF parent.story %]
 		<div class="details">
 		[% IF parent.story.by %]
@@ -62,7 +63,7 @@ __template__
    	horiz = 1;
    END;
    count = count || 0;
-   this_title = title;
+   this_title = stripped_title;
    spilltext = "Spill at <b>${user.commentspill}</b>!";
    fineprint = 'The following comments are owned by whoever posted them.  We are not responsible for them in any way.';
    modpoints = BLOCK %]

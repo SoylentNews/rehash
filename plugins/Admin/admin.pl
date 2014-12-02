@@ -1133,8 +1133,6 @@ sub editStory {
 	# if that tells us, then sure - pudge
 	
 	if ($form->{title}) {
-		$form->{title} = strip_attribute($form->{title});
-
 		my $storyskin = $gSkin;
 		$storyskin = $slashdb->getSkin($form->{skin}) if $form->{skin};
 
@@ -1279,7 +1277,7 @@ sub editStory {
 	}
 
 	if ($storyref->{title}) {
-		$storyref->{title} = strip_attribute($storyref->{title});
+		$storyref->{stripped_title} = strip_title($storyref->{title});
 		my $oldskin = $gSkin->{skid};
 		setCurrentSkin($storyref->{primaryskid});
 		# Do we want to
@@ -1656,7 +1654,8 @@ sub listStories {
 		$story->{td2}    = timeCalc($time_plain, '%m/%d', 0);
 		$story->{aid}    = $slashdb->getAuthor($story->{uid}, 'nickname');
 		$story->{x}	 = ++$i;
-		$story->{title}  = chopEntity($story->{title}, 50);
+		#$story->{title}  = chopEntity($story->{title}, 50);
+		$story->{title} = strip_title($story->{title});
 		$story->{tbtitle} = fixparam($story->{title});
 		if ($constants->{plugin}{FireHose}) {
 			my $fh = getObject("Slash::FireHose");
@@ -1771,7 +1770,6 @@ sub updateStory {
 	my $default_set = 0;
 
 	$form->{dept} =~ s/ /-/g;
-	$form->{title}   = strip_attribute($form->{title})  if $form->{title};
 
 	my $story = $slashdb->getStory($form->{sid}, '', 1);
 	$form->{aid} = $story->{aid} unless $form->{aid};
@@ -2208,7 +2206,6 @@ sub saveStory {
 	my $default_set = 0;
 
 	$form->{dept} =~ s/ /-/g;
-	$form->{title}   = strip_attribute($form->{title})  if $form->{title};
 
 	my $admindb = getObject('Slash::Admin');
 

@@ -21,7 +21,7 @@ __template__
 
 					[% PROCESS formLabel value => "Subject" %]
 					[% PROCESS formNote note => "This is required" %]
-					<input class="fullbox" type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_attribute %]">
+					<input class="fullbox" type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_subject %]">
 					[% PROCESS formLabel value => "Journal Topic", comment => "";
 					   def_topic = article.tid || constants.journal_default_topic;
 					   Slash.selectTopic('tid', def_topic, '', 1) %]
@@ -42,7 +42,7 @@ __template__
 						[% PROCESS formNote note => "Comments are enabled" %]
 					[% END %]
 					[% PROCESS formLabel value => "Entry" %]
-					<textarea class="fullbox" wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
+					<textarea class="fullbox" wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_textarea %]</textarea>
 					<br>
 					[% format_select %]
 					<br>

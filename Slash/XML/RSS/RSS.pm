@@ -325,8 +325,6 @@ sub create {
 					my $data = $item->{$key};
 					if ($key eq 'link') {
 						$data = _tag_link($data);
-						$encoded_item->{$key} = $data;
-						next;
 					}
 					$encoded_item->{$key} = $self->encode($data, $key);
 				}
