@@ -450,3 +450,4 @@ INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (12, 'Disagree', 0, 1, 0, 0, 0.5);
 DELETE FROM modreasons WHERE id = 9;
 DELETE FROM modreasons WHERE id = 10;
+ALTER TABLE users_info ADD mod_banned datetime DEFAULT NULL;

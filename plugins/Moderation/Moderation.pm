@@ -1293,6 +1293,27 @@ sub stirPool {
 	return $n_stirred;
 } 
 
+sub getSpamCount {
+	my ($self, $cid, $reasons) = @_;
+	my $user = getCurrentUser();
+	if($cid !~ /^\d+$/) {
+		print STDERR "\nGot non-numeric cid '$cid' in getSpamLink\n";
+		return "";
+	}
+	my $spamreason;
+	foreach my $reason (values %$reasons) {
+		$spamreason = $reason->{id} if $reason->{name} eq 'Spam';
+	}
+	return "" unless $spamreason;
+
+	my $count = $self->sqlCount('moderatorlog',
+		"reason = $spamreason AND cid = $cid");
+	if( ($count) && ($user->{seclev} >= 100) ) {
+		return $count;
+	}
+	return "";
+}
+
 # placeholders, used only in TagModeration
 sub removeModTags {}
 sub createModTag  {}

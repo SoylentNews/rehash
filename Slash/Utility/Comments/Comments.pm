@@ -1971,8 +1971,11 @@ EOT
 		return @return;
 	}
 
+	my $marked_spam = $mod_reader->getSpamCount($comment->{cid}, $reasons);
+
 	return slashDisplay('dispComment', {
 		%$comment,
+		marked_spam	=> $marked_spam,
 		comment_shrunk	=> $comment_shrunk,
 		reasons		=> $reasons,
 		can_mod		=> $can_mod,

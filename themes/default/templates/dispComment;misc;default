@@ -7,6 +7,7 @@ Display a comment
 * reasons = hashref of moderation "reasons" (or undef if no moderation plugin)
 * can_mod = boolean for whether or not current user can moderate
 * is_anon = boolean for whether or not comment user is anonymous
+* marked_spam = count of the times a comment has been moderated as spam, used as boolean
 
 Also included are all the individual elements of the comment and its
 poster: sid, cid, pid, date, subject, comment, uid, points, lastmod,
@@ -30,7 +31,9 @@ __template__
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
 			<h4><a name="[% cid %]">[% subject %]</a>
-			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]</h4>
+				[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]
+				[% IF marked_spam %] <a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]">This is not Spam</a>[% END %]
+			</h4>
 		</div>
 		<div class="details">
 			by

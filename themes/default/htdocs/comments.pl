@@ -87,6 +87,12 @@ sub main {
 			checks			=> 
 			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check formkey_check ) ],
 		},
+		unspam => {
+			function		=> \&unspamComment,
+			seclev			=> 100,
+			formname		=> 'comments',
+			checks			=> [],
+		},
 	};
 	$ops->{default} = $ops->{display};
 
@@ -819,6 +825,31 @@ sub deleteThread {
 		});
 	}
 	return $count;
+}
+
+sub unspamComment {
+	my ($form, $slashdb, $user, $constants, $discussion) = @_;
+	
+	my $cid = $form->{cid};
+	if($cid !~ /^\d+$/) {
+		print STDERR "\nGot non-numeric cid '$cid' in \$form. Bailing to simple display.\n";
+		displayComments($form, $slashdb, $user, $constants, $discussion);
+		return;
+	}
+
+	my $spamreason = $slashdb->sqlSelect( 'id',
+					'modreasons',
+					"name = 'Spam'");
+	if(!$spamreason) {
+		print STDERR "\nGot undef for \$spamreason. WTF?\n";
+		displayComments($form, $slashdb, $user, $constants, $discussion);
+		return;
+	}
+	
+	my $spamMods = $slashdb->sqlSelectAll('moderatorlog',
+					" cid = $cid AND reason = $spamreason ");
+	use Data::Dumper;
+	print STDERR "\n",Dumper($spamMods),"\n";
 }
 
 
