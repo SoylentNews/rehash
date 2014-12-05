@@ -929,7 +929,7 @@ sub _can_mod {
 	# these is true, this comment is not moderatable, and these
 	# override the ACL and seclev tests.
 	return 0 if !$comment;
-	return 0 and print STDERR "\nWTF\n" if
+	return 0 if
 		    $user->{is_anon}
 		|| !$constants->{m1}
 		||  $comment->{no_moderation}
