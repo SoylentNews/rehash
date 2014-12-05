@@ -12,7 +12,8 @@ use Slash::Constants qw( :messages :slashd );
 
 use vars qw( %task $me $task_exit_flag );
 
-$task{$me}{timespec} = '*/5 0-23 * * *';
+#$task{$me}{timespec} = '*/5 0-23 * * *';
+$task{$me}{timespec} = '10 0 * * *';
 $task{$me}{timespec_panic_1} = '';
 $task{$me}{resource_locks} = { log_slave => 1, moderatorlog => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -31,14 +32,22 @@ $task{$me}{code} = sub {
 	# 2. Work out if we need to issue more points to get the system
 	#    balanaced if we have points
 	# 3. Work out who to give points to, and issue
-	my $points_to_handout;
+	#my $points_to_handout;
 	
-	stir_mod_pool();
+	#stir_mod_pool();
 	
 	# Note, points to hand out CAN be negative, in that case, the system
 	# only hands out minimium points (as always more modpoints is better)
-	$points_to_handout = determine_mod_points_to_be_issued($slashdb);
-	distributeModPoints($constants, $slashdb, $points_to_handout);
+	#$points_to_handout = determine_mod_points_to_be_issued($slashdb);
+	#distributeModPoints($constants, $slashdb, $points_to_handout);
+
+	# New method for the experiment
+	use DateTime;
+	use DateTime::Format::MySQL;
+	my $dtNow = DateTime->now;
+	my $now = DateTime::Format::MySQL->format_date($dtNow);
+	my $acUID = $constants->{anonymous_coward_uid};
+	$slashdb->sqlUpdate("users_info", { points => 5,  lastgranted => $now }, "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID");
 	
 	return ;
 };

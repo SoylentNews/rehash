@@ -1314,6 +1314,97 @@ sub getSpamCount {
 	return "";
 }
 
+# Ban $uid from moderating for 
+sub modBanUID {
+	my ($self, $uid) = @_;
+	my $constants = getCurrentStatic();
+	use DateTime;
+	use DateTime::Format::MySQL;
+	my $dtToday = DateTime->today;
+	my $dtBan;
+
+	my $currentBan = $self->sqlSelect('mod_banned', 'users_info', "uid = $uid");
+
+	# Decide the ban length
+	if($currentBan) {
+		$dtBan = DateTime::Format::MySQL->parse_date($currentBan);
+		if($dtBan > $dtToday){return 1;} # already serving a ban, nothing to do
+		$dtBan = DateTime->today;
+		$dtBan->add( days => $constants->{m1_ban_duration} );
+	}
+	else {
+		$dtBan = $dtToday;
+		$dtBan->add( days => $constants->{m1_1st_ban_duration} );
+	}
+	
+	# Now set the ban.
+	my $banUntil = DateTime::Format::MySQL->format_date($dtBan);
+	return $self->setUser( $uid, { mod_banned => $banUntil } );
+}
+
+sub undoSingleModeration {
+	my ($self, $mod) = @_;
+	# $mod is a hash of a single line of the moderatorlog table
+	
+	$self->undoSingleModKarma($mod) or print STDERR "\nFailed to restore karma to $mod->{cuid}\n" and return 0;
+	$self->recalcCommentScore($mod->{cid}) or print STDERR "\nFailed to recalculate comment score for $mod->{cid}\n" and return 0;
+	return 1;
+}
+
+sub recalcCommentScore {
+	my ($self, $cid) = @_;
+	my $constants = getCurrentStatic();
+	
+	my $scores = $self->sqlSelectAll("val", "moderatorlog", "cid = $cid");
+	my $points = 0;
+	if($scores) {
+		my $minScore = $constants->{comment_minscore};
+		my $maxScore = $constants->{comment_maxscore};
+		foreach my $score (@$scores) {
+			$points += $score;
+		}
+		$points = $minScore if $points < $minScore;
+		$points = $maxScore if $points > $maxScore;
+	}
+	# stopped here
+	$self->sqlUpdate("comments", { points => $points }, "cid = $cid") or return 0;
+	
+	my $newReason = $self->getCommentMostCommonReason($cid)
+			|| 0; # no active moderations? reset reason to empty
+
+	$self->sqlUpdate("comments", { reason => $newReason }, "cid=$cid") or return 0;
+	return 1;
+}
+
+sub undoSingleModKarma {
+	my ($self, $mod) = @_;
+	# $mod is a hash of a single line of the moderatorlog table
+	my $constants = getCurrentStatic();
+	my $cuid = $mod->{cuid}; # who was modded
+	my $user = $self->getUser($cuid);
+	my $minKarma = $constants->{minkarma};
+	my $maxKarma = $constants->{maxkarma};
+	my $karmaHit = $self->sqlSelect('karma', 'modreasons', " id = $mod->{reason} ");
+
+	# Nothing to do if there is no karma hit or the person modded was AC
+	if( ($karmaHit == 0) || isAnon($cuid) ) {return 1;}
+	elsif($karmaHit < 0) {
+		return 1 if $user->{karma} eq $maxKarma;
+		my $newKarma = $user->{karma} + abs($karmaHit);
+		if($newKarma >= $maxKarma){$self->setUser($cuid, { karma => $maxKarma } ) or return 0;}
+		else{$self->setUser($cuid, { karma => $newKarma } ) or return 0;}
+		return 1;
+	}
+	elsif($karmaHit > 0) {
+		return 1 if $user->{karma} eq $minKarma;
+		my $newKarma = $user->{karma} - abs($karmaHit);
+		if($newKarma <= $minKarma){$self->setUser($cuid, { karma => $minKarma } ) or return 0;}
+		else{$self->setUser($cuid, { karma => $newKarma } ) or return 0;}
+		return 1;
+	}
+	else {print STDERR "\nHow the fuck did we even get here?\n"; return 0;}
+}
+
 # placeholders, used only in TagModeration
 sub removeModTags {}
 sub createModTag  {}

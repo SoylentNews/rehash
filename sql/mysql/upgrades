@@ -450,4 +450,6 @@ INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (12, 'Disagree', 0, 1, 0, 0, 0.5);
 DELETE FROM modreasons WHERE id = 9;
 DELETE FROM modreasons WHERE id = 10;
-ALTER TABLE users_info ADD mod_banned datetime DEFAULT NULL;
+ALTER TABLE users_info ADD mod_banned date DEFAULT NULL;
+INSERT INTO vars (name, value, description) VALUES ('m1_1st_ban_duration', '30', 'Duration of ban in days the first time someone is banned from moderating');
+INSERT INTO vars (name, value, description) VALUES ('m1_ban_duration', '180', 'Duration of ban in days all subsequent times someone is banned from moderating');

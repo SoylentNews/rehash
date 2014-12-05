@@ -929,10 +929,11 @@ sub _can_mod {
 	# these is true, this comment is not moderatable, and these
 	# override the ACL and seclev tests.
 	return 0 if !$comment;
-	return 0 if
+	return 0 and print STDERR "\nWTF\n" if
 		    $user->{is_anon}
 		|| !$constants->{m1}
-		||  $comment->{no_moderation};
+		||  $comment->{no_moderation}
+		||  _is_mod_banned($user);
 	
 	# More easy tests.  If any of these is true, the user has
 	# authorization to mod any comments, regardless of any of
@@ -2657,6 +2658,14 @@ sub discussion2 {
 #	return $user->{discussion2} eq 'slashdot'
 #		? $user->{discussion2} : 0;
 	return 0;
+}
+
+sub _is_mod_banned {
+	my $user = shift;
+	my $slashdb = getCurrentDB();
+
+	my $banned = $slashdb->sqlSelect("1", 'users_info', "uid = $user->{uid} and mod_banned > NOW()");
+	return ($banned || 0);
 }
 
 

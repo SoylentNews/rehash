@@ -829,6 +829,14 @@ sub deleteThread {
 
 sub unspamComment {
 	my ($form, $slashdb, $user, $constants, $discussion) = @_;
+	use Data::Dumper;
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+
+	if(!$moddb) {
+		print STDERR "\nERROR: Could not get moddb.\n";
+		displayComments($form, $slashdb, $user, $constants, $discussion);
+		return;
+	}
 	
 	my $cid = $form->{cid};
 	if($cid !~ /^\d+$/) {
@@ -837,7 +845,7 @@ sub unspamComment {
 		return;
 	}
 
-	my $spamreason = $slashdb->sqlSelect( 'id',
+	my $spamreason = $moddb->sqlSelect( 'id',
 					'modreasons',
 					"name = 'Spam'");
 	if(!$spamreason) {
@@ -846,10 +854,47 @@ sub unspamComment {
 		return;
 	}
 	
-	my $spamMods = $slashdb->sqlSelectAll('moderatorlog',
+	my $spamMods = $moddb->sqlSelectAllHashref('id',
+					'*',
+					'moderatorlog',
 					" cid = $cid AND reason = $spamreason ");
-	use Data::Dumper;
-	print STDERR "\n",Dumper($spamMods),"\n";
+	
+	# Here we do the following for each:
+	# delete the moderation from the modlog
+	# recalculate the comment score
+	# restore the commenter's karma
+	# remove any mod points from the user who modded it spam
+	# ban the user who modded it spam
+	# 	until 30 days in the future or
+	#	not at all if the user is already banned or
+	#	using the larger ban if the user has served out a previous ban
+	foreach my $spamMod (values %$spamMods) {
+		my ($modderUID, $commenterUID, $modLogID) = ($spamMod->{uid}, $spamMod->{cuid}, $spamMod->{id});
+		# Bail if we somehow got a bad entry without the proper data
+		unless ($modderUID && $commenterUID && $modLogID) {
+			displayComments($form, $slashdb, $user, $constants, $discussion);
+			return;
+		}
+
+		# Delete the moderation from the log
+		my $deleted = $moddb->sqlDelete('moderatorlog', " id = $modLogID ");
+		print STDERR "\nTried to delete $modLogID from moderatorlog but got $deleted rows back. WTF?!\n"
+			unless $deleted;
+
+		# Recalculate the comment score from scratch and restore cuid user's karma
+		$moddb->undoSingleModeration($spamMod);
+
+		# Remove any mod points from the user who modded it spam
+		$slashdb->setUser( $user->{uid}, { points => 0 } );
+
+		# Ban the user from moderating
+		my $banned = $moddb->modBanUID($modderUID);
+		print STDERR "\nGot a bad return value on modBanUID: uid=$modderUID" unless $banned;
+	}
+
+	# Now redirect them back where they were.
+	displayComments($form, $slashdb, $user, $constants, $discussion);
+	return;
 }
 
 
