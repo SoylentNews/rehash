@@ -9123,6 +9123,7 @@ sub getDiscussionParent {
 		$parent->{type} = 'poll';
 	}
 	else{return undef};
+	$parent->{content} = parseSlashizedLinks($parent->{content});
 	return $parent;
 }
 
