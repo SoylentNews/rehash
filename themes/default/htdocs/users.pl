@@ -2171,7 +2171,7 @@ sub editComm {
 			push @reasons, $reasons->{$id}{name};
 		}
 		# Reason modifiers
-		for my $reason_name (@reasons) {
+		foreach my $reason_name (@reasons) {
 			my $key = "reason_alter_$reason_name";
 			$reason_select{$reason_name} = createSelect(
 				$key, \@range, 

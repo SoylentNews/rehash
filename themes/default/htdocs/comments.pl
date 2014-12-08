@@ -200,7 +200,7 @@ sub main {
 	my $header_emitted = 0;
 	my $title = $constants->{sitename} . '  Comments';
 	$title .= " | $discussion->{'title'}" if $discussion;
-	if ($op ne 'submit') {
+	if ($op ne 'submit' && $op ne 'unspam') {
 		header($title, $section) or return;
 		$header_emitted = 1;
 	}
@@ -829,19 +829,19 @@ sub deleteThread {
 
 sub unspamComment {
 	my ($form, $slashdb, $user, $constants, $discussion) = @_;
-	use Data::Dumper;
+	my $rootdir = getCurrentSkin("rootdir");
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 
 	if(!$moddb) {
 		print STDERR "\nERROR: Could not get moddb.\n";
-		displayComments($form, $slashdb, $user, $constants, $discussion);
+		redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
 		return;
 	}
 	
 	my $cid = $form->{cid};
 	if($cid !~ /^\d+$/) {
 		print STDERR "\nGot non-numeric cid '$cid' in \$form. Bailing to simple display.\n";
-		displayComments($form, $slashdb, $user, $constants, $discussion);
+		redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
 		return;
 	}
 
@@ -850,7 +850,7 @@ sub unspamComment {
 					"name = 'Spam'");
 	if(!$spamreason) {
 		print STDERR "\nGot undef for \$spamreason. WTF?\n";
-		displayComments($form, $slashdb, $user, $constants, $discussion);
+		redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
 		return;
 	}
 	
@@ -872,7 +872,7 @@ sub unspamComment {
 		my ($modderUID, $commenterUID, $modLogID) = ($spamMod->{uid}, $spamMod->{cuid}, $spamMod->{id});
 		# Bail if we somehow got a bad entry without the proper data
 		unless ($modderUID && $commenterUID && $modLogID) {
-			displayComments($form, $slashdb, $user, $constants, $discussion);
+			redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
 			return;
 		}
 
@@ -893,7 +893,7 @@ sub unspamComment {
 	}
 
 	# Now redirect them back where they were.
-	displayComments($form, $slashdb, $user, $constants, $discussion);
+	redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
 	return;
 }
 

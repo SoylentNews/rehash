@@ -546,7 +546,9 @@ sub getCommentMostCommonReason {
 		my $new_hr = { };
 		for my $reason (keys %$hr) {
 			$new_hr->{$reason} = $hr->{$reason}
-				if $reasons->{$hr->{$reason}{reason}}{val} == $needval;
+				# What say we just give the actual most common reason?
+				#if $reasons->{$hr->{$reason}{reason}}{val} == $needval;
+				;
 		}
 		$hr = $new_hr;
 	}
