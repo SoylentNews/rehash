@@ -47,10 +47,8 @@ $task{$me}{code} = sub {
 	my $dtNow = DateTime->now;
 	my $now = DateTime::Format::MySQL->format_date($dtNow);
 	my $acUID = $constants->{anonymous_coward_uid};
-	my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID";
+	my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID AND mod_banned < NOW()";
 	$slashdb->sqlUpdate("users_info", { points => 5,  lastgranted => $now }, $where);
-	# My SQL-fu is not good enough to not give them points in the first place, so...
-	$slashdb->sqlUpdate("users_info", { points => 0 }, "mod_banned > NOW()");
 	
 	return ;
 };

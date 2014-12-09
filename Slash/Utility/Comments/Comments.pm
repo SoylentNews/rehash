@@ -2662,9 +2662,9 @@ sub discussion2 {
 
 sub _is_mod_banned {
 	my $user = shift;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $banned = $slashdb->sqlSelect("1", 'users_info', "uid = $user->{uid} and mod_banned > NOW()");
+	my $banned = $reader->sqlSelect("1", 'users_info', "uid = $user->{uid} and mod_banned > NOW()");
 	return ($banned || 0);
 }
 

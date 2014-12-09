@@ -885,11 +885,14 @@ sub unspamComment {
 		$moddb->undoSingleModeration($spamMod);
 
 		# Remove any mod points from the user who modded it spam
-		$slashdb->setUser( $user->{uid}, { points => 0 } );
+		$slashdb->setUser( $user->{uid}, { points => 0 } )
+			unless $form->{noban};
 
 		# Ban the user from moderating
-		my $banned = $moddb->modBanUID($modderUID);
-		print STDERR "\nGot a bad return value on modBanUID: uid=$modderUID" unless $banned;
+		unless($form->{noban}) {
+			my $banned = $moddb->modBanUID($modderUID);
+			print STDERR "\nGot a bad return value on modBanUID: uid=$modderUID" unless $banned;
+		}
 	}
 
 	# Now redirect them back where they were.

@@ -1325,7 +1325,7 @@ sub modBanUID {
 	my $dtToday = DateTime->today;
 	my $dtBan;
 
-	my $currentBan = $self->sqlSelect('mod_banned', 'users_info', "uid = $uid");
+	my $currentBan = $self->sqlSelect('mod_banned', 'users_info', "uid = $uid AND mod_banned <> '1000-01-01'");
 
 	# Decide the ban length
 	if($currentBan) {
