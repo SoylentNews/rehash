@@ -42,13 +42,16 @@ $task{$me}{code} = sub {
 	#distributeModPoints($constants, $slashdb, $points_to_handout);
 
 	# New method for the experiment
-	use DateTime;
-	use DateTime::Format::MySQL;
-	my $dtNow = DateTime->now;
-	my $now = DateTime::Format::MySQL->format_date($dtNow);
+	#use DateTime;
+	#use DateTime::Format::MySQL;
+	#my $dtNow = DateTime->now;
+	#my $now = DateTime::Format::MySQL->format_date($dtNow);
 	my $acUID = $constants->{anonymous_coward_uid};
-	my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID AND mod_banned < NOW()";
-	$slashdb->sqlUpdate("users_info", { points => 5,  lastgranted => $now }, $where);
+	my $points = $constants->{m1_pointsgrant_arbitrary};
+	my $rows = $slashdb->sqlDo(
+		"update users_info join users_prefs on users_info.uid = users_prefs.uid  set points = $points where created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() AND willing = 1;");
+	#my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID AND mod_banned < NOW()";
+	#$slashdb->sqlUpdate("users_info", { points => $constants->{m1_pointsgrant_arbitrary},  lastgranted => $now }, $where);
 	
 	return ;
 };

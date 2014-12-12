@@ -145,6 +145,9 @@ __template__
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
 				<td>	Troll				</td>
 				<td>	[% reason_select.Troll %]	</td>
+				<td>	&nbsp; &nbsp; &nbsp;		</td>
+				<td>	Touche				</td>
+				<td>	[% reason_select.Touche %]	</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>

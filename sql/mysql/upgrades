@@ -442,14 +442,17 @@ UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|di
 UPDATE skins SET url = 'https://soylentnews.org/' where name = 'mainpage';
 
 # For the moderation rework
-UPDATE modreasons SET val = 0, karma = 0 WHERE id = 1;
-UPDATE modreasons SET val = 0, karma = 0 WHERE id = 2;
-UPDATE modreasons SET val = 0, karma = 0 WHERE id = 3;
-UPDATE modreasons SET val = 0, karma = 0 WHERE id = 4;
+# Commented lines are held back but may go in at a later date
+#UPDATE modreasons SET val = 0, karma = 0 WHERE id = 1;
+#UPDATE modreasons SET val = 0, karma = 0 WHERE id = 2;
+#UPDATE modreasons SET val = 0, karma = 0 WHERE id = 3;
+#UPDATE modreasons SET val = 0, karma = 0 WHERE id = 4;
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (11, 'Spam', 0, 1, -1, -10, 0.5);
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (12, 'Disagree', 0, 1, 0, 0, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (13, 'Touche', 0, 1, 1, 1, 0.5);
 DELETE FROM modreasons WHERE id = 9;
-DELETE FROM modreasons WHERE id = 10;
+#DELETE FROM modreasons WHERE id = 10;
 ALTER TABLE users_info ADD mod_banned date DEFAULT '1000-01-01';
 INSERT INTO vars (name, value, description) VALUES ('m1_1st_ban_duration', '30', 'Duration of ban in days the first time someone is banned from moderating');
 INSERT INTO vars (name, value, description) VALUES ('m1_ban_duration', '180', 'Duration of ban in days all subsequent times someone is banned from moderating');
+INSERT INTO vars (name, value, description) VALUES ('m1_pointsgrant_arbitrary', '5', 'Number of points to grant when we are arbitrarily granting mod points.');
