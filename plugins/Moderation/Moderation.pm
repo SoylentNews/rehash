@@ -139,6 +139,11 @@ sub moderateComment {
 
 	my $comment = $options->{comment} || $self->getComment($cid);
 
+	# No moderating of your own comments.
+	if ($comment->{uid} eq $user->{uid} && !$superAuthor) {
+		return -3;
+	}
+
 	# Start putting together the data we'll need to display to
 	# the user.
 	my $reasons = $self->getReasons();
@@ -878,6 +883,9 @@ sub moderateCheck {
 	}
 
 	my $return = {};
+	# short circuit for mod-and-post being allowed
+	return $return if $constants->{moderate_or_post} eq 2;
+
 	$return->{count} = $self->countCommentsBySidUID($form->{sid}, $user->{uid})
 		unless (   $constants->{authors_unlimited}
 			&& $user->{seclev} >= $constants->{authors_unlimited}

@@ -75,6 +75,10 @@ You don't have any moderator points.
 CASE "not enough points" %]
 You don't have enough moderator points.
 
+[% # NO SELF MODS.
+CASE "no self mods" %]
+You can not moderate your own comments.
+
 [% # COMMENTS MAX POSTS.
 CASE "comments max posts" %]
 You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].

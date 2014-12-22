@@ -456,3 +456,4 @@ ALTER TABLE users_info ADD mod_banned date DEFAULT '1000-01-01';
 INSERT INTO vars (name, value, description) VALUES ('m1_1st_ban_duration', '30', 'Duration of ban in days the first time someone is banned from moderating');
 INSERT INTO vars (name, value, description) VALUES ('m1_ban_duration', '180', 'Duration of ban in days all subsequent times someone is banned from moderating');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointsgrant_arbitrary', '5', 'Number of points to grant when we are arbitrarily granting mod points.');
+INSERT INTO vars (name, value, description) VALUES ('moderate_or_post', '2', '0 = or, 1 = then, 2 = and');

@@ -718,6 +718,8 @@ sub moderate {
 					print Slash::Utility::Comments::getError('no points');
 				} elsif ($ret_val == -2){
 					print Slash::Utility::Comments::getError('not enough points');
+				} elsif ($ret_val == -3){
+					print Slash::Utility::Comments::getError('no self mods');
 				}
 			} else {
 				$was_touched += $ret_val;

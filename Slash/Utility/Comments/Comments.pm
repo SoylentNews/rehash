@@ -275,9 +275,10 @@ sub selectComments {
 		$comments->{$C->{pid}}{visiblekids}++
 			if $C->{points} >= (defined $threshold ? $threshold : $min);
 
+		# This fucking shit belongs in _can_mod, goddamnit
 		# Can't mod in a discussion that you've posted in.
 		# Just a point rule -Brian
-		$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
+		#$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
 	}
 ##slashProf("sC more fudging", "sC fudging");
 
@@ -924,7 +925,6 @@ sub _can_mod {
 	my($comment) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-
 	# Do some easy and high-priority initial tests.  If any of
 	# these is true, this comment is not moderatable, and these
 	# override the ACL and seclev tests.
@@ -947,12 +947,15 @@ sub _can_mod {
 	# OK, the user is an ordinary user, so see if they have mod
 	# points and do some other fairly ordinary tests to try to
 	# rule out whether they can mod.
+	# No modding your own comments
+	if(defined($user->{uid}) && defined($comment->{uid})) {
+		return 0 if $user->{uid} eq $comment->{uid};
+	}
 	return 0 if
 		    $user->{points} <= 0
 		|| !$user->{willing}
-		||  $comment->{uid} == $user->{uid}
-		||  $comment->{lastmod} == $user->{uid}
-		||  $comment->{ipid} eq $user->{ipid};
+		||  $comment->{ipid} eq $user->{ipid}
+	;
 	return 0 if
 		    $constants->{mod_same_subnet_forbid}
 		&&  $comment->{subnetid} eq $user->{subnetid};
