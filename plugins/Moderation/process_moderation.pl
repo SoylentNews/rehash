@@ -49,7 +49,7 @@ $task{$me}{code} = sub {
 	my $acUID = $constants->{anonymous_coward_uid};
 	my $points = $constants->{m1_pointsgrant_arbitrary};
 	my $rows = $slashdb->sqlDo(
-		"update users_info join users_prefs on users_info.uid = users_prefs.uid  set points = $points where created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() AND willing = 1;");
+		"update users_info join users_prefs on users_info.uid = users_prefs.uid  set points = $points, lastgranted = NOW() where created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() AND willing = 1;");
 	#my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID AND mod_banned < NOW()";
 	#$slashdb->sqlUpdate("users_info", { points => $constants->{m1_pointsgrant_arbitrary},  lastgranted => $now }, $where);
 	
