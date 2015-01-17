@@ -1,0 +1,635 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use utf8;
+use JSON;
+use Slash;
+use Slash::Utility;
+use Slash::Constants qw(:web :messages);
+use Data::Dumper;
+use Slash::API;
+
+sub main {
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
+	my $api = Slash::API->new;
+
+	# lc just in case
+	my $endpoint = lc($form->{m});
+
+	my $endpoints = {
+		user		=> {
+			function	=> \&user,
+			seclev		=> 1,
+		},
+		comment		=> {
+			function	=> \&comment,
+			seclev		=> 1,
+		},
+		story		=> {
+			function	=> \&story,
+			seclev		=> 1,
+		},
+		journal		=> {
+			function	=> \&journal,
+			seclev		=> 1,
+		},
+		auth		=> {
+			function	=> \&auth,
+			seclev		=> 1,
+		},
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+
+	};
+
+	$endpoint = 'default' unless $endpoints->{$endpoint};
+
+	my $retval = $endpoints->{$endpoint}{function}->($form, $slashdb, $user, $constants, $gSkin);
+
+	binmode(STDOUT, ':encoding(utf8)');
+	$api->header;
+	print $retval;
+}
+
+sub user {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $api = Slash::API->new;
+	my $op = lc($form->{op});
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		max_uid		=> {
+			function	=> \&maxUid,
+			seclev		=> 1,
+		},
+		get_uid		=> {
+			function	=> \&nameToUid,
+			seclev		=> 1,
+		},
+		get_nick	=> {
+			function	=> \&uidToName,
+			seclev		=> 1,
+		},
+		get_user	=> {
+			function	=> \&getPubUserInfo,
+			seclev		=> 1,
+		},
+	};
+
+	$op = 'default' unless $ops->{$op};
+
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub story {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $op = lc($form->{op});
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		latest		=> {
+			function	=> \&getLatestStories,
+			seclev		=> 1,
+		},
+		single	=> {
+			function	=> \&getSingleStory,
+			seclev		=> 1,
+		},
+		pending	=> {
+			function	=> \&getPendingBoth,
+			seclev		=> 1,
+		},
+		post	=> {
+			function	=> \&postStory,
+			seclev		=> 1,
+		},
+		reskey		=> {
+			function	=> \&getStoryReskey,
+			seclev		=> 1,
+		},
+	};
+
+	$op = 'default' unless $ops->{$op};
+
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub comment {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $op = lc($form->{op});
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		latest		=> {
+			function	=> \&getLatestComments,
+			seclev		=> 1,
+		},
+		single		=> {
+			function	=> \&getSingleComment,
+			seclev		=> 1,
+		},
+		discussion	=> {
+			function	=> \&getDiscussion,
+			seclev		=> 1,
+		},
+		post		=> {
+			function	=> \&postComment,
+			seclev		=> 1,
+		},
+		reskey		=> {
+			function	=> \&getCommentReskey,
+			seclev		=> 1,
+		},
+	};
+
+	$op = 'default' unless $ops->{$op};
+
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub journal {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $op = lc($form->{op});
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		latest		=> {
+			function	=> \&getLatestJournals,
+			seclev		=> 1,
+		},
+		single		=> {
+			function	=> \&getSingleJournal,
+			seclev		=> 1,
+		},
+	};
+
+	$op = 'default' unless $ops->{$op};
+
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub getPendingBoth {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $submissions = $slashdb->getSubmissionForUser;
+	my $pending = $slashdb->getStoriesSince;
+
+	foreach my $sub (@$submissions) {
+		delete $sub->{ipid};
+		delete $sub->{weight};
+		delete $sub->{subnetid};
+		delete $sub->{signature};
+		delete $sub->{note};
+		delete $sub->{del};
+		delete $sub->{email};
+		delete $sub->{emaildomain};
+		delete $sub->{mediatype};
+		delete $sub->{comment};
+	}
+
+	return $json->pretty->encode({ submissions => $submissions, pending_stories => $pending });
+}
+
+sub getStoryReskey {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	return $json->pretty->encode($rkey->errstr) unless $rkey->create;
+	return $json->pretty->encode( { reskey => $rkey->reskey } );
+}
+
+sub getCommentReskey {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('comments');
+	return $json->pretty->encode($rkey->errstr) unless $rkey->create;
+	return $json->pretty->encode( { reskey => $rkey->reskey } );
+}
+
+sub postStory {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $error_message;
+
+	return &nullop unless $form->{story} && $form->{subj} && $form->{tid} && $form->{sub_type} && $form->{primaryskid} && $form->{reskey};
+
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit', { reskey => $form->{reskey} } );
+	return $json->pretty->encode( { error_here => $rkey->errstr } ) unless $rkey->use;
+
+	$form->{name} ||= 'Anonymous Coward';
+	my $uid;
+	if($form->{name} eq $user->{nickname}) {
+		$uid = $user->{uid};
+	} else {
+		$uid = getCurrentStatic('anonymous_coward_uid');
+	}
+
+	if (length($form->{subj}) < 2) {
+		$error_message = getData('badsubject');
+		return $json->pretty->encode($error_message);
+	}
+
+	my %keys_to_check = ( story => 1, subj => 1 );
+	for (keys %$form) {
+		next unless $keys_to_check{$_};
+		return $json->pretty->encode($error_message) unless filterOk('submissions', $_, $form->{$_}, \$error_message);
+
+		my $compressOK = compressOk($form->{$_});
+		$error_message = getData('compresserror');
+		return $json->pretty->encode($error_message) unless $compressOK;
+	}
+	
+	# This needs to go away once filters are in place for rendering.
+	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
+	#return blah if $form->{preview} == 1;
+
+	my $submission = {
+		email		=> $form->{email},
+		uid		=> $uid,
+		name		=> $form->{name},
+		story		=> $form->{story},
+		subj		=> $form->{subj},
+		tid		=> $form->{tid},
+		primaryskid	=> $form->{primaryskid},
+		mediatype	=> $form->{mediatype},
+	};
+	
+	my @topics = ();
+	my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
+	push @topics, $nexus;
+	push @topics, $form->{tid} if $form->{tid};
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+	my $extras = $slashdb->getNexusExtrasForChosen($chosen_hr) || [];
+	my @missing_required = grep{$_->[4] eq "yes" && !$form->{$_->[1]}} @$extras;
+	return $json->pretty->encode( { missing_required => @missing_required } ) if @missing_required;
+
+	if ($extras && @$extras) {
+		for (@$extras) {
+			my $key = $_->[1];
+			$submission->{$key} = strip_nohtml($form->{$key}) if $form->{$key};
+		}
+	}
+
+	my $messagesub = { %$submission };
+	$messagesub->{subid} = $slashdb->createSubmission($submission);
+	return $json->pretty->encode("Failed to create submission") unless $messagesub->{subid};
+
+	if ($messagesub->{subid} && ($uid != getCurrentStatic('anonymous_coward_uid'))) {
+		my $dynamic_blocks = getObject('Slash::DynamicBlocks');
+		$dynamic_blocks->setUserBlock('submissions', $uid) if $dynamic_blocks;
+	}
+
+	my $messages = getObject('Slash::Messages');
+	if ($messages) {
+		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
+		my $data  = {
+			template_name	=> 'messagenew',
+			subject		=> { template_name => 'messagenew_subj' },
+			submission	=> $messagesub,
+		};
+		$messages->create($users, MSG_CODE_NEW_SUBMISSION, $data) if @$users;
+	}
+	
+	return $json->pretty->encode($messagesub);
+}
+
+sub postComment {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	$form->{pid} = 0 unless $form->{pid};
+	my $json = JSON->new->utf8->allow_nonref;
+	my ($error_message, $preview);
+
+	return &nullop unless $form->{sid} && $form->{postersubj} && $form->{postercomment} && $form->{posttype} && $form->{reskey};
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('comments', { reskey => $form->{reskey} } );
+		
+	my $discussion;
+	if ($form->{sid} !~ /^\d+$/){$discussion = $slashdb->getDiscussionBySid($form->{sid});}
+	else{$discussion = $slashdb->getDiscussion($form->{sid});}
+	return $json->pretty->encode("No such discussion") unless $discussion;
+	return $json->pretty->encode("You can't post to that discussion yet.") if $discussion->{is_future};
+
+	$preview = previewForm(\$error_message, $discussion) if (($form->{preview}) && ($form->{preview} eq 1));
+	return $json->pretty->encode($error_message) if $error_message;
+	return $json->pretty->encode($preview) if $preview;
+	
+	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
+
+	if($comment eq '-1' || !$comment){return $json->pretty->encode($error_message);}
+
+	return $json->pretty->encode($rkey->errstr) unless $rkey->use;
+
+	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
+
+	if(!$saved_comment){return $json->pretty->encode($error_message);}
+	delete $saved_comment->{ipid};
+	delete $saved_comment->{subnetid};
+	delete $saved_comment->{signature},
+	return $json->encode($saved_comment);
+}
+
+sub getSingleJournal {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+
+	my $journal = $journal_reader->get($form->{id});
+	delete $journal->{srcid_32};
+	delete $journal->{srcid_24};
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($journal);
+}
+
+sub getLatestJournals {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
+
+	my $journals = $journal_reader->getRecent($form->{limit}, $form->{uid});
+
+	my $items;
+	for my $id (sort {$b <=> $a} keys %$journals) {
+		delete $journals->{$id}->{srcid_32};
+		delete $journals->{$id}->{srcid_24};
+
+		$journals->{$id}->{nickname} = $slashdb->sqlSelect(
+					'nickname',
+					'users',
+					" uid = $journals->{$id}->{uid} ");
+		$journals->{$id}->{link} = "$gSkin->{absolutedir}/~$journals->{$id}->{nickname}/journal/$id";
+		
+		my $texts = $slashdb->sqlSelectArrayRef(
+					'introtext, article',
+					'journals_text',
+					" id = $id ");
+		($journals->{$id}->{introtext}, $journals->{$id}->{artice}) = @$texts;
+		
+		push @$items, $journals->{$id};
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($items);
+}
+
+sub getLatestComments {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	
+	my $select = "* ";
+	my $id = "cid";
+	my $table = "comments ";
+	my $where = "1 = 1 "; # we need a where but this needs to default to always true
+	my $other = "ORDER BY cid DESC LIMIT 50 ";
+
+	if($form->{since} && $form->{since} =~ /^\d+$/) {
+		my $cid_q = $slashdb->sqlQuote($form->{since} - 1);
+		$where = "cid > $cid_q ";
+	}
+
+	my $comments_h = $slashdb->sqlSelectAllHashref($id, $select, $table, $where, $other);
+	my $comments = [];
+	foreach my $cid (sort sort {$a <=> $b} keys %$comments_h) {
+		my $comment = $comments_h->{$cid};		
+		my $cid_q = $slashdb->sqlQuote($cid);
+
+		delete $comment->{subnetid};
+		delete $comment->{has_read};
+		delete $comment->{time};
+		delete $comment->{ipid};
+		delete $comment->{signature};
+
+		$comment->{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
+		push(@$comments, $comment);
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($comments);
+}
+
+sub getSingleComment {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $tables = "comments";
+	my $cid_q = $slashdb->sqlQuote($form->{cid});
+	my $where = "cid=$cid_q ";
+	my $select = "* ";
+	my $comment = $slashdb->sqlSelectHashref($select, $tables, $where);
+	$comment->{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
+
+	delete $comment->{subnetid};
+	delete $comment->{has_read};
+	delete $comment->{time};
+	delete $comment->{ipid};
+	delete $comment->{signature};
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($comment);
+}
+
+sub getDiscussion {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $discussion = $slashdb->getDiscussion($form->{id});
+	if (!$discussion || !$discussion->{commentcount} ||  $discussion->{commentstatus} eq 'disabled' ) { return; }
+
+	my($comments, $count) = selectComments($discussion);
+	# Add comment text
+	foreach my $cid (keys %$comments) {
+		next if $cid eq "0";
+		my $cid_q = $slashdb->sqlQuote($cid);
+		$comments->{$cid}{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
+		delete $comments->{$cid}{subnetid};
+		delete $comments->{$cid}{has_read};
+		delete $comments->{$cid}{time};
+		delete $comments->{$cid}{ipid};
+		delete $comments->{signature} if $comments->{signature};
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($comments);
+}
+
+sub getSingleStory {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $story = $slashdb->getStory($form->{sid});
+	if( ($story->{is_future}) || ($story->{in_trash} ne "no") ){return;};
+	return unless $slashdb->checkStoryViewable($story->{stoid});
+	delete $story->{story_topics_rendered};
+	delete $story->{primaryskid};
+	delete $story->{is_future};
+	delete $story->{in_trash};
+	delete $story->{thumb_signoff_needed};
+	delete $story->{rendered};
+	delete $story->{qid};
+	$story->{bodytext} = $story->{introtext} unless $story->{bodytext};
+	$story->{body_length} = length($story->{bodytext});
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($story);
+}
+
+sub getLatestStories {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $options;
+	($options->{limit}, $options->{limit_extra}) = (($form->{limit} || 10), 0);
+	$options->{limit} = 10 unless $options->{limit} =~ /^\d+$/;
+	$options->{limit} = 1 unless $options->{limit} > 1;
+	$options->{limit} = 50 unless $options->{limit} <= 50;
+	my $stories = $slashdb->getStoriesEssentials($options);
+	foreach my $story (@$stories) {
+		($story->{introtext}, $story->{bodytext}, $story->{title}, $story->{relatedtext}) = $slashdb->sqlSelect("introtext, bodytext, title, relatedtext", "story_text", "stoid = $story->{stoid}");
+		$story->{bodytext} = $story->{introtext} unless $story->{bodytext};
+		$story->{body_length} = length($story->{bodytext});
+		delete $story->{is_future};
+		delete $story->{hitparade};
+		delete $story->{primaryskid};
+	}
+	my $json = JSON->new->utf8->allow_nonref;	
+	return $json->encode($stories);
+}
+
+sub nullop {
+	my $error = { RTFM => 'http://wiki.soylentnews.org/wiki/ApiDocs' };
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($error);
+}
+
+sub maxUid {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $max = {};
+	$max->{max_uid} = $slashdb->sqlSelect(
+					'max(uid)',
+					'users');
+	return $json->encode($max);
+}
+
+sub nameToUid {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $nick = $slashdb->sqlQuote($form->{nick});
+	my $uid = {};
+	$uid->{uid} = $slashdb->sqlSelect(
+					'uid',
+					'users',
+					" nickname = $nick ");
+	return $json->encode($uid);
+}
+
+sub uidToName {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $uid = $form->{uid};
+	my $nick = {};
+	$nick->{nick} = $slashdb->sqlSelect(
+					'nickname',
+					'users',
+					" uid = $uid ");
+	return $json->encode($nick);
+}
+
+sub getPubUserInfo {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $askUser = $slashdb->getUser($form->{uid});
+
+	my @allowed = (
+		'jabber',
+		'fakeemail',
+		'uid',
+		'nickname',
+		'icq',
+		'sig',
+		'homepage',
+		'registered',
+		'realname',
+		'karma',
+		'journal_last_entry_date',
+		'aim',
+		'created_at',
+		'calendar_url',
+		'people',
+		'yahoo',
+		'bio',
+		'totalcomments',
+
+	);
+	my $subscriber = 0;
+	unless($askUser->{hide_subscription}) {
+		use DateTime;
+		use DateTime::Format::MySQL;
+		my $dt_today   = DateTime->today;
+		my $dt_sub = DateTime::Format::MySQL->parse_date($askUser->{subscriber_until});
+		
+		if ( $dt_sub >= $dt_today ){
+			$subscriber = 1;
+		}
+	}
+
+	my $repUser = {};
+	$repUser->{is_subscriber} = $subscriber;
+	foreach my $field (@allowed) {
+		$repUser->{$field} = $askUser->{$field};
+	}
+
+	my $json = JSON->new->utf8->allow_nonref;
+	return $json->encode($repUser);
+}
+
+# Copied over from comments.pl. Wish it'd been in Comments.pm instead.
+sub previewForm {
+	my($error_message, $discussion) = @_;
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $comment = preProcessComment($form, $user, $discussion, $error_message) or return;
+	return $$error_message if $comment eq '-1';
+	my $preview = postProcessComment({ %$user, %$form, %$comment }, 0, $discussion);
+
+	if ($constants->{plugin}{Subscribe}) {
+		$preview->{subscriber_bonus} =
+			$user->{is_subscriber}
+			&& (!$form->{nosubscriberbonus} || $form->{nosubscriberbonus} ne 'on')
+			? 1 : 0;
+	}
+
+	return prevComment($preview, $user);
+}
+
+# Copied over from submit.pl
+sub genChosenHashrefForTopics {
+	my($topics) = @_;
+	my $constants = getCurrentStatic();
+	my $chosen_hr ={};
+	for my $tid (@$topics) {
+		$chosen_hr->{$tid} = 
+			$tid == $constants->{mainpage_nexus_tid}
+				? 30
+				: $constants->{topic_popup_defaultweight} || 10;
+	}
+	return $chosen_hr;
+}
+
+#createEnvironment();
+main();
+1;
