@@ -87,6 +87,12 @@ sub main {
 			checks			=> 
 			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check formkey_check ) ],
 		},
+		unspam => {
+			function		=> \&unspamComment,
+			seclev			=> 100,
+			formname		=> 'comments',
+			checks			=> [],
+		},
 	};
 	$ops->{default} = $ops->{display};
 
@@ -194,7 +200,7 @@ sub main {
 	my $header_emitted = 0;
 	my $title = $constants->{sitename} . '  Comments';
 	$title .= " | $discussion->{'title'}" if $discussion;
-	if ($op ne 'submit') {
+	if ($op ne 'submit' && $op ne 'unspam') {
 		header($title, $section) or return;
 		$header_emitted = 1;
 	}
@@ -712,6 +718,8 @@ sub moderate {
 					print Slash::Utility::Comments::getError('no points');
 				} elsif ($ret_val == -2){
 					print Slash::Utility::Comments::getError('not enough points');
+				} elsif ($ret_val == -3){
+					print Slash::Utility::Comments::getError('no self mods');
 				}
 			} else {
 				$was_touched += $ret_val;
@@ -819,6 +827,79 @@ sub deleteThread {
 		});
 	}
 	return $count;
+}
+
+sub unspamComment {
+	my ($form, $slashdb, $user, $constants, $discussion) = @_;
+	my $rootdir = getCurrentSkin("rootdir");
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+
+	if(!$moddb) {
+		print STDERR "\nERROR: Could not get moddb.\n";
+		redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
+		return;
+	}
+	
+	my $cid = $form->{cid};
+	if($cid !~ /^\d+$/) {
+		print STDERR "\nGot non-numeric cid '$cid' in \$form. Bailing to simple display.\n";
+		redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
+		return;
+	}
+
+	my $spamreason = $moddb->sqlSelect( 'id',
+					'modreasons',
+					"name = 'Spam'");
+	if(!$spamreason) {
+		print STDERR "\nGot undef for \$spamreason. WTF?\n";
+		redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
+		return;
+	}
+	
+	my $spamMods = $moddb->sqlSelectAllHashref('id',
+					'*',
+					'moderatorlog',
+					" cid = $cid AND reason = $spamreason ");
+	
+	# Here we do the following for each:
+	# delete the moderation from the modlog
+	# recalculate the comment score
+	# restore the commenter's karma
+	# remove any mod points from the user who modded it spam
+	# ban the user who modded it spam
+	# 	until 30 days in the future or
+	#	not at all if the user is already banned or
+	#	using the larger ban if the user has served out a previous ban
+	foreach my $spamMod (values %$spamMods) {
+		my ($modderUID, $commenterUID, $modLogID) = ($spamMod->{uid}, $spamMod->{cuid}, $spamMod->{id});
+		# Bail if we somehow got a bad entry without the proper data
+		unless ($modderUID && $commenterUID && $modLogID) {
+			redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
+			return;
+		}
+
+		# Delete the moderation from the log
+		my $deleted = $moddb->sqlDelete('moderatorlog', " id = $modLogID ");
+		print STDERR "\nTried to delete $modLogID from moderatorlog but got $deleted rows back. WTF?!\n"
+			unless $deleted;
+
+		# Recalculate the comment score from scratch and restore cuid user's karma
+		$moddb->undoSingleModeration($spamMod);
+
+		# Remove any mod points from the user who modded it spam
+		$slashdb->setUser( $user->{uid}, { points => 0 } )
+			unless $form->{noban};
+
+		# Ban the user from moderating
+		unless($form->{noban}) {
+			my $banned = $moddb->modBanUID($modderUID);
+			print STDERR "\nGot a bad return value on modBanUID: uid=$modderUID" unless $banned;
+		}
+	}
+
+	# Now redirect them back where they were.
+	redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
+	return;
 }
 
 

@@ -37,7 +37,7 @@ __template__
 			subject_only => 1,
 		}, 1) %]</b></p></span>[% END %]
 		
-		[% IF can_moderate %]
+		[% IF can_mod %]
 		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, {
 			'return'	=> 1,
 			nsort		=> 1, 
