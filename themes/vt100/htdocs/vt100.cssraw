@@ -237,7 +237,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #0f0;
-	background-color: #001800;
+	background-color: #000;
 }
 
 .article .body
@@ -249,7 +249,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 div.storylinks
 {
-	background-color: #001800;
+	background-color: #000;
 	border: 1px solid #0f0;
 	border-top: none;
 	border-radius: 0 0 10px 10px;
@@ -266,7 +266,7 @@ div.storylinks div ul
 div.storylinks ul li 
 { 
 	padding: .3em .5em; 
-	border-left: 1px solid #555; 
+	border-left: 1px solid #0f0; 
 }
 
 
@@ -563,4 +563,9 @@ fieldset
 border: 1px solid #0f0;
 }
 
-.user_admin { background: #020; border: 1px solid #0f0; padding: 0 .3em; }
+.user_admin { background: #001c00; border: 1px solid #0f0; padding: 0 .3em; }
+
+legend
+{
+color: #0b0;
+}
