@@ -71,7 +71,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 /* slashboxes */
 #slashboxes div.title { 
-	background: #111;
+	background-color: #001800;
 	border-radius: 10px 10px 0 0;
 	border: 1px solid #0f0;
 }
@@ -106,10 +106,6 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 .commentTop .title {     
 	background-color: #000;
-	background: -o-linear-gradient(#000, #333);
-	background: -webkit-linear-gradient(#000, #333);
-	background: -moz-linear-gradient(#000, #333);
-	background: linear-gradient(#000, #333);
 	border-radius: 10px 10px 0 0;
 	border: 1px solid #0f0;
 }
@@ -121,12 +117,8 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 }
 
 .commentTop .details {
-	border: 1px solid #aaa;
-	background-color: #333;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	border: 1px solid #0f0;
+	background-color: #000;
 	color: #0c0;
 }
 
@@ -177,14 +169,14 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 /* FORMTABS */
 
 #formtabs ul li{
-	background: #333;
+	background: #000;
 	border-radius: .3em .3em 0 0;
 	color: #0f0;
 	border: 1px solid #0f0;
 }
 
 #formtabs ul li.active{
-	background: #181818;
+	background: #030;
 	border-radius: .3em .3em 0 0;
 	border: 1px solid #0f0;
 	color: #0f0;
@@ -229,11 +221,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 /* articles */
 
 .generaltitle div.title, .article div.title {     
-	background-color: #c5618e;
-	background: -o-linear-gradient(#000, #333);
-	background: -webkit-linear-gradient(#000, #333);
-	background: -moz-linear-gradient(#000, #333);
-	background: linear-gradient(#000, #333);
+	background-color: #000;
 	border-radius: 10px 10px 0 0;
 	border: 1px solid #0f0;
 }
@@ -249,11 +237,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #0f0;
-	background-color: #ccc;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	background-color: #001800;
 }
 
 .article .body
@@ -265,15 +249,11 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 div.storylinks
 {
-	background-color: #000;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
-    border: 1px solid #0f0;
-    border-top: none;
-    border-radius: 0 0 10px 10px;
-    font-size: .813em;
+	background-color: #001800;
+	border: 1px solid #0f0;
+	border-top: none;
+	border-radius: 0 0 10px 10px;
+	font-size: .813em;
 }
 
 div.storylinks div ul 
@@ -401,7 +381,8 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 }
 
 #usermenu ul.menu li a{
-    background: #333;
+    background: #000;
+		border: 1px solid #0f0;
     border-radius: .3em .3em 0 0;
     padding: .2em .6em;
     text-decoration: none;
@@ -410,7 +391,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 
 #usermenu ul.menu li.selected a
 {
-	background: #333;
+	background: #030;
 	text-decoration: none;
 	color: #0f0;
 }
@@ -446,11 +427,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 	padding: .3em .6em;  
 	color:#0f0;
 	margin-bottom: .6em;
-	background-color: #000;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	background-color: #001800;
 	border-radius: 10px;
 }
 
@@ -475,11 +452,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 .message_subject
 {
 	border: 1px solid #0f0;
-	background-color: #000;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	background-color: #001800;
 	color: #0f0;
 }
 
@@ -589,3 +562,5 @@ fieldset
 {
 border: 1px solid #0f0;
 }
+
+.user_admin { background: #020; border: 1px solid #0f0; padding: 0 .3em; }
