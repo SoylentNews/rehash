@@ -14,12 +14,19 @@ a { color: #0c0; }
 a:visited { color: #0a0; }
 a:hover { color: #0f0; }
 
+hr {
+	color: #0c0;
+	background-color: #0c0;
+	height: 2px;
+	line-height: 0;
+	border: 0px;
+}
+
 /* layout */
 #contents
 {
 	min-width: 20em;
 }
-
 
 /* Header */
 #logo h1 a
