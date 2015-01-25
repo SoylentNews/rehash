@@ -566,15 +566,15 @@ option {
 }
 
 .data_hl3 {
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #001800;
 }
 
 .data_hl2 {
-	background: none repeat scroll 0% 0% #333;
+	background: none repeat scroll 0% 0% #002400;
 }
 
 .data_hl1 {
-	background: none repeat scroll 0% 0% #555;
+	background: none repeat scroll 0% 0% #030;
 }
 
 #authors .generalbody h3 a {
@@ -583,4 +583,9 @@ option {
 
 #slashboxes h4 a, #slashboxes h4 a:visited {
 	color: #0f0;
+}
+
+fieldset
+{
+border: 1px solid #0f0;
 }
