@@ -3,10 +3,13 @@ body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img {
 }
 
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
-body {
+body, body.admin {
 	background: none repeat scroll 0% 0% #000;
 	color: #0c0;
- }
+}
+
+.user_admin, body .adminstoryform fieldset, .story_main {background: #020;}
+ 
 a { color: #0c0; }
 a:visited { color: #0a0; }
 a:hover { color: #0f0; }
@@ -77,6 +80,12 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 {
 	font-size: .813em;
 	color: #0f0;
+}
+
+#slashboxes .highlight
+{
+	background: #020;
+	border: 1px solid #000;
 }
 
 #slashboxes div.content
@@ -324,9 +333,9 @@ div.storylinks ul li
 
 .data_head
 {
-	background: #c5618e;
+	background-color: #040;
+	color: #0f0;
 }
-
 
 /* Comments */
 .commentBox { background: #000; color: #0f0;}
