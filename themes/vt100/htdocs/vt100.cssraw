@@ -130,7 +130,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 .commentSub
 {
 	border: 1px solid #0f0;
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #000;
 	border-top: none;
 }
 
@@ -159,7 +159,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 .preview li.comment
 {
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #0f0;
 }
 
 
@@ -344,7 +344,7 @@ div.storylinks ul li
 /* Forms */
 textarea {
 	width: 80%;
-	background-color: #181818;
+	background-color: #001800;
 	color: #0f0;
 	border: 1px solid #0f0;
 }
@@ -439,7 +439,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 /* Messaging */
 
 .message_menu{
-	border: 1px solid #aaa;
+	border: 1px solid #0f0;
 	background: #000;
 	color: #0f0;
 	border-bottom: none;
@@ -496,7 +496,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 }
 
 #commentwrap {
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #000;
 }
 
 #commentwrap a, a:visited {
@@ -513,7 +513,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 }
 
 .commentBoxForm {
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #000;
 }
 
 input[type="text"], input[type="password"] {
