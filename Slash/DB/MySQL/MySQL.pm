@@ -8422,7 +8422,7 @@ sub getSlashConf {
 				dfn code samp kbd var cite address ins del
 				h1 h2 h3 h4 h5 h6
 				table thead tbody tfoot tr th td pre
-				slash
+				slash strike abbr sarc sarcasm user
 		)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],

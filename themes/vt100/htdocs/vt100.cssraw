@@ -3,20 +3,30 @@ body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img {
 }
 
 body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
-body {
+body, body.admin {
 	background: none repeat scroll 0% 0% #000;
 	color: #0c0;
- }
+}
+
+.user_admin, body .adminstoryform fieldset, .story_main {background: #020;}
+ 
 a { color: #0c0; }
 a:visited { color: #0a0; }
 a:hover { color: #0f0; }
+
+hr {
+	color: #0c0;
+	background-color: #0c0;
+	height: 2px;
+	line-height: 0;
+	border: 0px;
+}
 
 /* layout */
 #contents
 {
 	min-width: 20em;
 }
-
 
 /* Header */
 #logo h1 a
@@ -68,7 +78,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 /* slashboxes */
 #slashboxes div.title { 
-	background: #111;
+	background-color: #001800;
 	border-radius: 10px 10px 0 0;
 	border: 1px solid #0f0;
 }
@@ -77,6 +87,12 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 {
 	font-size: .813em;
 	color: #0f0;
+}
+
+#slashboxes .highlight
+{
+	background: #020;
+	border: 1px solid #000;
 }
 
 #slashboxes div.content
@@ -97,10 +113,6 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 .commentTop .title {     
 	background-color: #000;
-	background: -o-linear-gradient(#000, #333);
-	background: -webkit-linear-gradient(#000, #333);
-	background: -moz-linear-gradient(#000, #333);
-	background: linear-gradient(#000, #333);
 	border-radius: 10px 10px 0 0;
 	border: 1px solid #0f0;
 }
@@ -112,12 +124,8 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 }
 
 .commentTop .details {
-	border: 1px solid #aaa;
-	background-color: #333;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	border: 1px solid #0f0;
+	background-color: #000;
 	color: #0c0;
 }
 
@@ -129,7 +137,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 .commentSub
 {
 	border: 1px solid #0f0;
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #000;
 	border-top: none;
 }
 
@@ -158,7 +166,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 .preview li.comment
 {
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #0f0;
 }
 
 
@@ -168,14 +176,14 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 /* FORMTABS */
 
 #formtabs ul li{
-	background: #333;
+	background: #000;
 	border-radius: .3em .3em 0 0;
 	color: #0f0;
 	border: 1px solid #0f0;
 }
 
 #formtabs ul li.active{
-	background: #181818;
+	background: #030;
 	border-radius: .3em .3em 0 0;
 	border: 1px solid #0f0;
 	color: #0f0;
@@ -220,11 +228,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 /* articles */
 
 .generaltitle div.title, .article div.title {     
-	background-color: #c5618e;
-	background: -o-linear-gradient(#000, #333);
-	background: -webkit-linear-gradient(#000, #333);
-	background: -moz-linear-gradient(#000, #333);
-	background: linear-gradient(#000, #333);
+	background-color: #000;
 	border-radius: 10px 10px 0 0;
 	border: 1px solid #0f0;
 }
@@ -240,11 +244,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 	font-size: .7em;
 	font-weight: normal;
 	border: 1px solid #0f0;
-	background-color: #ccc;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	background-color: #000;
 }
 
 .article .body
@@ -257,14 +257,10 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 div.storylinks
 {
 	background-color: #000;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
-    border: 1px solid #0f0;
-    border-top: none;
-    border-radius: 0 0 10px 10px;
-    font-size: .813em;
+	border: 1px solid #0f0;
+	border-top: none;
+	border-radius: 0 0 10px 10px;
+	font-size: .813em;
 }
 
 div.storylinks div ul 
@@ -277,7 +273,7 @@ div.storylinks div ul
 div.storylinks ul li 
 { 
 	padding: .3em .5em; 
-	border-left: 1px solid #555; 
+	border-left: 1px solid #0f0; 
 }
 
 
@@ -324,9 +320,9 @@ div.storylinks ul li
 
 .data_head
 {
-	background: #c5618e;
+	background-color: #040;
+	color: #0f0;
 }
-
 
 /* Comments */
 .commentBox { background: #000; color: #0f0;}
@@ -355,7 +351,7 @@ div.storylinks ul li
 /* Forms */
 textarea {
 	width: 80%;
-	background-color: #181818;
+	background-color: #001800;
 	color: #0f0;
 	border: 1px solid #0f0;
 }
@@ -392,7 +388,8 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 }
 
 #usermenu ul.menu li a{
-    background: #333;
+    background: #000;
+		border: 1px solid #0f0;
     border-radius: .3em .3em 0 0;
     padding: .2em .6em;
     text-decoration: none;
@@ -401,7 +398,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 
 #usermenu ul.menu li.selected a
 {
-	background: #333;
+	background: #030;
 	text-decoration: none;
 	color: #0f0;
 }
@@ -437,11 +434,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 	padding: .3em .6em;  
 	color:#0f0;
 	margin-bottom: .6em;
-	background-color: #000;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	background-color: #001800;
 	border-radius: 10px;
 }
 
@@ -453,7 +446,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 /* Messaging */
 
 .message_menu{
-	border: 1px solid #aaa;
+	border: 1px solid #0f0;
 	background: #000;
 	color: #0f0;
 	border-bottom: none;
@@ -466,11 +459,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 .message_subject
 {
 	border: 1px solid #0f0;
-	background-color: #000;
-	background: -o-linear-gradient(#333, #111);
-	background: -webkit-linear-gradient(#333, #111);
-	background: -moz-linear-gradient(#333, #111);
-	background: linear-gradient(#333, #111);
+	background-color: #001800;
 	color: #0f0;
 }
 
@@ -514,7 +503,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 }
 
 #commentwrap {
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #000;
 }
 
 #commentwrap a, a:visited {
@@ -531,7 +520,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #0f0; }
 }
 
 .commentBoxForm {
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #000;
 }
 
 input[type="text"], input[type="password"] {
@@ -557,15 +546,15 @@ option {
 }
 
 .data_hl3 {
-	background: none repeat scroll 0% 0% #181818;
+	background: none repeat scroll 0% 0% #001800;
 }
 
 .data_hl2 {
-	background: none repeat scroll 0% 0% #333;
+	background: none repeat scroll 0% 0% #002400;
 }
 
 .data_hl1 {
-	background: none repeat scroll 0% 0% #555;
+	background: none repeat scroll 0% 0% #030;
 }
 
 #authors .generalbody h3 a {
@@ -574,4 +563,16 @@ option {
 
 #slashboxes h4 a, #slashboxes h4 a:visited {
 	color: #0f0;
+}
+
+fieldset
+{
+border: 1px solid #0f0;
+}
+
+.user_admin { background: #001c00; border: 1px solid #0f0; padding: 0 .3em; }
+
+legend
+{
+color: #0b0;
 }
