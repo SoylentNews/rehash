@@ -459,3 +459,6 @@ INSERT INTO vars (name, value, description) VALUES ('m1_1st_ban_duration', '30',
 INSERT INTO vars (name, value, description) VALUES ('m1_ban_duration', '180', 'Duration of ban in days all subsequent times someone is banned from moderating');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointsgrant_arbitrary', '5', 'Number of points to grant when we are arbitrarily granting mod points.');
 INSERT INTO vars (name, value, description) VALUES ('moderate_or_post', '2', '0 = or, 1 = then, 2 = and');
+
+# Turn off meta-moderation as it breaks stuff with our setup
+UPDATE vars SET value = 0 WHERE name = 'm2';
