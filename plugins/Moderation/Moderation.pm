@@ -1366,7 +1366,7 @@ sub recalcCommentScore {
 	my $constants = getCurrentStatic();
 	
 	my $scores = $self->sqlSelectAll("val", "moderatorlog", "cid = $cid");
-	my $points = 0;
+	my $points = $self->sqlSelect("pointsorig", "comments", "cid = $cid") || 0;
 	if($scores) {
 		my $minScore = $constants->{comment_minscore};
 		my $maxScore = $constants->{comment_maxscore};
