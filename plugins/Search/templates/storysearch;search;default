@@ -59,15 +59,7 @@ __template__
 	[% PROCESS pagination %]
 	</div>
 </div>
-<script type="text/javascript">
-(function() {
-// coremetrics
-if( window.location.hostname.indexOf('slashdot.org') >= 0 ) {
-	cmSetProduction();
-}
-cmCreatePageviewTag && cmCreatePageviewTag('OLD STORIES') && (cmCreatePageviewTag = null);
-})();
-</script>
+
 
 __seclev__
 100
