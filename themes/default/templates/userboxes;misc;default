@@ -40,15 +40,8 @@ IF user.is_anon;
 	# Show the login block.
 
 	title = "Log In";
-	IF form.sid;
-		contents = BLOCK %]
-			[% PROCESS userlogin
-				return_url = "$return_url?sid=$form.sid" %]
-		[% END;
-	ELSE;
-		contents = BLOCK %]
-			[% PROCESS userlogin %]
-		[% END;
+	contents = BLOCK;
+		PROCESS userlogin;
 	END;
 	Slash.sidebox(title, contents, "userlogin", 1);
 
