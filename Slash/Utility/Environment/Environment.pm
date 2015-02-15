@@ -1245,8 +1245,6 @@ sub isModBanned{
 	if ( $dt_ban >= $dt_today ){
 		$banned = 1;
 	}
-		
-	
 
 	return $banned;
 }
