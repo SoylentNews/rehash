@@ -43,14 +43,14 @@ __template__
   <ol>
    <li><strong>Logged In User</strong> If the system can't keep track, it won't work, so you gotta log in. Sorry if you're paranoid, but this system demands a certain level of accountability.</li>
    <li><strong>Positive Contributors</strong> Slashcode tracks your "Karma" (see the <a href="#faq">FAQ</a>). If you have non-negative Karma, this means you have posted more good comments than bad, and are eligible to moderate. This weeds out spam accounts.</li>
+	 <li><strong>No Sockpuppet Accounts</strong> Accounts newer than 1 month are not eligible to moderate.  This should keep sockpuppet accounts from immediate being a problem.
   </ol>
-  <p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. Occasionally the system checks the number of comments that have been posted, and gives a proportionate amount of eligible users moderator points. The goal: everyone takes turns, and abuse is mitigated.</p>
+  <p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. </p>
  
   <h3 id="how">How</h3>
-  <p>When a moderator is given access, they are given a number of points of influence to play with. Each comment they moderate deducts a point. When they run out of points, they are done moderating until next time it is their turn.</p>
+  <p>Everyday each eligible moderator is given $constants.m1_pointsgrant_arbitrary mod points to play with. Each comment they moderate deducts a point. When they run out of points, they are done moderating until 00:10 UTC when mod points are regenerated.</p>
   <p>Moderation takes place by clicking the drop down list that appears next to comments, and selecting one of the adjectives like 'Flamebait' or 'Informative'. Bad words will reduce the comments score by a single point, good words increase a comments score by a single point. All comments are scored on an absolute scale from -1 to 5. Logged in users start at 1 (although this can vary from -1 to 2 based on their overall contribution to discussions) and anonymous users start at 0.</p>
-  <p>Moderators can participate in the same discussion as both a moderator and a poster. You should be able to moderate on any discussion you haven't posted on. Posting a reply won't undo your moderations, but it will prevent you from moderating again on the same story.</p>
-  <p>Moderation points are given out in 5 minute intervals to eligible users, based on point availability.  The points expire after 8 hours. If you have not used the points by then, the points will go back into the pool and be redistributed. You then go back to the end of the queue and will be given access again another day.</p>
+  <p>Moderators can participate in the same discussion as both a moderator and a poster. You are only prevented from modding your own posts.</p>
   <p>Concentrate more on promoting than on demoting. The real goal here is to find the juicy good stuff and let others read it. Do not promote personal agendas. Do not let your opinions factor in. <strong>Try</strong> to be impartial about this. Simply disagreeing with a comment is not a valid reason to mark it down. Likewise, agreeing with a comment is not a valid reason to mark it up. The goal here is to share ideas. To sift through the haystack and find golden, shiny needles. And to keep the children who like to spam in check.</p>
   
   <h3 id="faq">FAQ</h3>
@@ -58,9 +58,8 @@ __template__
   <p>The fact that you are reading this document proves that you are already on the right track.</p>
   <h4>Why can't I moderate any more?</h4>
   <ul>
-   <li>Moderator access only lasts 8 hours.</li>
-   <li>You can't moderate after you have posted in a discussion.</li>
    <li>Do you still have any moderator points left?</li>
+   <li>You can't moderate your own posts.</li>
   </ul>
   <h4>What is a Good Comment? A Bad Comment?</h4>
   <ul>
@@ -69,16 +68,16 @@ __template__
    <li>Bad Comments are flamebait, incorrect, or have nothing to do with the article. Other examples: Ad Hominem, ridicule for others with different opinion without (backing it up with anything more tangible than strong words), repeats of something said 15 times already (read previous comments before you post), use of <strong>unnecessary</strong> foul language, some are hard to read or just don't make any sense. Basically they detract from the article they are attached to.(Score: -1)</li>
   </ul>
   <h4>What is Karma?</h4>
-  <p>Karma is the sum of all moderation activity done to a user. Karma is used to determine eligibility for moderator status and can affect your comments starting score. Every new user starts with a Karma of 0, and as long as your karma isn't <em>negative</em> you are eligible to become a moderator.</p>
+  <p>Karma is the sum of all moderation activity done to a user. Karma is used to determine eligibility for moderator status and can affect your comments starting score. Every new user starts with a Karma of 0, and as long as your Karma isn't <em>negative</em> you are eligible to become a moderator.</p>
   <h4>Why Don't I get my points back after I post in a discussion I moderated?</h4>
-  <p>We've decided to allow a moderator to moderate in a discussion, and then comment afterward without undoing their moderation (although they cannot moderate in that discussion <em>after</em> commenting).</p>
+  <p>We've decided to allow a moderator to moderate in a discussion, and then comment afterward without undoing their moderation.</p>
   <h4>How can I improve my Karma?</h4>
   <p><strong>10 tips for improving your Karma:</strong></p>
   <dl>
   <dt><strong>Post intelligently:</strong></dt>
   <dd>Interesting, insightful, thought provoking comments are rated higher on a fairly consistent basis.</dd>
   <dt><strong>Post calmly:</strong></dt>
-  <dd>Nobody likes a flame war. In fact, more times than not the flamer gets burned much more than their target. "Flame Bait" is hit quickly and consistently with "-1" by moderators. As the bumper sticker says... "Don't be a dick."</dd>
+  <dd>Nobody likes a flame war. In fact, more times than not the flamer gets burned much more than their target. "Flamebait" is hit quickly and consistently with "-1" by moderators. As the bumper sticker says... "Don't be a dick."</dd>
   <dt><strong>If you can't be deep, be funny:</strong></dt>
   <dd>If you don't have something to contribute to the discussion, some humor is welcome. Humor is lacking in our lives and will continue to be promoted. Remember though, what rips your sides out may be completely inane to somebody else.</dd>
   <dt><strong>Post early:</strong></dt>
@@ -96,11 +95,14 @@ __template__
   <dt><strong>Read SoylentNews regularly:</strong></dt>
   <dd>You can't possibly contribute to the discussion if you're not in the room. Come to the party and play.</dd>
   </dl>
+	
+	<h3 id="spam">What is Special About the Spam Mod</h3>
+	<p>The Spam mod is special in that is removes 10 Karma points from the user that posted the comment.  This mod is meant to combat spam and not to be used to punish commenters, as a spammer will eventually find themselves in Karma Hell and will not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all Spam mods to make sure moderators are not abusing the Spam mod.  If we find a moderator that unfairly applied the Spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month.  Further bans to the same modder add increasing amounts of ban time.  If you inadvertently applied a Spam mod, <a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> and we will remove the Spam mod without banning you.  Yes we know that the interface needs a bit of work and miss modding is an unfortunate consequence.</p>
   
   <h3 id="future">Ideas for the Future</h3>
   <p>This is a system in development. Things can change. Our goal is to create one of the most comprehensive and well though-out moderation systems in existence. These ideas might help accomplish that goal:</p>
   <ol>
-  <li>Integrating <a href="http://spamassassin.apache.org/" targe="new">SpamAssassin</a> into the comment system for ACs</li>
+  <li>Integrating <a href="http://spamassassin.apache.org/" target="new">SpamAssassin</a> into the comment system for ACs</li>
   <li>Integrating a weighting system for ACs (anonymous comments) IP addresses: known ip addresses would be subject to Karma that can affect their initial post score</li>
   </ol>
  </div>
