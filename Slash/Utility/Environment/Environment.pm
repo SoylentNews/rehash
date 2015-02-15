@@ -1226,7 +1226,7 @@ Returns true if the USER is mod banned, otherwise false.
 
 =cut
 
-sub isSubscriber {
+sub isModBanned{
 	my($buser) = @_;
 
 	# assume is not banned by default
