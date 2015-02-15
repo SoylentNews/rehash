@@ -16,97 +16,70 @@ spam
 __template__
 [% PROCESS titlebar title="Spam Moderations" %]
 <div class="generalbody">
-[% skins = Slash.db.getSkins %]
-Show only comments from section:
-[% FOREACH skid = skins.keys %]
-	<a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;primaryskid=[% skid %]">[% skins.$skid.title %]</a> |	
-[% END %]
-<a href="[% gSkin.rootdir %]/admin.pl?op=recent">All</a>	
-<br>
-[% IF !startat; startat = 0; END;
-   IF startat > 0;
-	next_startat = startat - 100;
-	IF next_startat < 0; next_startat = 0; END; %]
+
+	[% IF !startat; startat = 0; END;
+		 IF startat > 0;
+		next_startat = startat - 100;
+		IF next_startat < 0; next_startat = 0; END; %]
+		<form action="[% gSkin.rootdir %]/admin.pl" method="get">
+			<input type="hidden" name="op" value="spam">
+			<input type="hidden" name="startat" value="[% next_startat | strip_attribute %]">
+			<input type="submit" value="&lt;&lt; Newer Spam Mods">
+		</form>
+	[% END %]
+	
+	<table>
+		<tr>
+			<th>sid</th>
+			<th>cid</th>
+			<th>ipid</th>
+			<th>poster</th>
+			<th>sc</th>
+			<th>val</th>
+			<th>#m</th>
+			<th>reason</th>
+			<th>time</th>
+			<th>subject</th>
+		</tr>
+	
+	
+		[% FOREACH comm = recent_comments %]
+		<tr>
+			<td align="right"><a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</a></td>
+			<td align="right"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.cid %]</a></td>
+			<td align="left"><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[% comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
+			<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
+				IF comm.uid != constants.anonymous_coward_uid %]<a href="[%
+				gSkin.rootdir
+				%]/users.pl?op=userinfo&amp;uid=[%
+				comm.uid | strip_attribute %]">[% END %][% comm.uid %][%
+				IF comm.uid != constants.anonymous_coward_uid %]</a>[%
+				END %]) &nbsp; </td>
+			<td align="right">[% comm.score %]</td>
+			<td align="right">[% comm.sum_val %]</td>
+			<td align="right">[% comm.num_mods %]</td>
+			<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
+			<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
+			<td align="left"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.subject_vis | strip_title %]</a></td>
+		</tr>
+		<tr>
+			<td colspan="3" valign="top">
+				<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% comm.sid %]&cid=[% comm.cid %]">Unspam and Ban</a><br>
+				<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">Unspam Only</a>
+			</td>
+			<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,1000)) %]</td>
+		</tr>
+		<tr><td colspan="10" valign="top"><hr></td></tr>
+		[% END %]
+	
+	</table>
+	
+	[% prev_startat = startat + 100; %]
 	<form action="[% gSkin.rootdir %]/admin.pl" method="get">
-	<input type="hidden" name="op" value="recent">
-	[% IF min.defined %]
-		<input type="hidden" name="min" value="[% min | strip_attribute %]">
-	[% END %]
-	[% IF max.defined %]
-		<input type="hidden" name="max" value="[% max | strip_attribute %]">
-	[% END %]
-	<input type="hidden" name="primaryskid" value="[% form.primaryskid | strip_attribute %]">
-	<input type="hidden" name="sid" value="[% form.sid | strip_attribute %]">
-	<input type="hidden" name="startat" value="[% next_startat | strip_attribute %]">
-	<input type="submit" value="&lt;&lt; Next Comments">
+		<input type="hidden" name="startat" value="[% prev_startat | strip_attribute %]">
+		<input type="submit" value="Older Spam Mods &gt;&gt;">
+		<input type="hidden" name="op" value="spam">
 	</form>
-[% END %]
-<form action="[% gSkin.rootdir %]/admin.pl" method="post">
-[% IF form.sid %]<a href="[% gSkin.rootdir %]/admin.pl?op=recent">View recent comments for all discussions</a><br> [% END %]
-<table>
-	<tr>
-		<th>sid</th>
-		<th>cid</th>
-		<th>ipid</th>
-		<th>poster</th>
-		<th>sc</th>
-		<th>val</th>
-		<th>#m</th>
-		<th>reason</th>
-		<th>time</th>
-		<th>subject</th>
-	</tr>
-
-	<tr><td>&nbsp;</td><td>[% max_cid %]</td><td colspan="8">&nbsp;</td></tr>
-
-	[% FOREACH comm = recent_comments %]
-	<tr>
-		<td align="right"><a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</a></td>
-		<td align="right"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.cid %]</a></td>
-		<td align="left"><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[% comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
-		<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
-			IF comm.uid != constants.anonymous_coward_uid %]<a href="[%
-			gSkin.rootdir
-			%]/users.pl?op=userinfo&amp;uid=[%
-			comm.uid | strip_attribute %]">[% END %][% comm.uid %][%
-			IF comm.uid != constants.anonymous_coward_uid %]</a>[%
-			END %]) &nbsp; </td>
-		<td align="right">[% comm.score %]</td>
-		<td align="right">[% comm.sum_val %]</td>
-		<td align="right">[% comm.num_mods %]</td>
-		<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
-		<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
-		<td align="left"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.subject_vis | strip_title %]</a></td>
-	</tr>
-	<tr>
-		<td colspan="3" valign="top">
-			<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% comm.sid %]&cid=[% comm.cid %]">Unspam and Ban</a><br>
-			<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">Unspam Only</a>
-		</td>
-		<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,1000)) %]</td>
-	</tr>
-	<tr><td colspan="10" valign="top"><hr></td></tr>
-	[% END %]
-
-</table>
-
-[% prev_startat = startat + 100; %]
-<input type="hidden" name="op" value="moderate_recent">
-<input type="submit" name="submit" value="Moderate">
-<input type="hidden" name="startat" value="[% startat | strip_attribute %]">
-</form>
-<form action="[% gSkin.rootdir %]/admin.pl" method="get">
-[% IF min.defined %]
-	<input type="hidden" name="min" value="[% min | strip_attribute %]">
-[% END %]
-[% IF max.defined %]
-	<input type="hidden" name="max" value="[% max | strip_attribute %]">
-[% END %]
-<input type="hidden" name="startat" value="[% prev_startat | strip_attribute %]">
-<input type="submit" value="Prev Comments &gt;&gt;">
-<input type="hidden" name="sid" value="[% form.sid | strip_attribute %]">
-<input type="hidden" name="op" value="recent">
-</form>
 </div>
 __seclev__
 100
