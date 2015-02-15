@@ -43,7 +43,7 @@ __template__
   <ol>
    <li><strong>Logged In User</strong> If the system can't keep track, it won't work, so you gotta log in. Sorry if you're paranoid, but this system demands a certain level of accountability.</li>
    <li><strong>Positive Contributors</strong> Slashcode tracks your "Karma" (see the <a href="#faq">FAQ</a>). If you have non-negative Karma, this means you have posted more good comments than bad, and are eligible to moderate. This weeds out spam accounts.</li>
-	 <li><strong>No Sockpuppet Accounts</strong> Accounts newer than 1 month are not eligible to moderate.  This should keep sockpuppet accounts from immediate being a problem.
+	 <li><strong>No Sockpuppet Accounts</strong> Accounts newer than 1 month are not eligible to moderate.  This should keep sockpuppet accounts from immediately being a problem.
   </ol>
   <p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. </p>
  
@@ -97,7 +97,7 @@ __template__
   </dl>
 	
 	<h3 id="spam">What is Special About the Spam Mod</h3>
-	<p>The Spam mod is special in that is removes 10 Karma points from the user that posted the comment.  This mod is meant to combat spam and not to be used to punish commenters, as a spammer will eventually find themselves in Karma Hell and will not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all Spam mods to make sure moderators are not abusing the Spam mod.  If we find a moderator that unfairly applied the Spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month.  Further bans to the same modder add increasing amounts of ban time.  If you inadvertently applied a Spam mod, <a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> and we will remove the Spam mod without banning you.  Yes we know that the interface needs a bit of work and miss modding is an unfortunate consequence.</p>
+	<p>The Spam mod is special in that is removes 10 Karma points from the user that posted the comment.  This mod is meant to combat spam and not to be used to punish commenters. Our goal is to put a spammer in Karma Hell and to not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all Spam mods to make sure moderators are not abusing the Spam mod.  If we find a moderator that unfairly applied the Spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month.  Further bans to the same modder add increasing amounts of ban time.  If you inadvertently applied a Spam mod, <a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> and we will remove the Spam mod without banning you.  Yes we know that the interface needs a bit of work and miss modding is an unfortunate consequence.</p>
   
   <h3 id="future">Ideas for the Future</h3>
   <p>This is a system in development. Things can change. Our goal is to create one of the most comprehensive and well though-out moderation systems in existence. These ideas might help accomplish that goal:</p>
