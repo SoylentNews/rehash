@@ -190,7 +190,7 @@ IF !useredit.is_anon;
 		title = "Moderation";
 		contents = BLOCK %]
 			<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator</a>
-			Point[% user.points > 1 ? "s." %].</b><br/>
+			Point[% IF user.points > 1 %]s[% END %].</b><br/>
 			You get [% constants.m1_pointsgrant_arbitrary %] per day, given out at 00:10 UTC. <br>
 			[% IF user.points > 0 %]
 				<br/><b>Please</b>read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a>
