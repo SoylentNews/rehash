@@ -39,7 +39,7 @@ IF user.is_anon;
 	# The user we're displaying this page for is not logged in.
 	# Show the login block.
 
-	IF !return_url; return_url = gSkin.rootdir _ '/'; END
+	IF !return_url; return_url = gSkin.rootdir _ '/'; END;
 	
 	title = "Log In";
 	PROCESS userlogin;
