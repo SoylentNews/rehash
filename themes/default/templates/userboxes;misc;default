@@ -38,12 +38,18 @@ IF user.is_anon;
 
 	# The user we're displaying this page for is not logged in.
 	# Show the login block.
-	IF !return_url; return_url = gSkin.rootdir _ '/'; END;
+
 	title = "Log In";
-	contents = BLOCK;
-		PROCESS userlogin;
+	IF form.sid;
+		contents = BLOCK %]
+			[% PROCESS userlogin
+				return_url = "$return_url?sid=$form.sid" %]
+		[% END;
+	ELSE;
+		contents = BLOCK %]
+			[% PROCESS userlogin %]
+		[% END;
 	END;
-	
 	Slash.sidebox(title, contents, "userlogin", 1);
 
 END;
