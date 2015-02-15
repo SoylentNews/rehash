@@ -189,21 +189,15 @@ IF !useredit.is_anon;
 	IF user.points || ( constants.authors_unlimited && user.seclev >= constants.authors_unlimited );
 		title = "Moderation";
 		contents = BLOCK %]
-			<b>You have [% user.points %]
-			<a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator</a>
-			Point[% user.points == 1 ? "! Use it or lose it!" : "s! Use 'em or lose 'em!" %]</b><br/>
-			[%- IF user.points && user.lastgranted %]<br/>Your points expire at [%
-				hours = constants.mod_stir_hours || (constants.stir * 24);
-				hours = hours * 3600;
-				hours = hours + user.off_set;
-				Slash.timeCalc(user.lastgranted, "%Y-%m-%d %H:%m", hours); %].<br/>
-			[% END %]
+			<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator</a>
+			Point[% user.points > 1 ? "s." %].</b><br/>
+			You get [% constants.m1_pointsgrant_arbitrary %] per day, given out at 00:10 UTC. <br>
 			[% IF user.points > 0 %]
-				<br/>Welcome to those of you just joining: <b>please</b>
-				read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a>
+				<br/><b>Please</b>read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a>
 				for instructions.
 				<ul>
-					<li>You can't moderate after posting in the same discussion.</li>
+					<li>You can moderate after posting in the same discussion.</li>
+					<li>You cannot moderate your own posts.</li>
 					<li>Concentrate on promoting more than demoting.</li>
 					<li>Browse at -1 to keep an eye out for abuses.</li>
 					<li><a href="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</a> URLs showing abuse (the cid link please!).</li>
