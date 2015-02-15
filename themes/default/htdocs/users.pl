@@ -2413,8 +2413,9 @@ sub saveUserAdmin {
 		$user_edits_table->{m2info} = $form->{m2info};
 		$user_edits_table->{acl} = $acl_change if $acl_change;
 		$user_edits_table->{shill_static_marquee} = $form->{shill_static_marquee} ? 1 : undef;
-                $user_edits_table->{u2_friends_bios} = $form->{u2_friends_bios} ? 1 : undef;
-                $user_edits_table->{shill_rss_url} = $form->{shill_rss_url} ? $form->{shill_rss_url} : undef;
+		$user_edits_table->{u2_friends_bios} = $form->{u2_friends_bios} ? 1 : undef;
+		$user_edits_table->{shill_rss_url} = $form->{shill_rss_url} ? $form->{shill_rss_url} : undef;
+		$user_edits_table->{mod_banned} = $form->{mod_banned} ? $form->{mod_banned} : "1000-01-01";
 
 		my $author = $slashdb->getAuthor($id);
 		my $was_author = ($author && $author->{author}) ? 1 : 0;

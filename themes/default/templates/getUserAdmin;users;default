@@ -167,6 +167,9 @@ __template__
 						END %]
 					[% END %]
 				[% END %]
+				<b>Moderation Ban Date:</b>&nbsp;<input type="text" name="mod_banned" value="[% useredit.mod_banned | strip_attribute %]" size="20"><br>
+				Note format is YYYY-MM-DD.
+				
 				<p>
 				[% marquee_check = '';
 				IF useredit.shill_static_marquee;
