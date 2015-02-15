@@ -62,14 +62,8 @@ Show only comments from section:
 	[% FOREACH comm = recent_comments %]
 	<tr>
 		<td align="right"><a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</a></td>
-		<td align="right"><a href="[% gSkin.rootdir
-			%]/comments.pl?sid=[% comm.sid | strip_attribute
-			%]&amp;cid=[% comm.cid | strip_attribute
-			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[%
-			comm.cid %]</a></td>
-		<td align="left"><a href="[% gSkin.rootdir
-			%]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[%
-			comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
+		<td align="right"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.cid %]</a></td>
+		<td align="left"><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[% comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
 		<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
 			IF comm.uid != constants.anonymous_coward_uid %]<a href="[%
 			gSkin.rootdir
@@ -82,12 +76,16 @@ Show only comments from section:
 		<td align="right">[% comm.num_mods %]</td>
 		<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
 		<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
-		<td align="left">[% comm.subject_vis | strip_title %]</td>
+		<td align="left"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.subject_vis | strip_title %]</a></td>
 	</tr>
 	<tr>
-		<td colspan="3" valign="top"><a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% comm.sid %]&cid=[% comm.cid %]">Unspam and Ban</a> or <a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">Unspam Only</a></td>
-		<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,120)) %]</td>
+		<td colspan="3" valign="top">
+			<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% comm.sid %]&cid=[% comm.cid %]">Unspam and Ban</a><br>
+			<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">Unspam Only</a>
+		</td>
+		<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,1000)) %]</td>
 	</tr>
+	<tr><td colspan="10" valign="top"><hr></td></tr>
 	[% END %]
 
 </table>
