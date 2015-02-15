@@ -2107,14 +2107,14 @@ sub displaySpamMods {
 		num	=> 100,
 	}) || [ ];
 
-	my $subj_vislen = 300;
+	my $subj_vislen = 1000;
 	for my $comm (@$recent_comments) {
 		vislenify($comm); # add $comm->{ipid_vis}
 		$comm->{subject_vis} = substr($comm->{subject}, 0, $subj_vislen);
 		$comm->{date} = substr($comm->{date}, 5); # strip off year
 	}
 
-	slashDisplay('recent', {
+	slashDisplay('spam', {
 		startat		=> $startat,
 		recent_comments	=> $recent_comments,
 	});
