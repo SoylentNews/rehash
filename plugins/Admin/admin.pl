@@ -2107,13 +2107,7 @@ sub displaySpamMods {
 		num	=> 100,
 	}) || [ ];
 
-	if (defined($form->{show_m2s})) {
-		$slashdb->setUser($user->{uid},
-			{ user_m2_with_mod => $form->{show_m2s} });
-	}
-
-
-	my $subj_vislen = 30;
+	my $subj_vislen = 300;
 	for my $comm (@$recent_comments) {
 		vislenify($comm); # add $comm->{ipid_vis}
 		$comm->{subject_vis} = substr($comm->{subject}, 0, $subj_vislen);
@@ -2122,11 +2116,7 @@ sub displaySpamMods {
 
 	slashDisplay('recent', {
 		startat		=> $startat,
-		max_cid		=> $max_cid,
 		recent_comments	=> $recent_comments,
-		min		=> $min,
-		max		=> $max,
-		sid		=> $sid
 	});
 }
 
