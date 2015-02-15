@@ -1681,12 +1681,7 @@ sub prepareUser {
 		# MC: Ok, it's fracking 2014, lets get a real timestamp in our DB
 		$slashdb->updateLastAccessTimestamp($uid);
 	}
-	
-	if (isModBanned($uid)) {
-		$user->{is_mod_banned} = 1;
-	} else {
-		$user->{is_mod_banned} = 0;
-	}
+
 	
 #print STDERR scalar(localtime) . " $$ prepareUser user->uid=$user->{uid} is_anon=$user->{is_anon}\n";
 
@@ -1848,6 +1843,8 @@ sub prepareUser {
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
 		}
 	}
+	
+	$user->{is_mod_banned} = isModBanned($user);
 
 	if (!$user->{is_anon} && $user->{maker_mode} && $form->{adtoggle}) {
 		print STDERR "adtoggle |$form->{adsoff}|\n";
