@@ -28,7 +28,7 @@ __template__
 		</form>
 	[% END %]
 	
-	<table width="100%">
+	<table width="100%" cellpadding=2>
 		<tr>
 			<th>SID</th>
 			<th>CID</th>
@@ -47,7 +47,7 @@ __template__
 		<tr>
 			<td align="right"><a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</a></td>
 			<td align="right"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.cid %]</a></td>
-			<td align="left"><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[% comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
+			<td align="right"><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[% comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
 			<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
 				IF comm.uid != constants.anonymous_coward_uid %]<a href="[%
 				gSkin.rootdir
@@ -55,9 +55,9 @@ __template__
 				comm.uid | strip_attribute %]">[% END %][% comm.uid %][%
 				IF comm.uid != constants.anonymous_coward_uid %]</a>[%
 				END %]) &nbsp; </td>
-			<td align="right">[% comm.score %]</td>
-			<td align="right">[% comm.sum_val %]</td>
-			<td align="right">[% comm.num_mods %]</td>
+			<td align="center">[% comm.score %]</td>
+			<td align="center">[% comm.sum_val %]</td>
+			<td align="center">[% comm.num_mods %]</td>
 			<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
 			<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
 			<td align="left"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[% comm.subject_vis | strip_title %]</a></td>
