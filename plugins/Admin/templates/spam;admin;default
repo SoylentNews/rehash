@@ -28,18 +28,18 @@ __template__
 		</form>
 	[% END %]
 	
-	<table>
+	<table width="100%">
 		<tr>
-			<th>sid</th>
-			<th>cid</th>
-			<th>ipid</th>
-			<th>poster</th>
-			<th>sc</th>
-			<th>val</th>
-			<th>#m</th>
-			<th>reason</th>
-			<th>time</th>
-			<th>subject</th>
+			<th>SID</th>
+			<th>CID</th>
+			<th>IPID</th>
+			<th>Poster</th>
+			<th>Score</th>
+			<th>Value</th>
+			<th>Num Mods</th>
+			<th>Reason</th>
+			<th>Time</th>
+			<th>Subject</th>
 		</tr>
 	
 	
