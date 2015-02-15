@@ -2,12 +2,9 @@ __section__
 default
 __description__
 * startat - starting offset (0 for top comment)
-* max_cid - highest cid in the DB
 * recent_comments - arrayref of hashrefs, each one comment, each with fields
 	sid, cid, date, ipid, subnetid, subject, uid, score, lastmod, reason, 
 	nickname, sum_val, num_mods
-* min - setting of min threshold
-* max - setting of max threshold
 __title__
 admin interface recent template
 __page__
@@ -15,7 +12,7 @@ admin
 __lang__
 en_US
 __name__
-recent
+spam
 __template__
 [% PROCESS titlebar title="Spam Moderations" %]
 <div class="generalbody">
