@@ -166,6 +166,9 @@ sub main {
 				}
 			}
 		}
+		
+		my $return_url = $ENV{REQUEST_URI};
+		
 		slashDisplay('display', {
 			poll			=> $pollbooth,
 			section			=> $SECT,
@@ -173,6 +176,7 @@ sub main {
 			show_poll		=> $pollbooth ? 1 : 0,
 			story			=> $story,
 			stories			=> \%stories,
+			return_url  => $return_url,
 		});
 
 		my $called_pc = 0;
