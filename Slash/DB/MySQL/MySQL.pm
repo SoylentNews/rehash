@@ -9097,6 +9097,40 @@ sub getRecentComments {
 	return $ar;
 }
 
+sub getSpamMods {
+	my($self, $options) = @_;
+
+	my $startat = $options->{startat} || 0;
+	my $num = $options->{num} || 100; # should be a var
+	
+
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"comments.sid AS sid, comments.cid AS cid,
+		 date, comments.ipid AS ipid,
+		 comments.subnetid AS subnetid, subject,
+		 comments.uid AS uid, points AS score,
+		 lastmod, comments.reason AS reason,
+		 users.nickname AS nickname,
+		 discussions.primaryskid,
+		 comment_text.comment AS comment,
+		 SUM(val) AS sum_val,
+		 IF(moderatorlog.cid IS NULL, 0, COUNT(*))
+		 	AS num_mods",
+		"users, discussions, comment_text,
+		 comments LEFT JOIN moderatorlog
+		 	ON comments.cid=moderatorlog.cid
+			AND moderatorlog.active=1",
+		"comments.uid=users.uid
+		 AND comments.cid = comment_text.cid
+		 AND moderatorlog.reason = 11
+		 AND comments.sid = discussions.id",
+		"GROUP BY comments.cid
+		 ORDER BY comments.cid DESC
+		 LIMIT $startat, $num"
+	);
+	
+}
+
 sub getDiscussionParent {
 	# $did is the discussion id
 	my ($self, $did) = @_;

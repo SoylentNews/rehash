@@ -174,6 +174,12 @@ sub main {
 			adminmenu	=> 'security',
 			tab_selected	=> 'recent_mods',
 		},
+		spam_mods		=> {
+			function	=> \&displaySpamMods,
+			seclev		=> 500,
+			adminmenu	=> 'security',
+			tab_selected	=> 'spam_mods',
+		},
 		recent_requests		=> {
 			function	=> \&displayRecentRequests,
 			seclev		=> 500,
@@ -2046,6 +2052,8 @@ sub displayRecentMods {
 	slashDisplay('recent_mods');
 }
 
+
+##################################################################
 sub displayRecent {
 	my($form, $slashdb, $user, $constants) = @_;
 	my($min, $max, $sid, $primaryskid) = (undef, undef, undef, undef);
@@ -2088,6 +2096,40 @@ sub displayRecent {
 		sid		=> $sid
 	});
 }
+
+##################################################################
+sub displaySpamMods {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $startat = $form->{startat} || undef;
+
+	my $recent_comments = $slashdb->getSpamMods({
+		startat	=> $startat,
+		num	=> 100,
+	}) || [ ];
+
+	if (defined($form->{show_m2s})) {
+		$slashdb->setUser($user->{uid},
+			{ user_m2_with_mod => $form->{show_m2s} });
+	}
+
+
+	my $subj_vislen = 30;
+	for my $comm (@$recent_comments) {
+		vislenify($comm); # add $comm->{ipid_vis}
+		$comm->{subject_vis} = substr($comm->{subject}, 0, $subj_vislen);
+		$comm->{date} = substr($comm->{date}, 5); # strip off year
+	}
+
+	slashDisplay('recent', {
+		startat		=> $startat,
+		max_cid		=> $max_cid,
+		recent_comments	=> $recent_comments,
+		min		=> $min,
+		max		=> $max,
+		sid		=> $sid
+	});
+}
+
 
 ##################################################################
 sub displayRecentRequests {
