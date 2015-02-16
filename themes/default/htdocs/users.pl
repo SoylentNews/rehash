@@ -2413,8 +2413,9 @@ sub saveUserAdmin {
 		$user_edits_table->{m2info} = $form->{m2info};
 		$user_edits_table->{acl} = $acl_change if $acl_change;
 		$user_edits_table->{shill_static_marquee} = $form->{shill_static_marquee} ? 1 : undef;
-                $user_edits_table->{u2_friends_bios} = $form->{u2_friends_bios} ? 1 : undef;
-                $user_edits_table->{shill_rss_url} = $form->{shill_rss_url} ? $form->{shill_rss_url} : undef;
+		$user_edits_table->{u2_friends_bios} = $form->{u2_friends_bios} ? 1 : undef;
+		$user_edits_table->{shill_rss_url} = $form->{shill_rss_url} ? $form->{shill_rss_url} : undef;
+		$user_edits_table->{mod_banned} = isValidDate($form->{mod_banned}) ? $form->{mod_banned} : "1000-01-01";
 
 		my $author = $slashdb->getAuthor($id);
 		my $was_author = ($author && $author->{author}) ? 1 : 0;
@@ -2449,6 +2450,27 @@ sub saveUserAdmin {
 	$data->{note} = $note if defined $note;
 	showInfo($data);
 }
+
+
+#################################################################
+sub isValidDate {
+  my $input = shift;
+  if ($input =~ m!^((?:10|20|21)\d\d)[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$!) {
+    # At this point, $1 holds the year, $2 the month and $3 the day of the date entered
+    if ($3 == 31 and ($2 == 4 or $2 == 6 or $2 == 9 or $2 == 11)) {
+      return 0; # 31st of a month with 30 days
+    } elsif ($3 >= 30 and $2 == 2) {
+      return 0; # February 30th or 31st
+    } elsif ($2 == 2 and $3 == 29 and not ($1 % 4 == 0 and ($1 % 100 != 0 or $1 % 400 == 0))) {
+      return 0; # February 29th outside a leap year
+    } else {
+      return 1; # Valid date
+    }
+  } else {
+    return 0; # Not a date
+  }
+}
+
 
 #################################################################
 sub savePasswd {

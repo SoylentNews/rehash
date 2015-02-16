@@ -23,15 +23,6 @@ __template__
 	<p>Granting [% pages %] pages to [% grant_recipient.nickname | strip_literal %] ([% grant_recipient.uid %]).<p>
 	[% IF grant_success %]
 		<p>Grant completed successfully.</p>
-		<script type="text/javascript">
-		(function() {
-		// coremetrics
-		        if( window.location.hostname === 'slashdot.org' ) {
-		                cmSetProduction();
-		        }
-			cmCreateConversionEventTag( 'Account Subscription', '2', 'subscription', '50' );
-		})();
-		</script>
 	[% ELSE %]
 		<p><b>Error:</b> Grant did not complete successfully.</p>
 	[% END %]

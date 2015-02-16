@@ -1199,6 +1199,58 @@ sub isSubscriber {
 
 #========================================================================
 
+
+=head2 isModBanned(USER)
+
+Tests to see if the user passed in banned from moderation.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item USER
+
+User data hashref from getUser() call.
+
+If you pass a UID instead of a USER, then the function will call getUser() for you.
+
+=back
+
+=item Return value
+
+Returns true if the USER is mod banned, otherwise false.  
+
+=back
+
+=cut
+
+sub isModBanned{
+	my($buser) = @_;
+
+	# assume is not banned by default
+	my $banned = 0;
+
+	if (! ref $buser) {
+		my $slashdb = getCurrentDB();
+		$buser = $slashdb->getUser($buser, [qw(mod_banned)]);
+	}
+	
+	use DateTime;
+	use DateTime::Format::MySQL;
+	my $dt_today   = DateTime->today;
+	my $dt_ban= DateTime::Format::MySQL->parse_date($buser->{mod_banned});
+	
+	if ( $dt_ban >= $dt_today ){
+		$banned = 1;
+	}
+
+	return $banned;
+}
+
+#========================================================================
+
 =head2 getAnonId([FORMKEY])
 
 Returns a string of random alphanumeric characters.
@@ -1629,6 +1681,8 @@ sub prepareUser {
 		# MC: Ok, it's fracking 2014, lets get a real timestamp in our DB
 		$slashdb->updateLastAccessTimestamp($uid);
 	}
+
+	
 #print STDERR scalar(localtime) . " $$ prepareUser user->uid=$user->{uid} is_anon=$user->{is_anon}\n";
 
 	# Now store the DB information from above in the user
@@ -1789,6 +1843,8 @@ sub prepareUser {
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
 		}
 	}
+	
+	$user->{is_mod_banned} = isModBanned($user);
 
 	if (!$user->{is_anon} && $user->{maker_mode} && $form->{adtoggle}) {
 		print STDERR "adtoggle |$form->{adsoff}|\n";
