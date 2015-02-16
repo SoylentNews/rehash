@@ -176,7 +176,7 @@ sub main {
 		},
 		spam_mods		=> {
 			function	=> \&displaySpamMods,
-			seclev		=> 500,
+			seclev		=> 100,
 			adminmenu	=> 'security',
 			tab_selected	=> 'spam_mods',
 		},
