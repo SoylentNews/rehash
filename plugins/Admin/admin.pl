@@ -1171,7 +1171,7 @@ sub editStory {
 			$storyref->{$field} = $slashdb->autoUrl($form->{section}, $storyref->{$field});
 			$storyref->{$field} = cleanSlashTags($storyref->{$field});
 			$storyref->{$field} = strip_html($storyref->{$field});
-			$storyref->{$field} = slashizeLinks($storyref->{$field});
+			#$storyref->{$field} = slashizeLinks($storyref->{$field});
 			$storyref->{$field} = parseSlashizedLinks($storyref->{$field});
 			$storyref->{$field} = balanceTags($storyref->{$field});
 		}
@@ -1794,7 +1794,7 @@ sub updateStory {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 		$form->{$field} = cleanSlashTags($form->{$field});
 		$form->{$field} = strip_html($form->{$field});
-		$form->{$field} = slashizeLinks($form->{$field});
+		#$form->{$field} = slashizeLinks($form->{$field});
 		$form->{$field} = balanceTags($form->{$field});
 	}
 
@@ -2249,7 +2249,7 @@ sub saveStory {
 		local $Slash::Utility::Data::approveTag::admin = 2;
 		$form->{$field} = cleanSlashTags($form->{$field});
 		$form->{$field} = strip_html($form->{$field});
-		$form->{$field} = slashizeLinks($form->{$field});
+		#$form->{$field} = slashizeLinks($form->{$field});
 		$form->{$field} = balanceTags($form->{$field});
 	}
 
