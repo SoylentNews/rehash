@@ -943,7 +943,7 @@ sub _printHead {
 		$data->{useredit} = $useredit;
 	}
 	
-	$data->{return_url} = $ENV{REQUEST_URI};
+	$data->{return_url} = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
 
 	slashDisplay('journalhead', $data);
 }

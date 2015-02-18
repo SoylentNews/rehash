@@ -167,7 +167,7 @@ sub main {
 			}
 		}
 		
-		my $return_url = $ENV{REQUEST_URI};
+		my $return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
 		
 		slashDisplay('display', {
 			poll			=> $pollbooth,

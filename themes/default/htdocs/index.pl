@@ -307,7 +307,7 @@ my $start_time = Time::HiRes::time;
 		my $metamod_reader = getObject('Slash::Metamod', { db_type => 'reader' });
 		$metamod_elig = $metamod_reader->metamodEligible($user);
 	}
-	my $return_url = $ENV{REQUEST_URI};
+	my $return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
 	
 	slashDisplay('index', {
 		metamod_elig	=> $metamod_elig,
