@@ -65,16 +65,22 @@ __template__
 			<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
 				<fieldset>
 					<legend>Purchase Subscriptions</legend>
-					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and BitPay (for Bitcoin payments).  You can purchase a [% constants.paypal_num_days %] day subscription for only $[% constants.paypal_amount %] US.<br />
+					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and BitPay (for Bitcoin payments).<br />
 					<br />
 					The recipient of a gift subscription will be notified of your purchase through email.<br />
 					<br />
 					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
 					<input type="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <input type="text" name="uid" size="10"><br />	
 					<br />
+					
 					For gift subscriptions only:<br />
 					Who do you want the recipient to be told the gift is from?<br />
 					<input type="text" name="from" size="35" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
+					<br />
+					Length of subscription and price.  Choose the length of the subscription and if you want you can purchase your subscription for custom price, in US dollars..  (Price must be equal or greater than the default minimum values.)<br />
+					<input type="radio" name="subscription_days" value="[% constants.subscribe_monthly_days %]"> [% constants.subscribe_monthly_days %] Day: <input type="text" name="monthly_amount" size="7" maxlength="7" value="[% constants.subscribe_monthly_amount %]"><br />
+					<input type="radio" name="subscription_days" value="[% constants.subscribe_semiannual_days %]"> [% constants.subscribe_semiannual_days %] Day: <input type="text" name="semiannual_amount" size="7" maxlength="7" value="[% constants.subscribe_semiannual_amount %]"><br />
+					<input type="radio" name="subscription_days" value="[% constants.subscribe_annual_days %]" checked="checked"> [% constants.subscribe_annual_days %] Day: <input type="text" name="annual_amount" size="7" maxlength="7" value="[% constants.subscribe_annual_amount %]"><br />
 					<br />
 					<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue">
 				</fieldset>
