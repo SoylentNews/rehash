@@ -7,7 +7,7 @@ package Slash::Apache::Log;
 use strict;
 use utf8;
 use Slash::Utility;
-use Apache::Constants qw(:common);
+use Apache2::Const;
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -33,20 +33,33 @@ our $VERSION = $Slash::Constants::VERSION;
 
 sub handler {
 	my($r) = @_;
+
+	###################################
+	# MC: this is horridly hacky, but basically, we use %ENV{MOD_PERL}
+	# to see if we're in mod_perl, to see if we can use Request APIs
+	# However, in early init, we can't do that without Apache crashing
+	# so we need to clean up the ENV, then restore it before we exit. What a hack
+	#$ENV{FORCE_SLASH_STATIC} = 1;
+
 	return OK unless dbAvailable("write_accesslog");
-	my $constants = getCurrentStatic();
+	#my $constants = getCurrentStatic();
+
+	# delete FORCE var
+	#delete $ENV{FORCE_SLASH_STATIC};
 
 	# Notes has a bug (still in apache 1.3.17 at
 	# last look). Apache's directory sub handler
 	# is not copying notes. Bad Apache!
 	# -Brian
-	my $uri = $r->uri;
-	my $dat = $r->err_header_out('SLASH_LOG_DATA');
+	
+	# Disabled for mod_perl 2.x - do we really need this? - MC
+	#my $uri = $r->uri;
+	#my $dat = $r->err_header_out('SLASH_LOG_DATA');
 
 	# There used to be some (broken) logic here involving the
 	# log_admin var, but that's been moved to createLog().
 
-	createLog($uri, $dat, $r->status);
+	#createLog($uri, $dat, $r->status);
 
 	return OK;
 }

@@ -733,7 +733,7 @@ sub ajaxDeleteMessage {
 
 sub DESTROY {
 	my($self) = @_;
-	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
+	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{MOD_PERL};
 }
 
 1;

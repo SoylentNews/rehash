@@ -339,7 +339,7 @@ sub getLastInsertId {
 # back anyway.
 sub sqlSetVar {
 	my($self, $var, $value) = @_;
-	return if $ENV{GATEWAY_INTERFACE} && !getCurrentUser('is_admin');
+	return if $ENV{MOD_PERL} && !getCurrentUser('is_admin');
 
 	# can't use sqlQuote for this, can't be quoted
 	$var =~ s/\W+//;   # just in case
@@ -473,7 +473,7 @@ sub _querylog_finish {
 		. " '$self->{_querylog}{package}' , '$self->{_querylog}{line}' ,"
 		. " '$self->{_querylog}{package1}', '$self->{_querylog}{line1}',"
 		. " $elapsed)";
-	if (!$ENV{GATEWAY_INTERFACE}) {
+	if (!$ENV{MOD_PERL}) {
 		$self->{_querylog}{db}{_dbh}->do($insert);
 		return ;
 	}

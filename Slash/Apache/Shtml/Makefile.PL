@@ -1,11 +1,7 @@
 package Slash::Apache::Shtml;
-use ExtUtils::MakeMaker;
+use ModPerl::MM ();
 
-use Apache::ExtUtils;
-use Apache::src ();
-
-WriteMakefile(
+ModPerl::MM::WriteMakefile(
 	'NAME'	=> 'Slash::Apache::Shtml',
 	'VERSION_FROM' => 'Shtml.pm',
-	'INC'       => Apache::src->new->inc,
 );

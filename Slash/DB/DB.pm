@@ -33,7 +33,7 @@ sub new {
 
 	my $dsn = DBIx::Password::getDriver($user);
 	if (my $modname = $dsnmods->{$dsn}) {
-		my $dbclass = ($ENV{GATEWAY_INTERFACE})
+		my $dbclass = ($ENV{MOD_PERL})
 			? "Slash::DB::$modname"
 			: "Slash::DB::Static::$modname";
 		eval "use $dbclass"; die $@ if $@;
@@ -112,7 +112,7 @@ sub init {
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect
-		if ! $ENV{GATEWAY_INTERFACE} && defined $self->{_dbh};
+		if ! $ENV{MOD_PERL} && defined $self->{_dbh};
 }
 
 1;

@@ -382,8 +382,8 @@ sub get_template {
 
 	# think more on this, consider putting it in
 	# Slash::Utility::Environment -- pudge
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		$cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
+		$cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config );
 		return $cfg->{template} if $cfg->{template};
 	} elsif ($VirtualUser && ref $objects{$VirtualUser}) {
 		return $objects{$VirtualUser};

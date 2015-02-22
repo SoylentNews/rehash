@@ -17,7 +17,7 @@ our $VERSION = $Slash::Constants::VERSION;
 sub doCheck {
 	my($self) = @_;
 
-	if (!$ENV{GATEWAY_INTERFACE}) {
+	if (!$ENV{MOD_PERL}) {
 		return RESKEY_SUCCESS;
 	}
 
