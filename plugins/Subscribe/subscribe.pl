@@ -350,7 +350,7 @@ sub confirm {
 		}
 	}
 
-	my $uid = $form->{uid} || $user->$uid;
+	my $uid = $form->{uid} || $user->{uid};
 	my $sub_user = $slashdb->getUser($uid);
 	my $puid = $user->{uid};
 	my $title ="Confirm subscription and choose payment type";
