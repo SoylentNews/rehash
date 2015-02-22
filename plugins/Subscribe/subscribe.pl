@@ -14,7 +14,6 @@ use DateTime;
 use DateTime::Format::MySQL;
 use Slash::Constants qw(:web :messages);
 use JSON;
-use Switch;
 
 sub main {
 	my $user = getCurrentUser();
@@ -330,31 +329,27 @@ sub confirm {
 	my $type = $form->{subscription_type};
 	my $days = $form->{subscription_days};
 	my $amount;
-	
-	switch ($days) {
-		case ($constants->{subscribe_monthly_days}) {
-			if ($form->{monthly_amount} >= $constants->{subscribe_monthly_amount}) {
-				$amount = $form->{monthly_amount};
-			} else {
-				$amount = $constants->{subscribe_monthly_amount};
-			}
+
+	if ($days == $constants->{subscribe_monthly_days}) {
+		if ($form->{monthly_amount} >= $constants->{subscribe_monthly_amount}) {
+			$amount = $form->{monthly_amount};
+		} else {
+			$amount = $constants->{subscribe_monthly_amount};
 		}
-		case ($constants->{subscribe_semiannual_days}) {
-			if ($form->{semiannual_amount} >= $constants->{subscribe_semiannual_amount}) {
-				$amount = $form->{semiannual_amount};
-			} else {
-				$amount = $constants->{subscribe_semiannual_amount};
-			}
+	} elsif ($days == $constants->{subscribe_semiannual_days}) {
+		if ($form->{semiannual_amount} >= $constants->{subscribe_semiannual_amount}) {
+			$amount = $form->{semiannual_amount};
+		} else {
+			$amount = $constants->{subscribe_semiannual_amount};
 		}
-		else {
-			if ($form->{annual_amount} >= $constants->{subscribe_annual_amount}) {
-				$amount = $form->{annual_amount};
-			} else {
-				$amount = $constants->{subscribe_annual_amount};
-			}
+	} else {
+		if ($form->{annual_amount} >= $constants->{subscribe_annual_amount}) {
+			$amount = $form->{annual_amount};
+		} else {
+			$amount = $constants->{subscribe_annual_amount};
 		}
 	}
-	
+
 	my $uid = $form->{uid};
 	my $sub_user = $slashdb->getUser($uid);
 	my $puid = sub_user->{uid};
