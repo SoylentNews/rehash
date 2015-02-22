@@ -286,10 +286,8 @@ reload: install
 # We need this to remove Makefile.old's as well, and *.xs.orig
 clean:
 	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; $(MAKE) clean)
-	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
 	(cd plugins; $(MAKE) clean)
 	find ./ | grep Makefile.old | xargs rm
-	find ./ | grep .xs.orig | xargs rm
 
 dist: $(DISTVNAME).tar$(SUFFIX)
 
