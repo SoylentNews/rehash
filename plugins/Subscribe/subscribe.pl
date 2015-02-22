@@ -14,6 +14,7 @@ use DateTime;
 use DateTime::Format::MySQL;
 use Slash::Constants qw(:web :messages);
 use JSON;
+use Switch;
 
 sub main {
 	my $user = getCurrentUser();
