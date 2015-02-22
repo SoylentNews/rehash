@@ -285,7 +285,8 @@ sub handler {
 				}
 
 				$uid = $constants->{anonymous_coward_uid};
-				delete $cookies->{user};
+				#delete $cookies->{user};
+
 				# if you are here, chances are your cookie is bad,
 				# so we blank it out for you.  you're welcome.
 				setCookie('user', '');
@@ -293,7 +294,7 @@ sub handler {
 		}
 
 	} elsif ($op eq 'userclose') {
-		delete $cookies->{user};
+		#delete $cookies->{user};
 		setCookie('user', '');
 	}
 
@@ -301,7 +302,7 @@ sub handler {
 	delete $form->{login_temp};
 
 	# This has happened to me a couple of times.
-	delete $cookies->{user} if $cookies->{user} && !$cookies->{user}->value;
+	#delete $cookies->{user} if $cookies->{user} && !$cookies->{user}->value;
 
 	if (!$uid) {
 		if ($gSkin && $gSkin->{ac_uid}) {

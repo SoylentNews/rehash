@@ -31,11 +31,10 @@ sub new {
 }
 
 sub header {
-	my $r = Apache->request;
-	$r->header_out('Cache-Control', 'no-cache');
-	$r->header_out('Pragma', 'no-cache');
-	$r->header_out('Content-Type', "application/json; charset=UTF-8");
-	$r->send_http_header;
+	my $r = Apache2::RequestUtil->request;
+	$r->headers_out->set('Cache-Control', 'no-cache');
+	$r->headers_out->set('Pragma', 'no-cache');
+	$r->headers_out->set('Content-Type', "application/json; charset=UTF-8");
 }
 
 1;

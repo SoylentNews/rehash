@@ -26,8 +26,8 @@ sub main {
 
 
 	if ($constants->{journal_soap_enabled}) {
-		my $r = Apache->request;
-		if ($r->header_in('SOAPAction')) {
+		my $r = Apache2::RequestUtil->request;
+		if ($r->headers_in->{'SOAPAction'}) {
 			require SOAP::Transport::HTTP;
 			# security problem previous to 0.55
 			if (SOAP::Lite->VERSION gt 0.55) {
@@ -37,7 +37,7 @@ sub main {
 				$user->{state}{packagename} = __PACKAGE__;
 				return SOAP::Transport::HTTP::Apache->dispatch_to
 					('Slash::Journal::SOAP')->handle(
-						Apache->request->pnotes('filterobject')
+						Apache2::RequestUtil->request->pnotes('filterobject')
 					);
 			}
 		}
@@ -108,7 +108,7 @@ sub main {
 	} else {
 		$ops{$op}[FUNCTION]->($journal, $constants, $user, $form, $journal_reader, $gSkin);
 		my $r;
-		if ($r = Apache->request) {
+		if ($r = Apache2::RequestUtil->request) {
 			return if $r->header_only;
 		}
 		footer();
