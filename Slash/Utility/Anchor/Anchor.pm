@@ -414,10 +414,10 @@ sub redirect {
 	my $constants = getCurrentStatic();
 	$url = url2abs($url);
 	my $r = Apache2::RequestUtil->request;
+	$r->status($code);
 
 	$r->content_type($constants->{content_type_webpage} || 'text/html');
 	$r->headers_out->set(Location => $url);
-	$r->status($code);
 
 	slashDisplay('html-redirect', { url => $url, code => $code });
 }
