@@ -190,14 +190,14 @@ sub sendMailPasswd {
 
 	my $newpasswd = $slashdb->getNewPasswd($uid);
 
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	my $remote_ip = $r->connection->remote_ip;
 
-	my $xff = $r->header_in('X-Forwarded-For') || '';
+	my $xff = $r->headers_in->{'X-Forwarded-For'} || '';
 	$xff =~ s/\s+/ /g;
 	$xff = substr(strip_notags($xff), 0, 20);
 
-	my $ua = $r->header_in('User-Agent') || '';
+	my $ua = $r->headers_in->{'User-Agent'} || '';
 	$ua =~ s/\s+/ /g;
 	$ua = substr(strip_attribute($ua), 0, 60);
 

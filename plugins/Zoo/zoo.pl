@@ -51,7 +51,7 @@ sub main {
 
 	$ops{$op}[FUNCTION]->($zoo, $constants, $user, $form, $slashdb, $gSkin);
 	my $r;
-	if ($r = Apache->request) {
+	if ($r = Apache2::RequestUtil->request) {
 		return if $r->header_only;
 	}
 	footer() unless $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};

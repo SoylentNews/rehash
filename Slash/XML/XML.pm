@@ -130,7 +130,7 @@ sub xmlDisplay {
 	if ($opt->{Return}) {
 		return $content;
 	} else {
-		my $r = Apache->request;
+		my $r = Apache2::RequestUtil->request;
 		my $content_type = 'text/xml';
 		my $suffix = 'xml';
 

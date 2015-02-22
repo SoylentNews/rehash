@@ -1271,7 +1271,7 @@ sub createAccessLog {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	my $bytes = $r->bytes_sent;
 
 	$user ||= {};
@@ -1394,7 +1394,7 @@ sub createAccessLogAdmin {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 
 	# $ENV{SLASH_USER} wasn't working, was giving us some failed inserts
 	# with uid NULL.
@@ -1699,7 +1699,7 @@ sub createBadPasswordLog {
 
 	# Bad passwords that don't come through the web,
 	# we don't bother to log.
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	return unless $r;
 
 	# We also store the realemail field of the actual user account
@@ -4543,7 +4543,7 @@ sub setKnownOpenProxy {
 	return 0 unless $ip;
 	my $xff;
 	if ($port) {
-		my $r = Apache->request;
+		my $r = Apache2::RequestUtil->request;
 		$xff = $r->header_in('X-Forwarded-For') if $r;
 #use Data::Dumper; print STDERR "sKOP headers_in: " . Dumper([ $r->headers_in ]) if $r;
 	}
@@ -4567,7 +4567,7 @@ sub checkForOpenProxy {
 	# If we weren't passed an IP address, default to whatever
 	# the current IP address is.
 	if (!$ip && $ENV{MOD_PERL}) {
-		my $r = Apache->request;
+		my $r = Apache2::RequestUtil->request;
 		$ip = $r->connection->remote_ip if $r;
 	}
 

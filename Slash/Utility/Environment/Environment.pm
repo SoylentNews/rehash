@@ -1473,11 +1473,11 @@ sub setCookie {
 		$cookie->expires('+1y');
 	}
 
-	$cookie->bake;
+	$cookie->bake($r);
 
 	if ($domain) {
 		$cookie->domain($domain);
-		$cookie->bake;
+		$cookie->bake($r);
 	}
 }
 
