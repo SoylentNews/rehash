@@ -350,9 +350,9 @@ sub confirm {
 		}
 	}
 
-	my $uid = $form->{uid};
+	my $uid = $form->{uid} || $user->$uid;
 	my $sub_user = $slashdb->getUser($uid);
-	my $puid = $sub_user->{uid};
+	my $puid = $user->{uid};
 	my $title ="Confirm subscription and choose payment type";
 	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
 		tab_selected =>		'subscription',
