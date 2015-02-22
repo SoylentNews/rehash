@@ -4566,7 +4566,7 @@ sub checkForOpenProxy {
 	my($self, $ip) = @_;
 	# If we weren't passed an IP address, default to whatever
 	# the current IP address is.
-	if (!$ip && $ENV{GATEWAY_INTERFACE}) {
+	if (!$ip && $ENV{MOD_PERL}) {
 		my $r = Apache->request;
 		$ip = $r->connection->remote_ip if $r;
 	}
@@ -10740,7 +10740,7 @@ sub getSection {
 sub getSkin {
 	my($self, $skid, $options) = @_;
 	if (!$skid) {
-		if ($ENV{GATEWAY_INTERFACE}) {
+		if ($ENV{MOD_PERL}) {
 			errorLog("cannot getSkin for empty skid='$skid'");
 		}
 		$skid = getCurrentStatic('mainpage_skid');
@@ -13357,7 +13357,7 @@ sub DESTROY {
 	$self->_querylog_writecache;
 
 	# Slash::Tagbox, a subclass of MySQL.pm, does this too:
-	#	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
+	#	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{MOD_PERL};
 	# I'm not sure why we don't do that here instead.  I'm not sure
 	# how often it actually happens that a MySQL.pm is destroyed by
 	# slashd, and I don't know exactly how DBI.pm handles disconnects

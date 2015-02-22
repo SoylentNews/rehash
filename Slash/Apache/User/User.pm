@@ -8,27 +8,40 @@ use strict;
 use utf8;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
-use Apache;
-use Apache::Constants qw(:common M_GET REDIRECT);
-use Apache::Cookie;
-use Apache::Request ();
-use Apache::File;
-use Apache::ModuleConfig;
-use AutoLoader ();
-use DynaLoader ();
+use Apache2::Cookie;
+use Apache2::Const -compile => qw( :http );
+use Apache2::Module;
+use Apache2::Request;
+use Apache2::RequestRec ();
+use Apache2::RequestIO ();
+
 use Slash::Apache ();
 use Slash::Display;
 use Slash::Utility;
 use URI ();
 use vars qw($VERSION @ISA @QUOTES $USER_MATCH $request_start_time);
 
-@ISA		= qw(DynaLoader);
 $VERSION   	= '2.003000';  # v2.3.0
 
-bootstrap Slash::Apache::User $VERSION;
 
 # BENDER: Oh, so, just 'cause a robot wants to kill humans
 # that makes him a radical?
+my @directives = (
+	{ name      => 'SlashEnableENV',
+		errmsg      => 'Takes a flag that is either on or off (off by default)',
+		args_how    => 'FLAG',
+		req_override => 'RSRC_CONF'
+	},
+	{ name      => 'SlashAuthAll',
+		errmsg      => 'Takes a flag that is either on or off (off by default)',
+		args_how    => 'FLAG',
+		req_override => 'RSRC_CONF'
+	}
+
+);
+
+Apache2::Module::add(__PACKAGE__, \@directives);
+
 
 $USER_MATCH = $Slash::Apache::USER_MATCH;
 
@@ -49,26 +62,28 @@ my $srand_called;
 sub handler {
 	my($r) = @_;
 
-	return DECLINED unless $r->is_main;
+	return Apache2::Const::DECLINED unless !$r->main;
 
 	my $uri = $r->uri;
 
 	# Exclude any URL that matches the environment variable regex
 	if ($ENV{SLASH_EXCLUDE_URL_USERHANDLER}) {
-		return OK if $uri =~ /$ENV{SLASH_EXCLUDE_URL_USERHANDLER}/;
+		return Apache2::Const::OK if $uri =~ /$ENV{SLASH_EXCLUDE_URL_USERHANDLER}/;
 	}
 
 	$request_start_time ||= Time::HiRes::time;
 
-	# Ok, this will make it so that we can reliably use Apache->request
-	Apache->request($r);
-
-	my $cfg = Apache::ModuleConfig->get($r);
-	my $dbcfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
+	my $dbcfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 	my $constants = getCurrentStatic();
+
+	# Ok, this will make it so that we can reliably use Apache->request
+	Apache2::RequestUtil->request($r);
+
 	my $slashdb = $dbcfg->{slashdb};
-	my $apr = Apache::Request->new($r);
+	my $apr = Apache2::Request->new($r);
 	my $gSkin = getCurrentSkin();
+	my $method = $r->method;
 
 	my $reader_user = $slashdb->getDB('reader');
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
@@ -80,7 +95,7 @@ sub handler {
 		&& $constants->{cvs_tag_currentcode} =~ /_(\d+)$/) {
 		$version_code .= sprintf("%03d", $1);
 	}
-	$r->header_out('X-Powered-By' => $version_code);
+	$r->headers_out->set('X-Powered-By', $version_code);
 
 	add_random_quote($r);
 
@@ -95,47 +110,14 @@ sub handler {
 	$slashdb->sqlConnect;
 	$reader->sqlConnect;
 
-	##################################################
-	# Don't remove this. This solves a known bug in Apache -- brian
-	# i really wish we knew WHAT bug, and how this solves it -- pudge
-	#
-	# OK, let's try to clear this up. See:
-	# http://www.apache.org/dist/perl/mod_perl-1.28/faq/mod_perl_api.pod
-	# The issue is that we use Apache::Request's methods to parse an
-	# incoming POST request;  it reads Content-length bytes from STDIN
-	# and converts them into params which we assign into a form hash in
-	# filter_params().  If another module later tries to do the same
-	# thing, it will hang forever waiting to read Content-length more
-	# bytes from STDIN when of course none are left to read.  The main
-	# danger is that someone will 'use CGI' along with Slash -- CGI.pm
-	# automatically parses that data and so will hang.  There is no
-	# good way to share that data between the two modules, so what we
-	# do instead is munge what Apache::Request considers the incoming
-	# data to be, so no later code will try to read from it.  Maybe we
-	# should do this in filter_params itself, but for now it's here.
-	# -- jamie
-	# And gee it sure looks like this makes this handler get executed
-	# twice and the second time through it comes as a GET with no
-	# parameters because they've been nuked.  But when I comment
-	# those three lines out, it at least works, so that's what I'm
-	# doing for now.  We'll figure it out better later.  -- jamie
-
-	my $method = $r->method;
 
 	my $form = filter_params($apr);
-
-#	$r->method('GET');
-#	$r->method_number(M_GET);
-#	$r->headers_in->unset('Content-length');
-
-	# And now the request is safe for CGI.pm or anything else to try
-	# to work with -- or at least it won't hang.
-	##################################################
 
 	$form->{query_apache} = $apr;
 	@{$form}{keys  %{$constants->{form_override}}} =
 		values %{$constants->{form_override}};
-	my $cookies = Apache::Cookie->fetch;
+
+	my $cookies = Apache2::Cookie->fetch;
 
 	# So we are either going to pick the user up from
 	# the form, a cookie, or they will be anonymous
@@ -357,7 +339,7 @@ sub handler {
 	if ($banlist->{$uid}) {
 		# The global current user hasn't been created yet, so the
 		# template expects uid just passed in as the var named "uid".
-		$r->custom_response(FORBIDDEN,
+		$r->custom_response( Apache2::Const::FORBIDDEN,
 			slashDisplay('bannedtext_uid', { uid => $uid }, { Return => 1 } )
 		);
 		# Now we need to create a user hashref for that global
@@ -374,7 +356,7 @@ sub handler {
 			subnetid	=> $subnetid,
 		};
 		createCurrentUser($user);
-		return FORBIDDEN;
+		return Apache2::Const::FORBIDDEN;
 	}
 
 	my $user = prepareUser($uid, $form, $uri, $cookies, $method);
@@ -397,7 +379,7 @@ sub handler {
 		$r->err_header_out(Location =>
 			URI->new_abs('/', $constants->{absolutedir})
 		);
-		return REDIRECT;
+		return Apache2::Const::REDIRECT;
 	}
 
 	# If the user is connecting over SSL, make sure this is allowed.
@@ -452,7 +434,7 @@ sub handler {
 		$newloc .= "?" . $r->args if $r->args;
 		$r->err_header_out(Location =>
 			URI->new_abs($newloc, $gSkin->{absolutedir}));
-		return REDIRECT;
+		return Apache2::Const::REDIRECT;
 	}
 
 	createCurrentCookie($cookies);
@@ -477,7 +459,7 @@ sub handler {
 		}
 	}
 
-	return OK;
+	return Apache2::Const::OK;
 }
 
 ########################################################
@@ -503,15 +485,15 @@ sub add_random_quote {
 	my($r) = @_;
 	my $quote = $QUOTES[int(rand(@QUOTES))];
 	(my($who), $quote) = split(/: */, $quote, 2);
-	$r->header_out("X-$who" => $quote);
+	$r->headers_out->set("X-$who", $quote);
 }
 
 sub add_author_quotes {
 	my($r) = @_;
-	$r->header_out('X-Author-Krow' => "You can't grep a dead tree.");
-	$r->header_out('X-Author-Pudge' => "Bite me.");
-	$r->header_out('X-Author-CaptTofu' => "I like Tofu.");
-	$r->header_out('X-Author-Jamie' => "I also enjoy tofu.");
+	$r->headers_out->set('X-Author-Krow',"You can't grep a dead tree.");
+	$r->headers_out->set('X-Author-Pudge', "Bite me.");
+	$r->headers_out->set('X-Author-CaptTofu', "I like Tofu.");
+	$r->headers_out->set('X-Author-Jamie', "I also enjoy tofu.");
 }
 
 ########################################################
@@ -624,9 +606,9 @@ $ops_my_ac{$_}{uri} ||= 'login.pl' for (keys %ops_my_ac);
 # Of course renaming requires editing a .conf file (see
 # bin/install-slashsite PerlTransHandler).
 sub userdir_handler {
-	my($r) = @_;
+	my($class, $r) = @_;
 
-	return DECLINED unless $r->is_initial_req;
+	return Apache2::Const::DECLINED unless $r->is_initial_req;
 
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
@@ -664,7 +646,7 @@ sub userdir_handler {
 		$r->args(join('&', @args));
 		$r->uri('/tags.pl');
 		$r->filename($constants->{basedir} . '/tags.pl');
-		return OK;
+		return Apache2::Const::OK;
 	}
 
 	# for self-references (/~/ and /my/)
@@ -683,7 +665,7 @@ sub userdir_handler {
 		my($op, $extra) = split /\//, $string, 2;
 		$extra ||= '';
 
-		my $logged_in = $r->header_in('Cookie') =~ $USER_MATCH;
+		my $logged_in = $r->headers_in->{'Cookie'} =~ $USER_MATCH;
 		my $try_login = !$logged_in && $logtoken;
 
 		my($r_args, $r_uri);
@@ -739,13 +721,13 @@ sub userdir_handler {
 		$r->uri('/' . $r_uri);
 		$r->filename($constants->{basedir} . '/' . $r_uri);
 
-		return OK;
+		return Apache2::Const::OK;
 
 	} elsif ($uri =~ m[^/bookmarks (?: /(.*) | /? ) $]x) {
 		$r->args('op=showbookmarks');
 		$r->uri('/bookmark.pl');
 		$r->filename($constants->{basedir} . '/bookmark.pl');
-		return OK;
+		return Apache2::Const::OK;
 	}
 
 	# assuming Apache/mod_perl is decoding the URL in ->uri before
@@ -847,10 +829,10 @@ sub userdir_handler {
 		$r->uri('/' . $r_uri);
 		$r->filename($constants->{basedir} . '/' . $r_uri);
 
-		return OK;
+		return Apache2::Const::OK;
 	}
 
-	return DECLINED;
+	return Apache2::Const::DECLINED;
 } }
 
 

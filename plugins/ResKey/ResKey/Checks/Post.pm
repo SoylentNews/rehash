@@ -17,7 +17,7 @@ our $VERSION = $Slash::Constants::VERSION;
 sub doCheck {
 	my($self) = @_;
 
-	return RESKEY_NOOP unless $ENV{GATEWAY_INTERFACE};
+	return RESKEY_NOOP unless $ENV{MOD_PERL};
 
 	my $user = getCurrentUser();
 

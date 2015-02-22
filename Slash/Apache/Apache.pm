@@ -7,20 +7,17 @@ package Slash::Apache;
 use strict;
 use utf8;
 use Time::HiRes;
-use Apache;
-use Apache::SIG ();
-use Apache::ModuleConfig;
-use Apache::Constants qw(:common);
+use Apache2::Const;
+use Apache2::Module;
+use Apache2::RequestUtil ();
+use Apache2::RequestIO ();
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
 use URI;
 
-require DynaLoader;
-require AutoLoader;
-use vars qw($VERSION @ISA $USER_MATCH $DAYPASS_MATCH);
+use vars qw($VERSION $USER_MATCH $DAYPASS_MATCH);
 
-@ISA		= qw(DynaLoader);
 $VERSION   	= '2.003000';  # v2.3.0
 
 $USER_MATCH = qr{ \buser=(?!	# must have user, but NOT ...
@@ -29,13 +26,60 @@ $USER_MATCH = qr{ \buser=(?!	# must have user, but NOT ...
 )}x;
 $DAYPASS_MATCH = qr{\bdaypassconfcode=};
 
-bootstrap Slash::Apache $VERSION;
-
 # BENDER: There's nothing wrong with murder, just as long
 # as you let Bender whet his beak.
 
+# Apache configuration Directives
+my @directives = (
+	{ name			=> 'SlashVirtualUser',
+	function		=> __PACKAGE__ . '::SlashVirtualUser',
+	errmsg			=> 'Takes a DBIx::Password virtual name',
+	args_how		=> 'TAKE1',
+	req_override		=> 'RSRC_CONF'
+	},
+	{ name			=> 'SlashSetVar',
+	errmsg			=> 'Takes a key and a value that will override the var values in the DB',
+	args_how		=> 'TAKE2',
+	req_override		=> 'RSRC_CONF'
+	},
+	{ name			=> 'SlashSetForm',
+	errmsg			=> 'Takes a key and a value that will be applied to each form object',
+	args_how		=> 'TAKE2',
+	req_override		=> 'RSRC_CONF'
+	},
+	{ name			=> 'SlashSetVarHost',
+	errmsg			=> 'Takes a key, a value, and a hostname that will override the var values in the DB for a specific hostname',
+	args_how		=> 'TAKE3',
+	req_override		=> 'RSRC_CONF'
+	},
+	{ name			=> 'SlashSetFormHost',
+	errmsg			=> 'Takes a key, a value, and a hostname that will be applied to each form object for a specific hostname',
+	args_how		=> 'TAKE3',
+	req_override		=> 'RSRC_CONF'
+	},
+	{ name			=> 'SlashCompileTemplates',
+	errmsg			=> 'Turn precompiling templates on or off',
+	args_how		=> 'FLAG',
+	req_override		=> 'RSRC_CONF'
+	},
+	{ name			=> 'SlashSectionHost',
+	errmsg			=> 'Associate a host with a given section name',
+	args_how		=> 'TAKE2',
+	req_override		=> 'RSRC_CONF'
+	}
+);
+
+Apache2::Module::add(__PACKAGE__, \@directives);
+
 sub SlashVirtualUser ($$$) {
 	my($cfg, $params, $user) = @_;
+
+	###################################
+	# MC: this is horridly hacky, but basically, we use %ENV{MOD_PERL}
+	# to see if we're in mod_perl, to see if we can use Request APIs
+	# However, in early init, we can't do that without Apache crashing
+	# so we need to clean up the ENV, then restore it before we exit. What a hack
+	$ENV{FORCE_SLASH_STATIC} = 1;
 
 	# In case someone calls SlashSetVar before we have done the big mojo -Brian
 	my $overrides = $cfg->{constants};
@@ -90,6 +134,9 @@ sub SlashVirtualUser ($$$) {
 	########################################
 
 	$cfg->{slashdb}->{_dbh}->disconnect if $cfg->{slashdb}->{_dbh};
+
+	# delete FORCE var
+	delete $ENV{FORCE_SLASH_STATIC};
 }
 
 sub SlashSetVar ($$$$) {
@@ -285,8 +332,8 @@ sub ProxyRemoteAddr ($) {
 	# presumably if the trusted IP does merely modify the header,
 	# it appends the actual original IP to its value).
 	my $xf = undef;
-	$xf = $r->header_in($trusted_header) if $trusted_header;
-	$xf ||= $r->header_in('X-Forwarded-For');
+	$xf = $r->headers_in->{$trusted_header} if $trusted_header;
+	$xf ||= $r->headers_in->{'X-Forwarded-For'} | '';
 	if ($xf) {
 		if (my($ip) = $xf =~ /([\d.]+)$/) {
 			$r->connection->remote_ip($ip);
@@ -301,13 +348,17 @@ sub ConnectionIsSSL {
 	# If the connection is made over an SSL connection, it's secure.
 	# %ENV won't contain all its fields this early in mod_perl but
 	# it's quick to check just in case.
+
+	# if we don't have headers (i.e. config directives, return 0 here
+	return 0 if (!exists $ENV{HTTP_HOST});
+
 	return 1 if $ENV{SSL_SESSION_ID};
 
 	# That probably didn't work so let's get that data the hard way.
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	return 0 if !$r;
 
-	my $x = $r->header_in('X-SFINC-SSL');
+	my $x = $r->headers_in->{'X-SFINC-SSL'} || '';
 	return 1 if $x && $x eq 'true';
 
 	# This is a very expensive test and not one useful to us.
@@ -318,7 +369,7 @@ sub ConnectionIsSSL {
 #		return 1 if $se && $se eq 'on'; # https is on
 #	}
 
-	$x = $r->header_in('X-SSL-On');
+	$x = $r->headers_in->{'X-SSL-On'} || '';
 	return 1 if $x && $x eq 'yes'; 
 
 	# We're out of ideas.  If the above didn't work we must not be
@@ -333,7 +384,7 @@ sub ConnectionIsSecure {
 	# secure by the admin, it's secure.  (The too-clever-by-half
 	# way of doing this would be to check this machine's routing
 	# tables.  Instead we have the admins set a regex in a var.)
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	my $ip = $r->connection->remote_ip;
 	my $constants = getCurrentStatic();
 	my $secure_ip_regex = $constants->{admin_secure_ip_regex};
@@ -350,10 +401,10 @@ sub ConnectionIsSecure {
 	return 0;
 }
 
-sub IndexHandler {
-	my($r) = @_;
+sub IndexHandler  {
+	my ($class, $r) = @_;
 
-	return DECLINED unless $r->is_main;
+	return DECLINED unless (!$r->main);
 	my $constants = getCurrentStatic();
 
 #print STDERR scalar(localtime) . " $$ IndexHandler A\n";
@@ -361,7 +412,7 @@ sub IndexHandler {
 	my $gSkin     = getCurrentSkin();
 
 	my $uri = $r->uri;
-	my $cookie = $r->header_in('Cookie');
+	my $cookie = $r->headers_in->{'Cookie'} || '';
 	my $is_user = $cookie =~ $USER_MATCH;
 	my $has_daypass = 0;
 	if (!$is_user) {
@@ -578,7 +629,7 @@ sub IndexHandler {
 	if ($constants->{referrer_external_static_redirect}
 		&& !$is_user && !$has_daypass
 		&& $uri eq '/article.pl') {
-		my $referrer = $r->header_in("Referer");
+		my $referrer = $r->headers_in->{"Referer"} || '';
 		my $referrer_domain = $constants->{referrer_domain} || $gSkin->{basedomain};
 		my $the_request = $r->the_request;
 		if ($referrer

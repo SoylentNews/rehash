@@ -26,12 +26,18 @@ LONG DESCRIPTION.
 use strict;
 use utf8;
 use Encode qw(encode_utf8 decode_utf8 is_utf8);
-use Apache::ModuleConfig;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Slash::Constants ();
 use Socket qw( inet_aton inet_ntoa );
 
+use Apache2::Cookie;
+use Apache2::Module;
+use Apache2::Request;
+use Apache2::RequestRec ();
+use Apache2::RequestIO ();
+
+use Data::Dumper;
 use base 'Exporter';
 
 our $VERSION = $Slash::Constants::VERSION;
@@ -235,15 +241,15 @@ sub getCurrentMenu {
 	# and a footer, if we don't generate menus on static pages,
 	# the page itself will be busted. We've already run into this
 	# for one site, so took a stab at fixing it. -- Cliff
-	if ($ENV{GATEWAY_INTERFACE}) {;
+	if ($ENV{MOD_PERL}) {;
 		$user = getCurrentUser();
 
 		unless ($menu) {
 			($menu = $ENV{SCRIPT_NAME}) =~ s/\.pl$//;
 		}
 
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 
 		return unless $cfg->{menus}{$menu};
 		@menus = @{$cfg->{menus}{$menu}};
@@ -293,8 +299,8 @@ sub getCurrentUser {
 	my($value) = @_;
 	my $user;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$user = $cfg->{user} ||= {};
 	} else {
 		$user = $static_user ||= {};
@@ -338,9 +344,9 @@ sub setCurrentUser {
 	my($key, $value) = @_;
 	my $user;
 
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$user = $cfg->{'user'};
 	} else {
 		$user = $static_user;
@@ -383,9 +389,9 @@ sub setCurrentForm {
 	my($key, $value) = @_;
 	my $form;
 
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$form = $cfg->{'form'};
 	} else {
 		$form = $static_form;
@@ -425,8 +431,8 @@ sub createCurrentUser {
 
 	$user ||= {};
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$cfg->{'user'} = $user;
 	} else {
 		$static_user = $user;
@@ -464,9 +470,14 @@ sub getCurrentForm {
 	my($value) = @_;
 	my $form;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$form = $cfg->{'form'};
+
+		##########
+		# MC - mod_perl 2 seems to handle cfgs slightly differently.  This is probably a hack but eh
+		#if (ref($form) ne 'HASH') { my $hashref = {}; return $hashref }
+
 		##########
 		# TMB Why we have to do this for forms, I have no idea.
 		# Feel free to find out why and fix it.
@@ -522,9 +533,9 @@ sub createCurrentForm {
 
 	$form ||= {};
 
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$cfg->{'form'} = $form;
 	} else {
 		$static_form = $form;
@@ -563,9 +574,9 @@ sub getCurrentCookie {
 	my($value) = @_;
 	my $cookie;
 
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$cookie = $cfg->{'cookie'};
 	} else {
 		$cookie = $static_cookie;
@@ -605,9 +616,9 @@ sub createCurrentCookie {
 
 	$cookie ||= {};
 
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$cfg->{'cookie'} = $cookie;
 	} else {
 		$static_cookie = $cookie;
@@ -645,9 +656,9 @@ sub getCurrentSkin {
 	my($value) = @_;
 
 	my $current_skin;
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$current_skin = $cfg->{skin}  ||= {};
 	} else {
 		$current_skin = $static_skin  ||= {};
@@ -693,9 +704,9 @@ sub setCurrentSkin {
 	my $slashdb = getCurrentDB();
 
 	my $current_skin;
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$current_skin = $cfg->{skin} ||= {};
 	} else {
 		$current_skin = $static_skin ||= {};
@@ -773,8 +784,8 @@ sub getCurrentStatic {
 
 	my $constants;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+		my $const_cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$constants = $want_secure
 			? $const_cfg->{constants_secure} : $const_cfg->{constants};
 	} else {
@@ -880,9 +891,9 @@ sub getCurrentAnonymousCoward {
 	my($value) = @_;
 
 	my $ref;
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache') or return;
+	if ($ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		my $const_cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config) or return;
 		$ref = $const_cfg->{anonymous_coward};
 	} else {
 		$ref = $static_anonymous_coward;
@@ -942,8 +953,8 @@ The current virtual user that the site is running under.
 =cut
 
 sub getCurrentVirtualUser {
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		return $cfg->{'VirtualUser'};
 	} else {
 		return $static_virtual_user;
@@ -1000,8 +1011,8 @@ Returns the current Slash::DB object.
 sub getCurrentDB {
 	my $slashdb;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+		my $const_cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$slashdb = $const_cfg->{slashdb};
 	} else {
 		$slashdb = $static_db;
@@ -1412,12 +1423,12 @@ No value is returned.
 =cut
 
 sub setCookie {
-	return unless $ENV{GATEWAY_INTERFACE};
+	return unless $ENV{MOD_PERL};
 
 	my($name, $val, $session) = @_;
 	return unless $name;
 
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
 
@@ -1449,7 +1460,7 @@ sub setCookie {
 	$cookiehash{-secure} = 1
 		if $constants->{cookiesecure} && Slash::Apache::ConnectionIsSSL();
 
-	my $cookie = Apache::Cookie->new($r, %cookiehash);
+	my $cookie = Apache2::Cookie->new($r, %cookiehash);
 
 	if (!$val) {
 		$cookie->expires('-1y');  # delete
@@ -1600,7 +1611,7 @@ The URI of the page the user is on.
 
 =item COOKIES
 
-An Apache::Cookie object (not used in "command line" mode).
+An Apache2::Cookie object (not used in "command line" mode).
 
 =back
 
@@ -1633,8 +1644,8 @@ sub prepareUser {
 	$constants = getCurrentStatic();
 
 	my $r;
-	if ($ENV{GATEWAY_INTERFACE}) {
-		$r = Apache->request;
+	if ($ENV{MOD_PERL}) {
+		$r = Apache2::RequestUtil->request;
 		$hostip = $r->connection->remote_ip;
 	} else {
 		$hostip = '';
@@ -1658,7 +1669,7 @@ sub prepareUser {
 	}
 
 	if (isAnon($uid)) {
-		if ($ENV{GATEWAY_INTERFACE}) {
+		if ($ENV{MOD_PERL}) {
 			$user = getCurrentAnonymousCoward();
 #print STDERR scalar(localtime) . " $$ prepareUser going to getCurrentAnonymousCoward for uid $uid, got uid $user->{uid}\n";
 		}
@@ -1688,7 +1699,7 @@ sub prepareUser {
 	# Now store the DB information from above in the user
 	saveUserDBs($user, $user_types);
 
-	unless ($user->{is_anon} && $ENV{GATEWAY_INTERFACE}) { # already done in Apache.pm
+	unless ($user->{is_anon} && $ENV{MOD_PERL}) { # already done in Apache.pm
 		setUserDate($user);
 	}
 
@@ -1697,7 +1708,7 @@ sub prepareUser {
 	if ($uri eq '/index2.pl') {
 		# Under certain circumstances, switch out the URI without
 		# doing an HTTP redirect.
-		if ($user->{index_classic} || $r->header_in('User-Agent') =~ /MSIE [2-6]/) {
+		if ($user->{index_classic} || $r->headers_in->{'User-Agent'} =~ /MSIE [2-6]/) {
 			$r->uri('/index.pl');
 			$r->filename($constants->{basedir} . '/index.pl');
 			$uri = $r->uri;
@@ -1764,7 +1775,7 @@ sub prepareUser {
 	#	my $d2 = 'slashdot';  # default for all users
 	#	if ($user->{state}{no_d2}) {
 	#		$d2 = 'none';
-	#	} elsif ($ENV{GATEWAY_INTERFACE}) {
+	#	} elsif ($ENV{MOD_PERL}) {
 	#		# get user-agent (ENV not populated yet)
 	#		my %headers = $r->headers_in;
 	#		# just in case:
@@ -1837,7 +1848,7 @@ sub prepareUser {
 		# of this page.  Note that we still have $r lying around,
 		# so we can save Subscribe.pm a bit of work.
 		# we don't need or want to do this if not in Apache ...
-		if ($ENV{GATEWAY_INTERFACE} && (my $subscribe = getObject('Slash::Subscribe', { db_type => 'reader' }))) {
+		if ($ENV{MOD_PERL} && (my $subscribe = getObject('Slash::Subscribe', { db_type => 'reader' }))) {
 			$user->{state}{page_plummy} = $subscribe->plummyPage($r, $user);
 			$user->{state}{page_buying} = $subscribe->buyingThisPage($r, $user);
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
@@ -2522,8 +2533,8 @@ sub getObject {
 	$vuser ||= $user->{state}{dbs}{writer} || getCurrentVirtualUser();
 	return undef unless $vuser && $class;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		$cfg     = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+		$cfg     = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$objects = $cfg->{'objects'} ||= {};
 	} else {
 		$objects = $static_objects   ||= {};
@@ -2693,7 +2704,7 @@ sub errorLog {
 		push @errors, "Which was called by:$package:$filename:$line";
 	}
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
+	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
 		$errors[0] = $ENV{SCRIPT_NAME} . $errors[0];
 		#$errors[-1] .= "\n";
 		$r->log_error(join ' ;; ', @errors); # for @errors;
@@ -2718,17 +2729,17 @@ sub writeLog {
 	# doing it with an apache header adds an unnecessary header to
 	# outgoing user requests, which is helpful for debugging but
 	# a waste of bandwidth -Jamie
-	return unless $ENV{GATEWAY_INTERFACE};
+	return unless $ENV{MOD_PERL};
 	my @args = grep { defined $_ } @_;
 	my $dat = @args ? join("\t", @args) : '';
 
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 
 	# Notes has a bug (still in apache 1.3.17 at
 	# last look). Apache's directory sub handler
 	# is not copying notes. Bad Apache!
 	# -Brian
-	$r->err_header_out(SLASH_LOG_DATA => $dat);
+	#$r->err_header_out->set(SLASH_LOG_DATA, $dat);
 }
 
 sub getOpAndDatFromStatusAndURI {
@@ -2742,7 +2753,7 @@ sub getOpAndDatFromStatusAndURI {
 	if ($status == 302) {
 		# See mod_relocate -Brian
 		if ($uri =~ /\.relo$/) {
-			my $apr = Apache::Request->new(Apache->request);
+			my $apr = Apache2::Request->new(Apache2::RequestUtil->request);
 			$dat = $apr->param('_URL');
 			$uri = 'relocate';
 		} else  {
@@ -2893,7 +2904,7 @@ No value is returned.
 =cut
 
 sub createEnvironment {
-	return if $ENV{GATEWAY_INTERFACE};
+	return if $ENV{MOD_PERL};
 	my($virtual_user) = @_;
 	my %form;
 	unless ($virtual_user) {
@@ -2979,8 +2990,8 @@ sub determineCurrentSkin {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $skin;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $hostname = $r->header_in('host') || '';
+	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
+		my $hostname = $r->headers_in->{'host'} || '';
 		$hostname =~ s/:\d+$//;
  
 		my $skins = $reader->getSkins;
@@ -3023,8 +3034,8 @@ sub get_ipids {
  
 	$locationid = getCurrentStatic('cookie_location') if @_ > 2 && !$locationid;
  
-	if (!$hostip && $ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
+	if (!$hostip && $ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
 		$hostip = $r->connection->remote_ip;
 	} elsif (!$hostip) {
 		$hostip = '';
@@ -3132,8 +3143,8 @@ sub get_srcids {
 			return undef;
 		}
 		if (!$ip) {
-			if ($ENV{GATEWAY_INTERFACE}) {
-				my $r = Apache->request;
+			if ($ENV{MOD_PERL}) {
+				my $r = Apache2::RequestUtil->request;
 				$ip = $r->connection->remote_ip;
 			} elsif (!$ip) {
 				$ip = '0.0.0.0';
@@ -3536,7 +3547,7 @@ sub apacheConnectionSSL {
 #	return $cached_value if defined($cached_value);
 	my $retval = defined &Slash::Apache::ConnectionIsSSL
 		&& Slash::Apache::ConnectionIsSSL();
-#	$cached_value = $retval if $ENV{GATEWAY_INTERFACE};
+#	$cached_value = $retval if $ENV{MOD_PERL};
 	return $retval;
 }
 #}
@@ -3684,8 +3695,8 @@ sub getCurrentCache {
 	my($value) = @_;
 	my $cache;
 
-	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
+		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
 		$cache = $cfg->{'cache'} ||= {};
 	} else {
 		$cache = $static_cache   ||= {};

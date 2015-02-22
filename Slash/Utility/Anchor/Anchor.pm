@@ -24,8 +24,8 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use Apache;
-use Apache::Constants ':http';
+use Apache2::RequestUtil ();
+use Apache2::Const -compile => qw (:http );
 use Digest::MD5 'md5_hex';
 use Encode 'encode_utf8';
 use Slash::Display;
@@ -118,7 +118,7 @@ sub header {
 
 	my $r;
 	unless ($form->{ssi} || $form->{taskgen}) {
-		$r = Apache->request;
+		$r = Apache2::RequestUtil->request;
 
 		$r->content_type($constants->{content_type_webpage}
 			|| $options->{content_type}
@@ -134,12 +134,12 @@ sub header {
 			# Caching used to be Cache-Control: private but that doesn't
 			# seem to be correct; let's hope switching to no-cache
 			# causes few complaints.
-			$r->header_out('Cache-Control', 'no-cache');
+			$r->headers_out->set('Cache-Control', 'no-cache');
 			# And while Pragma: no-cache is not really correct (it's
 			# to be used for requests and the RFC doesn't define it to
 			# mean anything for responses) it probably doesn't hurt
 			# anything and allegedly has stopped users from complaining.
-			$r->header_out('Pragma', 'no-cache');
+			$r->headers_out->set('Pragma', 'no-cache');
 		}
 
 # 		unless ($user->{seclev} || $ENV{SCRIPT_NAME} =~ /comments/) {
@@ -148,7 +148,6 @@ sub header {
 # 			$r->header_out('Cache-Control', 'private');
 # 		}
 
-		$r->send_http_header;
 		return if $r->header_only;
 	}
 
@@ -267,15 +266,15 @@ True upon success, false upon failure.
 sub http_send {
 	my($opt) = @_;
 
-	$opt->{status}        ||= HTTP_OK;
+	$opt->{status}        ||= Apache2::Const::HTTP_OK;
 	$opt->{content_type}  ||= 'text/plain';
 	$opt->{cache_control} ||= 'private'  unless defined $opt->{cache_control};
 	$opt->{pragma}        ||= 'no-cache' unless defined $opt->{pragma};
 
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	$r->content_type($opt->{content_type});
-	$r->header_out('Cache-Control', $opt->{cache_control}) if $opt->{cache_control};
-	$r->header_out('Pragma', $opt->{pragma}) if $opt->{pragma};
+	$r->headers_out->set('Cache-Control', $opt->{cache_control}) if $opt->{cache_control};
+	$r->headers_out->set('Pragma', $opt->{pragma}) if $opt->{pragma};
 
 	if ($opt->{etag} || $opt->{do_etag}) {
 		if ($opt->{do_etag} && $opt->{content}) {
@@ -284,12 +283,11 @@ sub http_send {
 			$opt->{etag} = get_etag( encode_utf8($opt->{content}));
 			##########
 		}
-		$r->header_out('ETag', $opt->{etag});
+		$r->headers_out->set('ETag', $opt->{etag});
 
 		my $match = $r->header_in('If-None-Match');
 		if ($match && $match eq $opt->{etag}) {
-			$r->status(HTTP_NOT_MODIFIED);
-			$r->send_http_header;
+			$r->status(Apache2::Const::HTTP_NOT_MODIFIED);
 			return 1;
 		}
 	}
@@ -302,11 +300,10 @@ sub http_send {
 			$opt->{dis_type} =~ s/\W+//;
 			$val = "$opt->{dis_type}; $val";
 		}
-		$r->header_out('Content-Disposition', $val);
+		$r->headers_out->set('Content-Disposition', $val);
 	}
 
 	$r->status($opt->{status});
-	$r->send_http_header;
 	$r->rflush;
 #print STDERR "http_send sent, header_only='" . ($r->header_only) . "' length(content)='" . length($opt->{content}) ."'\n";
 	return 1 if $r->header_only;
@@ -416,12 +413,11 @@ sub redirect {
 	$code = 302 if !$code || $code != 301;
 	my $constants = getCurrentStatic();
 	$url = url2abs($url);
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 
 	$r->content_type($constants->{content_type_webpage} || 'text/html');
-	$r->header_out(Location => $url);
+	$r->headers_out->set(Location => $url);
 	$r->status($code);
-	$r->send_http_header;
 
 	slashDisplay('html-redirect', { url => $url, code => $code });
 }
@@ -431,7 +427,7 @@ sub redirect {
 sub emit404 {
 	my $form = getCurrentForm();
 
-	my $r = Apache->request;
+	my $r = Apache2::RequestUtil->request;
 	$r->status(404);
 
 	$ENV{REQUEST_URI} ||= '';

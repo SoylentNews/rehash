@@ -8,7 +8,9 @@ package Slash::Apache::Banlist;
 
 use strict;
 use utf8;
-use Apache::Constants qw(:common);
+use Apache2::Const;
+use Apache2::Connection;
+require APR::SockAddr;
 
 use Slash;
 use Slash::Display;
@@ -20,15 +22,15 @@ our $VERSION = $Slash::Constants::VERSION;
 sub handler {
 	my($r) = @_;
 
-	return DECLINED unless $r->is_main;
+	return DECLINED unless !$r->main;
 
 	$Slash::Apache::User::request_start_time ||= Time::HiRes::time;
 
 	# Ok, this will make it so that we can reliably use Apache->request
-	Apache->request($r);
+	Apache2::RequestUtil->request($r);
 
 	# Get some information about the IP this request is coming from.
-	my $hostip = $r->connection->remote_ip;
+	my $hostip = $r->connection->remote_addr->ip_get;
 	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
 		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
 	my($cur_srcid_ip, $cur_srcid_subnet) = get_srcids({ ip => $hostip },

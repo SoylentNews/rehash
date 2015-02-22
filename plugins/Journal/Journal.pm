@@ -815,7 +815,7 @@ sub fixJournalText {
 
 sub DESTROY {
 	my($self) = @_;
-	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
+	$self->{_dbh}->disconnect if !$ENV{MOD_PERL} && $self->{_dbh};
 }
 
 
