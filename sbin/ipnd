@@ -156,34 +156,24 @@ $cbServer->on(request => sub {
 		$subscribe->ppAddLog($logthis);
 
 		my $paypal = $ipn->vars();
+		$paypal->{custom} = decode_json($paypal->{custom}) || "";
 
 		if($ipn->completed){
 			if(!$subscribe->paymentExists($ipn->txn_id)){
 				# Check if PDT got transaction first.
-				my $days = $subscribe->convertDollarsToDays($paypal->{payment_gross}, 'paypal');
 				my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
 			
-				my ($puid, $payment_type, $from);
-				if ($paypal->{custom}){
-					$puid = $paypal->{custom};
-					$payment_type = 'gift';
-					$from = $paypal->{option_selection1};
-				} else {
-					$puid = $paypal->{item_number};
-					$payment_type = 'user';
-				}
-			
 				my $payment = {
-					days => $days,
-					uid	=> $paypal->{item_number},
+					days => $paypal->{custom}{days},
+					uid	=> $paypal->{custom}{uid},
 					payment_net   => $payment_net,
 					payment_gross => $paypal->{payment_gross},
-					payment_type  => $payment_type,
+					payment_type  => $paypal->{custom}{type},
 					transaction_id => $paypal->{txn_id},
 					method => 'paypal',
-					email => $from,
-					raw_transaction  => $subscribe->convertToText($paypal),
-					puid => $puid
+					email => $paypal->{custom}{from},
+					raw_transaction  => encode_json($paypal),
+					puid => $paypal->{custom}{puid}
 				};
 			
 				if (!$subscribe->paymentExists($ipn->txn_id)){
@@ -192,9 +182,9 @@ $cbServer->on(request => sub {
 					my ($rows, $result, $warning);
 					$rows = $subscribe->insertPayment($payment);
 					if ($rows && $rows == 1) {
-						$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+						$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 						if ($result && $result == 1){
-							send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+							send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 						} else {
 							$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 							print STDERR $warning;
@@ -238,9 +228,9 @@ $cbServer->on(request => sub {
 			($content->{status} eq 'complete') ||
 			($content->{status} eq 'confirmed'))
 		{
-			my $payment_type = $content->{posData}{isGift} ? "gift" : "user";
+			my $payment_type = $content->{posData}{type};
 			my $payment = {
-					days => $subscribe->convertDollarsToDays($content->{price}, 'bitpay'),
+					days =>$content->{posData}{days},
 					uid	=> $content->{posData}{uid},
 					payment_net   => $content->{price},
 					payment_gross => $content->{price},
@@ -257,7 +247,7 @@ $cbServer->on(request => sub {
 				if ($rows && $rows == 1) {
 					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 					if ($result && $result == 1){
-						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{from}) if $payment->{payment_type} eq "gift";
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 					} else {
 						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 						print STDERR $warning;
@@ -305,7 +295,7 @@ sub send_gift_msg {
 			days 		=> $days,
 			from		=> $from	
 		}, { Return => 1, Nocomm => 1 } );
-	my $title = "Gift subscription to $constants->{sitename}\n";
+	my $title = "$days Day Gift Subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
 }
 

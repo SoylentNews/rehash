@@ -21,7 +21,8 @@ INSERT INTO vars (name, value, description) VALUES ('paypal_amount', '20.00', 'H
 INSERT INTO vars (name, value, description) VALUES ('paypal_host','www.sandbox.paypal.com','Host part of url for PayPal. Change this to to use PayPal sandbox. ');
 INSERT INTO vars (name, value, description) VALUES ('paypal_business', 'yourname@example.com', 'Email of Paypal business acct');
 INSERT INTO vars (name, value, description) VALUES ('paypal_cancel_return', 'http://www.example.com/subscribe.pl', 'URL to go to if payment is cancelled before being made');
-INSERT INTO vars (name, value, description) VALUES ('paypal_image_src', 'http://images.paypal.com/images/x-click-but02.gif', 'URL of button image to click on');
+INSERT INTO vars (name, value, description) VALUES ('paypal_image_src', '//www.paypalobjects.com/en_US/i/btn/x-click-but01.gif', 'URL of buy now button image to click on');
+INSERT INTO vars (name, value, description) VALUES ('paypal_sub_image_src', '//www.paypalobjects.com/en_US/i/btn/x-click-but20.gif', 'URL of subscribe button image to click on');
 INSERT INTO vars (name, value, description) VALUES ('paypal_no_shipping', '1', '0=Shipping address reqd (more secure), 1=No shipping address reqd (more convenient)');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','How many days your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_pages', '1000', 'How many pages your paypal_amount buys');

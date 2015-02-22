@@ -245,15 +245,6 @@ sub convertDaysToDollars {
 }
 
 
-sub convertToText{
-	my($self, $hashref) = @_;
-	use Data::Dumper;
-	my $dumped = Dumper($hashref);
-	$dumped =~ s/^\s+//mg; $dumped =~ s/^.VAR1 = {\n//g; $dumped =~ s/};\n//g;
-	return $dumped;
-}
-
-
 sub addDaysToSubscriber {
 	my($self, $uid, $days) = @_;
 	return 0 unless $uid;
@@ -502,7 +493,7 @@ sub ppAddLog {
 	my $data = {
 		transaction_id		=> $logthis->{txn_id},
 		transaction_type	=> $logthis->{txn_type},
-		raw_transaction		=> $self->convertToText($logthis)
+		raw_transaction		=> encode_json($logthis)
 	};
 
 	$data->{email} = $logthis->{payer_email} if $logthis->{payer_email};

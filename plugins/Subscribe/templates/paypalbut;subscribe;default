@@ -34,16 +34,15 @@ __template__
 <input type="hidden" name="undefined_quantity" value="1">
 <input type="hidden" name="charset" value="[% constants.rdfencoding %]">
 [% IF gift %]
-<input type="hidden" name="item_name" value="[% constants.paypal_num_days %]-Day Gift Subscription to [% constants.sitename %] for UID [% gift.uid %]">
-<input type="hidden" name="item_number" value="[% gift.uid %]">
-<input type="hidden" name="custom" value="[% gift.puid %]">
-<input type="hidden" name="on0" value="From">
-<input type="hidden" name="os0" value="[% from | strip_attribute %]">
+<input type="hidden" name="item_name" value="[% days %]-Day Gift Subscription to [% constants.sitename %] for UID [% gift.uid %]">
 [% ELSE %]
-<input type="hidden" name="item_name" value="[% constants.paypal_num_days %]-Day Subscription to [% constants.sitename %]">
-<input type="hidden" name="item_number" value="[% user.uid %]">
+<input type="hidden" name="item_name" value="[% days %]-Day Subscription to [% constants.sitename %]">
 [% END %]
-<input type="hidden" name="amount" value="[% constants.paypal_amount %]">
+
+<input type="hidden" name="item_number" value="[% uid %]">
+<input type="hidden" name="custom" value="{ \"uid\" : [% uid %] , \"type\" : \"[% type %]\" , \"puid\" : [% puid %] , \"from\" : \"[% from %]\", \"days\" : [% days %] }";
+
+<input type="hidden" name="amount" value="[% amount %]">
 <input type="hidden" name="no_shipping" value="[% constants.paypal_no_shipping %]">
 <input type="hidden" name="return" value="[% constants.paypal_return %]">
 <input type="hidden" name="cancel_return" value="[% constants.paypal_cancel_return %]">

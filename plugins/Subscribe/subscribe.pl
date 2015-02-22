@@ -13,6 +13,7 @@ use Slash::Utility;
 use DateTime;
 use DateTime::Format::MySQL;
 use Slash::Constants qw(:web :messages);
+use JSON;
 
 sub main {
 	my $user = getCurrentUser();
@@ -216,31 +217,22 @@ sub paypal {
 		my $pp_pdt = $subscribe->ppDoPDT($txid);
 		# use Data::Dumper; print STDERR Dumper($pp_pdt);
 		
+		$pp_pdt->{custom} = decode_json($pp_pdt->{custom}) || "";
+		
 		if (ref($pp_pdt) eq "HASH") {
-			my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross}, 'paypal');
 			my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
 			
-			my ($puid, $payment_type, $from);
-			if ($pp_pdt->{custom}){
-				$puid = $pp_pdt->{custom};
-				$payment_type = 'gift';
-				$from = $pp_pdt->{option_selection1};
-			} else {
-				$puid = $pp_pdt->{item_number};
-				$payment_type = 'user';
-			}
-			
 			my $payment = {
-				days => $days,
-				uid	=> $pp_pdt->{item_number},
+				days => $pp_pdt->{custom}{days},
+				uid	=> $pp_pdt->{custom}{uid},
 				payment_net   => $payment_net,
 				payment_gross => $pp_pdt->{payment_gross},
-				payment_type  => $payment_type,
+				payment_type  => $pp_pdt->{custom}{type},
 				transaction_id => $pp_pdt->{txn_id},
 				method => 'paypal',
-				email => $from,
-				raw_transaction  => $subscribe->convertToText($pp_pdt),
-				puid => $puid
+				email => $pp_pdt->{custom}{from},
+				raw_transaction  => encode_json($pp_pdt),
+				puid => $pp_pdt->{custom}{puid}
 			};
 			
 			if (!$subscribe->paymentExists($txid)){
@@ -249,9 +241,9 @@ sub paypal {
 				my ($rows, $result, $warning);
 				$rows = $subscribe->insertPayment($payment);
 				if ($rows && $rows == 1) {
-					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 					if ($result && $result == 1){
-						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 					} else {
 						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 						print STDERR $warning;
@@ -335,6 +327,7 @@ sub confirm {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $type = $form->{subscription_type};
+	
 	my $days = $form->{subscription_days};
 	my $amount;
 	switch($days) {
@@ -366,6 +359,7 @@ sub confirm {
 	
 	my $uid = $form->{uid};
 	my $sub_user = $slashdb->getUser($uid);
+	my $puid = sub_user->{uid};
 	my $title ="Confirm subscription and choose payment type";
 	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
 		tab_selected =>		'subscription',
@@ -378,6 +372,7 @@ sub confirm {
 		days           => $days,
 		amount         => $amount,
 		uid            => $uid,
+		puid           => $puid,
 		sub_user       => $sub_user,
 		user           => $user,
 		from           => $form->{from}

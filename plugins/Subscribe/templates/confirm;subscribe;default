@@ -29,14 +29,14 @@ __template__
 			[% IF type == "user" %]
 			<p>You've decided to purchase:</p>
 			<ul>
-				<li>A [% constants.sitename %] subscription for [% user.nickname | strip_literal %] ([% user.uid %])
+				<li>A [% days %] Day subscription for [% user.nickname | strip_literal %] ([% user.uid %]) for $[% amount %].
 			</ul>
 			<p>If this is correct select your payment type below:</p>
 				<center>
 					<table border=0 cellpadding=3>
 						<tr>
 							<td>[% PROCESS paypalbut %]</td>
-							<td>[% PROCESS bitpaybut uid = user.uid puid = user.uid %]</td>
+							<td>[% PROCESS bitpaybut %]</td>
 						</tr>
 					</table>
 				</center>
@@ -44,15 +44,14 @@ __template__
 				[% IF sub_user %]
 					<p>You've decided to purchase:</p>
 					<ul>
-						<li>A [% constants.sitename %] gift subscription for [% sub_user.nickname | strip_literal %] ([% sub_user.uid %])
+						<li>A [% days %] gift subscription for [% sub_user.nickname | strip_literal %] ([% sub_user.uid %]) for $[% amount %].
 					</ul>
 					<p>If this is correct select your payment type below:</p>
-					[% gift.uid = uid; gift.puid = user.uid %]
 					<center>
 						<table border=0 cellpadding=3>
 							<tr>
-								<td>[% PROCESS paypalbut gift = gift from = from %]</td>
-								<td>[% PROCESS bitpaybut gift = gift from = from uid = sub_user.uid puid = user.uid %]</td>
+								<td>[% PROCESS paypalbut %]</td>
+								<td>[% PROCESS bitpaybut %]</td>
 							</tr>
 						</table>
 					</center>
