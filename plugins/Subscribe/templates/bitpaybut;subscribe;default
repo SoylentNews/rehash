@@ -28,6 +28,7 @@ __template__
 <input type="hidden" name="puid" value="[% puid %]">
 <input type="hidden" name="amount" value="[% amount %]">
 <input type="hidden" name="days" value="[% days %]">
+<input type="hidden" name="custom" value="[% custom %]">
 <input type="image" src="[% constants.bitpay_image_src %]" name="submit" alt="Subscribe With Bitpay">
 </form>
 __seclev__

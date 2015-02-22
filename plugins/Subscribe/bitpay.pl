@@ -37,7 +37,7 @@ sub bitpay {
 					fullNotifications	=> "true",
 					redirectURL		=> $constants->{bitpay_return},
 					notificationURL		=> $constants->{bitpay_callback},
-					posData			=> "{ \"uid\" : $form->{uid} , \"type\" : \"$form->{type}\" , \"puid\" : $form->{puid} , \"from\" : \"$form->{from}\", \"days\" : $form->{days} }",
+					posData			=> $form->{custom},
 	);
 
 	redirect("$invoice->{url}", "302");

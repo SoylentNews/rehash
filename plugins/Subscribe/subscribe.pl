@@ -359,6 +359,14 @@ sub confirm {
 		title  => $title
 	}, { Return => 1 });
 	
+	my $custom = encode_json({
+		type           => $type,
+		days           => $days,
+		uid            => $uid,
+		puid           => $puid,
+		from           => $form->{from}
+	})
+	
 	slashDisplay("confirm", {
 		prefs_titlebar => $prefs_titlebar,
 		type           => $type,
@@ -368,6 +376,7 @@ sub confirm {
 		puid           => $puid,
 		sub_user       => $sub_user,
 		user           => $user,
+		custom         => $custom,
 		from           => $form->{from}
 	});
 }
