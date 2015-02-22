@@ -365,7 +365,7 @@ sub confirm {
 		uid            => $uid,
 		puid           => $puid,
 		from           => $form->{from}
-	})
+	});
 	
 	slashDisplay("confirm", {
 		prefs_titlebar => $prefs_titlebar,
