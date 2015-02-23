@@ -3,15 +3,15 @@ default
 __description__
 Bitpay button to subscribe to this site.
 
-* user
 * constants
 	bitpay_image_src		location of the bitpay button image
 
-	
-* gift	hashref passed if handling a gift subscription.  Should contain values
-        for keys uid, and puid (uid of user receiving subscription, uid of purchaser)
-
-* from  string user wants included in e-mail message 
+* uid
+* puid
+* from
+* days
+* type
+* custom	JSON encoded version of uid, puid, from, days, and type
 
 __title__
 
