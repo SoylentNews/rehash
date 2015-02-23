@@ -567,9 +567,9 @@ $include
     # index.shtml if they request the home page; turn it
     # on to help increase performance or if you are using something
     # other than index.pl for the index
-    PerlTransHandler Slash::Apache::IndexHandler
+    PerlTransHandler Slash::Apache->IndexHandler
     # this directive will display a user's pages at /~username
-    PerlTransHandler Slash::Apache::User::userdir_handler
+    PerlTransHandler Slash::Apache::User->userdir_handler
 
     # Third Apache phase:  header parsing
 
@@ -600,14 +600,14 @@ $include
     # saving both startup time and memory in the child
     # add/remove scripts from \@pls (normally best to include only
     # and all commonly used scripts)
-    PerlModule Apache::RegistryLoader;
+    PerlModule ModPerl::RegistryLoader;
     <Perl>
         # if you need to debug, temporarily turn this on
         # \$Apache::Registry::Debug = 4;
         my \@pls     = qw(index comments article users journal search ajax firehose);
         my \$vhost   = '$host_noport';
         my \$docroot = '$prefix_site/$sitename/htdocs';
-        my \$r       = Apache::RegistryLoader->new;
+        my \$r       = ModPerl::RegistryLoader->new;
 
         for my \$u (\@pls) {
                 my \$f = "\$docroot/\$u.pl";
