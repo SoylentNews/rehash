@@ -33,7 +33,7 @@ __template__
 	<input type="hidden" name="business" value="[% constants.paypal_business %]">
 	<input type="hidden" name="undefined_quantity" value="1">
 	<input type="hidden" name="charset" value="[% constants.rdfencoding %]">
-	[% IF  type == gift %]
+	[% IF type == "gift" %]
 	<input type="hidden" name="item_name" value="[% days %]-Day Gift Subscription to [% constants.sitename %] for UID [% uid %]">
 	[% ELSE %]
 	<input type="hidden" name="item_name" value="[% days %]-Day Subscription to [% constants.sitename %]">

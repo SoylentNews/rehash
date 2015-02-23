@@ -41,7 +41,7 @@ __template__
 	<input type="hidden" name="business" value="[% constants.paypal_business %]">
 	<input type="hidden" name="no_note" value="1">
 	<input type="hidden" name="charset" value="[% constants.rdfencoding %]">
-	[% IF  type == gift %]
+	[% IF type == "gift" %]
 	<input type="hidden" name="item_name" value="[% days %]-Day Gift Subscription to [% constants.sitename %] for UID [% uid %]">
 	[% ELSE %]
 	<input type="hidden" name="item_name" value="[% days %]-Day Subscription to [% constants.sitename %]">
@@ -51,6 +51,7 @@ __template__
 	<input type="hidden" name="p3" value="[% p3 %]">
 	<input type="hidden" name="t3" value="M">
 	<input type="hidden" name="src" value="1">
+	<input type="hidden" name="no_shipping" value="[% constants.paypal_no_shipping %]">
 	<input type="hidden" name="return" value="[% constants.paypal_return %]">
 	<input type="hidden" name="cancel_return" value="[% constants.paypal_cancel_return %]">
 	<input type="image" src="[% constants.paypal_sub_image_src %]" name="submit" alt="Subscribe With Paypal">

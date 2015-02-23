@@ -34,9 +34,9 @@ __template__
 			<p>If this is correct select your payment type below:</p>
 				<center>
 					<table border=0 cellpadding=2>
-						<tr><td align"right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
-						<tr><td align"right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
-						<tr><td align"right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr>
+						<tr><td align="right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
+						<tr><td align="right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
+						<tr><td align="right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr>
 					</table>
 				</center>
 			[% ELSIF type == "gift" %]
@@ -48,9 +48,9 @@ __template__
 					<p>If this is correct select your payment type below:</p>
 					<center>
 						<table border=0 cellpadding=2>
-							<tr><td align"right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
-							<tr><td align"right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
-							<tr><td align"right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr>
+							<tr><td align="right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
+							<tr><td align="right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
+							<tr><td align="right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr>
 						</table>
 					</center>
 				[% ELSE %]
