@@ -298,7 +298,7 @@ sub SlashCompileTemplates ($$$) {
 my $trusted_ip_regex = undef;
 my $trusted_header = undef;
 sub ProxyRemoteAddr ($) {
-	my($r) = @_;
+	my($class, $r) = @_;
 
 	# Set up the variables that are loaded only once.
 	#if (!defined($trusted_ip_regex) || !defined($trusted_header)) {
@@ -503,10 +503,7 @@ sub IndexHandler  {
 			}
 		}
 
-		my $new_skin = $slashdb->getSkin($key);
-		my $new_skid = $new_skin->{skid} || $constants->{mainpage_skid};
 #print STDERR scalar(localtime) . " $$ IndexHandler B new_skid=$new_skid\n";
-		setCurrentSkin($new_skid);
 		$gSkin = getCurrentSkin();
 
 		my $index_handler = $gSkin->{index_handler};
@@ -527,14 +524,14 @@ sub IndexHandler  {
 				# to handle this situation at the moment, so
 				# instead I'm hardcoding in the solution for the
 				# most common problem. - Jamie 2004/07/17
-				if ($key eq "faq" || $key eq "palm") {
-					$r->uri("/$key/index.shtml");
-				} elsif ($key eq "docs"
-					|| $key eq "privaterss") {
-					$r->uri("/$key/");
-				} else {
-					$r->uri("/$index_handler");
-				}
+				#if ($key eq "faq" || $key eq "palm") {
+				#	$r->uri("/$key/index.shtml");
+				#} elsif ($key eq "docs"
+				#	|| $key eq "privaterss") {
+				#	$r->uri("/$key/");
+				#} else {
+				#	$r->uri("/$index_handler");
+				#}
 				$r->filename("$basedir/$index_handler");
 				return OK;
 			} else {

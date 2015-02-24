@@ -9970,9 +9970,11 @@ sub getTemplateByName {
 	#	$skin ||= 'default';
 	#}
 
-	# Instead, we get the skin based on the user
+	# Instead, we get the skin based on the user, then failing that,
+	# get the theme as based in the skin table ...
 	unless ($skin) {
 		$skin = getCurrentUser('skin');
+		$skin ||= getCurrentSkin()->{theme};
 		$skin ||= $constants->{'default_skin'};
 		$skin ||= 'default';
 	}

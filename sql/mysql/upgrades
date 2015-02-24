@@ -499,8 +499,6 @@ INSERT INTO vars (name, value, description) VALUES ('moderate_or_post', '2', '0 
 # Turn off meta-moderation as it breaks stuff with our setup
 UPDATE vars SET value = 0 WHERE name = 'm2';
 
-
-
 #######################################
 # SoylentNews Slashcode updates 15_03 #
 #######################################
@@ -552,3 +550,7 @@ INSERT INTO vars (name, value, description) VALUES ("downmod_karma_floor", "10",
 ALTER TABLE modreasons ADD COLUMN needs_prior_mod tinyint UNSIGNED DEFAULT '0' NOT NULL;
 UPDATE modreasons SET needs_prior_mod = 1 WHERE id = 9;
 UPDATE modreasons SET needs_prior_mod = 1 WHERE id = 10;
+
+# MP2 Release
+
+alter table skins add column theme varchar(255) default '';

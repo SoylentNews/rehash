@@ -52,10 +52,7 @@ my $start_time = Time::HiRes::time;
 	}
 
 	my $skin_name = $form->{section};
-	my $skid = $skin_name
-		? $reader->getSkidFromName($skin_name)
-		: determineCurrentSkin();
-	setCurrentSkin($skid);
+	my $skid = determineCurrentSkin();
 	my $gSkin = getCurrentSkin();
 	$skin_name = $gSkin->{name};
 
