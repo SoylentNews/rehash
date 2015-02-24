@@ -37,6 +37,8 @@ use Apache2::Request;
 use Apache2::RequestRec ();
 use Apache2::RequestIO ();
 
+use URI;
+
 use Data::Dumper;
 use base 'Exporter';
 
@@ -468,11 +470,12 @@ MEMBER is passed in then only its value will be returned.
 
 sub getCurrentForm {
 	my($value) = @_;
-	my $form;
+	my $form ={};
 
 	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
-		my $cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
-		$form = $cfg->{'form'};
+		my $req = Apache2::Request->new($r);
+		my $params = $req->param;
+		foreach(keys %$params){$form->{$_}=$params->{$_};}
 
 		##########
 		# MC - mod_perl 2 seems to handle cfgs slightly differently.  This is probably a hack but eh
@@ -2993,12 +2996,29 @@ sub determineCurrentSkin {
 	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
 		my $hostname = $r->headers_in->{'host'} || '';
 		$hostname =~ s/:\d+$//;
- 
+
+		# could probably do this faster with a regex but ..
+	        my $uri = URI->new($r->uri);
+		my @bits = split ('/', $uri->path);
+
+		# MC: skins can come in two forms, either as a hostname, or as a nexus name. Nexus names have no periods
+		#     This is a bit hacky, but lets us keep the old functionality if we skill want it ...
+
 		my $skins = $reader->getSkins;
+
+		# First see if we can retrieve by name ...
 		($skin) = grep {
-				(my $tmp = lc $skins->{$_}{hostname} || '') =~ s/:\d+$//;
-				$tmp eq lc $hostname
+				my $tmp = lc $skins->{$_}{name} || ''; 
+				$tmp eq lc $bits[1];
 			} sort { $a <=> $b } keys %$skins;
+
+		# Nope, fall back to hostname
+		if (!$skin) {
+			($skin) = grep {
+					(my $tmp = lc $skins->{$_}{hostname} || '') =~ s/:\d+$//;
+					$tmp eq lc $hostname
+				} sort { $a <=> $b } keys %$skins;
+		}
 
 		# don't bother warning if $hostname is numeric IP
 		if (!$skin && $hostname !~ /^\d+\.\d+\.\d+\.\d+$/) {
