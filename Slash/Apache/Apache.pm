@@ -439,51 +439,15 @@ sub IndexHandler  {
 		my $basedir = $constants->{basedir};
 
 		# $USER_MATCH defined above
-		if ($dbon && ($is_user || $has_daypass || $gSkin->{index_handler} =~ /^users/)) {
-			$r->uri("/$gSkin->{index_handler}");
-			$r->filename("$basedir/$gSkin->{index_handler}");
-			return OK;
-		} elsif (!$dbon) {
-			# no db (you may wish to symlink index.shtml to your real
-			# home page if you don't have one already)
-			$r->uri('/index.shtml');
-			return DECLINED;
-		} else {
-			# user not logged in
-
-			# consider using File::Basename::basename() here
-			# for more robustness, if it ever matters -- pudge
-			my($base) = split(/\./, $gSkin->{index_handler});
-			my $new_filename = "$base.shtml";
-
-			my $new_filename_abs       = "$basedir/";
-			my $new_uri                = '/';
-			if ($gSkin->{skid} != $constants->{mainpage_skid}
-				&& $new_filename =~ /\.shtml$/) {
-				# Only handle subdirs for .shtml;  there aren't .pl
-				# scripts in those subdirs.
-				$new_filename_abs .= "$gSkin->{name}/";
-				$new_uri          .= "$gSkin->{name}/";
-			}
-			$new_filename_abs         .= $new_filename;
-			$new_uri                  .= $new_filename;
-
-			$r->filename($new_filename_abs);
-			$r->uri($new_uri);
-			writeLog('shtml');
-			return OK;
-		}
+		$r->uri("/$gSkin->{index_handler}");
+		$r->filename("$basedir/$gSkin->{index_handler}");
+		return OK;
 	}
 
 	# match /section/ or /section
 	if ($uri =~ m|^/(\w+)/?$|) {
 		my $key = $1;
 		
-		if (!$dbon) {
-			$r->uri('/index.shtml');
-			return DECLINED;
-		}
-
 		my $slashdb = getCurrentDB();
 
 		if ($constants->{plugin}{Edit}) {
@@ -512,50 +476,14 @@ sub IndexHandler  {
 		my $index_handler = $gSkin->{index_handler};
 		if ($index_handler ne 'IGNORE') {
 			# $USER_MATCH defined above
-			if ($dbon && ($is_user || $has_daypass)) {
-				$r->args("section=$key");
-				# For any directory which can be accessed by a
-				# logged-in user in the URI form /foo or /foo/,
-				# but which is not a skin's directory, there
-				# is a problem;  we cannot simply bounce the uri
-				# back to /index.pl or whatever, since the
-				# index handler will not recognize the section
-				# key argument above and will just present the
-				# ordinary homepage.  I don't know the best way
-				# to handle this situation at the moment, so
-				# instead I'm hardcoding in the solution for the
-				# most common problem. - Jamie 2004/07/17
-				#if ($key eq "faq" || $key eq "palm") {
-				#	$r->uri("/$key/index.shtml");
-				#} elsif ($key eq "docs"
-				#	|| $key eq "privaterss") {
-				#	$r->uri("/$key/");
-				#} else {
-				#	$r->uri("/$index_handler");
-				#}
-				$r->filename("$basedir/$index_handler");
-				return OK;
-			} else {
-				# user not logged in
-
-				# consider using File::Basename::basename() here
-				# for more robustness, if it ever matters -- pudge
-				my($base) = split(/\./, $index_handler);
-				$base = 'index' if $base eq 'index2';
-				$r->uri("/$key/$base.shtml");
-				$r->filename("$basedir/$key/$base.shtml");
-				writeLog('shtml');
-				return OK;
-			}
+			$r->args("section=$key");
+			$r->filename("$basedir/$index_handler");
+			return OK;
 		}
 	}
 	if ($uri =~ m#^/(stories|recent|popular|daddypants|search)/([^/]*)/?([^/]*)?/?$#) {
 		my ($key, $rss_or_search, $search) = ($1,$2,$3);
 		my $rss;	
-		if (!$dbon) {
-			$r->uri('/index.shtml');
-			return DECLINED;
-		}
 		$rss = 1 if $rss_or_search && $rss_or_search eq "rss";
 		$search = $rss_or_search if !$rss;
 	}
@@ -568,29 +496,6 @@ sub IndexHandler  {
 		if ($rss) {
 			$rss_string = "\&content_type=rss";
 			$op_string = "op=rss";
-		}
-	}
-
-	if ($uri eq '/authors.pl') {
-		my $filename = $r->filename;
-		my $basedir  = $constants->{basedir};
-
-		if (!$dbon || !$is_user) {
-			$r->uri('/authors.shtml');
-			$r->filename("$basedir/authors.shtml");
-			writeLog('shtml');
-			return OK;
-		}
-	}
-
-	if ($uri eq '/hof.pl') {
-		my $basedir  = $constants->{basedir};
-
-		if (!$dbon || !$is_user) {
-			$r->uri('/hof.shtml');
-			$r->filename("$basedir/hof.shtml");
-			writeLog('shtml');
-			return OK;
 		}
 	}
 
@@ -619,38 +524,6 @@ sub IndexHandler  {
 				my $actual_file = $bits[-1];
 				$r->filename("$basedir/$actual_file");
 				return OK;
-			}
-		}
-	}
-
-
-	# redirect to static if
-	# * not a user, nor a daypass holder,
-	# and
-	# * var is on
-	# * is article.pl
-	# * no page number > 1 specified
-	# * sid specified
-	# * referrer exists AND is external to our site
-	if ($constants->{referrer_external_static_redirect}
-		&& !$is_user && !$has_daypass
-		&& $uri eq '/article.pl') {
-		my $referrer = $r->headers_in->{"Referer"} || '';
-		my $referrer_domain = $constants->{referrer_domain} || $gSkin->{basedomain};
-		my $the_request = $r->the_request;
-		if ($referrer
-			&& $referrer !~ m{^(?:https?:)?(?://)?(?:[\w-.]+\.)?$referrer_domain(?:/|$)}
-			&& $the_request !~ m{\bpagenum=(?:[2-9]|\d\d+)\b}
-			&& $the_request =~ m{\bsid=([\d/]+)}
-		) {
-			my $sid = $1;
-			my $slashdb = getCurrentDB();
-			my $section = $slashdb->getStory($sid, 'section') || $constants->{defaultsection};
-
-			my $newurl = "/$section/$sid.shtml";
-			if (-e "$constants->{basedir}$newurl") {
-				redirect($newurl);
-				return DONE;
 			}
 		}
 	}
