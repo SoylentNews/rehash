@@ -16,6 +16,8 @@ use Slash::Display;
 use Slash::Utility;
 use URI;
 
+use Data::Dumper;
+
 use vars qw($VERSION $USER_MATCH $DAYPASS_MATCH);
 
 $VERSION   	= '2.003000';  # v2.3.0
@@ -415,6 +417,8 @@ sub IndexHandler  {
 	my $cookie = $r->headers_in->{'Cookie'} || '';
 	my $is_user = $cookie =~ $USER_MATCH;
 	my $has_daypass = 0;
+	my $basedir = $constants->{basedir};
+
 	if (!$is_user) {
 		if ($constants->{daypass} && $cookie =~ $DAYPASS_MATCH) {
 			$has_daypass = 1;
@@ -428,9 +432,8 @@ sub IndexHandler  {
 
 	# Comment this in if you want to try having this do the right
 	# thing dynamically
-	# my $slashdb = getCurrentDB();
-	# my $dbon = $slashdb->sqlConnect(); 
-	my $dbon = dbAvailable();
+	my $slashdb = getCurrentDB();
+	my $dbon = $slashdb->sqlConnect(); 
 
 	if ($uri eq '/' && $gSkin->{index_handler} ne 'IGNORE') {
 		my $basedir = $constants->{basedir};
@@ -508,8 +511,6 @@ sub IndexHandler  {
 
 		my $index_handler = $gSkin->{index_handler};
 		if ($index_handler ne 'IGNORE') {
-			my $basedir = $constants->{basedir};
-
 			# $USER_MATCH defined above
 			if ($dbon && ($is_user || $has_daypass)) {
 				$r->args("section=$key");
@@ -593,27 +594,35 @@ sub IndexHandler  {
 		}
 	}
 
-	# Moved, 2009-05
-	if ($uri eq '/code.shtml') {
-		redirect('/faq/code.shtml', 301);
-		return DONE;
-	} elsif ($uri eq '/slashdottit.shtml') {
-		redirect('/faq/badges.shtml', 301);
-		return DONE;
-	} elsif ($uri eq '/book.review.guidelines.shtml') {
-                redirect('/faq/bookreviews.shtml', 301);
-                return DONE;
-        }
+	# MC: Deleted a huge chunk of code here that handled shit of the DB was MIA, which we don't support
 
-	# These files are long-outdated and were removed, 2009-05
-	if ($uri =~ m{^/
-		(   authorguidelines | fool | rules | slashdot_techsay
-		  | slashguide | techjobs | anniversary_contest_rules
-		)\.shtml
-	}x) {
-		redirect('/faq/', 301);
-		return DONE;
+	# Exclude some files from redirection
+#        if ($uri ~ /\.(?:shtml|html|jpg|gif|png|rss|rdf|xml|txt|css)$/) {
+#		return DECLINED;
+#	}
+
+	# Handle redirecting nexus links
+	# Nexuses can either be in the form of nexus.domain or domain/nexus, in the later case, we can have things like
+	# http://domain/nexus/article.pl. We should handle this case properly
+	my $proper_uri = URI->new($r->uri);
+	my @bits = split ('/', $proper_uri->path);
+
+	# Only handle this if we have at least *2* segments
+	if ( (scalar @bits) ge 2) {
+		# we've got a live one!
+
+		# this should probably be cached ...
+		my $skins = $slashdb->getSkins();
+
+		for my $skin (keys %$skins) {
+			if ($skins->{$skin}{name} eq $bits[1]) {
+				my $actual_file = $bits[-1];
+				$r->filename("$basedir/$actual_file");
+				return OK;
+			}
+		}
 	}
+
 
 	# redirect to static if
 	# * not a user, nor a daypass holder,
@@ -644,15 +653,6 @@ sub IndexHandler  {
 				return DONE;
 			}
 		}
-	}
-
-	if (!$dbon && $uri !~ /\.(?:shtml|html|jpg|gif|png|rss|rdf|xml|txt|css)$/) {
-		# if db is off we don't necessarily have access to constants
-		# this means we change the URI and return DECLINED which lets
-		# Apache do the URI to filename translation
-		$r->uri('/index.shtml');
-		writeLog('shtml');
-		$r->notes('SLASH_FAILURE' => "db"); # You should be able to find this in other processes
 	}
 
 	return DECLINED;
