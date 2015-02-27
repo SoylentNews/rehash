@@ -210,7 +210,7 @@ sub paypal {
 	my $txid = getCurrentForm('tx');
 	my $subscribe = getObject('Slash::Subscribe');
 	my ($error, $note);
-	my $puid = $constanst->{anonymous_coward_uid};
+	my $puid = $constants->{anonymous_coward_uid};
 	
 	if (!$subscribe->paymentExists($txid)){
 		#	IPN may have gotten the payment first.
