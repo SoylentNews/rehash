@@ -46,6 +46,10 @@ sub main {
 			function	=> \&confirm,
 			seclev		=> 1
 		},
+		acsub 	=> {
+			function	=> \&acsub,
+			seclev		=> 1
+		},
 	};
 	
 	# Duplicating code because the redirect page needs to skip the
