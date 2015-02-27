@@ -209,7 +209,8 @@ sub paypal {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $txid = getCurrentForm('tx');
 	my $subscribe = getObject('Slash::Subscribe');
-	my ($error, $note); 
+	my ($error, $note);
+	my $puid = $constanst->{anonymous_coward_uid};
 	
 	if (!$subscribe->paymentExists($txid)){
 		#	IPN may have gotten the payment first.
@@ -221,6 +222,8 @@ sub paypal {
 		
 		if (ref($pp_pdt) eq "HASH") {
 			my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
+			
+			$puid = $pp_pdt->{custom}{puid};
 			
 			my $payment = {
 				days => $pp_pdt->{custom}{days},
@@ -269,7 +272,7 @@ sub paypal {
 		
 	}
 	
-	my $puid_user = $slashdb->getUser($payment->{puid});
+	my $puid_user = $slashdb->getUser($puid);
 	if ($puid_user->{is_anon}){
 		acsub(@_, $note);
 	} else {
