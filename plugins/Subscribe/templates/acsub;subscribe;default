@@ -16,7 +16,7 @@ __template__
 	[% PROCESS userboxes %]
 </div>
 <div id="users-blocks">
-	[% PROCESS titlebar title %]
+	[% PROCESS titlebar title => 'Purcase Gift Subscription' %]
 	<div class="generalbody">
 	
 		[% IF note %]

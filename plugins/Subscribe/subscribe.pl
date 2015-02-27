@@ -366,32 +366,49 @@ sub confirm {
 	my $uid = $form->{uid} || $user->{uid};
 	my $sub_user = $slashdb->getUser($uid);
 	my $puid = $user->{uid};
-	my $title ="Confirm subscription and choose payment type";
-	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
-		tab_selected =>		'subscription',
-		title  => $title
-	}, { Return => 1 });
 	
-	my $custom = encode_json({
-		type           => $type,
-		days           => $days,
-		uid            => $uid,
-		puid           => $puid,
-		from           => $form->{from}
-	});
-	
-	slashDisplay("confirm", {
-		prefs_titlebar => $prefs_titlebar,
-		type           => $type,
-		days           => $days,
-		amount         => $amount,
-		uid            => $uid,
-		puid           => $puid,
-		sub_user       => $sub_user,
-		user           => $user,
-		custom         => $custom,
-		from           => $form->{from}
-	});
+	if ($uid == $constants->{anonymous_coward_uid};) {
+		my $note = $constants->{anon_name_alt} . " cannot recieve a subscription.  Please choose another user to gift.";
+		if ($user->{is_anon}){
+			acsub(@_, $note);
+		} else {
+			edit(@_, $note);
+		}
+	} else {
+		my $title ="Confirm subscription and choose payment type";
+		
+		if ($user->{is_anon}){
+			my $prefs_titlebar = slashDisplay('titlebar', {
+				title  => $title
+			}, { Return => 1 });
+		} else {
+			my $prefs_titlebar = slashDisplay('prefs_titlebar', {
+				tab_selected =>		'subscription',
+				title  => $title
+			}, { Return => 1 });
+		}
+		
+		my $custom = encode_json({
+			type           => $type,
+			days           => $days,
+			uid            => $uid,
+			puid           => $puid,
+			from           => $form->{from}
+		});
+		
+		slashDisplay("confirm", {
+			prefs_titlebar => $prefs_titlebar,
+			type           => $type,
+			days           => $days,
+			amount         => $amount,
+			uid            => $uid,
+			puid           => $puid,
+			sub_user       => $sub_user,
+			user           => $user,
+			custom         => $custom,
+			from           => $form->{from}
+		});
+	}
 }
 
 sub send_gift_msg {
@@ -419,12 +436,8 @@ sub send_gift_msg {
 sub acsub {
 	my($form, $slashdb, $user, $constants, $note) = @_;
 
-	my $title ='Purcase Gift Subscription';
-	
-		
 	slashDisplay("acsub", {
 		note => $note,
-		title	=> $title,
 	});
 	1;
 }
