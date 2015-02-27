@@ -68,10 +68,10 @@ __template__
 [% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
 	<hr>
 	<div class="logout">
-		<a href="/subscribe.pl">Subscribe</a>
+		<a href="/subscribe.pl">Gift a Subscription</a>
 	</div>
 	<div class="whysub">
-		<a href="/faq.pl?op=subscribe">Why Subscribe</a>
+		<a href="/faq.pl?op=subscribe">Why Gift</a>
 	</div>
 [% END %]
 

@@ -180,10 +180,10 @@ IF !useredit.is_anon;
 	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only && !user.is_subscriber %]
 		<hr>
 		<div class="logout">
-			<a href="/subscribe.pl">Gift a Subscription</a>
+			<a href="/subscribe.pl">Subscribe</a>
 		</div>
 		<div class="whysub">
-			<a href="/faq.pl?op=subscribe">Why Gift</a>
+			<a href="/faq.pl?op=subscribe">Why Subscribe</a>
 		</div>
   [% END %]
 	[% END;
