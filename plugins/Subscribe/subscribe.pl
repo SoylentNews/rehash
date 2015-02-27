@@ -376,13 +376,14 @@ sub confirm {
 		}
 	} else {
 		my $title ="Confirm subscription and choose payment type";
+		my $prefs_titlebar;
 		
 		if ($user->{is_anon}){
-			my $prefs_titlebar = slashDisplay('titlebar', {
+			$prefs_titlebar = slashDisplay('titlebar', {
 				title  => $title
 			}, { Return => 1 });
 		} else {
-			my $prefs_titlebar = slashDisplay('prefs_titlebar', {
+			$prefs_titlebar = slashDisplay('prefs_titlebar', {
 				tab_selected =>		'subscription',
 				title  => $title
 			}, { Return => 1 });
