@@ -367,7 +367,7 @@ sub confirm {
 	my $sub_user = $slashdb->getUser($uid);
 	my $puid = $user->{uid};
 	
-	if ($uid == $constants->{anonymous_coward_uid};) {
+	if ($uid == $constants->{anonymous_coward_uid}) {
 		my $note = $constants->{anon_name_alt} . " cannot recieve a subscription.  Please choose another user to gift.";
 		if ($user->{is_anon}){
 			acsub(@_, $note);
