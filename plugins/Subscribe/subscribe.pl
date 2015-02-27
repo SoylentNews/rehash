@@ -57,17 +57,17 @@ sub main {
 	$op = 'pause' if $form->{merchant_return_link};
 	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
+	if ($user->{is_anon}) {
+		$op = 'acsub' unless $ops->{$op};
+	} else {
+		$op = 'default' unless $ops->{$op};
+	}
+	
 	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm)$/) ||
 	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
-	}
-
-	if ($user->{is_anon}) {
-		$op = 'acsub' unless $ops->{$op};
-	} else {
-		$op = 'default' unless $ops->{$op};
 	}
 
 	header("subscribe") or return;
