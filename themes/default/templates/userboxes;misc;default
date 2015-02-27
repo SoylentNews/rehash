@@ -145,10 +145,10 @@ IF !useredit.is_anon;
 			'">Download</a>';
 		END;
 
-                IF useredit.bio;
-                        '<br><hr>';
+		IF useredit.bio;
+			'<br><hr>';
 			Slash.parseDomainTags(useredit.bio);
-                END;
+		END;
 
 	messages = Slash.getObject("Slash::Messages");
 	IF messages;
@@ -180,8 +180,10 @@ IF !useredit.is_anon;
 	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only && !user.is_subscriber %]
 		<hr>
 		<div class="logout">
-			<a href="/subscribe.pl">Subscribe</a><br>
-			<a href="/faq.pl?op=subscribe">Why Subscribe</a>
+			<a href="/subscribe.pl">Gift a Subscription</a>
+		</div>
+		<div class="whysub">
+			<a href="/faq.pl?op=subscribe">Why Gift</a>
 		</div>
   [% END %]
 	[% END;

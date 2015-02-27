@@ -59,10 +59,19 @@ __template__
 
 <p>
 <b>
-<a href="[% constants.real_rootdir %]/my/newuser"[% IF extra_modals %] onclick="javascript:getModalPrefs('newUserModal', 'Create Account', 1); return false;"[% END %]>Create Account</a>
+<a href="[% constants.real_rootdir %]/my/newuser">Create Account</a>
 &nbsp;|&nbsp;
-<a href="[% constants.real_rootdir %]/my/mailpassword"[% IF extra_modals %] onclick="javascript:getModalPrefs('sendPasswdModal', 'Retrieve Password', 1); return false;"[% END %]>Retrieve Password</a>
+<a href="[% constants.real_rootdir %]/my/mailpassword">Retrieve Password</a>
 </b>
+[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+	<hr>
+	<div class="logout">
+		<a href="/subscribe.pl">Subscribe</a>
+	</div>
+	<div class="whysub">
+		<a href="/faq.pl?op=subscribe">Why Subscribe</a>
+	</div>
+[% END %]
 </p>
 
 __seclev__

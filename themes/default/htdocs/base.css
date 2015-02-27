@@ -375,6 +375,12 @@ input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover {ba
 
 input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 
+.whysub{
+	text-align:center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .fullbox{
 	width: 100%;
 	-webkit-box-sizing:border-box;
