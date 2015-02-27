@@ -7,3 +7,4 @@ template=templates/editorial;faq;default
 template=templates/faq;faq;default
 template=templates/friends;faq;default
 template=templates/moderation;faq;default
+template=templates/subscribe;faq;default
