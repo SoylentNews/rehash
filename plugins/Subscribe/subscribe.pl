@@ -53,7 +53,7 @@ sub main {
 	$op = 'pause' if $form->{merchant_return_link};
 	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
-	if (($user->{is_anon} && $op !~ /^(paypal)$/) ||
+	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm)$/) ||
 	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
@@ -268,8 +268,14 @@ sub paypal {
 		$note = "<p><b>Transaction $txid completed.  Thank you for supporting $constants->{sitename}.</b></p>";
 		
 	}
-
-	edit(@_, $note);
+	
+	$puid_user = $slashdb->getUser($payment->{puid});
+	if ($puid_user->{is_anon}){
+		acsub(@_, $note);
+	} else {
+		edit(@_, $note);
+	}
+	
 }
 
 
@@ -398,6 +404,22 @@ sub send_gift_msg {
 		}, { Return => 1, Nocomm => 1 } );
 	my $title = "Gift subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
+}
+
+
+##################################################################
+# AC sub
+sub acsub {
+	my($form, $slashdb, $user, $constants, $note) = @_;
+
+	my $title ='Purcase Gift Subscription';
+	
+		
+	slashDisplay("acsub", {
+		note => $note,
+		title	=> $title,
+	});
+	1;
 }
 
 createEnvironment();

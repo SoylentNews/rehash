@@ -7,6 +7,7 @@ image=images/star.png
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema
 task=subscribemail.pl
+template=templates/acsub;subscribe;default
 template=templates/confirm;subscribe;default
 template=templates/edit;subscribe;default
 template=templates/gift_msg;subscribe;default
