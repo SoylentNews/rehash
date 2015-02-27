@@ -177,9 +177,12 @@ IF !useredit.is_anon;
 
 	
 	<div class="logout"><a href="[% gSkin.rootdir %]/my/logout">Log Out</a></div>
-	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only && !$user.is_subscriber %]
-		<div class="logout"><a href="/subscribe.pl">Subscribe</a></div>
-		<br><a href=<a href="/faq.pl?op=subscribe">Why Subscribe</a>
+	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only && !user.is_subscriber %]
+		<hr>
+		<div class="logout">
+			<a href="/subscribe.pl">Subscribe</a><br>
+			<a href="/faq.pl?op=subscribe">Why Subscribe</a>
+		</div>
   [% END %]
 	[% END;
 	Slash.sidebox(title, contents, "user-info", 1);
