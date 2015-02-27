@@ -269,7 +269,7 @@ sub paypal {
 		
 	}
 	
-	$puid_user = $slashdb->getUser($payment->{puid});
+	my $puid_user = $slashdb->getUser($payment->{puid});
 	if ($puid_user->{is_anon}){
 		acsub(@_, $note);
 	} else {
