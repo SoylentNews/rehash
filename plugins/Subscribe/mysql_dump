@@ -61,7 +61,7 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe_monthly_days','30
 INSERT INTO vars (name, value, description) VALUES ('subscribe_annual_amount','30.00', 'How much an annual subscription costs, in U.S. dollars with 2 decimal places');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_semiannual_amount','15.00', 'How much a semiannual subscription costs, in U.S. dollars with 2 decimal places');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_monthly_amount','5.00', 'How much a montly subscription costs, in U.S. dollars with 2 decimal places');
-
+INSERT INTO vars (name, value, description) VALUES ('subscribe_ac_default_gift','6', 'Default uid to get AC users gift subs');
 
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (15, 'Subscription Running Low', 1, '', 'now', 1);
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (16, 'Subscription Expired', 1, '', 'now', 1);

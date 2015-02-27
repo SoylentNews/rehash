@@ -32,7 +32,7 @@ __template__
 				The recipient of a gift subscription will be notified of your purchase through email.<br />
 				<br />
 				<input type="hidden" name="subscription_type" value="gift">
-				Buy Gift Subscription for UID <input type="text" name="uid" size="10" value="6"><br />	
+				Buy Gift Subscription for UID <input type="text" name="uid" size="10" value="[% constants.subscribe_ac_default_gift %]"><br />	
 				<br />
 				Who do you want the recipient to be told the gift is from?<br />
 				<input type="text" name="from" size="35" maxlength="35" value="[% constants.anon_name_alt %]" > (35 character limit)<br />

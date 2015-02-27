@@ -64,7 +64,11 @@ sub main {
 		return;
 	}
 
-	$op = 'default' unless $ops->{$op};
+	if ($user->{is_anon}) {
+		$op = 'acsub' unless $ops->{$op};
+	} else {
+		$op = 'default' unless $ops->{$op};
+	}
 
 	header("subscribe") or return;
 
@@ -297,7 +301,7 @@ sub grant {
 	$user_edit ||= $user;
 
 	if (!$user->{is_admin}){
-		my $note = "<p class='error'>Insufficient permission -- you aren't an admin</p>";
+		my $note = "<p class='error'>Insufficient permission -- you are not an admin</p>";
 		edit(@_, $note);
 	}
 
@@ -368,7 +372,7 @@ sub confirm {
 	my $puid = $user->{uid};
 	
 	if ($uid == $constants->{anonymous_coward_uid}) {
-		my $note = $constants->{anon_name_alt} . " cannot recieve a subscription.  Please choose another user to gift.";
+		my $note = "<p class='error'>" . $constants->{anon_name_alt} . " cannot recieve a subscription.  Please choose another user to gift.</p>";
 		if ($user->{is_anon}){
 			acsub(@_, $note);
 		} else {
