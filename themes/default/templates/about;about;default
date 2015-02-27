@@ -20,7 +20,9 @@ __template__
 		<p>Now, go forth and submit stories, comment, moderate, and be free!</p>
 		<h3>Useful Links:</h3>
 		<ul>
-			<li><a href="/subscribe.pl">Subscriptions - Support Us</a></li>
+		  [% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+				<li><a href="/subscribe.pl">Subscribe Here</a> - <a href="/faq.pl?op=subscribe">Why Subscribe</a></li>
+			[% END %]
 			<li><a href="/faq.pl">Frequently Asked Questions</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" target="blank">Wiki - Main Page</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved" target="blank">Wiki - Get Involved</a> | Information on the many ways one can contribute to this project.</li>
