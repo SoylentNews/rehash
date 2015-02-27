@@ -22,7 +22,10 @@ __template__
 		<h3 id="why">Why should I subscribe?</h3>
 		<p>Besides the warm fuzzy feeling that you helped us out, here's the rundown of subscription features:</p><ul> <li>Subscriber badge (toggleable)</li><li>Early access to new features</li><li>Exemption from ads if we ever run any</li><li>Full comment histories</li><li>Access to database-intensive operations</li><li>No rate limiting or spam filtering</li></ul></p>
 		
-		<h3 id="mondy">So you are just in it for the money?</h3>
+		<h3 id="ac">Can I subscribe without an SoylentNews account?</h3>
+		<p>Unfortunately Anonymous Cowards can not buy a subscription for themselves, but you can, as an AC, gift a subscription to a user.  The default is set up to NCommander's spare account, but you can change this to any user you wish (other than the AC account).</p>
+		
+		<h3 id="money">So you are just in it for the money?</h3>
 		<p>Nope. This is a open-source, volunteer-run project for public benefit. We don't seek profits or power, so supporting us just helps pay the bills. We aren't bound by fiduciary responsibility to shareholders, we are instead bound to uphold the benefit of the public in growing and fostering this community of news and discussion. And we look to the community for suggestions on how to improve and further this project.</p>
 		
 		<h3 id="where">Where does the money go?</h3>
@@ -35,7 +38,7 @@ __template__
 		<p>SoylentNews is run by (and for) the community. The simplest way to contribute is by <a href="/submit.pl">submitting quality stories</a> and leaving interesting comments. Check out the <a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved">Get Involved</a> section on the wiki for more information.</p>
 			
 		<h3 id="question">I have a question that is not answered in this FAQ. What should I do?</h3>
-		<p>Join us on <a href="http://chat.soylentnews.org" targe="blank">IRC</a> (webchat) or email your questions to <a href="mailto:admin@soylentnews.org">admin@soylentnews.org</a>. We will get you an answer, and if it's a question we've seen before, we'll consider adding it to the FAQ.</p>
+		<p>Join us on <a href="http://chat.soylentnews.org" target="blank">IRC</a> (webchat) or email your questions to <a href="mailto:admin@soylentnews.org">admin@soylentnews.org</a>. We will get you an answer, and if it's a question we've seen before, we'll consider adding it to the FAQ.</p>
  </div>
 </div>
 

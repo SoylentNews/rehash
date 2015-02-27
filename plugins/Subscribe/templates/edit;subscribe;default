@@ -65,7 +65,7 @@ __template__
 			<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
 				<fieldset>
 					<legend>Purchase Subscriptions</legend>
-					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and BitPay (for Bitcoin payments). The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="/faq.pl?op=subscribe">Why Subscribe FAQ</a><br />
+					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and BitPay (for Bitcoin payments). The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
 					
 					<br />
 					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
