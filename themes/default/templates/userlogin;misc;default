@@ -63,6 +63,8 @@ __template__
 &nbsp;|&nbsp;
 <a href="[% constants.real_rootdir %]/my/mailpassword">Retrieve Password</a>
 </b>
+</p>
+
 [% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
 	<hr>
 	<div class="logout">
@@ -72,7 +74,6 @@ __template__
 		<a href="/faq.pl?op=subscribe">Why Subscribe</a>
 	</div>
 [% END %]
-</p>
 
 __seclev__
 10000
