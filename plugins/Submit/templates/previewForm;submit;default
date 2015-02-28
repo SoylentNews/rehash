@@ -154,13 +154,7 @@ __template__
 
 
 	<br>
-	<script type="text/javascript">
-		function submitAndReload() {
-			var form = document.getElementById("adminform");
-			form.submit();
-			window.location.href = "[% gSkin.absolutedir_secure %]/submit.pl?op=list&amp;fromconsole=1&amp;nowrapper=1";
-		}
-	</script>
+
 	<form id="adminform" action="[% gSkin.rootdir %]/admin.pl" method="post" accept-charset="UTF-8" [% IF form.fromconsole %]target="_blank" onsubmit="submitAndReload();"[% END %]>
 		[% IF form.fromconsole %]<div class="hide">[% END %]
 		<input type="hidden" name="firstpreview" value="1">
