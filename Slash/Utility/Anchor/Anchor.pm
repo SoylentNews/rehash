@@ -419,7 +419,7 @@ sub redirect {
 	$r->content_type($constants->{content_type_webpage} || 'text/html');
 	$r->headers_out->set(Location => $url);
 
-	slashDisplay('html-redirect', { url => $url, code => $code });
+	#slashDisplay('html-redirect', { url => $url, code => $code });
 }
 
 #========================================================================
