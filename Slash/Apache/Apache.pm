@@ -7,6 +7,7 @@ package Slash::Apache;
 use strict;
 use utf8;
 use Time::HiRes;
+use Apache2::Connection;
 use Apache2::Const;
 use Apache2::Module;
 use Apache2::RequestUtil ();
@@ -473,13 +474,13 @@ sub IndexHandler  {
 #print STDERR scalar(localtime) . " $$ IndexHandler B new_skid=$new_skid\n";
 		$gSkin = getCurrentSkin();
 
-		my $index_handler = $gSkin->{index_handler};
-		if ($index_handler ne 'IGNORE') {
-			# $USER_MATCH defined above
-			$r->args("section=$key");
-			$r->filename("$basedir/$index_handler");
-			return OK;
-		}
+		#my $index_handler = $gSkin->{index_handler};
+		#if ($index_handler ne 'IGNORE') {
+		#	# $USER_MATCH defined above
+		#	$r->args("section=$key");
+		#	$r->filename("$basedir/$index_handler");
+		#	return OK;
+		#}
 	}
 	if ($uri =~ m#^/(stories|recent|popular|daddypants|search)/([^/]*)/?([^/]*)?/?$#) {
 		my ($key, $rss_or_search, $search) = ($1,$2,$3);
