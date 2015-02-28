@@ -43,13 +43,13 @@ __template__
 						<a href="[% gSkin.rootdir %]/faq.pl">FAQ</a>
 					</li>
 					<li>
-						<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>
+						<a href="[% constants.real_rootdir %]/journal.pl">Journals</a>
 					</li>
 					<li>
-						<a href="[% gSkin.rootdir %]/topics.pl">Topics</a>
+						<a href="[% constants.real_rootdir %]/topics.pl">Topics</a>
 					</li>
 					<li>
-						<a href="[% gSkin.rootdir %]/authors.pl">Authors</a>
+						<a href="[% constants.real_rootdir %]/authors.pl">Authors</a>
 					</li>
 					<li>
 						<a href="[% gSkin.rootdir %]/search.pl">Search</a>
@@ -61,22 +61,28 @@ __template__
 						<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
 					</li>					
 					[%- IF user.is_anon %]
+						[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+							<li><a href="[% constants.real_rootdir %]/subscribe.pl">Buy Gift Sub</a></li>
+						[% END %]
 						<li>
-							<a href="[% gSkin.rootdir %]/my/newuser">Create Account</a>
+							<a href="[% constants.real_rootdir %]/my/newuser">Create Account</a>
 						</li>
 						<li>
-							<a href="[% gSkin.rootdir %]/my/">Log In</a>
+							<a href="[% constants.real_rootdir %]/my/">Log In</a>
 						</li>
 					[% ELSE %]
+						[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+							<li><a href="[% constants.real_rootdir %]/subscribe.pl">Subscribe</a></li>
+						[% END %]
 						<li>
-							<a href="[% gSkin.rootdir %]/my/info">Preferences</a>
+							<a href="[% constants.real_rootdir %]/my/info">Preferences</a>
 						</li>
 						<li>
-							<a href="[% gSkin.rootdir %]/my/logout">Log Out</a>
+							<a href="[% constants.real_rootdir %]/my/logout">Log Out</a>
 						</li>
 					[%- END %]
 					<li>
-                                               <a href="[% PROCESS rsslink feed_type='atom' %]"><img src="[% constants.imagedir %]/atomicon.gif" width="36" height="14" alt="Atom feed"></a>
+						<a href="[% PROCESS rsslink feed_type='atom' %]"><img src="[% constants.imagedir %]/atomicon.gif" width="36" height="14" alt="Atom feed"></a>
 						<a href="[% PROCESS rsslink %]"><img src="[% constants.imagedir %]/rssicon.gif" width="36" height="14" alt="RSS feed"></a>
 					</li>
 				</ul>

@@ -156,7 +156,7 @@ IF !useredit.is_anon;
 		IF message_count.total
 			%]<br><hr>You have <b>[%
 			IF message_count.unread
-				%]<a href="[% gSkin.rootdir %]/my/inbox">[%
+				%]<a href="[% constants.real_rootdir %]/my/inbox">[%
 			END;
 			message_count.unread
 			%] new message[% message_count.unread == 1 ? "" : "s";
@@ -165,7 +165,7 @@ IF !useredit.is_anon;
 			END
 			%]</b> waiting for you, and <b>[%
 			IF message_count.read
-				%]<a href="[% gSkin.rootdir %]/my/inbox">[%
+				%]<a href="[% constants.real_rootdir %]/my/inbox">[%
 			END;
 			message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 			IF message_count.read
@@ -176,14 +176,14 @@ IF !useredit.is_anon;
 	END %]
 
 	
-	<div class="logout"><a href="[% gSkin.rootdir %]/my/logout">Log Out</a></div>
+	<div class="logout"><a href="[% constants.real_rootdir %]/my/logout">Log Out</a></div>
 	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only && !user.is_subscriber %]
 		<hr>
 		<div class="logout">
-			<a href="/subscribe.pl">Subscribe</a>
+			<a href="[% constants.real_rootdir %]/subscribe.pl">Subscribe</a>
 		</div>
 		<div class="whysub">
-			<a href="/faq.pl?op=subscribe">Why Subscribe</a>
+			<a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe</a>
 		</div>
   [% END %]
 	[% END;

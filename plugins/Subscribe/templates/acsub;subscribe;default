@@ -25,7 +25,7 @@ __template__
 			</div>
 		[% END %]
 		
-		<form method="post" action="[% gSkin.rootdir %]/subscribe.pl">
+		<form method="post" action="[% constants.real_rootdir %]/subscribe.pl">
 			<fieldset>
 				You can buy a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and BitPay (for Bitcoin payments). The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
 				<br />
