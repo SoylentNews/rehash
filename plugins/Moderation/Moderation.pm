@@ -35,6 +35,17 @@ sub getReasons {
 
 ########################################################
 
+sub getReasonsOrder {
+	my($self) = @_;
+	my $order_cache = "_reasons_order_cache";
+	$self->{$order_cache} ||= $self->sqlSelectColArrayref(
+		"id", "modreasons","","ORDER BY ordered ASC"
+	);
+	return $self->{$order_cache};
+}
+
+########################################################
+
 # to-do:
 #
 # db down
@@ -122,6 +133,7 @@ sub moderateComment {
 	my($self, $sid, $cid, $reason, $options) = @_;
 	return 0 unless dbAvailable("write_comments");
 	return 0 unless $reason;
+	return 0 if ($reason > 99);
 	$options ||= {};
 
 	my $constants = getCurrentStatic();
@@ -161,7 +173,7 @@ sub moderateComment {
 		if ($mid) {
 			$dispArgs->{type} = 'already moderated';
 			Slash::slashDisplay('moderation', $dispArgs)
-				unless $options->{no_display};
+			unless $options->{no_display};
 			return 0;
 		}
 	}
@@ -222,10 +234,6 @@ sub moderateComment {
 		$user->{points} -= $pointsneeded;
 		$user->{points} = 0 if $user->{points} < 0;
 
-		my $achievements = getObject('Slash::Achievements');
-		if (!$user->{is_admin} && ($user->{points} == 0)) {
-			$achievements->setUserAchievement('mod_points_exhausted', $user->{uid}, { ignore_lookup => 1 }) if $achievements;
-		}
 
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
@@ -269,12 +277,6 @@ sub moderateComment {
 				$cu_changes->{-downmods} = "downmods + 1";
 			} elsif ($val > 0) {
 				$cu_changes->{-upmods} = "upmods + 1";
-				if ($achievements) {
-                                        $achievements->setUserAchievement('comment_upmodded', $comment->{uid}, { ignore_lookup => 1, maker_mode => 1 });
-                                        if ($achievements->checkMeta($comment->{uid}, 'the_maker', ['comment_upmodded', 'story_accepted'])) {
-                                                $achievements->setUserAchievement('the_maker', $comment->{uid}, { ignore_lookup => 1 });
-                                        }
-                                }
 			}
 			if ($karma_change < 0) {
 				$cu_changes->{-karma} = "GREATEST("

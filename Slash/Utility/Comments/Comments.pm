@@ -1908,8 +1908,10 @@ sub dispComment {
 	}
 
 	my $reasons = undef;
+	my $ordered = undef;
 	if ($mod_reader) {
 		$reasons = $mod_reader->getReasons();
+		$ordered = $mod_reader->getReasonsOrder();
 	}
 
 	my $can_mod = _can_mod($comment);
@@ -1967,6 +1969,7 @@ EOT
 			%$comment,
 			comment_shrunk	=> $comment_shrunk,
 			reasons		=> $reasons,
+			ordered		=> $ordered,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
 			discussion2	=> $discussion2,
@@ -1982,6 +1985,7 @@ EOT
 		marked_spam	=> $marked_spam,
 		comment_shrunk	=> $comment_shrunk,
 		reasons		=> $reasons,
+		ordered		=> $ordered,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
 		discussion2	=> $discussion2,
