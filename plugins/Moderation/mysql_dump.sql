@@ -18,7 +18,7 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('m1_pointgrant_factor
 INSERT IGNORE INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_stirratio', '1.3', 'Factor of stirred-points ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('moderator_or_post', '1', 'Can users moderate and post in the same discussion (1=yes, 0=no)');
 
-INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 0,  'Normal',        0, 0,  0,   0, 0.5,  1);
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 0,  'Normal',        0, 0,  0,   0, 0.5,  0);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 1,  'Offtopic',      1, 1, -1,  -1, 0.5, 10);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 2,  'Flamebait',     1, 1, -1,  -1, 0.5, 12);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 3,  'Troll',         1, 1, -1,  -1, 0.5, 13);
@@ -27,9 +27,9 @@ INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac,
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 6,  'Interesting',   1, 1,  1,   1, 0.5,  3);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 7,  'Informative',   1, 1,  1,   1, 0.5,  4);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 8,  'Funny',         1, 1,  1,   1, 0.5,  5);
-INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 9,  'Overrated',     0, 0, -1,   0, 0.5,  9);
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 9,  'Overrated',     0, 0, -1,   0, 0.5,  8);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (10,  'Underrated',    0, 0,  1,   0, 0.5,  7);
-INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (11,  'Spam',          0, 1, -1, -10, 0.5, 99);
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (11,  'Spam',          0, 1, -1, -10, 0.5, 101);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (12,  'Disagree',      0, 1,  0,   0, 0.5,  9);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (13,  'Touché',        0, 1,  1,   1, 0.5,  6);
-INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (100, '-----------',   0, 1,  1,   1, 0.5, 98);
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (100, '-----------',   0, 1,  1,   1, 0.5, 100);
