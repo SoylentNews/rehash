@@ -52,6 +52,7 @@ __template__
   <p>Moderation takes place by clicking the drop down list that appears next to comments, and selecting one of the adjectives like 'Flamebait' or 'Informative'. Bad words will reduce the comments score by a single point, good words increase a comments score by a single point. All comments are scored on an absolute scale from -1 to 5. Logged in users start at 1 (although this can vary from -1 to 2 based on their overall contribution to discussions) and anonymous users start at 0.</p>
   <p>Moderators can participate in the same discussion as both a moderator and a poster. You are only prevented from modding your own posts.</p>
   <p>Concentrate more on promoting than on demoting. The real goal here is to find the juicy good stuff and let others read it. Do not promote personal agendas. Do not let your opinions factor in. <strong>Try</strong> to be impartial about this. Simply disagreeing with a comment is not a valid reason to mark it down. Likewise, agreeing with a comment is not a valid reason to mark it up. The goal here is to share ideas. To sift through the haystack and find golden, shiny needles. And to keep the children who like to spam in check.</p>
+	<p>Please <li><a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> any comments (the cid link) showing moderation abuse.  We will investigate and make amends if necessary.</p>
   
   <h3 id="faq">FAQ</h3>
   <h4>I just got moderator access, what do I do?</h4>
@@ -97,14 +98,8 @@ __template__
   </dl>
 	
 	<h3 id="spam">What is Special About the Spam Mod</h3>
-	<p>The Spam mod is special in that is removes 10 Karma points from the user that posted the comment.  This mod is meant to combat spam and not to be used to punish commenters. Our goal is to put a spammer in Karma Hell and to not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all Spam mods to make sure moderators are not abusing the Spam mod.  If we find a moderator that unfairly applied the Spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month.  Further bans to the same modder add increasing amounts of ban time.  If you inadvertently applied a Spam mod, <a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> and we will remove the Spam mod without banning you.  Yes we know that the interface needs a bit of work and miss modding is an unfortunate consequence.</p>
+	<p>The Spam mod is special in that is removes 10 Karma points from the user that posted the comment.  This mod is meant to combat spam and not to be used to punish commenters. Our goal is to put a spammer in Karma Hell and to not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all Spam mods to make sure moderators are not abusing the Spam mod.  If we find a moderator that unfairly applied the Spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month.  Further bans to the same modder add increasing amounts of ban time.  If you inadvertently applied a Spam mod, <a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> and we will remove the Spam mod without banning you.  Even though we have updated the interface, miss modding may still be an unfortunate occurrence.</p>
   
-  <h3 id="future">Ideas for the Future</h3>
-  <p>This is a system in development. Things can change. Our goal is to create one of the most comprehensive and well though-out moderation systems in existence. These ideas might help accomplish that goal:</p>
-  <ol>
-  <li>Integrating <a href="http://spamassassin.apache.org/" target="new">SpamAssassin</a> into the comment system for ACs</li>
-  <li>Integrating a weighting system for ACs (anonymous comments) IP addresses: known ip addresses would be subject to Karma that can affect their initial post score</li>
-  </ol>
  </div>
 </div>
 

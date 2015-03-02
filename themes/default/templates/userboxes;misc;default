@@ -204,13 +204,6 @@ IF !useredit.is_anon;
 			[% IF user.points > 0 %]
 				<br/><b>Please</b> read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a>
 				for instructions.
-				<ul>
-					<li>You can moderate after posting in the same discussion.</li>
-					<li>You cannot moderate your own posts.</li>
-					<li>Concentrate on promoting more than demoting.</li>
-					<li>Browse at -1 to keep an eye out for abuses.</li>
-					<li><a href="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</a> URLs showing abuse (the cid link please!).</li>
-				</ul>
 			[% END %]
 		[% END;
 		Slash.sidebox(title, contents, "moderation", 1);
