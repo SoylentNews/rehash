@@ -48,7 +48,9 @@ sub main {
 	# you are logged in, just go to your prefs (you were authenticated
 	# in Slash::Apache::User, before you got here)
 	if ($op eq 'userlogin' && $user_ok) {
-		redirect(cleanRedirectUrl($form->{returnto}));
+		# cleanRedirectUrl needs to be fixed to properly pull site match based on no schema.
+		# redirect(cleanRedirectUrl($form->{returnto}));
+		redirect($form->{returnto});
 		return;
 	}
 

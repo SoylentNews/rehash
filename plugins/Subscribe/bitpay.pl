@@ -26,22 +26,18 @@ sub main {
 sub bitpay {
 	my ($form, $slashdb, $user, $constants) = @_;
 	
-	my $puid = $form->{puid};
-	my $uid = $form->{uid};
-	my $from = $form->{from};
-	my $isGift = $puid ne $uid ? 1 : 0;
-	$puid = '""' unless $isGift;
+
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my $invoice = $subscribe->bpCreateInvoice(
-					price			=> $constants->{bitpay_amount},
+					price			=> $form->{amount},
 					currency		=> "USD",
 					notificationType	=> "json",
 					transactionSpeed	=> "high",
 					fullNotifications	=> "true",
 					redirectURL		=> $constants->{bitpay_return},
 					notificationURL		=> $constants->{bitpay_callback},
-					posData			=> "{ \"uid\" : $uid , \"gift\" : $isGift , \"puid\" : $puid , \"from\" : \"$from\" }",
+					posData			=> $form->{custom},
 	);
 
 	redirect("$invoice->{url}", "302");

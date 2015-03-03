@@ -21,13 +21,13 @@ __template__
 		<a href="[% gSkin.rootdir %]/faq.pl">FAQ</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>
+		<a href="[% constants.real_rootdir %]/journal.pl">Journals</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/topics.pl">Topics</a>
+		<a href="[% constants.real_rootdir %]/topics.pl">Topics</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/authors.pl">Authors</a>
+		<a href="[% constants.real_rootdir %]/authors.pl">Authors</a>
 	</li>	
 	<li>
 		<a href="[% gSkin.rootdir %]/search.pl">Search</a>
@@ -39,39 +39,42 @@ __template__
 		<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
 	</li>
 		[% IF user.is_anon %]
+		[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+			<li><a href="[% constants.real_rootdir %]/subscribe.pl">Buy Gift Sub</a></li>
+		[% END %]
 		<li>
-			<a href="[% gSkin.rootdir %]/my/newuser">Create Account</a>
+			<a href="[% constants.real_rootdir %]/my/newuser">Create Account</a>
 		</li>
 		<li>
-			<a href="[% gSkin.rootdir %]/my/">Log In</a>
+			<a href="[% constants.real_rootdir %]/my/">Log In</a>
 		</li>
 		[% ELSE %]
 		<li class="user">
 			<em>You</em>
 			<ul>
 				<li>
-					<a href="[% gSkin.rootdir %]/~[% user.nickname | strip_paramattr %]/">Info</a>
+					<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/">Info</a>
 				</li>
 				<li>
-					<a href="[% gSkin.rootdir %]/my/info">Preferences</a>
+					<a href="[% constants.real_rootdir %]/my/info">Preferences</a>
 				</li>
 				<li>
-					<a href="[% gSkin.rootdir %]/my/journal">Journal</a>
+					<a href="[% constants.real_rootdir %]/my/journal">Journal</a>
 				</li>
 				<li>
-					<a href="[% gSkin.rootdir %]/my/inbox">Messages</a>
+					<a href="[% constants.real_rootdir %]/my/inbox">Messages</a>
 				</li>
 				<li>
-					<a href="[% gSkin.rootdir %]/my/friends">Friends, Foes</a>
+					<a href="[% constants.real_rootdir %]/my/friends">Friends, Foes</a>
 				</li>
 				[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
-					<li><a href="[% gSkin.rootdir %]/subscribe.pl">Subscribe</a></li>
+					<li><a href="[% constants.real_rootdir %]/subscribe.pl">Subscribe</a></li>
 				[% END %]
 				<li>
-					<a href="[% gSkin.rootdir %]/my/password">Set Password</a>
+					<a href="[% constants.real_rootdir %]/my/password">Set Password</a>
 				</li>
 				<li>
-					<a href="[% gSkin.rootdir %]/my/logout">Log Out</a>
+					<a href="[% constants.real_rootdir %]/my/logout">Log Out</a>
 				</li>
 			</ul>
 		</li>

@@ -13,6 +13,7 @@ use Slash::Utility;
 use DateTime;
 use DateTime::Format::MySQL;
 use Slash::Constants qw(:web :messages);
+use JSON;
 
 sub main {
 	my $user = getCurrentUser();
@@ -45,6 +46,10 @@ sub main {
 			function	=> \&confirm,
 			seclev		=> 1
 		},
+		acsub 	=> {
+			function	=> \&acsub,
+			seclev		=> 1
+		},
 	};
 	
 	# Duplicating code because the redirect page needs to skip the
@@ -52,14 +57,18 @@ sub main {
 	$op = 'pause' if $form->{merchant_return_link};
 	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
-	if (($user->{is_anon} && $op !~ /^(paypal)$/) ||
+	if ($user->{is_anon}) {
+		$op = 'acsub' unless $ops->{$op};
+	} else {
+		$op = 'default' unless $ops->{$op};
+	}
+	
+	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm)$/) ||
 	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
 	}
-
-	$op = 'default' unless $ops->{$op};
 
 	header("subscribe") or return;
 
@@ -208,7 +217,8 @@ sub paypal {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $txid = getCurrentForm('tx');
 	my $subscribe = getObject('Slash::Subscribe');
-	my ($error, $note); 
+	my ($error, $note);
+	my $puid = $constants->{anonymous_coward_uid};
 	
 	if (!$subscribe->paymentExists($txid)){
 		#	IPN may have gotten the payment first.
@@ -216,31 +226,24 @@ sub paypal {
 		my $pp_pdt = $subscribe->ppDoPDT($txid);
 		# use Data::Dumper; print STDERR Dumper($pp_pdt);
 		
+		$pp_pdt->{custom} = decode_json($pp_pdt->{custom}) || "";
+		
 		if (ref($pp_pdt) eq "HASH") {
-			my $days = $subscribe->convertDollarsToDays($pp_pdt->{payment_gross}, 'paypal');
 			my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
 			
-			my ($puid, $payment_type, $from);
-			if ($pp_pdt->{custom}){
-				$puid = $pp_pdt->{custom};
-				$payment_type = 'gift';
-				$from = $pp_pdt->{option_selection1};
-			} else {
-				$puid = $pp_pdt->{item_number};
-				$payment_type = 'user';
-			}
+			$puid = $pp_pdt->{custom}{puid};
 			
 			my $payment = {
-				days => $days,
-				uid	=> $pp_pdt->{item_number},
+				days => $pp_pdt->{custom}{days},
+				uid	=> $pp_pdt->{custom}{uid},
 				payment_net   => $payment_net,
 				payment_gross => $pp_pdt->{payment_gross},
-				payment_type  => $payment_type,
+				payment_type  => $pp_pdt->{custom}{type},
 				transaction_id => $pp_pdt->{txn_id},
 				method => 'paypal',
-				email => $from,
-				raw_transaction  => $subscribe->convertToText($pp_pdt),
-				puid => $puid
+				email => $pp_pdt->{custom}{from},
+				raw_transaction  => encode_json($pp_pdt),
+				puid => $pp_pdt->{custom}{puid}
 			};
 			
 			if (!$subscribe->paymentExists($txid)){
@@ -249,9 +252,9 @@ sub paypal {
 				my ($rows, $result, $warning);
 				$rows = $subscribe->insertPayment($payment);
 				if ($rows && $rows == 1) {
-					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $days);
+					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 					if ($result && $result == 1){
-						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from) if $payment->{payment_type} eq "gift";
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 					} else {
 						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 						print STDERR $warning;
@@ -276,8 +279,14 @@ sub paypal {
 		$note = "<p><b>Transaction $txid completed.  Thank you for supporting $constants->{sitename}.</b></p>";
 		
 	}
-
-	edit(@_, $note);
+	
+	my $puid_user = $slashdb->getUser($puid);
+	if ($puid_user->{is_anon}){
+		acsub(@_, $note);
+	} else {
+		edit(@_, $note);
+	}
+	
 }
 
 
@@ -292,7 +301,7 @@ sub grant {
 	$user_edit ||= $user;
 
 	if (!$user->{is_admin}){
-		my $note = "<p class='error'>Insufficient permission -- you aren't an admin</p>";
+		my $note = "<p class='error'>Insufficient permission -- you are not an admin</p>";
 		edit(@_, $note);
 	}
 
@@ -335,22 +344,76 @@ sub confirm {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $type = $form->{subscription_type};
-	my $uid = $form->{uid};
+	my $days = $form->{subscription_days};
+	my $amount;
+
+	if ($days == $constants->{subscribe_monthly_days}) {
+		if ($form->{monthly_amount} >= $constants->{subscribe_monthly_amount}) {
+			$amount = $form->{monthly_amount};
+		} else {
+			$amount = $constants->{subscribe_monthly_amount};
+		}
+	} elsif ($days == $constants->{subscribe_semiannual_days}) {
+		if ($form->{semiannual_amount} >= $constants->{subscribe_semiannual_amount}) {
+			$amount = $form->{semiannual_amount};
+		} else {
+			$amount = $constants->{subscribe_semiannual_amount};
+		}
+	} else {
+		if ($form->{annual_amount} >= $constants->{subscribe_annual_amount}) {
+			$amount = $form->{annual_amount};
+		} else {
+			$amount = $constants->{subscribe_annual_amount};
+		}
+	}
+
+	my $uid = $form->{uid} || $user->{uid};
 	my $sub_user = $slashdb->getUser($uid);
-	my $title ="Confirm subscription and choose payment type";
-	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
-		tab_selected =>		'subscription',
-		title  => $title
-	}, { Return => 1 });
+	my $puid = $user->{uid};
 	
-	slashDisplay("confirm", {
-		prefs_titlebar => $prefs_titlebar,
-		type           => $type,
-		uid            => $uid,
-		sub_user       => $sub_user,
-		user           => $user,
-		from           => $form->{from}
-	});
+	if ($uid == $constants->{anonymous_coward_uid}) {
+		my $note = "<p class='error'>" . $constants->{anon_name_alt} . " cannot recieve a subscription.  Please choose another user to gift.</p>";
+		if ($user->{is_anon}){
+			acsub(@_, $note);
+		} else {
+			edit(@_, $note);
+		}
+	} else {
+		my $title ="Confirm subscription and choose payment type";
+		my $prefs_titlebar;
+		
+		if ($user->{is_anon}){
+			$prefs_titlebar = slashDisplay('titlebar', {
+				title  => $title
+			}, { Return => 1 });
+		} else {
+			$prefs_titlebar = slashDisplay('prefs_titlebar', {
+				tab_selected =>		'subscription',
+				title  => $title
+			}, { Return => 1 });
+		}
+		
+		my $custom = encode_json({
+			type           => $type,
+			days           => $days,
+			uid            => $uid,
+			puid           => $puid,
+			from           => $form->{from}
+		});
+		
+		slashDisplay("confirm", {
+			prefs_titlebar => $prefs_titlebar,
+			type           => $type,
+			days           => $days,
+			amount         => $amount,
+			uid            => $uid,
+			puid           => $puid,
+			sub_user       => $sub_user,
+			user           => $user,
+			custom         => $custom,
+			from           => $form->{from}
+		});
+	}
 }
 
 sub send_gift_msg {
@@ -370,6 +433,18 @@ sub send_gift_msg {
 		}, { Return => 1, Nocomm => 1 } );
 	my $title = "Gift subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
+}
+
+
+##################################################################
+# AC sub
+sub acsub {
+	my($form, $slashdb, $user, $constants, $note) = @_;
+
+	slashDisplay("acsub", {
+		note => $note,
+	});
+	1;
 }
 
 createEnvironment();

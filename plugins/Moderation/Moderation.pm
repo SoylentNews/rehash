@@ -26,11 +26,46 @@ sub isInstalled {
 
 sub getReasons {
 	my($self) = @_;
+	
+	my $slashdb = getCurrentDB();
 	my $table_cache = "_reasons_cache";
-	$self->{$table_cache} ||= $self->sqlSelectAllHashref(
-		"id", "*", "modreasons"
-	);
+	
+	my $mcd = $slashdb->getMCD;
+	my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_cache:";
+	if ($mcd) {
+		$self->{$table_cache} ||= $mcd->get("$mcdkey");
+		if (!$self->{$table_cache}){
+				$self->{$table_cache} = $self->sqlSelectAllHashref("id", "*", "modreasons");
+				$mcd->set("$mcdkey", $self->{$table_cache}, 86400);
+			}
+	} else {
+		$self->{$table_cache} ||= $self->sqlSelectAllHashref("id", "*", "modreasons");
+	}
+	
 	return {( %{$self->{$table_cache}} )};
+}
+
+########################################################
+
+sub getReasonsOrder {
+	my($self) = @_;
+	
+	my $slashdb = getCurrentDB();
+	my $order_cache = "_reasons_order_cache";
+	
+	my $mcd = $slashdb->getMCD;
+	my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_order_cache:";
+	if ($mcd) {
+		$self->{$order_cache} ||= $mcd->get("$mcdkey");
+			if (!$self->{$order_cache}){
+				$self->{$order_cache} = $self->sqlSelectColArrayref("id", "modreasons","","ORDER BY ordered ASC");
+				$mcd->set("$mcdkey", $self->{$order_cache}, 86400);
+			}
+	} else {
+		$self->{$order_cache} ||= $self->sqlSelectColArrayref("id", "modreasons","","ORDER BY ordered ASC");
+	}
+
+	return $self->{$order_cache};
 }
 
 ########################################################
@@ -122,6 +157,7 @@ sub moderateComment {
 	my($self, $sid, $cid, $reason, $options) = @_;
 	return 0 unless dbAvailable("write_comments");
 	return 0 unless $reason;
+	return 0 if ($reason > 99);
 	$options ||= {};
 
 	my $constants = getCurrentStatic();
@@ -161,7 +197,7 @@ sub moderateComment {
 		if ($mid) {
 			$dispArgs->{type} = 'already moderated';
 			Slash::slashDisplay('moderation', $dispArgs)
-				unless $options->{no_display};
+			unless $options->{no_display};
 			return 0;
 		}
 	}
@@ -222,10 +258,6 @@ sub moderateComment {
 		$user->{points} -= $pointsneeded;
 		$user->{points} = 0 if $user->{points} < 0;
 
-		my $achievements = getObject('Slash::Achievements');
-		if (!$user->{is_admin} && ($user->{points} == 0)) {
-			$achievements->setUserAchievement('mod_points_exhausted', $user->{uid}, { ignore_lookup => 1 }) if $achievements;
-		}
 
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
@@ -269,12 +301,6 @@ sub moderateComment {
 				$cu_changes->{-downmods} = "downmods + 1";
 			} elsif ($val > 0) {
 				$cu_changes->{-upmods} = "upmods + 1";
-				if ($achievements) {
-                                        $achievements->setUserAchievement('comment_upmodded', $comment->{uid}, { ignore_lookup => 1, maker_mode => 1 });
-                                        if ($achievements->checkMeta($comment->{uid}, 'the_maker', ['comment_upmodded', 'story_accepted'])) {
-                                                $achievements->setUserAchievement('the_maker', $comment->{uid}, { ignore_lookup => 1 });
-                                        }
-                                }
 			}
 			if ($karma_change < 0) {
 				$cu_changes->{-karma} = "GREATEST("

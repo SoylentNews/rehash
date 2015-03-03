@@ -21,7 +21,8 @@ INSERT INTO vars (name, value, description) VALUES ('paypal_amount', '20.00', 'H
 INSERT INTO vars (name, value, description) VALUES ('paypal_host','www.sandbox.paypal.com','Host part of url for PayPal. Change this to to use PayPal sandbox. ');
 INSERT INTO vars (name, value, description) VALUES ('paypal_business', 'yourname@example.com', 'Email of Paypal business acct');
 INSERT INTO vars (name, value, description) VALUES ('paypal_cancel_return', 'http://www.example.com/subscribe.pl', 'URL to go to if payment is cancelled before being made');
-INSERT INTO vars (name, value, description) VALUES ('paypal_image_src', 'http://images.paypal.com/images/x-click-but02.gif', 'URL of button image to click on');
+INSERT INTO vars (name, value, description) VALUES ('paypal_image_src', '//www.paypalobjects.com/en_US/i/btn/x-click-but01.gif', 'URL of buy now button image to click on');
+INSERT INTO vars (name, value, description) VALUES ('paypal_sub_image_src', '//www.paypalobjects.com/en_US/i/btn/x-click-but20.gif', 'URL of subscribe button image to click on');
 INSERT INTO vars (name, value, description) VALUES ('paypal_no_shipping', '1', '0=Shipping address reqd (more secure), 1=No shipping address reqd (more convenient)');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_days','365','How many days your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('paypal_num_pages', '1000', 'How many pages your paypal_amount buys');
@@ -42,7 +43,6 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_sub_speed_limit
 INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptions enabled?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_only', 1, 'Subscription prefs only enabled for admins?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_seclev', 1000, 'Min seclev to do subscription admin stuff');
-INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_debug', 0, 'Debug plugins/Subscribe?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_defpages', 'index article', 'Space-separated list of default pages (script names)');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_email', 'admin@example.com', 'Email address for subscription-related issues');
@@ -55,7 +55,13 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe_hits_only', 1, '0
 INSERT INTO vars (name, value, description) VALUES ('subscribe_secretword', 'changemenow', 'Secret word to buy pages with');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_low_val','14','Number of days before subscripion ends to start sending low subscription message');
 INSERT INTO vars (name, value, description) VALUES ('subscriber_bonus','0','Comment point bonus for subscribers (1 = on | 0 = off)');
-
+INSERT INTO vars (name, value, description) VALUES ('subscribe_annual_days','365','How many days for annual subs');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_semiannual_days','180','How many days for semiannual subs');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_monthly_days','30','How many days for montly subs');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_annual_amount','20.00', 'How much an annual subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_semiannual_amount','12.00', 'How much a semiannual subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_monthly_amount','4.00', 'How much a montly subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_ac_default_gift','2', 'Default uid to get AC users gift subs');
 
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (15, 'Subscription Running Low', 1, '', 'now', 1);
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (16, 'Subscription Expired', 1, '', 'now', 1);

@@ -20,8 +20,10 @@ __template__
 		<p>Now, go forth and submit stories, comment, moderate, and be free!</p>
 		<h3>Useful Links:</h3>
 		<ul>
-			<li><a href="/subscribe.pl">Subscriptions - Support Us</a></li>
-			<li><a href="/faq.pl">Frequently Asked Questions</a></li>
+		  [% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+				<li><a href="[% constants.real_rootdir %]/subscribe.pl">Subscribe Here</a> - <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe</a></li>
+			[% END %]
+			<li><a href="[% gSkin.rootdir %]/faq.pl">Frequently Asked Questions</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" target="blank">Wiki - Main Page</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved" target="blank">Wiki - Get Involved</a> | Information on the many ways one can contribute to this project.</li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="blank">Wiki - IRC</a> | Information about how to join and get the most of the realtime discussion on our IRC network.</li>
@@ -40,9 +42,9 @@ __template__
 		</ul></p>
 		<h3>Suggested Reading</h3>
 		<ul>
-			<li><a href="/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow...Today!</a> | One of the first posts to the site and a quick blurb about the goals of this project.</li>
-			<li><a href="/faq.pl?op=moderation">Moderation Guidelines</a> | Everything you want to know about moderating.</li>
-			<li><a href="/faq.pl?op=editorial">Submission Guidelines</a> | Everything you want to know about submitting stories.</li>
+			<li><a href="[% constants.real_rootdir %]/article.pl?sid=14/02/17/0148235">Welcome to the World of Tomorrow...Today!</a> | One of the first posts to the site and a quick blurb about the goals of this project.</li>
+			<li><a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderation Guidelines</a> | Everything you want to know about moderating.</li>
+			<li><a href="[% gSkin.rootdir %]/faq.pl?op=editorial">Submission Guidelines</a> | Everything you want to know about submitting stories.</li>
 		</ul>
 		<h3>Info on Slashcode</h3>
 		<p>Slashcode is the code for All Things Slash. Slash is the source code and database that was originally used to create <a href="http://slashdot.org/" target="blank">Slashdot</a>, and has now been released under the GNU General Public License. It is a bona fide Open Source / Free Software project.</p>

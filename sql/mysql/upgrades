@@ -1,4 +1,37 @@
-# Post-slashcode 14.04 release
+#######################################
+# SoylentNews Slashcode updates 14_04 #
+#######################################
+
+UPDATE vars SET value = 'slashcode_04_14' WHERE name = 'cvs_tag_currentcode';
+
+# New variable for use with moderation.
+INSERT INTO vars VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
+ALTER TABLE users_info ADD COLUMN points smallint(5) NOT NULL DEFAULT 0 AFTER bio;
+ALTER TABLE users_info ADD COLUMN lastaccess_ts timestamp DEFAULT CURRENT_TIMESTAMP AFTER lastaccess;
+ALTER TABLE users_comments DROP points;
+
+# New variable for use with low submissions message.
+INSERT INTO vars (name, value, description) VALUES ('subs_level','15','Level at which to not to display low submissions message, set to 0 to disable message');
+
+# Update approvedtags_attr to add class to p and div.  For formatSub template changes.
+UPDATE vars SET value = 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U p:class div:class' WHERE name = 'approvedtags_attr';
+
+# Update menus table to remove users menu.  Needed for prefes update.
+DELETE FROM menus WHERE menu='users';
+
+# New variables for use disabling moderate_or_post
+# NOTE: on production this is currently moderator_or_post
+INSERT IGNORE INTO vars (name, value, description) VALUES ('moderate_or_post', '1', 'Can users moderate and post in the same discussion (1=yes, 0=no)');
+
+# Add a missing variable to the database
+INSERT IGNORE INTO vars (name, value, description) VALUES ('use_https_for_absolutedir_secure', '1', 'Should we use https as a secure absolutedir for nexuses (YOU PROBABLY WANT THIS!)');
+
+
+
+#######################################
+# SoylentNews Slashcode updates 14_06 #
+#######################################
+
 # Theme change
 # (ok, this isn't technically a schema edit, *but* this file kinda acts as our general upgrade documentation
 # We've got two new themes, replacing the old slashcode.com one; chillax which is our default theme, and soylentnews
@@ -76,7 +109,7 @@ UPDATE blocks SET default_block = 1 WHERE bid = 'poll' OR bid = 'index_more' OR 
 UPDATE blocks SET hidden = 1 WHERE bid = 'features_qlinks' OR bid ='recenttopics' OR bid ='spamurlregexes' OR bid ='subscriber_plug' OR bid ='articles_more' OR bid = 'features_more';
 UPDATE blocks SET ordernum = 100 WHERE bid = 'mysite';
 UPDATE blocks SET ordernum = 3 WHERE bid = 'topcomments';
-UPDATE blocks SET seclev = 500 where bid = 'index_qlinks';
+UPDATE blocks SET seclev = 500 WHERE bid = 'index_qlinks';
 DELETE FROM blocks WHERE bid = 'newestthree';
 
 # Remove all dynmaic user blocks or new blocks will not show up
@@ -94,10 +127,10 @@ UPDATE users_index SET story_never_author = '';
 
 
 
-##############################
-# Post-slashcode 14.06 release
+#######################################
+# SoylentNews Slashcode updates 14_08 #
+#######################################
 
-# 14_08 RELEASE
 UPDATE vars SET value = 'slashcode_14_08' WHERE name = 'cvs_tag_currentcode';
 
 # Allow Reltionship Change Messages to get sent for non subscribers
@@ -374,10 +407,11 @@ INSERT INTO vars (name, value, description) VALUES ('signoffs_per_article','2','
 UPDATE message_codes SET delivery_bvalue=1 WHERE type LIKE 'Subscription%';
 
 
-##############################
-# Post-slashcode 14.08 release
 
-# 14_10 RELEASE
+#######################################
+# SoylentNews Slashcode updates 14_10 #
+#######################################
+
 UPDATE vars SET value = 'slashcode_14_10' WHERE name = 'cvs_tag_currentcode';
 
 # Set up Bitpay Log Table
@@ -405,13 +439,13 @@ INSERT INTO vars (name, value, description) VALUES ('bp_ipn_path','/bitpay','Bit
 INSERT INTO vars (name, value, description) VALUES ('bitpay_num_days','365','How many days your bitpay_amount buys');
 
 # Unset subscriber_bonus on comments since it got set due to a bug.
-update comments set subscriber_bonus = 'no' where subscriber_bonus = 'yes';
+UPDATE comments SET subscriber_bonus = 'no' WHERE subscriber_bonus = 'yes';
 
 # Create a variable to decide who gets to see future article titles on /submit.pl?op=list
 INSERT INTO vars (name, value, description) VALUES ('future_headlines','1','Who to show future headlines to on submissions list page. 3=Everyone, 2=Registered Users, 1=Subscribers anything else = off');
 
 # Setup to disable comments for older articles
-UPDATE vars SET value=0, description='days to wait for story archiving, set to 0 to disable' where name='archive_delay';
+UPDATE vars SET value=0, description='days to wait for story archiving, set to 0 to disable' WHERE name='archive_delay';
 INSERT INTO vars (name, value, description) VALUES ('discussion_archive_delay','30','days to wait until disabing further comments, set to 0 to disable');
 INSERT INTO vars (name, value, description) VALUES ('discussion_skip_dkids', '3', 'discussion types to NOT archive, comma-separated,  3 is Journals');
 
@@ -419,10 +453,12 @@ INSERT INTO vars (name, value, description) VALUES ('discussion_skip_dkids', '3'
 INSERT INTO reskey_vars VALUES (6, 'subscriberbypass', 1, 'If subscriber, bypass checks for duration');
 UPDATE reskey_vars SET value = 12 WHERE rkrid = 6 and name = 'duration_max-uses';
 
-##############################
-# Post-slashcode 14.10 release
 
-# 14_10 RELEASE
+
+#######################################
+# SoylentNews Slashcode updates 15_01 #
+#######################################
+
 UPDATE vars SET value = 'slashcode_15_01' WHERE name = 'cvs_tag_currentcode';
 
 #Fix for formatSub template
@@ -432,7 +468,7 @@ INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An Anonymou
 INSERT INTO vars (name, value, description) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');
 
 # Set max sup/sub depth to 1 because screw wavey text
-UPDATE vars SET value = 1 where name = 'nest_su_maxdepth';
+UPDATE vars SET value = 1 WHERE name = 'nest_su_maxdepth';
 
 # Add new approved tags
 UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|strike|abbr|sarc|sarcasm|user' WHERE name = 'approvedtags';
@@ -441,7 +477,7 @@ UPDATE vars SET value = 'a:href_U,name,title,rel div:id,class,title,style,dir,la
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_visible', 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|strike|sarc|sarcasm|user', 'tags that show in the availible list shown to users. for easter-egg purposes mostly.');
 
 # This switches feeds to https. http was hardcoded if you don't assign a url to a skin.
-UPDATE skins SET url = 'https://soylentnews.org/' where name = 'mainpage';
+UPDATE skins SET url = 'https://soylentnews.org/' WHERE name = 'mainpage';
 
 # For the moderation rework
 # Commented lines are held back but may go in at a later date
@@ -462,3 +498,41 @@ INSERT INTO vars (name, value, description) VALUES ('moderate_or_post', '2', '0 
 
 # Turn off meta-moderation as it breaks stuff with our setup
 UPDATE vars SET value = 0 WHERE name = 'm2';
+
+
+
+#######################################
+# SoylentNews Slashcode updates 15_03 #
+#######################################
+
+UPDATE vars SET value = 'slashcode_15_03' WHERE name = 'cvs_tag_currentcode';
+
+# Subscription Updates
+INSERT INTO vars (name, value, description) VALUES ('subscribe_annual_days','365','How many days for annual subs');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_semiannual_days','180','How many days for semiannual subs');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_monthly_days','30','How many days for montly subs');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_annual_amount','20.00', 'How much an annual subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_semiannual_amount','12.00', 'How much a semiannual subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_monthly_amount','4.00', 'How much a montly subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_ac_default_gift','6', 'Default uid to get AC users gift subs');
+INSERT INTO vars (name, value, description) VALUES ('paypal_sub_image_src', '//www.paypalobjects.com/en_US/i/btn/x-click-but20.gif', 'URL of subscribe button image to click on');
+UPDATE vars SET value = '//www.paypalobjects.com/en_US/i/btn/x-click-but01.gif' WHERE name = 'paypal_image_src';
+
+# Moderation Updates
+ALTER TABLE modreasons ADD COLUMN ordered tinyint UNSIGNED DEFAULT '50' NOT NULL;
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 9, 'Overrated', 0, 0, -0, 0, 0.5, 8);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 100, '-----------', 0, 0, 0, 0, 0.5, 100);
+UPDATE modreasons SET name = 'Touché' WHERE id = 13;
+UPDATE modreasons SET ordered = 0 WHERE id = 0;
+UPDATE modreasons SET ordered = 2 WHERE id = 5;
+UPDATE modreasons SET ordered = 3 WHERE id = 6;
+UPDATE modreasons SET ordered = 4 WHERE id = 7;
+UPDATE modreasons SET ordered = 5 WHERE id = 8;
+UPDATE modreasons SET ordered = 6 WHERE id = 13;
+UPDATE modreasons SET ordered = 7 WHERE id = 10;
+UPDATE modreasons SET ordered = 9 WHERE id = 12;
+UPDATE modreasons SET ordered = 10 WHERE id = 1;
+UPDATE modreasons SET ordered = 11 WHERE id = 4;
+UPDATE modreasons SET ordered = 12 WHERE id = 2;
+UPDATE modreasons SET ordered = 13 WHERE id = 3;
+UPDATE modreasons SET ordered = 101 WHERE id = 11;

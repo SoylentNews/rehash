@@ -25,17 +25,16 @@ __template__
 	<h3>Who runs it?</h3>
 	<p>It is currently managed by an ad-hoc group of <a href="http://wiki.soylentnews.org/wiki/WhosWho" target="_blank">volunteers</a> who maintain and operate the site. We've since incorporated as a Delaware Public Benefit Corporation (similar to a non-profit). Setting up a true non-profit organization is very expensive, but there are plans to place SoylentNews under a proper not-for-profit legal entity when funds allow.</p>
 	
-	<h3>How can I support SoylentNews?</h3>
-	<p>You could consider buying a <a href="/subscribe.pl">subscription</a>.</p>
-	
-	<h3>Why should I subscribe?</h3>
-	<p>Besides the warm fuzzy feeling that you helped us out, here's the rundown of subscription features:</p><ul> <li>Subscriber badge (toggleable)</li><li>Early access to new features</li><li>Exemption from ads if we ever run any</li><li>Full comment histories/access to database-intensive operations</li><li>No rate limiting or spam filtering</li></ul></p>
+	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
+		<h3>How can I support SoylentNews?</h3>
+		<p>You could consider buying a <a href="[% constants.real_rootdir %]/subscribe.pl">subscription</a>.  Information about subcriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.</p>
+	[% END %]
 
 	<h3>How can I get involved with the project?</h3>
-	<p>The simplest way to help the site is by <a href="/submit.pl">submitting quality stories</a> and leaving interesting comments. Without these, the site has little to offer the community. If you'd like to become more directly involved, visit the <a href="http://wiki.soylentnews.org/wiki/TeamPages" target="_blank">team pages</a> and contact a team directly. Beyond that, hop on to our <a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="_blank">IRC</a> channels and get to know the staff and learn about what needs doing. Volunteering is how this site was brought about, and there is likely something that meshes with your talents. Check out the <a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved">Get Involved</a> section on the wiki for more information.</p>
+	<p>The simplest way to help the site is by <a href="[% gSkin.rootdir %]/submit.pl">submitting quality stories</a> and leaving interesting comments. Without these, the site has little to offer the community. If you'd like to become more directly involved, visit the <a href="http://wiki.soylentnews.org/wiki/TeamPages" target="_blank">team pages</a> and contact a team directly. Beyond that, hop on to our <a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="_blank">IRC</a> channels and get to know the staff and learn about what needs doing. Volunteering is how this site was brought about, and there is likely something that meshes with your talents. Check out the <a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved">Get Involved</a> section on the wiki for more information.</p>
 	
 	<h3>Can anyone submit a story?</h3>
-	<p>Yes, of course anyone can <a href="/submit.pl">submit a story</a>. Please read the <a href="/faq.pl?op=editorial">submission guidelines</a> to increase the quality of your submission and subsequently improve its chances of being accepted.</p>
+	<p>Yes, of course anyone can <a href="[% gSkin.rootdir %]/submit.pl">submit a story</a>. Please read the <a href="[% gSkin.rootdir %]/faq.pl?op=editorial">submission guidelines</a> to increase the quality of your submission and subsequently improve its chances of being accepted.</p>
 	
 	<h3>Can I submit a story anonymously?</h3>
 	<p>Yes.</p>
@@ -78,7 +77,7 @@ __template__
 		<li>The ability to save user preferences from visit to visit.</li>
 		<li>Your own <a href="/journal.pl">Journal</a> in which to share your innermost feelings.</li>
 		<li>The ability to define Friends and Foes to aid in reading discussions.</li>
-		<li>A chance to participate in the <a href="/faq.pl?op=moderation">Moderation System</a>.</li>
+		<li>A chance to participate in the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderation System</a>.</li>
 		<li>Posting in Discussions at Score:1 instead of Score:0 means twice as many people will see your comments.</li>
 	</ul>
 	
