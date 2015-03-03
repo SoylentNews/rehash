@@ -26,10 +26,22 @@ sub isInstalled {
 
 sub getReasons {
 	my($self) = @_;
+	
+	my $slashdb = getCurrentDB();
 	my $table_cache = "_reasons_cache";
-	$self->{$table_cache} ||= $self->sqlSelectAllHashref(
-		"id", "*", "modreasons"
-	);
+	
+	my $mcd = $slashdb->getMCD;
+	my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_cache:";
+	if ($mcd) {
+		$self->{$table_cache} ||= $mcd->get("$mcdkey");
+		if (!$self->{$table_cache}){
+				$self->{$table_cache} = $self->sqlSelectAllHashref("id", "*", "modreasons");
+				$mcd->set("$mcdkey", $self->{$table_cache}, 86400);
+			}
+	} else {
+		$self->{$table_cache} ||= $self->sqlSelectAllHashref("id", "*", "modreasons");
+	}
+	
 	return {( %{$self->{$table_cache}} )};
 }
 
@@ -37,10 +49,22 @@ sub getReasons {
 
 sub getReasonsOrder {
 	my($self) = @_;
+	
+	my $slashdb = getCurrentDB();
 	my $order_cache = "_reasons_order_cache";
-	$self->{$order_cache} ||= $self->sqlSelectColArrayref(
-		"id", "modreasons","","ORDER BY ordered ASC"
-	);
+	
+	my $mcd = $slashdb->getMCD;
+	my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_order_cache:";
+	if ($mcd) {
+		$self->{$order_cache} ||= $mcd->get("$mcdkey");
+			if (!$self->{$order_cache}){
+				$self->{$order_cache} = $self->sqlSelectColArrayref("id", "modreasons","","ORDER BY ordered ASC");
+				$mcd->set("$mcdkey", $self->{$order_cache}, 86400);
+			}
+	} else {
+		$self->{$order_cache} ||= $self->sqlSelectColArrayref("id", "modreasons","","ORDER BY ordered ASC");
+	}
+
 	return $self->{$order_cache};
 }
 
