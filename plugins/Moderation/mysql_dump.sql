@@ -31,5 +31,5 @@ INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac,
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (10,  'Underrated',    0, 0,  1,   0, 0.5,  7);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (11,  'Spam',          0, 1, -1, -10, 0.5, 101);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (12,  'Disagree',      0, 1,  0,   0, 0.5,  9);
-INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (13,  'Touché',        0, 1,  1,   1, 0.5,  6);
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (13,  'Touch√©',        0, 1,  1,   1, 0.5,  6);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES (100, '-----------',   0, 1,  1,   1, 0.5, 100);
