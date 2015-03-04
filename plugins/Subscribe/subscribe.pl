@@ -342,7 +342,8 @@ sub grant {
 
 sub confirm {
 	my($form, $slashdb, $user, $constants) = @_;
-
+	my $return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
+	
 	my $type = $form->{subscription_type};
 	my $days = $form->{subscription_days};
 	my $amount;
@@ -411,7 +412,8 @@ sub confirm {
 			sub_user       => $sub_user,
 			user           => $user,
 			custom         => $custom,
-			from           => $form->{from}
+			from           => $form->{from},
+			return_url  => $return_url,
 		});
 	}
 }
@@ -440,9 +442,11 @@ sub send_gift_msg {
 # AC sub
 sub acsub {
 	my($form, $slashdb, $user, $constants, $note) = @_;
+	my $return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
 
 	slashDisplay("acsub", {
 		note => $note,
+		return_url  => $return_url,
 	});
 	1;
 }

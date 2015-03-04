@@ -2232,9 +2232,9 @@ sub editComm {
 	$highlightthresh_select = createSelect(
 		'highlightthresh', $formats, $user_edit->{highlightthresh}, 1
 	);
-
+	
 	$user_edit->{bytelimit} = $constants->{defaultbytelimit}
-		if $user_edit->{bytelimit} < 0 || $user_edit->{bytelimit} > 7;
+		if !defined($user_edit->{bytelimit}) || $user_edit->{bytelimit} < 0 || $user_edit->{bytelimit} > 7;
 	my $bytelimit_desc = $user_edit->{is_subscriber} ? 'bytelimit' : 'bytelimit_sub';
 	$formats = $slashdb->getDescriptions($bytelimit_desc);
 	$bytelimit_select = createSelect(
@@ -2845,7 +2845,7 @@ sub saveComm {
 		reparent        => 1,
 		commentlimit    => 100,
 		commentspill    => 50,
-		mode            => 'thread'
+		mode            => 'improvedthreaded'
 	};
 
 	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });

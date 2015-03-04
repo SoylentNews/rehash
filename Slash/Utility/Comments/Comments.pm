@@ -929,6 +929,8 @@ sub _can_mod {
 	# these is true, this comment is not moderatable, and these
 	# override the ACL and seclev tests.
 	return 0 if !$comment;
+	return 0 unless defined($comment->{cid});
+	
 	return 0 if
 		    $user->{is_anon}
 		|| !$constants->{m1}
@@ -951,14 +953,16 @@ sub _can_mod {
 	if(defined($user->{uid}) && defined($comment->{uid})) {
 		return 0 if $user->{uid} eq $comment->{uid};
 	}
-	return 0 if
-		    $user->{points} <= 0
-		|| !$user->{willing}
-		||  $comment->{ipid} eq $user->{ipid}
-	;
+	
+	return 0 if $user->{points} <= 0 || !$user->{willing};
+		
+	return 0 if defined($comment->{ipid}) && $comment->{ipid} eq $user->{ipid};
+		
 	return 0 if
 		    $constants->{mod_same_subnet_forbid}
+		&&	defined($comment->{subnetid})
 		&&  $comment->{subnetid} eq $user->{subnetid};
+	
 	return 0 if
 		   !$constants->{comments_moddable_archived}
 		&&  $user->{state}{discussion_archived};
