@@ -162,6 +162,7 @@ sub moderateComment {
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $reasons = $self->getReasons();
 
 	my $comment_changed = 0;
 	my $superAuthor = $options->{is_superauthor}
@@ -180,9 +181,15 @@ sub moderateComment {
 		return -3;
 	}
 
+	# Minimum karma to downmod check.
+	if (($user->{karma} < $constants->{downmod_karma_floor}) &&
+		($reasons->{$reason}{val} < 0)) {
+		return -4;
+	}
+
 	# Start putting together the data we'll need to display to
 	# the user.
-	my $reasons = $self->getReasons();
+	
 	my $dispArgs = {
 		cid     => $cid,
 		sid     => $sid,

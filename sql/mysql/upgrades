@@ -547,3 +547,6 @@ INSERT INTO vars (name, value, description) VALUES ('mod_mb_time_span, '72', 'Le
 # Quick fix for Overrated/Underrated
 UPDATE modreasons SET karma = 0 WHERE id = 10;
 UPDATE modreasons SET val = 1 WHERE id = 9;
+
+# Add a karma floor for downmods
+INSERT INTO vars (name, value, description) VALUES ("downmod_karma_floor", "20", "Below this level of karma, users cannot use negative moderations");
