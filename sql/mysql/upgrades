@@ -522,7 +522,7 @@ UPDATE vars SET value = '//www.paypalobjects.com/en_US/i/btn/x-click-but01.gif' 
 ALTER TABLE modreasons ADD COLUMN ordered tinyint UNSIGNED DEFAULT '50' NOT NULL;
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 9, 'Overrated', 0, 0, -0, 0, 0.5, 8);
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 100, '-----------', 0, 0, 0, 0, 0.5, 100);
-UPDATE modreasons SET name = 'TouchŽ' WHERE id = 13;
+UPDATE modreasons SET name = 'Touché' WHERE id = 13;
 UPDATE modreasons SET ordered = 0 WHERE id = 0;
 UPDATE modreasons SET ordered = 2 WHERE id = 5;
 UPDATE modreasons SET ordered = 3 WHERE id = 6;
