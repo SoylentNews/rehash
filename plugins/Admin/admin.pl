@@ -2141,7 +2141,7 @@ sub displayModBombs {
 	}
 
 	if (form->{mb_del}) {
-		$note  = _removeMod($moddb, form->{id}, form->{uid}, form->{noban})
+		$note  = _removeMod($moddb, $form->{id}, $form->{uid}, $form->{noban})
 	}
 	
 	my $data = $moddb->dispModBombs($form->{mod_floor}, $form->{time_span});
