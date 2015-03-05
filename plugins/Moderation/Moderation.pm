@@ -1057,7 +1057,7 @@ sub undoSingleMod {
 	my $min_karma = $constants->{minkarma};
 	my $max_karma = $constants->{maxkarma};
 
-	return 0 unless $mod->{active};
+	return 2 unless $mod->{active};
 
 	$self->sqlUpdate("moderatorlog", { active => 0 }, "id=$id");
 
