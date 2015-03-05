@@ -202,6 +202,21 @@ body .adminstoryform legend { display: none;}
 	padding: 0.3em 0.6em;
 }
 
+#modBomb #mb_settings label{
+	display: inline;
+	margin-left: 10px;
+}
+
+#modBomb #mb_settings input{
+	display: inline;
+	margin-right: 20px;
+}
+
+#modBomb #mb_settings {
+	font-size: .875em;
+	margin-bottom: 10px;
+}
+
 
 
 

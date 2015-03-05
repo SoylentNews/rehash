@@ -16,7 +16,16 @@ __template__
 
 
 	<div id="modBomb">
-		
+	
+	<form method="post" id="mb_settings"[% END %] action="[% gSkin.rootdir %]/admin.pl">
+		<input type="hidden" name="op" value="mod_bombs">
+		<label>Downmod Floor</label>
+		<input type="text" name="mod_floor" size="2" maxlength="2" value="[% mod_floor %]">
+		<label>Time Span (in hours)</label>
+		<input type="text" name="time_span" size="3" maxlength="3" value="[% time_span %]">
+		<input type="submit" name="submit" value="Update">
+	</form>
+	
 	[% PROCESS titlebar width="100%" title="List of Recent Down Moderations" %]
 	<table border="0" cellpadding="0" cellspacing="0" width="100%" class="data">
 		<tr class="data_head">
