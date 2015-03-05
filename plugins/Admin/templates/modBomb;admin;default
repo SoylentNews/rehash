@@ -18,7 +18,7 @@ __template__
 	<div id="modBomb">
 		
 	[% PROCESS titlebar width="100%" title="List of Recent Down Moderations" %]
-	<table align="center" border="0" cellpadding="2" cellspacing="0" width="100%" class="data">
+	<table border="0" cellpadding="0" cellspacing="0" width="100%" class="data">
 		<tr class="data_head">
 			<th class="mb1">Datestamp</th>
 			<th class="mb2">Was</th>
@@ -41,20 +41,20 @@ __template__
 				<td class="mb4"><b>[% moderation.val %]</b></td>
 				<td class="mb5">[% moderation.reason_name %]</td>
 				<td class="mb6">[% PROCESS link_ipid ipid=moderation.ipid2  ipid_vis=moderation.ipid2_vis %]</td>
-				<th class="mb7">&nbsp; [% PROCESS nick_and_uid nickname=moderation.nickname2 uid=moderation.uid2 %] &nbsp; </td>
+				<th class="mb7">[% PROCESS nick_and_uid nickname=moderation.nickname2 uid=moderation.uid2 %]</td>
 				<td class="mb8">[% PROCESS link_ipid ipid=moderation.ipid ipid_vis=moderation.ipid_vis %]</td>
-				<th class="mb9">&nbsp; [% PROCESS nick_and_uid nickname=moderation.nickname uid=moderation.uid %] &nbsp; </td>
+				<th class="mb9">[% PROCESS nick_and_uid nickname=moderation.nickname uid=moderation.uid %]</td>
 			</tr>
 		[% END %]
 	</table>
 </div>
 
 [% BLOCK link_ipid %]
-<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
+	<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
 [% END %] 
 
 [% BLOCK nick_and_uid %]
-<a href="[% constants.real_rootdir %]/users.pl?op=userinfo&amp;fieldname=[% uid %]&amp;userfield=[% uid %]">[% nickname | strip_literal %] ([% uid %])</a>
+	<a href="[% constants.real_rootdir %]/users.pl?op=userinfo&amp;fieldname=[% uid %]&amp;userfield=[% uid %]">[% nickname | strip_literal %] ([% uid %])</a>
 [% END %]
 
 __seclev__
