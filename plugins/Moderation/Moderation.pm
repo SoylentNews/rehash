@@ -1041,6 +1041,56 @@ sub undoModeration {
 	return \@removed;
 }
 
+
+sub undoSingleModeration {
+	my($self, $id) = @_;
+	my $constants = getCurrentStatic();
+
+	return 0 unless dbAvailable("write_comments");
+	return 0 unless $id;
+
+
+	my $mod = $self->sqlSelectAllHashref("cid,val,active,cuid","moderatorlog","moderatorlog.id=$id");
+
+	my $min_score = $constants->{comment_minscore};
+	my $max_score = $constants->{comment_maxscore};
+	my $min_karma = $constants->{minkarma};
+	my $max_karma = $constants->{maxkarma};
+
+	return 0 unless $mod->{active};
+
+	$self->sqlUpdate("moderatorlog", { active => 0 }, "id=$id");
+
+	# Restore modded user's karma, again within the proper boundaries.
+	my $adjust = -$mod->{val};
+	$adjust =~ s/^([^+-])/+$1/;
+	my $adjust_abs = abs($adjust);
+	$self->sqlUpdate(
+		"users_info",
+		{ -karma =>	$adjust > 0
+				? "LEAST($max_karma, karma $adjust)"
+				: "GREATEST($min_karma, karma $adjust)" },
+		"uid=$mod->{cuid}"
+	) unless isAnon($mod->{cuid});
+
+	# Adjust the comment score up or down, but don't push it
+	# beyond the maximum or minimum.  Also recalculate its reason.
+	# Its pointsmax logically can't change.
+	my $points = $adjust > 0
+		? "LEAST($max_score, points $adjust)"
+		: "GREATEST($min_score, points $adjust)";
+	my $new_reason = $self->getCommentMostCommonReason($mod->{cid})
+		|| 0; # no active moderations? reset reason to empty
+	my $comm_update = {
+		-points =>      $points,
+		reason =>       $new_reason,
+	};
+	$self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
+
+	return 1 ;
+}
+
+
 sub getModeratorLogID {
 	my($self, $cid, $uid) = @_;
 	my($mid) = $self->sqlSelect("id", "moderatorlog",

@@ -16,7 +16,7 @@ __template__
 
 
 	<div id="modBomb">
-	
+	[% note %]
 	<form method="post" id="mb_settings" action="[% gSkin.rootdir %]/admin.pl">
 		<input type="hidden" name="op" value="mod_bombs">
 		<label>Downmod Floor</label>
@@ -38,6 +38,8 @@ __template__
 			<th class="mb7">Moderatee</th>
 			<th class="mb8">IPID </th>
 			<th class="mb9">Moderator</th>
+			<th class="mb10">&nsbsp;</th>
+			<th class="mb11">&nsbsp;</th>
 		</tr>
 		[% FOREACH moderation = mods %]
 			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
@@ -53,6 +55,9 @@ __template__
 				<th class="mb7">[% PROCESS nick_and_uid nickname=moderation.nickname2 uid=moderation.uid2 %]</td>
 				<td class="mb8">[% PROCESS link_ipid ipid=moderation.ipid ipid_vis=moderation.ipid_vis %]</td>
 				<th class="mb9">[% PROCESS nick_and_uid nickname=moderation.nickname uid=moderation.uid %]</td>
+				<td class="mb10"><a href="[% gskin.rootdir %]/admin.pl?op=remove_mod&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]">Remove and Ban</a></td>
+				<td class="mb11"><a href="[% gskin.rootdir %]/admin.pl?op=remove_mod&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]&amp;noban=1">Remove Only</a></td>
+			</td>
 			</tr>
 		[% END %]
 	</table>

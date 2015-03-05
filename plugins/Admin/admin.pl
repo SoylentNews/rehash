@@ -186,6 +186,10 @@ sub main {
 			adminmenu	=> 'security',
 			tab_selected	=> 'mod_Bombs',
 		},
+		remove_mod		=> {
+			function	=> \&removeMod,
+			seclev		=> 100,
+		},
 		recent_requests		=> {
 			function	=> \&displayRecentRequests,
 			seclev		=> 500,
@@ -2130,14 +2134,54 @@ sub displaySpamMods {
 
 ##################################################################
 sub displayModBombs {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $note) = @_;
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	
+	if(!$moddb) {
+		print STDERR "\nERROR: Could not get moddb.\n";
+		return;
+	}
 
 	my $data = $moddb->dispModBombs($form->{mod_floor}, $form->{time_span});
-
+	$data->{note} = $note;
+	
 	slashDisplay('modBomb', $data);
 }
 
+
+##################################################################
+sub removeMod {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	
+	if(!$moddb) {
+		print STDERR "\nERROR: Could not get moddb.\n";
+		return;
+	}
+	
+	return unless $form->{id} && $form->{uid};
+	my $note;
+	
+	my $remove = $moddb(undoSingleModeration);
+	if ($remove) {
+		$note = "<p class='error'>Mod id=$form->{id} remove.</p>";
+	} else {
+		print STDERR "\nGot a bad return value on undoSingleModeration: id=$form->{id}"
+	}
+	
+	
+	# Ban the user from moderating
+	unless($form->{noban}) {
+		my $banned = $moddb->modBanUID($form->{uid});
+		if ($banned) {
+			$note .= "<p class='error'>User iud=$form->{uid} banned.</p>";
+		} else{
+			print STDERR "\nGot a bad return value on modBanUID: uid=$form->{uid}"
+		}
+	}
+	
+	displayModBombs(@_, $note);
+}
 
 ##################################################################
 sub displayRecentRequests {
