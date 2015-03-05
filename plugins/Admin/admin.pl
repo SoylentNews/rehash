@@ -2143,7 +2143,7 @@ sub displayModBombs {
 	}
 
 	my $data = $moddb->dispModBombs($form->{mod_floor}, $form->{time_span});
-	$data->{note} = $note;
+	$data->{'note'} = $note;
 	
 	slashDisplay('modBomb', $data);
 }

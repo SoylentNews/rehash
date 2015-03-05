@@ -1050,7 +1050,7 @@ sub undoSingleMod {
 	return 0 unless $id;
 
 
-	my $mod = $self->sqlSelectAllHashref("cid,val,active,cuid","moderatorlog","moderatorlog.id=$id");
+	my $mod = $self->sqlSelectHashref("cid,val,active,cuid","moderatorlog","moderatorlog.id=$id");
 
 	my $min_score = $constants->{comment_minscore};
 	my $max_score = $constants->{comment_maxscore};
