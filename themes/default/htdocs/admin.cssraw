@@ -170,3 +170,32 @@ html>body #admin { margin: 0 auto .2em 0; }
 body .adminstoryform fieldset {background: #ffd; }
 body .adminstoryform legend { display: none;}
 #console #remarks_table, #submitframe { margin-right: 15em }
+
+
+
+#modBomb .mb1 {
+	align: left;
+}
+
+#modBomb .mb2, #modBomb .mb3, #modBomb .mb4 {
+	align: right;
+	width: 25px;
+}
+
+#modBomb .mb5 {
+	align: right;
+	width: 75px;
+}
+
+#modBomb .mb6, #modBomb .mb8 {
+	align: right;
+	width: 50px;
+}
+
+#modBomb .mb7, #modBomb .mb9 {
+	align: left;
+}
+
+
+
+
