@@ -15,18 +15,18 @@ __name__
 admin
 __template__
 [% IF constants.panic %]
-        **&nbsp;PANIC&nbsp;LEVEL&nbsp;[% constants.panic %]&nbsp;**
+  **&nbsp;PANIC&nbsp;LEVEL&nbsp;[% constants.panic %]&nbsp;**
 [% END %]
 [% subs = Slash.db.getSubmissionCount() %]
 [% tabs = [
-        { link = "$gSkin.rootdir/admin.pl",                     label = "Stories",              sel_label = "stories" },
-        { link = "$gSkin.rootdir/admin.pl?op=edit",             label = "New",                  sel_label = "new" },
-        { link = "$gSkin.rootdir/submit.pl?op=list",    label = "$subs&nbsp;Submissions", sel_label = "submissions" },
-        { link = "$gSkin.rootdir/pollBooth.pl?op=edit", label = "Poll",                 sel_label = "poll" },
-        { link = "$gSkin.rootdir/admin.pl?op=topics",   label = "Config",               sel_label = "topics" },
-        { link = "$gSkin.rootdir/stats.pl",                     label = "Info",                 sel_label = "stats" },
-        { link = "$gSkin.rootdir/admin.pl?op=recent",   label = "Security",             sel_label = "recent" },
-	{ link = "$gSkin.rootdir/admin.pl?op=peerweights",	label = "PeerWeights",	sel_label = "peerweights" },
+  { link = "$gSkin.rootdir/admin.pl",                 label = "STORIES:",               sel_label = "stories_menu" },
+	{ link = "$gSkin.rootdir/admin.pl",                 label = "Stories",                sel_label = "stories" },
+	{ link = "$gSkin.rootdir/admin.pl?op=edit",         label = "New",                    sel_label = "new" },
+	{ link = "$gSkin.rootdir/submit.pl?op=list",        label = "$subs&nbsp;Submissions", sel_label = "submissions" },
+	{ link = "$gSkin.rootdir/pollBooth.pl?op=edit",     label = "Poll",                   sel_label = "poll" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",       label = "CONFIG",                 sel_label = "config_menu" },
+	{ link = "$gSkin.rootdir/stats.pl",                 label = "INFO",                   sel_label = "info_menu" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",       label = "SECURITY",               sel_label = "security_menu" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; lightfontcolor=lightfontcolor || "" %]
 
