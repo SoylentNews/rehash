@@ -1247,7 +1247,7 @@ sub dispModBombs {
 	
 	my $reasons = $self->getReasons();
 	
-	my $order_col = $options->{order_col} || "uid2,ts";
+	my $order_col = $options->{order_col} || "uid2,uid,ts";
 
 	my $time_clause = "ts > DATE_SUB(NOW(), INTERVAL $time_span HOUR)";	
 	
