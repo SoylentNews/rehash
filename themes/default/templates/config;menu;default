@@ -16,7 +16,7 @@ __name__
 config
 __template__
 [% tabs = [
-  { link = "$gSkin.rootdir/admin.pl",                label = "STORIES",    sel_label = "stories_menu" },
+  { link = "$gSkin.rootdir/admin.pl",                label = "SITE",       sel_label = "site_menu" },
 	{ link = "$gSkin.rootdir/admin.pl?op=topics",      label = "CONFIG:",    sel_label = "config_menu" },
 	{ link = "$gSkin.rootdir/admin.pl?op=topics",      label = "Topics",     sel_label = "topics" },
 	{ link = "$gSkin.rootdir/admin.pl?op=blocks",      label = "Blocks",     sel_label = "blocks" },

@@ -19,7 +19,7 @@ __template__
 [% END %]
 [% subs = Slash.db.getSubmissionCount() %]
 [% tabs = [
-  { link = "$gSkin.rootdir/admin.pl",                 label = "STORIES:",               sel_label = "stories_menu" },
+  { link = "$gSkin.rootdir/admin.pl",                 label = "SITE:",                  sel_label = "site_menu" },
 	{ link = "$gSkin.rootdir/admin.pl",                 label = "Stories",                sel_label = "stories" },
 	{ link = "$gSkin.rootdir/admin.pl?op=edit",         label = "New",                    sel_label = "new" },
 	{ link = "$gSkin.rootdir/submit.pl?op=list",        label = "$subs&nbsp;Submissions", sel_label = "submissions" },
