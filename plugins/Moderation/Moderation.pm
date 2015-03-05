@@ -1208,6 +1208,7 @@ sub createModeratorLog {
 	return $ret_val;
 }
 
+
 sub deleteModeratorlog {
 	my($self, $opts) = @_;
 	my $where;
@@ -1234,6 +1235,67 @@ sub deleteModeratorlog {
 	}
 	$self->sqlDelete('moderatorlog', $where);
 }
+
+
+sub dispModBombs {
+	my($self, $mod_floor, $time_span, $options) = @_;
+	my $constants = getCurrentStatic();
+
+	$mod_floor ||= $constants->{mod_mb_floor};
+	$time_span ||= $constants->{mod_mb_time_span};
+	$options ||= {};
+	
+	my $reasons = $self->getReasons();
+	
+	my $order_col = $options->{order_col} || "uid2";
+
+	my $time_clause = "ts > DATE_SUB(NOW(), INTERVAL $time_span HOUR)";	
+	
+	my $subquery = "(SELECT cuid as uid2 FROM moderatorlog WHERE val < 0 AND uid2 <> 1 AND $time_clause  GROUP BY uid2 HAVING COUNT(uid2) > $mod_floor)";
+	my $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cid=comments.cid AND val < 0 AND uid2 IN $subquery AND $time_clause";
+	
+	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
+	my $sth = $self->sqlSelectMany(
+		"comments.sid AS sid,
+		 comments.cid AS cid,
+		 comments.pid AS pid,
+		 comments.points AS score,
+		 comments.karma AS karma,
+		 users.uid AS uid,
+		 users.nickname AS nickname,
+		 moderatorlog.ipid AS ipid,
+		 moderatorlog.val AS val,
+		 moderatorlog.reason AS reason,
+		 moderatorlog.ts AS ts,
+		 moderatorlog.active AS active,
+		 moderatorlog.id AS id,
+		 moderatorlog.points_orig AS points_orig,
+		 comments.uid AS uid2,
+		 comments.ipid AS ipid2",
+		"moderatorlog, users, comments",
+		"$where_clause",
+		"ORDER BY $order_col"
+	);
+	my(@mods, $mod, @ml_ids);
+	# XXX can simplify this now, don't need to do fetchrow_hashref, can use utility method
+	while ($mod = $sth->fetchrow_hashref) {
+		vislenify($mod);
+		$mod->{reason_name} = $reasons->{$mod->reason}{name};
+	  $mod->{nickname2} = $self->getUser($mod->{uid2},'nickname');
+		push @mods, $mod;
+	}
+	$self->_querylog_finish($qlid);
+
+	my $data = {
+		mods            => $mods,
+		reasons         => $reasons,
+		mod_floor       => $mod_floor,
+		time_span       => $time_span,
+	};
+	
+	return $data;
+}
+
 
 ########################################################
 

@@ -1,0 +1,55 @@
+__section__
+default
+__description__
+Prints table detailing history of moderation of downmods grouped by uid
+
+* mods = arrayref of hashref of comment moderations (sid, cid, val, reason,
+	score, ts, active, uid, cuid, nickname)
+
+__page__
+admin
+__lang__
+en_US
+__name__
+modBomb
+__template__
+
+
+	<div id="modBomb">
+		
+	[% PROCESS titlebar width="100%" title="List of Recent Down Moderations" %]
+	<table align="center" border="0" cellpadding="2" cellspacing="0" width="100%" class="data">
+		<tr class="data_head">
+			<th align="left">Datestamp</th>
+			<th align="right">Was</th>
+			<th align="right">Now</th>
+			<th align="right">Val</th>
+			<th align="right">Reason</th>
+			<th align="right">IPID </th>
+			<th align="left">Moderatee</th>
+			<th align="right">IPID </th>
+			<th align="left">Moderator</th>
+		</tr>
+		[% FOREACH moderation = mods %]
+			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
+				<td align="left">
+					<a href="[% gSkin.rootdir %]/comments.pl?sid=[% moderation.sid %]&amp;cid=[% moderation.cid %]">[% moderation.ts.substr(5,-3) %]</a>
+					[% IF !moderation.active %]*[% END %]
+				</td>
+				<td align="right">[% moderation.points_orig %]</td>
+				<td align="right">[% moderation.score %]</td>
+				<td align="right"><b>[% moderation.val %]</b></td>
+				<td align="right">[% moderation.reason_name %]</td>
+				<td align="right">[% PROCESS link_ipid ipid=moderation.ipid2  ipid_vis=moderation.ipid2_vis %]</td>
+				<th align="left">&nbsp; [% PROCESS nick_and_uid nickname=moderation.nickname2 uid=moderation.uid2 %] &nbsp; </td>
+				<td align="right">[% PROCESS link_ipid ipid=moderation.ipid ipid_vis=moderation.ipid_vis %]</td>
+				<th align="left">&nbsp; [% PROCESS nick_and_uid nickname=moderation.nickname uid=moderation.uid %] &nbsp; </td>
+			</tr>
+		[% END %]
+	</table>
+</div>
+
+__seclev__
+10000
+__version__
+$Id$

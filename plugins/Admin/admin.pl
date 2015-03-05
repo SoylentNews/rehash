@@ -170,7 +170,7 @@ sub main {
 		},
 		recent_mods		=> {
 			function	=> \&displayRecentMods,
-			seclev		=> 500,
+			seclev		=> 100,
 			adminmenu	=> 'security',
 			tab_selected	=> 'recent_mods',
 		},
@@ -179,6 +179,12 @@ sub main {
 			seclev		=> 100,
 			adminmenu	=> 'security',
 			tab_selected	=> 'spam_mods',
+		},
+		mod_bombs		=> {
+			function	=> \&displayModBombs,
+			seclev		=> 100,
+			adminmenu	=> 'security',
+			tab_selected	=> 'mod_Bombs',
 		},
 		recent_requests		=> {
 			function	=> \&displayRecentRequests,
@@ -2097,6 +2103,7 @@ sub displayRecent {
 	});
 }
 
+
 ##################################################################
 sub displaySpamMods {
 	my($form, $slashdb, $user, $constants) = @_;
@@ -2118,6 +2125,17 @@ sub displaySpamMods {
 		startat		=> $startat,
 		recent_comments	=> $recent_comments,
 	});
+}
+
+
+##################################################################
+sub displayModBombs {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+
+	my $data = $moddb->getSpamMods($form->{mod_floor}, $form->{time_span});
+
+	slashDisplay('modBomb', $data);
 }
 
 
