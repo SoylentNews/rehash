@@ -2162,11 +2162,11 @@ sub removeMod {
 	return unless $form->{id} && $form->{uid};
 	my $note;
 	
-	my $remove = $moddb(undoSingleModeration);
+	my $remove = $moddb->undoSingleMod($form->{id});
 	if ($remove) {
 		$note = "<p class='error'>Mod id=$form->{id} remove.</p>";
 	} else {
-		print STDERR "\nGot a bad return value on undoSingleModeration: id=$form->{id}"
+		print STDERR "\nGot a bad return value on undoSingleMod: id=$form->{id}"
 	}
 	
 	

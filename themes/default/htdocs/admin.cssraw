@@ -205,7 +205,7 @@ body .adminstoryform legend { display: none;}
 #modBomb .mb10, #modBomb .mb11 {
 	text-align: left;
 	padding: 0.3em 0.6em;
-	width: 75px;
+	width: 110px;
 }
 
 #modBomb #mb_settings label{

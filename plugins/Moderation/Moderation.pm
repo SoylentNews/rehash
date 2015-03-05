@@ -1042,7 +1042,7 @@ sub undoModeration {
 }
 
 
-sub undoSingleModeration {
+sub undoSingleMod {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 

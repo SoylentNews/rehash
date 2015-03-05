@@ -38,8 +38,8 @@ __template__
 			<th class="mb7">Moderatee</th>
 			<th class="mb8">IPID </th>
 			<th class="mb9">Moderator</th>
-			<th class="mb10">&nsbsp;</th>
-			<th class="mb11">&nsbsp;</th>
+			<th class="mb10">&nbsp;</th>
+			<th class="mb11">&nbsp;</th>
 		</tr>
 		[% FOREACH moderation = mods %]
 			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
