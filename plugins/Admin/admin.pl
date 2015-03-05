@@ -2140,7 +2140,7 @@ sub displayModBombs {
 		return;
 	}
 
-	if (form->{mb_del}) {
+	if ($form->{mb_del}) {
 		$note  = _removeMod($moddb, $form->{id}, $form->{uid}, $form->{noban})
 	}
 	
