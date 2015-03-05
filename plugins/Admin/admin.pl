@@ -2133,7 +2133,7 @@ sub displayModBombs {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 
-	my $data = $moddb->getSpamMods($form->{mod_floor}, $form->{time_span});
+	my $data = $moddb->dispModBombs($form->{mod_floor}, $form->{time_span});
 
 	slashDisplay('modBomb', $data);
 }

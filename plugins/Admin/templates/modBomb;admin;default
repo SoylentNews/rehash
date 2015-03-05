@@ -49,6 +49,21 @@ __template__
 	</table>
 </div>
 
+[% BLOCK link_ipid %]
+<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
+[% END %] 
+
+[% BLOCK nick_and_uid;
+	nickname | strip_literal;
+	' (<a href="';
+	constants.real_rootdir;
+	'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
+	uid;
+	'">';
+	uid;
+	'</a>)';
+END %]
+
 __seclev__
 10000
 __version__
