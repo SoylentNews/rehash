@@ -2366,7 +2366,8 @@ sub saveUserAdmin {
 	# it out into AL2's which are legitimate.  Anything left
 	# over is an ACL.
 	my @al2_new_formfields = ( );
-	@al2_new_formfields = @{ $form->{aclams_new_multiple} } if $form->{aclams_new_multiple};
+	@al2_new_formfields = @{ $form->{aclams_new_multiple} } if ($form->{aclams_new_multiple} && ref($form->{aclams_new_multiple}) eq "ARRAY");
+        push(@al2_new_formfields, $form->{aclams_new_multiple}) if ref($form->{aclams_new_multiple}) eq "SCALAR";
 	my @al2_new_submitted = map { s/^aclam_//; $_ } @al2_new_formfields;
 	my @al2_new = grep { exists $all_al2types->{$_} } @al2_new_submitted;
 	my %al2_new = ( map { ($_, 1) } @al2_new );
