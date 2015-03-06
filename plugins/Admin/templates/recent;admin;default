@@ -89,7 +89,7 @@ Show only comments from section:
 	</tr>
 	<tr>
 		<td colspan="3" valign="top">[% Slash.createSelect("reason_${comm.sid}_${comm.cid}",
-constants.reasons, '', 1, 1) %]</td>
+constants.reasons, { 'return'	=> 1, 'ordered'	=> constants.reasons_order, }) %]</td>
 		<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,120)) %]</td>
 	</tr>
 	[% END %]

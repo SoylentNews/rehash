@@ -8318,9 +8318,8 @@ sub getSlashConf {
 	# getReasons() the same way getTopicTree() works.  It's only part
 	# of $constants for historical, er, reasons.
 	if ($conf{m1}) {
-		$conf{reasons} = $self->sqlSelectAllHashref(
-			"id", "*", "modreasons"
-		);
+		$conf{reasons} = $self->sqlSelectAllHashref("id", "*", "modreasons");
+		$conf{reasons_order} = $self->sqlSelectColArrayref("id", "modreasons","","ORDER BY ordered ASC");
 	}
 
 	$conf{rootdir}		||= "//$conf{basedomain}";
