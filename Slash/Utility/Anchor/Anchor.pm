@@ -285,7 +285,7 @@ sub http_send {
 		}
 		$r->headers_out->set('ETag', $opt->{etag});
 
-		my $match = $r->header_in('If-None-Match');
+		my $match = $r->headers_in('If-None-Match');
 		if ($match && $match eq $opt->{etag}) {
 			$r->status(Apache2::Const::HTTP_NOT_MODIFIED);
 			return 1;

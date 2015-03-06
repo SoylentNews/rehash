@@ -10,8 +10,8 @@ use Encode 'encode_utf8';
 use Slash::Utility::Data;
 use Slash::Utility::Display;
 use Slash::Utility::Environment;
-use Apache;
-use Apache::Constants ':http';
+use Apache2::RequestUtil;
+#use Apache::Constants ':http';
 
 my $jsonFlags = { utf8 => 1, pretty => 1 };
 binmode(STDOUT, ':encoding(utf8)');
