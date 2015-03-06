@@ -162,6 +162,7 @@ sub moderateComment {
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $reasons = $self->getReasons();
 
 	my $comment_changed = 0;
 	my $superAuthor = $options->{is_superauthor}
@@ -180,9 +181,22 @@ sub moderateComment {
 		return -3;
 	}
 
+	# Minimum karma to downmod check.
+	if( ($user->{karma} < $constants->{downmod_karma_floor}) &&
+		($reasons->{$reason}{val} < 0) &&
+		(!$superAuthor) ) {
+		return -4;
+	}
+
+	if( $reasons->{$reason}{needs_prior_mod} != 0 &&
+		!$self->hasBeenModerated($cid) &&
+		!$superAuthor ) {
+		return -5;
+	}
+
 	# Start putting together the data we'll need to display to
 	# the user.
-	my $reasons = $self->getReasons();
+	
 	my $dispArgs = {
 		cid     => $cid,
 		sid     => $sid,
@@ -1549,6 +1563,13 @@ sub undoSingleModKarma {
 		return 1;
 	}
 	else {print STDERR "\nHow the fuck did we even get here?\n"; return 0;}
+}
+
+sub hasBeenModerated {
+	my ($self, $cid) = @_;
+	my $rows = $self->sqlSelect("count(cid)", "moderatorlog", " cid = $cid ");
+	return 1 if $rows;
+	return 0;
 }
 
 # placeholders, used only in TagModeration

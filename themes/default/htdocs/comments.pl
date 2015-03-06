@@ -720,6 +720,10 @@ sub moderate {
 					print Slash::Utility::Comments::getError('not enough points');
 				} elsif ($ret_val == -3){
 					print Slash::Utility::Comments::getError('no self mods');
+				} elsif ($ret_val == -4){
+					print Slash::Utility::Comments::getError('not enough karma');
+				} elsif ($ret_val == -5){
+					print Slash::Utility::Comments::getError('needs modded first');
 				}
 			} else {
 				$was_touched += $ret_val;
