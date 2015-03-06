@@ -1455,7 +1455,7 @@ sub getSpamCount {
 
 	my $count = $self->sqlCount('moderatorlog',
 		"reason = $spamreason AND cid = $cid");
-	if( ($count) && ($user->{seclev} >= 100) ) {
+	if( ($count) && ($user->{seclev} >= 500) ) {
 		return $count;
 	}
 	return "";

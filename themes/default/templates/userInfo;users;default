@@ -72,9 +72,9 @@ __template__
 		</div>
 </div>
 <div id="users-lists">
-			[% IF admin_flag or useredit.uid == user.uid; %]
+			[% IF admin_flag or useredit.uid == user.uid or constants.allow_other_users_comments %]
 				[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons ordered=ordered cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
-      [% ENF %]
+      [% END %]
 			[% thisnickname = useredit.nickname | strip_literal %]
 			[% IF admin_flag;
        				mod_options.title = "Moderations performed by $thisnickname";
