@@ -16,18 +16,19 @@ __name__
 config
 __template__
 [% tabs = [
-	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",	sel_label = "stories" },
-	{ link = "$gSkin.rootdir/admin.pl?op=topics",	label = "Topics",	sel_label = "topics" },
-	{ link = "$gSkin.rootdir/admin.pl?op=blocks",	label = "Blocks",	sel_label = "blocks" },
-	{ link = "$gSkin.rootdir/admin.pl?op=colors",	label = "Colors",	sel_label = "colors" },
-	{ link = "$gSkin.rootdir/admin.pl?op=listfilters",	label = "Filters",	sel_label = "filters" },
-	{ link = "$gSkin.rootdir/sections.pl?op=list",	label = "Sections",	sel_label = "sections" },
-	{ link = "$gSkin.rootdir/admin.pl?op=templates",	label = "Templates",	sel_label = "templates" },
-	{ link = "$gSkin.rootdir/admin.pl?op=vars",		label = "Vars",		sel_label = "vars" },
-	{ link = "$gSkin.rootdir/admin.pl?op=acls",		label = "ACLs",		sel_label = "acls" },
-	{ link = "$gSkin.rootdir/stats.pl",			label = "Info",		sel_label = "stats" },
-	{ link = "$gSkin.rootdir/admin.pl?op=recent",	label = "Security",	sel_label = "security" },
-];
+  { link = "$gSkin.rootdir/admin.pl",                label = "SITE",       sel_label = "site_menu" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",      label = "CONFIG:",    sel_label = "config_menu" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",      label = "Topics",     sel_label = "topics" },
+	{ link = "$gSkin.rootdir/admin.pl?op=blocks",      label = "Blocks",     sel_label = "blocks" },
+	{ link = "$gSkin.rootdir/admin.pl?op=colors",      label = "Colors",     sel_label = "colors" },
+	{ link = "$gSkin.rootdir/admin.pl?op=listfilters", label = "Filters",    sel_label = "filters" },
+	{ link = "$gSkin.rootdir/sections.pl?op=list",     label = "Sections",   sel_label = "sections" },
+	{ link = "$gSkin.rootdir/admin.pl?op=templates",   label = "Templates",  sel_label = "templates" },
+	{ link = "$gSkin.rootdir/admin.pl?op=vars",        label = "Vars",       sel_label = "vars" },
+	{ link = "$gSkin.rootdir/admin.pl?op=acls",        label = "ACLs",       sel_label = "acls" },
+	{ link = "$gSkin.rootdir/stats.pl",                label = "INFO",       sel_label = "info_menu" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",      label = "SECURITY",   sel_label = "security_menu" },
+	];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 
 __seclev__

@@ -1297,6 +1297,7 @@ sub showInfo {
 			netid			=> $netid,
 			netid_vis		=> $netid_vis,
 			reasons			=> $mod_reader->getReasons(),
+			ordered     => $mod_reader->getReasonsOrder(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
 			hr_hours_back		=> $ipid_hoursback,

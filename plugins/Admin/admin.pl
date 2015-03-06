@@ -128,7 +128,7 @@ sub main {
 		},
 		templates 	=> {
 			function 	=> \&templateEdit,
-			seclev		=> 500,
+			seclev		=> 1000,
 			adminmenu	=> 'config',
 			tab_selected	=> 'templates',
 		},
@@ -164,7 +164,7 @@ sub main {
 		},
 		recent		=> {
 			function	=> \&displayRecent,
-			seclev		=> 100,
+			seclev		=> 500,
 			adminmenu	=> 'security',
 			tab_selected	=> 'recent',
 		},
@@ -176,9 +176,15 @@ sub main {
 		},
 		spam_mods		=> {
 			function	=> \&displaySpamMods,
-			seclev		=> 100,
+			seclev		=> 500,
 			adminmenu	=> 'security',
 			tab_selected	=> 'spam_mods',
+		},
+		mod_bombs		=> {
+			function	=> \&displayModBombs,
+			seclev		=> 500,
+			adminmenu	=> 'security',
+			tab_selected	=> 'mod_Bombs',
 		},
 		recent_requests		=> {
 			function	=> \&displayRecentRequests,
@@ -2097,6 +2103,7 @@ sub displayRecent {
 	});
 }
 
+
 ##################################################################
 sub displaySpamMods {
 	my($form, $slashdb, $user, $constants) = @_;
@@ -2120,6 +2127,56 @@ sub displaySpamMods {
 	});
 }
 
+
+##################################################################
+sub displayModBombs {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $note;
+	
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	
+	if(!$moddb) {
+		print STDERR "\nERROR: Could not get moddb.\n";
+		return;
+	}
+
+	if ($form->{mb_del}) {
+		$note  = _removeMod($moddb, $form->{id}, $form->{uid}, $form->{noban})
+	}
+	
+	my $data = $moddb->dispModBombs($form->{mod_floor}, $form->{time_span});
+	$data->{'note'} = $note;
+	
+	slashDisplay('modBomb', $data);
+}
+
+
+##################################################################
+sub _removeMod {
+	my($moddb, $id, $uid, $noban) = @_;
+
+	return 0 unless $moddb && $id && $uid;
+	my $note;
+	
+	my $remove = $moddb->undoSingleMod($id);
+	if ($remove) {
+		$note = "<p class='error'>Mod id=$id remove or inactive.</p>";
+	} else {
+		print STDERR "\nGot a bad return value on undoSingleMod: id=$id"
+	}
+	
+	# Ban the user from moderating
+	unless($noban) {
+		my $banned = $moddb->modBanUID($uid);
+		if ($banned) {
+			$note .= "<p class='error'>User iud=$uid banned.</p>";
+		} else{
+			print STDERR "\nGot a bad return value on modBanUID: uid=$uid"
+		}
+	}
+	
+	return $note;
+}
 
 ##################################################################
 sub displayRecentRequests {

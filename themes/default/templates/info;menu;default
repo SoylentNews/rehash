@@ -15,19 +15,18 @@ en_US
 __name__
 info
 __template__
-
 [% tabs = [
-	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "$gSkin.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
-	{ link = "$gSkin.rootdir/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
-	{ link = "$gSkin.rootdir/admin.pl?op=topictree",	label = "Tree",			sel_label = "tree" },
-	{ link = "$gSkin.rootdir/admin.pl?op=recent_subs",	label = "Subs",			sel_label = "subs" },
-	{ link = "$gSkin.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
-	{ link = "$gSkin.rootdir/admin.pl?op=recent_webheads", label = "Webheads",		sel_label = "webheads" },
-	{ link = "$gSkin.rootdir/admin.pl?op=mcd_stats",	label = "Memcached",		sel_label = "mcdstats" },
-	{ link = "$gSkin.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "security" },
-	{ link = "$gSkin.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
-	{ link = "$gSkin.rootdir/admin.pl?op=peerweights",	label = "PeerWeights",		sel_label = "peerweights" },
+  { link = "$gSkin.rootdir/admin.pl",                      label = "SITE",        sel_label = "site_menu" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",            label = "CONFIG",      sel_label = "config_menu" },
+	{ link = "$gSkin.rootdir/stats.pl",                      label = "INFO:",       sel_label = "info_menu" },
+	{ link = "$gSkin.rootdir/stats.pl",                      label = "Stats",       sel_label = "stats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=siteinfo",          label = "Site",        sel_label = "site" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topictree",         label = "Tree",        sel_label = "tree" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent_subs",       label = "Subs",        sel_label = "subs" },
+	{ link = "$gSkin.rootdir/admin.pl?op=slashd",            label = "Slashd",      sel_label = "slashd" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent_webheads",   label = "Webheads",    sel_label = "webheads" },
+	{ link = "$gSkin.rootdir/admin.pl?op=mcd_stats",         label = "Memcached",   sel_label = "mcdstats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",            label = "SECURITY",    sel_label = "security_menu" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 

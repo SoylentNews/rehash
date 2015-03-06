@@ -536,3 +536,10 @@ UPDATE modreasons SET ordered = 11 WHERE id = 4;
 UPDATE modreasons SET ordered = 12 WHERE id = 2;
 UPDATE modreasons SET ordered = 13 WHERE id = 3;
 UPDATE modreasons SET ordered = 101 WHERE id = 11;
+
+# Do not allow users to view the comments of a different user when looking at that user's info page (to limit mod bombing)
+INSERT INTO vars (name, value, description) VALUES ('allow_other_users_comments', '0', 'Allow users to view the comments of other users the other users info page');
+
+# Mod Bomb vars
+INSERT INTO vars (name, value, description) VALUES ('mod_mb_floor', '3', 'Min amount of downmods needed to trigger mod bomb list');
+INSERT INTO vars (name, value, description) VALUES ('mod_mb_time_span, '72', 'Lenght of search span for mod bomb search in hours.');

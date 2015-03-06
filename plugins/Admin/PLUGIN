@@ -35,6 +35,7 @@ template=templates/listFilters;admin;default
 template=templates/listStories;admin;default
 template=templates/mcd_stats;admin;default
 template=templates/messages;admin;default
+template=templates/modBomb;admin;default
 template=templates/neverdisplay;misc;default
 template=templates/otherLinks;admin;default
 template=templates/peer_weights;admin;default

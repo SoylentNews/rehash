@@ -1,0 +1,77 @@
+__section__
+default
+__description__
+Prints table detailing history of moderation of downmods grouped by uid
+
+* mods = arrayref of hashref of comment moderations (sid, cid, val, reason,
+	score, ts, active, uid, cuid, nickname)
+
+__page__
+admin
+__lang__
+en_US
+__name__
+modBomb
+__template__
+
+
+	<div id="modBomb">
+	[% note %]
+	<form method="post" id="mb_settings" action="[% gSkin.rootdir %]/admin.pl">
+		<input type="hidden" name="op" value="mod_bombs">
+		<label>Downmod Floor</label>
+		<input type="text" name="mod_floor" size="2" maxlength="2" value="[% mod_floor %]">
+		<label>Time Span (in hours)</label>
+		<input type="text" name="time_span" size="3" maxlength="3" value="[% time_span %]">
+		<input type="submit" name="submit" value="Update">
+	</form>
+	
+	[% PROCESS titlebar width="100%" title="List of Recent Down Moderations" %]
+	<table border="0" cellpadding="0" cellspacing="0" width="100%" class="data">
+		<tr class="data_head">
+			<th class="mb1">Datestamp</th>
+			<th class="mb2">Was</th>
+			<th class="mb3">Now</th>
+			<th class="mb4">Val</th>
+			<th class="mb5">Reason</th>
+			<th class="mb6">IPID </th>
+			<th class="mb7">Moderatee</th>
+			<th class="mb8">IPID </th>
+			<th class="mb9">Moderator</th>
+			<th class="mb10">&nbsp;</th>
+			<th class="mb11">&nbsp;</th>
+		</tr>
+		[% FOREACH moderation = mods %]
+			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
+				<td class="mb1">
+					<a href="[% gSkin.rootdir %]/comments.pl?sid=[% moderation.sid %]&amp;cid=[% moderation.cid %]">[% moderation.ts.substr(5,-3) %]</a>
+					[% IF !moderation.active %]*[% END %]
+				</td>
+				<td class="mb2">[% moderation.points_orig %]</td>
+				<td class="mb3">[% moderation.score %]</td>
+				<td class="mb4"><b>[% moderation.val %]</b></td>
+				<td class="mb5">[% moderation.reason_name %]</td>
+				<td class="mb6">[% PROCESS link_ipid ipid=moderation.ipid2  ipid_vis=moderation.ipid2_vis %]</td>
+				<th class="mb7">[% PROCESS nick_and_uid nickname=moderation.nickname2 uid=moderation.uid2 %]</td>
+				<td class="mb8">[% PROCESS link_ipid ipid=moderation.ipid ipid_vis=moderation.ipid_vis %]</td>
+				<th class="mb9">[% PROCESS nick_and_uid nickname=moderation.nickname uid=moderation.uid %]</td>
+				<td class="mb10"><a href="[% gskin.rootdir %]/admin.pl?op=mod_bombs&amp;mb_del=1&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]">Remove and Ban</a></td>
+				<td class="mb11"><a href="[% gskin.rootdir %]/admin.pl?op=mod_bombs&amp;mb_del=1&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]&amp;noban=1">Remove Only</a></td>
+			</td>
+			</tr>
+		[% END %]
+	</table>
+</div>
+
+[% BLOCK link_ipid %]
+	<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
+[% END %] 
+
+[% BLOCK nick_and_uid %]
+	<a href="[% constants.real_rootdir %]/users.pl?op=userinfo&amp;fieldname=[% uid %]&amp;userfield=[% uid %]">[% nickname | strip_literal %] ([% uid %])</a>
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

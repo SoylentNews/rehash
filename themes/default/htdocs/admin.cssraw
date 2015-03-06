@@ -170,3 +170,59 @@ html>body #admin { margin: 0 auto .2em 0; }
 body .adminstoryform fieldset {background: #ffd; }
 body .adminstoryform legend { display: none;}
 #console #remarks_table, #submitframe { margin-right: 15em }
+
+
+
+#modBomb .mb1 {
+	text-align: left;
+	width: 125px;
+	padding: 0.3em 0.6em;
+}
+
+#modBomb .mb2, #modBomb .mb3, #modBomb .mb4 {
+	text-align: right;
+	width: 25px;
+	padding: 0.3em 0.6em;
+}
+
+#modBomb .mb5 {
+	text-align: right;
+	width: 75px;
+	padding: 0.3em 0.6em;
+}
+
+#modBomb .mb6, #modBomb .mb8 {
+	text-align: right;
+	width: 50px;
+	padding: 0.3em 0.6em;
+}
+
+#modBomb .mb7, #modBomb .mb9 {
+	text-align: left;
+	padding: 0.3em 0.6em;
+}
+
+#modBomb .mb10, #modBomb .mb11 {
+	text-align: left;
+	padding: 0.3em 0.6em;
+	width: 110px;
+}
+
+#modBomb #mb_settings label{
+	display: inline;
+	margin-left: 10px;
+}
+
+#modBomb #mb_settings input{
+	display: inline;
+	margin-right: 20px;
+}
+
+#modBomb #mb_settings {
+	font-size: .875em;
+	margin-bottom: 10px;
+}
+
+
+
+

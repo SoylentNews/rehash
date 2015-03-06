@@ -1041,6 +1041,56 @@ sub undoModeration {
 	return \@removed;
 }
 
+
+sub undoSingleMod {
+	my($self, $id) = @_;
+	my $constants = getCurrentStatic();
+
+	return 0 unless dbAvailable("write_comments");
+	return 0 unless $id;
+
+
+	my $mod = $self->sqlSelectHashref("cid,val,active,cuid","moderatorlog","moderatorlog.id=$id");
+
+	my $min_score = $constants->{comment_minscore};
+	my $max_score = $constants->{comment_maxscore};
+	my $min_karma = $constants->{minkarma};
+	my $max_karma = $constants->{maxkarma};
+
+	return 2 unless $mod->{active};
+
+	$self->sqlUpdate("moderatorlog", { active => 0 }, "id=$id");
+
+	# Restore modded user's karma, again within the proper boundaries.
+	my $adjust = -$mod->{val};
+	$adjust =~ s/^([^+-])/+$1/;
+	my $adjust_abs = abs($adjust);
+	$self->sqlUpdate(
+		"users_info",
+		{ -karma =>	$adjust > 0
+				? "LEAST($max_karma, karma $adjust)"
+				: "GREATEST($min_karma, karma $adjust)" },
+		"uid=$mod->{cuid}"
+	) unless isAnon($mod->{cuid});
+
+	# Adjust the comment score up or down, but don't push it
+	# beyond the maximum or minimum.  Also recalculate its reason.
+	# Its pointsmax logically can't change.
+	my $points = $adjust > 0
+		? "LEAST($max_score, points $adjust)"
+		: "GREATEST($min_score, points $adjust)";
+	my $new_reason = $self->getCommentMostCommonReason($mod->{cid})
+		|| 0; # no active moderations? reset reason to empty
+	my $comm_update = {
+		-points =>      $points,
+		reason =>       $new_reason,
+	};
+	$self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
+
+	return 1 ;
+}
+
+
 sub getModeratorLogID {
 	my($self, $cid, $uid) = @_;
 	my($mid) = $self->sqlSelect("id", "moderatorlog",
@@ -1208,6 +1258,7 @@ sub createModeratorLog {
 	return $ret_val;
 }
 
+
 sub deleteModeratorlog {
 	my($self, $opts) = @_;
 	my $where;
@@ -1234,6 +1285,66 @@ sub deleteModeratorlog {
 	}
 	$self->sqlDelete('moderatorlog', $where);
 }
+
+
+sub dispModBombs {
+	my($self, $mod_floor, $time_span, $options) = @_;
+	my $constants = getCurrentStatic();
+
+	$mod_floor ||= $constants->{mod_mb_floor};
+	$time_span ||= $constants->{mod_mb_time_span};
+	$options ||= {};
+	
+	my $reasons = $self->getReasons();
+	
+	my $order_col = $options->{order_col} || "uid2,uid,ts";
+
+	my $time_clause = "ts > DATE_SUB(NOW(), INTERVAL $time_span HOUR)";	
+	
+	my $subquery = "(SELECT cuid FROM moderatorlog WHERE val < 0 AND cuid <> 1 AND $time_clause  GROUP BY cuid HAVING COUNT(cuid) >= $mod_floor)";
+	my $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cid=comments.cid AND val < 0 AND moderatorlog.cuid IN $subquery AND $time_clause";
+	
+	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
+	my $sth = $self->sqlSelectMany(
+		"comments.sid AS sid,
+		 comments.cid AS cid,
+		 comments.pid AS pid,
+		 comments.points AS score,
+		 comments.karma AS karma,
+		 users.uid AS uid,
+		 users.nickname AS nickname,
+		 moderatorlog.ipid AS ipid,
+		 moderatorlog.val AS val,
+		 moderatorlog.reason AS reason,
+		 moderatorlog.ts AS ts,
+		 moderatorlog.active AS active,
+		 moderatorlog.id AS id,
+		 moderatorlog.points_orig AS points_orig,
+		 comments.uid AS uid2,
+		 comments.ipid AS ipid2",
+		"moderatorlog, users, comments",
+		"$where_clause",
+		"ORDER BY $order_col"
+	);
+	my(@mods, $mod);
+	# XXX can simplify this now, don't need to do fetchrow_hashref, can use utility method
+	while ($mod = $sth->fetchrow_hashref) {
+		vislenify($mod);
+		$mod->{reason_name} = $reasons->{$mod->{reason}}{name};
+		$mod->{nickname2} = $self->getUser($mod->{uid2},'nickname');
+		push @mods, $mod;
+	}
+	$self->_querylog_finish($qlid);
+
+	my $data = {
+		mods            => \@mods,
+		mod_floor       => $mod_floor,
+		time_span       => $time_span,
+	};
+	
+	return $data;
+}
+
 
 ########################################################
 
@@ -1344,7 +1455,7 @@ sub getSpamCount {
 
 	my $count = $self->sqlCount('moderatorlog',
 		"reason = $spamreason AND cid = $cid");
-	if( ($count) && ($user->{seclev} >= 100) ) {
+	if( ($count) && ($user->{seclev} >= 500) ) {
 		return $count;
 	}
 	return "";
