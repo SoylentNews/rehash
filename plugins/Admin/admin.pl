@@ -128,7 +128,7 @@ sub main {
 		},
 		templates 	=> {
 			function 	=> \&templateEdit,
-			seclev		=> 500,
+			seclev		=> 1000,
 			adminmenu	=> 'config',
 			tab_selected	=> 'templates',
 		},
@@ -164,25 +164,25 @@ sub main {
 		},
 		recent		=> {
 			function	=> \&displayRecent,
-			seclev		=> 100,
+			seclev		=> 500,
 			adminmenu	=> 'security',
 			tab_selected	=> 'recent',
 		},
 		recent_mods		=> {
 			function	=> \&displayRecentMods,
-			seclev		=> 100,
+			seclev		=> 500,
 			adminmenu	=> 'security',
 			tab_selected	=> 'recent_mods',
 		},
 		spam_mods		=> {
 			function	=> \&displaySpamMods,
-			seclev		=> 100,
+			seclev		=> 500,
 			adminmenu	=> 'security',
 			tab_selected	=> 'spam_mods',
 		},
 		mod_bombs		=> {
 			function	=> \&displayModBombs,
-			seclev		=> 100,
+			seclev		=> 500,
 			adminmenu	=> 'security',
 			tab_selected	=> 'mod_Bombs',
 		},

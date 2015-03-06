@@ -286,12 +286,9 @@ END %]
 
 [% BLOCK make_reason_mod_select %]
 	[% IF admin_flag and comment.type != "archived";
-	h = { "1000" => text };
-	FOREACH r = reasons;
-		h.${r.key} = reasons.${r.key}.name;
-	END;
-	unshift(ordered, "1000");
-	Slash.createSelect("reason_${comment.sid}_${comment.cid}", h, {'return'	=> 1, 'ordered'	=> ordered, });
+	text;
+	'<br>';
+	Slash.createSelect("reason_${comment.sid}_${comment.cid}", reasons, {'return'	=> 1, 'ordered'	=> ordered, });
 	ELSE;
 		text;
 	END %]
