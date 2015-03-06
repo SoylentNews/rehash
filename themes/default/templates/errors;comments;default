@@ -83,6 +83,10 @@ You can not moderate your own comments.
 CASE "not enough karma" %]
 You do not have enough karma to use negative moderations.
 
+[% # NEEDS MODDED FIRST
+CASE "needs modded first" %]
+A comment must already be moderated before you can use this moderation.
+
 [% # COMMENTS MAX POSTS.
 CASE "comments max posts" %]
 You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].
