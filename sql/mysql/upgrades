@@ -543,3 +543,7 @@ INSERT INTO vars (name, value, description) VALUES ('allow_other_users_comments'
 # Mod Bomb vars
 INSERT INTO vars (name, value, description) VALUES ('mod_mb_floor', '3', 'Min amount of downmods needed to trigger mod bomb list');
 INSERT INTO vars (name, value, description) VALUES ('mod_mb_time_span, '72', 'Lenght of search span for mod bomb search in hours.');
+
+# Quick fix for Overrated/Underrated
+UPDATE modreasons SET karma = 0 WHERE id = 10;
+UPDATE modreasons SET val = 1 WHERE id = 9;
