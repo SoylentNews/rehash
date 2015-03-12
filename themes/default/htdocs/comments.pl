@@ -878,10 +878,10 @@ sub unspamComment {
 			return;
 		}
 
-		# Delete the moderation from the log
-		my $deleted = $moddb->sqlDelete('moderatorlog', " id = $modLogID ");
-		print STDERR "\nTried to delete $modLogID from moderatorlog but got $deleted rows back. WTF?!\n"
-			unless $deleted;
+		# Deactivate mod in moderatorlog
+		my $deactivate = $moddb->sqlUpdate("moderatorlog", { active => 0 }, "id=$modLogID");
+		print STDERR "\nTried to deactivate $modLogID in moderatorlog but got $deactivate rows back. WTF?!\n"
+			unless $deactivate;
 
 		# Recalculate the comment score from scratch and restore cuid user's karma
 		$moddb->undoSingleModeration($spamMod);
