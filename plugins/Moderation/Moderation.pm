@@ -1304,9 +1304,11 @@ sub deleteModeratorlog {
 sub dispModBombs {
 	my($self, $mod_floor, $time_span, $options) = @_;
 	my $constants = getCurrentStatic();
+	
+	
 
-	$mod_floor ||= $constants->{mod_mb_floor};
-	$time_span ||= $constants->{mod_mb_time_span};
+	$mod_floor = $constants->{mod_mb_floor} unless $mod_floor && $mod_floor =~ /^\d+$/;
+	$time_span = $constants->{mod_mb_time_span} unless $time_span && $time_span =~ /^\d+$/;
 	$options ||= {};
 	
 	my $reasons = $self->getReasons();
