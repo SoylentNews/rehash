@@ -30,6 +30,7 @@ __template__
 	<table border="0" cellpadding="0" cellspacing="0" width="100%" class="data">
 		<tr class="data_head">
 			<th class="mb1">Datestamp</th>
+			<th class="mb1a">CID</th>
 			<th class="mb2">Was</th>
 			<th class="mb3">Now</th>
 			<th class="mb4">Val</th>
@@ -45,6 +46,10 @@ __template__
 			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
 				<td class="mb1">
 					<a href="[% gSkin.rootdir %]/comments.pl?sid=[% moderation.sid %]&amp;cid=[% moderation.cid %]">[% moderation.ts.substr(5,-3) %]</a>
+					[% IF !moderation.active %]*[% END %]
+				</td>
+				<td class="mb1a">
+					<a href="[% gSkin.rootdir %]/comments.pl?sid=[% moderation.sid %]&amp;cid=[% moderation.cid %]">[% moderation.cid %]</a>
 					[% IF !moderation.active %]*[% END %]
 				</td>
 				<td class="mb2">[% moderation.points_orig %]</td>
