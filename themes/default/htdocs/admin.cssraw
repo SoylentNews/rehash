@@ -175,13 +175,13 @@ body .adminstoryform legend { display: none;}
 
 #modBomb .mb1 {
 	text-align: left;
-	width: 10em;
+	width: 8em;
 	padding: 0.3em 0.6em;
 }
 
 #modBomb .mb1a {
 	text-align: right;
-	width: 3em;
+	width: 5em;
 	padding: 0.3em 0.6em;
 }
 
