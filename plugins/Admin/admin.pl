@@ -2155,7 +2155,7 @@ sub displayModBombs {
 sub _removeMod {
 	my($moddb, $id, $uid, $noban) = @_;
 
-	return 0 unless $moddb && $id && $uid;
+	return 0 unless $moddb && $id && $id =~ /^\d+$/ && $uid && $uid =~ /^\d+$/;
 	my $note;
 	
 	my $remove = $moddb->undoSingleMod($id);

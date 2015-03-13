@@ -863,7 +863,7 @@ sub unspamComment {
 	my $spamMods = $moddb->sqlSelectAllHashref('id',
 					'*',
 					'moderatorlog',
-					" cid = $cid AND reason = $spamreason ");
+					" cid = $cid AND reason = $spamreason AND active = 1 ");
 	
 	# Here we do the following for each:
 	# delete the moderation from the modlog
@@ -882,10 +882,10 @@ sub unspamComment {
 			return;
 		}
 
-		# Delete the moderation from the log
-		my $deleted = $moddb->sqlDelete('moderatorlog', " id = $modLogID ");
-		print STDERR "\nTried to delete $modLogID from moderatorlog but got $deleted rows back. WTF?!\n"
-			unless $deleted;
+		# Deactivate mod in moderatorlog
+		my $deactivate = $moddb->sqlUpdate("moderatorlog", { active => 0 }, "id=$modLogID");
+		print STDERR "\nTried to deactivate $modLogID in moderatorlog but got $deactivate rows back. WTF?!\n"
+			unless $deactivate;
 
 		# Recalculate the comment score from scratch and restore cuid user's karma
 		$moddb->undoSingleModeration($spamMod);

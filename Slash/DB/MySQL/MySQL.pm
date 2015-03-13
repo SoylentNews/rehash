@@ -9122,6 +9122,7 @@ sub getSpamMods {
 		"comments.uid=users.uid
 		 AND comments.cid = comment_text.cid
 		 AND moderatorlog.reason = 11
+		 AND moderatorlog.active = 1
 		 AND comments.sid = discussions.id",
 		"GROUP BY comments.cid
 		 ORDER BY comments.cid DESC
