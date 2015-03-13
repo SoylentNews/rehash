@@ -863,7 +863,7 @@ sub unspamComment {
 	my $spamMods = $moddb->sqlSelectAllHashref('id',
 					'*',
 					'moderatorlog',
-					" cid = $cid AND reason = $spamreason ");
+					" cid = $cid AND reason = $spamreason AND active = 1 ");
 	
 	# Here we do the following for each:
 	# delete the moderation from the modlog
