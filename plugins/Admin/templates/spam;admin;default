@@ -65,7 +65,7 @@ __template__
 		<tr>
 			<td colspan="3" valign="top">
 				<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% comm.sid %]&cid=[% comm.cid %]">Unspam and Ban</a><br>
-				<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">Unspam Only</a>
+				<a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% comm.sid %]&cid=[% comm.cid %]&noban=1">Unspam Only</a>
 			</td>
 			<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,1000)) %]</td>
 		</tr>
