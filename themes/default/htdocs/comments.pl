@@ -875,24 +875,16 @@ sub unspamComment {
 	#	not at all if the user is already banned or
 	#	using the larger ban if the user has served out a previous ban
 	foreach my $spamMod (values %$spamMods) {
-		my ($modderUID, $commenterUID, $modLogID) = ($spamMod->{uid}, $spamMod->{cuid}, $spamMod->{id});
+		my ($modderUID, $modLogID) = ($spamMod->{uid}, $spamMod->{id});
 		# Bail if we somehow got a bad entry without the proper data
-		unless ($modderUID && $commenterUID && $modLogID) {
+		unless ($modderUID && $modLogID) {
 			redirect("$rootdir/comments.pl?sid=$form->{sid}#$form->{cid}", 301);
 			return;
 		}
 
-		# Deactivate mod in moderatorlog
-		my $deactivate = $moddb->sqlUpdate("moderatorlog", { active => 0 }, "id=$modLogID");
-		print STDERR "\nTried to deactivate $modLogID in moderatorlog but got $deactivate rows back. WTF?!\n"
-			unless $deactivate;
-
-		# Recalculate the comment score from scratch and restore cuid user's karma
-		$moddb->undoSingleModeration($spamMod);
-
-		# Remove any mod points from the user who modded it spam
-		$slashdb->setUser( $user->{uid}, { points => 0 } )
-			unless $form->{noban};
+		# Undo Mod
+		my $undo = $moddb->undoSingleModeration($spamMod);
+		print STDERR "\nTried to undo mod $modLogID and failed. WTF?!\n" unless $undo;
 
 		# Ban the user from moderating
 		unless($form->{noban}) {

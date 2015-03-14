@@ -1022,7 +1022,6 @@ sub undoModeration {
 		# Restore modded user's karma, again within the proper boundaries.
 		my $adjust = -$val;
 		$adjust =~ s/^([^+-])/+$1/;
-		my $adjust_abs = abs($adjust);
 		$self->sqlUpdate(
 			"users_info",
 			{ -karma =>	$adjust > 0
@@ -1053,55 +1052,6 @@ sub undoModeration {
 	}
 
 	return \@removed;
-}
-
-
-sub undoSingleMod {
-	my($self, $id) = @_;
-	my $constants = getCurrentStatic();
-
-	return 0 unless dbAvailable("write_comments");
-	return 0 unless $id;
-
-
-	my $mod = $self->sqlSelectHashref("cid,val,active,cuid","moderatorlog","moderatorlog.id=$id");
-
-	my $min_score = $constants->{comment_minscore};
-	my $max_score = $constants->{comment_maxscore};
-	my $min_karma = $constants->{minkarma};
-	my $max_karma = $constants->{maxkarma};
-
-	return 2 unless $mod->{active};
-
-	$self->sqlUpdate("moderatorlog", { active => 0 }, "id=$id");
-
-	# Restore modded user's karma, again within the proper boundaries.
-	my $adjust = -$mod->{val};
-	$adjust =~ s/^([^+-])/+$1/;
-	my $adjust_abs = abs($adjust);
-	$self->sqlUpdate(
-		"users_info",
-		{ -karma =>	$adjust > 0
-				? "LEAST($max_karma, karma $adjust)"
-				: "GREATEST($min_karma, karma $adjust)" },
-		"uid=$mod->{cuid}"
-	) unless isAnon($mod->{cuid});
-
-	# Adjust the comment score up or down, but don't push it
-	# beyond the maximum or minimum.  Also recalculate its reason.
-	# Its pointsmax logically can't change.
-	my $points = $adjust > 0
-		? "LEAST($max_score, points $adjust)"
-		: "GREATEST($min_score, points $adjust)";
-	my $new_reason = $self->getCommentMostCommonReason($mod->{cid})
-		|| 0; # no active moderations? reset reason to empty
-	my $comm_update = {
-		-points =>      $points,
-		reason =>       $new_reason,
-	};
-	$self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
-
-	return 1 ;
 }
 
 
@@ -1305,8 +1255,6 @@ sub dispModBombs {
 	my($self, $mod_floor, $time_span, $options) = @_;
 	my $constants = getCurrentStatic();
 	
-	
-
 	$mod_floor = $constants->{mod_mb_floor} unless $mod_floor && $mod_floor =~ /^\d+$/;
 	$time_span = $constants->{mod_mb_time_span} unless $time_span && $time_span =~ /^\d+$/;
 	$options ||= {};
@@ -1454,7 +1402,8 @@ sub stirPool {
 	}
 
 	return $n_stirred;
-} 
+}
+
 
 sub getSpamCount {
 	my ($self, $cid, $reasons) = @_;
@@ -1476,6 +1425,7 @@ sub getSpamCount {
 	}
 	return "";
 }
+
 
 # Ban $uid from moderating for 
 sub modBanUID {
@@ -1502,70 +1452,71 @@ sub modBanUID {
 	
 	# Now set the ban.
 	my $banUntil = DateTime::Format::MySQL->format_date($dtBan);
-	return $self->setUser( $uid, { mod_banned => $banUntil } );
+	return $self->setUser( $uid, { mod_banned => $banUntil, points => 0 } );
+	
 }
+
+
+sub undoSingleModerationByID {
+	my($self, $id) = @_;
+
+	return 0 unless dbAvailable("write_comments");
+	return 0 unless $id && $id =~ /^\d+$/;
+
+	my $mod = $self->sqlSelectHashref("*","moderatorlog","moderatorlog.id=$id");
+	
+	return $self->undoSingleModeration($mod);
+	
+}
+
 
 sub undoSingleModeration {
 	my ($self, $mod) = @_;
 	# $mod is a hash of a single line of the moderatorlog table
 	
-	$self->undoSingleModKarma($mod) or print STDERR "\nFailed to restore karma to $mod->{cuid}\n" and return 0;
-	$self->recalcCommentScore($mod->{cid}) or print STDERR "\nFailed to recalculate comment score for $mod->{cid}\n" and return 0;
-	return 1;
-}
-
-sub recalcCommentScore {
-	my ($self, $cid) = @_;
 	my $constants = getCurrentStatic();
 	
-	my $scores = $self->sqlSelectAll("val", "moderatorlog", "cid = $cid");
-	my $points = $self->sqlSelect("pointsorig", "comments", "cid = $cid") || 0;
-	if($scores) {
-		my $minScore = $constants->{comment_minscore};
-		my $maxScore = $constants->{comment_maxscore};
-		foreach my $score (@$scores) {
-			$points += $score->[0];
-		}
-		$points = $minScore if $points < $minScore;
-		$points = $maxScore if $points > $maxScore;
-	}
-	$self->sqlUpdate("comments", { points => $points }, "cid = $cid") or return 0;
+	return 0 unless dbAvailable("write_comments");
+	return 0 unless $mod && mod->{id} =~ /^\d+$/;
 	
-	my $newReason = $self->getCommentMostCommonReason($cid)
-			|| 0; # no active moderations? reset reason to empty
+	my $min_score = $constants->{comment_minscore};
+	my $max_score = $constants->{comment_maxscore};
+	my $min_karma = $constants->{minkarma};
+	my $max_karma = $constants->{maxkarma};
 
-	$self->sqlUpdate("comments", { reason => $newReason }, "cid=$cid") or return 0;
-	return 1;
+	return 2 unless $mod->{active};
+
+	$self->sqlUpdate("moderatorlog", { active => 0 }, "id=$mod->{id}");
+
+	# Restore modded user's karma, again within the proper boundaries.
+	my $adjust = -$mod->{val};
+	$adjust =~ s/^([^+-])/+$1/;
+	$self->sqlUpdate(
+		"users_info",
+		{ -karma =>	$adjust > 0
+				? "LEAST($max_karma, karma $adjust)"
+				: "GREATEST($min_karma, karma $adjust)" },
+		"uid=$mod->{cuid}"
+	) unless isAnon($mod->{cuid});
+
+	# Adjust the comment score up or down, but don't push it
+	# beyond the maximum or minimum.  Also recalculate its reason.
+	# Its pointsmax logically can't change.
+	my $points = $adjust > 0
+		? "LEAST($max_score, points $adjust)"
+		: "GREATEST($min_score, points $adjust)";
+	my $new_reason = $self->getCommentMostCommonReason($mod->{cid})
+		|| 0; # no active moderations? reset reason to empty
+	my $comm_update = {
+		-points =>      $points,
+		reason =>       $new_reason,
+	};
+	$self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
+
+	return 1 ;
+	
 }
 
-sub undoSingleModKarma {
-	my ($self, $mod) = @_;
-	# $mod is a hash of a single line of the moderatorlog table
-	my $constants = getCurrentStatic();
-	my $cuid = $mod->{cuid}; # who was modded
-	my $user = $self->getUser($cuid);
-	my $minKarma = $constants->{minkarma};
-	my $maxKarma = $constants->{maxkarma};
-	my $karmaHit = $self->sqlSelect('karma', 'modreasons', " id = $mod->{reason} ");
-
-	# Nothing to do if there is no karma hit or the person modded was AC
-	if( ($karmaHit == 0) || isAnon($cuid) ) {return 1;}
-	elsif($karmaHit < 0) {
-		return 1 if $user->{karma} eq $maxKarma;
-		my $newKarma = $user->{karma} + abs($karmaHit);
-		if($newKarma >= $maxKarma){$self->setUser($cuid, { karma => $maxKarma } ) or return 0;}
-		else{$self->setUser($cuid, { karma => $newKarma } ) or return 0;}
-		return 1;
-	}
-	elsif($karmaHit > 0) {
-		return 1 if $user->{karma} eq $minKarma;
-		my $newKarma = $user->{karma} - abs($karmaHit);
-		if($newKarma <= $minKarma){$self->setUser($cuid, { karma => $minKarma } ) or return 0;}
-		else{$self->setUser($cuid, { karma => $newKarma } ) or return 0;}
-		return 1;
-	}
-	else {print STDERR "\nHow the fuck did we even get here?\n"; return 0;}
-}
 
 sub hasBeenModerated {
 	my ($self, $cid) = @_;
@@ -1573,6 +1524,7 @@ sub hasBeenModerated {
 	return 1 if $rows;
 	return 0;
 }
+
 
 # placeholders, used only in TagModeration
 sub removeModTags {}
