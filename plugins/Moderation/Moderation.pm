@@ -1477,7 +1477,7 @@ sub undoSingleModeration {
 	my $constants = getCurrentStatic();
 	
 	return 0 unless dbAvailable("write_comments");
-	return 0 unless $mod && mod->{id} =~ /^\d+$/;
+	return 0 unless $mod && $mod->{id} =~ /^\d+$/;
 	return 2 unless $mod->{active};
 	
 	my $min_score = $constants->{comment_minscore};
