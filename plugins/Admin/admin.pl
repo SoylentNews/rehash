@@ -2158,18 +2158,18 @@ sub _removeMod {
 	return 0 unless $moddb && $id && $id =~ /^\d+$/ && $uid && $uid =~ /^\d+$/;
 	my $note;
 	
-	my $remove = $moddb->undoSingleMod($id);
+	my $remove = $moddb->undoSingleModerationByID($id);
 	if ($remove) {
-		$note = "<p class='error'>Mod id=$id remove or inactive.</p>";
+		$note = "<p class='error'>Mod id=$id removed or inactive.</p>";
 	} else {
-		print STDERR "\nGot a bad return value on undoSingleMod: id=$id"
+		print STDERR "\nGot a bad return value on undoSingleModerationByID: id=$id"
 	}
 	
 	# Ban the user from moderating
 	unless($noban) {
 		my $banned = $moddb->modBanUID($uid);
 		if ($banned) {
-			$note .= "<p class='error'>User iud=$uid banned.</p>";
+			$note .= "<p class='error'>User uid=$uid banned.</p>";
 		} else{
 			print STDERR "\nGot a bad return value on modBanUID: uid=$uid"
 		}
