@@ -2160,7 +2160,7 @@ sub _removeMod {
 	
 	my $remove = $moddb->undoSingleModerationByID($id);
 	if ($remove) {
-		$note = "<p class='error'>Mod id=$id remove or inactive.</p>";
+		$note = "<p class='error'>Mod id=$id removed or inactive.</p>";
 	} else {
 		print STDERR "\nGot a bad return value on undoSingleModerationByID: id=$id"
 	}
