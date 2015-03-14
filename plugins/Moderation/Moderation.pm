@@ -1478,15 +1478,14 @@ sub undoSingleModeration {
 	
 	return 0 unless dbAvailable("write_comments");
 	return 0 unless $mod && mod->{id} =~ /^\d+$/;
+	return 2 unless $mod->{active};
 	
 	my $min_score = $constants->{comment_minscore};
 	my $max_score = $constants->{comment_maxscore};
 	my $min_karma = $constants->{minkarma};
 	my $max_karma = $constants->{maxkarma};
 
-	return 2 unless $mod->{active};
-
-	$self->sqlUpdate("moderatorlog", { active => 0 }, "id=$mod->{id}");
+	$self->sqlUpdate("moderatorlog", { active => 0 }, "id = $mod->{id}");
 
 	# Restore modded user's karma, again within the proper boundaries.
 	my $adjust = -$mod->{val};
@@ -1513,7 +1512,7 @@ sub undoSingleModeration {
 	};
 	$self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
 
-	return 1 ;
+	return 1;
 	
 }
 
