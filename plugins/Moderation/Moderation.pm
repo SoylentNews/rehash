@@ -1020,19 +1020,24 @@ sub undoModeration {
 		$self->removeModTags($uid, $cid);
 
 		# Restore modded user's karma, again within the proper boundaries.
-		my $adjust = -$val;
+		my $adjust =  -$self->sqlSelect('karma', 'modreasons', " id = $reason ");
 		$adjust =~ s/^([^+-])/+$1/;
-		$self->sqlUpdate(
+		my $rows = $self->sqlUpdate(
 			"users_info",
 			{ -karma =>	$adjust > 0
 					? "LEAST($max_karma, karma $adjust)"
 					: "GREATEST($min_karma, karma $adjust)" },
 			"uid=$cuid"
 		) unless isAnon($cuid);
-
+		
+		print STDERR "\nWTF karma adjust fail\n" unless $rows || isAnon($cuid);
+		
+	
 		# Adjust the comment score up or down, but don't push it
 		# beyond the maximum or minimum.  Also recalculate its reason.
 		# Its pointsmax logically can't change.
+		$adjust = -$val;
+		$adjust =~ s/^([^+-])/+$1/;
 		my $points = $adjust > 0
 			? "LEAST($max_score, points $adjust)"
 			: "GREATEST($min_score, points $adjust)";
@@ -1042,7 +1047,7 @@ sub undoModeration {
 			-points =>      $points,
 			reason =>       $new_reason,
 		};
-		$self->sqlUpdate("comments", $comm_update, "cid=$cid");
+		$rows = $self->sqlUpdate("comments", $comm_update, "cid=$cid");
 
 		push @removed, {
 			cid     => $cid,
@@ -1488,19 +1493,24 @@ sub undoSingleModeration {
 	$self->sqlUpdate("moderatorlog", { active => 0 }, "id = $mod->{id}");
 
 	# Restore modded user's karma, again within the proper boundaries.
-	my $adjust = -$mod->{val};
+	my $adjust =  -$self->sqlSelect('karma', 'modreasons', " id = $mod->{reason} ");
 	$adjust =~ s/^([^+-])/+$1/;
-	$self->sqlUpdate(
+	my $rows = $self->sqlUpdate(
 		"users_info",
 		{ -karma =>	$adjust > 0
 				? "LEAST($max_karma, karma $adjust)"
 				: "GREATEST($min_karma, karma $adjust)" },
 		"uid=$mod->{cuid}"
 	) unless isAnon($mod->{cuid});
+	
+	print STDERR "\nWTF karma adjust fail\n" unless $rows || isAnon($mod->{cuid});
+	
 
 	# Adjust the comment score up or down, but don't push it
 	# beyond the maximum or minimum.  Also recalculate its reason.
 	# Its pointsmax logically can't change.
+	$adjust = -$mod->{val};
+	$adjust =~ s/^([^+-])/+$1/;
 	my $points = $adjust > 0
 		? "LEAST($max_score, points $adjust)"
 		: "GREATEST($min_score, points $adjust)";
@@ -1510,7 +1520,9 @@ sub undoSingleModeration {
 		-points =>      $points,
 		reason =>       $new_reason,
 	};
-	$self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
+	$rows = $self->sqlUpdate("comments", $comm_update, "cid=$mod->{cid}");
+	
+	print STDERR "\nWTF comment adjust fail\n" unless $rows;
 
 	return 1;
 	

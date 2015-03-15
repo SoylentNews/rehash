@@ -39,8 +39,8 @@ __template__
 			<th class="mb7">Moderatee</th>
 			<th class="mb8">IPID </th>
 			<th class="mb9">Moderator</th>
-			<th class="mb10">&nbsp;</th>
 			<th class="mb11">&nbsp;</th>
+			<th class="mb10">&nbsp;</th>
 		</tr>
 		[% FOREACH moderation = mods %]
 			<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
@@ -57,8 +57,8 @@ __template__
 				<th class="mb7">[% PROCESS nick_and_uid nickname=moderation.nickname2 uid=moderation.uid2 %]</td>
 				<td class="mb8">[% PROCESS link_ipid ipid=moderation.ipid ipid_vis=moderation.ipid_vis %]</td>
 				<th class="mb9">[% PROCESS nick_and_uid nickname=moderation.nickname uid=moderation.uid %]</td>
-				<td class="mb10"><a href="[% gskin.rootdir %]/admin.pl?op=mod_bombs&amp;mb_del=1&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]">Unmod and Ban</a></td>
 				<td class="mb11"><a href="[% gskin.rootdir %]/admin.pl?op=mod_bombs&amp;mb_del=1&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]&amp;noban=1">Unmod Only</a></td>
+				<td class="mb10"><a href="[% gskin.rootdir %]/admin.pl?op=mod_bombs&amp;mb_del=1&amp;id=[% moderation.id %]&amp;uid=[% moderation.uid %]">Unmod and Ban</a></td>
 			</td>
 			</tr>
 		[% END %]
