@@ -520,7 +520,7 @@ UPDATE vars SET value = '//www.paypalobjects.com/en_US/i/btn/x-click-but01.gif' 
 
 # Moderation Updates
 ALTER TABLE modreasons ADD COLUMN ordered tinyint UNSIGNED DEFAULT '50' NOT NULL;
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 9, 'Overrated', 0, 0, -0, 0, 0.5, 8);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 9, 'Overrated', 0, 0, -1, 0, 0.5, 8);
 INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac, ordered) VALUES ( 100, '-----------', 0, 0, 0, 0, 0.5, 100);
 UPDATE modreasons SET name = 'Touché' WHERE id = 13;
 UPDATE modreasons SET ordered = 0 WHERE id = 0;
@@ -529,7 +529,7 @@ UPDATE modreasons SET ordered = 3 WHERE id = 6;
 UPDATE modreasons SET ordered = 4 WHERE id = 7;
 UPDATE modreasons SET ordered = 5 WHERE id = 8;
 UPDATE modreasons SET ordered = 6 WHERE id = 13;
-UPDATE modreasons SET ordered = 7 WHERE id = 10;
+UPDATE modreasons SET ordered = 7, karma = 0 WHERE id = 10;
 UPDATE modreasons SET ordered = 9 WHERE id = 12;
 UPDATE modreasons SET ordered = 10 WHERE id = 1;
 UPDATE modreasons SET ordered = 11 WHERE id = 4;
@@ -544,9 +544,6 @@ INSERT INTO vars (name, value, description) VALUES ('allow_other_users_comments'
 INSERT INTO vars (name, value, description) VALUES ('mod_mb_floor', '3', 'Min amount of downmods needed to trigger mod bomb list');
 INSERT INTO vars (name, value, description) VALUES ('mod_mb_time_span', '72', 'Lenght of search span for mod bomb search in hours.');
 
-# Quick fix for Overrated/Underrated
-UPDATE modreasons SET karma = 0 WHERE id = 10;
-UPDATE modreasons SET val = 1 WHERE id = 9;
 
 # Add a karma floor for downmods
 INSERT INTO vars (name, value, description) VALUES ("downmod_karma_floor", "10", "Below this level of karma, users cannot use negative moderations");
