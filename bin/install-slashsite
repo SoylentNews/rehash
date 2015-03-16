@@ -27,7 +27,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('hvfu:H:n:xRL:i:T:P:a:e:p:o:g:', \%opts);
+usage('Options used incorrectly') unless getopts('Nhvfu:H:n:xRL:i:T:P:a:e:p:o:g:', \%opts);
 usage() if !$opts{'u'} and ($opts{'h'} or !keys %opts);
 # if invoked with both -u and -h, call usage() later, after we load Slash::Install
 version() if $opts{'v'};
@@ -341,6 +341,43 @@ unless ($opts{'f'}) {
 
 print "\nInstalling...\n";
 
+mkpath "$prefix_site/$sitename", 0, 0775;
+mkpath "$prefix_site/$sitename/logs", 0, 0775;
+mkpath "$prefix_site/$sitename/htdocs", 0, 0775;
+mkpath "$prefix_site/$sitename/htdocs/images", 0, 0775;
+mkpath "$prefix_site/$sitename/htdocs/images/topics", 0, 0775;
+mkpath "$prefix_site/$sitename/backups", 0, 0775;
+mkpath "$prefix_site/$sitename/sbin", 0, 0775;
+mkpath "$prefix_site/$sitename/tasks", 0, 0775;
+mkpath "$prefix_site/$sitename/misc", 0, 0775;
+
+# Now, lets update slash.sites
+my $sites = gensym();
+if (open($sites, "< $SLASH_PREFIX/slash.sites\0")) {
+	while (<$sites>) {
+		chomp;
+		my($dbuser) = split /:/;
+		$slash_sites{$dbuser} = 1;
+	}
+	close $sites;
+}
+
+unless (exists $slash_sites{$opts{'u'}}) {
+	open($sites, ">> $SLASH_PREFIX/slash.sites\0")
+		or die "Can't append to $SLASH_PREFIX/slash.sites: $!";
+	print $sites "$opts{'u'}:$owner:$sitename\n";
+	close $sites;
+}
+
+find(sub { chown $owner_id, $group_id, $_ unless -l $_ }, "$prefix_site/$sitename");
+
+apache_site_conf();
+
+if ($opts{'N'}) {
+	print "\nWould install DB but not actually doing so\n";
+	exit 0;
+}
+
 my $trgst = '';
 
 # Dump in the schema then pepper with a trace of your own theme
@@ -430,16 +467,6 @@ EOT
 	}
 }
 
-mkpath "$prefix_site/$sitename", 0, 0775;
-mkpath "$prefix_site/$sitename/logs", 0, 0775;
-mkpath "$prefix_site/$sitename/htdocs", 0, 0775;
-mkpath "$prefix_site/$sitename/htdocs/images", 0, 0775;
-mkpath "$prefix_site/$sitename/htdocs/images/topics", 0, 0775;
-mkpath "$prefix_site/$sitename/backups", 0, 0775;
-mkpath "$prefix_site/$sitename/sbin", 0, 0775;
-mkpath "$prefix_site/$sitename/tasks", 0, 0775;
-mkpath "$prefix_site/$sitename/misc", 0, 0775;
-
 my $slashdb = Slash::DB->new($opts{'u'});
 
 my $time = localtime();
@@ -481,30 +508,9 @@ if ($opts{'i'}) {
 
 $dbh->do("SET FOREIGN_KEY_CHECKS = 1");
 
-# Now, lets update slash.sites
-my $sites = gensym();
-if (open($sites, "< $SLASH_PREFIX/slash.sites\0")) {
-	while (<$sites>) {
-		chomp;
-		my($dbuser) = split /:/;
-		$slash_sites{$dbuser} = 1;
-	}
-	close $sites;
-}
-
-unless (exists $slash_sites{$opts{'u'}}) {
-	open($sites, ">> $SLASH_PREFIX/slash.sites\0")
-		or die "Can't append to $SLASH_PREFIX/slash.sites: $!";
-	print $sites "$opts{'u'}:$owner:$sitename\n";
-	close $sites;
-}
-
-find(sub { chown $owner_id, $group_id, $_ unless -l $_ }, "$prefix_site/$sitename");
-
 # Install spamarmors for a given site. This can be recoded/moved/whatever
 # if this code is inappropriate, for whatever reason.
 system("$^X -w $SLASH_PREFIX/bin/reload_armor -u $opts{'u'} -q");
-apache_site_conf();
 
 $dbh->do("UPDATE vars SET value = " . $dbh->quote("$prefix_site/$sitename/logs") . " WHERE name = 'logdir'");
 $dbh->do("UPDATE vars SET value = " . $dbh->quote("$prefix_site/$sitename/htdocs") . " WHERE name = 'basedir'");
@@ -730,6 +736,7 @@ Site options:
 	-T	Theme to use
 	-P	Comma-separated list of plugin names$sample_plugins
 		("ALL"/"DEFAULT" avoid prompt, do what you'd expect)
+	-N	Don't install the database (useful for regenerating configs)
 
 User options:
 	-a	Admin name
