@@ -18,7 +18,6 @@ use Storable qw(thaw nfreeze);
 use URI ();
 
 use Slash::Utility;
-use Slash::Custom::ParUserAgent;
 use Slash::Constants ':messages';
 
 use vars qw($_proxy_port);
@@ -4564,105 +4563,9 @@ sub setKnownOpenProxy {
 
 sub checkForOpenProxy {
 	my($self, $ip) = @_;
-	# If we weren't passed an IP address, default to whatever
-	# the current IP address is.
-	if (!$ip && $ENV{MOD_PERL}) {
-		my $r = Apache2::RequestUtil->request;
-		$ip = $r->connection->remote_ip if $r;
-	}
 
-	# If we don't have an IP address, it can't be an open proxy.
-	return 0 if !$ip;
-	# Known secure IPs also don't count as open proxies.
-	my $constants = getCurrentStatic();
-	my $gSkin = getCurrentSkin();
-
-	# Don't port scan unless it is explicately enabled it
-	my $enable_portscan = $constants->{enable_portscan} || 0;
-	return 0 unless ($enable_portscan != 0);
-
-	my $secure_ip_regex = $constants->{admin_secure_ip_regex};
-	return 0 if $secure_ip_regex && $ip =~ /$secure_ip_regex/;
-
-	# If the IP address is already one we have listed, use the
-	# existing listing.
-	my $port = $self->getKnownOpenProxy($ip);
-	if (defined $port) {
-#print STDERR scalar(localtime) . " cfop no need to check ip '$ip', port is '$port'\n";
-		return $port;
-	}
-#print STDERR scalar(localtime) . " cfop ip '$ip' not known, checking\n";
-
-	# No known answer;  probe the IP address and get an answer.
-	my $ports = $constants->{comments_portscan_ports} || '80 8080 8000 3128';
-	my @ports = grep /^\d+$/, split / /, $ports;
-	return 0 if !@ports;
-	my $timeout = $constants->{comments_portscan_timeout} || 5;
-	my $connect_timeout = int($timeout/scalar(@ports)+0.2);
-	my $ok_url = "$gSkin->{absolutedir}/ok.txt";
-
-	my $pua = Slash::Custom::ParUserAgent->new();
-	$pua->redirect(1);
-	$pua->max_redirect(3);
-	$pua->max_hosts(scalar(@ports));
-	$pua->max_req(scalar(@ports));
-	$pua->timeout($connect_timeout);
-
-#use LWP::Debug;
-#use Data::Dumper;
-#LWP::Debug::level("+trace"); LWP::Debug::level("+debug");
-
-	my $start_time = Time::HiRes::time;
-
-	local $_proxy_port = undef;
-	sub _cfop_callback {
-		my($data, $response, $protocol) = @_;
-#print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' port '$_proxy_port' succ '" . ($response->is_success()) . "' data '$data' content '" . ($response->is_success() ? $response->content() : "(fail)") . "'\n";
-		if ($response->is_success() && $data eq "ok\n") {
-			# We got a success, so the IP is a proxy.
-			# We should know the proxy's port at this
-			# point;  if not, that's remarkable, so
-			# print an error.
-			my $orig_req = $response->request();
-			$_proxy_port = $orig_req->{_slash_proxytest_port};
-			if (!$_proxy_port) {
-				print STDERR scalar(localtime) . " _cfop_callback got data but no port, protocol '$protocol' port '$_proxy_port' succ '" . ($response->is_success()) . "' data '$data' content '" . $response->content() . "'\n";
-			}
-			$_proxy_port ||= 1;
-			# We can quit listening on any of the
-			# other ports that may have connected,
-			# returning immediately from the wait().
-			# So we want to return C_ENDALL.  Except
-			# C_ENDALL doesn't seem to _work_, it
-			# crashes in _remove_current_connection.
-			# Argh.  So we use C_LASTCON.
-			return LWP::Parallel::UserAgent::C_LASTCON;
-		}
-#print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' succ '0'\n";
-	}
-
-#print STDERR scalar(localtime) . " cfop beginning registering\n";
-	for my $port (@ports) {
-		# We switch to a new proxy every time thru.
-		$pua->proxy('http', "http://$ip:$port/");
-		my $req = HTTP::Request->new(GET => $ok_url);
-		$req->{_slash_proxytest_port} = $port;
-#print STDERR scalar(localtime) . " cfop registering for proxy '$pua->{proxy}{http}'\n";
-		$pua->register($req, \&_cfop_callback);
-	}
-#print STDERR scalar(localtime) . "pua: " . Dumper($pua);
-	my $elapsed = Time::HiRes::time - $start_time;
-	my $wait_timeout = int($timeout - $elapsed + 0.5);
-	$wait_timeout = 1 if $wait_timeout < 1;
-	$pua->wait($wait_timeout);
-#print STDERR scalar(localtime) . " cfop done with wait, returning " . (defined $_proxy_port ? 'undef' : "'$port'") . "\n";
-	$_proxy_port = 0 if !$_proxy_port;
-	$elapsed = Time::HiRes::time - $start_time;
-
-	# Store this value so we don't keep probing the IP.
-	$self->setKnownOpenProxy($ip, $_proxy_port, $elapsed);
-
-	return $_proxy_port;
+	# MC: Depreicated, old portscanner code was here. Gone.
+	return 0;
 }
 
 ##################################################################
