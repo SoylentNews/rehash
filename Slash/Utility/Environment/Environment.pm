@@ -474,12 +474,22 @@ sub getCurrentForm {
 
 	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
 		my $req = Apache2::Request->new($r);
-		my $params = $req->param;
-		foreach(keys %$params){$form->{$_}=$params->{$_};}
+		my @params = $req->param;
 
-		##########
-		# MC - mod_perl 2 seems to handle cfgs slightly differently.  This is probably a hack but eh
-		#if (ref($form) ne 'HASH') { my $hashref = {}; return $hashref }
+		# the MP1 code that was here before was very odd. This appears the proper
+		# way of handling form variables on MP2
+		foreach my $key(@params) {
+			my @value = $req->param($key);
+			next unless scalar @value;
+
+			if ( @value > 1 ) {
+				$form->{$key} = \@value;
+			} else {
+				$form->{$key} = $value[0];
+			}
+		}
+
+		if (ref($form) ne 'HASH') { my $hashref = {}; return $hashref }
 
 		##########
 		# TMB Why we have to do this for forms, I have no idea.
@@ -493,7 +503,7 @@ sub getCurrentForm {
 				next unless $form->{$item};
 				##########
 				# TMB Combined the two loops. This takes over the job of encode_high_bits.
-				$form->{$item} =~ s[([^\n\r\t !-~])][ "&#".ord($1).";" ]ge unless getCurrentStatic('utf8');
+				#$form->{$item} =~ s[([^\n\r\t !-~])][ "&#".ord($1).";" ]ge unless getCurrentStatic('utf8');
 			}
 			else{ next;}
 		}
@@ -2706,7 +2716,7 @@ sub errorLog {
 		push @errors, "Which was called by:$package:$filename:$line";
 	}
 
-	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
+	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
 		$errors[0] = $ENV{SCRIPT_NAME} . $errors[0];
 		#$errors[-1] .= "\n";
 		$r->log_error(join ' ;; ', @errors); # for @errors;
