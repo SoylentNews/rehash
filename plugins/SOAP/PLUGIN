@@ -1,5 +1,0 @@
-# $Id$
-name=SOAP
-description="SOAP API for Plugins"
-mysql_dump=mysql_dump.sql
-htdoc=soap.pl
