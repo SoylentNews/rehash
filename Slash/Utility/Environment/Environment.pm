@@ -42,6 +42,8 @@ use URI;
 use Data::Dumper;
 use base 'Exporter';
 
+use feature 'state';
+
 our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
 
@@ -470,10 +472,37 @@ MEMBER is passed in then only its value will be returned.
 
 sub getCurrentForm {
 	my($value) = @_;
-	my $form ={};
 
 	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
+		# UNBELIEVE HACKINESS AHEAD
+		#
+		# Ok, under MP1, it was possible to use param as a "semi-persistant" scratchpad
+		# that is, to save a new element in the hashref, and get it back by future calls
+		#
+		# This worked because the older APR methods allowed you to store into the HASREF.
+		# even though this behavior was wrong, and bad according to MP documentation. MP2
+		# now removed the STORE method from the APR tables so any attempt to write to them
+		# goes BANG.
+		#
+		# Since we can't do that now, we're going to have to fake it. On our first call to
+		# getCurrentForm, we'll copy the param tables to a hashref, then shove it into the
+		# apache2 pnotes, and then retrieve it on demand.
+		#
+		# This is a fucking hack, but I can't think of a better way than to refactor a TON of
+		# perl, and perl is not a language that makes it easy to refactor ...
+
+		my $form = {};
+
 		my $req = Apache2::Request->new($r);
+
+		# Check if we left ourselves a note ..
+		$form = $r->pnotes("form");
+		if ($form) {
+			# we've already done this, so return stuff
+			return defined $value ? $form->{$value} : $form;
+		}
+
+		# Else we need to build the initial form.
 		my @params = $req->param;
 
 		# the MP1 code that was here before was very odd. This appears the proper
@@ -481,15 +510,12 @@ sub getCurrentForm {
 		foreach my $key(@params) {
 			my @value = $req->param($key);
 			next unless scalar @value;
-
 			if ( @value > 1 ) {
 				$form->{$key} = \@value;
 			} else {
 				$form->{$key} = $value[0];
 			}
 		}
-
-		if (ref($form) ne 'HASH') { my $hashref = {}; return $hashref }
 
 		##########
 		# TMB Why we have to do this for forms, I have no idea.
@@ -507,11 +533,16 @@ sub getCurrentForm {
 			}
 			else{ next;}
 		}
-	} else {
-		$form = $static_form;
-	}
 
-	return defined $value ? $form->{$value} : $form;
+		# Store our hashref in a note for laster
+		$r->pnotes("form" => $form);
+		return defined $value ? $form->{$value} : $form;
+
+	} else {
+		# if we're not running under MP2, we can just return the old static_form hashref
+		# directly, vs. dealing with deferencing fun.
+		return defined $value ? $static_form->{$value} : $static_form;
+	}
 }
 
 #========================================================================
