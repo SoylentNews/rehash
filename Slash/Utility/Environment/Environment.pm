@@ -505,8 +505,8 @@ sub getCurrentForm {
 		# Else we need to build the initial form.
 		my @params = $req->param;
 
-		# the MP1 code that was here before was very odd. This appears the proper
-		# way of handling form variables on MP2
+		# We need to explicately copy here, just doing $form = $req->param
+		# copies the APR table object, and doesn't work.
 		foreach my $key(@params) {
 			my @value = $req->param($key);
 			next unless scalar @value;
