@@ -1,0 +1,18 @@
+The revised Search plugin requires Sphinx to generate search results for
+rehash. An example configuration is provided in sphinx.conf; you'll have
+to modify this to include the database username and password as it does not
+hook into the Perl DBIx::Password mechanism; the sphinx user should only
+have select status to reduce attack surface, though this is not *strictly*
+required.
+
+Rehash uses Sphinx's native API, the MySQL protocol frontend is not required
+
+When setting up sphinx, you need to setup a crontab to run build the indexes,
+running every few minutes, something like the following should work
+
+$SPHINX/bin/indexer --all --rotate -c *path_to_sphinx.conf*
+
+Currently there is no direct intergration with slashd for this, though that
+would likely be a worthwhile update to help simplify setup and maintence.
+
+
