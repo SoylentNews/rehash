@@ -1662,7 +1662,9 @@ sub listStories {
 	my $stoid_list = [];
 	for my $story (@$storylist) {
 		my $time_plain   = $story->{'time'};
-		$story->{'time'} = timeCalc($time_plain, '%H:%M', 0);
+		my $time_user = timeCalc($story->{time});
+		$time_user =~ s/^.*@(.*)$/($1)/;
+		$story->{'time'} = timeCalc($time_plain, '%H:%M', 0).' '.$time_user;
 		$story->{td}     = timeCalc($time_plain, '%A %B %d', 0);
 		$story->{td2}    = timeCalc($time_plain, '%m/%d', 0);
 		$story->{aid}    = $slashdb->getAuthor($story->{uid}, 'nickname');
