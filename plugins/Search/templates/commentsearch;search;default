@@ -13,9 +13,6 @@ commentsearch
 __template__
 
 <div class="commentsearch">
-	<div class="message">
-		This search covers only subjects of comments that are posted.
-	</div>
 [% FOREACH comment=comments %]
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
 	<div class="search-results">
