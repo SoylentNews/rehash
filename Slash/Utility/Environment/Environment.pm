@@ -3115,10 +3115,10 @@ sub get_ipids {
 	my $classbid;
 
 	if (ip_is_ipv4($hostip)) {
-		my $ipid = $no_md5 ? $hostip : md5_hex($hostip);
-		(my $subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+		$ipid = $no_md5 ? $hostip : md5_hex($hostip);
+		($subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
 		$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
-		(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
+		($classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
 		$classbid = $no_md5 ? $classbid : md5_hex($classbid);
 	} else {
 		# IP address is IPv6
