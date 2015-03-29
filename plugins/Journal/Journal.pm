@@ -186,7 +186,25 @@ sub create {
 
 	my $constants = getCurrentStatic();
 
+	# These variable names are not accurate for IPv6.
 	my $user = getCurrentUser();
+	my $subnetid;
+	my $ipid;
+
+	# Handle subnet ID
+	if (exists $user->{srcids}{24}) {
+		$subnetid = get_srcid_sql_in($user->{srcids}{24});
+	} elsif (exists $user->{srcids}{56}) {
+		$subnetid = get_srcid_sql_in($user->{srcids}{56});
+	}
+
+	# and now the IPID
+	if (exists $user->{srcids}{32}) {
+		$ipid = get_srcid_sql_in($user->{srcids}{32});
+	} elsif (exists $user->{srcids}{64}) {
+		$ipid = get_srcid_sql_in($user->{srcids}{64});
+	}
+
 	$self->sqlInsert("journals", {
 		uid		=> $user->{uid},
 		description	=> $description,
@@ -194,8 +212,8 @@ sub create {
 		-date		=> 'NOW()',
 		posttype	=> $posttype,
 		promotetype	=> $promotetype,
-		-srcid_24	=> get_srcid_sql_in($user->{srcids}{24}),
-		-srcid_32	=> get_srcid_sql_in($user->{srcids}{32}),
+		-srcid_24	=> $subnetid,
+		-srcid_32	=> $ipid,
 	});
 
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });

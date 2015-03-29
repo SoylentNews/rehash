@@ -812,9 +812,23 @@ sub getSrcid {
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	return $self->{_srcid_ip} = get_srcid_sql_in(
-		$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 }
-	);
+
+	# Depending on if we have IPv6 or IPv4, we'll get a different reskey
+	# I'm not sure why this was using a subnetid for IPv4, but I'll
+	# mimic the behavior with IPv6
+
+	my $reskey_size_ipv4 = $constants->{reskey_srcid_masksize} || 24;
+	my $reskey_size_ipv6 = $constants->{reskey_srcid6_masksize} || 56;
+
+	if (exists $user->{srcids}{ $reskey_size_ipv4 }) {
+		return $self->{_srcid_ip} = get_srcid_sql_in(
+			$user->{srcids}{$reskey_size_ipv4}
+		);
+	} elsif (exists $user->{srcids}{ $reskey_size_ipv6}) {
+		return $self->{_srcid_ip} = get_srcid_sql_in(
+			$user->{srcids}{$reskey_size_ipv6}
+		);
+	}
 }
 
 #========================================================================
@@ -937,10 +951,20 @@ sub makeStaticKey {
 	$salt ||= $self->getCurrentSalt;
 	$id   ||= $self->{id} || '';
 
+	my $reskey_size_ipv4 = $constants->{reskey_srcid_masksize} || 24;
+	my $reskey_size_ipv6 = $constants->{reskey_srcid6_masksize} || 56;
+	my $use_key_size;
+
+	if (exists $user->{srcids}{$reskey_size_ipv4}) {
+		$use_key_size = $reskey_size_ipv4 ;
+	} elsif (exists $user->{srcids}{$reskey_size_ipv6}) {
+                $use_key_size = $reskey_size_ipv6 ;
+	}
+
 	return md5_hex(
 		join($;,
 			$user->{uid},
-			$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 },
+			$user->{srcids}{$use_key_size},
 			# these change so often, i don't think there's a real point
 			# to fixing it to a specific resource (resname) or id,
 			# and making it more general makes it a little simpler to use

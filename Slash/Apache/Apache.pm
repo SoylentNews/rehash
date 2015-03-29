@@ -338,9 +338,9 @@ sub ProxyRemoteAddr {
 	$xf = $r->headers_in->{$trusted_header} if $trusted_header;
 	$xf ||= $r->headers_in->{'X-Forwarded-For'} | '';
 	if ($xf) {
-		if (my($ip) = $xf =~ /([\d.]+)$/) {
-			$r->connection->remote_ip($ip);
-		}
+		# This doesn't strictly speaking handle the case of multiple IPs in
+		# XFF, so this probably should be fixed.
+		$r->connection->remote_ip($xf);
 	}
 
 	return OK;

@@ -28,14 +28,15 @@ use utf8;
 use Encode qw(encode_utf8 decode_utf8 is_utf8);
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
+use Net::IP qw(:PROC);
 use Slash::Constants ();
-use Socket qw( inet_aton inet_ntoa );
 
 use Apache2::Cookie;
 use Apache2::Module;
 use Apache2::Request;
 use Apache2::RequestRec ();
 use Apache2::RequestIO ();
+use Socket qw( inet_aton inet_ntoa );
 
 use URI;
 
@@ -120,7 +121,6 @@ our @EXPORT  = qw(
 	get_srcid_sql_out
 	get_srcid_type
 	get_srcid_vis
-	decode_srcid_prependbyte
 
 	apacheConnectionSSL
 
@@ -3089,6 +3089,11 @@ sub determineCurrentSkin {
 
 #========================================================================
 # XXXSRCID eliminate this or bring it back or something
+#
+# This function is used to get full IP hashs which are used in some
+# places which is why its seperate. I'd love to get rid of it, but
+# the amount of refactoring would be silly
+
 sub get_ipids {
 	my($hostip, $no_md5, $locationid) = @_;
  
@@ -3098,15 +3103,45 @@ sub get_ipids {
 		my $r = Apache2::RequestUtil->request;
 		$hostip = $r->connection->remote_ip;
 	} elsif (!$hostip) {
-		$hostip = '';
+		# Can't use '' when in slashd ...
+		$hostip = '0.0.0.0';
 	}
+
+	my $ip = new Net::IP($hostip);
+	$hostip = $ip->ip();
  
-	my $ipid = $no_md5 ? $hostip : md5_hex($hostip);
-	(my $subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
-	$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
-	(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
-	$classbid = $no_md5 ? $classbid : md5_hex($classbid);
- 
+	my $ipid;
+	my $subnetid;
+	my $classbid;
+
+	if (ip_is_ipv4($hostip)) {
+		my $ipid = $no_md5 ? $hostip : md5_hex($hostip);
+		(my $subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+		$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
+		(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
+		$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+	} else {
+		# IP address is IPv6
+		my $binip = $ip->binip();
+
+		# Calculate out the requested hashs
+		my $masked_ip = substr $binip, 0, 64;
+		$masked_ip .= "0" x ( 128 - length( $masked_ip ) );
+		$ipid = new Net::IP(ip_bintoip($masked_ip, 6))->print();
+		$ipid = $no_md5 ? $ipid : md5_hex($ipid);
+
+		$masked_ip = substr $binip, 0, 56;
+		$masked_ip .= "0" x ( 128 - length( $masked_ip ) );
+		$subnetid = new Net::IP(ip_bintoip($masked_ip, 6))->print();
+		$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
+
+
+		$masked_ip = substr $binip, 0, 48;
+		$masked_ip .= "0" x ( 128 - length( $masked_ip ) );
+		$classbid = new Net::IP(ip_bintoip($masked_ip, 6))->print();
+		$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+	}
+
 	if ($locationid) {
 		return $locationid eq 'classbid' ? $classbid
 		     : $locationid eq 'subnetid' ? $subnetid
@@ -3135,10 +3170,9 @@ more srcids.
 
 A hashref containing one or more of two possible fields:  (1) "uid",
 whose value is a user id;  and/or (2) "ip", whose value is a text string
-representing an IPv4 address in the form of "1.2.3.4" (IPv6 is not
-yet supported), or a false value which means to use the current Apache
-connection's remote_ip if invoked within Apache, or the dummy value
-"0.0.0.0" otherwise.
+representing an IPv4 or IPv6 address in string form, or a false value
+which means to use the current Apache connection's remote_ip if invoked 
+within Apache, or the dummy value "0.0.0.0" otherwise.
 
 =item OPTIONS
 
@@ -3153,6 +3187,10 @@ values of an IP are encoded:  a 32-bit and a 24-bit mask (the IP itself
 and its Class C subnet).  Any additional values between 1 and 32 may be
 passed in in 'masks' and those additional mask sizes will also be
 calculated and encoded in the returned hashref.
+
+For IPv6 addresses, the default masked off values are 64-bit, 56-bit,
+and 48-bit. Masking an individual IPv6 address is relatively useless
+due to things like IPv6 privacy extensions
 
 The option 'return_only' will change the returned value from a hashref
 with multiple fields into an array which contains the values of one or
@@ -3185,7 +3223,7 @@ sub get_srcids {
 	my($hr, $options) = @_;
 	$hr ||= { };
 	my $retval = { };
-	my($no_md5, $return_only, $masks) = _get_srcids_options($options);
+	my($no_md5, $return_only, $masks, $masks6) = _get_srcids_options($options);
 
 	# UIDs are the easy part.  The encoded value of a uid is the uid
 	# itself, in decimal form, so we just pass this input along to
@@ -3211,7 +3249,10 @@ sub get_srcids {
 			}
 		}
 
-		$retval->{ip} = $ip; # return the IP passed in, for convenience
+		# Feed the IP into Net::IP
+		$ip = new Net::IP($ip);
+		my $ascii_ip = $ip->ip();
+		$retval->{ip} = $ascii_ip; # return the IP passed in, for convenience
 
 		# For each entry in @$masks, we truncate the IPv4 address
 		# to that many bits (so 32 is the whole IP address, this
@@ -3220,30 +3261,80 @@ sub get_srcids {
 		# proper width, and prepend the code indicating what kind
 		# of mask has been applied.
 
-		# XXX For IPv6, here's where we need to decide how to
-		# extend the value of 'masks' to a 128-bit IP address.
-		# For IPv4, we convert the string "1.2.3.4" to the
-		# number 0x01020304, mask it, then convert back to
-		# dotted-quad string.
-		my $n = unpack("N", inet_aton($ip));
+		# For IPv6, simply masking off addresses MIGHT generate
+		# collisions, in case you have an address like:
+		#
+		# dead:beef:0f06:10f5:0000/64
+		# dead:beef:0f06:10f5:00/56
+		#
+		# So instead, we're going to simply chop off that many
+		# bits + colons to generate the MD5, which will prevent
+		# collision between various masks (in practice this MIGHT
+		# not be a problem since we prepend the class size, but
+		# better safe than sorry).
 
-		for my $mask (@$masks) {
-			my $prepend_code = get_srcid_prependbyte({
-				type =>         'ipid',
-				mask =>         $mask,
-			});
-			my $bitmask = ~( 2**(32-$mask) - 1 );
-			my $nm = $n & $bitmask;
-			my $str = inet_ntoa(pack("N", $nm));
-			my $val;
-			if ($no_md5) {
-				$val = $str;
-			} else {
-				my $md5 = md5_hex($str);
-				my $md5_trunc = substr($md5, 0, 14);
-				$val = lc("$prepend_code$md5_trunc");
+		if (ip_is_ipv4($ascii_ip)) {
+			my $n = unpack("N", inet_aton($ascii_ip));
+
+			for my $mask (@$masks) {
+				my $prepend_code = get_srcid_prependbyte({
+					type =>         'ipid',
+					mask =>         $mask,
+				});
+				my $bitmask = ~( 2**(32-$mask) - 1 );
+				my $nm = $n & $bitmask;
+				my $str = inet_ntoa(pack("N", $nm));
+				my $val;
+				if ($no_md5) {
+					$val = $str;
+				} else {
+					my $md5 = md5_hex($str);
+					my $md5_trunc = substr($md5, 0, 14);
+					$val = lc("$prepend_code$md5_trunc");
+				}
+				$retval->{$mask} = $val;
 			}
-			$retval->{$mask} = $val;
+		} elsif (ip_is_ipv6($ascii_ip)) {
+			for my $mask (@$masks6) {
+				my $prepend_code = get_srcid_prependbyte({
+					type =>         'ipid6',
+					mask =>         $mask,
+				});
+
+				# So, an IPv6 address is 8 groups of 4 hex numbers. Fully expanded
+				# that looks like this:
+				#
+				# dead:beef:0f06:10f5:0000:0000:0000:0002
+				#
+				# Each hex represent /4 of an address. So
+				# to illistrate, here are the remaining bits of
+				# an address when we mask:
+				#
+				# dead:beef:0f06:10f5:0000:0000:0000:0002/128
+				# dead:beef:0f06:10f5:0000/64
+				# dead:beef:0f06:10f5:00/56
+				# dead:beef:0f06:10f5/46
+				#
+				# We can't use the unpack trick above because Perl doesn't
+				# have a form that can handle a 128-bit number
+
+
+				my $binip = $ip->binip();
+				my $masked_ip = substr $binip, 0, $mask;
+
+				# pad it out to 128
+				$masked_ip .= "0" x ( 128 - length( $masked_ip ) );
+				my $val = new Net::IP(ip_bintoip($masked_ip, 6))->print();
+
+				# Now generate the MD5 sums like IPv4 addresses
+				if (!$no_md5) {
+					my $md5 = md5_hex($val);
+					my $md5_trunc = substr($md5, 0, 14);
+					$val = lc("$prepend_code$md5_trunc");
+				}
+
+				$retval->{$mask} = $val;
+			}
 		}
 
 	}
@@ -3268,13 +3359,19 @@ my %mask_size_name = (
 	classbid =>     16,
 );
 
+my %mask6_size_name = (
+	ipid =>         64,
+	subnetid =>     56,
+	classbid =>     48,
+);
+
 sub convert_srcid {
 	my($type, $old_id_str) = @_;
 	# UIDs are easy, they haven't changed.
 	return $old_id_str if $type eq 'uid';
 	# IPs, Subnets, and Class B's get converted to MD5s and then
 	# treated like IPIDs, SubnetIDs, and ClassBIDs..
-	if ($mask_size_name{"${type}id"}) {
+	if ($mask_size_name{"${type}id"} || $mask6_size_name{"${type}id"}) {
 		$old_id_str = md5_hex($old_id_str);
 		$type = "${type}id";
 	}
@@ -3337,6 +3434,7 @@ sub _get_srcids_options {
 		$return_only = \@ret;
 	}
 
+	# Handle IPv4 masks
 	my $masks = [ ];
 	if ($return_only) {
 		# If we've been asked to return specific values,
@@ -3357,8 +3455,28 @@ sub _get_srcids_options {
 		}
 	}
 
+	my $masks6 = [ ];
+	if ($return_only) {
+		# If we've been asked to return specific values,
+		# calculate just those values.
+		$masks6 = [ @$return_only ];
+	} else {
+		if (defined $options->{masks6}) {
+			$masks6 = $options->{masks6};
+			if (!ref $masks6) {
+				$masks6 = [ $masks6 ];
+			}
+		}
+		@$masks6 = sort grep { /^\d+$/ } @$masks6;
+		if (!@$masks6) {
+			# Bad or no option passed in;  use default.
+			# XXXSRCID This should be a var.
+			$masks6 = [qw( 48 56 64 )];
+		}
+	}
+
 	# Return the options the caller's caller asked for.
-	return ($no_md5, $return_only, $masks);
+	return ($no_md5, $return_only, $masks, $masks6);
 }
 } # closure
 
@@ -3413,6 +3531,8 @@ for future use.
 bits 3-7 (LSBs): if uid, all 0; if IPv4 ipid, 32 minus the mask
 size (so 0b00000 indicates a mask size of 32, 0b01000 24, etc.)
 
+if IPv6 ipid6, 128 minus the mask size like IPv4
+
 =back
 
 Thus the most commonly returned values will be: "00" = uid,
@@ -3427,33 +3547,13 @@ sub get_srcid_prependbyte {
 	if ($type eq 'ipid') {
 		my $mask32 = 32 - $hr->{mask};
 		$val = 0x20 + $mask32;
+	 } elsif ($type eq 'ipid6') {
+		my $mask128 = 128 - $hr->{mask};
+		$val = 0x80 + $mask128;
 	} else {
 		$val = 0x00;
 	}
 	return sprintf("%02x", $val);
-}
-
-#========================================================================
-
-=head2 decode_srcid_prependbyte(BYTE)
-
-Decodes the byte encoded by encode_prepend_byte.  Returns a
-hashref with fields 'type' and, if type is 'ipid', 'mask'.
-
-=cut
-
-sub decode_srcid_prependbyte {
-	my($byte) = @_;
-	my $val = hex($byte);
-	my $type = ($val & 0b11100000) >> 5;
-	if ($type == 0) {
-		return { type => 'uid' };
-	}
-	my $mask = 32 - ($val & 0b00011111);
-	return {
-		type => 'ipid',
-		mask => $mask,
-	};
 }
 
 #========================================================================
