@@ -138,9 +138,9 @@ SET txRows = 20 IF txRows < 20  %]
 				<label class="checkbox">
 					<input type="checkbox" name="fixquotes" [% fixquotes_check %]>fixquotes
 				</label>
-				<label class="checkbox">
+<!--				<label class="checkbox">
 					<input type="checkbox" name="autonode" [% autonode_check %]>autonode
-				</label>
+				</label> -->
 
 				[% IF sid %]
 					<label class="checkbox">
@@ -234,9 +234,9 @@ SET txRows = 20 IF txRows < 20  %]
 				<label>
 					<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
 				</label>
-				<a name="media"></a>
+<!--				<a name="media"></a>
 				<textarea class="fullbox" name="media" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
-				<div class="notes">[% ispell_comments.bodytext %]</div>
+				<div class="notes">[% ispell_comments.bodytext %]</div> -->
 				[% PROCESS editbuttons %]
 			</fieldset>
 			</div>

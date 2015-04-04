@@ -74,7 +74,7 @@ __template__
 	</tr>
 	[% END %]
 
-	<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td></tr>
+	<tr class="data_hl1"><td colspan="5"><!--<textarea rows="2" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea> --></td></tr>
 </table>
 __seclev__
 10000
