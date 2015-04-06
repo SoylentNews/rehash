@@ -36,17 +36,8 @@ use Apache2::Module;
 use Apache2::Request;
 use Apache2::RequestRec ();
 use Apache2::RequestIO ();
-use Socket qw( inet_aton inet_ntoa );
+#use Socket qw( inet_aton inet_ntoa );
 
-<<<<<<< HEAD
-=======
-use Apache2::Cookie;
-use Apache2::Module;
-use Apache2::Request;
-use Apache2::RequestRec ();
-use Apache2::RequestIO ();
-
->>>>>>> 0ae88ede9ad1c4f15e27b6bca3f4556b0398cefb
 use URI;
 
 use Data::Dumper;
@@ -481,7 +472,6 @@ MEMBER is passed in then only its value will be returned.
 
 sub getCurrentForm {
 	my($value) = @_;
-<<<<<<< HEAD
 
 	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
 		# UNBELIEVE HACKINESS AHEAD
@@ -527,19 +517,6 @@ sub getCurrentForm {
 			}
 		}
 
-=======
-	my $form ={};
-
-	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
-		my $req = Apache2::Request->new($r);
-		my $params = $req->param;
-		foreach(keys %$params){$form->{$_}=$params->{$_};}
-
-		##########
-		# MC - mod_perl 2 seems to handle cfgs slightly differently.  This is probably a hack but eh
-		#if (ref($form) ne 'HASH') { my $hashref = {}; return $hashref }
-
->>>>>>> 0ae88ede9ad1c4f15e27b6bca3f4556b0398cefb
 		##########
 		# TMB Why we have to do this for forms, I have no idea.
 		# Feel free to find out why and fix it.
@@ -2770,11 +2747,7 @@ sub errorLog {
 		push @errors, "Which was called by:$package:$filename:$line";
 	}
 
-<<<<<<< HEAD
 	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
-=======
-	if ($ENV{MOD_PERL} && (my $r = Apache2::RequestUtil->request)) {
->>>>>>> 0ae88ede9ad1c4f15e27b6bca3f4556b0398cefb
 		$errors[0] = $ENV{SCRIPT_NAME} . $errors[0];
 		#$errors[-1] .= "\n";
 		$r->log_error(join ' ;; ', @errors); # for @errors;
