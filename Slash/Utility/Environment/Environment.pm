@@ -36,7 +36,7 @@ use Apache2::Module;
 use Apache2::Request;
 use Apache2::RequestRec ();
 use Apache2::RequestIO ();
-#use Socket qw( inet_aton inet_ntoa );
+use Socket qw( inet_aton inet_ntoa );
 
 use URI;
 
