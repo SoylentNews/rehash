@@ -3113,6 +3113,7 @@ sub get_ipids {
 	my $ipid;
 	my $subnetid;
 	my $classbid;
+	my $network_type;
 
 	if (ip_is_ipv4($hostip)) {
 		$ipid = $no_md5 ? $hostip : md5_hex($hostip);
@@ -3120,6 +3121,7 @@ sub get_ipids {
 		$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
 		($classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
 		$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+		$network_type = 'ipv4';
 	} else {
 		# IP address is IPv6
 		my $binip = $ip->binip();
@@ -3140,6 +3142,7 @@ sub get_ipids {
 		$masked_ip .= "0" x ( 128 - length( $masked_ip ) );
 		$classbid = new Net::IP(ip_bintoip($masked_ip, 6))->print();
 		$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+		$network_type = 'ipv6';
 	}
 
 	if ($locationid) {
@@ -3147,10 +3150,11 @@ sub get_ipids {
 		     : $locationid eq 'subnetid' ? $subnetid
 		     : $locationid eq 'ipid'     ? $ipid
 		     : $locationid eq 'ip'       ? $hostip
+                     : $locationid eq 'networktype' ? $network_type
 		     : '';
 	}
  
-	return($ipid, $subnetid, $classbid, $hostip);
+	return($ipid, $subnetid, $classbid, $hostip, $network_type);
 }
 
 #========================================================================
