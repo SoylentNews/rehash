@@ -300,7 +300,7 @@ sub SlashCompileTemplates ($$$) {
 {
 my $trusted_ip_regex = undef;
 my $trusted_header = undef;
-sub ProxyRemoteAddr {
+sub ProxyRemoteAddr ($) {
 	my($class, $r) = @_;
 
 	# Set up the variables that are loaded only once.

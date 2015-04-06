@@ -554,8 +554,11 @@ UPDATE modreasons SET needs_prior_mod = 1 WHERE id = 10;
 # MP2 Release
 
 alter table skins add column theme varchar(255) default '';
+<<<<<<< HEAD
 
 # Need to drop 'NOT NULL' due to table change
 ALTER TABLE submissions MODIFY comment VARCHAR(255) null;
 ALTER TABLE submissions MODIFY mediatype enum('text','none','video','image','audio') null DEFAULT 'none';
 ALTER TABLE submissions MODIFY name varchar (50) null;
+=======
+>>>>>>> 0ae88ede9ad1c4f15e27b6bca3f4556b0398cefb

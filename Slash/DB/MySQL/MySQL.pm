@@ -4563,6 +4563,21 @@ sub setKnownOpenProxy {
 
 sub checkForOpenProxy {
 	my($self, $ip) = @_;
+<<<<<<< HEAD
+=======
+	# If we weren't passed an IP address, default to whatever
+	# the current IP address is.
+	if (!$ip && $ENV{MOD_PERL}) {
+		my $r = Apache2::RequestUtil->request;
+		$ip = $r->connection->remote_ip if $r;
+	}
+
+	# If we don't have an IP address, it can't be an open proxy.
+	return 0 if !$ip;
+	# Known secure IPs also don't count as open proxies.
+	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
+>>>>>>> 0ae88ede9ad1c4f15e27b6bca3f4556b0398cefb
 
 	# MC: Depreicated, old portscanner code was here. Gone.
 	return 0;
