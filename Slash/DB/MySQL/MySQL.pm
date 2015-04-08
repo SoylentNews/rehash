@@ -3663,7 +3663,7 @@ sub setStory {
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
 		my @non_cchp = grep !/^(commentcount|hitparade|hits)$/, keys %$change_hr;
-		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|mediatype|thumb|offmainpage)$/, keys %$change_hr;
+		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|mediatype|thumb|offmainpage|notes)$/, keys %$change_hr;
 		
 		if (@non_cchp > 0) {
 			$change_hr->{-last_update} = 'NOW()';
@@ -3694,7 +3694,7 @@ sub setStory {
 
 	# what about stories set to ND?  this is not supported by our OAI code,
 	# i think, but let's update anyway -- pudge
-	if (grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay)$/, keys %$change_hr) {
+	if (grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|notes)$/, keys %$change_hr) {
 		# this is the only place this ever changes
 		$change_hr->{-archive_last_update} = 'NOW()';
 	}

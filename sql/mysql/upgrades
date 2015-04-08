@@ -559,3 +559,5 @@ alter table skins add column theme varchar(255) default '';
 ALTER TABLE submissions MODIFY comment VARCHAR(255) null;
 ALTER TABLE submissions MODIFY mediatype enum('text','none','video','image','audio') null DEFAULT 'none';
 ALTER TABLE submissions MODIFY name varchar (50) null;
+ALTER TABLE stories ADD COLUMN notes text;
+
