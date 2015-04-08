@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+gopher
+__lang__
+en_US
+__name__
+netnews_story
+__template__
+
+[% USE num = format("\n%5d. %s") %]
+[% USE box = format("| %-93.93s|\n") %]
+
++----------------------------------------------------------------------------------------------+
+[% 
+	box(story.title);
+	IF constants.use_dept;
+		box("  from the $story.dept dept.");
+	END;
+	thisurl = Slash.url2abs(Slash.db.getSection(story.section, 'rootdir'), absolutedir) || absolutedir;
+	stime = Slash.timeCalc(story.time, "%A %B %d, @%H:%M");
+	box("  posted by $story.author on $stime ($topicname)");
+  box("  $thisurl/article.pl?sid=$story.sid");
+%]+----------------------------------------------------------------------------------------------+
+
+[% story.asciitext.replace('\n(?=\n  \* \[\d+\])', '') %]
+
+Originally Posted At:
+    [% thisurl %]/comments.pl?sid=[% story.sid %][% IF story.refs.size %]
+
+Links:[%
+  count = -1;
+  FOR ref = story.refs;
+    count = count + 1;
+    num(count, ref); #urlize(ref));
+ END;
+END 
+
+%]
+
+__seclev__
+500
+__version__
+$Id$

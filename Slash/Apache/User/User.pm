@@ -350,11 +350,16 @@ sub handler {
 		# instead of going through prepareUser(), because this is
 		# much, much faster.
 		my $hostip = $r->connection->remote_ip;
-		my($ipid, $subnetid) = get_ipids($hostip);
+
+		#my($ipid, $subnetid) = get_ipids($hostip);
+		# I *really* depise perl's multiple returns
+		my @ipids = get_ipids($hostip);
+		
 		my $user = {
 			uid		=> $uid,
-			ipid		=> $ipid,
-			subnetid	=> $subnetid,
+			ipid		=> $ipids[0],
+			subnetid	=> $ipids[1],
+			networktype	=> $ipids[5]
 		};
 		createCurrentUser($user);
 		return Apache2::Const::FORBIDDEN;

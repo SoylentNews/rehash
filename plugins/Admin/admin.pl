@@ -1522,9 +1522,16 @@ sub extractChosenFromForm {
 			}
 
 			my $weight = shift @weights;
+<<<<<<< HEAD
 			my @thismany = @{ $form->{$input} };
 			for my $i (0..$#thismany) {
+=======
+			my @thismany = $form->{$input};
+			for my $i (0..$#thismany) {
+				no strict;
+>>>>>>> 0ae88ede9ad1c4f15e27b6bca3f4556b0398cefb
 				my $tid = $form->{$input}[$i];
+				use strict;
 				if ($tid =~ /^-(\d+)$/) {
 					until ($weight < $1) {
 						last unless @weights;
