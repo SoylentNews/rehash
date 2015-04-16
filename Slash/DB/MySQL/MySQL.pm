@@ -1820,28 +1820,26 @@ sub _getLogTokenCookieLocation {
 	my $cookie_location = $temp_str eq 'yes'
 		? 'classbid'
 		: $self->getUser($uid, 'cookie_location');
-	my $locationid = get_ipids('', '', $cookie_location);
-	return($locationid, $temp_str, $public_str);
+	return($temp_str, $public_str);
 }
 
 ########################################################
 # Get a logtoken from the DB, or create a new one
 sub _logtoken_read_memcached {
-	my($self, $uid, $temp_str, $public_str, $locationid) = @_;
+	my($self, $uid, $temp_str, $public_str) = @_;
 	my $mcd = $self->getMCD();
 	return undef unless $mcd;
 	my $mcdkey = "$self->{_mcd_keyprefix}:lt:";
 	my $lt_str = $uid
 		. ":" . ($temp_str   eq 'yes' ? 1 : 0)
-		. ":" . ($public_str eq 'yes' ? 1 : 0)
-		. ":" . $locationid;
+		. ":" . ($public_str eq 'yes' ? 1 : 0);
 	my $value = $mcd->get("$mcdkey$lt_str");
 #print STDERR scalar(gmtime) . " $$ _lt_read_mcd lt_str=$lt_str value='$value'\n";
 	return $value;
 }
 
 sub _logtoken_write_memcached {
-	my($self, $uid, $temp_str, $public_str, $locationid, $value, $seconds) = @_;
+	my($self, $uid, $temp_str, $public_str, $value, $seconds) = @_;
 	# Take a few seconds off this expiration time, because it's what's
 	# in the DB that's authoritative;  for those last few seconds,
 	# requests will have to go to the DB.
@@ -1853,14 +1851,13 @@ sub _logtoken_write_memcached {
 	my $mcdkey = "$self->{_mcd_keyprefix}:lt:";
 	my $lt_str = $uid
 		. ":" . ($temp_str   eq 'yes' ? 1 : 0)
-		. ":" . ($public_str eq 'yes' ? 1 : 0)
-		. ":" . $locationid;
+		. ":" . ($public_str eq 'yes' ? 1 : 0);
 	$mcd->set("$mcdkey$lt_str", $value, $seconds);
 #print STDERR scalar(gmtime) . " $$ _lt_write_mcd lt_str=$lt_str value='$value' seconds=$seconds\n";
 }
 
 sub _logtoken_delete_memcached {
-	my($self, $uid, $temp_str, $public_str, $locationid) = @_;
+	my($self, $uid, $temp_str, $public_str) = @_;
 	my $mcd = $self->getMCD();
 	return unless $mcd;
 
@@ -1869,8 +1866,7 @@ sub _logtoken_delete_memcached {
 		# Delete just this one logtoken for this user.
 		my $lt_str = $uid
 			. ":" . ($temp_str   eq 'yes' ? 1 : 0)
-			. ":" . ($public_str eq 'yes' ? 1 : 0)
-			. ":" . $locationid;
+			. ":" . ($public_str eq 'yes' ? 1 : 0);
 		$mcd->delete("$mcdkey$lt_str");
 #print STDERR scalar(gmtime) . " $$ _lt_delete_mcd deleted lt_str=$lt_str\n";
 	} else {
@@ -1879,16 +1875,15 @@ sub _logtoken_delete_memcached {
 		# them from the DB and delete them one at a time.
 		my $uid_q = $self->sqlQuote($uid);
 		my $logtokens_ar = $self->sqlSelectAllHashrefArray(
-			"temp, locationid",
+			"temp",
 			"users_logtokens",
 			"uid=$uid_q");
 		for my $data (@$logtokens_ar) {
-			my($temp_str, $locationid) = ($data->{temp}, $data->{locationid});
+			my($temp_str) = ($data->{temp});
 			$public_str ||= 0;
 			my $lt_str = $uid
 				. ":" . ($temp_str   eq 'yes' ? 1 : 0)
-				. ":" . ($public_str eq 'yes' ? 1 : 0)
-				. ":" . $locationid;
+				. ":" . ($public_str eq 'yes' ? 1 : 0);
 			# The 3 means "don't accept new writes to this key for 3 seconds."
 			$mcd->delete("$mcdkey$lt_str");
 #print STDERR scalar(gmtime) . " $$ _lt_delete_mcd deleted lt_str=$lt_str\n";
@@ -1921,15 +1916,13 @@ sub getLogToken {
 		$user->{state}{login_public} = 'yes';
 	}
 
-
-	my($locationid, $temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
+	my($temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
 
 	my $where = join(" AND ",
 		"uid=$uid_q",
-		"locationid='$locationid'",
 		"temp='$temp_str'",
 		"public='$public_str'");
-	my $value = $self->_logtoken_read_memcached($uid, $temp_str, $public_str, $locationid) || '';
+	my $value = $self->_logtoken_read_memcached($uid, $temp_str, $public_str) || '';
 #print STDERR scalar(gmtime) . " $$ getLogToken value from mcd '$value' for uid=$uid temp_str=$temp_str public_str=$public_str locationid=$locationid\n";
 	if (!$value) {
 		my $thiswhere = $where;
@@ -1944,14 +1937,14 @@ sub getLogToken {
 	# always bump expiration for temp logins
 	if ($value && $temp_str eq 'yes') {
 		my $minutes = getCurrentStatic('login_temp_minutes') || 10;
-		$self->updateLogTokenExpires($uid, $temp_str, $public_str, $locationid, $value, $minutes*60);
+		$self->updateLogTokenExpires($uid, $temp_str, $public_str, $value, $minutes*60);
 #print STDERR scalar(gmtime) . " $$ getLogToken called updateLogTokenExpires for temp, uid=$uid value=$value\n";
 	}
 
 	# bump expiration for public (aka RSS) logins if the caller requested it
 	if ($value && $public_str eq 'yes' && $bump_public) {
 		my $days = getCurrentStatic('login_nontemp_days') || 365;
-		$self->updateLogTokenExpires($uid, $temp_str, $public_str, $locationid, $value, $days*86400);
+		$self->updateLogTokenExpires($uid, $temp_str, $public_str, $value, $days*86400);
 #print STDERR scalar(gmtime) . " $$ getLogToken called updateLogTokenExpires for public, uid=$uid value=$value\n";
 	}
 
@@ -1975,11 +1968,12 @@ sub setLogToken {
 	my($self, $uid) = @_;
 
 	my $logtoken = createLogToken();
-	my($locationid, $temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
 
 	my $constants = getCurrentStatic();
 	my $nontemp_days = $constants->{login_nontemp_days} || 365;
 	my($interval, $seconds) = ("$nontemp_days DAY", $nontemp_days * 86400);
+	my($temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
+
 	if ($temp_str eq 'yes') {
 		my $minutes = getCurrentStatic('login_temp_minutes') || 1;
 		($interval, $seconds) = ("$minutes MINUTE", $minutes * 60);
@@ -1987,7 +1981,6 @@ sub setLogToken {
 
 	my $rows = $self->sqlReplace('users_logtokens', {
 		uid		=> $uid,
-		locationid	=> $locationid,
 		temp		=> $temp_str,
 		public		=> $public_str,
 		value		=> $logtoken,
@@ -1995,7 +1988,7 @@ sub setLogToken {
 	});
 	if ($rows) {
 		$self->_logtoken_write_memcached($uid, $temp_str, $public_str,
-			$locationid, $logtoken, $seconds);
+			$logtoken, $seconds);
 	}
 
 	# prune logtokens table, each user should not have too many
@@ -2006,8 +1999,8 @@ sub setLogToken {
 	if ($total > $max) {
 		my $limit = $total - $max;
 		my $logtokens = $self->sqlSelectAllHashref(
-			'lid', 'lid, uid, temp, public, locationid',
-			'users_logtokens', $where,
+			'lid', 'lid, uid, temp, public, users_logtokens', 
+			$where,
 			"ORDER BY expires LIMIT $limit"
 		);
 		my @lids = sort { $a <=> $b } keys %$logtokens;
@@ -2017,7 +2010,6 @@ sub setLogToken {
 				$lt->{uid},
 				$lt->{temp},
 				$lt->{public},
-				$lt->{locationid}
 			);
 		}
 		my $lids_text = join(",", @lids);
@@ -2033,11 +2025,10 @@ sub setLogToken {
 ########################################################
 # Update the expiration time of a logtoken
 sub updateLogTokenExpires {
-	my($self, $uid, $temp_str, $public_str, $locationid, $value, $seconds) = @_;
+	my($self, $uid, $temp_str, $public_str, $value, $seconds) = @_;
 	my $uid_q = $self->sqlQuote($uid);
 	my $where = join(" AND ",
 		"uid=$uid_q",
-		"locationid='$locationid'",
 		"temp='$temp_str'",
 		"public='$public_str'");
 
@@ -2046,7 +2037,7 @@ sub updateLogTokenExpires {
 	}, $where);
 #print STDERR scalar(gmtime) . " $$ updateLogTokenExpires where='$where' seconds=$seconds rows='$rows'\n";
 	$self->_logtoken_write_memcached($uid, $temp_str, $public_str,
-		$locationid, $value, $seconds);
+		$value, $seconds);
 	return $rows;
 }
 
@@ -2059,9 +2050,9 @@ sub deleteLogToken {
 	my $where = "uid=$uid_q";
 
 	if (!$all) {
-		my($locationid, $temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
-		$where .= " AND locationid='$locationid' AND temp='$temp_str' AND public='$public_str'";
-		$self->_logtoken_delete_memcached($uid, $temp_str, $public_str, $locationid);
+		my($temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
+		$where .= " AND temp='$temp_str' AND public='$public_str'";
+		$self->_logtoken_delete_memcached($uid, $temp_str, $public_str);
 		$self->sqlDelete('users_logtokens', $where);
 	} else {
 		$self->_logtoken_delete_memcached($uid);
