@@ -162,9 +162,10 @@ $cbServer->on(request => sub {
 			if(!$subscribe->paymentExists($ipn->txn_id)){
 				# Check if PDT got transaction first.
 				my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
-			
+				
+				my $quantity = $paypal->{quantity} || 1;
 				my $payment = {
-					days => $paypal->{custom}{days},
+					days => $paypal->{custom}{days} * $quantity,
 					uid	=> $paypal->{custom}{uid},
 					payment_net   => $payment_net,
 					payment_gross => $paypal->{payment_gross},
