@@ -1482,7 +1482,7 @@ sub editStory {
 		add_related_text	=> $add_related_text,
 		pending_file_count	=> $pending_file_count,
 		story_static_files	=> $story_static_files,
-		notes			=> $notes
+		editoral_notes			=> $notes
 	});
 }
 
@@ -1846,7 +1846,8 @@ sub updateStory {
 		related_sids	=> $related_sids,
 		thumb		=> $form->{thumb},
 		-rendered	=> 'NULL', # freshenup.pl will write this
-		is_dirty	=> 1
+		is_dirty	=> 1,
+		notes		=> $form->{editor_notes}
 	};
 
 	for (qw(dept bodytext relatedtext)) {
