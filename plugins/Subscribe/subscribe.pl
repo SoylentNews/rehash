@@ -233,8 +233,9 @@ sub paypal {
 			
 			$puid = $pp_pdt->{custom}{puid};
 			
+			my $quantity = $pp_pdt->{quantity} || 1;
 			my $payment = {
-				days => $pp_pdt->{custom}{days},
+				days => $pp_pdt->{custom}{days} * $quantity,
 				uid	=> $pp_pdt->{custom}{uid},
 				payment_net   => $payment_net,
 				payment_gross => $pp_pdt->{payment_gross},
