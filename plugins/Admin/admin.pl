@@ -1122,7 +1122,7 @@ sub editStory {
 	my($extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $storycontent, $locktest,
 		$extracolumns, $commentstatus_select, 
-		$subid, $fhid, $description);
+		$subid, $fhid, $description, $notes);
 	my $extracolref = {};
 	my($fixquotes_check, $autonode_check, $fastforward_check) = ('','','');
 	my $page = 'index';
@@ -1448,6 +1448,7 @@ sub editStory {
 	if ($stoid || $form->{sid}) {
 		my $story = $slashdb->getStory($form->{sid});
 		$stoid ||= $story->{stoid};
+		$notes  ||= $story->{notes};
 		$pending_file_count = $slashdb->numPendingFilesForStory($stoid); 
 		$story_static_files = $slashdb->getStaticFilesForStory($stoid);
 	}
@@ -1480,7 +1481,8 @@ sub editStory {
 		user_signoff		=> $user_signoff,
 		add_related_text	=> $add_related_text,
 		pending_file_count	=> $pending_file_count,
-		story_static_files	=> $story_static_files
+		story_static_files	=> $story_static_files,
+		editoral_notes			=> $notes
 	});
 }
 
@@ -1844,7 +1846,8 @@ sub updateStory {
 		related_sids	=> $related_sids,
 		thumb		=> $form->{thumb},
 		-rendered	=> 'NULL', # freshenup.pl will write this
-		is_dirty	=> 1
+		is_dirty	=> 1,
+		notes		=> $form->{editor_notes}
 	};
 
 	for (qw(dept bodytext relatedtext)) {
@@ -2350,6 +2353,7 @@ sub saveStory {
 		commentstatus	=> $form->{commentstatus},
 		thumb		=> $form->{thumb},
 		-rendered	=> 'NULL', # freshenup.pl will write this
+		notes		=> $form->{editor_notes}
 	};
 
 	for (qw(dept bodytext relatedtext)) {
