@@ -1462,7 +1462,6 @@ CREATE TABLE users_clout (
 DROP TABLE IF EXISTS users_comments;
 CREATE TABLE users_comments (
 	uid mediumint UNSIGNED NOT NULL,
-	points smallint UNSIGNED DEFAULT '0' NOT NULL,
 	posttype mediumint DEFAULT '2' NOT NULL,
 	defaultpoints tinyint DEFAULT '1' NOT NULL,
 	highlightthresh tinyint DEFAULT '4' NOT NULL,
@@ -1540,6 +1539,7 @@ CREATE TABLE users_info (
 	totalmods mediumint DEFAULT '0' NOT NULL,
 	realname varchar(50),
 	bio text NOT NULL,
+	points smallint(5) NOT NULL DEFAULT 0,
 	tokens mediumint DEFAULT '0' NOT NULL,
 	lastgranted datetime DEFAULT '1970-01-01 00:00' NOT NULL,
 	karma mediumint DEFAULT '0' NOT NULL,
