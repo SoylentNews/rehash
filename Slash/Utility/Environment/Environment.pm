@@ -1490,9 +1490,12 @@ sub setCookie {
 	# enter an *invalid* value in skins.cookiedomain to
 	# override constants.cookiedomain, and *not* have
 	# any domain cookie set -- pudge
-	my $domain = ($cookiedomain && $cookiedomain =~ /^\..+\./)
-		? $cookiedomain
-		: '';
+	
+	# MC - HUH? The above completely defies how cookies are supposed to work
+	#	    If we get a cookie, we use the cookie;
+	#my $domain = ($cookiedomain && $cookiedomain =~ /^\..+\./)
+	#	? $cookiedomain
+	#	: '';
 
 	my %cookiehash = (
 		-name    =>  $name,
@@ -1505,9 +1508,10 @@ sub setCookie {
 
 	my $cookie = Apache2::Cookie->new($r, %cookiehash);
 
-	if (!$val) {
-		$cookie->expires('-1y');  # delete
-	} elsif ($session && $session =~ /^\+\d+[mhdy]$/) {
+	# MC: Only delete cookies if a user explicately tells us to
+	#if (!$val) {
+	#	$cookie->expires('-1y');  # delete
+	if ($session && $session =~ /^\+\d+[mhdy]$/) {
 		$cookie->expires($session);
 	} elsif ($session && $session > 1) {
 		my $minutes = $constants->{login_temp_minutes};
@@ -1518,10 +1522,10 @@ sub setCookie {
 
 	$cookie->bake($r);
 
-	if ($domain) {
-		$cookie->domain($domain);
-		$cookie->bake($r);
-	}
+#	if ($domain) {
+#		$cookie->domain($domain);
+#		$cookie->bake($r);
+#	}
 }
 
 #========================================================================

@@ -52,7 +52,6 @@ clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_loc
 
 <label>Login Cookie</label>
 <ul class="nobull">
-	<li>Valid Location: [% clocation_sel %]</li>
 	<li>Expires: [% session_sel %]</li>
 </ul>
 
