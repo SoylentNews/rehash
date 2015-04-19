@@ -58,6 +58,31 @@ sub main {
 	print $retval;
 }
 
+sub auth {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $api = Slash::API->new;
+	my $op = lc($form->{op});
+	
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		login		=> {
+			function	=> \&login,
+			seclev		=> 0,
+		},
+		logout		=> {
+			function	=> \&logout,
+			seclev		=> 1,
+		},
+	}
+
+	$op = 'default' unless $ops->{$op};
+
+        return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
 sub user {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $api = Slash::API->new;
@@ -185,6 +210,16 @@ sub journal {
 	$op = 'default' unless $ops->{$op};
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub login {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	
+	my $cookie = Apache2::Cookie->fetch;
+}
+
+sub logout {
 }
 
 sub getPendingBoth {
