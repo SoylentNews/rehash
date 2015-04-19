@@ -224,7 +224,7 @@ sub login {
 		$slashdb->getUser($uid, 'session_login')
 	);
 	
-	return $json->pretty->encode({cookie => $baked, uid => $user->{uid}});
+	return $json->pretty->encode($baked);
 }
 
 sub logout {
