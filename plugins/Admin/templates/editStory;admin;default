@@ -50,203 +50,166 @@ SET txRows = 20 IF txRows < 20  %]
 		</div>
 		<div id="articles">
 			<div id="preview">
-				<legend>
-					Story Preview	
-				</legend>
+				<legend>Story Preview</legend>
 				[% storycontent %]
 				[% tagbox_html %]
 			</div>
-				<div class="note">
-					Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
-				</div>
+			<div class="note">
+				Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
+			</div>
 
 			[% PROCESS relatedui %]
 
 			<table border="0" cellpadding="3" cellspacing="0" id="notes" style="width: 100%;">
-			<tr class="data_head">
-				<td><b>Editor Notes</b></td>
-			</tr>
-		        <tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="editor_notes">[% editoral_notes %]</textarea></td></tr>
+				<tr class="data_head"><td><b>Editor Notes</b></td></tr>
+				<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="editor_notes">[% editoral_notes %]</textarea></td></tr>
 			</table>
 			<br>
 
 			<div class="adminstoryform">
-			<fieldset id="st-display">
-				<legend>
-					Story Options
-				</legend>
-		
-				[% PROCESS editbuttons %]&nbsp;[% IF constants.plugin.Ajax %][% PROCESS signoff checked=user_signoff %][% END %]
-
-				[% IF storyref.sid %]
-					<input type="hidden" name="sid" value="[% storyref.sid %]">
-				[% END %]
-				<input type="hidden" name="submitter" value="[% storyref.submitter | strip_attribute %]">
-				<input type="checkbox" name="display" [% display_check %]><b>Display</b>
-				[% PROCESS formLabel value => "Topics" %]
-				[% IF topic_select %]
-					[% topic_select %]
-				[% END %]
-				[% shown_in_desc %]
-				[% PROCESS formLabel value => "Title" %]
-				<input class="fullbox" type="text" name="title" value="[% storyref.title | strip_subject %]" size="75" MAXLENGTH="100">
-				<div class="notes">[% ispell_comments.title %]</div>
-
-				[% IF constants.use_dept %]
-					[% PROCESS formLabel value => "Dept" %]
-					<input class="fullbox" type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="75" MAXLENGTH="100">
-				[% END %]
-
-				[% PROCESS formLabel value="Author" %]
-				[% author_select %]
-
-				[% FOR extra = extras %]
-					<label>
-						[% extra.0 %]
-					</label>
-					[% IF extra.2 == 'text' %]
-						<input type="text" name="[% extra.1 %]" value="[% storyref.${extra.1} | strip_attribute %]" size="50">
-					[% ELSIF extra.2 == 'textarea' %]
-						<textarea class="fullbox" wrap="virtual" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% storyref.${extra.1} | strip_literal %]</textarea>
-					[% ELSIF extra.2 == 'list' %]
-						[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), storyref.${extra.1}, 1, 1) %]	
+				<fieldset id="st-display">
+					<legend>Story Options</legend>
+			
+					[% PROCESS editbuttons %]&nbsp;[% IF constants.plugin.Ajax %][% PROCESS signoff checked=user_signoff %][% END %]
+	
+					[% IF storyref.sid %]
+						<input type="hidden" name="sid" value="[% storyref.sid %]">
 					[% END %]
-				[% END %]
+					<input type="hidden" name="submitter" value="[% storyref.submitter | strip_attribute %]">
+					<input type="checkbox" name="display" [% display_check %]><b>Display</b>
+					<label>Topics</label>
+					[% IF topic_select %]
+						[% topic_select %]
+					[% END %]
+					[% shown_in_desc %]
+					<label>Title</label>
+					<input class="fullbox" type="text" name="title" value="[% storyref.title | strip_subject %]" size="75" MAXLENGTH="100">
+					<div class="notes">[% ispell_comments.title %]</div>
+	
+					[% IF constants.use_dept %]
+						<label>Dept</label>
+						<input class="fullbox" type="text" name="dept" value="[% storyref.dept | strip_attribute %]" size="75" MAXLENGTH="100">
+					[% END %]
 
-				[% locktest %]
+					[% FOR extra = extras %]
+						<label>[% extra.0 %]</label>
+						[% IF extra.2 == 'text' %]
+							<input type="text" name="[% extra.1 %]" value="[% storyref.${extra.1} | strip_attribute %]" size="50">
+						[% ELSIF extra.2 == 'textarea' %]
+							<textarea class="fullbox" wrap="virtual" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="[% extra.1 %]">[% storyref.${extra.1} | strip_literal %]</textarea>
+						[% ELSIF extra.2 == 'list' %]
+							[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), storyref.${extra.1}, 1, 1) %]	
+						[% END %]
+					[% END %]
 
-				[% commentstatus_select %]
-				<input type="text" name="time" value="[% storyref.time %]" size="19">
-				<br>
-				[% IF constants.plugin.PollBooth %]
-					<label class="checkbox">
-						Poll ID:  [% storyref.qid %]
-					</label>
-					[% IF storyref.qid %] 
-						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</a>
-						</label>
-						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=detach">Detach Related Poll</a>
-						</label>
-						<label class="checkbox">
+					[% locktest %]
+				
+					<p><b>Author</b> [% author_select %]</p>
+					<p><b>Comment Status</b> [% commentstatus_select %]</p>
+					<p><b>Release Time</b> <input type="text" name="time" value="[% storyref.time %]" size="19">[% IF sid %], <input type="checkbox" name="fastforward" [% fastforward_check %]>Fastforward[% END %]</p>
+					
+					[% IF constants.plugin.PollBooth %]
+						<label>Poll Info</label>
+						[% IF storyref.qid %]
+							Poll ID: [% storyref.qid %],
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</a>,
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=detach">Detach Related Poll</a>,
 							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;op=linkstory">Link Story to Different Poll</a>
-						</label>
-					[% ELSE %]
-						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | strip_paramattr %]&amp;polltype=story&amp;date=[% storyref.time | strip_paramattr %]&amp;section=[% storyref.section | strip_paramattr %]&amp;topic=[% storyref.tid | strip_paramattr %]">Create Poll</a>
-						</label>
-						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;op=linkstory">Link Story to Existing Poll</a>
-						</label>	
-					[% END %]
-					<br>
-				[% END %]
-
-				<label class="checkbox">
-					<input type="checkbox" name="fixquotes" [% fixquotes_check %]>fixquotes
-				</label>
-<!--				<label class="checkbox">
-					<input type="checkbox" name="autonode" [% autonode_check %]>autonode
-				</label> -->
-
-				[% IF sid %]
-					<label class="checkbox">
-						<input type="checkbox" name="fastforward" [% fastforward_check %]>fastforward
-					</label>
-						[% IF constants.plugin.Blob && constants.story_files %]
-							<label class="checkbox">
-								<a href="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</a>
-							</label>
-						[% END %]
-				[% END %]
-				[% IF subid %]
-					<label class="checkbox">
-						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% subid %]">submission</a>
-					</label>
-				[% END %]
-
-				<label>
-					Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
-				</label>
-				<textarea class="fullbox" wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="[% txRows %]">[% storyref.introtext | strip_textarea %]</textarea>
-				<div class="notes">[% ispell_comments.introtext %]</div>
-
-				[% PROCESS editbuttons %]
-				[% IF newarticle %]
-					Need to save the story before you can upload files to it <br>
-				[% ELSE %]
-				<label>
-					Upload an image/audio file for this story [% IF pending_file_count %]([% pending_file_count %] awaiting processing)[% END %]
-				</label>
-				<input type="file" name="media_file">
-				[% END %]
-
-				[% IF story_static_files && story_static_files.size  %]
-					<label>
-						<a href="[% constants.rootdir %]/admin.pl?op=static_files&amp;sid=[% sid %]">Media Files associated with this story</a>
-					</label>
-					<table cellpadding="3" cellspacing="3">
-					<tr><td>Select <br>Thumb</td><td colspan="3"></td><td>Click to <br>add to body</td><td>Click to add<br>to media</td></tr>
-					[% FOREACH mfile = story_static_files %]
-					[% bigfile = mfile.name %]
-					[% IF mfile.filetype != "image" || (mfile.filetype == "image" && bigfile.match('-thumb\.')) %]
-						[% filename = mfile.name %]
-						[% filename = filename.replace(".*\/", ""); %]
-						<tr><td><input type="radio" name="thumb" value="[% mfile.sfid %]"[% constants.markup_checked_attribute IF storyref.thumb == mfile.sfid %]></td><td>[% filename %]</td><td>[% mfile.width %]</td>
-						<td>[% mfile.height %]</td>
-
-						<td>
-						[% IF mfile.filetype == "image" %]
-							[% height = mfile.height; width = mfile.width %]
-							[% IF width && height %]
-								[% WHILE (height > 225 || width > 225) %]
-									[% height = height / 1.3  %]
-									[% width = width / 1.3 %]
-								[% END %]
-								[% width = width.int %]
-								[% height = height.int %]
-							[% END %]
-							[% bigfile = bigfile.replace('-thumb') %]
-							<a href="#bodytext" onclick="appendToBodytext('\n<img src=\'[% constants.imagedir %][% bigfile %]\'>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
 						[% ELSE %]
-							<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | strip_paramattr %]&amp;polltype=story&amp;date=[% storyref.time | strip_paramattr %]&amp;section=[% storyref.section | strip_paramattr %]&amp;topic=[% storyref.tid | strip_paramattr %]">Create Poll</a>,
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;op=linkstory">Link Story to Existing Poll</a>
 						[% END %]
-</td>
-<td>
-	[% IF mfile.filetype == "image" %]
-		[% admindb = Slash.getObject("Slash::Admin");
-                   thumblink = admindb.getStoryThumbLargeLink(mfile.sfid, storyref.stoid);
-		%]
-		<a href="#media" onclick="appendToMedia('\n[% thumblink %]')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
-	[% ELSE %]
-		<a href="#media" onclick="appendToMedia('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
-	[% END %]
-</td>
-</tr>
+						<br>
 					[% END %]
-					[% END %]
-					<tr><td><input type="radio" name="thumb" value="0"[% constants.markup_checked_attribute IF !storyref.thumb %]></td><td>None</td><td colspan="1"></td></tr>
-					</table>
-				[% END %]
 
-				<label>
-					Upload a file for bodytext
-				</label>
-				<input type="file" name="bodytext_file">
-				<a name="bodytext"></a>
-				<label>
-					<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
-				</label>
-				<textarea class="fullbox" name="bodytext" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_textarea %]</textarea>
-				<label>
-					<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
-				</label>
-<!--				<a name="media"></a>
-				<textarea class="fullbox" name="media" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
-				<div class="notes">[% ispell_comments.bodytext %]</div> -->
-				[% PROCESS editbuttons %]
-			</fieldset>
+					<label>Misc</label>
+					<input type="checkbox" name="fixquotes" [% fixquotes_check %]>Fixquotes, 
+					[% IF sid && constants.plugin.Blob && constants.story_files%]
+						<a href="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</a>,
+					[% END %]
+					[% IF subid %]
+						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% subid %]">View Submission</a>
+					[% END %]
+					
+					<label>
+						Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
+					</label>
+					<textarea class="fullbox" wrap="virtual" name="introtext" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="[% txRows %]">[% storyref.introtext | strip_textarea %]</textarea>
+					<div class="notes">[% ispell_comments.introtext %]</div>
+
+					[% PROCESS editbuttons %]
+					[% IF newarticle %]
+						Need to save the story before you can upload files to it <br>
+					[% ELSE %]
+					<label>
+						Upload an image/audio file for this story [% IF pending_file_count %]([% pending_file_count %] awaiting processing)[% END %]
+					</label>
+					<input type="file" name="media_file">
+					[% END %]
+	
+					[% IF story_static_files && story_static_files.size  %]
+						<label>
+							<a href="[% constants.rootdir %]/admin.pl?op=static_files&amp;sid=[% sid %]">Media Files associated with this story</a>
+						</label>
+						<table cellpadding="3" cellspacing="3">
+							<tr><td>Select <br>Thumb</td><td colspan="3"></td><td>Click to <br>add to body</td><td>Click to add<br>to media</td></tr>
+							[% FOREACH mfile = story_static_files %]
+								[% bigfile = mfile.name %]
+								[% IF mfile.filetype != "image" || (mfile.filetype == "image" && bigfile.match('-thumb\.')) %]
+									[% filename = mfile.name %]
+									[% filename = filename.replace(".*\/", ""); %]
+									<tr>
+										<td><input type="radio" name="thumb" value="[% mfile.sfid %]"[% constants.markup_checked_attribute IF storyref.thumb == mfile.sfid %]></td>
+										<td>[% filename %]</td><td>[% mfile.width %]</td>
+										<td>[% mfile.height %]</td>
+										<td>
+											[% IF mfile.filetype == "image" %]
+												[% height = mfile.height; width = mfile.width %]
+												[% IF width && height %]
+													[% WHILE (height > 225 || width > 225) %]
+														[% height = height / 1.3  %]
+														[% width = width / 1.3 %]
+													[% END %]
+													[% width = width.int %]
+													[% height = height.int %]
+												[% END %]
+												[% bigfile = bigfile.replace('-thumb') %]
+												<a href="#bodytext" onclick="appendToBodytext('\n<img src=\'[% constants.imagedir %][% bigfile %]\'>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+											[% ELSE %]
+												<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
+											[% END %]
+										</td>
+										<td>
+											[% IF mfile.filetype == "image" %]
+												[% admindb = Slash.getObject("Slash::Admin");
+													thumblink = admindb.getStoryThumbLargeLink(mfile.sfid, storyref.stoid);
+												%]
+												<a href="#media" onclick="appendToMedia('\n[% thumblink %]')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+											[% ELSE %]
+												<a href="#media" onclick="appendToMedia('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
+											[% END %]
+										</td>	
+									</tr>
+								[% END %]
+							[% END %]
+							<tr><td><input type="radio" name="thumb" value="0"[% constants.markup_checked_attribute IF !storyref.thumb %]></td><td>None</td><td colspan="1"></td></tr>
+						</table>
+					[% END %]
+
+					<label>Upload a file for bodytext</label>
+					<input id="bodytext" type="file" name="bodytext_file">
+				
+					<label>
+						<a href="#" onclick="$('#admin-bodytext').toggle(); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
+					</label>
+					<textarea class="fullbox" name="bodytext" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_textarea %]</textarea>
+					<label>
+						<a href="#" onclick="$('#admin-media').toggle(); return false">Media</a>
+					</label>
+					<textarea id="media" class="fullbox" name="media" rows="[% txRows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
+					<div class="notes">[% ispell_comments.bodytext %]</div>
+					[% PROCESS editbuttons %]
+				</fieldset>
 			</div>
 		</div>
 	</form>
