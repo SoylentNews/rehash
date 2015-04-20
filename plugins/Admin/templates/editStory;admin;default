@@ -123,13 +123,9 @@ SET txRows = 20 IF txRows < 20  %]
 					[% END %]
 
 					<label>Misc</label>
-					<input type="checkbox" name="fixquotes" [% fixquotes_check %]>Fixquotes, 
-					[% IF sid && constants.plugin.Blob && constants.story_files%]
-						<a href="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</a>,
-					[% END %]
-					[% IF subid %]
-						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% subid %]">View Submission</a>
-					[% END %]
+					<input type="checkbox" name="fixquotes" [% fixquotes_check %]>Fixquotes
+					[%- IF sid && constants.plugin.Blob && constants.story_files -%], <a href="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</a>[%- END -%]
+					[%- IF subid -%], <a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% subid %]">View Submission</a>[%- END -%]
 					
 					<label>
 						Intro Copy[% IF storyref.introtext_wordcount %] <em>([% storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])</em>[% END %]
