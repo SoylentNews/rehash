@@ -62,7 +62,7 @@ local *PIDFILE;
 
 # Check for the PID file's existance
 if (-e $pid_file) {
-  #die ("Program already running or ended prematurely. \n");
+	#die ("Program already running or ended prematurely. \n");
 }
 
 # Create the PID file
@@ -140,9 +140,9 @@ $cbServer->on(request => sub {
 	unless( $goodPath ) {
 		print STDOUT "Request for $reqPath. \n";
 		$tx->res->code(200);
-	        $tx->res->headers->content_type('text/plain');
-        	$tx->res->body("Request for $reqPath. \n");
-        	$tx->resume;
+					$tx->res->headers->content_type('text/plain');
+					$tx->res->body("Request for $reqPath. \n");
+					$tx->resume;
 		return 0
 	}
 
@@ -178,7 +178,7 @@ $cbServer->on(request => sub {
 			$paypal->{$name} = $value;
 			$count++;
 		}
-	  $paypal->{custom} = decode_json($paypal->{custom}) || "";
+		$paypal->{custom} = decode_json($paypal->{custom}) || "";
 		
 		print STDERR "\nDEBUG PayPal: \n" . Dumper($paypal);
 		
@@ -212,7 +212,7 @@ $cbServer->on(request => sub {
 					my ($rows, $result, $warning);
 					$rows = $subscribe->insertPayment($payment);
 					if ($rows && $rows == 1) {
-						$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+						$result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 						if ($result && $result == 1){
 							send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 						} else {
@@ -238,7 +238,7 @@ $cbServer->on(request => sub {
 			# It needs to go to the attention of an admin ASAFP by whatever means necessary.
 			# Save this for later -- paulej72 2014/08/01
 		}
-		elsif(($paypal->{payment_status} eq 'Reversed' || $paypal->{payment_status} eq 'Refunded')  && $res->content eq 'VERIFIED'){
+		elsif(($paypal->{payment_status} eq 'Reversed' || $paypal->{payment_status} eq 'Refunded') && $res->content eq 'VERIFIED'){
 			# The dillhole reversed payment on us. Remove any previously paid for days and the transaction.
 			my $uid = $subscribe->txnToUID($paypal->{parent_txn_id});
 			my $days = $subscribe->getDaysByTxn($paypal->{txn_id});
@@ -275,7 +275,7 @@ $cbServer->on(request => sub {
 				my ($rows, $result, $warning);
 				$rows = $subscribe->insertPayment($payment);
 				if ($rows && $rows == 1) {
-					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+					$result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 					if ($result && $result == 1){
 						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 					} else {
