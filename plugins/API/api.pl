@@ -58,6 +58,31 @@ sub main {
 	print $retval;
 }
 
+sub auth {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $api = Slash::API->new;
+	my $op = lc($form->{op});
+	
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 1,
+		},
+		login		=> {
+			function	=> \&login,
+			seclev		=> 0,
+		},
+		logout		=> {
+			function	=> \&logout,
+			seclev		=> 1,
+		},
+	};
+
+	$op = 'default' unless $ops->{$op};
+
+        return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
 sub user {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $api = Slash::API->new;
@@ -185,6 +210,24 @@ sub journal {
 	$op = 'default' unless $ops->{$op};
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub login {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	
+	my $tmpuid = $slashdb->getUserUID($form->{nick});
+
+	my ($uid, $cookvalue) = $slashdb->getUserAuthenticate($tmpuid, $form->{pass}, 0, 0);
+	my $baked = bakeUserCookie($uid, $cookvalue);
+	setCookie('user', $baked,
+		$slashdb->getUser($uid, 'session_login')
+	);
+	
+	return $json->pretty->encode($baked);
+}
+
+sub logout {
 }
 
 sub getPendingBoth {
@@ -349,7 +392,7 @@ sub postComment {
 	delete $saved_comment->{ipid};
 	delete $saved_comment->{subnetid};
 	delete $saved_comment->{signature},
-	return $json->encode($saved_comment);
+	return $json->pretty->encode($saved_comment);
 }
 
 sub getSingleJournal {
@@ -361,7 +404,7 @@ sub getSingleJournal {
 	delete $journal->{srcid_24};
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($journal);
+	return $json->pretty->encode($journal);
 }
 
 sub getLatestJournals {
@@ -391,7 +434,7 @@ sub getLatestJournals {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($items);
+	return $json->pretty->encode($items);
 }
 
 sub getLatestComments {
@@ -425,7 +468,7 @@ sub getLatestComments {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($comments);
+	return $json->pretty->encode($comments);
 }
 
 sub getSingleComment {
@@ -444,7 +487,7 @@ sub getSingleComment {
 	delete $comment->{signature};
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($comment);
+	return $json->pretty->encode($comment);
 }
 
 sub getDiscussion {
@@ -466,7 +509,7 @@ sub getDiscussion {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($comments);
+	return $json->pretty->encode($comments);
 }
 
 sub getSingleStory {
@@ -484,7 +527,7 @@ sub getSingleStory {
 	$story->{bodytext} = $story->{introtext} unless $story->{bodytext};
 	$story->{body_length} = length($story->{bodytext});
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($story);
+	return $json->pretty->encode($story);
 }
 
 sub getLatestStories {
@@ -504,13 +547,13 @@ sub getLatestStories {
 		delete $story->{primaryskid};
 	}
 	my $json = JSON->new->utf8->allow_nonref;	
-	return $json->encode($stories);
+	return $json->pretty->encode($stories);
 }
 
 sub nullop {
 	my $error = { RTFM => 'http://wiki.soylentnews.org/wiki/ApiDocs' };
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($error);
+	return $json->pretty->encode($error);
 }
 
 sub maxUid {
@@ -520,7 +563,7 @@ sub maxUid {
 	$max->{max_uid} = $slashdb->sqlSelect(
 					'max(uid)',
 					'users');
-	return $json->encode($max);
+	return $json->pretty->encode($max);
 }
 
 sub nameToUid {
@@ -532,7 +575,7 @@ sub nameToUid {
 					'uid',
 					'users',
 					" nickname = $nick ");
-	return $json->encode($uid);
+	return $json->pretty->encode($uid);
 }
 
 sub uidToName {
@@ -544,7 +587,7 @@ sub uidToName {
 					'nickname',
 					'users',
 					" uid = $uid ");
-	return $json->encode($nick);
+	return $json->pretty->encode($nick);
 }
 
 sub getPubUserInfo {
@@ -591,7 +634,7 @@ sub getPubUserInfo {
 	}
 
 	my $json = JSON->new->utf8->allow_nonref;
-	return $json->encode($repUser);
+	return $json->pretty->encode($repUser);
 }
 
 # Copied over from comments.pl. Wish it'd been in Comments.pm instead.
