@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# a simple comment to make sure we have the right user.name fucking set
 
 use strict;
 use warnings;
