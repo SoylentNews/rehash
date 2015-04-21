@@ -50,6 +50,12 @@ hr {
 	border-radius: 8px;
 	font-size: 1.125em;
 	font-weight: bold;
+	color: 0c0;
+}
+
+#section a, #section a:visited
+{
+color: #0c0;
 }
 
 input[type="submit"], .logout a, div.storylinks ul li.more a {
