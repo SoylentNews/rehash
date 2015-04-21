@@ -167,7 +167,8 @@ sub main {
 			}
 		}
 		
-		my $return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
+		my $return_url ="";
+		$return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI} unless $form->{cchp};
 		
 		slashDisplay('display', {
 			poll			=> $pollbooth,

@@ -3446,6 +3446,7 @@ sub parseDomainTags {
 	return '' if !defined($html) || $html eq '';
 
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 
 	# The default is 2 ("always show");  note this default is enforced in
 	# prepareUser().  Note also that if I were being smart I'd use
@@ -3459,9 +3460,12 @@ sub parseDomainTags {
 			$udt == 1		# the user leaves it up to us
 			&& $recommended		# and we think the poster has earned tagless posting
 		);
-	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/admin.pl';
-	$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/submit.pl' && $user->{is_admin};
-
+		
+	unless ($form->{cchp}) {	
+		$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/admin.pl';
+		$want_tags = 1 if $ENV{SCRIPT_NAME} eq '/submit.pl' && $user->{is_admin};
+	}
+	
 	if ($want_tags && !$notags) {
 		$html =~ s{</a ([^<>]+)>}{</a> [$1]}gi;
 	} else {
