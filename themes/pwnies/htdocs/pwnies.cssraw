@@ -27,6 +27,17 @@ a:hover { color: #ea97bc; }
 	font-size: .813em;
 }
 
+#section  {     
+	background-color: #c5618e;
+	background: -o-linear-gradient(#c5618e, #ea97bc);
+	background: -webkit-linear-gradient(#c5618e, #ea97bc);
+	background: -moz-linear-gradient(#c5618e, #ea97bc);
+	background: linear-gradient(#c5618e, #ea97bc);
+	border-radius: 8px;
+	font-size: 1.125em;
+	font-weight: bold;
+}
+
 input[type="submit"], .logout a, div.storylinks ul li.more a {
 	background: none repeat scroll 0% 0% #c5618e;
 }

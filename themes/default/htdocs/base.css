@@ -164,6 +164,12 @@ width:19%;
 }
 
 
+#section  {
+	margin: .4em 0;
+	padding:.3em .5em;
+}
+
+
 /* links */
 
 #links a, #links a:visited { color: #006; text-decoration:none;}

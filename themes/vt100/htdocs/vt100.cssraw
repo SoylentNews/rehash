@@ -44,6 +44,14 @@ hr {
 	font-size: .813em;
 }
 
+#section  {     
+	background-color: #000;
+	border: 1px solid #0f0;
+	border-radius: 8px;
+	font-size: 1.125em;
+	font-weight: bold;
+}
+
 input[type="submit"], .logout a, div.storylinks ul li.more a {
 	background: none repeat scroll 0% 0% #333;
 	color: #0f0 !important;

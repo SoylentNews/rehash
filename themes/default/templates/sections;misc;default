@@ -20,7 +20,7 @@ __template__
 	[% skins = Slash.db.getSkins %]
 	
 	[% FOREACH skid IN skins.keys %]
-		[% NEXT IF skid == 1 %]
+		[% NEXT IF skid == constants.mainpage_skid %]
 		[% skins.skid.title %]
 		<li>
 			<a href="[% skins.$skid.rootdir %]/">[% skins.$skid.title %]</a>

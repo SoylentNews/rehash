@@ -19,13 +19,7 @@ __template__
 <div id="top_parent"></div>
 [% IF user.is_admin %]
 	<div id="adminmenu">
-        	<small>
-                	<b>
-                        	<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
-                	</b>
- 	               Admin:
-        	</small>
-	        [% Slash.createMenu(adminmenu) %]
+		<small><b><a href="[% constants.real_rootdir %]">[% constants.sitename %]</a></b> Admin: </small> [% Slash.createMenu(adminmenu) %]
 	</div>
 [% END %]
 <div id="jump">
@@ -39,35 +33,32 @@ __template__
 <div id="frame">
 	<div id="topnav">
 		<div id="logo">
-			<h1>
-				<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
-			</h1>
+			<h1><a href="[% constants.real_rootdir %]">[% constants.sitename %]</a></h1>
 		</div>
 		[% UNLESS user.lowbandwidth || user.simpledesign %]
-		<ul>
-			[% PROCESS recentTopics %]
-		</ul>
+			<ul>
+				[% PROCESS recentTopics %]
+			</ul>
 		[% END %]
-		</div>
-		<div id="slogan">
-		<h2>
-			[% constants.slogan %]
-		</h2>
+	</div>
+	<div id="slogan">
+		<h2>[% constants.slogan %]</h2>
 		[% PROCESS headMessage %]
 		<div class="clear"></div>
-		</div>
-		<div id="links">
-			[% UNLESS user.lowbandwidth %]
-				[% text = INCLUDE mainmenu; Slash.sidebox("Navigation", text, "navigation", 1) %]
-				[% text = INCLUDE sections; Slash.sidebox("Sections", text, "sections", 1) %]
-				[% text = INCLUDE organisation; Slash.sidebox(constants.sitename, text, "sitebox", 1) %]
-			[% END %]
-		</div>
-		<div id="contents">
-			[% UNLESS nopageid %]
+	</div>
+	[% PROCESS section %]
+	<div id="links">
+		[% UNLESS user.lowbandwidth %]
+			[% text = INCLUDE mainmenu; Slash.sidebox("Navigation", text, "navigation", 1) %]
+			[% text = INCLUDE sections; Slash.sidebox("Sections", text, "sections", 1) %]
+			[% text = INCLUDE organisation; Slash.sidebox(constants.sitename, text, "sitebox", 1) %]
+		[% END %]
+	</div>
+	<div id="contents">
+		[% UNLESS nopageid %]
 			[% id_page = user.currentPage || "general" %]
 			<div id="[% id_page %]">
-			[% END %]
+		[% END %]
 __seclev__
 10000
 __version__
