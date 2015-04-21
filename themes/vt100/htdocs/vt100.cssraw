@@ -584,3 +584,15 @@ legend
 {
 color: #0b0;
 }
+
+.article blockquote,  .article .quote, .commentBody blockquote, .commentBody .quote {
+	background: none repeat scroll 0% 0% #000;
+	border-left:2px solid #0F0;
+}
+
+.data .status0 {background:#FFF; color:#080;}
+.data .status0 a {color:#080;}
+.data .status0 a:visited {color:#0A0;}
+.data .status0 a:hover {color:#0C0;}
+.data .status1 {background:#800;}
+.data .status2 {background:#256625;}

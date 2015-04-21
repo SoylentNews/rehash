@@ -15,7 +15,7 @@ section
 __template__
 
 [% IF gSkin.skid != constants.mainpage_skid %]
-	<div id="section"><a href="[% gSkin.rootdir %]">[% gSkin.name %]</a></div>
+	<div id="section"><a href="[% gSkin.rootdir %]">[% gSkin.title %]</a></div>
 [% END %]
 
 

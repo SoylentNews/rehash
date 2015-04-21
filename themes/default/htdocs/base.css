@@ -169,6 +169,10 @@ width:19%;
 	padding:.3em .5em;
 }
 
+#section a {
+	text-decoration: none;
+}
+
 
 /* links */
 
