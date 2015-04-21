@@ -189,7 +189,7 @@ $task{$me}{code} = sub {
 	}
 
 	############################################################
-	# rewrite .shtml files for stories
+	# get cc and hp  for stories
 	############################################################
 
 	# Freshen the static versions of any stories that have changed.
@@ -208,6 +208,123 @@ $task{$me}{code} = sub {
 	my $totalChangedStories = 0;
 	my $do_log;
 	my $logmsg;
+
+	# If 100 or more stories are marked as dirty, there is a backlog
+	# that we aren't able to get to in the 90-second chunks here.
+	# So extend more time to complete that work.  Note that since we
+	# cue off the number of stories returned, this will only be
+	# triggered during a $do_all pass, since otherwise the number of
+	# stories to process is capped at 3.
+	my $extra_minutes = int( scalar(@$stories)/100 );
+	if ($extra_minutes) {
+		$extra_minutes = 5 if $extra_minutes > 5;
+		$timeout_shtml += 60 * $extra_minutes;
+		slashdLog("Will process for $extra_minutes extra minutes, "
+			. scalar(@$stories) . " stories");
+	}
+
+	STORIES_FRESHEN: for my $story (@$stories) {
+
+		$do_log = (verbosity() >= 2);
+		$logmsg = "";
+
+		# Don't run forever freshening stories.  Before we
+		# stomp on too many other invocations of freshenup.pl,
+		# quit and let the next invocation get some work done.
+		# Since this task is run every minute, quitting after
+		# 90 seconds of work should mean we only stomp on the
+		# one invocation following.
+		# (But if there are many backlogged dirty stories, we
+		# may stomp on 2, 3, or more invocations -- oh well.)
+		if (time > $start_time + $timeout_shtml) {
+			slashdLog("Aborting stories at freshen, too much elapsed time");
+			last STORIES_FRESHEN;
+		}
+		if ($task_exit_flag) {
+			slashdLog("Aborting stories at freshen, got SIGUSR1");
+			last STORIES_FRESHEN;
+		}
+
+		my($stoid, $sid, $title, $skid) =
+			@{$story}{qw( stoid sid title primaryskid )};
+		my $skinname = '';
+		my $story_skin = $slashdb->getSkin($skid) if $skid;
+		if (!$story_skin || !%$story_skin) {
+			slashdLog("skipping, nonexistent primaryskid '$skid' for $sid: $title");
+			next STORIES_FRESHEN;
+		}
+		$skinname = $story_skin->{name};
+
+		my $mp_tid = $constants->{mainpage_nexus_tid};
+		my $displaystatus = $slashdb->_displaystatus($story->{stoid});
+		
+		slashdLog("Updating $sid") if verbosity() >= 3;
+		# XXXSKIN no -- we should dirty *all* skins that this story is on
+		$dirty_skins{$skid} = 1;
+		if ($displaystatus == 0) {
+			# If this story goes on the mainpage, its being
+			# dirty means the main page is dirty too,
+			# regardless of which section the story is in.
+			$dirty_skins{$constants->{mainpage_skid}} = 1;
+		}
+		$totalChangedStories++;
+
+		# We need to pull some data from a file that article.pl will
+		# write to.  But first it needs us to create the file and
+		# tell it where it will be.
+		my($cchp_file, $cchp_param) = _make_cchp_file();
+
+		# update a story's audio version, if using cepstral audio.
+		if ($constants->{cepstral_audio}) {
+			# fork a new script to render the audio, and
+			# it will update the story_param table with the correct
+			# pointers to the file
+			system("$constants->{datadir}/sbin/audio-gen.pl $virtual_user $stoid &");
+		}
+
+		# Now call prog2nofile().
+		$args = "$vu ssi=yes sid='$sid'$cchp_param";
+		my $filename;
+		if ($skid) {
+			# XXXSKIN - more hardcoding (see Slash::Utility::Display)
+			my $this_skinname = $skinname eq 'mainpage' ? 'articles' : $skinname;
+			$args .= " section='$skinname'";
+			$logmsg = "$me updated $stoid $skinname:$sid ($title)";
+		} else {
+			$logmsg = "$me updated $sid ($title)";
+		}
+		my($success, $stderr_text) = prog2nofile(
+			"$basedir/article.pl",
+			{
+				args =>		$args,
+				verbosity =>	verbosity(),
+				handle_err =>	1,
+			} );
+		if (!$success) {
+			$logmsg .= " success='$success'";
+			$do_log ||= (verbosity() >= 1);
+		}
+		if ($stderr_text) {
+			$stderr_text =~ s/\s+/ /g;
+			$logmsg .= " stderr: '$stderr_text'";
+			$do_log ||= (verbosity() >= 1);
+			if ($stderr_text =~ /\b(ID \d+, \w+;\w+;\w+) :/) {
+				# template error, skip
+				slashdErrnote("template error updating $sid: $stderr_text");
+				next STORIES_FRESHEN;
+			}
+		}
+
+		# Now we extract what we need from the file we created
+		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file, $cchp_param);
+		if (defined($cc)) {
+			$story_set{$stoid}{writestatus} = 'ok';
+			$story_set{$stoid}{commentcount} = $cc;
+			$story_set{$stoid}{hitparade} = $hp;
+		}
+
+		slashdLog($logmsg) if $logmsg && $do_log;
+	}
 
 	############################################################
 	# bulk-update commentcount and hitparade

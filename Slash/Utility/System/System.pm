@@ -523,6 +523,92 @@ sub prog2file {
 }
 
 
+sub prog2nofile {
+	my($command, $options) = @_;
+	return 0 unless -e $command and -r _ and -x _;
+	my $arguments = $options->{args} || "";
+	$arguments = join(" ", @$arguments)
+		if ref($arguments) && ref($arguments) eq 'ARRAY';
+	$arguments = " $arguments" if $arguments;
+	my $verbosity = $options->{verbosity} || 0;
+	my $handle_err = $options->{handle_err} || 0;
+
+	my $exec = "$command$arguments";
+	my $success = 0;
+	my $err_str = "";
+	my $data = undef;
+	my $stderr_text = "";
+
+	# Two ways of handling data from child programs yet we maintain
+	# backwards compatibility.
+	# Passing "timeout" as a field to $options does what you'd think.
+	# A timeout of 0 means "never time out".  30 seconds is default.
+	my $timeout = 30;
+	$timeout = $options->{timeout} if defined($options->{timeout});
+	my($errfh, $errfile) = (undef, undef);
+	eval {
+		local $SIG{ALRM} = sub { die "timeout" };
+		alarm $timeout if $timeout;
+		if (!$handle_err) {
+			open(EXEC, "$exec |") || die "can't fork $exec\n $!\n";
+			while(<EXEC>){$data .= $_;}
+			close EXEC;
+			#$data = `$exec`;
+			alarm 0 if $timeout;
+		} else {
+			($errfh, $errfile) = tempfile();
+			$data = `$exec 2>$errfile`;
+			alarm 0 if $timeout;
+			$stderr_text = join '', <$errfh>;
+			close $errfh; $errfh = undef;
+			unlink $errfile; $errfile = undef;
+		}
+	};
+	my $success_str = "";
+	if ($timeout && $@ && $@ =~ /timeout/) {
+		$success_str = " TIMEOUT_HIT";
+		close $errfh if $errfh;
+		unlink $errfile if $errfile;
+	}
+	my $bytes = defined($data) ? length($data) : 0;
+
+	if ($stderr_text =~ /\b(ID \d+, \w+;\w+;\w+) :/) {
+		my $template = $1;
+		my $error = "task operation aborted, error in template $template";
+		$err_str .= " $error";
+		# template error, don't write file
+		if (defined &main::slashdErrnote) {
+			main::slashdErrnote("$error: $stderr_text");
+		} else {
+			doLog('slashd', ["$error: $stderr_text"]);
+		}
+	} elsif ($bytes == 0) {
+		$err_str .= " no data";
+	} else {
+		$success = 1;
+	}
+	
+
+	my($command_base) = $command =~ m{([^/]+)$};
+	$command_base ||= $command;
+	$success_str .= $success ? "" : " FAILED:$err_str";
+	$success_str =~ s/\s+/ /g; chomp $success_str;
+
+	if ($verbosity >= 2) {
+		my $logdata = "$command_base$arguments bytes=$bytes$success_str";
+		if (defined &main::slashdLog) {
+			main::slashdLog($logdata);
+		} else {
+			doLog('slashd', [$logdata]);
+		}
+	}
+
+	# Old way.
+	return $success if ! $handle_err;
+	# New way.
+	return($success, $stderr_text);
+}
+
 # Makes a directory based on a base directory, a section name and a char-based
 # SID.
 sub makeDir {
