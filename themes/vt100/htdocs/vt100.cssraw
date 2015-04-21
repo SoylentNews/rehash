@@ -588,11 +588,17 @@ color: #0b0;
 .article blockquote,  .article .quote, .commentBody blockquote, .commentBody .quote {
 	background: none repeat scroll 0% 0% #000;
 	border-left:2px solid #0F0;
+	border-radius: 0;
 }
 
-.data .status0 {background:#FFF; color:#080;}
-.data .status0 a {color:#080;}
-.data .status0 a:visited {color:#0A0;}
-.data .status0 a:hover {color:#0C0;}
-.data .status1 {background:#800;}
-.data .status2 {background:#256625;}
+.data .status0 {background:#662;}
+.data .status1 {background:#600;}
+.data .status2 {background:#262;}
+
+.gs_story_main { background: #262; color: #0C0; }
+.ss_story_main { background: #662; color: #0C0; }
+.ns_story_main { background: #600; color: #0C0; }
+.gs_story_main a, .gs_story_main a:visited, .gs_story_sec a, .gs_story_sec a:visited { color: #0C0; }
+.ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #0C0; }
+.ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #0C0; }
+.admin_story_list a, .admin_story_list a:visited { color: #0C0; }
