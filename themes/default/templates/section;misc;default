@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+Section Display
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+section
+__template__
+
+[% IF gSkin.skid != constants.mainpage_skid %]
+	<div id="section"><a href="[% gSkin.rootdir %]">[% gSkin.title %]</a></div>
+[% END %]
+
+
+__seclev__
+10000
+__version__
+$Id$

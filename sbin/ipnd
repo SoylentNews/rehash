@@ -17,7 +17,7 @@ use Slash::Constants ':slashd';
 use Slash::Display;
 use Slash::Utility;
 use Slash::Subscribe;
-use Slash::Subscribe::IPN;
+use LWP::UserAgent 6;
 
 use vars qw(
 	$PROGNAME $virtual_user $hostname
@@ -62,7 +62,7 @@ local *PIDFILE;
 
 # Check for the PID file's existance
 if (-e $pid_file) {
-  #die ("Program already running or ended prematurely. \n");
+	#die ("Program already running or ended prematurely. \n");
 }
 
 # Create the PID file
@@ -140,26 +140,55 @@ $cbServer->on(request => sub {
 	unless( $goodPath ) {
 		print STDOUT "Request for $reqPath. \n";
 		$tx->res->code(200);
-	        $tx->res->headers->content_type('text/plain');
-        	$tx->res->body("Request for $reqPath. \n");
-        	$tx->resume;
+					$tx->res->headers->content_type('text/plain');
+					$tx->res->body("Request for $reqPath. \n");
+					$tx->resume;
 		return 0
 	}
 
 	my $content = $tx->req->content;
 	if($reqPath eq $constants->{pp_ipn_path}) {
+		
+		
+		# read post from PayPal system and add 'cmd'
+		my $query = $content->{asset}->{content}.'&cmd=_notify-validate';
+		
+		print STDERR "\nDEBUG Query: \n" . Dumper($query);
+		
+		# post back to PayPal system to validate
 		my $gateway = $constants->{paypal_host};
-		$Slash::Subscribe::IPN::GTW = "https://$gateway/cgi-bin/webscr";
-		my $ipn = Slash::Subscribe::IPN->new($content->{asset}->{content});
-		$logthis = $ipn->vars if $ipn;
-		$logthis->{remote_address} = $tx->{remote_address};
-		$subscribe->ppAddLog($logthis);
-
-		my $paypal = $ipn->vars();
+		my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 1 });
+		my $req = HTTP::Request->new('POST', "https://$gateway/cgi-bin/webscr");
+		$req->content_type('application/x-www-form-urlencoded');
+		$req->header(Host => $gateway);
+		$req->content($query);
+		my $res = $ua->request($req);
+		print STDERR "\nDEBUG Request: \n" . Dumper($req);
+		print STDERR "\nDEBUG Response: \n" . Dumper($res);
+		
+		
+		# split posted variables into pairs
+		my $paypal;
+		my @pairs = split(/&/, $query);
+		my $count = 0;
+		foreach my $pair (@pairs) {
+			my ($name, $value) = split(/=/, $pair);
+			$value =~ tr/+/ /;
+			$value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+			$paypal->{$name} = $value;
+			$count++;
+		}
 		$paypal->{custom} = decode_json($paypal->{custom}) || "";
+		
+		print STDERR "\nDEBUG PayPal: \n" . Dumper($paypal);
+		
+		$logthis = $paypal if $paypal;
+		$logthis->{remote_address} = $tx->{remote_address};
 
-		if($ipn->completed){
-			if(!$subscribe->paymentExists($ipn->txn_id)){
+
+
+		if($paypal->{payment_status} eq 'Completed' && $res->content eq 'VERIFIED'){
+			if(!$subscribe->paymentExists($paypal->{txn_id})){
 				# Check if PDT got transaction first.
 				my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
 				
@@ -177,20 +206,20 @@ $cbServer->on(request => sub {
 					puid => $paypal->{custom}{puid}
 				};
 			
-				if (!$subscribe->paymentExists($ipn->txn_id)){
+				if (!$subscribe->paymentExists($paypal->{txn_id})){
 					# Doulbe check as we have a race condition going on here.
 				
 					my ($rows, $result, $warning);
 					$rows = $subscribe->insertPayment($payment);
 					if ($rows && $rows == 1) {
-						$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+						$result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 						if ($result && $result == 1){
 							send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 						} else {
 							$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 							print STDERR $warning;
 						}
-					} elsif (!$subscribe->paymentExists($ipn->txn_id)){
+					} elsif (!$subscribe->paymentExists($paypal->{txn_id})){
 						# What did I say about that race condition.
 					
 						$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
@@ -200,21 +229,21 @@ $cbServer->on(request => sub {
 			}
 		}
 		# Now for other statuses
-		elsif($ipn->denied || $ipn->failed){
+		elsif(($paypal->{payment_status} eq 'Denied' || $paypal->{payment_status} eq 'Failed') && $res->content eq 'VERIFIED'){
 			# This should probably be brought to the attention of the user. Myabe via email.
 			# Save this for later -- paulej72 2014/08/01
 		}
-		elsif($ipn->expired || $ipn->voided){
+		elsif(($paypal->{payment_status} eq 'Expired' || $paypal->{payment_status} eq 'Voided') && $res->content eq 'VERIFIED'){
 			# This means OUR account key is either expired or has been canceled.
 			# It needs to go to the attention of an admin ASAFP by whatever means necessary.
 			# Save this for later -- paulej72 2014/08/01
 		}
-		elsif($ipn->reversed){
+		elsif(($paypal->{payment_status} eq 'Reversed' || $paypal->{payment_status} eq 'Refunded') && $res->content eq 'VERIFIED'){
 			# The dillhole reversed payment on us. Remove any previously paid for days and the transaction.
-			my $uid = $subscribe->txnToUID($ipn->parent_txn_id);
-			my $days = $subscribe->getDaysByTxn($ipn->txn_id);
+			my $uid = $subscribe->txnToUID($paypal->{parent_txn_id});
+			my $days = $subscribe->getDaysByTxn($paypal->{txn_id});
 			$subscribe->removeDaysFromSubscriber($days, $uid);
-			$subscribe->removePayment($ipn->parent_txn_id);
+			$subscribe->removePayment($paypal->{parent_txn_id});
 		}
 
 		# log to paypal_log
@@ -246,7 +275,7 @@ $cbServer->on(request => sub {
 				my ($rows, $result, $warning);
 				$rows = $subscribe->insertPayment($payment);
 				if ($rows && $rows == 1) {
-					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+					$result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 					if ($result && $result == 1){
 						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
 					} else {

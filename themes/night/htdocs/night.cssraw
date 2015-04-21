@@ -34,6 +34,17 @@ a:hover { color: #800;}
 
 #slogan #head_message a { color: #ccc }
 
+#section  {     
+	background-color: #600;
+	background: -o-linear-gradient(#933, #600);
+	background: -webkit-linear-gradient(#933, #600);
+	background: -moz-linear-gradient(#933, #600);
+	background: linear-gradient(#933, #600);
+	border-radius: 8px;
+	font-size: 1.125em;
+	font-weight: bold;
+}
+
 /* links */
 #links a, #links a:visited, #slashboxes a { color: #a00; text-decoration:none;}
 #links a:hover, #slashboxes a:hover { color: #600; text-decoration: underline; }

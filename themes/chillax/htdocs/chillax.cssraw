@@ -27,6 +27,16 @@ a:hover { color: #008; }
 	font-size: .813em;
 }
 
+#section  {     
+	background-color: #006;
+	background: -o-linear-gradient(#006, #339);
+	background: -webkit-linear-gradient(#006, #339);
+	background: -moz-linear-gradient(#006, #339);
+	background: linear-gradient(#006, #339);
+	border-radius: 8px;
+	font-size: 1.125em;
+	font-weight: bold;
+}
 
 /* links */
 #links a, #links a:visited { color: #006; text-decoration:none;}
