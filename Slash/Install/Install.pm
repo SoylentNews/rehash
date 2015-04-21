@@ -605,6 +605,7 @@ sub _parseFilesForTemplates {
 	$file =~ s/THEME//;
 	while (my $line = <$file_handle>) {
 		chomp($line);
+		next unless $line =~ /=/;
 		my($key, $val) = split(/=/, $line, 2);
 		$key = lc $key;
 		if ($key eq 'template') {
