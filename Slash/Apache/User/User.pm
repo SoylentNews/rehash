@@ -100,14 +100,10 @@ sub handler {
 	add_random_quote($r);
 
 	# let pass unless / or .pl
-	#
-	# MC: This seems broken; if we don't deal with cookies
-	# on every page, we get inconsistent behavior *at best*
-	#
-	#if ($gSkin->{rootdir}) {
-	#	my $path = URI->new($gSkin->{rootdir})->path;
-	#	$uri =~ s/^\Q$path//;
-	#}
+	if ($gSkin->{rootdir}) {
+		my $path = URI->new($gSkin->{rootdir})->path;
+		$uri =~ s/^\Q$path//;
+	}
 
 	my $is_ssl = Slash::Apache::ConnectionIsSSL();
 
