@@ -189,7 +189,7 @@ $task{$me}{code} = sub {
 	}
 
 	############################################################
-	# get cc and hp  for stories
+	# get commentcount and hitparade for stories
 	############################################################
 
 	# Freshen the static versions of any stories that have changed.
@@ -424,30 +424,6 @@ sub _read_and_unlink_cchp_file {
 	}
 	unlink $cchp_file;
 	return($cc, $hp);
-}
-
-sub gen_firehose_static {
-	my($vu, $filename, $section, $skinname, $opts) = @_;
-	my $constants = getCurrentStatic();
-	my $fargs = "virtual_user=$vu taskgen=1 section='$section'";
-	my $basedir = $constants->{basedir};
-	$skinname .= "/" if $skinname;
-
-	foreach (keys %$opts) {
-		$fargs .= " $_=$opts->{$_}";
-	}
-	$fargs .= " anonval=$constants->{firehose_anonval_param}" if $constants->{firehose_anonval_param};
-	slashdLog("$vu $filename $section $fargs");
-	$filename ||= "firehose.shtml";
-
-	prog2file(
-		"$basedir/firehose.pl",
-		"$basedir/$skinname/$filename", {
-			args => $fargs,
-			verbosity => verbosity(),
-			handle_err => 0
-
-	});
 }
 
 1;
