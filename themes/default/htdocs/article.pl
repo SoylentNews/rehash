@@ -167,6 +167,10 @@ sub main {
 			}
 		}
 		
+		my $return_url ="";
+		$return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI} unless $form->{cchp};
+		
+		
 		my $return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI};
 		
 		slashDisplay('display', {
