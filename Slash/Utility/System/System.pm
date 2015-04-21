@@ -55,6 +55,7 @@ our @EXPORT  = qw(
 	doLogExit
 	save2file
 	prog2file
+	prog2nofile
 	makeDir
 );
 our @EXPORT_OK = qw();
