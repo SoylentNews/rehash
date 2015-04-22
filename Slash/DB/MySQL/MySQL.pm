@@ -5607,6 +5607,19 @@ sub currentAdmin {
 	my $aids = $self->sqlSelectAll(
 		'nickname,lasttime,lasttitle,last_subid,last_sid,sessions.uid,last_fhid,last_action',
 		'sessions,users',
+		'sessions.uid=users.uid GROUP BY sessions.uid'
+	);
+
+	return $aids;
+}
+
+##################################################################
+# Current Active admin users
+sub currentActiveAdmin {
+	my($self) = @_;
+	my $aids = $self->sqlSelectAll(
+		'nickname,lasttime,lasttitle,last_subid,last_sid,sessions.uid,last_fhid,last_action',
+		'sessions,users',
 		'sessions.uid=users.uid AND lasttime IS NOT NULL GROUP BY sessions.uid'
 	);
 

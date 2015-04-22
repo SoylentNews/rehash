@@ -735,7 +735,7 @@ sub currentAdminUsers {
 	my $user = getCurrentUser();
 
 	my $now = timeCalc($slashdb->getTime(), "%s", 0);
-	my $aids = $slashdb->currentAdmin();
+	my $aids = $slashdb->currentActiveAdmin();
 	for my $data (@$aids) {
 		my($usernick, $usertime, $lasttitle, $last_subid, $last_sid, $uid) = @$data;
 		if ($usernick eq $user->{nickname}) {
