@@ -195,7 +195,6 @@ task=tasks/set_gse_min_stoid.pl
 task=tasks/set_recent_topics.pl
 task=tasks/spamarmor.pl
 task=tasks/url_checker.pl
-task=tasks/rotate_semirandom_block.pl
 
 topic=htdocs/images/topics/blank.gif
 topic=htdocs/images/topics/topicbusiness.png

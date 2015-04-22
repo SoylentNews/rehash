@@ -17,6 +17,7 @@ __name__
 currentAdminUsers
 __template__
 <table width="100%" border="0" cellpadding="2" cellspacing="0" class="data">
+	<tr class="data_hl2"><td><b>Current Editor/Admin Sessions</b></td><td><b>Story</b></td></tr>
 	[% toggle = 0 %]
 [% FOREACH author = ids %]
 	[% id         = author.0;
@@ -38,7 +39,6 @@ __template__
 	</td></tr>
 	[% toggle = !toggle %]
 [% END %]
-
 [% IF constants.cur_performance_stats_disp %]
 	<tr class="data_hl1">
 	<td valign="top" class="data_bgc1">Performance</td>
