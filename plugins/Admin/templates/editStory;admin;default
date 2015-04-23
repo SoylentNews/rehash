@@ -84,6 +84,7 @@ SET txRows = 20 IF txRows < 20  %]
 					[% shown_in_desc %]
 					<label>Title</label>
 					<input class="fullbox" type="text" name="title" value="[% storyref.title | strip_subject %]" size="75" MAXLENGTH="100">
+					[% locktest %]
 					<div class="notes">[% ispell_comments.title %]</div>
 	
 					[% IF constants.use_dept %]
