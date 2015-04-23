@@ -491,7 +491,7 @@ color: #fff;
 color: #ccc;
 }
 
-.search-results .info, .search-results .author
+.search-results .intro, .search-results .author
 {
 padding: 1em;
 margin: 0;
@@ -501,7 +501,7 @@ overflow-y: hidden;
 
 .search-results .details
 {
-margin: 0 0 .5em 0;
+margin: 0 0 1em 0;
 padding: .4em 1em;
 }
 
@@ -551,7 +551,7 @@ margin: 0;
 position: relative;
 }
 
-.article .body
+.article .body, 
 {
 padding: 1em;
 margin: 0;

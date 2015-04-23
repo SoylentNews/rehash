@@ -228,7 +228,7 @@ a:hover { color: #008; }
 	background: linear-gradient(#ccc, #eee);
 }
 
-.article .body, .search-results .info, .search-results .author
+.article .body, .search-results .intro, .search-results .author
 {
 	border: 1px solid #aaa;
 	border-top: none;

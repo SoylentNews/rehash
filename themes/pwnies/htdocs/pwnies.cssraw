@@ -205,7 +205,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 
 /* articles */
 
-.generaltitle div.title, .article div.title {     
+.generaltitle div.title, .article div.title, .search-results h4 {     
 	background-color: #c5618e;
 	background: -o-linear-gradient(#c5618e, #ea97bc);
 	background: -webkit-linear-gradient(#c5618e, #ea97bc);
@@ -220,7 +220,7 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 	font-size: 1em;
 }
 
-.article .details
+.article .details, .search-results .data
 {
 	font-size: .7em;
 	font-weight: normal;
@@ -232,14 +232,14 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 	background: linear-gradient(#ccc, #eee);
 }
 
-.article .body
+.article .body, .search-results .intro, .search-results .author
 {
 	border: 1px solid #aaa;
 	border-top: none;
 	background: #fff;
 }
 
-div.storylinks
+div.storylinks, .search-results .details
 {
 	background-color: #ccc;
 	background: -o-linear-gradient(#ccc, #eee);
