@@ -460,7 +460,7 @@ padding: 0;
 margin: 0;
 }
 
-.generaltitle div.title
+.generaltitle div.title, .search-results h4
 {
 background: #999;
 padding: 0;
@@ -468,7 +468,7 @@ margin: 0;
 overflow-y: hidden;
 }
 
-.generaltitle h3
+.generaltitle h3, .search-results h4
 {
 margin: 0;
 padding: .3em .8em .2em .8em;
@@ -476,14 +476,33 @@ color: #fff;
 overflow-y: hidden;
 }
 
-.generaltitle h3 a
+.generaltitle h3 a, .search-results h4 a
 {
 text-decoration: none;
 }
 
-.generaltitle h3 a, .generaltitle h3 a:visited
+.generaltitle h3 a, .generaltitle h3 a:visited, .search-results h4 a, .search-results h4 a:visited
 {
 color: #fff;
+}
+
+.search-results h4 a:hover
+{
+color: #ccc;
+}
+
+.search-results .intro, .search-results .author
+{
+padding: 1em;
+margin: 0;
+font-size: 0.929em;
+overflow-y: hidden;
+}
+
+.search-results .details
+{
+margin: 0 0 1em 0;
+padding: .4em 1em;
 }
 
 .generalbody
@@ -525,7 +544,7 @@ overflow-y: hidden;
 
 #journal .article h3 a, #journal .article h3 a:visited { color: #fff; }
 
-.article .details
+.article .details, .search-results .data
 {
 padding: .4em 1em;
 margin: 0;
