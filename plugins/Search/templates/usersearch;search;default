@@ -23,8 +23,8 @@ __template__
 			[% END %]
 			</h4>
 			[% IF thisuser.journal_last_entry_date %]
-				<div class="info">
-					<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"><em> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</em></A>
+				<div class="intro">
+					<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</a>
 				</div>
 			[% END %]
 			<div class="details">
