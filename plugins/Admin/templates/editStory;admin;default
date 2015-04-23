@@ -102,8 +102,6 @@ SET txRows = 20 IF txRows < 20  %]
 							[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), storyref.${extra.1}, 1, 1) %]	
 						[% END %]
 					[% END %]
-
-					[% locktest %]
 				
 					<p><b>Author</b> [% author_select %]</p>
 					<p><b>Comment Status</b> [% commentstatus_select %]</p>
