@@ -11,34 +11,29 @@ en_US
 __name__
 usersearch
 __template__
-
 <div class="usersearch">
 	[% FOREACH thisuser=users %]
-		<ul>
-		[% IF thisuser.score %]
-			<li class="score">
-				[% thisuser.score %]
-			</li>
-		[% END %]
-			<li class="author">
+		<div class="search-results">
+			<h4>
 			<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/">[% thisuser.nickname | strip_literal %]</a> &nbsp;
 			[% IF thisuser.fakeemail %]
 				([% thisuser.uid %]) email: <a href="mailto:[% thisuser.fakeemail | strip_paramattr_nonhttp %]">[% thisuser.fakeemail | strip_literal %]</a>
 			[% ELSE %]
 				([% thisuser.uid %])
 			[% END %]
-			</li>
-		[% IF thisuser.journal_last_entry_date %]
-			<li class="data">
-				<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"><em> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</em></A>
-			</li>
-		[% END %]
-		[% UNLESS user.is_anon %]
-			<li class="details">
-				[% PROCESS zoo_icons person=thisuser.uid %]
-			</li>
-		[% END %]
-		</ul>
+			</h4>
+			[% IF thisuser.journal_last_entry_date %]
+				<div class="info">
+					<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"><em> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</em></A>
+				</div>
+			[% END %]
+			<div class="details">
+				[% UNLESS user.is_anon %]
+					[% PROCESS zoo_icons person=thisuser.uid %]
+				[% END %]
+				&nbsp;
+			</div>
+		</div>
 	[% END %]
 [% PROCESS pagination %]
 </div>

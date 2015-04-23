@@ -201,7 +201,7 @@ a:hover { color: #008; }
 
 /* articles */
 
-.generaltitle div.title, .article div.title {     
+.generaltitle div.title, .article div.title, .search-results h4 {     
 	background-color: #006;
 	background: -o-linear-gradient(#006, #339);
 	background: -webkit-linear-gradient(#006, #339);
@@ -216,7 +216,7 @@ a:hover { color: #008; }
 	font-size: 1em;
 }
 
-.article .details
+.article .details, .search-results .data
 {
 	font-size: .7em;
 	font-weight: normal;
@@ -228,14 +228,14 @@ a:hover { color: #008; }
 	background: linear-gradient(#ccc, #eee);
 }
 
-.article .body
+.article .body, .search-results .info, .search-results .author
 {
 	border: 1px solid #aaa;
 	border-top: none;
 	background: #fff;
 }
 
-div.storylinks
+div.storylinks, .search-results .details
 {
 	background-color: #ccc;
 	background: -o-linear-gradient(#ccc, #eee);
