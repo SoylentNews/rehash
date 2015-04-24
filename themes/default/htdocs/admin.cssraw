@@ -229,6 +229,10 @@ body .adminstoryform legend { display: none;}
 	margin-bottom: 10px;
 }
 
+#storyadmin-content table {
+	width: 226px;
+	table-layout: fixed;
+}
 
 
 

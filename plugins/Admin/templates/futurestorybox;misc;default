@@ -44,7 +44,7 @@ __template__
 	futuretext = story.title;
    ELSE;
 	futuretext = BLOCK -%]
-<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.title %]</a> <a href="/submit/?from_id=[% story.fhid %]" onclick="show_submit_box([% story.fhid %]); return false;">[be]</a>
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.title | strip_title %]</a>
 	[%- END;
    END;
 

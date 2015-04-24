@@ -164,18 +164,18 @@ width:19%;
 }
 
 
-#section  {
+#section_banner  {
 	margin: .4em 0;
 	padding:.3em .5em;
 	background: #999;
 	color: #fff;
 }
 
-#section a {
+#section_banner a {
 	text-decoration: none;
 }
 
-#section a, #section a:visited
+#section_banner a, #section_banner a:visited
 {
 color: #fff;
 }
