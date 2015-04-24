@@ -3042,7 +3042,7 @@ sub determineCurrentSkin {
 		$hostname =~ s/:\d+$//;
 
 		# could probably do this faster with a regex but ..
-	        my $uri = URI->new($r->uri);
+		my $uri = URI->new($r->uri);
 		my @bits = split ('/', $uri->path);
 
 		# MC: skins can come in two forms, either as a hostname, or as a nexus name. Nexus names have no periods
@@ -3053,7 +3053,7 @@ sub determineCurrentSkin {
 		# First see if we can retrieve by name ...
 		($skin) = grep {
 				my $tmp = lc $skins->{$_}{name} || ''; 
-				$tmp eq lc $bits[1];
+				$tmp eq lc $bits[0];
 			} sort { $a <=> $b } keys %$skins;
 
 		# Nope, fall back to hostname

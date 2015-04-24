@@ -514,20 +514,20 @@ sub IndexHandler  {
 	my @bits = split ('/', $proper_uri->path);
 
 	# Only handle this if we have at least *2* segments
-	if ( (scalar @bits) ge 2) {
+	# if ( (scalar @bits) ge 2) {
 		# we've got a live one!
 
 		# this should probably be cached ...
 		my $skins = $slashdb->getSkins();
 
 		for my $skin (keys %$skins) {
-			if ($skins->{$skin}{name} eq $bits[1]) {
+			if ($skins->{$skin}{name} eq $bits[0]) {
 				my $actual_file = $bits[-1];
 				$r->filename("$basedir/$actual_file");
 				return OK;
 			}
 		}
-	}
+	# }
 
 	return DECLINED;
 }
