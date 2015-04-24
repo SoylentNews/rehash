@@ -34,7 +34,7 @@ a:hover { color: #800;}
 
 #slogan #head_message a { color: #ccc }
 
-#section  {     
+#section_banner  {     
 	background-color: #600;
 	background: -o-linear-gradient(#933, #600);
 	background: -webkit-linear-gradient(#933, #600);

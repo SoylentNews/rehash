@@ -44,7 +44,7 @@ hr {
 	font-size: .813em;
 }
 
-#section  {     
+#section_banner  {     
 	background-color: #000;
 	border: 1px solid #0f0;
 	border-radius: 8px;
@@ -53,7 +53,7 @@ hr {
 	color: 0c0;
 }
 
-#section a, #section a:visited
+#section_banner a, #section_banner a:visited
 {
 color: #0c0;
 }
