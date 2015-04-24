@@ -27,7 +27,7 @@ a:hover { color: #ea97bc; }
 	font-size: .813em;
 }
 
-#section  {     
+#section_banner  {     
 	background-color: #c5618e;
 	background: -o-linear-gradient(#c5618e, #ea97bc);
 	background: -webkit-linear-gradient(#c5618e, #ea97bc);
