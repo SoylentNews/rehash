@@ -432,6 +432,7 @@ sub IndexHandler  {
 		}
 	}
 
+	# Remove base rootdir path from uri so that all nexuses behave as mainpage.
 	if ($gSkin->{rootdir}) {
 		my $path = URI->new($gSkin->{rootdir})->path;
 		$uri =~ s/^\Q$path//;
