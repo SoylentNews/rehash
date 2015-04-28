@@ -409,16 +409,22 @@ sub IndexHandler  {
 
 	return DECLINED unless (!$r->main);
 	my $constants = getCurrentStatic();
-
-#print STDERR scalar(localtime) . " $$ IndexHandler A\n";
-	setCurrentSkin(determineCurrentSkin());
-	my $gSkin     = getCurrentSkin();
+	my $slashdb = getCurrentDB();
+	my $dbon = $slashdb->sqlConnect(); 
 
 	my $uri = $r->uri;
 	my $cookie = $r->headers_in->{'Cookie'} || '';
 	my $is_user = $cookie =~ $USER_MATCH;
 	my $has_daypass = 0;
 	my $basedir = $constants->{basedir};
+	
+	# Bypass skin set if not a regular file
+	if ($uri =~ /\.(?:jpg|gif|png|js|css|txt)$/) {
+		return DECLINED;
+	}
+
+	setCurrentSkin(determineCurrentSkin());
+	my $gSkin     = getCurrentSkin();
 
 	if (!$is_user) {
 		if ($constants->{daypass} && $cookie =~ $DAYPASS_MATCH) {
@@ -430,26 +436,17 @@ sub IndexHandler  {
 		my $path = URI->new($gSkin->{rootdir})->path;
 		$uri =~ s/^\Q$path//;
 	}
-
-	# Comment this in if you want to try having this do the right
-	# thing dynamically
-	my $slashdb = getCurrentDB();
-	my $dbon = $slashdb->sqlConnect(); 
-
+	
+	# set index handler
 	if ($uri eq '/' && $gSkin->{index_handler} ne 'IGNORE') {
-		my $basedir = $constants->{basedir};
-
-		# $USER_MATCH defined above
 		$r->uri("/$gSkin->{index_handler}");
 		$r->filename("$basedir/$gSkin->{index_handler}");
 		return OK;
 	}
 
-	# match /section/ or /section
+	# check for Edit Plugin
 	if ($uri =~ m|^/(\w+)/?$|) {
 		my $key = $1;
-		
-		my $slashdb = getCurrentDB();
 
 		if ($constants->{plugin}{Edit}) {
 			if ($key =~ /^(submit|submission|story|journal)$/) {
@@ -470,63 +467,17 @@ sub IndexHandler  {
 				return OK;
 			}
 		}
-
-#print STDERR scalar(localtime) . " $$ IndexHandler B new_skid=$new_skid\n";
-		$gSkin = getCurrentSkin();
-
-		#my $index_handler = $gSkin->{index_handler};
-		#if ($index_handler ne 'IGNORE') {
-		#	# $USER_MATCH defined above
-		#	$r->args("section=$key");
-		#	$r->filename("$basedir/$index_handler");
-		#	return OK;
-		#}
-	}
-	if ($uri =~ m#^/(stories|recent|popular|daddypants|search)/([^/]*)/?([^/]*)?/?$#) {
-		my ($key, $rss_or_search, $search) = ($1,$2,$3);
-		my $rss;	
-		$rss = 1 if $rss_or_search && $rss_or_search eq "rss";
-		$search = $rss_or_search if !$rss;
-	}
-	
-	# Match /datatype/id /story/sid or datatype/id/Item-title syntax
-	if ($uri =~ /^\/(journal|submission|comment|story)\/(rss\/)?(\d+(?:\/\d+\/\d+\/\d+)?)\/?(\w+|\-)*\/?/) {
-		my $basedir  = $constants->{basedir};
-		my($datatype, $rss, $id) = ($1,$2,$3);
-		my ($op_string, $rss_string) = ('op=view','');
-		if ($rss) {
-			$rss_string = "\&content_type=rss";
-			$op_string = "op=rss";
-		}
 	}
 
 	# MC: Deleted a huge chunk of code here that handled shit of the DB was MIA, which we don't support
 
-	# Exclude some files from redirection
-#        if ($uri ~ /\.(?:shtml|html|jpg|gif|png|rss|rdf|xml|txt|css)$/) {
-#		return DECLINED;
-#	}
-
 	# Handle redirecting nexus links
 	# Nexuses can either be in the form of nexus.domain or domain/nexus, in the later case, we can have things like
 	# http://domain/nexus/article.pl. We should handle this case properly
-	my $proper_uri = URI->new($r->uri);
-	my @bits = split ('/', $proper_uri->path);
-
-	# Only handle this if we have at least *2* segments
-	if ( (scalar @bits) ge 2) {
-		# we've got a live one!
-
-		# this should probably be cached ...
-		my $skins = $slashdb->getSkins();
-
-		for my $skin (keys %$skins) {
-			if ($skins->{$skin}{name} eq $bits[1]) {
-				my $actual_file = $bits[-1];
-				$r->filename("$basedir/$actual_file");
-				return OK;
-			}
-		}
+	
+	if ($uri =~ /\.(?:pl)$/) {
+		$r->filename("$basedir$uri");
+		return OK;
 	}
 
 	return DECLINED;
