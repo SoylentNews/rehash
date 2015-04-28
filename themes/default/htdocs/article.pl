@@ -34,13 +34,14 @@ sub main {
 		&& !($form->{ssi} && $form->{ssi} eq "yes")) {
 		# Make sure the reader is viewing this story in the
 		# proper skin.
-		my $cur_skid = determineCurrentSkin();
+#		my $cur_skid = determineCurrentSkin(); #broken now, but may be fixed
+		my $cur_skid = $gSkin->{skid};
 		if ($story->{primaryskid} != $cur_skid) {
 			my $cur_skin = $reader->getSkin($cur_skid);
 			my $story_skin = $reader->getSkin($story->{primaryskid});
 			if ($story_skin && $story_skin->{rootdir}
 				&& $story_skin->{rootdir} ne $cur_skin->{rootdir}) {
-				redirect("$story_skin->{rootdir}$ENV{REQUEST_URI}");
+				redirect("$story_skin->{rootdir}/article.pl?$ENV{QUERY_STRING}");
 				return;
 			}
 		}
