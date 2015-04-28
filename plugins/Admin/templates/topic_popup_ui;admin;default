@@ -14,9 +14,9 @@ __template__
 <table cellpadding="2"><tr><td>
 [%- name = name.0 %]
 [%- IF include_css %]
-<link rel="stylesheet" type="text/css" rev="alternate" href="[% gSkin.rootdir %]/admin-topic-popup.css?[% constants.cvs_tag_currentcode %]">
+<link rel="stylesheet" type="text/css" rev="alternate" href="[% constants.real_rootdir %]/admin-topic-popup.css?[% constants.cvs_tag_currentcode %]">
 [%- END %]
-<script src="[% gSkin.rootdir %]/admin-topic-popup.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.real_rootdir %]/admin-topic-popup.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 
 <input type="hidden" value="preview" name="[% name %]_submit_op">
 [% mykey = name _ "_saved_tree" -%]
