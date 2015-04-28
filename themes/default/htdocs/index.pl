@@ -276,7 +276,7 @@ my $start_time = Time::HiRes::time;
 	);
 
 	my $title = getData('head', { skin => $skin_name });
-	header({ title => $title, link => $linkrel }) or return;
+	header({ title => $title, link => $linkrel }, $skin_name) or return;
 
 	if ($form->{remark}
 		&& $user->{is_subscriber}
