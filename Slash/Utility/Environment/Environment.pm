@@ -3053,7 +3053,7 @@ sub determineCurrentSkin {
 		# First see if we can retrieve by name ...
 		($skin) = grep {
 				my $tmp = lc $skins->{$_}{name} || ''; 
-				$tmp eq lc $bits[0];
+				$tmp eq lc $bits[1];
 			} sort { $a <=> $b } keys %$skins;
 
 		# Nope, fall back to hostname
