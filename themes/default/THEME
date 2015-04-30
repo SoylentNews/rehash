@@ -197,7 +197,7 @@ task=tasks/spamarmor.pl
 task=tasks/url_checker.pl
 
 topic=htdocs/images/topics/blank.gif
-topic=htdocs/images/topics/breakingnews.png
+topic=htdocs/images/topics/topicbreakingnews.png
 topic=htdocs/images/topics/topicbusiness.png
 topic=htdocs/images/topics/topiccareer_education.png
 topic=htdocs/images/topics/topiccode.png
