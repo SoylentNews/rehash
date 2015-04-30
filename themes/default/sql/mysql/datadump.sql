@@ -308,7 +308,7 @@ INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,4);
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (1,'mainpage', 'Main Page', 'no', '', 0,0, 'no');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (2,'features','Features', 'no', '', 0, 0, 'no');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (3,'opensource','Open Source', 'no', '',0, 0, 'no');
-INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (4,'slash', 'Slash', 'no', 'topicslash.png',81,36,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (4,'rehash', 'Rehash', 'no', 'topicrehash.png',112,36,'yes');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (5,'code', 'Code', 'no', 'topiccode.gif',40,40,'yes');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (6,'news', 'News', 'no', 'topicnews.png',40,40,'yes');
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (7,'reviews', 'Reviews', 'no', 'topicreviews.gif',40,40,'yes');

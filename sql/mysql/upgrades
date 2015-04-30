@@ -12,3 +12,6 @@ ALTER TABLE submissions MODIFY comment VARCHAR(255) null;
 ALTER TABLE submissions MODIFY mediatype enum('text','none','video','image','audio') null DEFAULT 'none';
 ALTER TABLE submissions MODIFY name varchar (50) null;
 ALTER TABLE stories ADD COLUMN notes text;
+
+# New Rehash topic
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (25,'rehash', 'Rehash', 'no', 'topicrehash.png',112,36,'yes');

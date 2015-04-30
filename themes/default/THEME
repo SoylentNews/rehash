@@ -197,6 +197,7 @@ task=tasks/spamarmor.pl
 task=tasks/url_checker.pl
 
 topic=htdocs/images/topics/blank.gif
+topic=htdocs/images/topics/breakingnews.png
 topic=htdocs/images/topics/topicbusiness.png
 topic=htdocs/images/topics/topiccareer_education.png
 topic=htdocs/images/topics/topiccode.png
@@ -208,6 +209,7 @@ topic=htdocs/images/topics/topicmobile.png
 topic=htdocs/images/topics/topicnews.png
 topic=htdocs/images/topics/topicos.png
 topic=htdocs/images/topics/topicqa.png
+topic=htdocs/images/topics/topicrehash.png
 topic=htdocs/images/topics/topicreview.png
 topic=htdocs/images/topics/topicscience.png
 topic=htdocs/images/topics/topicsecurity.png
