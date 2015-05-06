@@ -26,7 +26,7 @@ __template__
 	<div class="search-results">
 			<h4>
 				<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>
-					[% storylinks.1 | strip_html %]
+					[% storylinks.1 | strip_title %]
 				</a>
 				[% IF user.is_admin %]
 					[ 
@@ -49,11 +49,6 @@ __template__
 					<a href="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
 				[% END %]
 			</div>
-			[% IF story.score %]
-			<div class="score">
-				Score: [% story.score %]
-			</div>		
-			[% END %] 
 		</div>
 	[% END %]
 	[% PROCESS pagination %]

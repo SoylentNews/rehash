@@ -179,18 +179,19 @@ sub main {
 
 	$form->{pid} ||= "0";
 
+	# Not needed --paulej72 20150427
 	# this is so messed up ... it's done again under header(), but
 	# sometimes we need it done before header() is called, because,
 	# like i said, this is so messed up ...
-	{
-		my $skid;
-		if ($section) {
-			my $skin = $slashdb->getSkin($section);
-			$skid = $skin->{skid} if $skin;
-		}
-		setCurrentSkin($skid || determineCurrentSkin());
-		Slash::Utility::Anchor::getSkinColors();
-	}
+	#{
+	#	my $skid;
+	#	if ($section) {
+	#		my $skin = $slashdb->getSkin($section);
+	#		$skid = $skin->{skid} if $skin;
+	#	}
+	#	setCurrentSkin($skid || determineCurrentSkin());
+	#	Slash::Utility::Anchor::getSkinColors();
+	#}
 
 
 	# If this is a comment post, we can't write the header yet,

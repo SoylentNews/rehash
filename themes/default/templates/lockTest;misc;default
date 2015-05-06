@@ -15,7 +15,7 @@ en_US
 __name__
 lockTest
 __template__
-<b>[% percent %]%</b> matching with [% subject %] by <b>[% nickname %]</b><br>
+<b>[% percent %]%</b> matching with "[% subject | strip_title %]" currently edited by <b>[% nickname %]</b><br>
 
 __seclev__
 10000

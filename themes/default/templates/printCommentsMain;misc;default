@@ -20,15 +20,16 @@ __name__
 printCommentsMain
 __template__
 [% stripped_title = title | strip_title %]
+[% stripped_link = link | strip_urlattr %]
 [% IF parent.type == 'journal' %]
-	[% PROCESS titlebar title="$stripped_title" %]
+	[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
 	<div class="generalbody">
 		[% parent.content %]
 	</div>
 [% END %]
 [% IF parent.type == 'story' %]
 <div class="article">
-	[% PROCESS titlebar title="$stripped_title" %]
+	[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
 	[% IF parent.story %]
 		<div class="details">
 		[% IF parent.story.by %]

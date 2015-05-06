@@ -151,13 +151,15 @@ sub header {
 		return if $r->header_only;
 	}
 
-	my $skid = 0;
-	if ($skin_name) {
-		my $skin = $slashdb->getSkin($skin_name);
-		$skid = $skin->{skid} if $skin;
-	}
-#print STDERR scalar(localtime) . " $$ header skin_name='$skin_name' skid='$skid' det='" . determineCurrentSkin() . "'\n";
-	setCurrentSkin($skid || determineCurrentSkin());
+	#  gSkin is set during PerlTransHandler step by Slash::Apache sub IndexHandler --paulej72
+	#my $skid = 0;
+	#if ($skin_name) {
+	#	my $skin = $slashdb->getSkin($skin_name);
+	#	$skid = $skin->{skid} if $skin;
+	#}
+	#print STDERR scalar(localtime) . " $$ header skin_name='$skin_name' skid='$skid' det='" . determineCurrentSkin() . "'\n";
+	
+	#setCurrentSkin($skid || determineCurrentSkin());
 	getSkinColors();
 
 	# This is ALWAYS displayed. Let the template handle the title

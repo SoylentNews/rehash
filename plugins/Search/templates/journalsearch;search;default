@@ -16,7 +16,7 @@ __template__
 [% FOREACH journal=entries %]
 	<div class="search-results">
 		<h4>
-			<a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a>
+			<a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description | strip_title %]</a>
 		</h4>
 		<div class="data">
 			On [% Slash.timeCalc(journal.date) %]
@@ -27,11 +27,6 @@ __template__
 		<div class="author">
 			Author: <a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/">[% journal.nickname | strip_literal %]</a>
 		</div>
-		[% IF journal.score %]
-		<div class="score">
-			Score: ([% journal.score %])
-		</div>
-		[% END %]
 	</div>
 [% END %]
 [% PROCESS pagination %]

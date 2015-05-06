@@ -1522,7 +1522,7 @@ sub extractChosenFromForm {
 			}
 
 			my $weight = shift @weights;
-			my @thismany = $form->{$input};
+			my @thismany = @{$form->{$input}};
 			for my $i (0..$#thismany) {
 				no strict;
 				my $tid = $form->{$input}[$i];

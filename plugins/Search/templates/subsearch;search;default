@@ -11,20 +11,25 @@ en_US
 __name__
 subsearch
 __template__
-
 <div class="subsearch">
 [% FOREACH entry = entries %]
 	<div class="search-results">
+		[% submission_state = Slash.db.getDescriptions('submission-state') %]
 		<h4>
-			<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</a>
+			<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj | strip_title %]</a>
 		</h4>
 		<div class="data">
-			On [% Slash.timeCalc(entry.time) %]
+			On [% Slash.timeCalc(entry.time) %], State: [% del = entry.del; submission_state.$del -%]
 		</div>
 		<div class="intro">
 			[% entry.story %]
+			
+			[% IF entry.note %]
+			<div class="note">
+				Note: [% entry.note %]
+			</div>
+			[% END %]
 		</div>
-		[% submission_state = Slash.db.getDescriptions('submission-state') %]
 		[% skin = Slash.db.getSkin(entry.skid) %]
 		<div class="details">
 			Section: 
@@ -39,19 +44,6 @@ __template__
 			<a href="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
 		[% END %]
 		</div>
-		<div class="state">
-			State: [% del = entry.del; submission_state.$del %]
-		</div>
-		[% IF entry.note %]
-		<div class="note">
-			Note: [% entry.note %]
-		</div>
-		[% END %]
-		[% IF entry.score %]
-		<div class="score">
-			Score: [% entry.score %]
-		</div>
-		[% END %]
 	</div>
 [% END %]
 [% PROCESS pagination %]

@@ -17,7 +17,7 @@ __template__
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
 	<div class="search-results">
 		<h4>
-			<a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</a>
+			<a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject | strip_title %]</a>
 		</h4>
 		<div class="author">
 			by <a href="mailto:[% user_email.fakeemail | strip_paramattr_nonhttp %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]
@@ -25,11 +25,6 @@ __template__
 		<div class="details">
 			Attached to:  <a href="[% comment.url %]">[% comment.title %]</a> posted on [% Slash.timeCalc(comment.ts) %]
 		</div>
-	[% IF comment.score %]
-		<div class="score">
-			Score: [% comment.score %]
-		</div>
-	[% END %]
 	</div>
 [% END %]
 [% PROCESS pagination %]
