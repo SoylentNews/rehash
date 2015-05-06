@@ -261,10 +261,10 @@ sub _get_web {
 	$self->sqlUpdate($table, { readed => 1 }, "$prime=$id_db");
 
 	# force to set UTF8 flag because these fields are 'blob'.
-	if (getCurrentStatic('utf8')) {
-		$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
-		$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
-	}
+	#if (getCurrentStatic('utf8')) {
+	#	$data->{'subject'} = decode_utf8($data->{'subject'}) unless (is_utf8($data->{'subject'}));
+	#	$data->{'message'} = decode_utf8($data->{'message'}) unless (is_utf8($data->{'message'}));
+	#}
 
 	return $data;
 }
@@ -292,8 +292,8 @@ sub _get_web_by_uid {
 	# force to set UTF8 flag because these fields are 'blob'.
 	if (getCurrentStatic('utf8')) {
 		for (@$data) {
-			$_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'}));
-			$_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'}));
+			#$_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'}));
+			#$_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'}));
 		}
 	}
 

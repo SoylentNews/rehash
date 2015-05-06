@@ -1291,7 +1291,8 @@ sub _approveUnicodeChar {
 	$constants ||= getCurrentStatic();
 	my %ansi_to_utf = _ansi_to_utf();
 	my $str = '';
-	my $decimal = ord(decode_utf8($char));
+	#my $decimal = ord(decode_utf8($char));
+	my $decimal = ord($char);
 
 	if(!$constants->{bad_numeric}{$decimal})
 	{
@@ -2764,7 +2765,7 @@ Chomped string.
 
 sub chopEntity {
 	my($text, $length, $end) = @_;
-	$text = decode_utf8($text) if ((!getCurrentStatic('utf8')) && (is_utf8($text)));
+	#$text = decode_utf8($text) if ((!getCurrentStatic('utf8')) && (is_utf8($text)));
 	if ($length && $end) {
 		$text = substr($text, -$length);
 	} elsif ($length) {
@@ -4411,7 +4412,7 @@ sub getUrlsFromText {
 	my %urls = ( );
 	for my $text (@texts) {
 		next unless $text;
-		$text = decode_utf8($text);
+		#$text = decode_utf8($text);
 		my $tokens = HTML::TokeParser->new(\$text);
 		next unless $tokens;
 		while (my $token = $tokens->get_tag('a')) {
