@@ -1091,7 +1091,7 @@ sub sqlDo {
 	my($self, $sql) = @_;
 	$self->_refCheck($sql);
 	$self->sqlConnect() or return undef;
-	is_utf8($sql) or $sql = decode_utf8($sql);
+	#is_utf8($sql) or $sql = decode_utf8($sql);
 	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
 		unless ($sql =~ /^INSERT\s+IGNORE\b/i) {

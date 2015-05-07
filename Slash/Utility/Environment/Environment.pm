@@ -527,6 +527,9 @@ sub getCurrentForm {
 			if( (ref $form->{$item} eq "SCALAR") || (ref $form->{$item} eq '') )
 			{
 				next unless $form->{$item};
+				#if( $form->{$item} && is_utf8($form->{$item}) && getCurrentStatic("utf8") ) {
+					$form->{$item} = decode_utf8($form->{$item});
+				#}
 				##########
 				# TMB Combined the two loops. This takes over the job of encode_high_bits.
 				#$form->{$item} =~ s[([^\n\r\t !-~])][ "&#".ord($1).";" ]ge unless getCurrentStatic('utf8');
