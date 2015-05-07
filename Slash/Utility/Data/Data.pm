@@ -3751,7 +3751,7 @@ sub _url_to_domain_tag {
 	# Entities should never have gotten this far but strip them anyway just in case.
 	$info =~ s/&(.+?);//g;
 	# Warning message for unicode links
-	if($info =~ /[^A-Za-z0-9.-]/){$info = " \x{202d}$info (Warning: Unicode in URL)\x{2069} ";}
+	if($href =~ /[^\x00-\x7F]/){$info = " \x{202d}$info (Warning: Unicode in URL)\x{2069} ";}
 
 	if (length($info) == 0) {
 		$info = '?';
