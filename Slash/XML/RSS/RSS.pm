@@ -400,7 +400,7 @@ sub rss_story {
 		my $linktitle = $story->{title};
 		$linktitle =~ s/\s+/-/g;
 		$linktitle =~ s/[^A-Za-z0-9\-]//g;
-		$action = "article.pl?sid=$story->{sid}&from=rss";
+		$action = "article.pl?sid=$story->{sid}";
 
 
 		if ($story->{primaryskid}) {
@@ -440,7 +440,7 @@ sub rss_story {
 			my $extra = '';
 			# If the text of the <img src>'s query string changes,
 			# Stats.pm getTopBadgeURLs() may also have to change.
-			$extra .= qq{<p><a href="$action"><img src="$channel->{'link'}slashdot-it.pl?from=rss&amp;op=image&amp;style=h0&amp;sid=$story->{sid}"></a></p>}
+			$extra .= qq{<p><a href="$action"><img src="$channel->{'link'}slashdot-it.pl?op=image&amp;style=h0&amp;sid=$story->{sid}"></a></p>}
 				if $constants->{rdfbadge};
 			$extra .= "<p><a href=\"$action\">Read more of this story</a> at $constants->{sitename}.</p>"
 				if $action;
