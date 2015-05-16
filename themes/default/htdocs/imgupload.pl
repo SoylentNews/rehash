@@ -37,7 +37,9 @@ sub main {
 sub receive_upload {
         my($form, $slashdb, $user, $constants) = @_;
 
-        my $upload = $form->{query_apache}->upload;
+        my $r = Apache2::RequestUtil->request;
+	my $req = Apache2::Request->new($r);
+        my $upload = $req->upload("fileToUpload");
         my $fh = $upload->fh;
 
         http_send({ content_type => 'text/html' });
