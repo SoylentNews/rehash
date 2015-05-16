@@ -88,7 +88,7 @@ sub handler {
 	my $reader_user = $slashdb->getDB('reader');
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
 
-	my $version_code = "slashcode";
+	my $version_code = "rehash";
 	$version_code .= " $Slash::VERSION";
 	if ($constants->{cvs_tag_currentcode_emit}
 		&& $constants->{cvs_tag_currentcode}
@@ -117,7 +117,6 @@ sub handler {
 
 	my $form = filter_params($apr);
 
-	$form->{query_apache} = $apr;
 	@{$form}{keys  %{$constants->{form_override}}} =
 		values %{$constants->{form_override}};
 
