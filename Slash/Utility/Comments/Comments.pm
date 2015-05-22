@@ -1874,13 +1874,13 @@ sub dispComment {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
-	my $maxcommentsize = $options->{maxcommentsize} || $constants->{default_maxcommentsize};
+	my $maxcommentsize = $constants->{default_maxcommentsize};
 
 	my $comment_shrunk;
 
 	if ($form->{mode} ne 'archive'
 		&& !defined($comment->{abbreviated})
-		&& $comment->{len} > $maxcommentsize
+		&& $comment->{len} > ($maxcommentsize+256) #allow overrun of 256 chars as the trimming that happens in MySQL.pm also allows this
 		&& $form->{cid} ne $comment->{cid})
 	{
 		$comment_shrunk = 1;
