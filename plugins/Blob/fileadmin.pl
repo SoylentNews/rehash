@@ -11,6 +11,8 @@ use Slash::Blob;
 use Slash::Display;
 use Slash::Utility;
 
+use Apache2::Upload;
+
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -100,7 +102,9 @@ sub addFileForStory {
 	if ($form->{file_content}) {
 		my $data;
 		if ($form->{file_content}) {
-			my $upload = $form->{query_apache}->upload;
+	                my $r = Apache2::RequestUtil->request;
+        	        my $req = Apache2::Request->new($r);
+                	my $upload = $req->upload("file_content");
 			if ($upload) {
 				my $temp_body;
 				my $fh = $upload->fh;

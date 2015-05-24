@@ -6392,9 +6392,10 @@ sub getCommentTextCached {
 		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
 		my $original_text = $more_comment_text->{$cid};
 		my $this_max_len = $abbreviate ? $abbreviate_len : $max_len;
+		my $allowed_overrun = $abbreviate ? 256 : ($this_max_len * 0.20); #allow 256 char overrun for abbreviated mode or 20% for normal
 		if (	   $possible_chop
 			&& !($opt->{cid} && $opt->{cid} eq $cid)
-			&& ($comments->{$cid}{len} > ($this_max_len + 256))
+			&& ($comments->{$cid}{len} > ($this_max_len + $allowed_overrun))
 		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll

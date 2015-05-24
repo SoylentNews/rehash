@@ -1443,7 +1443,7 @@ sub cleanSlashTags {
 	my $tag_re = join '|', sort keys %$slashTags;
 	$text =~ s#<SLASH-($tag_re)#<SLASH TYPE="\L$1\E"#gis;
 	my $newtext = $text;
-	$text = decode_utf8($text);
+	#$text = decode_utf8($text);
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
 		my $type = lc($token->[1]{type});
@@ -1549,7 +1549,7 @@ sub processSlashTags {
 	return unless $text;
 
 	my $newtext = $text;
-	 $text = decode_utf8($text);
+	#$text = decode_utf8($text);
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 
 	return $newtext unless $tokens;

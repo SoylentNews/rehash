@@ -361,7 +361,8 @@ sub ppDoPDT {
 	if($status eq 'SUCCESS'){
 		foreach (@content){
 			my ($key, $value) = split("=", $_);	    
-			$transaction{$key} = decode_utf8($value);
+			#$transaction{$key} = decode_utf8($value);
+			$transaction{$key} = $value;
 		}
 		$transaction{remote_address} = 'PDT';
 		

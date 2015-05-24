@@ -1291,7 +1291,8 @@ sub _approveUnicodeChar {
 	$constants ||= getCurrentStatic();
 	my %ansi_to_utf = _ansi_to_utf();
 	my $str = '';
-	my $decimal = ord(decode_utf8($char));
+	#my $decimal = ord(decode_utf8($char));
+	my $decimal = ord($char);
 
 	if(!$constants->{bad_numeric}{$decimal})
 	{
@@ -2764,7 +2765,7 @@ Chomped string.
 
 sub chopEntity {
 	my($text, $length, $end) = @_;
-	$text = decode_utf8($text) if ((!getCurrentStatic('utf8')) && (is_utf8($text)));
+	#$text = decode_utf8($text) if ((!getCurrentStatic('utf8')) && (is_utf8($text)));
 	if ($length && $end) {
 		$text = substr($text, -$length);
 	} elsif ($length) {
@@ -3750,7 +3751,7 @@ sub _url_to_domain_tag {
 	# Entities should never have gotten this far but strip them anyway just in case.
 	$info =~ s/&(.+?);//g;
 	# Warning message for unicode links
-	if($info =~ /[^A-Za-z0-9.-]/){$info = " \x{202d}$info (Warning: Unicode in URL)\x{2069} ";}
+	if($href =~ /[^\x00-\x7F]/){$info = " \x{202d}$info (Warning: Unicode in URL)\x{2069} ";}
 
 	if (length($info) == 0) {
 		$info = '?';
@@ -4411,7 +4412,7 @@ sub getUrlsFromText {
 	my %urls = ( );
 	for my $text (@texts) {
 		next unless $text;
-		$text = decode_utf8($text);
+		#$text = decode_utf8($text);
 		my $tokens = HTML::TokeParser->new(\$text);
 		next unless $tokens;
 		while (my $token = $tokens->get_tag('a')) {

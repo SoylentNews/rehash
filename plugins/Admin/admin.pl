@@ -12,6 +12,9 @@ use LWP::UserAgent;
 use URI;
 use Encode 'decode_utf8';
 
+use Apache2::RequestUtil;
+use Apache2::Request;
+use Apache2::Upload;
 use Slash;
 use Slash::Display;
 use Slash::Hook;
@@ -1105,7 +1108,10 @@ sub editStory {
 
 	# Basically, we upload the bodytext if we realize a name has been passed in -Brian
 	if ($form->{bodytext_file}) {
-		my $upload = $form->{query_apache}->upload;
+                my $r = Apache2::RequestUtil->request;
+                my $req = Apache2::Request->new($r);
+                my $upload = $req->upload("bodytext_file");
+
 		if ($upload) {
 			my $temp_body;
 			$form->{bodytext} = '';
@@ -1935,7 +1941,9 @@ sub handleMediaFileForStory {
 	my $savefile = !$saveblob;
 
 	if ($form->{media_file}) {
-		my $upload = $form->{query_apache}->upload;
+                my $r = Apache2::RequestUtil->request;
+                my $req = Apache2::Request->new($r);
+                my $upload = $req->upload("bodytext_file");
 		if ($upload) {
 			my $fh = $upload->fh;
 			use File::Path;
