@@ -52,7 +52,7 @@ END {
 ################################################################################
 sub geturl {
 	my($url, $options) = @_;
-	my $ua = new LWP::UserAgent;
+	my $ua = new LWP::UserAgent(ssl_opts => { verify_hostname => 0 });
 	my $request = new HTTP::Request('GET', $url);
 	$ua->proxy(http => $constants->{http_proxy}) if $constants->{http_proxy};
 	my $timeout = 30;
