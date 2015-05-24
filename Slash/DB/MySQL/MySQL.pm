@@ -6294,6 +6294,7 @@ sub getCommentTextCached {
 	my $abbreviate_ok  = $opt->{discussion2} && $possible_chop;
 	my $abbreviate_len = 256;
 	my $max_len = $constants->{default_maxcommentsize};
+	my $fuzzy_length = $constants->{fuzzy_length} || 0.75;
 
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
@@ -6459,7 +6460,12 @@ sub getCommentTextCached {
 						last if $plen >= $this_max_len + 256; # rest getting cut anyway
 					}
 				}
+			} else {
+				# If we're chopping, chop plenty, not just a bit.
+				# This lets the rest of the comment actually be more than just a few lines or sometime none.
+				$this_len = int($this_len * $fuzzy_length);
 			}
+			
 			$abbrev_text = chopEntity($abbrev_text, $this_len);
 
 			# the comments have already gone through approveTag
