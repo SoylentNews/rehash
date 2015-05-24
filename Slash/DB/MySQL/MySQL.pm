@@ -6294,7 +6294,6 @@ sub getCommentTextCached {
 	my $abbreviate_ok  = $opt->{discussion2} && $possible_chop;
 	my $abbreviate_len = 256;
 	my $max_len = $constants->{default_maxcommentsize};
-	my $fuzzy_length = $constants->{fuzzy_length} || 0.75;
 
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
