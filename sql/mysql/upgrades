@@ -15,3 +15,6 @@ ALTER TABLE stories ADD COLUMN notes text;
 
 # New Rehash topic
 INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (25,'rehash', 'Rehash', 'no', 'topicrehash.png',112,36,'yes');
+
+# Fix Poll Insert
+ALTER TABLE pollquestions CHANGE discussion discussion mediumint UNSIGNED NULL;
