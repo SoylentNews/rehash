@@ -20,6 +20,10 @@ en_US
 __name__
 editUser
 __template__
+[% maxbio = constants.users_bio_length %]
+[% DEFAULT 
+   maxbio = 1024
+%]
 [% orig_title = title %]
 <div id="slashboxes">
 [% UNLESS user.lowbandwidth %]
@@ -95,14 +99,14 @@ __template__
 [% END %]
 
 			[% PROCESS formLabel value => 'Sig' %]
-			<textarea name="sig" rows="2" cols="30">[% useredit.sig | strip_literal %]</textarea>
+			<textarea name="sig" rows="2" cols="30" maxlength="120">[% useredit.sig | strip_literal %]</textarea>
 			<div class="notes">
-				Appended to the end of comments you post. 120 chars.
+				Appended to the end of comments you post. Max: 120 chars.
 			</div>
 			[% PROCESS formLabel value => 'Bio' %]
-			<textarea name="bio" rows="5" cols="30" wrap="virtual">[% useredit.bio | strip_literal %]</textarea>
+			<textarea name="bio" rows="5" cols="30" wrap="virtual" maxlength="[% maxbio %]">[% useredit.bio | strip_literal %]</textarea>
 			<div class="notes">
-				This information is publicly displayed on your user page.  255 chars.
+				This information is publicly displayed on your user page. Max: [% maxbio %] chars.
 			</div>
 
 			[% editkey %]
