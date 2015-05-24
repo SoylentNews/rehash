@@ -735,7 +735,7 @@ CREATE TABLE pollquestions (
 	question char(255) NOT NULL,
 	voters mediumint,
 	topic smallint UNSIGNED NOT NULL,
-	discussion mediumint UNSIGNED NOT NULL,
+	discussion mediumint UNSIGNED NULL,
 	date datetime,
 	uid mediumint UNSIGNED NOT NULL,
 	primaryskid SMALLINT UNSIGNED,
