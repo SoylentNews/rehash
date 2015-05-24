@@ -6461,12 +6461,7 @@ sub getCommentTextCached {
 						last if $plen >= $this_max_len + 256; # rest getting cut anyway
 					}
 				}
-			} else {
-				# If we're chopping, chop plenty, not just a bit.
-				# This lets the rest of the comment actually be more than just a few lines or sometime none.
-				$this_len = int($this_len * $fuzzy_length);
 			}
-			
 			$abbrev_text = chopEntity($abbrev_text, $this_len);
 
 			# the comments have already gone through approveTag
@@ -6561,13 +6556,13 @@ sub getCommentTextCached {
 			if (defined $comments->{$cid}{abbreviated}) {
 				$append = $comments->{$cid}{abbreviated} . ':';
 				$mcdkey_cid = $mcdkey_abbrev . $cid;
-			} elsif (!$possible_chop) {
+			} elsif (!$possible_chop || ($opt->{cid} && $opt->{cid} eq $cid)) {
 				$mcdkey_cid = $mcdkey_full . $cid;
 			}
 			my $retval = $mcd->set($mcdkey_cid, $append . $comment_text->{$cid}, $exptime);
 			if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 				my $exp_at = $exptime ? scalar(gmtime(time + $exptime)) : "never";
-				print STDERR scalar(gmtime) . " getCommentTextCached memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
+				print STDERR scalar(gmtime) . " getCommentTextCached memcached writing '$mcdkey_cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
 			}
 		}
 	}
