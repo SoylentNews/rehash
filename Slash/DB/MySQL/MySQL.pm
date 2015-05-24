@@ -6391,10 +6391,10 @@ sub getCommentTextCached {
 		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
 		my $original_text = $more_comment_text->{$cid};
 		my $this_max_len = $abbreviate ? $abbreviate_len : $max_len;
-		my $allowed_overrun = $abbreviate ? 256 : ($this_max_len * 0.20); #allow 256 char overrun for abbreviated mode or 20% for normal
+		
 		if (	   $possible_chop
 			&& !($opt->{cid} && $opt->{cid} eq $cid)
-			&& ($comments->{$cid}{len} > ($this_max_len + $allowed_overrun))
+			&& ($comments->{$cid}{len} > ($this_max_len + 256))
 		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll
@@ -6555,13 +6555,13 @@ sub getCommentTextCached {
 			if (defined $comments->{$cid}{abbreviated}) {
 				$append = $comments->{$cid}{abbreviated} . ':';
 				$mcdkey_cid = $mcdkey_abbrev . $cid;
-			} elsif (!$possible_chop) {
+			} elsif (!$possible_chop || ($opt->{cid} && $opt->{cid} eq $cid)) {
 				$mcdkey_cid = $mcdkey_full . $cid;
 			}
 			my $retval = $mcd->set($mcdkey_cid, $append . $comment_text->{$cid}, $exptime);
 			if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 				my $exp_at = $exptime ? scalar(gmtime(time + $exptime)) : "never";
-				print STDERR scalar(gmtime) . " getCommentTextCached memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
+				print STDERR scalar(gmtime) . " getCommentTextCached memcached writing '$mcdkey_cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
 			}
 		}
 	}

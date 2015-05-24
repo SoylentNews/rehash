@@ -1874,14 +1874,13 @@ sub dispComment {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
-	my $maxcommentsize = $constants->{default_maxcommentsize};
-	my $allowed_overrun = $maxcommentsize * 0.20; #allow 20% overrun
+	my $maxcommentsize = $options->{maxcommentsize} || $constants->{default_maxcommentsize};
 
 	my $comment_shrunk;
 
 	if ($form->{mode} ne 'archive'
 		&& !defined($comment->{abbreviated})
-		&& $comment->{len} > ($maxcommentsize + $allowed_overrun) #check if comment length is past max size + overrun (trimming actually happens in MySQL.pm getCommentTextCached)
+		&& $comment->{len} > $maxcommentsize
 		&& $form->{cid} ne $comment->{cid})
 	{
 		$comment_shrunk = 1;
