@@ -1880,7 +1880,7 @@ sub dispComment {
 
 	if ($form->{mode} ne 'archive'
 		&& !defined($comment->{abbreviated})
-		&& $comment->{len} > $maxcommentsize
+		&& $comment->{len} > ($maxcommentsize + 256)
 		&& $form->{cid} ne $comment->{cid})
 	{
 		$comment_shrunk = 1;
