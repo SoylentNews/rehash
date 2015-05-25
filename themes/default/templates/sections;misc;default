@@ -19,7 +19,7 @@ __template__
 	</li>
 	[% skins = Slash.db.getSkins %]
 	
-	[% FOREACH skid IN skins.keys %]
+	[% FOREACH skid IN skins.sort('title') %]
 		[% NEXT IF skid == constants.mainpage_skid %]
 		[% skins.skid.title %]
 		<li>
