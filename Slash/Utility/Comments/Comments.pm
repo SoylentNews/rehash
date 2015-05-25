@@ -1874,7 +1874,7 @@ sub dispComment {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
-	my $maxcommentsize = $options->{maxcommentsize} || $constants->{default_maxcommentsize};
+	my $maxcommentsize = $constants->{default_maxcommentsize};
 
 	my $comment_shrunk;
 
