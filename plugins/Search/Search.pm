@@ -16,9 +16,17 @@ sub initializeSphinxSearch {
 	my $constants = getCurrentStatic();
 	my $sph = Sphinx::Search->new();
 	$sph->SetServer($constants->{search_sphinx_host}, $constants->{search_sphinx_port});
-
 	return $sph;
 }
+
+# Sorting should be handled via a function, but the object we get from Sphinx::Search
+# isn't properly blessed so passing by reference fails miserable. 
+#
+# Just accept the ugly :(
+# Sort values:
+# 1 Score
+# 2. Time, most recent first
+# 3. Time, oldest first
 
 sub findComments {
 	my($self, $form, $start, $limit, $sort) = @_;
@@ -27,7 +35,6 @@ sub findComments {
 	my $query = $form->{query};
 	my $sph = initializeSphinxSearch();
 	$sph->SetLimits($start, $limit);
-	my $results = $sph->Query($query, "rehash_comment_index");
 
 	if ($form->{sid}) { 
 		my @sid = split (',', $form->{sid});
@@ -39,6 +46,15 @@ sub findComments {
 		$sph->SetFilter("score", \@thresholds);
 	}
 
+	if  ($sort == 1) {
+		$sph->SetSortMode(SPH_SORT_RELEVANCE);
+	} elsif ($sort == 2) {
+		$sph->SetSortMode(SPH_SORT_ATTR_DESC, "time");
+	} elsif ($sort == 3) {
+		$sph->SetSortMode(SPH_SORT_ATTR_ASC, "time");
+	}
+
+	my $results = $sph->Query($query, "rehash_comment_index");
 	# Sphinx will return an array of matches with the cid; 
 	# we need to retrieve the comments for those matches
 
@@ -54,7 +70,7 @@ sub findComments {
 		$columns .= "discussions.id AS did";
 
 		my $tables = "comments, discussions";
-		my $where = " cid IN ($ids_joined) AND comments.sid = discussions.id ";
+		my $where = " cid IN ($ids_joined) AND comments.sid = discussions.id ORDER BY FIELD(cid, $ids_joined)";
 
 		my $search = $self->sqlSelectAllHashrefArray($columns, $tables, $where);
 		return $search;
@@ -85,14 +101,7 @@ sub findUsers {
 		$where .= " AND journal_last_entry_date IS NOT NULL" 
 				if $with_journal;
 
-		my $other;
-		if ($form->{query} && $sort == 2) {
-			$other .= " ORDER BY FIELD(uid, $ids_joined)";
-		} else {
-			$other .= " ORDER BY users.uid ";
-		}
-
-		my $users = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
+		my $users = $self->sqlSelectAllHashrefArray($columns, $tables, $where);
 
 		return $users;
 	} else {
@@ -136,16 +145,14 @@ sub findStory {
 
 		$sph->SetFilter("tid", \@tids);
 	}
-	
 
-	# Low priority FIXME: search_ignore_skids not implemented
-
-
-	#if  ($sort == 2) {
-	#	$sph->SetSortMode(SPH_SORT_TIME_SEGMENTS, "time");
-	#} else {
-	#	$sph->SetSortMode(SPH_SORT_RELEVANCE);
-	#}
+	if  ($sort == 1) {
+		$sph->SetSortMode(SPH_SORT_RELEVANCE);
+	} elsif ($sort == 2) {
+		$sph->SetSortMode(SPH_SORT_ATTR_DESC, "time");
+	} elsif ($sort == 3) {
+		$sph->SetSortMode(SPH_SORT_ATTR_ASC, "time");
+	}
 
 	my $results = $sph->Query($query, "rehash_stories_index");
 
@@ -164,7 +171,7 @@ sub findStory {
 
 		# The big old searching WHERE clause, fear it
 		my $where = "stories.stoid = story_text.stoid";
-		$where .= " AND stories.stoid IN ($ids_joined) ";
+		$where .= " AND stories.stoid IN ($ids_joined) ORDER BY FIELD(stories.stoid, $ids_joined)";
 		my $other;
 		my $gSkin = getCurrentSkin();
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -207,6 +214,15 @@ sub findJournalEntry {
 		$sph->SetFilter("tid", \@tids);
 	}
 
+	if  ($sort == 1) {
+		$sph->SetSortMode(SPH_SORT_RELEVANCE);
+	} elsif ($sort == 2) {
+		$sph->SetSortMode(SPH_SORT_ATTR_DESC, "time");
+	} elsif ($sort == 3) {
+		$sph->SetSortMode(SPH_SORT_ATTR_ASC, "time");
+	}
+
+
 	my $results = $sph->Query($query, "rehash_journal_index");
 
 	if ($results->{'total_found'}) {
@@ -222,7 +238,7 @@ sub findJournalEntry {
 
 		# The big old searching WHERE clause, fear it
 		my $where = "journals.id IN ($ids_joined)";
-		$where .= " AND journals.id = journals_text.id AND journals.uid = users.uid ";
+		$where .= " AND journals.id = journals_text.id AND journals.uid = users.uid ORDER BY FIELD (journals.id, $ids_joined)";
 	
 		my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where);
 
@@ -241,6 +257,14 @@ sub findPollQuestion {
 	my $query = $form->{query};
 	my $sph = initializeSphinxSearch();
 	$sph->SetLimits($start, $limit);
+
+	if  ($sort == 1) {
+		$sph->SetSortMode(SPH_SORT_RELEVANCE);
+	} elsif ($sort == 2) {
+		$sph->SetSortMode(SPH_SORT_ATTR_DESC, "time");
+	} elsif ($sort == 3) {
+		$sph->SetSortMode(SPH_SORT_ATTR_ASC, "time");
+	}
 	my $results = $sph->Query($query, "rehash_poll_questions_index");
 
 	if ($results->{'total_found'}) {
@@ -250,10 +274,7 @@ sub findPollQuestion {
 		my $query = $self->sqlQuote($form->{query});
 		my $columns = "*";
 		my $tables = "pollquestions";
-		my $other;
-		if ($sort == 2) {
-			$other .= " ORDER BY date DESC";
-		}
+		my $other = " ORDER BY FIELD (qid, $ids_joined)";
 
 		# The big old searching WHERE clause, fear it
 		my $where = "qid IN ($ids_joined) AND autopoll = 'no' ";
@@ -269,7 +290,6 @@ sub findPollQuestion {
 	
 		my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
-		$other .= " LIMIT $start, $limit" if $limit;
 		my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
 		return $stories;
@@ -288,6 +308,15 @@ sub findSubmission {
 	my $query = $form->{query};
 	my $sph = initializeSphinxSearch();
 	$sph->SetLimits($start, $limit);
+
+	if  ($sort == 1) {
+		$sph->SetSortMode(SPH_SORT_RELEVANCE);
+	} elsif ($sort == 2) {
+		$sph->SetSortMode(SPH_SORT_ATTR_DESC, "time");
+	} elsif ($sort == 3) {
+		$sph->SetSortMode(SPH_SORT_ATTR_ASC, "time");
+	}
+
 	my $results = $sph->Query($query, "rehash_submissions_index");
 
 	if ($results->{'total_found'}) {
@@ -299,10 +328,7 @@ sub findSubmission {
 		my $query = $self->sqlQuote($form->{query});
 		my $columns = "*";
 		my $tables = "submissions";
-		my $other;
-		if ($sort == 2) {
-			$other .= " ORDER BY subid DESC";
-		}
+		my $other= " ORDER BY FIELD (subid, $ids_joined)";
 
 		# The big old searching WHERE clause, fear it
 		my $where = " subid IN ($ids_joined) ";
