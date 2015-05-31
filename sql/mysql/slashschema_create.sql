@@ -175,8 +175,8 @@ CREATE TABLE backup_blocks (
 DROP TABLE IF EXISTS badpasswords;
 CREATE TABLE badpasswords (
 	uid mediumint(8) UNSIGNED NOT NULL DEFAULT 0,
-	ip varchar(15) NOT NULL DEFAULT '',
-	subnet varchar(15) NOT NULL DEFAULT '',
+	ip varchar(255) NOT NULL DEFAULT '',
+	subnet varchar(255) NOT NULL DEFAULT '',
 	password varchar(20) NOT NULL DEFAULT '',
 	ts timestamp NOT NULL,
 	realemail VARCHAR(50) NOT NULL DEFAULT '',
@@ -1411,7 +1411,7 @@ CREATE TABLE users (
 	seclev mediumint UNSIGNED DEFAULT '0' NOT NULL,	/* This is set to 0 as a safety factor */
 	matchname varchar(35),
 	newpasswd char(32),
-	newpasswd_ts int UNSIGNED,
+	newpasswd_ts datetime,
 	journal_last_entry_date datetime,
 	author tinyint DEFAULT 0 NOT NULL,
 	shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL,

@@ -29,3 +29,10 @@ INSERT INTO code_param (type, code, name) VALUES ('sortorder', '3', 'Sort By Dat
 
 # Fix <p> tags in subs
 INSERT INTO vars (name, value, discription) VALUES ('submit_keep_p',1,'Keep <p> tags in story submissions');
+
+# Fix badpassword fields to handle larger IP address
+ALTER TABLE badpasswords MODIFY COLUMN ip varchar(255) NOT NULL DEFAULT '';
+ALTER TABLE badpasswords MODIFY COLUMN subnet varchar(255) NOT NULL DEFAULT '';
+
+# Fix newpasswd_ts field
+ALTER TABLE users MODIFY COLUMN newpasswd_ts datetime;
