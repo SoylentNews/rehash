@@ -14,20 +14,15 @@ __name__
 sections
 __template__
 <ul>
-	<li>
-		<a href="[% constants.rootdir %]/">[% constants.sitename %]</a>
-	</li>
-	[% skins = Slash.db.getSkins %]
-	
-	[% FOREACH skid IN skins.sort('title') %]
-		[% NEXT IF skid == constants.mainpage_skid %]
-		[% skins.skid.title %]
-		<li>
-			<a href="[% skins.$skid.rootdir %]/">[% skins.$skid.title %]</a>
-		</li>
+	<li><a href="[% constants.rootdir %]/">[% constants.sitename %]</a></li>
+
+	[% skins = Slash.db.getSkins;
+	skins.delete(constants.mainpage_skid) %]
+
+	[% FOREACH item IN skins.values.sort('title') %]
+		<li><a href="[% item.rootdir %]/">[% item.title %]</a></li>
 	[% END %]
 </ul>
-
 __seclev__
 10000
 __version__
