@@ -4822,8 +4822,8 @@ sub fixStory {
 	}
 
 	# remove leading and trailing whitespace
-	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
-	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+	$str =~ s/^$Slash::Utility::Data::WS_RE2+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE2+$//io;
 
 	# and let's just get rid of these P tags; we don't need them, and they
 	# cause too many problems in submissions
@@ -4843,8 +4843,8 @@ sub fixStory {
 	$str = balanceTags($str, { deep_nesting => 1, deep_su => 1 });
 
 	# do it again, just in case balanceTags added more ...
-	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
-	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+	$str =~ s/^$Slash::Utility::Data::WS_RE2+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE2+$//io;
 
 	return $str;
 }
