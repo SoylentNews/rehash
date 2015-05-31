@@ -1113,6 +1113,7 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_speed_limit','3
 INSERT INTO vars (name, value, description) VALUES ('submit_domains_invalid', 'example.com', 'space separated list of domains that are not valid for submitting stories');
 INSERT INTO vars (name, value, description) VALUES ('submit_categories','Back','Extra submissions categories');
 INSERT INTO vars (name, value, description) VALUES ('submit_extra_sort_key', '', 'Provides an additional submission list sorted on the given field name');
+INSERT INTO vars (name, value, discription) VALUES ('submit_keep_p',1,'Keep <p> tags in story submissions');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720','Hours after which a submissions\'s ipid/subnetid are forgotten; set very large to disable');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');

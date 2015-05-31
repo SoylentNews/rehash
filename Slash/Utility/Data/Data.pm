@@ -54,6 +54,7 @@ use base 'Exporter';
 
 # whitespace regex
 our $WS_RE = qr{(?: \s | </? (?:br|p) (?:\ /)?> )*}x;
+our $WS_RE2 = qr{(?: \s | <br (?:\ /)?> )*}x;
 
 # without this, HTML::TreeBuilder will skip slash
 BEGIN {
@@ -1391,9 +1392,10 @@ my %actions = (
 			# this doesn't assume there will be only two BRs,
 			# but it does come after whitespace_tagify, so
 			# chances are, will be only two BRs in a row
-			${$_[0]} =~ s/(?:<br>){2}/<p>/g;
+			${$_[0]} =~ s|(?:<br>){2}|</p>\n\n<p>|g;
 			# make sure we don't end with a <br><p> or <br>
-			${$_[0]} =~ s/<br>(<p>|$)/$1/g;			},
+			${$_[0]} =~ s/<br>(<p>|$)/$1/g;
+			${$_[0]} = ${$_[0]} . '</p>' unless ${$_[0]} =~ /<\/p>\s*$/s; },
 	whitespace_and_tt => sub {
 			${$_[0]} =~ s{((?:  )+)(?: (\S))?} {
 				("&nbsp; " x (length($1)/2)) .

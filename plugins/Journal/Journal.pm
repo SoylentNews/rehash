@@ -512,8 +512,8 @@ sub createSubmissionFromJournal {
 
 	my $story = $src_journal->{article};
 	
-	$story =~ s/^$Slash::Utility::Data::WS_RE+//io;
-	$story =~ s/$Slash::Utility::Data::WS_RE+$//io;
+	$story =~ s/^$Slash::Utility::Data::WS_RE2+//io;
+	$story =~ s/$Slash::Utility::Data::WS_RE2+$//io;
 	
 	$story = $self->fixJournalText($story, $src_journal->{posttype}, $src_journal->{uid});
 	#perhaps need more string cleanup from submit.pl's findStory here
@@ -628,8 +628,8 @@ sub splitJournalTextForStory {
 	my($intro, $body) = split(/<br>|<\/p>/i, $text, 2);
 
 	for ($intro, $body) {
-		s/^$Slash::Utility::Data::WS_RE+//io if defined;
-		s/$Slash::Utility::Data::WS_RE+$//io if defined;
+		s/^$Slash::Utility::Data::WS_RE2+//io if defined;
+		s/$Slash::Utility::Data::WS_RE2+$//io if defined;
 
 		$_ = balanceTags($_);
 	}
