@@ -1392,7 +1392,7 @@ my %actions = (
 			# this doesn't assume there will be only two BRs,
 			# but it does come after whitespace_tagify, so
 			# chances are, will be only two BRs in a row
-			${$_[0]} =~ s|(?:<br>){2}|</p>\n\n<p>|g;
+			${$_[0]} =~ s|(?:<br>){2}|</p> <p>|g;
 			# make sure we don't end with a <br><p> or <br>
 			${$_[0]} =~ s/<br>(<p>|$)/$1/g;
 			${$_[0]} = ${$_[0]} . '</p>' unless ${$_[0]} =~ /<\/p>\s*$/s; },
@@ -4845,6 +4845,8 @@ sub fixStory {
 	# do it again, just in case balanceTags added more ...
 	$str =~ s/^$Slash::Utility::Data::WS_RE2+//io;
 	$str =~ s/$Slash::Utility::Data::WS_RE2+$//io;
+	
+	$str =~ s|</p>|\n\n</p>|g;
 
 	return $str;
 }
