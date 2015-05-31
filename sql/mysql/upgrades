@@ -4,6 +4,8 @@
 
 # Apply these after reinstall rehash but before starting up slashd/apache
 
+UPDATE vars SET value = 'rehash_15_05' WHERE name = 'cvs_tag_currentcode';
+
 # Allow skins to be themeable (our termology here could be better)
 ALTER TABLE skins ADD COLUMN theme varchar(255) default '';
 
