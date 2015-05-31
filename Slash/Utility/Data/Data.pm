@@ -4846,7 +4846,7 @@ sub fixStory {
 	$str =~ s/^$Slash::Utility::Data::WS_RE2+//io;
 	$str =~ s/$Slash::Utility::Data::WS_RE2+$//io;
 	
-	$str =~ s|</p>|\n\n</p>|g;
+	$str =~ s|</p>|</p>\n\n|g;
 
 	return $str;
 }
