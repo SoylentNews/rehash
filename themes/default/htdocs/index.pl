@@ -149,7 +149,7 @@ my $start_time = Time::HiRes::time;
 	if ($stoid_in_str) {
 		$nd_hr = $gse_db->sqlSelectAllKeyValue('stoid, value',
 			'story_param',
-			qq{stoid IN ($stoid_in_str) AND name='neverdisplay' AND value != 0});
+			qq{stoid IN ($stoid_in_str) AND name='neverdisplay'});
 		if (keys %$nd_hr) {
 			for my $story_hr (@$stories) {
 				$story_hr->{neverdisplay} = 1 if $nd_hr->{ $story_hr->{stoid} };
