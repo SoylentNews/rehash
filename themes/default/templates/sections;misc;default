@@ -16,10 +16,10 @@ __template__
 <ul>
 	<li><a href="[% constants.rootdir %]/">[% constants.sitename %]</a></li>
 
-	[% skins = Slash.db.getSkins;
-	skins.delete(constants.mainpage_skid) %]
+	[% skins = Slash.db.getSkins %]
 
 	[% FOREACH item IN skins.values.sort('title') %]
+		[% NEXT IF item.skid == constants.mainpage_skid %]
 		<li><a href="[% item.rootdir %]/">[% item.title %]</a></li>
 	[% END %]
 </ul>
