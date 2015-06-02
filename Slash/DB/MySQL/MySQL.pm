@@ -2801,7 +2801,7 @@ sub checkStoryViewable {
 
 	return 0 if $self->sqlCount(
 		"story_param",
-		"stoid = '$stoid' AND name='neverdisplay' AND value > 0");
+		"stoid = '$stoid' AND name='neverdisplay'");
 
 	my @nexuses;
 	if ($start_tid) {
@@ -6002,7 +6002,7 @@ sub getStoryByTime {
 		'stories.stoid, sid, title, stories.tid',
 		"story_text, story_topics_rendered,
 		 stories LEFT JOIN story_param ON (stories.stoid=story_param.stoid
-			AND story_param.name='neverdisplay' AND story_param.value != 0)",
+			AND story_param.name='neverdisplay')",
 		"stories.stoid = story_text.stoid
 		 AND stories.stoid = story_topics_rendered.stoid
 		 AND '$time' > DATE_SUB($now, INTERVAL $bytime_delay DAY)
