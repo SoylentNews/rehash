@@ -23,7 +23,8 @@ sub main {
 	my $error_flag = 0;
 	my $postflag = $user->{state}{post};
 
-	my $op = lc($form->{op}) || '';
+	my $op = $form->{op} || '';
+	$op = lc($op);
 
 	my($formkey, $stories);
 

@@ -38,13 +38,6 @@ sub countStories {
 		'ORDER BY commentcount DESC LIMIT 10'
 	);
 
-	# XXXSKIN - not sure if this is the best way to do this, but
-	# i figure it is fine ... please change or advise if should be changed ...
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	for (@$stories) {
-		$_->[2] = $reader->getSkin($_->[2])->{name};
-	}
-
 	return $stories;
 }
 

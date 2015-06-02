@@ -15,10 +15,9 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 
-	my $section = $reader->getSection($form->{section});
 	my $list    = $reader->getAuthorDescription();
 
-	header("$constants->{sitename}: Authors", $section->{section}) or return;
+	header("$constants->{sitename}: Authors") or return;
 	slashDisplay('main', {
 		list	=> $list,
 		title	=> "The Authors",

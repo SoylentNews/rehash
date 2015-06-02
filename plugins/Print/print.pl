@@ -57,8 +57,8 @@ sub main {
 		return;
 	}
 
-	my $sect_title = 
-		$slashdb->getSection($constants->{section}, 'title');
+	my $sect_title = $gSkin->{'title'};
+		
 	my $story;
 	#Yeah, I am being lazy and paranoid  -Brian
 	if (!($user->{author} or $user->{is_admin}) and 
@@ -143,7 +143,6 @@ sub main {
 		story		=> $story,
 		topic		=> $topic,
 		author		=> $author,
-		section		=> $sect_title,
 		links		=> \@story_links,
 	}, { Nocomm => 1 });
 

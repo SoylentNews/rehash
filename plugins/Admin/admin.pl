@@ -29,7 +29,8 @@ sub main {
 	my $gSkin = getCurrentSkin();
 	my $postflag = $user->{state}{post};
 	# lc just in case
-	my $op = lc($form->{op});
+	my $op = $form->{op} || '';
+	$op = lc($op);
 
 	my $tbtitle = '';
 
