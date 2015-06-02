@@ -3459,7 +3459,7 @@ sub getSectionBlocks {
 		"bid, title, always_on",
 		"blocks",
 		"hidden != 1 AND shill = 'no'",
-		"ORDER BY ordernum");
+		"ORDER BY ordernum ASC, id ASC");
 }
 
 ########################################################
@@ -5698,7 +5698,7 @@ sub getPortalsCommon {
 			'bid,title,url,skin,portal,ordernum,all_skins,default_block,hidden,always_on',
 			'blocks',
 			"hidden != 1 AND (default_block = 1 OR always_on = 1) AND shill = 'no'",
-			'ORDER BY ordernum ASC'
+			'ORDER BY ordernum ASC, id ASC'
 	);
 	# We could get rid of tmp at some point
 	my %tmp;
@@ -5706,14 +5706,12 @@ sub getPortalsCommon {
 		$self->{_boxes}{$SB->{bid}} = $SB;  # Set the Slashbox
 		# Set the skinBoxes
 		if ($SB->{all_skins}) {
-			for my $skin (keys %$skins) {
-				push @{$tmp{$skin}}, $SB->{bid};
+			for my $skid (keys %$skins) {
+				push @{$tmp{$skid}}, $SB->{bid};
 			}
 		} else {
-			my $skin = $self->getSkin($SB->{skin});
-			next if !$skin;
-			$tmp{$skin->{skid}} ||= [ ];
-			push @{$tmp{$skin->{skid}}}, $SB->{bid};
+			# $SB->{skin} is an skid
+			push @{$tmp{$SB->{skin}}}, $SB->{bid};
 		}
 	}
 	$self->{_skinBoxes} = \%tmp;
@@ -10680,7 +10678,7 @@ sub getSkins {
 	return $self->{$table_cache} if $self->{$table_cache_time};
 
 	my $colors    = $self->sqlSelectAllHashref([qw( skid name )], "*", "skin_colors", "", "GROUP BY skid, name");
-	my $skins_ref = $self->sqlSelectAllHashref(    "skid",        "*", "skins");
+	my $skins_ref = $self->sqlSelectAllHashref(    "skid",        "*", "skins",       "", "ORDER BY skid");
 	if (my $regex = $constants->{debughash_getSkins}) {
 		$skins_ref = debugHash($regex, $skins_ref);
 	}

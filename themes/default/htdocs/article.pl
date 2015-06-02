@@ -78,7 +78,7 @@ sub main {
 
 	if ($story) {
 		# XXXSECTIONTOPICS this needs to be updated
-		my $SECT = $reader->getSection($story->{section});
+
 		# This should be a getData call for title
 		my $title = "$story->{title} - $constants->{sitename}";
 		if ($gSkin->{name} && $gSkin->{name} eq "idle") {
@@ -91,10 +91,8 @@ sub main {
 		if ($constants->{use_prev_next_link}) {
 			# section and series links must be defined as separate
 			# constants in vars
-			my($use_section, $use_series);
-#			$use_section = $story->{section} if
-#				$constants->{use_prev_next_link_section} &&
-#				$SECT->{type} eq 'contained';
+			my($use_series);
+
 			$use_series  = $story->{tid}     if 
 				$constants->{use_prev_next_link_series} &&
 				$reader->getTopic($story->{tid})->{series} eq 'yes';
@@ -102,13 +100,6 @@ sub main {
 			$stories{'prev'}   = $reader->getStoryByTime('<', $story);
 			$stories{'next'}   = $reader->getStoryByTime('>', $story)
 				unless $story->{is_future};
-
-			if ($use_section) {
-				my @a = ($story, { section => $use_section });
-				$stories{'s_prev'} = $reader->getStoryByTime('<', @a);
-				$stories{'s_next'} = $reader->getStoryByTime('>', @a)
-					unless $story->{is_future};
-			}
 
 			if ($use_series) {
 				my @a = ($story, { topic => $use_series });
@@ -119,14 +110,13 @@ sub main {
 
 			# you should only have one next/prev link, so do series first, then sectional,
 			# then main, each if applicable -- pudge
-			$prev_next_linkrel = $use_series ? 't_' : $use_section ? 's_' : '';
+			$prev_next_linkrel = $use_series ? 't_' : '';
 		}
 
 		my $links = {
 			title	=> $title,
 			story	=> $story,
 			'link'	=> {
-				section	=> $SECT,
 				prev	=> $stories{$prev_next_linkrel . 'prev'},
 				'next'	=> $stories{$prev_next_linkrel . 'next'},
 				author	=> $story->{uid},
@@ -173,8 +163,6 @@ sub main {
 		
 		slashDisplay('display', {
 			poll			=> $pollbooth,
-			section			=> $SECT,
-			section_block		=> $reader->getBlock($SECT->{section}),
 			show_poll		=> $pollbooth ? 1 : 0,
 			story			=> $story,
 			stories			=> \%stories,

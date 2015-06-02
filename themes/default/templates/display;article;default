@@ -4,8 +4,6 @@ __description__
 Template which describes the layout of the article display (and included comments if preferred).
 
 * poll = pollbooth block
-* section = section hashref
-* section_block = section block hashref
 * show_poll = boolean for showing poll or not
 * story = story data structure
 * stories = links to next/prev stories
@@ -38,13 +36,7 @@ IF story.relatedtext;
 		name		= "related";
  END;
 %]
-[%
-IF section_block.block;
-	PROCESS sidebox
-		title		= section.title
-		contents	= section_block.block
-		name		= section.title;
-END %]
+
 [% END %]
 </div>
 <a name="main-articles"></a>
@@ -58,11 +50,6 @@ END %]
 [% IF p %] <br>&laquo;&nbsp; [% p %][% END %]
 [% IF n %] [% IF p %] | [% ELSE %]<br>[% END %][% n %] &nbsp;&raquo; [% END; END %]
 
-[% IF constants.use_prev_next_link_section %]
-[% n = BLOCK; PROCESS nextStory s=stories.s_next; END %]
-[% p = BLOCK; PROCESS nextStory s=stories.s_prev; END %]
-[% IF p %] <br>Section: laquo;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<br>[% END %][% n %] &nbsp;&raquo; [% END; END %]
 
 [% IF constants.use_prev_next_link_series %]
 [% n = BLOCK; PROCESS nextStory s=stories.t_next; END %]
@@ -82,7 +69,6 @@ END %]
 			link	=> s.title,
 			sid	=> s.sid,
 			tid	=> s.tid,
-			section	=> s.section
 		};
 		storylinks = Slash.linkStory(ls) -%]
 <a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] title="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
