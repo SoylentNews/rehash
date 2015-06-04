@@ -479,7 +479,8 @@ sub ssiHeadFoot {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
-	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
+	my $gSkin = $slashdb->getSkin($form->{section}) || getCurrentSkin();
 
 	(my $dir = $gSkin->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
 	my $hostname = $gSkin->{hostname};
