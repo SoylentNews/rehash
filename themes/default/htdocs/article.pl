@@ -45,6 +45,8 @@ sub main {
 				return;
 			}
 		}
+	} elsif ($form->{ssi} && $form->{ssi} eq "yes"){
+		$gSkin = $slashdb->getSkin($form->{section}) || getCurrentSkin();
 	}
 
 	# Set the $future_err flag if a story would be available to be
