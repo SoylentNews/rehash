@@ -36,3 +36,10 @@ ALTER TABLE badpasswords MODIFY COLUMN subnet varchar(255) NOT NULL DEFAULT '';
 
 # Fix newpasswd_ts field
 ALTER TABLE users MODIFY COLUMN newpasswd_ts datetime;
+
+#######################################
+# SoylentNews Rehash 15.05.2          #
+#######################################
+
+# Disable user expiry; code appears to be broken and makes no sense
+UPDATE vars SET value = '0' WHERE name = 'do_expiry';
