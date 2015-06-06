@@ -1302,12 +1302,7 @@ sub editStory {
 		# Do we want to
 		# Slash::Utility::Anchor::getSkinColors()
 		# here?
-		my $reloDB = getObject("Slash::Relocate");
 		my %story_copy = %$storyref;
-		if ($reloDB) {
-			$story_copy{introtext} = $reloDB->href2SlashTag($story_copy{introtext}, $stoid);
-			$story_copy{bodytext} = $reloDB->href2SlashTag($story_copy{bodytext}, $stoid);
-		}
 
 		for my $field (qw( introtext bodytext )) {
 			$storyref->{$field} = cleanSlashTags($storyref->{$field});
@@ -1816,12 +1811,6 @@ sub updateStory {
 		$form->{$field} = strip_html($form->{$field});
 		#$form->{$field} = slashizeLinks($form->{$field});
 		$form->{$field} = balanceTags($form->{$field});
-	}
-
-	my $reloDB = getObject("Slash::Relocate");
-	if ($reloDB) {
-		$form->{introtext} = $reloDB->href2SlashTag($form->{introtext}, $form->{sid});
-		$form->{bodytext} = $reloDB->href2SlashTag($form->{bodytext}, $form->{sid});
 	}
 
 	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";

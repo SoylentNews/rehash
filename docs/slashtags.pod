@@ -147,45 +147,6 @@ This is processed into something like:
 	WIDTH="200" HEIGHT="200">
 
 
-=head2 LINK
-
-This tag encloses text.  Available attributes (please note that
-I<either> ID or HREF attribute are required):
-
-=over 4
-
-=item ID [OPTIONAL]
-
-The ID of the desired link.  If not supplied, one will be created automatically
-from the HREF attribute.
-
-=item HREF [OPTIONAL]
-
-The URL to the desired link; not required if ID is supplied.
-
-=item TITLE [OPTIONAL]
-
-The enclosed text is used if not supplied.  TITLE value is used for the
-ALT attribute.
-
-=item TYPE [OPTIONAL]
-
-"link", if hyphenated form not used.
-
-=back
-
-The SLASH-LINK tag creates a link to an arbitrary URL.  It uses the
-Slash::Relocate plugin, which is then used to control and track links to
-outside URLs.
-
-	<SLASH-LINK HREF="http://www.example.com/">Example site</SLASH>
-
-This is processed into something like (assuming the user is a friend):
-
-	<A HREF="//slash.example.com/relocate.pl?id=SOMEID"
-	TITLE="Example site">Example site</A>
-
-
 =head2 RELATED
 
 This tag encloses text.  Available attributes:

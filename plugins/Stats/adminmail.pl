@@ -892,27 +892,7 @@ EOT
 	$data{rand_users_yest} = $slashdb->getRandUsersCreatedYest(10, $yesterday);
 	($data{top_recent_domains}, $data{top_recent_domains_daysback}, $data{top_recent_domains_newaccounts}, $data{top_recent_domains_newnicks}) = $slashdb->getTopRecentRealemailDomains($yesterday);
 
-	my $relocate = getObject('Slash::Relocate');
-
-	if($relocate){
-		my $rls      = $logdb->getRelocatedLinksSummary();
-		my $sum      = $stats->getRelocatedLinkHitsByType($rls);
-		my $rls_tu   = $logdb->getRelocatedLinksSummary({ limit => 10});
-
-		$data{top_relocated_urls} = $stats->getRelocatedLinkHitsByUrl($rls_tu);
-
-		my $total;
-		foreach my $type (keys %$sum){
-			my $label = $type eq "" ? "relocate_other" : "relocate_$type";
-			$statsSave->createStatDaily($label, $sum->{$type});
-			$total += $sum->{$type};
-		}
-		$statsSave->createStatDaily("relocate_all", $total);
-	}
-
 	my $subscribe = getObject('Slash::Subscribe') if $constants->{plugin}{Subscribe};
-	my $firehose = getObject('Slash::FireHose') if $constants->{plugin}{FireHose};
-	my $tags = getObject('Slash::Tags') if $constants->{plugin}{Tags};
 
 	if ($subscribe) {
 		my $rswh =   $stats->getSubscribersWithRecentHits();
@@ -922,68 +902,6 @@ EOT
 			$sub_report .= sprintf("%6d %s\n", $sub->{cnt}, ($slashdb->getUser($sub->{uid}, 'nickname') || $sub->{uid})); 
 	 	}
 		$data{crawling_subscribers} = $sub_report if $sub_report; 
-	}
-
-	if ($firehose) {
-		my $fh_report = '';
-		my $fh_nods_nix = $stats->getTagCountForDay($yesterday, ["nod", "nix" ]);
-		$statsSave->createStatDaily("firehose_nod_nix", $fh_nods_nix);
-		$fh_report .= "Firehose total nods & nixes: $fh_nods_nix\n";
-
-		my $fh_nod = $stats->getTagCountForDay($yesterday, ["nod"]);
-		$statsSave->createStatDaily("firehose_nod", $fh_nod);
-		$fh_report .= "Firehose total nods: $fh_nod\n";
-		
-		my $fh_nix = $stats->getTagCountForDay($yesterday, ["nix"]);
-		$statsSave->createStatDaily("firehose_nix", $fh_nix);
-		$fh_report .= "Firehose total nixes: $fh_nix\n";
-		
-		# fh_active_users
-		my $fh_active_users = $stats->getTagCountForDay($yesterday, ["nod", "nix" ], 1);
-		$statsSave->createStatDaily("firehose_active_users", $fh_active_users);
-		$fh_report .= "Firehose active users: $fh_active_users\n";
-
-		# fh_objects
-		my $fh_objects = $stats->numFireHoseObjectsForDay($yesterday);
-		$statsSave->createStatDaily("firehose_objects", $fh_objects);
-		$fh_report .= "Firehose objects created: $fh_objects\n";
-
-		# fh_by_type
-		my $fh_objects_type = $stats->numFireHoseObjectsForDayByType($yesterday);
-		foreach (@$fh_objects_type) {
-			$statsSave->createStatDaily("firehose_objects_$_->{type}", "$_->{cnt}");
-			$fh_report .= "Firehose objects $_->{type}: $_->{cnt}\n";
-		}
-		$data{firehose_report} = $fh_report;
-	}
-
-	if ($firehose && $tags) {
-		my($binspam_globj_count, $is_spam_new_count, $autodetected_count)
-			= $stats->tallyBinspam();
-		$data{binspam_globj_count} = $binspam_globj_count;
-		$statsSave->createStatDaily('binspam_globj_count', $binspam_globj_count);
-		$data{is_spam_new_count} = $is_spam_new_count;
-		$statsSave->createStatDaily('is_spam_new_count', $is_spam_new_count);
-		$data{is_spam_autodetected_count} = $autodetected_count;
-		$statsSave->createStatDaily('is_spam_autodetected_count', $autodetected_count);
-	}
-
-	if ($tags) {
-		my $tags_report = '';
-		my $tags_users = $stats->getTagCountForDay($yesterday, [], 1);
-		$statsSave->createStatDaily("tags_users", $tags_users);
-		$tags_report .= "Tags active users: $tags_users\n";
-
-		my $tags_count = $stats->getTagCountForDay($yesterday, [], 0);
-		$statsSave->createStatDaily("tags_count", $tags_count);
-		$tags_report .= "Tags Count: $tags_count\n";
-	
-		my $tags_by_type = $stats->numTagsForDayByType($yesterday);
-		foreach(@$tags_by_type) {
-			$statsSave->createStatDaily("tags_count_$_->{type}", $_->{cnt});
-			$tags_report .= "Tags Count $_->{type}: $_->{cnt}\n";
-		}
-		$data{tags_report} = $tags_report;
 	}
 
 	my $email = slashDisplay('display', \%data, {

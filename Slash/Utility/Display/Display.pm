@@ -1427,7 +1427,6 @@ my $slashTags = {
 };
 
 my $cleanSlashTags = {
-	'link'     => \&_cleanSlashLink,
 	'related'  => \&_cleanSlashRelated,
 	'user'     => \&_cleanSlashUser,
 	'story'    => \&_cleanSlashStory,
@@ -1459,18 +1458,6 @@ sub cleanSlashTags {
 	}
 
 	return $newtext;
-}
-
-sub _cleanSlashLink {
-	my($tokens, $token, $newtext) = @_;
-	my $reloDB = getObject('Slash::Relocate');
-
-	if ($reloDB) {
-		my $link  = $reloDB->create({ url => $token->[1]{href} });
-		my $href  = strip_attribute($token->[1]{href});
-		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<slash href="$href" id="$link" title="$title" type="link">#is;
-	}
 }
 
 sub _cleanSlashRelated {

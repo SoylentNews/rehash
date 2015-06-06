@@ -1,10 +1,7 @@
 __section__
 default
 __description__
-Display a link that uses Slash::Relocate
-
-If Slash::Relocate is no longer available, shows the plain link by itself,
-instead, without using relocate.pl
+Display a link
 
 __title__
 
@@ -15,11 +12,7 @@ en_US
 __name__
 hrefLink
 __template__
-[%- IF constants.plugin.Relocate -%]
-<a href="[% constants.real_rootdir%]/relocate.pl?id=[% id | strip_paramattr %]" title="[% title | strip_attribute %]">[% text %]</a>
-[%- ELSE -%]
 <a href="[% (href || title) | strip_urlattr %]">[% text %]</a>
-[%- END -%]
 __seclev__
 10000
 __version__

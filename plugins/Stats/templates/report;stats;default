@@ -39,11 +39,6 @@ __template__
       'rss'	  => 'RSS Report',
 }
 
-relocate_plugin = Slash.getObject('Slash::Relocate');
-IF relocate_plugin;
-	reports.relocate="Relocated Page Report";
-END; 
-
 %]
 
 [% SWITCH form.report;
