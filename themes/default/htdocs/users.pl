@@ -27,7 +27,8 @@ sub main {
 
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0 ;
 	my $postflag = $user->{state}{post};
-	my $op = lc($form->{op});
+	my $op = $form->{op} || '';
+	$op  = lc($op);
 
 	# savepasswd is a special case, because once it's called, you
 	# have to reload the form, and you don't want to do any checks if
