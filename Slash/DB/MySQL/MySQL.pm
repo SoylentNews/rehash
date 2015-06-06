@@ -8537,66 +8537,6 @@ sub getMCD {
 }
 
 ##################################################################
-# Extremely ugly but necessary if we want stats on memcached
-sub getMCDold {
-	my($self, $options) = @_;
-
-	# If we already created it for this object, or if we tried to
-	# create it and failed and assigned it 0, return that.
-	return $self->{_mcdold} if defined($self->{_mcdold});
-
-	# If we aren't using memcached, return false.
-	my $constants;
-	if ($options->{no_getcurrentstatic}) {
-		# If our caller needs getMCD because it's going to
-		# set up vars, we can't rely on getCurrentStatic.
-		# So get the vars we need directly.
-		my @needed = qw( memcached memcached_debug
-			memcached_keyprefix memcached_servers
-			sitename );
-		my $in_clause = join ",", map { $self->sqlQuote($_) } @needed;
-		$constants = $self->sqlSelectAllKeyValue(
-			"name, value",
-			"vars",
-			"name IN ($in_clause)");
-	} else {
-		$constants = getCurrentStatic();
-	}
-	return 0 if !$constants->{memcached} || !$constants->{memcached_servers};
-
-	# OK, let's try memcached.  The memcached_servers var is in the format
-	# "10.0.0.15:11211 10.0.0.15:11212 10.0.0.17:11211=3".
-
-	my @servers = split / /, $constants->{memcached_servers};
-	for my $server (@servers) {
-		if ($server =~ /(.+)=(\d+)$/) {
-			$server = [ $1, $2 ];
-		}
-	}
-	require Cache::Memcached;
-	$self->{_mcdold} = Cache::Memcached->new({
-		servers =>	[ @servers ],
-	##########
-	#	TMB I think we're okay just pulling stats even in a non-debug state
-	#	debug =>	$constants->{memcached_debug} > 1 ? 1 : 0,
-		debug => 1,
-	});
-	if (!$self->{_mcdold}) {
-		# Can't connect; not using it.
-		return $self->{_mcdold} = 0;
-	}
-	if ($constants->{memcached_keyprefix}) {
-		$self->{_mcd_keyprefix} = $constants->{memcached_keyprefix};
-	} else {
-		# If no keyprefix defined in vars, use the first and
-		# last letter from the sitename.
-		$constants->{sitename} =~ /([A-Za-z]).*(\w)/;
-		$self->{_mcd_keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
-	}
-	return $self->{_mcdold};
-}
-
-##################################################################
 sub getMCDStats {
 	my($self) = @_;
 	my $mcd = $self->getMCDold();
@@ -8638,7 +8578,6 @@ sub autoUrl {
 	my $form = getCurrentForm();
 
 	$data =~ s/([0-9a-z])\?([0-9a-z])/$1'$2/gi if $form->{fixquotes};
-	$data =~ s/\[([^\]]+)\]/linkNode($1)/ge if $form->{autonode};
 
 	my $initials = substr $user->{nickname}, 0, 1;
 	my $more = substr $user->{nickname}, 1;
@@ -8658,16 +8597,6 @@ sub autoUrl {
 	$data =~ s/<image(.*?)>/importImage($section)/ex;
 	$data =~ s/<attach(.*?)>/importFile($section)/ex;
 	return $data;
-}
-
-#################################################################
-# link to Everything2 nodes --- should be elsewhere (as should autoUrl)
-sub linkNode {
-	my($title) = @_;
-	my $link = URI->new("http://www.everything2.com/");
-	$link->query("node=$title");
-
-	return qq|$title<sup><a href="$link">?</a></sup>|;
 }
 
 ##################################################################
