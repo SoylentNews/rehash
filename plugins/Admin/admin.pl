@@ -1366,8 +1366,6 @@ sub editStory {
 	$slashdb->setSession($user->{uid}, {
 		lasttitle	=> $storyref->{title},
 		last_sid	=> $sid,
-		last_subid	=> '',
-		last_fhid	=> '',
 		last_action	=> 'editing',
 	});
 
