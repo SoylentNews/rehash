@@ -41,7 +41,5 @@ template=templates/unmod_msg_subj;comments;default
 template=templates/zoo_msg;zoo;default
 template=templates/zoo_msg_subj;zoo;default
 template=templates/storynew;messages;default
-template=templates/achievement_msg;achievements;default
-template=templates/achievement_msg_subj;achievements;default
 template=templates/remarks_msg;dynamicblocks;default
 template=templates/remarks_msg_subj;dynamicblocks;default

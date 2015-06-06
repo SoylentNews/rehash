@@ -588,7 +588,6 @@ my %ops_u2 = (
 	admin           => { args => 'nick=__NICK__&uid=__UID__&dp=admin' },
 	journal         => { args => 'nick=__NICK__&uid=__UID__&dp=journal' },
 	tags            => { args => 'nick=__NICK__&uid=__UID__&dp=tags&op=userinfo' },
-	achievements    => { args => 'nick=__NICK__&uid=__UID__&dp=achievements' },
 
 	friends         => { args => 'nick=__NICK__&uid=__UID__&dp=friends' },
 	fans            => { args => 'nick=__NICK__&uid=__UID__&dp=fans' },

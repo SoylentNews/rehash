@@ -1907,10 +1907,6 @@ sub updateStory {
 		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		
-		if ($admindb) {
-			$admindb->addSpriteForSid($form->{sid});
-		}
-
 
 		# handle any media files that were given
 		handleMediaFileForStory($st->{stoid});
@@ -2426,9 +2422,6 @@ sub saveStory {
 					table => 'stories', id => $stoid });
 			}
 		}
-
-		$admindb->grantStoryPostingAchievements($form->{uid}, $form->{submitter});
-		$admindb->addSpriteForSid($sid);
 
 		listStories(@_);
 	} else {

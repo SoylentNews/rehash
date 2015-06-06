@@ -1810,11 +1810,6 @@ sub saveComment {
 		$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
 	}
 
-	my $achievements = getObject('Slash::Achievements');
-	if ($achievements) {
-		$achievements->setUserAchievement('comment_posted', $user->{uid});
-	}
-
 	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
 	if ($dynamic_blocks) {
 		$dynamic_blocks->setUserBlock('comments', $user->{uid});
