@@ -1007,10 +1007,6 @@ sub editCreateStory {
 
 		#XXXEdit Tags Auto save?
 		my $admindb = getObject("Slash::Admin");
-		if ($admindb) {
-			$admindb->grantStoryPostingAchievements($data->{uid}, $data->{submitter});
-			$admindb->addSpriteForSid($_);
-		}
 
 		#XXX Move this to Slash::DB
 		my $sfids = $self->sqlSelect('value', 'preview_param', "name = 'sfid' and preview_id = " . $preview->{preview_id});

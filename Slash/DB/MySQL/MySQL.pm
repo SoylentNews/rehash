@@ -8638,7 +8638,6 @@ sub autoUrl {
 	my $form = getCurrentForm();
 
 	$data =~ s/([0-9a-z])\?([0-9a-z])/$1'$2/gi if $form->{fixquotes};
-	$data =~ s/\[([^\]]+)\]/linkNode($1)/ge if $form->{autonode};
 
 	my $initials = substr $user->{nickname}, 0, 1;
 	my $more = substr $user->{nickname}, 1;
@@ -8658,16 +8657,6 @@ sub autoUrl {
 	$data =~ s/<image(.*?)>/importImage($section)/ex;
 	$data =~ s/<attach(.*?)>/importFile($section)/ex;
 	return $data;
-}
-
-#################################################################
-# link to Everything2 nodes --- should be elsewhere (as should autoUrl)
-sub linkNode {
-	my($title) = @_;
-	my $link = URI->new("http://www.everything2.com/");
-	$link->query("node=$title");
-
-	return qq|$title<sup><a href="$link">?</a></sup>|;
 }
 
 ##################################################################

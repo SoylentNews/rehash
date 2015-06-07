@@ -1302,12 +1302,7 @@ sub editStory {
 		# Do we want to
 		# Slash::Utility::Anchor::getSkinColors()
 		# here?
-		my $reloDB = getObject("Slash::Relocate");
 		my %story_copy = %$storyref;
-		if ($reloDB) {
-			$story_copy{introtext} = $reloDB->href2SlashTag($story_copy{introtext}, $stoid);
-			$story_copy{bodytext} = $reloDB->href2SlashTag($story_copy{bodytext}, $stoid);
-		}
 
 		for my $field (qw( introtext bodytext )) {
 			$storyref->{$field} = cleanSlashTags($storyref->{$field});
@@ -1371,8 +1366,6 @@ sub editStory {
 	$slashdb->setSession($user->{uid}, {
 		lasttitle	=> $storyref->{title},
 		last_sid	=> $sid,
-		last_subid	=> '',
-		last_fhid	=> '',
 		last_action	=> 'editing',
 	});
 
@@ -1818,12 +1811,6 @@ sub updateStory {
 		$form->{$field} = balanceTags($form->{$field});
 	}
 
-	my $reloDB = getObject("Slash::Relocate");
-	if ($reloDB) {
-		$form->{introtext} = $reloDB->href2SlashTag($form->{introtext}, $form->{sid});
-		$form->{bodytext} = $reloDB->href2SlashTag($form->{bodytext}, $form->{sid});
-	}
-
 	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";
 	{
 		local $Slash::Utility::Data::approveTag::admin = 2;
@@ -1918,10 +1905,6 @@ sub updateStory {
 		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		
-		if ($admindb) {
-			$admindb->addSpriteForSid($form->{sid});
-		}
-
 
 		# handle any media files that were given
 		handleMediaFileForStory($st->{stoid});
@@ -2437,9 +2420,6 @@ sub saveStory {
 					table => 'stories', id => $stoid });
 			}
 		}
-
-		$admindb->grantStoryPostingAchievements($form->{uid}, $form->{submitter});
-		$admindb->addSpriteForSid($sid);
 
 		listStories(@_);
 	} else {

@@ -358,7 +358,10 @@ sub changePrefs {
 			$fieldkey = 'nickname';
 		}
 	} else {
-		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
+		# MC: This can't possibly be correct, $id is never initialized ...
+		# I'm not even sure if its used?!
+		#$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
+		$user_edit = $user;
 		$fieldkey = 'uid';
 		$id = $user_edit->{uid};
 	}
@@ -431,7 +434,6 @@ sub savePrefs {
 		my $user_save = {};
 		$user_save->{passwd} = $form->{pass1} if $changepass;
 		$user_save->{session_login} = $form->{session_login};
-		$user_save->{cookie_location} = $form->{cookie_location};
 
 		# changed pass, so delete all logtokens
 		$slashdb->deleteLogToken($user_edit->{uid}, 1);

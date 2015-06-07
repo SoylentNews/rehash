@@ -754,34 +754,6 @@ sub getStoryThumbLargeLink {
 
 }
 
-sub grantStoryPostingAchievements {
-	my($self, $uid, $submitter) = @_;
-	my $achievements = getObject('Slash::Achievements');
-	if ($achievements) {
-		# User
-		if ($uid != $submitter) {
-			$achievements->setUserAchievement('story_accepted', $submitter, { maker_mode => 1 });
-			if ($achievements->checkMeta($submitter, 'the_maker', ['story_accepted', 'comment_upmodded'])) {
-				$achievements->setUserAchievement('the_maker', $submitter, { ignore_lookup => 1, exponent => 0 });
-			}
-		}
-		# Author
-		$achievements->setUserAchievement('story_posted', $uid);
-	}
-}
-
-# Create the sprite for this sid.
-# This may change to calling addFileToQueue() with globjid.
-
-sub addSpriteForSid {
-	my($self, $sid) = @_;
-	my $fh_reader = getObject("Slash::FireHose");
-	if ($fh_reader) {
-		my $sprite_fhid = $fh_reader->getFireHoseBySidOrStoid($sid);
-		$self->addFileToQueue({ fhid => $sprite_fhid->{id}, action => 'sprite' });
-	}
-}
-
 ##################################################################
 # Based on $t (time from form), returns the time for a story we're saving.  It
 # takes a look at the and $ff 'fastforward' checkbox, handles a blank field

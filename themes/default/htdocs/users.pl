@@ -27,7 +27,8 @@ sub main {
 
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0 ;
 	my $postflag = $user->{state}{post};
-	my $op = lc($form->{op});
+	my $op = $form->{op} || '';
+	$op  = lc($op);
 
 	# savepasswd is a special case, because once it's called, you
 	# have to reload the form, and you don't want to do any checks if
@@ -1957,12 +1958,6 @@ sub changePasswd {
 	my $session = $slashdb->getDescriptions('session_login');
 	my $session_select = createSelect('session_login', $session, $user_edit->{session_login}, 1);
 
-	my $clocation = $slashdb->getDescriptions('cookie_location');
-	my @clocation_order = grep { exists $clocation->{$_} } qw(none classbid subnetid ipid);
-	my $clocation_select = createSelect('cookie_location', $clocation,
-		$user_edit->{cookie_location}, 1, 0, \@clocation_order
-	);
-
 	my $got_oldpass = 0;
 	if ($form->{oldpass}) {
 		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass}, 1);
@@ -1974,7 +1969,6 @@ sub changePasswd {
 		admin_flag		=> $suadmin_flag,
 		title			=> $title,
 		session 		=> $session_select,
-		clocation 		=> $clocation_select,
 		admin_block		=> $admin_block,
 		got_oldpass		=> $got_oldpass
 	});
@@ -2530,7 +2524,6 @@ sub savePasswd {
 	if (! $error_flag) {
 		$user_edits_table->{passwd} = $form->{pass1} if $form->{pass1};
 		$user_edits_table->{session_login} = $form->{session_login};
-		$user_edits_table->{cookie_location} = $form->{cookie_location};
 
 		# changed pass, so delete all logtokens
 		$slashdb->deleteLogToken($form->{uid}, 1);

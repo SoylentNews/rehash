@@ -3606,7 +3606,7 @@ $slashdb->sqlInsert("al2", { srcid => get_srcid_sql_in($srcid) });
 
 sub get_srcid_sql_in {
 	my($srcid) = @_;
-	if ($srcid !~ /^[0-9a-f]+$/) {
+	if ($srcid !~ /^[0-9a-f:]+$/) {
 		my @caller_info = ( );
 		for (my $lvl = 1; $lvl < 99; ++$lvl) {
 			my @c = caller($lvl);

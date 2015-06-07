@@ -41,30 +41,6 @@ sub set {
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
-
-	$self->insertFireHose($id, $j1{promotetype});
-}
-
-sub insertFireHose {
-	my($self, $id, $promotetype) = @_;
-
-	return unless getCurrentStatic()->{plugin}{FireHose};
-
-	if ($promotetype ne 'post') {
-		my $reskey = getObject('Slash::ResKey');
-		my $rkey = $reskey->key('submit', { nostate => 1 });
-		if (!$rkey || !$rkey->createuse) {
-			# user is not able to submit, so we make it
-			# a "non-submitted" FH entry
-			$self->sqlUpdate('journals',
-				{ promotetype => 'post' },
-				"id=" . $self->sqlQuote($id)
-			);
-		}
-	}
-
-	my $firehose = getObject("Slash::FireHose");
-	$firehose->createUpdateItemFromJournal($id);
 }
 
 sub getsByUid {
@@ -229,13 +205,6 @@ sub create {
 	my($date) = $self->sqlSelect('date', 'journals', "id=$id");
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($user->{uid}, { journal_last_entry_date => $date });
-
-	$self->insertFireHose($id, $promotetype);
-
-	my $achievements = getObject('Slash::Achievements');
-	if ($achievements) {
-		$achievements->setUserAchievement('journal_posted', $user->{uid});
-	}
 
 	my $dynamic_blocks = getObject('Slash::DynamicBlocks');
 	if ($dynamic_blocks) {

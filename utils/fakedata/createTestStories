@@ -22,7 +22,6 @@ use Date::Manip qw( UnixDate ParseDateString );
 use Slash;
 use Slash::Utility;
 use Benchmark;
-use Slash::Relocate;
 
 use vars qw( $slashdb $werder $constants );
 
@@ -124,13 +123,6 @@ $constants = getCurrentStatic();
 		$story->{neverdisplay} = 1 if rand(1) < 0.1;
 
 		my $sid = $slashdb->createStory($story);
-		my $reloDB = getObject("Slash::Relocate");
-		if ($reloDB && $sid) {
-			$slashdb->setStory($sid, { 
-				introtext => $reloDB->href2SlashTag($introtext, $sid),
-				bodytext => $reloDB->href2SlashTag($bodytext, $sid),
-			});
-		}
 		if ($sid) {
 			print "($count) Story created: $sid $time $title\n";
 		} else {

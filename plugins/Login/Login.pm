@@ -329,7 +329,6 @@ sub createNewUser {
                 'Journal Entry by Friend',
                 'Subscription Running Low',
                 'Subscription Expired',
-                'Achievement',
                 'Relationship Change'
         );
 
