@@ -1213,10 +1213,11 @@ sub getStoriesToRefresh {
 	my($self, $limit, $tid, $options) = @_;
 	$options ||= {};
 	$limit ||= 10;
+
 	my $tid_clause = "";
-	$tid_clause = " AND story_topics_rendered.tid = $tid" if $tid;
-	my $stoid_clause = "";
+	$tid_clause = " WHERE story_topics_rendered.tid = $tid" if $tid;
 	
+	my $stoid_clause = "";
 	if ($options->{stoid}) {
 		my @stoids = ( );
 		if (ref $options->{stoid} eq "ARRAY") {
@@ -1235,17 +1236,14 @@ sub getStoriesToRefresh {
 	# The check for primaryskid > 0 also ensures the results
 	# don't include neverdisplay stories.
 	my $retval = $self->sqlSelectAllHashrefArray(
-		"DISTINCT stories.stoid AS stoid, sid, primaryskid, title, time",
-		"story_text, story_topics_rendered,
-		 stories LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
+		"stories.stoid AS stoid, sid, primaryskid, title, time",
+		"story_text, stories",
 		"time < NOW()
 		 AND stories.primaryskid > 0
 		 AND stories.stoid = story_text.stoid
-		 AND story_dirty.stoid IS NOT NULL
-		 AND stories.stoid = story_topics_rendered.stoid
-		 $tid_clause
+		 AND stories.stoid IN (SELECT story_topics_rendered.stoid FROM story_topics_rendered INNER JOIN story_dirty ON story_topics_rendered.stoid=story_dirty.stoid $tid_clause)
 		 $stoid_clause",
-		"ORDER BY time DESC LIMIT $limit");
+		"GROUP BY stoid ORDER BY time DESC LIMIT $limit");
 	return [ ] if !@$retval;
 
 	# Weed out the stories marked as 'never display' -- they don't
