@@ -504,8 +504,10 @@ sub editComment {
 
 	preProcessReplyForm($form, $reply);
 	
-	my $extras = [];	
-	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
+	my $extras = [];
+	my $skid = $discussion->{primaryskid} || $constants->{mainpage_skid};
+	my $disc_skin = $slashdb->getSkin($skid);
+	# print STDERR scalar(localtime) . " $$ comment.pl 508 discussion primaryskid: " . $discussion->{primaryskid} . ", discussion id: " . $discussion->{id} . "\n" ;
 	
 	$extras =  $slashdb->getNexusExtrasForChosen(
 		{ $disc_skin->{nexus} => 1 },

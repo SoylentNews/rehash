@@ -2404,22 +2404,6 @@ sub saveStory {
 		}
 		titlebar('100%', getTitle('saveStory-title', $data) );
 		$slashdb->createSignoff($stoid, $user->{uid}, "saved");
-		if ($constants->{tags_admin_autoaddstorytopics} && $constants->{plugin}{Tags}) {
-			my $tree = $slashdb->getTopicTree();
-			my $tagsdb = getObject('Slash::Tags');
-			my %tt = ( ); # topic tagnames
-			for my $tid (keys %$chosen_hr) {
-				next unless $chosen_hr->{$tid} > 0;	# must have weight
-				next unless $tree->{$tid}{image};	# must have an image
-				my $kw = $tree->{$tid}{keyword};
-				next unless $tagsdb->tagnameSyntaxOK($kw); # must be a valid tagname
-				$tt{$kw} = 1;
-			}
-			for my $tagname (sort keys %tt) {
-				$tagsdb->createTag({ name => $tagname,
-					table => 'stories', id => $stoid });
-			}
-		}
 
 		listStories(@_);
 	} else {

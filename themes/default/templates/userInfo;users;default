@@ -114,11 +114,6 @@ __template__
 					title = "$thisnickname's Recently Accepted Submissions";
 				END;
 				PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions;
-			END;
-
-			IF user.is_admin && tagshist && tagshist.size > 0;
-				title = "$thisnickname's Recent Tags";
-				PROCESS usertaghistory tagshist = tagshist title = title;
 			END %]
 </div>
 

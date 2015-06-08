@@ -104,12 +104,6 @@ sub main {
 
 	writeLog($form->{query})
 		if $form->{op} =~ /^(?:comments|stories|users|polls|journals|submissions|rss)$/;
-
-	my $plugins = $slashdb->getDescriptions('plugins');
-	if ($form->{query} && $plugins->{Tags}) {
-		my $tagsdb = getObject('Slash::Tags');
-		$tagsdb->logSearch($form->{query});
-	}
 }
 
 
