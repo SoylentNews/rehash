@@ -92,7 +92,8 @@ sub main {
 	# if section is defined, perhaps. -- pudge
 	Slash::Utility::Anchor::getSkinColors();
 
-	my $op = lc($form->{op}) || '';
+	my $op = $form->{op} || '';
+	$op = lc($op);
 
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
 		$op = 'default';
