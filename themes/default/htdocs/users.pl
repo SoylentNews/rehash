@@ -228,34 +228,6 @@ sub main {
 			formname	=> $formname,
 			checks		=> ['regen_formkey'],
 		},
-		showtags => {
-			function	=> \&showTags,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'tags',
-		},
-		showbookmarks => {
-			function	=> \&showBookmarks,
-			seclev		=> 0,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'bookmarks',
-		},
-		edittags => {
-			function	=> \&editTags,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'tags',
-		},
-		savetags => {
-			function	=> \&saveTags,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected	=> 'tags',
-		},
 #		userclose	=>  {
 #			function	=> \&displayForm,
 #			seclev		=> 0,
@@ -1340,11 +1312,6 @@ sub showInfo {
 			$metamods = $metamod_reader->getMetamodlogForUser($uid, 30);
 		}
 
-		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-		my $tagshist = [];
-		if ($tags_reader && $user->{is_admin}) {
-			$tagshist = $tags_reader->getAllTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 30, include_private => 1 });
-		}
 
 		slashDisplay('userInfo', {
 			title			=> $title,
@@ -1368,7 +1335,6 @@ sub showInfo {
 			submissions		=> $submissions,
 			subcount		=> $subcount,
 			metamods		=> $metamods,
-			tagshist		=> $tagshist
 		});
 	}
 
@@ -1537,147 +1503,6 @@ sub validateUser {
 	}
 
 	slashDisplay('regResult');
-}
-
-#####################################################################
-sub editTags {
-	my($hr) = @_;
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser(); 
-	my $constants = getCurrentStatic();
-	my $note = $hr->{note} || "";
-
-	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
-
-	my $user_edit = $slashdb->getUser($user->{uid});
-	my $title = getTitle('editTags_title');
-
-	slashDisplay('editTags', {
-		user_edit	=> $user_edit,
-		title		=> $title,
-		note		=> $note,
-	});
-}
-
-sub saveTags {
-	my($hr) = @_;
-	my $slashdb = getCurrentDB();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $constants = getCurrentStatic();
-
-	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
-
-	$slashdb->setUser($user->{uid}, {
-		tags_turnedoff =>	$form->{showtags} ? '' : 1 });
-	editTags({ note => getMessage('savetags_msg') });
-}
-
-#####################################################################
-sub showTags {
-	my($hr) = @_;
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-
-	# XXX if $user_edit->{acl}{spammer}, either abort or put ref=nofollow in all links
-
-	my $tagname = $form->{tagname} || '';
-	$tagname = '' if !$tags_reader->tagnameSyntaxOK($tagname);
-
-	my($uid, $user_edit);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
-		$user_edit = $tags_reader->getUser($uid);
-	}
-	if (!$user_edit || $user_edit->{is_anon}) {
-		$uid = $user->{uid};
-		$user_edit = $user;
-	}
-	my $nickname = $user_edit->{nickname};
-
-	if (!$constants->{plugin}{Tags}) {
-		print getError('bad_op', { op => $form->{op}});
-		return;
-	}
-
-	my $tagnameid = $tags_reader->getTagnameidFromNameIfExists($tagname);
-	if ($tagnameid) {
-		# Show all user's tags for one particular tagname.
-		my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid},
-			{ tagnameid => $tagnameid });
-		my $tags_ar = $tags_hr->{$tagname} || [ ];
-		slashDisplay('usertagsforname', {
-			useredit	=> $user_edit,
-			tagname		=> $tagname,
-			tags		=> $tags_ar,
-		});
-		
-	} else {
-		my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
-		my $num_tags = 0;
-		for my $tn (keys %$tags_hr) {
-			$num_tags += scalar @{ $tags_hr->{$tn} };
-		}
-		my $cutoff = $constants->{tags_usershow_cutoff} || 200;
-		if ($num_tags <= $cutoff) {
-			# Show all user's tags, grouped by tagname.
-			slashDisplay('usertags', {
-				useredit	=> $user_edit,
-				tags_grouped	=> $tags_hr,
-			});
-		} else {
-			# Show all user's tagnames, with links to show all
-			# tags for each particular tagname.
-			my $tagname_ar = [ sort keys %$tags_hr ];
-			slashDisplay('usertagnames', {
-				useredit	=> $user_edit,
-				tagnames	=> $tagname_ar,
-			});
-		}
-	}
-}
-
-#################################################################
-sub showBookmarks {
-	my($hr) = @_;
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-
-	my($uid, $user_edit);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
-		$user_edit = $tags_reader->getUser($uid);
-	}
-	if (!$user_edit || $user_edit->{is_anon}) {
-		$uid = $user->{uid};
-		$user_edit = $user;
-	}
-	my $nickname = $user_edit->{nickname};
-
-	if (!$constants->{plugin}{Tags}) {
-		print getError('bad_op', { op => $form->{op}});
-		return;
-	}
-
-	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid}, { type => "urls", only_bookmarked => 1 });
-
-	slashDisplay('userbookmarks', {
-		useredit	=> $user_edit,
-		tags_grouped	=> $tags_ar,
-	});
 }
 
 #################################################################

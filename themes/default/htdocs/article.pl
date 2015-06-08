@@ -35,7 +35,7 @@ sub main {
 		# Make sure the reader is viewing this story in the
 		# proper skin.
 #		my $cur_skid = determineCurrentSkin(); #broken now, but may be fixed
-		my $cur_skid = $gSkin->{skid};
+		my $cur_skid = $gSkin->{skid} || $constants->{mainpage_skid};
 		if ($story->{primaryskid} != $cur_skid) {
 			my $cur_skin = $reader->getSkin($cur_skid);
 			my $story_skin = $reader->getSkin($story->{primaryskid});
@@ -216,13 +216,6 @@ sub main {
 			$message = getData('no_such_sid');
 		}
 		print $message;
-	}
-
-	my $plugins = $slashdb->getDescriptions('plugins');
-	if (!$user->{is_anon} && $plugins->{Tags} && $story) {
-		my $tagsdb = getObject('Slash::Tags');
-		$tagsdb->markViewed($user->{uid},
-			$reader->getGlobjidCreate('stories', $story->{stoid}));
 	}
 
 	footer();

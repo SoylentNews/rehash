@@ -27,6 +27,7 @@ bg_toggle = 0;
 bg_col_1 = "DDDDDD";
 bg_col_2 = user.colors.bg_2;
 cur_time = Slash.db.getTime();
+total = 0;
 %]
 [% admin_link_user = admin_flag && !useredit.uid && !useredit.nickname %]
 [% admin_link_ipid = admin_flag && !useredit.ipid %]
