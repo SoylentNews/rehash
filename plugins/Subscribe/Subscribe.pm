@@ -570,8 +570,8 @@ sub bpRequest {
 
 sub bpCreateInvoice {
     my ($self, %args) = @_;
-    return 0 and print STDERR "price missed\n" unless exists $args{price};
-    return 0 and print STDERR "currency missed\n" unless exists $args{currency};
+    unless(exists $args{price}){print STDERR "price missed\n"; return 0;}
+    unless(exists $args{currency}){print STDERR "currency missed\n"; return 0;}
     return $self->bpRequest('invoice', \%args);
 }
 
