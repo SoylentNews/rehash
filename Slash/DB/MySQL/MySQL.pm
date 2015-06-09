@@ -8836,7 +8836,7 @@ sub getStoryList {
 
 	# Fetch the count, and fetch the data.
 
-	my $count = $self->sqlSelect("COUNT(DISTINCT str.stoid)", $tables, $where);
+	my $count = $self->sqlSelect("COUNT(DISTINCT stories.stoid)", $tables, $where);
 	my $list = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
 	# Set some data tidbits for each story on the list.  Don't set
