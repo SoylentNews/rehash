@@ -8811,7 +8811,7 @@ sub getStoryList {
 	# If this is a "sectional" (one skin only) admin.pl storylist,
 	# then restrict ourselves to only stories matching its nexus.
 	if (!$is_mainpage) {
-		$tables .= " LEFT JOIN story_topics_rendered AS str ON str.stoid = stories.stoid";
+		$tables .= " INNER JOIN story_topics_rendered AS str ON str.stoid = stories.stoid";
 		push @where,
 			"(str.tid = $gSkin->{nexus} OR stories.primaryskid = $gSkin->{skid})";
 		$other = "GROUP BY stoid ";
@@ -8836,7 +8836,7 @@ sub getStoryList {
 
 	# Fetch the count, and fetch the data.
 
-	my $count = $self->sqlSelect("COUNT(*)", $tables, $where);
+	my $count = $self->sqlSelect("COUNT(DISTINCT str.stoid)", $tables, $where);
 	my $list = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
 	# Set some data tidbits for each story on the list.  Don't set
