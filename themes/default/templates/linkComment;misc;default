@@ -38,14 +38,14 @@ ELSE;
 	IF cid %]#[% cid; END;
 END;
 IF op.lower == "reply"  %]#post_comment[% END %]"[% IF onclick %] onclick="[% onclick %]"[% END 
-%]>[% subject %]</a>
+%]>[% subject | strip_title %]</a>
 
 [% IF !subject_only %]
 	[% IF nickname %]
 		[% IF adminflag %]
-			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</a>
+			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname  | strip_paramattr %]">[% nickname | strip_literal; %]</a>
 		[% ELSE %]
-			by [% nickname %]
+			by [% nickname | strip_literal; %]
 		[% END %]
 	[% END %]
 
