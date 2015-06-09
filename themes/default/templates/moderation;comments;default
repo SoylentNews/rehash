@@ -20,12 +20,12 @@ __template__
 
 # ALREADY MODERATED.
 CASE "already moderated" %]
-<li>[% subject %]([% sid %]-[% cid %], <b>Already moderated</b>)</li>
+<li>[% subject | strip_title %]([% sid %]-[% cid %], <b>Already moderated</b>)</li>
 [%
 
 # SCORE LIMIT.
 CASE "score limit" %]
-<li>[% subject %] ([% sid %]-[% cid %], <b>Comment already at limit</b>)</li>
+<li>[% subject | strip_title %] ([% sid %]-[% cid %], <b>Comment already at limit</b>)</li>
 [%
 
 # (COMMENT SUCCESSFULLY) MODERATED.

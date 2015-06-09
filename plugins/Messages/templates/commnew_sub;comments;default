@@ -11,7 +11,7 @@ en_US
 __name__
 commnew_subj
 __template__
-New Comment "[% reply.subject %]" by [% reply.nickname %]
+New Comment "[% reply.subject | strip_title %]" by [% reply.nickname | strip_literal %]
 __seclev__
 500
 __version__
