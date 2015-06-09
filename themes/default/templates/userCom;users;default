@@ -36,7 +36,7 @@ __template__
 			label    = comment.disc_title;
 		END %]
 		<br><b>[% n %]</b> <a href="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
-		[% comment.subject %]</a> posted on [% Slash.timeCalc(comment.date) %]
+		[% comment.subject  | strip_title %]</a> posted on [% Slash.timeCalc(comment.date) %]
 	(Score:[% comment.points %][% IF comment.replies %] Replies: [% comment.replies %][% END %])
 		<br>attached to <a href="[% comment.url %]">[% label %]</a>
 	[% END %]

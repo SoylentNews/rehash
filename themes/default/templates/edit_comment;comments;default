@@ -19,6 +19,7 @@ en_US
 __name__
 edit_comment
 __template__
+
 <div id="wide">
 
 [% IF form.sid %]
@@ -54,22 +55,23 @@ __template__
 [% END %]
 
 [% IF form.pid %]
-        [% PROCESS titlebar title="Reply to: $reply.subject" %]
-        <div class="generalbody">
-		<ul id="commentlisting" class="d1">
-                [% Slash.dispComment(reply) %]
-		</li>
-		</ul>
-        </div>
+ [% subj = reply.subject | strip_title %]
+ [% PROCESS titlebar title="Reply to: $subj" %]
+ <div class="generalbody">
+	<ul id="commentlisting" class="d1">
+	[% Slash.dispComment(reply) %]
+	</li>
+	</ul>
+ </div>
 [% END %]
 <div id="post_comment">
 [% PROCESS titlebar title="Post Comment" %]
 	<div class="generalbody">
 <!-- error message -->
 [% IF error_message %]
-        <div class="error">
-                [% error_message %]
-        </div>
+ <div class="error">
+	[% error_message %]
+ </div>
 [% END %]
 <!-- end error message -->
 <form  action="[% gSkin.rootdir %]/comments.pl#post_comment" method="post">
@@ -134,7 +136,7 @@ END %]
 [% END %]
 
 	[% PROCESS formLabel value => 'Subject' %]
-		<input type="text" name="postersubj" value="[% form.postersubj | strip_subject %]" size="50" maxlength="50">
+		<input type="text" name="postersubj" value="[% form.postersubj | strip_title %]" size="50" maxlength="50">
 	[% FOR extra = extras %]
 	
 		<b>[% extra.0 %]
