@@ -1,25 +1,28 @@
 NAME
-    README - Slash Readme
+    README - Rehash ("Revised and Enhanced Homebrewed Automatic Storytelling Homepage")
 
 DESCRIPTION
-    Slash -- Slashdot Like Automated Storytelling Homepage -- is the code
-    that runs Slashdot. More than that, however, Slash is an architecture
-    for putting together web sites. It comes with functionality for posting
-    articles, conducting polls, having discussions, and more; but it can be
-    extended in innumerable ways.
+    Rehash is a fork of the last open-source release of Slash, which was
+    the basis of basis of slashdot.org. Rehash is a partial rewrite of Slash
+    to increase functionality, improve usabilitiy, and an incremental port
+    to modern versions of Apache, perl, and mod_perl. It is designed for high
+    relaibility and scalability, with intergrated support for MySQL cluster,
+    multi-frontend support, and a strong adherence to the MVC development
+    methodology, clearly abstracting user-facing code from backend management.
 
-    Slash is written in Perl, and is built on top of Apache and mod_perl. It
-    requires a database backend, though the only well-supported database
-    used with it is MySQL (more databases will become well-supported as time
-    goes on; PostgreSQL support is already well on its way). Slash is fast,
-    scalable, and secure (as evidenced by one of the best test cases you
-    could have, running Slashdot itself).
+    In addition, rehash is designed to be fast, flexible, and highly scalable
+    and should scale to almost any load put to it. Furthermore, with support
+    for AppArmor, parameter filtering, and query hardening, rehash is resistant
+    to both SQL exploitation, and server compromise through the frontend. As
+    always, efforts continue to improve this wherever possible. As for proof of
+    its robustness, rehash powers soylentnews.org, and its ancestor powered
+    slashdot.org (which is one heck of a torture test).
 
-    Through a plugin system, developers can add functionality to Slash.
+    Through a plugin system, developers can add functionality to Rehash,
     Through themes and templates (which are written using Template Toolkit),
     the look and feel of a Slash site can be customized.
 
-    See INSTALL for information about installing Slash, including hardware
+    See INSTALL for information about installing Rehash, including hardware
     and software requirements. Read that document carefully, and follow the
     instructions as precisely as possible.
 
@@ -27,22 +30,16 @@ DESCRIPTION
     Slash.
 
     As noted in the FAQ, please send any bug reports, and subscribe to
-    mailing lists, at Slash's SourceForge.net site.
+    mailing lists, at Rehash's github page.
 
-            http://sf.net/projects/slashcode/
+            https://github.com/soylentnews/rehash
 
 DOCUMENTATION
-    The .pod documentation included with Slash can be read with the
+    The .pod documentation included with Rehash can be read with the
     "perldoc" program, included with perl, or translated using one of the
     many "pod2*" translators.
 
     The documentation is also available online on the Slash FAQ.
-
-    Slash FAQ
-        Basic information about Slash, how to contact the developers, and a
-        lot more.
-
-        http://slashcode.com/faq.shtml
 
     Template Toolkit (version 2)
         For more information on how to write templates, see the Template
@@ -56,11 +53,11 @@ DOCUMENTATION
         http://slashcode.com/rss/1.0/modules/Slash/
 
     Installation
-        The details on how to install, and upgrade, Slash.
+        The details on how to install, and upgrade, Rehash.
 
         INSTALL
 
-    API The details of the API available in Slash.
+    API The details of the API available in Rehash.
 
                 perldoc Slash
                 perldoc Slash::Utility
@@ -72,6 +69,13 @@ DOCUMENTATION
         of the documentation here is woefully incomplete.
 
                 use Source 'Luke';
+
+    Slash FAQ
+        Although very outdated, much of the basic information from the original Slash FAQ
+        applies to rehash.
+
+        http://slashcode.com/faq.shtml
+
 
     HOWTOs
         There are currently the beginnings of HOWTO documents for templates,
@@ -107,6 +111,11 @@ DOCUMENTATION
         AUTHORS
 
 LINKS
+    SoylentNews
+        Primary user of rehash, and home of its developers.
+
+        https://soylentnews.org
+
     Slashdot
         The site that started it all.
 
@@ -117,36 +126,36 @@ LINKS
 
         http://slashcode.com/
 
-    CVS
-    	The main CVS repository.
+    GitHub
+    	Home of the rehash git repo.
 
-        http://cvs.slashcode.com/
-
-    SourceForge.net Site
-        Access to the code, bug reports, patches, mailing lists, and more.
-
-        http://sf.net/projects/slashcode/
+        https://github.com/soylentnews/rehash
 
 COPYRIGHT AND LICENSE
     The information below applies to everything in this distribution, except
     where noted.
 
+    Copyright 2015 by the Rehash Developers and the SoylentNews Team.
+
+            https://soylentnews.org
+            https://github.com/soylentnews/rehash
+
     Copyright 1997-2005 by Open Source Technology Group.
 
             http://www.ostg.com/
 
-    Slash is free software; you can redistribute it and/or modify it under
+    Rehash is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your
     option) any later version.
 
-    Slash is distributed in the hope that it will be useful, but WITHOUT ANY
+    Rehash is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
     more details.
 
     You should have received a copy of the GNU General Public License along
-    with Slash (COPYING); if not, go to http://www.fsf.org/ or write to the
+    with Rehash (COPYING); if not, go to http://www.fsf.org/ or write to the
     Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
     02111-1307, USA.
 
