@@ -8959,7 +8959,7 @@ sub getRecentComments {
 		$limit_clause = " LIMIT $num";
 	}
 	if ($primaryskid) {
-		$where_extra = " AND discussions.primaryskid = ".$self->sqlQuote($primaryskid)
+		$where_extra = " AND comment.sid IN (SELECT discussions.id from discussions WHERE discussions.primaryskid = ".$self->sqlQuote($primaryskid).") ";
 	}
 
 	my $ar = $self->sqlSelectAllHashrefArray(
@@ -8968,20 +8968,16 @@ sub getRecentComments {
 		 comments.subnetid AS subnetid, subject,
 		 comments.uid AS uid, points AS score,
 		 lastmod, comments.reason AS reason,
-		 users.nickname AS nickname,
-		 discussions.primaryskid,
-		 comment_text.comment AS comment,
+		 (SELECT nickname FROM users WHERE comments.uid=users.uid) AS nickname,
+		 (SELECT primaryskid FROM discussions WHERE comments.sid=discussions.id) as primaryskid,
+		 (SELECT comment FROM comment_text WHERE comments.cid=comment_text.cid) AS comment,
 		 SUM(val) AS sum_val,
 		 IF(moderatorlog.cid IS NULL, 0, COUNT(*))
 		 	AS num_mods",
-		"users, discussions, comment_text,
-		 comments LEFT JOIN moderatorlog
+		"comments LEFT JOIN moderatorlog
 		 	ON comments.cid=moderatorlog.cid
 			AND moderatorlog.active=1",
-		"comments.uid=users.uid
-		 AND comments.cid = comment_text.cid
-		 AND comments.points BETWEEN $min AND $max
-		 AND comments.sid = discussions.id
+		"comments.points BETWEEN $min AND $max
 		 $where_extra",
 		"GROUP BY comments.cid
 		 ORDER BY comments.cid DESC
@@ -9004,21 +9000,17 @@ sub getSpamMods {
 		 comments.subnetid AS subnetid, subject,
 		 comments.uid AS uid, points AS score,
 		 lastmod, comments.reason AS reason,
-		 users.nickname AS nickname,
-		 discussions.primaryskid,
-		 comment_text.comment AS comment,
+		 (SELECT nickname FROM users WHERE comments.uid=users.uid) AS nickname,
+		 (SELECT primaryskid FROM discussions WHERE comments.sid=discussions.id) as primaryskid,
+		 (SELECT comment FROM comment_text WHERE comments.cid=comment_text.cid) AS comment,
 		 SUM(val) AS sum_val,
 		 IF(moderatorlog.cid IS NULL, 0, COUNT(*))
 		 	AS num_mods",
-		"users, discussions, comment_text,
-		 comments LEFT JOIN moderatorlog
+		"comments LEFT JOIN moderatorlog
 		 	ON comments.cid=moderatorlog.cid
 			AND moderatorlog.active=1",
-		"comments.uid=users.uid
-		 AND comments.cid = comment_text.cid
-		 AND moderatorlog.reason = 11
-		 AND moderatorlog.active = 1
-		 AND comments.sid = discussions.id",
+		"moderatorlog.reason = 11
+		 AND moderatorlog.active = 1",
 		"GROUP BY comments.cid
 		 ORDER BY comments.cid DESC
 		 LIMIT $startat, $num"

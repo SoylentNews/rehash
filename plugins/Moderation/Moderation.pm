@@ -31,8 +31,8 @@ sub getReasons {
 	my $table_cache = "_reasons_cache";
 	
 	my $mcd = $slashdb->getMCD;
-	my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_cache:";
 	if ($mcd) {
+		my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_cache:";
 		$self->{$table_cache} ||= $mcd->get("$mcdkey");
 		if (!$self->{$table_cache}){
 				$self->{$table_cache} = $self->sqlSelectAllHashref("id", "*", "modreasons");
@@ -54,8 +54,8 @@ sub getReasonsOrder {
 	my $order_cache = "_reasons_order_cache";
 	
 	my $mcd = $slashdb->getMCD;
-	my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_order_cache:";
 	if ($mcd) {
+		my $mcdkey = "$slashdb->{_mcd_keyprefix}:mod:reasons_order_cache:";
 		$self->{$order_cache} ||= $mcd->get("$mcdkey");
 			if (!$self->{$order_cache}){
 				$self->{$order_cache} = $self->sqlSelectColArrayref("id", "modreasons","","ORDER BY ordered ASC");
