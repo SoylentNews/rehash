@@ -1354,12 +1354,12 @@ sub createAuthorCache {
 	$sql .= "SELECT users.uid, nickname,
 		GREATEST(IF(fakeemail IS NULL, '',	fakeemail), ''),
 		GREATEST(IF(homepage IS NULL, '',	homepage), ''),
-		COUNT(stories.uid),
+		(SELECT COUNT(stories.uid) FROM stories WHERE stories.uid=users.uid GROUP BY stories.uid),
 		GREATEST(IF(bio IS NULL, '',		bio), ''),
 		author ";
-	$sql .= "FROM users, stories, users_info ";
-	$sql .= "WHERE stories.uid=users.uid ";
-	$sql .= "AND users.uid=users_info.uid GROUP BY stories.uid";
+	$sql .= "FROM users, users_info ";
+	$sql .= "WHERE users.uid IN (SELECT stories.uid FROM stories GROUP BY stories.uid) ";
+	$sql .= "AND users.uid=users_info.uid AND users.author=1";
 
 	$self->sqlDo($sql);
 
