@@ -16,8 +16,8 @@ __template__
 <p>
 [% reply.nickname | strip_literal %] has posted a comment,
 <b><a href="[% gSkin.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
-%]">[% reply.subject %]</a></b>, in reply to your journal entry,
-<b><a href="[% discussion.url %]">[% discussion.title %]</a></b>.
+%]">[% reply.subject | strip_title  %]</a></b>, in reply to your journal entry,
+<b><a href="[% discussion.url %]">[% discussion.title | strip_title  %]</a></b>.
 </p>
 
 [% ELSE %]

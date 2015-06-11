@@ -13,7 +13,7 @@ storynew
 __template__
 
 [% story = Slash.db.getStory(sid) %]
-[% title %]: [% absolutedir %]/article.pl?sid=[% sid %]
+[% title | strip_title %]: [% absolutedir %]/article.pl?sid=[% sid %]
 
 __seclev__
 500

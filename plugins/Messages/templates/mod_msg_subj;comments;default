@@ -11,7 +11,7 @@ en_US
 __name__
 mod_msg_subj
 __template__
-Moderation of "[% comment.subject %]"
+Moderation of "[% comment.subject  | strip_title  %]"
 __seclev__
 500
 __version__

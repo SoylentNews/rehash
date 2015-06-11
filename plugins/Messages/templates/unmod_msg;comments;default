@@ -20,8 +20,8 @@ __template__
 <p>
 A user <i>had</i> given a moderation of <b>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</b> to
 your comment, <b><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid
-%]">[% comment.subject %]</a></b>, attached to
-<b><a href="[% gSkin.rootdir %][% discussion.realurl %]">[% discussion.title %]</a></b>.  That moderation has now been undone,
+%]">[% comment.subject | strip_title  %]</a></b>, attached to
+<b><a href="[% gSkin.rootdir %][% discussion.realurl %]">[% discussion.title | strip_title %]</a></b>.  That moderation has now been undone,
 probably due to the user posting in the discussion after moderating in it.
 Your comment is currently scored <b>[% reasons.${comment.reason}.name %] ([% cur_score %])</b>.
 </p>

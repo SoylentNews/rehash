@@ -14,7 +14,7 @@ __template__
 [% IF msg.mode == 1 %]
 
 <p>
-[% submission.name %] has submitted a new story,
+[% submission.name | strip_literal %] has submitted a new story,
 <b><a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% submission.subid %]&amp;title=[%
 submission.subj | strip_subject %]">[% submission.subj | strip_title %]</a></b>.
 </p>
