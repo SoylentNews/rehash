@@ -31,7 +31,7 @@ __template__
 			<li><a href="http://wiki.soylentnews.org/wiki/WhosWho" target="blank">Who's Who?</a> | A list of team contacts and staff members.</li>
 			<li><a href="https://github.com/SoylentNews/rehash/issues?labels=&page=1&state=open" target="blank">Bugs</a> | The list of open issues on Github.</li>
 			<li><a href="https://github.com/SoylentNews/rehash/issues/new" target="blank">Bugs - Submit a New Bug</a> | Please use as much relevant detail as you can (i.e. UID, when, browser and version, OS, error message, and screenshots).</li>
-			<li><a href="https://github.com/SoylentNews" target="blank">The Repo</a> | The slashcode repository for SoylentNews on GitHub.</li>
+			<li><a href="https://github.com/SoylentNews/rehash/" target="blank">The Repo</a> | The rehash repository for SoylentNews on GitHub.</li>
 			<li><a href="http://status.soylentnews.org" target="blank">Site Status</a> | A static page used to relay information regarding downtime. It will be updated in cases of unexpected downtime.</li>
 		</ul>
 		<h3>Tor .onion Links:</h3>
