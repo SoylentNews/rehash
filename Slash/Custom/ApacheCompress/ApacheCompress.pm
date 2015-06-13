@@ -35,10 +35,10 @@ sub handler {
   # Other people's eyes need to check this 1.1 stuff.
   if ($r->protocol =~ /1\.1/) {
     my %vary = map {$_,1} qw(Accept-Encoding User-Agent);
-    if (my $vary = $r->header_out('Vary')||0) {
+    if (my $vary = $r->headers_out->get('Vary')||0) {
       $vary{$vary} = 1;
     }
-    $r->header_out('Vary' => join ',', keys %vary);
+    $r->headers_out->set('Vary' => join ',', keys %vary);
   }
   
   my $fh;
@@ -51,8 +51,8 @@ sub handler {
     my @stat = stat(_);
     my $time = $stat[9];
 
-    if ($r->header_in('If-Modified-Since')) {
-    	my $ltime = str2time($r->header_in('If-Modified-Since'));
+    if ($r->headers_in->get('If-Modified-Since')) {
+    	my $ltime = str2time($r->headers_in->get('If-Modified-Since'));
     	if ($ltime >= $time) {
     		$r->status(HTTP_NOT_MODIFIED);
     		$r->send_http_header;
@@ -60,7 +60,7 @@ sub handler {
     	}
     }
 
-    $r->header_out('Last-Modified' => time2str("%a, %d %h %Y %X %Z", $time));
+    $r->headers_out->set('Last-Modified' => time2str("%a, %d %h %Y %X %Z", $time));
     $fh = Apache::File->new($filename);
   }
   unless ($fh) {
@@ -86,9 +86,9 @@ sub can_gzip {
 
   my $how_decide = $r->dir_config('CompressDecision');
   if (!defined($how_decide) || lc($how_decide) eq 'header') {
-    return +($r->header_in('Accept-Encoding')||'') =~ /gzip/;
+    return +($r->headers_in->get('Accept-Encoding')||'') =~ /gzip/;
   } elsif (lc($how_decide) eq 'user-agent') {
-    return guess_by_user_agent($r->header_in('User-Agent'));
+    return guess_by_user_agent($r->headers_in->get('User-Agent'));
   }
   
   die "Unrecognized value '$how_decide' specified for CompressDecision";

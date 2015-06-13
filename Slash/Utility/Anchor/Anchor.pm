@@ -143,9 +143,9 @@ sub header {
 		}
 
 # 		unless ($user->{seclev} || $ENV{SCRIPT_NAME} =~ /comments/) {
-# 			$r->header_out('Cache-Control', 'no-cache');
+# 			$r->headers_out->set('Cache-Control', 'no-cache');
 # 		} else {
-# 			$r->header_out('Cache-Control', 'private');
+# 			$r->headers_out->set('Cache-Control', 'private');
 # 		}
 
 		return if $r->header_only;
@@ -419,7 +419,7 @@ sub redirect {
 	$r->status($code);
 
 	$r->content_type($constants->{content_type_webpage} || 'text/html');
-	$r->headers_out->set(Location => $url);
+	$r->headers_out->set('Location' => $url);
 
 	#slashDisplay('html-redirect', { url => $url, code => $code });
 }

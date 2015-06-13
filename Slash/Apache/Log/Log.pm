@@ -53,13 +53,13 @@ sub handler {
 	# -Brian
 	
 	# Disabled for mod_perl 2.x - do we really need this? - MC
-	#my $uri = $r->uri;
-	#my $dat = $r->err_header_out('SLASH_LOG_DATA');
+	my $uri = $r->uri;
+	my $dat = $r->err_headers_out->get('SLASH_LOG_DATA');
 
 	# There used to be some (broken) logic here involving the
 	# log_admin var, but that's been moved to createLog().
 
-	#createLog($uri, $dat, $r->status);
+	createLog($uri, $dat, $r->status);
 
 	return OK;
 }

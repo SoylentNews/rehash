@@ -207,7 +207,7 @@ sub handler {
 			# not working ... move out into users.pl and index.pl
 			# I may know why this is the case, we may need
 			# to send a custom errormessage. -Brian
-#			$r->err_header_out(Location => $newurl);
+#			$r->err_headers_out->set('Location' => $newurl);
 #			return REDIRECT;
 		}
 
@@ -385,7 +385,7 @@ sub handler {
 	createCurrentForm($form);
 
 	if ($gSkin->{require_acl} && !$user->{acl}{$gSkin->{require_acl}}) {
-		$r->err_header_out(Location =>
+		$r->err_headers_out->set('Location' =>
 			URI->new_abs('/', $constants->{absolutedir})
 		);
 		return Apache2::Const::REDIRECT;
@@ -441,7 +441,7 @@ sub handler {
 		# so redirect them to the non-SSL URL.
 		my $newloc = $uri;
 		$newloc .= "?" . $r->args if $r->args;
-		$r->err_header_out(Location =>
+		$r->err_headers_out->set('Location' =>
 			URI->new_abs($newloc, $gSkin->{absolutedir}));
 		return Apache2::Const::REDIRECT;
 	}

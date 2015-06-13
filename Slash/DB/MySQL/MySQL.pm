@@ -1324,14 +1324,12 @@ sub createAccessLog {
 	}
 	my $pagemark = $user->{state}{pagemark} || 0;
 	$pagemark = 0 if $op =~ /^ajax/;
-	my $local_addr = inet_ntoa(
-		( unpack_sockaddr_in($r->connection()->local_addr()) )[1]
-	);
+	my $local_addr = inet_ntoa($r->connection()->local_addr->ip_get);
 	$status ||= $r->status;
 	my $skid = $reader->getSkidFromName($skin_name);
 
 	my $query_string = $ENV{QUERY_STRING} || 'none';
-	my $referrer     = $r->header_in("Referer");
+	my $referrer     = $r->headers_in->get("Referer");
 	if (!$referrer && $query_string =~ /\bfrom=(\w+)\b/) {
 		$referrer = $1;
 	}
@@ -4534,7 +4532,7 @@ sub setKnownOpenProxy {
 	my $xff;
 	if ($port) {
 		my $r = Apache2::RequestUtil->request;
-		$xff = $r->header_in('X-Forwarded-For') if $r;
+		$xff = $r->headers_in->get('X-Forwarded-For') if $r;
 #use Data::Dumper; print STDERR "sKOP headers_in: " . Dumper([ $r->headers_in ]) if $r;
 	}
 	$xff = undef unless $xff && length($xff) >= 7
