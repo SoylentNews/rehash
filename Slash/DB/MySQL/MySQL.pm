@@ -3334,8 +3334,6 @@ sub saveBlock {
 		$self->sqlInsert('blocks', { bid => $bid, seclev => 500 });
 	}
 
-	my($portal, $retrieve) = (0, 0, 0);
-
 	# If someone marks a block as a portald block then potald is a portald
 	# something tell me I may regret this...  -Brian
 	$form->{type} = 'portald' if $form->{portal} == 1;
@@ -3350,6 +3348,15 @@ sub saveBlock {
 
 	$form->{block} = $self->autoUrl($form->{section}, $form->{block})
 		unless $form->{type} eq 'template';
+
+	$form->{autosubmit} ||= 'no';
+	$form->{hidden} ||= 0;
+	$form->{always_on} ||= 0;
+	$form->{default_block} ||= 0;
+	$form->{all_skins} ||= 0;
+	$form->{portal} ||= 0;
+	$form->{retrieve} ||= 0;
+	$form->{items} ||= 0;
 
 	if ($rows == 0 || $form->{blocksavedef}) {
 		$self->sqlUpdate('blocks', {
