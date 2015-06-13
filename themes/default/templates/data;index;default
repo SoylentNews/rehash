@@ -30,7 +30,7 @@ __template__
 	[% IF skid == constants.mainpage_skid;
 	      constants.sitename;
 	   ELSE;
-	      constants.sitename %]: [% skin_name;
+	      constants.sitename %]: [% skin_title;
 	   END;
 	%]
 
