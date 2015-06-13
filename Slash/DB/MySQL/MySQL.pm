@@ -1324,7 +1324,7 @@ sub createAccessLog {
 	}
 	my $pagemark = $user->{state}{pagemark} || 0;
 	$pagemark = 0 if $op =~ /^ajax/;
-	my $local_addr = inet_ntoa($r->connection()->local_addr->ip_get);
+	my $local_addr = $r->connection()->local_addr->ip_get;
 	$status ||= $r->status;
 	my $skid = $reader->getSkidFromName($skin_name);
 
