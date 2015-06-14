@@ -8150,7 +8150,7 @@ sub getSignoffsForStory {
 	return $self->sqlSelectAllHashrefArray(
 		"signoff.*, users.nickname, signoff_type",
 		"signoff, users",
-		"signoff.stoid=$stoid_q AND users.uid=signoff.uid"
+		"signoff.stoid=$stoid_q AND users.uid=signoff.uid ORDER BY signoff.soid"
 	);
 }
 
