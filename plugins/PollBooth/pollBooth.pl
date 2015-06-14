@@ -350,7 +350,7 @@ sub savepoll {
 		}
 	}
 	
-	if (!_is_number(form->{voters} && !_is_number(form->{votes1} && !_is_number(form->{votes2} && !_is_number(form->{votes3} && !_is_number(form->{votes4} && !_is_number(form->{votes5} && !_is_number(form->{votes6} && !_is_number(form->{votes7} && !_is_number(form->{votes8}) {
+	if (!_is_number($form->{voters} && !_is_number($form->{votes1} && !_is_number($form->{votes2} && !_is_number($form->{votes3} && !_is_number($form->{votes4} && !_is_number($form->{votes5} && !_is_number($form->{votes6} && !_is_number($form->{votes7} && !_is_number($form->{votes8}) {
 		print getData('invalid_sid');
 		editpoll(@_);
 		return;
