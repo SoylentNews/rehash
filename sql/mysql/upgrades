@@ -47,3 +47,15 @@ UPDATE vars SET value = '0' WHERE name = 'do_expiry';
 # Fix too small title lenght
 ALTER TABLE sessions MODIFY COLUMN lasttitle varchar(100) DEFAULT NULL;
 ANALYZE TABLE sessions;
+
+#######################################
+# SoylentNews Rehash 15.05.4          #
+#######################################
+
+UPDATE vars SET value = 'rehash_15_05_4' WHERE name = 'cvs_tag_currentcode';
+
+# Update Polls to work with Nexuses
+INSERT INTO vars (name, value, description) VALUES ('poll_dynamic','1','On home page, display dynamic poll on each nexus (if ture, is extra hits to database)');
+UPDATE blocks SET all_skins = 1 where id = 9;
+
+

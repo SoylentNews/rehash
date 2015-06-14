@@ -1046,6 +1046,7 @@ INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organ
 INSERT INTO vars (name, value, description) VALUES ('panic','0','0:Normal, 1:No frills, 2:Essentials only');
 INSERT INTO vars (name, value, description) VALUES ('poll_cache','0','On home page, cache and display default poll for users (if false, is extra hits to database)');
 INSERT INTO vars (name, value, description) VALUES ('poll_discussions','1','Allow discussions on polls');
+INSERT INTO vars (name, value, description) VALUES ('poll_dynamic','1','On home page, display dynamic poll on each nexus (if ture, is extra hits to database)');
 INSERT INTO vars (name, value, description) VALUES ('poll_fwdfor','1','Loose proxy management for voting?');
 INSERT INTO vars (name, value, description) VALUES ('postedout_end_secs','21600','Window to count posted-out stories closes this many seconds in the future');
 INSERT INTO vars (name, value, description) VALUES ('postedout_start_secs','300','Window to count posted-out stories opens this many seconds in the future');
