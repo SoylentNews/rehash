@@ -24,7 +24,7 @@ can also use the form below to select the poll qid you like to attach the story 
 	[% FOREACH question = questions %]
 	<tr>
 		<td valign="TOP" align="LEFT">
-				<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</a>
+				<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 | strip_title %]</a>
 		</td>
 		<td>
 			<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]&amp;op=edit&amp;override_sid=[% sid | strip_paramattr %]">Attach poll to story</a>

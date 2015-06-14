@@ -26,7 +26,7 @@ __template__
 [% maxvotes = -1 %]
 [% FOR answer = answers %]
 	[% IF answer.1 > maxvotes;
-		poll_option     = answer.0;
+		poll_option     = answer.0 | strip_title;
 		votes      = answer.1;
 		percent    = poll.voters ? (votes / totalvotes * 100) : 0; 
 		percent = percent.int;
@@ -34,7 +34,7 @@ __template__
         END; 
 END %]
 <div id="pollplug">
-[% percent %]% Voted '[% poll_option %]' for '<a href="[% gSkin.rootdir %]/pollBooth.pl?op=vote&amp;qid=[% qid %]&amp;aid=-1" onclick="$('pollplug_pb').style.display='block'; $('pollplug').style.display='none'; return false;">[% poll.question %]</a>'
+[% percent %]% Voted '[% poll_option %]' for '<a href="[% gSkin.rootdir %]/pollBooth.pl?op=vote&amp;qid=[% qid %]&amp;aid=-1" onclick="$('pollplug_pb').style.display='block'; $('pollplug').style.display='none'; return false;">[% poll.question | strip_title %]</a>'
 </div>
 <div id="pollplug_pb" style="display:none">
 
