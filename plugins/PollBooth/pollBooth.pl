@@ -301,7 +301,6 @@ sub editpoll {
 	});
 }
 
-
 #################################################################
 sub _is_integer {
    defined $_[0] && $_[0] =~ /^[+-]?\d+$/;
@@ -360,12 +359,10 @@ sub savepoll {
 		return;
 	}
 	
-
 	#We are lazy, we just pass along $form as a $poll
 	# Correct section for sectional editor first -Brian
 	$form->{section} = $user->{section} if $user->{section};
 	my $qid = $pollbooth_db->savePollQuestion($form);
-	
 
 	# we have a problem here.  if you attach the poll to an SID,
 	# and then unattach it, it will still be attached to that SID
