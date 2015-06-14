@@ -36,7 +36,7 @@ __template__
         END;
         long_title = long_title _ '...';
         %]
-        [% constants.sitename %] Poll | [% long_title | stirp_title %]
+        [% constants.sitename %] Poll | [% long_title | strip_title %]
 
 [% CASE 'edit_poll_title' %]
 	[% IF qid %]Editing Poll #[% qid %][% ELSE %]New Poll[% END %]
