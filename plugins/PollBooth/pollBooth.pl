@@ -189,6 +189,8 @@ sub editpoll {
 				$warning->{attached_to_other} = 1 if $slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0");
 			}
 		}
+		
+		$warning->{invalid_votes} = 1	if (!_is_integer($form->{voters}) || !_is_integer($form->{votes1}) || !_is_integer($form->{votes2}) || !_is_integer($form->{votes3}) || !_is_integer($form->{votes4}) || !_is_integer($form->{votes5}) || !_is_integer($form->{votes6}) || !_is_integer($form->{votes7}) || !_is_integer($form->{votes8}));
 
 		if ($story_ref) {
 			$question->{'date'}		= $story_ref->{'time'};
@@ -299,6 +301,8 @@ sub editpoll {
 	});
 }
 
+
+#################################################################
 sub _is_integer {
    defined $_[0] && $_[0] =~ /^[+-]?\d+$/;
 }
@@ -350,8 +354,8 @@ sub savepoll {
 		}
 	}
 	
-	if (!_is_number($form->{voters}) && !_is_number($form->{votes1}) && !_is_number($form->{votes2}) && !_is_number($form->{votes3}) && !_is_number($form->{votes4}) && !_is_number($form->{votes5}) && !_is_number($form->{votes6}) && !_is_number($form->{votes7}) && !_is_number($form->{votes8})) {
-		print getData('invalid_sid');
+	if (!_is_integer($form->{voters}) || !_is_integer($form->{votes1}) || !_is_integer($form->{votes2}) || !_is_integer($form->{votes3}) || !_is_integer($form->{votes4}) || !_is_integer($form->{votes5}) || !_is_integer($form->{votes6}) || !_is_integer($form->{votes7}) || !_is_integer($form->{votes8})) {
+		print getData('invalid_votes');
 		editpoll(@_);
 		return;
 	}

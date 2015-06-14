@@ -52,7 +52,7 @@ __template__
 	Invalid poll!<br>
 [% CASE 'invalid_votes' %]
 	[% returnme.data_constant = 1 %]
-	Invalid votes specified.  Please correct and try to save again.
+	One or more votes are not an integer.  Please correct and try to save again.
 
 [% CASE 'display' %]
 	[% returnme.data_constant = 1 %]

@@ -32,6 +32,7 @@ __template__
 			<legend>Poll Edit Page</legend>
 			<fieldset>
 			[% IF warning.invalid_sid %]<b>Story ID specified does not exist invalid</b><br>[% END %]
+			[% IF warning.invalid_votes %]<b>One or more votes are not an integer</b><br>[% END %]
 			[% IF warning.attached_to_other %]<b>Story is already attached to another poll -- detach poll from that story before attaching this one</b><br>[% END %]
 			
 			[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
