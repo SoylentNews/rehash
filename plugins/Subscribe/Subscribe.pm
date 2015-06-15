@@ -10,7 +10,7 @@ use Slash::Utility;
 use DateTime;
 use DateTime::Format::MySQL;
 use JSON;
-use LWP::UserAgent;
+use LWP::UserAgent 6;
 use URI;
 
 
@@ -317,7 +317,6 @@ sub insertPayment {
 	
 sub ppDoPDT {
 	my($self, $txid) = @_;
-	use LWP::UserAgent;
 	use Encode qw(decode_utf8);
 	my $constants = getCurrentStatic();
 	my $token = $constants->{paypal_token};
@@ -331,7 +330,7 @@ sub ppDoPDT {
 		return 0;
 	}
 	 
-	my $ua = new LWP::UserAgent;
+	my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 1, SSL_ca_path => '/etc/ssl/certs' });
 	my $req = new HTTP::Request('POST', "https://$constants->{paypal_host}/cgi-bin/webscr");
 	$req->content_type("application/x-www-form-urlencoded");
 	$req->header(Host => "$constants->{paypal_host}");
