@@ -151,7 +151,7 @@ IF !useredit.is_anon;
 		END;
 
 	messages = Slash.getObject("Slash::Messages");
-	IF messages;
+	IF messages && user.uid == useredit.uid;
 		message_count = messages.getWebCount();
 		IF message_count.total
 			%]<br><hr>You have <b>[%
@@ -195,7 +195,7 @@ IF !useredit.is_anon;
 	
 
 
-	IF !user.is_mod_banned && (user.points || ( constants.authors_unlimited && user.seclev >= constants.authors_unlimited )) ;
+	IF !user.is_mod_banned && (user.points || ( constants.authors_unlimited && user.seclev >= constants.authors_unlimited )) && user.uid == useredit.uid ;
 		title = "Moderation";
 		contents = BLOCK %]
 			<b>You have [% user.points %] <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator</a>
