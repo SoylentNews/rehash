@@ -2789,7 +2789,7 @@ sub writeLog {
 	# last look). Apache's directory sub handler
 	# is not copying notes. Bad Apache!
 	# -Brian
-	#$r->err_header_out->set(SLASH_LOG_DATA, $dat);
+	$r->err_headers_out->set('SLASH_LOG_DATA' => $dat);
 }
 
 sub getOpAndDatFromStatusAndURI {

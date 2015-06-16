@@ -2825,7 +2825,7 @@ sub html2text {
 	$form = new HTML::FormatText (leftmargin => 0, rightmargin => $col-2);
 	$refs = new HTML::FormatText::AddRefs;
 
-	my $was_utf8 = getCurrentStatic('utf8') ? is_utf8($html) : 0;
+	# --see below -- my $was_utf8 = getCurrentStatic('utf8') ? is_utf8($html) : 0;
 	$tree->parse($html);
 	$tree->eof;
 	$refs->parse_refs($tree);
@@ -2833,7 +2833,8 @@ sub html2text {
 	1 while chomp($text);
 
 	# restore UTF-8 Flag lost by HTML::TreeBuilder
-	$text = decode_utf8($text) if ($was_utf8);
+	# Looks like current versions of code do not mangle utf8 -- paulej72 20150613
+	# $text = decode_utf8($text) if ($was_utf8);
 
 	return $text, $refs->get_refs($gSkin->{absolutedir});
 }

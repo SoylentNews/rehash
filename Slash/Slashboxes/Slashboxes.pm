@@ -82,7 +82,7 @@ sub displaySlashboxes {
 			) if @$older_stories_essentials;
 
 		} elsif ($bid eq 'poll' && !$constants->{poll_cache}) {
-			if ($dynamic_blocks_reader) {
+			if ($dynamic_blocks_reader && !$constants->{poll_dynamic}) {
 				# Poll ad (currently disabled)
 				my $poll_supplement = [];
 				#$poll_supplement->[0] = { "poll_ad" => '' } if (!$user->{maker_mode_adless} && !$user->{is_subscriber});

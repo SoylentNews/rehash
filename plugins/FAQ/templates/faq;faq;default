@@ -88,7 +88,7 @@ __template__
 	<p>This is not a bug, it's a feature! That name is the last user page (besides your own) that you have visited. This is useful when you want to hop around between your user info, and someone else's (e.g. to compare friends and foes). Your account has not been hacked, this is totally by design.</p>
 
 	<h3>How do I submit bugs?</h3>
-	<p>The bugs are tracked on github. You'll need a github account to <a href="https://github.com/SoylentNews/slashcode/issues/new">submit a new bug</a>. You can also email admin@soylentnews.org and we can submit one on your behalf. Either way, please include as much relevant detail as you can (i.e. UID, time, browser and version, OS, error message, and screenshots).</p>
+	<p>The bugs are tracked on github. You'll need a github account to <a href="https://github.com/SoylentNews/rehash/issues/new">submit a new bug</a>. You can also email admin@soylentnews.org and we can submit one on your behalf. Either way, please include as much relevant detail as you can (i.e. UID, time, browser and version, OS, error message, and screenshots).</p>
 	
 	<h3>Why can't I log into the Wiki?</h3>
 	<p>The wiki uses a separate account system from the main page, you'll need to create separate accounts on each site.</p>

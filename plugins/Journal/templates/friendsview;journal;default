@@ -15,7 +15,7 @@ __template__
 [% FOREACH diatribe = articles; topic = diatribe.topic %]
 	<div class="article">
 		<div class="title">
-			<h3>[% diatribe.description %]</h3>
+			<h3>[% diatribe.description | strip_title  %]</h3>
 		</div>
 		<div class="details">
 			Posted by <a href="[% constants.real_rootdir %]/~[% diatribe.nickname | strip_paramattr %]/journal/">[% diatribe.nickname | strip_literal %]</a> [% user.aton %]

@@ -15,7 +15,7 @@ __template__
 [% FOREACH entry=entries %]
 	<div class="search-results">
 		<h4>
-			<a href="[% entry.link %]">[% entry.title %]</a>
+			<a href="[% entry.link %]">[% entry.title | strip.title %]</a>
 		</h4>
 		<div class="data">
 			On [% Slash.timeCalc(entry.created) %]

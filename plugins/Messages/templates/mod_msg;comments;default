@@ -21,8 +21,8 @@ __template__
 
 <p>
 <b><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
->[% comment.subject %]</a></b>, posted to
-<b><a href="[% gSkin.rootdir %][% discussion.realurl %]">[% discussion.title %]</a></b>, has been moderated
+>[% comment.subject | strip_title %]</a></b>, posted to
+<b><a href="[% gSkin.rootdir %][% discussion.realurl %]">[% discussion.title | strip_title  %]</a></b>, has been moderated
 <b>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</b>.
 </p>
 

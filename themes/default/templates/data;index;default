@@ -27,11 +27,10 @@ __template__
 	%]
 
 [% CASE 'rsshead' %]
-	[% varsection = Slash.db.getVar('section');
-	   IF varsection.value == constants.section;
+	[% IF skid == constants.mainpage_skid;
 	      constants.sitename;
 	   ELSE;
-	      constants.sitename %]: [% section.title;
+	      constants.sitename %]: [% skin_title;
 	   END;
 	%]
 

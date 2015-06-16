@@ -40,7 +40,7 @@ sub main {
 		undef $form->{aid} if $form->{aid} < -1 || $form->{aid} > 8;
 	}
 
-	my $longtitle = 'long' if ($op eq 'default' and $form->{'qid'});
+	my $longtitle = ($op eq 'default' and $form->{'qid'}) ? 'long' : '';
 	header(getData($longtitle . 'title', { qid => $form->{'qid'} }), $form->{section}, { tab_selected => 'poll'}) or return;
 
 	$ops{$op}->($form, $slashdb, $constants);
@@ -189,6 +189,8 @@ sub editpoll {
 				$warning->{attached_to_other} = 1 if $slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0");
 			}
 		}
+		
+		$warning->{invalid_votes} = 1	if (!_is_integer($form->{voters}) || !_is_integer($form->{votes1}) || !_is_integer($form->{votes2}) || !_is_integer($form->{votes3}) || !_is_integer($form->{votes4}) || !_is_integer($form->{votes5}) || !_is_integer($form->{votes6}) || !_is_integer($form->{votes7}) || !_is_integer($form->{votes8}));
 
 		if ($story_ref) {
 			$question->{'date'}		= $story_ref->{'time'};
@@ -300,6 +302,11 @@ sub editpoll {
 }
 
 #################################################################
+sub _is_integer {
+   defined $_[0] && $_[0] =~ /^[+-]?\d+$/;
+}
+
+#################################################################
 sub savepoll {
 	my($form, $slashdb, $constants) = @_;
 
@@ -334,26 +341,28 @@ sub savepoll {
 				editpoll(@_);
 				return;
 			}
-		} else {
-			if ($slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0")) {
+		} elsif ($slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0")) {
 				print getData('attached_to_other');
 				editpoll(@_);
 				return;
-			}
-		}
-		if (!$slashdb->sqlCount("stories","sid = ".$slashdb->sqlQuote($form->{sid}))) {
+	
+		} elsif (!$slashdb->sqlCount("stories","sid = ".$slashdb->sqlQuote($form->{sid}))) {
 			print getData("invalid_sid");
 			editpoll(@_);
 			return;
 		}
 	}
-
-
+	
+	if (!_is_integer($form->{voters}) || !_is_integer($form->{votes1}) || !_is_integer($form->{votes2}) || !_is_integer($form->{votes3}) || !_is_integer($form->{votes4}) || !_is_integer($form->{votes5}) || !_is_integer($form->{votes6}) || !_is_integer($form->{votes7}) || !_is_integer($form->{votes8})) {
+		print getData('invalid_votes');
+		editpoll(@_);
+		return;
+	}
+	
 	#We are lazy, we just pass along $form as a $poll
 	# Correct section for sectional editor first -Brian
 	$form->{section} = $user->{section} if $user->{section};
 	my $qid = $pollbooth_db->savePollQuestion($form);
-	
 
 	# we have a problem here.  if you attach the poll to an SID,
 	# and then unattach it, it will still be attached to that SID
@@ -499,8 +508,12 @@ sub listpolls {
 	}
 
 	$questions = $pollbooth_reader->getPollQuestionList($min, $opts);
-
+	
 	my $sitename = getCurrentStatic('sitename');
+	if ($gSkin->{skid} != $constants->{mainpage_skid}) {
+		$sitename = $sitename.": ".$gSkin->{title};
+	}
+	
 
 	# Just me, but shouldn't title be in the template?
 	# yes

@@ -11,7 +11,7 @@ en_US
 __name__
 reply_msg_subj
 __template__
-Reply to "[% parent.subject %]" by [% reply.nickname %]
+Reply to "[% parent.subject | strip_title %]" by [% reply.nickname | strip_literal %]
 __seclev__
 500
 __version__

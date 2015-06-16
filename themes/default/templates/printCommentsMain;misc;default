@@ -28,120 +28,114 @@ __template__
 	</div>
 [% END %]
 [% IF parent.type == 'story' %]
-<div class="article">
-	[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
-	[% IF parent.story %]
-		<div class="details">
-		[% IF parent.story.by %]
-		Written by [% parent.story.by | strip_literal %]
+	<div class="article">
+		[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
+		[% IF parent.story %]
+			<div class="details">
+				[% IF parent.story.by %]
+					Written by [% parent.story.by | strip_literal %]
+				[% END %]
+				posted by
+				[% IF parent.author.homepage %]
+					<a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
+				[% ELSE %]
+					<a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
+				[% END %]
+				[% parent.story.atstorytime %]
+				[% IF constants.plugin.Print %] 
+					&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
+				[% END %]
+				[% IF constants.plugin.Email %]
+					&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/email.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir -%]/email.gif" height="14" width="20" alt="Email story" ></a>
+				[% END %]<br>
+				[% IF constants.use_dept && parent.story.dept %]<strong>from the <b>[% parent.story.dept %]</b> dept.</strong>[% END %]
+			</div>
 		[% END %]
-		posted by
-		[% IF parent.author.homepage %]
-			<a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
-		[% ELSE %]
-			<a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
-		[% END %]
-		[% parent.story.atstorytime %]
-		[% IF constants.plugin.Print %] 
-			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
-		[% END %]
-		[% IF constants.plugin.Email %]
-			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/email.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir -%]/email.gif" height="14" width="20" alt="Email story" ></a>
-		[% END %]<br>
-		[% IF constants.use_dept && parent.story.dept %]<strong>from the <b>[% parent.story.dept %]</b> dept.</strong>[% END %]
+		<div class="body">
+			<div class="intro">[% parent.content %]</div>
 		</div>
-	[% END %]
-	<div class="body">
-		<div class="intro">[% parent.content %]</div>
 	</div>
-</div>
 	<div class="prev-next">&nbsp;</div>
 [% END %]
 
 [% horiz = 0; rooted = 0;
-   rooted = 1 IF user.comments_control == 'rooted';
-   IF gSkin.name == 'idle' || user.lowbandwidth || user.firehose_hide_section_menu;
-   	horiz = 1;
-   END;
-   count = count || 0;
-   this_title = stripped_title;
-   spilltext = "Spill at <b>${user.commentspill}</b>!";
-   fineprint = 'The following comments are owned by whoever posted them.  We are not responsible for them in any way.';
-   modpoints = BLOCK %]
-	| <b>[% user.points %]</b>
-	<a href="[% gSkin.rootdir %]/faq.pl?op=moderation">
-	moderator</a>
-	point[% user.points == 1 ? '' : 's' %] &nbsp;
+	rooted = 1 IF user.comments_control == 'rooted';
+	IF gSkin.name == 'idle' || user.lowbandwidth || user.firehose_hide_section_menu;
+		horiz = 1;
+	END;
+	count = count || 0;
+	this_title = stripped_title;
+	reply = 'Reply to Article';
+	spilltext = "Spill at <b>${user.commentspill}</b>!";
+	fineprint = 'The following comments are owned by whoever posted them. We are not responsible for them in any way.' %]
+[% modpoints = BLOCK %]
+	| <b>[% user.points %]</b> <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator</a> point[% user.points == 1 ? '' : 's' %] &nbsp;
 [% END %]
 
 <a name="acomments"></a>
 <div class="commentwrap" id="commentwrap">
-   [% IF archive_text; archive_text; END %]
-   <div class="commentBox">
-      [% IF this_title %]
-	 <a href="[% link | strip_urlattr %]">[% this_title %]</a>
-      [% ELSE %]
-	 [% Slash.linkComment({
-	    sid	=> sid,
-	    pid	=> pid,
-	    subject	=> 'Top',
-	    subject_only => 1,
-	 }) %]
-      [% END %]
-      |
-      [% IF user.is_anon %]
-	 <a href="[% gSkin.rootdir %]/users.pl">Log In/Create an Account</a>
-      [% ELSE %]
-	 <a href="[% gSkin.rootdir %]/my/comments">Preferences</a>
-      [% END %]
-      [% IF sid %]
-	 | [% Slash.linkComment({
-	       sid	=> sid,
-	       pid	=> 0,
-	       subject	=> 'Top',
-	       subject_only => 1,
-	 }); END %]
-      [% IF user.points; modpoints; END %]
-      [% IF count %]| <b>[% count %]</b> comments[% END %]
-      [% IF lvl && user.mode == 'thread' %]([% spilltext %]) | Index Only[% END %]
-      [% IF sid && form.startat %]| Starting at #[% form.startat %][% END %]
-      | <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
-   </div>
+	[% IF archive_text; archive_text; END %]
+	<div class="commentBox">
+		[% IF this_title %]
+			<a href="[% link | strip_urlattr %]">[% this_title %]</a>
+		[% ELSE %]
+			[% Slash.linkComment({
+				sid	=> sid,
+				pid	=> pid,
+				subject	=> 'Top',
+				subject_only => 1,
+			}) %]
+		[% END %]
+		|
+		[% IF user.is_anon %]
+			<a href="[% gSkin.rootdir %]/users.pl">Log In/Create an Account</a>
+		[% ELSE %]
+			<a href="[% gSkin.rootdir %]/my/comments">Preferences</a>
+		[% END %]
+		[% IF sid %]
+			| [% Slash.linkComment({
+				sid	=> sid,
+				pid	=> 0,
+				subject	=> 'Top',
+				subject_only => 1,
+			}); END %]
+		[% IF user.points; modpoints; END %]
+		[% IF count %]| <b>[% count %]</b> comments[% END %]
+		[% IF lvl && user.mode == 'thread' %]([% spilltext %]) | Index Only[% END %]
+		[% IF sid && form.startat %]| Starting at #[% form.startat %][% END %]
+		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
+	</div>
 
-   <div class="commentBoxForm" id="commentControlBox">
-
-      <form action="[% gSkin.rootdir %]/comments.pl#post_comment">
-	 <fieldset>
-	    <legend>Display Options</legend>
-	    
-	    Threshold/Breakthrough: [%
-		    Slash.selectThreshold(comments.0.totals);
-		    Slash.selectBreakthrough(comments.0.totals);
-		    IF user.mode != 'parents' && user.mode != 'child';
-		      Slash.selectMode(user.mode);
-		    END;
-		    Slash.selectSortcode(user.commentsort) %]
-      
-	       [% UNLESS user.is_anon %]
-		  Save: <input type="checkbox" name="savechanges" class="button">
-	       [%- END %]
-	       <input type="submit" name="op" value="Change" class="button">
-	       <input type="hidden" name="sid" value="[% sid %]">
-	       [% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
-	       [% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-	       [% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
-	       [% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-		  <input type="submit" name="op" value="Reply" class="button">
-	       [% END %]
-	 </fieldset>
-      </form>
-      <div></div>
-      <div class="commentBox">
-	 <small>
-	    <b>The Fine Print:</b> [% fineprint %]
-	 </small>
-      </div>
-   </div>	
+	<div class="commentBoxForm" id="commentControlBox">
+		<form action="[% gSkin.rootdir %]/comments.pl#post_comment">
+			<fieldset>
+				<legend>Display Options</legend>
+				 
+				Threshold/Breakthrough: [%
+					Slash.selectThreshold(comments.0.totals);
+					Slash.selectBreakthrough(comments.0.totals);
+					IF user.mode != 'parents' && user.mode != 'child';
+						Slash.selectMode(user.mode);
+					END;
+					Slash.selectSortcode(user.commentsort) %]
+			 
+				[% UNLESS user.is_anon %]
+					Save: <input type="checkbox" name="savechanges" class="button">
+				[%- END %]
+				<input type="submit" name="op" value="Change" class="button">
+				<input type="hidden" name="sid" value="[% sid %]">
+				[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% reply = 'Reply to Comment'; END %]
+				[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+				[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
+				[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+					<input type="submit" name="op" value="[% reply %]" class="button">
+				[% END %]
+			</fieldset>
+		</form>
+		<div class="commentBox">
+			<small>b>The Fine Print:</b> [% fineprint %]</small>
+		</div>
+	</div>	
 </div>
 <a name="topcomment"></a>
 __seclev__

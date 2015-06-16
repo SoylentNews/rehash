@@ -13,11 +13,11 @@ messagenew
 __template__
 [% IF msg.mode == 1 %]
 
-<p>[% journal.nickname %]  has posted a new journal entry: <b><a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a></b></p>
+<p>[% journal.nickname | strip_literal %]  has posted a new journal entry: <b><a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description | strip_title  %]</a></b></p>
 
 [% ELSE %]
 
-[% journal.nickname %] has posted a new journal entry on [% constants.sitename %].
+[% journal.nickname | decode_entities %] has posted a new journal entry on [% constants.sitename %].
 
     [% journal.description | decode_entities %]
     [% absolutedir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]

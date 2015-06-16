@@ -17,7 +17,7 @@ __template__
 		[% FOREACH diatribe = article.article %]
 			<div class="article">
 				<div class="title">
-					<h3>[% diatribe.description %]</h3>
+					<h3>[% diatribe.description | strip_title  %]</h3>
 				</div>
 				<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>   
 				<div class="body">

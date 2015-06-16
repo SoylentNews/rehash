@@ -77,14 +77,14 @@ __template__
 
 [% CASE 'search_titlebar_title' %]
 	[% IF text.length > 0 %]
-		Searching For: [% text %]
+		Searching For: [% text | strip_title %]
 	[% ELSE %]
 		Search [% constants.sitename %]
 	[% END %]
 
 [% CASE 'search_header_title' %]
 	[% IF text.length > 0 %]
-		Search '[% text %]'
+		Search '[% text | strip_title %]'
 	[% ELSE %]
 		Search [% constants.sitename %]
 	[% END %]

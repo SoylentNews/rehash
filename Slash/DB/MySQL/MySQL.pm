@@ -1324,14 +1324,12 @@ sub createAccessLog {
 	}
 	my $pagemark = $user->{state}{pagemark} || 0;
 	$pagemark = 0 if $op =~ /^ajax/;
-	my $local_addr = inet_ntoa(
-		( unpack_sockaddr_in($r->connection()->local_addr()) )[1]
-	);
+	my $local_addr = $r->connection()->local_addr->ip_get;
 	$status ||= $r->status;
 	my $skid = $reader->getSkidFromName($skin_name);
 
 	my $query_string = $ENV{QUERY_STRING} || 'none';
-	my $referrer     = $r->header_in("Referer");
+	my $referrer     = $r->headers_in->get("Referer");
 	if (!$referrer && $query_string =~ /\bfrom=(\w+)\b/) {
 		$referrer = $1;
 	}
@@ -3336,8 +3334,6 @@ sub saveBlock {
 		$self->sqlInsert('blocks', { bid => $bid, seclev => 500 });
 	}
 
-	my($portal, $retrieve) = (0, 0, 0);
-
 	# If someone marks a block as a portald block then potald is a portald
 	# something tell me I may regret this...  -Brian
 	$form->{type} = 'portald' if $form->{portal} == 1;
@@ -3352,6 +3348,15 @@ sub saveBlock {
 
 	$form->{block} = $self->autoUrl($form->{section}, $form->{block})
 		unless $form->{type} eq 'template';
+
+	$form->{autosubmit} ||= 'no';
+	$form->{hidden} ||= 0;
+	$form->{always_on} ||= 0;
+	$form->{default_block} ||= 0;
+	$form->{all_skins} ||= 0;
+	$form->{portal} ||= 0;
+	$form->{retrieve} ||= 0;
+	$form->{items} ||= 0;
 
 	if ($rows == 0 || $form->{blocksavedef}) {
 		$self->sqlUpdate('blocks', {
@@ -4534,7 +4539,7 @@ sub setKnownOpenProxy {
 	my $xff;
 	if ($port) {
 		my $r = Apache2::RequestUtil->request;
-		$xff = $r->header_in('X-Forwarded-For') if $r;
+		$xff = $r->headers_in->get('X-Forwarded-For') if $r;
 #use Data::Dumper; print STDERR "sKOP headers_in: " . Dumper([ $r->headers_in ]) if $r;
 	}
 	$xff = undef unless $xff && length($xff) >= 7
@@ -8145,7 +8150,7 @@ sub getSignoffsForStory {
 	return $self->sqlSelectAllHashrefArray(
 		"signoff.*, users.nickname, signoff_type",
 		"signoff, users",
-		"signoff.stoid=$stoid_q AND users.uid=signoff.uid"
+		"signoff.stoid=$stoid_q AND users.uid=signoff.uid ORDER BY signoff.soid"
 	);
 }
 

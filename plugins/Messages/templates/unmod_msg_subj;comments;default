@@ -11,7 +11,7 @@ en_US
 __name__
 unmod_msg_subj
 __template__
-Undo Moderation of "[% comment.subject %]"
+Undo Moderation of "[% comment.subject | strip_title %]"
 __seclev__
 500
 __version__

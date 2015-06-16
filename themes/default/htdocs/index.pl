@@ -227,7 +227,7 @@ my $start_time = Time::HiRes::time;
 		$future_plug = 1;
 	}
 
-	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
+	return do_rss($reader, $constants, $user, $form, $stories, $gSkin) if $rss;
 
 	# Do we want to display the plug offering the user a daypass?
 	my $daypass_plug_text = '';
@@ -467,8 +467,7 @@ sub getSidFromRemark {
 }
 
 sub do_rss {
-	my($reader, $constants, $user, $form, $stories, $skin_name) = @_;
-	my $gSkin = getCurrentSkin();
+	my($reader, $constants, $user, $form, $stories, $gSkin) = @_;
 	my @rss_stories;
 
 	my @stoids_for_cache =
@@ -490,7 +489,7 @@ sub do_rss {
 		push @rss_stories, { story => $story };
 	}
 
-	my $title = getData('rsshead', { skin => $skin_name });
+	my $title = getData('rsshead', { skin_title => $gSkin->{title}, skid => $gSkin->{skid} });
 	my $name = lc($gSkin->{basedomain}) . '.' . $form->{content_type};
 
 	xmlDisplay($form->{content_type} => {
@@ -506,7 +505,7 @@ sub do_rss {
 		filename		=> $name,
 	});
 
-	writeLog($skin_name);
+	writeLog($gSkin->{name});
 	return;
 }
 

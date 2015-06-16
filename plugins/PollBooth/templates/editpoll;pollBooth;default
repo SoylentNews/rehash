@@ -19,83 +19,84 @@ __name__
 editpoll
 __template__
 [% IF pollbooth %]
-        <div id="slashboxes">
+  <div id="slashboxes">
 		[% PROCESS sidebox contents=pollbooth %]
-        </div>
+  </div>
 <div id="polls">
 [% ELSE %]
 <div id="wide">
 [% END %]
 	[% PROCESS titlebar %]
 	<div class="generalbody">
-<form action="[% env.script_name %]" method="post">
-	<legend>Poll Edit Page</legend>
-	<fieldset>
-	[% IF warning.invalid_sid %]<b>Story ID specified does not exist invalid</b><br>[% END %]
-	[% IF warning.attached_to_other %]<b>Story is already attached to another poll -- detach poll from that story before attaching this one</b><br>[% END %]
-	
-	[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
-	<input type="text" name="question" value="[% question.question %]" size="40">
-	<input type="text" name="voters" value="[% question.voters %]" size="5"><br>
-	[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visible in" %]
-	[% skins = Slash.db.getDescriptions('skins') %]
-	[% IF story %]
-		[% skins.${question.primaryskid}.title %] *<br>
-		<input type="hidden" name="primaryskid" value="[% question.primaryskid %]">
-	[% ELSE %]
-		[% primaryskid_val = question.primaryskid.defined ? question.primaryskid : constants.mainpage_skid %]
-		[% Slash.createSelect('primaryskid', skins, primaryskid_val, 1, 0, 1) %]
-	[% END %]
-	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
-	[% DEFAULT question.topic=constants.discussion_default_topic %]
-	[% IF story %]
-		[% topics.${question.topic} %] *<br>
-		<input type="hidden" name="topic" value="[% question.topic %]">
-	[% ELSE %]
-		[% Slash.createSelect('topic', topics, question.topic, 1, 0 ,1) %]
-	[% END %]
-        [% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll"; polltype.nodisplay = "Never Display" %]
-      	[% PROCESS formLabel value => "Poll Type" comment => "" %]
-	[% IF story %]
-		[%# XXX question.polltype doesn't work, shows up for me as Never Display, see editpoll() code comment - Jamie %]
-		[% polltype.${question.polltype} %] *<br>
-		<input type="hidden" name="polltype" value="[% question.polltype %]">
-	[% ELSE %]
-		[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
-	[% END %]
-	<div class="notes">
-		Never Display - Poll won't display to regular users until type is changed<br>
-		SlashBox Section Poll - Poll will show up on the side for a given section<br>
-		Story Related Display - Poll is displayed on the specified story's page<br>
-	</div>
-
-
-	        [% PROCESS formLabel value => "Poll Time" comment => "choose a time in the future if you want to delay this poll's appearance" %]
-        <input type="text" name="date" value="[% date %]" size="19" [% IF story %]readonly[% END %]>[% IF story %]*[% END %]<br>
-	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
-
-[% FOREACH n = [0 .. 7] %]
-	<input type="text" name="aid[% n + 1%]" value="[% answers.$n.0 %]" size="40">
-	<input type="text" name="votes[% n + 1%]" value="[% answers.$n.1 or 0 %]" size="5"><br>
-[% END %]
-
-
-	<input type="hidden" name="qid" value="[% qid %]">
-
-[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear on the story's page" %]
-        <input type="text" name="sid" value="[% question.sid %]" size="20" >[% IF question.sid %]<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.sid %]">Related story</a> [% END %] [% IF question.sid && story && qid %]| <a href="[% gSkin.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | strip_paramattr %]&amp;qid=[% qid %]">Detach Poll from Story</a>[% END %]<br>
-	<div class="notes">
-		Time, section, topic, and polltype will be set based on related story's settings<br>
-	[% IF story %]
-		*These values set from related story<br>
-	[% END %]
-	</div>
-	
-
-        <input type="submit" name="op" value="preview" class="button">
-	<input type="submit" name="op" value="save" class="button">
-	</fieldset>
-</form>
+		<form action="[% env.script_name %]" method="post">
+			<legend>Poll Edit Page</legend>
+			<fieldset>
+			[% IF warning.invalid_sid %]<b>Story ID specified does not exist invalid</b><br>[% END %]
+			[% IF warning.invalid_votes %]<b>One or more votes are not an integer</b><br>[% END %]
+			[% IF warning.attached_to_other %]<b>Story is already attached to another poll -- detach poll from that story before attaching this one</b><br>[% END %]
+			
+			[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
+			<input type="text" name="question" value="[% question.question | strip_title %]" size="40">
+			<input type="text" name="voters" value="[% question.voters %]" size="5"><br>
+			[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visible in" %]
+			[% skins = Slash.db.getDescriptions('skins') %]
+			[% IF story %]
+				[% skins.${question.primaryskid}.title %] *<br>
+				<input type="hidden" name="primaryskid" value="[% question.primaryskid %]">
+			[% ELSE %]
+				[% primaryskid_val = question.primaryskid.defined ? question.primaryskid : constants.mainpage_skid %]
+				[% Slash.createSelect('primaryskid', skins, primaryskid_val, 1, 0, 1) %]
+			[% END %]
+			[% PROCESS formLabel value => "Poll Topic" comment => "" %]
+			[% DEFAULT question.topic=constants.discussion_default_topic %]
+			[% IF story %]
+				[% topics.${question.topic} %] *<br>
+				<input type="hidden" name="topic" value="[% question.topic %]">
+			[% ELSE %]
+				[% Slash.createSelect('topic', topics, question.topic, 1, 0 ,1) %]
+			[% END %]
+						[% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll"; polltype.nodisplay = "Never Display" %]
+						[% PROCESS formLabel value => "Poll Type" comment => "" %]
+			[% IF story %]
+				[%# XXX question.polltype doesn't work, shows up for me as Never Display, see editpoll() code comment - Jamie %]
+				[% polltype.${question.polltype} %] *<br>
+				<input type="hidden" name="polltype" value="[% question.polltype %]">
+			[% ELSE %]
+				[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
+			[% END %]
+			<div class="notes">
+				Never Display - Poll won't display to regular users until type is changed<br>
+				SlashBox Section Poll - Poll will show up on the side for a given section<br>
+				Story Related Display - Poll is displayed on the specified story's page<br>
+			</div>
+		
+		
+			[% PROCESS formLabel value => "Poll Time" comment => "choose a time in the future if you want to delay this poll's appearance" %]
+			<input type="text" name="date" value="[% date %]" size="19" [% IF story %]readonly[% END %]>[% IF story %]*[% END %]<br>
+			[% PROCESS formLabel value => "The Answers" comment => "voters" %]
+		
+			[% FOREACH n = [0 .. 7] %]
+				<input type="text" name="aid[% n + 1%]" value="[% answers.$n.0 | strip_title %]" size="40">
+				<input type="text" name="votes[% n + 1%]" value="[% answers.$n.1 or 0 %]" size="5"><br>
+			[% END %]
+		
+		
+			<input type="hidden" name="qid" value="[% qid %]">
+		
+			[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear on the story's page" %]
+			<input type="text" name="sid" value="[% question.sid %]" size="20" >[% IF question.sid %]<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.sid %]">Related story</a> [% END %] [% IF question.sid && story && qid %]| <a href="[% gSkin.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | strip_paramattr %]&amp;qid=[% qid %]">Detach Poll from Story</a>[% END %]<br>
+			<div class="notes">
+				Time, section, topic, and polltype will be set based on related story's settings<br>
+			[% IF story %]
+				*These values set from related story<br>
+			[% END %]
+			</div>
+			
+		
+			<input type="submit" name="op" value="preview" class="button">
+			<input type="submit" name="op" value="save" class="button">
+			</fieldset>
+		</form>
 	</div>
 </div>
 __seclev__
