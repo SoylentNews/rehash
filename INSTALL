@@ -1,194 +1,237 @@
 NAME
-    INSTALL - Slash Installation
-
+    INSTALL - Rehash Installation
+ 
 SYNOPSIS
-    This document describes how to install Slash, versions 2.2 and
-    pre-releases of 2.3 and 2.5. For instructions on installation or upgrade
-    of previous versions of Slash, see the INSTALL document included with
-    those distributions.
-
+    This document describes how to install Rehash 15.05 and later. Always check
+    your distrubitions version of INSTALL for version specific information.
+ 
     These instructions have only been tested on Linux. Installation under
     BSD and other Unix OSes is doable, with minor glitches (see "BSD
     Systems" below). Windows is not supported.
-
-    Slash can always be downloaded from SourceForge.net, from the FTP site,
-    and via CVS.
-
-            http://sf.net/projects/slashcode/
-            ftp://ftp.slashcode.com//pub/slashcode/
-            http://cvs.slashcode.com/
-
-    See the SourceForge.net page for patches and bug reports.
-
-  Which version should I use?
-    First of all: if you are using Slash 2.2.5 or before, including all
-    2.1.x, 2.0.x, and 1.x versions, you should upgrade to the latest version
-    in the 2.2 tree, 2.2.6, as soon as possible. There are security issues
-    with previous versions. You should not install previous versions.
-
-    As of this writing (August 2006), our last official release (2.2.6) was
-    long ago, and many features have been added since. All development has
-    been in CVS. If you are installing a new Slash site, you don't want to
-    use 2.2.6. And while you probably don't want to use the very latest CVS,
-    you almost certainly do want to use the latest "R_" tag available in
-    CVS. See "VERSIONS", "CVS tags", below, for advice on choosing and
-    maintaining a CVS installation.
-
+ 
+    Rehash is available on github; it is recommended that sites pull from the
+    current HEAD of the repo, but if you prefer a more stable platform, tagged
+    releases are made from time to time.
+ 
+    If in doubt, rehash's canonical development site is:
+        https://github.com/soylentnews/rehash
+ 
   Read, then install
     We know you want to get right into the installation, but you must first
     read, carefully, these sections of this INSTALL file:
-
+ 
     *   REQUIREMENTS, to make sure you have the right hardware and software
-
-    *   "CVS tags," in VERSIONS, to make sure you have the right version of
-        this code
-
+ 
     *   SECURITY NOTES, to keep your system safe
-
+ 
     *   INSTALLATION (the longest section), to make sure you will be able to
         finish what you start
-
+ 
     And it's a good idea to at least skim:
-
+ 
     *   INSTALLATION OPTIONS
-
+ 
     *   TROUBLESHOOTING
-
+ 
     Read those sections before you begin actually performing the steps in
     "INSTALLATION".
-
-    This document also contains information on upgrading a Slash site (which
-    can be tricky), and uninstalling (which is easy).
-
-  Updates to this file
-    This INSTALL file you are currently reading may not be the latest.
-    Again, you probably don't want to upgrade your whole Slash checkout to
-    the very latest CVS. But if you encounter problems, it might not be a
-    bad idea to look over the very latest version of this INSTALL file,
-    which you can find at:
-
-    http://slashcode.cvs.sourceforge.net/*checkout*/slashcode/slash/INSTALL
-
-    The version of this file that you are currently reading is:
-
-    $Id$
-
-    If there are more recent versions of this file, you can find a list of
-    those changes at:
-
-    http://slashcode.cvs.sourceforge.net/slashcode/slash/INSTALL
-
+ 
 INSTALLATION
+  Rehash Envirionment
+    Rehash requires a stable mod_perl 2 running against Apache 2.2. While
+    efforts have been underway to port mod_perl to Apache 2.4, this port is
+    as of writing unable to support rehash to extensive use of the mod_perl API
+    throughout the codebase. Unfortunately, most Linux distributions have chosen
+    to ship this experimental branch, and no longer provide the older Apache 2.2
+    packages anymore.
+ 
+    Furthermore, rehash depends on a fair number of perl modules that must be
+    installed into the site_perl directory as they are shared between both Apache
+    and slashd. As such, its recommended to build and install an independent version
+    of Perl to accommodate rehash. This also allows installation and management by
+    a non-root user.
+ 
+    To ease this process, rehash provides a "build-environment" target which
+    automatically downloads, compiles, and installs Apache, Perl, mod_perl,
+    and all the dependent CPAN modules. Although it is possible to run
+    rehash without this, using "build-environment" is the recommended way
+    to make sure you're always running the lastest and most up-to-date
+    packages.
+ 
+    If you choose to set your own environment up here are the following known
+    gotchas that we're aware of. It's strongly recommended if you do this that
+    you open Makefile to get the definitive list of CPAN modules currently
+    required for rehash.
+ 
+    * Perl must be built as a shared library (libperl.so), and be threaded
+      - Without both, mod_perl installation *will* fail.
+    * Apache should be built with a default MPM of prefork vs. worker
+      - Worker *should* be safe, but we still have areas of the code where
+        we need to get $r dynamically, which has a massive performance
+        penality under worker. Prefork gives behavior consistent with
+        Apache 1.3 and is recommended for now.
+    * Perl passes both the CPPFLAGS and LDFLAGS set by Configure to CPAN
+      modules. This is important if the mysql, GD and SSL headers are
+      in non-standard locations on your system, or if you've built these
+      packages manually.
+    * rehash can use both standard MySQL (referred to as "vanilla" below) or
+      MySQL Cluster. We use both configurations at soylentnews.org, with
+      production and dev on cluster, and our staff rehash instance using
+      vanilla. For high-availability, the use of MySQL cluster is *highly*
+      recommended. When using vanilla, all tables use InnoDB; likewise,
+      in cluster, all tables use the NDB type. When using vanilla MySQL
+      rehash supports using read-only replicas for performance boosts.
+    * As of this writing, soylentnews.org currently uses pre-generated binaries
+      of MySQL Cluster from mysql.com vs. Ubuntu's mysql packages. As
+      MySQL's protocol is stable, its acceptable if you link against
+      libmysqlclient-dev as provided by your distribution than the
+      version specifically.
+ 
   Installation Note
-    All of the installation steps below should be executed as root. If this
-    is a problem, then Slash is probably not for you (see "Non-Root" below,
-    under "INSTALLATION OPTIONS"). Type carefully. Now's a good time to back
-    up anything important.
-
+    Rehash can be built and run as a non-root user, which is the recommended
+    configuration, however, two scripts must be installed to /etc/init.d
+    by "make install" to start slashd and ipnd. Furthermore, it may be
+    necessary to run build-environment as root depending on your distributions
+    setup.
+ 
+    As such, these instructions assume you have a dedicated rehash user
+    (creatively called "rehash"), but have the ability to execute commands
+    as root.
+ 
   Installation Procedure
-    There are eight steps to installation. Anything already done can be
-    skipped -- but only if you have the correct version and configuration,
-    particularly with Apache/mod_perl.
-
-    1.  Install MySQL.
-
-        If it is already installed, doublecheck that its version is at least
-        the minimum required (see "REQUIREMENTS"). If you have questions
-        about the installation process, please refer to MySQL documentation.
-
-        Slash requires that your MySQL server run in the GMT timezome. Find
-        your global my.cnf file (probably "/etc/my.cnf" or
-        "/etc/mysql/my.cnf"), locate the "[mysqld_safe]" (or
-        "[safe_mysqld]") group, and add this line to it:
-
-                timezone = GMT
-
-        Start MySQL (it must be running for the installation of Slash and
+    There are XXX steps to installation.
+ 
+    0. Install system dependencies
+        Rehash's build-environment target assumes a few libraries are available
+        for Perl and perl modules to link against. You also need a C compiler.
+        As of writing, you need the following for successful installation
+ 
+        * GD
+        * OpenSSL (LibreSSL should also work, but untested)
+        * MySQL client libraries
+ 
+        On Ubuntu 14.04, the following commands will get everything you need:
+ 
+        $ sudo apt-get install build-essential libgd-dev libmysqlclient-dev libssl-dev
+ 
+    1. Configure the server to be in UTC time
+        For sanity reasons, rehash requires the server timezone be set to UTC. You can
+        check the timezone using the 'date' command. If it reports UTC like this:
+       
+        $ date
+        Mon Jun 15 23:47:19 UTC 2015
+       
+        Then you're good to go. If it reports something like EDT, PDT, or similar, you need
+        to change the system timezone. On Debian-based systems, you can do this by running
+        'dpkg-reconfigure tzdata' as root.
+       
+    1. Install MySQL or MySQL Cluster.
+ 
+        As indicated previously, rehash can run on both vanilla MySQL or MySQL
+        Cluster. For those unfamiliar with MySQL Cluster, its a mostly-compatible
+        replacement for vanilla MySQL which supports multimaster replication. Or
+        in other words, with two seperate machines running cluster, one backend
+        can be shutdown, restarted, and relaunched with no interruption in
+        access by the mysqld frontend.
+ 
+        Setting up MySQL cluster is complicated, and for full redundacy at minimium
+        two machines to run ndbd, and mysqld on each. If you choose to use
+        Cluster, reading through the documentation on mysql.com is *highly*
+        recommended. As part of the cluster installation, you'll need to
+        tune ndbmgmd to have enough attributes for your site. An example
+        configuration file based on soylentnews.org production environment
+        is provided in the "MySQL Cluster" section of this document. This
+        document assumes that you have already installed MySQL and have root
+        access on the server/cluster.
+ 
+        Rehash requires specific configuration of all MySQL instances to
+        get consistent behavior, as well as function unicode encoding. These
+        settings must be set in the global my.cnf file. Generally, this file is
+        /etc/my.cnf for binary releases from Oracle, or /etc/mysql/my.cnf
+        from distribution packages in Debian/Ubuntu. Consult your distributions
+        documentaiton for more information.
+       
+        Here's an example [mysqld] section that sets both UTF-8 support and sane
+        caching values.
+ 
+        [mysqld]
+        character_set_client=utf8
+        character_set_server=utf8
+        collation_server=utf8_unicode_ci
+        wait_timeout = 60
+        interactive_timeout = 28800
+        key_buffer_size=64M
+        #table_cache=256
+        sort_buffer_size=4M
+        read_buffer_size=1M
+ 
+        Start MySQL (it must be running for the installation of Rehash and
         some perl modules). Or, if it is already running, restart MySQL (if
         you have other services using MySQL, you should probably stop and
         start them -- make sure they are timezone-agnostic!).
-
-        Create a database to be used by Slash. Our default name is 'slash':
-
-                CREATE DATABASE slash;
-
+ 
+        Create a database to be used by rehash.
+ 
+                CREATE DATABASE rehash;
+ 
         Create a username/password that can access that database, and ensure
         that user has at least privileges to select, insert, update, delete,
         lock, create, drop, index and alter. For example, if your whole site
         (slashd daemon and apache) will run on the same machine as your
         mysql server, and you wanted to use the mysql username 'slash', you
         might:
-
+ 
                 GRANT SELECT, INSERT, UPDATE, DELETE, LOCK TABLES, CREATE, DROP,
-                INDEX, ALTER ON slash.* TO 'slash'@'localhost'
+                INDEX, ALTER ON rehash.* TO 'rehash'@'localhost'
                 IDENTIFIED BY (quoted password);
-
-                GRANT PROCESS ON *.* TO 'slash'@'localhost' IDENTIFIED BY
+ 
+                GRANT PROCESS ON *.* TO 'rehash'@'localhost' IDENTIFIED BY
                 (quoted password);
-
-        In this case, 'slash' would also be the name of your MySQL user as
+ 
+        In this case, 'rehash' would also be the name of your MySQL user as
         described in "Types of Users" below. You'll have to give your MySQL
         user to DBIx::Password when you install and configure it, so don't
         forget it.
-
-    2.  Install perl.
-
-        Perl is likely already installed on your machine; doublecheck that
-        its version is at least the minimum required (see "REQUIREMENTS").
-
-        Also, check the "Libraries" (or "Debian libraries") section under
-        "REQUIREMENTS", below. You may need to install dev packages for not
-        only perl but mysql and expat as well and now's a good time to take
-        care of that.
-
-    3.  Install Apache and mod_perl.
-
-        You MUST install mod_perl and Apache as directed here. OK, that is
-        not strictly true, but unless you really know what you're doing,
-        just assume it's true. If you already have mod_perl installed, it is
-        probably not configured properly to work with Slash and you will
-        have to rebuild it.
-
-        If you are using the provided httpd.conf file from the slash
-        distribution, and find that Apache is giving you errors, chances are
-        mod_perl is not installed correctly, and you need to build it from
-        scratch. Not following this direction is one of the most common
-        reasons we see for a Slash install not working.
-
-        Of course, if you have your own Apache modules or build options, you
-        will need to modify the instructions here appropriately.
-
-        First, untar apache and mod_perl. Then, go to the mod_perl
-        directory, and have mod_perl build and install apache for you:
-
-                perl Makefile.PL APACHE_SRC=../where_you_have_apache/src \
-                        DO_HTTPD=1 USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
-                        APACHE_PREFIX=/where_apache_will_be_installed
-                make
-                make test
-                make install
-
-        NOTE: You may be unsuccessful with "make test" if the perl modules
-        are not yet installed. However, some perl modules will not install
-        without Apache and mod_perl installed. If you wish, skip "make
-        test", run "make install", install the perl modules in step 4, and
-        then come back and run "make test" here again to make sure
-        everything is OK.
-
-        NOTE: If you know what you're doing, Slash will work with a DSO
-        Apache. Be sure you're on the latest versions of Apache and mod_perl
-        and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
-
-        NOTE: See also "Other requirements" under "REQUIREMENTS".
-
-        Ubuntu NOTE: In mid-2006 Ubuntu 6.x switched sh to point to dash
-        instead of bash, which apparently breaks the above step (because
-        dash's 'echo -E' isn't compliant enough for apache's 'configure').
-        We're looking into it, but for now apparently (temporarily) linking
-        /bin/sh to /bin/bash during this step is a workaround.
-        "dash-as-bin-sh" in https://launchpad.net/ubuntu/+spec (Update: this
-        appears to no longer be a problem, but if you encounter problems on
-        Ubuntu, check where your /bin/sh points.)
+ 
+    2.  Build the rehash environment
+ 
+        Once MySQL is sorted, you're ready to build rehash's dependencies. This
+        is an automated process, though some CPAN modules may prompt for
+        configuration information. The rehash environment is installed to
+        the location dictated by the ENVIRONMENT_PREFIX variable, which by
+        default is set to /opt/rehash-environment.
+       
+        Rehash download and build Apache and Perl and place them in version-specific
+        directories. For example, as of this writing, the most recent version of Perl is 5.22
+        and Apache 2.2.29. These will be installed to $ENVIRONMENT_PREFIX/apache-2.2.29
+        and $ENVIRONMENT_PREFIX/perl-5.22.0; older versions of Apache and Perl are
+        left in place, allowing for ease of upgrade. It's recommended that the rehash
+        system user has their home folder set to $ENVIRONMENT_PREFIX.
+       
+        As root, from the base of the rehash folder, execute the following command
+       
+        # make ENVIRONMENT_PREFIX=/opt/rehash-environment build-environment
+       
+        build-environment download Apache, Perl, and mod_perl, and run the test
+        suite on each; if the test suite fails, the build is aborted, and it
+        is left to the user to try and correct test failures. Rehash keeps
+        track of what its built via files in the stamp/ directory, and will
+        not try and rebuild components that have succeeded.
+       
+        For Perl modules, rehash will first install cpanminus with a copy of cpanm
+        shipped in the utils folder. cpanminus is Perl script that automates and
+        simplifies the management of CPAN modules, and automatically grabs the latest
+        version of said modules.
+       
+        dev.soylentnews.org is regularly updated and rebuilt via build-environment
+        to test rehash against these modules, and work is underway to provide unit
+        tests for most of rehash's functionality. If you encounter an issue due to
+        a specific CPAN module, please file a bug on it, and we'll work on fixing
+        compability if we haven't already caught the same issue. After this step
+       
+        --- UPDATED TO HERE ---
+        
+        --- UPDATED TO HERE ---
 
     4.  Install the perl modules.
 
@@ -1411,6 +1454,9 @@ UNINSTALLING
     7.  Delete your site's directory tree: "rm -rf
         /usr/local/slash/site/yoursitename".
 
+MYSQL CLUSTER TUNING
+    XXXX - Fill me in
+
 SECURITY NOTES
     Older Slash versions
         Slash prior to versions 2.2.6 must be upgraded to 2.2.6. See the
@@ -1488,4 +1534,3 @@ SECURITY NOTES
 
 VERSION
     $Id$
-

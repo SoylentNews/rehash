@@ -8,42 +8,23 @@ __END__
 
 =head1 NAME
 
-INSTALL - Slash Installation
+INSTALL - Rehash Installation
 
 =head1 SYNOPSIS
 
-This document describes how to install Slash, versions 2.2 and
-pre-releases of 2.3 and 2.5.  For instructions on installation or upgrade
-of previous versions of Slash, see the INSTALL document included with
-those distributions.
+This document describes how to install Rehash 15.05 and later. Always check
+your distrubitions version of INSTALL for version specific information.
 
-These instructions have only been tested on Linux.  Installation under
-BSD and other Unix OSes is doable, with minor glitches (see L<"BSD
-Systems"> below).  Windows is not supported.
+These instructions have only been tested on Linux. Historically, installation
+under BSD and other Unix OSes is doable, with minor glitches (see L<"BSD
+Systems"> below). Windows is not supported.
 
-Slash can always be downloaded from SourceForge.net, from the FTP site,
-and via CVS.
-
-	http://sf.net/projects/slashcode/
-	ftp://ftp.slashcode.com//pub/slashcode/
-	http://cvs.slashcode.com/
-
-See the SourceForge.net page for patches and bug reports.
-
-=head2 Which version should I use?
-
-First of all: if you are using Slash 2.2.5 or before, including all 2.1.x,
-2.0.x, and 1.x versions, you should upgrade to the latest version in
-the 2.2 tree, 2.2.6, as soon as possible.  There are security issues
-with previous versions.  You should not install previous versions.
-
-As of this writing (August 2006), our last official release (2.2.6) was
-long ago, and many features have been added since.  All development has
-been in CVS.  If you are installing a new Slash site, you don't want to
-use 2.2.6.  And while you probably don't want to use the very latest
-CVS, you almost certainly do want to use the latest "R_" tag available
-in CVS.  See L<"VERSIONS">, "CVS tags", below, for advice on choosing
-and maintaining a CVS installation.
+Rehash is available on github; it is recommended that sites pull from the
+current HEAD of the repo, but if you prefer a more stable platform, tagged
+releases are made on roughly 2-3 month basis.
+ 
+If in doubt, rehash's canonical development site is:
+    https://github.com/soylentnews/rehash
 
 =head2 Read, then install
 
@@ -55,11 +36,6 @@ read, carefully, these sections of this INSTALL file:
 =item *
 
 REQUIREMENTS, to make sure you have the right hardware and software
-
-=item *
-
-"CVS tags," in VERSIONS, to make sure you have the right version
-of this code
 
 =item *
 
@@ -92,27 +68,83 @@ L<"INSTALLATION">.
 This document also contains information on upgrading a Slash site
 (which can be tricky), and uninstalling (which is easy).
 
-=head2 Updates to this file
-
-This INSTALL file you are currently reading may not be the latest.
-Again, you probably don't want to upgrade your whole Slash checkout to
-the very latest CVS.  But if you encounter problems, it might not be
-a bad idea to look over the very latest version of this INSTALL file,
-which you can find at:
-
-L<http:E<sol>E<sol>slashcode.cvs.sourceforge.netE<sol>*checkout*E<sol>slashcodeE<sol>slashE<sol>INSTALL>
-
-The version of this file that you are currently reading is:
-
-$Id$
-
-If there are more recent versions of this file, you can find a list of
-those changes at:
-
-L<http:E<sol>E<sol>slashcode.cvs.sourceforge.netE<sol>slashcodeE<sol>slashE<sol>INSTALL>
-
-
 =head1 INSTALLATION
+
+=head2 Rehash Environment
+
+Rehash requires a stable mod_perl 2 running against Apache 2.2. While
+efforts have been underway to port mod_perl to Apache 2.4, this port is
+as of writing unable to support rehash to extensive use of the mod_perl API
+throughout the codebase. Unfortunately, most Linux distributions have chosen
+to ship this experimental branch, and no longer provide the older Apache 2.2
+packages anymore.
+
+Furthermore, rehash depends on a fair number of perl modules that must be
+installed into the site_perl directory as they are shared between both Apache
+and slashd. As such, its recommended to build and install an independent version
+of Perl to accommodate rehash. This also allows installation and management by
+a non-root user.
+ 
+To ease this process, rehash provides a "build-environment" target which
+automatically downloads, compiles, and installs Apache, Perl, mod_perl,
+and all the dependent CPAN modules. Although it is possible to run
+rehash without this, using "build-environment" is the recommended way
+to make sure you're always running the lastest and most up-to-date
+packages.
+ 
+If you choose to set your own environment up here are the following known
+gotchas that we're aware of. It's strongly recommended if you do this that
+you open Makefile to get the definitive list of CPAN modules currently
+required for rehash.
+
+=over 4
+
+=item *
+
+Perl must be built as a shared library (libperl.so), and be built with threading support
+Without both, mod_perl installation *will* fail.
+
+=item *
+
+Apache should be built with a default MPM of prefork vs. worker
+
+=over 4
+
+=item -
+
+Worker *should* be safe, but we still have areas of the code where
+we need to get $r dynamically, which has a massive performance
+penality under worker. Prefork gives behavior consistent with
+Apache 1.3 and is recommended for now.
+
+=back
+
+=item *
+
+Perl passes both the CPPFLAGS and LDFLAGS set by Configure to CPAN
+modules. This is important if the mysql, GD and SSL headers are
+in non-standard locations on your system, or if you've built these
+packages manually.
+
+=item *
+
+rehash can use both standard MySQL (referred to as "vanilla" below) or
+MySQL Cluster. We use both configurations at soylentnews.org, with
+production and dev on cluster, and our staff rehash instance using
+vanilla. For high-availability, the use of MySQL cluster is *highly*
+recommended. When using vanilla, all tables use InnoDB; likewise,
+in cluster, all tables use the NDB type. When using vanilla MySQL
+rehash supports using read-only replicas for performance boosts.
+
+=item *
+
+As of this writing, soylentnews.org currently uses pre-generated binaries
+of MySQL Cluster from mysql.com vs. Ubuntu's mysql packages. As
+MySQL's protocol is stable, its acceptable if you link against
+libmysqlclient-dev as provided by your distribution than the
+version specifically.
+
+=back
 
 =head2 Installation Note
 
@@ -168,7 +200,7 @@ server, and you wanted to use the mysql username 'slash', you might:
 	(quoted password);
 
 In this case, 'slash' would also be the name of your MySQL user as
-described in L<"Types of Users"> below.  You'll have to give your MySQL
+described in "Types of Users" below.  You'll have to give your MySQL
 user to DBIx::Password when you install and configure it, so don't
 forget it.
 
@@ -344,7 +376,7 @@ and database user in Step 1.  First, you'll be asked for a
 B<virtual user> name, which will be the identifier for all of
 this data.  You can just use the name of your site,
 or any other alphanumeric string.  This string will be your
-"DBIx::Password virtual user" as described in L<"Types of Users"> below --
+"DBIx::Password virtual user" as described in "Types of Users" below --
 you will use this in other places, so don't forget it.
 
 Then you'll be asked for your DBI driver (mysql), the name of the database
