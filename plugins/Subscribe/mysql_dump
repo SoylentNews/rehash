@@ -39,6 +39,7 @@ INSERT INTO vars (name, value, description) VALUES ('pp_ipn_key', '', 'Paypal ip
 INSERT INTO vars (name, value, description) VALUES ('pp_ipn_verify', '', 'Paypal ipn daemon verify hostnames');
 INSERT INTO vars (name, value, description) VALUES ('pp_ipn_slient', '0', 'Paypal ipn daemon disable console messages.');
 INSERT INTO vars (name, value, description) VALUES ('pp_ipn_debugfile', '0', 'Should Paypal ipn daemon write to log file, or dump to /dev/null');
+INSERT INTO vars (name, value, description) VALUES ('pp_SSL_ca_path', '/etc/ssl/certs', 'Path to SSL certs needed by LWP::UserAgent');
 INSERT INTO vars (name, value, description) VALUES ('submissions_sub_speed_limit','0','Seconds delay before repeat submission for subscriber.');
 INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptions enabled?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_only', 1, 'Subscription prefs only enabled for admins?');
