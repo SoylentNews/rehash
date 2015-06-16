@@ -1,73 +1,52 @@
 #!perl -w
 # run this document through perl to check its syntax
+# To make it into plaintext at the standard location:
+#	perldoc -tF docs/README.pod > README
 use Pod::Checker;
 podchecker(\*DATA);
 __END__
 
 =head1 NAME
 
-README - Slash Readme
-
-=head1 WARNING
-
-This release is B<BETA> software.  It is not intended or recommended
-for production use, and is constantly changing.  Please use this only
-for development and testing purposes.
-
-The upgrade procedures are available (L<INSTALL>).  Standard
-disclaimer applies.  Please test them if you are so inclined, and
-let us know how they work for you.
-
+README - Rehash ("Revised and Enhanced Homebrewed Automatic Storytelling Homepage")
 
 =head1 DESCRIPTION
 
-Slash -- Slashdot Like Automated Storytelling Homepage -- is the code
-that runs Slashdot.  More than that, however, Slash is an architecture
-for putting together web sites.  It comes with functionality for posting
-articles, conducting polls, having discussions, and more; but it can be
-extended in innumerable ways.
+Rehash is a fork of the last open-source release of Rehash, which was
+the basis of basis of slashdot.org. Rehash is a partial rewrite of Rehash
+to increase functionality, improve usabilitiy, and an incremental port
+to modern versions of Apache, perl, and mod_perl. It is designed for high
+relaibility and scalability, with intergrated support for MySQL cluster,
+multi-frontend support, and a strong adherence to the MVC development
+methodology, clearly abstracting user-facing code from backend management.
 
-Slash is written in Perl, and is built on top of Apache and mod_perl. It
-requires a database backend, though the only well-supported database
-used with it is MySQL (more databases will become well-supported as time
-goes on; PostgreSQL support is already well on its way).  Slash is
-fast, scalable, and secure (as evidenced by one of the best test cases
-you could have, running Slashdot itself).
+In addition, rehash is designed to be fast, flexible, and highly scalable
+and should scale to almost any load put to it. Furthermore, with support
+for AppArmor, parameter filtering, and query hardening, rehash is resistant
+to both SQL exploitation, and server compromise through the frontend. As
+always, efforts continue to improve this wherever possible. As for proof of
+its robustness, rehash powers soylentnews.org, and its ancestor powered
+slashdot.org (which is one heck of a torture test).
 
-Through a plugin system, developers can add functionality to Slash. 
-Through themes and templates (which are written using Template Toolkit),
-the look and feel of a Slash site can be customized.
-
-See F<INSTALL> for information about B<installing> Slash, including hardware
-and software requirements.  Read that document carefully, and follow the
+See F<INSTALL> for information about B<installing> Rehash, including hardware
+and software requirements. Read that document carefully, and follow the
 instructions as precisely as possible.
 
-Also see F<INSTALL> for information on B<upgrading> from previous versions
-of Slash.
+Also see F<INSTALL> for information on  B<upgrading> from previous versions of
+Rehash, Rehash or slashcode.
 
 As noted in the FAQ, please send any bug reports, and subscribe to
-mailing lists, at Slash's SourceForge.net site.
+mailing lists, at Rehash's github page.
 
-	http://sf.net/projects/slashcode/
-
+    https://github.com/soylentnews/rehash
 
 =head1 DOCUMENTATION
 
-The F<.pod> documentation included with Slash can be read with the
+The F<.pod> documentation included with Rehash can be read with the
 C<perldoc> program, included with perl, or translated using one of
 the many C<pod2*> translators.
 
-The documentation is also available online on the Slash FAQ.
-
 =over 4
-
-=item Slash FAQ
-
-Basic information about Slash, how to contact the developers,
-and a lot more.
-
-http://slashcode.com/faq.shtml
-
 
 =item Template Toolkit (version 2)
 
@@ -79,7 +58,7 @@ http://www.template-toolkit.org/
 
 =item RSS
 
-For more information on RSS 1.0, and the RSS Slash module.
+For more information on RSS 1.0, and the RSS Rehash module.
 
 http://purl.org/rss/1.0/
 
@@ -88,22 +67,22 @@ http://purl.org/rss/1.0/modules/slash/
 
 =item Installation
 
-The details on how to install, and upgrade, Slash.
+The details on how to install, and upgrade, Rehash.
 
 F<INSTALL>
 
 
 =item API
 
-The details of the API available in Slash.
+The details of the API available in Rehash.
 
 	perldoc Slash
 	perldoc Slash::Utility
 	perldoc Slash::Display
 	perldoc Slash::DB
 
-The modules represent the bulk of the public API of Slash.
-The other Slash modules have embedded POD to be read with perldoc, too.
+The modules represent the bulk of the public API of Rehash.
+The other Rehash modules have embedded POD to be read with perldoc, too.
 Some of the documentation here is woefully incomplete.
 
 	use Source 'Luke';
@@ -120,32 +99,17 @@ F<docs/HOWTO-Templates.pod>
 
 F<docs/HOWTO-Themes.pod>
 
-
-=item Schema
-
-The layout and description of the database.  [These are out of date.]
-
-F<docs/slasherd.fig>
-
-F<docs/slasherd.ps>
-
-F<docs/slashtables.pod>
-
-
 =item Other
 
 The slashguide document (previously called getting_started) helps
 you get your feet wet and gives vital information for how to run
-a Slash site.
+a Rehash site.
 
 F<docs/slashguide.pod>
 
-F<themes/slashcode/htdocs/slashguide.shtml>
-
-
 =item Authors
 
-The authors and contributors of Slash.
+The authors and contributors of Rehash.
 
 F<AUTHORS>
 
@@ -157,6 +121,12 @@ F<AUTHORS>
 
 =over 4
 
+=item Rehash
+
+Primary user of rehash, and home of its developers.
+
+https://soylentnews.org
+
 =item Slashdot
 
 The site that started it all.
@@ -164,25 +134,11 @@ The site that started it all.
 http://slashdot.org/
 
 
-=item Slash
+=item GitHub (rehash repo)
 
-The main site for Slash.
+Home of the rehash git repo.
 
-http://slashcode.com/
-
-
-=item CVS
-
-The main CVS repository.
-
-http://cvs.slashcode.com/
-
-
-=item SourceForge.net Site
-
-Access to the code, bug reports, patches, mailing lists, and more.
-
-http://sf.net/projects/slashcode/
+https://github.com/soylentnews/rehash
 
 =back
 
@@ -192,22 +148,27 @@ http://sf.net/projects/slashcode/
 The information below applies to everything in this distribution,
 except where noted.
 
+Copyright 2014-2015 by the Rehash Developers and the SoylentNews Team.
+
+    https://soylentnews.org
+    https://github.com/soylentnews/rehash
+
 Copyright 1997-2005 by Open Source Technology Group.
 
 	http://www.ostg.com/
 
-Slash is free software; you can redistribute it and/or
+Rehash is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
 
-Slash is distributed in the hope that it will be useful,
+Rehash is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Slash (F<COPYING>); if not, go to http://www.fsf.org/
+along with Rehash (F<COPYING>); if not, go to http://www.fsf.org/
 or write to the Free Software Foundation, Inc., 59 Temple Place -
 Suite 330, Boston, MA 02111-1307, USA.
 
