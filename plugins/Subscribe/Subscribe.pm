@@ -330,7 +330,7 @@ sub ppDoPDT {
 		return 0;
 	}
 	 
-	my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 1, SSL_ca_path => $constants-{pp_SSL_ca_path} });
+	my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 1, SSL_ca_path => $constants->{pp_SSL_ca_path} });
 	my $req = new HTTP::Request('POST', "https://$constants->{paypal_host}/cgi-bin/webscr");
 	$req->content_type("application/x-www-form-urlencoded");
 	$req->header(Host => "$constants->{paypal_host}");
