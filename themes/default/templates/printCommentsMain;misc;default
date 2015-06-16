@@ -133,7 +133,7 @@ __template__
 			</fieldset>
 		</form>
 		<div class="commentBox">
-			<small>b>The Fine Print:</b> [% fineprint %]</small>
+			<small><b>The Fine Print:</b> [% fineprint %]</small>
 		</div>
 	</div>	
 </div>
