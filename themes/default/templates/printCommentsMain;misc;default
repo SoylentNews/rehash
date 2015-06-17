@@ -130,7 +130,7 @@ __template__
 				[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 					<span class="nbutton"><p><b>[% Slash.linkComment({
 						sid          => sid,
-						cid          => cid,
+						pid          => cid,
 						op           => 'reply',
 						subject      => reply,
 						subject_only => 1,
