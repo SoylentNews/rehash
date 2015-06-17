@@ -1213,6 +1213,7 @@ sub editStory {
 		$stoid = $slashdb->getStory($form->{stoid} || $form->{sid}, 'stoid', 1);
 		if ($stoid) {
 			handleMediaFileForStory($stoid);
+			$storyref->{stoid} = $stoid;
 		}
 
 	} elsif ($stoid) { # Loading an existing SID

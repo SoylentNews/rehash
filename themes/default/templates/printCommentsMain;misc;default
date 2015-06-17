@@ -128,7 +128,13 @@ __template__
 				[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
 				[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
 				[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-					<input type="submit" name="op" value="[% reply %]" class="button">
+					<span class="nbutton"><p><b>[% Slash.linkComment({
+						sid          => sid,
+						cid          => cid,
+						op           => 'reply',
+						subject      => reply,
+						subject_only => 1,
+					}) %]</b></p></span>
 				[% END %]
 			</fieldset>
 		</form>
