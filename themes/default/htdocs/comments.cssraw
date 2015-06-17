@@ -261,6 +261,7 @@ ul#commentlisting
 .nbutton{
 	background: none;
 	margin:0;
+	white-space: nowrap;
 }
 .nbutton p{
 	display:inline;
