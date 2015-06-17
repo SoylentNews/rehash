@@ -66,6 +66,10 @@ html > body .commentwrap table {
 	padding: .3em;
 }
 
+.commentwrap .nbutton {
+	font-size: 0.813em;
+}
+
 .commentTop 
 {
 	padding: 0;
