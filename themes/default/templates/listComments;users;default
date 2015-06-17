@@ -132,7 +132,7 @@ row_class_3 = "data_hl3";
 				'/comments.pl?sid='; comment.sid;
 				'&amp;cid='; comment.cid;
 			'">';
-			comment.subj;
+			comment.subj | strip_title;
 			'</a>&nbsp;';
 		'</td>';
 		'<td valign="top"><nobr>&nbsp;'; IF comment.type == "archived"; "*"; END; Slash.timeCalc(comment.cdate); '</nobr></td>';
