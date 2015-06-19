@@ -1190,7 +1190,7 @@ sub editStory {
 			# This should be moved to balanceTags once that braindead POS is fixed -- paulej72 20150617
 			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
-			$storyref->{$field} =~ s|<hr>\s*</p>|<hr>|g;
+			$storyref->{$field} =~ s|(<h.>)\s*</p>|$1|g;
 		}
 
 		$form->{uid} ||= $user->{uid};
