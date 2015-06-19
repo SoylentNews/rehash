@@ -16,11 +16,11 @@ __template__
 [% fullsubtext = ""; os = ""; count = 1;
 FOREACH submission = submissions;
 	PROCESS formatSub;
-	fullsubtext = fullsubtext _ "\n\n<h4>" _ submission.subj _ "</h4>\n\n" _ subtext;
-	os = os _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission #" _ count _ "</a> ";
+	fullsubtext = fullsubtext _ "\n\n<h4>" _ submission.subj | strip_title _ "</h4>\n\n" _ subtext;
+	os = os _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission #" _ count _ "</a>\n";
 	count = count + 1;
 END;
-fullsubtext = fullsubtext _ "\n\n<hr /><p><small>" _ os _ "</small></p>";
+fullsubtext = fullsubtext _ "\n\n<hr><p><small>" _ os _ "</small></p>";
 fullsubtext %]
 
 __seclev__
