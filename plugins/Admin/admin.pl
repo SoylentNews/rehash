@@ -1187,6 +1187,8 @@ sub editStory {
 			#$storyref->{$field} = slashizeLinks($storyref->{$field});
 			$storyref->{$field} = parseSlashizedLinks($storyref->{$field});
 			$storyref->{$field} = balanceTags($storyref->{$field});
+			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
+			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
 		}
 
 		$form->{uid} ||= $user->{uid};

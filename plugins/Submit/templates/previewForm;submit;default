@@ -18,8 +18,10 @@ __name__
 previewForm
 __template__
 [% # set the variable 'subtext'
-   PROCESS formatSub %]
-
+  PROCESS formatSub;
+	UNLESS (submission.subj.match('^Merge'));
+		subtext = subtext _ "\n\n<hr><p><small>" _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission</a>" _ "</small></p>";
+	END %]
 
 [% title = submission.journal_id ? "Journal Submission Preview" : "Submission Preview" %]
 [% PROCESS titlebar %]
@@ -53,7 +55,7 @@ __template__
 		[% END;
 	END %]
 		[% pretext = Slash.addDomainTags(subtext);
-                   pretext = Slash.parseDomainTags(pretext); %]
+			pretext = Slash.parseDomainTags(pretext); %]
 		[% pretext %]
 	</div>
 </div>
