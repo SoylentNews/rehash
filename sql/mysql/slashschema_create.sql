@@ -1210,7 +1210,7 @@ CREATE TABLE submissions (
 	subj varchar(100) NOT NULL,
 	story text NOT NULL,
 	tid int unsigned NOT NULL,
-	note varchar(30) DEFAULT '' NOT NULL,
+	note varchar(30) DEFAULT '' NULL,
 	primaryskid SMALLINT UNSIGNED,
 	comment varchar(255) NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
