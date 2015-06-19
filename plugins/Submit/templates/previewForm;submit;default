@@ -20,7 +20,7 @@ __template__
 [% # set the variable 'subtext'
   PROCESS formatSub;
 	UNLESS (submission.subj.match('^Merge'));
-		subtext = subtext _ "\n\n<hr /><p><small>" _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission</a>" _ "</small></p>";
+		subtext = subtext _ "\n\n<hr><p><small>" _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission</a>" _ "</small></p>";
 	END %]
 
 [% title = submission.journal_id ? "Journal Submission Preview" : "Submission Preview" %]
