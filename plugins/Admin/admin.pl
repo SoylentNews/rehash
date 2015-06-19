@@ -1189,6 +1189,7 @@ sub editStory {
 			$storyref->{$field} = balanceTags($storyref->{$field});
 			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|<hr> </p>|</p>\n\n<hr>|g;
 		}
 
 		$form->{uid} ||= $user->{uid};
