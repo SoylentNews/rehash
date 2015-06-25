@@ -2613,7 +2613,10 @@ The escaped data.
 
 sub fudgeurl {
 	my($url) = @_;
-
+	
+	use URI::Encode;
+	my $encoder = URI::Encode->new;
+	$url = $encoder->decode($url);
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
 	$url =~ s/["\s]//g;
@@ -2723,9 +2726,9 @@ sub fudgeurl {
 	# These entities can crash browsers and don't belong in URLs.
 	# Correction: NO entities belong in URLs. If they can't input the character, tough shit to them.
 	$url =~ s/&(.+?);//g;
-	# we don't like SCRIPT at the beginning of a URL
-	# This can currently never happen though so why do we bother?
-	$url = $url =~ /^[\s\w]*script\b/i ? undef : $url;
+	# we don't like SCRIPT in a URL
+	$url = $url =~ /<script.*?>/i ? undef : $url;
+	$url = $encoder->encode($url);
 	return $url;
 }
 
