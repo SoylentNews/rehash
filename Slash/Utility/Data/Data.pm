@@ -1427,6 +1427,13 @@ my %actions = (
 			${$_[0]} =~ s/(&#[a-zA-Z0-9]+;)/_diacriticEntities2Literals($1)/ge;
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
 			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
+	nix_script_tags	=> sub {
+			# This should already be done but to fix bad entries already in the db
+			# we shall do it again.
+			use URI::Encode;
+			my $encoder = URI::Encode->new;
+			${$_[0]} =~ s/(<a.*?href=("|'|%22|%27))((\S)*%[0-9a-fA-F][0-9a-fA-F](\S)*)(("|'|%22|%27)(>|%3e))/$1.$encoder->decode($2).$3/ieg;
+			${$_[0]} =~ s/<script.*?>//g;		},
 );
 
 my %mode_actions = (
@@ -1529,6 +1536,8 @@ my %mode_actions = (
 			diacritic_max
 			encode_html_ltgt
 			approve_unicode		)],
+	BACKTRACK, [qw(
+			nix_script_tags		)],
 	
 );
 
