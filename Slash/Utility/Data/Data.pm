@@ -1445,10 +1445,15 @@ my %actions = (
 			${$_[0]} =~ s/(&#[a-zA-Z0-9]+;)/_diacriticEntities2Literals($1)/ge;
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
 			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
+	fix_href	=> sub {
+			# This should already be done but to fix bad entries already in the db
+			# we shall do it again.
+			${$_[0]} =~ s/href=['"](.*?)['"]/_remove_script_tag($1)/iegs;	},
 	nix_script_tags	=> sub {
 			# This should already be done but to fix bad entries already in the db
 			# we shall do it again.
-			${$_[0]} =~ s/href=['"](.*?)['"]/_remove_script_tag($1)/ieg;	},
+			${$_[0]} =~ s/<script.*?<\/script>//igs;	},
+	
 );
 
 my %mode_actions = (
@@ -1552,6 +1557,7 @@ my %mode_actions = (
 			encode_html_ltgt
 			approve_unicode		)],
 	BACKTRACK, [qw(
+			fix_href
 			nix_script_tags		)],
 );
 
