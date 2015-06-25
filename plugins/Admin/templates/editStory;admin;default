@@ -18,11 +18,9 @@ SET txRows = constants.textarea_rows UNLESS txRows;
 SET txRows = 20 IF txRows < 20  %]
 <div id="content" class="admin">
 	<form action="[% gSkin.rootdir %]/admin.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
-		[% IF form.subid %]
-			<input type="hidden" name="subid" value="[% form.subid | strip_attribute %]">
-		[% END %]
-		[% IF form.fhid %]
-			<input type="hidden" name="fhid" value="[% form.fhid | strip_attribute %]">
+		[% subid = subid || form.subid;
+		IF subid %]
+			<input type="hidden" name="subid" value="[% subid | strip_attribute %]">
 		[% END %]
 		<div id="slashboxes">
 			[% IF constants.plugin.Events && Slash.getObject('Slash::Events') %]
