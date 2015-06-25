@@ -2616,8 +2616,11 @@ sub fudgeurl {
 	
 	use URI::Encode;
 	my $encoder = URI::Encode->new;
+	my $i = 1;
 	while($url =~ /%/){
+		$url = '' if $i > 3;
 		$url = $encoder->decode($url);
+		$i++;
 	}
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
