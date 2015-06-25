@@ -128,6 +128,7 @@ our @EXPORT  = qw(
 	strip_textarea
 	strip_subject
 	strip_title
+	strip_backtrack
 	strip_html
 	strip_literal
 	strip_mode
@@ -1335,6 +1336,23 @@ sub _fixupCharrefs {
 	#	TMB not using good_numeric/good_entity anymore
 }
 
+sub _remove_script_tag {
+	my($url) = @_;
+	
+	use URI::Encode;
+	my $encoder = URI::Encode->new;
+	my $i = 1;
+	while($url =~ /%/){
+		$url = '' if $i > 3;
+		$url = $encoder->decode($url);
+		$i++;
+	}
+	$url = $url =~ /<script.*?>/i ? undef : $url;
+	$url = $encoder->encode($url);
+	return $url;
+
+}
+
 my %action_data = ( );
 
 my %actions = (
@@ -1427,6 +1445,10 @@ my %actions = (
 			${$_[0]} =~ s/(&#[a-zA-Z0-9]+;)/_diacriticEntities2Literals($1)/ge;
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
 			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
+	nix_script_tags	=> sub {
+			# This should already be done but to fix bad entries already in the db
+			# we shall do it again.
+			${$_[0]} =~ s/<a.*?href=['|"](.*?)['|']/_remove_script_tag($1)/ieg;	},
 );
 
 my %mode_actions = (
@@ -1529,7 +1551,8 @@ my %mode_actions = (
 			diacritic_max
 			encode_html_ltgt
 			approve_unicode		)],
-	
+	BACKTRACK, [qw(
+			nix_script_tags		)],
 );
 
 sub stripByMode {
@@ -1601,6 +1624,7 @@ sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 sub strip_textarea	{ stripByMode($_[0], TEXTAREA,	@_[1 .. $#_]) }
 sub strip_subject	{ stripByMode($_[0], SUBJECT,	@_[1 .. $#_]) }
 sub strip_title		{ stripByMode($_[0], TITLE,	@_[1 .. $#_]) }
+sub strip_backtrack		{ stripByMode($_[0], BACKTRACK,	@_[1 .. $#_]) }
 
 sub determine_html_format {
 	my($html, $user) = @_;
@@ -2613,6 +2637,15 @@ The escaped data.
 
 sub fudgeurl {
 	my($url) = @_;
+	
+	use URI::Encode;
+	my $encoder = URI::Encode->new;
+	my $i = 1;
+	while($url =~ /%/){
+		$url = '' if $i > 3;
+		$url = $encoder->decode($url);
+		$i++;
+	}
 
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
@@ -2723,9 +2756,9 @@ sub fudgeurl {
 	# These entities can crash browsers and don't belong in URLs.
 	# Correction: NO entities belong in URLs. If they can't input the character, tough shit to them.
 	$url =~ s/&(.+?);//g;
-	# we don't like SCRIPT at the beginning of a URL
-	# This can currently never happen though so why do we bother?
-	$url = $url =~ /^[\s\w]*script\b/i ? undef : $url;
+	# we don't like SCRIPT in a URL
+	$url = $url =~ /<script.*?>/i ? undef : $url;
+	$url = $encoder->encode($url);
 	return $url;
 }
 

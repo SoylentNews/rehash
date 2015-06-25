@@ -173,11 +173,12 @@ change Slash::Data::strip_mode() to allow the new value.
 	TEXTAREA
 	SUBJECT
 	TITLE
+	BACKTRACK
 	FULLHTML
 
 =cut
 
-# -4 -3 -2 -1 0 1 2 3 4 5 6 7 77
+# -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 77
 
 =head2 people
 
