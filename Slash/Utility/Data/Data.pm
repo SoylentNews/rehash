@@ -1349,7 +1349,7 @@ sub _remove_script_tag {
 	}
 	$url = $url =~ /<script.*?>/i ? undef : $url;
 	$url = $encoder->encode($url);
-	return $url;
+	return 'href="'.$url.'"';
 
 }
 
@@ -1448,7 +1448,7 @@ my %actions = (
 	nix_script_tags	=> sub {
 			# This should already be done but to fix bad entries already in the db
 			# we shall do it again.
-			${$_[0]} =~ s/<a.*?href=['|"](.*?)["|']/_remove_script_tag($1)/ieg;	},
+			${$_[0]} =~ s/href=['"](.*?)['"]/_remove_script_tag($1)/ieg;	},
 );
 
 my %mode_actions = (
