@@ -1433,7 +1433,7 @@ my %actions = (
 			use URI::Encode;
 			my $encoder = URI::Encode->new;
 			${$_[0]} =~ s/(<a.*?href=("|'|%22|%27))((\S)*%[0-9a-fA-F][0-9a-fA-F](\S)*)(("|'|%22|%27)(>|%3e))/$1.$encoder->decode($2).$3/ieg;
-			${$_[0]} =~ s/<script.*?>//g;		},
+			${$_[0]} =~ s#<[/]*script.*?>##g;		},
 );
 
 my %mode_actions = (
