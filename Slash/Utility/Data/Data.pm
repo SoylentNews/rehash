@@ -2616,7 +2616,9 @@ sub fudgeurl {
 	
 	use URI::Encode;
 	my $encoder = URI::Encode->new;
-	$url = $encoder->decode($url);
+	while($url =~ /%/){
+		$url = $encoder->decode($url);
+	}
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
 	$url =~ s/["\s]//g;
