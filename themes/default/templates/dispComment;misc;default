@@ -46,7 +46,7 @@ __template__
 		</div>
 	</div>
 	<div class="commentBody">
-		<div id="comment_body_[% cid %]">[% comment | strip_backtrack %]</div>
+		<div id="comment_body_[% cid %]">[% comment %]</div>
 		[% IF sig && !user.nosigs %]
 		<div id="comment_sig_[% cid %]" class="sig[% ' hide' IF comment_shrunk %]">[% sig %]</div>
 		[% END %]
