@@ -1,45 +1,42 @@
 NAME
-    README - Rehash ("Revised and Enhanced Homebrewed Automatic Storytelling Homepage")
+    README - Rehash ("Revised and Enhanced Homebrewed Automatic Storytelling
+    Homepage")
 
 DESCRIPTION
-    Rehash is a fork of the last open-source release of Slash, which was
-    the basis of basis of slashdot.org. Rehash is a partial rewrite of Slash
-    to increase functionality, improve usabilitiy, and an incremental port
-    to modern versions of Apache, perl, and mod_perl. It is designed for high
-    relaibility and scalability, with intergrated support for MySQL cluster,
-    multi-frontend support, and a strong adherence to the MVC development
-    methodology, clearly abstracting user-facing code from backend management.
+    Rehash is a fork of the last open-source release of Rehash, which was
+    the basis of basis of slashdot.org. Rehash is a partial rewrite of
+    Rehash to increase functionality, improve usabilitiy, and an incremental
+    port to modern versions of Apache, perl, and mod_perl. It is designed
+    for high relaibility and scalability, with intergrated support for MySQL
+    cluster, multi-frontend support, and a strong adherence to the MVC
+    development methodology, clearly abstracting user-facing code from
+    backend management.
 
-    In addition, rehash is designed to be fast, flexible, and highly scalable
-    and should scale to almost any load put to it. Furthermore, with support
-    for AppArmor, parameter filtering, and query hardening, rehash is resistant
-    to both SQL exploitation, and server compromise through the frontend. As
-    always, efforts continue to improve this wherever possible. As for proof of
-    its robustness, rehash powers soylentnews.org, and its ancestor powered
-    slashdot.org (which is one heck of a torture test).
-
-    Through a plugin system, developers can add functionality to Rehash,
-    Through themes and templates (which are written using Template Toolkit),
-    the look and feel of a Slash site can be customized.
+    In addition, rehash is designed to be fast, flexible, and highly
+    scalable and should scale to almost any load put to it. Furthermore,
+    with support for AppArmor, parameter filtering, and query hardening,
+    rehash is resistant to both SQL exploitation, and server compromise
+    through the frontend. As always, efforts continue to improve this
+    wherever possible. As for proof of its robustness, rehash powers
+    soylentnews.org, and its ancestor powered slashdot.org (which is one
+    heck of a torture test).
 
     See INSTALL for information about installing Rehash, including hardware
     and software requirements. Read that document carefully, and follow the
     instructions as precisely as possible.
 
     Also see INSTALL for information on upgrading from previous versions of
-    Slash.
+    Rehash, Rehash or slashcode.
 
     As noted in the FAQ, please send any bug reports, and subscribe to
     mailing lists, at Rehash's github page.
 
-            https://github.com/soylentnews/rehash
+        https://github.com/soylentnews/rehash
 
 DOCUMENTATION
     The .pod documentation included with Rehash can be read with the
     "perldoc" program, included with perl, or translated using one of the
     many "pod2*" translators.
-
-    The documentation is also available online on the Slash FAQ.
 
     Template Toolkit (version 2)
         For more information on how to write templates, see the Template
@@ -47,10 +44,11 @@ DOCUMENTATION
 
         http://www.template-toolkit.org/
 
-    RSS For more information on RSS 1.0, and the RSS Slash module.
+    RSS For more information on RSS 1.0, and the RSS Rehash module.
 
         http://purl.org/rss/1.0/
-        http://slashcode.com/rss/1.0/modules/Slash/
+
+        http://purl.org/rss/1.0/modules/slash/
 
     Installation
         The details on how to install, and upgrade, Rehash.
@@ -64,18 +62,11 @@ DOCUMENTATION
                 perldoc Slash::Display
                 perldoc Slash::DB
 
-        The modules represent the bulk of the public API of Slash. The other
-        Slash modules have embedded POD to be read with perldoc, too. Some
-        of the documentation here is woefully incomplete.
+        The modules represent the bulk of the public API of Rehash. The
+        other Rehash modules have embedded POD to be read with perldoc, too.
+        Some of the documentation here is woefully incomplete.
 
                 use Source 'Luke';
-
-    Slash FAQ
-        Although very outdated, much of the basic information from the original Slash FAQ
-        applies to rehash.
-
-        http://slashcode.com/faq.shtml
-
 
     HOWTOs
         There are currently the beginnings of HOWTO documents for templates,
@@ -87,31 +78,19 @@ DOCUMENTATION
 
         docs/HOWTO-Themes.pod
 
-    Schema
-        The layout and description of the database. [These are out of date.]
-
-        docs/slasherd.fig
-
-        docs/slasherd.ps
-
-        docs/slashtables.pod
-
     Other
-        The slashguide document (previously called getting_started) helps
-        you get your feet wet and gives vital information for how to run a
-        Slash site.
+        The rehashguide document helps you get your feet wet and gives vital
+        information for how to run a Rehash site.
 
         docs/slashguide.pod
 
-        themes/slashcode/htdocs/slashguide.shtml
-
     Authors
-        The authors and contributors of Slash.
+        The authors and contributors of Rehash.
 
         AUTHORS
 
 LINKS
-    SoylentNews
+    Rehash
         Primary user of rehash, and home of its developers.
 
         https://soylentnews.org
@@ -121,13 +100,8 @@ LINKS
 
         http://slashdot.org/
 
-    Slash
-        The main site for Slash.
-
-        http://slashcode.com/
-
-    GitHub
-    	Home of the rehash git repo.
+    GitHub (rehash repo)
+        Home of the rehash git repo.
 
         https://github.com/soylentnews/rehash
 
@@ -135,10 +109,10 @@ COPYRIGHT AND LICENSE
     The information below applies to everything in this distribution, except
     where noted.
 
-    Copyright 2015 by the Rehash Developers and the SoylentNews Team.
+    Copyright 2014-2015 by the Rehash Developers and the SoylentNews Team.
 
-            https://soylentnews.org
-            https://github.com/soylentnews/rehash
+        https://soylentnews.org
+        https://github.com/soylentnews/rehash
 
     Copyright 1997-2005 by Open Source Technology Group.
 
@@ -149,8 +123,8 @@ COPYRIGHT AND LICENSE
     Software Foundation; either version 2 of the License, or (at your
     option) any later version.
 
-    Rehash is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    Rehash is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
     more details.
 

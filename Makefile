@@ -27,7 +27,7 @@ TARFLAGS = cvf
 PREOP = @$(NOOP)
 POSTOP = @$(NOOP)
 TO_UNIX = @$(NOOP)
-SLASH_PREFIX = /usr/local/slash
+SLASH_PREFIX = /opt/rehash-environment/rehash
 # If this isn't used anymore, can we remove it?
 INIT = /etc
 USER = nobody
@@ -599,5 +599,5 @@ stamp/install-xml-rss:
 	$(REHASH_CPANM) XML::RSS
 	touch stamp/install-xml-rss
 
-install-dbi-password:
-	$(REHASH_CPANM) DBIx::Password
+install-dbix-password:
+	$(REHASH_CPANM) --interactive DBIx::Password

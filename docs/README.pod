@@ -101,9 +101,8 @@ F<docs/HOWTO-Themes.pod>
 
 =item Other
 
-The slashguide document (previously called getting_started) helps
-you get your feet wet and gives vital information for how to run
-a Rehash site.
+The rehashguide document helps you get your feet wet and gives vital
+information for how to run a Rehash site.
 
 F<docs/slashguide.pod>
 
