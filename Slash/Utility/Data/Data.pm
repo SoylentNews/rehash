@@ -1347,7 +1347,7 @@ sub _remove_tags {
 		$url = $encoder->decode($url);
 		$i++;
 	}
-	$url = strip_nohtml($url);
+	$url = strip_nohtmlurl($url);
 	$url = $encoder->encode($url);
 	return 'href="'.$url.'"';
 
@@ -1497,6 +1497,8 @@ my %mode_actions = (
 			remove_ltgt
 			encode_html_amp 
 			approve_unicode		)],
+	NOHTMLURL, [qw(
+			remove_tags		)],
 	PLAINTEXT, [qw(
 			newline_to_local
 			diacritic_max
@@ -1627,6 +1629,7 @@ sub strip_extrans	{ stripByMode($_[0], EXTRANS,	@_[1 .. $#_]) }
 sub strip_html		{ stripByMode($_[0], HTML,	@_[1 .. $#_]) }
 sub strip_literal	{ stripByMode($_[0], LITERAL,	@_[1 .. $#_]) }
 sub strip_nohtml	{ stripByMode($_[0], NOHTML,	@_[1 .. $#_]) }
+sub strip_nohtmlurl	{ stripByMode($_[0], NOHTMLURL,	@_[1 .. $#_]) }
 sub strip_notags	{ stripByMode($_[0], NOTAGS,	@_[1 .. $#_]) }
 sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 sub strip_textarea	{ stripByMode($_[0], TEXTAREA,	@_[1 .. $#_]) }
@@ -2765,7 +2768,7 @@ sub fudgeurl {
 	# Correction: NO entities belong in URLs. If they can't input the character, tough shit to them.
 	$url =~ s/&(.+?);//g;
 	# we don't like SCRIPT in a URL
-	$url = strip_nohtml($url);
+	$url = strip_nohtmlurl($url);
 	$url = $encoder->encode($url);
 	return $url;
 }
