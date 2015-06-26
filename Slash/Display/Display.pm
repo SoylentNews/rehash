@@ -366,6 +366,7 @@ my $strip_mode = sub {
 	strip_subject		=> \&strip_subject,
 	strip_textarea		=> \&strip_textarea,
 	strip_title		=> \&strip_title,
+	strip_backtrack		=> \&strip_backtrack,
 	strip_mode		=> [ $strip_mode, 1 ],
 	%FILTERS
 );

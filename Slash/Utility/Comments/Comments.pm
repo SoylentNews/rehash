@@ -1215,7 +1215,7 @@ sub printComments {
 
 	# OK we have all the comment data in our hashref, so the search/replace
 	# on the nearly-fully-rendered page will work now.
-	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|$comment_text->{$1}|g;
+	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|strip_backtrack($comment_text->{$1})|eg;
 
 	# for abbreviated comments, remove some stuff
 	if ($discussion2) {
