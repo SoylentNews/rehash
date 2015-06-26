@@ -1336,7 +1336,7 @@ sub _fixupCharrefs {
 	#	TMB not using good_numeric/good_entity anymore
 }
 
-sub _remove_script_tag {
+sub _remove_tags {
 	my($url) = @_;
 	
 	use URI::Encode;
@@ -1347,7 +1347,7 @@ sub _remove_script_tag {
 		$url = $encoder->decode($url);
 		$i++;
 	}
-	$url = $url =~ /<script.*?>/i ? undef : $url;
+	$url = strip_nohtml($url);
 	$url = $encoder->encode($url);
 	return 'href="'.$url.'"';
 
@@ -1448,11 +1448,13 @@ my %actions = (
 	fix_href	=> sub {
 			# This should already be done but to fix bad entries already in the db
 			# we shall do it again.
-			${$_[0]} =~ s/href=['"](.*?)['"]/_remove_script_tag($1)/iegs;	},
-	nix_script_tags	=> sub {
+			${$_[0]} =~ s/href=(['"])(.*?)\g{1}/_remove_tags($2)/iegs;	},
+	nix_tags	=> sub {
 			# This should already be done but to fix bad entries already in the db
 			# we shall do it again.
-			${$_[0]} =~ s/<script.*?<\/script>//igs;	},
+			${$_[0]} =~ s/<script.*?<\/script\s*>//igs;
+			${$_[0]} =~ s/<iframe.*?<\/iframe\s*>//igs;
+			${$_[0]} =~ s/<style.*?<\/style\s*>//igs;  },
 	
 );
 
@@ -1558,7 +1560,7 @@ my %mode_actions = (
 			approve_unicode		)],
 	BACKTRACK, [qw(
 			fix_href
-			nix_script_tags		)],
+			nix_tags		)],
 );
 
 sub stripByMode {
@@ -2763,7 +2765,7 @@ sub fudgeurl {
 	# Correction: NO entities belong in URLs. If they can't input the character, tough shit to them.
 	$url =~ s/&(.+?);//g;
 	# we don't like SCRIPT in a URL
-	$url = $url =~ /<script.*?>/i ? undef : $url;
+	$url = strip_nohtml($url);
 	$url = $encoder->encode($url);
 	return $url;
 }
