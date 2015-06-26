@@ -161,6 +161,7 @@ user-definable constants (for journals, comments) should be E<gt>= 1.  All
 else should be E<lt> 1.  If adding new user-definable modes, make sure to
 change Slash::Data::strip_mode() to allow the new value.
 
+	NOHTMLURL
 	ANCHOR
 	NOTAGS
 	ATTRIBUTE
@@ -178,7 +179,7 @@ change Slash::Data::strip_mode() to allow the new value.
 
 =cut
 
-# -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 77
+# -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 77
 
 =head2 people
 
