@@ -1340,7 +1340,7 @@ sub _remove_tags {
 	my($url) = @_;
 	
 	use URI::Encode;
-	my $encoder = URI::Encode->new;
+	my $encoder = URI::Encode->new({double_encode => 0});
 	my $i = 1;
 	while($url =~ /%/){
 		$url = '' if $i > 3;
@@ -2650,7 +2650,7 @@ sub fudgeurl {
 	my($url) = @_;
 	
 	use URI::Encode;
-	my $encoder = URI::Encode->new;
+	my $encoder = URI::Encode->new({double_encode => 0});
 	my $i = 1;
 	while($url =~ /%/){
 		$url = '' if $i > 3;
