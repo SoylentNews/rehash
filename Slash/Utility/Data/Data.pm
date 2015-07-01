@@ -1340,13 +1340,15 @@ sub _remove_tags {
 	my($url) = @_;
 	
 	use URI::Encode;
-	my $encoder = URI::Encode->new;
+	use utf8;
+	my $encoder = URI::Encode->new({double_encode => 0});
 	my $i = 1;
 	while($url =~ /%/){
 		$url = '' if $i > 3;
 		$url = $encoder->decode($url);
 		$i++;
 	}
+	utf8::decode($url);
 	$url = strip_nohtmlurl($url);
 	$url = $encoder->encode($url);
 	return 'href="'.$url.'"';
@@ -2650,13 +2652,15 @@ sub fudgeurl {
 	my($url) = @_;
 	
 	use URI::Encode;
-	my $encoder = URI::Encode->new;
+	use utf8;
+	my $encoder = URI::Encode->new({double_encode => 0});
 	my $i = 1;
 	while($url =~ /%/){
 		$url = '' if $i > 3;
 		$url = $encoder->decode($url);
 		$i++;
 	}
+	utf8::decode($url);
 
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
