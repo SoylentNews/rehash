@@ -199,26 +199,21 @@ Mon Jun 15 23:47:19 UTC 2015
 Then you're good to go. If it reports something like EDT, PDT, or similar, you need
 to change the system timezone. On Debian-based systems, you can do this by running
 'dpkg-reconfigure tzdata' as root.
-        
+
+=item 2. Create the MySQL Database
+
 If it is already installed, doublecheck that its version is at least the
 minimum required (see L<"REQUIREMENTS">).  If you have questions about
 the installation process, please refer to MySQL documentation.
-
-Slash requires that your MySQL server run in the GMT timezome.  Find your
-global my.cnf file (probably C</etc/my.cnf> or C</etc/mysql/my.cnf>),
-locate the C<[mysqld_safe]> (or C<[safe_mysqld]>) group, and add this line
-to it:
-
-	timezone = GMT
 
 Start MySQL (it must be running for the installation of Slash and some
 perl modules).  Or, if it is already running, restart MySQL (if you have
 other services using MySQL, you should probably stop and start them --
 make sure they are timezone-agnostic!).
 
-Create a database to be used by Slash.  Our default name is 'slash':
+Create a database to be used by Rehash.  Our default name is 'rehash':
 
-	CREATE DATABASE slash;
+	CREATE DATABASE rehash;
 
 Create a username/password that can access that database, and ensure
 that user has at least privileges to select, insert, update, delete,
@@ -227,16 +222,20 @@ lock, create, drop, index and alter.  For example, if your whole site
 server, and you wanted to use the mysql username 'slash', you might:
 
 	GRANT SELECT, INSERT, UPDATE, DELETE, LOCK TABLES, CREATE, DROP,
-	INDEX, ALTER ON slash.* TO 'slash'@'localhost'
+	INDEX, ALTER ON rehash.* TO 'rehash'@'localhost'
 	IDENTIFIED BY (quoted password);
 
-	GRANT PROCESS ON *.* TO 'slash'@'localhost' IDENTIFIED BY
+	GRANT PROCESS ON *.* TO 'rehash'@'localhost' IDENTIFIED BY
 	(quoted password);
 
-In this case, 'slash' would also be the name of your MySQL user as
+In this case, 'rehash' would also be the name of your MySQL user as
 described in "Types of Users" below.  You'll have to give your MySQL
 user to DBIx::Password when you install and configure it, so don't
 forget it.
+
+NOTE: For MySQL Cluster users, the user must be created on each mysqld
+instance unless the mysql database itself is replicated via NDB. See
+the documentation for MySQL Cluster for more information.
 
 =item 2.
 
@@ -257,14 +256,29 @@ system user has their home folder set to $ENVIRONMENT_PREFIX.
 
 As root, from the base of the rehash folder, execute the following command
 
-# make ENVIRONMENT_PREFIX=/opt/rehash-environment build-environment
+# make build-environment install
+
+By default, this command uses the following defaults:
+
+ENVIRONMENT_PREFIX=/opt/rehash-environment
+SLASH_PREFIX=$(ENVIRONMENT_PREFIX)/rehash 
+
+You can override these on the command line as you see fit as such:
+
+# make ENVIRONMENT_PREFIX=/srv/soylentnews.org build-environment
+
+Running "install" as root is necessary at least once to install the init
+script for slashd. Alternatively, it can be manually installed; the script
+is in utils/slashd and should work with any SysV compatible init system.
 
 build-environment will download Apache, Perl, and mod_perl, and run the test
 suite on each; if the test suite fails, the build is aborted, and it
 is left to the user to try and correct test failures. Rehash keeps
 track of what its built via files in the stamp/ directory, and will
 not try and rebuild components that have succeeded.
-       
+It will also add the necessary LoadModule and Include lines for Apache to
+load mod_perl, and the rehash httpd.conf.
+
 For Perl modules, rehash will first install cpanminus with a copy of cpanm
 shipped in the utils folder. cpanminus is Perl script that automates and
 simplifies the management of CPAN modules, and automatically grabs the latest
@@ -434,6 +448,14 @@ Slash won't mistakenly double-start the daemon:
   sudo mv /etc/rc3.d/S*slash /etc/rc3.d/S99slash
   sudo mv /etc/rc6.d/K*slash /etc/rc6.d/K99slash
 
+Finally, make sure the templates and symlinks are properly installed by rehash.
+As the rehash user, run the following commands
+  cd /opt/rehash-enviornment/rehash
+  bin/template-tool -U
+  bin/symlink-tool -U
+
+You should be good to go at this point
+
 =item 6.
 
 B<Start it up.>
@@ -474,7 +496,7 @@ assistance and tips.
 =head2 Multiple Servers
 
 You can, of course, have a separate database server from your Rehash
-server.  Further, you can have multiple web servers for one Slash site,
+server.  Further, you can have multiple web servers for one Rehash site,
 and a good thing too because web server RAM/CPU will probably be your
 first bottleneck as your site grows.
 
@@ -532,7 +554,7 @@ work with SSL by itself, SSL and non-SSL together, or non-SSL by itself.
 
 =head2 Memcached
 
-B<AS OF REHASH 14.04, MEMCACHE SUPPORT IS BROKEN, THIS IS LEFT FOR
+B<AS OF REHASH 14.05, MEMCACHE SUPPORT IS BROKEN, THIS IS LEFT FOR
 HISTORICAL REASONS UNTIL SUCH SUPPORT IS FIXED>
 
 Memcached is not required, but Rehash includes optimizations that move
@@ -548,10 +570,29 @@ rehash sites.  Just set the vars 'memcached', 'memcached_keyprefix', and
 
 =head1 UPGRADING
 
-XXX: FIXME, summarize upgrade instructions.
+In general, upgrading rehash is a straight forward affair. If desired,
+you can run build-environment to upgrade Apache/Perl/mod_perl/CPAN to the
+latest versions. After doing so, simply copy the DBIx/Password.pm file
+from the old perl directory to the new, apply any Apache configuration
+changes as necessary.
 
+After updating the environment, examine sql/mysql/upgrades for necessary
+SQL stanzas required for the update; these must be run on your database.
+As a rule, we don't break backwards compatability across versions; i.e.
+the previous release will work with the current release, so you can safely
+update the database while live. Run "make install" to update the rehash
+directory and global perl modules.
+
+Restart Apache, and you're good to go.
+
+=head1 UPGRADING LEGACY SLASHSITES
 B<NC: This is left mostly as is for historical slash and slashcode sites,
-and is not tested>
+and is not tested. In general, it should be possible to upgrade through
+to the tip of the slashcode git repo, then through our old slashcode
+releases, then onto rehash. See sql/mysql/upgrades_legacy upgrades_slashcode
+to determine which database upgrades are necessary. However, this procedure
+is untested, and some Slash functionality such as firehose and D2 has been
+removed from our codebase>
 
 B<Some of these upgrade procedures are still in testing.  Please read
 them entirely before beginning.  We are not responsible for any loss of
