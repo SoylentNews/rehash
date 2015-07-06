@@ -55,7 +55,11 @@ REHASH_PERL=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/perl
 REHASH_CPANM=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/cpanm
 
 # mod_perl stuff
-MOD_PERL_MIRROR=http://mirror.cogentco.com/pub/apache/perl/
+# mod_perl 2.0.9 is for 2.4 apache, unclear if it
+# works on 2.2, but we're not upgrading (yet)
+
+#MOD_PERL_MIRROR=http://mirror.cogentco.com/pub/apache/perl/
+MOD_PERL_VER=http://archive.apache.org/dist/perl/
 MOD_PERL_VER=2.0.8
 MOD_PERL_DIR=mod_perl-$(MOD_PERL_VER)
 MOD_PERL_FILE=$(MOD_PERL_DIR).tar.gz
@@ -337,7 +341,7 @@ manifest :
 rpm :
 	rpm -ba slash.spec
 
-build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload  stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search  stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss
+build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload stamp/install-cache-memcached stamp/install-cache-memcached-fast stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search stamp/install-uri-encode stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss
 	@echo ""
 	@echo "Rehash Environment Successfully Installed!"
 	@echo ""
@@ -413,6 +417,16 @@ stamp/install-apache2-upload:
 	-mkdir stamp
 	$(REHASH_CPANM) Apache2::Upload
 	touch stamp/install-apache2-upload
+
+stamp/install-cache-memcached:
+	-mkdir stamp
+	$(REHASH_CPANM) Cache::Memcached
+	touch stamp/install-cache-memcached
+
+stamp/install-cache-memcached-fast:
+	-mkdir stammp
+	$(REHASH_CPANM) Cache::Memcached::Fast
+	touch stamp/install-cache-memcached-fast
 
 stamp/install-data-javascript-anon:
 	-mkdir stamp
@@ -578,6 +592,11 @@ stamp/install-sphinx-search:
 	-mkdir stamp
 	$(REHASH_CPANM) Sphinx::Search
 	touch stamp/install-sphinx-search
+
+stamp/install-uri-encode:
+	-mkdir stamp
+	$(REHASH_CPANM) URI::Encode
+	touch stamp/install-uri-encode
 
 stamp/install-template:
 	-mkdir stamp
