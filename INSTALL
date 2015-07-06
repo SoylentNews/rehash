@@ -1,47 +1,27 @@
 NAME
-    INSTALL - Slash Installation
+    INSTALL - Rehash Installation
 
 SYNOPSIS
-    This document describes how to install Slash, versions 2.2 and
-    pre-releases of 2.3 and 2.5. For instructions on installation or upgrade
-    of previous versions of Slash, see the INSTALL document included with
-    those distributions.
+    This document describes how to install Rehash 15.05 and later. Always
+    check your distrubitions version of INSTALL for version specific
+    information.
 
-    These instructions have only been tested on Linux. Installation under
-    BSD and other Unix OSes is doable, with minor glitches (see "BSD
-    Systems" below). Windows is not supported.
+    These instructions have only been tested on Linux. Historically,
+    installation under BSD and other Unix OSes is doable, with minor
+    glitches (see "BSD Systems" below). Windows is not supported.
 
-    Slash can always be downloaded from SourceForge.net, from the FTP site,
-    and via CVS.
+    Rehash is available on github; it is recommended that sites pull from
+    the current HEAD of the repo, but if you prefer a more stable platform,
+    tagged releases are made on roughly 2-3 month basis.
 
-            http://sf.net/projects/slashcode/
-            ftp://ftp.slashcode.com//pub/slashcode/
-            http://cvs.slashcode.com/
-
-    See the SourceForge.net page for patches and bug reports.
-
-  Which version should I use?
-    First of all: if you are using Slash 2.2.5 or before, including all
-    2.1.x, 2.0.x, and 1.x versions, you should upgrade to the latest version
-    in the 2.2 tree, 2.2.6, as soon as possible. There are security issues
-    with previous versions. You should not install previous versions.
-
-    As of this writing (August 2006), our last official release (2.2.6) was
-    long ago, and many features have been added since. All development has
-    been in CVS. If you are installing a new Slash site, you don't want to
-    use 2.2.6. And while you probably don't want to use the very latest CVS,
-    you almost certainly do want to use the latest "R_" tag available in
-    CVS. See "VERSIONS", "CVS tags", below, for advice on choosing and
-    maintaining a CVS installation.
+    If in doubt, rehash's canonical development site is:
+    https://github.com/soylentnews/rehash
 
   Read, then install
     We know you want to get right into the installation, but you must first
     read, carefully, these sections of this INSTALL file:
 
     *   REQUIREMENTS, to make sure you have the right hardware and software
-
-    *   "CVS tags," in VERSIONS, to make sure you have the right version of
-        this code
 
     *   SECURITY NOTES, to keep your system safe
 
@@ -60,25 +40,64 @@ SYNOPSIS
     This document also contains information on upgrading a Slash site (which
     can be tricky), and uninstalling (which is easy).
 
-  Updates to this file
-    This INSTALL file you are currently reading may not be the latest.
-    Again, you probably don't want to upgrade your whole Slash checkout to
-    the very latest CVS. But if you encounter problems, it might not be a
-    bad idea to look over the very latest version of this INSTALL file,
-    which you can find at:
-
-    http://slashcode.cvs.sourceforge.net/*checkout*/slashcode/slash/INSTALL
-
-    The version of this file that you are currently reading is:
-
-    $Id$
-
-    If there are more recent versions of this file, you can find a list of
-    those changes at:
-
-    http://slashcode.cvs.sourceforge.net/slashcode/slash/INSTALL
-
 INSTALLATION
+  Rehash Environment
+    Rehash requires a stable mod_perl 2 running against Apache 2.2. While
+    efforts have been underway to port mod_perl to Apache 2.4, this port is
+    as of writing unable to support rehash to extensive use of the mod_perl
+    API throughout the codebase. Unfortunately, most Linux distributions
+    have chosen to ship this experimental branch, and no longer provide the
+    older Apache 2.2 packages anymore.
+
+    Furthermore, rehash depends on a fair number of perl modules that must
+    be installed into the site_perl directory as they are shared between
+    both Apache and slashd. As such, its recommended to build and install an
+    independent version of Perl to accommodate rehash. This also allows
+    installation and management by a non-root user.
+
+    To ease this process, rehash provides a "build-environment" target which
+    automatically downloads, compiles, and installs Apache, Perl, mod_perl,
+    and all the dependent CPAN modules. Although it is possible to run
+    rehash without this, using "build-environment" is the recommended way to
+    make sure you're always running the lastest and most up-to-date
+    packages.
+
+    If you choose to set your own environment up here are the following
+    known gotchas that we're aware of. It's strongly recommended if you do
+    this that you open Makefile to get the definitive list of CPAN modules
+    currently required for rehash.
+
+    *   Perl must be built as a shared library (libperl.so), and be built
+        with threading support Without both, mod_perl installation *will*
+        fail.
+
+    *   Apache should be built with a default MPM of prefork vs. worker
+
+        -   Worker *should* be safe, but we still have areas of the code
+            where we need to get $r dynamically, which has a massive
+            performance penality under worker. Prefork gives behavior
+            consistent with Apache 1.3 and is recommended for now.
+
+    *   Perl passes both the CPPFLAGS and LDFLAGS set by Configure to CPAN
+        modules. This is important if the mysql, GD and SSL headers are in
+        non-standard locations on your system, or if you've built these
+        packages manually.
+
+    *   rehash can use both standard MySQL (referred to as "vanilla" below)
+        or MySQL Cluster. We use both configurations at soylentnews.org,
+        with production and dev on cluster, and our staff rehash instance
+        using vanilla. For high-availability, the use of MySQL cluster is
+        *highly* recommended. When using vanilla, all tables use InnoDB;
+        likewise, in cluster, all tables use the NDB type. When using
+        vanilla MySQL rehash supports using read-only replicas for
+        performance boosts.
+
+    *   As of this writing, soylentnews.org currently uses pre-generated
+        binaries of MySQL Cluster from mysql.com vs. Ubuntu's mysql
+        packages. As MySQL's protocol is stable, its acceptable if you link
+        against libmysqlclient-dev as provided by your distribution than the
+        version specifically.
+
   Installation Note
     All of the installation steps below should be executed as root. If this
     is a problem, then Slash is probably not for you (see "Non-Root" below,
@@ -90,503 +109,363 @@ INSTALLATION
     skipped -- but only if you have the correct version and configuration,
     particularly with Apache/mod_perl.
 
-    1.  Install MySQL.
+    0.  Install system dependencies
 
-        If it is already installed, doublecheck that its version is at least
-        the minimum required (see "REQUIREMENTS"). If you have questions
-        about the installation process, please refer to MySQL documentation.
+        Rehash's build-environment target assumes a few libraries are
+        available for Perl and perl modules to link against. You also need a
+        C compiler. As of writing, you need the following for successful
+        installation
 
-        Slash requires that your MySQL server run in the GMT timezome. Find
-        your global my.cnf file (probably "/etc/my.cnf" or
-        "/etc/mysql/my.cnf"), locate the "[mysqld_safe]" (or
-        "[safe_mysqld]") group, and add this line to it:
+        *   GD
 
-                timezone = GMT
+        *   OpenSSL (LibreSSL should also work, but untested)
 
-        Start MySQL (it must be running for the installation of Slash and
-        some perl modules). Or, if it is already running, restart MySQL (if
-        you have other services using MySQL, you should probably stop and
-        start them -- make sure they are timezone-agnostic!).
+        *   MySQL client libraries
 
-        Create a database to be used by Slash. Our default name is 'slash':
+            On Ubuntu 14.04, the following commands will get everything you
+            need:
 
-                CREATE DATABASE slash;
+            $ sudo apt-get install build-essential libgd-dev
+            libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev
 
-        Create a username/password that can access that database, and ensure
-        that user has at least privileges to select, insert, update, delete,
-        lock, create, drop, index and alter. For example, if your whole site
-        (slashd daemon and apache) will run on the same machine as your
-        mysql server, and you wanted to use the mysql username 'slash', you
-        might:
+        *   1.
 
-                GRANT SELECT, INSERT, UPDATE, DELETE, LOCK TABLES, CREATE, DROP,
-                INDEX, ALTER ON slash.* TO 'slash'@'localhost'
-                IDENTIFIED BY (quoted password);
+            Configure the server to be in UTC time
 
-                GRANT PROCESS ON *.* TO 'slash'@'localhost' IDENTIFIED BY
-                (quoted password);
+            For sanity reasons, rehash requires the server timezone be set
+            to UTC. You can check the timezone using the 'date' command. If
+            it reports UTC like this:
 
-        In this case, 'slash' would also be the name of your MySQL user as
-        described in "Types of Users" below. You'll have to give your MySQL
-        user to DBIx::Password when you install and configure it, so don't
-        forget it.
+            $ date Mon Jun 15 23:47:19 UTC 2015
 
-    2.  Install perl.
+            Then you're good to go. If it reports something like EDT, PDT,
+            or similar, you need to change the system timezone. On
+            Debian-based systems, you can do this by running
+            'dpkg-reconfigure tzdata' as root.
 
-        Perl is likely already installed on your machine; doublecheck that
-        its version is at least the minimum required (see "REQUIREMENTS").
+        *   2. Create the MySQL Database
 
-        Also, check the "Libraries" (or "Debian libraries") section under
-        "REQUIREMENTS", below. You may need to install dev packages for not
-        only perl but mysql and expat as well and now's a good time to take
-        care of that.
+            If it is already installed, doublecheck that its version is at
+            least the minimum required (see "REQUIREMENTS"). If you have
+            questions about the installation process, please refer to MySQL
+            documentation.
 
-    3.  Install Apache and mod_perl.
+            Start MySQL (it must be running for the installation of Slash
+            and some perl modules). Or, if it is already running, restart
+            MySQL (if you have other services using MySQL, you should
+            probably stop and start them -- make sure they are
+            timezone-agnostic!).
 
-        You MUST install mod_perl and Apache as directed here. OK, that is
-        not strictly true, but unless you really know what you're doing,
-        just assume it's true. If you already have mod_perl installed, it is
-        probably not configured properly to work with Slash and you will
-        have to rebuild it.
+            Create a database to be used by Rehash. Our default name is
+            'rehash':
 
-        If you are using the provided httpd.conf file from the slash
-        distribution, and find that Apache is giving you errors, chances are
-        mod_perl is not installed correctly, and you need to build it from
-        scratch. Not following this direction is one of the most common
-        reasons we see for a Slash install not working.
+                    CREATE DATABASE rehash;
 
-        Of course, if you have your own Apache modules or build options, you
-        will need to modify the instructions here appropriately.
+            Create a username/password that can access that database, and
+            ensure that user has at least privileges to select, insert,
+            update, delete, lock, create, drop, index and alter. For
+            example, if your whole site (slashd daemon and apache) will run
+            on the same machine as your mysql server, and you wanted to use
+            the mysql username 'slash', you might:
 
-        First, untar apache and mod_perl. Then, go to the mod_perl
-        directory, and have mod_perl build and install apache for you:
+                    GRANT SELECT, INSERT, UPDATE, DELETE, LOCK TABLES, CREATE, DROP,
+                    INDEX, ALTER ON rehash.* TO 'rehash'@'localhost'
+                    IDENTIFIED BY (quoted password);
 
-                perl Makefile.PL APACHE_SRC=../where_you_have_apache/src \
-                        DO_HTTPD=1 USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
-                        APACHE_PREFIX=/where_apache_will_be_installed
-                make
-                make test
-                make install
+                    GRANT PROCESS ON *.* TO 'rehash'@'localhost' IDENTIFIED BY
+                    (quoted password);
 
-        NOTE: You may be unsuccessful with "make test" if the perl modules
-        are not yet installed. However, some perl modules will not install
-        without Apache and mod_perl installed. If you wish, skip "make
-        test", run "make install", install the perl modules in step 4, and
-        then come back and run "make test" here again to make sure
-        everything is OK.
+            In this case, 'rehash' would also be the name of your MySQL user
+            as described in "Types of Users" below. You'll have to give your
+            MySQL user to DBIx::Password when you install and configure it,
+            so don't forget it.
 
-        NOTE: If you know what you're doing, Slash will work with a DSO
-        Apache. Be sure you're on the latest versions of Apache and mod_perl
-        and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
+            NOTE: For MySQL Cluster users, the user must be created on each
+            mysqld instance unless the mysql database itself is replicated
+            via NDB. See the documentation for MySQL Cluster for more
+            information.
 
-        NOTE: See also "Other requirements" under "REQUIREMENTS".
+        *   2.
 
-        Ubuntu NOTE: In mid-2006 Ubuntu 6.x switched sh to point to dash
-        instead of bash, which apparently breaks the above step (because
-        dash's 'echo -E' isn't compliant enough for apache's 'configure').
-        We're looking into it, but for now apparently (temporarily) linking
-        /bin/sh to /bin/bash during this step is a workaround.
-        "dash-as-bin-sh" in https://launchpad.net/ubuntu/+spec (Update: this
-        appears to no longer be a problem, but if you encounter problems on
-        Ubuntu, check where your /bin/sh points.)
+            Build the rehash environment.
 
-    4.  Install the perl modules.
+            Once MySQL is sorted, you're ready to build rehash's
+            dependencies. This is an automated process, though some CPAN
+            modules may prompt for configuration information. The rehash
+            environment is installed to the location dictated by the
+            ENVIRONMENT_PREFIX variable, which by default is set to
+            /opt/rehash-environment.
 
-        Slash is powerful and complex, and, rather than reinvent the wheel,
-        it often relies on CPAN modules. Open-source code reuse has many
-        advantages. One disadvantage is that installing all those modules
-        can be tricky, as you may be about to find out.
+            Rehash download and build Apache and Perl and place them in
+            version-specific directories. For example, as of this writing,
+            the most recent version of Perl is 5.22 and Apache 2.2.29. These
+            will be installed to $ENVIRONMENT_PREFIX/apache-2.2.29 and
+            $ENVIRONMENT_PREFIX/perl-5.22.0; older versions of Apache and
+            Perl are left in place, allowing for ease of upgrade. It's
+            recommended that the rehash system user has their home folder
+            set to $ENVIRONMENT_PREFIX.
 
-        You could install each module in Bundle/Slash.pm by hand, but this
-        would be time-consuming. Instead, you'll want to install the bundle
-        "Bundle::Slash" using CPAN.
+            As root, from the base of the rehash folder, execute the
+            following command
 
-            IMPORTANT NOTES (read through these first! really!):
+            # make build-environment install
 
-            Overall comment about CPAN module failure
-                It is possible that upon typing "install Bundle::Slash", you
-                will have one or more modules fail to install on the first
-                try. The rest of the modules will be successfully installed
-                but some won't. In that case you will want to fix the
-                problems and retype "install Bundle::Slash" to make sure
-                everything proceeds smoothly. Once that command gives you
-                just a long list of "Foo::Bar is up to date," you are done.
-                Until that point, you are not done; you must resolve the
-                errors.
+            By default, this command uses the following defaults:
 
-            Old Version of Bundle::Slash
-                If you have previously installed Bundle::Slash, you will
-                want to install it again, but you will need to delete the
-                existing version. Go to your .cpan/Bundle directory (usually
-                ~/.cpan/Bundle/) and remove Slash.pm.
+            ENVIRONMENT_PREFIX=/opt/rehash-environment
+            SLASH_PREFIX=$(ENVIRONMENT_PREFIX)/rehash
 
-            Overactive CPAN
-                With some versions of the CPAN module, the module will try
-                to download and install the latest version of perl. Watch
-                what the module is doing; if it begins to download an entire
-                perl distribution, interrupt it (hit ctrl-C) until it stops,
-                then try again with the CPAN module. This should not be an
-                issue in the latest version of Bundle::Slash.
+            You can override these on the command line as you see fit as
+            such:
 
-            Uninstalling Old Modules
-                Sometimes, you will be installing a newer version of a
-                module that exists elsewhere on the system. You probably
-                want to tell the CPAN module to automatically remove older
-                files. To do that from the CPAN shell, type:
+            # make ENVIRONMENT_PREFIX=/srv/soylentnews.org build-environment
 
-                        cpan> o conf make_install_arg UNINST=1
+            Running "install" as root is necessary at least once to install
+            the init script for slashd. Alternatively, it can be manually
+            installed; the script is in utils/slashd and should work with
+            any SysV compatible init system.
 
-                And if you want that to be CPAN's default from now on, add:
+            build-environment will download Apache, Perl, and mod_perl, and
+            run the test suite on each; if the test suite fails, the build
+            is aborted, and it is left to the user to try and correct test
+            failures. Rehash keeps track of what its built via files in the
+            stamp/ directory, and will not try and rebuild components that
+            have succeeded. It will also add the necessary LoadModule and
+            Include lines for Apache to load mod_perl, and the rehash
+            httpd.conf.
 
-                        cpan> o conf commit
+            For Perl modules, rehash will first install cpanminus with a
+            copy of cpanm shipped in the utils folder. cpanminus is Perl
+            script that automates and simplifies the management of CPAN
+            modules, and automatically grabs the latest version of said
+            modules.
 
-            Automatically Installing Dependencies
-                Some of the modules in Bundle::Slash require other modules.
-                We have not put some of those other modules in Bundle::Slash
-                because, if those requirements change in the future, we
-                don't want to make future Slash sites install more than they
-                have to.
-
-                If you see this:
-
-                        ---- Unsatisfied dependencies detected during [FOO/Bar-1.23.tar.gz] -----
-                            Foobar::Baz
-                        Shall I follow them and prepend them to the queue
-                        of modules we are processing right now? [yes]
-
-                That's normal; just hit return.
-
-                If it annoys you to have to do this, edit the
-                "prerequisites_policy" field of your CPAN/Config.pm file.
-                Or, just do this to change it to automatically follow
-                dependencies and commit the change:
-
-                        cpan> o conf prerequisites_policy follow
-                        cpan> o conf commit
-
-            Data::JavaScript::Anon
-                There are bugs in versions earlier than 1.00 that break our
-                JS. Unfortunately, CPAN seems to prefer version 0.9 even
-                though 1.00 is available. You may have to install a better
-                version in CPAN by hand:
-
-                  cpan> install A/AD/ADAMK/Data-JavaScript-Anon-1.00.tar.gz
-
-            Additional Libraries
-                You must have certain libraries existing on your system
-                before building, for Compress::Zlib, XML::Parser, DBI and
-                DBD::mysql. See "Libraries" under "REQUIREMENTS", below.
-
-            BSD Systems
-                If running BSD, also install the BSD::Resource module. We
-                have heard reports of minor problems running Slash on BSD,
-                but you are welcome to try. See SLASH_PREFIX below, and
-                after the install, doublecheck the init scripts. If you have
-                to make changes to get it to work, send us patches or
-                detailed bug reports please: we want to support the BSDs.
-
+            dev.soylentnews.org is regularly updated and rebuilt via
+            build-environment to test rehash against these modules, and work
+            is underway to provide unit tests for most of rehash's
+            functionality. If you encounter an issue due to a specific CPAN
+            module, please file a bug on it, and we'll work on fixing
+            compability if we haven't already caught the same issue. After
+            this step, the only major reverse dependency to handle is
             DBIx::Password
-                When installing DBIx::Password, you will be asked for
-                various information, the same information used to create the
-                database and database user in Step 1. First, you'll be asked
-                for a virtual user name, which will be the identifier for
-                all of this data. You can just use the name of your site, or
-                any other alphanumeric string. This string will be your
-                "DBIx::Password virtual user" as described in "Types of
-                Users" below -- you will use this in other places, so don't
-                forget it.
-
-                Then you'll be asked for your DBI driver (mysql), the name
-                of the database you CREATEd in Step 1, its machine (maybe
-                'localhost' or an IP number) and port, and then the MySQL
-                user name you GRANTed privileges to in Step 1 and its
-                password.
-
-                Some perl modules you can hit return for defaults and
-                they'll work. This isn't one of them. If you don't
-                understand what you're doing here, don't fake it -- that's a
-                common reason for Slash installations failing.
-
-            Documentation
-                To read the README for any module, before or after
-                installing:
-
-                        cpan> readme MODULE
-
-                To read the documentation of any of the modules, once they
-                have been installed, type "perldoc MODULE" at the command
-                line.
-
-                See perlmodinstall for more information on installing perl
-                modules.
-
-        Now that you have read the above notes, you're ready to install the
-        perl modules.
-
-        To use the CPAN module, invoke the CPAN shell:
-
-                perl -MCPAN -e shell
-
-        (Or, you may have the program "cpan" already available, which does
-        the same thing.)
-
-        If this is the first time you've invoked CPAN, you will be asked to
-        configure it. Note that CPAN works best if most or all of these
-        helper programs are installed: bzip2 gzip tar unzip make curl lynx
-        wget ncftpget ncftp ftp gpg. If your OS installation is very anemic
-        and you lack most of them, you might ^C its questions, install the
-        missing programs, and then re-invoke the CPAN shell to restart
-        configuration.
-
-        It's probably a good idea here to install the latest version of the
-        CPAN module itself, along with all the helper modules it requires.
-        This is an optional step but may make the rest of module
-        installation easier:
-
-                cpan> install Bundle::CPAN
-
-        If you chose to do that, then afterwards, "exit" the CPAN and
-        reinvoke it. (The plain shell command "cpan" will probably now
-        work.)
-
-        Next, install some important networking modules. This is also
-        optional but, if there are problems with these modules, you'll want
-        to resolve them before moving on to the rest of the installation:
-
-                cpan> install Bundle::LWP
-
-        Make sure all those modules are installed and up to date before
-        proceeding. Note that Net::Cmd has a history of being a little
-        broken in its tests; if it fails on tests 8 and 9 of t/require, then
-        it's OK; just do "force install Net::Cmd" and repeat "install
-        Bundle::LWP". On Mac OS X and possibly other operating systems, if
-        LWP's live/https tests fail, "install Net::SSL" manually and retry.
-
-        Assuming you chose to install the LWP, then after it's been
-        configured successfully, again, "exit" the CPAN and reinvoke it.
-
-        Finally, you must install Bundle::Slash:
-
-                cpan> install Bundle::Slash
-
-        This will be a long process. Several modules will ask to be
-        configured during this process. Here are some tips:
-
-        DBI Don't worry about the threading warning. Slash doesn't use
-            threads.
-
-        DBIx::Password
-            See "DBIx::Password" under IMPORTANT NOTES above.
-
-        Apache::Test and Apache::Cookie
-            You will need "httpd" and "apxs" in your $PATH, and even if they
-            are there, you will probably see the lengthy error that starts
-            "Apache cannot spawn child processes as 'root'". This is
-            because, ironically, Apache::Test's self-tests are a colossal
-            pain to actually run (I take the option to skip them). And
-            personally I just "force install Apache::Cookie" which is lame
-            but solves the problem.
-
-        Template
-            The Template Toolkit is a complex install. Try accepting all the
-            defaults and see if it works. It has 90 test scripts with over
-            2000 tests, and installation will be halted if just 1 of these
-            tests fails. Do a "look Template" and try your best to resolve
-            the issues. The README includes a URL to the mailing list
-            archives, where you may find help. If you're getting 100 errors,
-            you need to fix them, but if you're down to 1 or 2 you can't
-            fix, you might just make a note of what the failures were and
-            just "force install Template".
-
-        Other failures
-            We can't predict whether bugs will appear in CPAN modules in
-            future. Often the bugs are not in the software proper, but in
-            its too-strictly coded test suites, which don't allow for
-            changed but still-legitimate output. When this happens, the
-            module itself is fine but it will not install unless forced. As
-            of October 2006, we've noticed the following module throw
-            spurious errors, requiring a "force install":
-
-                    HTML::CalendarMonth 1.18
-
-        If you have problems, feel free to re-run "install Bundle::Slash".
-        It will safely skip anything already installed.
-
-        Again: once you are able to do "install Bundle::Slash" and see
-        nothing but a long list of modules that are "up to date," you are
-        done. Until you see that, you are not done with this step!
-
-        If you wish to take full advantage of Slash, there are some plugins
-        not installed and vars not turned on by default, which provide
-        additional features, improve performance, or help in testing, which
-        require additional perl modules and sometimes non-perl libraries.
-        See the listing at the bottom of Bundle/Slash.pm, and see also the
-        tips in plugins/Admin/README, plugins/HumanConf/INSTALL-NOTES, and
-        plugins/Stats/README.
-
-    5.  Install Slash.
-
-        Unpack the distribution, go to the new directory that creates, and
-        type:
-
-                make
-                make install
-
-        Note: you will want the GNU versions of fileutils and make. Older
-        versions of install, and make and cp from other systems, might not
-        work.
-
-        There are a few options to "make" and "make install" you may want to
-        change.
-
-                option          default                 purpose
-                ==========================================================
-                SLASH_PREFIX    /usr/local/slash        Location for
-                                                        installed files
-                INIT            /etc or /etc/rc.d       Location for init
-                                                        scripts
-                USER            nobody                  User to own files
-                GROUP           nobody                  Group to own files
-                CP              cp                      Name of or path to
-                                                        alternate 'cp'
-                INSTALL         install                 Name of or path to
-                                                        alternate 'install'
-
-        (USER and GROUP can also be changed later on a per-site basis, in
-        step 6, while running "install-slashsite".)
-
-        So, for example, you might type (although the default SLASH_PREFIX
-        is *strongly* recommended):
-
-                make SLASH_PREFIX=/home/slash
-                make install SLASH_PREFIX=/home/slash
-
-        When done, a configuration file for Apache will be created at
-        $SLASH_PREFIX/httpd/slash.conf. You can put its contents into your
-        httpd.conf, or you can just "Include" it in your httpd.conf. You
-        must do one or the other!
-
-        WARNING!
-
-        Please be aware that if you include $SLASH_PREFIX/slash.conf or
-        $SLASH_PREFIX/sites/sitename/sitename.conf more than once, or if
-        this file shares contents with directives in httpd.conf, that your
-        Slash site WILL break. The directives in $SLASH_PREFIX/slash.conf
-        should be run only ONCE in any any site context. Read through
-        $SLASH_PREFIX/slash.conf to make sure it all looks proper.
-
-    6.  Install your Slash site.
-
-        At this point, you may want to (re)read "DBIx::Password" in
-        "SECURITY NOTES" at the end of this section, and consider the option
-        of installing your site with a custom unix system user and group for
-        added security. You will be prompted for user and group shortly.
-
-        Go to your installation directory (by default, /usr/local/slash) and
-        execute (where "VIRTUAL_USER" is the name of the virtual user given
-        in the DBIx::Password distribution):
-
-                bin/install-slashsite -u VIRTUAL_USER
-
-        The program will prompt for answers to several configuration
-        questions. Then it will install your site.
-
-        Another configuration file will be created at
-        $SLASH_PREFIX/$SITENAME/$SITENAME.conf, which will be "Include"'d in
-        $SLASH_PREFIX/httpd/slash.conf. You'll want to add an "Include" for
-        the latter in your Apache's httpd.conf if you haven't done so on a
-        previous site install.
-
-        If you are using virtual hosting by hostname, you may also need to
-        add a NameVirtualHost.
-
-        If you don't have your Slash site in the root of the web server
-        (e.g., http://www.example.com/mysite/ instead of the more usual
-        http://www.example.com/), you will need to adjust the rootdir,
-        rdfimage, imagedir, absolutedir, and cookiepath variables, and you
-        also need to change your Apache config appropriately. If you're
-        planning on having sections with more than two dots in the hostname
-        (e.g. your mainpage will be at http://division.company.com/ with a
-        section at http://newprojects.division.company.com/) you will also
-        want to set the cookiedomain var (e.g. to .division.company.com).
-        These are all in the vars table of your database.
-
-        NOTE: Read the message printed at the end of running
-        install_slashsite. Failure to pay attention here is another common
-        reason we see for Slash installations not working.
-
-        Ubuntu NOTE: Reported after installing on Kubuntu 7.10, a Slash
-        install's idea of run-levels was not sufficient to start slashd at
-        boot. The following makes sure that all the right run-levels are
-        covered, and that rebuilding Slash won't mistakenly double-start the
-        daemon:
-
-          sudo update-rc.d -f slash remove
-          sudo update-rc.d slash defaults
-          sudo mv /etc/rc3.d/S*slash /etc/rc3.d/S99slash
-          sudo mv /etc/rc6.d/K*slash /etc/rc6.d/K99slash
-
-    7.  Start it up.
-
-        After installation of the site is done, you'll need to start Apache.
-        Stop it if necessary, then start it:
-
-                apachectl stop
-                apachectl start
-
-        Use the apachectl script under the APACHE_PREFIX you specified in
-        step 3. Don't try its "restart" or "graceful" options, you'll need
-        to do a full stop and start.
-
-        Then run slashd. This should be done via the init script:
-
-                /etc/init.d/slash start
-
-        slashd is the daemon that runs routine maintenance on Slash sites,
-        including sending out daily mailings, cleaning up the database, and
-        updating stories. The init script above will start up an individual
-        slashd daemon process for each installed site (and while running,
-        they will spawn child processes, some of which may run for a long
-        time or until you stop slashd with "slash stop").
-
-        Now's a good time to (re)read the "SECURITY NOTES" section at the
-        end of this file.
-
-    8.  Stay in touch.
-
-        For as long as you are running a Slash site, you should stay on our
-        "slashcode-announce" mailing list, to receive notification of
-        security issues (and, rarely, other major news of interest to Slash
-        admins). You can sign up at:
-
-                https://lists.sourceforge.net/lists/listinfo/slashcode-announce
-
-        You may wish to subscribe to "slashcode-general", for discussion of
-        running Slash sites. This list probably averages 1-2 emails a day,
-        mostly on administration issues, and bugs and features in Slash.
-
-                https://lists.sourceforge.net/lists/listinfo/slashcode-general
-
-        You may also wish to create a user on slashcode.com and subscribe to
-        its daily newsletter. If/when news is posted to that site, you'll be
-        in the loop.
-
-        If you want to register your new site, feel free to do so at
-        http://slashcode.com/sites.pl.
+
+        *   3.
+
+            Install DBIx::Password
+
+            Communication between Rehash and the database module is handled
+            by by a perl module known as DBIx::Password. Under
+            DBIx::Password, each instance of rehash is managed by a 'virtual
+            user', which in turn corresponds to a DBD connection string. For
+            a more in-dpeth explination, the CPAN page on DBIx::Password is
+            extremely informative:
+            <http://search.cpan.org/~krow/DBIx-Password-1.9/Password.pm>
+
+            An example season of install-dbix-password is posted below
+
+                $ sudo make install-dbix-password
+                /opt/rehash-environment/perl-5.22.0/bin/cpanm --interactive DBIx::Password
+                --> Working on DBIx::Password
+                Fetching http://www.cpan.org/authors/id/K/KR/KROW/DBIx-Password-1.9.tar.gz ... OK
+                Configuring DBIx-Password-1.9 ... What is the name of the Virtual User?
+                slash
+                What is the dbi driver? (AKA mysql)
+                mysql
+                What is the name of the database?
+                rehash
+                What is the name of the machine that the database is on?
+
+                Is the database on any special port(you should probably just hit return)?
+
+                What is the username?
+                rehash
+                What is the password?
+                myrehashsite
+                What attributes would you like to add?
+                (Enter nothing to skip or finish)
+
+                What is the name of the Virtual User?
+                (Enter nothing if you are finished adding users.)
+
+                Checking if your kit is complete...
+                Looks good
+                Generating a Unix-style Makefile
+                Writing Makefile for DBIx::Password
+                Writing MYMETA.yml and MYMETA.json
+                OK
+
+            slash is the defaut user used for most scripts. If the machine
+            name is left blank, rehash will try and communicate via a local
+            socket to the mysql server. DBIx::Password's test suite will
+            fail if it can't establish a connection to the backend.
+
+            NOTE: There's no line break between Configuring
+            DBIx-Password-1.9 ... and "What is the name of virtual user",
+            simply type in the name when prompted, and press enter.
+
+        *   4.
+
+            Install Rehash.
+
+            After the environment is installed, rehash itself must be
+            installed into said envirionment. Make sure rehash's copy of
+            Perl and Apache are in the path (use 'which perl' to confirm),
+            then type:
+
+                    make install
+
+            Note: you will want the GNU versions of coreutils and make.
+            Older versions of install, and make and cp from other systems,
+            might not work.
+
+            There are a few options to "make" and "make install" you may
+            want to change.
+
+                    option          default                 purpose
+                    ==========================================================
+                    SLASH_PREFIX    /opt/rehash-environment/rehash  Location for
+                                                            installed files
+                    INIT            /etc or /etc/rc.d       Location for init
+                                                            scripts
+                    USER            nobody                  User to own files
+                    GROUP           nobody                  Group to own files
+                    CP              cp                      Name of or path to
+                                                            alternate 'cp'
+                    INSTALL         install                 Name of or path to
+                                                            alternate 'install'
+
+            (USER and GROUP can also be changed later on a per-site basis,
+            in step 6, while running "install-slashsite".)
+
+            So, for example, you might type (although the default
+            SLASH_PREFIX is *strongly* recommended):
+
+                    make install SLASH_PREFIX=/home/slash
+
+            When done, a configuration file for Apache will be created at
+            $SLASH_PREFIX/httpd/slash.conf. You can put its contents into
+            your httpd.conf, or you can just "Include" it in your
+            httpd.conf. You must do one or the other!
+
+            WARNING!
+
+            Please be aware that if you include $SLASH_PREFIX/slash.conf or
+            $SLASH_PREFIX/sites/sitename/sitename.conf more than once, or if
+            this file shares contents with directives in httpd.conf, that
+            your Rehash site WILL break. The directives in
+            $SLASH_PREFIX/slash.conf should be run only ONCE in any any site
+            context. Read through $SLASH_PREFIX/slash.conf to make sure it
+            all looks proper.
+
+        *   5.
+
+            Install your Slash site.
+
+            At this point, you may want to (re)read "DBIx::Password" in
+            "SECURITY NOTES" at the end of this section, and consider the
+            option of installing your site with a custom unix system user
+            and group for added security. You will be prompted for user and
+            group shortly.
+
+            Go to your installation directory (by default, /usr/local/slash)
+            and execute (where "VIRTUAL_USER" is the name of the virtual
+            user given in the DBIx::Password distribution):
+
+                    bin/install-slashsite -u VIRTUAL_USER
+
+            The program will prompt for answers to several configuration
+            questions. Then it will install your site.
+
+            Another configuration file will be created at
+            $SLASH_PREFIX/$SITENAME/$SITENAME.conf, which will be
+            "Include"'d in $SLASH_PREFIX/httpd/slash.conf. You'll want to
+            add an "Include" for the latter in your Apache's httpd.conf if
+            you haven't done so on a previous site install.
+
+            If you are using virtual hosting by hostname, you may also need
+            to add a NameVirtualHost.
+
+            If you don't have your Rehash site in the root of the web server
+            (e.g., http://www.example.com/mysite/ instead of the more usual
+            http://www.example.com/), you will need to adjust the rootdir,
+            rdfimage, imagedir, absolutedir, and cookiepath variables, and
+            you also need to change your Apache config appropriately. If
+            you're planning on having sections with more than two dots in
+            the hostname (e.g. your mainpage will be at
+            http://division.company.com/ with a section at
+            http://newprojects.division.company.com/) you will also want to
+            set the cookiedomain var (e.g. to .division.company.com). These
+            are all in the vars table of your database.
+
+            NOTE: Read the message printed at the end of running
+            install_slashsite. Failure to pay attention here is another
+            common reason we see for Slash installations not working.
+
+            Ubuntu NOTE: Reported after installing on Kubuntu 7.10, a Slash
+            install's idea of run-levels was not sufficient to start slashd
+            at boot. The following makes sure that all the right run-levels
+            are covered, and that rebuilding Slash won't mistakenly
+            double-start the daemon:
+
+              sudo update-rc.d -f slash remove
+              sudo update-rc.d slash defaults
+              sudo mv /etc/rc3.d/S*slash /etc/rc3.d/S99slash
+              sudo mv /etc/rc6.d/K*slash /etc/rc6.d/K99slash
+
+            Finally, make sure the templates and symlinks are properly
+            installed by rehash. As the rehash user, run the following
+            commands cd /opt/rehash-enviornment/rehash bin/template-tool -U
+            bin/symlink-tool -U
+
+            You should be good to go at this point
+
+        *   6.
+
+            Start it up.
+
+            After installation of the site is done, you'll need to start
+            Apache. Stop it if necessary, then start it:
+
+                    apachectl -k stop
+                    apachectl -k start
+
+            Then run slashd. This should be done via the init script:
+
+                    /etc/init.d/slash start
+
+            slashd is the daemon that runs routine maintenance on Rehash
+            sites, including sending out daily mailings, cleaning up the
+            database, and updating stories. The init script above will start
+            up an individual slashd daemon process for each installed site
+            (and while running, they will spawn child processes, some of
+            which may run for a long time or until you stop slashd with
+            "slash stop").
+
+            Now's a good time to (re)read the "SECURITY NOTES" section at
+            the end of this file.
+
+        *   7.
+
+            Stay in touch.
+
+            The rehash development team lives in #dev on
+            irc.soylentnews.org. We'd love to hear from you if you're
+            running rehash, and would be able to provide assistance and
+            tips.
 
 INSTALLATION OPTIONS
   Multiple Servers
-    You can, of course, have a separate database server from your Slash
-    server. Further, you can have multiple web servers for one Slash site,
+    You can, of course, have a separate database server from your Rehash
+    server. Further, you can have multiple web servers for one Rehash site,
     and a good thing too because web server RAM/CPU will probably be your
     first bottleneck as your site grows.
 
-    Slashdot has one primary server with all of the code (Apache, perl,
-    etc.) in /usr/local. That server runs slashd and NFS. Our slashd writes
-    directly to its /usr/local/slash. Each web server mounts /usr/local
-    read-only over NFS. (Yes, NFS has a reputation for being flaky, but
-    we've never had a problem with it, which we attribute both to good
-    sysadmins and to only exporting our filesystem read-only.)
+    SoylentNews has one primary server with all of the code (Apache, perl,
+    etc.) in /srv/soylentnews.org. That server runs slashd. Our slashd
+    writes directly to its /srv/soylentnews.org/rehash. During a site
+    upgrade, the entire /srv/soylentnews.org folder is rsynced to each of
+    the web frontends in turn. During normal site operations, just
+    /srv/soylentnews.org/rehash is synced for files written out by slashd.
 
     Some notes:
 
@@ -601,13 +480,13 @@ INSTALLATION OPTIONS
         NFS volume.
 
   Virtual Hosts
-    Slash has support for virtual hosts, so you can have multiple Slash
+    Rehash has support for virtual hosts, so you can have multiple rehash
     sites on one machine. Simply execute step 6 in the install process for
     each Slash site (after adding a new virtual user to DBIx::Password for
     each).
 
   SSL
-    In Slash, there are two variables for the root URL of the site.
+    In Rehash, there are two variables for the root URL of the site.
     absolutedir is the full URL, including protocol, while rootdir is the
     URL without protocol:
 
@@ -620,30 +499,11 @@ INSTALLATION OPTIONS
     anything special to the code or preferences to allow it to work with SSL
     by itself, SSL and non-SSL together, or non-SSL by itself.
 
-  Non-Root
-    It is theoretically possible to install and run everything here without
-    root.
-
-    It is not easy. If you don't know your flavor of unix intimately, we
-    don't recommend trying this.
-
-    Describing the process for a non-root install would take up significant
-    space and time, having to account for differences in various systems,
-    and all the workarounds necessary for it to work. We don't support it,
-    and we're not going to document it.
-
-    If you must have a non-root install, consult the various documentation
-    for Apache, MySQL, and perl about running and installing without root
-    access. Then, for Slash, you need to set the make variables PREFIX,
-    SLASH_PREFIX, and INIT appropriately for your needs.
-
-    Note: Slash sites (or, more accurately, Apache + mod_perl and MySQL)
-    take up a lot of system resources. It is *not advisable* for anyone to
-    run Slash on any system, without the permission of the administrator of
-    that system.
-
   Memcached
-    Memcached is not required, but Slash includes optimizations that move
+    AS OF REHASH 14.05, MEMCACHE SUPPORT IS BROKEN, THIS IS LEFT FOR
+    HISTORICAL REASONS UNTIL SUCH SUPPORT IS FIXED
+
+    Memcached is not required, but Rehash includes optimizations that move
     load from your (expensive) MySQL server to a (very cheap) memcached
     server or servers. If you are concerned about performance, this is one
     of the first options to install. You can probably install it using your
@@ -651,68 +511,33 @@ INSTALLATION OPTIONS
     http://www.danga.com/memcached/.
 
     A 64 or 128 MB memcached instance should be plenty for moderate-sized
-    Slash sites. Just set the vars 'memcached', 'memcached_keyprefix', and
+    rehash sites. Just set the vars 'memcached', 'memcached_keyprefix', and
     'memcached_servers', and restart apache and slashd. That's it.
 
-    (As of August 2006, Slashdot uses a total of 2 GB of memcached, but
-    that's in small allocations spread across many servers because we like
-    redundancy. Last I checked the 2 GB wasn't even half full.)
-
-  Separate Image Server
-    Those of you with infinite RAM will have no problems hosting as many
-    Slash sites as you want on a single box running just Apache. Those whose
-    RAM is limited may be able to keep your MaxClients down to a reasonable
-    level to avoid going into swap, and still not lock clients out of your
-    website, by using a separate webserver process to deliver your images.
-
-    This is possible with any website, of course, not just a Slash site, but
-    because Slash's httpd clients all have mod_perl, a lot of perl modules,
-    and a lot of templates all compiled into RAM, they are especially heavy.
-    While serving an image may take only a few milliseconds, which would you
-    rather have tied up on your computer for those milliseconds, 25 MB of
-    RAM or 5 MB?
-
-    Slashdot, and some other Slash sites we're hosting, are currently using
-    boa 0.94.14rc17 (http://www.boa.org/) for images. Boa is fast and has a
-    small footprint. It's easy to build ("./configure && make") but you have
-    to install it yourself by copying the binary and mkdir'ing a little tree
-    wherever you want it. We did roughly this. Your mileage may vary. This
-    sets up an alternate server just for images on port 8080, and sets
-    Slash's imagedir var to point to it. Your apache will still serve images
-    at the old URLs if anyone requests them, but nobody will, because your
-    site's pages will all point to boa:
-
-            # Install boa and set up its files.
-            cd /usr/local/src/boa-0.94.14rc17
-            ./configure && make
-            mkdir /usr/local/boa
-            mkdir /usr/local/boa/bin
-            mkdir /usr/local/boa/htdocs
-            cp -a src/{boa,boa_indexer,webindex.pl} /usr/local/boa/bin/
-            ln -s /usr/local/slash/site/mysite/htdocs/images /usr/local/boa/htdocs/images.mysite.com
-            touch /usr/local/boa/htdocs/favicon.ico
-
-            # Set up and edit boa conf file.
-            cp examples/boa.conf /usr/local/boa/
-            # At this point we patched /usr/local/boa/boa.conf, changing
-            # Port to 8080, ServerName to www.mysite.com, DocumentRoot to
-            # /usr/local/boa/htdocs, and commenting out the DirectoryIndex,
-            # DirectoryMaker, Alias and ScriptAlias directives.
-
-            # Start boa.
-            /usr/local/boa/bin/boa
-
-            # In mysql client:
-            # UPDATE vars SET value='//www.mysite.com:8080/images.mysite.com' WHERE name='imagedir';
-            # INSERT IGNORE INTO story_dirty SELECT stoid FROM stories WHERE in_trash='no';
-
-            # Restart apache, slashd;  let slashd rewrite .shtml files both
-            # recent and archived.
-
-    You'll probably also want to create a script in your init.d and rcN.d
-    directories so boa runs at startup along with apache.
-
 UPGRADING
+    In general, upgrading rehash is a straight forward affair. If desired,
+    you can run build-environment to upgrade Apache/Perl/mod_perl/CPAN to
+    the latest versions. After doing so, simply copy the DBIx/Password.pm
+    file from the old perl directory to the new, apply any Apache
+    configuration changes as necessary.
+
+    After updating the environment, examine sql/mysql/upgrades for necessary
+    SQL stanzas required for the update; these must be run on your database.
+    As a rule, we don't break backwards compatability across versions; i.e.
+    the previous release will work with the current release, so you can
+    safely update the database while live. Run "make install" to update the
+    rehash directory and global perl modules.
+
+    Restart Apache, and you're good to go.
+
+UPGRADING LEGACY SLASHSITES
+NC: This is left mostly as is for historical slash and slashcode sites,
+and is not tested. In general, it should be possible to upgrade through
+to the tip of the slashcode git repo, then through our old slashcode
+releases, then onto rehash. See sql/mysql/upgrades_legacy upgrades_slashcode
+to determine which database upgrades are necessary. However, this procedure
+is untested, and some Slash functionality such as firehose and D2 has been
+removed from our codebase
     Some of these upgrade procedures are still in testing. Please read them
     entirely before beginning. We are not responsible for any loss of data
     or functionality.
@@ -923,44 +748,22 @@ REQUIREMENTS
     version we believe could work.
 
     Perl
-        Version 5.8.7 (5.6.1).
+        Version 5.20.00
 
                 http://www.cpan.org/
 
     MySQL
-        Version 5.0.22 (4.0.12).
+        Version 5.6
 
                 http://www.mysql.com/
 
-        MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
-        (October 18, 2004). MySQL 4.0.x is not being actively updated by
-        MySQL AB except for security issues (though as far as we know it
-        still works fine), so we would recommend that you upgrade to at
-        least 4.1.x. At some point in the future we will switch over to some
-        syntaxes which have been recommended for some time which will break
-        on 4.0.x, so you'll have to upgrade to at least 4.1.x eventually
-        anyway. (You probably have until 2007 before we spring this on you.)
-
-        Slashdot ran on 4.1.x for a long time with no problems, so we now
-        recommend either that or 5.0.x. We have been testing on 5.0.x for
-        months, and as of this writing (August 2006), Slashdot has been
-        running on 5.0.18 and 5.0.22 for some time with no problems. For
-        what it's worth, we have found the MySQL upgrade process, even
-        between major versions, to be about as painless as we could have
-        imagined.
-
     Apache
-        Version 1.3.34 (1.3.33).
+        Version 2.2.29
 
                 http://httpd.apache.org/
 
-        Since most of Apache 1.3.x's recent releases included security
-        fixes, we wouldn't recommend running an earlier version. Slash is
-        not compatible with Apache 2.x and we have no plans to port to 2.x
-        (though we aren't excluding the possibility).
-
     mod_perl
-        Version 1.29.
+        Version 2.08.
 
                 http://perl.apache.org/
 
@@ -974,149 +777,29 @@ REQUIREMENTS
 
     Perl module distributions
         The latest version of each perl module is recommended. To download
-        and install them, use CPAN -- see "INSTALLATION", item 4, "Install
-        the perl modules."
-
-    Libraries
-        For Compress::Zlib, the zlib development library is required. For
-        XML::Parser, the expat library is required. If they are not present
-        on the system already, download and install them before installing
-        the modules.
-
-                http://www.gzip.org/zlib/
-                http://sf.net/projects/expat/
-
-        The current list of required perl modules can be found in the
-        Bundle/Slash.pm file. At its end we also list optional modules,
-        which may be required depending on your setup.
-
-    Debian libraries
-        On Debian Linux, or Debian-based distributions like Ubuntu, the
-        above libraries can be installed with:
-
-                apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
-
-        Also on Debian, as of the current writing (July 2006), you will want
-        libperl-dev. DBD::mysql requires mysql_config and mysql.h; on Debian
-        stable, try libmysqlclient12 (and -dev) for 4.0.x and/or
-        libmysqlclient14 (and -dev) for 4.1.x. On testing or unstable, try
-        libmysqlclient15off and libmysqlclient15-dev.
+        and install them, use build-environment -- see "INSTALLATION".
 
   Hardware Requirements
     There are no specific hardware requirements.
 
-    Slash is designed to work well on multi-machine setups, with one or more
-    webheads that are separate from one or more MySQL DB machines. But for
-    low-load sites (1-5 pages/sec or slower), it can probably be run OK on a
-    single machine.
+    rehash is designed to work well on multi-machine setups, with one or
+    more webheads that are separate from one or more MySQL DB machines. But
+    for low-load sites (1-5 pages/sec or slower), it can probably be run OK
+    on a single machine.
 
     Apache (with mod_perl) and MySQL both take up a lot of RAM. Running a
     complete system with 128MB might be possible, if you do some tuning of
-    the configuration, but a practical minimum of 256MB is recommended, and
-    you will be much happier with at least 1GB of RAM. See "INSTALLATION
-    OPTIONS", "Separate Image Server" for tips on saving some RAM.
-
-    Disk space depends on how busy you expect the site to be. Slash keeps a
-    small database -- even Slashdot's DB compresses down to a few GB. The
-    disk files as installed are under 0.5 GB, and grow predictably as
-    stories and comments are added (keep an eye on the site/foo/logs/
-    directory, too). A minimum of 1 GB of disk is recommended.
-
-    Necessary processor speed is also dependent on how busy the site is. A
-    Pentium II/400 equivalent is recommended, but obviously, the faster the
-    better.
-
-    For the curious, Slashdot (as of September 2001) runs on nine machines:
-    nine webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
-    NFS server (600MHz PIII, 1GB RAM), and three database servers (quad
-    600MHz PIII, 4GB RAM). One database server is live, one is a replicated
-    backup, and a third is for doing live searches and performance-intensive
-    SELECTs by daemons etc.
-
-    However, this is certainly overkill for most sites (and possibly even
-    overkill for Slashdot). slashcode.com runs on two web servers and one
-    NFS/database server. Many sites can run fine on just one machine for
-    everything (we use a minimum of two web server machines on every site
-    for load balancing and redundancy).
-
-    If you're concerned about performance, the bin/mechmonkey script may
-    help provide load vaguely similar to real user patterns, though it
-    doesn't try simulating logged-in users. One more data point: my personal
-    machine is a 2.4 GHz Athlon with 1.5 GB RAM and an IDE disk, and it
-    easily handled the load when its Slash site got a mild Slashdotting (a
-    link in a non-major story, about 10 pages/sec).
+    the configuration, but a practical minimum of 1 GiB is recommended, and
+    you will be much happier with at least 2GB of RAM. See "INSTALLATION
+    OPTIONS".
 
 VERSIONS
-    Each version of slash has a code name, and the files on CVS for that
-    version are tagged with that name. The current release is always MAIN.
-    The versioning scheme is as Linux and perl are,
-    revision.version.subversion. version is even for releases, and odd for
-    development. The codename applies to the development version and
-    subsequent release.
+    rehash uses time based version stamps, with the major being the year,
+    and the minor being the month. Point releases are done for bug fixes
+    related to a specific major.minor pair
 
-    For example, 1.0.11 is a normal release, while 1.1.0 is the first
-    development release for what will be the next release (either 1.2 or
-    2.0).
-
-    The CVS repository is tagged with version numbers, so to get release
-    1.0.3, use tag "v1_0_3_0". The last number (in this case a zero) will be
-    incremented during development ("v1_0_3_1", "v1_0_3_2", etc.) until the
-    next release. Non-release versions are tagged with a T_ or R_ prefix. We
-    are currently developing 2.5.x, so our CVS tags are T_2_5_0_x and
-    R_2_5_0_x (though there was no 2.4.0 release and to date has been no
-    2.5.0).
-
-  Codenames
-    v1.0
-        beast
-
-    v2.0
-        bender
-
-    v2.2
-        fry
-
-    v2.3
-        (never released)
-
-    v2.4
-        (never released)
-
-    v2.5
-        leela
-
-  Security note
-    We are no longer releasing bugfixes, even for security, for the 1.0 or
-    2.0 versions, and do not recommend their use. If we become aware of
-    security issues in the 2.2 tree, we will release another version. For
-    this reason, if you are using any version of Slash in 2.2.x or earlier,
-    we recommend you upgrade at the very least to the latest version of 2.2,
-    which as of this writing (August 2006) is 2.2.6.
-
-  CVS tags
-    Our development of 2.3/2.5 has gone on exceptionally long without a
-    tarball release of either 2.3.0 or 2.5.0. Most Slash hosting sites are
-    choosing to follow CVS instead of waiting, and we encourage this.
-
-    Installation of the latest CVS (as of August 2006) is almost identical
-    to the installation of 2.2.
-
-    You probably do not want to use the very latest CVS, as the Slash
-    developers are constantly updating it. If you wish to live on the edge,
-    try a T_2_5_0_x tag ("Testing in 2.5.0 branch" -- one or two of these
-    are added every week, Slashdot uses them, but they may have bugs). If
-    you are content with recent code that the developers believe is likely
-    to be free of major bugs, look for a recent R_2_5_0_x cvs tag ("Release
-    candidates for 2.5.0").
-
-    To upgrade from 2.2.x to the CVS tree, you will need to follow the
-    instructions in the sql/mysql/upgrades file. At the moment, these are
-    just SQL commands you will need to issue, but read carefully because you
-    may have to use judgement and issue command-line commands and so on. (We
-    are working on a tool to automate this process.) Once you are upgraded
-    to, or have installed, a given CVS tag, upgrading to later CVS tags is
-    simply a matter of following along in that file -- we append as we go,
-    and each T_* tag is clearly marked.
+    For example, rehash version 15.05.4 refers to a release made in 2015, in
+    May (05), and has had four point releases to stablize or fix major bugs.
 
 TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
     Here are some common errors reported by other site administrators.
@@ -1137,7 +820,7 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
         @INC directories than you expect. Try, at the command line:
 
                 which perl
-                head -1 /usr/local/slash/sbin/slashd
+                head -1 /opt/rehash-environment/rehash/sbin/slashd
                 perl -MSlash -le 'print $INC{"Slash.pm"}'
 
         and see if it emits the perl binaries you expect and the location of
@@ -1157,26 +840,6 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
         Bundle::Slash; try reinstalling Bundle::Slash (and see "Old Version
         of Bundle::Slash" above).
 
-    *   DBD::mysql will not install.
-
-        As of October 2006, its tests by default assume you have a running
-        mysqld on localhost, with a database named 'test', accessible to the
-        user 'root' with no password. If you don't have a database named
-        'test', create one with "CREATE DATABASE test;". If you don't run
-        mysqld on the same machine as you're installing the module, or if
-        you have a password for its 'root' user (good idea), almost all its
-        tests will fail. You can either override the failures with
-
-                cpan> force install DBD::mysql
-
-        or (better) run proper tests by telling it the actual mysqld host,
-        user, and password to connect to, with
-
-                cpan> look DBD::mysql
-                # perl Makefile.PL --usage
-                # perl Makefile.PL --testmycustomargs=foobar
-                # make && make test && make install
-
     *   "Can't call method '(whatever)' on an undefined value at..."
 
         Slash can't connect to your database server. (This manifests as the
@@ -1189,22 +852,16 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
     *   I created a new author but s/he doesn't show up in authors.pl and
         can't post stories.
 
-        For performance reasons, Slash aggressively caches the list of which
-        users are authors. After you mark a user as an author and boost
-        their seclev (maybe to 100) in users.pl, go back to the command line
-        and run the refresh_authors.pl task by hand:
+        For performance reasons, Rehash aggressively caches the list of
+        which users are authors. After you mark a user as an author and
+        boost their seclev (maybe to 100) in users.pl, go back to the
+        command line and run the refresh_authors.pl task by hand:
 
-                # /usr/local/slash/bin/runtask -u yourvirtuser refresh_authors
+                # /opt/rehash-environment/rehash/bin/runtask -u yourvirtuser refresh_authors
 
         Then restart apache and slashd. That user will now be able to post
         stories. The authors.pl listing will update some time after the
         first story is actually posted.
-
-    *   Freshly-posted stories aren't showing up on the homepage.
-
-        Are you sure slashd is running? If a story appears on /index.pl but
-        not /index.shtml, and it's more than a few minutes old, check the
-        output of 'ps' for slashd, and check slashd.log for errors.
 
     *   "Use of uninitialized value in..."
 
@@ -1212,11 +869,6 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
         don't need to worry about it.
 
     Here are some other common reasons why Slash installations fail.
-
-    *   Failure to build mod_perl with PERL_MARK_WHERE=1 EVERYTHING=1.
-
-        We emphasize this in the instructions for a reason. Go back and
-        reread the Installation Procedure, step 3.
 
     *   Perl module installation troubles.
 
@@ -1243,16 +895,17 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
     *   httpd.conf errors.
 
         After you "install-slashsite", you're told that you probably want to
-        add "Include /usr/local/slash/httpd/slash.conf" to its httpd.conf.
-        Note that that file Include's your site-specific conf file at
-        /usr/local/slash/site/sitename/sitename.conf. One way or another
-        those site-specific directives have to be processed by Apache.
+        add "Include /opt/rehash-environment/rehash/httpd/slash.conf" to its
+        httpd.conf. Note that that file Include's your site-specific conf
+        file at /opt/rehash-environment/rehash/sitename/sitename.conf. One
+        way or another those site-specific directives have to be processed
+        by Apache.
 
         Are you doing virtual hosting? Make sure you've set it up correctly.
 
     *   Database authentication issues.
 
-        For each dynamic page your Slash site delivers, an Apache httpd
+        For each dynamic page your Rehash site delivers, an Apache httpd
         child needs to connect to your MySQL server. There's a chain of
         access to get from Apache to MySQL and a number of places where it
         can break:
@@ -1299,130 +952,50 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
             http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL_
             Database_Administration.html#Privilege_system
 
-        *   mod_gzip
+        *   Types of Users
 
-            Are you finding that POST operations fail? Have you compiled in
-            mod_gzip? mod_gzip 1.3.19.1a doesn't handle incoming POST very
-            well, with the result that our User.pm handler() gets called
-            twice, and the second time through, there's no more data on
-            STDIN, so your form is empty. We use this patch to make it
-            ignore POSTs:
+            Make sure you don't confuse the different types of "users":
 
-                    --- mod_gzip_BROKEN_FOR_POST.c  2003-09-26 14:26:36.000000000 -0700
-                    +++ mod_gzip.c                  2003-10-06 11:39:45.000000000 -0700
-                    @@ -2155,12 +2155,15 @@
-                         ap_table_setn( r->notes,"mod_gzip_result",ap_pstrdup(r->pool,"DECLINED:UNHANDLED_REDIR"));
-                        }
-                      else
-                        {
-                         ap_table_setn( r->notes,"mod_gzip_result",ap_pstrdup(r->pool,"DECLINED:INIT1"));
-                        }
-                    +   if ( r->method_number == M_POST ) {
-                    +       return DECLINED;
-                    +   }
+            *   unix system user account -- given in httpd.conf User
+                directive and in the second field of slash.sites, defaults
+                to 'nobody' unless you changed it in Step 5;
 
-                      ap_table_setn( r->notes,"mod_gzip_input_size", ap_pstrdup(r->pool,"0"));
-                      ap_table_setn( r->notes,"mod_gzip_output_size",ap_pstrdup(r->pool,"0"));
-                      ap_table_setn( r->notes,"mod_gzip_compression_ratio",ap_pstrdup(r->pool,"0"));
+            *   DBIx::Password virtual user -- given in httpd.conf
+                SlashVirtualUser directive and in the first field of
+                slash.sites, you picked this in Step 4 when you installed
+                DBIx::Password;
 
-                      #endif
+            *   MySQL user -- given as the DBIx::Password virtual user's
+                'username' hash value, points to the database user you
+                picked in Step 1.
 
-            Or just use mod_gzip 1.3.26.1a and omit POST from the list of
-            methods it handles, in your httpd.conf:
+            If slashd doesn't seem to be working, check its log and make
+            sure it has permission to write its files. It is probably
+            running as your Apache user "nobody", and if that user doesn't
+            have write permission to your web directories and/or .shtml and
+            .rss files and so on, slashd's current behavior is to log an
+            error and die. (If you want to make slashd run as a different
+            unix system user, edit the second field in
+            "/usr/local/slash/slash.sites".)
 
-                    mod_gzip_handle_methods GET
-
-    *   Types of Users
-
-        Make sure you don't confuse the different types of "users":
-
-        *   unix system user account -- given in httpd.conf User directive
-            and in the second field of slash.sites, defaults to 'nobody'
-            unless you changed it in Step 5;
-
-        *   DBIx::Password virtual user -- given in httpd.conf
-            SlashVirtualUser directive and in the first field of
-            slash.sites, you picked this in Step 4 when you installed
-            DBIx::Password;
-
-        *   MySQL user -- given as the DBIx::Password virtual user's
-            'username' hash value, points to the database user you picked in
-            Step 1.
-
-        If slashd doesn't seem to be working, check its log and make sure it
-        has permission to write its files. It is probably running as your
-        Apache user "nobody", and if that user doesn't have write permission
-        to your web directories and/or .shtml and .rss files and so on,
-        slashd's current behavior is to log an error and die. (If you want
-        to make slashd run as a different unix system user, edit the second
-        field in "/usr/local/slash/slash.sites".)
-
-    If you've doublechecked all this, you're sure you followed the
-    directions, and it still doesn't work, stop in IRC #slash on
-    irc.slashcode.com and ask your question. Someone there may know the
-    answer. Also, Shane, aka tf23, maintains an unofficial Slash FAQ which
-    you may find helpful:
-
-    http://slash.lottadot.com/faqster.pl?op=view&fid=1#c_Troubleshooting
-
-    If you are trying to install Slash from someone else's package, maybe a
-    BSD package, or an RPM that someone built, or by a Debian apt-get
-    command -- good luck to you, we hope it goes well, we love packages,
-    they're great when they work. But if installation fails, complain to the
-    package maintainers, not us. For those who download our tarball and
-    follow our instructions carefully, installation should go smoothly.
-
-UNINSTALLING
-    If you want to uninstall a site, there are two steps you must follow:
-
-    1.  Stop slashd with "/etc/init.d/slash stop" ("/etc/rc.d/init.d/slash
-        stop" for Red Hat systems). Then edit "/usr/local/slash/slash.sites"
-        to remove the line referencing the site you wish to uninstall. Then
-        if any lines remain, restart slashd with "/etc/init.d/slash start".
-
-    2.  Edit your Apache httpd.conf file so that the directives for the
-        site's VirtualHost are not included. If you did the standard
-        install, that file probably "Include"s
-        "/usr/local/slash/httpd/slash.conf", which "Include"s
-        "/usr/local/slash/yoursitename/yoursitename.conf", so you'll want to
-        delete or comment out the "Include" line in the file
-        "/usr/local/slash/httpd/slash.conf". Restart Apache with
-        "/usr/local/apache/bin/apachectl stop ; sleep 10 ;
-        /usr/local/apache/bin/apachectl start".
-
-    There are also five optional steps you may follow:
-
-    3.  Back up your site's database, if it has anything you care about:
-        "mysqldump -umysqlusername -p sitedatabasename >
-        /some/dir/sitedb.sql".
-
-    4.  Drop your site's database: "echo DROP DATABASE sitedatabasename |
-        mysql -umysqlusername -p".
-
-    5.  Remove the virtual user for your site's database from the
-        DBIx::Password file, whose location you can probably find with:
-
-        # perl -MDBIx::Password -le 'print $INC{"DBIx/Password.pm"}'
-
-    6.  Back up your site's html documents, if you care about any of them:
-        "cp -pvR /usr/local/slash/site/yoursitename/htdocs
-        /some/dir/htdocs".
-
-    7.  Delete your site's directory tree: "rm -rf
-        /usr/local/slash/site/yoursitename".
+        If you've doublechecked all this, you're sure you followed the
+        directions, and it still doesn't work, stop in IRC #dev on
+        irc.soylentnews.org and ask your question. Someone there may know
+        the answer.
 
 SECURITY NOTES
     Older Slash versions
-        Slash prior to versions 2.2.6 must be upgraded to 2.2.6. See the
-        section "UPGRADING", above.
+        If you're running Slash, you're on a very old and outdates software
+        stack with Apache 1.3. Upgrading to rehash is required if you wish
+        to use modern and supported software such as Apache 2.2 or 2.4.
 
     DBIx::Password
         DBIx::Password is essentially a keychain to give access to one or
-        more databases. The "key" that gives access to your Slash site(s) is
-        simply the ability to read its file, DBIx/Password.pm. By default,
-        this file is owned by root, and set world-readable (444), so any
-        process running on any of your web server or slashd machines will
-        have full read/write access to your Slash database.
+        more databases. The "key" that gives access to your rehash site(s)
+        is simply the ability to read its file, DBIx/Password.pm. By
+        default, this file is owned by root, and set world-readable (444),
+        so any process running on any of your web server or slashd machines
+        will have full read/write access to your Slash database.
 
         In general, don't allow people you don't trust onto your systems.
         Local exploits are far more common than remotes, and the properly
@@ -1466,7 +1039,7 @@ SECURITY NOTES
         things, all user data, including passwords, of any of your users,
         including admins, who have logged in recently.
 
-        If your Slash site is running entirely on one machine, make sure
+        If your rehash site is running entirely on one machine, make sure
         memcached is listening only on 127.0.0.1.
 
         Of course, that doesn't help you against attackers on that one
@@ -1474,18 +1047,43 @@ SECURITY NOTES
         If you can't follow this rule, your only option is to not enable
         memcached (do not set the var "memcached").
 
-    Slashcode-announce
-        Please subscribe to our "slashcode-announce" mailing list, and stay
-        subscribed as long as you run a Slash site. Any security
-        notifications that affect Slash sites will be sent to this mailing
-        list. If you don't subscribe, you may miss a notice, which may have
-        serious implications for the security of your website and its users.
+POD ERRORS
+    Hey! The above document had some coding errors, which are explained
+    below:
 
-        This is a very low traffic list: in the past 4 years, we haven't had
-        to send out any notices. You can subscribe here:
+    Around line 189:
+        Expected '=item *'
 
-                https://lists.sourceforge.net/lists/listinfo/slashcode-announce
+    Around line 203:
+        Expected '=item *'
 
-VERSION
-    $Id$
+    Around line 240:
+        Expected '=item *'
+
+    Around line 294:
+        Expected '=item *'
+
+    Around line 346:
+        Expected '=item *'
+
+    Around line 398:
+        Expected '=item *'
+
+    Around line 459:
+        Expected '=item *'
+
+    Around line 483:
+        Expected '=item *'
+
+    Around line 494:
+        You forgot a '=back' before '=head1'
+
+    Around line 922:
+        You forgot a '=back' before '=head2'
+
+    Around line 1178:
+        You forgot a '=back' before '=head1'
+
+    Around line 1180:
+        =over without closing =back
 
