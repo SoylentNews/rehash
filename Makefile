@@ -46,7 +46,7 @@ APACHE_FILE=$(APACHE_DIR).tar.bz2
 
 # Perl stuff
 PERL_MIRROR=http://www.cpan.org/src/5.0/
-PERL_VER=5.22.0
+PERL_VER=5.20.0
 PERL_DIR=perl-$(PERL_VER)
 PERL_FILE=$(PERL_DIR).tar.gz
 REHASH_PERL=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/perl
