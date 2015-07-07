@@ -2971,7 +2971,7 @@ sub deleteSubmission {
 		my $n_q = $self->sqlQuote($n);
 
 		if ($t eq "note" || $t eq "comment" || $t eq "skid") {
-			$form->{"note_$n"} = "" if $form->{"note_$n"} eq " ";
+			$form->{"note_$n"} = "" if ($form->{"note_$n"} eq " " || !defined($form->{"note_$n"}) ); 
 			if ($form->{$_}) {
 				my %sub = (
 					note		=> $form->{"note_$n"},
