@@ -39,7 +39,7 @@ sub updateRecentTopics {
 
 	my $ar = $slashdb->getNewStoryTopics($skin_name);
 	my($html, $num_stories, $cur_tid) = ('', 0);
-#	my $block = '';
+
 	my $topics = $slashdb->getDescriptions('topics');
 	my %tid_list = ( );
 	while (my $cur_story = shift @$ar) {
@@ -66,12 +66,6 @@ sub updateRecentTopics {
 				textname => $cur_story->{textname},
 			}, 1);
 		}
-#		if ($num_stories <= $constants->{recent_topic_txt_count}) {
-#			$block .= slashDisplay('setrectop_txt', {
-#				id	=> $cur_tid,
-#				name	=> $topics->{$cur_tid},
-#			}, 1);
-#		}
 		if ($num_stories >= $constants->{recent_topic_img_count}
 			&& $num_stories >= $constants->{recent_topic_txt_count}) {
 			# We're done, no more are needed.
@@ -84,13 +78,7 @@ sub updateRecentTopics {
 		skin	=> $skin_name
 	});
 	$slashdb->setTemplate($tpid, { template => $html });
-	# We need to create that template if it's not available.
-	# And we need to ditch the block and start using just the
-	# template on every skin's index page.
-#	$slashdb->setBlock('recenttopics', {
-#		block	=> $block,
-#		bid	=> 'recenttopics',
-#	}) unless $skin_name; # this needs to be changed
+
 }
 
 1;
