@@ -336,11 +336,16 @@ sub mergeSubmissions {
 
 	my $submissions = $slashdb->getSubmissionsMerge;
 	if (@$submissions) {
-		my $stuff = slashDisplay('mergeSub',
+		my $story = slashDisplay('mergeSub',
 			{ submissions => $submissions },
 			{ Return => 1, Nocomm => 1 }
 		);
-		$slashdb->setSubmissionsMerge($stuff);
+		my $comment = slashDisplay('mergeNotes',
+			{ submissions => $submissions },
+			{ Return => 1, Nocomm => 1 }
+		);
+		
+		$slashdb->setSubmissionsMerge($story,$comment);
 	}
 
 	# need to do this even if nothing is checked, so we update notes etc.

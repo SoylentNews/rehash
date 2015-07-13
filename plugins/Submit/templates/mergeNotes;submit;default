@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Generate a merged submission from other submissions
+
+* submissions = arrayref of submissions to generate merged submission from
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+mergeNotes
+__template__
+[% fullnote = ""; count = 1;
+FOREACH submission = submissions;
+	fullnote = fullnote _ "Sub" _ count _ ": " _ submission.comment _ "\n\n";
+	count = count + 1;
+END;
+fullnote %]
+
+__seclev__
+10000
+__version__
+$Id$

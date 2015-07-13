@@ -1179,6 +1179,7 @@ sub createSubmission {
 	$data->{story} = delete $submission->{story} || '';
 	$data->{subj} = delete $submission->{subj} || '';
 	$data->{subj} = $self->truncateStringForCharColumn($data->{subj}, 'submissions', 'subj');
+	$data->{comment} = delete $submission->{comment} || '';
 	$data->{ipid} = getCurrentUser('ipid');
 	$data->{subnetid} = getCurrentUser('subnetid');
 	$data->{email} = delete $submission->{email} || '';
@@ -7427,7 +7428,7 @@ sub getSubmissionsMerge {
 
 ########################################################
 sub setSubmissionsMerge {
-	my($self, $content) = @_;
+	my($self, $story, $comment ) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -7436,7 +7437,8 @@ sub setSubmissionsMerge {
 	my $subid = $self->createSubmission({
 		subj	=> "Merge: " . strip_literal($user->{nickname}) . " ($time)",
 		tid	=> $constants->{defaulttopic},
-		story	=> $content,
+		story	=> $story,
+		comment => $comment,
 		name	=> strip_literal($user->{nickname}),
 	});
 	$self->setSubmission($subid, {
