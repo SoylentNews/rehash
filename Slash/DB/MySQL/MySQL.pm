@@ -8808,7 +8808,7 @@ sub getStoryList {
 	my $columns = "hits, stories.commentcount AS commentcount,
 		stories.stoid, stories.sid,
 		story_text.title, stories.uid, stories.tid,
-		time, stories.in_trash, primaryskid
+		time, stories.in_trash, primaryskid, notes
 		";
 	my $tables = 'story_text, stories';
 	my @where = ( 'stories.stoid = story_text.stoid' );

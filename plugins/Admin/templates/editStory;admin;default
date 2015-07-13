@@ -59,8 +59,8 @@ SET txRows = 20 IF txRows < 20  %]
 			[% PROCESS relatedui %]
 
 			<table border="0" cellpadding="3" cellspacing="0" id="notes" style="width: 100%;">
-				<tr class="data_head"><td><b>Editor Notes</b></td></tr>
-				<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="editor_notes">[% editoral_notes %]</textarea></td></tr>
+				<tr class="data_head"><td><b>Editors' Notes</b></td></tr>
+				<tr class="data_hl1"><td><textarea class="fullbox" rows="3" wrap="virual" maxlength="1023" name="notes" cols="[% user.textarea_cols || constants.textarea_cols %]">[% storyref.notes %]</textarea></td></tr>
 			</table>
 			<br>
 

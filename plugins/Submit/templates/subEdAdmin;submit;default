@@ -80,10 +80,14 @@ __template__
 
 [% # Now we define that enignatic "sub_display" we referred to, earlier.
 BLOCK sub_display -%]
-	[% this_note = sub.note || '' %]
+	[% this_note = sub.note || '' ;
+	but_text ="New Note";
+	IF sub.comment;
+		but_text = "View Note";
+	END %]
 
 	<tr class="ps_[% sub.primaryskid %]"><td><nobr>
-		<input type="text" name="comment_[% sub.subid | strip_attribute %]" value="[% sub.comment | strip_attribute %]" size="20">
+		<button type="button" title="[% sub.comment | strip_attribute %]" onclick="toggle_visibility('sub_note_[% sub.subid | strip_attribute %]')">[% but_text %]</button>
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
 		[% IF form.fromconsole %]<div class="hide">[% END %]
 		[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
@@ -119,6 +123,7 @@ BLOCK sub_display -%]
 		<br>[% sub.strs.2 %]
 	[% END %]
 	</td></tr>
+	<tr id ="sub_note_[% sub.subid | strip_attribute %]" class="sub_note"><td colspan="4"><textarea class="fullbox" wrap="virtual" maxlength="1023" name="comment_[% sub.subid | strip_attribute %]" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% sub.comment | strip_attribute %]</textarea></td><tr> 
 [% END %]
 </div>
 __seclev__

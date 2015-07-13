@@ -234,5 +234,11 @@ body .adminstoryform legend { display: none;}
 	table-layout: fixed;
 }
 
+.sub_note {
+	display: none;
+}
 
+.sub_note td {
+	padding:.1em 2em .5em 2em;
+}
 
