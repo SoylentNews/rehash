@@ -1187,6 +1187,10 @@ sub editStory {
 			#$storyref->{$field} = slashizeLinks($storyref->{$field});
 			$storyref->{$field} = parseSlashizedLinks($storyref->{$field});
 			$storyref->{$field} = balanceTags($storyref->{$field});
+			# This should be moved to balanceTags once that braindead POS is fixed -- paulej72 20150617
+			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
+			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
 
 		$form->{uid} ||= $user->{uid};

@@ -87,7 +87,7 @@ FOREACH story = storylistref;
 		<td class="admin_title">
 		
 		<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% IF story.in_trash == 'yes' %]<s>[% END; story.title  | strip_title; IF story.in_trash == 'yes' %]</s>[% END %]</a> [% IF story.notes %]<a href="javascript:void(0);" onclick="toggle_visibility('notes_[% story.stoid | strip_attribute %]')" title="[% story.notes | strip_attribute %]">&#x1F4CE;</a>[% END %]
+		[% IF story.in_trash == 'yes' %]<s>[% END; story.title  | strip_title; IF story.in_trash == 'yes' %]</s>[% END %]</a> [% IF story.notes %]<a href="javascript:void(0);" onclick="toggle_visibility('notes_[% story.stoid | strip_attribute %]')" title="[% story.notes | strip_attribute %]">***</a>[% END %]
 		
 		</td>
 		<td><b>[% story.aid %]</b></td>
