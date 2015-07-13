@@ -18,7 +18,7 @@ FOREACH submission = submissions;
 	PROCESS formatSub;
 	stripSubj = submission.subj | strip_title;
 	fullsubtext = fullsubtext _ "\n\n<h4>" _ stripSubj _ "</h4>\n\n" _ subtext;
-	os = os _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission #" _ count _ "</a>\n";
+	os = os _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission #" _ count _ "</a>&emsp; \n ";
 	count = count + 1;
 END;
 fullsubtext = fullsubtext _ "\n\n<hr><p><small>" _ os _ "</small></p>";
