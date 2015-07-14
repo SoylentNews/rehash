@@ -1,0 +1,38 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+netnews
+__lang__
+en_US
+__name__
+netnews_comment
+__template__
+
+Path: lithium!carbon
+From: [% comment.nickname %]
+Newsgroups: soylentnews.test.mainpage
+Subject: [% comment.subject %]
+Date: [% Slash.timeCalc(comment.date, "%a, %d %b %Y %H:%M:%S %z"); %]
+Message-ID: [% comment.msg_id %]
+References: [% comment.reference %]
+
+[% comment.asciitext.replace('\n(?=\n  \* \[\d+\])', '') %]
+
+[% IF comment.ref_count != 0; %]
+Links:[%
+  count = -1;
+  FOR ref = comment.refs;
+    count = count + 1;
+    num(count, ref); #urlize(ref));
+  END; %]
+
+[% END %]
+
+__seclev__
+500
+__version__
+$Id$

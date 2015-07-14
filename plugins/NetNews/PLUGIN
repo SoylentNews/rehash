@@ -1,0 +1,5 @@
+name=NetNews
+description="slashcode->newsgroup gateway support"
+task=spool_to_nntp.pl
+template=templates/netnews_comment;netnews;default
+template=templates/netnews_story;netnews;default
