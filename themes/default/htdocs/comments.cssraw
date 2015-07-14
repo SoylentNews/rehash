@@ -9,6 +9,10 @@ html>body #comments { margin: 0 auto .2em 0; width: 100%; }
 	width: 98%;
 }
 
+.commentDiv{
+	min-width: 15em;
+}
+
 #commentwrap
 {
 	margin-bottom: .6em;
