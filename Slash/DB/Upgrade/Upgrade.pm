@@ -74,12 +74,13 @@ sub getSchemaVersions
     # case
     my $current_versions = $slashdb->getDBSchemaVersions();
 
-    # db_schema by itself references to all SQL not part of a plugin
-    if (exists $current_versions->{db_schema}) {
-        $schema_vers{core} = $current_versions->{db_schema};
+    # db_schema_core by itself references to all SQL not part of a plugin
+    if (exists $current_versions->{db_schema_core}) {
+        $schema_vers{core} = $current_versions->{db_schema_core};
     } else {
         $schema_vers{core} = 0;
     }
+
 
     # installed plugins exist as a list of keys under $constants->{'plugin'}
     # we only consider versions for plugins we have installed
@@ -94,7 +95,7 @@ sub getSchemaVersions
     while ( my ($key, $value) = each %$plugins ) {
         my $rowname = $plugin_db_prefix . $key;
         if (exists $current_versions->{$rowname}) {
-            $schema_vers{$rowname} = $current_versions->{$rowname};
+            $schema_vers{$rowname} = int($current_versions->{$rowname});
          } else {
             $schema_vers{$rowname} = 0;
          }
