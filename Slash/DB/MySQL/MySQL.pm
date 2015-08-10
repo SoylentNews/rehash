@@ -13219,9 +13219,9 @@ See Also   :
 sub getDBSchemaVersions
 {
 	my ($self) = @_;
+
 	# Everything has a schema version of 0 if not explicately set
-	
-	return $self->sqlSelectHashref('*', 'site_info', 'value=\'db_schema%\''); 
+	return $self->sqlSelectAllKeyValue('name, value', 'site_info', 'name like \'db_schema%\''); 
 }
 
 ########################################################
@@ -13300,7 +13300,35 @@ sub nickExists {
 	return 1;
 }
 
+##################################################################
+# Database upgrades to core go here, keep this right below the bottom
+#
+# Feel free to use sqlDO in this section; upgrade methods are never
+# called from the UI, only from the update-database utility.
 
+sub upgradeCoreDB() {
+	# Check the versions of stuff
+	my ($self, $upgrade) = @_;
+	my $schema_versions = $upgrade->getSchemaVersions();
+	my $core_ver = $schema_versions->{core};
+	my $upgrades_done = 0;
+	
+	if ($core_ver == 0) {
+		# Every schema upgrade should have a comment as to why. In this case, initialize the
+		# core version schema
+		print "upgrading core to v1 ...\n";
+		if (!$self->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_core', 1, 'Version of core database schema')")) {
+			return 0;
+		};
+		$core_ver = 1;
+		$upgrades_done++;
+	}
+
+	if (!$upgrades_done) {
+		print "No schema upgrades needed for core\n";
+	}
+	return 1;
+}
 
 1;
 
