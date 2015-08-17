@@ -361,11 +361,13 @@ my $strip_mode = sub {
 	strip_html		=> \&strip_html,
 	strip_literal		=> \&strip_literal,
 	strip_nohtml		=> \&strip_nohtml,
+	strip_nohtmlurl		=> \&strip_nohtmlurl,
 	strip_notags		=> \&strip_notags,
 	strip_plaintext		=> \&strip_plaintext,
 	strip_subject		=> \&strip_subject,
 	strip_textarea		=> \&strip_textarea,
 	strip_title		=> \&strip_title,
+	strip_backtrack		=> \&strip_backtrack,
 	strip_mode		=> [ $strip_mode, 1 ],
 	%FILTERS
 );

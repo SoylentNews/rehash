@@ -1,5 +1,13 @@
 ; // $Id$
 
+function toggle_visibility(id) {
+	var e = document.getElementById(id);
+	if(e.style.display == 'table-row')
+		e.style.display = 'none';
+	else
+		e.style.display = 'table-row';
+}
+
 function um_ajax(the_behaviors, the_events) {
 	ajax_update({
 		op:		'um_ajax',

@@ -36,7 +36,7 @@ __template__
 			[% IF warning.attached_to_other %]<b>Story is already attached to another poll -- detach poll from that story before attaching this one</b><br>[% END %]
 			
 			[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
-			<input type="text" name="question" value="[% question.question | strip_title %]" size="40">
+			<input type="text" name="question" value="[% question.question | strip_subject %]" size="40">
 			<input type="text" name="voters" value="[% question.voters %]" size="5"><br>
 			[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visible in" %]
 			[% skins = Slash.db.getDescriptions('skins') %]
@@ -76,7 +76,7 @@ __template__
 			[% PROCESS formLabel value => "The Answers" comment => "voters" %]
 		
 			[% FOREACH n = [0 .. 7] %]
-				<input type="text" name="aid[% n + 1%]" value="[% answers.$n.0 | strip_title %]" size="40">
+				<input type="text" name="aid[% n + 1%]" value="[% answers.$n.0 | strip_subject %]" size="40">
 				<input type="text" name="votes[% n + 1%]" value="[% answers.$n.1 or 0 %]" size="5"><br>
 			[% END %]
 		

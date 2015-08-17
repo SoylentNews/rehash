@@ -1179,6 +1179,7 @@ sub createSubmission {
 	$data->{story} = delete $submission->{story} || '';
 	$data->{subj} = delete $submission->{subj} || '';
 	$data->{subj} = $self->truncateStringForCharColumn($data->{subj}, 'submissions', 'subj');
+	$data->{comment} = delete $submission->{comment} || '';
 	$data->{ipid} = getCurrentUser('ipid');
 	$data->{subnetid} = getCurrentUser('subnetid');
 	$data->{email} = delete $submission->{email} || '';
@@ -2971,7 +2972,7 @@ sub deleteSubmission {
 		my $n_q = $self->sqlQuote($n);
 
 		if ($t eq "note" || $t eq "comment" || $t eq "skid") {
-			$form->{"note_$n"} = "" if $form->{"note_$n"} eq " ";
+			$form->{"note_$n"} = "" if ($form->{"note_$n"} eq " " || !defined($form->{"note_$n"}) ); 
 			if ($form->{$_}) {
 				my %sub = (
 					note		=> $form->{"note_$n"},
@@ -7427,7 +7428,7 @@ sub getSubmissionsMerge {
 
 ########################################################
 sub setSubmissionsMerge {
-	my($self, $content) = @_;
+	my($self, $story, $comment ) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -7436,7 +7437,8 @@ sub setSubmissionsMerge {
 	my $subid = $self->createSubmission({
 		subj	=> "Merge: " . strip_literal($user->{nickname}) . " ($time)",
 		tid	=> $constants->{defaulttopic},
-		story	=> $content,
+		story	=> $story,
+		comment => $comment,
 		name	=> strip_literal($user->{nickname}),
 	});
 	$self->setSubmission($subid, {
@@ -8808,7 +8810,7 @@ sub getStoryList {
 	my $columns = "hits, stories.commentcount AS commentcount,
 		stories.stoid, stories.sid,
 		story_text.title, stories.uid, stories.tid,
-		time, stories.in_trash, primaryskid
+		time, stories.in_trash, primaryskid, notes
 		";
 	my $tables = 'story_text, stories';
 	my @where = ( 'stories.stoid = story_text.stoid' );
@@ -13217,9 +13219,9 @@ See Also   :
 sub getDBSchemaVersions
 {
 	my ($self) = @_;
+
 	# Everything has a schema version of 0 if not explicately set
-	
-	return $self->sqlSelectHashref('*', 'site_info', 'value=\'db_schema%\''); 
+	return $self->sqlSelectAllKeyValue('name, value', 'site_info', 'name like \'db_schema%\''); 
 }
 
 ########################################################
@@ -13298,7 +13300,35 @@ sub nickExists {
 	return 1;
 }
 
+##################################################################
+# Database upgrades to core go here, keep this right below the bottom
+#
+# Feel free to use sqlDO in this section; upgrade methods are never
+# called from the UI, only from the update-database utility.
 
+sub upgradeCoreDB() {
+	# Check the versions of stuff
+	my ($self, $upgrade) = @_;
+	my $schema_versions = $upgrade->getSchemaVersions();
+	my $core_ver = $schema_versions->{core};
+	my $upgrades_done = 0;
+	
+	if ($core_ver == 0) {
+		# Every schema upgrade should have a comment as to why. In this case, initialize the
+		# core version schema
+		print "upgrading core to v1 ...\n";
+		if (!$self->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_core', 1, 'Version of core database schema')")) {
+			return 0;
+		};
+		$core_ver = 1;
+		$upgrades_done++;
+	}
+
+	if (!$upgrades_done) {
+		print "No schema upgrades needed for core\n";
+	}
+	return 1;
+}
 
 1;
 

@@ -80,45 +80,51 @@ __template__
 
 [% # Now we define that enignatic "sub_display" we referred to, earlier.
 BLOCK sub_display -%]
-	[% this_note = sub.note || '' %]
+	[% this_note = sub.note || '' ;
+	but_text ="New Note";
+	IF sub.comment;
+		but_text = "<b>VIEW NOTE</b>";
+	END %]
 
-	<tr class="ps_[% sub.primaryskid %]"><td><nobr>
-		<input type="text" name="comment_[% sub.subid | strip_attribute %]" value="[% sub.comment | strip_attribute %]" size="20">
-		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
-		[% IF form.fromconsole %]<div class="hide">[% END %]
-		[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
-		[% IF form.fromconsole %]</div>[% END %]
-
-		[%# this is called del_ for legacy reasons, but is also use for merging %]
-		<input type="checkbox" name="del_[% sub.subid %]">
-	</nobr></td><td>
-	[% IF constants.submiss_ts %]
-		[% sub.time %]&nbsp;
-	[% END %]
-	</td><td class="sub_title">
-		<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute;
-			IF form.skin; "&amp;table_skin="; form.skin | strip_attribute; END;
-			IF form.note; "&amp;table_note="; form.note | strip_attribute; END;
-			IF sub.sskin; sub.sskin | strip_attribute; END;
-			IF sub.stitle; sub.stitle | strip_subject; END;
-			IF form.nowrapper; "&amp;nowrapper=1"; END;
-			IF form.fromconsole; "&amp;fromconsole=1"; END;
-		%]">[% sub.subj | strip_title %]&nbsp;</a>
-		[% IF constants.submit_show_weight %]
-			[% IF sub.keywords %]<br>[% sub.keywords %] [% END %]
-			[% IF sub.weight %] ([% sub.weight %])[% END %]
-			[% IF sub.url %] <b><a href="[% sub.url | strip_attribute %]">L</a></b>[% END %]
-			[% IF sub.keywords %][% END %]
-		[% END %]
-	</td><td>
-	[% IF !form.fromconsole %]
-		[% sub.strs.1 %]
-		[% UNLESS sub.is_anon %]
-			([% sub.karma || 0 %])
-		[% END %]
-		<br>[% sub.strs.2 %]
-	[% END %]
-	</td></tr>
+	<tr class="ps_[% sub.primaryskid %]">
+		<td><nobr><button type="button" title="[% sub.comment | strip_attribute %]" onclick="toggle_visibility('sub_note_[% sub.subid | strip_attribute %]')">[% but_text %]</button></nobr></td>
+		<td><nobr>
+			[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
+			[% IF form.fromconsole %]<div class="hide">[% END %]
+			[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
+			[% IF form.fromconsole %]</div>[% END %]
+	
+			[%# this is called del_ for legacy reasons, but is also use for merging %]
+			<input type="checkbox" name="del_[% sub.subid %]">
+		</nobr></td>
+		<td>[% IF constants.submiss_ts %][% sub.time %][% END %]&nbsp;</td>
+		<td class="sub_title">
+			<a href="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute;
+				IF form.skin; "&amp;table_skin="; form.skin | strip_attribute; END;
+				IF form.note; "&amp;table_note="; form.note | strip_attribute; END;
+				IF sub.sskin; sub.sskin | strip_attribute; END;
+				IF sub.stitle; sub.stitle | strip_subject; END;
+				IF form.nowrapper; "&amp;nowrapper=1"; END;
+				IF form.fromconsole; "&amp;fromconsole=1"; END;
+			%]">[% sub.subj | strip_title %]&nbsp;</a>
+			[% IF constants.submit_show_weight %]
+				[% IF sub.keywords %]<br>[% sub.keywords %] [% END %]
+				[% IF sub.weight %] ([% sub.weight %])[% END %]
+				[% IF sub.url %] <b><a href="[% sub.url | strip_attribute %]">L</a></b>[% END %]
+				[% IF sub.keywords %][% END %]
+			[% END %]
+		</td>
+		<td>
+			[% IF !form.fromconsole %]
+				[% sub.strs.1 %]
+				[% UNLESS sub.is_anon %]
+					([% sub.karma || 0 %])
+				[% END %]
+				<br>[% sub.strs.2 %]
+			[% END %]
+		</td>
+	</tr>
+	<tr id ="sub_note_[% sub.subid | strip_attribute %]" class="sub_note"><td colspan="5"><textarea class="fullbox" wrap="virtual" maxlength="1023" name="comment_[% sub.subid | strip_attribute %]" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% sub.comment | strip_textarea %]</textarea></td><tr> 
 [% END %]
 </div>
 __seclev__

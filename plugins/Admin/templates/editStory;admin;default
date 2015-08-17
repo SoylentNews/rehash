@@ -18,11 +18,9 @@ SET txRows = constants.textarea_rows UNLESS txRows;
 SET txRows = 20 IF txRows < 20  %]
 <div id="content" class="admin">
 	<form action="[% gSkin.rootdir %]/admin.pl" method="post" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
-		[% IF form.subid %]
-			<input type="hidden" name="subid" value="[% form.subid | strip_attribute %]">
-		[% END %]
-		[% IF form.fhid %]
-			<input type="hidden" name="fhid" value="[% form.fhid | strip_attribute %]">
+		[% subid = subid || form.subid;
+		IF subid %]
+			<input type="hidden" name="subid" value="[% subid | strip_attribute %]">
 		[% END %]
 		<div id="slashboxes">
 			[% IF constants.plugin.Events && Slash.getObject('Slash::Events') %]
@@ -61,8 +59,8 @@ SET txRows = 20 IF txRows < 20  %]
 			[% PROCESS relatedui %]
 
 			<table border="0" cellpadding="3" cellspacing="0" id="notes" style="width: 100%;">
-				<tr class="data_head"><td><b>Editor Notes</b></td></tr>
-				<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="editor_notes">[% editoral_notes %]</textarea></td></tr>
+				<tr class="data_head"><td><b>Editors' Notes</b></td></tr>
+				<tr class="data_hl1"><td><textarea class="fullbox" rows="3" wrap="virual" maxlength="1023" name="notes" cols="[% user.textarea_cols || constants.textarea_cols %]">[% storyref.notes | strip_textarea %]</textarea></td></tr>
 			</table>
 			<br>
 

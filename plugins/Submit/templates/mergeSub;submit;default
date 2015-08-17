@@ -13,11 +13,15 @@ en_US
 __name__
 mergeSub
 __template__
-[% fullsubtext = "";
-   FOREACH submission = submissions;
+[% fullsubtext = ""; os = ""; count = 1;
+FOREACH submission = submissions;
 	PROCESS formatSub;
-	fullsubtext = fullsubtext _ "\n\n<h3>" _ submission.subj _ "</h3>\n\n" _ subtext;
-   END;
+	stripSubj = submission.subj | strip_title;
+	fullsubtext = fullsubtext _ "\n\n<h4>" _ stripSubj _ "</h4>\n\n" _ subtext;
+	os = os _ "<a href='" _ gSkin.rootdir _ "/submit.pl?op=viewsub&subid=" _ submission.subid _"'>Original Submission #" _ count _ "</a>&emsp; \n ";
+	count = count + 1;
+END;
+fullsubtext = fullsubtext _ "\n\n<hr><p><small>" _ os _ "</small></p>";
 fullsubtext %]
 
 __seclev__

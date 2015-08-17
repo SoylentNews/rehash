@@ -1129,7 +1129,7 @@ sub editStory {
 	my($extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $storycontent, $locktest,
 		$extracolumns, $commentstatus_select, 
-		$subid, $fhid, $description, $notes);
+		$subid, $fhid, $description);
 	my $extracolref = {};
 	my($fixquotes_check, $autonode_check, $fastforward_check) = ('','','');
 	my $page = 'index';
@@ -1187,6 +1187,10 @@ sub editStory {
 			#$storyref->{$field} = slashizeLinks($storyref->{$field});
 			$storyref->{$field} = parseSlashizedLinks($storyref->{$field});
 			$storyref->{$field} = balanceTags($storyref->{$field});
+			# This should be moved to balanceTags once that braindead POS is fixed -- paulej72 20150617
+			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
+			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
 
 		$form->{uid} ||= $user->{uid};
@@ -1449,7 +1453,6 @@ sub editStory {
 	if ($stoid || $form->{sid}) {
 		my $story = $slashdb->getStory($form->{sid});
 		$stoid ||= $story->{stoid};
-		$notes  ||= $story->{notes};
 		$pending_file_count = $slashdb->numPendingFilesForStory($stoid); 
 		$story_static_files = $slashdb->getStaticFilesForStory($stoid);
 	}
@@ -1483,7 +1486,6 @@ sub editStory {
 		add_related_text	=> $add_related_text,
 		pending_file_count	=> $pending_file_count,
 		story_static_files	=> $story_static_files,
-		editoral_notes			=> $notes
 	});
 }
 
@@ -1842,7 +1844,7 @@ sub updateStory {
 		thumb		=> $form->{thumb},
 		-rendered	=> 'NULL', # freshenup.pl will write this
 		is_dirty	=> 1,
-		notes		=> $form->{editor_notes}
+		notes		=> $form->{notes}
 	};
 
 	for (qw(dept bodytext relatedtext)) {
@@ -2346,7 +2348,7 @@ sub saveStory {
 		commentstatus	=> $form->{commentstatus},
 		thumb		=> $form->{thumb},
 		-rendered	=> 'NULL', # freshenup.pl will write this
-		notes		=> $form->{editor_notes}
+		notes		=> $form->{notes}
 	};
 
 	for (qw(dept bodytext relatedtext)) {

@@ -2,8 +2,6 @@
 # $Id$
 #
 
-INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, hidden) VALUES ('subscriber_plug', '', 10000, 'static', 'Plug for subscribers', 'mainpage', 0, 'Subscriber plug', 0, NULL, '', 0 ,1);
-
 INSERT INTO vars (name, value, description) VALUES ('bitpay_amount','20.00','How much a subscription costs, in U.S. dollars with two decimal places');
 INSERT INTO vars (name, value, description) VALUES ('bitpay_token','','Bitpay API auth token');
 INSERT INTO vars (name, value, description) VALUES ('bitpay_host','https://bitpay.com/api/','Bitpay api host. Should be either https://bitpay.com/api/ or https://test.bitpay.com/api/');

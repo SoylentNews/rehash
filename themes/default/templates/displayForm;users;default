@@ -93,7 +93,7 @@ __template__
 				<label>
 					Nickname of choice
 				</label>
-				<input type="text" name="newusernick" size="20" maxlength="20" value="[% newnick %]">
+				<input type="text" name="newusernick" size="20" maxlength="20" value="[% newnick | strip_attribute %]">
 				<label>
 					Valid email address
 				</label>

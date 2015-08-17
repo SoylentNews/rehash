@@ -128,6 +128,7 @@ our @EXPORT  = qw(
 	strip_textarea
 	strip_subject
 	strip_title
+	strip_backtrack
 	strip_html
 	strip_literal
 	strip_mode
@@ -1335,6 +1336,25 @@ sub _fixupCharrefs {
 	#	TMB not using good_numeric/good_entity anymore
 }
 
+sub _remove_tags {
+	my($url) = @_;
+	
+	use URI::Encode;
+	use utf8;
+	my $encoder = URI::Encode->new({double_encode => 0});
+	my $i = 1;
+	while($url =~ /%/){
+		$url = '' if $i > 3;
+		$url = $encoder->decode($url);
+		$i++;
+	}
+	utf8::decode($url);
+	$url = strip_nohtmlurl($url);
+	$url = $encoder->encode($url);
+	return 'href="'.$url.'"';
+
+}
+
 my %action_data = ( );
 
 my %actions = (
@@ -1427,6 +1447,17 @@ my %actions = (
 			${$_[0]} =~ s/(&#[a-zA-Z0-9]+;)/_diacriticEntities2Literals($1)/ge;
 			my $max = getCurrentStatic("utf8_max_diacritics") || 4;
 			${$_[0]} =~ s/\p{Mn}{$max,}//g;		},
+	fix_href	=> sub {
+			# This should already be done but to fix bad entries already in the db
+			# we shall do it again.
+			${$_[0]} =~ s/href=(['"])(.*?)\g{1}/_remove_tags($2)/iegs;	},
+	nix_tags	=> sub {
+			# This should already be done but to fix bad entries already in the db
+			# we shall do it again.
+			${$_[0]} =~ s/<script.*?<\/script\s*>//igs;
+			${$_[0]} =~ s/<iframe.*?<\/iframe\s*>//igs;
+			${$_[0]} =~ s/<style.*?<\/style\s*>//igs;  },
+	
 );
 
 my %mode_actions = (
@@ -1468,6 +1499,8 @@ my %mode_actions = (
 			remove_ltgt
 			encode_html_amp 
 			approve_unicode		)],
+	NOHTMLURL, [qw(
+			remove_tags		)],
 	PLAINTEXT, [qw(
 			newline_to_local
 			diacritic_max
@@ -1529,7 +1562,9 @@ my %mode_actions = (
 			diacritic_max
 			encode_html_ltgt
 			approve_unicode		)],
-	
+	BACKTRACK, [qw(
+			fix_href
+			nix_tags		)],
 );
 
 sub stripByMode {
@@ -1596,11 +1631,13 @@ sub strip_extrans	{ stripByMode($_[0], EXTRANS,	@_[1 .. $#_]) }
 sub strip_html		{ stripByMode($_[0], HTML,	@_[1 .. $#_]) }
 sub strip_literal	{ stripByMode($_[0], LITERAL,	@_[1 .. $#_]) }
 sub strip_nohtml	{ stripByMode($_[0], NOHTML,	@_[1 .. $#_]) }
+sub strip_nohtmlurl	{ stripByMode($_[0], NOHTMLURL,	@_[1 .. $#_]) }
 sub strip_notags	{ stripByMode($_[0], NOTAGS,	@_[1 .. $#_]) }
 sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 sub strip_textarea	{ stripByMode($_[0], TEXTAREA,	@_[1 .. $#_]) }
 sub strip_subject	{ stripByMode($_[0], SUBJECT,	@_[1 .. $#_]) }
 sub strip_title		{ stripByMode($_[0], TITLE,	@_[1 .. $#_]) }
+sub strip_backtrack		{ stripByMode($_[0], BACKTRACK,	@_[1 .. $#_]) }
 
 sub determine_html_format {
 	my($html, $user) = @_;
@@ -2613,6 +2650,17 @@ The escaped data.
 
 sub fudgeurl {
 	my($url) = @_;
+	
+	use URI::Encode;
+	use utf8;
+	my $encoder = URI::Encode->new({double_encode => 0});
+	my $i = 1;
+	while($url =~ /%/){
+		$url = '' if $i > 3;
+		$url = $encoder->decode($url);
+		$i++;
+	}
+	utf8::decode($url);
 
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
@@ -2723,9 +2771,9 @@ sub fudgeurl {
 	# These entities can crash browsers and don't belong in URLs.
 	# Correction: NO entities belong in URLs. If they can't input the character, tough shit to them.
 	$url =~ s/&(.+?);//g;
-	# we don't like SCRIPT at the beginning of a URL
-	# This can currently never happen though so why do we bother?
-	$url = $url =~ /^[\s\w]*script\b/i ? undef : $url;
+	# we don't like SCRIPT in a URL
+	$url = strip_nohtmlurl($url);
+	$url = $encoder->encode($url);
 	return $url;
 }
 
