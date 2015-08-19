@@ -556,7 +556,7 @@ sub getLatestStories {
 	$options->{limit} = 50 unless $options->{limit} <= 50;
 	my $stories = $slashdb->getStoriesEssentials($options);
 	foreach my $story (@$stories) {
-		($story->{introtext}, $story->{bodytext}, $story->{title}, $story->{relatedtext}) = $slashdb->sqlSelect("introtext, bodytext, title, relatedtext", "story_text", "stoid = $story->{stoid}");
+		($story->{introtext}, $story->{bodytext}, $story->{title}, $story->{relatedtext}, $story->{tid}, $story->{dept}) = $slashdb->sqlSelect("introtext, bodytext, title, relatedtext, stories.tid, stories.dept", "story_text LEFT JOIN stories ON stories.stoid = story_text.stoid", "story_text.stoid = $story->{stoid}");
 		$story->{bodytext} = $story->{introtext} unless $story->{bodytext};
 		$story->{body_length} = length($story->{bodytext});
 		my $sSkin = $slashdb->getSkin($story->{primaryskid});
