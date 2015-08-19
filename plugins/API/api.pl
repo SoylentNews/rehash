@@ -517,6 +517,8 @@ sub getSingleStory {
 	my $story = $slashdb->getStory($form->{sid});
 	if( ($story->{is_future}) || ($story->{in_trash} ne "no") ){return;};
 	return unless $slashdb->checkStoryViewable($story->{stoid});
+	my $sSkin = $slashdb->getSkin($story->{primaryskid});
+	$story->{nexus} = $sSkin->{name};
 	delete $story->{story_topics_rendered};
 	delete $story->{is_future};
 	delete $story->{in_trash};
@@ -541,6 +543,8 @@ sub getLatestStories {
 		($story->{introtext}, $story->{bodytext}, $story->{title}, $story->{relatedtext}) = $slashdb->sqlSelect("introtext, bodytext, title, relatedtext", "story_text", "stoid = $story->{stoid}");
 		$story->{bodytext} = $story->{introtext} unless $story->{bodytext};
 		$story->{body_length} = length($story->{bodytext});
+		my $sSkin = $slashdb->getSkin($story->{primaryskid});
+	        $story->{nexus} = $sSkin->{name};
 		delete $story->{is_future};
 		delete $story->{hitparade};
 	}
