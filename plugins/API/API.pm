@@ -16,7 +16,7 @@ use Apache2::RequestUtil;
 my $jsonFlags = { utf8 => 1, pretty => 1 };
 binmode(STDOUT, ':encoding(utf8)');
 
-# constructor method. Initializes and returns Slash::Subscribe::IPN object
+# constructor method. Initializes and returns Slash::API object
 sub new {
 	my ($class, $data) = @_;
 	$class = ref($class) || $class;

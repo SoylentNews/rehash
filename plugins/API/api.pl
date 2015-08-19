@@ -518,7 +518,6 @@ sub getSingleStory {
 	if( ($story->{is_future}) || ($story->{in_trash} ne "no") ){return;};
 	return unless $slashdb->checkStoryViewable($story->{stoid});
 	delete $story->{story_topics_rendered};
-	delete $story->{primaryskid};
 	delete $story->{is_future};
 	delete $story->{in_trash};
 	delete $story->{thumb_signoff_needed};
@@ -544,7 +543,6 @@ sub getLatestStories {
 		$story->{body_length} = length($story->{bodytext});
 		delete $story->{is_future};
 		delete $story->{hitparade};
-		delete $story->{primaryskid};
 	}
 	my $json = JSON->new->utf8->allow_nonref;	
 	return $json->pretty->encode($stories);
