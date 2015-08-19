@@ -145,6 +145,10 @@ sub story {
 			function	=> \&getStoryReskey,
 			seclev		=> 1,
 		},
+		nexuslist	=> {
+			function	=> \&getNexusList,
+			seclev		=> 1,
+		},
 	};
 
 	$op = 'default' unless $ops->{$op};
@@ -210,6 +214,18 @@ sub journal {
 	$op = 'default' unless $ops->{$op};
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub getNexusList {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+        my $json = JSON->new->utf8->allow_nonref;
+	my $wholeshebang = $slashdb->getSkins();
+	my $nexuses = [];
+	foreach(sort(keys(%$wholeshebang))) {
+		push(@$nexuses, $wholeshebang->{$_});
+	}
+	return $json->pretty->encode($nexuses);
+	
 }
 
 sub login {
