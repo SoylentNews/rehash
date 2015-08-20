@@ -149,6 +149,10 @@ sub story {
 			function	=> \&getNexusList,
 			seclev		=> 1,
 		},
+		topiclist	=> {
+			function	=> \&getTopicsList,
+			seclev		=> 1,
+		},
 	};
 
 	$op = 'default' unless $ops->{$op};
@@ -216,12 +220,24 @@ sub journal {
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
+sub getTopicsList {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+        my $json = JSON->new->utf8->allow_nonref;
+	my $wholeshebang = $slashdb->getTopics();
+	my $topics = [];
+	foreach(sort { $a <=> $b } keys(%$wholeshebang) ) {
+		push(@$topics, $wholeshebang->{$_});
+	}
+
+	return $json->pretty->encode($topics);
+}
+
 sub getNexusList {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
         my $json = JSON->new->utf8->allow_nonref;
 	my $wholeshebang = $slashdb->getSkins();
 	my $nexuses = [];
-	foreach(sort(keys(%$wholeshebang))) {
+	foreach(sort { $a <=> $b } keys(%$wholeshebang) ) {
 		push(@$nexuses, $wholeshebang->{$_});
 	}
 	return $json->pretty->encode($nexuses);
@@ -549,11 +565,22 @@ sub getSingleStory {
 
 sub getLatestStories {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
 	my $options;
 	($options->{limit}, $options->{limit_extra}) = (($form->{limit} || 10), 0);
 	$options->{limit} = 10 unless $options->{limit} =~ /^\d+$/;
 	$options->{limit} = 1 unless $options->{limit} > 1;
 	$options->{limit} = 50 unless $options->{limit} <= 50;
+
+	my $topics = $slashdb->getTopics();
+	if(! defined($topics->{$form->{tid}})) {
+		return $json->pretty->encode("no such topic: $form->{tid}");
+	} elsif($topics->{$form->{tid}}->{searchable} ne 'yes') {
+		return $json->pretty->encode("tid $form->{tid} is not searchable");
+	} else {
+		$options->{tid} = $form->{tid};
+	}
+
 	my $stories = $slashdb->getStoriesEssentials($options);
 	foreach my $story (@$stories) {
 		($story->{introtext}, $story->{bodytext}, $story->{title}, $story->{relatedtext}, $story->{tid}, $story->{dept}) = $slashdb->sqlSelect("introtext, bodytext, title, relatedtext, stories.tid, stories.dept", "story_text LEFT JOIN stories ON stories.stoid = story_text.stoid", "story_text.stoid = $story->{stoid}");
@@ -564,7 +591,6 @@ sub getLatestStories {
 		delete $story->{is_future};
 		delete $story->{hitparade};
 	}
-	my $json = JSON->new->utf8->allow_nonref;	
 	return $json->pretty->encode($stories);
 }
 
