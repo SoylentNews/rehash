@@ -82,6 +82,7 @@ $task{$me}{code} = sub {
 		slashdErrnote($err);
 		#return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted"; # no return yet, go on with the rest
 	}
+	$counter = 0;
 
 	$id = $log_slave->sqlSelectNumericKeyAssumingMonotonic(
 		'pagemark', 'max', 'id',
@@ -118,6 +119,14 @@ $task{$me}{code} = sub {
 	}
 	$done = 0;
 
+	if ($counter >= $failures) {
+		my $err = "more than $failures errors occured, pagemark is probably locked, last_err '$last_err'";
+		slashdLog($err);
+		slashdErrnote($err);
+		#return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted"; # no return yet, go on with the rest
+	}
+	$counter = 0;
+
 	# Now handle accesslog_admin table
 
 	$hoursback = $constants->{accesslog_admin_hoursback} || 720; # Default to keeping one month of entries
@@ -153,6 +162,13 @@ $task{$me}{code} = sub {
 			sleep 5;
 			$counter++;
 		}
+	}
+
+	if ($counter >= $failures) {
+		my $err = "more than $failures errors occured, accesslog_admin is probably locked, last_err '$last_err'";
+		slashdLog($err);
+		slashdErrnote($err);
+		#return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted"; # no return yet, go on with the rest
 	}
 	
 
