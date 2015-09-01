@@ -119,7 +119,7 @@ __template__
 			%]
 		
 			<input type="submit" name="update" value="Update">
-			<input type="submit" name="del_[% subid %]" value="Delete">
+			<input type="submit" name="del_[% subid %]" value="Delete"> Reason <input type="text" name="rejectreason">
 		</fieldset>
 	</form>
 

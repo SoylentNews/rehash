@@ -114,10 +114,11 @@ These constants are for message delivery modes and message type codes.
 	MSG_CODE_SUBSCRIPTION_OUT
 	MSG_CODE_SCHEDULECHG
 	MSG_CODE_HTML_INVALID
+	MSG_CODE_SUBMISSION_REJECT
 
 =cut
 
-# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 
 =pod
 

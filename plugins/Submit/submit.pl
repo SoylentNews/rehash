@@ -121,6 +121,23 @@ sub changeSubmission {
 		my @subids = $slashdb->deleteSubmission($option);
 		# Restore subid for proper functioning of the next page view.
 		$form->{subid} = $subid;
+		
+		# Send a rejection message to the submitter of each sub we deleted.
+		# But only if the messages plugin is loaded.
+		if($constants->{plugin}{Messages}) {
+			my $message = getObject("Slash::Messages");
+			foreach(@subids) {
+				my $sub = getSubmission($_);
+				my $data = {
+					template_name	=>	'submission_reject_msg',
+					subject		=>	'Submission declined',
+					reason		=>	$form->{rejectreason},
+					subtitle	=>	$sub->{subj},
+					sub_id		=>	$_,
+				};
+				$message->create($sub->{uid}, MSG_CODE_SUBMISSION_REJECT, $data);
+			}
+		}
 		if (@subids) {
 			$title = getData('updatehead', { subids => \@subids });
 			submissionEd(@_, $title);
