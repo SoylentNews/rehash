@@ -127,7 +127,7 @@ sub changeSubmission {
 		if($constants->{plugin}{Messages}) {
 			my $message = getObject("Slash::Messages");
 			foreach(@subids) {
-				my $sub = getSubmission($_);
+				my $sub = $message->getSubmission($_);
 				my $data = {
 					template_name	=>	'submission_reject_msg',
 					subject		=>	'Submission declined',
