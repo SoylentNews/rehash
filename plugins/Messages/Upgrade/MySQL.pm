@@ -42,7 +42,7 @@ sub upgradeDB() {
 	if ($messages_schema_ver == 0) {
 		# initialize the messages plugin schema and insert an entry for MSG_CODE_SUBMISSION_REJECT reasons into the message_codes table
 		print "upgrading messages to v1 ...\n";
-		if (!$slashdb->sqlDo("INSERT INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (19, 'Rejected Submission Reason', 1, 'now', 0, 2)")) {
+		if (!$slashdb->sqlDo("INSERT INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (19, 'Declined Submission Reason', 1, 'now', 0, 3)")) {
 			return 0;
 		}
 		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Messages', 1, 'Version of messages plugin schema')")) {

@@ -19,10 +19,17 @@ en_US
 __name__
 submission_reject_msg
 __template__
+[% IF msg.mode == 1 %]
 <p>We're sorry, your submission "<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% sub_id %]">[% subtitle %]</a>" was declined for the following reason:<br>
 [% reason %]
 
 <p>The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and <a href="[% gSkin.rootdir %]/submit.pl">resubmit</a>.
+[% ELSE %]
+We're sorry, your submission "[% subtitle %]" at [% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% sub_id %] was declined for the following reason:
+[% reason %]
+
+The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and resubmit at [% gSkin.rootdir %]/submit.pl
+[% END %]
 __seclev__
 10000
 __version__
