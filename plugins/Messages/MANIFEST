@@ -1,6 +1,8 @@
 MANIFEST
 Makefile.PL
 Messages.pm
+Upgrade/Makefile.PL
+Upgrade/MySQL.pm
 PLUGIN
 dump
 message_delete.pl
