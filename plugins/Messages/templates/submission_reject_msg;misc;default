@@ -25,7 +25,7 @@ __template__
 
 <p>The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and <a href="[% gSkin.rootdir %]/submit.pl">resubmit</a>.
 [% ELSE %]
-We're sorry, your submission "[% subtitle %]" at [% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% sub_id %] was declined for the following reason:
+We're sorry, your submission "[% subtitle %]" at [% absolutedir %]/submit.pl?op=viewsub&subid=[% sub_id %] was declined for the following reason:
 [% reason %]
 
 The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and resubmit at [% absolutedir %]/submit.pl
