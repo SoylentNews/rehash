@@ -28,7 +28,7 @@ __template__
 We're sorry, your submission "[% subtitle %]" at [% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% sub_id %] was declined for the following reason:
 [% reason %]
 
-The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and resubmit at [% gSkin.rootdir %]/submit.pl
+The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and resubmit at [% absolutedir %]/submit.pl
 [% END %]
 __seclev__
 10000
