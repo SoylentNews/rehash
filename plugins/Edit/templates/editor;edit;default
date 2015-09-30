@@ -16,7 +16,7 @@ __template__
 
 [% PROCESS tag_menus %]
 	[% IF item.type == 'submission' %]
-		<p>Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or reject the story.
+		<p>Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or decline the story.
 		</p>
 	[% END %]
 
