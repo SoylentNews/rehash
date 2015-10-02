@@ -212,7 +212,7 @@ IF !useredit.is_anon;
 		title = "Moderation";
 		contents = BLOCK %]
 			<b>You are currently banned from moderating.<br/><br/>The last day of your ban is [% user.mod_banned %].<br/><br/>
-			Please reread the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a> so this will not happen again or <a href="mailto:[% constants.adminmail | strip_attribute %]">contact us</a> if you feel there has been an error.
+			Please reread the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a> so this will not happen again or <a href="mailto:[% constants.adminmail_mod | strip_attribute %]">contact us</a> if you feel there has been an error.
 		[% END;
 		Slash.sidebox(title, contents, "moderation", 1);
 	END;
