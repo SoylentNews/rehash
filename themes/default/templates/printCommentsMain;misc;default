@@ -22,6 +22,9 @@ __template__
 [% stripped_title = title | strip_title %]
 [% stripped_link = link | strip_urlattr %]
 [% IF parent.type == 'journal' %]
+
+	<p><small><b>The Fine print:</b> The following are owned by whoever posted them. We are not responsible for them in any way.</small></p>
+
 	[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
 	<div class="generalbody">
 		[% parent.content %]
