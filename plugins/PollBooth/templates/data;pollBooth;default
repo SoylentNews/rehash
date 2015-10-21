@@ -71,8 +71,8 @@ __template__
 [% CASE 'success' %]
 	Your vote ([% aid %]) has been registered.
 
-[% CASE 'reject' %]
-	Your vote ([% aid %]) was rejected.
+[% CASE 'declined' %]
+	Your vote ([% aid %]) was declined.
 
 [% CASE 'noquestion' %]
 	[% returnme.data_constant = 1 %]
