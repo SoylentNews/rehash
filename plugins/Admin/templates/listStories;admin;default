@@ -109,7 +109,7 @@ FOREACH story = storylistref;
 		
 		</td>
 
-		<td>
+		<td align="right">
 		
 [% IF story.hits %]
 		[% story.hits %]
@@ -118,7 +118,7 @@ FOREACH story = storylistref;
 [% END %]
 		
 		</td>
-		<td>
+		<td align="right style="padding-right:1em;">
 		[% story.commentcount %]
 		</td>
 
