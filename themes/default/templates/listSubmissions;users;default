@@ -67,7 +67,7 @@ total = 0;
 						[%- CASE 0 -%]
 							Pending
 						[%- CASE 1 -%]
-							Declined
+							Rejected
 						[%- CASE 2 -%]
 							Accepted
 							[% approved = approved + 1; %]	
@@ -84,7 +84,7 @@ total = 0;
 		<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>
 		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
 		[% ELSIF user.uid != sub.uid %]
-		<tr class="data_hl1"><td colspan="5"><i>(Declined submissions are not listed.)</i></td></tr>
+		<tr class="data_hl1"><td colspan="5"><i>(Rejected submissions are not listed.)</i></td></tr>
 		[% END %]
 	</table>
 [% END %]

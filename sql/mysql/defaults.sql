@@ -81,7 +81,7 @@ INSERT INTO code_param (type, code, name) VALUES ('statuscodes',1,'Refreshing');
 INSERT INTO code_param (type, code, name) VALUES ('statuscodes',0,'Normal');
 INSERT INTO code_param (type, code, name) VALUES ('statuscodes',10,'Archive');
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',0,'Pending');
-INSERT INTO code_param (type, code, name) VALUES ('submission-state',1,'Declined');
+INSERT INTO code_param (type, code, name) VALUES ('submission-state',1,'Rejected');
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',2,'Accepted');
 INSERT INTO code_param (type, code, name) VALUES ('threshcodes',-1,'-1: Uncut and Raw');
 INSERT INTO code_param (type, code, name) VALUES ('threshcodes',0,'0: Almost Everything');
