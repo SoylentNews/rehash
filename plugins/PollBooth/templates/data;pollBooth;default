@@ -71,7 +71,7 @@ __template__
 [% CASE 'success' %]
 	Your vote ([% aid %]) has been registered.
 
-[% CASE 'rejected' %]
+[% CASE 'reject' %]
 	Your vote ([% aid %]) was rejected.
 
 [% CASE 'noquestion' %]
