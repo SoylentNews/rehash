@@ -202,9 +202,17 @@ IF !useredit.is_anon;
 			Point[% IF user.points > 1 %]s[% END %].</b><br/>
 			You get [% constants.m1_pointsgrant_arbitrary %] points per day, given out at 00:10 UTC. <br>
 			[% IF user.points > 0 %]
-				<br/><b>Please</b> read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a>
-				for instructions.
+				<br/><b>Please</b> read the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a> for instructions.
 			[% END %]
+		[% END;
+		Slash.sidebox(title, contents, "moderation", 1);
+	END;
+	
+	IF user.is_mod_banned;
+		title = "Moderation";
+		contents = BLOCK %]
+			<b>You are currently banned from moderating.</b><br/><br/>The last day of your ban is [% user.mod_banned %].<br/><br/>
+			Please reread the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">moderator guidelines</a> so this will not happen again or <a href="mailto:[% constants.adminmail_mod | strip_attribute %]">contact us</a> if you feel there has been an error.
 		[% END;
 		Slash.sidebox(title, contents, "moderation", 1);
 	END;
