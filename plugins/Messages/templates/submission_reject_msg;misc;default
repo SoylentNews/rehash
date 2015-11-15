@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+* bp_count = number of bad attempts
+* bp_ips = arrayref of hashrefs, fields:
+	ip = IP address
+	c = count of bad attempts from that address
+	mints = min timestamp
+	maxts = max timestamp
+* reason = the reason the submission was declined
+* sub_id = the subid of the rejected submission
+* subtitle = the title of the rejected submission
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+submission_reject_msg
+__template__
+[% IF msg.mode == 1 %]
+<p>We're sorry, your submission "<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% sub_id %]">[% subtitle %]</a>" was declined for the following reason:<br>
+[% reason %]
+
+<p>The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and <a href="[% gSkin.rootdir %]/submit.pl">resubmit</a>.
+[% ELSE %]
+We're sorry, your submission "[% subtitle %]" at [% absolutedir %]/submit.pl?op=viewsub&subid=[% sub_id %] was declined for the following reason:
+[% reason %]
+
+The editors felt it inappropriate for them to correct the issue themselves. Please feel free to correct the issue yourself and resubmit at [% absolutedir %]/submit.pl
+[% END %]
+__seclev__
+10000
+__version__
+$Id$
