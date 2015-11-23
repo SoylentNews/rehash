@@ -14,14 +14,16 @@ use DateTime;
 use DateTime::Format::MySQL;
 use Slash::Constants qw(:web :messages);
 use JSON;
+use Data::Dumper;
+use LWP::UserAgent;
 
 sub main {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
-	# lc just in case
-	my $op = lc($form->{op});
+	my $op = 'default';
+	$op = lc($form->{op}) if $form->{op};
 
 	my($tbtitle);
 
@@ -36,6 +38,10 @@ sub main {
 		},
 		paypal		=> {
 			function	=> \&paypal,
+			seclev		=> 1,
+		},
+		stripe		=> {
+			function	=> \&stripe,
 			seclev		=> 1,
 		},
 		grant		=> {
@@ -63,7 +69,7 @@ sub main {
 		$op = 'default' unless $ops->{$op};
 	}
 	
-	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm)$/) ||
+	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm|stripe)$/) ||
 	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
@@ -222,6 +228,8 @@ sub paypal {
 	
 	if (!$subscribe->paymentExists($txid)){
 		#	IPN may have gotten the payment first.
+		#	This is not actually possible since we haven't submitted a payment yet
+		#	but I don't feel like fixing it since I'm busy and it hurts nothing. -TMB
 		
 		my $pp_pdt = $subscribe->ppDoPDT($txid);
 		# use Data::Dumper; print STDERR Dumper($pp_pdt);
@@ -255,7 +263,7 @@ sub paypal {
 				if ($rows && $rows == 1) {
 					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
 					if ($result && $result == 1){
-						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{custom}{from} ) if $payment->{payment_type} eq "gift";
 					} else {
 						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
 						print STDERR $warning;
@@ -290,6 +298,108 @@ sub paypal {
 	
 }
 
+sub stripe {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $subscribe = getObject('Slash::Subscribe');
+	my ($response_data, $error, $note, $warning);
+	my $payment_type = $form->{uid} == $form->{puid} ? "user" : "gift";
+
+	my $tx = {
+		amount			=> int(sprintf("%.2d", $form->{amount}) * 100),
+		description		=> $constants->{sitename}." subscription payment for uid $form->{uid}",
+		currency		=> defined $constants->{stripe_currency} ? $constants->{stripe_currency} : "USD",
+		'metadata[uid]'		=> $form->{uid},
+		'metadata[puid'		=> $form->{puid},
+		'metadata[type]'	=> $payment_type,
+		'metadata[days]'	=> $form->{days},
+		'metadata[from]'	=> $form->{from},
+		source			=> $form->{stripeToken},
+		statement_descriptor	=> "Sub for uid $form->{uid}",
+	};
+
+	$response_data = $subscribe->stripeDoCharge($tx);
+        my $payment;
+
+        if( $response_data ne 0 ) {
+                $payment = {
+                        days            => $form->{days},
+                        uid             => $form->{uid},
+                        payment_net     => $form->{amount},
+                        payment_gross   => $form->{amount},
+                        payment_type    => $payment_type,
+                        transaction_id  => $response_data->{id},
+                        method          => "stripe",
+                        email           => $form->{stripeEmail},
+                        puid            => $form->{puid},
+                };
+        }
+	
+	if($form->{stripeToken}) {
+		my $exists = $subscribe->paymentExists($response_data->{id});		
+		if( $response_data && $response_data->{status} eq "succeeded" && !$exists ){
+			# Double check here. There's no telling how fast IPN receives notifications.
+			if(!$subscribe->paymentExists($response_data->{id})) {
+				my ($rows, $result);
+				$rows = $subscribe->insertPayment($payment);
+				if ($rows && $rows == 1) {
+					$result =  $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+					if ($result && $result == 1){
+						my $from;
+						if($form->{from}){ $from = $form->{from}; }
+						elsif($user->{is_anon}) { $from = "An Anonymous Coward"; }
+						else { $from = $user->{nickname}; }
+						
+						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $from ) if $payment->{payment_type} eq "gift";
+					} else {
+						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+						print STDERR $warning;
+						$error = "<p class='error'>Subscription not updated for transaction $payment->{transaction_id}.</p>";
+					}
+				} elsif ($subscribe->paymentExists($payment->{transaction_id})){
+					#	IPN can be REAL fast, what have I told you.
+					$warning = "DEBUG: Payment accepted but record already in the database!\n" . Dumper($payment);
+					print STDERR $warning;
+					$error = "<p class='error'>Payment transaction $payment->{transaction_id} already recorded.</p>";
+				}
+				else {
+					$warning = "DEBUG: Payment accepted but record not added to database!\n" . Dumper($payment);
+					print STDERR $warning;
+					$error = "<p class='error'>Payment transaction $payment->{transaction_id} unable to be recorded.</p>";
+				}
+			}
+		}
+		# error case where we got an ipn notification before we got a response to the post request
+		# should not be possible but wtf
+		elsif( $response_data && $response_data->{status} eq "succeeded" && $exists ) {
+			$warning = "DEBUG: Payment accepted but record already in the database!\n" . Dumper($payment);
+                        print STDERR $warning;
+                        $error = "<p class='error'>Payment transaction $payment->{transaction_id} already recorded.</p>";
+		}
+		else{
+			# couldn't get a response or possibly got a refusal/other error condition
+			print STDERR "\n".Dumper($form)."\n".Dumper($response_data)."\n";
+			$error = "<p class='error'>Stripe failed to accept the transaction.</p>";
+		}
+	}
+	else { # nobody should ever land here. this is if we did not get the correct form details like say from someone trying to hack our shat.
+		print STDERR Dumper($form);
+		$error = "<p class='error'>OMGWTFBBQ!</p>";
+	}
+
+	if ($error){
+		$note = $error . "<p class='error'>Transaction may still complete in the background. Please contact $constants->{adminmail} if you do not see your transaction complete.</p>";
+	} else {
+		$note = "<p><b>Transaction $response_data->{id} completed.  Thank you for supporting $constants->{sitename}.</b></p>";
+		
+	}
+	
+	my $puid_user = $slashdb->getUser($form->{puid});
+	if ($puid_user->{is_anon}){
+		acsub(@_, $note);
+	} else {
+		edit(@_, $note);
+	}
+}
 
 sub grant {
 	my($form, $slashdb, $user, $constants) = @_;
@@ -368,6 +478,8 @@ sub confirm {
 			$amount = $constants->{subscribe_annual_amount};
 		}
 	}
+	# Previously we were allowing infinite or zero decimal places.
+	$amount = sprintf("%.2d", $amount);
 
 	my $uid = $form->{uid} || $user->{uid};
 	my $sub_user = $slashdb->getUser($uid);

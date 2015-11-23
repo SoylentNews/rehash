@@ -1,0 +1,61 @@
+__section__
+default
+__description__
+Stripe button to subscribe to this site.
+
+* user
+* constants
+	sitename
+	rdfencoding
+	stripe_public_key	public key to send to Stripe so's they know who we are
+	stripe_logo		our logo to display on the Stripe dialog
+	
+
+* uid
+* puid
+* from
+* days
+* type
+* custom	JSON encoded version of uid, puid, from, days, and type
+
+__title__
+
+__page__
+subscribe
+__lang__
+en_US
+__name__
+stripebut
+__template__
+<form action="[% constants.real_rootdir %]/subscribe.pl" method="POST">
+	<input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="charset" value="[% constants.rdfencoding %]">
+        <input type="hidden" name="amount" value="[% amount %]">
+	<input type="hidden" name="days" value="[% days %]">
+	<input type="hidden" name="puid" value="[% puid %]">
+	<input type="hidden" name="uid" value="[% uid %]">
+	<input type="hidden" name="from" value="[% from %]">
+	<input type="hidden" name="type" value="[% type %]">
+	<input type="hidden" name="op" value="stripe">
+	<script
+		src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+		data-key="[% constants.stripe_public_key %]"
+		data-image="[% constants.stripe_logo %]"
+		data-name="[% constants.sitename %]"
+		[% IF type == "gift" %]
+			data-description="[% days %]-Day Subscription to [% constants.sitename %] for UID [% uid %]"
+		[% ELSE %]
+			data-description="[% days %]-Day Subscription to [% constants.sitename %]"
+		[% END %]
+		data-amount="[% amount * 100 %]"
+		data-panel-label="Subscribe"
+		data-allow-remember-me="false"
+		data-currency="USD"
+		data-locale="auto">
+	</script>
+</form>
+__seclev__
+10000
+
+__version__
+$Id$

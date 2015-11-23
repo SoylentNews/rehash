@@ -373,6 +373,22 @@ sub ppDoPDT {
 	}
 }
 
+sub stripeDoCharge {
+	my ($self, $tx) = @_;
+	my $ua = LWP::UserAgent->new();
+	my $constants = getCurrentStatic();
+        $ua->default_header( 'Authorization' => "Bearer $constants->{stripe_private_key}");
+	
+        my $response = $ua->post("https://api.stripe.com/v1/charges", $tx);
+	
+	if($response->is_success) {
+		return decode_json($response->decoded_content);
+	} else {
+		print STDERR "\n".$response->status_line."\n".$response->decoded_content."\n";
+		return 0;
+	}
+}
+
 sub getSubscriptionsForUser {
 	my($self, $uid) = @_;
 	my $slashdb = getCurrentDB();
@@ -524,6 +540,19 @@ sub bpAddLog {
 
 	my $success = $slashdb->sqlInsert('bitpay_log', $data);
 	$slashdb->sqlErrorLog($success) unless $success;
+}
+
+sub stripeAddLog {
+	my ($self, $logthis) = @_;
+	my $slashdb = getCurrentDB();
+	my $data = {
+		raw_transaction		=> encode_json($logthis),
+		remote_address		=> $logthis->{source},
+                event_id              => $logthis->{data}->{id},
+	};
+	
+	my $success = $slashdb->sqlInsert('stripe_log', $data);
+        $slashdb->sqlErrorLog($success) unless $success;
 }
 
 sub bpPrepareRequest {
