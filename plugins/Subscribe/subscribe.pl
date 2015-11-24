@@ -16,6 +16,8 @@ use Slash::Constants qw(:web :messages);
 use JSON;
 use Data::Dumper;
 use LWP::UserAgent;
+use MIME::Base64;
+use Crypt::CBC;
 
 sub main {
 	my $user = getCurrentUser();
@@ -69,6 +71,11 @@ sub main {
 		$op = 'default' unless $ops->{$op};
 	}
 	
+	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm|stripe)$/) &&
+	   (!$constants->{subscribe_admin_only})) {
+		$op = 'acsub';
+	}
+
 	if (($user->{is_anon} && $op !~ /^(paypal|acsub|confirm|stripe)$/) ||
 	   (!$user->{is_admin} && $constants->{subscribe_admin_only} == 1)) {
 		my $rootdir = getCurrentSkin('rootdir');
@@ -301,20 +308,37 @@ sub paypal {
 sub stripe {
 	my ($form, $slashdb, $user, $constants) = @_;
 	my $subscribe = getObject('Slash::Subscribe');
-	my ($response_data, $error, $note, $warning);
+	my ($response_data, $error, $note, $warning, $cryptValues);
 	my $payment_type = $form->{uid} == $form->{puid} ? "user" : "gift";
+	my $cipher = Crypt::CBC->new(
+				-cipher		=> 'Rijndael',
+				-key		=> $constants->{crypt_key},
+				-keysize	=> 32,
+	);
+	$cryptValues = {
+		'uid' 	=> $cipher->encrypt($form->{uid}),
+		'puid'	=> $cipher->encrypt($form->{puid}),
+		'type'	=> $cipher->encrypt($payment_type),
+		'days'	=> $cipher->encrypt($form->{days}),
+		'from'	=> $cipher->encrypt($form->{from}),
+	};
+	foreach my $key (keys %$cryptValues) {
+		chomp $cryptValues->{$key};
+		$cryptValues->{$key} = encode_base64($cryptValues->{$key});
+		chomp $cryptValues->{$key};
+	}
 
 	my $tx = {
 		amount			=> int(sprintf("%.2d", $form->{amount}) * 100),
-		description		=> $constants->{sitename}." subscription payment for uid $form->{uid}",
+		description		=> $constants->{sitename}." subscription payment",
 		currency		=> defined $constants->{stripe_currency} ? $constants->{stripe_currency} : "USD",
-		'metadata[uid]'		=> $form->{uid},
-		'metadata[puid'		=> $form->{puid},
-		'metadata[type]'	=> $payment_type,
-		'metadata[days]'	=> $form->{days},
-		'metadata[from]'	=> $form->{from},
+		'metadata[uid]'		=> $cryptValues->{uid},
+		'metadata[puid]'	=> $cryptValues->{puid},
+		'metadata[type]'	=> $cryptValues->{type},
+		'metadata[days]'	=> $cryptValues->{days},
+		'metadata[from]'	=> $cryptValues->{from},
 		source			=> $form->{stripeToken},
-		statement_descriptor	=> "Sub for uid $form->{uid}",
+		statement_descriptor	=> "Subscription payment",
 	};
 
 	$response_data = $subscribe->stripeDoCharge($tx);

@@ -18,6 +18,8 @@ use Slash::Display;
 use Slash::Utility;
 use Slash::Subscribe;
 use LWP::UserAgent 6;
+use MIME::Base64;
+use Crypt::CBC;
 
 use vars qw(
 	$PROGNAME $virtual_user $hostname
@@ -313,16 +315,27 @@ $cbServer->on(request => sub {
 				return;
 			}
 			$content->{source} = $tx->{remote_address};
+			if(defined $content->{data}->{object}->{source}) {$content->{data}->{object}->{source} = "Look it up on the Stripe website if necessary.";}
 
 			# Good payment. Do our thing.
-			if(defined $content->{data}->{status} &&
-					$content->{data}->{status} eq 'succeeded' &&
+			if(defined $content->{data}->{object}->{status} &&
+					$content->{data}->{object}->{status} eq 'succeeded' &&
 					defined $content->{type} &&
 					$content->{type} eq 'charge.succeeded')
 			{
 				my $metaData = $content->{data}->{object}->{metadata};
+				my $cipher = Crypt::CBC->new(
+					-cipher         => 'Rijndael',
+					-key            => $constants->{crypt_key},
+					-keysize        => 32,
+				);
+				foreach my $key (keys %$metaData) {
+					$metaData->{$key} = $cipher->decrypt(decode_base64($metaData->{$key}));
+				}
+				$content->{data}->{object}->{metadata} = $metaData;
+
 				my $payment = {
-                                        days =>$metaData->{days},
+                                        days => $metaData->{days},
                                         uid     => $metaData->{uid},
                                         payment_net   => $content->{data}->{object}->{amount},
                                         payment_gross => $content->{data}->{object}->{amount},
