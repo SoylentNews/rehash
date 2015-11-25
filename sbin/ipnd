@@ -128,7 +128,7 @@ $cbServer->unsubscribe('request');
 $cbServer->on(request => sub {
 	my ($daemon, $tx) = @_;
 	
-	my $logthis = { remote_address => $tx->{remote_address} };
+	my $logthis = { remote_address => $tx->{original_remote_address} };
 
 	# Don't even bother trying to process or log requests not to our chosen path
 	my $reqPath = $tx->req->url->path;
@@ -180,7 +180,7 @@ $cbServer->on(request => sub {
                 }
 		
 		$logthis = $paypal if $paypal;
-		$logthis->{remote_address} = $tx->{remote_address};
+		$logthis->{remote_address} = $tx->{original_remote_address};
 
 
 
@@ -253,7 +253,7 @@ $cbServer->on(request => sub {
                         print "Malformed JSON in request\n".Dumper($tx->req->content);
                         return;
                 }
-		$content->{source} = $tx->{remote_address};
+		$content->{source} = $tx->{original_remote_address};
 		eval { $content->{posData} = decode_json($content->{posData}); };
 		unless(ref($content->{posData}) eq "HASH" && !$@) {
                         print "Malformed JSON in posData\n".Dumper($content);
@@ -314,7 +314,6 @@ $cbServer->on(request => sub {
 				print "Malformed JSON in request\n".Dumper($tx->req->content);
 				return;
 			}
-			$content->{source} = $tx->{remote_address};
 			if(defined $content->{data}->{object}->{source}) {$content->{data}->{object}->{source} = "Look it up on the Stripe website if necessary.";}
 
 			# Good payment. Do our thing.
@@ -364,10 +363,12 @@ $cbServer->on(request => sub {
 	                                        print STDERR $warning;
         	                        }
 				}
+				$content->{source} = $tx->{original_remote_address};
 				$subscribe->stripeAddLog($content);
 			}
 			# Any other status message just log it. We'll build a page for viewing non-success records for admins later.
 			else {
+				$content->{source} = $logthis->{original_remote_address};
 				$subscribe->stripeAddLog($content);
 			}
 		}

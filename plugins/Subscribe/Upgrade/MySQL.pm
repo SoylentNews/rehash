@@ -68,6 +68,18 @@ sub upgradeDB() {
 		
 		$upgrades_done++;
 	}
+	if($subscribe_schema_ver == 1) {
+		print "upgrading subscribe to v2 ...\n";
+
+                $slashdb->sqlDo("DELETE FROM vars WHERE name = 'crypt_key'");
+		if(!$slashdb->sqlDo("INSERT INTO vars (name, value, description) VALUES ('crypt_key', 'changeme', 'Key for (de|en)crypting metadata for sending to payment processors')") ) {
+                        return 0;
+                }
+
+		$subscribe_schema_ver = 2;
+
+                $upgrades_done++;
+	}
 
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for Subscribe\n";

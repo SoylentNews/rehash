@@ -548,7 +548,7 @@ sub stripeAddLog {
 	my $data = {
 		raw_transaction		=> encode_json($logthis),
 		remote_address		=> $logthis->{source},
-                event_id              => $logthis->{data}->{id},
+                event_id              => $logthis->{data}->{object}->{id},
 	};
 	
 	my $success = $slashdb->sqlInsert('stripe_log', $data);
