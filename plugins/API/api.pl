@@ -8,7 +8,7 @@ use Slash;
 use Slash::Utility;
 use Slash::Constants qw(:web :messages);
 use Data::Dumper;
-use Slash::API;
+use Encode qw(_utf8_on);
 
 sub main {
 	my $user = getCurrentUser();
@@ -16,7 +16,6 @@ sub main {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $gSkin     = getCurrentSkin();
-	my $api = Slash::API->new;
 
 	# lc just in case
 	my $endpoint = lc($form->{m});
@@ -54,13 +53,13 @@ sub main {
 	my $retval = $endpoints->{$endpoint}{function}->($form, $slashdb, $user, $constants, $gSkin);
 
 	binmode(STDOUT, ':encoding(utf8)');
-	$api->header;
+	http_send({ content_type => 'application/json; charset=UTF-8',  cache_control => 'no-cache', pragma => 'no-cache' });
+	_utf8_on($retval);
 	print $retval;
 }
 
 sub auth {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
-	my $api = Slash::API->new;
 	my $op = lc($form->{op});
 	
 	my $ops = {
@@ -85,7 +84,6 @@ sub auth {
 
 sub user {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
-	my $api = Slash::API->new;
 	my $op = lc($form->{op});
 
 	my $ops = {
