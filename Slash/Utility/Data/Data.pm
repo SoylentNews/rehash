@@ -2664,7 +2664,8 @@ sub fudgeurl {
 
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
-	$url =~ s/["\s]//g;
+	# Whitespace is allowed nowadays --TMB
+	$url =~ s/"//g;
 	# any < or > char after the first char truncates the URL right there
 	# (we will expect a trailing ">" probably)
 	$url =~ s/^[<>]+//;
