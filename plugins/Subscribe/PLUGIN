@@ -19,3 +19,4 @@ template=templates/sub_low_msg;misc;default
 template=templates/sub_out_msg;misc;default
 template=templates/bp_redirect;misc;default
 template=templates/bitpaybut;subscribe;default
+template=templates/stripebut;subscribe;default

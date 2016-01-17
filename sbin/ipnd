@@ -18,6 +18,8 @@ use Slash::Display;
 use Slash::Utility;
 use Slash::Subscribe;
 use LWP::UserAgent 6;
+use MIME::Base64;
+use Crypt::CBC;
 
 use vars qw(
 	$PROGNAME $virtual_user $hostname
@@ -49,6 +51,12 @@ my $slashdb = getCurrentDB();
 my $user = getCurrentUser();
 setCurrentSkin(determineCurrentSkin());
 my $gSkin = getCurrentSkin();
+my @paths = (
+                $constants->{pp_ipn_path},
+                $constants->{bp_ipn_path},
+                $constants->{stripe_ipn_path}
+);
+
 
 if (!$constants->{plugin}{Subscribe}) {
 	die <<"EOT";
@@ -67,7 +75,7 @@ if (-e $pid_file) {
 
 # Create the PID file
 # Use the 3 argument form of open for safety
-open PIDFILE, ">", $pid_file;
+open PIDFILE, ">", $pid_file or die "Could not open pid file:  $pid_file";
 print PIDFILE "$$";
 close PIDFILE;
 
@@ -95,7 +103,6 @@ foreach(@args){
 	push(@cbTheRest, "$_=".$constants->{$pp_ipn_var}) if $constants->{$pp_ipn_var};
 }
 my $cbArgs = join('&', @cbTheRest);
-print STDOUT "cbArgs: $cbArgs \n" if !$constants->{pp_ipn_silent};
 
 my $cbServer;
 if ($cbArgs){
@@ -121,20 +128,13 @@ $cbServer->unsubscribe('request');
 $cbServer->on(request => sub {
 	my ($daemon, $tx) = @_;
 	
-	my $logthis = { remote_address => $tx->{remote_address} };
+	my $logthis = { remote_address => $tx->{original_remote_address} };
 
-	#my $path = $constants->{pp_ipn_path} || "";
-	# TMB There has to be a better way to do this.
-	my @paths = (
-			$constants->{pp_ipn_path},
-			$constants->{bp_ipn_path}
-	);
-	
 	# Don't even bother trying to process or log requests not to our chosen path
 	my $reqPath = $tx->req->url->path;
 	my $goodPath = 0;
-	foreach(@paths) {
-		$goodPath = 1 if $reqPath eq $_;
+	foreach my $path (@paths) {
+		$goodPath = 1 if $reqPath eq $path;
 	}
 
 	unless( $goodPath ) {
@@ -153,8 +153,6 @@ $cbServer->on(request => sub {
 		# read post from PayPal system and add 'cmd'
 		my $query = $content->{asset}->{content}.'&cmd=_notify-validate';
 		
-		print STDERR "\nDEBUG Query: \n" . Dumper($query);
-		
 		# post back to PayPal system to validate
 		my $gateway = $constants->{paypal_host};
 		my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 1, SSL_ca_path => $constants->{pp_SSL_ca_path} });
@@ -163,9 +161,6 @@ $cbServer->on(request => sub {
 		$req->header(Host => $gateway);
 		$req->content($query);
 		my $res = $ua->request($req);
-		print STDERR "\nDEBUG Request: \n" . Dumper($req);
-		print STDERR "\nDEBUG Response: \n" . Dumper($res);
-		
 		
 		# split posted variables into pairs
 		my $paypal;
@@ -178,16 +173,18 @@ $cbServer->on(request => sub {
 			$paypal->{$name} = $value;
 			$count++;
 		}
-		$paypal->{custom} = decode_json($paypal->{custom}) || "";
-		
-		print STDERR "\nDEBUG PayPal: \n" . Dumper($paypal);
+		eval { $paypal->{custom} = decode_json($paypal->{custom}); };
+                unless(ref($content) eq "HASH" && !$@) {
+                        print "Malformed JSON in \$paypal->{custom}\n".Dumper($paypal);
+                        return;
+                }
 		
 		$logthis = $paypal if $paypal;
-		$logthis->{remote_address} = $tx->{remote_address};
+		$logthis->{remote_address} = $tx->{original_remote_address};
 
 
 
-		if($paypal->{payment_status} eq 'Completed' && $res->content eq 'VERIFIED'){
+		if(defined $paypal->{payment_status} && $paypal->{payment_status} eq 'Completed' && $res->content eq 'VERIFIED'){
 			if(!$subscribe->paymentExists($paypal->{txn_id})){
 				# Check if PDT got transaction first.
 				my $payment_net = $paypal->{payment_gross} - $paypal->{payment_fee};
@@ -250,9 +247,18 @@ $cbServer->on(request => sub {
 		$subscribe->ppAddLog($logthis);
 	}
 	elsif($reqPath eq $constants->{bp_ipn_path}) {
-		my $content = decode_json($tx->req->content->asset->{content});
-		$content->{source} = $tx->{remote_address};
-		$content->{posData} = decode_json($content->{posData}) || "";
+		my $content;
+		eval { $content = decode_json($tx->req->content->asset->{content}); };
+                unless(ref($content) eq "HASH" && !$@) {
+                        print "Malformed JSON in request\n".Dumper($tx->req->content);
+                        return;
+                }
+		$content->{source} = $tx->{original_remote_address};
+		eval { $content->{posData} = decode_json($content->{posData}); };
+		unless(ref($content->{posData}) eq "HASH" && !$@) {
+                        print "Malformed JSON in posData\n".Dumper($content);
+                        return;
+                }
 
 		if(	($content->{status} eq 'paid') ||
 			($content->{status} eq 'complete') ||
@@ -298,6 +304,77 @@ $cbServer->on(request => sub {
 		}
 
 		$subscribe->bpAddLog($content);
+	}
+	elsif($reqPath eq $constants->{stripe_ipn_path}) {
+		my $content;
+		if(defined $tx->req->content->asset->{content}) {
+			# eval because there is no is_this_fucking_json method in the JSON module and we can't be having errors unaccounted for
+			eval { $content = decode_json($tx->req->content->asset->{content}); };
+			unless(ref($content) eq "HASH" && !$@) {
+				print "Malformed JSON in request\n".Dumper($tx->req->content);
+				return;
+			}
+			if(defined $content->{data}->{object}->{source}) {$content->{data}->{object}->{source} = "Look it up on the Stripe website if necessary.";}
+
+			# Good payment. Do our thing.
+			if(defined $content->{data}->{object}->{status} &&
+					$content->{data}->{object}->{status} eq 'succeeded' &&
+					defined $content->{type} &&
+					$content->{type} eq 'charge.succeeded')
+			{
+				my $metaData = $content->{data}->{object}->{metadata};
+				my $cipher = Crypt::CBC->new(
+					-cipher         => 'Rijndael',
+					-key            => $constants->{crypt_key},
+					-keysize        => 32,
+				);
+				foreach my $key (keys %$metaData) {
+					$metaData->{$key} = $cipher->decrypt(decode_base64($metaData->{$key}));
+				}
+				$content->{data}->{object}->{metadata} = $metaData;
+
+				my $payment = {
+                                        days => $metaData->{days},
+                                        uid     => $metaData->{uid},
+                                        payment_net   => $content->{data}->{object}->{amount},
+                                        payment_gross => $content->{data}->{object}->{amount},
+                                        payment_type  => $metaData->{type},
+                                        transaction_id => $content->{data}->{object}->{id},
+                                        method => 'stripe',
+                                        email => $metaData->{from},
+                                        raw_transaction  => encode_json($content),
+                                        puid => $metaData->{puid}
+                        	};
+				# I'm only checking once because I don't really care if we do the work up until here unnecessarily and this is the latest we can possibly check.
+				# If we start getting enough payments per minute to justify optimizing, you can pay me moneys and I'll optimize it. -TMB
+				if(!$subscribe->paymentExists($content->{data}->{object}->{id})) {
+					my ($rows, $result, $warning);
+        	                        $rows = $subscribe->insertPayment($payment);
+	                                if ($rows && $rows == 1) {
+                	                        $result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+                                	        if ($result && $result == 1){
+                        	                        send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
+                                        	} else {
+                                                	$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+	                                                print STDERR $warning;
+        	                                }
+                                	} else {
+                                        	$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
+	                                        print STDERR $warning;
+        	                        }
+				}
+				$content->{source} = $tx->{original_remote_address};
+				$subscribe->stripeAddLog($content);
+			}
+			# Any other status message just log it. We'll build a page for viewing non-success records for admins later.
+			else {
+				$content->{source} = $logthis->{original_remote_address};
+				$subscribe->stripeAddLog($content);
+			}
+		}
+		else {
+			print STDERR "Malformed request object. Beats the fuck out of me.\n".Dumper($tx->req->content);
+		}
 	}
 
 	# Response
