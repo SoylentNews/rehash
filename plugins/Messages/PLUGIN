@@ -44,3 +44,4 @@ template=templates/storynew;messages;default
 template=templates/remarks_msg;dynamicblocks;default
 template=templates/remarks_msg_subj;dynamicblocks;default
 template=templates/submission_reject_msg;misc;default
+template=templates/admin_to_user_msg;misc;default

@@ -39,18 +39,57 @@ sub upgradeDB() {
 	my $messages_schema_ver = $schema_versions->{db_schema_plugin_Messages};
 	my $upgrades_done = 0;
 
+	my $max_uid = $slashdb->sqlSelect(
+					"max(uid)",
+					"users"
+	);
+
 	if ($messages_schema_ver == 0) {
 		# initialize the messages plugin schema and insert an entry for MSG_CODE_SUBMISSION_REJECT reasons into the message_codes table
 		print "upgrading messages to v1 ...\n";
-		if (!$slashdb->sqlDo("INSERT INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (19, 'Declined Submission Reason', 1, 'now', 0, 3)")) {
+		if (!$slashdb->sqlDo("REPLACE INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (19, 'Declined Submission Reason', 1, 'now', 0, 3)")) {
+			print "Failed inserting 19 into message_codes.\n";
 			return 0;
 		}
-		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Messages', 1, 'Version of messages plugin schema')")) {
+		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('db_schema_plugin_Messages', 1, 'Version of messages plugin schema')")) {
+			print "Failed updating site_info.db_schema_plugin_Messages to 1.\n";
 			return 0;
+		}
+		my $badupdate = 0;
+		foreach my $uid (2 .. $max_uid) {
+			if (!$slashdb->sqlDo("REPLACE INTO users_messages (uid, code, mode) VALUES ('$uid', 20, 1)")) {
+				$badupdate = 1;
+			}
+		}
+		if($badupdate) {
+			print "There were problems updating everyone's preferences to web messages for rejected submission messages. This is not fatal though.\n";
 		}
 		$messages_schema_ver = 1;
 		$upgrades_done++;
 	}
+	if ($messages_schema_ver == 1) {
+		print "upgrading messages to v2 ...\n";
+		if (!$slashdb->sqlDo("REPLACE INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (20, 'Admin to user message', 1, 'now', 0, 3)")) {
+			print "Failed inserting 20 into message_codes.\n";
+			return 0;
+		}
+		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('db_schema_plugin_Messages', 2, 'Version of messages plugin schema')")) {
+			print "Failed updating site_info.db_schema_plugin_Messages to 2.\n";
+			return 0;
+		}
+		my $badupdate = 0;
+		foreach my $uid (2 .. $max_uid) {
+			if (!$slashdb->sqlDo("REPLACE INTO users_messages (uid, code, mode) VALUES ('$uid', 20, 1)")) {
+				$badupdate = 1;
+			}
+		}
+		if($badupdate) {
+			print "There were problems updating everyone's preferences to web messages for admin messages. This is not fatal though.\n";
+		}
+		$messages_schema_ver = 2;
+		$upgrades_done++;
+	}
+	
 
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for Messages\n";

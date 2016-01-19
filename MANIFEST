@@ -259,6 +259,7 @@ plugins/Messages/templates/msg_web_subj;messages;default
 plugins/Messages/templates/reply_msg;comments;default
 plugins/Messages/templates/reply_msg_subj;comments;default
 plugins/Messages/templates/submission_reject_msg;misc;default
+plugins/Messages/templates/admin_to_user_msg;misc;default
 plugins/Messages/test.pl
 plugins/PubKey/PLUGIN
 plugins/PubKey/pubkey.pl

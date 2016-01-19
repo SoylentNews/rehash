@@ -56,6 +56,14 @@ __template__
 			<p>This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.</p>
 		[% END %]
 	</div>
+
+	[% IF user.seclev > 99 %]
+		[% PROCESS titlebar title="User Messaging" %]
+		<div class="generalbody">
+			<p>[% useredit.uid %] [% useredit.nickname %]</p>
+		</div>
+	[% END %]
+
 		[% PROCESS titlebar title="Last Journal Entry" %]
 		<div class="generalbody">
 				[% Slash.createMenu("journal", style => "tabbed") %]
