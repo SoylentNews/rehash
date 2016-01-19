@@ -293,7 +293,14 @@ sub main {
 			post		=> 1,
 			formname 	=> $formname,
 			checks		=> []
-		}	
+		},
+		sendumessage => {
+			function	=> \&sendUserMessage,
+			seclev		=> 100,
+			post		=> 1,
+			formname 	=> $formname,
+			checks		=> []
+		}
 	
 	} ;
 
@@ -1270,7 +1277,7 @@ sub showInfo {
 			netid			=> $netid,
 			netid_vis		=> $netid_vis,
 			reasons			=> $mod_reader->getReasons(),
-			ordered     => $mod_reader->getReasonsOrder(),
+			ordered			=> $mod_reader->getReasonsOrder(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
 			hr_hours_back		=> $ipid_hoursback,
@@ -1342,6 +1349,36 @@ sub showInfo {
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 
+	return 1;
+}
+
+sub sendUserMessage {
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	my $useredit = getUser($form->{touid});
+
+	unless($useredit && $constants->{plugin}{messages}){ return; }
+
+	if($form->{usermessage}) {
+		my $message = getObject("Slash::Messages");
+		my $htmlmessage = $form->{usermessage};
+		$htmlmessage =~ s#\n#<br />\n#g;
+		$htmlmessage =~ s/</&lt;/g;
+		$htmlmessage =~ s/>/&gt;/g;
+		my $data = {
+			template_name	=> 'admin_to_user_msg',
+			subject		=> "Message from $user->{nickname}:",
+			message		=> $form->{usermessage},
+			htmlmessage	=> $htmlmessage
+		};
+		
+		$message->create($useredit->{touid}, MSG_CODE_ADMIN_TO_USER(), $data);
+	}
+	
+	redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
+	
 	return 1;
 }
 

@@ -1,13 +1,9 @@
 __section__
 default
 __description__
-* bp_count = number of bad attempts
-* bp_ips = arrayref of hashrefs, fields:
-	ip = IP address
-	c = count of bad attempts from that address
-	mints = min timestamp
-	maxts = max timestamp
 * message = the text of the message
+* htmlmessage = the text of the message in html
+* msg = the message object
 __title__
 Useless title to template
 __page__
@@ -18,9 +14,9 @@ __name__
 admin_to_user_msg
 __template__
 [% IF msg.mode == 1 %]
-<p>[% message %]
+[% htmlmessage %]
 [% ELSE %]
-[% reason %]
+[% message %]
 [% END %]
 __seclev__
 10000
