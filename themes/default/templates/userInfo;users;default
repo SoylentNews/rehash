@@ -60,7 +60,15 @@ __template__
 	[% IF user.seclev > 99 %]
 		[% PROCESS titlebar title="User Messaging" %]
 		<div class="generalbody">
-			<p>[% useredit.uid %] [% useredit.nickname %]</p>
+			<form action="[% gSkin.rootdir %]/users.pl" method="post">
+				<fieldset>
+					<legend>Message [% useredit.nickname %]</legend>
+					<label>Message</label>
+					<textarea class="fullbox" wrap="virtual" name="usermessage" id="usermessage" rows="10" cols="50"></textarea>
+					<input type="hidden" name="touid" value="[% useredit.uid %]">
+					<input type="submit" name="op" value="sendumessage" class="button">
+				</fieldset>
+			</form>
 		</div>
 	[% END %]
 
