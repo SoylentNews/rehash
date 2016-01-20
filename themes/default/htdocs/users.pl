@@ -318,16 +318,16 @@ sub main {
 	# Setup redirects for admin_block before page draws
 	# Password
 	if ($op eq 'admin' &&  $form->{changepasswd}){
-    redirect("$constants->{real_rootdir}/login.pl?op=changeprefs&userfield=$form->{userfield}", "301");
-  }
+		redirect("$constants->{real_rootdir}/login.pl?op=changeprefs&userfield=$form->{userfield}", "301");
+	}
 	# Messages
 	if ($op eq 'admin' &&  $form->{messages}){
-    redirect("$constants->{real_rootdir}/messages.pl?op=display_prefs&userfield=$form->{userfield}", "301");
-  }
+		redirect("$constants->{real_rootdir}/messages.pl?op=display_prefs&userfield=$form->{userfield}", "301");
+	}
 	# Submissions
 	if ($op eq 'admin' &&  $form->{subscription}){
-    redirect("$constants->{real_rootdir}/subscribe.pl?userfield=$form->{userfield}", "301");
-  }
+		redirect("$constants->{real_rootdir}/subscribe.pl?userfield=$form->{userfield}", "301");
+	}
 
 	my $errornote = "";
 	if ($form->{op} && ! defined $ops->{$op}) {
@@ -389,6 +389,17 @@ sub main {
 	}
 	if ($ops->{$op}{post} && !$postflag) {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
+	}
+
+	if ($op eq 'sendumessage') {
+		$ops->{$op}{function}->({
+		op		=> $op,
+		tab_selected_1	=> $ops->{$op}{tab_selected_1} || "",
+		note		=> $errornote,
+		});
+		my $useredit = $slashdb->getUser($form->{touid});
+		redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
+		return;
 	}
 
 	# Print the header and very top stuff on the page.  We have
@@ -1375,9 +1386,6 @@ sub sendUserMessage {
 		
 		$message->create($useredit->{uid}, MSG_CODE_ADMIN_TO_USER, $data);
 	}
-	
-	#redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
-	showInfo({uid => $useredit->{uid}});
 	
 	return 1;
 }
