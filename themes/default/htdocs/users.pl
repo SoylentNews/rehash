@@ -1376,7 +1376,8 @@ sub sendUserMessage {
 		$message->create($useredit->{uid}, MSG_CODE_ADMIN_TO_USER, $data);
 	}
 	
-	redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
+	#redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
+	showInfo({uid => $useredit->{uid}});
 	
 	return 1;
 }
