@@ -392,11 +392,13 @@ sub main {
 	}
 
 	if ($op eq 'sendumessage') {
-		$ops->{$op}{function}->({
-		op		=> $op,
-		tab_selected_1	=> $ops->{$op}{tab_selected_1} || "",
-		note		=> $errornote,
-		});
+		if($user->{seclev} >= 100) {
+			$ops->{$op}{function}->({
+			op		=> $op,
+			tab_selected_1	=> $ops->{$op}{tab_selected_1} || "",
+			note		=> $errornote,
+			});
+		}
 		my $useredit = $slashdb->getUser($form->{touid});
 		redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
 		return;
