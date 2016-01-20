@@ -292,6 +292,9 @@ sub _get_web_by_uid {
 	# force to set UTF8 flag because these fields are 'blob'.
 	if (getCurrentStatic('utf8')) {
 		for (@$data) {
+			use Encode qw(_is_utf8);
+			_is_utf8($_->{subject};
+			_is_utf8($_->{message};
 			#$_->{'subject'} = decode_utf8($_->{'subject'}) unless (is_utf8($_->{'subject'}));
 			#$_->{'message'} = decode_utf8($_->{'message'}) unless (is_utf8($_->{'message'}));
 		}
