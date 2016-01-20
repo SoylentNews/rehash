@@ -1357,16 +1357,15 @@ sub sendUserMessage {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
-	my $useredit = getUser($form->{touid});
+	my $useredit = $slashdb->getUser($form->{touid});
 
-	unless($useredit && $constants->{plugin}{messages}){ return; }
-
+	unless($useredit && $constants->{plugin}{Messages}){ return; }
 	if($form->{usermessage}) {
 		my $message = getObject("Slash::Messages");
 		my $htmlmessage = $form->{usermessage};
-		$htmlmessage =~ s#\n#<br />\n#g;
 		$htmlmessage =~ s/</&lt;/g;
 		$htmlmessage =~ s/>/&gt;/g;
+		$htmlmessage =~ s#\n#<br />\n#g;
 		my $data = {
 			template_name	=> 'admin_to_user_msg',
 			subject		=> "Message from $user->{nickname}:",
@@ -1374,7 +1373,7 @@ sub sendUserMessage {
 			htmlmessage	=> $htmlmessage
 		};
 		
-		$message->create($useredit->{touid}, MSG_CODE_ADMIN_TO_USER(), $data);
+		$message->create($useredit->{uid}, MSG_CODE_ADMIN_TO_USER, $data);
 	}
 	
 	redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
