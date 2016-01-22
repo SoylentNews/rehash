@@ -35,7 +35,7 @@ __template__
 		<div id="logo">
 			<h1><a href="[% constants.real_rootdir %]">[% constants.sitename %]</a></h1>
 		</div>
-		[% UNLESS user.lowbandwidth || user.simpledesign %]
+		[% UNLESS user.lowbandwidth || user.simpledesign || user.noicons %]
 			<ul>
 				[% PROCESS recentTopics %]
 			</ul>
