@@ -5,9 +5,9 @@ NAME
 DESCRIPTION
     Rehash is a fork of the last open-source release of Slash, which was
     the basis of basis of slashdot.org. Rehash is a partial rewrite of
-    Slash to increase functionality, improve usabilitiy, and an incremental
+    Slash to increase functionality, improve usability, and an incremental
     port to modern versions of Apache, perl, and mod_perl. It is designed
-    for high relaibility and scalability, with intergrated support for MySQL
+    for high reliability and scalability, with integrated support for MySQL
     cluster, multi-frontend support, and a strong adherence to the MVC
     development methodology, clearly abstracting user-facing code from
     backend management.
