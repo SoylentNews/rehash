@@ -308,7 +308,7 @@ INSTALLATION
             Install Rehash.
 
             After the environment is installed, rehash itself must be
-            installed into said envirionment. Make sure rehash's copy of
+            installed into said environment. Make sure rehash's copy of
             Perl and Apache are in the path (use 'which perl' to confirm),
             then type:
 
