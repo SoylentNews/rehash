@@ -589,7 +589,7 @@ fieldset
 border: 1px solid #ffc200;
 }
 
-.user_admin { background: #001c00; border: 1px solid #ffc200; padding: 0 .3em; }
+.user_admin { background: #1c1000; border: 1px solid #ffc200; padding: 0 .3em; }
 
 legend
 {
@@ -598,7 +598,7 @@ color: #ffb200;
 
 .article blockquote,  .article .quote, .commentBody blockquote, .commentBody .quote {
 	background: none repeat scroll 0% 0% #000;
-	border-left:2px solid #0F0;
+	border-left:2px solid #ffc200;
 	border-radius: 0;
 }
 
