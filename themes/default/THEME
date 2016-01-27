@@ -307,6 +307,12 @@ htdoc=../vt220/htdocs/favicon-vt220.png
 template=../vt220/templates/html-header;misc;vt220
 image=../vt220/htdocs/images/logo_vt220.png
 
+# grayscale theme files go here
+css=../grayscale/htdocs/grayscale.cssraw
+htdoc=../grayscale/htdocs/favicon-grayscale.png
+template=../grayscale/templates/html-header;misc;grayscale
+image=../grayscale/htdocs/images/logo_grayscale.png
+
 misc=misc/spamarmors
 
 plugin=Admin

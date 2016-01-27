@@ -57,7 +57,8 @@ __template__
 			'icicle' => 'Black IcIcle',
 			'pwnies' => 'OMG PWNIES',
 			'vt100'	=> 'VT100',
-			'vt220' => 'VT220'
+			'vt220' => 'VT220',
+			'grayscale' => 'Grayscale'
 		}, user_edit.skin, 1);
 		%]
 		<label>
