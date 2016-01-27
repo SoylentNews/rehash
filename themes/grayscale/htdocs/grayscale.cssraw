@@ -6,7 +6,7 @@ body, body.admin
 }
 .user_admin, body .adminstoryform fieldset, .story_main
 {
-	background: #440;
+	background: #333 !important;
 }
 
 a, .error { color: #ddd; }
@@ -460,6 +460,10 @@ ul.menu li a, ul.menu li a:visited { color: #fff; }
 ul.menu li.selected a, ul.menu li a:hover { color: #fff; }
 
 .generalbody ul.menu li a { color: #ccc; }
+
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #ccc; }
+
+#adminmenu ul.menu li.selected { background: #222; }
 
 #usermenu{
 	border: 1px solid #000;
