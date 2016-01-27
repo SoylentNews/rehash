@@ -463,7 +463,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #fff; }
 
 #adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #ccc !important; }
 
-#adminmenu ul.menu li.selected { background: #222 !important; }
+#adminmenu ul.menu li.selected { background: #AAA !important; }
 
 #usermenu{
 	border: 1px solid #000;
@@ -507,7 +507,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #fff; }
 	color: #fff;
 }
 
-#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #000; }
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #000 !important; }
 
 .menuoldstyle li
 {
