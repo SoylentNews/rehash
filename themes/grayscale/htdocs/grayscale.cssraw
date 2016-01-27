@@ -43,7 +43,6 @@ a:hover { color: #fff;}
 
 #section_banner  {     
 	background-color: #000;
-	border: 1px solid #ccc;
 	border-radius: 8px;
 	font-size: 1.125em;
 	font-weight: bold;
@@ -69,7 +68,6 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 #links div.title {
 	background: #444;
 	border-radius: 10px 10px 0 0;
-	border: 1px solid #ccc;
 }
 
 #links h4
@@ -104,7 +102,6 @@ input[type="submit"], .logout a, div.storylinks ul li.more a {
 {
 	background: #444;
 	border-radius: 10px 10px 0 0;
-	border: 1px solid #ccc;
 }
 
 #slashboxes h4
@@ -362,7 +359,6 @@ div.storylinks ul li
 
 #footer .admin li
 {
-	border-left: 1px solid #000;
 	margin: 0;
 	padding: 0;
 	list-style: none;
