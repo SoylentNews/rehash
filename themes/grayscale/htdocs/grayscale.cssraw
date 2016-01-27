@@ -376,7 +376,7 @@ input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:h
 input[type=text], input[type=password] {border: 1px solid #666;}
 
 
-#adminmenu a {color:#600}
+#adminmenu a {color: #000}
 
 .data_head
 {
@@ -461,9 +461,9 @@ ul.menu li.selected a, ul.menu li a:hover { color: #fff; }
 
 .generalbody ul.menu li a { color: #ccc; }
 
-#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #ccc; }
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #ccc !important; }
 
-#adminmenu ul.menu li.selected { background: #222; }
+#adminmenu ul.menu li.selected { background: #222 !important; }
 
 #usermenu{
 	border: 1px solid #000;
@@ -507,7 +507,7 @@ ul.menu li.selected a, ul.menu li a:hover { color: #fff; }
 	color: #fff;
 }
 
-#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #600; }
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #000; }
 
 .menuoldstyle li
 {
