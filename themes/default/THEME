@@ -301,6 +301,12 @@ htdoc=../vt100/htdocs/favicon-vt100.png
 template=../vt100/templates/html-header;misc;vt100
 image=../vt100/htdocs/images/logo_vt100.png
 
+# vt220 theme files go here
+css=../vt220/htdocs/vt220.cssraw
+htdoc=../vt220/htdocs/favicon-vt220.png
+template=../vt220/templates/html-header;misc;vt220
+image=../vt220/htdocs/images/logo_vt220.png
+
 misc=misc/spamarmors
 
 plugin=Admin
