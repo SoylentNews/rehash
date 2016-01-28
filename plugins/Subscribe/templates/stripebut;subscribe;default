@@ -34,7 +34,7 @@ __template__
 	<input type="hidden" name="days" value="[% days %]">
 	<input type="hidden" name="puid" value="[% puid %]">
 	<input type="hidden" name="uid" value="[% uid %]">
-	<input type="hidden" name="from" value="[% from %]">
+	<input type="hidden" name="from" value="[% from | strip_notags %]">
 	<input type="hidden" name="type" value="[% type %]">
 	<input type="hidden" name="op" value="stripe">
 	<script
