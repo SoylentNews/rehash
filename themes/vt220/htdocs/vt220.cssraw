@@ -1,0 +1,615 @@
+body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img {
+	font-family: "Liberation Mono", "Lucida Sans Typewriter","Lucida Console",Monaco,"Bitstream Vera Sans Mono","Unifont CSUR",monospace;
+}
+
+body, div, form, #links ul li, #links ul, #topnav, img { font-size: 100%; }
+body, body.admin {
+	background: none repeat scroll 0% 0% #000;
+	color: #ffa200;
+}
+
+.user_admin, body .adminstoryform fieldset, .story_main {background: #020;}
+ 
+a { color: #ffa200; }
+a:visited { color: #ff9200; }
+a:hover { color: #ffc200; }
+
+hr {
+	color: #ffa200;
+	background-color: #ffa200;
+	height: 2px;
+	line-height: 0;
+	border: 0px;
+}
+
+/* layout */
+#contents
+{
+	min-width: 20em;
+}
+
+/* Header */
+#logo h1 a
+{
+	width: 115px;
+	height: 80px;
+	background: url("[% constants.imagedir %]/logo_vt220.png") no-repeat;
+}
+
+#slogan h2, #slogan #head_message
+{
+	color: #ff9200;
+	
+	font-weight: bold;
+	font-size: .813em;
+}
+
+#section_banner  {     
+	background-color: #000;
+	border: 1px solid #ffc200;
+	border-radius: 8px;
+	font-size: 1.125em;
+	font-weight: bold;
+	color: 0c0;
+}
+
+#section_banner a, #section_banner a:visited
+{
+color: #ffa200;
+}
+
+input[type="submit"], .logout a, div.storylinks ul li.more a {
+	background: none repeat scroll 0% 0% #333;
+	color: #ffc200 !important;
+}
+
+/* links */
+#links a, #links a:visited { color: #ffa200; text-decoration:none;}
+#links a:hover { color: #ffc200; text-decoration: underline; }
+
+#links div.title { 
+	background: #000;
+	border-radius: 10px 10px 0 0;
+	border: 1px solid #ffc200;
+}
+
+#links h4
+{
+	font-weight: bold;
+	font-size: .813em;
+}
+
+#links div.content
+{
+	background: #000;
+	border-radius: 0 0 10px 10px;
+	padding: .3em .3em .6em .3em;
+	font-size: .755em;
+	line-height: 1.4em;
+	position: relative;
+}
+
+
+/* slashboxes */
+#slashboxes div.title { 
+	background-color: #181000;
+	border-radius: 10px 10px 0 0;
+	border: 1px solid #ffc200;
+}
+
+#slashboxes h4
+{
+	font-size: .813em;
+	color: #ffc200;
+}
+
+#slashboxes .highlight
+{
+	background: #020;
+	border: 1px solid #000;
+}
+
+#slashboxes div.content
+{
+	background: #000;
+	border-radius: 0 0 10px 10px;
+	font-size: .755em;
+	line-height: 1.4em;
+}
+
+.indexhead
+{
+  font-size: .875em;
+}
+
+
+/* Commnets Pages */
+
+.commentTop .title {     
+	background-color: #000;
+	border-radius: 10px 10px 0 0;
+	border: 1px solid #ffc200;
+}
+
+
+.commentTop .title h4
+{
+    color: #ffa200;
+}
+
+.commentTop .details {
+	border: 1px solid #ffc200;
+	background-color: #000;
+	color: #ffa200;
+}
+
+.commentTop .details a, .commentTop .details a:hover, .commentTop .details a:visited
+{
+	color: #ffc200;
+}
+
+.commentSub
+{
+	border: 1px solid #ffc200;
+	background: none repeat scroll 0% 0% #000;
+	border-top: none;
+}
+
+.commentSub a, a:visited {
+	color: #ffa200;
+}
+
+.commentSub a:hover {
+	color: #ffc200;
+}
+
+.commentBody
+{
+	border: 1px solid #ffc200;
+	border-bottom: none;
+	border-top: none;
+	background-color: #000;
+}
+
+
+#commentlisting ul 
+{
+    border-left: 1px solid #ffc200;
+
+}
+
+.preview li.comment
+{
+    border-bottom: 1px solid #ffc200;
+}
+
+
+.commentBox { background: #181818; }
+
+
+/* FORMTABS */
+
+#formtabs ul li{
+	background: #000;
+	border-radius: .3em .3em 0 0;
+	color: #ffc200;
+	border: 1px solid #ffc200;
+}
+
+#formtabs ul li.active{
+	background: #302400;
+	border-radius: .3em .3em 0 0;
+	border: 1px solid #ffc200;
+	color: #ffc200;
+}
+
+#formtabs ul li a {
+    text-decoration:none;
+    color:#000;
+}
+
+#formtabs ul li a:visited {
+   color:#000;
+}
+#formtabs ul li a:hover {
+    color:#000;
+}
+
+
+/* Quick links content */
+#slashboxes #index_qlinks-content ul, #slashboxes #index_qlinks-content li, #slashboxes #features_qlinks-content ul, #slashboxes #features_qlinks-content li
+{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+/* General */
+
+.generaltitle h3
+{
+	color: #ffc200;
+	font-size: 1em;
+}
+
+.generalbody
+{
+	background: #000;
+	border: 1px solid #ffc200;
+}
+
+
+/* articles */
+
+.generaltitle div.title, .article div.title, .search-results h4 {     
+	background-color: #000;
+	border-radius: 10px 10px 0 0;
+	border: 1px solid #ffc200;
+}
+
+#journal .article h3
+{
+	color: #ffc200;
+	font-size: 1em;
+}
+
+.article .details, .search-results .data
+{
+	font-size: .7em;
+	font-weight: normal;
+	border: 1px solid #ffc200;
+	background-color: #000;
+}
+
+.article .body, .search-results .intro, .search-results .author
+{
+	border: 1px solid #ffc200;
+	border-top: none;
+	background: #000;
+}
+
+div.storylinks, .search-results .details
+{
+	background-color: #000;
+	border: 1px solid #ffc200;
+	border-top: none;
+	border-radius: 0 0 10px 10px;
+	font-size: .813em;
+}
+
+div.storylinks div ul 
+{
+	padding: .5em 1em; 
+	margin: 0;
+	line-height: .875em;
+}
+
+div.storylinks ul li 
+{ 
+	padding: .3em .5em; 
+	border-left: 1px solid #ffc200; 
+}
+
+
+/* Footer */
+#footer {  }
+
+#footer em
+{
+	font-size: .813em;
+	float: right;
+	width: 45%;
+}
+
+#footer .search
+{
+	font-size: .7em;
+	width: 50%;
+	padding: 0 .3em;
+	margin: 0;
+}
+
+#footer legend, #footer fieldset, #footer label
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer .search input { margin: 0; }
+
+#footer .copyright
+{
+	font-size: x-small;
+	color: #ffc200;
+}
+
+#footer	.admin li
+{
+	border-left: 1px solid #000;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline;
+}
+
+.data_head
+{
+	background-color: #442400;
+	color: #ffc200;
+}
+
+/* Comments */
+.commentBox { background: #000; color: #ffc200;}
+
+/* Poll */
+.barColor { background: #000; color: #ffc200;}
+
+/* Bottom Nav */
+.btmnav
+{
+	color: #ffc200;
+	font-size: .7em;
+}
+
+.btmnav ul li a, .btmnav ul li a:visited { color: #ffc200; }
+
+/* Journal */
+.journaldate { position: relative; }
+.generalbody #journalgeneric .article
+{
+	height: auto;
+	margin: 0 0 1em 0;
+}
+
+
+/* Forms */
+textarea {
+	width: 80%;
+	background-color: #181000;
+	color: #ffc200;
+	border: 1px solid #ffc200;
+}
+#journal input.button, #admin input.button { width: auto; }
+
+/* Misc */
+.tb_col { background: #000;}
+
+/* Usermenu */
+
+ul.menu li a, ul.menu li a:visited { color: #ffa200; }
+
+ul.menu li.selected a, ul.menu li a:hover { color: #ffc200; }
+
+.generalbody ul.menu li a { color: #ffa200; }
+
+#usermenu{
+	border: 1px solid #ffc200;
+	border-bottom: none;
+	background:#000;
+}
+
+#usermenu ul.menu {
+    border-bottom: 1px solid #ffc200;
+    padding: .2em 0 0 0;
+}
+
+#usermenu ul.menu  li{
+    padding: .2em;
+}
+
+#navigation-content li.user {
+	background: none repeat scroll 0% 0% #333;
+}
+
+#usermenu ul.menu li a{
+    background: #000;
+		border: 1px solid #ffc200;
+    border-radius: .3em .3em 0 0;
+    padding: .2em .6em;
+    text-decoration: none;
+    color: #ffc200;
+}
+
+#usermenu ul.menu li.selected a
+{
+	background: #302400;
+	text-decoration: none;
+	color: #ffc200;
+}
+
+#adminmenu ul.menu a, #adminmenu ul.menu a:visited { color: #ffc200; }
+
+#adminmenu ul.menu li.selected { background: #000; }
+
+.story_nd { background: #001; }
+
+.menuoldstyle li
+{
+        display: inline;
+        list-style: none;
+        margin: 0;
+        padding: 0 2px 0 1px;
+}
+
+.menuoldstyle ul
+{       
+        padding: 0; 
+        margin: 0 0 1em 0;
+}
+
+.menuoldstyle li:before { content: "| "; }
+.menuoldstyle li:first-child:before { content: ""; }
+
+#article .briefarticle { padding: .3em .6em; background: #000; font-size: .813em; color:#ffc200; }
+#article .briefarticle a { color: #ffc200 }
+#article .briefarticle .storytitle { font-weight: bold; }
+
+#index .briefarticle { 
+	padding: .3em .6em;  
+	color:#ffc200;
+	margin-bottom: .6em;
+	background-color: #181000;
+	border-radius: 10px;
+}
+
+#index .briefarticle a { color: #ffc200; text-decoration: none; font-weight: bold;}
+.briefarticle .section { color: #333; }
+.briefarticle .introhide { display : none }
+.briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+
+/* Messaging */
+
+.message_menu{
+	border: 1px solid #ffc200;
+	background: #000;
+	color: #ffc200;
+	border-bottom: none;
+}
+.message_menu ul
+{
+	margin: 0;
+}
+
+.message_subject
+{
+	border: 1px solid #ffc200;
+	background-color: #181000;
+	color: #ffc200;
+}
+
+.message_body
+{
+	border: 1px solid #ffc200;
+	border-bottom: none;
+	border-top: none;
+	background: #000;
+}
+
+.message_footer
+{
+	border: 1px solid #ffc200;
+	border-top: none;
+	background: #000;
+}
+
+#navigation-content ul ul {
+	margin: 0px;
+	padding: 0.3em 0px 0.3em 0.6em;
+	background: none repeat scroll 0% 0% #111;
+}
+
+#navigation-content li.user {
+	color: #ffc200;
+}
+
+#links h4 {
+	color: #ffc200;
+}
+
+.generaltitle h3 a, .generaltitle h3 a:visited, .search-results h4 a, .search-results h4 a:visited {
+	color: #ffc200;
+}
+
+.search-results h4 a:hover
+{
+color: #ffa200;
+}
+
+#adminmenu {
+	background: none repeat scroll 0% 0% #000;
+	border: 1px solid #ffc200;
+	color: #ff9200;
+}
+
+#commentwrap {
+	background: none repeat scroll 0% 0% #000;
+}
+
+#commentwrap a, a:visited {
+	color: #ffc200;
+}
+
+.commentTop a, .commentTop a:hover {
+	color: #ffc200;
+}
+
+.nbutton p b a {
+	color: #ffc200 !important;
+	background: none repeat scroll 0% 0% #333 !important;
+}
+
+.commentBoxForm {
+	background: none repeat scroll 0% 0% #000;
+}
+
+input[type="text"], input[type="password"] {
+	background-color:#181818;
+	color: #ffc200;
+	border: 1px solid #ffc200;
+}
+
+select {
+	background-color: #181818;
+	border: 1px solid #ffc200;
+	color: #ffc200;
+}
+
+option {
+	border: 1px solid #ffc200;
+}
+
+.fullbox {
+	background-color: #181818;
+	color: #ffc200;
+	border: 1px solid #ffc200;
+}
+
+.data_hl3 {
+	background: none repeat scroll 0% 0% #181000;
+}
+
+.data_hl2 {
+	background: none repeat scroll 0% 0% #241800;
+}
+
+.data_hl1 {
+	background: none repeat scroll 0% 0% #302400;
+}
+
+#authors .generalbody h3 a {
+	color: #ffc200;
+}
+
+#slashboxes h4 a, #slashboxes h4 a:visited {
+	color: #ffc200;
+}
+
+fieldset
+{
+border: 1px solid #ffc200;
+}
+
+.user_admin { background: #1c1000; border: 1px solid #ffc200; padding: 0 .3em; }
+
+legend
+{
+color: #ffb200;
+}
+
+.article blockquote,  .article .quote, .commentBody blockquote, .commentBody .quote {
+	background: none repeat scroll 0% 0% #000;
+	border-left:2px solid #ffc200;
+	border-radius: 0;
+}
+
+.data .status0 {background:#662;}
+.data .status1 {background:#600;}
+.data .status2 {background:#262;}
+
+.gs_story_main { background: #262; color: #0C0; }
+.ss_story_main { background: #662; color: #0C0; }
+.ns_story_main { background: #600; color: #0C0; }
+.gs_story_main a, .gs_story_main a:visited, .gs_story_sec a, .gs_story_sec a:visited { color: #0C0; }
+.ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #0C0; }
+.ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #0C0; }
+.admin_story_list a, .admin_story_list a:visited { color: #0C0; }
