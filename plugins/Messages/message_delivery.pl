@@ -9,6 +9,7 @@ use utf8;
 use File::Spec::Functions;
 use Slash::Utility;
 use Slash::Constants qw(:slashd :messages);
+use Encode qw(_utf8_on);
 
 my $me = 'message_delivery.pl';
 
@@ -87,6 +88,8 @@ $task{$me}{code} = sub {
 			if ($constants->{message_delivery_debug} > 0) {
 				use Data::Dumper;
 				foreach my $m (@$coll) {
+					_utf8_on($m->{subject});
+					_utf8_on($m->{message});
 					delete $m->{user}{people};
 					messagedLog("Empty message: " . Dumper($m))
 						unless $m->{message};

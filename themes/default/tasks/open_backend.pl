@@ -17,6 +17,7 @@ $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
+	return 1 if $constants->{rss_allow_index};
 
 	load_redirects();
 

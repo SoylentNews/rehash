@@ -28,6 +28,7 @@ $task{$me}{code} = sub {
 	my $log_slave = getObject('Slash::DB', { db_type => 'log_slave' } );
 	my $logdb = getObject('Slash::DB', { db_type => 'log' } );
 	my $counter = 0;
+	my $done = 0; 
 	my $hoursback = $constants->{accesslog_hoursback} || 60;
 	my $failures = 10; # This is probably related to a lock failure
 	my $id = $log_slave->sqlSelectNumericKeyAssumingMonotonic(
@@ -35,7 +36,8 @@ $task{$me}{code} = sub {
 		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
 	if (!$id) {
 		slashdLog("no accesslog rows older than $hoursback hours");
-		return "nothing to do";
+		$done = 1;
+		#return "nothing to do"; # We don't want to return here, need to process accesslog_admin as well.
 	}
 
 	# If the log master is ENGINE=BLACKHOLE, we can't delete from there;
@@ -50,7 +52,6 @@ $task{$me}{code} = sub {
 	my $limit = 100_000;
 
 	my $last_err = "";
-	my $done = 0;
 	MAINLOOP: while (!$done) {
 		while ($rows = $delete_db->sqlDelete("accesslog", "id < $id", $limit)) {
 			$total_accesslog += $rows;
@@ -73,25 +74,27 @@ $task{$me}{code} = sub {
 			$counter++;
 		}
 	}
+	$done = 0;
 
 	if ($counter >= $failures) {
 		my $err = "more than $failures errors occured, accesslog is probably locked, last_err '$last_err'";
 		slashdLog($err);
 		slashdErrnote($err);
-		return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted";
+		#return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted"; # no return yet, go on with the rest
 	}
+	$counter = 0;
 
 	$id = $log_slave->sqlSelectNumericKeyAssumingMonotonic(
 		'pagemark', 'max', 'id',
 		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
 	if (!$id) {
 		slashdLog("no pagemark rows older than $hoursback hours");
+		$done = 1;
 	}
 
 	my $total_pagemark = 0;
 
 	$last_err = "";
-	$done = 0;
 	MAINLOOP: while (!$done) {
 		while ($rows = $delete_db->sqlDelete("pagemark", "id < $id", $limit)) {
 			$total_pagemark += $rows;
@@ -114,8 +117,62 @@ $task{$me}{code} = sub {
 			$counter++;
 		}
 	}
+	$done = 0;
 
-	return "success, $total_accesslog accesslog rows deleted, $total_pagemark pagemark rows deleted";
+	if ($counter >= $failures) {
+		my $err = "more than $failures errors occured, pagemark is probably locked, last_err '$last_err'";
+		slashdLog($err);
+		slashdErrnote($err);
+		#return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted"; # no return yet, go on with the rest
+	}
+	$counter = 0;
+
+	# Now handle accesslog_admin table
+
+	$hoursback = $constants->{accesslog_admin_hoursback} || 720; # Default to keeping one month of entries
+
+	$id = $log_slave->sqlSelectNumericKeyAssumingMonotonic(
+		'accesslog_admin', 'max', 'id',
+		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
+	if (!$id) {
+		slashdLog("no accesslog_admin rows older than $hoursback hours");
+	}
+
+	$last_err = "";
+	my $total_adminlog = 0;
+
+	MAINLOOP: while (!$done) {
+		while ($rows = $delete_db->sqlDelete("accesslog_admin", "id < $id", $limit)) {
+			$total_adminlog += $rows;
+			last if $rows eq "0E0";
+			slashdLog("deleted so far $total_adminlog of $limit accesslog_admin rows");
+			sleep 10;
+		}
+		my $err = "";
+		if ( $counter >= $failures || !($err = $delete_db->sqlError()) ) {
+			# If either we're giving up because there are too many
+			# failures, or the last attempt was successful, then
+			# break out of the loop, we're done.
+			$done = 1;
+		} else {
+			# We had an error but we haven't reached our max
+			# number of failures yet;  keep trying.
+			$last_err = "accesslog_admin sql error: '$err'";
+			slashdLog($last_err);
+			sleep 5;
+			$counter++;
+		}
+	}
+
+	if ($counter >= $failures) {
+		my $err = "more than $failures errors occured, accesslog_admin is probably locked, last_err '$last_err'";
+		slashdLog($err);
+		slashdErrnote($err);
+		#return "failures, accesslog probably locked, $total_accesslog accesslog rows deleted"; # no return yet, go on with the rest
+	}
+	
+
+	return "success, $total_accesslog accesslog rows deleted, $total_pagemark pagemark rows deleted, $total_adminlog accesslog_admin rows deleted";
 };
 
 1;

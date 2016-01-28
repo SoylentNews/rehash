@@ -37,8 +37,10 @@ __template__
 						<tr><td align="right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
 						<tr><td align="right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
 						<tr><td align="right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr>
+						<tr><td align="right">[% PROCESS stripebut %] </td><td>Non-automatic renewal payments with Stripe</td></tr>
 					</table>
 				</center>
+				* We apologize but javascript is absolutely required for payment via Stripe, though a valid email address is not.
 			[% ELSIF type == "gift" %]
 				[% IF sub_user %]
 					<p>You've decided to purchase:</p>
@@ -51,8 +53,10 @@ __template__
 							<tr><td align="right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
 							<tr><td align="right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
 							<tr><td align="right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr>
+							<tr><td align="right">[% PROCESS stripebut %] </td><td>Non-automatic renewal payments with Stripe</td></tr>
 						</table>
 					</center>
+					* We apologize but javascript is absolutely required for payment via Stripe, though a valid email address is not.
 				[% ELSE %]
 					<p class='error'>No user was found for the UID ([% uid %]) you specified.  Please <a href="[% constants.real_rootdir %]/subscribe.pl">go back</a> and correct this to continue.</p>
 				[% END %]

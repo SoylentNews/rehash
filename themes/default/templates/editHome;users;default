@@ -54,9 +54,11 @@ __template__
 			'chillax'	=> 'Chillax',
 			'soylentnews'	=> 'SoylentNews',
 			'night' => 'Night Mode',
-			'icicle' => 'Black IcIcle'
-			'pwnies' => 'OMG PWNIES'
-			'vt100'	=> 'VT100'
+			'icicle' => 'Black IcIcle',
+			'pwnies' => 'OMG PWNIES',
+			'vt100'	=> 'VT100',
+			'vt220' => 'VT220',
+			'grayscale' => 'Grayscale'
 		}, user_edit.skin, 1);
 		%]
 		<label>

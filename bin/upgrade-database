@@ -1,0 +1,118 @@
+#!/srv/soylentnews.org/perl/bin/perl -w
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use File::Copy;
+use Slash;
+use Slash::Utility;
+use Slash::DB;
+use Slash::DB::Upgrade;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $SLASH_PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage() unless getopts('hvlUu:L:', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+
+$| = 1;
+
+unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
+	print "You did not supply a valid DBIx::Password virtual name($opts{'u'}).\n";
+	exit;
+}
+
+createEnvironment($opts{'u'});
+
+{
+    my $constants = getCurrentStatic();
+    my $upgrade = Slash::DB::Upgrade->new($opts{'u'});
+    my $current_schema = $upgrade->getSchemaVersions();
+    my $slashdb = getCurrentDB();
+    
+    # Just list, do nothing else
+    if($opts{'l'}) {
+        printf ("%30s %30s\n", "schema", "version");
+
+        foreach my $key (sort keys %$current_schema) {
+            printf ("%30s %30s\n", $key, $current_schema->{$key});
+        }
+        exit; # just bail out
+    }
+
+
+    # Each plugin pm has to define an upgrade method for the database
+    # (core is in Slash::DB::*driver*). Run the core upgrade method
+    # then check if the plugin defines an upgrade mechanism, and
+    # run THAT if necessary.
+
+    # NOTE: getObject won't let us instance a class unless its
+    # specifically installed in site_info's table. As such, we're
+    # going to call loadClass directly to get it. loadClass() is
+    # weird, it takes a string with the class. If it exists, it returns
+    # the object in the variable that was passed in ...
+
+    if($opts{'U'}) {
+        # handle the core
+        if (!$slashdb->upgradeCoreDB($upgrade)) {
+	    print "Error updating core DB schema. Review SQL errors above!\n";
+	    exit -1;
+	}
+
+        my $plugins = $constants->{plugin};
+        foreach my $key ( sort keys %$plugins ) {
+            my $plugin_object = "Slash::" . $key . "::Upgrade::MySQL";
+            
+            if (loadClass($plugin_object)) {
+                if (!$plugin_object->upgradeDB($upgrade)) {
+                    print "Failed to upgrade $key. Review SQL errors above!\n";
+                    exit -1;
+                }
+            } else {
+                print "No upgrade module for $key.\n";
+            }
+        }
+    }
+    exit;
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS]
+
+Upgrades the rehash database
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-U  Install all database upgrades
+	-l	Does not upgrade, just reports DB versions
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2005 by Open Source Technology Group. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

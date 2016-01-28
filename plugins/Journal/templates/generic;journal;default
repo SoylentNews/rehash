@@ -12,6 +12,9 @@ __name__
 generic
 __template__
 <div id="journalgeneric">
+	<div class="commentBox">
+		<small><b>The Fine Print:</b> The following are owned by whoever posted them. We are not responsible for them in any way.</small>
+	</div>
 	[% FOREACH article = articles %]
 		<div class="journaldate">[% Slash.timeCalc(article.day,"%A %B %d, %y") %]</div>
 		[% FOREACH diatribe = article.article %]

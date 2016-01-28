@@ -293,7 +293,14 @@ sub main {
 			post		=> 1,
 			formname 	=> $formname,
 			checks		=> []
-		}	
+		},
+		sendumessage => {
+			function	=> \&sendUserMessage,
+			seclev		=> 100,
+			post		=> 1,
+			formname 	=> $formname,
+			checks		=> []
+		}
 	
 	} ;
 
@@ -311,16 +318,16 @@ sub main {
 	# Setup redirects for admin_block before page draws
 	# Password
 	if ($op eq 'admin' &&  $form->{changepasswd}){
-    redirect("$constants->{real_rootdir}/login.pl?op=changeprefs&userfield=$form->{userfield}", "301");
-  }
+		redirect("$constants->{real_rootdir}/login.pl?op=changeprefs&userfield=$form->{userfield}", "301");
+	}
 	# Messages
 	if ($op eq 'admin' &&  $form->{messages}){
-    redirect("$constants->{real_rootdir}/messages.pl?op=display_prefs&userfield=$form->{userfield}", "301");
-  }
+		redirect("$constants->{real_rootdir}/messages.pl?op=display_prefs&userfield=$form->{userfield}", "301");
+	}
 	# Submissions
 	if ($op eq 'admin' &&  $form->{subscription}){
-    redirect("$constants->{real_rootdir}/subscribe.pl?userfield=$form->{userfield}", "301");
-  }
+		redirect("$constants->{real_rootdir}/subscribe.pl?userfield=$form->{userfield}", "301");
+	}
 
 	my $errornote = "";
 	if ($form->{op} && ! defined $ops->{$op}) {
@@ -382,6 +389,19 @@ sub main {
 	}
 	if ($ops->{$op}{post} && !$postflag) {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
+	}
+
+	if ($op eq 'sendumessage') {
+		if($user->{seclev} >= 100) {
+			$ops->{$op}{function}->({
+			op		=> $op,
+			tab_selected_1	=> $ops->{$op}{tab_selected_1} || "",
+			note		=> $errornote,
+			});
+		}
+		my $useredit = $slashdb->getUser($form->{touid});
+		redirect($constants->{real_rootdir}."/~".$useredit->{nickname});
+		return;
 	}
 
 	# Print the header and very top stuff on the page.  We have
@@ -1270,7 +1290,7 @@ sub showInfo {
 			netid			=> $netid,
 			netid_vis		=> $netid_vis,
 			reasons			=> $mod_reader->getReasons(),
-			ordered     => $mod_reader->getReasonsOrder(),
+			ordered			=> $mod_reader->getReasonsOrder(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
 			hr_hours_back		=> $ipid_hoursback,
@@ -1342,6 +1362,33 @@ sub showInfo {
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 
+	return 1;
+}
+
+sub sendUserMessage {
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	my $useredit = $slashdb->getUser($form->{touid});
+
+	unless($useredit && $constants->{plugin}{Messages}){ return; }
+	if($form->{usermessage}) {
+		my $message = getObject("Slash::Messages");
+		my $htmlmessage = $form->{usermessage};
+		$htmlmessage =~ s/</&lt;/g;
+		$htmlmessage =~ s/>/&gt;/g;
+		$htmlmessage =~ s#\n#<br />\n#g;
+		my $data = {
+			template_name	=> 'admin_to_user_msg',
+			subject		=> "Message from $user->{nickname}:",
+			message		=> $form->{usermessage},
+			htmlmessage	=> $htmlmessage
+		};
+		
+		$message->create($useredit->{uid}, MSG_CODE_ADMIN_TO_USER, $data);
+	}
+	
 	return 1;
 }
 

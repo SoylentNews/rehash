@@ -56,6 +56,23 @@ __template__
 			<p>This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.</p>
 		[% END %]
 	</div>
+
+	[% IF user.seclev > 99 %]
+		[% PROCESS titlebar title="User Messaging" %]
+		<div class="generalbody">
+			<form action="[% gSkin.rootdir %]/users.pl" method="post">
+				<fieldset>
+					<legend>Message [% useredit.nickname %]</legend>
+					<label>Message</label>
+					<textarea class="fullbox" wrap="virtual" name="usermessage" id="usermessage" rows="10" cols="50"></textarea>
+					<input type="hidden" name="touid" value="[% useredit.uid %]">
+					<input type="hidden" name="op" value="sendumessage">
+					<input type="submit" name="submit" value="Send" class="button">
+				</fieldset>
+			</form>
+		</div>
+	[% END %]
+
 		[% PROCESS titlebar title="Last Journal Entry" %]
 		<div class="generalbody">
 				[% Slash.createMenu("journal", style => "tabbed") %]
