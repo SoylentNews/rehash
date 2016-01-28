@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+* message = the text of the message
+* htmlmessage = the text of the message in html
+* msg = the message object
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+admin_to_user_msg
+__template__
+[% IF msg.mode == 1 %]
+[% htmlmessage %]
+[% ELSE %]
+[% message %]
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

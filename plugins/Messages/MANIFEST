@@ -29,4 +29,5 @@ templates/msg_web_subj;messages;default
 templates/reply_msg;comments;default
 templates/reply_msg_subj;comments;default
 templates/submission_reject_msg;misc;default
+templates/admin_to_user_msg;misc;default
 test.pl
