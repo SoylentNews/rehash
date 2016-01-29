@@ -8,7 +8,7 @@
 ##
 
 #   the used tools
-VERSION = 15.05.4
+VERSION = 16.02
 DISTNAME = rehash
 DISTVNAME = $(DISTNAME)-$(VERSION)
 

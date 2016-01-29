@@ -13317,6 +13317,9 @@ sub upgradeCoreDB() {
 		# Every schema upgrade should have a comment as to why. In this case, initialize the
 		# core version schema
 		print "upgrading core to v1 ...\n";
+		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_16_02' WHERE name = 'cvs_tag_currentcode'")) {
+			return 0;
+		};
 		if (!$self->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_core', 1, 'Version of core database schema')")) {
 			return 0;
 		};
