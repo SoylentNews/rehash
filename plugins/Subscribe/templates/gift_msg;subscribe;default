@@ -11,10 +11,10 @@ en_US
 __name__
 gift_msg
 __template__
-[% receiving_user.nickname %],
+[% receiving_user.nickname | strip_literal %],
 
 This message is to inform you of a gift subscription to [% constants.sitename %]. 
-The subscription was purchased on your behalf by [% IF from %][% from %][% ELSE %][% purchasing_user.nickname %] ([% purchasing_user.uid %])[% END %].
+The subscription was purchased on your behalf by [% IF from %][% from %][% ELSE %][% purchasing_user.nickname | strip_literal %] ([% purchasing_user.uid %])[% END %].
 
 Subscription Details:
 - [% days %] Day Gift Subscription to [% constants.sitename %]

@@ -58,7 +58,7 @@ __template__
 					</center>
 					* We apologize but javascript is absolutely required for payment via Stripe, though a valid email address is not.
 				[% ELSE %]
-					<p class='error'>No user was found for the UID ([% uid %]) you specified.  Please <a href="[% constants.real_rootdir %]/subscribe.pl">go back</a> and correct this to continue.</p>
+					<p class='error'>No user was found for the UID ([% uid | strip_notags %]) you specified.  Please <a href="[% constants.real_rootdir %]/subscribe.pl">go back</a> and correct this to continue.</p>
 				[% END %]
 			[% END %]
 		[% ELSE %]

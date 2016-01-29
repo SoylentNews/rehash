@@ -240,10 +240,12 @@ sub paypal {
 		
 		my $pp_pdt = $subscribe->ppDoPDT($txid);
 		# use Data::Dumper; print STDERR Dumper($pp_pdt);
-		
-		$pp_pdt->{custom} = decode_json($pp_pdt->{custom}) || "";
-		
+
+
 		if (ref($pp_pdt) eq "HASH") {
+			
+			$pp_pdt->{custom} = decode_json($pp_pdt->{custom}) || "";
+			
 			my $payment_net = $pp_pdt->{payment_gross} - $pp_pdt->{payment_fee};
 			
 			$puid = $pp_pdt->{custom}{puid};
