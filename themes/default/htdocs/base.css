@@ -1,3 +1,32 @@
+@media only screen and (max-device-width:800px) {
+	#links {
+        	display: none !important;
+	}
+	#slashboxes {
+        	display: none !important;
+	}	
+	#contents {
+        	margin-left: 0px !important;
+	}
+	#articles {
+        	width: 100% !important;
+	}
+	body {
+		font-size: 150% !important;
+	}
+	.btmnav {
+		font-size: 200% !important;
+	}
+	.btmnav ul {
+		width: 100% !important;
+		padding-left: 0px !important;
+		text-align: left !important;
+	}
+	#users-blocks {
+		margin-right: 0px !important;
+	}
+}
+
 body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img
 {
 padding: 0;
