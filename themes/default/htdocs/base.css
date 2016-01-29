@@ -16,6 +16,7 @@
 	}
 	.btmnav {
 		font-size: 200% !important;
+		margin: 0px !important;
 	}
 	.btmnav ul {
 		width: 100% !important;
@@ -24,6 +25,9 @@
 	}
 	#users-blocks {
 		margin-right: 0px !important;
+	}
+	#footer {
+		margin-left: .3em !important;
 	}
 }
 
