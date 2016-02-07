@@ -118,7 +118,7 @@ FOREACH story = storylistref;
 [% END %]
 		
 		</td>
-		<td align="right style="padding-right:1em;">
+		<td align="right" style="padding-right:1em;">
 		[% story.commentcount %]
 		</td>
 
