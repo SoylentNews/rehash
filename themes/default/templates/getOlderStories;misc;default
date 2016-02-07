@@ -67,7 +67,7 @@ __template__
    # pointing back in time into search.pl
    # (why wouldn't we??) %]
 
-<b><a href="[% gSkin.rootdir %]/search.pl?start=[% start %]
+<b><a href="[% gSkin.rootdir %]/search.pl?sort=2&start=[% start %]
 	[%- IF gSkin.skid != constants.mainpage_skid %]&amp;section=[% gSkin.name; END -%]
 ">Older Articles</a></b>
 
