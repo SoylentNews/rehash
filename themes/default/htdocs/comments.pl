@@ -666,13 +666,58 @@ sub moderate {
 
 	my $hasPosted = $moderate_check->{count};
 
-	titlebar("100%", getData('moderating'));
-	slashDisplay('mod_header');
+
+	# We're going to redirect so these have to go. --TMB
+	#titlebar("100%", getData('moderating'));
+	#slashDisplay('mod_header');
 
 	my $sid = $form->{sid};
 	my $was_touched = 0;
 	my $meta_mods_performed = 0;
 	my $total_deleted = 0;
+	
+	# Begin logic to find the lowest on the page comment moderated
+	my $search_comments = '';
+	my $lvl = 0;
+	my $pid = $form->{pid} ? $form->{pid} : 0;
+
+
+	my $sco = { force_read_from_master => 0, one_cid_only => 0 };
+	my($comments, $count) = selectComments($discussion, $pid, $sco);
+
+	my $cc = 0;
+	$cc = $comments->{$pid}{visiblekids}
+		if $comments->{$pid}
+			&& $comments->{$pid}{visiblekids};
+
+	$lvl++ if $user->{mode} ne 'flat'
+		&& $user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod'
+		&& $cc > $user->{commentspill}
+		&& ( $user->{commentlimit} > $cc ||
+		     $user->{commentlimit} > $user->{commentspill} );
+
+
+	$search_comments = displayThread($discussion->{id}, $pid, $lvl, $comments);
+
+	my @cids = ();
+	foreach my $key (keys %{$form}) {
+		my $tempkey = '';
+		if($key =~ /reason_(\d+)/) {
+			my $reason = "reason_$1";
+			if($form->{$reason} && $form->{$reason} < 100) {
+				push(@cids, $1);
+			}
+		}
+		
+	}
+	use Data::Dumper;
+	my $combined_cids = join("|", @cids);
+	my @matched_anchors = ($search_comments =~ /.*(id="comment_(?:$combined_cids)")/g);
+	print STDERR "\n\nTMB: $combined_cids\n\n".Dumper(@matched_anchors)."\n\n";
+	my $last_anchor = $matched_anchors[$#matched_anchors];
+
+	# Now we skip down to where the page is rendered and search/replace the anchor tag in the html with "lastmoderated"
 
 	# Handle Deletions, Points & Reparenting
 	# It would be nice to sort these by current score of the comments
@@ -752,8 +797,11 @@ sub moderate {
 		});
 	}
 
-	printComments($discussion, $form->{pid}, $form->{cid},
-		{ force_read_from_master => 1 } );
+	my $print_comments = printComments($discussion, $form->{pid}, $form->{cid},
+		{ force_read_from_master => 1, Return => 1 } );
+	$print_comments =~ s/$last_anchor/id="lastmoderated"/;
+	print $print_comments;
+
 
 	if ($was_touched) {
 		# This is for stories. If a sid is only a number
