@@ -667,9 +667,8 @@ sub moderate {
 	my $hasPosted = $moderate_check->{count};
 
 
-	# We're going to redirect so these have to go. --TMB
-	#titlebar("100%", getData('moderating'));
-	#slashDisplay('mod_header');
+	titlebar("100%", getData('moderating'));
+	slashDisplay('mod_header');
 
 	my $sid = $form->{sid};
 	my $was_touched = 0;
