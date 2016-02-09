@@ -373,7 +373,7 @@ input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:h
 	background-color: #666;
 }
 
-input[type=text], input[type=password] {border: 1px solid #666;}
+input[type=text], input[type=password] {border: 1px solid #666; background: #111;}
 
 
 #adminmenu a {color: #000}
@@ -446,7 +446,7 @@ input[type=text], input[type=password] {border: 1px solid #666;}
 #authors .generalbody h3 a { color: #fff; }
 
 /* Forms */
-textarea { width: 80%; }
+textarea { width: 80%; background: #111;}
 #journal input.button, #admin input.button { width: auto; }
 
 /* Misc */
