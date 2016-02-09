@@ -1187,11 +1187,13 @@ sub printComments {
 #use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments->{34}) . "discussion2: " . Dumper($discussion2);
 	my $comment_html = $options->{Return} ?  $pretext : '';
 
-
+	my $thread = '';
+	$thread = displayThread($discussion->{id}, $pid, $lvl, $comments) if $comments;
 	$comment_html .= slashDisplay('printCommComments', {
 		can_moderate	=> $can_mod_any,
 		comment		=> $comment,
 		comments	=> $comments,
+		thread		=> $thread,
 		'next'		=> $next,
 		previous	=> $previous,
 		sid		=> $discussion->{id},

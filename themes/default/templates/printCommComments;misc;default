@@ -34,7 +34,7 @@ __template__
 	&& ( !user.state.discussion_archived || constants.comments_moddable_archived));
 %]
 [% IF moderate_form %]
-	<form id="commentform" name="commentform" action="[% gSkin.rootdir %]/comments.pl" method="post">
+	<form id="commentform" name="commentform" action="[% gSkin.rootdir %]/comments.pl#lastmoderated" method="post">
 [% END %]
 
 [% IF cid %]
@@ -79,10 +79,7 @@ __template__
 
 	[% lcp %]
 	[% IF lvl; END %]
-	[% IF comments;
-	     thread = Slash.displayThread(sid, pid, lvl, comments);
-	   END %]
-	[% IF thread %]
+	[% IF comments %]
 		[% IF !cid %]<ul id="commentlisting" >[% END %]
 			[% thread %]
 			<li id="roothiddens" class="hide"></li>
