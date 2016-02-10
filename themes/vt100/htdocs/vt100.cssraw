@@ -59,7 +59,7 @@ color: #0c0;
 }
 
 input[type="submit"], button, .logout a, div.storylinks ul li.more a {
-	background: none repeat scroll 0% 0% #333;
+	background: none repeat scroll 0% 0% #333; !important;
 	color: #0f0 !important;
 }
 
