@@ -13,96 +13,105 @@ __name__
 moderation
 __template__
 <div id="moderation">
-	[% PROCESS titlebar title => constants.sitename _ ' Moderation' %]
- <div class="generalbody">
-  <p>This document will attempt to explain the moderation system that lies underneath this implementation of Slashcode's vast comment section. It was originally written for Slashcode years ago</a>, so the specifics of this moderation system are outlined here. Keep in mind that as this project grows, some aspects can change to better serve the community and improve the overall experience.</p>
- 
-  <h3>Contents</h3>
-  <ol>
-   <li><a href="#purpose">Purpose</a></li>
-   <li><a href="#goals">Goals</a></li>
-   <li><a href="#who">Who</a></li>
-   <li><a href="#how">How</a></li>
-   <li><a href="#faq">FAQ</a></li></ol>
- 
-  <h3 id="purpose">Purpose</h3>
-  <p>As you might have noticed, a site like this can get a lot of comments. Some are downright terrible; others are truly gems, and hundreds of comments can be hard to sift through.</p>
-  <p>The moderation system is designed to sort the gems and the crap from the steady stream of information that flows through the pipe. And wherever possible, it tries to make the readers of the site take on the responsibility.</p>
-  <p>The goal is that each reader will be able to read the the threshold they prefer. Select "-1" and you'll see trolls and possible wrongly-modded comments, try "5" and you'll see only the top-rated comments.</p>
- 
-  <h3 id="goals" >Goals</h3>
-  <ol>
-   <li>Promote Quality, Discourage Crap.</li>
-   <li>Make SoylentNews as readable as possible for as many people as possible.</li>
-   <li>Do not require a huge amount of time from any single moderator.</li>
-   <li>Do not allow any single moderator a 'reign of terror'.</li>
-  </ol>
- 
-  <h3 id="who">Who</h3>
-  <p>We've set up a few simple rules for determining who is eligible to moderate.</p>
-  <ol>
-   <li><strong>Logged In User</strong> If the system can't keep track, it won't work, so you gotta log in. Sorry if you're paranoid, but this system demands a certain level of accountability.</li>
-   <li><strong>Positive Contributors</strong> Slashcode tracks your "Karma" (see the <a href="#faq">FAQ</a>). If you have non-negative Karma, this means you have posted more good comments than bad, and are eligible to moderate. This weeds out spam accounts.</li>
-	 <li><strong>No Sockpuppet Accounts</strong> Accounts newer than 1 month are not eligible to moderate.  This should keep sockpuppet accounts from immediately being a problem.
-  </ol>
-  <p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. </p>
- 
-  <h3 id="how">How</h3>
-  <p>Everyday each eligible moderator is given [% constants.m1_pointsgrant_arbitrary %] mod points to play with. Each comment they moderate deducts a point. When they run out of points, they are done moderating until 00:10 UTC when mod points are regenerated.</p>
-  <p>Moderation takes place by clicking the drop down list that appears next to comments, and selecting one of the adjectives like 'Flamebait' or 'Informative'. Bad words will reduce the comments score by a single point, good words increase a comments score by a single point. All comments are scored on an absolute scale from -1 to 5. Logged in users start at 1 (although this can vary from -1 to 2 based on their overall contribution to discussions) and anonymous users start at 0.</p>
-  <p>Moderators can participate in the same discussion as both a moderator and a poster. You are only prevented from modding your own posts.</p>
-  <p>Concentrate more on promoting than on demoting. The real goal here is to find the juicy good stuff and let others read it. Do not promote personal agendas. Do not let your opinions factor in. <strong>Try</strong> to be impartial about this. Simply disagreeing with a comment is not a valid reason to mark it down. Likewise, agreeing with a comment is not a valid reason to mark it up. The goal here is to share ideas. To sift through the haystack and find golden, shiny needles. And to keep the children who like to spam in check.</p>
-	<p>Please <li><a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> any comments (the cid link) showing moderation abuse.  We will investigate and make amends if necessary.</p>
-  
-  <h3 id="faq">FAQ</h3>
-  <h4>I just got moderator access, what do I do?</h4>
-  <p>The fact that you are reading this document proves that you are already on the right track.</p>
-  <h4>Why can't I moderate any more?</h4>
-  <ul>
-   <li>Do you still have any moderator points left?</li>
-   <li>You can't moderate your own posts.</li>
-  </ul>
-  <h4>What is a Good Comment? A Bad Comment?</h4>
-  <ul>
-   <li>Good Comments are insightful. You read them and are better off having read them. They add new information to a discussion. They are clear, hopefully well written, or maybe amusing. These are the gems we're looking for, and they deserve to be promoted.(Score: 2-5)</li>
-   <li>Average Comments might be slightly offtopic, but still might be worth reading. They might be redundant. They might be a 'Me Too' comment. They might say something painfully obvious. They don't detract from the discussion, but they don't necessarily significantly add to it. They are the comments that require the most attention from the moderators, and they also represent the bulk of the comments.(Score: 0-1)</li>
-   <li>Bad Comments are flamebait, incorrect, or have nothing to do with the article. Other examples: Ad Hominem, ridicule for others with different opinion without (backing it up with anything more tangible than strong words), repeats of something said 15 times already (read previous comments before you post), use of <strong>unnecessary</strong> foul language, some are hard to read or just don't make any sense. Basically they detract from the article they are attached to.(Score: -1)</li>
-  </ul>
-  <h4>What is Karma?</h4>
-  <p>Karma is the sum of all moderation activity done to a user. Karma is used to determine eligibility for moderator status and can affect your comments starting score. Every new user starts with a Karma of 0, and as long as your Karma isn't <em>negative</em> you are eligible to become a moderator.</p>
-  <h4>Why Don't I get my points back after I post in a discussion I moderated?</h4>
-  <p>We've decided to allow a moderator to moderate in a discussion, and then comment afterward without undoing their moderation.</p>
-  <h4>How can I improve my Karma?</h4>
-  <p><strong>10 tips for improving your Karma:</strong></p>
-  <dl>
-  <dt><strong>Post intelligently:</strong></dt>
-  <dd>Interesting, insightful, thought provoking comments are rated higher on a fairly consistent basis.</dd>
-  <dt><strong>Post calmly:</strong></dt>
-  <dd>Nobody likes a flame war. In fact, more times than not the flamer gets burned much more than their target. "Flamebait" is hit quickly and consistently with "-1" by moderators. As the bumper sticker says... "Don't be a dick."</dd>
-  <dt><strong>If you can't be deep, be funny:</strong></dt>
-  <dd>If you don't have something to contribute to the discussion, some humor is welcome. Humor is lacking in our lives and will continue to be promoted. Remember though, what rips your sides out may be completely inane to somebody else.</dd>
-  <dt><strong>Post early:</strong></dt>
-  <dd>If an article has over a certain number of posts on it already, yours is less likely to be moderated. This is less likely both statistically (there are more to choose from) and due to positioning (as a moderator I have to actually find your post way at the end of a long list.)</dd>
-  <dt><strong>Post often:</strong></dt>
-  <dd>If you only post once a month you can expect your karma to remain low. Also, lively discussion in an open forum is what makes SoylentNews really "Rock the Casbah."</dd>
-  <dt><strong>Stay on topic:</strong></dt>
-  <dd>Off topic posts are slapped quickly and consistently with "-1" by moderators.</dd>
-  <dt><strong>Be original:</strong></dt>
-  <dd>Avoid being redundant and just repeating what has already been said. (Did I really just say that?) Yes, being moderated as "redundant" is worth "-1" to your post and your karma. Especially to be avoided are the "what he said" and "me too" posts.</dd>
-  <dt><strong>Read it before you post:</strong></dt>
-  <dd>Does it say what you really want it to say? Check your own spelling and grammar. Occasionally, a perfectly beneficial post is passed over by moderators because it is completely irrelevant to content feature. This is also a good approach to checking yourself for what you're really saying. Can't tell you the number of times I've stopped myself from saying the opposite of what I meant by checking my own s&amp;g.</dd>
-  <dt><strong>Log in as a registered user:</strong></dt>
-  <dd>I know, this sounds obvious but, "Anonymous Coward" does not have a karma rating. You can't reap the perceived benefits of your own accidental brilliance if you post anonymously. Have pride in your work and take credit for it.</dd>
-  <dt><strong>Read SoylentNews regularly:</strong></dt>
-  <dd>You can't possibly contribute to the discussion if you're not in the room. Come to the party and play.</dd>
-  </dl>
-	
-	<h3 id="spam">What is Special About the Spam Mod</h3>
-	<p>The Spam mod is special in that is removes 10 Karma points from the user that posted the comment.  This mod is meant to combat spam and not to be used to punish commenters. Our goal is to put a spammer in Karma Hell and to not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all Spam mods to make sure moderators are not abusing the Spam mod.  If we find a moderator that unfairly applied the Spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month.  Further bans to the same modder add increasing amounts of ban time.  If you inadvertently applied a Spam mod, <a href="mailto:[% constants.adminmail | strip_attribute %]">mail the admin</a> and we will remove the Spam mod without banning you.  Even though we have updated the interface, miss modding may still be an unfortunate occurrence.</p>
-  
- </div>
-</div>
+		[% PROCESS titlebar title => constants.sitename _ ' Moderation' %]
+		<div class="generalbody">
+				<p>This document will attempt to explain the moderation system that lies underneath this implementation of Slashcode's vast comment section. It was originally written for Slashcode years ago</a>, so the specifics of this moderation system are outlined here. Keep in mind that as this project grows, some aspects can change to better serve the community and improve the overall experience.</p>
+				
+				<h3>Contents</h3>
+				<ol>
+						<li><a href="#purpose">Purpose</a></li>
+						<li><a href="#goals">Goals</a></li>
+						<li><a href="#who">Who</a></li>
+						<li><a href="#how">How</a></li>
+						<li><a href="#spam">Spam Mod</a></li>
+						<li><a href="#faq">FAQ</a></li>
+				</ol>
+				
+				<h3 id="purpose">Purpose</h3>
+				<p>As you might have noticed, a site like this can get a lot of comments. Some are downright terrible; others are truly gems, and hundreds of comments can be hard to sift through.</p>
+				<p>The moderation system is designed to sort the gems and the crap from the steady stream of information that flows through the pipe. And wherever possible, it tries to make the readers of the site take on the responsibility.</p>
+				<p>The goal is that each reader will be able to read the the threshold they prefer. Select "-1" and you'll see trolls and possible wrongly-modded comments, try "5" and you'll see only the top-rated comments.</p>
+				
+				<h3 id="goals" >Goals</h3>
+				<ol>
+						<li>Promote Quality, Discourage Crap.</li>
+						<li>Make SoylentNews as readable as possible for as many people as possible.</li>
+						<li>Do not require a huge amount of time from any single moderator.</li>
+						<li>Do not allow any single moderator a 'reign of terror'.</li>
+				</ol>
+				
+				<h3 id="who">Who</h3>
+				<p>We've set up a few simple rules for determining who is eligible to moderate.</p>
+				<ol>
+						<li><strong>Logged In User</strong> If the system can't keep track, it won't work, so you gotta log in. Sorry if you're paranoid, but this system demands a certain level of accountability.</li>
+						<li><strong>Positive Contributors</strong> Slashcode tracks your "Karma" (see the <a href="#faq">FAQ</a>). If you have non-negative Karma, this means you have posted more good comments than bad, and are eligible to moderate. This weeds out spam accounts.</li>
+						<li><strong>No Sockpuppet Accounts</strong> Accounts newer than 1 month are not eligible to moderate.  This should keep sockpuppet accounts from immediately being a problem.
+				</ol>
+				<p>So the end result is a pool of eligible users that represent (hopefully) average, positive SoylentNews contributors. </p>
+				
+				<h3 id="how">How</h3>
+				<p>Everyday each eligible moderator is given 5 mod points to play with. Each comment they moderate deducts a point. When they run out of points, they are done moderating until 00:10 UTC when mod points are regenerated.</p>
+				<p>Moderation takes place by clicking the drop down list that appears next to comments, and selecting one of the adjectives like 'Flamebait' or 'Informative'. Bad words will reduce the comments score by a single point, good words increase a comments score by a single point. All comments are scored on an absolute scale from -1 to 5. Logged in users start at 1 (although this can vary from -1 to 2 based on their overall contribution to discussions) and anonymous users start at 0.</p>
+				<p>Moderators can participate in the same discussion as both a moderator and a poster. You are only prevented from modding your own posts.</p>
+				<p>Concentrate more on promoting than on demoting. The real goal here is to find the juicy good stuff and let others read it. Do not promote personal agendas. Do not let your opinions factor in. <strong>Try</strong> to be impartial about this. Simply disagreeing with a comment is not a valid reason to mark it down. Likewise, agreeing with a comment is not a valid reason to mark it up. The goal here is to share ideas. To sift through the haystack and find golden, shiny needles. And to keep the children who like to spam in check.</p>
+				<p>Please <a href="mailto:admin@soylentnews.org">mail the admin</a> any comments (the cid link) showing moderation abuse.  We will investigate and make amends if necessary. Note: in the rare case that someone has contacted us regarding "moderation abuse", we not only find this practice practically non-existent here (yay!), but in fact, comments that are incorrectly modded down get modded back up nearly every time.</p>
+				
+				<h3 id="spam">Spam Mod</h3>
+				<p>The spam moderation (spam mod) is to be used only on comments that genuinely qualify as spam. Spam is unsolicited advertisement, undesired and offtopic filth, or possibly illegal in general. Spam can come in many forms, but it differs from a troll comment in that it will have absolutely no substance, is completely undesired, are detrimental to the site, or worse.</p>
+				<p>The spam mod is special in that is removes 10 Karma points from the user that posted the comment. This mod is meant to combat spam and not to be used to punish commenters (when in doubt, don't use this mod). Our goal is to put a spammer in Karma Hell and for them to not be able to get out of it easily. As we do not want this used against non-spamers, we monitor all spam mods to make sure moderators are not abusing the spam mod. If we find a moderator that unfairly applied the spam mod, we remove the mod giving the poster back the Karma points, and the modder is banned from modding for one month. Further bans to the same modder add increasing amounts of ban time. If you inadvertently applied a spam mod, <a href="mailto:admin@soylentnews.org">mail the admin</a> and we will remove the spam mod without banning you. Even though we have updated the interface to physically separate the spam mod from the other mods, unintentional modding may still be an unfortunate occurrence.</p>
+				<h4>Examples</h4>
+				<p>If you are unsure of whether a comment is spam or not, don't use the spam mod. Here are some examples of spam:</p>
+				<ul>
+						<li>Proper spam. Anything whose primary purpose is advertisement (unless somehow relevant to the discussion/article).</li>
+						<li>HOSTS/GNAA/etc... type posts. Recurring, useless annoyances we're all familiar with.</li>
+						<li>Posts so offtopic and lacking value to even be a troll that they can't be called anything else. See <a href="https://soylentnews.org/comments.pl?cid=123138&sid=5164">here</a>, <a href="https://soylentnews.org/comments.pl?sid=11580&cid=287626">here</a> or <a href="https://soylentnews.org/comments.pl?sid=7440&cid=182739">here</a> for example.</li>
+				</ul>
 
+				<h3 id="faq">FAQ</h3>
+				<h4>I just got moderator access, what do I do?</h4>
+				<p>The fact that you are reading this document proves that you are already on the right track.</p>
+				<h4>Why can't I moderate any more?</h4>
+				<ul>
+						<li>Do you still have any moderator points left?</li>
+						<li>You can't moderate your own posts.</li>
+				</ul>
+				<h4>What is a Good Comment? A Bad Comment?</h4>
+				<ul>
+						<li>Good Comments are insightful. You read them and are better off having read them. They add new information to a discussion. They are clear, hopefully well written, or maybe amusing. These are the gems we're looking for, and they deserve to be promoted. (Score: 2-5)</li>
+						<li>Average Comments might be slightly offtopic, but still might be worth reading. They might be redundant. They might be a 'Me Too' comment. They might say something painfully obvious. They don't detract from the discussion, but they don't necessarily significantly add to it. They are the comments that require the most attention from the moderators, and they also represent the bulk of the comments. (Score: 0-1)</li>
+						<li>Bad Comments are flamebait, incorrect, or have nothing to do with the article. Other examples: Ad Hominem, ridicule for others with different opinion (without backing it up with anything more tangible than strong words), repeats of something said 15 times already (read previous comments before you post), use of <strong>unnecessary</strong> foul language, some are hard to read or just don't make any sense. Basically they detract from the article they are attached to. (Score: -1)</li>
+				</ul>
+				<h4>What is Karma?</h4>
+				<p>Karma is the sum of all moderation activity done to a user. Karma is used to determine eligibility for moderator status and can affect your comments starting score. Every new user starts with a Karma of 0, and as long as your Karma isn't <em>negative</em> you are eligible to become a moderator.</p>
+				<h4>Why Don't I get my points back after I post in a discussion I moderated?</h4>
+				<p>We've decided to allow a moderator to moderate in a discussion, and then comment afterward without undoing their moderation.</p>
+				<h4>How can I improve my Karma?</h4>
+				<p><strong>10 tips for improving your Karma:</strong></p>
+				<dl>
+						<dt><strong>Post intelligently:</strong></dt>
+						<dd>Interesting, insightful, thought provoking comments are rated higher on a fairly consistent basis.</dd>
+						<dt><strong>Post calmly:</strong></dt>
+						<dd>Nobody likes a flame war. In fact, more times than not the flamer gets burned much more than their target. "Flamebait" is hit quickly and consistently with "-1" by moderators. As the bumper sticker says... "Don't be a dick."</dd>
+						<dt><strong>If you can't be deep, be funny:</strong></dt>
+						<dd>If you don't have something to contribute to the discussion, some humor is welcome. Humor is lacking in our lives and will continue to be promoted. Remember though, what rips your sides out may be completely inane to somebody else.</dd>
+						<dt><strong>Post early:</strong></dt>
+						<dd>If an article has over a certain number of posts on it already, yours is less likely to be moderated. This is less likely both statistically (there are more to choose from) and due to positioning (as a moderator I have to actually find your post way at the end of a long list.)</dd>
+						<dt><strong>Post often:</strong></dt>
+						<dd>If you only post once a month you can expect your karma to remain low. Also, lively discussion in an open forum is what makes SoylentNews really "Rock the Casbah."</dd>
+						<dt><strong>Stay on topic:</strong></dt>
+						<dd>Off topic posts are slapped quickly and consistently with "-1" by moderators.</dd>
+						<dt><strong>Be original:</strong></dt>
+						<dd>Avoid being redundant and just repeating what has already been said. (Did I really just say that?) Yes, being moderated as "redundant" is worth "-1" to your post and your karma. Especially to be avoided are the "what he said" and "me too" posts.</dd>
+						<dt><strong>Read it before you post:</strong></dt>
+						<dd>Does it say what you really want it to say? Check your own spelling and grammar. Occasionally, a perfectly beneficial post is passed over by moderators because it is completely irrelevant to content feature. This is also a good approach to checking yourself for what you're really saying. Can't tell you the number of times I've stopped myself from saying the opposite of what I meant by checking my own s&g.</dd>
+						<dt><strong>Log in as a registered user:</strong></dt>
+						<dd>I know, this sounds obvious but, "Anonymous Coward" does not have a karma rating. You can't reap the perceived benefits of your own accidental brilliance if you post anonymously. Have pride in your work and take credit for it.</dd>
+						<dt><strong>Read SoylentNews regularly:</strong></dt>
+						<dd>You can't possibly contribute to the discussion if you're not in the room. Come to the party and play.</dd>
+				</dl>
+				
+		</div>
+</div>
 __seclev__
 10000
 __version__

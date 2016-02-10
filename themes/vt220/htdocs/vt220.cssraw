@@ -58,8 +58,9 @@ hr {
 color: #ffa200;
 }
 
-input[type="submit"], .logout a, div.storylinks ul li.more a {
-	background: none repeat scroll 0% 0% #333;
+input[type=submit], button, .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a, .nbutton p b a:hover
+{
+	background: none repeat scroll 0% 0% #333; !important;
 	color: #ffc200 !important;
 }
 
