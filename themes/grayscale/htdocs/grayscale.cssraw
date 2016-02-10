@@ -54,7 +54,7 @@ a:hover { color: #fff;}
 color: #ccc;
 }
 
-input[type="submit"], .logout a, div.storylinks ul li.more a {
+input[type="submit"], button, .logout a, div.storylinks ul li.more a {
 	background: none repeat scroll 0% 0% #333;
 	color: #ccc !important;
 }
@@ -368,12 +368,12 @@ div.storylinks ul li
 .story_main { background: #ccc;}
 
 
-input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a
+input[type=submit], button, .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a, .nbutton p b a:hover
 {
 	background-color: #666;
 }
 
-input[type=text], input[type=password] {border: 1px solid #666;}
+input[type=text], input[type=password] {border: 1px solid #666; background: #111;}
 
 
 #adminmenu a {color: #000}
@@ -446,7 +446,7 @@ input[type=text], input[type=password] {border: 1px solid #666;}
 #authors .generalbody h3 a { color: #fff; }
 
 /* Forms */
-textarea { width: 80%; }
+textarea { width: 80%; background: #111;}
 #journal input.button, #admin input.button { width: auto; }
 
 /* Misc */
