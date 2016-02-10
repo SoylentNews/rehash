@@ -430,7 +430,7 @@ sub displayComments {
 # Welcome to one of the ancient beast functions.  The comment editor
 # is the form in which you edit a comment.
 sub editComment {
-	my($form, $slashdb, $user, $constants, $discussion, $error_message) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin, $error_message) = @_;
 
 	my $preview;
 	my $error_flag = 0;
