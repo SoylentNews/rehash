@@ -25,9 +25,14 @@ __template__
 
 	<p><small><b>The Fine print:</b> The following are owned by whoever posted them. We are not responsible for them in any way.</small></p>
 
-	[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
-	<div class="generalbody">
-		[% parent.content %]
+	<div class="article">
+		[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
+		<div class="details">
+				Journal by <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/journal">[% parent.author.nickname | strip_literal %]</a>
+		</div>
+		<div class="body">
+			<div class="intro">[% parent.content %]</div>
+		</div>	
 	</div>
 [% END %]
 [% IF parent.type == 'story' %]
