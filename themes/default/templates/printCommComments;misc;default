@@ -116,7 +116,7 @@ __template__
 		<input type="hidden" name="sid" value="[% sid %]">
 		<input type="hidden" name="cid" value="[% cid %]">
 		<input type="hidden" name="pid" value="[% pid %]">
-		<input type="submit" value="Moderate" class="button">
+		<button type="submit" name="moderate" value="discussion_buttons">Moderate</button>
 		[% IF can_del %]
 			<span class="nbutton"><p><b><a href="#" onclick="$('#commentform').submit(); return false">Delete</a></b></p></span>
 			Checked comments will be deleted!

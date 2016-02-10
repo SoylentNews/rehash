@@ -202,7 +202,7 @@ sub main {
 	my $header_emitted = 0;
 	my $title = $constants->{sitename} . '  Comments';
 	$title .= " | $discussion->{'title'}" if $discussion;
-	if ($op ne 'submit' && $op ne 'unspam') {
+	if ($op ne 'submit' && $op ne 'unspam' && $op ne 'moderate') {
 		header($title, $section) or return;
 		$header_emitted = 1;
 	}
@@ -328,7 +328,7 @@ sub main {
 
 	if (!$error_flag) {
 		# CALL THE OP
-		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion);
+		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion, $gskin);
 
 		# this has to happen - if this is a form that you updated
 		# the formkey val ('formkey_check') you need to call
@@ -565,7 +565,7 @@ sub previewForm {
 # so (assuming we don't want to do a redirect) it must be
 # called manually.
 sub submitComment {
-	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $header_emitted = 0;
@@ -588,61 +588,29 @@ sub submitComment {
 		return 0;
 	}
 
-	# If we want a redirect to a new URL after comment posting success,
-	# set some vars to indicate that.  Note that cleanRedirectUrlFromForm
-	# both reads the URL from $form and confirms that it's been signed
-	# with the correct confirmation password ('returnto_passwd').
-	my $do_emit_html = 1;
-	my $redirect_to = undef;
-	if ($redirect_to = cleanRedirectUrlFromForm("commentpostsuccess")) {
-		$do_emit_html = 0;
-	}
-	if ($do_emit_html) {
-		header('Comments', $discussion->{section}) or return;
-		$header_emitted = 1;
-	}
-
-	if ($header_emitted) {
-		titlebar("100%", getData('submitted_comment'));
-	}
-
+	# Save the comment
 	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
-
+	
+	# Bail if comment save fails
 	if (!$saved_comment) {
- 		if (!$header_emitted) {
- 			header('Comments', $discussion->{section}) or return;
- 		}
+ 		header('Comments', $discussion->{section}) or return;
  		print $error_message if $error_message;
  		return;
 	}
 
-	if ($do_emit_html) {
-		slashDisplay('comment_submit', {
-			metamod_elig => metamod_elig($user),
-		});
-
- 		print $error_message if $error_message;
-
-		# so other code thinks we are viewing this comment from a link -- pudge
-		$form->{cid} = $saved_comment->{cid};
-		printComments($discussion, $saved_comment->{cid}, $saved_comment->{cid},
-			{ force_read_from_master => 1, just_submitted => 1 }
-		);
-	}
+	# Setup redirect to new comment
+	my $redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid};
+	$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
+	$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+	$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
+	$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+	$redirect = $redirect."#comment_".$saved_comment->{cid};
+	
 
 	# OK -- if we make it all the way here, and there were
-	# no errors so no header has been emitted, and we were
-	# asked to redirect to a new URL, NOW we can finally
-	# do it.
-	if ($redirect_to) {
-#print STDERR scalar(localtime) . " $$ H redirecting to '$redirect_to'\n";
-		redirect($redirect_to);
-	} else {
-#print STDERR scalar(localtime) . " $$ H not redirecting, emitted=$header_emitted\n";
-		if (!$header_emitted) {
-			header('Comments', $discussion->{section}) or return;
-		}
-	}
+	# no errors, NOW we can finally do it.
+	
+	redirect($redirect);
 
 	return(1);
 }
@@ -659,10 +627,6 @@ sub moderate {
 		return;
 	}
 
-	if ($form->{meta_mod_only}) {
-		print metamod_if_necessary();
-		return;
-	}
 
 	my $hasPosted = $moderate_check->{count};
 
@@ -673,6 +637,7 @@ sub moderate {
 	my $was_touched = 0;
 	my $meta_mods_performed = 0;
 	my $total_deleted = 0;
+	my $error = '';
 
 	# Handle Deletions, Points & Reparenting
 	# It would be nice to sort these by current score of the comments
@@ -693,15 +658,13 @@ sub moderate {
 			if ($cid) {
 				$comment = $moddb->getComment($cid);
 			} else {
-				print "didn't get CID";
-				#print Slash::Utility::Comments::getError('didnt get a cid');
+				$error .= Slash::Utility::Comments::getError('didnt get a cid')."\n";
 			}
 
 			if ($comment) {
 				$can_mod = Slash::Utility::Comments::_can_mod($comment);
 			} else {
-				print "didn't find comment";
-				print Slash::Utility::Comments::getError('cannot find comment');
+				$error .=  Slash::Utility::Comments::getError('cannot find comment')."\n";
 			} 
 
 			if ($can_mod) {
@@ -719,15 +682,15 @@ sub moderate {
 			# went wrong.
 			if ($ret_val < 0) {
 				if ($ret_val == -1) {
-					print Slash::Utility::Comments::getError('no points');
+					$error .= Slash::Utility::Comments::getError('no points')."\n";
 				} elsif ($ret_val == -2){
-					print Slash::Utility::Comments::getError('not enough points');
-				} elsif ($ret_val == -3){
-					print Slash::Utility::Comments::getError('no self mods');
-				} elsif ($ret_val == -4){
-					print Slash::Utility::Comments::getError('not enough karma');
+					$error .= Slash::Utility::Comments::getError('not enough points')."\n";
+				} $error .= ($ret_val == -3){
+					$error .= Slash::Utility::Comments::getError('no self mods')."\n";
+				} $error .= ($ret_val == -4){
+					$error .= Slash::Utility::Comments::getError('not enough karma')."\n";
 				} elsif ($ret_val == -5){
-					print Slash::Utility::Comments::getError('needs modded first');
+					$error .= Slash::Utility::Comments::getError('needs modded first')."\n";
 				}
 			} else {
 				$was_touched += $ret_val;
@@ -737,24 +700,18 @@ sub moderate {
 	$slashdb->setDiscussionDelCount($sid, $total_deleted);
 	$was_touched = 1 if $total_deleted;
 
-	print metamod_if_necessary();
-
-	slashDisplay('mod_footer', {
-		metamod_elig => metamod_elig($user),
-	});
 
 	if ($hasPosted && !$total_deleted) {
-		print $moderate_check->{msg};
+		$error .= $moderate_check->{msg}."\n";
 	} elsif ($user->{seclev} && $total_deleted) {
-		slashDisplay('del_message', {
+		$error .= slashDisplay('del_message', {
 			total_deleted   => $total_deleted,
 			comment_count   => $slashdb->countCommentsBySid($sid),
+			Return => 1,
 		});
 	}
-
-	printComments($discussion, $form->{pid}, $form->{cid},
-		{ force_read_from_master => 1 } );
-
+  
+	
 	if ($was_touched) {
 		# This is for stories. If a sid is only a number
 		# then it belongs to discussions, if it has characters
@@ -765,6 +722,37 @@ sub moderate {
 			$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
 		}
 	}
+		
+	if ($error) {
+		header($title, $section) or return;
+		$header_emitted = 1;code
+	  print $error;
+		printComments($discussion, $form->{pid}, $form->{cid},
+			{ force_read_from_master => 1 } );
+	} else {
+		
+		# Get ID from button
+		my $id=$form->{moderate};
+		
+		# Setup redirect to new comment
+		my $redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid};
+		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
+		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
+		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+		$redirect = $redirect."#comment_".$id;
+		
+		# OK -- if we make it all the way here, and there were
+		# no errors, NOW we can finally do it.
+		
+		redirect($redirect);
+		
+		
+	}
+	
+
+	
+	
 }
 
 sub metamod_elig {
