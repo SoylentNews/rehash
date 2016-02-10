@@ -42,7 +42,7 @@ __template__
 		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, {
 			'return'	=> 1,
 			'ordered'	=> ordered, 
-		}) %]</div><button type="submit" name="moderate" value="comment_$cid">Moderate</button>[% END %]
+		}) %]</div><button type="submit" name="moderate" value="comment_[% cid %]">Moderate</button>[% END %]
 
 		[% IF can_del %]
 		<input type="checkbox" name="del_[% cid %]"> Check to Delete

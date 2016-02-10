@@ -54,7 +54,7 @@ a:hover { color: #fff;}
 color: #ccc;
 }
 
-input[type="submit"], .logout a, div.storylinks ul li.more a {
+input[type="submit"], button, .logout a, div.storylinks ul li.more a {
 	background: none repeat scroll 0% 0% #333;
 	color: #ccc !important;
 }
@@ -368,7 +368,7 @@ div.storylinks ul li
 .story_main { background: #ccc;}
 
 
-input[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a
+input[type=submit], button, .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a
 {
 	background-color: #666;
 }

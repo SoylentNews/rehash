@@ -328,7 +328,7 @@ sub main {
 
 	if (!$error_flag) {
 		# CALL THE OP
-		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion, $gskin);
+		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion, $gSkin);
 
 		# this has to happen - if this is a form that you updated
 		# the formkey val ('formkey_check') you need to call
@@ -618,26 +618,26 @@ sub submitComment {
 
 ##################################################################
 sub moderate {
-	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin) = @_;
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	my $error = '';
 
 	my $moderate_check = $moddb->moderateCheck($form, $user, $constants, $discussion);
 	if (!$moderate_check->{count} && $moderate_check->{msg}) {
-		print $moderate_check->{msg} if $moderate_check->{msg};
+		$error .= $moderate_check->{msg} if $moderate_check->{msg};
 		return;
 	}
 
 
 	my $hasPosted = $moderate_check->{count};
 
-	titlebar("100%", getData('moderating'));
-	slashDisplay('mod_header');
+
 
 	my $sid = $form->{sid};
 	my $was_touched = 0;
 	my $meta_mods_performed = 0;
 	my $total_deleted = 0;
-	my $error = '';
+
 
 	# Handle Deletions, Points & Reparenting
 	# It would be nice to sort these by current score of the comments
@@ -658,18 +658,18 @@ sub moderate {
 			if ($cid) {
 				$comment = $moddb->getComment($cid);
 			} else {
-				$error .= Slash::Utility::Comments::getError('didnt get a cid')."\n";
+				$error .= Slash::Utility::Comments::getError('didnt get a cid')."<br/>";
 			}
 
 			if ($comment) {
 				$can_mod = Slash::Utility::Comments::_can_mod($comment);
 			} else {
-				$error .=  Slash::Utility::Comments::getError('cannot find comment')."\n";
+				$error .=  Slash::Utility::Comments::getError('cannot find comment')."<br/>";
 			} 
 
 			if ($can_mod) {
 				$ret_val = $moddb->moderateComment(
-					$sid, $cid, $form->{$key}, { comment => $comment }
+					$sid, $cid, $form->{$key}, { comment => $comment, no_display => 1 }, 
 				);
 			} else {
 				# MC: This is useful for debugging general moderation problems, but isn't
@@ -682,15 +682,15 @@ sub moderate {
 			# went wrong.
 			if ($ret_val < 0) {
 				if ($ret_val == -1) {
-					$error .= Slash::Utility::Comments::getError('no points')."\n";
+					$error .= Slash::Utility::Comments::getError('no points')."<br/>";
 				} elsif ($ret_val == -2){
-					$error .= Slash::Utility::Comments::getError('not enough points')."\n";
-				} $error .= ($ret_val == -3){
-					$error .= Slash::Utility::Comments::getError('no self mods')."\n";
-				} $error .= ($ret_val == -4){
-					$error .= Slash::Utility::Comments::getError('not enough karma')."\n";
+					$error .= Slash::Utility::Comments::getError('not enough points')."<br/>";
+				} elsif ($ret_val == -3){
+					$error .= Slash::Utility::Comments::getError('no self mods')."<br/>";
+				} elsif ($ret_val == -4){
+					$error .= Slash::Utility::Comments::getError('not enough karma')."<br/>";
 				} elsif ($ret_val == -5){
-					$error .= Slash::Utility::Comments::getError('needs modded first')."\n";
+					$error .= Slash::Utility::Comments::getError('needs modded first')."<br/>";
 				}
 			} else {
 				$was_touched += $ret_val;
@@ -702,7 +702,7 @@ sub moderate {
 
 
 	if ($hasPosted && !$total_deleted) {
-		$error .= $moderate_check->{msg}."\n";
+		$error .= $moderate_check->{msg}."<br/>";
 	} elsif ($user->{seclev} && $total_deleted) {
 		$error .= slashDisplay('del_message', {
 			total_deleted   => $total_deleted,
@@ -724,9 +724,9 @@ sub moderate {
 	}
 		
 	if ($error) {
-		header($title, $section) or return;
-		$header_emitted = 1;code
-	  print $error;
+		header('Comments', $discussion->{section}) or return;
+		titlebar("100%", getData('moderating'));
+	  print $error;		
 		printComments($discussion, $form->{pid}, $form->{cid},
 			{ force_read_from_master => 1 } );
 	} else {
@@ -740,18 +740,14 @@ sub moderate {
 		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
 		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
 		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
-		$redirect = $redirect."#comment_".$id;
+		$redirect = $redirect."#".$id;
 		
 		# OK -- if we make it all the way here, and there were
 		# no errors, NOW we can finally do it.
 		
 		redirect($redirect);
-		
-		
 	}
-	
 
-	
 	
 }
 
