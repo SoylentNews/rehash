@@ -23,9 +23,10 @@ __template__
 <div id="wide">
 
 [% IF form.sid %]
-[% stripped_title = discussion.title | strip_title %]
+[% stripped_title = discussion.title | strip_title;
+title = "<a href=\"$gSkin.rootdir/comments.pl?sid=$form.sid\">$stripped_title</a>"; %]
 <div class="article">
-	[% PROCESS titlebar title="$stripped_title" %]
+	[% PROCESS titlebar title="$title" %]
 	[% IF parent.story %]
 		<div class="details">
 		[% IF parent.story.by %]
