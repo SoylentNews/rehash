@@ -124,7 +124,7 @@ __template__
 	[% END %]
 [% END %]
 </div>
-[% IF moderate_form %]	</form>[% END %]
+</form>
 [% PROCESS collapsibleCommentsJS %]
 __seclev__
 10000
