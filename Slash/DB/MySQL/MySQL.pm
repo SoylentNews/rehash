@@ -9046,6 +9046,10 @@ sub getDiscussionParent {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
 		my $article = $journal_reader->get($jid);
 		$parent->{content} = $journal_reader->fixJournalText($article->{article}, $article->{posttype}, $article->{uid});
+		$parent->{author} = $slashdb->getAuthor(
+			$article->{uid},
+			[qw( nickname fakeemail homepage )]
+		);
 	}
 	elsif(undef){
 		$parent->{type} = 'poll';

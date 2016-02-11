@@ -505,7 +505,7 @@ sub confirm {
 		}
 	}
 	# Previously we were allowing infinite or zero decimal places.
-	$amount = sprintf("%.2d", $amount);
+	$amount = sprintf("%.2f", $amount);
 
 	my $uid = $form->{uid} || $user->{uid};
 	my $sub_user = $slashdb->getUser($uid);

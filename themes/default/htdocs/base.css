@@ -542,7 +542,11 @@ color: #fff;
 overflow-y: hidden;
 }
 
-#journal .article h3 a, #journal .article h3 a:visited { color: #fff; }
+#journal .article h3 a, #journal .article h3 a:visited
+{
+color: #fff;
+text-decoration: none;
+}
 
 .article .details, .search-results .data
 {
