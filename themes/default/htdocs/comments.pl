@@ -600,10 +600,10 @@ sub submitComment {
 
 	# Setup redirect to new comment
 	my $redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid};
-	$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
-	$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-	$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-	$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+	$redirect = $redirect."&amp;threshold=".$form->{threshold} if defined($form->{threshold});
+	$redirect = $redirect."&amp;highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+	$redirect = $redirect."&amp;commentsort=".$form->{commentsort} if defined($form->{commentsort});
+	$redirect = $redirect."&amp;mode=".$form->{mode} if ($form->{mode});
 	$redirect = $redirect."#comment_".$saved_comment->{cid};
 	
 
@@ -736,10 +736,10 @@ sub moderate {
 		
 		# Setup redirect to new comment
 		my $redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid};
-		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
-		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+		$redirect = $redirect."&amp;threshold=".$form->{threshold} if defined($form->{threshold});
+		$redirect = $redirect."&amp;highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+		$redirect = $redirect."&amp;commentsort=".$form->{commentsort} if defined($form->{commentsort});
+		$redirect = $redirect."&amp;mode=".$form->{mode} if ($form->{mode});
 		$redirect = $redirect."#".$id;
 		
 		# OK -- if we make it all the way here, and there were
