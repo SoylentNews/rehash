@@ -19,7 +19,6 @@ en_US
 __name__
 printCommentsMain
 __template__
-<form action="[% gSkin.rootdir %]/comments.pl#post_comment">
 [% stripped_title = title | strip_title %]
 [% stripped_link = link | strip_urlattr %]
 [% IF parent.type == 'journal' %]
@@ -116,7 +115,7 @@ __template__
 	</div>
 
 	<div class="commentBoxForm" id="commentControlBox">
-	
+		<form action="[% gSkin.rootdir %]/comments.pl#post_comment">
 			<fieldset>
 				<legend>Display Options</legend>
 				 
@@ -146,6 +145,7 @@ __template__
 					}) %]</b></p></span>
 				[% END %]
 			</fieldset>
+		</form>
 		<div class="commentBox">
 			<small><b>The Fine Print:</b> [% fineprint %]</small>
 		</div>
