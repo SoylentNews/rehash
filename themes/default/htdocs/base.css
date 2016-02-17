@@ -393,6 +393,10 @@ input[type=submit]:hover, button[type=submit]:hover, .logout a:hover, div.storyl
 
 input[type=text], input[type=password] {border: 1px solid #555; font-size: 1em;}
 
+button {
+cursor: pointer;
+}
+
 .whysub{
 	text-align:center;
 	margin-left: auto;
