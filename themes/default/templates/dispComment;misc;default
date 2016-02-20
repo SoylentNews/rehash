@@ -23,11 +23,24 @@ en_US
 __name__
 dispComment
 __template__
-[% IF !options.noshow_show %]
+[% collapse = 0;
+	below = 0;
+	IF points < user.threshold;
+		collapse = 1;
+	END;
+	IF points < user.highlightthresh;
+		below = 1;
+	END; %]
+	
 <li id="tree_[% cid %]" class="comment">
-<div id="comment_status_[% cid %]" class="commentstatus"></div>
+[% IF below %]
+	<input type="checkbox" class="commentBelow" checked="checked">
+	<div id=comment_hidden_[% cid %]" class="commentbt">Comment Below Threshold</div>
+[% END %]
+<input type="checkbox" class="commentTreeHider">
+<input type="checkbox" class="commentHider" [% IF collapse %] checked="checked" [% END %]
 <div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
-[% END; IF !options.noshow %]
+[% END %]
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
 			<h4><a name="[% cid %]">[% subject | strip_title %]</a>
@@ -64,9 +77,8 @@ __template__
 	</div>
 	[% PROCESS dispLinkComment %]
 	[% END %]
-[% IF !options.noshow_show %]
+
 </div>
-[% END %]
 
 __seclev__
 10000
