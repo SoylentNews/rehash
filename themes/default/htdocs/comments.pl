@@ -40,7 +40,7 @@ sub main {
 			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
 		},
 		change		=> { 
-			function		=> \&displayComments,
+			function		=> \&changeComment,
 			seclev			=> 0,
 			formname		=> 'discussions',
 			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
@@ -202,7 +202,7 @@ sub main {
 	my $header_emitted = 0;
 	my $title = $constants->{sitename} . '  Comments';
 	$title .= " | $discussion->{'title'}" if $discussion;
-	if ($op ne 'submit' && $op ne 'unspam' && $op ne 'moderate') {
+	if ($op ne 'submit' && $op ne 'unspam' && $op ne 'moderate'  && $op ne 'change' ) {
 		header($title, $section) or return;
 		$header_emitted = 1;
 	}
@@ -616,6 +616,38 @@ sub submitComment {
 	return(1);
 }
 
+
+##################################################################
+# Change Comment Options
+# Actual save is in the perpareUser routine.  This function just 
+# does a redirect with the proper options set.
+# Also, header() is NOT called before this function is called.
+
+sub changeComment {
+	my($form, $slashdb, $user, $constants, $discussion) = @_;
+
+	# Setup redirect to new comment
+		my $redirect = '';
+		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
+		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
+		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+		$redirect = $redirect."&noupdate=1";
+		
+		# Check if url has parameters or is naked
+		# Add ? if naked
+		if (index($discussion->{url}, '?') != -1 ) {
+			$redirect = $discussion->{url}.$redirect;
+		} else {
+			$redirect = $discussion->{url}."?".$redirect;
+		}
+		
+		$redirect = $redirect."#comment_".$saved_comment->{cid};
+	
+	redirect($redirect);
+
+	return(1);
+}
 
 ##################################################################
 sub moderate {

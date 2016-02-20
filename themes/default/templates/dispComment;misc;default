@@ -23,22 +23,13 @@ en_US
 __name__
 dispComment
 __template__
-[% collapse = 0;
-	below = 0;
-	IF points < user.highlightthresh;
-		collapse = 1;
-	END;
-	IF points < user.threshold;
-		below = 1;
-	END %]
-	
 <li id="tree_[% cid %]" class="comment">
-[% IF below %]
+[% IF points < user.threshold %]
 	<input type="checkbox" class="commentBelow" checked="checked" />
 	<div id=comment_below_id %]" class="commentbt">Comment Below Threshold</div>
 [% END %]
 <input type="checkbox" class="commentTreeHider" />
-<input type="checkbox" class="commentHider" [% IF collapse %] checked="checked" [% END %] />
+<input type="checkbox" class="commentHider" [% IF points < user.highlightthresh %] checked="checked" [% END %] />
 <div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">

@@ -115,12 +115,7 @@ __template__
 	</div>
 
 	<div class="commentBoxForm" id="commentControlBox">
-		[% IF cid;
-				action = gSkin.rootdir _ "/comments.pl#post_comment";
-			ELSE;
-				action = stripped_link;
-			END %]	
-		<form action="[%action %]">
+		<form action="[% gSkin.rootdir %]/comments.pl#post_comment">
 			<fieldset>
 				<legend>Display Options</legend>
 				 
@@ -136,9 +131,7 @@ __template__
 					Save: <input type="checkbox" name="savechanges" class="button">
 				[%- END %]
 				<input type="submit" name="op" value="Change" class="button">
-				[% IF cid %]<input type="hidden" name="sid" value="[% sid %]">[% END %]
-				[% IF parent.stoid %]<input type="hidden" name="sid" value="[% parent.stoid %]">[% END %]
-				
+				<input type="hidden" name="sid" value="[% sid %]">
 				<input type="hidden" name="noupdate" value="1">
 				[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% reply = 'Reply to Comment'; END %]
 				[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]

@@ -9034,7 +9034,6 @@ sub getDiscussionParent {
 		my $story = $self->getStory($stoid);
 		$story->{atstorytime} = " on ".timeCalc($story->{time});
 		$parent->{type} = 'story';
-		$parent->{stoid} = $stoid;
 		$parent->{content} = $story->{bodytext} ? $story->{introtext}.$story->{bodytext} : $story->{introtext};
 		$parent->{story} = $story;
 		$parent->{author} = $slashdb->getAuthor(

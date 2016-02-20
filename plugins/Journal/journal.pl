@@ -69,7 +69,6 @@ sub main {
 
 		list		=> [ 1,			\&listArticle		],
 		display		=> [ 1,			\&displayArticle	],
-		change		=> [ 1,			\&displayArticle	],
 		top		=> [ $top_ok,		\&displayTop		],
 		searchusers	=> [ 1,			\&searchUsers		],
 		friends		=> [ 1,			\&displayFriends	],
