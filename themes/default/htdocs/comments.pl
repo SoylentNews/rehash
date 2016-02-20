@@ -642,7 +642,7 @@ sub changeComment {
 			$redirect = $discussion->{url}."?".$redirect;
 		}
 		
-		$redirect = $redirect."#comment_".$saved_comment->{cid};
+		$redirect = $redirect."#commentwrap"->{cid};
 	
 	redirect($redirect);
 
