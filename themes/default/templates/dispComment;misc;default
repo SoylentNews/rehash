@@ -30,17 +30,16 @@ __template__
 	END;
 	IF points < user.highlightthresh;
 		below = 1;
-	END; %]
+	END %]
 	
 <li id="tree_[% cid %]" class="comment">
 [% IF below %]
-	<input type="checkbox" class="commentBelow" checked="checked">
-	<div id=comment_hidden_[% cid %]" class="commentbt">Comment Below Threshold</div>
+	<input type="checkbox" class="commentBelow" checked="checked" />
+	<div id=comment_below_id %]" class="commentbt">Comment Below Threshold</div>
 [% END %]
-<input type="checkbox" class="commentTreeHider">
-<input type="checkbox" class="commentHider" [% IF collapse %] checked="checked" [% END %]
+<input type="checkbox" class="commentTreeHider" />
+<input type="checkbox" class="commentHider" [% IF collapse %] checked="checked" [% END %] />
 <div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
-[% END %]
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
 			<h4><a name="[% cid %]">[% subject | strip_title %]</a>
@@ -76,7 +75,6 @@ __template__
 	[% END %]
 	</div>
 	[% PROCESS dispLinkComment %]
-	[% END %]
 
 </div>
 
