@@ -25,10 +25,10 @@ dispComment
 __template__
 [% collapse = 0;
 	below = 0;
-	IF points < user.threshold;
+	IF points < user.highlightthresh;
 		collapse = 1;
 	END;
-	IF points < user.highlightthresh;
+	IF points < user.threshold;
 		below = 1;
 	END %]
 	

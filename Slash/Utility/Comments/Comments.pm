@@ -81,9 +81,9 @@ sub selectComments {
 	my $commentsort = defined $options->{commentsort}
 		? $options->{commentsort}
 		: $user->{commentsort};
-	my $threshold = defined $options->{threshold}
-		? $options->{threshold}
-		: $user->{threshold};
+	my $threshold = -1; #defined $options->{threshold}
+#		? $options->{threshold}
+#		: $user->{threshold};
 
 
 	my $comments; # One bigass hashref full of comments
@@ -367,7 +367,7 @@ sub selectComments {
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
 #slashProf("sC reparenting");
-	reparentComments($comments, $reader, $options);
+#	reparentComments($comments, $reader, $options);
 #slashProf("", "sC reparenting");
 
 	return($comments, $count);
