@@ -1301,11 +1301,11 @@ sub displayThread {
 	my $return = '';
 
 	my $discussion2 = discussion2($user);
-	my $threshold = $discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
-	my $highlightthresh = $discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
+	my $threshold = -1; #$discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
+	my $highlightthresh = -1; #$discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 	# root comment should have more likelihood to be full
-	$highlightthresh-- if !$pid;
+	#$highlightthresh-- if !$pid;
 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
 	# of the discussion without page breaks.  'metamod' means we're doing
