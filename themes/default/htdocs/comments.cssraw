@@ -342,7 +342,7 @@ input.commentTreeHider:checked ~ ul {
 
 input.commentBelow:checked ~ input.commentHider,
 input.commentBelow:checked ~ input.commentTreeHider,
-input.commentBelow:checked ~ div.commentDiv,
+input.commentBelow:checked ~ div.commentDiv
 {
 	display: none;
 }
