@@ -23,30 +23,34 @@ __template__
 <div id="wide">
 
 [% IF form.sid %]
-[% stripped_title = discussion.title | strip_title %]
+[% stripped_title = discussion.title | strip_title;
+title = "<a href=\"$gSkin.rootdir/comments.pl?sid=$form.sid\">$stripped_title</a>"; %]
 <div class="article">
-	[% PROCESS titlebar title="$stripped_title" %]
-	[% IF parent.story %]
-		<div class="details">
-		[% IF parent.story.by %]
-		Written by [% parent.story.by | strip_literal %]
-		[% END %]
-		posted by
-		[% IF parent.author.homepage %]
-			<a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
-		[% ELSE %]
-			<a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
-		[% END %]
-		[% parent.story.atstorytime %]
-		[% IF constants.plugin.Print %] 
-			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
-		[% END %]
-		[% IF constants.plugin.Email %]
-			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/email.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir -%]/email.gif" height="14" width="20" alt="Email story" ></a>
-		[% END %]<br>
-		[% IF constants.use_dept && parent.story.dept %]<strong>from the <b>[% parent.story.dept %]</b> dept.</strong>[% END %]
-		</div>
-	[% END %]
+	[% PROCESS titlebar title="$title" %]
+	 <div class="details">
+		[% IF parent.story %]
+		 [% IF parent.story.by %]
+		 Written by [% parent.story.by | strip_literal %]
+		 [% END %]
+		 posted by
+		 [% IF parent.author.homepage %]
+			 <a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
+		 [% ELSE %]
+			 <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
+		 [% END %]
+		 [% parent.story.atstorytime %]
+		 [% IF constants.plugin.Print %] 
+			 &nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
+		 [% END %]
+		 [% IF constants.plugin.Email %]
+			 &nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/email.pl?sid=[% parent.story.sid %]"><img src="[% constants.imagedir -%]/email.gif" height="14" width="20" alt="Email story" ></a>
+		 [% END %]<br>
+		 [% IF constants.use_dept && parent.story.dept %]<strong>from the <b>[% parent.story.dept %]</b> dept.</strong>[% END %]
+	 [% END %]
+	 [% IF parent.type == 'journal' %]
+		Journal by <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/journal">[% parent.author.nickname | strip_literal %]</a>
+	 [% END %]
+	</div>
 	<div class="body">
 		<div class="intro">[% parent.content %]</div>
 	</div>
@@ -91,11 +95,12 @@ __template__
 		<input type="hidden" name="returnto_commentpostsuccess_confirm"
 			value="[% form.returnto_commentpostsuccess_confirm | strip_attribute %]">
 	[% END %]
-	<input type="hidden" name="mode" value="[% user.mode %]">
+	[% IF form.threshold.defined %]<input type="hidden" name="threshold" value="[% form.threshold %]">[% END %]
+	[% IF form.highlightthresh.defined %]<input type="hidden" name="highlightthresh" value="[% form.highlightthresh %]">[% END %]
+	[% IF form.commentsort.defined %]<input type="hidden" name="commentsort" value="[% form.commentsort %]">[% END %]
+	[% IF form.mode.defined %]<input type="hidden" name="mode" value="[% form.mode %]">[% END %]
 	<input type="hidden" name="startat" value="[% user.startat %]">
-	<input type="hidden" name="threshold" value="[% user.threshold %]">
-	<input type="hidden" name="commentsort" value="[% user.commentsort %]">
-        [% IF gotmodwarning %]<input type="hidden" name="gotmodwarning" value="1">[% END %]
+  [% IF gotmodwarning %]<input type="hidden" name="gotmodwarning" value="1">[% END %]
 
 [% PROCESS formkey_tag %]
 
