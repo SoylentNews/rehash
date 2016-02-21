@@ -25,11 +25,11 @@ dispComment
 __template__
 <li id="tree_[% cid %]" class="comment">
 [% IF points < user.threshold %]
-	<input type="checkbox" class="commentBelow" checked="checked" />
-	<div id=comment_below_id %]" class="commentbt">Comment Below Threshold</div>
+	<input id="commentBelow_[% cid %]"type="checkbox" class="commentBelow" checked="checked" /><label for="commentBelow_[% cid %]"> </label>
+	<div id="comment_below_[% cid %]" class="commentbt commentDiv"><div class="commentTop"><div class="title"><h4>Comment Below Threshold</h4></div></div></div>
 [% END %]
-<input type="checkbox" class="commentTreeHider" />
-<input type="checkbox" class="commentHider" [% IF points < user.highlightthresh %] checked="checked" [% END %] />
+<input id="commentTreeHider_[% cid %]" type="checkbox" class="commentTreeHider" /><label for="commentTreeHider_[% cid %]'> </label>
+<input id="commentHider_[% cid %]"type="checkbox" class="commentHider" [% IF points < user.highlightthresh %] checked="checked" [% END %] /><label for="commentHider_[% cid %]"> </label>
 <div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
@@ -42,7 +42,7 @@ __template__
 			[% END %]
 			[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 			</span>
-				[% IF marked_spam %] <div style="float: right"> <a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">[Unspam-Only]</a> or <a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]">[Unspam-AND-Ban]</a></div>[% END %]
+				[% IF marked_spam %] <div class="spam"> <a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]&noban=1">[Unspam-Only]</a> or <a href="[% constants.real_rootdir %]/comments.pl?op=unspam&sid=[% sid %]&cid=[% cid %]">[Unspam-AND-Ban]</a></div>[% END %]
 			</h4>
 		</div>
 		<div class="details">
