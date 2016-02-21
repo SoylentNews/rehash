@@ -607,10 +607,16 @@ color: #ffb200;
 .data .status1 {background:#600;}
 .data .status2 {background:#262;}
 
-.gs_story_main { background: #262; color: #0C0; }
-.ss_story_main { background: #662; color: #0C0; }
-.ns_story_main { background: #600; color: #0C0; }
-.gs_story_main a, .gs_story_main a:visited, .gs_story_sec a, .gs_story_sec a:visited { color: #0C0; }
-.ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #0C0; }
-.ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #0C0; }
-.admin_story_list a, .admin_story_list a:visited { color: #0C0; }
+.gs_story_main { background: #262; color: #ffa200; }
+.ss_story_main { background: #662; color: #ffa200; }
+.ns_story_main { background: #600; color: #ffa200; }
+.gs_story_main a, .gs_story_main a:visited, .gs_story_sec a, .gs_story_sec a:visited { color: #ffa200; }
+.ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #ffa200; }
+.ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #ffa200; }
+.admin_story_list a, .admin_story_list a:visited { color: #ffa200; }
+
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4,
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4 a
+{
+  color: #ffa200;
+}

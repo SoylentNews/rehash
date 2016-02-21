@@ -553,3 +553,9 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 	border-top: none;
 	background: #222;
 }
+
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4,
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4 a
+{
+  color: #fff;
+}
