@@ -145,7 +145,7 @@ __template__
 						subject_only => 1,
 					}) %]</b></p></span>
 				[% END %]
-				 <span class="nbutton"><p><b><a href="[% action %]">Mark All as Read</a></b></p></span>
+				 <span class="nbutton"><p><b><a href="[% discussion.url %]">Mark All as Read</a></b></p></span>
 			</fieldset>
 		</form>
 		<div class="commentBox">
