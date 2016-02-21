@@ -296,7 +296,7 @@ ul#commentlisting
 .nbutton a:hover {background-color: #555}
 
 
-/* Collapsable comments */
+/* Collapsible comments */
 
 input.commentTreeHider:checked ~ label.commentHider
 {
