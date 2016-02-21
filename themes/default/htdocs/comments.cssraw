@@ -352,6 +352,7 @@ li.comment input[type=checkbox] + label{
 	position:absolute;
 	width:16px;
 	margin-left:10px;
+	margin-top: 0.45em;
 	background: url("[% constants.imagedir %]/minus.png");
 }
 
