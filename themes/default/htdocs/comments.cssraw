@@ -389,3 +389,8 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
   background: url("//dev.soylentnews.org/images/chev2up.png");
 	margin-left:28px;
 }
+
+.noCollapse .commentTop .title h4
+{
+	padding-left: .6em;
+}

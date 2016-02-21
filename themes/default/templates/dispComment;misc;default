@@ -42,7 +42,7 @@ __template__
 	  [% IF user.mode != 'flat' %]<label class="commentTreeHider" title="Show/Hide Comment Tree" for="commentTreeHider_[% cid %]"> </label>[% END %]
 	  <label class="commentHider" title="Show/Hide Comment" for="commentHider_[% cid %]"> </label>
   [% END %]	
-<div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
+<div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?"; IF noCollaspe %] noCollapse[% END %]">
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
 			<h4><a name="[% cid %]">[% subject | strip_title %]</a>
