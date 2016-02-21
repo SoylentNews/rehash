@@ -360,7 +360,7 @@ li.comment input[type=checkbox] + label{
 }
 
 li.comment input.commentTreeHider + label{
-  background: url("[% constants.imagedir %]/chev2donw.png");
+  background: url("[% constants.imagedir %]/chev2down.png");
 	margin-left:28px;
 }
 
