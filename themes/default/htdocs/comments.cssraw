@@ -298,7 +298,7 @@ ul#commentlisting
 
 /* Collapsable comments */
 
-input.commentTreeHider:checked ~ input.commentHider + label
+input.commentTreeHider:checked ~ label.commentHider
 {
 	display:none;
 }
@@ -326,8 +326,8 @@ input.commentTreeHider:checked ~ ul
 	display:none;
 }
 
-input.commentBelow:checked ~ input.commentHider + label,
-input.commentBelow:checked ~ input.commentTreeHider + label,
+input.commentBelow:checked ~ label.commentHider,
+input.commentBelow:checked ~ label.commentTreeHider,
 input.commentBelow:checked ~ div.commentDiv
 {
 	display: none;
@@ -351,24 +351,39 @@ input.commentBelow:checked ~ div.commentbt
 	display:block;
 }
 
-li.comment input[type=checkbox] + label{
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title
+{
+  background: none;
+}
+
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4,
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4 a
+{
+  color: #000;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+li.comment input[type=checkbox] ~ label{
 	position:absolute;
 	width:16px;
 	margin-left:10px;
-	margin-top: 0.45em;
-	background: url("[% constants.imagedir %]/chev1down.png");
+	margin-top: .45em;
+	cursor: pointer;
+	background: url("//dev.soylentnews.org/images/chev1down.png"), no-repeat;
 }
 
-li.comment input.commentTreeHider + label{
-  background: url("[% constants.imagedir %]/chev2down.png");
+li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
+  background: url("//dev.soylentnews.org/images/chev2down.png");
 	margin-left:28px;
 }
 
-li.comment input[type=checkbox]:checked + label{
-	background: url("[% constants.imagedir %]/chev1up.png");
+li.comment input[type=checkbox]:checked ~ label{
+	background: url("//dev.soylentnews.org/images/chev1up.png");
+	margin-top: .15em;
 }
 
-li.comment input.commentTreeHider:checked + label{
-  background: url("[% constants.imagedir %]/chev2up.png");
+li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
+  background: url("//dev.soylentnews.org/images/chev2up.png");
 	margin-left:28px;
 }
