@@ -24,15 +24,24 @@ __name__
 dispComment
 __template__
 <li id="tree_[% cid %]" class="comment">
-[% IF points < user.threshold %]
-	<input id="commentBelow_[% cid %]"type="checkbox" class="commentBelow" checked="checked" autocomplete="off" />
-	<label class="commentBelow" title="Load Comment" for="commentBelow_[% cid %]"> </label>
-	<div id="comment_below_[% cid %]" class="commentbt commentDiv"><div class="commentTop"><div class="title"><h4>Comment Below Threshold</h4></div></div></div>
-[% END %]
-<input id="commentTreeHider_[% cid %]" type="checkbox" class="commentTreeHider" autocomplete="off" />
-<input id="commentHider_[% cid %]"type="checkbox" class="commentHider" [% IF points < user.highlightthresh %] checked="checked" [% END %] autocomplete="off" />
-<label class="commentTreeHider" title="Show/Hide Comment Tree" for="commentTreeHider_[% cid %]"> </label>
-<label class="commentHider" title="Show/Hide Comment" for="commentHider_[% cid %]"> </label>
+[% show = 0;
+  IF form.cid.length && form.cid == cid;
+    show = 1;
+  END;
+	IF user.uid == uid && !user.is_anon;
+		show = 1;
+  END;
+	IF !options.noCollapse;
+		IF points.length && points < user.threshold && !show %]
+		  <input id="commentBelow_[% cid %]"type="checkbox" class="commentBelow" checked="checked" autocomplete="off" />
+	  	<label class="commentBelow" title="Load Comment" for="commentBelow_[% cid %]"> </label>
+	  	<div id="comment_below_[% cid %]" class="commentbt commentDiv"><div class="commentTop"><div class="title"><h4>Comment Below Threshold</h4></div></div></div>
+	  [% END %]
+    [% IF user.mode != 'flat' %]<input id="commentTreeHider_[% cid %]" type="checkbox" class="commentTreeHider" autocomplete="off" />[% END %]
+  	<input id="commentHider_[% cid %]"type="checkbox" class="commentHider" [% IF points.length && points < user.highlightthresh && !show %] checked="checked" [% END %] autocomplete="off" />
+	  [% IF user.mode != 'flat' %]<label class="commentTreeHider" title="Show/Hide Comment Tree" for="commentTreeHider_[% cid %]"> </label>[% END %]
+	  <label class="commentHider" title="Show/Hide Comment" for="commentHider_[% cid %]"> </label>
+  [% END %]	
 <div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
 	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">

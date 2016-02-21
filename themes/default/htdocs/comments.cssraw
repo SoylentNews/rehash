@@ -106,7 +106,7 @@ html > body .commentwrap table {
 {
 	color: #fff;
 	display: block;
-	padding: .3em .6em .3em 3em;
+	padding: .3em .6em .3em 55px;
 	overflow-y: hidden;
 }
 
