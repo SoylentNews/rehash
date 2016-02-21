@@ -334,19 +334,15 @@ input.commentBelow:checked ~ div.commentDiv
 }
 
 input.commentBelow,
-input.commentBelow ~ div.commentbt
+input.commentBelow ~ div.commentbt,
+input.commentBelow ~ label.commentBelow
 {
 	display:none;
 }
 
-li.comment input.commentBelow,
-li.comment input.commentHider,
-li.comment input.commentTreeHider {
-	display:none
-}
-
 input.commentBelow:checked,
 input.commentBelow:checked ~ div.commentbt
+input.commentBelow ~ label.commentBelow
 {
 	display:block;
 }
@@ -362,6 +358,12 @@ li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h
   color: #000;
 	padding-top: 0;
 	padding-bottom: 0;
+}
+
+li.comment input.commentBelow,
+li.comment input.commentHider,
+li.comment input.commentTreeHider {
+	display:none
 }
 
 li.comment input[type=checkbox] ~ label{
