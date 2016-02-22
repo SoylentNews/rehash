@@ -6209,19 +6209,21 @@ sub getCommentsForUser {
 	$other.= "ORDER BY $options->{order_col} $order_dir" if $options->{order_col};
 	$other.= " LIMIT $options->{limit}" if $options->{limit};
 
-	my $select = " cid, date, date as time, subject, nickname, "
+	my $select = " comments.cid, date, date as time, subject, nickname, "
 		. "homepage, fakeemail, users.uid AS uid, sig, "
 		. "comments.points AS points, pointsorig, "
 		. "tweak, tweak_orig, subject_orig, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
 		. "karma_bonus, "
-		. "len, badge_id, CONCAT('<SLASH type=\"COMMENT-TEXT\">', cid ,'</SLASH>') as comment";
+		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
 	}
-	my $tables = "comments, users";
-	my $where = "sid=$sid_quoted AND comments.uid=users.uid ";
+	# Because fuck a bunch of doing search and replace to add comment text.
+	# That shit is insanely expensive compared to this.
+	my $tables = "comments LEFT JOIN comment_text ON comments.cid=comment_text.cid LEFT JOIN users ON comments.uid=users.uid";
+	my $where = "sid=$sid_quoted";
 
 	if ($cid && $one_cid_only) {
 		$where .= "AND cid=$cid";
@@ -6614,19 +6616,28 @@ sub saveCommentReadLog {
 	}
 
 	if ($mcd) {
-		$mcd->delete($mcdkey);
+		$mcd->delete("$mcdkey:now");
+		$mcd->delete("$mcdkey:new");
 	}
 
 	# cache inserts?
 	my @sorted = sort { $b <=> $a } @$comments;
-	$self->sqlReplace('users_comments_read_log', {
-		uid            => $uid,
-		discussion_id  => $discussion_id,
-		cid            => $sorted[0]
+	my $cidnow = $self->sqlSelect('cid_now',
+		'users_comments_read_log',
+		'uid=' . $self->sqlQuote($uid) .
+		' AND discussion_id=' . $self->sqlQuote($discussion_id);
+	$cidnow ||= 0;
+	$cidnew = $sorted[0];
+	$self->sqlInsert('users_comments_read_log', {
+		uid		=> $uid,
+		discussion_id	=> $discussion_id,
+		cid_now		=> $cidnow,
+		cid_new		=> $cidnew
 	});
 
 	if ($mcd) {
-		$mcd->set($mcdkey, $sorted[0]);
+		$mcd->set("$mcdkey:now", $cidnow);
+		$mcd->set("$mcdkey:new", $cidnew);
 	}
 
 	return 1;
@@ -6640,28 +6651,23 @@ sub getCommentReadLog {
 	return if isAnon($uid);
 
 	my($mcd, $mcdkey);
-	if (!$no_mcd) {
-		$mcd = $self->getMCD;
-		##########
-		# TMB Throws errors all the damned time if memcached isn't being used and this is accessed improperly.
-		$self->{_mcd_keyprefix} ||= '';
-		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
-	}
+	$mcd = $self->getMCD;
+	my $cids = {};
 
-	my $last_read;
 	if ($mcd) {
-		$last_read = $mcd->get($mcdkey);
-		return $last_read if $last_read;
+		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
+		$cids->{cid_now} = $mcd->get("$mcdkey:now");
+		$cids->{cid_new} = $mcd->get("$mcdkey:new");
 	}
+	else {
+		$cids = $self->sqlSelectHashref(
+			'cid_now, cid_new',
+			'users_comments_read_log',
+			'uid=' . $self->sqlQuote($uid) .
+			' AND discussion_id=' . $self->sqlQuote($discussion_id)
+		);
 
-	$last_read = $self->sqlSelect(
-		'cid',
-		'users_comments_read_log',
-		'uid=' . $self->sqlQuote($uid) .
-		' AND discussion_id=' . $self->sqlQuote($discussion_id)
-	) or return;
-
-	return $last_read;
+	return $cids;
 }
 
 #######################################################
@@ -13336,7 +13342,8 @@ sub upgradeCoreDB() {
 		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
 uid mediumint(8) unsigned NOT NULL,
 discussion_id mediumint(8) unsigned NOT NULL,
-cid int(10) unsigned NOT NULL,
+cid_now int(10) unsigned NOT NULL,
+cid_next int(10) unsigned NOT NULL,
 UNIQUE KEY didnuid (discussion_id, uid)
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 		")) {
