@@ -116,7 +116,7 @@ html > body .commentwrap table {
 	font-size: .85em;
 }
 
-.commentTop .title h4 .sapm
+.commentTop .title h4 .spam
 {
   float: right;	
 }
