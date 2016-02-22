@@ -6627,14 +6627,26 @@ sub saveCommentReadLog {
 		'users_comments_read_log',
 		'uid=' . $self->sqlQuote($uid) .
 		' AND discussion_id=' . $self->sqlQuote($discussion_id));
-	$cidnow ||= 0;
+	my $oldcidnew = $self->sqlSelect('cid_new',
+                'users_comments_read_log',
+                'uid=' . $self->sqlQuote($uid) .
+                ' AND discussion_id=' . $self->sqlQuote($discussion_id));
 	my $cidnew = $sorted[0];
-	$self->sqlInsert('users_comments_read_log', {
-		uid		=> $uid,
-		discussion_id	=> $discussion_id,
-		cid_now		=> $cidnow,
-		cid_new		=> $cidnew
-	});
+	if(!defined($cidnow)) {
+		$self->sqlInsert('users_comments_read_log', {
+			uid		=> $uid,
+			discussion_id	=> $discussion_id,
+			cid_now		=> '0',
+			cid_new		=> $cidnew
+		});
+	}
+	else {
+		$self->sqlUpdate('users_comments_read_log', {
+			cid_now		=> $oldcidnew,
+			cid_new		=> $cidnew },
+			"uid = $uid AND discussion_id = $discussion_id"
+		);
+	}
 
 	if ($mcd) {
 		$mcd->set("$mcdkey:now", $cidnow);
@@ -6667,6 +6679,7 @@ sub getCommentReadLog {
 			'uid=' . $self->sqlQuote($uid) .
 			' AND discussion_id=' . $self->sqlQuote($discussion_id)
 		);
+	}
 
 	return $cids;
 }
@@ -13335,24 +13348,27 @@ sub upgradeCoreDB() {
 		$core_ver = 1;
 		$upgrades_done++;
 	}
-#	if ($core_ver == 1) {
-#		print "upgrading core to v2 ...\n";
-#		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
-#			return 0;
-#		}
-#		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
-#uid mediumint(8) unsigned NOT NULL,
-#discussion_id mediumint(8) unsigned NOT NULL,
-#cid_now int(10) unsigned NOT NULL,
-#cid_next int(10) unsigned NOT NULL,
-#UNIQUE KEY didnuid (discussion_id, uid)
-#) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-#		")) {
-#			return 0;
-#		}
-#		$core_ver = 2;
-#		$upgrades_done++;
-#	}
+	if ($core_ver == 1) {
+		print "upgrading core to v2 ...\n";
+		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
+			return 0;
+		}
+		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
+uid mediumint(8) unsigned NOT NULL,
+discussion_id mediumint(8) unsigned NOT NULL,
+cid_now int(10) unsigned NOT NULL,
+cid_new int(10) unsigned NOT NULL,
+UNIQUE KEY didnuid (discussion_id, uid)
+) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+		")) {
+			return 0;
+		}
+		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
+                        return 0;
+                };
+		$core_ver = 2;
+		$upgrades_done++;
+	}
 
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for core\n";

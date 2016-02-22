@@ -1492,11 +1492,9 @@ EOT
 
 #use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
 
-	my $discussion2 = discussion2($user);
-
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, $reasons, $options, $discussion2
+		$can_mod, $reasons, $options, 0
 	) if $constants->{comments_hardcoded};
 
 	if ($options->{show_pieces}) {
@@ -1507,7 +1505,6 @@ EOT
 			reasons		=> $reasons,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
-			discussion2	=> $discussion2,
 			options		=> $options
 		}, { Return => 1, Nocomm => 1 });
 		push @return, slashDisplay('dispLinkComment', {
@@ -1517,7 +1514,6 @@ EOT
 			ordered		=> $ordered,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
-			discussion2	=> $discussion2,
 			options		=> $options
 		}, { Return => 1, Nocomm => 1 });
 		return @return;
@@ -1533,7 +1529,6 @@ EOT
 		ordered		=> $ordered,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
-		discussion2	=> $discussion2,
 		options		=> $options,
 		subscriber_badge => $subscriber_badge
 	}, { Return => 1, Nocomm => 1 });
