@@ -54,37 +54,18 @@ sub selectComments {
 	my($min, $max) = ($constants->{comment_minscore}, 
 			  $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
-# print STDERR scalar(gmtime) . " selectComments cid undef for $discussion\n" if !defined($cid);
 	$cid ||= 0;
 
-	my $discussion2 = discussion2($user);
-
-#slashProf("sC setup");
 
 	# it's a bit of a drag, but ... oh well! 
 	# print_cchp gets messed up with d2, so we just punt and have
 	# selectComments called twice if necessary, the first time doing
 	# print_cchp, then blanking that out so it is not done again -- pudge
 	my $shtml = 0;
-	if ($discussion2 && $form->{ssi} && $form->{ssi} eq 'yes' && $form->{cchp}) {
-		$user->{discussion2} = 'none';
-		selectComments($discussion, $cid, $options);
-		$user->{discussion2} = $discussion2;
-		$shtml = 1;
-		delete $form->{cchp};
-	}
-
-	my $comments_read = !$user->{is_anon}
-		? $slashdb->getCommentReadLog($discussion->{id}, $user->{uid})
-		: {};
 
 	my $commentsort = defined $options->{commentsort}
 		? $options->{commentsort}
 		: $user->{commentsort};
-	my $threshold = -1; #defined $options->{threshold}
-#		? $options->{threshold}
-#		: $user->{threshold};
-
 
 	my $comments; # One bigass hashref full of comments
 	for my $x (0..$num_scores-1) {
@@ -108,15 +89,11 @@ sub selectComments {
 		cache_read_only	=> $cache_read_only,
 		one_cid_only	=> $options->{one_cid_only},
 	};
-	$gcfu_opt->{discussion2} = $discussion2;
-#slashProf("sC getCommentsForUser");
 	if ($options->{force_read_from_master}) {
 		$thisComment = $slashdb->getCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
 	} else {
 		$thisComment = $reader->getCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
 	}
-#slashProf("", "sC getCommentsForUser");
-#slashProfBail() if $cid || @$thisComment < 100;
 
 	if (!$thisComment) {
 		_print_cchp($discussion);
@@ -132,7 +109,11 @@ sub selectComments {
 
 	# We first loop through the comments and assign bonuses and
 	# and such.
-	for my $C (@$thisComment) {
+	# We also need to build a cid list for sending to saveCommentReadLog,
+	# might as well do it now.
+	my @cids = ();
+	foreach my $C (@$thisComment) {
+		push(@cids, $C->{cid});
 		# By setting pid to zero, we remove the threaded
 		# relationship between the comments. Don't ignore threads
 		# in forums, or when viewing a single comment (cid > 0)
@@ -144,103 +125,29 @@ sub selectComments {
 		# precisely, it munges up other things).
 		# I'm still looking into how to get parent links and
 		# children to show up properly in flat mode. - Jamie 2002/07/30
-#		$user->{state}{noreparent} = 1 if $commentsort > 3;
-#my $errstr = "selectComments discid=$discussion->{id} cid=$cid options=" . Dumper($options); $errstr =~ s/\s+/ /g;
 		$C->{points} = getPoints($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
 	}
 
-	my $d2_comment_q = $user->{d2_comment_q};
-	if ($discussion2 && !$d2_comment_q) {
-		if ($user->{is_anon}) {
-			$d2_comment_q = 5; # medium
-		}
-	}
-
-#slashProf("sC main sort", "sC setup");
 	my($oldComment, %old_comments);
-	# MC: hack hack hack (force d2 off
-	if ($discussion2 && !$options->{no_d2}) {
-		my $limits = $slashdb->getDescriptions('d2_comment_limits');
-		my $max = $d2_comment_q ? $limits->{ $d2_comment_q } : 0;
-		$max = int($max/2) if $shtml;
-		my @new_comments;
-		$options->{existing} ||= {};
-		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
-
-		# we need to filter which comments are descendants of $cid
-		my %cid_seen;
-		if ($cid) {
-			# for display later
-			$user->{state}{d2_defaultclass}{$cid} = 'full';
-			# this only works because we are already in cid order
-			for my $C (@$thisComment) {
-				if ($cid == $C->{cid} || $cid_seen{$C->{pid}}) {
-					$cid_seen{$C->{cid}} = 1;
-				}
-			}
-		}
-
-		my $sort_comments;
-		if (!$user->{d2_comment_order}) { # score
-			$sort_comments = [ sort {
-				$b->{points} <=> $a->{points}
-					||
-				$a->{cid} <=> $b->{cid}
-			} @$thisComment ];
-		} else { # date / cid
-			$sort_comments = $thisComment;
-		}
-
-
-		for my $C (@$sort_comments) {
-			next if $options->{existing}{$C->{cid}};
-
-			if ($max && @new_comments >= $max) {
-				if ($cid) {
-					# still include $cid even if it would
-					# otherwise be excluded (should only
-					# matter if not sorting by date
-					push @new_comments, $C if $cid == $C->{cid};
-				} else {
-					last;
-				}
-			} else {
-				next if $cid && !$cid_seen{$C->{cid}};
-				push @new_comments, $C;
-			}
-		}
-
-		$comments->{0}{d2_seen} = makeCommentBitmap({
-			%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments
-		});
-
-		@new_comments = sort { $a->{cid} <=> $b->{cid} } @new_comments;
-		($oldComment, $thisComment) = ($thisComment, \@new_comments);
-		%old_comments = map { $_->{cid} => $_ } @$oldComment;
-
+	# If we are sorting by highest score we resort to figure in bonuses
+	if ($commentsort == 3) {
+		@$thisComment = sort {
+			$b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid}
+		} @$thisComment;
+	} elsif ($commentsort == 1 || $commentsort == 5) {
+		@$thisComment = sort {
+			$b->{cid} <=> $a->{cid}
+		} @$thisComment;
 	} else {
-		# If we are sorting by highest score we resort to figure in bonuses
-		if ($commentsort == 3) {
-			@$thisComment = sort {
-				$b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid}
-			} @$thisComment;
-		} elsif ($commentsort == 1 || $commentsort == 5) {
-			@$thisComment = sort {
-				$b->{cid} <=> $a->{cid}
-			} @$thisComment;
-		} else {
-			@$thisComment = sort {
-				$a->{cid} <=> $b->{cid}
-			} @$thisComment;
-		}
+		@$thisComment = sort {
+			$a->{cid} <=> $b->{cid}
+		} @$thisComment;
 	}
-##slashProf("sC fudging", "sC main sort");
-#slashProf("", "sC main sort");
 
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# in the index of the hash (based on its cid).
-	for my $C (@$thisComment) {
+	foreach my $C (@$thisComment) {
 		# Let us fill the hash range for hitparade
 		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;  
 
@@ -258,29 +165,15 @@ sub selectComments {
 		$comments->{$C->{cid}}{kids} = $tmpkids || [];
 		$comments->{$C->{cid}}{visiblekids} = $tmpvkids || 0;
 
-		$comments->{$C->{cid}}{has_read} = $comments_read->{$C->{cid}};
-		$user->{state}{d2_defaultclass}{$C->{cid}} = 'oneline'
-			if $user->{d2_reverse_switch} && $comments_read->{$C->{cid}}
-			&& $C->{cid} != $cid;
-
 		# The comment pushes itself onto its parent's
 		# kids array.
 		push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
 
-		# The next line deals with hitparade -Brian
-		#$comments->{0}{totals}[$C->{points} - $min]++;  # invert minscore
-
-		# Increment the parent comment's count of visible kids,
-		# if this comment is indeed visible.
-		$comments->{$C->{pid}}{visiblekids}++
-			if $C->{points} >= (defined $threshold ? $threshold : $min);
-
-		# This fucking shit belongs in _can_mod, goddamnit
-		# Can't mod in a discussion that you've posted in.
-		# Just a point rule -Brian
-		#$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
+		# Increment the parent comment's count of visible kids.
+		# All kids are now technically visible.
+		# Previously invisible kids will now simply be collapsed.
+		$comments->{$C->{pid}}{visiblekids}++;
 	}
-##slashProf("sC more fudging", "sC fudging");
 
 	# After that loop, there may be comments in the $comments hashref
 	# which have no visible parents and thus which incremented an
@@ -296,7 +189,6 @@ sub selectComments {
 
 	my $count = @$thisComment;
 
-##slashProf("sC counting", "sC more fudging");
 	# Cascade comment point totals down to the lowest score, so
 	# (2, 1, 3, 5, 4, 2, 1) becomes (18, 16, 15, 12, 7, 3, 1).
 	# We do a bit of a weird thing here, returning this data in
@@ -306,9 +198,8 @@ sub selectComments {
 	}
 
 	# get the total visible kids for each comment --Pater
-	countTotalVisibleKids($comments) unless $discussion2;
+	countTotalVisibleKids($comments);
 
-##slashProf("sC d2 fudging", "sC counting");
 	if ($oldComment) {
 		my @new_seen;
 		for my $this_cid (sort { $a <=> $b } keys %$comments) {
@@ -356,146 +247,11 @@ sub selectComments {
 				$C = $parent;
 			}
 		}
-
-		# fix d2_seen to include new cids ... these will all be after
-		# the last element in seen, which makes this simpler
-		$comments->{0}{d2_seen} = makeCommentBitmap(\@new_seen, $comments->{0}{d2_seen});
 	}
-
-##slashProf("", "sC d2 fudging");
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
-#slashProf("sC reparenting");
-#	reparentComments($comments, $reader, $options);
-#slashProf("", "sC reparenting");
-
 	return($comments, $count);
-}
-
-sub jsSelectComments {
-#slashProf("jsSelectComments");
-	# version 0.9 is broken; 0.6 and 1.00 seem to work -- pudge 2006-12-19
-	require Data::JavaScript::Anon;
-	my($slashdb, $constants, $user, $form, $gSkin) = @_;
-	$slashdb   ||= getCurrentDB();
-	$constants ||= getCurrentStatic();
-	$user      ||= getCurrentUser();
-	$form      ||= getCurrentForm();
-	$gSkin     ||= getCurrentSkin();
-
-	my $id = $form->{sid};
-	return unless $id;
-
-	my $threshold = defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
-	my $highlightthresh = defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
-	for ($threshold, $highlightthresh) {
-		$_ = 6  if $_ > 6;
-		$_ = -1 if $_ < -1;
-	}
-	$highlightthresh = $threshold if $highlightthresh < $threshold;
-
-	# only differences:
-	# sco: force_read, one_cid_only, threshold (was -1 here, matters?)
-	my($comments) = $user->{state}{selectComments}{comments};
-
-	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
-
-	my @roots = @{$comments->{0}{kids} || []};
-	my %roots_hash = ( map { $_ => 1 } @roots );
-	my $thresh_totals;
-
-	if ($form->{full}) {
-		my $comment_text = $slashdb->getCommentTextCached(
-			$comments, [ grep $_, keys %$comments ],
-		);
-
-		for my $cid (keys %$comment_text) {
-			$comments->{$cid}{comment} = $comment_text->{$cid};
-		}
-	} else {
-		my $comments_new;
-		my @keys = qw(pid points uid);
-		for my $cid (grep $_, keys %$comments) {
-			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
-			$comments_new->{$cid}{read} = $comments->{$cid}{has_read} ? 1 : 0;
-			$comments_new->{$cid}{opid} = $comments->{$cid}{original_pid};
-			$comments_new->{$cid}{kids} = [sort { $a <=> $b } @{$comments->{$cid}{kids}}];
-
-			# we only care about it if it is not original ... we could
-			# in theory guess at what it is and just use a flag, but that
-			# could be complicated, esp. if we are several levels deep -- pudge
-			if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
-				$comments_new->{$cid}{subject} = $comments->{$cid}{subject};
-			}
-		}
-
-		$thresh_totals = commentCountThreshold($comments, 0, \%roots_hash);
-		$comments = $comments_new;
-	}
-
-	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
-	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
-	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
-	my $anon_thresh   = Data::JavaScript::Anon->anon_dump($thresh_totals || {});
-	s/\s+//g for ($anon_thresh, $anon_roots, $anon_rootsh);
-
-	$user->{is_anon}          ||= 0;
-	$user->{is_admin}         ||= 0;
-	$user->{is_subscriber}    ||= 0;
-	$user->{state}{d2asp}     ||= 0;
-	$user->{d2_comment_order} ||= 0;
-	my $root_comment = $user->{state}{selectComments}{cidorpid} || 0;
-
-	my $extra = '';
-	if ($d2_seen_0) {
-		my $total = $slashdb->countCommentsBySid($id);
-		$total -= $d2_seen_0 =~ tr/,//; # total
-		$total--; # off by one
-		$extra .= "D2.d2_seen('$d2_seen_0');\nD2.more_comments_num($total);\n";
-	}
-	if ($user->{d2_keybindings_switch}) {
-		$extra .= "D2.d2_keybindings_off(1);\n";
-	}
-	if ($user->{d2_reverse_switch}) {
-		$extra .= "D2.d2_reverse_shift(1);\n";
-	}
-
-	# maybe also check if this ad should be running with some other var?
-	# from ads table? -- pudge
-	if ( $constants->{run_ads}
-	 && !$user->{state}{page_adless}
-	 && !$user->{state}{page_buying}
-	 &&  $user->{currentSkin} ne 'admin'
-	 &&  $constants->{run_ads_inline_comments}
-	) {
-		(my $url = $constants->{run_ads_inline_comments}) =~ s/<topic>/$gSkin->{name}/g;
-		$extra .= "D2.adTimerUrl('$url');\n";
-	}
-#slashProf("", "jsSelectComments");
-
-	return <<EOT;
-D2.comments($anon_comments);
-
-D2.thresh_totals($anon_thresh);
-
-D2.root_comment($root_comment);
-D2.root_comments($anon_roots);
-D2.root_comments_hash($anon_rootsh);
-
-D2.d2_comment_order($user->{d2_comment_order});
-D2.user_uid($user->{uid});
-D2.user_is_anon($user->{is_anon});
-D2.user_is_admin($user->{is_admin});
-D2.user_is_subscriber($user->{is_subscriber});
-D2.user_threshold($threshold);
-D2.user_highlightthresh($highlightthresh);
-D2.user_d2asp($user->{state}{d2asp});
-
-D2.discussion_id($id);
-
-$extra
-EOT
 }
 
 # save counts of comments at each threshold value
@@ -805,113 +561,6 @@ sub _print_cchp {
 	}
 }
 
-########################################################
-sub reparentComments {
-	my($comments, $reader, $options) = @_;
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-
-	my $threshold = defined $options->{threshold}
-		? $options->{threshold}
-		: $user->{threshold};
-
-	my $max_depth_allowed = $user->{state}{max_depth} || $constants->{max_depth} || 7;
-
-	# even if !reparent, we still want to be here so we can set comments at max depth
-	return if $user->{state}{noreparent} || (!$max_depth_allowed && !$user->{reparent});
-
-	# Adjust the max_depth_allowed for the root pid or cid.
-	# Actually I'm not sure this should be done at all.
-	# My guess is that it does the opposite of what's desired
-	# when $form->{cid|pid} is set.  And besides, max depth we
-	# display is for display, so it should be based on how much
-	# we're displaying, not on absolute depth of this thread.
-	my $root_cid_or_pid = discussion2($user) ? 0 : ($form->{cid} || $form->{pid} || 0);
-	if ($root_cid_or_pid) {
-		my $tmpcid = $root_cid_or_pid;
-		while ($tmpcid) {
-			my $pid = $reader->getComment($tmpcid, 'pid') || 0;
-			last unless $pid;
-			$max_depth_allowed++;
-			$tmpcid = $pid;
-		}
-	}
-
-	# The below algorithm assumes that comments are inserted into
-	# the database with cid's that increase chronologically, in order
-	# words that for any two comments where A's cid > B's cid, that
-	# A's timestamp > B's timestamp also.
-
-	for my $x (sort { $a <=> $b } keys %$comments) {
-		next if $x == 0; # exclude the fake "cid 0" comment
-
-		my $pid = $comments->{$x}{pid} || 0;
-		my $reparent = 0;
-
-		# First, if this comment is above the user's desired threshold
-		# (and thus will likely be shown), but its parent is below
-		# the desired threshold (and thus will not likely be shown),
-		# bounce it up the chain until we can reparent it to a comment
-		# that IS being shown.  Effectively we pretend the invisible
-		# comments between this comment and its (great-etc.) grandparent
-		# do not exist.
-		#
-		# But, if all its (great-etc.) grandparents are either invisible
-		# or chronologically precede the root comment, don't reparent it
-		# at all.
-		# XXX either $comments->{$x}{points} or $threshold is sometimes undefined here, not sure which or why
-		if ($user->{reparent} && $comments->{$x}{points} >= $threshold) {
-			my $tmppid = $pid;
-			while ($tmppid
-				&& $comments->{$tmppid} && defined($comments->{$tmppid}{points})
-				&& $comments->{$tmppid}{points} < $threshold) {
-				$tmppid = $comments->{$tmppid}{pid} || 0;
-				$reparent = 1;
-			}
-
-			if ($reparent && $tmppid >= $root_cid_or_pid) {
-				$pid = $tmppid;
-			} else {
-				$reparent = 0;
-			}
-		}
-
-		# Second, if the above did not find a suitable (great)grandparent,
-		# we try a second method of collapsing to a (great)grandparent:
-		# check whether the depth of this comment is too great to show
-		# nested so deeply, and if so, ratchet it back.  Note that since
-		# we are iterating through %$comments in cid order, the parents of
-		# this comment will already have gone through this code and thus
-		# already should have their {depth}s set.  (At least that's the
-		# theory, I'm not sure that part really works.)
-		if ($max_depth_allowed && !$reparent) {
-			# set depth of this comment based on parent's depth
-			$comments->{$x}{depth} = ($pid ? ($comments->{$pid}{depth} ||= 0) : 0) + 1;
-
-			# go back each pid until we find one with depth less than $max_depth_allowed
-			while ($pid && defined($comments->{$pid})
-				&& ($comments->{$pid}{depth} ||= 0) >= $max_depth_allowed) {
-				$pid = $comments->{$pid}{pid};
-				$reparent = 1;
-			}
-		}
-
-		if ($reparent) {
-			# remove child from old parent
-			if ($pid >= $root_cid_or_pid) {
-				@{$comments->{$comments->{$x}{pid}}{kids}} =
-					grep { $_ != $x }
-					@{$comments->{$comments->{$x}{pid}}{kids}}
-			}
-
-			# add child to new parent
-			$comments->{$x}{pid} = $pid;
-			push @{$comments->{$pid}{kids}}, $x;
-		}
-	}
-}
-
 # I wonder if much of this logic should be moved out to the theme.
 # This logic can then be placed at the theme level and would eventually
 # become what is put into $comment->{no_moderation}. As it is, a lot
@@ -1037,18 +686,6 @@ sub printComments {
 		return 0;
 	}
 
-	my $discussion2 = discussion2($user);
-
-#slashProfInit();
-#slashProf("printComments: $discussion2, $discussion->{id}");
-
-	if ($discussion2 && $user->{mode} ne 'metamod') {
-		$user->{mode} = $form->{mode} = 'thread';
-		$user->{commentsort} = 0;
-		$user->{reparent} = 0;
-		$user->{state}{max_depth} = $constants->{max_depth} + 3;
-	}
-
 	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
 	$discussion->{type} = isDiscussionOpen($discussion);
 
@@ -1068,16 +705,7 @@ sub printComments {
 	# read it here, don't use the one_cid_only optimization feature.
 	$sco->{one_cid_only} = 0;
 
-#slashProf("selectComments");
 	my($comments, $count) = selectComments($discussion, $cidorpid, $sco);
-#slashProf("", "selectComments");
-	if ($discussion2) {
-		$user->{state}{selectComments} = {
-			cidorpid	=> $cidorpid,
-			comments        => $comments,
-			count           => $count
-		};
-	}
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
 		# No such comment in this discussion.
@@ -1119,7 +747,6 @@ sub printComments {
 		$archive_text = slashDisplay('printCommNoArchive', { discussion => $discussion }, { Return => 1 });
 	}
 
-#slashProf("printCommentsMain");
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $parent = $reader->getDiscussionParent($form->{sid});
 	$pretext .= slashDisplay('printCommentsMain', {
@@ -1135,12 +762,11 @@ sub printComments {
 		options		=> $options,
 		archive_text => $archive_text,
 	}, { Return => $options->{Return}} );
-#slashProf("", "printCommentsMain");
 
 	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
 	my($comment, $next, $previous);
-	if ($cid && !$discussion2) {
+	if ($cid) {
 		my($next, $previous);
 		$comment = $comments->{$cid};
 		if (my $sibs = $comments->{$comment->{pid}}{kids}) {
@@ -1161,10 +787,6 @@ sub printComments {
 		? $comments->{$cidorpid}{totalvisiblekids}
 		: $cc;
 
-	my $lcp = $discussion2
-		? ''
-		: linkCommentPages($discussion->{id}, $pid, $cid, $total);
-
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
 	my $can_mod_any = _can_mod($comment);
@@ -1177,14 +799,8 @@ sub printComments {
 		}
 	}
 
-#slashProf("printCommComments");
 	my $anon_dump;
-	if ($discussion2) {
-		require Data::JavaScript::Anon;
-		$anon_dump = \&Data::JavaScript::Anon::anon_dump;
-	}
 
-#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments->{34}) . "discussion2: " . Dumper($discussion2);
 	my $comment_html = $options->{Return} ?  $pretext : '';
 
 
@@ -1198,47 +814,22 @@ sub printComments {
 		cid		=> $cid,
 		pid		=> $pid,
 		cc		=> $cc,
-		lcp		=> $lcp,
 		lvl		=> $lvl,
-		discussion2	=> $discussion2,
 		anon_dump	=> $anon_dump,
 	}, { Return => 1 });
 
-#slashProf("getCommentTextCached", "printCommComments");
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
+	# This is fucked up. Search and replace is expensive --TMB
 	my $comment_text = $slashdb->getCommentTextCached(
 		$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
-		{ mode => $form->{mode}, cid => $form->{cid}, discussion2 => $discussion2 }
+		{ mode => $form->{mode}, cid => $form->{cid} }
 	);
-#slashProf("comment regexes", "getCommentTextCached");
 
 	# OK we have all the comment data in our hashref, so the search/replace
 	# on the nearly-fully-rendered page will work now.
 	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|strip_backtrack($comment_text->{$1})|eg;
 
-	# for abbreviated comments, remove some stuff
-	if ($discussion2) {
-		my @abbrev     = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} != -1 } keys %$comments;
-		my @not_abbrev = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} == -1 } keys %$comments;
-		my %abbrev_and_not = map { $_ => 1 } (@abbrev, @not_abbrev);
-		$comment_html =~ s|(<div id="comment_shrunk_(\d+)" class="commentshrunk">.+?</div>)|$abbrev_and_not{$2} ? '' : $1|eg;
-		$comment_html =~ s|((<div id="comment_sig_(\d+)" class="sig) hide">)|$abbrev_and_not{$3} ? qq{$2">} : $1|eg;
-
-#		for my $cid (@abbrev, @not_abbrev) {
-#			$comment_html =~ s|<div id="comment_shrunk_$cid" class="commentshrunk">.+?</div>||;
-#			$comment_html =~ s|<div id="comment_sig_$cid" class="sig hide">|<div id="comment_sig_$cid" class="sig">|;
-#		}
-
-		if (@abbrev) {
-			my $abbrev_comments = join ',', map { "$_:$comments->{$_}{abbreviated}" } @abbrev;
-			$comment_html =~ s|D2\.abbrev_comments\({}\);|D2.abbrev_comments({$abbrev_comments});|;
-		}
-	}
-
-#slashProf("", "comment regexes");
-#slashProf("", "printComments: $discussion2, $discussion->{id}");
-#slashProfEnd();
 	return $comment_html if $options->{Return};
 	print $comment_html;
 }
@@ -2655,16 +2246,6 @@ sub isTroll {
 	return $slashdb->getIsTroll($good_behavior);
 }
 
-
-########################################################
-# is discussion2 active?
-# MC: D2 is really broken in slashcode, forcibly disable it
-sub discussion2 {
-#	my $user = $_[0] || getCurrentUser();
-#	return $user->{discussion2} eq 'slashdot'
-#		? $user->{discussion2} : 0;
-	return 0;
-}
 
 sub _is_mod_banned {
 	my $user = shift;
