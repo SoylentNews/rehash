@@ -6622,12 +6622,13 @@ sub saveCommentReadLog {
 
 	# cache inserts?
 	my @sorted = sort { $b <=> $a } @$comments;
-	my $cidnow = $self->sqlSelect('cid_now',
+	my $cidnow;
+	$cidnow = $self->sqlSelect('cid_now',
 		'users_comments_read_log',
 		'uid=' . $self->sqlQuote($uid) .
-		' AND discussion_id=' . $self->sqlQuote($discussion_id);
+		' AND discussion_id=' . $self->sqlQuote($discussion_id));
 	$cidnow ||= 0;
-	$cidnew = $sorted[0];
+	my $cidnew = $sorted[0];
 	$self->sqlInsert('users_comments_read_log', {
 		uid		=> $uid,
 		discussion_id	=> $discussion_id,
@@ -13334,24 +13335,24 @@ sub upgradeCoreDB() {
 		$core_ver = 1;
 		$upgrades_done++;
 	}
-	if ($core_ver == 1) {
-		print "upgrading core to v2 ...\n";
-		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
-			return 0;
-		}
-		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
-uid mediumint(8) unsigned NOT NULL,
-discussion_id mediumint(8) unsigned NOT NULL,
-cid_now int(10) unsigned NOT NULL,
-cid_next int(10) unsigned NOT NULL,
-UNIQUE KEY didnuid (discussion_id, uid)
-) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-		")) {
-			return 0;
-		}
-		$core_ver = 2;
-		$upgrades_done++;
-	}
+#	if ($core_ver == 1) {
+#		print "upgrading core to v2 ...\n";
+#		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
+#			return 0;
+#		}
+#		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
+#uid mediumint(8) unsigned NOT NULL,
+#discussion_id mediumint(8) unsigned NOT NULL,
+#cid_now int(10) unsigned NOT NULL,
+#cid_next int(10) unsigned NOT NULL,
+#UNIQUE KEY didnuid (discussion_id, uid)
+#) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+#		")) {
+#			return 0;
+#		}
+#		$core_ver = 2;
+#		$upgrades_done++;
+#	}
 
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for core\n";

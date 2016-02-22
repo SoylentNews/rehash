@@ -216,7 +216,6 @@ sub selectComments {
 					if ($cid && $C->{pid} < $cid) {
 						$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
 						$parent = $old_comments{ $C->{pid} };
-						$parent->{has_read} = $comments_read->{$C->{pid}};
 						push @new_seen, $C->{pid};
 						$count++;
 					} else {
@@ -227,7 +226,6 @@ sub selectComments {
 							kids     => [ ],
 							points   => -2,
 							dummy    => 1,
-							has_read => $comments_read->{$C->{pid}},
 							%$parent,
 						};
 						$parent->{opid} ||= $parent->{pid};
@@ -807,8 +805,6 @@ sub printComments {
 
 	my $comment_html = $options->{Return} ?  $pretext : '';
 
-	my 	
-
 	$comment_html .= slashDisplay('printCommComments', {
 		can_moderate	=> $can_mod_any,
 		comment		=> $comment,
@@ -826,14 +822,14 @@ sub printComments {
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
 	# This is fucked up. Search and replace is expensive --TMB
-	my $comment_text = $slashdb->getCommentTextCached(
-		$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
-		{ mode => $form->{mode}, cid => $form->{cid} }
-	);
+	#my $comment_text = $slashdb->getCommentTextCached(
+	#	$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
+	#	{ mode => $form->{mode}, cid => $form->{cid} }
+	#);
 
 	# OK we have all the comment data in our hashref, so the search/replace
 	# on the nearly-fully-rendered page will work now.
-	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|strip_backtrack($comment_text->{$1})|eg;
+	#$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|strip_backtrack($comment_text->{$1})|eg;
 
 	return $comment_html if $options->{Return};
 	print $comment_html;
@@ -929,7 +925,7 @@ sub displayThread {
 		# ahead more, counting all the visible kids.	--Pater
 		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
-		next if $skipped <= $form->{startat} && !$discussion2;
+		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
 		my $class = 'oneline';
@@ -988,9 +984,9 @@ sub displayThread {
 		}
 
 		$return .= "$const->{commentend}" if $finish_list;
-		$return .= "$const->{fullcommentend}" if (($full || $highlight || $discussion2) && $user->{mode} ne 'flat');
+		$return .= "$const->{fullcommentend}" if (($full || $highlight) && $user->{mode} ne 'flat');
 
-		last if $displayed >= $user->{commentlimit} && !$discussion2;
+		last if $displayed >= $user->{commentlimit};
 	}
 
 	if ($hidden && (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod')) {
