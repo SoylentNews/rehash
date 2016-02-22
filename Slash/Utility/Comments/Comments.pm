@@ -251,6 +251,10 @@ sub selectComments {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
+	if(!$form->{noupdate}) {
+		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
+	}
+
 	return($comments, $count);
 }
 
