@@ -6608,26 +6608,28 @@ sub saveCommentReadLog {
 		$mcd = $self->getMCD;
 		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
 	}
+	else {
+		print STDERR "\nFIX ME: saveCommentReadLog called without \$comments being supplied.\n";
+		return;
+	}
 
 	if ($mcd) {
 		$mcd->delete($mcdkey);
 	}
 
 	# cache inserts?
-	for my $cid (@$comments) {
-		$self->sqlInsert('users_comments_read_log', {
-			uid            => $uid,
-			discussion_id  => $discussion_id,
-			cid            => $cid
-		}, { ignore => 1 });
-	}
+	my @sorted = sort { $b <=> $a } @$comments;
+	$self->sqlReplace('users_comments_read_log', {
+		uid            => $uid,
+		discussion_id  => $discussion_id,
+		cid            => $sorted[0]
+	});
 
 	if ($mcd) {
-		my $comments_read = $self->getCommentReadLog($discussion_id, $uid, 1);
-		$mcd->set($mcdkey, $comments_read) if $comments_read;
+		$mcd->set($mcdkey, $sorted[0]);
 	}
 
-	1;
+	return 1;
 }
 
 #######################################################
@@ -6641,29 +6643,25 @@ sub getCommentReadLog {
 	if (!$no_mcd) {
 		$mcd = $self->getMCD;
 		##########
-		# TMB Throws errors all the damned time if memcached isn't being used.
+		# TMB Throws errors all the damned time if memcached isn't being used and this is accessed improperly.
 		$self->{_mcd_keyprefix} ||= '';
 		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
 	}
 
-	my $comments_read;
+	my $last_read;
 	if ($mcd) {
-		$comments_read = $mcd->get($mcdkey);
-		return $comments_read if $comments_read;
+		$last_read = $mcd->get($mcdkey);
+		return $last_read if $last_read;
 	}
 
-	$comments_read = $self->sqlSelectAllKeyValue(
-		'cid, 1',
+	$last_read = $self->sqlSelect(
+		'cid',
 		'users_comments_read_log',
 		'uid=' . $self->sqlQuote($uid) .
 		' AND discussion_id=' . $self->sqlQuote($discussion_id)
 	) or return;
 
-	if ($mcd) {
-		$mcd->add($mcdkey, $comments_read);
-	}
-
-	return $comments_read;
+	return $last_read;
 }
 
 #######################################################
@@ -13328,6 +13326,23 @@ sub upgradeCoreDB() {
 			return 0;
 		};
 		$core_ver = 1;
+		$upgrades_done++;
+	}
+	if ($core_ver == 1) {
+		print "upgrading core to v2 ...\n";
+		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
+			return 0;
+		}
+		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
+uid mediumint(8) unsigned NOT NULL,
+discussion_id mediumint(8) unsigned NOT NULL,
+cid int(10) unsigned NOT NULL,
+UNIQUE KEY didnuid (discussion_id, uid)
+) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+		")) {
+			return 0;
+		}
+		$core_ver = 2;
 		$upgrades_done++;
 	}
 
