@@ -14,7 +14,8 @@ __name__
 preview_comm
 __template__
 <ul id="commentlisting" class="preview">
-[% Slash.dispComment(preview) %]
+[% options => { 'noCollapse' => 1,};
+	Slash.dispComment(preview, options) %]
 </li>
 </ul>
 

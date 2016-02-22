@@ -614,3 +614,9 @@ color: #0b0;
 .ns_story_main a, .ns_story_main a:visited, .ns_story_sec a, .ns_story_sec a:visited { color: #0C0; }
 .ss_story_main a, .ss_story_main a:visited, .ss_story_sec a, .ss_story_sec a:visited { color: #0C0; }
 .admin_story_list a, .admin_story_list a:visited { color: #0C0; }
+
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4,
+li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4 a
+{
+  color: #0c0;
+}
