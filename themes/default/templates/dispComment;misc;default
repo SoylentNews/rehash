@@ -34,22 +34,17 @@ __template__
 	IF !options.noCollapse;
 		IF points.length && points < user.threshold && !show %]
 		  <input id="commentBelow_[% cid %]"type="checkbox" class="commentBelow" checked="checked" autocomplete="off" />
-	  	<label class="commentBelow" title="Load Comment" for="commentBelow_[% cid %]"> </label>
+	  	<label class="commentBelow" title="Load comment" for="commentBelow_[% cid %]"> </label>
 	  	<div id="comment_below_[% cid %]" class="commentbt commentDiv"><div class="commentTop"><div class="title"><h4>Comment Below Threshold</h4></div></div></div>
 	  [% END %]
     [% IF user.mode != 'flat' %]<input id="commentTreeHider_[% cid %]" type="checkbox" class="commentTreeHider" autocomplete="off" />[% END %]
   	<input id="commentHider_[% cid %]"type="checkbox" class="commentHider" [% IF points.length && points < user.highlightthresh && !show %] checked="checked" [% END %] autocomplete="off" />
-	  [% IF user.mode != 'flat' %]<label class="commentTreeHider" title="Show/Hide Comment Tree" for="commentTreeHider_[% cid %]"> </label>[% END %]
-	  <label class="commentHider" title="Show/Hide Comment" for="commentHider_[% cid %]"> </label>
+	  [% IF user.mode != 'flat' %]<label class="commentTreeHider" title="Show/hide comment tree" for="commentTreeHider_[% cid %]"> </label>[% END %]
+	  <label class="commentHider" title="Show/hide comment" for="commentHider_[% cid %]"> </label>
   [% END %]	
-<div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?"; IF options.noCollapse %] noCollapse[% END %]">
-	<div id="comment_top_[% cid %]" class="commentTop">
-		
-		[% IF cid > cid_now || user.uid == 1 || comment.uid == user.uid || !user.dimread %]
-			<div class="title">
-		[% ELSE %]
-			<div class="title dimmed">
-		[% END %]
+<div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?"; IF options.noCollapse %] noCollapse[% ELSIF cid <= cid_now && !user.is_anon && user.dimread %] dimmed[% END %]">
+	<div id="comment_top_[% cid %]" class="commentTop">	
+		<div class="title">
 			<h4><a name="[% cid %]">[% subject | strip_title %]</a>
 				[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]
 				<span class="by">by

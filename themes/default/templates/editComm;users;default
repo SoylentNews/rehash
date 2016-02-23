@@ -74,6 +74,10 @@ __template__
 		[% PROCESS formNote note='This changes weekly' %]
                 <input type="radio" name="emaildisplay" value="2"[% emaildisplay.2 %]> Show your real email address without cowering behind childish anonymity or obfuscation.
 		</div></blockquote>
+		<label>Dim Read Comments
+		<input type="checkbox" name="dimmed" [% dim_check %]>
+		</label>
+		[% PROCESS formNote note='Dim already read comments' %]
 		<label>Disable Sigs
 		<input type="checkbox" name="nosigs"[% s_check %]>
 		</label>
