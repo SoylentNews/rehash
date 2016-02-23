@@ -373,22 +373,30 @@ li.comment input[type=checkbox] ~ label{
 	margin-left:10px;
 	margin-top: .45em;
 	cursor: pointer;
+	z-index: 3;
 	background: url("//dev.soylentnews.org/images/chev1down.png"), no-repeat;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
   background: url("//dev.soylentnews.org/images/chev2down.png");
 	margin-left:28px;
+	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
 	background: url("//dev.soylentnews.org/images/chev1up.png");
 	margin-top: .15em;
+	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
   background: url("//dev.soylentnews.org/images/chev2up.png");
 	margin-left:28px;
+	z-index: 3;
+}
+
+.dimmed {
+	opacity: 0.7;
 }
 
 .noCollapse .commentTop .title h4

@@ -1520,6 +1520,8 @@ EOT
 	}
 
 	my $marked_spam = $mod_reader->getSpamCount($comment->{cid}, $reasons);
+	my $discussion = $mod_reader->getDiscussion($comment->{sid});
+	my $dim = $mod_reader->getCommentReadLog($discussion->{id}, $user->{uid});
 
 	return slashDisplay('dispComment', {
 		%$comment,
@@ -1530,6 +1532,7 @@ EOT
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
 		options		=> $options,
+		cid_now		=> $dim->{cid_now},
 		subscriber_badge => $subscriber_badge
 	}, { Return => 1, Nocomm => 1 });
 }

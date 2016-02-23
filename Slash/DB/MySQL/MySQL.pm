@@ -6637,7 +6637,8 @@ sub saveCommentReadLog {
 			uid		=> $uid,
 			discussion_id	=> $discussion_id,
 			cid_now		=> '0',
-			cid_new		=> $cidnew
+			cid_new		=> $cidnew,
+			ts		=> 'NOW()'
 		});
 	}
 	else {
@@ -13358,9 +13359,13 @@ uid mediumint(8) unsigned NOT NULL,
 discussion_id mediumint(8) unsigned NOT NULL,
 cid_now int(10) unsigned NOT NULL,
 cid_new int(10) unsigned NOT NULL,
+ts timestamp default NOW(),
 UNIQUE KEY didnuid (discussion_id, uid)
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 		")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD dimread tinyint(4) NOT NULL default 1")) {
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
