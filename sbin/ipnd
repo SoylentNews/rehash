@@ -52,9 +52,9 @@ my $user = getCurrentUser();
 setCurrentSkin(determineCurrentSkin());
 my $gSkin = getCurrentSkin();
 my @paths = (
-                $constants->{pp_ipn_path},
-                $constants->{bp_ipn_path},
-                $constants->{stripe_ipn_path}
+	$constants->{pp_ipn_path},
+	$constants->{bp_ipn_path},
+	$constants->{stripe_ipn_path}
 );
 
 
@@ -140,9 +140,9 @@ $cbServer->on(request => sub {
 	unless( $goodPath ) {
 		print STDOUT "Request for $reqPath. \n";
 		$tx->res->code(200);
-					$tx->res->headers->content_type('text/plain');
-					$tx->res->body("Request for $reqPath. \n");
-					$tx->resume;
+			$tx->res->headers->content_type('text/plain');
+			$tx->res->body("Request for $reqPath. \n");
+			$tx->resume;
 		return 0
 	}
 
@@ -174,10 +174,10 @@ $cbServer->on(request => sub {
 			$count++;
 		}
 		eval { $paypal->{custom} = decode_json($paypal->{custom}); };
-                unless(ref($content) eq "HASH" && !$@) {
-                        print "Malformed JSON in \$paypal->{custom}\n".Dumper($paypal);
-                        return;
-                }
+		unless(ref($paypal->{custom}) eq "HASH" && !$@) {
+			print "Malformed JSON in \$paypal->{custom}\n".Dumper($paypal);
+			return;
+		}
 		
 		$logthis = $paypal if $paypal;
 		$logthis->{remote_address} = $tx->{original_remote_address};
@@ -249,16 +249,16 @@ $cbServer->on(request => sub {
 	elsif($reqPath eq $constants->{bp_ipn_path}) {
 		my $content;
 		eval { $content = decode_json($tx->req->content->asset->{content}); };
-                unless(ref($content) eq "HASH" && !$@) {
-                        print "Malformed JSON in request\n".Dumper($tx->req->content);
-                        return;
-                }
+		unless(ref($content) eq "HASH" && !$@) {
+			print "Malformed JSON in request\n".Dumper($tx->req->content);
+			return;
+		}
 		$content->{source} = $tx->{original_remote_address};
 		eval { $content->{posData} = decode_json($content->{posData}); };
 		unless(ref($content->{posData}) eq "HASH" && !$@) {
-                        print "Malformed JSON in posData\n".Dumper($content);
-                        return;
-                }
+			print "Malformed JSON in posData\n".Dumper($content);
+			return;
+		}
 
 		if(	($content->{status} eq 'paid') ||
 			($content->{status} eq 'complete') ||
@@ -266,16 +266,16 @@ $cbServer->on(request => sub {
 		{
 			my $payment_type = $content->{posData}{type};
 			my $payment = {
-					days =>$content->{posData}{days},
-					uid	=> $content->{posData}{uid},
-					payment_net   => $content->{price},
-					payment_gross => $content->{price},
-					payment_type  => $payment_type,
-					transaction_id => $content->{id},
-					method => 'bitpay',
-					email => $content->{posData}{from},
-					raw_transaction  => encode_json($content),
-					puid => $content->{posData}{puid}
+				days =>$content->{posData}{days},
+				uid	=> $content->{posData}{uid},
+				payment_net   => $content->{price},
+				payment_gross => $content->{price},
+				payment_type  => $payment_type,
+				transaction_id => $content->{id},
+				method => 'bitpay',
+				email => $content->{posData}{from},
+				raw_transaction  => encode_json($content),
+				puid => $content->{posData}{puid}
 			};
 			if(!$subscribe->paymentExists($content->{id})) {
 				my ($rows, $result, $warning);
@@ -318,9 +318,9 @@ $cbServer->on(request => sub {
 
 			# Good payment. Do our thing.
 			if(defined $content->{data}->{object}->{status} &&
-					$content->{data}->{object}->{status} eq 'succeeded' &&
-					defined $content->{type} &&
-					$content->{type} eq 'charge.succeeded')
+				$content->{data}->{object}->{status} eq 'succeeded' &&
+				defined $content->{type} &&
+				$content->{type} eq 'charge.succeeded')
 			{
 				my $metaData = $content->{data}->{object}->{metadata};
 				my $cipher = Crypt::CBC->new(
@@ -334,34 +334,34 @@ $cbServer->on(request => sub {
 				$content->{data}->{object}->{metadata} = $metaData;
 
 				my $payment = {
-                                        days => $metaData->{days},
-                                        uid     => $metaData->{uid},
-                                        payment_net   => $content->{data}->{object}->{amount},
-                                        payment_gross => $content->{data}->{object}->{amount},
-                                        payment_type  => $metaData->{type},
-                                        transaction_id => $content->{data}->{object}->{id},
-                                        method => 'stripe',
-                                        email => $metaData->{from},
-                                        raw_transaction  => encode_json($content),
-                                        puid => $metaData->{puid}
-                        	};
+					days => $metaData->{days},
+					uid     => $metaData->{uid},
+					payment_net   => $content->{data}->{object}->{amount},
+					payment_gross => $content->{data}->{object}->{amount},
+					payment_type  => $metaData->{type},
+					transaction_id => $content->{data}->{object}->{id},
+					method => 'stripe',
+					email => $metaData->{from},
+					raw_transaction  => encode_json($content),
+					puid => $metaData->{puid}
+				};
 				# I'm only checking once because I don't really care if we do the work up until here unnecessarily and this is the latest we can possibly check.
 				# If we start getting enough payments per minute to justify optimizing, you can pay me moneys and I'll optimize it. -TMB
 				if(!$subscribe->paymentExists($content->{data}->{object}->{id})) {
 					my ($rows, $result, $warning);
-        	                        $rows = $subscribe->insertPayment($payment);
-	                                if ($rows && $rows == 1) {
-                	                        $result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
-                                	        if ($result && $result == 1){
-                        	                        send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
-                                        	} else {
-                                                	$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
-	                                                print STDERR $warning;
-        	                                }
-                                	} else {
-                                        	$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
-	                                        print STDERR $warning;
-        	                        }
+						$rows = $subscribe->insertPayment($payment);
+						if ($rows && $rows == 1) {
+							$result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
+							if ($result && $result == 1){
+								send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
+							} else {
+								$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
+								print STDERR $warning;
+							}
+						} else {
+							$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
+							print STDERR $warning;
+						}
 				}
 				$content->{source} = $tx->{original_remote_address};
 				$subscribe->stripeAddLog($content);
@@ -397,11 +397,11 @@ sub send_gift_msg {
 	my $purchasing_user = $slashdb->getUser($puid);
 
 	my $message = slashDisplay('gift_msg', {
-			receiving_user  => $receiving_user,
-			purchasing_user => $purchasing_user,
-			days 		=> $days,
-			from		=> $from	
-		}, { Return => 1, Nocomm => 1 } );
+		receiving_user  => $receiving_user,
+		purchasing_user => $purchasing_user,
+		days 		=> $days,
+		from		=> $from	
+	}, { Return => 1, Nocomm => 1 } );
 	my $title = "$days Day Gift Subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
 }
