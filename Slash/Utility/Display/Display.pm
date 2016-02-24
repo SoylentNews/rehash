@@ -1154,6 +1154,7 @@ sub linkComment {
 			adminflag	=> $adminflag,
 			date		=> $options->{date},
 			threshold	=> defined($linkdata->{threshold}) ? $linkdata->{threshold} : $user->{threshold},
+			highlightthresh	=> defined($linkdata->{highlightthresh}) ? $linkdata->{highlightthresh} : $user->{highlightthresh},
 			commentsort	=> $user->{commentsort},
 			mode		=> $user->{mode},
 		);

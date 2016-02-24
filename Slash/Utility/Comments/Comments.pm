@@ -81,9 +81,9 @@ sub selectComments {
 	my $commentsort = defined $options->{commentsort}
 		? $options->{commentsort}
 		: $user->{commentsort};
-	my $threshold = defined $options->{threshold}
-		? $options->{threshold}
-		: $user->{threshold};
+	my $threshold = -1; #defined $options->{threshold}
+#		? $options->{threshold}
+#		: $user->{threshold};
 
 
 	my $comments; # One bigass hashref full of comments
@@ -367,7 +367,7 @@ sub selectComments {
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
 #slashProf("sC reparenting");
-	reparentComments($comments, $reader, $options);
+#	reparentComments($comments, $reader, $options);
 #slashProf("", "sC reparenting");
 
 	return($comments, $count);
@@ -1301,11 +1301,11 @@ sub displayThread {
 	my $return = '';
 
 	my $discussion2 = discussion2($user);
-	my $threshold = $discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
-	my $highlightthresh = $discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
+	my $threshold = -1; #$discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
+	my $highlightthresh = -1; #$discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 	# root comment should have more likelihood to be full
-	$highlightthresh-- if !$pid;
+	#$highlightthresh-- if !$pid;
 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
 	# of the discussion without page breaks.  'metamod' means we're doing

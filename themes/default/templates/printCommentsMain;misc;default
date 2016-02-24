@@ -132,6 +132,7 @@ __template__
 				[%- END %]
 				<input type="submit" name="op" value="Change" class="button">
 				<input type="hidden" name="sid" value="[% sid %]">
+				<input type="hidden" name="noupdate" value="1">
 				[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% reply = 'Reply to Comment'; END %]
 				[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
 				[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
@@ -144,6 +145,7 @@ __template__
 						subject_only => 1,
 					}) %]</b></p></span>
 				[% END %]
+				 <span class="nbutton"><p><b><a href="[% stripped_link %]">Mark All as Read</a></b></p></span>
 			</fieldset>
 		</form>
 		<div class="commentBox">

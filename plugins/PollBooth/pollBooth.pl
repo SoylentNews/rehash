@@ -21,7 +21,7 @@ sub main {
 		save		=> \&savepoll,
 		'delete'	=> \&deletepolls,
 		list		=> \&listpolls,
-		default		=> \&default,
+		default		=> \&default, 
 		vote		=> \&vote,
 		get		=> \&poll_booth,
 		preview	 => \&editpoll,
