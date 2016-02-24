@@ -13367,7 +13367,27 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("ALTER TABLE users_comments ADD dimread tinyint(4) NOT NULL default 1")) {
 			return 0;
 		}
-		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('comment_read_max_age', '30', 'Number of days to save the read state of comments for a user+discussion.')");
+		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('comment_read_max_age', '30', 'Number of days to save the read state of comments for a user+discussion.')")) {
+			return 0;
+		}
+		if (!$self->sqlDo("update users_comments set mode = 'thread' where mode = 'nested' or mode = 'improvedthreaded'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("DELETE FROM commentmodes where mode = 'nested' or mode = 'improvedthreaded'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
+                        return 0;
+                }
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
                         return 0;
                 };

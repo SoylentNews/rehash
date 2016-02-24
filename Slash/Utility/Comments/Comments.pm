@@ -785,12 +785,16 @@ sub printComments {
 	# Flat and theaded mode don't index, even on large stories, so they
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
-	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
-		? $comments->{$cidorpid}{totalvisiblekids}
-		: $cc;
+	# Index go bye-bye, just use $cc --TMB
+	my $total = $cc;
+		# Saved for now --TMB
+		#= ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
+		#? $comments->{$cidorpid}{totalvisiblekids}
+		#: $cc;
 
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
+	# This is the slowest possible way to do this. Let's find a better way one of these days. --TMB
 	my $can_mod_any = _can_mod($comment);
 	if (!$can_mod_any) {
 		CID: for my $cid (keys %$comments) {
@@ -905,10 +909,7 @@ sub displayThread {
 		|| $user->{mode} eq 'child') {
 		$indent = 0;
 		$full = 1;
-	} elsif ($user->{mode} eq 'nested') {
-		$indent = 1;
-		$full = 1;
-	}
+	} 
 
 	unless ($const) {
 		for (map { ($_ . "begin", $_ . "end") }
@@ -921,9 +922,9 @@ sub displayThread {
 		my $comment = $comments->{$cid};
 
 		$skipped++;
-		# since nested and threaded show more comments, we can skip
+		# since threaded shows more comments, we can skip
 		# ahead more, counting all the visible kids.	--Pater
-		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
+		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
 		$form->{startat} ||= 0;
 		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
@@ -978,9 +979,9 @@ sub displayThread {
 				$return .= $const->{indentend} if $indent;
 				$return .= $const->{cageend} if $cagedkids;
 			}
-			# in flat or nested mode, all visible kids will
+			# in flat mode, all visible kids will
 			# be shown, so count them.	-- Pater
-			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
+			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
 		}
 
 		$return .= "$const->{commentend}" if $finish_list;

@@ -2715,7 +2715,7 @@ sub saveComm {
 		reparent        => 1,
 		commentlimit    => 100,
 		commentspill    => 50,
-		mode            => 'improvedthreaded'
+		mode            => 'thread'
 	};
 
 	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
