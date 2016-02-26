@@ -71,7 +71,7 @@ __template__
 				[% stripped_title = form.subj | strip_title %]
 				[% PROCESS titlebar width => "100%", title => stripped_title %]
 			<div class="details">
-				[% IF constants.use_dept && form.dept %]<strong>from the <b>[% form.dept %]</b> dept.</strong>[% END %]
+				[% IF constants.use_dept && constants.submit_dept && form.dept %]<strong>from the <b>[% form.dept %]</b> dept.</strong>[% END %]
 			</div>
 				<div class="body">
 					<div class="topic">
@@ -100,7 +100,7 @@ __template__
 			<input class="fullbox" type="text" name="subj" value="[% form.subj | strip_subject %]" size="75" maxlength="100">
 			[% PROCESS formNote note => "Be descriptive and concise!" %]
 			[% PROCESS formNote note => "(Nondescriptive subjects like 'Check this out!' usually just get deleted, because we get many every day. For best results, put the important words early.)" %]
-			[% IF constants.use_dept %]
+			[% IF constants.use_dept && constants.submit_dept %]
 				 [% PROCESS formLabel value => "Department"  %]
 				 <input class="fullbox" type="text" name="dept" value="[% form.dept | strip_subject %]" size="75" maxlength="100">
 				 [% PROCESS formNote note => "May be ignored by the Editors. They are a strange lot." %]
