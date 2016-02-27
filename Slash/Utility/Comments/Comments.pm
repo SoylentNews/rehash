@@ -794,16 +794,17 @@ sub printComments {
 
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
-	# This is the slowest possible way to do this. Let's find a better way one of these days. --TMB
-	my $can_mod_any = _can_mod($comment);
-	if (!$can_mod_any) {
-		CID: for my $cid (keys %$comments) {
-			if (_can_mod($comments->{$cid})) {
-				$can_mod_any = 1;
-				last CID;
-			}
-		}
-	}
+	# Short circuited because you have to loop through every last comment on archived pages --TMB
+	my $can_mod_any = 1;
+	#my $can_mod_any = _can_mod($comment);
+	#if (!$can_mod_any) {
+	#	CID: for my $cid (keys %$comments) {
+	#		if (_can_mod($comments->{$cid})) {
+	#			$can_mod_any = 1;
+	#			last CID;
+	#		}
+	#	}
+	#}
 
 	my $anon_dump;
 
