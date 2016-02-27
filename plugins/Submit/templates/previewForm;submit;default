@@ -41,7 +41,7 @@ __template__
 	[% del = submission.del; submission_state.$del %] submission by <b>[% submission.name %] <a href="[% submission.email %]">[% submission.email %]</a></b>
         	at [% submission.time %]
 	[% END -%]
-	[% IF constants.use_dept && form.dept %]<strong>from the <b>[% submission.dept %]</b> dept.</strong>[% END %]
+	[% IF constants.use_dept && constants.submit_dept && submission.dept %]<strong>from the <b>[% submission.dept %]</b> dept.</strong>[% END %]
 	</div>
 	<div class="body">
 		<div class="topic">
@@ -140,7 +140,7 @@ __template__
 			<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj | strip_subject %]" size="75" MAXLENGTH="100"></label>
 			[% lockTest %]
 			[% IF constants.use_dept %]
-				<label>Dept&nbsp; <input type="text" name="dept" value="[% submission.dept | strip_subject %]" size="75" MAXLENGTH="100"></label>
+				<label>Dept&nbsp; <input type="text" name="dept" value="[% IF constants.submit_dept; submission.dept | strip_subject; END %]" size="75" MAXLENGTH="100"></label>
 			[% END %]
 			[% FOR extra = extras %]
 				<br>[% extra.1 %]
