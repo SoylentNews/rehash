@@ -11,12 +11,14 @@ Slash::Sumbit::Upgrade::MySQL
 
 =head1 SYNOPSIS
 
-	# basic example of usage
+Database upgrades file for Submit Plugin
 
 
 =head1 DESCRIPTION
 
-LONG DESCRIPTION.
+Automagically updates database with schema and data changes
+needed for the Submit plugin when associate code changes are
+made in rehash.
 
 
 =head1 EXPORTED FUNCTIONS
