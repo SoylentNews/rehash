@@ -264,7 +264,7 @@ sub getAL2Counts {
 ########################################################
 sub getPointsInPool {
 	my($self) = @_;
-	return $self->sqlSelect('SUM(points)', 'users_comments');
+	return $self->sqlSelect('SUM(points)', 'users_info');
 }
 
 ########################################################
