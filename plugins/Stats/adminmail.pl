@@ -889,6 +889,7 @@ EOT
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
 	$statsSave->createStatDaily('users_created', $new_users_yest);
+	$data{new_users_yest} = $new_users_yest;
 	$data{rand_users_yest} = $slashdb->getRandUsersCreatedYest(10, $yesterday);
 	($data{top_recent_domains}, $data{top_recent_domains_daysback}, $data{top_recent_domains_newaccounts}, $data{top_recent_domains_newnicks}) = $slashdb->getTopRecentRealemailDomains($yesterday);
 
