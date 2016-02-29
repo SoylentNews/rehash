@@ -785,8 +785,7 @@ sub printComments {
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
 	# Index go bye-bye, just use $cc --TMB
-	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
-	my $total = $cc;
+	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $cc);
 		# Saved for now --TMB
 		#= ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
 		#? $comments->{$cidorpid}{totalvisiblekids}
@@ -930,7 +929,7 @@ sub displayThread {
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
 		my $class = 'full';
-		$comment->{class} = $class
+		$comment->{class} = $class;
 
 		$user->{state}{comments}{totals}{$class}++;# unless $comment->{dummy};
 
@@ -939,15 +938,15 @@ sub displayThread {
 		my($noshow, $pieces) = (0, 0);
 
 		if ($lvl && $indent) {
-				$return .= $const->{tablebegin} .
-					dispComment($comment, { noshow => $noshow, pieces => $pieces }) .
-					$const->{tableend};
-				$cagedkids = 0;
-			} else {
-				$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
-			}
-			$displayed++; # unless $comment->{dummy};
+			$return .= $const->{tablebegin} .
+				dispComment($comment, { noshow => $noshow, pieces => $pieces }) .
+				$const->{tableend};
+			$cagedkids = 0;
+		} else {
+			$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
 		}
+		$displayed++; # unless $comment->{dummy};
+
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
 
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
@@ -968,7 +967,7 @@ sub displayThread {
 		}
 
 		$return .= "$const->{commentend}" if $finish_list;
-		$return .= "$const->{fullcommentend}" if (($full || $highlight) && $user->{mode} ne 'flat');
+		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 
 		last if $displayed >= $user->{commentlimit};
 	}
