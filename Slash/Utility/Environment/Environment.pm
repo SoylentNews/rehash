@@ -1826,32 +1826,6 @@ sub prepareUser {
 			
 	$user->{karma_bonus}  = '+1' unless defined($user->{karma_bonus});
 
-	# see Slash::discussion2()
-	# if D2 is not set, it is because user is anon, or user has not
-	# selected D2 one way or another.  such users get D2 by default unless
-	# no_d2 is set, or they are IE users
-	#$user->{state}{no_d2} = $form->{no_d2} ? 1 : 0;
-	#if (!$user->{discussion2}) {
-	#	my $d2 = 'slashdot';  # default for all users
-	#	if ($user->{state}{no_d2}) {
-	#		$d2 = 'none';
-	#	} elsif ($ENV{MOD_PERL}) {
-	#		# get user-agent (ENV not populated yet)
-	#		my %headers = $r->headers_in;
-	#		# just in case:
-	#		@headers{map lc, keys %headers} = values %headers;
-	#		my $ua = $r->headers_in->{'user-agent'};
-	#		if ($ua =~ /MSIE (\d+)/) {
-	#			$d2 = 'none' if $1 < 7;
-	#		}
-	#	}
-	#	$user->{discussion2} = $d2;
-	#}
-
-	# D2 is hosed due to most of the Javascript required to run it being MITA
-	# Forcibly disable it for now
-	$user->{discussion2} = 'none';
-	
 	# All sorts of checks on user data.  The story_{never,always} checks
 	# are important because that data is fed directly into SQL queries
 	# without being quoted.

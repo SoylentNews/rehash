@@ -1153,14 +1153,11 @@ sub linkComment {
 		%$linkdata = (%$linkdata,
 			adminflag	=> $adminflag,
 			date		=> $options->{date},
-			threshold	=> defined($linkdata->{threshold}) ? $linkdata->{threshold} : $user->{threshold},
-			highlightthresh	=> defined($linkdata->{highlightthresh}) ? $linkdata->{highlightthresh} : $user->{highlightthresh},
 			commentsort	=> $user->{commentsort},
 			mode		=> $user->{mode},
 		);
 	}
 
-	return _hard_linkComment($linkdata) if $constants->{comments_hardcoded};
 	slashDisplay('linkComment', $linkdata, { Return => 1, Nocomm => 1 });
 }
 
@@ -1367,51 +1364,6 @@ sub lockTest {
 		}
 	}
 	return $msg;
-}
-
-########################################################
-# this sucks, but it is here for now
-sub _hard_linkComment {
-	my($linkdata) = @_;
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-	my $form = getCurrentForm();
-	my $gSkin = getCurrentSkin();
-
-	my $subject = $linkdata->{subject};
-
-	my $display = qq|<a |;
-	$display .= qq|id="$linkdata->{a_id}" |    if $linkdata->{a_id};
-	$display .= qq|class="$linkdata->{a_class}" | if $linkdata->{a_class};
-	$display .= qq|href="$gSkin->{rootdir}/comments.pl?sid=$linkdata->{sid}|;
-	$display .= "&amp;op=$linkdata->{op}" if defined($linkdata->{op});
-	$display .= "&amp;threshold=$linkdata->{threshold}" if defined($linkdata->{threshold});
-	$display .= "&amp;commentsort=$user->{commentsort}" if defined $linkdata->{commentsort};
-	$display .= "&amp;mode=$user->{mode}" if defined $linkdata->{mode};
-	$display .= "&amp;no_d2=1" if $user->{state}{no_d2} || $linkdata->{no_d2};
-	$display .= "&amp;startat=$linkdata->{startat}" if $linkdata->{startat};
-	$display .= "&amp;tid=$user->{state}{tid}"
-		if $constants->{tids_in_urls} && $user->{state}{tid};
-
-	if ($linkdata->{comment}) {
-		$display .= "&amp;cid=$linkdata->{cid}";
-	} else {
-		$display .= "&amp;pid=" . ($linkdata->{original_pid} || $linkdata->{pid});
-		$display .= "#$linkdata->{cid}" if $linkdata->{cid};
-	}
-
-	$display .= qq|" onclick="$linkdata->{onclick}| if $linkdata->{onclick};
-	$display .= qq|">$subject</a>|;
-	if (!$linkdata->{subject_only}) {
-		$display .= qq| by $linkdata->{nickname}|;
-		$display .= qq| (Score:$linkdata->{points})|
-			if !$user->{noscores} && $linkdata->{points};
-		$display .= " " . timeCalc($linkdata->{'time'}) 
-			if $linkdata->{date};
-	}
-	#$display .= "\n";
-
-	return $display;
 }
 
 #========================================================================

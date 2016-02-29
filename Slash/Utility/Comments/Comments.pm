@@ -35,7 +35,7 @@ use base 'Exporter';
 our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
 	constrain_score dispComment displayThread printComments
-	jsSelectComments commentCountThreshold commentThresholds discussion2
+	jsSelectComments commentCountThreshold commentThresholds 
 	selectComments preProcessReplyForm makeCommentBitmap parseCommentBitmap
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
@@ -214,7 +214,6 @@ sub selectComments {
 					# parents of our main cid, so spend time
 					# finding it ...
 					if ($cid && $C->{pid} < $cid) {
-						$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
 						$parent = $old_comments{ $C->{pid} };
 						push @new_seen, $C->{pid};
 						$count++;
@@ -569,7 +568,7 @@ sub _print_cchp {
 # of the functionality of the moderation engine is intrinsically linked
 # with how things behave on Slashdot.	- Cliff 6/6/01
 # I rearranged the order of these tests (check anon first for speed)
-# and pulled some of the tests from dispComment/_hard_dispComment
+# and pulled some of the tests from dispComment
 # back here as well, just to have it all in one place. - Jamie 2001/08/17
 # And now it becomes a function of its own - Jamie 2002/02/26
 sub _can_mod {
@@ -786,6 +785,7 @@ sub printComments {
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
 	# Index go bye-bye, just use $cc --TMB
+	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
 	my $total = $cc;
 		# Saved for now --TMB
 		#= ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
@@ -820,6 +820,7 @@ sub printComments {
 		cid		=> $cid,
 		pid		=> $pid,
 		cc		=> $cc,
+		lcp		=> $lcp,
 		lvl		=> $lvl,
 		anon_dump	=> $anon_dump,
 	}, { Return => 1 });
@@ -896,8 +897,6 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	my $threshold = -1;
-	my $highlightthresh = -1;
 	# root comment should have more likelihood to be full
 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
@@ -930,28 +929,16 @@ sub displayThread {
 		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
-		my $class = 'oneline';
-		if ($comment->{dummy}) {
-			$class = 'hidden';
-		} elsif ($comment->{points} < $threshold) {
-			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
-				$hidden++;
-				next;
-			}
-		}
+		my $class = 'full';
+		$comment->{class} = $class
 
-		my $highlight = ($comment->{points} >= $highlightthresh && $class ne 'hidden') ? 1 : 0;
-		$class = 'full' if $highlight;
-		$comment->{class} = $class;
-
-		$user->{state}{comments}{totals}{$class}++ unless $comment->{dummy};
+		$user->{state}{comments}{totals}{$class}++;# unless $comment->{dummy};
 
 		my $finish_list = 0;
 
-		if ($full || $highlight) {
-			my($noshow, $pieces) = (0, 0);
+		my($noshow, $pieces) = (0, 0);
 
-			if ($lvl && $indent) {
+		if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
 					dispComment($comment, { noshow => $noshow, pieces => $pieces }) .
 					$const->{tableend};
@@ -959,12 +946,7 @@ sub displayThread {
 			} else {
 				$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
 			}
-			$displayed++ unless $comment->{dummy};
-		} else {
-			my $pntcmt = @{$comments->{$comment->{pid}}{kids}} > $user->{commentspill};
-			$return .= $const->{commentbegin} .
-				linkComment($comment, $pntcmt, { date => 1 });
-			$finish_list++;
+			$displayed++; # unless $comment->{dummy};
 		}
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
 
@@ -989,24 +971,6 @@ sub displayThread {
 		$return .= "$const->{fullcommentend}" if (($full || $highlight) && $user->{mode} ne 'flat');
 
 		last if $displayed >= $user->{commentlimit};
-	}
-
-	if ($hidden && (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod')) {
-		my $link = linkComment({
-			sid		=> $sid,
-			threshold	=> $constants->{comment_minscore},
-			pid		=> $pid,
-			subject		=> Slash::getData('displayThreadLink', { 
-						hidden => $hidden 
-					   }, ''),
-			subject_only	=> 1,
-		});
-		$return .= $const->{cagebigbegin} if $cagedkids;
-		$return .= slashDisplay('displayThread',
-			{ 'link' => $link },
-			{ Return => 1, Nocomm => 1 }
-		);
-		$return .= $const->{cagebigend} if $cagedkids;
 	}
 
 	return $return;
@@ -1276,7 +1240,7 @@ sub saveComment {
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	if ($moddb) {
 		my $text = $moddb->checkDiscussionForUndoModeration($comm->{sid});
-		print $text if $text && !discussion2($user);
+		print $text if $text;
 	}
 
 	my $tc = $slashdb->getVar('totalComments', 'value', 1);
@@ -1472,16 +1436,9 @@ sub dispComment {
 	# ipid/subnetid need munging into one text string
 	if ($user->{seclev} >= 100 && $comment->{ipid} && $comment->{subnetid}) {
 		vislenify($comment); # create $comment->{ipid_vis} and {subnetid_vis}
-		if ($constants->{comments_hardcoded}) {
-			$comment->{ipid_display} = <<EOT;
-<span class="user_ipid_display">[<a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</a>
-<a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</a>]</span>
-EOT
-		} else {
-			$comment->{ipid_display} = slashDisplay(
-				"ipid_display", { data => $comment },
-				1);
-		}
+		$comment->{ipid_display} = slashDisplay(
+			"ipid_display", { data => $comment },
+			1);
 	} else {
 		$comment->{ipid_display} = "";
 	}
@@ -1491,13 +1448,6 @@ EOT
 	push @{$user->{state}{cids}}, $comment->{cid};
 
 	$comment->{class} ||= 'full';
-
-#use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
-
-	return _hard_dispComment(
-		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, $reasons, $options, 0
-	) if $constants->{comments_hardcoded};
 
 	if ($options->{show_pieces}) {
 		my @return;
@@ -1538,313 +1488,6 @@ EOT
 		subscriber_badge => $subscriber_badge
 	}, { Return => 1, Nocomm => 1 });
 }
-
-########################################################
-# this sucks, but it is here for now
-sub _hard_dispComment {
-	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons, $options, $discussion2) = @_;
-	my $gSkin = getCurrentSkin();
-
-	my($comment_to_display, $score_to_display,
-		$user_nick_to_display, $zoosphere_display, $user_email_to_display,
-		$time_to_display, $comment_link_to_display, $userinfo_to_display,
-		$comment_links)
-		= ("") x 9;
-
-	$comment_to_display = qq'<div id="comment_body_$comment->{cid}">$comment->{comment}</div>';
-	my $sighide = $comment_shrunk ? ' hide' : '';
-	$comment_to_display .= qq'<div id="comment_sig_$comment->{cid}" class="sig$sighide">$comment->{sig}</div>' if $comment->{sig} && !$user->{nosigs};
-
-	if ($comment_shrunk) {
-		my $readtext = 'Read the rest of this comment...';
-		my $link;
-		if ($discussion2) {
-			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.readRest($comment->{cid})">$readtext</a>';
-		} else {
-			$link = linkComment({
-				sid	=> $comment->{sid},
-				cid	=> $comment->{cid},
-				pid	=> $comment->{cid},
-				subject	=> $readtext,
-				subject_only => 1,
-			}, 1);
-		}
-		$comment_to_display .= qq'<div id="comment_shrunk_$comment->{cid}" class="commentshrunk">$link</div>';
-	}
-
-	$time_to_display = timeCalc($comment->{date});
-	unless ($user->{noscores}) {
-		$score_to_display .= "Score:";
-		if (length $comment->{points}) {
-			$score_to_display .= $comment->{points};
-			if ($constants->{modal_prefs_active}) {
-				my $func = "getModalPrefs('modcommentlog', 'Moderation Comment Log', $comment->{cid})";
-				$score_to_display = qq[<a href="#" onclick="$func; return false">$score_to_display</a>];
-			}
-		} else {
-			$score_to_display .= '?';
-		}
-		if ($reasons && $comment->{reason}) {
-			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
-		}
-		$score_to_display = " ($score_to_display)";
-	}
-
-	if ($comment->{sid} && $comment->{cid}) {
-		my $link = linkComment({
-			sid	=> $comment->{sid},
-			cid	=> $comment->{cid},
-			subject	=> "#$comment->{cid}",
-			subject_only => 1,
-		}, 1, { noextra => 1 });
-		$comment_link_to_display = qq| ($link)|;
-	} else {
-		$comment_link_to_display = " ";
-	}
-
-	if (isAnon($comment->{uid})) {
-		$user_nick_to_display = strip_literal($comment->{nickname});
-	} else {
-		my $nick_literal = strip_literal($comment->{nickname});
-		my $nick_param   = strip_paramattr($comment->{nickname});
-		my $reader = getObject('Slash::DB', { db_type => 'reader' });
-		my $hide_subscription = $reader->getUser($comment->{uid}, 'hide_subscription');
-
-		my $homepage = $comment->{homepage} || '';
-		$homepage = '' if length($homepage) <= 8;
-		my $homepage_maxlen = $constants->{comment_homepage_disp} || 50;
-		if (length($homepage) > $homepage_maxlen) {
-			my $halflen = $homepage_maxlen/2 - 5;
-			$halflen = 10 if $halflen < 10;
-			$homepage = substr($homepage, 0, $halflen) . "..." . substr($homepage, -$halflen);
-		}
-		$homepage = strip_literal($homepage);
-
-		$userinfo_to_display = "";
-		my $nofollow = '';
-		if (!$comment->{karma_bonus} || $comment->{karma_bonus} eq 'no') {
-			$nofollow = ' rel="nofollow"';
-		}
-		$userinfo_to_display = qq[<a href="$comment->{homepage}" title="$comment->{homepage}" class="user_homepage_display"$nofollow>Homepage</a>]
-			if $homepage;
-		if ($comment->{journal_last_entry_date} =~ /[1-9]/) {
-			$userinfo_to_display .= "\n" if $userinfo_to_display;
-			$userinfo_to_display .= sprintf('<a href="%s/~%s/journal/" title="%s" class="user_journal_display">Journal</a>',
-				$constants->{real_rootdir},
-				$nick_param,
-				timeCalc($comment->{journal_last_entry_date})
-			);
-		}
-		#$userinfo_to_display = "<br>($userinfo_to_display)" if $userinfo_to_display;
-		
-
-		$user_nick_to_display = qq{<a href="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</a>};
-		if ($constants->{plugin}{Subscribe} && $constants->{subscribe} && isSubscriber($comment->{uid}) && !$hide_subscription) {
-			if ($constants->{plugin}{FAQSlashdot}) {
-				$user_nick_to_display .= qq{ <a href="/faq/com-mod.shtml#cm2600">*</a>};
-			} else {
-				$user_nick_to_display .= " *";
-			}
-		}
-		if ($comment->{fakeemail}) {
-			my $mail_literal = strip_literal($comment->{fakeemail_vis});
-			my $mail_param = strip_paramattr($comment->{fakeemail});
-			$user_email_to_display = qq{ &lt;<a href="mailto:$mail_param">$mail_literal</a>&gt;};
-		}
-	}
-
-	my $otherdetails = $options->{pieces} ? '' : <<EOT;
-		$user_email_to_display
-		on $time_to_display$comment_link_to_display
-		<small>$userinfo_to_display $comment->{ipid_display}</small>
-EOT
-
-	# Do not display comment navigation and reply links if we are in
-	# archive mode or if we are in metamod. Nicknames are always equal to
-	# '-' in metamod. This logic is extremely old and could probably be
-	# better formulated.
-	my $commentsub = '';
-	if (!$options->{noshow} && !$options->{pieces}
-		&& $user->{mode} ne 'archive'
-		&& $user->{mode} ne 'metamod'
-		&& $comment->{nickname} ne "-") { # this last test probably useless
-		my @link = ( );
-
-		my($prefix, $a_id, $a_class, $suffix) = ('', '', '', '');
-		my $is_idle = $gSkin->{name} eq 'idle';
-		if ($is_idle) {
-			$a_class = 'vbutton bg_666666 rd_5';
-			$a_id = "reply_link_$comment->{cid}";
-		} else {
-			$prefix = qq'<span id="reply_link_$comment->{cid}" class="nbutton"><p><b>';
-			$suffix = qq'</b></p></span>'
-		}
-
-		push @link, ($prefix . linkComment({
-			a_id	=> $a_id,
-			a_class	=> $a_class,
-			sid	=> $comment->{sid},
-			pid	=> $comment->{cid},
-			op	=> 'Reply',
-			subject	=> 'Reply to This',
-			subject_only => 1,
-			onclick	=> ($discussion2 ? "D2.replyTo($comment->{cid}); return false;" : '')
-		}) . $suffix) unless $user->{state}{discussion_archived};
-
-		if (! $is_idle) {
-			$prefix = qq'<span class="nbutton"><p><b>';
-		}
-
-		push @link, ($prefix . linkComment({
-			a_class	=> $a_class,
-			sid	=> $comment->{sid},
-			cid	=> $comment->{original_pid},
-			pid	=> $comment->{original_pid},
-			subject	=> 'Parent',
-			subject_only => 1,
-			onclick	=> ($discussion2 ? "return D2.selectParent($comment->{original_pid})" : '')
-		}, 1) . $suffix) if $comment->{original_pid};
-
-#use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
-
-		push @link, qq'<div id="reasondiv_$comment->{cid}" class="modsel">' .
-			createSelect("reason_$comment->{cid}", $reasons, {
-				'return'	=> 1,
-				nsort		=> 1, 
-				onchange	=> ($discussion2 ? 'return D2.doModerate(this)' : '')
-			}) . "</div>" if $can_mod
-				&& ( !$user->{state}{discussion_archived}
-					|| $constants->{comments_moddable_archived} );
-
-		push @link, qq|<input type="checkbox" name="del_$comment->{cid}">|
-			if $user->{is_admin};
-
-		my $link = join(" ", @link);
-
-		if (@link) {
-			$commentsub = $link;
-		}
-
-	}
-
-	### short-circuit
-	if ($options->{show_pieces}) {
-		return($otherdetails, $commentsub);
-	}
-
-
-	$zoosphere_display = " ";
-	if ($comment->{badge_id}) {
-		my $reader = getObject('Slash::DB', { db_type => 'reader' });
-		my $badges = $reader->getBadgeDescriptions;
-		if (my $badge = $badges->{ $comment->{badge_id} }) {
-			my $badge_url   = strip_urlattr($badge->{badge_url});
-			my $badge_icon  = strip_paramattr($badge->{badge_icon});
-			my $badge_title = strip_attribute($badge->{badge_title});
-			$zoosphere_display .= qq|<span class="badgeicon"><a href="$badge_url"><img src="$constants->{imagedir}/$badge_icon" alt="$badge_title" title="$badge_title"></a></span>|;
-		}
-	}
-	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
-		my $person = $comment->{uid};
-		my $zooicon = qq|<span class="zooicon __IMG__" title="__TITLE__"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person" title="__TITLE__">|;
-			$zooicon .= qq|__TITLE__</a></span>|;
-		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person} && !$user->{people}{FOF()}{$person} && !$user->{people}{EOF()}{$person}) {
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/neutral/g;
-				$zoosphere_display =~ s/__TITLE__/Alter Relationship/g;
-		} else {
-			if ($user->{people}{FRIEND()}{$person}) {
-				my $title = $user->{people}{people_bonus_friend} ? "Friend ($user->{people}{people_bonus_friend})" : "Friend";
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/friend/g;
-				$zoosphere_display =~ s/__TITLE__/$title/g;
-			}
-			if ($user->{people}{FOE()}{$person}) {
-				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/foe/g;
-				$zoosphere_display =~ s/__TITLE__/$title/g;
-			}
-			if ($user->{people}{FAN()}{$person}) {
-				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/fan/g;
-				$zoosphere_display =~ s/__TITLE__/$title/g;
-			}
-			if ($user->{people}{FREAK()}{$person}) {
-				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/freak/g;
-				$zoosphere_display =~ s/__TITLE__/$title/g;
-			}
-			if ($user->{people}{FOF()}{$person}) {
-				my $title = $user->{people}{people_bonus_fof} ? "Friend of a Friend ($user->{people}{people_bonus_fof})" : "Friend of a Friend";
-				(my $tmp = $zooicon) =~ s/__IMG__/fof/g;
-				$tmp =~ s/__TITLE__/$title/g;
-				$tmp =~ s/width="\d+" /width="$constants->{badge_icon_size_wide}" /g;
-				$zoosphere_display .= $tmp;
-			}
-			if ($user->{people}{EOF()}{$person}) {
-				my $title = $user->{people}{people_bonus_eof} ? "Foe of a Friend ($user->{people}{people_bonus_eof})" : "Foe of a Friend";
-				(my $tmp = $zooicon) =~ s/__IMG__/eof/g;
-				$tmp =~ s/__TITLE__/$title/g;
-				$tmp =~ s/width="\d+" /width="$constants->{badge_icon_size_wide}" /g;
-				$zoosphere_display .= $tmp;
-			}
-		}
-	}
-
-	my $class = $comment->{class}; 
-	my $classattr = $discussion2 ? qq[ class="$class"] : '';
-	my $contain = $class eq 'full' && $discussion2 ? ' contain' : '';
-
-	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.setFocusComment($comment->{cid})">$comment->{subject}</a>
-EOT1
-			<h4><a name="$comment->{cid}">$comment->{subject}</a>
-EOT2
-
-	my $return = '';
-	$return = <<EOT if !$options->{noshow_show};
-<li id="tree_$comment->{cid}" class="comment$contain">
-<div id="comment_status_$comment->{cid}" class="commentstatus"></div>
-<div id="comment_$comment->{cid}"$classattr>
-EOT
-
-	my $new_old_comment = $comment->{has_read} ? 'oldcomment' : 'newcomment';
-
-	$return .= <<EOT if !$options->{noshow};
-	<div id="comment_top_$comment->{cid}" class="commentTop $new_old_comment">
-		<div class="title">
-$head
-$comment_links
-		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span></h4>
-		</div>
-		<div class="details">
-			<span class="by">by $user_nick_to_display</span>$zoosphere_display
-			<span class="otherdetails" id="comment_otherdetails_$comment->{cid}">$otherdetails</span>
-		</div>
-	</div>
-	<div class="commentBody">	
-		$comment_to_display
-	</div>
-
-	<div class="commentSub" id="comment_sub_$comment->{cid}">
-$commentsub
-EOT
-
-	$return .= "</div>\n" if !$options->{noshow};
-	$return .= "</div>\n\n" if !$options->{noshow_show};
-
-	if ($discussion2 && !$options->{noshow_show}) {
-		$return .= <<EOT;
-<div id="replyto_$comment->{cid}"></div>
-
-<ul id="group_$comment->{cid}">
-	<li id="hiddens_$comment->{cid}" class="hide"></li>
-</ul>
-
-EOT
-	}
-
-	return $return;
-}
-
 
 ##################################################################
 # Validate comment, looking for errors

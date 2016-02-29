@@ -16,8 +16,7 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
-	my $days = $slashdb->sqlSelect('value', 'vars', "name = 'comment_read_max_age'")
-	$days = int($days) || 14;
+	my $days = int($constants->{comment_read_max_age}) || 14;
 	$slashdb->sqlDo("DELETE FROM users_comments_read_log where ts < DATE_SUB(NOW(), INTERVAL $days DAY)");
 	
 	return;

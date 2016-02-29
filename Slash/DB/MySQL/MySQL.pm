@@ -6227,7 +6227,7 @@ sub getCommentsForUser {
 
 	if ($cid && $one_cid_only) {
 		$where .= "AND cid=$cid";
-	} elsif ($user->{hardthresh} && !$options->{discussion2}) {
+	} elsif ($user->{hardthresh}) {
 		my $threshold_q = $self->sqlQuote($user->{threshold});
 		$where .= "AND (comments.points >= $threshold_q";
 		$where .= "  OR comments.uid=$user->{uid}"	unless $user->{is_anon};
@@ -6297,7 +6297,7 @@ sub getCommentTextCached {
 	$opt ||= {};
 
 	my $possible_chop  = !$opt->{full} && !($opt->{mode} && $opt->{mode} eq 'archive');
-	my $abbreviate_ok  = $opt->{discussion2} && $possible_chop;
+	my $abbreviate_ok  = 0;
 	my $abbreviate_len = 256;
 	my $max_len = $constants->{default_maxcommentsize};
 
@@ -13388,6 +13388,9 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
                         return 0;
                 }
+		if (!$self->sqlDo("DELETE FROM vars WHERE name = 'comments_hardcoded'")) {
+			return 0;
+		}
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
                         return 0;
                 };
