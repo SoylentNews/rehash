@@ -631,6 +631,7 @@ input[type=checkbox].story_more:checked ~ div.story_more{
 
 input[type=checkbox].story_more ~ label.story_more{
     padding: 0;
+    cursor: pointer;
 }
 
 input[type=checkbox].story_more:checked ~ label.story_more{
