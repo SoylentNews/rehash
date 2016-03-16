@@ -13394,6 +13394,9 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
                         return 0;
                 };
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD threaddivisor TINYINT(4) UNSIGNED DEFAULT 20 NOT NULL") {
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}

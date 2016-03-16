@@ -17,8 +17,8 @@ en_US
 __name__
 linkCommentPages
 __template__
-[% UNLESS (total < user.commentlimit) || (user.commentlimit < 1) %]
-	[% pages = total / user.commentlimit %]
+[% IF !( (total < user.commentlimit ) || (user.commentlimit  < 1) )  && divisor == 1 %]
+	[% pages = total / user.commentlimit  %]
 	<div class="linkCommentPage">
 	[% FOREACH p = [0 .. pages] %]
 		[% start = user.commentlimit * p %]
@@ -41,6 +41,30 @@ __template__
 		([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
 	[% END %]
 	</div>
+[% ELSIF !( (total < (user.commentlimit / divisor)) || ((user.commentlimit / divisor) < 1) ) && divisor > 1 %]
+	[% pages = total / (user.commentlimit / divisor)  %]
+        <div class="linkCommentPage">
+        [% FOREACH p = [0 .. pages] %]
+                [% start = (user.commentlimit / divisor) * p %]
+                [% IF p != 0 %] | [% END %]
+                [% IF start == form.startat || (!form.startat && p == 0) %]
+                        <b>([% p + 1 %])</b>
+                [% ELSE %]
+                        [% Slash.linkComment({
+                                sid     => sid,
+                                pid     => pid,
+                                cid     => cid,
+                                subject => (p + 1),
+                                subject_only => 1,
+                                startat => (start ? start : 0),
+                        }) %]
+                [% END %]
+        [% END %]
+
+        [% IF user.breaking %]
+                ([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
+        [% END %]
+        </div>
 [% END %]
 
 __seclev__

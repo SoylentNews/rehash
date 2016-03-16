@@ -218,6 +218,9 @@ __template__
 		<label>Comment Limit <input type="text" name="commentlimit" size="6" value="[% user_edit.commentlimit %]"></label>
 		<div class="notes">Only display this many comments, for best results, set this to a low number and sort by score) If set above [% constants.breaking %], then it is ignored and [% constants.breaking / 2 %] is used instead.</div>
 
+		<label>Thread Divisor <input type="text" name="threaddivisor" size="6" value="[% user_edit.threaddivisor %]"></label>
+                <div class="notes">Threaded mode counts by threads instead of comments for pagination purposes. Divide Comment Limit by this setting to determine how many threads you want per page.</div>
+
 		<label>Comment Byte Limit [% bytelimit_select %]</label>
 		[% PROCESS formNote note="Number of bytes of comments to display. If this is reached before comment limit, break the page, else use above comment limit." %]
 

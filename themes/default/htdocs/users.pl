@@ -2632,10 +2632,13 @@ sub saveComm {
 
 	# Take care of the lists
 	# Enforce Ranges for variables that need it
-	$form->{commentlimit} = 0 if $form->{commentlimit} < 1;
+	$form->{commentlimit} = 1 if $form->{commentlimit} < 1;
 	my $cl_max = $constants->{comment_commentlimit} || 0;
 	$form->{commentlimit} = $cl_max if $cl_max > 0 && $form->{commentlimit} > $cl_max;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
+
+	$form->{threaddivisor} = 1 if $form->{threaddivisor} < 1;
+	$form->{threaddivisor} = $user->{commentlimit} if $form->{threaddivisor} > $user->{commentlimit};
 
 	# For some of these values, namely the ones that we happen to
 	# know get stored in users_param, we change them to 'undef'
@@ -2669,6 +2672,7 @@ sub saveComm {
 		clbig			=> $form->{clbig},
 		clbig_bonus		=> ($clbig_bonus || undef),
 		commentlimit		=> $form->{commentlimit},
+		threaddivisor		=> $form->{threaddivisor},
 		bytelimit		=> $form->{bytelimit},
 		commentsort		=> $form->{commentsort},
 		commentspill		=> $form->{commentspill},
@@ -2711,6 +2715,7 @@ sub saveComm {
 		reparent        => 1,
 		commentlimit    => 100,
 		commentspill    => 50,
+		threaddivisor	=> 20,
 		mode            => 'thread'
 	};
 

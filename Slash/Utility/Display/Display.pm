@@ -1085,12 +1085,14 @@ The 'linkCommentPages' template block.
 
 sub linkCommentPages {
 	my($sid, $pid, $cid, $total) = @_;
+	my $user = getCurrentUser();
 
 	return slashDisplay('linkCommentPages', {
 		sid	=> $sid,
 		pid	=> $pid,
 		cid	=> $cid,
 		total	=> $total,
+		divisor	=> (($user->{mode} eq 'thread') && ($user->{threaddivisor}) ? $user->{threaddivisor} : 1),
 	}, 1);
 }
 

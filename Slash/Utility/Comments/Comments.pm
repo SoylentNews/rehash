@@ -726,11 +726,7 @@ sub printComments {
 			&& $comments->{$cidorpid}{visiblekids};
 
 	$lvl++ if $user->{mode} ne 'flat'
-		&& $user->{mode} ne 'archive'
-		&& $user->{mode} ne 'metamod'
-		&& $cc > $user->{commentspill}
-		&& ( $user->{commentlimit} > $cc ||
-		     $user->{commentlimit} > $user->{commentspill} );
+		&& ( ($user->{commentlimit} / $user->{threaddivisor})  > $cc );
 	
 	my $archive_text;
 	if ($discussion->{type} eq 'archived'
@@ -969,7 +965,13 @@ sub displayThread {
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 
-		last if $displayed >= $user->{commentlimit};
+		if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
+			last;
+		}
+		if( ($displayed >= ($user->{commentlimit} / $user->{threaddivisor})) && ($user->{mode} eq "thread") ){
+                        last;
+                }
+		
 	}
 
 	return $return;
