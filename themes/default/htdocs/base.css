@@ -614,11 +614,28 @@ margin: 0 0 1em 0;
 position: relative;
 }
 
-
 .full
 {
 margin: 1em 0 0 0;
 position: relative;
+}
+
+input[type=checkbox].story_more,
+input[type=checkbox].story_more ~ div.story_more{
+    display: none;
+}
+
+input[type=checkbox].story_more:checked ~ div.story_more{
+    display: block;
+}
+
+input[type=checkbox].story_more ~ label.story_more{
+    padding: 0;
+    cursor: pointer;
+}
+
+input[type=checkbox].story_more:checked ~ label.story_more{
+    display: none;
 }
 
 div.storylinks

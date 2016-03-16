@@ -115,6 +115,14 @@ END %]
 				[% pretext %]
 			[% END %]
 		</div>
+		[% IF !full && story.bodytext.length %]
+				<input type="checkbox" id="more_[% story.sid %]" class="story_more" autocomplete="off" />
+				<label for="more_[% story.sid %]" class="story_more">More</label>
+				<div class="story_more full">
+						[% story.bodytext %]
+				</div>
+		[% END %]	
+
 
 [% IF full && user.is_admin && !preview && env.script_name != '/admin.pl' %]<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;[% END %]
 [% IF full && !preview && env.script_name != '/admin.pl' %]
@@ -143,14 +151,9 @@ END %]
 [% END %]
 
 [% IF full && story.bodytext %]
-	[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 		<div class="full">
 			[% story.bodytext %]
 		</div>
-	[% ELSE %]
-		[% IF constants.run_ads && constants.ad_messaging_num;
-			Slash.getAd(constants.ad_messaging_num);
-	END -%]
 [% END %]
 	</div>
 </div>

@@ -69,7 +69,7 @@ $task{$me}{code} = sub {
 		}
 		
 		for my $uid (keys %$subscribers_hr) {
-			if($subscribers_hr->{$uid}{gift}) $gift_users++; 
+			$gift_users++ if($subscribers_hr->{$uid}{gift}); 
 		}
 
 

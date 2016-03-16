@@ -14,7 +14,7 @@ use vars qw( %task $me );
 # GMT if you installed everything correctly.  So 6:07 AM GMT is a good
 # sort of midnightish time for the Western Hemisphere.  Adjust for
 # your audience and admins.
-$task{$me}{timespec} = '50 4 * * *';
+$task{$me}{timespec} = '17 5 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{resource_locks} = { log_slave => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -889,6 +889,7 @@ EOT
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
 	$statsSave->createStatDaily('users_created', $new_users_yest);
+	$data{new_users_yest} = $new_users_yest;
 	$data{rand_users_yest} = $slashdb->getRandUsersCreatedYest(10, $yesterday);
 	($data{top_recent_domains}, $data{top_recent_domains_daysback}, $data{top_recent_domains_newaccounts}, $data{top_recent_domains_newnicks}) = $slashdb->getTopRecentRealemailDomains($yesterday);
 
@@ -1047,10 +1048,9 @@ sub getAdminModsText {
 	my($am) = @_;
 	return "" if !$am or !scalar(keys %$am);
 
-	my $text = sprintf("%-13s   %4s %4s %5s    %5s %5s %6s %14s\n",
+	my $text = sprintf("%-13s   %4s %4s %5s\n",
 		"Nickname",
-		"M1up", "M1dn", "M1up%",
-		"M2fr", "M2un", " M2un%", " M2un% (month)"
+		"M1up", "M1dn", "M1up%"
 	);
 	my($num_admin_mods, $num_mods) = (0, 0);
 	for my $nickname (sort { lc($a) cmp lc($b) } keys %$am) {
@@ -1059,25 +1059,13 @@ sub getAdminModsText {
 		$m1_up_percent = $amn->{m1_up}*100
 			/ ( ($amn->{m1_up} || 0) + ($amn->{m1_down} || 0) )
 			if ($amn->{m1_up} || 0) + ($amn->{m1_down} || 0) > 0;
-		my $m2_un_percent = 0;
-		$m2_un_percent = $amn->{m2_unfair}*100
-			/ ( ($amn->{m2_unfair} || 0) + ($amn->{m2_fair} || 0) )
-			if ($amn->{m2_unfair} || 0) + ($amn->{m2_fair} || 0) > 20;
-		my $m2_un_percent_mo = 0;
-		$m2_un_percent_mo = $amn->{m2_unfair_mo}*100
-			/ ( ($amn->{m2_unfair_mo} || 0) + ($amn->{m2_fair_mo} || 0) )
-			if ($amn->{m2_unfair_mo} || 0) + ($amn->{m2_fair_mo} || 0) > 20;
 		next unless $amn->{m1_up} || $amn->{m1_down}
 			|| $amn->{m2_fair} || $amn->{m2_unfair};
-		$text .= sprintf("%13.13s   %4d %4d %4d%%    %5d %5d %5.1f%% %5.1f%%\n",
+		$text .= sprintf("%13.13s   %4d %4d %4d%%\n",
 			$nickname,
 			$amn->{m1_up}		|| 0,
 			$amn->{m1_down}		|| 0,
 			$m1_up_percent		|| 0,
-			$amn->{m2_fair}		|| 0,
-			$amn->{m2_unfair}	|| 0,
-			$m2_un_percent		|| 0,
-			$m2_un_percent_mo	|| 0
 		);
 		if ($nickname eq '~Day Total') {
 			$num_mods += $amn->{m1_up} || 0;
