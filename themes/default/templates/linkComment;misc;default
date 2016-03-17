@@ -24,7 +24,7 @@ en_US
 __name__
 linkComment
 __template__
-<a[% IF a_id %] id="[% a_id %]"[% END %][% IF a_class %] class="[% a_class %]"[% END %] href="[% gSkin.rootdir %]/comments.pl?sid=[% sid;
+<a[% IF a_id %] id="[% a_id %]"[% END %][% IF a_class %] class="[% a_class %]"[% END %] href="[% gSkin.rootdir %]/comments.pl?noupdate=1&amp;sid=[% sid;
 IF op.defined                                 %]&amp;op=[% op; END;
 IF commentsort.defined                        %]&amp;commentsort=[% commentsort; END;
 IF mode.defined                               %]&amp;mode=[% mode; END;

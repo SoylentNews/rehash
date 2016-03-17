@@ -1865,11 +1865,9 @@ sub prepareUser {
 
 	if (	   ( $user->{currentPage} eq 'article'
 			|| $user->{currentPage} eq 'comments' )
-		&& ( $user->{commentlimit} > $constants->{breaking}
-			&& $user->{mode} ne 'archive'
-			&& $user->{mode} ne 'metamod' )
+		&& ( $user->{commentlimit} > $constants->{breaking} )
 	) {
-		$user->{commentlimit} = int($constants->{breaking} / 2);
+		$user->{commentlimit} = $constants->{breaking};
 		$user->{breaking} = 1;
 	} else {
 		$user->{breaking} = 0;
