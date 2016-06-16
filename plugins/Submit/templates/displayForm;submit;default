@@ -71,7 +71,7 @@ __template__
 				[% stripped_title = form.subj | strip_title %]
 				[% PROCESS titlebar width => "100%", title => stripped_title %]
 			<div class="details">
-				[% IF constants.use_dept && constants.submit_dept && form.dept %]<strong>from the <b>[% form.dept %]</b> dept.</strong>[% END %]
+				[% IF constants.use_dept && constants.submit_dept && form.dept %]<strong>from the <b>[% form.dept | strip_subject %]</b> dept.</strong>[% END %]
 			</div>
 				<div class="body">
 					<div class="topic">

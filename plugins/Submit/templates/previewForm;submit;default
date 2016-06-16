@@ -41,7 +41,7 @@ __template__
 	[% del = submission.del; submission_state.$del %] submission by <b>[% submission.name %] <a href="[% submission.email %]">[% submission.email %]</a></b>
         	at [% submission.time %]
 	[% END -%]
-	[% IF constants.use_dept && constants.submit_dept && submission.dept %]<strong>from the <b>[% submission.dept %]</b> dept.</strong>[% END %]
+	[% IF constants.use_dept && constants.submit_dept && submission.dept %]<strong>from the <b>[% submission.dept | strip_subject %]</b> dept.</strong>[% END %]
 	</div>
 	<div class="body">
 		<div class="topic">
