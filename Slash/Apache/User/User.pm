@@ -448,6 +448,8 @@ sub handler {
 
 	createCurrentCookie($cookies);
 	createEnv($r) if $cfg->{env};
+	if(!$user->{is_admin}) { $r->headers_out->set('Content-Security-Policy', "default-src 'none'; script-src https://checkout.stripe.com; frame-src https://checkout.stripe.com; connect-src https://checkout.stripe.com; img-src 'self' https://www.paypalobjects.com https://q.stripe.com; style-src 'unsafe-inline' 'self' https://checkout.stripe.com");}
+        else{ $r->headers_out->unset('Content-Security-Policy');}
 	add_author_quotes($r) if $form->{slashcode_authors};
 
 	# a special test mode for getting a new template
