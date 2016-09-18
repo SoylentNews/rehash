@@ -343,7 +343,7 @@ INSERT INTO users (uid, nickname, realemail, fakeemail, homepage, passwd, sig, s
 # Dumping data for table 'users_comments'
 #
 
-INSERT INTO users_comments (uid, points, posttype, defaultpoints, highlightthresh, maxcommentsize, hardthresh, clbig, clsmall, reparent, nosigs, commentlimit, commentspill, commentsort, noscores, mode, threshold) VALUES (1,0,2,0,4,4096,0,0,0,1,0,50000,50,0,0,'thread',0);
+INSERT INTO users_comments (uid, posttype, defaultpoints, highlightthresh, maxcommentsize, hardthresh, clbig, clsmall, reparent, nosigs, commentlimit, commentspill, commentsort, noscores, mode, threshold) VALUES (1,2,0,4,4096,0,0,0,1,0,50000,50,0,0,'thread',0);
 
 #
 # Dumping data for table 'users_hits'
