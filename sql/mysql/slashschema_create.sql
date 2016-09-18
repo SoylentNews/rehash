@@ -1472,15 +1472,13 @@ CREATE TABLE users_comments (
 	clsmall smallint UNSIGNED DEFAULT '0' NOT NULL,
 	reparent tinyint DEFAULT '1' NOT NULL,
 	nosigs tinyint DEFAULT '0' NOT NULL,
-	points tinyint DEFAULT '0' NOT NULL,
 	commentlimit smallint UNSIGNED DEFAULT '100' NOT NULL,
 	commentspill smallint UNSIGNED DEFAULT '50' NOT NULL,
 	commentsort tinyint DEFAULT '0' NOT NULL,
 	noscores tinyint DEFAULT '0' NOT NULL,
 	mode ENUM('flat', 'nested', 'nocomment', 'thread','improvedthreaded') DEFAULT 'improvedthreaded' NOT NULL,
 	threshold tinyint DEFAULT '0' NOT NULL,
-	PRIMARY KEY (uid),
-	KEY points (points)
+	PRIMARY KEY (uid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
