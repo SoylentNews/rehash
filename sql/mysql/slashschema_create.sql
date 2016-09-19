@@ -1563,6 +1563,7 @@ CREATE TABLE users_info (
 	people MEDIUMBLOB,
 	lastaccess_ts timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
         skin varchar(255) DEFAULT NULL,
+        mod_banned date DEFAULT '1000-01-01',
 	PRIMARY KEY (uid),
 	KEY (initdomain),
 	KEY (created_ipid),
