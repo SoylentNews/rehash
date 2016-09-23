@@ -1084,7 +1084,7 @@ The 'linkCommentPages' template block.
 =cut
 
 sub linkCommentPages {
-	my($sid, $pid, $cid, $total) = @_;
+	my($sid, $pid, $cid, $total, $pages, $mode, $legacy) = @_;
 	my $user = getCurrentUser();
 
 	return slashDisplay('linkCommentPages', {
@@ -1092,7 +1092,9 @@ sub linkCommentPages {
 		pid	=> $pid,
 		cid	=> $cid,
 		total	=> $total,
-		divisor	=> (($user->{mode} eq 'thread') && ($user->{threaddivisor}) ? $user->{threaddivisor} : 1),
+		tpages	=> $pages,
+		mode	=> $mode,
+		legacy	=> $legacy,
 	}, 1);
 }
 
@@ -1143,10 +1145,7 @@ sub linkComment {
 	my $adminflag = $user->{seclev} >= 10000 ? 1 : 0;
 
 	# don't inherit these ...
-	for (qw(sid cid pid date subject comment uid points lastmod
-		reason nickname fakeemail homepage sig)) {
-		$linkdata->{$_} = undef unless exists $linkdata->{$_};
-	}
+	# That's the exact opposite of what this actually does, dumbass. Nuked. --TMB
 
 	$linkdata->{pid}     = $linkdata->{original_pid} || $linkdata->{pid};
 	$linkdata->{comment} = $printcomment;

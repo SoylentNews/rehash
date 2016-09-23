@@ -392,11 +392,6 @@ sub delete {
 sub displayComments {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
-	if ($constants->{m2} && defined($form->{show_m2s}) && $user->{is_admin}) {
-		$slashdb->setUser($user->{uid},
-			{ m2_with_comm_mod => $form->{show_m2s} });
-	}
-
 	if ($form->{cid}) {
 		# Here is the deal, if a user who has a mode of nocomment asks for a 
 		# comment we give it to them and assume the default mode (which 

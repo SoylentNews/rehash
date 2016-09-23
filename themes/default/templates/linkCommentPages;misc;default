@@ -7,6 +7,8 @@ Print links to pages for additional comments
 * pid = pid
 * cid = cid
 * total = total comments
+* tpages = array separated to one page per index. each page being an array holding the cids of the top level comments for that page.
+* legacy = old way or new
 
 __title__
 
@@ -17,44 +19,20 @@ en_US
 __name__
 linkCommentPages
 __template__
-[% IF !( (total < user.commentlimit ) || (user.commentlimit  < 1) )  && divisor == 1 %]
-	[% pages = total / user.commentlimit  %]
-	<div class="linkCommentPage">
-	[% FOREACH p = [0 .. pages] %]
-		[% start = user.commentlimit * p %]
-		[% IF p != 0 %] | [% END %]
-		[% IF start == form.startat || (!form.startat && p == 0) %]
-			<b>([% p + 1 %])</b>
-		[% ELSE %]
-			[% Slash.linkComment({
-				sid	=> sid,
-				pid	=> pid,
-				cid	=> cid,
-				subject	=> (p + 1),
-				subject_only => 1,
-				startat	=> (start ? start : 0),
-			}) %]
-		[% END %]
-	[% END %]
-
-	[% IF user.breaking %]
-		([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
-	[% END %]
-	</div>
-[% ELSIF !( (total < (user.commentlimit / divisor)) || ((user.commentlimit / divisor) < 1) ) && divisor > 1 %]
-	[% pages = total / (user.commentlimit / divisor)  %]
+[% IF !((total < user.commentlimit) || (user.commentlimit < 1)) && ((legacy == "yes") || (mode == "flat")) %]
+        [% pages = total / user.commentlimit %]
         <div class="linkCommentPage">
-        [% FOREACH p = [0 .. pages] %]
-                [% start = (user.commentlimit / divisor) * p %]
+        [% FOREACH p = [1 .. pages] %]
+                [% start = user.commentlimit * p %]
                 [% IF p != 0 %] | [% END %]
                 [% IF start == form.startat || (!form.startat && p == 0) %]
-                        <b>([% p + 1 %])</b>
+                        <b>([% p %])</b>
                 [% ELSE %]
                         [% Slash.linkComment({
                                 sid     => sid,
                                 pid     => pid,
                                 cid     => cid,
-                                subject => (p + 1),
+                                subject => p,
                                 subject_only => 1,
                                 startat => (start ? start : 0),
                         }) %]
@@ -65,8 +43,25 @@ __template__
                 ([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
         [% END %]
         </div>
+[% ELSIF (mode == "thread") && (legacy == "no") %]
+        <div class="linkCommentPage">
+	[% form.page = (form.page || 1) %]
+	[% FOREACH p = [1 .. tpages] %]
+		[% IF p != form.page %]
+			[% Slash.linkComment({
+				sid	=> sid,
+				pid	=> pid,
+				cid	=> cid,
+				subject => (p),
+                                subject_only => 1,
+				page	=> (p),
+			}) %]
+		[% ELSE %]
+			<b>([% p %])</b>
+		[% END %]	
+	[% END %]
+	</div>
 [% END %]
-
 __seclev__
 10000
 __version__
