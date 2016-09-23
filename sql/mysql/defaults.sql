@@ -1114,7 +1114,7 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_speed_limit','3
 INSERT INTO vars (name, value, description) VALUES ('submit_domains_invalid', 'example.com', 'space separated list of domains that are not valid for submitting stories');
 INSERT INTO vars (name, value, description) VALUES ('submit_categories','Back','Extra submissions categories');
 INSERT INTO vars (name, value, description) VALUES ('submit_extra_sort_key', '', 'Provides an additional submission list sorted on the given field name');
-INSERT INTO vars (name, value, discription) VALUES ('submit_keep_p',1,'Keep <p> tags in story submissions');
+INSERT INTO vars (name, value, description) VALUES ('submit_keep_p',1,'Keep <p> tags in story submissions');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720','Hours after which a submissions\'s ipid/subnetid are forgotten; set very large to disable');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
@@ -1158,5 +1158,5 @@ INSERT INTO vars (name, value, description) VALUES ('utf8', '1', '1 = Use end-to
 INSERT INTO vars (name, value, description) VALUES ('writestatus','dirty','Simple Boolean to determine if homepage needs rewriting');
 INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whether we are using XHTML');
 INSERT INTO vars (name, value, description) VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
-INSERT INTO vars (name, value, desctiption) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');
+INSERT INTO vars (name, value, description) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');
 INSERT INTO vars (name, value, description) VALUES ("downmod_karma_floor", "10", "Below this level of karma, users cannot use negative moderations");

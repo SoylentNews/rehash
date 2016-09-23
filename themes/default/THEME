@@ -41,7 +41,6 @@ template=templates/editComm;users;default
 template=templates/editHome;users;default
 template=templates/editKey;users;default
 template=templates/editMiscOpts;users;default
-template=templates/editTags;users;default
 template=templates/editUser;users;default
 template=templates/edit_comment;comments;default
 template=templates/end_tab;misc;default
