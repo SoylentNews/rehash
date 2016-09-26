@@ -1,0 +1,74 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Slash;
+use Slash::Constants ':slashd';
+use Slash::Utility;
+
+my $virtual_user = $ARGV[0];
+
+eval {
+	createEnvironment($virtual_user);
+};
+if($@) { die "Could not get info for virtual user $virtual_user from DBIx::Password"; }
+
+my $display_name = $ARGV[1];
+my $short_name = $ARGV[2];
+
+unless (defined($display_name) && defined($short_name)) {die 'Syntax: create-nexus <virtual_user> "display name" shortname"'; }
+
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+
+if($display_name =~ /[^a-zA-Z0-9\/ \-_]/ || $short_name =~ /[^a-zA-Z0-9\/ \-_]/) {
+	die "wtf are you trying to do to the poor db?!";
+}
+
+my $qdisplay_name = $slashdb->sqlQuote($display_name);
+my $qshort_name = $slashdb->sqlQuote($short_name);
+my $data = {
+	keyword => $short_name,
+	textname => $display_name,
+	image => '',
+};
+
+$slashdb->sqlInsert('topics', $data);
+my $where = "keyword = $qshort_name";
+my $tid = $slashdb->sqlSelect('tid', 'topics', $where);
+
+$data = {
+	tid => $tid,
+	parent_tid => 1,
+	min_weight => 10
+};
+$slashdb->sqlInsert('topic_parents', $data);
+
+$data = {
+	tid => $tid
+};
+$slashdb->sqlInsert('topic_nexus', $data);
+
+$data = {
+	nexus => $tid,
+	artcount_min => 10,
+	artcount_max => 30,
+	older_stories_max => 0,
+	name => $short_name,
+	othername => '',
+	title => $display_name,
+	issue => 'no',
+	submittable => 'yes',
+	storypickable => 'yes',
+	searchable => 'yes',
+	skinindex => 'yes',
+	url => $constants->{absolutedir_secure}."/$short_name",
+	hostname => '',
+	cookiedomain => ".".$constants->{basedomain},
+	index_handler => 'index.pl',
+	max_rewrite_secs => 3600,
+	last_rewrite => '2015-06-02 14:42:33',
+	ac_uid => 1,
+	require_acl => '',
+	theme => ''
+};
+$slashdb->sqlInsert('skins', $data);
