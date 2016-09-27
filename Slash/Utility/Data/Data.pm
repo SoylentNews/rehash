@@ -3279,6 +3279,8 @@ sub balanceTags {
 	}
 
 	$html =~ s/\s+$//s;
+	# Hacky fix for #265
+	$html =~ s/>\s+<\/a/><\/a/ig;
 
 	# add on any unclosed tags still on stack
 	$html .= join '', map { "</$_>" } grep { !exists $really_empty{$_} } reverse @stack;
