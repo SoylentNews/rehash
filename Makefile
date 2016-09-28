@@ -41,8 +41,10 @@ MAKE = make -s
 # Apache stuff
 APACHE_MIRROR=http://archive.apache.org/dist/httpd/
 APACHE_VER=2.2.29
-APACHE_DIR=httpd-$(APACHE_VER)
+APACHE_DIR=apache-$(APACHE_VER)
 APACHE_FILE=$(APACHE_DIR).tar.bz2
+HTTPD_DIR=httpd-$(APACHE_VER)
+HTTPD_FILE=$(HTTPD_DIR).tar.bz2
 
 # Perl stuff
 PERL_MIRROR=http://www.cpan.org/src/5.0/
@@ -87,9 +89,9 @@ INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir
 
 .PHONY : all pluginsandtagboxes slash install
 
-#   install the shared object file into Apache 
+#   install the shared object file into Apache
 # We should run a script on the binaries to get the right
-# version of perl. 
+# version of perl.
 # I should also grab an install-sh instead of using $(CP)
 slash:
 	@echo "=== INSTALLING SLASH MODULES ==="
@@ -122,7 +124,7 @@ pluginsandtagboxes:
 
 all: install
 
-install: stamp/append-apache-config slash pluginsandtagboxes
+install: slash pluginsandtagboxes stamp/append-apache-config
 
 	# Create all necessary directories.
 	$(INSTALL) -d \
@@ -143,7 +145,7 @@ install: stamp/append-apache-config slash pluginsandtagboxes
 	# Install the plugins and tagboxes.  Will also install kruft like CVS/
 	# and blib/ directories if they are around. Maybe a smarter copying
 	# procedure is called for, here?)
-	# 
+	#
 	# Note: Many users of Slash have taken to symlinking the plugins and themes
 	# directories into $(SLASH_PREFIX) from their checked-out CVS trees. We
 	# should try to check for this in the future and behave accordingly.
@@ -153,7 +155,7 @@ install: stamp/append-apache-config slash pluginsandtagboxes
 	# OpenBSD needs "-R" here instead of "-rv".  Its manpage notes:
 	# Historic versions of the cp utility had a -r option.  This implementation
 	# supports that option; however, its use is strongly discouraged, as it
-	# does not correctly copy special files, symbolic links or FIFOs. 
+	# does not correctly copy special files, symbolic links or FIFOs.
 	#
 	@(pluginstall=$(PLUGINSTALL); \
 	for f in $$pluginstall; do \
@@ -162,8 +164,8 @@ install: stamp/append-apache-config slash pluginsandtagboxes
 
 	# Now all the themes
 	$(CP) -r themes/* $(SLASH_PREFIX)/themes
-	
-	# Ensure we use the proper Perl interpreter and prefix in all scripts that 
+
+	# Ensure we use the proper Perl interpreter and prefix in all scripts that
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
 	# which may or may not exist on any given system.
 	(replacewith=$(REPLACEWITH); \
@@ -376,16 +378,16 @@ build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stam
 	@echo ""
 	@echo "Thanks for installing Rehash."
 
-get-rehash-dependencies: dist/$(APACHE_FILE) dist/$(PERL_FILE) dist/$(MOD_PERL_FILE)
+get-rehash-dependencies: dist/$(HTTPD_FILE) dist/$(PERL_FILE) dist/$(MOD_PERL_FILE)
 
-dist/$(APACHE_FILE):
+dist/$(HTTPD_FILE):
 	-mkdir dist
-	cd dist; wget $(APACHE_MIRROR)/$(APACHE_FILE)
+	cd dist; wget $(APACHE_MIRROR)/$(HTTPD_FILE)
 
-stamp/apache-built: dist/$(APACHE_FILE)
+stamp/apache-built: dist/$(HTTPD_FILE)
 	-mkdir build stamp
-	-rm -rf build/$(APACHE_DIR)
-	cd build && tar jxf ../dist/$(APACHE_FILE); cd $(APACHE_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most && make && make install
+	-rm -rf build/$(HTTPD_DIR)
+	cd build && tar jxf ../dist/$(HTTPD_FILE); cd $(HTTPD_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most && make && make install
 	touch stamp/apache-built
 
 dist/$(PERL_FILE):
@@ -411,7 +413,7 @@ stamp/mod-perl-built: dist/$(MOD_PERL_FILE)
 stamp/install-cpamn:
 	-mkdir stamp
 	$(REHASH_PERL) utils/cpanm App::cpanminus
-	touch stamp/install-cpamn	
+	touch stamp/install-cpamn
 
 stamp/install-apache2-upload:
 	-mkdir stamp
