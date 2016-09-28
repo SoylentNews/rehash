@@ -43,8 +43,6 @@ APACHE_MIRROR=http://archive.apache.org/dist/httpd/
 APACHE_VER=2.2.29
 APACHE_DIR=apache-$(APACHE_VER)
 APACHE_FILE=$(APACHE_DIR).tar.bz2
-HTTPD_DIR=httpd-$(APACHE_VER)
-HTTPD_FILE=$(HTTPD_DIR).tar.bz2
 
 # Perl stuff
 PERL_MIRROR=http://www.cpan.org/src/5.0/
@@ -378,16 +376,16 @@ build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stam
 	@echo ""
 	@echo "Thanks for installing Rehash."
 
-get-rehash-dependencies: dist/$(HTTPD_FILE) dist/$(PERL_FILE) dist/$(MOD_PERL_FILE)
+get-rehash-dependencies: dist/$(APACHE_FILE) dist/$(PERL_FILE) dist/$(MOD_PERL_FILE)
 
-dist/$(HTTPD_FILE):
+dist/$(APACHE_FILE):
 	-mkdir dist
-	cd dist; wget $(APACHE_MIRROR)/$(HTTPD_FILE)
+	cd dist; wget $(APACHE_MIRROR)/$(APACHE_FILE)
 
-stamp/apache-built: dist/$(HTTPD_FILE)
+stamp/apache-built: dist/$(APACHE_FILE)
 	-mkdir build stamp
-	-rm -rf build/$(HTTPD_DIR)
-	cd build && tar jxf ../dist/$(HTTPD_FILE); cd $(HTTPD_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most && make && make install
+	-rm -rf build/$(APACHE_DIR)
+	cd build && tar jxf ../dist/$(APACHE_FILE); cd $(APACHE_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most && make && make install
 	touch stamp/apache-built
 
 dist/$(PERL_FILE):
