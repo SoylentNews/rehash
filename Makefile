@@ -41,7 +41,7 @@ MAKE = make -s
 # Apache stuff
 APACHE_MIRROR=http://archive.apache.org/dist/httpd/
 APACHE_VER=2.2.29
-APACHE_DIR=apache-$(APACHE_VER)
+APACHE_DIR=httpd-$(APACHE_VER)
 APACHE_FILE=$(APACHE_DIR).tar.bz2
 
 # Perl stuff
