@@ -87,9 +87,9 @@ INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir
 
 .PHONY : all pluginsandtagboxes slash install
 
-#   install the shared object file into Apache 
+#   install the shared object file into Apache
 # We should run a script on the binaries to get the right
-# version of perl. 
+# version of perl.
 # I should also grab an install-sh instead of using $(CP)
 slash:
 	@echo "=== INSTALLING SLASH MODULES ==="
@@ -122,7 +122,7 @@ pluginsandtagboxes:
 
 all: install
 
-install: stamp/append-apache-config slash pluginsandtagboxes
+install: slash pluginsandtagboxes stamp/append-apache-config
 
 	# Create all necessary directories.
 	$(INSTALL) -d \
@@ -143,7 +143,7 @@ install: stamp/append-apache-config slash pluginsandtagboxes
 	# Install the plugins and tagboxes.  Will also install kruft like CVS/
 	# and blib/ directories if they are around. Maybe a smarter copying
 	# procedure is called for, here?)
-	# 
+	#
 	# Note: Many users of Slash have taken to symlinking the plugins and themes
 	# directories into $(SLASH_PREFIX) from their checked-out CVS trees. We
 	# should try to check for this in the future and behave accordingly.
@@ -153,7 +153,7 @@ install: stamp/append-apache-config slash pluginsandtagboxes
 	# OpenBSD needs "-R" here instead of "-rv".  Its manpage notes:
 	# Historic versions of the cp utility had a -r option.  This implementation
 	# supports that option; however, its use is strongly discouraged, as it
-	# does not correctly copy special files, symbolic links or FIFOs. 
+	# does not correctly copy special files, symbolic links or FIFOs.
 	#
 	@(pluginstall=$(PLUGINSTALL); \
 	for f in $$pluginstall; do \
@@ -162,8 +162,8 @@ install: stamp/append-apache-config slash pluginsandtagboxes
 
 	# Now all the themes
 	$(CP) -r themes/* $(SLASH_PREFIX)/themes
-	
-	# Ensure we use the proper Perl interpreter and prefix in all scripts that 
+
+	# Ensure we use the proper Perl interpreter and prefix in all scripts that
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
 	# which may or may not exist on any given system.
 	(replacewith=$(REPLACEWITH); \
@@ -411,7 +411,7 @@ stamp/mod-perl-built: dist/$(MOD_PERL_FILE)
 stamp/install-cpamn:
 	-mkdir stamp
 	$(REHASH_PERL) utils/cpanm App::cpanminus
-	touch stamp/install-cpamn	
+	touch stamp/install-cpamn
 
 stamp/install-apache2-upload:
 	-mkdir stamp
