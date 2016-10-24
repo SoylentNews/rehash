@@ -8325,7 +8325,7 @@ sub getSlashConf {
 						# See <http://www.iana.org/assignments/uri-schemes>
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
 		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote)],
-		approvedtags_break =>		[qw( p br ol ul li dl dt dd blockquote div img hr )],
+		approvedtags_break =>		[qw( p br ol ul li dl dt dd blockquote div img hr spoiler)],
 		# all known tags, plus table, pre, and slash; this can be overridden
 		# in vars, but since we make this all known tags by default ...
 		# easier to just keep it in here
@@ -8334,7 +8334,7 @@ sub getSlashConf {
 				dfn code samp kbd var cite address ins del
 				h1 h2 h3 h4 h5 h6
 				table thead tbody tfoot tr th td pre
-				slash strike abbr sarc sarcasm user
+				slash strike abbr sarc sarcasm user spoiler
 		)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
@@ -13330,6 +13330,17 @@ sub upgradeCoreDB() {
 		$core_ver = 1;
 		$upgrades_done++;
 	}
+
+	# complex merge incoming cause i've got a different version of this file in a different branch
+	# just add merge these next lines to the rest of v2
+	#	my $newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags'")."|spoiler";
+	#	if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags'") {
+	#		return 0;
+	#	}
+	#	$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_visible'")."|spoiler";
+	#	if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_visible'") {
+	#		return 0;
+	#	}
 
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for core\n";

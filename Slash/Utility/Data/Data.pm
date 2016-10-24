@@ -1867,7 +1867,7 @@ sub processCustomTagsPost {
 	my($str) = @_;
 	my $constants = getCurrentStatic();
 
-	# QUOTE must be in approvedtags
+	# all of these must be in approvedtags
 	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
 		my $quote   = 'quote';
 		my $open    = qr[\n* <\s*  $quote \s*> \n*]xsio;
@@ -1914,10 +1914,20 @@ sub processCustomTagsPost {
 		my $close = qr[<\s* /$utag \s*> \n*]xsio;
 		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
 	}
-	# also support @{blah} syntax
+	# also support @blah: syntax
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		# The link here is just the nick. any decoration is done in base.css
 		$str =~ s/@\s*(.*?)\s*:/_nick2Link($1,$constants,1)/ge;
+	}
+
+	# spoiler tags
+	if (grep /^spoiler$/i @{$constants->{approvedtags}}) {
+		my $spoiler	= 'spoiler';
+		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
+		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
+
+		$str =~ s/$open/<p><div class="spoiler">/g;
+		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
 	return $str;
