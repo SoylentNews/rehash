@@ -122,7 +122,7 @@ pluginsandtagboxes:
 
 all: install
 
-install: stamp/append-apache-config slash pluginsandtagboxes
+install: slash pluginsandtagboxes
 
 	# Create all necessary directories.
 	$(INSTALL) -d \

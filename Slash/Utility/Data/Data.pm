@@ -1921,7 +1921,7 @@ sub processCustomTagsPost {
 	}
 
 	# spoiler tags
-	if (grep /^spoiler$/i @{$constants->{approvedtags}}) {
+	if (grep /^spoiler$/i, @{$constants->{approvedtags}}) {
 		my $spoiler	= 'spoiler';
 		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
 		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
