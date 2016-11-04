@@ -125,7 +125,7 @@ FOREACH story = storylistref;
 		<td>[% story.td2 %]&nbsp;
 		[% story.time %]</td>
 	</tr>
-	[% IF story.notes %]<tr id ="notes_[% story.stoid | strip_attribute %]" class="[% class %] sub_note"><td colspan="8">[% story.notes | strip_attribute %]</td><tr>[% END %]
+	[% IF story.notes %]<tr id="notes_[% story.stoid | strip_attribute %]" class="[% class %] sub_note"><td colspan="8">[% story.notes | strip_attribute %]</td></tr>[% END %]
 [% END %]
 [% ELSE %]
 <tr><td><b>No stories.</b></td></tr>
