@@ -156,7 +156,7 @@ html>body #admin { margin: 0 auto .2em 0; }
 .story_sec { background: #ccc; }
 .story_nd { background: #999; }
 .gs_story_main { background: #66ff79; color: #000; }
-.ss_story_main { background: #ff6; color: #000; }
+.ss_story_main { background: #ffa; color: #000; }
 .ns_story_main { background: #f66; color: #000; }
 .gs_story_sec  { background: #33cc44; color: #000; }
 .ss_story_sec  { background: #993; color: #000; }
