@@ -20,6 +20,7 @@ __template__
 </div>
 <div class="generalbody">
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
+<div>
 <input type="hidden" name="op" value="mailpasswd">
 [% PROCESS formkey_tag %]
 		Retrieve Nickname/UID/Email
@@ -44,7 +45,7 @@ __template__
 	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
 	<input type="submit" name="mailpasswd" value="Mail Password">
 
-
+</div>
 </form>
 </div>
 
