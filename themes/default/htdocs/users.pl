@@ -2114,6 +2114,7 @@ sub editComm {
 	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
 	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
 	my $p_check  = $user_edit->{postanon}		 ? $constants->{markup_checked_attribute} : '';
+	my $dim_check = $user_edit->{dimread}            ? $constants->{markup_checked_attribute} : '';
 	my $nospell_check = $user_edit->{no_spell}	 ? $constants->{markup_checked_attribute} : '';
 	my $s_mod_check = $user_edit->{mod_with_comm}	 ? $constants->{markup_checked_attribute} : '';
 	my $s_m2_check = $user_edit->{m2_with_mod}	 ? $constants->{markup_checked_attribute} : '';
@@ -2134,6 +2135,7 @@ sub editComm {
 		s_check			=> $s_check,
 		b_check			=> $b_check,
 		p_check			=> $p_check,
+		dim_check		=> $dim_check,
 		s_mod_check		=> $s_mod_check,
 		s_m2_check		=> $s_m2_check,
 		s_m2c_check		=> $s_m2c_check,
@@ -2630,10 +2632,13 @@ sub saveComm {
 
 	# Take care of the lists
 	# Enforce Ranges for variables that need it
-	$form->{commentlimit} = 0 if $form->{commentlimit} < 1;
+	$form->{commentlimit} = 1 if $form->{commentlimit} < 1;
 	my $cl_max = $constants->{comment_commentlimit} || 0;
 	$form->{commentlimit} = $cl_max if $cl_max > 0 && $form->{commentlimit} > $cl_max;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
+
+	$form->{threaddivisor} = 1 if $form->{threaddivisor} < 1;
+	$form->{threaddivisor} = $user->{commentlimit} if $form->{threaddivisor} > $user->{commentlimit};
 
 	# For some of these values, namely the ones that we happen to
 	# know get stored in users_param, we change them to 'undef'
@@ -2662,15 +2667,12 @@ sub saveComm {
 			: $form->{d2_comment_q};
 
 	my $user_edits_table = {
-		# MC: More D2 neutring
-		#discussion2		=> $form->{discussion2} || undef,
-		#d2_comment_q		=> $form->{d2_comment_q} || undef,
-		#d2_comment_order	=> $form->{d2_comment_order} || undef,
 		clsmall			=> $form->{clsmall},
 		clsmall_bonus		=> ($clsmall_bonus || undef),
 		clbig			=> $form->{clbig},
 		clbig_bonus		=> ($clbig_bonus || undef),
 		commentlimit		=> $form->{commentlimit},
+		threaddivisor		=> $form->{threaddivisor},
 		bytelimit		=> $form->{bytelimit},
 		commentsort		=> $form->{commentsort},
 		commentspill		=> $form->{commentspill},
@@ -2682,6 +2684,7 @@ sub saveComm {
 		posttype		=> $form->{posttype},
 		threshold		=> $form->{uthreshold},
 		nosigs			=> ($form->{nosigs}     ? 1 : 0),
+		dimread			=> ($form->{dimmed}	? 1 : 0),
 		reparent		=> ($form->{reparent}   ? 1 : 0),
 		noscores		=> ($form->{noscores}   ? 1 : 0),
 		hardthresh		=> ($form->{hardthresh} ? 1 : 0),
@@ -2712,7 +2715,8 @@ sub saveComm {
 		reparent        => 1,
 		commentlimit    => 100,
 		commentspill    => 50,
-		mode            => 'improvedthreaded'
+		threaddivisor	=> 20,
+		mode            => 'thread'
 	};
 
 	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });

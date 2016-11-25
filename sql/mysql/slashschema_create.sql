@@ -1502,7 +1502,6 @@ CREATE TABLE users_comments_read_log (
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	discussion_id MEDIUMINT UNSIGNED NOT NULL,
 	cid INT UNSIGNED NOT NULL,
-	UNIQUE (discussion_id,uid,cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 

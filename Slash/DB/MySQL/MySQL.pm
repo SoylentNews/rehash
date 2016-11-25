@@ -363,7 +363,7 @@ sub createComment {
 		or return -1;
 
 	if ($comment->{pid}) {
-		# If we're being asked to parent this comment to another,
+		# If we're being asked to parent^Wchild this comment to another,
 		# verify that the other comment exists and is in this
 		# same discussion.
 		my $pid_sid = 0;
@@ -374,6 +374,11 @@ sub createComment {
 		my $pid_subject = '';
 		$pid_subject = $self->sqlSelect("subject", "comments",
 			"cid=" . $self->sqlQuote($comment->{pid}));
+
+		# Set the opid to parent's opid unless parent is the op, in which case set it to this comment's pid
+		my $pid_opid = $self->sqlSelect("opid", "comments", "cid=" . $self->sqlQuote($comment->{pid}));
+		$comment->{opid} = $pid_opid ? $pid_opid : $comment->{pid};
+
 		# see comments.pl:editComment()
 		$pid_subject =~ s/^Re://i;
 		$pid_subject =~ s/\s\s/ /g;
@@ -381,6 +386,10 @@ sub createComment {
 			$comment->{subject} =~ /^Re:\Q$pid_subject\E$/) {
 			$comment->{subject_orig} = 'no';
 		}
+	}
+	# If we didn't have a pid, we are the op
+	else {
+		$comment->{opid} = 0;
 	}
 
 	$comment->{subject} = $self->truncateStringForCharColumn($comment->{subject},
@@ -412,6 +421,16 @@ sub createComment {
 		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
 		return -1;
+	}
+	
+	# Now we need to update the children counts of all this comment's parents unless this is a top level comment
+	if($comment->{opid}) {
+		# For now just write the error to the log if we fail.
+		# Children counts are useful not crucial.
+		my $update_children_status = $self->updateChildrenCounts($comment->{pid});
+		if( $update_children_status->{status} == 0 ) {
+			errorLog("$update_children_status->{errortxt}");
+		}
 	}
 
 	# should this be conditional on the others happening?
@@ -3585,6 +3604,8 @@ sub deleteStory {
 }
 
 ########################################################
+# This sets a value on a story rather than the initial writing of the story
+########################################################
 sub setStory {
 	my($self, $id, $change_hr, $options) = @_;
 	my $constants = getCurrentStatic();
@@ -6186,6 +6207,89 @@ sub getCommentReply {
 }
 
 ########################################################
+sub getThreadedCommentsForUser {
+	my $form = getCurrentForm();
+	my($self, $sid, $cid, $options) = @_;
+        $options ||= {};
+
+        # Note that the "cache_read_only" option is not used at the moment.
+        # Slash has done comment caching in the past but does not do it now.
+        # If in the future we see fit to re-enable it, it's valuable to have
+        # some of this logic left over -- the places where this method is
+        # called that have that bit set should be kept that way.
+        my $cache_read_only = $options->{cache_read_only} || 0;
+        
+	my $one_cid_only = $options->{one_cid_only} || 0;
+        my $sid_quoted = $self->sqlQuote($sid);
+        my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $other = "";
+        my $order_dir = "";
+	$order_dir = uc($options->{order_dir}) eq "DESC" ? "DESC" : "ASC" if $options->{order_dir};
+	
+	# First thing's first, pull counts for each root-level comment
+        my $counts = $self->sqlSelectAllHashrefArray("cid, children", "comments", "sid=$sid_quoted AND pid=0", "ORDER BY cid $order_dir");
+
+	my ($pagecount, $page) = (0, 0);
+	my $cids; # array ref of arrays containing cids for each page where page number = array index + 1
+
+	foreach my $count (@$counts) {
+		push(@{$cids->[$page]}, $count->{cid});
+		$pagecount += $count->{children} + 1;
+		if($pagecount >= $user->{commentlimit}) {
+			$pagecount = 0;
+			$page++;
+		}
+	}
+	$page++;
+	
+	my ($thesecids, $theseopids);
+	
+	# If they asked for a page and didn't give us a martian page number
+	if(defined $form->{page} && int($form->{page}) <= scalar @$cids && int($form->{page}) > 0 ) {
+		my $index = int($form->{page}) - 1;
+		$thesecids = join( ' OR comments.cid=', @{ $cids->[$index] } );
+		$theseopids = join( ' OR comments.opid=', @{ $cids->[$index] } );
+	}
+	# Otherwise use the first page
+	else {
+		$thesecids = join( ' OR comments.cid=', @{$cids->[0]} );
+		$theseopids = join( ' OR comments.opid=', @{$cids->[0]} );
+	}
+
+        $other.= "ORDER BY opid ASC, cid $order_dir";
+
+        my $select = " comments.cid, date, date as time, subject, nickname, "
+                . "homepage, fakeemail, users.uid AS uid, sig, "
+                . "comments.points AS points, pointsorig, "
+                . "tweak, tweak_orig, subject_orig, "
+                . "pid, pid AS original_pid, sid, lastmod, reason, "
+                . "journal_last_entry_date, ipid, subnetid, "
+                . "karma_bonus, "
+                . "len, badge_id, comment_text.comment as comment";
+        if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
+                $select .= ", subscriber_bonus";
+        }
+        # Because fuck a bunch of doing search and replace to add comment text.
+        # That shit is insanely expensive compared to this.
+        my $tables = "comments LEFT JOIN comment_text ON comments.cid=comment_text.cid LEFT JOIN users ON comments.uid=users.uid";
+        my $where = "sid=$sid_quoted AND (comments.cid=$thesecids OR comments.opid=$theseopids)";
+
+        if ($cid && $one_cid_only) {
+                $where .= " AND comments.cid=$cid";
+	} elsif ($user->{hardthresh}) {
+                my $threshold_q = $self->sqlQuote($user->{threshold});
+                $where .= "AND (comments.points >= $threshold_q";
+                $where .= "  OR comments.uid=$user->{uid}"      unless $user->{is_anon};
+                $where .= "  OR comments.cid=$cid"                       if $cid;
+                $where .= ")";
+        }
+
+	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
+        return ($comments, scalar($cids));
+}
+
+########################################################
 sub getCommentsForUser {
 	my($self, $sid, $cid, $options) = @_;
 	$options ||= {};
@@ -6209,23 +6313,25 @@ sub getCommentsForUser {
 	$other.= "ORDER BY $options->{order_col} $order_dir" if $options->{order_col};
 	$other.= " LIMIT $options->{limit}" if $options->{limit};
 
-	my $select = " cid, date, date as time, subject, nickname, "
+	my $select = " comments.cid, date, date as time, subject, nickname, "
 		. "homepage, fakeemail, users.uid AS uid, sig, "
 		. "comments.points AS points, pointsorig, "
 		. "tweak, tweak_orig, subject_orig, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
 		. "karma_bonus, "
-		. "len, badge_id, CONCAT('<SLASH type=\"COMMENT-TEXT\">', cid ,'</SLASH>') as comment";
+		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
 	}
-	my $tables = "comments, users";
-	my $where = "sid=$sid_quoted AND comments.uid=users.uid ";
+	# Because fuck a bunch of doing search and replace to add comment text.
+	# That shit is insanely expensive compared to this.
+	my $tables = "comments LEFT JOIN comment_text ON comments.cid=comment_text.cid LEFT JOIN users ON comments.uid=users.uid";
+	my $where = "sid=$sid_quoted";
 
 	if ($cid && $one_cid_only) {
 		$where .= "AND cid=$cid";
-	} elsif ($user->{hardthresh} && !$options->{discussion2}) {
+	} elsif ($user->{hardthresh}) {
 		my $threshold_q = $self->sqlQuote($user->{threshold});
 		$where .= "AND (comments.points >= $threshold_q";
 		$where .= "  OR comments.uid=$user->{uid}"	unless $user->{is_anon};
@@ -6295,7 +6401,7 @@ sub getCommentTextCached {
 	$opt ||= {};
 
 	my $possible_chop  = !$opt->{full} && !($opt->{mode} && $opt->{mode} eq 'archive');
-	my $abbreviate_ok  = $opt->{discussion2} && $possible_chop;
+	my $abbreviate_ok  = 0;
 	my $abbreviate_len = 256;
 	my $max_len = $constants->{default_maxcommentsize};
 
@@ -6608,26 +6714,50 @@ sub saveCommentReadLog {
 		$mcd = $self->getMCD;
 		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
 	}
+	else {
+		print STDERR "\nFIX ME: saveCommentReadLog called without \$comments being supplied.\n";
+		return;
+	}
 
 	if ($mcd) {
-		$mcd->delete($mcdkey);
+		$mcd->delete("$mcdkey:now");
+		$mcd->delete("$mcdkey:new");
 	}
 
 	# cache inserts?
-	for my $cid (@$comments) {
+	my @sorted = sort { $b <=> $a } @$comments;
+	my $cidnow;
+	$cidnow = $self->sqlSelect('cid_now',
+		'users_comments_read_log',
+		'uid=' . $self->sqlQuote($uid) .
+		' AND discussion_id=' . $self->sqlQuote($discussion_id));
+	my $oldcidnew = $self->sqlSelect('cid_new',
+                'users_comments_read_log',
+                'uid=' . $self->sqlQuote($uid) .
+                ' AND discussion_id=' . $self->sqlQuote($discussion_id));
+	my $cidnew = $sorted[0];
+	if(!defined($cidnow)) {
 		$self->sqlInsert('users_comments_read_log', {
-			uid            => $uid,
-			discussion_id  => $discussion_id,
-			cid            => $cid
-		}, { ignore => 1 });
+			uid		=> $uid,
+			discussion_id	=> $discussion_id,
+			cid_now		=> '0',
+			cid_new		=> $cidnew,
+		});
+	}
+	else {
+		$self->sqlUpdate('users_comments_read_log', {
+			cid_now		=> $oldcidnew,
+			cid_new		=> $cidnew },
+			"uid = $uid AND discussion_id = $discussion_id"
+		);
 	}
 
 	if ($mcd) {
-		my $comments_read = $self->getCommentReadLog($discussion_id, $uid, 1);
-		$mcd->set($mcdkey, $comments_read) if $comments_read;
+		$mcd->set("$mcdkey:now", $cidnow);
+		$mcd->set("$mcdkey:new", $cidnew);
 	}
 
-	1;
+	return 1;
 }
 
 #######################################################
@@ -6638,32 +6768,24 @@ sub getCommentReadLog {
 	return if isAnon($uid);
 
 	my($mcd, $mcdkey);
-	if (!$no_mcd) {
-		$mcd = $self->getMCD;
-		##########
-		# TMB Throws errors all the damned time if memcached isn't being used.
-		$self->{_mcd_keyprefix} ||= '';
+	$mcd = $self->getMCD;
+	my $cids = {};
+
+	if ($mcd) {
 		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
+		$cids->{cid_now} = $mcd->get("$mcdkey:now");
+		$cids->{cid_new} = $mcd->get("$mcdkey:new");
+	}
+	else {
+		$cids = $self->sqlSelectHashref(
+			'cid_now, cid_new',
+			'users_comments_read_log',
+			'uid=' . $self->sqlQuote($uid) .
+			' AND discussion_id=' . $self->sqlQuote($discussion_id)
+		);
 	}
 
-	my $comments_read;
-	if ($mcd) {
-		$comments_read = $mcd->get($mcdkey);
-		return $comments_read if $comments_read;
-	}
-
-	$comments_read = $self->sqlSelectAllKeyValue(
-		'cid, 1',
-		'users_comments_read_log',
-		'uid=' . $self->sqlQuote($uid) .
-		' AND discussion_id=' . $self->sqlQuote($discussion_id)
-	) or return;
-
-	if ($mcd) {
-		$mcd->add($mcdkey, $comments_read);
-	}
-
-	return $comments_read;
+	return $cids;
 }
 
 #######################################################
@@ -7725,6 +7847,7 @@ sub createDiscussion {
 	$discussion->{ts} ||= $self->getTime();
 	$discussion->{uid} = getCurrentUser('uid')
 		unless defined $discussion->{uid} && length $discussion->{uid};
+	$discussion->{legacy} ||= 'no';
 	# commentcount and flags set to defaults
 
 	if ($discussion->{section}) {
@@ -7874,7 +7997,7 @@ sub createStory {
 			commentstatus	=> $comment_codes->{$commentstatus}
 					   ? $commentstatus
 					   : $constants->{defaultcommentstatus},
-			ts		=> $story->{'time'}
+			ts		=> $story->{'time'},
 		};
 
 		my $id;
@@ -13229,6 +13352,32 @@ sub getDBSchemaVersions
 }
 
 ########################################################
+# This is kind of expensive but I don't know a better way to do it.
+########################################################
+sub updateChildrenCounts {
+	my ($self, $firstparentcid) = @_;
+	my @cids;
+	my $firstparent = $self->getComment($firstparentcid);
+	my $comment = $firstparent;
+	
+	# Load @cids with a list of all parent cids so we can increment their `children` columns
+	while(1) {
+		push(@cids, $comment->{cid});
+		if($comment->{pid} == 0){ last; }
+		$comment = $self->getComment($comment->{pid});
+	}
+
+	my $wherecid = join(' OR cid = ', @cids);
+	my $result;
+	
+	unless($self->sqlDo("UPDATE comments SET children = children + 1 WHERE cid = $wherecid")) {
+		return { status => 0, errortxt => $DBI::errstr };
+	}
+	
+	return { status => 1 };
+}
+
+########################################################
 # Ok, it's fucking 2014, we can afford an UPDATE per page
 # view to have accurate login information, and not this shit
 # slash currently does
@@ -13328,6 +13477,64 @@ sub upgradeCoreDB() {
 			return 0;
 		};
 		$core_ver = 1;
+		$upgrades_done++;
+	}
+	if ($core_ver == 1) {
+		print "upgrading core to v2 ...\n";
+		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
+			return 0;
+		}
+		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
+uid mediumint(8) unsigned NOT NULL,
+discussion_id mediumint(8) unsigned NOT NULL,
+cid_now int(10) unsigned NOT NULL,
+cid_new int(10) unsigned NOT NULL,
+ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (discussion_id, uid)
+) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+		")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD dimread tinyint(4) NOT NULL default 1")) {
+			return 0;
+		}
+		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('comment_read_max_age', '30', 'Number of days to save the read state of comments for a user+discussion.')")) {
+			return 0;
+		}
+		if (!$self->sqlDo("update users_comments set mode = 'thread' where mode = 'nested' or mode = 'improvedthreaded'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("DELETE FROM commentmodes where mode = 'nested' or mode = 'improvedthreaded'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("DELETE FROM vars WHERE name = 'comments_hardcoded'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE discussions ADD legacy ENUM('no', 'yes') NOT NULL DEFAULT 'yes'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE comments ADD opid INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER pid")) {
+			return 0;
+		}
+		if (!$self->sqlDo("ALTER TABLE comments ADD children INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER opid")) {
+			return 0;
+		}
+		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
+                        return 0;
+                }
+		$core_ver = 2;
 		$upgrades_done++;
 	}
 
