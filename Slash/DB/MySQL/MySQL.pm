@@ -1199,6 +1199,8 @@ sub createSubmission {
 	$data->{subj} = delete $submission->{subj} || '';
 	$data->{subj} = $self->truncateStringForCharColumn($data->{subj}, 'submissions', 'subj');
 	$data->{comment} = delete $submission->{comment} || '';
+	$data->{dept} = delete $submission->{dept} || '';
+	$data->{dept} = $self->truncateStringForCharColumn($data->{dept}, 'submissions', 'dept');
 	$data->{ipid} = getCurrentUser('ipid');
 	$data->{subnetid} = getCurrentUser('subnetid');
 	$data->{email} = delete $submission->{email} || '';

@@ -161,7 +161,13 @@ sub main {
 		}
 		
 		my $return_url ="";
-		$return_url = "//".$ENV{HTTP_HOST}.$ENV{REQUEST_URI} unless $form->{cchp};
+		my $redirect = '';
+		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
+		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
+		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+		$redirect = $redirect."&noupdate=1";
+		$return_url = $gSkin->{rootdir} . "/article.pl?sid=" . $sid . $redirect unless $form->{cchp};
 		
 		slashDisplay('display', {
 			poll			=> $pollbooth,

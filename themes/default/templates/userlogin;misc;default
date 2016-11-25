@@ -15,7 +15,7 @@ userlogin
 __template__
 
 [%# we log in via main ("real") rootdir, return to current rootdir %]
-[% IF !return_url; return_url = gSkin.rootdir _ '/'; END %]
+[% IF !return_url; return_url = gSkin.rootdir; END %]
 <form action="[% constants.real_rootdir %]/login.pl" method="post">
 <fieldset>
 	<legend>Log In</legend>
