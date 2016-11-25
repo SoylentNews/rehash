@@ -40,6 +40,7 @@ __template__
 
 
 			<form action="[% constants.real_rootdir %]/login.pl" method="post">
+			<div>
 			[%- IF form.openid_reskey %]<input type="hidden" name="openid_reskey" value="[% form.openid_reskey | strip_attribute %]">[% END %]
 			[% PROCESS formkey_tag %]
 			[% PROCESS reskey_tag reskey_label => 'nick_rkey', rkey => nick_rkey %]
@@ -77,7 +78,7 @@ __template__
 	<br>
 	[% IF note %]<p id="submit_message">[% note %]</p>[% END %]
 	<input type="submit" name="newuser" value="Create Account">
-
+</div>
 </form>
 	</div>
 </div>
