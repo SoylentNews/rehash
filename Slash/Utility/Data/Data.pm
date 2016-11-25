@@ -1914,10 +1914,10 @@ sub processCustomTagsPost {
 		my $close = qr[<\s* /$utag \s*> \n*]xsio;
 		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
 	}
-	# also support @{blah} syntax
+	# also support @blah: syntax
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		# The link here is just the nick. any decoration is done in base.css
-		$str =~ s/@\s*(.*?)\s*:/_nick2Link($1,$constants,1)/ge;
+		$str =~ s/@([a-zA-Z0-9$_.+!*'(),\- ]+):[^\/]/_nick2Link($1,$constants,1)/ge;
 	}
 
 	return $str;
