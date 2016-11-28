@@ -1398,8 +1398,6 @@ my %actions = (
 			${$_[0]} =~ s{
 				&(\#?[a-zA-Z0-9]+);
 			}{approveCharref($1)}gex;			},
-	space_between_tags => sub {
-			${$_[0]} =~ s/></> </g;				},
 	whitespace_tagify => sub {
 			${$_[0]} =~ s/\n/<br>/gi;  # pp breaks
 			${$_[0]} =~ s/(?:<br>\s*){2,}<br>/<br><br>/gi;
@@ -1488,7 +1486,6 @@ my %mode_actions = (
 			encode_html_ltgt
 			remove_trailing_lts
 			approveTags
-			space_between_tags
 			encode_html_ltgt_stray
 			approve_unicode		)],
 	NOHTML, [qw(
@@ -1509,7 +1506,6 @@ my %mode_actions = (
 			remove_trailing_lts
 			approveTags
 			processCustomTagsPost
-			space_between_tags
 			encode_html_ltgt_stray
 			approveCharrefs
 			whitespace_tagify
@@ -1524,7 +1520,6 @@ my %mode_actions = (
 			remove_trailing_lts
 			approveTags
 			processCustomTagsPost
-			space_between_tags
 			encode_html_ltgt_stray
 			approveCharrefs
 			approve_unicode		)],
@@ -1745,7 +1740,7 @@ sub stripBadHtml {
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
-	$str =~ s/></> </g;
+	#$str =~ s/></> </g;
 
 	# Encode stray >
 	1 while $str =~ s{
@@ -3279,9 +3274,6 @@ sub balanceTags {
 	}
 
 	$html =~ s/\s+$//s;
-	# Hacky fix for #265
-	$html =~ s/>\s+<\/a/><\/a/ig;
-	$html =~ s/<p>\s+<a/<p><a/ig;
 
 	# add on any unclosed tags still on stack
 	$html .= join '', map { "</$_>" } grep { !exists $really_empty{$_} } reverse @stack;
