@@ -1921,16 +1921,6 @@ sub processCustomTagsPost {
 	}
 
 	# spoiler tags
-	if (grep /^spoiler$/i @{$constants->{approvedtags}}) {
-		my $spoiler	= 'spoiler';
-		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
-		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
-
-		$str =~ s/$open/<p><div class="spoiler">/g;
-		$str =~ s/$close/<\/div><\/p>/g;
-	}
-
-	# spoiler tags
 	if (grep /^spoiler$/i, @{$constants->{approvedtags}}) {
 		my $spoiler	= 'spoiler';
 		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
