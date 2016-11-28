@@ -122,8 +122,7 @@ pluginsandtagboxes:
 
 all: install
 
-install: slash pluginsandtagboxes stamp/append-apache-config
-
+install: slash pluginsandtagboxes
 	# Create all necessary directories.
 	$(INSTALL) -d \
 		$(SLASH_PREFIX)/bin/ \

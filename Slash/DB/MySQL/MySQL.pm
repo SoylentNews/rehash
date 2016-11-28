@@ -13551,6 +13551,17 @@ PRIMARY KEY (discussion_id, uid)
 	#		return 0;
 	#	}
 
+	# complex merge incoming cause i've got a different version of this file in a different branch
+	# just add merge these next lines to the rest of v2
+	#	my $newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags'")."|spoiler";
+	#	if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags'") {
+	#		return 0;
+	#	}
+	#	$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_visible'")."|spoiler";
+	#	if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_visible'") {
+	#		return 0;
+	#	}
+
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for core\n";
 	}
