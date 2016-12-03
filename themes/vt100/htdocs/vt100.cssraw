@@ -620,3 +620,8 @@ li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h
 {
   color: #0c0;
 }
+
+.spoiler {
+	background: linear-gradient(to right, rgba(0, 255, 0, 0.3), transparent 60%);
+	border-left-color: rgba(0,255,0, 0.5);
+}

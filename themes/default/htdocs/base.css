@@ -1062,3 +1062,33 @@ abbr {
 	text-decoration: none;
 	border-bottom: 1px dotted #000;
 }
+.spoiler:before {
+	content: "*SPOILER*";
+	display:block !important;
+	visibility: visible !important;
+}
+
+.spoiler {
+	display: block;
+	padding-left: 0.6em;
+	padding-top: 0.1em;
+	padding-bottom: 0.1em;
+	margin: 0.6em;
+	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent 60%);
+	border-left: 2px solid;
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 5px;
+	border-left-color: rgba(0,0,0, 0.5);
+}
+
+.spoiler > :first-child {
+	visibility: collapse;
+	height: 0;
+}
+
+.spoiler:hover > :first-child {
+	visibility: visible;
+	height:auto;
+	transition: height 0s, visibility 0s ease-in-out;
+	transition-delay: 1s;
+}

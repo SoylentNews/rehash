@@ -8450,7 +8450,7 @@ sub getSlashConf {
 						# See <http://www.iana.org/assignments/uri-schemes>
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
 		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote)],
-		approvedtags_break =>		[qw( p br ol ul li dl dt dd blockquote div img hr )],
+		approvedtags_break =>		[qw( p br ol ul li dl dt dd blockquote div img hr spoiler)],
 		# all known tags, plus table, pre, and slash; this can be overridden
 		# in vars, but since we make this all known tags by default ...
 		# easier to just keep it in here
@@ -8459,7 +8459,7 @@ sub getSlashConf {
 				dfn code samp kbd var cite address ins del
 				h1 h2 h3 h4 h5 h6
 				table thead tbody tfoot tr th td pre
-				slash strike abbr sarc sarcasm user
+				slash strike abbr sarc sarcasm user spoiler
 		)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
@@ -13531,6 +13531,18 @@ PRIMARY KEY (discussion_id, uid)
 			return 0;
 		}
 		if (!$self->sqlDo("ALTER TABLE comments ADD children INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER opid")) {
+			return 0;
+		}
+		my $newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags'")."|spoiler";
+		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags'") {
+			return 0;
+		}
+		$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_visible'")."|spoiler";
+		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_visible'") {
+			return 0;
+		}
+		$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_break'")."|spoiler";
+		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_break'") {
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
