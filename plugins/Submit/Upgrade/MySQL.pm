@@ -2,11 +2,11 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
-package Slash::Sumbit::Upgrade::MySQL;
+package Slash::Submit::Upgrade::MySQL;
 
 =head1 NAME
 
-Slash::Sumbit::Upgrade::MySQL
+Slash::Submit::Upgrade::MySQL
 
 
 =head1 SYNOPSIS
@@ -38,7 +38,7 @@ sub upgradeDB() {
 	my ($self, $upgrade) = @_;
 	my $slashdb = getCurrentDB();
 	my $schema_versions = $upgrade->getSchemaVersions();
-	my $subscribe_schema_ver = $schema_versions->{db_schema_plugin_Sumbit};
+	my $subscribe_schema_ver = $schema_versions->{db_schema_plugin_Submit};
 	my $upgrades_done = 0;
 
 	if ($subscribe_schema_ver < 1 ) {
@@ -57,7 +57,7 @@ sub upgradeDB() {
 	}
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Sumbit\n";
+		print "No schema upgrades needed for Submit\n";
 	}
 
 	return 1;
