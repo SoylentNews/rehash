@@ -189,8 +189,9 @@ sub selectCommentsNew {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 
+	my $numPages = $pages ? scalar(@$pages) : 0;
 
-	return($comments, scalar(@$pages), $count);
+	return($comments, $numPages, $count);
 }
 
 ########################################################
@@ -945,7 +946,7 @@ sub printComments {
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
 	# Index go bye-bye, just use $cc --TMB
-	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $user->{mode}, $discussion->{legacy});
+	my $lcp = $pages ? linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $user->{mode}, $discussion->{legacy}) : "";
 		# Saved for now --TMB
 		#= ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
 		#? $comments->{$cidorpid}{totalvisiblekids}

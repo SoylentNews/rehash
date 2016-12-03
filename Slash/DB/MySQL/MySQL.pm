@@ -6247,16 +6247,18 @@ sub getThreadedCommentsForUser {
 	
 	my ($thesecids, $theseopids);
 	
-	# If they asked for a page and didn't give us a martian page number
-	if(defined $form->{page} && int($form->{page}) <= scalar @$cids && int($form->{page}) > 0 ) {
-		my $index = int($form->{page}) - 1;
-		$thesecids = join( ' OR comments.cid=', @{ $cids->[$index] } );
-		$theseopids = join( ' OR comments.opid=', @{ $cids->[$index] } );
-	}
-	# Otherwise use the first page
-	else {
-		$thesecids = join( ' OR comments.cid=', @{$cids->[0]} );
-		$theseopids = join( ' OR comments.opid=', @{$cids->[0]} );
+	if ($cids) {
+		# If they asked for a page and didn't give us a martian page number
+		if(defined $form->{page} && int($form->{page}) <= scalar @$cids && int($form->{page}) > 0 ) {
+			my $index = int($form->{page}) - 1;
+			$thesecids = join( ' OR comments.cid=', @{ $cids->[$index] } );
+			$theseopids = join( ' OR comments.opid=', @{ $cids->[$index] } );
+		}
+		# Otherwise use the first page
+		else {
+			$thesecids = join( ' OR comments.cid=', @{$cids->[0]} );
+			$theseopids = join( ' OR comments.opid=', @{$cids->[0]} );
+		}
 	}
 
         $other.= "ORDER BY opid ASC, cid $order_dir";
@@ -6275,7 +6277,14 @@ sub getThreadedCommentsForUser {
         # Because fuck a bunch of doing search and replace to add comment text.
         # That shit is insanely expensive compared to this.
         my $tables = "comments LEFT JOIN comment_text ON comments.cid=comment_text.cid LEFT JOIN users ON comments.uid=users.uid";
-        my $where = "sid=$sid_quoted AND (comments.cid=$thesecids OR comments.opid=$theseopids)";
+        
+				my $where;
+				if ($cids) {
+					$where= "sid=$sid_quoted AND (comments.cid=$thesecids OR comments.opid=$theseopids)";
+				}
+				else {
+					$where= "sid=$sid_quoted";
+				}
 
         if ($cid && $one_cid_only) {
                 $where .= " AND comments.cid=$cid";
