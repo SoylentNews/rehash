@@ -864,6 +864,7 @@ sub printComments {
 	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp}))) {
 		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 		print STDERR "Legacy Comment\n";
+	}
 	else {
 		($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
 	}
