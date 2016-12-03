@@ -13546,8 +13546,15 @@ PRIMARY KEY (discussion_id, uid)
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
-                        return 0;
-                }
+			return 0;
+		}
+		my $acid = $self->sqlSelect('value', 'vars', "name = 'anonymous_coward_uid'");
+			if (!$self->sqlDo("UPDATE users_comments SET thresh  = 0 WHERE uid = $acid")) {
+			return 0;
+		}	
+		if (!$self->sqlDo("UPDATE users_comments SET highlightthresh  = 0 WHERE uid = $acid")) {
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}
