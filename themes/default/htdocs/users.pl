@@ -2637,9 +2637,6 @@ sub saveComm {
 	$form->{commentlimit} = $cl_max if $cl_max > 0 && $form->{commentlimit} > $cl_max;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
 
-	$form->{threaddivisor} = 1 if $form->{threaddivisor} < 1;
-	$form->{threaddivisor} = $user->{commentlimit} if $form->{threaddivisor} > $user->{commentlimit};
-
 	# For some of these values, namely the ones that we happen to
 	# know get stored in users_param, we change them to 'undef'
 	# if they are the default value.  This deletes them from the
@@ -2672,7 +2669,6 @@ sub saveComm {
 		clbig			=> $form->{clbig},
 		clbig_bonus		=> ($clbig_bonus || undef),
 		commentlimit		=> $form->{commentlimit},
-		threaddivisor		=> $form->{threaddivisor},
 		bytelimit		=> $form->{bytelimit},
 		commentsort		=> $form->{commentsort},
 		commentspill		=> $form->{commentspill},
@@ -2715,7 +2711,6 @@ sub saveComm {
 		reparent        => 1,
 		commentlimit    => 100,
 		commentspill    => 50,
-		threaddivisor	=> 20,
 		mode            => 'thread'
 	};
 
