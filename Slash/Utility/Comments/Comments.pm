@@ -98,15 +98,12 @@ sub selectCommentsNew {
 	my @cids = ();
 	if ($options->{force_read_from_master}) {
 		($thisComment, $pages) = $slashdb->getThreadedCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
-		my $sid_quoted = $slashdb->sqlQuote($discussion->{sid});
-		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$sid_quoted"));
+		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	} else {
 		($thisComment, $pages) = $reader->getThreadedCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
-		print STDERR Dumper($thisComment)."\n".Dumper($pages)."\n";
-		my $sid_quoted = $reader->sqlQuote($discussion->{sid});
-                push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$sid_quoted"));
+    push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	}
-
+	
 	if (!$thisComment) {
 		_print_cchp($discussion);
 		return ( {}, 0 );
@@ -173,6 +170,12 @@ sub selectCommentsNew {
 		$comments->{$C->{pid}}{visiblekids}++;
 	}
 	
+	# Now let's calcualte cumulative totals form the individual totals
+	# Run from top down and add the total from x+1 to the current one
+	for (my $x=($max-1); $x >= $min; $x--) {
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$x}] = $comments->{0}{totals}[$comments->{0}{total_keys}{$x}] + $comments->{0}{totals}[$comments->{0}{total_keys}{$x+1}];
+	}
+	
 	# Should be unnecessary jiggery-fuckery but we'll leave it in for now.
 	my @phantom_cids =
 		grep { $_ > 0 && !defined $comments->{$_}{cid} }
@@ -182,11 +185,11 @@ sub selectCommentsNew {
 	my $count = scalar(@$thisComment);
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
-	if(!$form->{noupdate} && $count > 0) {
-                $slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
-        }
+	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp})) {
+		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
+	}
 
-        return($comments, scalar(@$pages));
+	return($comments, scalar(@$pages), $count);
 }
 
 ########################################################
@@ -396,7 +399,7 @@ sub selectComments {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
-	if(!$form->{noupdate} && $count > 0) {
+	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp})) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 
@@ -857,12 +860,12 @@ sub printComments {
 	my $comments;
 	my ($count, $pages) = (0, 0);
 	# We need to write a selectComments for flat since we can let the db order them
-	if($discussion->{legacy} eq 'yes') {
+	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp}))) {
 		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
-		print STDERR "OMGWTFBBQ!?\n";
+		print STDERR "Legacy Comment\n";
 	}
 	else {
-		($comments, $pages) = selectCommentsNew($discussion, $cidorpid, $sco);
+		($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
 	}
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
