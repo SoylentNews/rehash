@@ -13534,15 +13534,15 @@ PRIMARY KEY (discussion_id, uid)
 			return 0;
 		}
 		my $newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags'")."|spoiler";
-		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags'") {
+		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags'")) {
 			return 0;
 		}
 		$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_visible'")."|spoiler";
-		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_visible'") {
+		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_visible'")) {
 			return 0;
 		}
 		$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_break'")."|spoiler";
-		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_break'") {
+		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_break'")) {
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_core'")) {
