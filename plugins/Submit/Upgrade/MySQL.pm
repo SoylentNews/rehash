@@ -49,7 +49,7 @@ sub upgradeDB() {
 		if(!$slashdb->sqlDo("INSERT INTO vars (name, value, description) VALUES ('submit_dept', 0, 'Allow users to submit deptatrment with stories')")) {
 			return 0;
 		};
-		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Sumbit', 1, 'Version of submit plugin schema')")) {
+		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Submit', 1, 'Version of submit plugin schema')")) {
 			return 0;
 		};
 		$subscribe_schema_ver = 1;
