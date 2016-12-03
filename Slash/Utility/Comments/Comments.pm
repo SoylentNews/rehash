@@ -101,7 +101,12 @@ sub selectCommentsNew {
 		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	} else {
 		($thisComment, $pages) = $reader->getThreadedCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
+<<<<<<< HEAD
     push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+=======
+		my $sid_quoted = $reader->sqlQuote($discussion->{sid});
+                push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$sid_quoted"));
+>>>>>>> SoylentNews/master
 	}
 	
 	if (!$thisComment) {
@@ -186,8 +191,13 @@ sub selectCommentsNew {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp})) {
+<<<<<<< HEAD
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
+=======
+                $slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
+        }
+>>>>>>> SoylentNews/master
 
 	return($comments, scalar(@$pages), $count);
 }
@@ -860,9 +870,14 @@ sub printComments {
 	my $comments;
 	my ($count, $pages) = (0, 0);
 	# We need to write a selectComments for flat since we can let the db order them
+<<<<<<< HEAD
 	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp}))) {
 		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 		print STDERR "Legacy Comment\n";
+=======
+	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp})) {
+		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
+>>>>>>> SoylentNews/master
 	}
 	else {
 		($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
