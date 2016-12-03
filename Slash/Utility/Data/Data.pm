@@ -1398,8 +1398,6 @@ my %actions = (
 			${$_[0]} =~ s{
 				&(\#?[a-zA-Z0-9]+);
 			}{approveCharref($1)}gex;			},
-	space_between_tags => sub {
-			${$_[0]} =~ s/></> </g;				},
 	whitespace_tagify => sub {
 			${$_[0]} =~ s/\n/<br>/gi;  # pp breaks
 			${$_[0]} =~ s/(?:<br>\s*){2,}<br>/<br><br>/gi;
@@ -1488,7 +1486,6 @@ my %mode_actions = (
 			encode_html_ltgt
 			remove_trailing_lts
 			approveTags
-			space_between_tags
 			encode_html_ltgt_stray
 			approve_unicode		)],
 	NOHTML, [qw(
@@ -1509,7 +1506,6 @@ my %mode_actions = (
 			remove_trailing_lts
 			approveTags
 			processCustomTagsPost
-			space_between_tags
 			encode_html_ltgt_stray
 			approveCharrefs
 			whitespace_tagify
@@ -1524,7 +1520,6 @@ my %mode_actions = (
 			remove_trailing_lts
 			approveTags
 			processCustomTagsPost
-			space_between_tags
 			encode_html_ltgt_stray
 			approveCharrefs
 			approve_unicode		)],
@@ -1745,7 +1740,7 @@ sub stripBadHtml {
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
-	$str =~ s/></> </g;
+	#$str =~ s/></> </g;
 
 	# Encode stray >
 	1 while $str =~ s{
@@ -1867,7 +1862,7 @@ sub processCustomTagsPost {
 	my($str) = @_;
 	my $constants = getCurrentStatic();
 
-	# QUOTE must be in approvedtags
+	# all of these must be in approvedtags
 	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
 		my $quote   = 'quote';
 		my $open    = qr[\n* <\s*  $quote \s*> \n*]xsio;
@@ -1914,10 +1909,20 @@ sub processCustomTagsPost {
 		my $close = qr[<\s* /$utag \s*> \n*]xsio;
 		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
 	}
-	# also support @{blah} syntax
+	# also support @blah: syntax
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		# The link here is just the nick. any decoration is done in base.css
-		$str =~ s/@\s*(.*?)\s*:/_nick2Link($1,$constants,1)/ge;
+		$str =~ s/@([a-zA-Z0-9$_.+!*'(),\- ]+):[^\/]/_nick2Link($1,$constants,1)/ge;
+	}
+
+	# spoiler tags
+	if (grep /^spoiler$/i, @{$constants->{approvedtags}}) {
+		my $spoiler	= 'spoiler';
+		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
+		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
+
+		$str =~ s/$open/<p><div class="spoiler">/g;
+		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
 	return $str;

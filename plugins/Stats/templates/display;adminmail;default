@@ -92,7 +92,7 @@ gstatic total:        -          -   [% grand_total_static %]
     Avg Hits Per Article:   [% avg_hits_per_story.0 %]|[% avg_hits_per_story.1 %]|[% avg_hits_per_story.2 %]
 Avg Comments Per Article:   [% avg_comments_per_story.0 %]|[% avg_comments_per_story.1 %]|[% avg_comments_per_story.2 %]
 
-[% rand_users_yest.size %] random users created yesterday:
+[% rand_users_yest.size %] random users out of [% new_users_yest %] created yesterday:
 [% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %]) 
 [% END %]
 

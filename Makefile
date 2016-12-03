@@ -32,14 +32,14 @@ SLASH_PREFIX = $(ENVIRONMENT_PREFIX)/rehash
 # If this isn't used anymore, can we remove it?
 INIT = /etc
 USER = nobody
-GROUP = nobody
+GROUP = nogroup
 CP = cp
 INSTALL = install
 UNAME = `uname`
 MAKE = make -s
 
 # Apache stuff
-APACHE_MIRROR=http://apache.osuosl.org/httpd
+APACHE_MIRROR=http://archive.apache.org/dist/httpd/
 APACHE_VER=2.2.29
 APACHE_DIR=httpd-$(APACHE_VER)
 APACHE_FILE=$(APACHE_DIR).tar.bz2
@@ -87,9 +87,9 @@ INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir
 
 .PHONY : all pluginsandtagboxes slash install
 
-#   install the shared object file into Apache 
+#   install the shared object file into Apache
 # We should run a script on the binaries to get the right
-# version of perl. 
+# version of perl.
 # I should also grab an install-sh instead of using $(CP)
 slash:
 	@echo "=== INSTALLING SLASH MODULES ==="
@@ -123,7 +123,6 @@ pluginsandtagboxes:
 all: install
 
 install: slash pluginsandtagboxes
-
 	# Create all necessary directories.
 	$(INSTALL) -d \
 		$(SLASH_PREFIX)/bin/ \
@@ -143,7 +142,7 @@ install: slash pluginsandtagboxes
 	# Install the plugins and tagboxes.  Will also install kruft like CVS/
 	# and blib/ directories if they are around. Maybe a smarter copying
 	# procedure is called for, here?)
-	# 
+	#
 	# Note: Many users of Slash have taken to symlinking the plugins and themes
 	# directories into $(SLASH_PREFIX) from their checked-out CVS trees. We
 	# should try to check for this in the future and behave accordingly.
@@ -153,7 +152,7 @@ install: slash pluginsandtagboxes
 	# OpenBSD needs "-R" here instead of "-rv".  Its manpage notes:
 	# Historic versions of the cp utility had a -r option.  This implementation
 	# supports that option; however, its use is strongly discouraged, as it
-	# does not correctly copy special files, symbolic links or FIFOs. 
+	# does not correctly copy special files, symbolic links or FIFOs.
 	#
 	@(pluginstall=$(PLUGINSTALL); \
 	for f in $$pluginstall; do \
@@ -162,8 +161,8 @@ install: slash pluginsandtagboxes
 
 	# Now all the themes
 	$(CP) -r themes/* $(SLASH_PREFIX)/themes
-	
-	# Ensure we use the proper Perl interpreter and prefix in all scripts that 
+
+	# Ensure we use the proper Perl interpreter and prefix in all scripts that
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
 	# which may or may not exist on any given system.
 	(replacewith=$(REPLACEWITH); \
@@ -339,8 +338,8 @@ manifest :
 rpm :
 	rpm -ba slash.spec
 
-build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload stamp/install-cache-memcached stamp/install-cache-memcached-fast stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search stamp/install-uri-encode stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss stamp/append-apache-config
-	@echo "Setting permissions on the $(ENVIRONMENT_PREFIX) directory
+build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload stamp/install-cache-memcached stamp/install-cache-memcached-fast stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search stamp/install-uri-encode stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss
+	@echo "Setting permissions on the $(ENVIRONMENT_PREFIX) directory"
 	chown $(USER):$(GROUP) -R $(ENVIRONMENT_PREFIX)
 	@echo ""
 	@echo "Rehash Environment Successfully Installed!"
@@ -411,7 +410,7 @@ stamp/mod-perl-built: dist/$(MOD_PERL_FILE)
 stamp/install-cpamn:
 	-mkdir stamp
 	$(REHASH_PERL) utils/cpanm App::cpanminus
-	touch stamp/install-cpamn	
+	touch stamp/install-cpamn
 
 stamp/install-apache2-upload:
 	-mkdir stamp

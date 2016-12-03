@@ -640,6 +640,13 @@ sub saveSub {
 		displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
 		return(0);
 	}
+	
+	if (length($form->{userid})) {
+		titlebar('100%', getData('error'));
+		my $error_message = getData('bot');
+		displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
+		return(0);
+	}
 
 	my %keys_to_check = ( story => 1, subj => 1 );
 	my $message = "";
@@ -671,14 +678,6 @@ sub saveSub {
 
 			$url_id = $slashdb->getUrlCreate($url_data);
 			my $url_id_q = $slashdb->sqlQuote($url_id);
-			if ($constants->{plugin}{FireHose}) {
-				my $firehose = getObject("Slash::FireHose");
-				if (!$firehose->allowSubmitForUrl($url_id)) {
-					my $submitted_items = $firehose->getFireHoseItemsByUrl($url_id);
-					displayForm($form->{name}, $form->{email}, $form->{skin}, '', getData("duplicateurl", { submitted_items => $submitted_items } ));
-					return(0);
-				}
-			}
 		}
 	}
 	
@@ -704,6 +703,7 @@ sub saveSub {
 		name		=> $form->{name},
 		story		=> $form->{story},
 		subj		=> $form->{subj},
+		dept		=> $form->{dept},
 		tid		=> $form->{tid},
 		primaryskid	=> $form->{primaryskid},
 		mediatype	=> $form->{mediatype},

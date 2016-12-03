@@ -38,7 +38,8 @@ __template__
 [% END %]
 
 <form action="[% constants.real_rootdir %]/my/login" method="post" onsubmit="if (global_returnto) { this.returnto.value = global_returnto }">
-                <input type="hidden" name="returnto" value="[% (return_url || form.returnto) | strip_urlattr %]">
+<div>
+		<input type="hidden" name="returnto" value="[% (return_url || form.returnto) | strip_urlattr %]">
                 <input type="hidden" name="op" value="userlogin">
 
                 <label>Nickname</label>
@@ -88,13 +89,15 @@ __template__
                 [% END %]
 
                 <input type="submit" name="userlogin" value="Log in" class="button">
+</div>		
 </form>
 
 [% IF constants.openid_consumer_allow %]
 <br>
 
 <form action="[% constants.real_rootdir %]/login.pl" method="post" onsubmit="if (global_returnto) { this.slash_returnto.value = global_returnto }">
-                <input type="hidden" name="slash_returnto" value="[% (return_url || form.returnto) | strip_urlattr %]">
+<div>
+		<input type="hidden" name="slash_returnto" value="[% (return_url || form.returnto) | strip_urlattr %]">
                 <input type="hidden" name="op" value="claim_openid">
                 <input type="hidden" name="openid_login" value="1">
 
@@ -105,6 +108,7 @@ __template__
                 [% IF is_modal %]<br>[% END %]
 
                 <input type="submit" value="Log in with OpenID" class="button">
+</div>		
 </form>
 [% END %]
 

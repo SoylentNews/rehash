@@ -36,18 +36,14 @@ sub new {
 
 sub countTotalSubs {
 	my($self) = @_;
-	my $dt_epoch = DateTime->new( year => 1970, month => 1, day => 1 );
-	my $md_epoch = DateTime::Format::MySQL->format_date($dt_epoch);
 	return $self->sqlCount('users_info',
-		"subscriber_until > $md_epoch");
+		"subscriber_until > '1970-01-01'");
 }
 
 sub countCurrentSubs {
 	my($self) = @_;
-	my $dt_today = DateTime->today;
-	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
 	return $self->sqlCount('users_info',
-		"subscriber_until >= $md_today");
+		"subscriber_until >= CURDATE()");
 }
 
 sub countTotalGiftSubs {
@@ -61,37 +57,26 @@ sub countCurrentGiftSubs {
 	my($self) = @_;
 	my @gift_uids = $self->_getUidsForPaymentType("gift");
 	return 0 unless @gift_uids;
-	my $dt_today = DateTime->today;
-	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
 	return $self->sqlCount('users_info',
-		'subscriber_until >= '.$md_today.' AND uid in('.join(',',@gift_uids).')');
+		'subscriber_until >= CURDATE() AND uid in('.join(',',@gift_uids).')');
 }
 
 sub getLowRunningSubs {
 	my ($self) = @_;
 	my $low_val = getCurrentStatic('subscribe_low_val');
-	my $dt_today = DateTime->today;
-	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
-	my $dt_low = $dt_today->add( days => $low_val );
-	my $md_low = DateTime::Format::MySQL->format_date($dt_low);
-	print STDERR "low_val: $low_val\n";
 	return $self->sqlSelectColArrayref(
 		'users_info.uid',
 		'users_info',
-		"users_info.subscriber_until < $md_low and subscriber_until >= $md_today"
+		"users_info.subscriber_until < DATE_ADD(CURDATE(), INTERVAL $low_val DAY) and subscriber_until >= CURDATE()"
 	);
 }
 
 sub getExpiredSubs {
 	my ($self) = @_;
-	my $dt_today = DateTime->today;
-	my $md_today = DateTime::Format::MySQL->format_date($dt_today);
-	my $dt_epoch = DateTime->new( year => 1970, month => 1, day => 1 );
-	my $md_epoch = DateTime::Format::MySQL->format_date($dt_epoch);
 	return $self->sqlSelectColArrayref(
 		'users_info.uid',
 		'users_info',
-		"users_info.subscriber_until > $md_epoch and subscriber_until < $md_today"
+		"users_info.subscriber_until > '1970-01-01' and subscriber_until < CURDATE()"
 	);
 }
 

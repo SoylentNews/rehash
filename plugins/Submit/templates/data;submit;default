@@ -80,6 +80,10 @@ __template__
 	[% returnme.data_constant = 1 %]
 	Please enter a reasonable subject.
 
+[% CASE 'bot' %]
+	[% returnme.data_constant = 1 %]
+	You look like a bot.
+
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
 	<div class="message error">

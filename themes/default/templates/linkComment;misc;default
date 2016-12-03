@@ -9,6 +9,7 @@ Create a link to a comment
 * comment = make link to only one comment, not whole story (i.e., include cid= in link)
 * a_id = element id, i.e., <a id="[% a_id %]" ...>
 * a_class = element class, i.e,  <a class="[% a_class %]" ...>
+* page = page number for new threaded pagination. technically should be the same as subject but just in case
 
 Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
 
@@ -24,13 +25,12 @@ en_US
 __name__
 linkComment
 __template__
-<a[% IF a_id %] id="[% a_id %]"[% END %][% IF a_class %] class="[% a_class %]"[% END %] href="[% gSkin.rootdir %]/comments.pl?sid=[% sid;
+<a[% IF a_id %] id="[% a_id %]"[% END %][% IF a_class %] class="[% a_class %]"[% END %] href="[% gSkin.rootdir %]/comments.pl?noupdate=1&amp;sid=[% sid;
 IF op.defined                                 %]&amp;op=[% op; END;
-IF threshold.defined                          %]&amp;threshold=[% threshold; END;
-IF highlightthresh.defined                    %]&amp;highlightthresh=[% highlightthresh; END;
 IF commentsort.defined                        %]&amp;commentsort=[% commentsort; END;
 IF mode.defined                               %]&amp;mode=[% mode; END;
 IF startat                                    %]&amp;startat=[% startat; END;
+IF page                                       %]&amp;page=[% page; END;
 IF (user.state.tid && constants.tids_in_urls) %]&amp;tid=[% user.state.tid; END;
 IF comment
 	%]&amp;cid=[% cid;

@@ -52,7 +52,7 @@ to do this unless you need more context to fairly meta moderate.<br><br></li>
 
 <form action="[% gSkin.rootdir %]/metamod.pl" method="post">
 [% IF comments.size %]
-<ul id="commentlisting" class="[% Slash.discussion2() ? 'd2' : 'd1' %]">
+<ul id="commentlisting" class="d1">
 [% END %]
 [% FOR C = comments %]
 [%

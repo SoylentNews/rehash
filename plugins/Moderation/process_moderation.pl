@@ -13,7 +13,7 @@ use Slash::Constants qw( :messages :slashd );
 use vars qw( %task $me $task_exit_flag );
 
 #$task{$me}{timespec} = '*/5 0-23 * * *';
-$task{$me}{timespec} = '10 0 * * *';
+$task{$me}{timespec} = '10 5 * * *';
 $task{$me}{timespec_panic_1} = '';
 $task{$me}{resource_locks} = { log_slave => 1, moderatorlog => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
