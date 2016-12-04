@@ -117,7 +117,7 @@ END %]
 		</div>
 		[% IF !full && story.bodytext.length %]
 				<input type="checkbox" id="more_[% story.sid %]" class="story_more" autocomplete="off" />
-				<label for="more_[% story.sid %]" class="story_more">More</label>
+				<label for="more_[% story.sid %]" class="story_more">[% constants.story_more %]</label>
 				<div class="story_more full">
 						[% story.bodytext %]
 				</div>

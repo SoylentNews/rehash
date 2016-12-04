@@ -13574,6 +13574,9 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE users_comments SET highlightthresh  = 0 WHERE uid = $acid")) {
 			return 0;
 		}
+		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('story_more', '[Continues...]', 'Text for label when there is extended copy in stories')")) {
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}
