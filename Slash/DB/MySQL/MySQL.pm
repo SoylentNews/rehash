@@ -6774,13 +6774,18 @@ sub saveCommentReadLog {
 #######################################################
 sub getCommentReadLog {
 	my($self, $discussion_id, $uid, $no_mcd) = @_;
-
+	my $cids = {};
+	
 	$uid ||= getCurrentUser('uid');
-	return if isAnon($uid);
+
+	if (isAnon($uid)) {
+		$cids->{cid_now} = 0;
+		$cids->{cid_new} = 0;
+		return $cids;
+	}
 
 	my($mcd, $mcdkey);
 	$mcd = $self->getMCD;
-	my $cids = {};
 
 	if ($mcd) {
 		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
@@ -6795,7 +6800,12 @@ sub getCommentReadLog {
 			' AND discussion_id=' . $self->sqlQuote($discussion_id)
 		);
 	}
-
+	
+	if (!$cids) {
+		$cids->{cid_now} = 0;
+		$cids->{cid_new} = 0;
+	}
+	
 	return $cids;
 }
 
