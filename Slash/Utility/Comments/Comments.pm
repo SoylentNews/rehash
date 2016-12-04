@@ -119,6 +119,7 @@ sub selectCommentsNew {
 	# We first loop through the comments and assign bonuses
 	foreach my $C (@$thisComment) {
 		$C->{points} = getPoints($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
+		$C->{legacy} = 0;
 	}
 	# Newest First
 	if($commentsort == 1) {
@@ -281,6 +282,7 @@ sub selectComments {
 		# I'm still looking into how to get parent links and
 		# children to show up properly in flat mode. - Jamie 2002/07/30
 		$C->{points} = getPoints($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
+		$C->{legacy} = 1;
 	}
 
 	my($oldComment, %old_comments);
@@ -1564,7 +1566,8 @@ sub dispComment {
 	if ($form->{mode} ne 'archive'
 		&& !defined($comment->{abbreviated})
 		&& $comment->{len} > ($maxcommentsize + 256)
-		&& $form->{cid} ne $comment->{cid})
+		&& $form->{cid} ne $comment->{cid}
+		&& $comment->{legacy})
 	{
 		$comment_shrunk = 1;
 	}
