@@ -6254,6 +6254,11 @@ sub getThreadedCommentsForUser {
 			$thesecids = join( ' OR comments.cid=', @{ $cids->[$index] } );
 			$theseopids = join( ' OR comments.opid=', @{ $cids->[$index] } );
 		}
+		# Or if they asked for one comment pull only that opid's thread
+		elsif($options->{one_cid_only} && defined($cid) && $cid) {
+			$thesecids = $cid;
+			$theseopids = $self->sqlSelect("opid", "comments", "cid=$cid");
+		}
 		# Otherwise use the first page
 		else {
 			$thesecids = join( ' OR comments.cid=', @{$cids->[0]} );
