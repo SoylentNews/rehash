@@ -307,6 +307,11 @@ position: relative;
 overflow-y: hidden;
 }
 
+#slashboxes #related-content {
+	overflow-y: auto;
+	max-height: 150px;
+}
+
 #slashboxes h4 img.map
 {
 position: absolute;
