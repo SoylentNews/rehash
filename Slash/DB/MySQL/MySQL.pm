@@ -6257,6 +6257,7 @@ sub getThreadedCommentsForUser {
 		elsif($cid) {
 			$thesecids = $cid;
 			$theseopids = $self->sqlSelect("opid", "comments", "cid=$cid");
+			if($theseopids == "0") {$theseopids = $cid;}
 		}
 		# Otherwise use the first page
 		else {
