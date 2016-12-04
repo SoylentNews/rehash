@@ -190,6 +190,8 @@ sub selectCommentsNew {
 	}
 
 	my $numPages = $pages ? scalar(@$pages) : 0;
+	
+	$count = $reader->sqlSelect('count(cid)', 'comments', "sid=$discussion->{id}");
 
 	return($comments, $numPages, $count);
 }
