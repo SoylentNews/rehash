@@ -950,6 +950,9 @@ sub printComments {
 	# totalviskids for the story 		--Pater
 	# Index go bye-bye, just use $cc --TMB
 	my $lcp = $pages ? linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $user->{mode}, $discussion->{legacy}) : "";
+	if($form->{cid}) {
+		$lcp = "";
+	}
 		# Saved for now --TMB
 		#= ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
 		#? $comments->{$cidorpid}{totalvisiblekids}
