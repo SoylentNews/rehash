@@ -6246,13 +6246,18 @@ sub getThreadedCommentsForUser {
 	$page++;
 	
 	my ($thesecids, $theseopids);
-	
 	if ($cids) {
 		# If they asked for a page and didn't give us a martian page number
 		if(defined $form->{page} && int($form->{page}) <= scalar @$cids && int($form->{page}) > 0 ) {
 			my $index = int($form->{page}) - 1;
 			$thesecids = join( ' OR comments.cid=', @{ $cids->[$index] } );
 			$theseopids = join( ' OR comments.opid=', @{ $cids->[$index] } );
+		}
+		# Or if they asked for one comment pull only that opid's thread
+		elsif($cid) {
+			$thesecids = $cid;
+			$theseopids = $self->sqlSelect("opid", "comments", "cid=$cid");
+			if($theseopids == "0") {$theseopids = $cid;}
 		}
 		# Otherwise use the first page
 		else {
