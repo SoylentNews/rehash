@@ -185,7 +185,7 @@ sub selectCommentsNew {
 	my $count = scalar(@$thisComment);
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
-	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp})) {
+	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 
@@ -401,7 +401,7 @@ sub selectComments {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
-	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp})) {
+	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 
@@ -864,7 +864,6 @@ sub printComments {
 	# We need to write a selectComments for flat since we can let the db order them
 	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp}))) {
 		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
-		print STDERR "Legacy Comment\n";
 	}
 	else {
 		($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
