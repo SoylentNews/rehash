@@ -365,7 +365,6 @@ sub getMode {
 	my($self, $msg) = @_;
 	my $code = $msg->{code};
 	my $mode = $msg->{user}{prefs}{$code};
-        $mode = MSG_MODE_EMAIL if $msg->{user}{prefs}{$code} == $self->getMessageDeliveryByName("Mobile");
 
 	my $coderef = $self->getMessageCode($code) or return MSG_MODE_NOCODE;
 
@@ -453,16 +452,9 @@ sub send {
 			messagedLog(getData("send_mail false", 0, "messages"));
 			return 0;
 		}
-
-                # Email and Mobile messages are both Email modes, but use different recipients.
-                my $mobile_code = $self->getMessageDeliveryByName('Mobile');
-                if ($mobile_code && $msg->{user}{prefs}{$msg->{code}} == $mobile_code) {
-                        $addr = $msg->{user}{mobile_text_address};
-                } else {
-                        $addr = $msg->{altto} || $msg->{user}{realemail};
-                }
+    $addr = $msg->{altto} || $msg->{user}{realemail};
 		
-                unless (emailValid($addr)) {
+    unless (emailValid($addr)) {
 			messagedLog(getData("send mail error", {
 				addr	=> $addr,
 				uid	=> $msg->{user}{uid},
