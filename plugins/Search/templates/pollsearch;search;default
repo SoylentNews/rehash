@@ -18,7 +18,7 @@ __template__
 	[% link = skin.rootdir || gSkin.rootdir %]
 	<div class="search-results">
 		<h4>
-			<a href="[% link %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question | strip_title %]</a>
+			<a href="[% link %]/pollBooth.pl?qid=[% poll.qid %]&display=full">[% poll.question | strip_title %]</a>
 		</h4>
 		<div class="data">
 			On [% Slash.timeCalc(poll.date) %]
