@@ -120,7 +120,9 @@ __template__
 			%]
 		
 			<input type="submit" name="update" value="Update">
-			<input type="submit" name="del_[% subid %]" value="Delete"> Reason <input type="text" name="rejectreason">
+			<br /><br/>
+			<input type="submit" name="del_[% subid %]" value="Delete"> 
+			Reason: <textarea class="fullbox" wrap="virtual" name="rejectreason" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3"></textarea>
 		</fieldset>
 	</form>
 
