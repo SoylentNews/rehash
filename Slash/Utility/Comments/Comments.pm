@@ -976,20 +976,36 @@ sub printComments {
 
 	my $comment_html = $options->{Return} ?  $pretext : '';
 
-	$comment_html .= slashDisplay('printCommComments', {
-		can_moderate	=> $can_mod_any,
-		comment		=> $comment,
-		comments	=> $comments,
-		'next'		=> $next,
-		previous	=> $previous,
-		sid		=> $discussion->{id},
-		cid		=> $cid,
-		pid		=> $pid,
-		cc		=> $cc,
-		lcp		=> $lcp,
-		lvl		=> $lvl,
-		anon_dump	=> $anon_dump,
-	}, { Return => 1 });
+	#$comment_html .= slashDisplay('printCommComments', {
+	#	can_moderate	=> $can_mod_any,
+	#	comment		=> $comment,
+	#	comments	=> $comments,
+	#	'next'		=> $next,
+	#	previous	=> $previous,
+	#	sid		=> $discussion->{id},
+	#	cid		=> $cid,
+	#	pid		=> $pid,
+	#	cc		=> $cc,
+	#	lcp		=> $lcp,
+	#	lvl		=> $lvl,
+	#	anon_dump	=> $anon_dump,
+	#}, { Return => 1 });
+	# NO MOAR TEMPLATES
+	my $pccArgs = {
+                can_moderate    => $can_mod_any,
+                comment         => $comment,
+                comments        => $comments,
+                'next'          => $next,
+                previous        => $previous,
+                sid             => $discussion->{id},
+                cid             => $cid,
+                pid             => $pid,
+                cc              => $cc,
+                lcp             => $lcp,
+                lvl             => $lvl,
+                anon_dump       => $anon_dump
+        };
+	$comment_html .= printCommComments($pccArgs);
 
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
@@ -2026,6 +2042,105 @@ sub _is_mod_banned {
 	return ($banned || 0);
 }
 
+sub printCommComments {
+	my $args = shift;
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $gSkin = getCurrentSkin();
+	my $html_out = "";
+	use Data::Dumper;
+	
+	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
+	my $moderate_form = $args->{can_moderate} || $can_del || $user->{acl}->{candelcomments_always};
+	my $moderate_button = $args->{can_moderate} && $user->{mode} != 'archive' && ( !$user->{state}->{discussion_archived} || $constants->{comments_moddable_archived});
+	my $next_prev_links = nextPrevLinks($args->{next}, $args->{prev}, $args->{comment});
+	my $mod_comment_log = "";
+
+	if($moderate_form) {
+		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n";
+		if(defined($form->{threshold})) { $html_out .= "<input type=\"hidden\" name=\"threshold\" value=\"$form->{threshold}\">\n"; }
+		if(defined($form->{highlightthresh})) { $html_out .= "<input type=\"hidden\" name=\"highlightthresh\" value=\"$form->{highlightthresh}\">\n"; }
+		if(defined($form->{mode})) { $html_out .= "<input type=\"hidden\" name=\"mode\" value=\"$form->{mode}\">\n"; }
+	}
+
+	if(!$constants->{modal_prefs_active}) {
+		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+		if($moddb) {
+			$mod_comment_log .= $moddb->dispModCommentLog('cid', $args->{cid}, { need_m2_form => 0, title => " " });
+		}
+	}
+
+	if($args->{cid}) {
+		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n".
+		dispComment($args->{comment}).
+		"\n<div class=\"comment_footer\">\n$next_prev_links\n</div>\n$mod_comment_log\n";
+		
+	}
+	
+	$html_out .= $args->{lcp};
+	my $thread;
+	if($args->{comments}) {
+		$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+	}
+	if($thread) {
+		if(!$args->{cid}) { $html_out .= '<ul id="commentlisting" >'.$thread."</ul>\n"; }
+		else {	$html_out .= $thread; }
+	}
+	if($args->{cid}) {$html_out .= "</ul>\n"; }
+	
+	$html_out .= $args->{lcp}."<div id=\"discussion_buttons\">\n";
+	
+	if(!$user->{state}->{discussion_archived} && !$user->{state}->{discussion_future_nopost}) {
+		$html_out .= "<span class=\"nbutton\"><p><b>".
+		linkComment({
+			sid => $args->{sid},
+			cid => $args->{cid},
+			op => 'reply',
+			subject => 'Reply',
+			subject_only => 1
+		}).
+		"</b></p></span>\n";
+	}
+
+	if(!$user->{is_anon}) {
+		$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/my/comments\">Prefs</a></b></p></span>\n";
+	}
+
+	$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></p></span>\n";
+
+	if($moderate_form && $moderate_button) {
+		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n".
+		"<input type=\"hidden\" name=\"sid\" value=\"i$args->{sid}\">\n".
+		"<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">".
+		"<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n".
+		"<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
+		if($can_del) {
+			$html_out .= "<span class=\"nbutton\"><p><b><a href=\"#\" onclick=\"\$('#commentform').submit(); return false\">Delete</a></b></p></span>\nChecked comments will be deleted!";
+		}
+
+	}
+
+	if($moderate_form) {
+		$html_out .= "</div>\n</form>\n";
+	}
+	else {
+		$html_out .= "</div>";
+	}
+
+	return $html_out;
+}
+
+sub nextPrevLinks {
+	my ($next, $prev, $comment) = @_;
+	my $html_out = "";
+	if($prev) { $html_out .= "&lt;&lt;".linkComment($prev, 1); }
+	if($prev && ($comment->{pid} || $next)) { $html_out .= " | "; }
+	if($comment->{pid}) { linkComment($comment, 1); }
+	if($next && ($comment->{pid} || $prev)) { $html_out .= " | "; }
+	if($next) { $html_out .= linkComment($next, 1)."&gt;&gt;"; }
+	return $html_out;
+}
 
 1;
 
