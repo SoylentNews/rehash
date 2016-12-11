@@ -1173,7 +1173,7 @@ sub preProcessReplyForm {
 	##########
 	# TMB As a general rule, we want to leave entities alone.
 	#$form->{postersubj} = decode_entities($reply->{subject});
-  $form->{postersubj} = $reply->{subject};
+	$form->{postersubj} = $reply->{subject};
 	##########
 	$form->{postersubj} =~ s/^Re://i;
 	$form->{postersubj} =~ s/\s\s/ /g;
@@ -1664,18 +1664,36 @@ sub dispComment {
 	my $discussion = $mod_reader->getDiscussion($comment->{sid});
 	my $dim = $mod_reader->getCommentReadLog($discussion->{id}, $user->{uid});
 
-	return slashDisplay('dispComment', {
+	my $return;
+	#$return = slashDisplay('dispComment', {
+	#	%$comment,
+	#	marked_spam	=> $marked_spam,
+	#	comment_shrunk	=> $comment_shrunk,
+	#	reasons		=> $reasons,
+	#	ordered		=> $ordered,
+	#	can_mod		=> $can_mod,
+	#	is_anon		=> isAnon($comment->{uid}),
+	#	options		=> $options,
+	#	cid_now		=> $dim->{cid_now},
+	#	subscriber_badge => $subscriber_badge
+	#}, { Return => 1, Nocomm => 1 });
+	
+	#COMMENT TEMPLATES MUST DIE
+	my $args = {
 		%$comment,
-		marked_spam	=> $marked_spam,
-		comment_shrunk	=> $comment_shrunk,
-		reasons		=> $reasons,
-		ordered		=> $ordered,
-		can_mod		=> $can_mod,
-		is_anon		=> isAnon($comment->{uid}),
-		options		=> $options,
-		cid_now		=> $dim->{cid_now},
-		subscriber_badge => $subscriber_badge
-	}, { Return => 1, Nocomm => 1 });
+                marked_spam     => $marked_spam,
+                comment_shrunk  => $comment_shrunk,
+                reasons         => $reasons,
+                ordered         => $ordered,
+                can_mod         => $can_mod,
+                is_anon         => isAnon($comment->{uid}),
+                options         => $options,
+                cid_now         => $dim->{cid_now},
+                subscriber_badge => $subscriber_badge
+	};
+	$return = dispCommentNoTemplate($args);
+
+	return $return;
 }
 
 ##################################################################
@@ -2140,6 +2158,182 @@ sub nextPrevLinks {
 	if($next && ($comment->{pid} || $prev)) { $html_out .= " | "; }
 	if($next) { $html_out .= linkComment($next, 1)."&gt;&gt;"; }
 	return $html_out;
+}
+
+sub dispCommentNoTemplate {
+	my $args = shift;
+	my $form = getCurrentForm();
+        my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $gSkin = getCurrentSkin();
+
+	my $html_out = "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
+	my $show = 0;
+
+	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
+	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
+	
+	# Now shit starts getting squirrely.
+	if(defined($args->{options}->{noCollapse}) && !$args->{options}->{noCollapse}) {
+		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show) {
+			$html_out .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
+			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
+		}
+
+		if($user->{mode} != 'flat') {
+			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" />\n";
+		}
+
+		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
+		if(defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
+			$html_out .= " checked=\"checked\" ";
+		}
+		$html_out .= " autocomplete=\"off\" />\n";
+
+		if($user->{mode} != 'flat') {
+			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
+		}
+	}
+
+	my $points = defined($args->{points}) ? $args->{points} : "?";
+	my $no_collapse = defined($args->{options}->{noCollapse}) ? "noCollapse" : "";
+	my $dimmed = "";
+	if($no_collapse ne "noCollapse" && $args->{cid} <= $args->{cid_now} && !$user->{is_anon} && $user->{dimread}) {
+		$dimmed = "dimmed";
+	}
+	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
+	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4><a name=\"$args->{cid}\">".strip_title($args->{subject})."</a>\n";
+
+	unless(defined($user->{noscores}) && $user->{noscores}) {
+		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
+		my $modal_end = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "</a>" : "";
+		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
+		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span>";
+	}
+	
+	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
+	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
+	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
+	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
+	$html_out .= " $prenick".strip_literal($args->{nickname})."$postnick</span>\n";
+
+	if($args->{marked_spam} && $user->{seclev} >= 500) {
+		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
+	}
+
+	my $details = $args->{options}->{pieces} ? dispCommentDetails() : "";
+	$html_out .= "</h4>\n</div>\n<div class=\"details\">\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
+
+	my $sig;
+	my $shrunk;
+	$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div>$sig$shrunk</div>\n";
+
+	$html_out .= dispLinkComment()."\n</div>\n\n";
+
+	return $html_out;
+}
+
+sub zooIcons {
+	my $args = shift;
+	my $form = getCurrentForm();
+        my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $gSkin = getCurrentSkin();
+	my $slashdb = getCurrentDB();
+	my $user_person = $slashdb->getUser($args->{person});
+	my $badges = $slashdb->getBadgeDescriptions();
+	my $implied = defined($args->{implied}) ? $args->{implied} : -90210;
+	my $bonus = defined($args->{bonus}) ? $args->{bonus} : 0;
+	my $html_out = " ";
+	my $zootitle = "";
+	
+	if($args->{person} && !$args->{implied} && $user_person->{acl}->{employee} && $user_person->{badge_id}) {
+		my $badgeurl = defined($badges->{$user_person->{badge_id}}->{badge_url}) ? strip_urlattr($badges->{$user_person->{badge_id}}->{badge_url}) : "";
+		my $badgeicon = $badges->{$user_person->{badge_id}}->{badge_icon} ? strip_urlattr($badges->{$user_person->{badge_id}}->{badge_icon}) : "";
+		my $badgetitle = $badges->{$user_person->{badge_id}}->{badge_title} ? strip_attribute($badges->{$user_person->{badge_id}}->{badge_title}) : "";
+		$html_out .= "<span class=\"badgeicon\"><a href=\"$badgeurl\"><img src=\"$constants->{imagedir}/$badgeicon\" alt=\"$badgetitle\" title=\"$badgetitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>";
+	}
+	elsif($args->{person} && $user->{uid} != $args->{person} && !$user->{is_anon}) {
+		# Neutral
+		if(!$user->{people}->{FRIEND()}->{$args->{person}} && !$user->{people}->{FOE()}->{$args->{person}} &&
+			!$user->{people}->{FAN()}->{$args->{person}} && !$user->{people}->{FREAK()}->{$args->{person}} &&
+			!$user->{people}->{FOF()}->{$args->{person}} && !$user->{people}->{EOF()}->{$args->{person}} ) {
+
+			$html_out .= "<span class=\"zooicon neutral\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}&type=friend\"><img src=\"$constants->{imagedir}/neutral.$constants->{badge_icon_ext}\" alt=\"Neutral\" title=\"Neutral\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>";
+		}
+		else {
+			# Friend
+			if($user->{people}->{FRIEND()}->{$args->{person}} && $implied != FRIEND() ) {
+				if($bonus && $user->{people_bonus_friend}) {
+					$zootitle = "Friend ($user->{people_bonus_friend})";
+				}
+				else {
+					$zootitle = "Friend";
+				}
+				$html_out .= "<span class=\"zooicon friend\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/friend.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
+			# Foe
+                        if($user->{people}->{FOE()}->{$args->{person}} && $implied != FOE() ) {
+                                if($bonus && $user->{people_bonus_foe}) {
+                                        $zootitle = "Foe ($user->{people_bonus_foe})";
+                                }
+                                else {
+                                        $zootitle = "Foe";
+                                }
+                                $html_out .= "<span class=\"zooicon foe\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/foe.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Fan
+                        if($user->{people}->{FAN()}->{$args->{person}} && $implied != FAN() ) {
+                                if($bonus && $user->{people_bonus_fan}) {
+                                        $zootitle = "Fan ($user->{people_bonus_fan})";
+                                }
+                                else {
+                                        $zootitle = "Fan";
+                                }
+                                $html_out .= "<span class=\"zooicon fan\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fan.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Freak
+                        if($user->{people}->{FREAK()}->{$args->{person}} && $implied != FREAK() ) {
+                                if($bonus && $user->{people_bonus_freak}) {
+                                        $zootitle = "Freak ($user->{people_bonus_freak})";
+                                }
+                                else {
+                                        $zootitle = "Freak";
+                                }
+                                $html_out .= "<span class=\"zooicon freak\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/freak.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Friend of Friend
+                        if($user->{people}->{FOF()}->{$args->{person}} && $implied != FOF() ) {
+                                if($bonus && $user->{people_bonus_fof}) {
+                                        $zootitle = "Friend of Friend ($user->{people_bonus_fof})";
+                                }
+                                else {
+                                        $zootitle = "Friend of Friend";
+                                }
+                                $html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Enemy of Friend
+                        if($user->{people}->{EOF()}->{$args->{person}} && $implied != EOF() ) {
+                                if($bonus && $user->{people_bonus_eof}) {
+                                        $zootitle = "Enemy of Friend ($user->{people_bonus_eof})";
+                                }
+                                else {
+                                        $zootitle = "Enemy of Friend";
+                                }
+                                $html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+		}
+	}
+	return $html_out;
+}
+
+sub dispCommentDetails {
+	return "";
+}
+
+sub dispLinkComment {
+	return "";
 }
 
 1;
