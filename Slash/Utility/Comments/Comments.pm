@@ -2242,13 +2242,13 @@ sub zooIcons {
         my $gSkin = getCurrentSkin();
 	my $slashdb = getCurrentDB();
 	my $user_person = $slashdb->getUser($args->{person});
-	my $badges = $slashdb->getBadgeDescriptions();
 	my $implied = defined($args->{implied}) ? $args->{implied} : -90210;
 	my $bonus = defined($args->{bonus}) ? $args->{bonus} : 0;
 	my $html_out = " ";
 	my $zootitle = "";
 	
 	if($args->{person} && !$args->{implied} && $user_person->{acl}->{employee} && $user_person->{badge_id}) {
+		my $badges = $slashdb->getBadgeDescriptions();
 		my $badgeurl = defined($badges->{$user_person->{badge_id}}->{badge_url}) ? strip_urlattr($badges->{$user_person->{badge_id}}->{badge_url}) : "";
 		my $badgeicon = $badges->{$user_person->{badge_id}}->{badge_icon} ? strip_urlattr($badges->{$user_person->{badge_id}}->{badge_icon}) : "";
 		my $badgetitle = $badges->{$user_person->{badge_id}}->{badge_title} ? strip_attribute($badges->{$user_person->{badge_id}}->{badge_title}) : "";
