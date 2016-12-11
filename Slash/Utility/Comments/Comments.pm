@@ -2174,14 +2174,14 @@ sub dispCommentNoTemplate {
 	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
 	
 	# Now shit starts getting squirrely.
-	if(defined($args->{options}->{noCollapse}) && !$args->{options}->{noCollapse}) {
+	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show) {
 			$html_out .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
 			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
 			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
 		}
 
-		if($user->{mode} != 'flat') {
+		if($user->{mode} ne 'flat') {
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" />\n";
 		}
 
@@ -2189,9 +2189,9 @@ sub dispCommentNoTemplate {
 		if(defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
 			$html_out .= " checked=\"checked\" ";
 		}
-		$html_out .= " autocomplete=\"off\" />\n";
+		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Show/hide comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
-		if($user->{mode} != 'flat') {
+		if($user->{mode} ne 'flat') {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
 		}
 	}
