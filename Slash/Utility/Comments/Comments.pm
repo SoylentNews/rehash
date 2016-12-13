@@ -991,6 +991,7 @@ sub printComments {
 	#	anon_dump	=> $anon_dump,
 	#}, { Return => 1 });
 	# NO MOAR TEMPLATES
+	print STDERR "\n\n".Dumper($discussion)."\n\n";
 	my $pccArgs = {
                 can_moderate    => $can_mod_any,
                 comment         => $comment,
@@ -2068,6 +2069,7 @@ sub printCommComments {
         my $gSkin = getCurrentSkin();
 	my $html_out = "";
 	use Data::Dumper;
+	print "\n\n".Dumper($args)."\n\n";
 	
 	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
 	my $moderate_form = $args->{can_moderate} || $can_del || $user->{acl}->{candelcomments_always};
@@ -2129,7 +2131,7 @@ sub printCommComments {
 
 	if($moderate_form && $moderate_button) {
 		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n".
-		"<input type=\"hidden\" name=\"sid\" value=\"i$args->{sid}\">\n".
+		"<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n".
 		"<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">".
 		"<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n".
 		"<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
@@ -2166,6 +2168,7 @@ sub dispCommentNoTemplate {
         my $user = getCurrentUser();
         my $constants = getCurrentStatic();
         my $gSkin = getCurrentSkin();
+	my $slashdb = getCurrentDB();
 
 	my $html_out = "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
 	my $show = 0;
@@ -2222,14 +2225,35 @@ sub dispCommentNoTemplate {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
 	}
 
-	my $details = $args->{options}->{pieces} ? dispCommentDetails() : "";
+	my $comment_user = $slashdb->getUser($form->{uid});
+	my $details = dispCommentDetails({
+		is_anon => $comment_user->{is_anon},
+		fakeemail => $comment_user->{fakeemail},
+		fakeemail_vis => $comment_user->{fakeemail_vis},
+		'time' => $args->{time},
+		cid => $args->{cid},
+		sid => $args->{sid},
+		homepage => $comment_user->{homepage},
+		journal_last_entry_date => $comment_user->{journal_last_entry_date},
+		nickname => $comment_user->{nickname},
+		ipid_display => $args->{ipid_display},
+	});
 	$html_out .= "</h4>\n</div>\n<div class=\"details\">\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
 
 	my $sig;
 	my $shrunk;
 	$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div>$sig$shrunk</div>\n";
 
-	$html_out .= dispLinkComment()."\n</div>\n\n";
+	$html_out .= dispLinkComment({
+			original_pid => $args->{original_pid},
+			ordered => $args->{ordered},
+			cid => $args->{cid},
+			pid => $args->{pid},
+			sid => $args->{sid},
+			options => $args->{options},
+			reasons => $args->{reasons},
+			can_mod => $args->{can_mod},
+		})."\n</div>\n\n";
 
 	return $html_out;
 }
@@ -2329,11 +2353,91 @@ sub zooIcons {
 }
 
 sub dispCommentDetails {
-	return "";
+	my $args = shift;
+        my $constants = getCurrentStatic();
+	my $html_out = "";
+
+	if( (!defined($args->{is_anon}) || !$args->{is_anon}) && (defined($args->{fakeemail}) && $args->{fakeemail}) ) {
+		$html_out .= "&lt;<a href=\"mailto:".strip_paramattr_nonhttp($args->{fakeemail})."\">".strip_literal($args->{fakeemail_vis})."</a>&gt;";
+	}
+
+	$html_out .= " on ".timeCalc($args->{time});
+	if($args->{cid} && $args->{sid}) {
+		$html_out .= " (".linkComment({
+			sid => $args->{sid},
+			cid => $args->{cid},
+			subject => "#$args->{cid}",
+			subject_only => 1,
+		}, 1, { noextra => 1 }).")";
+	}
+	
+	$html_out .= "<small>";
+	my $has_homepage = $args->{homepage} && length($args->{homepage}) > 8;
+	my $has_journal = $args->{journal_last_entry_date} =~ /[1-9]/ ? 1 : 0;
+	if(!$args->{is_anon} && ($has_homepage || $has_journal)) {
+		if($has_homepage) {
+			$html_out .= " <a href=\"$args->{homepage}\" class=\"user_homepage_display\">Homepage</a>";
+		}
+		if($has_journal) {
+			$html_out .= " <a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/journal/\" title=\"".timeCalc($args->{journal_last_entry_date})."\">Journal</a>";
+		}
+	}
+
+	$html_out .= " ".$args->{ipid_display}."\n</small>";
+	
+	return $html_out;
 }
 
 sub dispLinkComment {
-	return "";
+	my $args = shift;
+	my $html_out = "";
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+
+	if($user->{mode} eq 'metamod' || $user->{mode} eq 'archive') { return ""; }
+	if(!$user->{is_admin} && !$args->{original_pid} && $user->{state}->{discussion_archived}) { return ""; }
+
+	my $do_parent = defined($args->{original_pid}) ? $args->{original_pid} : 0;
+	my $can_del = (defined($constants->{authors_unlimited}) && $user->{seclev} >= $constants->{authors_unlimited})
+			|| (defined($user->{acl}->{candelcomments_always}) && $user->{acl}->{candelcomments_always});
+	
+	if(!$args->{options}->{show_pieces}) {
+		$html_out .= "<div class=\"commentSub\" id=\"comment_sub_$args->{cid}\">";
+	}
+	if(!$args->{options}->{pieces}) {
+		if(!$user->{state}->{discussion_archived} && !$user->{state}->{discussion_future_nopost}) {
+			$html_out .= "<span id=\"reply_link_$args->{cid}\" class=\"nbutton\"><p><b>".
+				linkComment({
+					sid => $args->{sid},
+					pid => $args->{pid},
+					op => 'Reply',
+					subject => 'Reply to This',
+					subject_only => 1,
+				})."</b></p></span>";
+		}
+		if($do_parent) {
+			$html_out .= "<span class=\"nbutton\"><p><b>".
+				linkComment({
+					sid => $args->{sid},
+					cid => $do_parent,
+					pid => $do_parent,
+					subject => 'Parent',
+					subject_only => 1,
+				}, 1)."</b></p></span>";
+		}
+		if($args->{can_mod}) {
+			$html_out .= "<div id=\"reasondiv_$args->{cid}\" class=\"modsel\">".
+				createSelect("reason_$args->{cid}", $args->{reasons}, {
+					'return' => 1,
+					ordered => $args->{ordered},
+				})."</div><button type=\"submit\" name=\"moderate\" value=\"comment_$args->{cid}\">Moderate</button>";
+		}
+		if($can_del) {
+			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Check to Delete";
+		}
+	}
+	if(!$args->{options}->{show_pieces}) { $html_out .= "</div>\n"; }
+	return $html_out;;
 }
 
 1;
