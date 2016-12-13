@@ -28,7 +28,6 @@ use Slash::Utility::Display;
 use Slash::Utility::Environment;
 use Slash::Display;
 use Slash::Hook;
-use Data::Dumper;
 use Slash::Constants qw(:strip :people :messages);
 
 use base 'Exporter';
@@ -991,7 +990,6 @@ sub printComments {
 	#	anon_dump	=> $anon_dump,
 	#}, { Return => 1 });
 	# NO MOAR TEMPLATES
-	print STDERR "\n\n".Dumper($discussion)."\n\n";
 	my $pccArgs = {
                 can_moderate    => $can_mod_any,
                 comment         => $comment,
@@ -2068,8 +2066,6 @@ sub printCommComments {
         my $constants = getCurrentStatic();
         my $gSkin = getCurrentSkin();
 	my $html_out = "";
-	use Data::Dumper;
-	print "\n\n".Dumper($args)."\n\n";
 	
 	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
 	my $moderate_form = $args->{can_moderate} || $can_del || $user->{acl}->{candelcomments_always};
