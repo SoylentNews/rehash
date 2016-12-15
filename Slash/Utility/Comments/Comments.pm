@@ -100,7 +100,7 @@ sub selectCommentsNew {
 		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	} else {
 		($thisComment, $pages) = $reader->getThreadedCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
-    push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+		push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	}
 	
 	if (!$thisComment) {
@@ -1613,13 +1613,15 @@ sub dispComment {
 		$ordered = $mod_reader->getReasonsOrder();
 	}
 
+	my $reasons_html = "";
+	foreach my $item (@$ordered) {
+		 $reasons_html .= "<option value=\"$item\">".strip_literal($reasons->{$item}{name})."</option>\n";
+	}
+
 	my $can_mod = _can_mod($comment);
 
 	# don't inherit these ...
-	for (qw(sid cid pid date subject comment uid points lastmod
-		reason nickname fakeemail homepage sig)) {
-		$comment->{$_} = '' unless exists $comment->{$_};
-	}
+	# THIS DOES NOT DO THAT, RETARD --TMB
 
 	# ipid/subnetid need munging into one text string
 	if ($user->{seclev} >= 100 && $comment->{ipid} && $comment->{subnetid}) {
@@ -1683,7 +1685,7 @@ sub dispComment {
                 marked_spam     => $marked_spam,
                 comment_shrunk  => $comment_shrunk,
                 reasons         => $reasons,
-                ordered         => $ordered,
+                reasons_html    => $reasons_html,
                 can_mod         => $can_mod,
                 is_anon         => isAnon($comment->{uid}),
                 options         => $options,
@@ -2125,7 +2127,7 @@ sub printCommComments {
 
 	$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></p></span>\n";
 
-	if($moderate_form && $moderate_button) {
+	if($moderate_form) {
 		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n".
 		"<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n".
 		"<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">".
@@ -2208,14 +2210,14 @@ sub dispCommentNoTemplate {
 		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
 		my $modal_end = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "</a>" : "";
 		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
-		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span>";
+		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
 	}
 	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
-	$html_out .= " $prenick".strip_literal($args->{nickname})."$postnick</span>\n";
+	$html_out .= " <span class=\"by\">by $prenick".strip_literal($args->{nickname})."$postnick</span> \n";
 
 	if($args->{marked_spam} && $user->{seclev} >= 500) {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
@@ -2237,17 +2239,31 @@ sub dispCommentNoTemplate {
 	$html_out .= "</h4>\n</div>\n<div class=\"details\">\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
 
 	my $sig;
+	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
+	
+		$sig .= "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n"
+	}
+	
 	my $shrunk;
-	$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div>$sig$shrunk</div>\n";
+	if ($args->{comment_shrunk}){
+		$shrunk = "<div id=\"comment_shrunk_$args->{cid}\" class=\"commentshrunk\">" . dispLinkComment({
+			sid     => $args->{sid},
+			cid     => $args->{cid},
+			pid     => $args->{cid},
+			subject => 'Read the rest of this comment...',
+			subject_only => 1
+		}) . "</div> \n";
+	}
+
+	$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div> \n$sig$shrunk</div>\n";
 
 	$html_out .= dispLinkComment({
 			original_pid => $args->{original_pid},
-			ordered => $args->{ordered},
 			cid => $args->{cid},
 			pid => $args->{pid},
 			sid => $args->{sid},
 			options => $args->{options},
-			reasons => $args->{reasons},
+			reasons_html => $args->{reasons_html},
 			can_mod => $args->{can_mod},
 		})."\n</div>\n\n";
 
@@ -2409,7 +2425,7 @@ sub dispLinkComment {
 					op => 'Reply',
 					subject => 'Reply to This',
 					subject_only => 1,
-				})."</b></p></span>";
+				})."</b></p></span> \n";
 		}
 		if($do_parent) {
 			$html_out .= "<span class=\"nbutton\"><p><b>".
@@ -2419,15 +2435,14 @@ sub dispLinkComment {
 					pid => $do_parent,
 					subject => 'Parent',
 					subject_only => 1,
-				}, 1)."</b></p></span>";
+				}, 1)."</b></p></span> \n";
 		}
 		if($args->{can_mod}) {
-			$html_out .= "<div id=\"reasondiv_$args->{cid}\" class=\"modsel\">".
-				createSelect("reason_$args->{cid}", $args->{reasons}, {
-					'return' => 1,
-					ordered => $args->{ordered},
-				})."</div><button type=\"submit\" name=\"moderate\" value=\"comment_$args->{cid}\">Moderate</button>";
+			$html_out .= "<div id=\"reasondiv_$args->{cid}\" class=\"modsel\">\n"
+				."<select id=\"reason_$args->{cid}\" name=\"reason_$args->{cid}\">\n$args->{reasons_html}</select> \n"
+				."</div> \n<button type=\"submit\" name=\"moderate\" value=\"comment_$args->{cid}\">Moderate</button> \n";
 		}
+
 		if($can_del) {
 			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Check to Delete";
 		}
