@@ -60,7 +60,6 @@ __template__
 			'vt100'	=> 'VT100',
 			'vt220' => 'VT220',
 			'grayscale' => 'Grayscale',
-			'lcars' => 'LCARS'
 		}, user_edit.skin, 1);
 		%]
 		<label>

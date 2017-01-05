@@ -324,10 +324,6 @@ htdoc=../grayscale/htdocs/favicon-grayscale.png
 template=../grayscale/templates/html-header;misc;grayscale
 image=../grayscale/htdocs/images/logo_grayscale.png
 
-# lcars theme files go here
-css=../lcars/htdocs/lcars.cssraw
-template=../lcars/templates/html-header;misc;lcars
-
 misc=misc/spamarmors
 
 plugin=Admin
