@@ -6271,7 +6271,7 @@ sub getThreadedCommentsForUser {
         my $select = " comments.cid, date, date as time, subject, nickname, "
                 . "homepage, fakeemail, users.uid AS uid, sig, "
                 . "comments.points AS points, pointsorig, "
-                . "tweak, tweak_orig, subject_orig, "
+                . "tweak, tweak_orig, subject_orig, children, "
                 . "pid, pid AS original_pid, sid, lastmod, reason, "
                 . "journal_last_entry_date, ipid, subnetid, "
                 . "karma_bonus, "
@@ -6283,13 +6283,13 @@ sub getThreadedCommentsForUser {
         # That shit is insanely expensive compared to this.
         my $tables = "comments LEFT JOIN comment_text ON comments.cid=comment_text.cid LEFT JOIN users ON comments.uid=users.uid";
         
-				my $where;
-				if ($cids) {
-					$where= "sid=$sid_quoted AND (comments.cid=$thesecids OR comments.opid=$theseopids)";
-				}
-				else {
-					$where= "sid=$sid_quoted";
-				}
+	my $where;
+	if ($cids) {
+		$where= "sid=$sid_quoted AND (comments.cid=$thesecids OR comments.opid=$theseopids)";
+	}
+	else {
+		$where= "sid=$sid_quoted";
+	}
 
         if ($cid && $one_cid_only) {
                 $where .= " AND comments.cid=$cid";
@@ -6303,6 +6303,107 @@ sub getThreadedCommentsForUser {
 
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
         return ($comments, scalar($cids));
+}
+
+########################################################
+sub getFlatCommentsForUser {
+	my $form = getCurrentForm();
+	my($self, $sid, $cid, $options) = @_;
+        $options ||= {};
+
+        # Note that the "cache_read_only" option is not used at the moment.
+        # Slash has done comment caching in the past but does not do it now.
+        # If in the future we see fit to re-enable it, it's valuable to have
+        # some of this logic left over -- the places where this method is
+        # called that have that bit set should be kept that way.
+        my $cache_read_only = $options->{cache_read_only} || 0;
+        
+	my $one_cid_only = $options->{one_cid_only} || 0;
+        my $sid_quoted = $self->sqlQuote($sid);
+        my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $other = "";
+	my $order_dir = defined($options->{order_dir}) && uc($options->{order_dir}) eq "DESC" ? "DESC" : "ASC";
+	
+	# First thing's first, find out how many pages we're gonna say there are in the return value
+	my $fpages =  $self->sqlSelect("count(*)", "comments", "sid=$sid_quoted") / $user->{commentlimit};
+	my $pages = $fpages != int($fpages) ? int($fpages) + 1 : $fpages;
+	
+	my $thisopid;
+	# If they asked for one comment pull only that opid's thread
+	if($cid) {
+		$thisopid = $self->sqlSelect("opid", "comments", "cid=$cid");
+	}
+
+	if($pages > 1) {
+		if(defined($form->{page}) && $form->{page} > 1 && $form->{page} <= $pages) {
+			my $skip = int($form->{page} - 1) * $user->{commentlimit};
+			$other = "ORDER BY comments.cid $order_dir LIMIT $skip, $user->{commentlimit}";
+		}
+		else {
+			$other = "ORDER BY comments.cid $order_dir LIMIT $user->{commentlimit}";
+		}
+	}
+
+        my $select = " comments.cid, date, date as time, subject, nickname, "
+                . "homepage, fakeemail, users.uid AS uid, sig, "
+                . "comments.points AS points, pointsorig, "
+                . "tweak, tweak_orig, subject_orig, children, "
+                . "pid, pid AS original_pid, sid, lastmod, reason, "
+                . "journal_last_entry_date, ipid, subnetid, "
+                . "karma_bonus, "
+                . "len, badge_id, comment_text.comment as comment";
+        if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
+                $select .= ", subscriber_bonus";
+        }
+        # Because fuck a bunch of doing search and replace to add comment text.
+        # That shit is insanely expensive compared to this.
+        my $tables = "comments LEFT JOIN comment_text ON comments.cid=comment_text.cid LEFT JOIN users ON comments.uid=users.uid";
+        
+	my $where;
+	if ($cid) {
+		$where = "sid=$sid_quoted AND (comments.opid=$thisopid OR comments.cid=$thisopid)";
+	}
+	else {
+		$where = "sid=$sid_quoted";
+	}
+
+        if ($cid && $one_cid_only) {
+                $where .= " AND comments.cid=$cid";
+	}
+
+	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
+	
+	# Okay, we pulled too many comments if $cid was set and $one_cid_only was not.
+	# This pares them down to only what we want.
+	if($cid && !$one_cid_only) {
+		my $newcomments = [];
+		my $temphr = {};
+		# Put everything in a hash for easier chain walking.
+		# We could do this with map but I suck at map.
+		foreach my $C (@$comments) {
+			$temphr->{$C->{cid}} = $C;
+		}
+		
+		foreach my $C (keys %$temphr) {
+			next if $C->{children} != 0;
+			my $tempcomments = [];
+			my $walker = $C;
+			while(1) {
+				push(@$tempcomments, $walker);
+				last if $walker->{pid} == 0;
+				$walker = $C->{$walker->{pid}};
+				last if $walker->{cid} == $cid;
+			}
+			if($walker->{pid} == 0 && $walker->{cid} != $cid) {
+				next;
+			}
+			push(@$newcomments, @$tempcomments);
+		}
+		$comments = $newcomments;
+	}
+
+        return ($comments, $pages);
 }
 
 ########################################################

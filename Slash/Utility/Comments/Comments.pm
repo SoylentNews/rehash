@@ -61,8 +61,11 @@ sub selectCommentsNew {
 		: $user->{commentsort};
 
 	# No "ignore threads" if you're asking for Threaded. That's fucking stupid.
-	if($commentsort > 2) {
-		$commentsort -= 3;
+	if($commentsort == 5 || $commentsort == 1) {
+		$commentsort = 1;
+	}
+	else {
+		$commentsort = 0;
 	}
 
 	my $comments; # Let's keep this as small as possible
@@ -124,12 +127,6 @@ sub selectCommentsNew {
 	if($commentsort == 1) {
 		@$thisComment = sort {
 			$b->{pid} <=> $a->{pid} || $b->{cid} <=> $a->{cid}
-		} @$thisComment;
-	}
-	# Highest Scores First
-	elsif($commentsort == 2) {
-		@$thisComment = sort {
-			$b->{points} <=> $a->{points} || $a->{pid} <=> $b->{pid} || $a->{cid} <=> $b->{cid}
 		} @$thisComment;
 	}
 	# Oldest First and invalid sort modes
@@ -194,6 +191,158 @@ sub selectCommentsNew {
 	$count = $reader->sqlSelect('count(cid)', 'comments', "sid=$discussion->{id}");
 
 	return($comments, $numPages, $count);
+}
+
+########################################################
+# Behold, faster flat mode comments
+sub selectCommentsFlat {
+	my($discussion, $cid, $options) = @_;
+	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $constants = getCurrentStatic();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my($min, $max) = ($constants->{comment_minscore},
+			  $constants->{comment_maxscore});
+	my $num_scores = $max - $min + 1;
+	$cid ||= 0;
+
+	my $commentsort = defined $options->{commentsort}
+		? $options->{commentsort}
+		: $user->{commentsort};
+
+	# Ignore threads if you're asking for Flat. That's fucking stupid.
+	if($commentsort == 1 || $commentsort == 5) {
+		$commentsort = 1;
+	}
+	else {
+		$commentsort = 0;
+	}
+
+	my $comments; # Let's keep this as small as possible
+	
+	for my $x (0..$num_scores-1) {
+		$comments->{0}{totals}[$x] = 0;
+	}
+	my $y = 0;
+	for my $x ($min..$max) {
+		$comments->{0}{total_keys}{$x} = $y;
+		$y++;
+	}
+	
+	# When we pull comment text from the DB, we only want to cache it if
+	# there's a good chance we'll use it again.
+	my $cache_read_only = 0;
+	$cache_read_only = 1 if $discussion->{type} eq 'archived';
+	$cache_read_only = 1 if timeCalc($discussion->{ts}, '%s') <
+		time - 3600 * $constants->{comment_cache_max_hours};
+
+	my ($thisComment, $pages);
+	my $gcfu_opt = {
+		cache_read_only => $cache_read_only,
+		one_cid_only    => $options->{one_cid_only},
+		# They should sort faster if we let the db give an attempt at pre-sorting
+		order_dir	=> $commentsort == 1 ? "DESC" : "ASC",
+	};
+	# We also need to build a cid list for sending to saveCommentReadLog.
+	# Let's cheat though and only put the one cid we care about in the array.
+        # We don't have all the current comments so this needs to be a separate db call.
+	my @cids = ();
+	if ($options->{force_read_from_master}) {
+		($thisComment, $pages) = $slashdb->getFlatCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
+		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+	} else {
+		($thisComment, $pages) = $reader->getFlatCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
+		push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+	}
+	
+	if (!$thisComment) {
+		_print_cchp($discussion);
+		return ( {}, 0 );
+	}
+
+	my $reasons = undef;
+	if ($mod_reader) {
+		$reasons = $mod_reader->getReasons();
+	}
+
+	my $max_uid = $reader->countUsers({ max => 1 });
+
+	# We first loop through the comments and assign bonuses
+	foreach my $C (@$thisComment) {
+		$C->{points} = getPoints($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
+		$C->{legacy} = 0;
+	}
+	# Newest First
+	if($commentsort == 1) {
+		@$thisComment = sort {
+			$b->{cid} <=> $a->{cid}
+		} @$thisComment;
+	}
+	# Oldest First and invalid sort modes
+	else {
+		@$thisComment = sort {
+			$a->{cid} <=> $b->{cid}
+		} @$thisComment;
+	}
+	
+	# This loop mainly takes apart the array and builds 
+	# a hash with the comments in it.  Each comment is
+	# in the index of the hash (based on its cid).
+	$comments->{0}{visiblekids} = 0;
+	$comments->{0}{kids} = [];
+	foreach my $C (@$thisComment) {
+		# We save a copy of the comment in the root of the hash
+		# which we will use later to find it via its cid
+		$comments->{$C->{cid}} = $C;
+
+		# Let us fill the hash range for hitparade
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;
+
+		# So we save information. This will only have data if we have 
+		# happened through this cid while it was a pid for another
+		# comments. -Brian
+		my $tmpkids = $comments->{$C->{cid}}{kids};
+		my $tmpvkids = $comments->{$C->{cid}}{visiblekids};
+
+		# Kids is what displayThread will actually use.
+		$comments->{$C->{cid}}{kids} = $tmpkids || [];
+		$comments->{$C->{cid}}{visiblekids} = $tmpvkids || 0;
+
+		# The comment pushes itself onto its parent's
+		# kids array.
+		#push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
+
+		# Increment the parent comment's count of visible kids.
+		# All kids are now technically visible.
+		# Previously invisible kids will now simply be collapsed.
+		#$comments->{$C->{pid}}{visiblekids}++;
+		push(@{$comments->{0}{kids}}, $C->{cid});
+		$comments->{0}{visiblekids}++;
+	}
+	# Now let's calcualte cumulative totals form the individual totals
+	# Run from top down and add the total from x+1 to the current one
+	for (my $x=($max-1); $x >= $min; $x--) {
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$x}] = $comments->{0}{totals}[$comments->{0}{total_keys}{$x}] + $comments->{0}{totals}[$comments->{0}{total_keys}{$x+1}];
+	}
+	
+	# Should be unnecessary jiggery-fuckery but we'll leave it in for now.
+	my @phantom_cids =
+		grep { $_ > 0 && !defined $comments->{$_}{cid} }
+			keys %$comments;
+	delete @$comments{@phantom_cids};
+
+	my $count = scalar(@$thisComment);
+
+	_print_cchp($discussion, $count, $comments->{0}{totals});
+	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
+		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
+	}
+
+	$count = $reader->sqlSelect('count(cid)', 'comments', "sid=$discussion->{id}");
+
+	return($comments, $pages, $count);
 }
 
 ########################################################
@@ -832,6 +981,7 @@ sub printComments {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $mode = defined($form->{mode}) ? $form->{mode} : $user->{mode};
 	my $pretext = '';
 	$options ||= {};
 
@@ -854,8 +1004,7 @@ sub printComments {
 	# Get the Comments
 	my $sco = { force_read_from_master => $options->{force_read_from_master} || 0 };
 	$sco->{one_cid_only} = 1 if $cidorpid && (
-		   $user->{mode} eq 'nocomment'
-		|| ( $user->{mode} eq 'flat' && $user->{commentsort} > 3 )
+		   $mode eq 'nocomment'
 		|| $options->{just_submitted}
 	);
 	# For now, until we are able to pull hitparade into discussions so we can
@@ -864,12 +1013,20 @@ sub printComments {
 
 	my $comments;
 	my ($count, $pages) = (0, 0);
-	# We need to write a selectComments for flat since we can let the db order them
 	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp}))) {
 		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 	}
 	else {
-		($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
+		if($mode eq 'flat') {
+			($comments, $pages, $count) = selectCommentsFlat($discussion, $cidorpid, $sco);
+		}
+		elsif($mode eq 'thread') {
+			($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
+		}
+		else {
+			print STDERR "wtf, no such mode as $mode";
+			return "wtf, no such mode";
+		}
 	}
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
@@ -889,7 +1046,7 @@ sub printComments {
 		if $comments->{$cidorpid}
 			&& $comments->{$cidorpid}{visiblekids};
 
-	$lvl++ if $user->{mode} ne 'flat'
+	$lvl++ if $mode ne 'flat'
 		&& ( $user->{commentlimit} > $cc );
 	
 	my $archive_text;
@@ -917,7 +1074,7 @@ sub printComments {
 		count		=> $count,
 		pages		=> $pages,
 		page		=> defined($form->{page}) ? $form->{page} : 1,
-		mode		=> $user->{mode},
+		mode		=> $mode,
 		parent		=> $parent,
 		sid		=> $discussion->{id},
 		cid		=> $cid,
@@ -927,7 +1084,7 @@ sub printComments {
 		archive_text => $archive_text,
 	}, { Return => $options->{Return}} );
 
-	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
+	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $mode eq 'nocomment';
 
 	my($comment, $next, $previous);
 	if ($cid) {
@@ -948,7 +1105,7 @@ sub printComments {
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
 	# Index go bye-bye, just use $cc --TMB
-	my $lcp = $pages ? linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $user->{mode}, $discussion->{legacy}) : "";
+	my $lcp = $pages ? linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $mode, $discussion->{legacy}) : "";
 	if($form->{cid}) {
 		$lcp = "";
 	}
@@ -2071,7 +2228,7 @@ sub printCommComments {
 	
 	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
 	my $moderate_form = $args->{can_moderate} || $can_del || $user->{acl}->{candelcomments_always};
-	my $moderate_button = $args->{can_moderate} && $user->{mode} != 'archive' && ( !$user->{state}->{discussion_archived} || $constants->{comments_moddable_archived});
+	my $moderate_button = $args->{can_moderate} && $user->{mode} ne 'archive' && ( !$user->{state}->{discussion_archived} || $constants->{comments_moddable_archived});
 	my $next_prev_links = nextPrevLinks($args->{next}, $args->{prev}, $args->{comment});
 	my $mod_comment_log = "";
 
