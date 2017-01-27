@@ -303,12 +303,12 @@ sub selectCommentsFlat {
 		# So we save information. This will only have data if we have 
 		# happened through this cid while it was a pid for another
 		# comments. -Brian
-		my $tmpkids = $comments->{$C->{cid}}{kids};
-		my $tmpvkids = $comments->{$C->{cid}}{visiblekids};
+		#my $tmpkids = $comments->{$C->{cid}}{kids};
+		#my $tmpvkids = $comments->{$C->{cid}}{visiblekids};
 
 		# Kids is what displayThread will actually use.
-		$comments->{$C->{cid}}{kids} = $tmpkids || [];
-		$comments->{$C->{cid}}{visiblekids} = $tmpvkids || 0;
+		$comments->{$C->{cid}}{kids} = [];
+		$comments->{$C->{cid}}{visiblekids} = 0;
 
 		# The comment pushes itself onto its parent's
 		# kids array.
@@ -1267,10 +1267,9 @@ sub displayThread {
 		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
-		my $class = 'full';
-		$comment->{class} = $class;
+		$comment->{class} = "full";
 
-		$user->{state}{comments}{totals}{$class}++;# unless $comment->{dummy};
+		$user->{state}{comments}{totals}{full}++;# unless $comment->{dummy};
 
 		my $finish_list = 0;
 
@@ -1308,12 +1307,13 @@ sub displayThread {
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 
-		if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
-			last;
-		}
-		if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "thread") ){
-			last;
-		}
+		# This is unnecessary as we only pull the comments we're gonna display now
+		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
+		#	last;
+		#}
+		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "thread") ){
+		#	last;
+		#}
 		
 	}
 

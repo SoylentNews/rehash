@@ -471,6 +471,8 @@ sub selectBreakthrough {
 	my($counts, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $highlightthresh = defined($form->{highlightthresh}) ? $form->{highlightthresh} : $user->{highlightthresh};
 
 	my %data;
 	foreach my $c ($constants->{comment_minscore} .. $constants->{comment_maxscore}) {
@@ -480,7 +482,7 @@ sub selectBreakthrough {
 		}, { Return => 1, Nocomm => 1 });
 	}
 
-	$options->{default}	= $user->{highlightthresh} unless defined $options->{default};
+	$options->{default}	= $highlightthresh unless defined $options->{default};
 	$options->{'return'}	= 1                  unless defined $options->{'return'};
 	$options->{nsort}	= 1                  unless defined $options->{nsort};
 
@@ -853,7 +855,7 @@ sub titlebar {
 	my($width, $title, $options) = @_;
 	my $templatename = $options->{template} ? $options->{template} : "titlebar";
 	my $data = { width => $width, title => $title };
-	$data->{tab_selected} = $options->{tab_selected} if $options->{tab_selected};
+	$dataselected} = $options->{tab_selected} if $options->{tab_selected};
 	slashDisplay($templatename, $data);
 }
 
