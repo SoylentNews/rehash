@@ -855,7 +855,7 @@ sub titlebar {
 	my($width, $title, $options) = @_;
 	my $templatename = $options->{template} ? $options->{template} : "titlebar";
 	my $data = { width => $width, title => $title };
-	$dataselected} = $options->{tab_selected} if $options->{tab_selected};
+	$data->{tab_selected} = $options->{tab_selected} if $options->{tab_selected};
 	slashDisplay($templatename, $data);
 }
 
