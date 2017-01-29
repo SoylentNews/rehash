@@ -53,7 +53,7 @@ __template__
 		</li>
 		[% ELSE %]
 		<li class="user">
-			<em>You</em>
+			<div id="you">You</div>
 			<ul>
 				<li>
 					<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/">Info</a>

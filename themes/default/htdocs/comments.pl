@@ -392,6 +392,7 @@ sub delete {
 sub displayComments {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
+	$form->{pid} = 0 unless defined $form->{pid};
 	if ($form->{cid}) {
 		# Here is the deal, if a user who has a mode of nocomment asks for a 
 		# comment we give it to them and assume the default mode (which 
@@ -399,6 +400,7 @@ sub displayComments {
 		$user->{mode} = 'thread' if $user->{mode} eq 'nocomment';
 		printComments($discussion, $form->{cid}, $form->{cid});
 	} elsif ($form->{sid}) {
+		
 		printComments($discussion, $form->{pid});
 	} else {
 		print getData('try_journals');
@@ -631,7 +633,7 @@ sub changeComment {
 			$redirect = $discussion->{url}."?".$redirect;
 		}
 		
-		$redirect = $redirect."#commentwrap"->{cid};
+		$redirect = $redirect."#commentwrap".$form->{cid};
 	
 	redirect($redirect);
 

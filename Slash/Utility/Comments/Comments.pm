@@ -28,7 +28,6 @@ use Slash::Utility::Display;
 use Slash::Utility::Environment;
 use Slash::Display;
 use Slash::Hook;
-use Data::Dumper;
 use Slash::Constants qw(:strip :people :messages);
 
 use base 'Exporter';
@@ -62,8 +61,11 @@ sub selectCommentsNew {
 		: $user->{commentsort};
 
 	# No "ignore threads" if you're asking for Threaded. That's fucking stupid.
-	if($commentsort > 2) {
-		$commentsort -= 3;
+	if($commentsort == 5 || $commentsort == 1) {
+		$commentsort = 1;
+	}
+	else {
+		$commentsort = 0;
 	}
 
 	my $comments; # Let's keep this as small as possible
@@ -101,7 +103,7 @@ sub selectCommentsNew {
 		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	} else {
 		($thisComment, $pages) = $reader->getThreadedCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
-    push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+		push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
 	}
 	
 	if (!$thisComment) {
@@ -125,12 +127,6 @@ sub selectCommentsNew {
 	if($commentsort == 1) {
 		@$thisComment = sort {
 			$b->{pid} <=> $a->{pid} || $b->{cid} <=> $a->{cid}
-		} @$thisComment;
-	}
-	# Highest Scores First
-	elsif($commentsort == 2) {
-		@$thisComment = sort {
-			$b->{points} <=> $a->{points} || $a->{pid} <=> $b->{pid} || $a->{cid} <=> $b->{cid}
 		} @$thisComment;
 	}
 	# Oldest First and invalid sort modes
@@ -195,6 +191,158 @@ sub selectCommentsNew {
 	$count = $reader->sqlSelect('count(cid)', 'comments', "sid=$discussion->{id}");
 
 	return($comments, $numPages, $count);
+}
+
+########################################################
+# Behold, faster flat mode comments
+sub selectCommentsFlat {
+	my($discussion, $cid, $options) = @_;
+	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $constants = getCurrentStatic();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my($min, $max) = ($constants->{comment_minscore},
+			  $constants->{comment_maxscore});
+	my $num_scores = $max - $min + 1;
+	$cid ||= 0;
+
+	my $commentsort = defined $options->{commentsort}
+		? $options->{commentsort}
+		: $user->{commentsort};
+
+	# Ignore threads if you're asking for Flat. That's fucking stupid.
+	if($commentsort == 1 || $commentsort == 5) {
+		$commentsort = 1;
+	}
+	else {
+		$commentsort = 0;
+	}
+
+	my $comments; # Let's keep this as small as possible
+	
+	for my $x (0..$num_scores-1) {
+		$comments->{0}{totals}[$x] = 0;
+	}
+	my $y = 0;
+	for my $x ($min..$max) {
+		$comments->{0}{total_keys}{$x} = $y;
+		$y++;
+	}
+	
+	# When we pull comment text from the DB, we only want to cache it if
+	# there's a good chance we'll use it again.
+	my $cache_read_only = 0;
+	$cache_read_only = 1 if $discussion->{type} eq 'archived';
+	$cache_read_only = 1 if timeCalc($discussion->{ts}, '%s') <
+		time - 3600 * $constants->{comment_cache_max_hours};
+
+	my ($thisComment, $pages);
+	my $gcfu_opt = {
+		cache_read_only => $cache_read_only,
+		one_cid_only    => $options->{one_cid_only},
+		# They should sort faster if we let the db give an attempt at pre-sorting
+		order_dir	=> $commentsort == 1 ? "DESC" : "ASC",
+	};
+	# We also need to build a cid list for sending to saveCommentReadLog.
+	# Let's cheat though and only put the one cid we care about in the array.
+        # We don't have all the current comments so this needs to be a separate db call.
+	my @cids = ();
+	if ($options->{force_read_from_master}) {
+		($thisComment, $pages) = $slashdb->getFlatCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
+		push(@cids, $slashdb->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+	} else {
+		($thisComment, $pages) = $reader->getFlatCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
+		push(@cids, $reader->sqlSelect("max(cid)", "comments", "sid=$discussion->{id}"));
+	}
+	
+	if (!$thisComment) {
+		_print_cchp($discussion);
+		return ( {}, 0 );
+	}
+
+	my $reasons = undef;
+	if ($mod_reader) {
+		$reasons = $mod_reader->getReasons();
+	}
+
+	my $max_uid = $reader->countUsers({ max => 1 });
+
+	# We first loop through the comments and assign bonuses
+	foreach my $C (@$thisComment) {
+		$C->{points} = getPoints($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
+		$C->{legacy} = 0;
+	}
+	# Newest First
+	if($commentsort == 1) {
+		@$thisComment = sort {
+			$b->{cid} <=> $a->{cid}
+		} @$thisComment;
+	}
+	# Oldest First and invalid sort modes
+	else {
+		@$thisComment = sort {
+			$a->{cid} <=> $b->{cid}
+		} @$thisComment;
+	}
+	
+	# This loop mainly takes apart the array and builds 
+	# a hash with the comments in it.  Each comment is
+	# in the index of the hash (based on its cid).
+	$comments->{0}{visiblekids} = 0;
+	$comments->{0}{kids} = [];
+	foreach my $C (@$thisComment) {
+		# We save a copy of the comment in the root of the hash
+		# which we will use later to find it via its cid
+		$comments->{$C->{cid}} = $C;
+
+		# Let us fill the hash range for hitparade
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;
+
+		# So we save information. This will only have data if we have 
+		# happened through this cid while it was a pid for another
+		# comments. -Brian
+		#my $tmpkids = $comments->{$C->{cid}}{kids};
+		#my $tmpvkids = $comments->{$C->{cid}}{visiblekids};
+
+		# Kids is what displayThread will actually use.
+		$comments->{$C->{cid}}{kids} = [];
+		$comments->{$C->{cid}}{visiblekids} = 0;
+
+		# The comment pushes itself onto its parent's
+		# kids array.
+		#push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
+
+		# Increment the parent comment's count of visible kids.
+		# All kids are now technically visible.
+		# Previously invisible kids will now simply be collapsed.
+		#$comments->{$C->{pid}}{visiblekids}++;
+		push(@{$comments->{0}{kids}}, $C->{cid});
+		$comments->{0}{visiblekids}++;
+	}
+	# Now let's calcualte cumulative totals form the individual totals
+	# Run from top down and add the total from x+1 to the current one
+	for (my $x=($max-1); $x >= $min; $x--) {
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$x}] = $comments->{0}{totals}[$comments->{0}{total_keys}{$x}] + $comments->{0}{totals}[$comments->{0}{total_keys}{$x+1}];
+	}
+	
+	# Should be unnecessary jiggery-fuckery but we'll leave it in for now.
+	my @phantom_cids =
+		grep { $_ > 0 && !defined $comments->{$_}{cid} }
+			keys %$comments;
+	delete @$comments{@phantom_cids};
+
+	my $count = scalar(@$thisComment);
+
+	_print_cchp($discussion, $count, $comments->{0}{totals});
+	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
+		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
+	}
+
+	$count = $reader->sqlSelect('count(cid)', 'comments', "sid=$discussion->{id}");
+
+	return($comments, $pages, $count);
 }
 
 ########################################################
@@ -833,6 +981,7 @@ sub printComments {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $mode = defined($form->{mode}) ? $form->{mode} : $user->{mode};
 	my $pretext = '';
 	$options ||= {};
 
@@ -855,8 +1004,7 @@ sub printComments {
 	# Get the Comments
 	my $sco = { force_read_from_master => $options->{force_read_from_master} || 0 };
 	$sco->{one_cid_only} = 1 if $cidorpid && (
-		   $user->{mode} eq 'nocomment'
-		|| ( $user->{mode} eq 'flat' && $user->{commentsort} > 3 )
+		   $mode eq 'nocomment'
 		|| $options->{just_submitted}
 	);
 	# For now, until we are able to pull hitparade into discussions so we can
@@ -865,12 +1013,20 @@ sub printComments {
 
 	my $comments;
 	my ($count, $pages) = (0, 0);
-	# We need to write a selectComments for flat since we can let the db order them
 	if(($discussion->{legacy} eq 'yes') || (defined($form->{cchp}))) {
 		($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 	}
 	else {
-		($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
+		if($mode eq 'flat') {
+			($comments, $pages, $count) = selectCommentsFlat($discussion, $cidorpid, $sco);
+		}
+		elsif($mode eq 'thread') {
+			($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
+		}
+		else {
+			print STDERR "wtf, no such mode as $mode";
+			return "wtf, no such mode";
+		}
 	}
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
@@ -890,7 +1046,7 @@ sub printComments {
 		if $comments->{$cidorpid}
 			&& $comments->{$cidorpid}{visiblekids};
 
-	$lvl++ if $user->{mode} ne 'flat'
+	$lvl++ if $mode ne 'flat'
 		&& ( $user->{commentlimit} > $cc );
 	
 	my $archive_text;
@@ -918,7 +1074,7 @@ sub printComments {
 		count		=> $count,
 		pages		=> $pages,
 		page		=> defined($form->{page}) ? $form->{page} : 1,
-		mode		=> $user->{mode},
+		mode		=> $mode,
 		parent		=> $parent,
 		sid		=> $discussion->{id},
 		cid		=> $cid,
@@ -928,7 +1084,7 @@ sub printComments {
 		archive_text => $archive_text,
 	}, { Return => $options->{Return}} );
 
-	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
+	return $options->{Return} ? $pretext: '' if $user->{state}{nocomment} || $mode eq 'nocomment';
 
 	my($comment, $next, $previous);
 	if ($cid) {
@@ -949,7 +1105,7 @@ sub printComments {
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
 	# Index go bye-bye, just use $cc --TMB
-	my $lcp = $pages ? linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $user->{mode}, $discussion->{legacy}) : "";
+	my $lcp = $pages ? linkCommentPages($discussion->{id}, $pid, $cid, $cc, $pages, $mode, $discussion->{legacy}) : "";
 	if($form->{cid}) {
 		$lcp = "";
 	}
@@ -976,20 +1132,36 @@ sub printComments {
 
 	my $comment_html = $options->{Return} ?  $pretext : '';
 
-	$comment_html .= slashDisplay('printCommComments', {
-		can_moderate	=> $can_mod_any,
-		comment		=> $comment,
-		comments	=> $comments,
-		'next'		=> $next,
-		previous	=> $previous,
-		sid		=> $discussion->{id},
-		cid		=> $cid,
-		pid		=> $pid,
-		cc		=> $cc,
-		lcp		=> $lcp,
-		lvl		=> $lvl,
-		anon_dump	=> $anon_dump,
-	}, { Return => 1 });
+	#$comment_html .= slashDisplay('printCommComments', {
+	#	can_moderate	=> $can_mod_any,
+	#	comment		=> $comment,
+	#	comments	=> $comments,
+	#	'next'		=> $next,
+	#	previous	=> $previous,
+	#	sid		=> $discussion->{id},
+	#	cid		=> $cid,
+	#	pid		=> $pid,
+	#	cc		=> $cc,
+	#	lcp		=> $lcp,
+	#	lvl		=> $lvl,
+	#	anon_dump	=> $anon_dump,
+	#}, { Return => 1 });
+	# NO MOAR TEMPLATES
+	my $pccArgs = {
+                can_moderate    => $can_mod_any,
+                comment         => $comment,
+                comments        => $comments,
+                'next'          => $next,
+                previous        => $previous,
+                sid             => $discussion->{id},
+                cid             => $cid,
+                pid             => $pid,
+                cc              => $cc,
+                lcp             => $lcp,
+                lvl             => $lvl,
+                anon_dump       => $anon_dump
+        };
+	$comment_html .= printCommComments($pccArgs);
 
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
@@ -1095,10 +1267,9 @@ sub displayThread {
 		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
-		my $class = 'full';
-		$comment->{class} = $class;
+		$comment->{class} = "full";
 
-		$user->{state}{comments}{totals}{$class}++;# unless $comment->{dummy};
+		$user->{state}{comments}{totals}{full}++;# unless $comment->{dummy};
 
 		my $finish_list = 0;
 
@@ -1136,12 +1307,13 @@ sub displayThread {
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 
-		if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
-			last;
-		}
-		if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "thread") ){
-			last;
-		}
+		# This is unnecessary as we only pull the comments we're gonna display now
+		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
+		#	last;
+		#}
+		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "thread") ){
+		#	last;
+		#}
 		
 	}
 
@@ -1157,7 +1329,7 @@ sub preProcessReplyForm {
 	##########
 	# TMB As a general rule, we want to leave entities alone.
 	#$form->{postersubj} = decode_entities($reply->{subject});
-  $form->{postersubj} = $reply->{subject};
+	$form->{postersubj} = $reply->{subject};
 	##########
 	$form->{postersubj} =~ s/^Re://i;
 	$form->{postersubj} =~ s/\s\s/ /g;
@@ -1598,13 +1770,15 @@ sub dispComment {
 		$ordered = $mod_reader->getReasonsOrder();
 	}
 
+	my $reasons_html = "";
+	foreach my $item (@$ordered) {
+		 $reasons_html .= "<option value=\"$item\">".strip_literal($reasons->{$item}{name})."</option>\n";
+	}
+
 	my $can_mod = _can_mod($comment);
 
 	# don't inherit these ...
-	for (qw(sid cid pid date subject comment uid points lastmod
-		reason nickname fakeemail homepage sig)) {
-		$comment->{$_} = '' unless exists $comment->{$_};
-	}
+	# THIS DOES NOT DO THAT, RETARD --TMB
 
 	# ipid/subnetid need munging into one text string
 	if ($user->{seclev} >= 100 && $comment->{ipid} && $comment->{subnetid}) {
@@ -1648,18 +1822,36 @@ sub dispComment {
 	my $discussion = $mod_reader->getDiscussion($comment->{sid});
 	my $dim = $mod_reader->getCommentReadLog($discussion->{id}, $user->{uid});
 
-	return slashDisplay('dispComment', {
+	my $return;
+	#$return = slashDisplay('dispComment', {
+	#	%$comment,
+	#	marked_spam	=> $marked_spam,
+	#	comment_shrunk	=> $comment_shrunk,
+	#	reasons		=> $reasons,
+	#	ordered		=> $ordered,
+	#	can_mod		=> $can_mod,
+	#	is_anon		=> isAnon($comment->{uid}),
+	#	options		=> $options,
+	#	cid_now		=> $dim->{cid_now},
+	#	subscriber_badge => $subscriber_badge
+	#}, { Return => 1, Nocomm => 1 });
+	
+	#COMMENT TEMPLATES MUST DIE
+	my $args = {
 		%$comment,
-		marked_spam	=> $marked_spam,
-		comment_shrunk	=> $comment_shrunk,
-		reasons		=> $reasons,
-		ordered		=> $ordered,
-		can_mod		=> $can_mod,
-		is_anon		=> isAnon($comment->{uid}),
-		options		=> $options,
-		cid_now		=> $dim->{cid_now},
-		subscriber_badge => $subscriber_badge
-	}, { Return => 1, Nocomm => 1 });
+                marked_spam     => $marked_spam,
+                comment_shrunk  => $comment_shrunk,
+                reasons         => $reasons,
+                reasons_html    => $reasons_html,
+                can_mod         => $can_mod,
+                is_anon         => isAnon($comment->{uid}),
+                options         => $options,
+                cid_now         => $dim->{cid_now},
+                subscriber_badge => $subscriber_badge
+	};
+	$return = dispCommentNoTemplate($args);
+
+	return $return;
 }
 
 ##################################################################
@@ -2026,6 +2218,395 @@ sub _is_mod_banned {
 	return ($banned || 0);
 }
 
+sub printCommComments {
+	my $args = shift;
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $gSkin = getCurrentSkin();
+	my $html_out = "";
+	
+	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
+	my $moderate_form = $args->{can_moderate} || $can_del || $user->{acl}->{candelcomments_always};
+	my $moderate_button = $args->{can_moderate} && $user->{mode} ne 'archive' && ( !$user->{state}->{discussion_archived} || $constants->{comments_moddable_archived});
+	my $next_prev_links = nextPrevLinks($args->{next}, $args->{prev}, $args->{comment});
+	my $mod_comment_log = "";
+
+	if($moderate_form) {
+		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n";
+		if(defined($form->{threshold})) { $html_out .= "<input type=\"hidden\" name=\"threshold\" value=\"$form->{threshold}\">\n"; }
+		if(defined($form->{highlightthresh})) { $html_out .= "<input type=\"hidden\" name=\"highlightthresh\" value=\"$form->{highlightthresh}\">\n"; }
+		if(defined($form->{mode})) { $html_out .= "<input type=\"hidden\" name=\"mode\" value=\"$form->{mode}\">\n"; }
+	}
+
+	if(!$constants->{modal_prefs_active}) {
+		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+		if($moddb) {
+			$mod_comment_log .= $moddb->dispModCommentLog('cid', $args->{cid}, { need_m2_form => 0, title => " " });
+		}
+	}
+
+	if($args->{cid}) {
+		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n".
+		dispComment($args->{comment}).
+		"\n<div class=\"comment_footer\">\n$next_prev_links\n</div>\n$mod_comment_log\n";
+		
+	}
+	
+	$html_out .= $args->{lcp};
+	my $thread;
+	if($args->{comments}) {
+		$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+	}
+	if($thread) {
+		if(!$args->{cid}) { $html_out .= '<ul id="commentlisting" >'.$thread."</ul>\n"; }
+		else {	$html_out .= $thread; }
+	}
+	if($args->{cid}) {$html_out .= "</ul>\n"; }
+	
+	$html_out .= $args->{lcp}."<div id=\"discussion_buttons\">\n";
+	
+	if(!$user->{state}->{discussion_archived} && !$user->{state}->{discussion_future_nopost}) {
+		$html_out .= "<span class=\"nbutton\"><p><b>".
+		linkComment({
+			sid => $args->{sid},
+			cid => $args->{cid},
+			op => 'reply',
+			subject => 'Reply',
+			subject_only => 1
+		}).
+		"</b></p></span>\n";
+	}
+
+	if(!$user->{is_anon}) {
+		$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/my/comments\">Prefs</a></b></p></span>\n";
+	}
+
+	$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></p></span>\n";
+
+	if($moderate_form) {
+		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n".
+		"<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n".
+		"<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">".
+		"<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n".
+		"<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
+		if($can_del) {
+			$html_out .= "<span class=\"nbutton\"><p><b><a href=\"#\" onclick=\"\$('#commentform').submit(); return false\">Delete</a></b></p></span>\nChecked comments will be deleted!";
+		}
+
+	}
+
+	if($moderate_form) {
+		$html_out .= "</div>\n</form>\n";
+	}
+	else {
+		$html_out .= "</div>";
+	}
+
+	return $html_out;
+}
+
+sub nextPrevLinks {
+	my ($next, $prev, $comment) = @_;
+	my $html_out = "";
+	if($prev) { $html_out .= "&lt;&lt;".linkComment($prev, 1); }
+	if($prev && ($comment->{pid} || $next)) { $html_out .= " | "; }
+	if($comment->{pid}) { linkComment($comment, 1); }
+	if($next && ($comment->{pid} || $prev)) { $html_out .= " | "; }
+	if($next) { $html_out .= linkComment($next, 1)."&gt;&gt;"; }
+	return $html_out;
+}
+
+sub dispCommentNoTemplate {
+	my $args = shift;
+	my $form = getCurrentForm();
+        my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $gSkin = getCurrentSkin();
+	my $slashdb = getCurrentDB();
+
+	my $html_out = "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
+	my $show = 0;
+
+	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
+	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
+	
+	# Now shit starts getting squirrely.
+	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
+		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show) {
+			$html_out .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
+			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
+		}
+
+		if($user->{mode} ne 'flat') {
+			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" />\n";
+		}
+
+		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
+		if(defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
+			$html_out .= " checked=\"checked\" ";
+		}
+		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Show/hide comment\" for=\"commentHider_$args->{cid}\"> </label>";
+
+		if($user->{mode} ne 'flat') {
+			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
+		}
+	}
+
+	my $points = defined($args->{points}) ? $args->{points} : "?";
+	my $no_collapse = defined($args->{options}->{noCollapse}) ? "noCollapse" : "";
+	my $dimmed = "";
+	if($no_collapse ne "noCollapse" && $args->{cid} <= $args->{cid_now} && !$user->{is_anon} && $user->{dimread}) {
+		$dimmed = "dimmed";
+	}
+	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
+	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4><a name=\"$args->{cid}\">".strip_title($args->{subject})."</a>\n";
+
+	unless(defined($user->{noscores}) && $user->{noscores}) {
+		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
+		my $modal_end = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "</a>" : "";
+		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
+		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
+	}
+	
+	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
+	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
+	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
+	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
+	$html_out .= " <span class=\"by\">by $prenick".strip_literal($args->{nickname})."$postnick</span> \n";
+
+	if($args->{marked_spam} && $user->{seclev} >= 500) {
+		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
+	}
+
+	my $comment_user = $slashdb->getUser($form->{uid});
+	my $details = dispCommentDetails({
+		is_anon => $comment_user->{is_anon},
+		fakeemail => $comment_user->{fakeemail},
+		fakeemail_vis => $comment_user->{fakeemail_vis},
+		'time' => $args->{time},
+		cid => $args->{cid},
+		sid => $args->{sid},
+		homepage => $comment_user->{homepage},
+		journal_last_entry_date => $comment_user->{journal_last_entry_date},
+		nickname => $comment_user->{nickname},
+		ipid_display => $args->{ipid_display},
+	});
+	$html_out .= "</h4>\n</div>\n<div class=\"details\">\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
+
+	my $sig;
+	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
+	
+		$sig .= "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n"
+	}
+	
+	my $shrunk;
+	if ($args->{comment_shrunk}){
+		$shrunk = "<div id=\"comment_shrunk_$args->{cid}\" class=\"commentshrunk\">" . dispLinkComment({
+			sid     => $args->{sid},
+			cid     => $args->{cid},
+			pid     => $args->{cid},
+			subject => 'Read the rest of this comment...',
+			subject_only => 1
+		}) . "</div> \n";
+	}
+
+	$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div> \n$sig$shrunk</div>\n";
+
+	$html_out .= dispLinkComment({
+			original_pid => $args->{original_pid},
+			cid => $args->{cid},
+			pid => $args->{pid},
+			sid => $args->{sid},
+			options => $args->{options},
+			reasons_html => $args->{reasons_html},
+			can_mod => $args->{can_mod},
+		})."\n</div>\n\n";
+
+	return $html_out;
+}
+
+sub zooIcons {
+	my $args = shift;
+	my $form = getCurrentForm();
+        my $user = getCurrentUser();
+        my $constants = getCurrentStatic();
+        my $gSkin = getCurrentSkin();
+	my $slashdb = getCurrentDB();
+	my $user_person = $slashdb->getUser($args->{person});
+	my $implied = defined($args->{implied}) ? $args->{implied} : -90210;
+	my $bonus = defined($args->{bonus}) ? $args->{bonus} : 0;
+	my $html_out = " ";
+	my $zootitle = "";
+	
+	if($args->{person} && !$args->{implied} && $user_person->{acl}->{employee} && $user_person->{badge_id}) {
+		my $badges = $slashdb->getBadgeDescriptions();
+		my $badgeurl = defined($badges->{$user_person->{badge_id}}->{badge_url}) ? strip_urlattr($badges->{$user_person->{badge_id}}->{badge_url}) : "";
+		my $badgeicon = $badges->{$user_person->{badge_id}}->{badge_icon} ? strip_urlattr($badges->{$user_person->{badge_id}}->{badge_icon}) : "";
+		my $badgetitle = $badges->{$user_person->{badge_id}}->{badge_title} ? strip_attribute($badges->{$user_person->{badge_id}}->{badge_title}) : "";
+		$html_out .= "<span class=\"badgeicon\"><a href=\"$badgeurl\"><img src=\"$constants->{imagedir}/$badgeicon\" alt=\"$badgetitle\" title=\"$badgetitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>";
+	}
+	elsif($args->{person} && $user->{uid} != $args->{person} && !$user->{is_anon}) {
+		# Neutral
+		if(!$user->{people}->{FRIEND()}->{$args->{person}} && !$user->{people}->{FOE()}->{$args->{person}} &&
+			!$user->{people}->{FAN()}->{$args->{person}} && !$user->{people}->{FREAK()}->{$args->{person}} &&
+			!$user->{people}->{FOF()}->{$args->{person}} && !$user->{people}->{EOF()}->{$args->{person}} ) {
+
+			$html_out .= "<span class=\"zooicon neutral\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}&type=friend\"><img src=\"$constants->{imagedir}/neutral.$constants->{badge_icon_ext}\" alt=\"Neutral\" title=\"Neutral\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>";
+		}
+		else {
+			# Friend
+			if($user->{people}->{FRIEND()}->{$args->{person}} && $implied != FRIEND() ) {
+				if($bonus && $user->{people_bonus_friend}) {
+					$zootitle = "Friend ($user->{people_bonus_friend})";
+				}
+				else {
+					$zootitle = "Friend";
+				}
+				$html_out .= "<span class=\"zooicon friend\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/friend.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
+			# Foe
+                        if($user->{people}->{FOE()}->{$args->{person}} && $implied != FOE() ) {
+                                if($bonus && $user->{people_bonus_foe}) {
+                                        $zootitle = "Foe ($user->{people_bonus_foe})";
+                                }
+                                else {
+                                        $zootitle = "Foe";
+                                }
+                                $html_out .= "<span class=\"zooicon foe\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/foe.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Fan
+                        if($user->{people}->{FAN()}->{$args->{person}} && $implied != FAN() ) {
+                                if($bonus && $user->{people_bonus_fan}) {
+                                        $zootitle = "Fan ($user->{people_bonus_fan})";
+                                }
+                                else {
+                                        $zootitle = "Fan";
+                                }
+                                $html_out .= "<span class=\"zooicon fan\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fan.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Freak
+                        if($user->{people}->{FREAK()}->{$args->{person}} && $implied != FREAK() ) {
+                                if($bonus && $user->{people_bonus_freak}) {
+                                        $zootitle = "Freak ($user->{people_bonus_freak})";
+                                }
+                                else {
+                                        $zootitle = "Freak";
+                                }
+                                $html_out .= "<span class=\"zooicon freak\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/freak.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Friend of Friend
+                        if($user->{people}->{FOF()}->{$args->{person}} && $implied != FOF() ) {
+                                if($bonus && $user->{people_bonus_fof}) {
+                                        $zootitle = "Friend of Friend ($user->{people_bonus_fof})";
+                                }
+                                else {
+                                        $zootitle = "Friend of Friend";
+                                }
+                                $html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+			# Enemy of Friend
+                        if($user->{people}->{EOF()}->{$args->{person}} && $implied != EOF() ) {
+                                if($bonus && $user->{people_bonus_eof}) {
+                                        $zootitle = "Enemy of Friend ($user->{people_bonus_eof})";
+                                }
+                                else {
+                                        $zootitle = "Enemy of Friend";
+                                }
+                                $html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+                        }
+		}
+	}
+	return $html_out;
+}
+
+sub dispCommentDetails {
+	my $args = shift;
+        my $constants = getCurrentStatic();
+	my $html_out = "";
+
+	if( (!defined($args->{is_anon}) || !$args->{is_anon}) && (defined($args->{fakeemail}) && $args->{fakeemail}) ) {
+		$html_out .= "&lt;<a href=\"mailto:".strip_paramattr_nonhttp($args->{fakeemail})."\">".strip_literal($args->{fakeemail_vis})."</a>&gt;";
+	}
+
+	$html_out .= " on ".timeCalc($args->{time});
+	if($args->{cid} && $args->{sid}) {
+		$html_out .= " (".linkComment({
+			sid => $args->{sid},
+			cid => $args->{cid},
+			subject => "#$args->{cid}",
+			subject_only => 1,
+		}, 1, { noextra => 1 }).")";
+	}
+	
+	$html_out .= "<small>";
+	my $has_homepage = $args->{homepage} && length($args->{homepage}) > 8;
+	my $has_journal = $args->{journal_last_entry_date} =~ /[1-9]/ ? 1 : 0;
+	if(!$args->{is_anon} && ($has_homepage || $has_journal)) {
+		if($has_homepage) {
+			$html_out .= " <a href=\"$args->{homepage}\" class=\"user_homepage_display\">Homepage</a>";
+		}
+		if($has_journal) {
+			$html_out .= " <a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/journal/\" title=\"".timeCalc($args->{journal_last_entry_date})."\">Journal</a>";
+		}
+	}
+
+	$html_out .= " ".$args->{ipid_display}."\n</small>";
+	
+	return $html_out;
+}
+
+sub dispLinkComment {
+	my $args = shift;
+	my $html_out = "";
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+
+	if($user->{mode} eq 'metamod' || $user->{mode} eq 'archive') { return ""; }
+	if(!$user->{is_admin} && !$args->{original_pid} && $user->{state}->{discussion_archived}) { return ""; }
+
+	my $do_parent = defined($args->{original_pid}) ? $args->{original_pid} : 0;
+	my $can_del = (defined($constants->{authors_unlimited}) && $user->{seclev} >= $constants->{authors_unlimited})
+			|| (defined($user->{acl}->{candelcomments_always}) && $user->{acl}->{candelcomments_always});
+	
+	if(!$args->{options}->{show_pieces}) {
+		$html_out .= "<div class=\"commentSub\" id=\"comment_sub_$args->{cid}\">";
+	}
+	if(!$args->{options}->{pieces}) {
+		if(!$user->{state}->{discussion_archived} && !$user->{state}->{discussion_future_nopost}) {
+			$html_out .= "<span id=\"reply_link_$args->{cid}\" class=\"nbutton\"><p><b>".
+				linkComment({
+					sid => $args->{sid},
+					pid => $args->{pid},
+					op => 'Reply',
+					subject => 'Reply to This',
+					subject_only => 1,
+				})."</b></p></span> \n";
+		}
+		if($do_parent) {
+			$html_out .= "<span class=\"nbutton\"><p><b>".
+				linkComment({
+					sid => $args->{sid},
+					cid => $do_parent,
+					pid => $do_parent,
+					subject => 'Parent',
+					subject_only => 1,
+				}, 1)."</b></p></span> \n";
+		}
+		if($args->{can_mod}) {
+			$html_out .= "<div id=\"reasondiv_$args->{cid}\" class=\"modsel\">\n"
+				."<select id=\"reason_$args->{cid}\" name=\"reason_$args->{cid}\">\n$args->{reasons_html}</select> \n"
+				."</div> \n<button type=\"submit\" name=\"moderate\" value=\"comment_$args->{cid}\">Moderate</button> \n";
+		}
+
+		if($can_del) {
+			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Check to Delete";
+		}
+	}
+	if(!$args->{options}->{show_pieces}) { $html_out .= "</div>\n"; }
+	return $html_out;;
+}
 
 1;
 

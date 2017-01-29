@@ -19,7 +19,7 @@ en_US
 __name__
 linkCommentPages
 __template__
-[% IF !((total < user.commentlimit) || (user.commentlimit < 1)) && ((legacy == "yes") || (mode == "flat")) %]
+[% IF !((total < user.commentlimit) || (user.commentlimit < 1)) && (legacy == "yes") %]
         [% pages = total / user.commentlimit %]
         <div class="linkCommentPage">
         [% FOREACH p = [1 .. pages] %]
@@ -43,7 +43,7 @@ __template__
                 ([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
         [% END %]
         </div>
-[% ELSIF (mode == "thread") && (legacy == "no") %]
+[% ELSIF (legacy == "no") %]
         <div class="linkCommentPage">
 	[% form.page = (form.page || 1) %]
 	[% FOREACH p = [1 .. tpages] %]
