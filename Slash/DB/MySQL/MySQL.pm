@@ -13683,6 +13683,9 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('story_more', '[Continues...]', 'Text for label when there is extended copy in stories')")) {
 			return 0;
 		}
+		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_17_02' WHERE name = 'cvs_tag_currentcode'")) {
+			return 0;
+		};
 		$core_ver = 2;
 		$upgrades_done++;
 	}
