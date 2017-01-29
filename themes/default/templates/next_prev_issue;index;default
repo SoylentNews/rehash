@@ -15,6 +15,7 @@ en_US
 __name__
 next_prev_issue
 __template__
+<div id='nextPrev'>
 [% myformat = '%B %e' %]
 [% mydelim = ' | ' %]
 
@@ -48,6 +49,7 @@ linkrel.prev.url = "${gSkin.rootdir}/index.pl?issue=$yesterday" -%]
 [% ELSE %]
  &nbsp;&gt;
 [% END %]
+</div>
 __seclev__
 10000
 __version__
