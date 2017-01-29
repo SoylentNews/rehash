@@ -11,7 +11,7 @@ en_US
 __name__
 html-header
 __skin__
-pwnies
+vomit
 __template__
 [% UNLESS only_css %]
 [% DEFAULT title="$constants.sitename: $constants.slogan" %]

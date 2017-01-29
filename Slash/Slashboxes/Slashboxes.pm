@@ -60,7 +60,11 @@ sub displaySlashboxes {
 		my($bid, $title, $always_on) = @$ary;
 		next if $user->{lowbandwidth}  && $constants->{lowbandwidth_bids_regex} eq "NONE";
 		next if $user->{lowbandwidth} && !($bid =~ $constants->{lowbandwidth_bids_regex} );
-		next unless $bid ~~ @boxes || $always_on;
+		my $noskip = 0;
+		foreach(@boxes) {
+			$noskip = 1 if $_ eq $bid;
+		}
+		next unless $noskip || $always_on;
 		if ($bid eq 'mysite') {
 			$return .= portalsidebox(
 				getData('userboxhead', {}, 'index'),

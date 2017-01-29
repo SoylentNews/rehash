@@ -59,7 +59,7 @@ __template__
 			'vomit'  => 'Vomit',
 			'vt100'	=> 'VT100',
 			'vt220' => 'VT220',
-			'grayscale' => 'Grayscale'
+			'grayscale' => 'Grayscale',
 		}, user_edit.skin, 1);
 		%]
 		<label>
