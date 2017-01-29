@@ -27,7 +27,7 @@ The constants below are grouped by tag.
 use strict;
 use base 'Exporter';
 
-our $VERSION = '16.02';
+our $VERSION = '17.02';
 our %CONSTANTS;
 
 constants();
