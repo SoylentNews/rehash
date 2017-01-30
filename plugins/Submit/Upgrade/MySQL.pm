@@ -42,7 +42,7 @@ sub upgradeDB() {
 	my $upgrades_done = 0;
 
 	if ($subscribe_schema_ver < 1 ) {
-		print "upgrading subscribe to v1 ...\n";
+		print "upgrading Submit to v1 ...\n";
 		if(!$slashdb->sqlDo("ALTER TABLE submissions ADD COLUMN dept varchar (100) null")) {
 			return 0;
 		};

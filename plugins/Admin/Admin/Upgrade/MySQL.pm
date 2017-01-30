@@ -42,7 +42,7 @@ sub upgradeDB() {
 	if ($admin_schema_ver == 0) {
 		# Every schema upgrade should have a comment as to why. In this case, initialize the
 		# admin version schema (this is done as an example on how this should be done)
-		print "upgrading admin to v1 ...\n";
+		print "upgrading Admin to v1 ...\n";
 		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Admin', 1, 'Version of admin plugin schema')")) {
 			return 0;
 		};

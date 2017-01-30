@@ -13596,7 +13596,7 @@ sub upgradeCoreDB() {
 	if ($core_ver == 0) {
 		# Every schema upgrade should have a comment as to why. In this case, initialize the
 		# core version schema
-		print "upgrading core to v1 ...\n";
+		print "upgrading Core to v1 ...\n";
 		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_16_02' WHERE name = 'cvs_tag_currentcode'")) {
 			return 0;
 		};
@@ -13607,7 +13607,7 @@ sub upgradeCoreDB() {
 		$upgrades_done++;
 	}
 	if ($core_ver == 1) {
-		print "upgrading core to v2 ...\n";
+		print "upgrading Core to v2 ...\n";
 		if(!$self->sqlDo("DROP TABLE IF EXISTS users_comments_read_log")) {
 			return 0;
 		}
@@ -13691,7 +13691,7 @@ PRIMARY KEY (discussion_id, uid)
 	}
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for core\n";
+		print "No schema upgrades needed for Core\n";
 	}
 	return 1;
 }
