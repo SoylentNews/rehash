@@ -13674,7 +13674,7 @@ PRIMARY KEY (discussion_id, uid)
 			return 0;
 		}
 		my $acid = $self->sqlSelect('value', 'vars', "name = 'anonymous_coward_uid'");
-			if (!$self->sqlDo("UPDATE users_comments SET thresh  = 0 WHERE uid = $acid")) {
+			if (!$self->sqlDo("UPDATE users_comments SET threshold  = 0 WHERE uid = $acid")) {
 			return 0;
 		}	
 		if (!$self->sqlDo("UPDATE users_comments SET highlightthresh  = 0 WHERE uid = $acid")) {
