@@ -40,7 +40,7 @@ sub upgradeDB() {
 	my $upgrades_done = 0;
 
 	if ($subscribe_schema_ver == 0) {
-		print "upgrading subscribe to v1 ...\n";
+		print "upgrading Subscribe to v1 ...\n";
 		# clean up here in case we have some of these already existing like could happen on dev or from a partially successful run of this version
 		$slashdb->sqlDo("DROP TABLE IF EXISTS stripe_log");
 		$slashdb->sqlDo("DELETE FROM vars WHERE name = 'stripe_private_key'");

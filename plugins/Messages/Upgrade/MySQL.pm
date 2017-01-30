@@ -46,7 +46,7 @@ sub upgradeDB() {
 
 	if ($messages_schema_ver == 0) {
 		# initialize the messages plugin schema and insert an entry for MSG_CODE_SUBMISSION_REJECT reasons into the message_codes table
-		print "upgrading messages to v1 ...\n";
+		print "upgrading Messages to v1 ...\n";
 		if (!$slashdb->sqlDo("REPLACE INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (19, 'Declined Submission Reason', 1, 'now', 0, 3)")) {
 			print "Failed inserting 19 into message_codes.\n";
 			return 0;
