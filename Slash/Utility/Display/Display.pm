@@ -1728,11 +1728,7 @@ sub linkCommentMiscDefault {
 	my $tid = (defined($user->{state}->{tid}) && defined($constants->{tids_in_urls}) && $user->{state}->{tid} && $constants->{tids_in_urls}) ? "&tid=$user->{state}->{tid}" : "";
 	my $a_onclick = (defined($args->{onclick}) && $args->{onclick}) ? " onclick=\"$args->{onclick}\"" : "";
 	my ($cid, $pid, $tail) = ("", "", "");
-	#unless(defined($args->{comment} )&& $args->{comment}) {
-	#	$tail = (defined($args->{cid}) && $args->{cid}) ? "#$args->{cid}" : "";
-	#	$pid = (defined($args->{pid}) && $args->{pid}) ? "&pid=$args->{pid}" : "";
-	#}
-	$tail = (lc($op) eq 'reply') ? "#post_comment" : $tail;
+	
 	if(defined($args->{subject}) && $args->{subject} =~ /^#\d+$/) {
 		$cid = "&cid=$args->{cid}";
 		$tail = "#commentwrap";
