@@ -1163,18 +1163,6 @@ sub printComments {
         };
 	$comment_html .= printCommComments($pccArgs);
 
-	# We have to get the comment text we need (later we'll search/replace
-	# them into the text).
-	# This is fucked up. Search and replace is expensive --TMB
-	#my $comment_text = $slashdb->getCommentTextCached(
-	#	$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
-	#	{ mode => $form->{mode}, cid => $form->{cid} }
-	#);
-
-	# OK we have all the comment data in our hashref, so the search/replace
-	# on the nearly-fully-rendered page will work now.
-	#$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|strip_backtrack($comment_text->{$1})|eg;
-
 	return $comment_html if $options->{Return};
 	print $comment_html;
 }
@@ -2241,8 +2229,9 @@ sub printCommComments {
 
 	if(!$constants->{modal_prefs_active}) {
 		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+		print STDERR "\ngot moddb\n" if $moddb;
 		if($moddb) {
-			$mod_comment_log .= $moddb->dispModCommentLog('cid', $args->{cid}, { need_m2_form => 0, title => " " });
+			$mod_comment_log .= $moddb->dispModCommentLog('cid', $args->{cid}, { need_m2_form => 0, need_m2_button => 0, show_m2s => 0, title => " " });
 		}
 	}
 
@@ -2254,6 +2243,7 @@ sub printCommComments {
 	}
 	
 	$html_out .= $args->{lcp};
+
 	my $thread;
 	if($args->{comments}) {
 		$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
