@@ -2537,7 +2537,7 @@ sub dispCommentDetails {
 			cid => $args->{cid},
 			subject => "#$args->{cid}",
 			subject_only => 1,
-		}, 1, { noextra => 1 }).")";
+		}, 0, { noextra => 1 }).")";
 	}
 	
 	$html_out .= "<small>";
