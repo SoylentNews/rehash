@@ -1734,7 +1734,6 @@ sub linkCommentMiscDefault {
 	}
 	$tail = (lc($op) eq 'reply') ? "#post_comment" : $tail;
 	if(defined($args->{subject}) && $args->{subject} eq 'Reply to This') {
-		$cid = "&cid=$args->{cid}";
 		$pid = "&pid=$args->{cid}";
 		$tail = "#commentwrap";
 	}	
