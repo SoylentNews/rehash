@@ -13689,6 +13689,12 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("DELETE FROM code_param WHERE type = 'sortcodes' AND code > 1")) {
 			return 0;
 		}
+		if (!$self->sqlDo("UPDATE users_comments SET commentsort = 0 WHERE commentsort = 3 OR commentsort = 4")) {
+			return 0;
+		}
+		if (!$self->sqlDo("UPDATE users_comments SET commentsort = 1 WHERE commentsort = 5")) {
+                        return 0;
+                }
 		$core_ver = 2;
 		$upgrades_done++;
 	}
