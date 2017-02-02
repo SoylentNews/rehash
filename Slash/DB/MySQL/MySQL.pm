@@ -13686,6 +13686,9 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_17_02' WHERE name = 'cvs_tag_currentcode'")) {
 			return 0;
 		};
+		if (!$self->sqlDo("DELETE FROM code_param WHERE type = 'sortcodes' AND code > 1")) {
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}
