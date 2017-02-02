@@ -2579,6 +2579,7 @@ sub dispLinkComment {
 				linkComment({
 					sid => $args->{sid},
 					pid => $args->{pid},
+					cid => $args->{cid},
 					op => 'Reply',
 					subject => 'Reply to This',
 					subject_only => 1,

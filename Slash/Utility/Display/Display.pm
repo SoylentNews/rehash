@@ -1733,8 +1733,8 @@ sub linkCommentMiscDefault {
 		$pid = (defined($args->{pid}) && $args->{pid}) ? "&pid=$args->{pid}" : "";
 	}
 	$tail = (lc($op) eq 'reply') ? "#post_comment" : $tail;
-	if(defined($args->{comment}) && $args->{comment}) {
-		$cid = "&cid=$args->{cid}";
+	if(defined($args->{subject}) && $args->{subject} eq 'Reply to This') {
+		$pid = "&pid=$args->{cid}";
 		$tail = "#commentwrap";
 	}	
 	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$startat$page$tid$pid$cid$tail\"$a_onclick>".
