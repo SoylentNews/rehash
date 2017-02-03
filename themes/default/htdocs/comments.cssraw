@@ -216,7 +216,10 @@ html > body .commentwrap table {
 	margin: 0px;
 	list-style: none;
 }
-.comment { margin-bottom: 0.5em }
+.comment {
+	margin-bottom: 0.5em;
+	list-style-type: none;
+}
 
 .preview li.comment
 {

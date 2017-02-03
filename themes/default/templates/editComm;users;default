@@ -150,8 +150,8 @@ __template__
 				<td>	Troll				</td>
 				<td>	[% reason_select.Troll %]	</td>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Touche				</td>
-				<td>	[% reason_select.Touche %]	</td>
+				<td>	Touché				</td>
+				<td>	[% reason_select.Touché %]	</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
