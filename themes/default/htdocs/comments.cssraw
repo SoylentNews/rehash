@@ -378,23 +378,23 @@ li.comment input[type=checkbox] ~ label{
 	margin-top: .45em;
 	cursor: pointer;
 	z-index: 3;
-	background: url("//dev.soylentnews.org/images/chev1down.png"), no-repeat;
+	background: url("[% constants.imagedir %]/chev1up.png"), no-repeat;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("//dev.soylentnews.org/images/chev2down.png");
+  background: url("[% constants.imagedir %]/chev2up.png");
 	margin-left:28px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("//dev.soylentnews.org/images/chev1up.png");
+	background: url("[% constants.imagedir %]/chev1down.png");
 	margin-top: .15em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("//dev.soylentnews.org/images/chev2up.png");
+  background: url("[% constants.imagedir %]/chev2down.png");
 	margin-left:28px;
 	z-index: 3;
 }
