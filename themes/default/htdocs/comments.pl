@@ -512,7 +512,7 @@ sub editComment {
 		preview		=> $preview,
 		reply		=> $reply,
 		gotmodwarning	=> $gotmodwarning,
-		extras		=> $extras
+		extras		=> $extras,
 	});
 }
 
