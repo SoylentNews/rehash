@@ -118,8 +118,7 @@ __template__
 			<fieldset>
 				<legend>Display Options</legend>
 				 
-				Threshold/Breakthrough: [%
-					Slash.selectThreshold(comments.0.totals);
+				Threshold [%
 					Slash.selectBreakthrough(comments.0.totals);
 					IF user.mode != 'parents' && user.mode != 'child';
 						Slash.selectMode(user.mode);
