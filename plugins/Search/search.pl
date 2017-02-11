@@ -60,7 +60,7 @@ sub main {
 		$form->{section} = '';
 	}
          
-	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
+	$form->{threshold}	= getCurrentUser('highlightthresh') if !defined($form->{threshold});
 
 	# The default search operation is to search stories.
 	$form->{op} ||= 'stories';
