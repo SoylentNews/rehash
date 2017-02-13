@@ -2259,7 +2259,15 @@ sub printCommComments {
 		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 		#$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 		if(!$threaddata->{visiblekid} && defined($args->{points} && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
-			my $kids = $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
+			my $kids = $args->{children} ? $args->{children} : "";
+			if($kids ne "") {
+				if($kids > 1) {
+					$kids = "($kids children)";
+				}
+				else {
+					$kids = "($kids child)";
+				}
+			}
 			$thread .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
 			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
             "<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>".
