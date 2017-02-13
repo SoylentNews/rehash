@@ -2258,21 +2258,21 @@ sub printCommComments {
 	if($args->{comments}) {
 		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 		#$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		if(!$threadbody->{visiblekid} && defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
-			my $children = $args->{children} != 0 ? $args->{children} : "";
-			if($kids ne "") {
-				if($kids > 1) {
-					$kids = "($kids children)";
-				}
-				else {
-					$kids = "($kids child)";
-				}
-			}
-			$thread .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
-            "<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>".
-			"</div></div></div>\n";
-		}
+		#if(!$threadbody->{visiblekid} && defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+		#	my $children = $args->{children} != 0 ? $args->{children} : "";
+		#	if($kids ne "") {
+		#		if($kids > 1) {
+		#			$kids = "($kids children)";
+		#		}
+		#		else {
+		#			$kids = "($kids child)";
+		#		}
+		#	}
+		#	$thread .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+		#	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
+        #	"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>".
+		#	"</div></div></div>\n";
+		#}
 		$thread .= $threaddata->{data};
 	}
 	if($thread) {
