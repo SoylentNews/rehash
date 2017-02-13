@@ -2273,7 +2273,7 @@ sub printCommComments {
         #	"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>".
 		#	"</div></div></div>\n";
 		#}
-		$thread .= $threaddata->{data};
+		$thread .= $threadbody->{data};
 	}
 	if($thread) {
 		if(!$args->{cid}) { $html_out .= '<ul id="commentlisting" >'.$thread->{data}."</ul>\n"; }
