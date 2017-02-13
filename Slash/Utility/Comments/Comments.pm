@@ -1266,7 +1266,7 @@ sub displayThread {
 		if ($lvl && $indent) {
 			$return .= $const->{tablebegin};
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
-			my $return .= "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
+			my $return .= "<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
 			if($thiscomment->{visible} && $user->{mode} eq 'threadtos') {
             	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
             	$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
