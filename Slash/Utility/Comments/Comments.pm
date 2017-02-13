@@ -2312,9 +2312,10 @@ sub dispCommentNoTemplate {
 	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
 	
 	# Now shit starts getting squirrely.
-		if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
+	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 
-		if($user->{mode} ne 'flat' && $args->{children}) {
+		#if($user->{mode} ne 'flat' && $args->{children}) {
+		if($user->{mode} ne 'flat') {
 			my $checked = "";
 			if($user->{mode} eq 'thread-tos') { $checked = "checked=\"checked\""; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
