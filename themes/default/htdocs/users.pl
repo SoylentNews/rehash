@@ -1996,7 +1996,7 @@ sub editComm {
 	my $constants = getCurrentStatic();
 	my $user_edit = {};
 	my($formats, $commentmodes_select, $commentsort_select, $title,
-		$highlightthresh_select, $highlightthresh_select, $posttype_select,
+		$uthreshold_select, $highlightthresh_select, $posttype_select,
 		$bytelimit_select);
 
 	my $admin_block = '';
