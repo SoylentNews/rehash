@@ -2341,7 +2341,7 @@ sub dispCommentNoTemplate {
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
-		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show) {
+		if(defined($args->{points}) && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$show) {
 			$html_out .= " checked=\"checked\" ";
 		}
 		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Show/hide comment\" for=\"commentHider_$args->{cid}\"> </label>";
