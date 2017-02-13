@@ -1244,6 +1244,7 @@ sub displayThread {
 		}
 	}
 
+	my $donothide = 0;
 	for my $cid (@{$comments->{$pid}{kids}}) {
 		my $comment = $comments->{$cid};
 
@@ -1264,9 +1265,12 @@ sub displayThread {
 		my($noshow, $pieces) = (0, 0);
 
 		if ($lvl && $indent) {
-			$return .= $const->{tablebegin} .
-				dispComment($comment, { noshow => $noshow, pieces => $pieces }) .
-				$const->{tableend};
+			$return .= $const->{tablebegin};
+			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
+			$return .= $thiscomment->{data} . $const->{tableend};
+			if($thiscomment->{visible}) {
+				$donothide = 1;
+			}
 			$cagedkids = 0;
 		} else {
 			$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
@@ -1277,7 +1281,16 @@ sub displayThread {
 
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			# Ewww, recursion when rendering comments is not a good thing. --TMB
-			if (my $str = displayThread($sid, $cid, $lvl+1, $comments, $const)) {
+			my $subthread = displayThread($sid, $cid, $lvl+1, $comments, $const);
+			my $toshider = "";
+			if($subthread->{visiblekid} && defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+            	my $kids = $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
+            	$toshider = "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+            	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
+            	"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>
+				</div></div></div>\n";
+			}
+			if (my $str = $subthread->{data}) {
 				$return .= $const->{cagebegin} if $cagedkids;
 				if ($indent && $const->{indentbegin}) {
 					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
@@ -1295,8 +1308,11 @@ sub displayThread {
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 	}
-
-	return $return;
+	my $newreturn = {
+		data		=> $return,
+		visiblekid	=> $donothide,
+	};
+	return $newreturn;
 }
 
 #========================================================================
@@ -1830,8 +1846,11 @@ sub dispComment {
 				children	=> $comment->{children},
 	};
 	$return = dispCommentNoTemplate($args);
-
-	return $return;
+	my $newreturn = {
+		data		=> $return->{data},
+		visible		=> $return->{visible},
+	};
+	return $newreturn;
 }
 
 ##################################################################
@@ -2226,8 +2245,9 @@ sub printCommComments {
 	}
 
 	if($args->{cid}) {
+		my $commentdata = dispComment($args->{comment});
 		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n".
-		dispComment($args->{comment}).
+		$commentdata->{data}.
 		"\n<div class=\"comment_footer\">\n$next_prev_links\n</div>\n$mod_comment_log\n";
 		
 	}
@@ -2236,10 +2256,19 @@ sub printCommComments {
 
 	my $thread;
 	if($args->{comments}) {
-		$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+		#$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+		if(!$threaddata->{visiblekid} && defined($args->{points} && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+			my $kids = $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
+			$thread .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
+            "<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>".
+			"</div></div></div>\n";
+		}
+		$thread .= $threaddata->{data};
 	}
 	if($thread) {
-		if(!$args->{cid}) { $html_out .= '<ul id="commentlisting" >'.$thread."</ul>\n"; }
+		if(!$args->{cid}) { $html_out .= '<ul id="commentlisting" >'.$thread->{data}."</ul>\n"; }
 		else {	$html_out .= $thread; }
 	}
 	if($args->{cid}) {$html_out .= "</ul>\n"; }
@@ -2307,6 +2336,7 @@ sub dispCommentNoTemplate {
 
 	my $html_out = "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
 	my $show = 0;
+	my $visible = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon} && $user->{mode} ne 'threadtos') { $show = 1; }
@@ -2315,17 +2345,17 @@ sub dispCommentNoTemplate {
 	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
-
+		my $toshider = "";
+		my $dowebreak = 0;
 		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
-			my $kids = $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
-			$html_out .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
-			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4></div></div></div>\n";
+			$visible = 1;
+		}
+
+		unless($dowebreak) {
+			$html_out .= $toshider;
 		}
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
-			print STDERR "$user->{mode}\n";
-		#if($user->{mode} ne 'flat') {
 			my $checked = "";
 			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold}) { $checked = "checked=\"checked\""; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
@@ -2412,7 +2442,11 @@ sub dispCommentNoTemplate {
 			can_mod => $args->{can_mod},
 		})."\n</div>\n\n";
 
-	return $html_out;
+	my $return = {
+		data		=> $html_out,
+		visible		=> $visible,
+	};
+	return $return;
 }
 
 sub zooIcons {
