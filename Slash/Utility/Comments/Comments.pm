@@ -2314,8 +2314,8 @@ sub dispCommentNoTemplate {
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 
-		#if($user->{mode} ne 'flat' && $args->{children}) {
-		if($user->{mode} ne 'flat') {
+		if($user->{mode} ne 'flat' && $args->{children}) {
+		#if($user->{mode} ne 'flat') {
 			my $checked = "";
 			if($user->{mode} eq 'thread-tos') { $checked = "checked=\"checked\""; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
@@ -2327,7 +2327,7 @@ sub dispCommentNoTemplate {
 		}
 		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Show/hide comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
-		if($user->{mode} ne 'flat') {
+		if($user->{mode} ne 'flat' && $args->{children}) {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
 		}
 	}
