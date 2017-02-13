@@ -2221,8 +2221,8 @@ sub printCommComments {
 	my $args = shift;
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
-        my $constants = getCurrentStatic();
-        my $gSkin = getCurrentSkin();
+	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $html_out = "";
 	
 	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
@@ -2258,8 +2258,8 @@ sub printCommComments {
 	if($args->{comments}) {
 		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 		#$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		if(!$threadbody->{visiblekid} && defined($args->{points} && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
-			my $kids = $args->{children} != 0 ? $args->{children} : "";
+		if(!$threadbody->{visiblekid} && defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+			my $children = $args->{children} != 0 ? $args->{children} : "";
 			if($kids ne "") {
 				if($kids > 1) {
 					$kids = "($kids children)";
