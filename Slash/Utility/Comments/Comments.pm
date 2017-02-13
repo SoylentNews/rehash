@@ -2258,7 +2258,7 @@ sub printCommComments {
 	if($args->{comments}) {
 		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 		#$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		if(!$threaddata->{visiblekid} && defined($args->{points} && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+		if(!$threadbody->{visiblekid} && defined($args->{points} && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
 			my $kids = $args->{children} != 0 ? $args->{children} : "";
 			if($kids ne "") {
 				if($kids > 1) {
