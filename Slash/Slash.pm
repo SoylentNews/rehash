@@ -141,7 +141,6 @@ sub dispStory {
 		preview  	=> $other->{preview},
 		dispmode 	=> $other->{dispmode},
 		dispoptions	=> $other->{dispoptions} || {},
-		thresh_commentcount => $other->{thresh_commentcount},
 		expandable 	=> $other->{expandable},
 		getintro	=> $other->{getintro},
 		fh_view         => $other->{fh_view},

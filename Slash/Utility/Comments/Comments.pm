@@ -2222,7 +2222,6 @@ sub printCommComments {
 
 	if($moderate_form) {
 		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n";
-		if(defined($form->{threshold})) { $html_out .= "<input type=\"hidden\" name=\"threshold\" value=\"$form->{threshold}\">\n"; }
 		if(defined($form->{highlightthresh})) { $html_out .= "<input type=\"hidden\" name=\"highlightthresh\" value=\"$form->{highlightthresh}\">\n"; }
 		if(defined($form->{mode})) { $html_out .= "<input type=\"hidden\" name=\"mode\" value=\"$form->{mode}\">\n"; }
 	}
@@ -2322,12 +2321,7 @@ sub dispCommentNoTemplate {
 	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
 	
 	# Now shit starts getting squirrely.
-	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
-		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show) {
-			$html_out .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
-			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
-		}
+		if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 
 		if($user->{mode} ne 'flat') {
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" />\n";

@@ -1996,7 +1996,7 @@ sub editComm {
 	my $constants = getCurrentStatic();
 	my $user_edit = {};
 	my($formats, $commentmodes_select, $commentsort_select, $title,
-		$uthreshold_select, $highlightthresh_select, $posttype_select,
+		$highlightthresh_select, $posttype_select,
 		$bytelimit_select);
 
 	my $admin_block = '';
@@ -2091,11 +2091,6 @@ sub editComm {
 	);
 
 	$formats = $slashdb->getDescriptions('threshcodes');
-	$uthreshold_select = createSelect(
-		'uthreshold', $formats, $user_edit->{threshold}, 1
-	);
-
-	$formats = $slashdb->getDescriptions('threshcodes');
 	$highlightthresh_select = createSelect(
 		'highlightthresh', $formats, $user_edit->{highlightthresh}, 1
 	);
@@ -2108,8 +2103,6 @@ sub editComm {
 		'bytelimit', $formats, $user_edit->{bytelimit}, 1
 	);
 
-	my $h_check  = $user_edit->{hardthresh}		 ? $constants->{markup_checked_attribute} : '';
-	my $r_check  = $user_edit->{reparent}		 ? $constants->{markup_checked_attribute} : '';
 	my $n_check  = $user_edit->{noscores}		 ? $constants->{markup_checked_attribute} : '';
 	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
 	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
@@ -2129,8 +2122,6 @@ sub editComm {
 		title			=> $title,
 		admin_block		=> $admin_block,
 		user_edit		=> $user_edit,
-		h_check			=> $h_check,
-		r_check			=> $r_check,
 		n_check			=> $n_check,
 		s_check			=> $s_check,
 		b_check			=> $b_check,
@@ -2143,7 +2134,6 @@ sub editComm {
 		commentmodes_select	=> $commentmodes_select,
 		commentsort_select	=> $commentsort_select,
 		highlightthresh_select	=> $highlightthresh_select,
-		uthreshold_select	=> $uthreshold_select,
 		posttype_select		=> $posttype_select,
 		reasons			=> \@reasons,
 		reason_select		=> \%reason_select,
@@ -2678,12 +2668,9 @@ sub saveComm {
 		highlightthresh		=> $form->{highlightthresh},
 		mode			=> $form->{umode},
 		posttype		=> $form->{posttype},
-		threshold		=> $form->{uthreshold},
 		nosigs			=> ($form->{nosigs}     ? 1 : 0),
 		dimread			=> ($form->{dimmed}	? 1 : 0),
-		reparent		=> ($form->{reparent}   ? 1 : 0),
 		noscores		=> ($form->{noscores}   ? 1 : 0),
-		hardthresh		=> ($form->{hardthresh} ? 1 : 0),
 		no_spell		=> ($form->{no_spell}   ? 1 : undef),
 		nobonus			=> ($form->{nobonus} ? 1 : undef),
 		postanon		=> ($form->{postanon} ? 1 : undef),

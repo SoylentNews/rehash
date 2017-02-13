@@ -582,7 +582,6 @@ sub submitComment {
 
 	# Setup redirect to new comment
 		my $redirect = '';
-		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
 		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
 		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
 		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
@@ -619,7 +618,6 @@ sub changeComment {
 
 	# Setup redirect to new comment
 		my $redirect = '';
-		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
 		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
 		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
 		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
@@ -760,7 +758,6 @@ sub moderate {
 		
 		# Setup redirect to new comment
 		my $redirect = '';
-		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
 		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
 		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
 		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});

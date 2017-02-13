@@ -5,14 +5,11 @@ Edit comment preferences
 
 * title = passed to titlebar
 * user_edit = hashref of preferences
-* h_check = boolean to check h?  hardthresh
-* r_check = boolean to check r?  reparent
 * n_check = boolean to check n?  noscores
 * s_check = boolean to check s?  nosigs
 * commentmodes_select = popup for comment modes
 * commentsort_select = popup for comment sort
 * highlightthresh_select = popup for highlight threshold
-* uthreshold_select = popup for threshold
 * posttype_select = popup for post type
 
 
@@ -91,21 +88,10 @@ __template__
 
 		<label>Sort Order [% commentsort_select %]</label>
 
-		<label>Threshold [% uthreshold_select %]</label>
-		<div class="notes">
-			Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Guidelines</a>
-		</div>
 
-		<label>Breakthrough [% highlightthresh_select %]</label>
-		[% PROCESS formNote note='Comments scoring this are displayed even after an article spills into index mode' %]
+		<label>Threshold [% highlightthresh_select %]</label>
+		[% PROCESS formNote note='Comments scoring below this are displayed as title only' %]
 
-		<label>Hard Thresholds
-		<input type="checkbox" name="hardthresh"[% h_check %]></label>
-		[% PROCESS formNote note="Hides 'X Replies Below Current Threshold' Message from Threads" %]
-
-		<label>Reparent Highly Rated Comments
-		<input type="checkbox" name="reparent"[% r_check %]></label>
-		[% PROCESS formNote note="Causes comments to be displayed even if they are replies to comments under current threshold" %]
 
 		<label>Do Not Display Scores
 		<input type="checkbox" name="noscores"[% n_check %]></label>
