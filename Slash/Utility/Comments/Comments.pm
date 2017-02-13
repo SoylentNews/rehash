@@ -1283,7 +1283,7 @@ sub displayThread {
 			# Ewww, recursion when rendering comments is not a good thing. --TMB
 			my $subthread = displayThread($sid, $cid, $lvl+1, $comments, $const);
 			my $toshider = "";
-			if($subthread->{visiblekid} && defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+			if($subthread->{visiblekid} && $user->{mode} eq 'threadtos') {
             	my $kids = $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
             	$toshider = "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
             	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
