@@ -1307,7 +1307,7 @@ sub displayThread {
 		$displayed++; # unless $comment->{dummy};
 
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
-		$return .= $below->{data};
+		$return .= $below;
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 	}
