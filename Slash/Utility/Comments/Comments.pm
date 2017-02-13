@@ -1214,6 +1214,7 @@ sub displayThread {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	use Data::Dumper;
 
 	$lvl ||= 0;
 	my $displayed = 0;
@@ -1286,6 +1287,7 @@ sub displayThread {
 			# be shown, so count them.	-- Pater
 			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
 		}
+		print STDERR "below: ".Dumper($below)."\n";
 
 		if ($lvl && $indent) {
 			$return .= $const->{tablebegin};
