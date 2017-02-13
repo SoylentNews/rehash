@@ -1222,6 +1222,8 @@ sub displayThread {
 	my $full = my $cagedkids = !$lvl;
 	my $hidden = my $skipped = 0;
 	my $return = '';
+	my $below = "";
+	my $visible = 0;
 
 	# root comment should have more likelihood to be full
 
@@ -1246,6 +1248,8 @@ sub displayThread {
 
 	for my $cid (@{$comments->{$pid}{kids}}) {
 		my $comment = $comments->{$cid};
+		$below = "";
+		$visible = 0;
 
 		$skipped++;
 		# since threaded shows more comments, we can skip
@@ -1262,10 +1266,31 @@ sub displayThread {
 		my $finish_list = 0;
 
 		my($noshow, $pieces) = (0, 0);
+		
+		# This has to go before we build this comment
+		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
+			# Ewww, recursion when rendering comments is not a good thing. --TMB
+			my $thread = displayThread($sid, $cid, $lvl+1, $comments, $const);
+			$visible ||= $thread->{visible};
+			if (my $str = $thread->{data}) {
+				$below .= $const->{cagebegin} if $cagedkids;
+				if ($indent && $const->{indentbegin}) {
+					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
+					$below .= $indentbegin;
+				}
+				$below .= $str;
+				$below .= $const->{indentend} if $indent;
+				$below .= $const->{cageend} if $cagedkids;
+			}
+			# in flat mode, all visible kids will
+			# be shown, so count them.	-- Pater
+			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
+		}
 
 		if ($lvl && $indent) {
 			$return .= $const->{tablebegin};
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
+			$visible ||= $thiscomment->{visible};
 			$return .= "<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
 			if(!$thiscomment->{visible} && $user->{mode} eq 'threadtos') {
             	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
@@ -1282,28 +1307,15 @@ sub displayThread {
 		$displayed++; # unless $comment->{dummy};
 
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
-
-		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
-			# Ewww, recursion when rendering comments is not a good thing. --TMB
-			if (my $str = displayThread($sid, $cid, $lvl+1, $comments, $const)) {
-				$return .= $const->{cagebegin} if $cagedkids;
-				if ($indent && $const->{indentbegin}) {
-					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
-					$return .= $indentbegin;
-				}
-				$return .= $str;
-				$return .= $const->{indentend} if $indent;
-				$return .= $const->{cageend} if $cagedkids;
-			}
-			# in flat mode, all visible kids will
-			# be shown, so count them.	-- Pater
-			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
-		}
-
+		$return .= $below->{data};
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 	}
-	return $return;
+	my $newreturn = {
+		data	=> $return,
+		visible => $visible,
+	};
+	return $newreturn;
 }
 
 #========================================================================
@@ -2248,9 +2260,10 @@ sub printCommComments {
 	
 	$html_out .= $args->{lcp};
 
-	my $thread;
+	my ($dthread, $thread);
 	if($args->{comments}) {
-		$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+		$dthread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+		$thread = $dthread->{data};
 	}
 	if($thread) {
 		if(!$args->{cid}) { $html_out .= "<ul id=\"commentlisting\" >$thread</ul>\n"; }
