@@ -1020,7 +1020,7 @@ sub printComments {
 		if($mode eq 'flat') {
 			($comments, $pages, $count) = selectCommentsFlat($discussion, $cidorpid, $sco);
 		}
-		elsif($mode eq 'thread') {
+		elsif($mode eq 'thread' || $mode eq 'thread-tos' || $mode eq 'thread-tng' ) {
 			($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
 		}
 		else {
@@ -1294,15 +1294,6 @@ sub displayThread {
 
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
-
-		# This is unnecessary as we only pull the comments we're gonna display now
-		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
-		#	last;
-		#}
-		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "thread") ){
-		#	last;
-		#}
-		
 	}
 
 	return $return;
@@ -1765,7 +1756,7 @@ sub dispComment {
 
 	my $can_mod = _can_mod($comment);
 
-	# don't inherit these ...
+	# do not inherit these ...
 	# THIS DOES NOT DO THAT, RETARD --TMB
 
 	# ipid/subnetid need munging into one text string
@@ -1835,7 +1826,8 @@ sub dispComment {
                 is_anon         => isAnon($comment->{uid}),
                 options         => $options,
                 cid_now         => $dim->{cid_now},
-                subscriber_badge => $subscriber_badge
+                subscriber_badge => $subscriber_badge,
+		children	=> $comment->{children},
 	};
 	$return = dispCommentNoTemplate($args);
 
@@ -2323,8 +2315,10 @@ sub dispCommentNoTemplate {
 	# Now shit starts getting squirrely.
 		if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 
-		if($user->{mode} ne 'flat') {
-			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" />\n";
+		if($user->{mode} ne 'flat' && $args->{children}) {
+			my $checked = "";
+			if($user->{mode} eq 'thread-tos') { $checked = "checked"; }
+			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";

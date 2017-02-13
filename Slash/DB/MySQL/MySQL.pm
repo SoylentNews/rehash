@@ -13695,6 +13695,21 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE users_comments SET commentsort = 1 WHERE commentsort = 5")) {
                         return 0;
                 }
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread', 'thread-tng', 'thread-tos') NOT NULL DEFAULT 'thread-tng'")) {
+			return 0;
+		}
+		if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread', 'thread-tng', 'thread-tos') NOT NULL DEFAULT 'thread-tng'")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("UPDATE users_comments set mode = 'thread-tng' where mode = 'thread'")) {
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}

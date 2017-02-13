@@ -397,7 +397,7 @@ sub displayComments {
 		# Here is the deal, if a user who has a mode of nocomment asks for a 
 		# comment we give it to them and assume the default mode (which 
 		# according to the schema is 'thread'). -Brian
-		$user->{mode} = 'thread' if $user->{mode} eq 'nocomment';
+		$user->{mode} = 'thread-tng' if $user->{mode} eq 'nocomment';
 		printComments($discussion, $form->{cid}, $form->{cid});
 	} elsif ($form->{sid}) {
 		
