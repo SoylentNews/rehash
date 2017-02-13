@@ -1827,7 +1827,7 @@ sub dispComment {
                 options         => $options,
                 cid_now         => $dim->{cid_now},
                 subscriber_badge => $subscriber_badge,
-		children	=> $comment->{children},
+				children	=> $comment->{children},
 	};
 	$return = dispCommentNoTemplate($args);
 
@@ -2300,9 +2300,9 @@ sub nextPrevLinks {
 sub dispCommentNoTemplate {
 	my $args = shift;
 	my $form = getCurrentForm();
-        my $user = getCurrentUser();
-        my $constants = getCurrentStatic();
-        my $gSkin = getCurrentSkin();
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $slashdb = getCurrentDB();
 
 	my $html_out = "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
@@ -2315,6 +2315,7 @@ sub dispCommentNoTemplate {
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
+			print STDERR "$user->{mode}\n";
 		#if($user->{mode} ne 'flat') {
 			my $checked = "";
 			if($user->{mode} eq 'thread-tos') { $checked = "checked=\"checked\""; }
