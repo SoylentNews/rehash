@@ -2309,7 +2309,7 @@ sub dispCommentNoTemplate {
 	my $show = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
-	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
+	if($user->{uid} == $args->{uid} && !$user->{is_anon} && $user->{mode} ne 'threadtos') { $show = 1; }
 
 
 	
