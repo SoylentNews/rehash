@@ -2276,7 +2276,7 @@ sub printCommComments {
 		$thread .= $threadbody->{data};
 	}
 	if($thread) {
-		if(!$args->{cid}) { $html_out .= '<ul id="commentlisting" >'.$thread->{data}."</ul>\n"; }
+		if(!$args->{cid}) { $html_out .= "<ul id=\"commentlisting\" >$thread</ul>\n"; }
 		else {	$html_out .= $thread; }
 	}
 	if($args->{cid}) {$html_out .= "</ul>\n"; }
