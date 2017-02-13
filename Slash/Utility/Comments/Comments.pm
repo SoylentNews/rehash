@@ -1287,7 +1287,6 @@ sub displayThread {
 			# be shown, so count them.	-- Pater
 			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
 		}
-		print STDERR "below: ".Dumper($below)."\n";
 
 		if ($lvl && $indent) {
 			$return .= $const->{tablebegin};
@@ -2223,6 +2222,7 @@ sub _is_mod_banned {
 }
 
 sub printCommComments {
+	use Data::Dumper;
 	my $args = shift;
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -2265,6 +2265,7 @@ sub printCommComments {
 	my ($dthread, $thread);
 	if($args->{comments}) {
 		$dthread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
+		print STDERR "\ndthread = ".Dumper($dthread)."\n";
 		$thread = $dthread->{data};
 	}
 	if($thread) {
