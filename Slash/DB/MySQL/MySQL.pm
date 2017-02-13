@@ -13710,6 +13710,12 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE users_comments set mode = 'threadtng' where mode = 'thread'")) {
 			return 0;
 		}
+		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtos', 'Threaded-TOS')") {
+			return 0;
+		}
+		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtng', 'Threaded-TNG')") {
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}

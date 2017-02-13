@@ -2318,7 +2318,7 @@ sub dispCommentNoTemplate {
 			print STDERR "$user->{mode}\n";
 		#if($user->{mode} ne 'flat') {
 			my $checked = "";
-			if($user->{mode} eq 'threadtos') { $checked = "checked=\"checked\""; }
+			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold}) { $checked = "checked=\"checked\""; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
