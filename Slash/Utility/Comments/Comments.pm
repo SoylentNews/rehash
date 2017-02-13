@@ -2220,7 +2220,6 @@ sub printCommComments {
 
 	if(!$constants->{modal_prefs_active}) {
 		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
-		print STDERR "\ngot moddb\n" if $moddb;
 		if($moddb) {
 			$mod_comment_log .= $moddb->dispModCommentLog('cid', $args->{cid}, { need_m2_form => 0, need_m2_button => 0, show_m2s => 0, title => " " });
 		}
@@ -2317,8 +2316,8 @@ sub dispCommentNoTemplate {
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
 			my $checked = "";
-			if($user->{mode} eq 'thread-tos') { $checked = "checked"; }
-			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" checked=\"$checked\" />\n";
+			if($user->{mode} eq 'thread-tos') { $checked = "checked=\"checked\""; }
+			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
