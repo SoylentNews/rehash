@@ -10,6 +10,7 @@ Edit comment preferences
 * commentmodes_select = popup for comment modes
 * commentsort_select = popup for comment sort
 * highlightthresh_select = popup for highlight threshold
+* uthreshold_select = popup for threshold
 * posttype_select = popup for post type
 
 
@@ -88,9 +89,13 @@ __template__
 
 		<label>Sort Order [% commentsort_select %]</label>
 
+		<label>Threshold [% uthreshold_select %]</label>
+-		<div class="notes">
+-			Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Guidelines</a>
+-		</div>
 
-		<label>Threshold [% highlightthresh_select %]</label>
-		[% PROCESS formNote note='Comments scoring below this are displayed as title only' %]
+		<label>Breakthrough [% highlightthresh_select %]</label>
+		[% PROCESS formNote note='Comments scoring this are displayed even if they are in a collapsed thread.' %]
 
 
 		<label>Do Not Display Scores

@@ -35,6 +35,7 @@ __template__
 %]
 [% IF moderate_form %]
 	<form id="commentform" name="commentform" action="[% gSkin.rootdir %]/comments.pl" method="post">
+	[% IF form.threshold.defined %]<input type="hidden" name="threshold" value="[% form.threshold %]">[% END %]
 	[% IF form.highlightthresh.defined %]<input type="hidden" name="highlightthresh" value="[% form.highlightthresh %]">[% END %]
 	[% IF form.commentsort.defined %]<input type="hidden" name="commentsort" value="[% form.commentsort %]">[% END %]
 	[% IF form.mode.defined %]<input type="hidden" name="mode" value="[% form.mode %]">[% END %]
