@@ -2246,8 +2246,7 @@ sub printCommComments {
 
 	my $thread;
 	if($args->{comments}) {
-		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		$thread .= $threadbody->{data};
+		$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 	}
 	if($thread) {
 		if(!$args->{cid}) { $html_out .= "<ul id=\"commentlisting\" >$thread</ul>\n"; }
