@@ -1244,7 +1244,6 @@ sub displayThread {
 		}
 	}
 
-	my $donothide = 0;
 	for my $cid (@{$comments->{$pid}{kids}}) {
 		my $comment = $comments->{$cid};
 
@@ -1267,10 +1266,14 @@ sub displayThread {
 		if ($lvl && $indent) {
 			$return .= $const->{tablebegin};
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
-			$return .= $thiscomment->{data} . $const->{tableend};
-			if($thiscomment->{visible}) {
-				$donothide = 1;
+			if($thiscomment->{visible} && $user->{mode} eq 'threadtos') {
+            	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
+            	$toshider = "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+            	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
+            	"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>
+				</div></div></div>\n";
 			}
+			$return .= $thiscomment->{data} . $const->{tableend};
 			$cagedkids = 0;
 		} else {
 			$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
@@ -1281,16 +1284,7 @@ sub displayThread {
 
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			# Ewww, recursion when rendering comments is not a good thing. --TMB
-			my $subthread = displayThread($sid, $cid, $lvl+1, $comments, $const);
-			my $toshider = "";
-			if($subthread->{visiblekid} && $user->{mode} eq 'threadtos') {
-            	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
-            	$toshider = "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-            	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
-            	"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>
-				</div></div></div>\n";
-			}
-			if (my $str = $subthread->{data}) {
+			if (my $str = displayThread($sid, $cid, $lvl+1, $comments, $const)) {
 				$return .= $const->{cagebegin} if $cagedkids;
 				if ($indent && $const->{indentbegin}) {
 					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
@@ -1308,11 +1302,7 @@ sub displayThread {
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 	}
-	my $newreturn = {
-		data		=> $return,
-		visiblekid	=> $donothide,
-	};
-	return $newreturn;
+	return $return;
 }
 
 #========================================================================
@@ -2257,22 +2247,6 @@ sub printCommComments {
 	my $thread;
 	if($args->{comments}) {
 		my $threadbody = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		#$thread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		#if(!$threadbody->{visiblekid} && defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
-		#	my $children = $args->{children} != 0 ? $args->{children} : "";
-		#	if($kids ne "") {
-		#		if($kids > 1) {
-		#			$kids = "($kids children)";
-		#		}
-		#		else {
-		#			$kids = "($kids child)";
-		#		}
-		#	}
-		#	$thread .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-		#	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
-        #	"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>".
-		#	"</div></div></div>\n";
-		#}
 		$thread .= $threadbody->{data};
 	}
 	if($thread) {
