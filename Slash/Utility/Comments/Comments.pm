@@ -1020,7 +1020,7 @@ sub printComments {
 		if($mode eq 'flat') {
 			($comments, $pages, $count) = selectCommentsFlat($discussion, $cidorpid, $sco);
 		}
-		elsif($mode eq 'thread' || $mode eq 'thread-tos' || $mode eq 'thread-tng' ) {
+		elsif($mode eq 'thread' || $mode eq 'threadtos' || $mode eq 'threadtng' ) {
 			($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
 		}
 		else {
@@ -2318,7 +2318,7 @@ sub dispCommentNoTemplate {
 			print STDERR "$user->{mode}\n";
 		#if($user->{mode} ne 'flat') {
 			my $checked = "";
-			if($user->{mode} eq 'thread-tos') { $checked = "checked=\"checked\""; }
+			if($user->{mode} eq 'threadtos') { $checked = "checked=\"checked\""; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
