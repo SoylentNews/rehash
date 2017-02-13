@@ -1267,7 +1267,7 @@ sub displayThread {
 			$return .= $const->{tablebegin};
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
 			$return .= "<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
-			if($thiscomment->{visible} && $user->{mode} eq 'threadtos') {
+			if(!$thiscomment->{visible} && $user->{mode} eq 'threadtos') {
             	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
             	$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
             	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
@@ -2321,7 +2321,7 @@ sub dispCommentNoTemplate {
 
 	my $html_out = "";
 	my $show = 0;
-	my $visible = 1;
+	my $visible = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon} && $user->{mode} ne 'threadtos') { $show = 1; }
@@ -2331,12 +2331,12 @@ sub dispCommentNoTemplate {
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 		if(defined($args->{points}) && $args->{points} >= $user->{highlightthresh} && !$show && $user->{mode} eq 'threadtos') {
-			$visible = 0;
+			$visible = 1;
 		}
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
 			my $checked = "";
-			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold}) { $checked = "checked=\"checked\""; }
+			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$visible ) { $checked = "checked=\"checked\""; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
