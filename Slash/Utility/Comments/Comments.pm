@@ -2310,9 +2310,17 @@ sub dispCommentNoTemplate {
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
+
+
 	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
+
+		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+			$html_out .= "<input id=\"commentBelow_$args->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+			"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$args->{cid}\"> </label>\n".
+			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
+		}
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
 			print STDERR "$user->{mode}\n";
