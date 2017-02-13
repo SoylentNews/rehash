@@ -1316,7 +1316,7 @@ sub displayThread {
 		data	=> $return,
 		visible => $visible,
 	};
-	return $newreturn;
+	return %$newreturn;
 }
 
 #========================================================================
