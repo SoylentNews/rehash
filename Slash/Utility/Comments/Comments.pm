@@ -1266,6 +1266,7 @@ sub displayThread {
 		if ($lvl && $indent) {
 			$return .= $const->{tablebegin};
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
+			my $return .= "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
 			if($thiscomment->{visible} && $user->{mode} eq 'threadtos') {
             	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
             	$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
@@ -2235,8 +2236,10 @@ sub printCommComments {
 	}
 
 	if($args->{cid}) {
+		
 		my $commentdata = dispComment($args->{comment});
 		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n".
+		"<li id=\"tree_$args->{cid}\" class=\"comment\">\n".
 		$commentdata->{data}.
 		"\n<div class=\"comment_footer\">\n$next_prev_links\n</div>\n$mod_comment_log\n";
 		
@@ -2315,7 +2318,7 @@ sub dispCommentNoTemplate {
 	my $gSkin = getCurrentSkin();
 	my $slashdb = getCurrentDB();
 
-	my $html_out = "<li id=\"tree_$args->{cid}\" class=\"comment\">\n";
+	my $html_out = "";
 	my $show = 0;
 	my $visible = 0;
 
@@ -2326,14 +2329,8 @@ sub dispCommentNoTemplate {
 	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
-		my $toshider = "";
-		my $dowebreak = 0;
 		if(defined($args->{points}) && $args->{points} < $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
 			$visible = 1;
-		}
-
-		unless($dowebreak) {
-			$html_out .= $toshider;
 		}
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
