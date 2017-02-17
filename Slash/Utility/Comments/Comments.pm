@@ -2462,7 +2462,6 @@ sub dispCommentNoTemplate {
 		visible		=> $visible,
 		visiblenopass	=> $visiblenopass,
 	};
-	print STDERR "\nvisible = $visible\nvisiblenopass = $visiblenopass\n"if $args->{cid} == 31085;
 	return $return;
 }
 
