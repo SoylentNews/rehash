@@ -322,7 +322,7 @@ sub main {
 
 	if (!$error_flag) {
 		# CALL THE OP
-		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion);
+		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion, $gSkin);
 
 		# this has to happen - if this is a form that you updated
 		# the formkey val ('formkey_check') you need to call
@@ -412,7 +412,7 @@ sub displayComments {
 # Welcome to one of the ancient beast functions.  The comment editor
 # is the form in which you edit a comment.
 sub editComment {
-	my($form, $slashdb, $user, $constants, $discussion, $error_message) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin, $error_message) = @_;
 
 	my $preview;
 	my $error_flag = 0;
@@ -547,7 +547,7 @@ sub previewForm {
 # so (assuming we don't want to do a redirect) it must be
 # called manually.
 sub submitComment {
-	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $header_emitted = 0;
@@ -571,7 +571,7 @@ sub submitComment {
 	}
 
 	# Save the comment
-	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
+	my $saved_comment = saveComment($form, $comment, $user, $discussion, $gSkin, \$error_message);
 	
 	# Bail if comment save fails
 	if (!$saved_comment) {
@@ -581,21 +581,23 @@ sub submitComment {
 	}
 
 	# Setup redirect to new comment
-		my $redirect = '';
-		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
-		$redirect = $redirect."&noupdate=1";
-		
-		# Check if url has parameters or is naked
-		# Add ? if naked
-		if (index($discussion->{url}, '?') != -1 ) {
-			$redirect = $discussion->{url}.$redirect;
-		} else {
-			$redirect = $discussion->{url}."?".$redirect;
-		}
-		
-		$redirect = $redirect."#comment_".$saved_comment->{cid};
+	my $redirect = '';
+	$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
+	$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+	$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
+	$redirect = $redirect."&mode=".$form->{mode} if defined($form->{mode});
+	$redirect = $redirect."&page=".$form->{page} if defined($form->{page});
+	$redirect = $redirect."&noupdate=1";
+	
+	# Check if url has parameters or is naked
+	# Add ? if naked
+	if (index($discussion->{url}, '?') != -1 ) {
+		$redirect = $discussion->{url}.$redirect;
+	} else {
+		$redirect = $discussion->{url}."?".$redirect;
+	}
+	
+	$redirect = $redirect."#comment_".$saved_comment->{cid};
 	
 
 	# OK -- if we make it all the way here, and there were
@@ -614,15 +616,20 @@ sub submitComment {
 # Also, header() is NOT called before this function is called.
 
 sub changeComment {
-	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin) = @_;
 
 	# Setup redirect to new comment
-		my $redirect = '';
-		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
-		$redirect = $redirect."&noupdate=1";
-		
+	my $redirect = '';
+	$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
+	$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+	$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
+	$redirect = $redirect."&mode=".$form->{mode} if defined($form->{mode});
+	$redirect = $redirect."&page=".$form->{page} if defined($form->{page});
+	$redirect = $redirect."&noupdate=1";	
+	
+	if (defined($form->{cid})) {
+		$redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid}."&cid=".$form->{cid}.$redirect;
+	} else {	
 		# Check if url has parameters or is naked
 		# Add ? if naked
 		if (index($discussion->{url}, '?') != -1 ) {
@@ -630,8 +637,9 @@ sub changeComment {
 		} else {
 			$redirect = $discussion->{url}."?".$redirect;
 		}
-		
-		$redirect = $redirect."#commentwrap".$form->{cid};
+	}
+	
+	$redirect = $redirect."#commentwrap";
 	
 	redirect($redirect);
 
@@ -640,13 +648,18 @@ sub changeComment {
 
 ##################################################################
 sub moderate {
-	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my($form, $slashdb, $user, $constants, $discussion, $gSkin) = @_;
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	my $error = '';
 
 	my $moderate_check = $moddb->moderateCheck($form, $user, $constants, $discussion);
 	if (!$moderate_check->{count} && $moderate_check->{msg}) {
 		$error .= $moderate_check->{msg} if $moderate_check->{msg};
+		header('Comments', $discussion->{section}) or return;
+		titlebar("100%", getData('moderating'));
+	  print $error;		
+		printComments($discussion, $form->{pid}, $form->{cid},
+			{ force_read_from_master => 1 } );
 		return;
 	}
 
@@ -758,17 +771,23 @@ sub moderate {
 		
 		# Setup redirect to new comment
 		my $redirect = '';
+		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
 		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
 		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-		$redirect = $redirect."&mode=".$form->{mode} if ($form->{mode});
+		$redirect = $redirect."&mode=".$form->{mode} if defined($form->{mode});
+		$redirect = $redirect."&page=".$form->{page} if defined($form->{page});
 		$redirect = $redirect."&noupdate=1";
 		
-		# Check if url has parameters or is naked
-		# Add ? if naked
-		if (index($discussion->{url}, '?') != -1 ) {
-			$redirect = $discussion->{url}.$redirect;
+		if (defined($form->{cid})) {
+			$redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid}."&cid=".$form->{cid}.$redirect;
 		} else {
-			$redirect = $discussion->{url}."?".$redirect;
+			# Check if url has parameters or is naked
+			# Add ? if naked
+			if (index($discussion->{url}, '?') != -1 ) {
+				$redirect = $discussion->{url}.$redirect;
+			} else {
+				$redirect = $discussion->{url}."?".$redirect;
+			}
 		}
 		
 		$redirect = $redirect."#".$id;
@@ -920,3 +939,4 @@ sub unspamComment {
 createEnvironment();
 main();
 1;
+

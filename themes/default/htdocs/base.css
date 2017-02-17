@@ -1087,12 +1087,12 @@ abbr {
 	border-left-color: rgba(0,0,0, 0.5);
 }
 
-.spoiler > :first-child {
+.spoiler *  {
 	visibility: collapse;
 	height: 0;
 }
 
-.spoiler:hover > :first-child {
+.spoiler:hover * {
 	visibility: visible;
 	height:auto;
 	transition: height 0s, visibility 0s ease-in-out;

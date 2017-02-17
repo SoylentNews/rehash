@@ -1211,10 +1211,10 @@ The 'displayThread' template block.
 
 sub displayThread {
 	my($sid, $pid, $lvl, $comments, $const) = @_;
+	use Data::Dumper;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	use Data::Dumper;
 
 	$lvl ||= 0;
 	my $displayed = 0;
@@ -1225,6 +1225,7 @@ sub displayThread {
 	my $return = '';
 	my $below = "";
 	my $visible = 0;
+	my $visiblepass = 0;
 
 	# root comment should have more likelihood to be full
 
@@ -1251,6 +1252,8 @@ sub displayThread {
 		my $comment = $comments->{$cid};
 		$below = "";
 		$visible = 0;
+		my $show = 0;
+		if($comments->{$cid}->{pid} == $form->{cid} || $pid == 0) { $show = 1; }
 
 		$skipped++;
 		# since threaded shows more comments, we can skip
@@ -1272,6 +1275,7 @@ sub displayThread {
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			# Ewww, recursion when rendering comments is not a good thing. --TMB
 			my $thread = displayThread($sid, $cid, $lvl+1, $comments, $const);
+			
 			$visible ||= $thread->{visible};
 			if (my $str = $thread->{data}) {
 				$below .= $const->{cagebegin} if $cagedkids;
@@ -1287,23 +1291,25 @@ sub displayThread {
 			# be shown, so count them.	-- Pater
 			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat');
 		}
-
+		$return .= "$const->{tablebegin}\n<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
 		if ($lvl && $indent) {
-			$return .= $const->{tablebegin};
-			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces });
+			#$return .= $const->{tablebegin};
+			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces, visiblekid => $visible, show => $show, lvl => $lvl });
 			$visible ||= $thiscomment->{visible};
-			$return .= "<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
-			if(!$thiscomment->{visible} && $user->{mode} eq 'threadtos') {
-            	my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
-            	$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-            	"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
-            	"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>
+			#$return .= "<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
+			if(!$thiscomment->{visiblenopass} && !$visible && $user->{mode} eq 'threadtos' && !$show ) {
+				my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
+
+				$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+				"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
+				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>
 				</div></div></div>\n";
 			}
 			$return .= $thiscomment->{data} . $const->{tableend};
 			$cagedkids = 0;
 		} else {
-			$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
+			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces, visiblekid => 1, show => 1 });
+			$return .= $thiscomment->{data};
 		}
 		$displayed++; # unless $comment->{dummy};
 
@@ -1311,12 +1317,13 @@ sub displayThread {
 		$return .= $below;
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
+		$visiblepass ||= $visible;
 	}
 	my $newreturn = {
 		data	=> $return,
-		visible => $visible,
+		visible => $visiblepass,
 	};
-	return %$newreturn;
+	return $newreturn;
 }
 
 #========================================================================
@@ -1847,12 +1854,14 @@ sub dispComment {
                 options         => $options,
                 cid_now         => $dim->{cid_now},
                 subscriber_badge => $subscriber_badge,
-				children	=> $comment->{children},
+		children	=> $comment->{children},
+		lvl		=> $options->{lvl},
 	};
 	$return = dispCommentNoTemplate($args);
 	my $newreturn = {
 		data		=> $return->{data},
 		visible		=> $return->{visible},
+		visiblenopass	=> $return->{visiblenopass},
 	};
 	return $newreturn;
 }
@@ -2222,7 +2231,6 @@ sub _is_mod_banned {
 }
 
 sub printCommComments {
-	use Data::Dumper;
 	my $args = shift;
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -2240,6 +2248,7 @@ sub printCommComments {
 		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n";
 		if(defined($form->{threshold})) { $html_out .= "<input type=\"hidden\" name=\"threshold\" value=\"$form->{threshold}\">\n"; }
 		if(defined($form->{highlightthresh})) { $html_out .= "<input type=\"hidden\" name=\"highlightthresh\" value=\"$form->{highlightthresh}\">\n"; }
+		if(defined($form->{page})) { $html_out .= "<input type=\"hidden\" name=\"page\" value=\"$form->{page}\">\n"; }
 		if(defined($form->{mode})) { $html_out .= "<input type=\"hidden\" name=\"mode\" value=\"$form->{mode}\">\n"; }
 	}
 
@@ -2264,8 +2273,7 @@ sub printCommComments {
 
 	my ($dthread, $thread);
 	if($args->{comments}) {
-		$dthread .= displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
-		print STDERR "\ndthread = ".Dumper($dthread)."\n";
+		$dthread = displayThread($args->{sid}, $args->{pid}, $args->{lvl}, $args->{comments});
 		$thread = $dthread->{data};
 	}
 	if($thread) {
@@ -2338,32 +2346,40 @@ sub dispCommentNoTemplate {
 	my $html_out = "";
 	my $show = 0;
 	my $visible = 0;
+	my $visiblenopass = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
+	if(defined($args->{options}->{show}) && $args->{options}->{show}){ $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon} && $user->{mode} ne 'threadtos') { $show = 1; }
-
-
 	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
+		if(defined($args->{points}) && $args->{points} >= $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
+                        $visiblenopass = 1;
+                }
 		if(defined($args->{points}) && $args->{points} >= $user->{highlightthresh} && !$show && $user->{mode} eq 'threadtos') {
 			$visible = 1;
 		}
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
 			my $checked = "";
-			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$visible ) { $checked = "checked=\"checked\""; }
+			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$show) { $checked = "checked=\"checked\""; }
+			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
+			if(defined($args->{options}->{visiblekid}) && $args->{options}->{visiblekid}) {$checked = "";}
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
-		if(defined($args->{points}) && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$show) {
+		if(defined($args->{points}) && $user->{mode} ne "threadtos" && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$show ) {
 			$html_out .= " checked=\"checked\" ";
 		}
-		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Show/hide comment\" for=\"commentHider_$args->{cid}\"> </label>";
+		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
+			$html_out .= " checked=\"checked\" ";
+		}
+		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Expand/Collapse comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
 		if($user->{mode} ne 'flat' && $args->{children}) {
-			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
+			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
 		}
 	}
 
@@ -2388,6 +2404,10 @@ sub dispCommentNoTemplate {
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
 	$html_out .= " <span class=\"by\">by $prenick".strip_literal($args->{nickname})."$postnick</span> \n";
+
+	if($no_collapse ne "noCollapse" && $args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
+		$html_out .= " *NEW*";
+	}
 
 	if($args->{marked_spam} && $user->{seclev} >= 500) {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
@@ -2440,7 +2460,9 @@ sub dispCommentNoTemplate {
 	my $return = {
 		data		=> $html_out,
 		visible		=> $visible,
+		visiblenopass	=> $visiblenopass,
 	};
+	print STDERR "\nvisible = $visible\nvisiblenopass = $visiblenopass\n"if $args->{cid} == 31085;
 	return $return;
 }
 
@@ -2541,6 +2563,7 @@ sub zooIcons {
 sub dispCommentDetails {
 	my $args = shift;
         my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
 	my $html_out = "";
 
 	if( (!defined($args->{is_anon}) || !$args->{is_anon}) && (defined($args->{fakeemail}) && $args->{fakeemail}) ) {
@@ -2548,10 +2571,15 @@ sub dispCommentDetails {
 	}
 
 	$html_out .= " on ".timeCalc($args->{time});
+	
 	if($args->{cid} && $args->{sid}) {
 		$html_out .= " (".linkComment({
 			sid => $args->{sid},
 			cid => $args->{cid},
+			threshold => defined($form->{threshold}) ? $form->{threshold} : "",
+			highlightthresh => defined($form->{highlightthresh}) ? $form->{highlightthresh} : "",
+			mode => defined($form->{mode}) ? $form->{mode} : "",
+			commentsort => defined($form->{commentsort}) ? $form->{commentsort} : "",
 			subject => "#$args->{cid}",
 			subject_only => 1,
 		}, 0, { noextra => 1 }).")";

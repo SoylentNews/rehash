@@ -43,7 +43,7 @@ __template__
 
 [% IF cid %]
 	<ul id="commentlisting" class="[% user.mode %] d1">
-	[% Slash.dispComment(comment) %]
+	[% Slash.dispComment(comment).data %]
 	<div class="comment_footer">
 	[% IF previous %]
 		&lt;&lt;[% Slash.linkComment(previous, 1) %]

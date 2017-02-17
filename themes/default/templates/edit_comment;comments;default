@@ -64,7 +64,7 @@ title = "<a href=\"$gSkin.rootdir/comments.pl?sid=$form.sid\">$stripped_title</a
  <div class="generalbody">
 	<ul id="commentlisting" class="d1">
 	[% options => { 'noCollapse' => 1,};
-		 Slash.dispComment(reply, options) %]
+		 Slash.dispComment(reply, options).data %]
 	</li>
 	</ul>
  </div>

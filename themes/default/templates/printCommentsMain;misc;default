@@ -131,6 +131,7 @@ __template__
 				[%- END %]
 				<input type="submit" name="op" value="Change" class="button">
 				<input type="hidden" name="sid" value="[% sid %]">
+				<input type="hidden" name="page" value="[% page %]">
 				<input type="hidden" name="noupdate" value="1">
 				[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% reply = 'Reply to Comment'; END %]
 				[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
