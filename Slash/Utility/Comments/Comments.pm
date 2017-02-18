@@ -1020,7 +1020,7 @@ sub printComments {
 		if($mode eq 'flat') {
 			($comments, $pages, $count) = selectCommentsFlat($discussion, $cidorpid, $sco);
 		}
-		elsif($mode eq 'thread' || $mode eq 'threadtos' || $mode eq 'threadtng' ) {
+		elsif($mode eq 'threadtos' || $mode eq 'threadtng' ) {
 			($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
 		}
 		else {
@@ -1211,7 +1211,6 @@ The 'displayThread' template block.
 
 sub displayThread {
 	my($sid, $pid, $lvl, $comments, $const) = @_;
-	use Data::Dumper;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -2374,7 +2373,7 @@ sub dispCommentNoTemplate {
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
-		if(defined($args->{points}) && $user->{mode} ne "threadtos" && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$show ) {
+		if(defined($args->{points}) && $user->{mode} ne "threadtos" && ($args->{points} < $user->{threshold} || $args->{points} < $user->{highlightthresh}) && !$show ) {
 			$html_out .= " checked=\"checked\" ";
 		}
 		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {

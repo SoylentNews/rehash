@@ -13634,10 +13634,16 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("update users_comments set mode = 'thread' where mode = 'nested' or mode = 'improvedthreaded'")) {
 			return 0;
 		}
-		if (!$self->sqlDo("DELETE FROM commentmodes where mode = 'nested' or mode = 'improvedthreaded'")) {
+		if (!$self->sqlDo("DELETE FROM commentmodes where mode = 'nested' or mode = 'improvedthreaded' or mode = 'thread")) {
 			return 0;
 		}
-		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
+		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtos', 'Threaded-TOS')")) {
+                        return 0;
+                }
+                if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtng', 'Threaded-TNG')")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread', 'threadtos', 'threadtng') NOT NULL DEFAULT 'thread'")) {
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
@@ -13646,7 +13652,22 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
                         return 0;
                 }
-		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread') NOT NULL DEFAULT 'thread'")) {
+		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread', 'threadtos', 'threadtng') NOT NULL DEFAULT 'thread'")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("update users_comments set mode = 'threadtos' where mode = 'thread'")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
+                        return 0;
+                }
+                if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
+                        return 0;
+                }
+                if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
+                        return 0;
+                }
+                if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
                         return 0;
                 }
 		if (!$self->sqlDo("DELETE FROM vars WHERE name = 'comments_hardcoded'")) {
@@ -13698,43 +13719,6 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE users_comments SET commentsort = 1 WHERE commentsort = 5")) {
                         return 0;
                 }
-		#here
-		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
-			return 0;
-		}
-		if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
-                        return 0;
-                }
-		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
-                        return 0;
-                }
-		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
-                        return 0;
-                }
-		if (!$self->sqlDo("UPDATE users_comments set mode = 'threadtos' where mode = 'thread'")) {
-			return 0;
-		}
-		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtos', 'Threaded-TOS')")) {
-			return 0;
-		}
-		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtng', 'Threaded-TNG')")) {
-			return 0;
-		}
-		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'thread', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtng'")) {
-                        return 0;
-                }
-                if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
-                        return 0;
-                }
-                if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
-                        return 0;
-                }
-		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtng'")) {
-                        return 0;
-                }
-		if (!$self->sqlDo("DELETE FROM commentmodes WHERE mode = 'thread'")) {
-			return 0;
-		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}
