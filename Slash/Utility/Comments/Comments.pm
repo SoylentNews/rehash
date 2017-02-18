@@ -2347,6 +2347,7 @@ sub dispCommentNoTemplate {
 	my $show = 0;
 	my $visible = 0;
 	my $visiblenopass = 0;
+	my $legacykids = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
 	if(defined($args->{options}->{show}) && $args->{options}->{show}){ $show = 1; }
@@ -2361,10 +2362,13 @@ sub dispCommentNoTemplate {
 			$visible = 1;
 		}
 
-		if($user->{mode} ne 'flat' && $args->{children}) {
+		if(!defined($args->{children}) || !$args->{children}) {
+			$legacykids = $slashdb->sqlSelect("1", "comments", "pid = $args->{cid} group by pid");
+		}
+		if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
 			my $checked = "";
-			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && $args->{points} < $user->{highlightthresh} && !$show) { $checked = "checked=\"checked\""; }
 			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
+			if($user->{mode} eq 'threadtos' && ($args->{points} >= $user->{highlightthresh} || $show)) { $checked = ""; }
 			if(defined($args->{options}->{visiblekid}) && $args->{options}->{visiblekid}) {$checked = "";}
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
@@ -2378,7 +2382,7 @@ sub dispCommentNoTemplate {
 		}
 		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Expand/Collapse comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
-		if($user->{mode} ne 'flat' && $args->{children}) {
+		if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
 		}
 	}
