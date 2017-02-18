@@ -2373,7 +2373,7 @@ sub dispCommentNoTemplate {
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
-		if(defined($args->{points}) && $user->{mode} ne "threadtos" && ($args->{points} < $user->{threshold} || $args->{points} < $user->{highlightthresh}) && !$show ) {
+		if(defined($args->{points}) && $user->{mode} ne "threadtos" && $args->{points} < $user->{highlightthresh} && !$show ) {
 			$html_out .= " checked=\"checked\" ";
 		}
 		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {

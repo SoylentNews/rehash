@@ -13652,22 +13652,16 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
                         return 0;
                 }
-		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'thread', 'threadtos', 'threadtng') NOT NULL DEFAULT 'thread'")) {
-                        return 0;
-                }
 		if (!$self->sqlDo("update users_comments set mode = 'threadtos' where mode = 'thread'")) {
                         return 0;
                 }
-		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode ENUM('flat', 'nocomment', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
                         return 0;
                 }
                 if (!$self->sqlDo("UPDATE users_comments SET mode_new = mode")) {
                         return 0;
                 }
-                if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
-                        return 0;
-                }
-                if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'threadtng', 'threadtos') NOT NULL DEFAULT 'threadtos'")) {
+                if (!$self->sqlDo("ALTER TABLE users_comments DROP mode_new")) {
                         return 0;
                 }
 		if (!$self->sqlDo("DELETE FROM vars WHERE name = 'comments_hardcoded'")) {
