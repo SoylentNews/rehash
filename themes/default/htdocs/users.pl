@@ -2108,12 +2108,11 @@ sub editComm {
 		'bytelimit', $formats, $user_edit->{bytelimit}, 1
 	);
 
-	my $h_check  = $user_edit->{hardthresh}		 ? $constants->{markup_checked_attribute} : '';
-	my $r_check  = $user_edit->{reparent}		 ? $constants->{markup_checked_attribute} : '';
 	my $n_check  = $user_edit->{noscores}		 ? $constants->{markup_checked_attribute} : '';
 	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
 	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
 	my $p_check  = $user_edit->{postanon}		 ? $constants->{markup_checked_attribute} : '';
+	my $new_check = $user_edit->{highnew}            ? $constants->{markup_checked_attribute} : '';
 	my $dim_check = $user_edit->{dimread}            ? $constants->{markup_checked_attribute} : '';
 	my $nospell_check = $user_edit->{no_spell}	 ? $constants->{markup_checked_attribute} : '';
 	my $s_mod_check = $user_edit->{mod_with_comm}	 ? $constants->{markup_checked_attribute} : '';
@@ -2129,12 +2128,11 @@ sub editComm {
 		title			=> $title,
 		admin_block		=> $admin_block,
 		user_edit		=> $user_edit,
-		h_check			=> $h_check,
-		r_check			=> $r_check,
 		n_check			=> $n_check,
 		s_check			=> $s_check,
 		b_check			=> $b_check,
 		p_check			=> $p_check,
+		new_check   => $new_check,
 		dim_check		=> $dim_check,
 		s_mod_check		=> $s_mod_check,
 		s_m2_check		=> $s_m2_check,
@@ -2680,10 +2678,9 @@ sub saveComm {
 		posttype		=> $form->{posttype},
 		threshold		=> $form->{uthreshold},
 		nosigs			=> ($form->{nosigs}     ? 1 : 0),
+		highnew			=> ($form->{new}	? 1 : 0),
 		dimread			=> ($form->{dimmed}	? 1 : 0),
-		reparent		=> ($form->{reparent}   ? 1 : 0),
 		noscores		=> ($form->{noscores}   ? 1 : 0),
-		hardthresh		=> ($form->{hardthresh} ? 1 : 0),
 		no_spell		=> ($form->{no_spell}   ? 1 : undef),
 		nobonus			=> ($form->{nobonus} ? 1 : undef),
 		postanon		=> ($form->{postanon} ? 1 : undef),
@@ -3664,3 +3661,4 @@ createEnvironment();
 main();
 
 1;
+

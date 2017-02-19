@@ -31,6 +31,8 @@ IF commentsort.defined                        %]&amp;commentsort=[% commentsort;
 IF mode.defined                               %]&amp;mode=[% mode; END;
 IF startat                                    %]&amp;startat=[% startat; END;
 IF page                                       %]&amp;page=[% page; END;
+IF threshold                                  %]&amp;threshold=[% threshold; END;
+IF highlightthresh                            %]&amp;highlightthresh[% highlightthresh; END;
 IF (user.state.tid && constants.tids_in_urls) %]&amp;tid=[% user.state.tid; END;
 IF comment
 	%]&amp;cid=[% cid;
