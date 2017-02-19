@@ -56,34 +56,37 @@ __template__
 		ELSE; ": <tt>"; user_edit.fakeemail | strip_literal; "</tt>";
 		END %])<br>
 		[% IF !user_edit.emaildisplay.defined;
-			IF user_edit.fakeemail %]
-			<i>(Your current email address was apparently set before
-			users' email addresses were forced to one of the below
-			choices. Please pick one and click Save.)</i><br>
-			[% END;
-			user_edit.emaildisplay = 0;
+				IF user_edit.fakeemail %]
+						<i>(Your current email address was apparently set before
+						users' email addresses were forced to one of the below
+						choices. Please pick one and click Save.)</i><br>
+				[% END;
+				user_edit.emaildisplay = 0;
 		END;
 		IF user_edit.emaildisplay.defined;
 			emaildisplay.${user_edit.emaildisplay} = constants.markup_checked_attribute;
 		END %]
 		<blockquote><div>
 		<input type="radio" name="emaildisplay" value="0"[% emaildisplay.0 %]> Do not display an e-mail address.<br>
-                <input type="radio" name="emaildisplay" value="1"[% emaildisplay.1 %]> Show your email address with random SPAM-armoring applied.<br>
-		[% PROCESS formNote note='This changes weekly' %]
-                <input type="radio" name="emaildisplay" value="2"[% emaildisplay.2 %]> Show your real email address without cowering behind childish anonymity or obfuscation.
+		<input type="radio" name="emaildisplay" value="1"[% emaildisplay.1 %]> Show your email address with random SPAM-armoring applied.<br>
+		<div class="notes">This changes weekly</div>
+		<input type="radio" name="emaildisplay" value="2"[% emaildisplay.2 %]> Show your real email address without cowering behind childish anonymity or obfuscation.
 		</div></blockquote>
+		
 		<label>Highlight New Comments
 		<input type="checkbox" name="new" [% new_check %]>
 		</label>
-		[% PROCESS formNote note='Highlight new comments with *New* Tag' %]
+		<div class="notes">Highlight new comments with *NEW* tag</div>
 		<label>Dim Read Comments
+		
 		<input type="checkbox" name="dimmed" [% dim_check %]>
 		</label>
-		[% PROCESS formNote note='Dim already read comments' %]
+		<div class="notes">Dim already read comments</div>
+		
 		<label>Disable Sigs
 		<input type="checkbox" name="nosigs"[% s_check %]>
 		</label>
-		[% PROCESS formNote note='Strip sig quotes from comments' %]
+		<div class="notes">Strip sig quotes from comments</div>
 
 		[% IF user.is_admin %]
 		<label>Disable Spellchecker <input type="checkbox" name="no_spell"[% nospell_check %]></label>
@@ -92,19 +95,23 @@ __template__
 		<label>Display Mode [% commentmodes_select %]</label>
 
 		<label>Sort Order [% commentsort_select %]</label>
+		
+		<label>Comment Limit <input type="text" name="commentlimit" size="6" value="[% user_edit.commentlimit %]"></label>
+		<div class="notes">
+				Only display this many comments per page (or slightly more to keep threads from splitting). If set above [% constants.breaking %], then it is ignored and this value is used instead.
+		</div>
 
 		<label>Threshold [% uthreshold_select %]</label>
--		<div class="notes">
--			Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Guidelines</a>
--		</div>
+		<div class="notes">
+				Comments scored less than this setting will be ignored.  Anonymous posts start at 0, logged in posts start at 1.  Moderators add and subtract points according to the <a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Guidelines</a>
+		</div>
 
 		<label>Breakthrough [% highlightthresh_select %]</label>
-		[% PROCESS formNote note='Comments scoring this are displayed even if they are in a collapsed thread.' %]
-
+		<div class="notes">Comments scoring this are displayed even if they are in a collapsed thread.</div>
 
 		<label>Do Not Display Scores
 		<input type="checkbox" name="noscores"[% n_check %]></label>
-		[% PROCESS formNote note="Hides score: They still <b>apply</b> you just don't see them." %]
+		<div class="notes">Hides score: They still <b>apply</b> you just don't see them.</div>
 
 		[%# XXX this needs to be flexible for sites that
 		    already have different reasons, in the code.  why
@@ -210,15 +217,6 @@ __template__
 		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
 		[% new_user_bonus_select %] (modifier assigned to new user posts)<br>
 
-		<label>Comment Limit <input type="text" name="commentlimit" size="6" value="[% user_edit.commentlimit %]"></label>
-		<div class="notes">Only display this many comments, for best results, set this to a low number and sort by score) If set above [% constants.breaking %], then it is ignored and [% constants.breaking / 2 %] is used instead.</div>
-
-		<label>Comment Byte Limit [% bytelimit_select %]</label>
-		[% PROCESS formNote note="Number of bytes of comments to display. If this is reached before comment limit, break the page, else use above comment limit." %]
-
-		<label>Index Spill <input type="text" name="commentspill" value="[% user_edit.commentspill %]" size="3"></label>
-		[% PROCESS formNote note="When an article has this many comments, it switches to indexed mode." %]
-
 		<p><b><a name="clsmall">Small Comment Modifier</a></b> (Modifier assigned to smaller comments)<br>
 		<input type="text" name="clsmall" value="[% user_edit.clsmall %]" size="6"> (length of comment in bytes)<br>
 		[% small_length_bonus_select %] (modifier assigned)<br>
@@ -230,7 +228,7 @@ __template__
 		<label>Comment Box Size</label>
 		Columns: <input type="text" name="textarea_cols" size="4" value="[% user_edit.textarea_cols || constants.textarea_cols %]">
 		Rows: <input type="text" name="textarea_rows" size="4" value="[% user_edit.textarea_rows || constants.textarea_rows %]">
-		[% PROCESS formNote note="Also applies to other large text boxes" %]
+		<div class="notes">Also applies to other large text boxes</div>
 
 		<label>Comment Post Mode</label>
 		[% posttype_select %]
