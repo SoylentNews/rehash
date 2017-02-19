@@ -1089,12 +1089,15 @@ The 'linkCommentPages' template block.
 
 sub linkCommentPages {
 	my($sid, $pid, $cid, $total, $pages, $mode, $legacy) = @_;
-	my $user = getCurrentUser();
+	my $threshold = getCurrentForm('threshold');
+	my $highlightthresh = getCurrentForm('highlightthresh');
 
 	return slashDisplay('linkCommentPages', {
 		sid	=> $sid,
 		pid	=> $pid,
 		cid	=> $cid,
+		threshold => $threshold,
+		highlightthresh => $highlightthresh,
 		total	=> $total,
 		tpages	=> $pages,
 		mode	=> $mode,
@@ -1143,8 +1146,6 @@ The 'linkComment' template block.
 
 sub linkComment {
 	my($linkdata, $printcomment, $options) = @_;
-	my $constants = getCurrentStatic();
-	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $adminflag = $user->{seclev} >= 10000 ? 1 : 0;
 
@@ -1723,6 +1724,8 @@ sub linkCommentMiscDefault {
 	my $op = (defined($args->{op}) && $args->{op}) ? "&op=$args->{op}" : "";
 	my $commentsort = (defined($args->{commentsort}) && $args->{commentsort}) ? "&commentsort=$args->{commentsort}" : "";
 	my $mode = (defined($args->{mode}) && $args->{mode}) ? "&mode=$args->{mode}" : "";
+	my $threshold = (defined($args->{threshold}) && $args->{threshold}) ? "&threshold=$args->{threshold}" : "";
+	my $highlightthresh = (defined($args->{highlightthresh}) && $args->{highlightthresh}) ? "&highlightthresh=$args->{highlightthresh}" : "";
 	my $startat = (defined($args->{startat}) && $args->{startat}) ? "&startat=$args->{startat}" : "";
 	my $page = (defined($args->{page}) && $args->{page}) ? "&page=$args->{page}" : "";
 	my $tid = (defined($user->{state}->{tid}) && defined($constants->{tids_in_urls}) && $user->{state}->{tid} && $constants->{tids_in_urls}) ? "&tid=$user->{state}->{tid}" : "";
@@ -1741,7 +1744,7 @@ sub linkCommentMiscDefault {
 		$pid = "&pid=$args->{cid}";
 		$tail = "#post_comment";
 	}	
-	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$startat$page$tid$pid$cid$tail\"$a_onclick>".
+	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$threshold$highlightthresh$startat$page$tid$pid$cid$tail\"$a_onclick>".
 		strip_title($args->{subject}).
 		"</a>";
 

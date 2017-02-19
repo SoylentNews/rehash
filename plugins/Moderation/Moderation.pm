@@ -918,7 +918,9 @@ sub moderateCheck {
 
 	if ($discussion->{type} eq 'archived' &&
 	   !$constants->{comments_moddable_archived} &&
-	   !$form->{meta_mod_only}) {
+	   !$form->{meta_mod_only} &&
+	   !($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited}) #Allow god mode mods on old stories
+	   ) {
 		return { msg => Slash::Utility::Comments::getError('archive_error') };
 	}
 

@@ -1996,7 +1996,7 @@ sub editComm {
 	my $constants = getCurrentStatic();
 	my $user_edit = {};
 	my($formats, $commentmodes_select, $commentsort_select, $title,
-		$highlightthresh_select, $posttype_select,
+		$uthreshold_select, $highlightthresh_select, $posttype_select,
 		$bytelimit_select);
 
 	my $admin_block = '';
@@ -2091,6 +2091,11 @@ sub editComm {
 	);
 
 	$formats = $slashdb->getDescriptions('threshcodes');
+	$uthreshold_select = createSelect(
+		'uthreshold', $formats, $user_edit->{threshold}, 1
+	);
+
+	$formats = $slashdb->getDescriptions('threshcodes');
 	$highlightthresh_select = createSelect(
 		'highlightthresh', $formats, $user_edit->{highlightthresh}, 1
 	);
@@ -2107,6 +2112,7 @@ sub editComm {
 	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
 	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
 	my $p_check  = $user_edit->{postanon}		 ? $constants->{markup_checked_attribute} : '';
+	my $new_check = $user_edit->{highnew}            ? $constants->{markup_checked_attribute} : '';
 	my $dim_check = $user_edit->{dimread}            ? $constants->{markup_checked_attribute} : '';
 	my $nospell_check = $user_edit->{no_spell}	 ? $constants->{markup_checked_attribute} : '';
 	my $s_mod_check = $user_edit->{mod_with_comm}	 ? $constants->{markup_checked_attribute} : '';
@@ -2126,6 +2132,7 @@ sub editComm {
 		s_check			=> $s_check,
 		b_check			=> $b_check,
 		p_check			=> $p_check,
+		new_check   => $new_check,
 		dim_check		=> $dim_check,
 		s_mod_check		=> $s_mod_check,
 		s_m2_check		=> $s_m2_check,
@@ -2134,6 +2141,7 @@ sub editComm {
 		commentmodes_select	=> $commentmodes_select,
 		commentsort_select	=> $commentsort_select,
 		highlightthresh_select	=> $highlightthresh_select,
+		uthreshold_select	=> $uthreshold_select,
 		posttype_select		=> $posttype_select,
 		reasons			=> \@reasons,
 		reason_select		=> \%reason_select,
@@ -2668,7 +2676,9 @@ sub saveComm {
 		highlightthresh		=> $form->{highlightthresh},
 		mode			=> $form->{umode},
 		posttype		=> $form->{posttype},
+		threshold		=> $form->{uthreshold},
 		nosigs			=> ($form->{nosigs}     ? 1 : 0),
+		highnew			=> ($form->{new}	? 1 : 0),
 		dimread			=> ($form->{dimmed}	? 1 : 0),
 		noscores		=> ($form->{noscores}   ? 1 : 0),
 		no_spell		=> ($form->{no_spell}   ? 1 : undef),
@@ -3651,3 +3661,4 @@ createEnvironment();
 main();
 
 1;
+
