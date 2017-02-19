@@ -13646,6 +13646,12 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("UPDATE users_comments SET mode_new = 'threadtos' WHERE mode = 'thread' OR mode = 'nested' OR mode = 'improvedthreaded'")) {
                         return 0;
                 }
+		if (!$self->sqlDo("UPDATE users_comments SET mode_new = 'flat' WHERE mode = 'flat'")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("UPDATE users_comments SET mode_new = 'nocomment' WHERE mode = 'nocomment'")) {
+                        return 0;
+                }
 		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
                         return 0;
                 }
