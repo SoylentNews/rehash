@@ -1252,7 +1252,7 @@ sub displayThread {
 		$below = "";
 		$visible = 0;
 		my $show = 0;
-		if($comments->{$cid}->{pid} == $form->{cid} || $pid == 0) { $show = 1; }
+		if((defined($form->{cid}) && $comments->{$cid}->{pid} == $form->{cid}) || ($user->{mode} ne 'threadtos' && $pid == 0)) { $show = 1; }
 
 		$skipped++;
 		# since threaded shows more comments, we can skip
@@ -1292,10 +1292,8 @@ sub displayThread {
 		}
 		$return .= "$const->{tablebegin}\n<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
 		if ($lvl && $indent) {
-			#$return .= $const->{tablebegin};
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces, visiblekid => $visible, show => $show, lvl => $lvl });
 			$visible ||= $thiscomment->{visible};
-			#$return .= "<li id=\"tree_$comment->{cid}\" class=\"comment\">\n";
 			if(!$thiscomment->{visiblenopass} && !$visible && $user->{mode} eq 'threadtos' && !$show ) {
 				my $kids = $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
 
@@ -1306,18 +1304,29 @@ sub displayThread {
 			}
 			$return .= $thiscomment->{data} . $const->{tableend};
 			$cagedkids = 0;
-		} else {
+		}
+		elsif($user->{mode} eq 'flat' && defined($comment->{points}) && $comment->{points} < $user->{threshold} && $comment->{uid} != $user->{uid}) {
+			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces});
+			$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
+                                "<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
+				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4>
+				</div></div></div>\n";
+			$return .= $thiscomment->{data};
+		}
+		else {
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces, visiblekid => 1, show => 1 });
 			$return .= $thiscomment->{data};
 		}
 		$displayed++; # unless $comment->{dummy};
 
-		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
+		#$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
 		$return .= $below;
 		$return .= "$const->{commentend}" if $finish_list;
-		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
+		#$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 		$visiblepass ||= $visible;
 	}
+	$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
+	$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
 	my $newreturn = {
 		data	=> $return,
 		visible => $visiblepass,
@@ -2349,7 +2358,7 @@ sub dispCommentNoTemplate {
 	my $legacykids = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
-	if(defined($args->{options}->{show}) && $args->{options}->{show}){ $show = 1; }
+	if($user->{mode} ne 'flat' && defined($args->{options}->{show}) && $args->{options}->{show}){ $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon} && $user->{mode} ne 'threadtos') { $show = 1; }
 	
 	# Now shit starts getting squirrely.
@@ -2367,17 +2376,21 @@ sub dispCommentNoTemplate {
 		if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
 			my $checked = "";
 			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
+			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && ($args->{points} >= $user->{highlightthresh} || $show)) { $checked = ""; }
 			if(defined($args->{options}->{visiblekid}) && $args->{options}->{visiblekid}) {$checked = "";}
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
-		if(defined($args->{points}) && $user->{mode} ne "threadtos" && $args->{points} < $user->{highlightthresh} && !$show ) {
+		if(defined($args->{points}) && $user->{mode} eq "threadtng" && $args->{points} < $user->{highlightthresh} && !$show ) {
 			$html_out .= " checked=\"checked\" ";
 		}
-		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
+		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && $args->{lvl} > 1) {
 			$html_out .= " checked=\"checked\" ";
+		}
+		elsif($user->{mode} eq 'flat' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
+			$html_out .= " checked=\"checked\"";
 		}
 		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Expand/Collapse comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
@@ -2460,6 +2473,7 @@ sub dispCommentNoTemplate {
 			can_mod => $args->{can_mod},
 		})."\n</div>\n\n";
 
+	if($user->{mode} eq 'flat') { $visible = 0; $visiblenopass = 0; }
 	my $return = {
 		data		=> $html_out,
 		visible		=> $visible,
