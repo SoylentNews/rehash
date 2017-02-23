@@ -118,15 +118,19 @@ __template__
 			<fieldset>
 				<legend>Display Options</legend>
 				 
-				Threshold/Breakthrough [%
-					Slash.selectThreshold(comments.0.totals);
-					Slash.selectBreakthrough(comments.0.totals);
-					IF user.mode != 'parents' && user.mode != 'child';
-						Slash.selectMode(user.mode);
-					END;
-					Slash.selectSortcode(user.commentsort) %]
-			 
-				[% UNLESS user.is_anon %]
+				[% IF user.mode != 'threadtng' %]
+						Threshold/Breakthrough [%
+						Slash.selectThreshold(comments.0.totals);
+				ELSE %]Breakthrough
+						<input type="hidden" name="threshold" value="[% threshold %]">
+				[% END;
+				Slash.selectBreakthrough(comments.0.totals);
+				IF user.mode != 'parents' && user.mode != 'child';
+					Slash.selectMode(user.mode);
+				END;
+				Slash.selectSortcode(user.commentsort);
+				
+				UNLESS user.is_anon %]
 					Save: <input type="checkbox" name="savechanges" class="button">
 				[%- END %]
 				<input type="submit" name="op" value="Change" class="button">
