@@ -122,7 +122,7 @@ __template__
 						Threshold/Breakthrough [%
 						Slash.selectThreshold(comments.0.totals);
 				ELSE %]Breakthrough
-						<input type="hidden" name="threshold" value="[% threshold %]">
+						<input type="hidden" name="threshold" value="[% user.threshold %]">
 				[% END;
 				Slash.selectBreakthrough(comments.0.totals);
 				IF user.mode != 'parents' && user.mode != 'child';
