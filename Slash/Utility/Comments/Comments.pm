@@ -1252,7 +1252,7 @@ sub displayThread {
 		$below = "";
 		$visible = 0;
 		my $show = 0;
-		if((defined($form->{cid}) && $comments->{$cid}->{pid} == $form->{cid}) || ($user->{mode} ne 'threadtos' && $pid == 0)) { $show = 1; }
+		if(defined($form->{cid}) && $comments->{$cid}->{pid} == $form->{cid}) { $show = 1; }
 
 		$skipped++;
 		# since threaded shows more comments, we can skip
