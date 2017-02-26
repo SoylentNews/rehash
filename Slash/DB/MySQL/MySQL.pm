@@ -13670,11 +13670,11 @@ PRIMARY KEY (discussion_id, uid)
 		if (!$self->sqlDo("ALTER TABLE comments ADD children INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER opid")) {
 			return 0;
 		}
-		my $newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags'")."|spoiler";
+		my $newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags'")."|spoiler|del";
 		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags'")) {
 			return 0;
 		}
-		$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_visible'")."|spoiler";
+		$newTag = $self->sqlSelect('value', 'vars', "name = 'approvedtags_visible'")."|spoiler|del";
 		if (!$self->sqlDo("UPDATE vars SET value = '$newTag' WHERE name = 'approvedtags_visible'")) {
 			return 0;
 		}
