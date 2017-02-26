@@ -225,7 +225,7 @@ a:hover { color: #888;}
   border-left: 1px solid #aaa;
 }
 
-.preview li.comment
+#previewComment .preview
 {
   border-bottom: 1px solid #aaa;
 }

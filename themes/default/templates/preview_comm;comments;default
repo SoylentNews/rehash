@@ -13,12 +13,10 @@ en_US
 __name__
 preview_comm
 __template__
-<ul id="commentlisting" class="preview">
+<div id="commentlisting" class="preview">
 [% options => { 'noCollapse' => 1,};
 	Slash.dispComment(preview, options).data %]
-</li>
-</ul>
-
+</div>
 __seclev__
 1000
 __version__

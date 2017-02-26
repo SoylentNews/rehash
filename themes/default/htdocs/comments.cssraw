@@ -220,7 +220,7 @@ html > body .commentwrap table {
 	list-style-type: none;
 }
 
-.preview li.comment
+#previewComment .preview
 {
 	border-bottom: 1px solid #ddd;
 }
