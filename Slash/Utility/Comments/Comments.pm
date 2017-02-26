@@ -2364,8 +2364,8 @@ sub dispCommentNoTemplate {
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 		if(defined($args->{points}) && $args->{points} >= $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
-                        $visiblenopass = 1;
-                }
+			$visiblenopass = 1;
+		}
 		if(defined($args->{points}) && $args->{points} >= $user->{highlightthresh} && !$show && $user->{mode} eq 'threadtos') {
 			$visible = 1;
 		}
@@ -2406,7 +2406,7 @@ sub dispCommentNoTemplate {
 		$dimmed = "dimmed";
 	}
 	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
-	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4><a name=\"$args->{cid}\">".strip_title($args->{subject})."</a>\n";
+	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\">".strip_title($args->{subject})."\n";
 
 	unless(defined($user->{noscores}) && $user->{noscores}) {
 		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
