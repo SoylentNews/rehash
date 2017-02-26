@@ -13612,52 +13612,52 @@ sub upgradeCoreDB() {
 			return 0;
 		}
 		if(!$self->sqlDo("CREATE TABLE users_comments_read_log (
-uid mediumint(8) unsigned NOT NULL,
-discussion_id mediumint(8) unsigned NOT NULL,
-cid_now int(10) unsigned NOT NULL,
-cid_new int(10) unsigned NOT NULL,
-ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-PRIMARY KEY (discussion_id, uid)
-) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+			uid mediumint(8) unsigned NOT NULL,
+			discussion_id mediumint(8) unsigned NOT NULL,
+			cid_now int(10) unsigned NOT NULL,
+			cid_new int(10) unsigned NOT NULL,
+			ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		§	PRIMARY KEY (discussion_id, uid)
+			) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 		")) {
 			return 0;
 		}
-		#if (!$self->sqlDo("ALTER TABLE users_comments ADD highnew tinyint(4) NOT NULL default 1")) {
-    #                    return 0;
-    #            }
-		#if (!$self->sqlDo("ALTER TABLE users_comments ADD dimread tinyint(4) NOT NULL default 1")) {
-		#	return 0;
-		#}
-		#if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('comment_read_max_age', '30', 'Number of days to save the read state of comments for a user+discussion.')")) {
-		#	return 0;
-		#}
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD highnew tinyint(4) NOT NULL default 1")) {
+                        return 0;
+                }
+		if (!$self->sqlDo("ALTER TABLE users_comments ADD dimread tinyint(4) NOT NULL default 1")) {
+			return 0;
+		}
+		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('comment_read_max_age', '30', 'Number of days to save the read state of comments for a user+discussion.')")) {
+			return 0;
+		}
 		if (!$self->sqlDo("DELETE FROM commentmodes where mode = 'nested' or mode = 'improvedthreaded' or mode = 'thread'")) {
 			return 0;
 		}
 		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtos', 'Threaded-TOS')")) {
-                        return 0;
-                }
-                if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtng', 'Threaded-TNG')")) {
-                        return 0;
-                }
+			return 0;
+		}
+		if (!$self->sqlDo("INSERT INTO commentmodes (mode, name) VALUES ('threadtng', 'Threaded-TNG')")) {
+			return 0;
+		}
 		if (!$self->sqlDo("ALTER TABLE users_comments ADD mode_new ENUM('flat', 'nocomment', 'threadtos', 'threadtng') NOT NULL DEFAULT 'threadtos'")) {
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE users_comments SET mode_new = 'threadtos' WHERE mode = 'thread' OR mode = 'nested' OR mode = 'improvedthreaded'")) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$self->sqlDo("UPDATE users_comments SET mode_new = 'flat' WHERE mode = 'flat'")) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$self->sqlDo("UPDATE users_comments SET mode_new = 'nocomment' WHERE mode = 'nocomment'")) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$self->sqlDo("ALTER TABLE users_comments DROP mode")) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$self->sqlDo("ALTER TABLE users_comments CHANGE mode_new mode ENUM('flat', 'nocomment', 'threadtos', 'threadtng') NOT NULL DEFAULT 'threadtos'")) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$self->sqlDo("DELETE FROM vars WHERE name = 'comments_hardcoded'")) {
 			return 0;
 		}
@@ -13689,7 +13689,7 @@ PRIMARY KEY (discussion_id, uid)
 			if (!$self->sqlDo("UPDATE users_comments SET threshold  = 0 WHERE uid = $acid")) {
 			return 0;
 		}	
-		if (!$self->sqlDo("UPDATE users_comments SET highlightthresh  = 0 WHERE uid = $acid")) {
+		if (!$self->sqlDo("UPDATE users_comments SET highlightthresh  = 2 WHERE uid = $acid")) {
 			return 0;
 		}
 		if (!$self->sqlDo("INSERT INTO vars (name, value, description) VALUES ('story_more', '[Continues...]', 'Text for label when there is extended copy in stories')")) {
@@ -13705,8 +13705,8 @@ PRIMARY KEY (discussion_id, uid)
 			return 0;
 		}
 		if (!$self->sqlDo("UPDATE users_comments SET commentsort = 1 WHERE commentsort = 5")) {
-                        return 0;
-                }
+			return 0;
+		}
 		$core_ver = 2;
 		$upgrades_done++;
 	}
