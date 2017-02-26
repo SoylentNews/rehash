@@ -381,19 +381,19 @@ li.comment input[type=checkbox] ~ label{
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2up.png");
+  background: url("[% constants.imagedir %]/chev2up.png"), no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("[% constants.imagedir %]/chev1down.png");
+	background: url("[% constants.imagedir %]/chev1down.png"), no-repeat;
 	margin-top: .15em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2down.png");
+  background: url("[% constants.imagedir %]/chev2down.png"), no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
