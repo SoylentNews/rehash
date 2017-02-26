@@ -2408,9 +2408,10 @@ sub dispCommentNoTemplate {
 	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
+	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$postnick \n"
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
-	my $nick .= " by $prenick".strip_literal($args->{nickname})."$postnick \n";
+	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
 	
 	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
 	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\">".strip_title($args->{subject})."\n";
@@ -2422,7 +2423,7 @@ sub dispCommentNoTemplate {
 		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
 	}
 
-	$html_out .= "<span class=\"by\">$nick</span>";
+	$html_out .= "<span class=\"by\">$noZoo</span>";
 
 	if($no_collapse ne "noCollapse" && $args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
 		$html_out .= " *NEW*";

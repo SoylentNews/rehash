@@ -86,6 +86,7 @@ html > body .commentwrap table {
 
 .commentTop a, .commentTop a:hover, .commentTop a:visited {
 	color: #fff;
+  text-decoration: none;
 }
 
 .sict_closed {
@@ -308,6 +309,12 @@ input.commentTreeHider:checked~ div.commentDiv .by,
 input.commentHider:checked ~ div.commentDiv .by
 {
 		display:inline
+}
+
+input.commentTreeHider:checked~ div.commentDiv h4,
+input.commentHider:checked ~ div.commentDiv h4
+{
+		font-weight: normal;
 }
 
 input.commentTreeHider:checked ~ label.commentHider
