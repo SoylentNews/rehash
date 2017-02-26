@@ -386,23 +386,23 @@ li.comment input[type=checkbox] ~ label{
 	margin-top: .45em;
 	cursor: pointer;
 	z-index: 3;
-	background: url("[% constants.imagedir %]/chev1up.png"), no-repeat;
+	background: url("[% constants.imagedir %]/chev1up.png") no-repeat;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2up.png"), no-repeat;
+  background: url("[% constants.imagedir %]/chev2up.png") no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("[% constants.imagedir %]/chev1down.png"), no-repeat;
+	background: url("[% constants.imagedir %]/chev1down.png") no-repeat;
 	margin-top: .15em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2down.png"), no-repeat;
+  background: url("[% constants.imagedir %]/chev2down.png") no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
@@ -416,10 +416,10 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 	padding-left: .6em;
 }
 
-#comments .nbutton,
-#comments .button,
-#comments button,
-#comments select
+#comments .nbutton, #article .nbutton, #pollBooth .nbutton, #journal .nbutton,
+#comments .button, #article .button, #pollBooth .button, #journal .button,
+#comments button, #article button, #pollBooth button, #journal button,
+#comments select, #article select, #pollBooth select, #journal .select
 {
 	margin-right: .5em
 }
