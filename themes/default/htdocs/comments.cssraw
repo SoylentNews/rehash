@@ -415,7 +415,7 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 }
 
 .dimmed {
-	opacity: 0.6;
+	opacity: 0.75;
 }
 
 .noCollapse .commentTop .title h4
