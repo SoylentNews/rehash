@@ -84,9 +84,8 @@ html > body .commentwrap table {
 	background:#aaa;
 }
 
-.commentTop a, .commentTop a:hover {
+.commentTop a, .commentTop a:hover, .commentTop a:visited {
 	color: #fff;
-	text-decoration: none;
 }
 
 .sict_closed {
@@ -160,7 +159,7 @@ html > body .commentwrap table {
 	background: #fff;
 	font-size: .875em;
 	overflow-y: auto;
-	max-height: 300px;
+	max-height: 1000px;
 }
 
 .generalbody .commentBody {
@@ -221,7 +220,7 @@ html > body .commentwrap table {
 	list-style-type: none;
 }
 
-.preview li.comment
+#previewComment .preview
 {
 	border-bottom: 1px solid #ddd;
 }
@@ -301,6 +300,15 @@ ul#commentlisting
 
 
 /* Collapsible comments */
+.by {
+		display:none;
+}
+
+input.commentTreeHider:checked~ div.commentDiv .by,
+input.commentHider:checked ~ div.commentDiv .by
+{
+		display:inline
+}
 
 input.commentTreeHider:checked ~ label.commentHider
 {
@@ -382,19 +390,19 @@ li.comment input[type=checkbox] ~ label{
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2up.png");
+  background: url("[% constants.imagedir %]/chev2up.png"), no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("[% constants.imagedir %]/chev1down.png");
+	background: url("[% constants.imagedir %]/chev1down.png"), no-repeat;
 	margin-top: .15em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2down.png");
+  background: url("[% constants.imagedir %]/chev2down.png"), no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
@@ -406,4 +414,12 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 .noCollapse .commentTop .title h4
 {
 	padding-left: .6em;
+}
+
+#comments .nbutton,
+#comments .button,
+#comments button,
+#comments select
+{
+	margin-right: .5em
 }

@@ -142,7 +142,7 @@ a:hover { color: #000; }
 
 }
 
-.preview li.comment
+#previewComment .preview
 {
     border-bottom: 1px solid #aaa;
 }

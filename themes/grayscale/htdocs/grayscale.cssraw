@@ -188,7 +188,7 @@ input[type="submit"], button, .logout a, div.storylinks ul li.more a {
 	border-left-color: rgba(0,0,0,0.2);
 }
 
-.preview li.comment
+#previewComment .preview
 {
 	border-bottom: none;
 }

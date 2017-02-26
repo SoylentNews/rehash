@@ -133,7 +133,7 @@ input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a,
 }
 
 
-.commentTop .title h4
+.commentTop .title h4, .commentTop a, .commentTop a:hover, .commentTop a:visited
 {
     color: #ffa200;
 }
@@ -179,7 +179,7 @@ input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a,
 
 }
 
-.preview li.comment
+#previewComment .preview
 {
     border-bottom: 1px solid #ffc200;
 }

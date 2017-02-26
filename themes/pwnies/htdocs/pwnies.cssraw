@@ -146,7 +146,7 @@ input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more 
 
 }
 
-.preview li.comment
+#previewComment .preview
 {
     border-bottom: 1px solid #aaa;
 }
