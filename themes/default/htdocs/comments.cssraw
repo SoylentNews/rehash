@@ -300,6 +300,14 @@ ul#commentlisting
 
 
 /* Collapsible comments */
+.by {
+		display:none;
+}
+
+input.commentHider:checked ~ div.commentDiv .by
+{
+		display:inline
+}
 
 input.commentTreeHider:checked ~ label.commentHider
 {
