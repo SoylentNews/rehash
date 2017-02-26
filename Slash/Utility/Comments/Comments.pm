@@ -2422,7 +2422,7 @@ sub dispCommentNoTemplate {
 		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
 	}
 
-	$html_out .= "<span class=\"by\">$nick</span>;
+	$html_out .= "<span class=\"by\">$nick</span>";
 
 	if($no_collapse ne "noCollapse" && $args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
 		$html_out .= " *NEW*";
