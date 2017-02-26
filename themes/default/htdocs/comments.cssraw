@@ -159,8 +159,7 @@ html > body .commentwrap table {
 	padding: 1em .8em .1em .8em;
 	background: #fff;
 	font-size: .875em;
-	overflow-y: auto;
-	max-height: 1000px;
+
 }
 
 .generalbody .commentBody {
