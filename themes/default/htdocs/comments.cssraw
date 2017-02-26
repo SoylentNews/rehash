@@ -304,6 +304,7 @@ ul#commentlisting
 		display:none;
 }
 
+input.commentTreeHider:checked~ div.commentDiv .by,
 input.commentHider:checked ~ div.commentDiv .by
 {
 		display:inline
