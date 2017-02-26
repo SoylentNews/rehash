@@ -1742,8 +1742,11 @@ sub linkCommentMiscDefault {
 	}
 	elsif(defined($args->{subject}) && $args->{subject} eq 'Reply to This') {
 		$pid = "&pid=$args->{cid}";
+	}
+	if(defined($args->{op}) && lc($args->{op}) eq 'reply') {
 		$tail = "#post_comment";
-	}	
+	}
+	
 	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$threshold$highlightthresh$startat$page$tid$pid$cid$tail\"$a_onclick>".
 		strip_title($args->{subject}).
 		"</a>";

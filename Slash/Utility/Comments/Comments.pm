@@ -2268,13 +2268,10 @@ sub printCommComments {
 	}
 
 	if($args->{cid}) {
-		
 		my $commentdata = dispComment($args->{comment});
-		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n".
-		"<li id=\"tree_$args->{cid}\" class=\"comment\">\n".
+		$html_out .= "<ul id=\"commentlisting\" >\n<li id=\"tree_$args->{cid}\" class=\"comment\">\n".
 		$commentdata->{data}.
 		"\n<div class=\"comment_footer\">\n$next_prev_links\n</div>\n$mod_comment_log\n";
-		
 	}
 	
 	$html_out .= $args->{lcp};
