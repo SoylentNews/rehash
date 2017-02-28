@@ -1160,7 +1160,7 @@ sub linkComment {
 	$linkdata->{highlightthresh} = $form->{highlightthresh} if defined($form->{highlightthresh});
 	$linkdata->{mode} = $form->{mode} if defined($form->{mode});
 	$linkdata->{commentsort} = $form->{commentsort} if defined($form->{commentsort});
-	$linkdata->{page} = $form->{page} if (!defined($linkdata->{page}) && (defined($form->{page});
+	$linkdata->{page} = $form->{page} if (!defined($linkdata->{page}) && defined($form->{page}));
 
 	if (!$options->{noextra}) {
 		%$linkdata = (%$linkdata,
