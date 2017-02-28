@@ -37,7 +37,7 @@ __template__
 				subject => p,
 				subject_only => 1,
 				startat => (start ? start : 0),
-				lcp     => 1,
+				linktop => 1,
 			}) %]
 		[% END %]
 	[% END %]
@@ -60,7 +60,7 @@ __template__
 				subject => (p),
 				subject_only => 1,
 				page	=> (p),
-				lcp   => 1,
+				linktop => 1,
 			}) %]
 		[% ELSE %]
 			<b>([% p %])</b>

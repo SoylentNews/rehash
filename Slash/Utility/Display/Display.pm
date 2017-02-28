@@ -1751,7 +1751,7 @@ sub linkCommentMiscDefault {
 	if(defined($args->{op}) && lc($args->{op}) eq 'reply') {
 		$tail = "#post_comment";
 	}
-		if(defined($args->{lcp}) && lc($args->{lcp})) {
+		if(defined($args->{linktop}) && lc($args->{linktop})) {
 		$tail = "#commentlisting";
 	}
 	
