@@ -1752,7 +1752,7 @@ sub linkCommentMiscDefault {
 		$tail = "#post_comment";
 	}
 		if(defined($args->{linktop}) && lc($args->{linktop})) {
-		$tail = "#commentlisting";
+		$tail = "#commentwrap";
 	}
 	
 	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$threshold$highlightthresh$startat$page$tid$pid$cid$tail\"$a_onclick>".
