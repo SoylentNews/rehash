@@ -1732,7 +1732,7 @@ sub linkCommentMiscDefault {
 	my $threshold = defined($args->{threshold}) ? "&threshold=$args->{threshold}" : "";
 	my $highlightthresh = defined($args->{highlightthresh}) ? "&highlightthresh=$args->{highlightthresh}" : "";
 	my $startat = defined($args->{startat}) ? "&startat=$args->{startat}" : "";
-	my $page = (defined($args->{page}) && !(defined($args->{subject}) && $args->{subject} eq 'Reply')) ? "&page=$args->{page}" : "";
+	my $page = (defined($args->{page}) && !(defined($args->{subject}) && ($args->{subject} eq 'Reply' || $args->{subject} eq 'Reply to Article'))) ? "&page=$args->{page}" : "";
 	my $tid = (defined($user->{state}->{tid}) && defined($constants->{tids_in_urls}) && $user->{state}->{tid} && $constants->{tids_in_urls}) ? "&tid=$user->{state}->{tid}" : "";
 	my $a_onclick = defined($args->{onclick}) ? " onclick=\"$args->{onclick}\"" : "";
 	my ($cid, $pid, $tail) = ("", "", "");
