@@ -20,33 +20,34 @@ __name__
 linkCommentPages
 __template__
 [% IF !((total < user.commentlimit) || (user.commentlimit < 1)) && (legacy == "yes") %]
-        [% pages = total / user.commentlimit %]
-        <div class="linkCommentPage">
-        [% FOREACH p = [1 .. pages] %]
-                [% start = user.commentlimit * p %]
-                [% IF p != 0 %] | [% END %]
-                [% IF start == form.startat || (!form.startat && p == 0) %]
-                        <b>([% p %])</b>
-                [% ELSE %]
-                        [% Slash.linkComment({
-                                sid     => sid,
-                                pid     => pid,
-                                cid     => cid,
+	[% pages = total / user.commentlimit %]
+	<div class="linkCommentPage">
+	[% FOREACH p = [1 .. pages] %]
+		[% start = user.commentlimit * p %]
+		[% IF p != 0 %] | [% END %]
+		[% IF start == form.startat || (!form.startat && p == 0) %]
+			<b>([% p %])</b>
+		[% ELSE %]
+			[% Slash.linkComment({
+				sid     => sid,
+				pid     => pid,
+				cid     => cid,
 				threshold => threshold,
 				highlightthresh = highlightthresh,
-                                subject => p,
-                                subject_only => 1,
-                                startat => (start ? start : 0),
-                        }) %]
-                [% END %]
-        [% END %]
+				subject => p,
+				subject_only => 1,
+				startat => (start ? start : 0),
+				lcp     => 1,
+			}) %]
+		[% END %]
+	[% END %]
 
-        [% IF user.breaking %]
-                ([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
-        [% END %]
-        </div>
+	[% IF user.breaking %]
+		([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
+	[% END %]
+	</div>
 [% ELSIF (legacy == "no") %]
-        <div class="linkCommentPage">
+	<div class="linkCommentPage">
 	[% form.page = (form.page || 1) %]
 	[% FOREACH p = [1 .. tpages] %]
 		[% IF p != form.page %]
@@ -55,10 +56,11 @@ __template__
 				pid	=> pid,
 				cid	=> cid,
 				threshold => threshold,
-                                highlightthresh = highlightthresh,
+				highlightthresh = highlightthresh,
 				subject => (p),
-                                subject_only => 1,
+				subject_only => 1,
 				page	=> (p),
+				lcp   => 1,
 			}) %]
 		[% ELSE %]
 			<b>([% p %])</b>

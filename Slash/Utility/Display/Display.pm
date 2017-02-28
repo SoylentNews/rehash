@@ -1147,6 +1147,7 @@ The 'linkComment' template block.
 sub linkComment {
 	my($linkdata, $printcomment, $options) = @_;
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 	my $adminflag = $user->{seclev} >= 10000 ? 1 : 0;
 
 	# don't inherit these ...
@@ -1154,13 +1155,17 @@ sub linkComment {
 
 	$linkdata->{pid}     = $linkdata->{original_pid} || $linkdata->{pid};
 	$linkdata->{comment} = defined($printcomment) && $printcomment ? $linkdata->{comment} : "";
+	
+	$linkdata->{threshold} = $form->{threshold} if defined($form->{threshold});
+	$linkdata->{highlightthresh} = $form->{highlightthresh} if defined($form->{highlightthresh});
+	$linkdata->{mode} = $form->{mode} if defined($form->{mode});
+	$linkdata->{commentsort} = $form->{commentsort} if defined($form->{commentsort});
+	$linkdata->{page} = $form->{page} if defined($form->{page});
 
 	if (!$options->{noextra}) {
 		%$linkdata = (%$linkdata,
 			adminflag	=> $adminflag,
 			date		=> $options->{date},
-			commentsort	=> $user->{commentsort},
-			mode		=> $user->{mode},
 		);
 	}
 
@@ -1745,6 +1750,9 @@ sub linkCommentMiscDefault {
 	}
 	if(defined($args->{op}) && lc($args->{op}) eq 'reply') {
 		$tail = "#post_comment";
+	}
+		if(defined($args->{lcp}) && lc($args->{lcp})) {
+		$tail = "#commentlisting";
 	}
 	
 	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$threshold$highlightthresh$startat$page$tid$pid$cid$tail\"$a_onclick>".
