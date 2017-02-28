@@ -2256,8 +2256,9 @@ sub printCommComments {
 		$html_out .= "<form id=\"commentform\" name=\"commentform\" action=\"$gSkin->{rootdir}/comments.pl\" method=\"post\">\n";
 		if(defined($form->{threshold})) { $html_out .= "<input type=\"hidden\" name=\"threshold\" value=\"$form->{threshold}\">\n"; }
 		if(defined($form->{highlightthresh})) { $html_out .= "<input type=\"hidden\" name=\"highlightthresh\" value=\"$form->{highlightthresh}\">\n"; }
-		if(defined($form->{page})) { $html_out .= "<input type=\"hidden\" name=\"page\" value=\"$form->{page}\">\n"; }
+		if(defined($form->{commentsort})) { $html_out .= "<input type=\"hidden\" name=\"commentsort\" value=\"$form->{commentsort}\">\n"; }
 		if(defined($form->{mode})) { $html_out .= "<input type=\"hidden\" name=\"mode\" value=\"$form->{mode}\">\n"; }
+		if(defined($form->{page})) { $html_out .= "<input type=\"hidden\" name=\"page\" value=\"$form->{page}\">\n"; }
 	}
 
 	if(!$constants->{modal_prefs_active}) {

@@ -1147,6 +1147,7 @@ The 'linkComment' template block.
 sub linkComment {
 	my($linkdata, $printcomment, $options) = @_;
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 	my $adminflag = $user->{seclev} >= 10000 ? 1 : 0;
 
 	# don't inherit these ...
@@ -1154,13 +1155,17 @@ sub linkComment {
 
 	$linkdata->{pid}     = $linkdata->{original_pid} || $linkdata->{pid};
 	$linkdata->{comment} = defined($printcomment) && $printcomment ? $linkdata->{comment} : "";
+	
+	$linkdata->{threshold} = $form->{threshold} if defined($form->{threshold});
+	$linkdata->{highlightthresh} = $form->{highlightthresh} if defined($form->{highlightthresh});
+	$linkdata->{mode} = $form->{mode} if defined($form->{mode});
+	$linkdata->{commentsort} = $form->{commentsort} if defined($form->{commentsort});
+	$linkdata->{page} = $form->{page} if (!defined($linkdata->{page}) && defined($form->{page}));
 
 	if (!$options->{noextra}) {
 		%$linkdata = (%$linkdata,
 			adminflag	=> $adminflag,
 			date		=> $options->{date},
-			commentsort	=> $user->{commentsort},
-			mode		=> $user->{mode},
 		);
 	}
 
@@ -1719,17 +1724,17 @@ sub linkCommentMiscDefault {
 	my $constants = getCurrentStatic();
 	my $html_out = "";
 
-	my $a_id = (defined($args->{a_id}) && $args->{a_id}) ? " id=\"$args->{a_id}\"" : "";
-	my $a_class = (defined($args->{a_class}) && $args->{a_class}) ? " class=\"$args->{a_class}\"" : "";
-	my $op = (defined($args->{op}) && $args->{op}) ? "&op=$args->{op}" : "";
-	my $commentsort = (defined($args->{commentsort}) && $args->{commentsort}) ? "&commentsort=$args->{commentsort}" : "";
-	my $mode = (defined($args->{mode}) && $args->{mode}) ? "&mode=$args->{mode}" : "";
-	my $threshold = (defined($args->{threshold}) && $args->{threshold}) ? "&threshold=$args->{threshold}" : "";
-	my $highlightthresh = (defined($args->{highlightthresh}) && $args->{highlightthresh}) ? "&highlightthresh=$args->{highlightthresh}" : "";
-	my $startat = (defined($args->{startat}) && $args->{startat}) ? "&startat=$args->{startat}" : "";
-	my $page = (defined($args->{page}) && $args->{page}) ? "&page=$args->{page}" : "";
+	my $a_id = defined($args->{a_id}) ? " id=\"$args->{a_id}\"" : "";
+	my $a_class = defined($args->{a_class})  ? " class=\"$args->{a_class}\"" : "";
+	my $op = defined($args->{op}) ? "&op=$args->{op}" : "";
+	my $commentsort = defined($args->{commentsort}) ? "&commentsort=$args->{commentsort}" : "";
+	my $mode = defined($args->{mode}) ? "&mode=$args->{mode}" : "";
+	my $threshold = defined($args->{threshold}) ? "&threshold=$args->{threshold}" : "";
+	my $highlightthresh = defined($args->{highlightthresh}) ? "&highlightthresh=$args->{highlightthresh}" : "";
+	my $startat = defined($args->{startat}) ? "&startat=$args->{startat}" : "";
+	my $page = (defined($args->{page}) && !(defined($args->{subject}) && ($args->{subject} eq 'Reply' || $args->{subject} eq 'Reply to Article'))) ? "&page=$args->{page}" : "";
 	my $tid = (defined($user->{state}->{tid}) && defined($constants->{tids_in_urls}) && $user->{state}->{tid} && $constants->{tids_in_urls}) ? "&tid=$user->{state}->{tid}" : "";
-	my $a_onclick = (defined($args->{onclick}) && $args->{onclick}) ? " onclick=\"$args->{onclick}\"" : "";
+	my $a_onclick = defined($args->{onclick}) ? " onclick=\"$args->{onclick}\"" : "";
 	my ($cid, $pid, $tail) = ("", "", "");
 	
 	if(defined($args->{subject}) && $args->{subject} =~ /^#\d+$/) {
@@ -1745,6 +1750,9 @@ sub linkCommentMiscDefault {
 	}
 	if(defined($args->{op}) && lc($args->{op}) eq 'reply') {
 		$tail = "#post_comment";
+	}
+		if(defined($args->{linktop}) && lc($args->{linktop})) {
+		$tail = "#commentwrap";
 	}
 	
 	$html_out .= "<a$a_id$a_class href=\"$gSkin->{rootdir}/comments.pl?noupdate=1&sid=$args->{sid}$op$commentsort$mode$threshold$highlightthresh$startat$page$tid$pid$cid$tail\"$a_onclick>".
