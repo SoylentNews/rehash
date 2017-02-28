@@ -311,7 +311,8 @@ input.commentHider:checked ~ div.commentDiv .by
 }
 
 input.commentTreeHider:checked~ div.commentDiv h4,
-input.commentHider:checked ~ div.commentDiv h4
+input.commentHider:checked ~ div.commentDiv h4,
+.commentbt h4
 {
 		font-weight: normal;
 }
