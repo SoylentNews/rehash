@@ -1724,17 +1724,17 @@ sub linkCommentMiscDefault {
 	my $constants = getCurrentStatic();
 	my $html_out = "";
 
-	my $a_id = (defined($args->{a_id}) && $args->{a_id}) ? " id=\"$args->{a_id}\"" : "";
-	my $a_class = (defined($args->{a_class}) && $args->{a_class}) ? " class=\"$args->{a_class}\"" : "";
-	my $op = (defined($args->{op}) && $args->{op}) ? "&op=$args->{op}" : "";
+	my $a_id = defined($args->{a_id}) ? " id=\"$args->{a_id}\"" : "";
+	my $a_class = defined($args->{a_class})  ? " class=\"$args->{a_class}\"" : "";
+	my $op = defined($args->{op}) ? "&op=$args->{op}" : "";
 	my $commentsort = defined($args->{commentsort}) ? "&commentsort=$args->{commentsort}" : "";
-	my $mode = (defined($args->{mode}) && $args->{mode}) ? "&mode=$args->{mode}" : "";
+	my $mode = defined($args->{mode}) ? "&mode=$args->{mode}" : "";
 	my $threshold = defined($args->{threshold}) ? "&threshold=$args->{threshold}" : "";
 	my $highlightthresh = defined($args->{highlightthresh}) ? "&highlightthresh=$args->{highlightthresh}" : "";
-	my $startat = (defined($args->{startat}) && $args->{startat}) ? "&startat=$args->{startat}" : "";
-	my $page = (defined($args->{page}) && $args->{page}) ? "&page=$args->{page}" : "";
+	my $startat = defined($args->{startat}) ? "&startat=$args->{startat}" : "";
+	my $page = (defined($args->{page}) && !(defined($args->{subject}) && $args->{subject} eq 'Reply')) ? "&page=$args->{page}" : "";
 	my $tid = (defined($user->{state}->{tid}) && defined($constants->{tids_in_urls}) && $user->{state}->{tid} && $constants->{tids_in_urls}) ? "&tid=$user->{state}->{tid}" : "";
-	my $a_onclick = (defined($args->{onclick}) && $args->{onclick}) ? " onclick=\"$args->{onclick}\"" : "";
+	my $a_onclick = defined($args->{onclick}) ? " onclick=\"$args->{onclick}\"" : "";
 	my ($cid, $pid, $tail) = ("", "", "");
 	
 	if(defined($args->{subject}) && $args->{subject} =~ /^#\d+$/) {
