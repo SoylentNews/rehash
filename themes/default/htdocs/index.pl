@@ -726,7 +726,8 @@ sub displayStories {
 				sid		=> $story->{sid},
 				tid		=> $story->{tid},
 				'link'		=> $story->{commentcount} || 0,
-				skin		=> $story->{primaryskid}
+				skin		=> $story->{primaryskid},
+				linktop	=> 1
 			}, '', $ls_other);
 
 			push @commentcount_link, $thresh, ($story->{commentcount} || 0);
