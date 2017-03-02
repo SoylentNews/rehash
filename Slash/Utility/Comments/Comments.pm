@@ -2628,10 +2628,6 @@ sub dispCommentDetails {
 		$html_out .= " (".linkComment({
 			sid => $args->{sid},
 			cid => $args->{cid},
-			threshold => defined($form->{threshold}) ? $form->{threshold} : "",
-			highlightthresh => defined($form->{highlightthresh}) ? $form->{highlightthresh} : "",
-			mode => defined($form->{mode}) ? $form->{mode} : "",
-			commentsort => defined($form->{commentsort}) ? $form->{commentsort} : "",
 			subject => "#$args->{cid}",
 			subject_only => 1,
 		}, 0, { noextra => 1 }).")";
