@@ -936,6 +936,39 @@ sub _can_mod {
 	return 1;
 }
 
+
+sub _can_mod_any {
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	
+	return 0 if
+		    $user->{is_anon}
+		||	!$constants->{m1}
+		||	_is_mod_banned($user)
+		||	$user->{state}->{discussion_future_nopost};
+	
+	# More easy tests.  If any of these is true, the user has
+	# authorization to mod any comments, regardless of any of
+	# the tests that come later.
+	return 1 if
+		    $constants->{authors_unlimited}
+		&&  $user->{seclev} >= $constants->{authors_unlimited};
+	return 1 if
+		    $user->{acl}{modpoints_always};
+
+	# OK, the user is an ordinary user, so see if they have mod
+	# points and do some other fairly ordinary tests to try to
+	# rule out whether they can mod.
+	
+	return 0 if $user->{points} <= 0 || !$user->{willing};
+	
+	return 0 if
+		   !$constants->{comments_moddable_archived}
+		&&  $user->{state}{discussion_archived};
+
+	
+	return 1;
+}
 #========================================================================
 
 =head2 printComments(SID [, PID, CID])
@@ -1117,7 +1150,8 @@ sub printComments {
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
 	# Short circuited because you have to loop through every last comment on archived pages --TMB
-	my $can_mod_any = 1;
+	# Well that needs some more tests so create a new sub to do them --paulej72
+	my $can_mod_any = _can_mod_any();
 	#my $can_mod_any = _can_mod($comment);
 	#if (!$can_mod_any) {
 	#	CID: for my $cid (keys %$comments) {
@@ -2594,10 +2628,6 @@ sub dispCommentDetails {
 		$html_out .= " (".linkComment({
 			sid => $args->{sid},
 			cid => $args->{cid},
-			threshold => defined($form->{threshold}) ? $form->{threshold} : "",
-			highlightthresh => defined($form->{highlightthresh}) ? $form->{highlightthresh} : "",
-			mode => defined($form->{mode}) ? $form->{mode} : "",
-			commentsort => defined($form->{commentsort}) ? $form->{commentsort} : "",
 			subject => "#$args->{cid}",
 			subject_only => 1,
 		}, 0, { noextra => 1 }).")";

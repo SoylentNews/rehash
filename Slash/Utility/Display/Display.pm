@@ -615,6 +615,10 @@ sub linkStory {
 		}
 	}
 
+	if (defined($story_link->{linktop}) && $story_link->{linktop}){
+		$url .= "#commentwrap";
+	}
+	
 	my @extra_attrs_allowed = qw( title class id );
 	if ($render) {
 		my $rendered = '<a href="' . strip_attribute($url) . '"';

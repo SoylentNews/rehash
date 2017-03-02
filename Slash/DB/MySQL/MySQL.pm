@@ -6335,15 +6335,15 @@ sub getFlatCommentsForUser {
 		$thisopid = $self->sqlSelect("opid", "comments", "cid=$cid");
 	}
 
-	if($pages > 1) {
-		if(defined($form->{page}) && $form->{page} > 1 && $form->{page} <= $pages) {
-			my $skip = int($form->{page} - 1) * $user->{commentlimit};
-			$other = "ORDER BY comments.cid $order_dir LIMIT $skip, $user->{commentlimit}";
-		}
-		else {
-			$other = "ORDER BY comments.cid $order_dir LIMIT $user->{commentlimit}";
-		}
+
+	if(defined($form->{page}) && $form->{page} > 1 && $form->{page} <= $pages && !$cid) {
+		my $skip = int($form->{page} - 1) * $user->{commentlimit};
+		$other = "ORDER BY comments.cid $order_dir LIMIT $skip, $user->{commentlimit}";
 	}
+	else {
+		$other = "ORDER BY comments.cid $order_dir LIMIT $user->{commentlimit}";
+	}
+
 
         my $select = " comments.cid, date, date as time, subject, nickname, "
                 . "homepage, fakeemail, users.uid AS uid, sig, "
@@ -6362,7 +6362,7 @@ sub getFlatCommentsForUser {
         
 	my $where;
 	if ($cid) {
-		$where = "sid=$sid_quoted AND (comments.opid=$thisopid OR comments.cid=$thisopid)";
+		$where = "sid=$sid_quoted AND (comments.pid=$cid OR comments.cid=$cid)";
 	}
 	else {
 		$where = "sid=$sid_quoted";
@@ -6374,34 +6374,6 @@ sub getFlatCommentsForUser {
 
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
 	
-	# Okay, we pulled too many comments if $cid was set and $one_cid_only was not.
-	# This pares them down to only what we want.
-	if($cid && !$one_cid_only) {
-		my $newcomments = [];
-		my $temphr = {};
-		# Put everything in a hash for easier chain walking.
-		# We could do this with map but I suck at map.
-		foreach my $C (@$comments) {
-			$temphr->{$C->{cid}} = $C;
-		}
-		
-		foreach my $C (keys %$temphr) {
-			next if $C->{children} != 0;
-			my $tempcomments = [];
-			my $walker = $C;
-			while(1) {
-				push(@$tempcomments, $walker);
-				last if $walker->{pid} == 0;
-				$walker = $C->{$walker->{pid}};
-				last if $walker->{cid} == $cid;
-			}
-			if($walker->{pid} == 0 && $walker->{cid} != $cid) {
-				next;
-			}
-			push(@$newcomments, @$tempcomments);
-		}
-		$comments = $newcomments;
-	}
 
         return ($comments, $pages);
 }
@@ -6447,12 +6419,12 @@ sub getCommentsForUser {
 	my $where = "sid=$sid_quoted";
 
 	if ($cid && $one_cid_only) {
-		$where .= "AND cid=$cid";
+		$where .= "AND comments.cid=$cid";
 	} elsif ($user->{hardthresh}) {
 		my $threshold_q = $self->sqlQuote($user->{threshold});
 		$where .= "AND (comments.points >= $threshold_q";
 		$where .= "  OR comments.uid=$user->{uid}"	unless $user->{is_anon};
-		$where .= "  OR cid=$cid"			if $cid;
+		$where .= "  OR comments.cid=$cid"			if $cid;
 		$where .= ")";
 	}
 

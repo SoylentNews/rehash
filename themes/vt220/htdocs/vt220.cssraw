@@ -248,10 +248,13 @@ input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a,
 	border: 1px solid #ffc200;
 }
 
-#journal .article h3
+#journal .article h3,
+#journal .article h3 a,
+#journal .article h3 a:visited
 {
 	color: #ffc200;
 	font-size: 1em;
+	text-decoration: none;
 }
 
 .article .details, .search-results .data
