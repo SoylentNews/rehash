@@ -7502,24 +7502,20 @@ sub getStoriesEssentials {
 #print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid\n";
 
 		# Need both tables.
-		$tables = "story_topics_rendered, stories";
+		$tables = "stories";
 
 		if (@$tid_x) {
 			# If we are excluding any topics, then add a LEFT JOIN
-			# against another copy of story_topics_rendered and
-			# allow only stories which don't fall into it.
+			# No Left JOIN, do a sub query --paulej72
 			my $tid_x_str = join(",", @$tid_x);
-			$tables .= " LEFT JOIN story_topics_rendered AS strx
-					ON stories.stoid=strx.stoid
-					AND strx.tid IN ($tid_x_str)";
-			push @stories_where, "strx.stoid IS NULL";
+			push @stories_where, "stories.stoid != (SELECT story_topics_rendered.stoid FROM story_topics_rendered WHERE story_topics_rendered.tid IN ($tid_x_str))";
 		}
 
 		# If we'd done multiple SELECTs, this logic would have been
 		# done on the story_topics_rendered table;  as it is, these
 		# phrases have to go into the JOIN.
-		push @stories_where, "stories.stoid = story_topics_rendered.stoid";
-		push @stories_where, $tid_in_where;
+		# No JOIN, do a sub query --paulej72
+		push @stories_where, "stories.stoid = (SELECT story_topics_rendered.stoid FROM story_topics_rendered WHERE $tid_in_where)"
 
 		# The logic can return multiple story_topics_rendered rows
 		# with the same stoid, and if it does, group them together
