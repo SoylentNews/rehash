@@ -399,28 +399,30 @@ li.comment input[type=checkbox] ~ label{
 	margin-top: .45em;
 	cursor: pointer;
 	z-index: 3;
-	background: url("[% constants.imagedir %]/chev1up.png") no-repeat;
+	background: url("[% constants.imagedir %]/minus.png") no-repeat;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2up.png") no-repeat;
+  background: url("[% constants.imagedir %]/minusminus.png") no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("[% constants.imagedir %]/chev1down.png") no-repeat;
+	background: url("[% constants.imagedir %]/plus.png") no-repeat;
 	margin-top: .15em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2down.png") no-repeat;
+  background: url("[% constants.imagedir %]/plusplus.png") no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
 
-.commentTop .title h4 label.commentHider {
+.commentTop .title h4 label.commentHider,
+.commentbt h4 label
+{
 	padding-top: 0;
 	display: inline;
 	cursor: pointer;
