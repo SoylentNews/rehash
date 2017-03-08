@@ -399,23 +399,23 @@ li.comment input[type=checkbox] ~ label{
 	margin-top: .45em;
 	cursor: pointer;
 	z-index: 3;
-	background: url("[% constants.imagedir %]/minus.png") no-repeat;
+	background: url("[% constants.imagedir %]/cminus.png") no-repeat;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/minusminus.png") no-repeat;
+  background: url("[% constants.imagedir %]/cminusminus.png") no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("[% constants.imagedir %]/plus.png") no-repeat;
+	background: url("[% constants.imagedir %]/cplus.png") no-repeat;
 	margin-top: .15em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/plusplus.png") no-repeat;
+  background: url("[% constants.imagedir %]/cplusplus.png") no-repeat;
 	margin-left:28px;
 	z-index: 3;
 }
