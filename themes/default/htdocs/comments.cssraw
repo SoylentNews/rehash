@@ -422,6 +422,8 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 
 .commentTop .title h4 label.commentHider {
 	padding-top: 0;
+	display: inline;
+	cursor: pointer;
 }
 
 .dimmed {

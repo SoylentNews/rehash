@@ -2459,7 +2459,7 @@ sub dispCommentNoTemplate {
 	$html_out .= "<span class=\"by\">$noZoo</span>";
 
 	if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
-		$html_out .= " <div class=\"newBadge\">*New*</sapn>";
+		$html_out .= " <div class=\"newBadge\">*New*</div>";
 	}
 	
 	if($args->{marked_spam} && $user->{seclev} >= 500) {
