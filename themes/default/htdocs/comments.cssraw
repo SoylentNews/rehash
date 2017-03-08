@@ -106,7 +106,7 @@ html > body .commentwrap table {
 {
 	color: #fff;
 	display: block;
-	padding: .3em .6em .3em 55px;
+	padding: .3em .6em .3em 65px;
 	overflow-y: hidden;
 }
 
@@ -394,9 +394,10 @@ li.comment input.commentTreeHider {
 
 li.comment input[type=checkbox] ~ label{
 	position:absolute;
-	width:16px;
+	width:18px;
+	min-height: 18px;
 	margin-left:10px;
-	margin-top: .45em;
+	margin-top: .4em;
 	cursor: pointer;
 	z-index: 3;
 	background: url("[% constants.imagedir %]/cminus.png") no-repeat;
@@ -404,19 +405,19 @@ li.comment input[type=checkbox] ~ label{
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
   background: url("[% constants.imagedir %]/cminusminus.png") no-repeat;
-	margin-left:28px;
+	margin-left:37px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
 	background: url("[% constants.imagedir %]/cplus.png") no-repeat;
-	margin-top: .15em;
+	margin-top: .1em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
   background: url("[% constants.imagedir %]/cplusplus.png") no-repeat;
-	margin-left:28px;
+	margin-left:37px;
 	z-index: 3;
 }
 
@@ -430,11 +431,6 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 
 .dimmed {
 	opacity: 0.75;
-}
-
-.noCollapse .commentTop .title h4
-{
-	padding-left: .6em;
 }
 
 .noCollapse .commentTop .title h4
