@@ -1333,7 +1333,8 @@ sub displayThread {
 
 				$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
 				"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
-				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold $kids</h4>
+				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\">".
+				"<h4><label class=\"commentBelow\" for=\"commentBelow_$comment->{cid}\">Comment Below Threshold $kids</label></h4>
 				</div></div></div>\n";
 			}
 			$return .= $thiscomment->{data} . $const->{tableend};
@@ -1342,8 +1343,9 @@ sub displayThread {
 		elsif($user->{mode} eq 'flat' && defined($comment->{points}) && $comment->{points} < $user->{threshold} && $comment->{uid} != $user->{uid}) {
 			my $thiscomment = dispComment($comment, { noshow => $noshow, pieces => $pieces});
 			$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
-                                "<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
-				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4>
+				"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
+				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\">".
+				"<label class=\"commentBelow\" for=\"commentBelow_$comment->{cid}\">Comment Below Threshold</label></h4>
 				</div></div></div>\n";
 			$return .= $thiscomment->{data};
 		}

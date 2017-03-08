@@ -316,9 +316,9 @@ input.commentHider:checked ~ div.commentDiv .by
 		display:inline
 }
 
-input.commentTreeHider:checked~ div.commentDiv h4,
-input.commentHider:checked ~ div.commentDiv h4,
-.commentbt h4
+input.commentTreeHider:checked~ div.commentDiv h4 label,
+input.commentHider:checked ~ div.commentDiv h4 label,
+.commentbt h4 label
 {
 		font-weight: normal;
 }
