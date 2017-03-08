@@ -1468,10 +1468,11 @@ sub postProcessComment {
 		$comm->{sig} = Slash::getData('sigdash', '', 'comments')
 			. $comm->{sig};
 	}
+	
+	$comm->{comment} = parseDomainTags($comm->{comment}, !$comm->{anon} && $comm->{fakeemail});
 
 	if (!$from_db) {
-		$comm->{comment} = parseDomainTags($comm->{comment},
-			!$comm->{anon} && $comm->{fakeemail});
+		
 
 		my $extras = [];
 		my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
