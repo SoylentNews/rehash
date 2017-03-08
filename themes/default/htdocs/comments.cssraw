@@ -316,9 +316,9 @@ input.commentHider:checked ~ div.commentDiv .by
 		display:inline
 }
 
-input.commentTreeHider:checked~ div.commentDiv h4 label,
-input.commentHider:checked ~ div.commentDiv h4 label,
-.commentbt h4 label
+input.commentTreeHider:checked~ div.commentDiv h4,
+input.commentHider:checked ~ div.commentDiv h4,
+.commentbt h4
 {
 		font-weight: normal;
 }
@@ -421,13 +421,13 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 	z-index: 3;
 }
 
-.commentTop .title h4 label.commentHider,
-.commentTop .title h4 label.commentTreeHider,
+.commentTop .title h4 label,
 .commentbt h4 label
 {
 	padding-top: 0;
 	display: inline;
 	cursor: pointer;
+	font-weight: inherit;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentTreeHider
