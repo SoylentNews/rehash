@@ -422,11 +422,23 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 }
 
 .commentTop .title h4 label.commentHider,
+.commentTop .title h4 label.commentTreeHider,
 .commentbt h4 label
 {
 	padding-top: 0;
 	display: inline;
 	cursor: pointer;
+}
+
+li.comment input[type=checkbox].commentTreeHider:checked ~ .commentTop .title h4 label.commentTreeHider
+{
+  display:inline;
+}
+
+.commentTop .title h4 label.commentTreeHider,
+li.comment input[type=checkbox].commentTreeHider:checked ~ .commentTop .title h4 label.commentHider
+{
+  display:none;
 }
 
 .dimmed {

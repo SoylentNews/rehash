@@ -2449,8 +2449,10 @@ sub dispCommentNoTemplate {
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
 	
 	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
-	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."\n";
-
+	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+	if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
+		$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+	}
 	unless(defined($user->{noscores}) && $user->{noscores}) {
 		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
 		my $modal_end = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "</a>" : "";
@@ -2481,7 +2483,7 @@ sub dispCommentNoTemplate {
 		nickname => $comment_user->{nickname},
 		ipid_display => $args->{ipid_display},
 	});
-	$html_out .= "</label></h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
+	$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
 
 	my $sig;
 	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
