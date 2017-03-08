@@ -121,6 +121,12 @@ html > body .commentwrap table {
   float: right;	
 }
 
+.commentTop .title h4 .newBadge
+{
+  float: right;	
+	padding-left: 1em;
+}
+
 .commentTop .details {
 	font-size: .75em;
 	margin: 0;
@@ -414,8 +420,17 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 	z-index: 3;
 }
 
+.commentTop .title h4 label.commentHider {
+	padding-top: 0;
+}
+
 .dimmed {
 	opacity: 0.75;
+}
+
+.noCollapse .commentTop .title h4
+{
+	padding-left: .6em;
 }
 
 .noCollapse .commentTop .title h4

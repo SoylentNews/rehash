@@ -2440,13 +2440,14 @@ sub dispCommentNoTemplate {
 	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
-	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$postnick \n";
+	my $noZooPN = !$args->{is_anon} ? "</a>" : "";
+	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$noZooPN\n";
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
 	
 	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
-	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\">".strip_title($args->{subject})."\n";
+	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."\n";
 
 	unless(defined($user->{noscores}) && $user->{noscores}) {
 		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
@@ -2457,10 +2458,10 @@ sub dispCommentNoTemplate {
 
 	$html_out .= "<span class=\"by\">$noZoo</span>";
 
-	if($no_collapse ne "noCollapse" && $args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
-		$html_out .= " *NEW*";
+	if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
+		$html_out .= " <div class=\"newBadge\">*New*</sapn>";
 	}
-
+	
 	if($args->{marked_spam} && $user->{seclev} >= 500) {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
 	}
@@ -2478,7 +2479,7 @@ sub dispCommentNoTemplate {
 		nickname => $comment_user->{nickname},
 		ipid_display => $args->{ipid_display},
 	});
-	$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
+	$html_out .= "</label></h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
 
 	my $sig;
 	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
