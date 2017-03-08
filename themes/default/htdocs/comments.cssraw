@@ -430,13 +430,13 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHide
 	cursor: pointer;
 }
 
-li.comment input[type=checkbox].commentTreeHider:checked ~ .commentTop .title h4 label.commentTreeHider
+li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentTreeHider
 {
   display:inline;
 }
 
 .commentTop .title h4 label.commentTreeHider,
-li.comment input[type=checkbox].commentTreeHider:checked ~ .commentTop .title h4 label.commentHider
+li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentHider
 {
   display:none;
 }
