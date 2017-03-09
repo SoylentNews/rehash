@@ -96,7 +96,7 @@ sub selectCommentsNew {
 	};
 	# We also need to build a cid list for sending to saveCommentReadLog.
 	# Let's cheat though and only put the one cid we care about in the array.
-        # We don't have all the current comments so this needs to be a separate db call.
+	# We don't have all the current comments so this needs to be a separate db call.
 	my @cids = ();
 	if ($options->{force_read_from_master}) {
 		($thisComment, $pages) = $slashdb->getThreadedCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
@@ -247,7 +247,7 @@ sub selectCommentsFlat {
 	};
 	# We also need to build a cid list for sending to saveCommentReadLog.
 	# Let's cheat though and only put the one cid we care about in the array.
-        # We don't have all the current comments so this needs to be a separate db call.
+	# We don't have all the current comments so this needs to be a separate db call.
 	my @cids = ();
 	if ($options->{force_read_from_master}) {
 		($thisComment, $pages) = $slashdb->getFlatCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
@@ -1182,19 +1182,19 @@ sub printComments {
 	#}, { Return => 1 });
 	# NO MOAR TEMPLATES
 	my $pccArgs = {
-                can_moderate    => $can_mod_any,
-                comment         => $comment,
-                comments        => $comments,
-                'next'          => $next,
-                previous        => $previous,
-                sid             => $discussion->{id},
-                cid             => $cid,
-                pid             => $pid,
-                cc              => $cc,
-                lcp             => $lcp,
-                lvl             => $lvl,
-                anon_dump       => $anon_dump
-        };
+		can_moderate    => $can_mod_any,
+		comment         => $comment,
+		comments        => $comments,
+		'next'          => $next,
+		previous        => $previous,
+		sid             => $discussion->{id},
+		cid             => $cid,
+		pid             => $pid,
+		cc              => $cc,
+		lcp             => $lcp,
+		lvl             => $lvl,
+		anon_dump       => $anon_dump
+	};
 	$comment_html .= printCommComments($pccArgs);
 
 	return $comment_html if $options->{Return};
@@ -1473,7 +1473,6 @@ sub postProcessComment {
 
 	if (!$from_db) {
 		
-
 		my $extras = [];
 		my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
 		$extras = $slashdb->getNexusExtrasForChosen(
@@ -1890,15 +1889,15 @@ sub dispComment {
 	#COMMENT TEMPLATES MUST DIE
 	my $args = {
 		%$comment,
-                marked_spam     => $marked_spam,
-                comment_shrunk  => $comment_shrunk,
-                reasons         => $reasons,
-                reasons_html    => $reasons_html,
-                can_mod         => $can_mod,
-                is_anon         => isAnon($comment->{uid}),
-                options         => $options,
-                cid_now         => $dim->{cid_now},
-                subscriber_badge => $subscriber_badge,
+		marked_spam     => $marked_spam,
+		comment_shrunk  => $comment_shrunk,
+		reasons         => $reasons,
+		reasons_html    => $reasons_html,
+		can_mod         => $can_mod,
+		is_anon         => isAnon($comment->{uid}),
+		options         => $options,
+		cid_now         => $dim->{cid_now},
+		subscriber_badge => $subscriber_badge,
 		children	=> $comment->{children},
 		lvl		=> $options->{lvl},
 	};
@@ -2527,9 +2526,9 @@ sub dispCommentNoTemplate {
 sub zooIcons {
 	my $args = shift;
 	my $form = getCurrentForm();
-        my $user = getCurrentUser();
-        my $constants = getCurrentStatic();
-        my $gSkin = getCurrentSkin();
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $slashdb = getCurrentDB();
 	my $user_person = $slashdb->getUser($args->{person});
 	my $implied = defined($args->{implied}) ? $args->{implied} : -90210;
@@ -2564,55 +2563,55 @@ sub zooIcons {
 				$html_out .= "<span class=\"zooicon friend\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/friend.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 			# Foe
-                        if($user->{people}->{FOE()}->{$args->{person}} && $implied != FOE() ) {
-                                if($bonus && $user->{people_bonus_foe}) {
-                                        $zootitle = "Foe ($user->{people_bonus_foe})";
-                                }
-                                else {
-                                        $zootitle = "Foe";
-                                }
-                                $html_out .= "<span class=\"zooicon foe\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/foe.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
-                        }
+			if($user->{people}->{FOE()}->{$args->{person}} && $implied != FOE() ) {
+				if($bonus && $user->{people_bonus_foe}) {
+					$zootitle = "Foe ($user->{people_bonus_foe})";
+				}
+				else {
+					$zootitle = "Foe";
+				}
+				$html_out .= "<span class=\"zooicon foe\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/foe.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
 			# Fan
-                        if($user->{people}->{FAN()}->{$args->{person}} && $implied != FAN() ) {
-                                if($bonus && $user->{people_bonus_fan}) {
-                                        $zootitle = "Fan ($user->{people_bonus_fan})";
-                                }
-                                else {
-                                        $zootitle = "Fan";
-                                }
-                                $html_out .= "<span class=\"zooicon fan\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fan.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
-                        }
+			if($user->{people}->{FAN()}->{$args->{person}} && $implied != FAN() ) {
+				if($bonus && $user->{people_bonus_fan}) {
+					$zootitle = "Fan ($user->{people_bonus_fan})";
+				}
+				else {
+					$zootitle = "Fan";
+				}
+				$html_out .= "<span class=\"zooicon fan\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fan.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
 			# Freak
-                        if($user->{people}->{FREAK()}->{$args->{person}} && $implied != FREAK() ) {
-                                if($bonus && $user->{people_bonus_freak}) {
-                                        $zootitle = "Freak ($user->{people_bonus_freak})";
-                                }
-                                else {
-                                        $zootitle = "Freak";
-                                }
-                                $html_out .= "<span class=\"zooicon freak\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/freak.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
-                        }
+			if($user->{people}->{FREAK()}->{$args->{person}} && $implied != FREAK() ) {
+				if($bonus && $user->{people_bonus_freak}) {
+					$zootitle = "Freak ($user->{people_bonus_freak})";
+				}
+				else {
+					$zootitle = "Freak";
+				}
+				$html_out .= "<span class=\"zooicon freak\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/freak.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
 			# Friend of Friend
-                        if($user->{people}->{FOF()}->{$args->{person}} && $implied != FOF() ) {
-                                if($bonus && $user->{people_bonus_fof}) {
-                                        $zootitle = "Friend of Friend ($user->{people_bonus_fof})";
-                                }
-                                else {
-                                        $zootitle = "Friend of Friend";
-                                }
-                                $html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
-                        }
+			if($user->{people}->{FOF()}->{$args->{person}} && $implied != FOF() ) {
+				if($bonus && $user->{people_bonus_fof}) {
+					$zootitle = "Friend of Friend ($user->{people_bonus_fof})";
+				}
+				else {
+					$zootitle = "Friend of Friend";
+				}
+				$html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
 			# Enemy of Friend
-                        if($user->{people}->{EOF()}->{$args->{person}} && $implied != EOF() ) {
-                                if($bonus && $user->{people_bonus_eof}) {
-                                        $zootitle = "Enemy of Friend ($user->{people_bonus_eof})";
-                                }
-                                else {
-                                        $zootitle = "Enemy of Friend";
-                                }
-                                $html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
-                        }
+			if($user->{people}->{EOF()}->{$args->{person}} && $implied != EOF() ) {
+				if($bonus && $user->{people_bonus_eof}) {
+					$zootitle = "Enemy of Friend ($user->{people_bonus_eof})";
+				}
+				else {
+					$zootitle = "Enemy of Friend";
+				}
+				$html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+			}
 		}
 	}
 	return $html_out;
@@ -2620,7 +2619,7 @@ sub zooIcons {
 
 sub dispCommentDetails {
 	my $args = shift;
-        my $constants = getCurrentStatic();
+	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $html_out = "";
 
