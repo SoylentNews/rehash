@@ -106,7 +106,7 @@ html > body .commentwrap table {
 {
 	color: #fff;
 	display: block;
-	padding: .3em .6em .3em 55px;
+	padding: .3em .6em .3em 65px;
 	overflow-y: hidden;
 }
 
@@ -119,6 +119,12 @@ html > body .commentwrap table {
 .commentTop .title h4 .spam
 {
   float: right;	
+}
+
+.commentTop .title h4 .newBadge
+{
+  float: right;	
+	padding-left: 1em;
 }
 
 .commentTop .details {
@@ -388,30 +394,51 @@ li.comment input.commentTreeHider {
 
 li.comment input[type=checkbox] ~ label{
 	position:absolute;
-	width:16px;
+	width:18px;
+	min-height: 18px;
 	margin-left:10px;
-	margin-top: .45em;
+	margin-top: .4em;
 	cursor: pointer;
 	z-index: 3;
-	background: url("[% constants.imagedir %]/chev1up.png") no-repeat;
+	background: url("[% constants.imagedir %]/cminus.png") no-repeat;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2up.png") no-repeat;
-	margin-left:28px;
+  background: url("[% constants.imagedir %]/cminusminus.png") no-repeat;
+	margin-left:37px;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox]:checked ~ label{
-	background: url("[% constants.imagedir %]/chev1down.png") no-repeat;
-	margin-top: .15em;
+	background: url("[% constants.imagedir %]/cplus.png") no-repeat;
+	margin-top: .1em;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
-  background: url("[% constants.imagedir %]/chev2down.png") no-repeat;
-	margin-left:28px;
+  background: url("[% constants.imagedir %]/cplusplus.png") no-repeat;
+	margin-left:37px;
 	z-index: 3;
+}
+
+.commentTop .title h4 label,
+.commentbt h4 label
+{
+	padding-top: 0;
+	display: inline;
+	cursor: pointer;
+	font-weight: inherit;
+}
+
+li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentTreeHider
+{
+  display:inline;
+}
+
+.commentTop .title h4 label.commentTreeHider,
+li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentHider
+{
+  display:none;
 }
 
 .dimmed {
