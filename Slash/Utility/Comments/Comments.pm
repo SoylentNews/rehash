@@ -1889,17 +1889,17 @@ sub dispComment {
 	#COMMENT TEMPLATES MUST DIE
 	my $args = {
 		%$comment,
-		marked_spam     => $marked_spam,
-		comment_shrunk  => $comment_shrunk,
-		reasons         => $reasons,
-		reasons_html    => $reasons_html,
-		can_mod         => $can_mod,
-		is_anon         => isAnon($comment->{uid}),
-		options         => $options,
-		cid_now         => $dim->{cid_now},
+		marked_spam      => $marked_spam,
+		comment_shrunk   => $comment_shrunk,
+		reasons          => $reasons,
+		reasons_html     => $reasons_html,
+		can_mod          => $can_mod,
+		is_anon          => isAnon($comment->{uid}),
+		options          => $options,
+		cid_now          => $dim->{cid_now},
 		subscriber_badge => $subscriber_badge,
-		children	=> $comment->{children},
-		lvl		=> $options->{lvl},
+		children	       => $comment->{children},
+		lvl		           => $options->{lvl},
 	};
 	$return = dispCommentNoTemplate($args);
 	my $newreturn = {
@@ -2465,7 +2465,7 @@ sub dispCommentNoTemplate {
 	if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
 		$html_out .= " <div class=\"newBadge\">*New*</div>";
 	}
-	
+
 	if($args->{marked_spam} && $user->{seclev} >= 500) {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
 	}
