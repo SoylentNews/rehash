@@ -1898,8 +1898,8 @@ sub dispComment {
 		options          => $options,
 		cid_now          => $dim->{cid_now},
 		subscriber_badge => $subscriber_badge,
-		children	       => $comment->{children},
-		lvl		           => $options->{lvl},
+		children         => $comment->{children},
+		lvl              => $options->{lvl},
 	};
 	$return = dispCommentNoTemplate($args);
 	my $newreturn = {
