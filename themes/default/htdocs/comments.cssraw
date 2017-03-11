@@ -110,6 +110,11 @@ html > body .commentwrap table {
 	overflow-y: hidden;
 }
 
+.commentTop .title h4.noTH
+{
+  padding-left: 37px;
+}
+
 .commentTop .title h4 .score,
 .commentTop .title h4 .by,
 .commentTop .title h4 .spam{

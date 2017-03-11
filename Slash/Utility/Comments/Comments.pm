@@ -1334,7 +1334,7 @@ sub displayThread {
 				$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
 				"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
 				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\">".
-				"<h4><label class=\"commentBelow\" for=\"commentBelow_$comment->{cid}\">Comment Below Threshold $kids</label></h4>
+				"<h4 class=\"noTH\"><label class=\"commentBelow\" for=\"commentBelow_$comment->{cid}\">Comment Below Threshold $kids</label></h4>
 				</div></div></div>\n";
 			}
 			$return .= $thiscomment->{data} . $const->{tableend};
@@ -1345,7 +1345,7 @@ sub displayThread {
 			$return .= "<input id=\"commentBelow_$comment->{cid}\" type=\"checkbox\" class=\"commentBelow\" checked=\"checked\" autocomplete=\"off\" />\n".
 				"<label class=\"commentBelow\" title=\"Load comment\" for=\"commentBelow_$comment->{cid}\"> </label>\n".
 				"<div id=\"comment_below_$comment->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\">".
-				"<label class=\"commentBelow\" for=\"commentBelow_$comment->{cid}\">Comment Below Threshold</label></h4>
+				"<h4 class=\"noTH\"><label class=\"commentBelow\" for=\"commentBelow_$comment->{cid}\">Comment Below Threshold</label></h4>
 				</div></div></div>\n";
 			$return .= $thiscomment->{data};
 		}
@@ -2407,7 +2407,10 @@ sub dispCommentNoTemplate {
 		if(!defined($args->{children}) || !$args->{children}) {
 			$legacykids = $slashdb->sqlSelect("1", "comments", "pid = $args->{cid} group by pid");
 		}
-		if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
+		my $treeHiderOn = $user->{mode} ne 'flat' && ($args->{children} || $legacykids);
+		my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : "";
+		
+		if($treeHiderOn) {
 			my $checked = "";
 			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && !$show) { $checked = "checked=\"checked\""; }
@@ -2428,7 +2431,7 @@ sub dispCommentNoTemplate {
 		}
 		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Expand/Collapse comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
-		if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
+		if($treeHiderOn) {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
 		}
 	}
@@ -2449,8 +2452,8 @@ sub dispCommentNoTemplate {
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
 	
 	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
-	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
-	if($user->{mode} ne 'flat' && ($args->{children} || $legacykids)) {
+	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"$treeHiderOffText><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+	if($treeHiderOn) {
 		$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
 	}
 	unless(defined($user->{noscores}) && $user->{noscores}) {
