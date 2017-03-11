@@ -2413,7 +2413,7 @@ sub dispCommentNoTemplate {
 		
 		my $checked = "";
 		if($treeHiderOn) {
-			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
+			if($args->{lvl} >= 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && ($args->{points} >= $user->{highlightthresh} || $show)) { $checked = ""; }
 			if(defined($args->{options}->{visiblekid}) && $args->{options}->{visiblekid}) {$checked = "";}
@@ -2424,7 +2424,7 @@ sub dispCommentNoTemplate {
 		if(defined($args->{points}) && $user->{mode} eq "threadtng" && $args->{points} < $user->{highlightthresh} && !$show && !$checked) {
 			$html_out .= " checked=\"checked\" ";
 		}
-		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && $args->{lvl} > 1 && !$checked) {
+		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && $args->{lvl} >= 1 && !$checked) {
 			$html_out .= " checked=\"checked\" ";
 		}
 		elsif($user->{mode} eq 'flat' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && !$checked) {
