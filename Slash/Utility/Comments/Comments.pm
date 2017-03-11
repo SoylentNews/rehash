@@ -2411,8 +2411,8 @@ sub dispCommentNoTemplate {
 			$visible = 1;
 		}
 		
+		my $checked = "";
 		if($treeHiderOn) {
-			my $checked = "";
 			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && ($args->{points} >= $user->{highlightthresh} || $show)) { $checked = ""; }
@@ -2421,13 +2421,13 @@ sub dispCommentNoTemplate {
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
-		if(defined($args->{points}) && $user->{mode} eq "threadtng" && $args->{points} < $user->{highlightthresh} && !$show ) {
+		if(defined($args->{points}) && $user->{mode} eq "threadtng" && $args->{points} < $user->{highlightthresh} && !$show && !$checked) {
 			$html_out .= " checked=\"checked\" ";
 		}
-		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && $args->{lvl} > 1) {
+		elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && $args->{lvl} > 1 && !$checked) {
 			$html_out .= " checked=\"checked\" ";
 		}
-		elsif($user->{mode} eq 'flat' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show) {
+		elsif($user->{mode} eq 'flat' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && !$checked) {
 			$html_out .= " checked=\"checked\"";
 		}
 		$html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Expand/Collapse comment\" for=\"commentHider_$args->{cid}\"> </label>";
