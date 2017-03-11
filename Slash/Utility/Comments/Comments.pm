@@ -2395,6 +2395,9 @@ sub dispCommentNoTemplate {
 	if($user->{mode} ne 'flat' && defined($args->{options}->{show}) && $args->{options}->{show}){ $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon} && $user->{mode} ne 'threadtos') { $show = 1; }
 	
+	my $treeHiderOn = $user->{mode} ne 'flat' && ($args->{children} || $legacykids);
+	my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : "";
+	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 		if(defined($args->{points}) && $args->{points} >= $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
@@ -2407,8 +2410,6 @@ sub dispCommentNoTemplate {
 		if(!defined($args->{children}) || !$args->{children}) {
 			$legacykids = $slashdb->sqlSelect("1", "comments", "pid = $args->{cid} group by pid");
 		}
-		my $treeHiderOn = $user->{mode} ne 'flat' && ($args->{children} || $legacykids);
-		my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : "";
 		
 		if($treeHiderOn) {
 			my $checked = "";
