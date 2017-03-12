@@ -312,12 +312,12 @@ sub selectCommentsFlat {
 
 		# The comment pushes itself onto its parent's
 		# kids array.
-		#push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
+		push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
 
 		# Increment the parent comment's count of visible kids.
 		# All kids are now technically visible.
 		# Previously invisible kids will now simply be collapsed.
-		#$comments->{$C->{pid}}{visiblekids}++;
+		$comments->{$C->{pid}}{visiblekids}++;
 		push(@{$comments->{0}{kids}}, $C->{cid});
 		$comments->{0}{visiblekids}++;
 	}
