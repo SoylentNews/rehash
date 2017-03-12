@@ -312,12 +312,12 @@ sub selectCommentsFlat {
 
 		# The comment pushes itself onto its parent's
 		# kids array.
-		push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
+		push @{$comments->{$C->{pid}}{kids}}, $C->{cid} if $cid;
 
 		# Increment the parent comment's count of visible kids.
 		# All kids are now technically visible.
 		# Previously invisible kids will now simply be collapsed.
-		$comments->{$C->{pid}}{visiblekids}++;
+		$comments->{$C->{pid}}{visiblekids}++ if $cid;
 		push(@{$comments->{0}{kids}}, $C->{cid});
 		$comments->{0}{visiblekids}++;
 	}
@@ -1306,8 +1306,7 @@ sub displayThread {
 		my($noshow, $pieces) = (0, 0);
 		
 		# This has to go before we build this comment
-		if ($comment->{kids} && (($user->{mode} ne 'parents' && $user->{mode} ne 'flat') || $pid)) {
-			# Don't thread for flat --paulej72
+		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			# Ewww, recursion when rendering comments is not a good thing. --TMB
 			my $thread = displayThread($sid, $cid, $lvl+1, $comments, $const);
 			
