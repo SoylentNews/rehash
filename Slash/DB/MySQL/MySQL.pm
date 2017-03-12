@@ -6329,8 +6329,6 @@ sub getFlatCommentsForUser {
 	my $fpages =  $self->sqlSelect("count(*)", "comments", "sid=$sid_quoted") / $user->{commentlimit};
 	my $pages = $fpages != int($fpages) ? int($fpages) + 1 : $fpages;
 
-
-
 	if(defined($form->{page}) && $form->{page} > 1 && $form->{page} <= $pages && !$cid) {
 		my $skip = int($form->{page} - 1) * $user->{commentlimit};
 		$other = "ORDER BY comments.cid $order_dir LIMIT $skip, $user->{commentlimit}";
@@ -6338,7 +6336,6 @@ sub getFlatCommentsForUser {
 	else {
 		$other = "ORDER BY comments.cid $order_dir LIMIT $user->{commentlimit}";
 	}
-
 
 	my $select = " comments.cid, date, date as time, subject, nickname, "
 		. "homepage, fakeemail, users.uid AS uid, sig, "
@@ -6358,9 +6355,9 @@ sub getFlatCommentsForUser {
 	my $where;
 	# If they asked for one comment pull only that opid's thread
 	if ($cid) {
-		my $theseopids = $self->sqlSelect("opid", "comments", "cid=$cid");
-		if($theseopids == "0") {$theseopids = $cid;}
-		$where = "sid=$sid_quoted AND (comments.cid=$cid OR comments.opid=$theseopids)";
+		my $theseopid = $self->sqlSelect("opid", "comments", "cid=$cid");
+		if($theseopid == "0") {$theseopid = $cid;}
+		$where = "sid=$sid_quoted AND (comments.cid=$cid OR comments.opid=$theseopid)";
 	}
 	else {
 		$where = "sid=$sid_quoted";
