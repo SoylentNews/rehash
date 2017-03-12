@@ -6360,7 +6360,7 @@ sub getFlatCommentsForUser {
 	if ($cid) {
 		my $theseopids = $self->sqlSelect("opid", "comments", "cid=$cid");
 		if($theseopids == "0") {$theseopids = $cid;}
-		$where = "sid=$sid_quoted AND (comments.pid=$cid OR comments.opid=$theseopids)";
+		$where = "sid=$sid_quoted AND (comments.cid=$cid OR comments.opid=$theseopids)";
 	}
 	else {
 		$where = "sid=$sid_quoted";
