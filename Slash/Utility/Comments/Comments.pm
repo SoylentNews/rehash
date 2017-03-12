@@ -1306,7 +1306,8 @@ sub displayThread {
 		my($noshow, $pieces) = (0, 0);
 		
 		# This has to go before we build this comment
-		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
+		if ($comment->{kids} && ($user->{mode} ne 'parents' || $user->{mode} ne 'flat' || $pid)) {
+			# Don't tread for flat --paulej72
 			# Ewww, recursion when rendering comments is not a good thing. --TMB
 			my $thread = displayThread($sid, $cid, $lvl+1, $comments, $const);
 			
