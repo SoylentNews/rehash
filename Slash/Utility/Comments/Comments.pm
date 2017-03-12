@@ -311,13 +311,18 @@ sub selectCommentsFlat {
 		$comments->{$C->{cid}}{visiblekids} = 0;
 
 		# The comment pushes itself onto its parent's
-		# kids array.
-		push @{$comments->{$C->{pid}}{kids}}, $C->{cid} if $cid;
-
+		# kids array for when cid is set and we need its thread.
 		# Increment the parent comment's count of visible kids.
 		# All kids are now technically visible.
 		# Previously invisible kids will now simply be collapsed.
-		$comments->{$C->{pid}}{visiblekids}++ if $cid;
+		
+		if ($cid){
+			push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
+			$comments->{$C->{pid}}{visiblekids}++;
+		}
+
+		# For normal mode root [0] is the parent for all and no other kids
+		# are set.
 		push(@{$comments->{0}{kids}}, $C->{cid});
 		$comments->{0}{visiblekids}++;
 	}
