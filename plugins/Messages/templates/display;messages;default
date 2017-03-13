@@ -20,7 +20,7 @@ __template__
 	<div class="message_subject" <b>[% message.subject %]</b><br/>
 		sent by <b>[% constants.sitename %] Message System</b> on [% Slash.timeCalc(message.date) %]
 	</div>
-	<div class="message_body"
+	<div class="message_body">
 		[% message.message %]
 	</div>	
 	<div class="message_footer">
