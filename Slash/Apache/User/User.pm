@@ -449,7 +449,9 @@ sub handler {
 	createCurrentCookie($cookies);
 	createEnv($r) if $cfg->{env};
 	# These next two lines set a CSP for users, unless they are an admin who needs inline scripts for the admin bells and whistles
-	if(!$user->{is_admin}) { $r->headers_out->set('Content-Security-Policy', "default-src 'none'; script-src https://checkout.stripe.com; frame-src https://checkout.stripe.com; connect-src https://checkout.stripe.com; img-src 'self' https://www.paypalobjects.com https://q.stripe.com; style-src 'unsafe-inline' 'self' https://checkout.stripe.com");}
+	# This next line is correct. Changing it temporarily until we can get all the resources coming from the domain requested instead of the base domain
+	#if(!$user->{is_admin}) { $r->headers_out->set('Content-Security-Policy', "default-src 'none'; script-src https://checkout.stripe.com; frame-src https://checkout.stripe.com; connect-src https://checkout.stripe.com; img-src 'self' https://www.paypalobjects.com https://q.stripe.com; style-src 'unsafe-inline' 'self' https://checkout.stripe.com");}
+	if(!$user->{is_admin}) { $r->headers_out->set('Content-Security-Policy', "default-src 'none'; script-src https://checkout.stripe.com; frame-src https://checkout.stripe.com; connect-src https://checkout.stripe.com; img-src 'self' https://soylentnews.org https://www.soylentnews.org http://7rmath4ro2of2a42.onion https://www.paypalobjects.com https://q.stripe.com; style-src 'unsafe-inline' 'self' https://soylentnews.org https://www.soylentnews.org http://7rmath4ro2of2a42.onion https://checkout.stripe.com");}
         else{ $r->headers_out->unset('Content-Security-Policy');}
 	add_author_quotes($r) if $form->{slashcode_authors};
 
