@@ -66,7 +66,7 @@ __template__
 				<p><b>[% question | strip_title %]</b></p>
 				<ul>
 					[% FOREACH ans = answers %]
-						<li><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]&from=rss">[% END %][% ans.answer | strip_title %][% IF fromrss %]</a>[% END %]</li>
+						<li><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;reskey=[% rkey.reskey %]">[% END %][% ans.answer | strip_title %][% IF fromrss %]</a>[% END %]</li>
 					[% END %]
 				</ul>
 				<p>
