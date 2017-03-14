@@ -1189,6 +1189,9 @@ sub editStory {
 			$storyref->{$field} = balanceTags($storyref->{$field});
 			# This should be moved to balanceTags once that braindead POS is fixed -- paulej72 20150617
 			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
+			$storyref->{$field} =~ s|</li>|</li>\n|g;
+			$storyref->{$field} =~ s|</ol>|</ol>\n\n|g;
+			$storyref->{$field} =~ s|</ul>|</ul>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
 			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
@@ -1250,6 +1253,17 @@ sub editStory {
 		$storyref->{is_dirty} = 1;
 		$storyref->{commentstatus} = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
 		$user->{currentSkin} = $tmp;
+		
+		for my $field (qw( introtext bodytext )) {
+			# This should be moved to balanceTags once that braindead POS is fixed -- paulej72 20150617
+			$storyref->{$field} =~ s|</p>|</p>\n\n|g;
+			$storyref->{$field} =~ s|</li>|</li>\n|g;
+			$storyref->{$field} =~ s|</ol>|</ol>\n\n|g;
+			$storyref->{$field} =~ s|</ul>|</ul>\n\n|g;
+			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
+		}
+		
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
