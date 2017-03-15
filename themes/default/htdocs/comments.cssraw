@@ -330,7 +330,8 @@ input.commentHider:checked ~ div.commentDiv h4,
 
 input.commentTreeHider:checked ~ label.commentHider
 {
-	display:none;
+	opacity: 0.3;
+	pointer-events: none
 }
 
 input.commentHider:checked ~ div.commentDiv div.commentBody,
@@ -387,8 +388,6 @@ li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h
 li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h4 a
 {
   color: #000;
-	padding-top: 0;
-	padding-bottom: 0;
 }
 
 li.comment input.commentBelow,
@@ -403,25 +402,29 @@ li.comment input[type=checkbox] ~ label{
 	min-height: 18px;
 	margin-left:10px;
 	margin-top: .4em;
+	padding-top: 0;
 	cursor: pointer;
 	z-index: 3;
 	background: url("[% constants.imagedir %]/minus.svg") no-repeat;
+	opacity: 0.8;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
   background: url("[% constants.imagedir %]/minusminus.svg") no-repeat;
+	opacity: 0.95;
 	margin-left:37px;
 	z-index: 3;
 }
 
-li.comment input[type=checkbox]:checked ~ label{
+li.comment input[type=checkbox].commentHider:checked ~ label{
 	background: url("[% constants.imagedir %]/plus.svg") no-repeat;
-	margin-top: .1em;
+	opacity: 0.95;
 	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
   background: url("[% constants.imagedir %]/plusplus.svg") no-repeat;
+	opacity: 0.95;
 	margin-left:37px;
 	z-index: 3;
 }
