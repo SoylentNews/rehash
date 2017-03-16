@@ -117,6 +117,7 @@ html > body .commentwrap table {
 
 .commentTop .title h4 .score,
 .commentTop .title h4 .by,
+.commentTop .title h4 span.commentTreeHider,
 .commentTop .title h4 .spam{
 	font-size: .85em;
 }
@@ -439,12 +440,14 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentHider
 	font-weight: inherit;
 }
 
-li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentTreeHider
+li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentTreeHider,
+li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 span.commentTreeHider
 {
   display:inline;
 }
 
 .commentTop .title h4 label.commentTreeHider,
+.commentTop .title h4 span.commentTreeHider,
 li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.commentTop .title h4 label.commentHider
 {
   display:none;

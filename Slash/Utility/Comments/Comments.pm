@@ -2470,7 +2470,13 @@ sub dispCommentNoTemplate {
 		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
 	}
 
-	$html_out .= "<span class=\"by\">$noZoo</span>";
+	$html_out .= "<span class=\"by\">$noZoo</span>\n";
+	
+	if($treeHiderOn) {
+		$html_out .= "<span class=\"commentTreeHider\">";
+		$html_out .= $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
+		$html_out .= "</span>\n";
+	}
 
 	if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
 		$html_out .= " <div class=\"newBadge\">*New*</div>";
