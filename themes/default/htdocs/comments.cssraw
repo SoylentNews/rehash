@@ -328,7 +328,7 @@ input.commentHider:checked ~ div.commentDiv h4,
 		font-weight: normal;
 }
 
-input.commentTreeHider:checked ~ label.commentHider
+li.comment input.commentTreeHider:checked ~ label.commentHider
 {
 	opacity: 0.3;
 	pointer-events: none
@@ -406,7 +406,7 @@ li.comment input[type=checkbox] ~ label{
 	cursor: pointer;
 	z-index: 3;
 	background: url("[% constants.imagedir %]/minus.svg") no-repeat;
-	opacity: 0.8;
+	opacity: 0.95;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
@@ -416,7 +416,8 @@ li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
 	z-index: 3;
 }
 
-li.comment input[type=checkbox].commentHider:checked ~ label{
+li.comment input[type=checkbox].commentHider:checked ~ label,
+li.comment input[type=checkbox].commentBelow:checked ~ label{{
 	background: url("[% constants.imagedir %]/plus.svg") no-repeat;
 	opacity: 0.95;
 	z-index: 3;
