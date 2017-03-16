@@ -417,7 +417,7 @@ li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
 }
 
 li.comment input[type=checkbox].commentHider:checked ~ label,
-li.comment input[type=checkbox].commentBelow:checked ~ label{{
+li.comment input[type=checkbox].commentBelow:checked ~ label{
 	background: url("[% constants.imagedir %]/plus.svg") no-repeat;
 	opacity: 0.95;
 	z-index: 3;
