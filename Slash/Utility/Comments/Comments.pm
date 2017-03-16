@@ -2474,7 +2474,7 @@ sub dispCommentNoTemplate {
 	
 	if($treeHiderOn) {
 		$html_out .= "<span class=\"commentTreeHider\">";
-		$html_out .= $comment->{children} ? ( $comment->{children} > 1 ? "($comment->{children} children)" : "($comment->{children} child)") : "";
+		$html_out .= $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
 		$html_out .= "</span>\n";
 	}
 
