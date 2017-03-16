@@ -2486,7 +2486,7 @@ sub dispCommentNoTemplate {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
 	}
 
-	my $comment_user = $slashdb->getUser($form->{uid});
+	my $comment_user = $slashdb->getUser($args->{uid});
 	my $details = dispCommentDetails({
 		is_anon => $comment_user->{is_anon},
 		fakeemail => $comment_user->{fakeemail},
