@@ -2351,11 +2351,11 @@ sub printCommComments {
 	$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></p></span>\n";
 
 	if($moderate_form) {
-		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n".
-		"<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n".
-		"<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">".
-		"<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n".
-		"<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
+		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n";
+		$html_out .= "<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n";
+		$html_out .= "<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">\n" if $args->{cid};
+		$html_out .= "<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n" if $args->{pid};
+		$html_out .= "<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
 		if($can_del) {
 			$html_out .= "<span class=\"nbutton\"><p><b><a href=\"#\" onclick=\"\$('#commentform').submit(); return false\">Delete</a></b></p></span>\nChecked comments will be deleted!";
 		}
