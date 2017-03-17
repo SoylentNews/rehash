@@ -3,7 +3,7 @@ function selectall () {
         for (var i = 0; i < myform.elements.length; i++)
                 myform.elements[i].checked = true;
 }
-function unhideButton {
+function unhideButton () {
 	sabutton = document.getElementById("sabutton");
 	sabutton.style.display = 'block';
 }

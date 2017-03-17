@@ -50,7 +50,7 @@ have been read or not.  After [% constants.message_web_expire || 31 %] days, the
 [% END %]
   <tr><td align="center"><input type="submit" value="Delete"></td>
     <td align="left">
-<input id="sabutton" type="button" value="Select All">&nbsp;
+<input id="sabutton" type="button" value="Select All">
 </td><td colspan="2">&nbsp;</td></tr>
 </table>
 
