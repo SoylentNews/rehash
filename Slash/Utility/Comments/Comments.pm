@@ -2449,11 +2449,12 @@ sub dispCommentNoTemplate {
 	if($no_collapse ne "noCollapse" && $args->{cid} <= $args->{cid_now} && !$user->{is_anon} && $user->{dimread}) {
 		$dimmed = "dimmed";
 	}
+	my $time = timeCalc($args->{time});
 	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
 	my $noZooPN = !$args->{is_anon} ? "</a>" : "";
-	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$noZooPN\n";
+	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$noZooPN on $time\n";
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
@@ -2490,7 +2491,7 @@ sub dispCommentNoTemplate {
 		is_anon => $args->{is_anon},
 		fakeemail => $args->{fakeemail},
 		fakeemail_vis => $args->{fakeemail_vis},
-		'time' => $args->{time},
+		'time' => $time,
 		cid => $args->{cid},
 		sid => $args->{sid},
 		homepage => $args->{homepage},
@@ -2642,7 +2643,7 @@ sub dispCommentDetails {
 		$html_out .= "&lt;<a href=\"mailto:".strip_paramattr_nonhttp($args->{fakeemail})."\">".strip_literal($args->{fakeemail_vis})."</a>&gt;";
 	}
 
-	$html_out .= " on ".timeCalc($args->{time});
+	$html_out .= " on ".$args->{time};
 	
 	if($args->{cid} && $args->{sid}) {
 		$html_out .= " (".linkComment({
