@@ -2493,9 +2493,9 @@ sub dispCommentNoTemplate {
 		'time' => $args->{time},
 		cid => $args->{cid},
 		sid => $args->{sid},
-		homepage => $comment_user->{homepage},
-		journal_last_entry_date => $comment_user->{journal_last_entry_date},
-		nickname => $comment_user->{nickname},
+		homepage => $args->{homepage},
+		journal_last_entry_date => $args->{journal_last_entry_date},
+		nickname => $args->{nickname},
 		ipid_display => $args->{ipid_display},
 	});
 	$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
