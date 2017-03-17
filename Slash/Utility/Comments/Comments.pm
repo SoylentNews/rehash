@@ -2351,11 +2351,11 @@ sub printCommComments {
 	$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></p></span>\n";
 
 	if($moderate_form) {
-		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n".
-		"<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n".
-		"<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">".
-		"<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n".
-		"<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
+		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n";
+		$html_out .= "<input type=\"hidden\" name=\"sid\" value=\"$args->{sid}\">\n";
+		$html_out .= "<input type=\"hidden\" name=\"cid\" value=\"$args->{cid}\">\n" if $args->{cid};
+		$html_out .= "<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n" if $args->{pid};
+		$html_out .= "<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
 		if($can_del) {
 			$html_out .= "<span class=\"nbutton\"><p><b><a href=\"#\" onclick=\"\$('#commentform').submit(); return false\">Delete</a></b></p></span>\nChecked comments will be deleted!";
 		}
@@ -2449,11 +2449,12 @@ sub dispCommentNoTemplate {
 	if($no_collapse ne "noCollapse" && $args->{cid} <= $args->{cid_now} && !$user->{is_anon} && $user->{dimread}) {
 		$dimmed = "dimmed";
 	}
+	my $time = timeCalc($args->{time});
 	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
 	my $noZooPN = !$args->{is_anon} ? "</a>" : "";
-	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$noZooPN\n";
+	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$noZooPN on $time\n";
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
@@ -2470,7 +2471,13 @@ sub dispCommentNoTemplate {
 		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
 	}
 
-	$html_out .= "<span class=\"by\">$noZoo</span>";
+	$html_out .= "<span class=\"by\">$noZoo</span>\n";
+	
+	if($treeHiderOn) {
+		$html_out .= "<span class=\"commentTreeHider\">";
+		$html_out .= $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
+		$html_out .= "</span>\n";
+	}
 
 	if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
 		$html_out .= " <div class=\"newBadge\">*New*</div>";
@@ -2480,17 +2487,16 @@ sub dispCommentNoTemplate {
 		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
 	}
 
-	my $comment_user = $slashdb->getUser($form->{uid});
 	my $details = dispCommentDetails({
-		is_anon => $comment_user->{is_anon},
-		fakeemail => $comment_user->{fakeemail},
-		fakeemail_vis => $comment_user->{fakeemail_vis},
-		'time' => $args->{time},
+		is_anon => $args->{is_anon},
+		fakeemail => $args->{fakeemail},
+		fakeemail_vis => $args->{fakeemail_vis},
+		'time' => $time,
 		cid => $args->{cid},
 		sid => $args->{sid},
-		homepage => $comment_user->{homepage},
-		journal_last_entry_date => $comment_user->{journal_last_entry_date},
-		nickname => $comment_user->{nickname},
+		homepage => $args->{homepage},
+		journal_last_entry_date => $args->{journal_last_entry_date},
+		nickname => $args->{nickname},
 		ipid_display => $args->{ipid_display},
 	});
 	$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
@@ -2637,7 +2643,7 @@ sub dispCommentDetails {
 		$html_out .= "&lt;<a href=\"mailto:".strip_paramattr_nonhttp($args->{fakeemail})."\">".strip_literal($args->{fakeemail_vis})."</a>&gt;";
 	}
 
-	$html_out .= " on ".timeCalc($args->{time});
+	$html_out .= " on ".$args->{time};
 	
 	if($args->{cid} && $args->{sid}) {
 		$html_out .= " (".linkComment({
