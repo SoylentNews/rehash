@@ -2490,7 +2490,6 @@ sub dispCommentNoTemplate {
 	my $details = dispCommentDetails({
 		is_anon => $comment_user->{is_anon},
 		fakeemail => $comment_user->{fakeemail},
-		fakeemail_vis => $comment_user->{fakeemail_vis},
 		'time' => $args->{time},
 		cid => $args->{cid},
 		sid => $args->{sid},
@@ -2640,7 +2639,7 @@ sub dispCommentDetails {
 	my $html_out = "";
 
 	if( (!defined($args->{is_anon}) || !$args->{is_anon}) && (defined($args->{fakeemail}) && $args->{fakeemail}) ) {
-		$html_out .= "&lt;<a href=\"mailto:".strip_paramattr_nonhttp($args->{fakeemail})."\">".strip_literal($args->{fakeemail_vis})."</a>&gt;";
+		$html_out .= "&lt;<a href=\"mailto:".strip_paramattr_nonhttp($args->{fakeemail})."\">".strip_literal(ellipsify($args->{fakeemail}))."</a>&gt;";
 	}
 
 	$html_out .= " on ".timeCalc($args->{time});
