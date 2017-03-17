@@ -4,6 +4,7 @@ description="Messaging system"
 mysql_schema=mysql_schema
 mysql_dump=dump
 htdoc=messages.pl
+htdoc=messages.js
 task=message_delete.pl
 task=message_delivery.pl
 template=templates/badpassword_msg;misc;default
