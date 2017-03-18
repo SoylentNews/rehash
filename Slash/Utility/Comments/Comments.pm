@@ -2383,7 +2383,7 @@ function expandAll(cid) {
 }
 
 function setJSButtonsOn() {  
-    var titles = document.querySelectorAll('.commentTop .title h4.noJs');
+    var titles = document.querySelectorAll('.commentTop .title h4.noJS');
     for(var i =0; i< titles.length;i++){
         var title = titles[i];
         title.classList.remove("noJS");
