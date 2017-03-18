@@ -2368,7 +2368,8 @@ sub printCommComments {
 	else {
 		$html_out .= "</div>";
 	}
-		$html_out .= <<'EOF';	
+		
+	$html_out .= <<'EOF';	
 <script>
 
 function expandAll(cid) {
@@ -2465,7 +2466,7 @@ sub dispCommentNoTemplate {
 	}
 	my $time = timeCalc($args->{time});
 	
-	my $expandAll = "<button class=\"expandAll\" title=\"Show all comments in tree\" onclick=\"expandAll($args->{cid}"></button>"; 
+	my $expandAll = "<button class=\"expandAll\" title=\"Show all comments in tree\" onclick=\"expandAll($args->{cid}\"></button>"; 
 	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
