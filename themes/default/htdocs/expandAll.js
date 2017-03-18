@@ -8,7 +8,9 @@ function setJSButtonsOn() {
     var buttons = document.querySelectorAll('.expandAll');
     for(var i =0; i< buttons.length;i++){
         var button = buttons[i];
-        button.style.display = 'inline';
+        if (button.parentElement.style.display != 'none') {
+					button.style.display = 'inline';
+				}
         button.addEventListener("click", function(event){
             var cid = event.target.getAttribute("cid");
             var checks = document.querySelectorAll('#tree_' + cid + ' input[type="checkbox"]');
