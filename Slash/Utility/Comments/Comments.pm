@@ -2443,7 +2443,7 @@ sub dispCommentNoTemplate {
 
 		if($treeHiderOn) {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
-			$html_out .= "<label class=\"expandAll\" title=\"Show all comments in tree\" cid=\"$args->{cid}\"></label>"; 
+			$html_out .= "<label class=\"expandAll noJS\" title=\"Show all comments in tree\" cid=\"$args->{cid}\"></label>"; 
 		}
 	}
 

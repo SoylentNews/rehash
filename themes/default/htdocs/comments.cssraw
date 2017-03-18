@@ -359,14 +359,10 @@ input.commentTreeHider:checked ~ ul
 
 input.commentBelow:checked ~ label.commentHider,
 input.commentBelow:checked ~ label.commentTreeHider,
+input.commentBelow:checked ~ label.expandAll,
 input.commentBelow:checked ~ div.commentDiv
 {
 	display: none;
-}
-
-input.commentBelow:checked ~ label.expandAll
-{
-	display: none !important;
 }
 
 input.commentBelow,
@@ -473,6 +469,9 @@ li.comment input[type="checkbox"] ~ label.expandAll {
 	z-index: 3;
 	background: url("[% constants.imagedir %]/plusplusplus.svg") no-repeat;
 	opacity: 0.9;
+}
+
+li.comment input[type="checkbox"] ~ label.noJS {
 	display: none;
 }
 
