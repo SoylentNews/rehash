@@ -1,5 +1,4 @@
-function expandAll(e) {
-    var cid = e.getAttribute("cid");
+function expandAll(cid) {
     var checks = document.querySelectorAll('#tree_' + cid + ' input[type="checkbox"]');
     for(var i =0; i< checks.length;i++){
         var check = checks[i];
@@ -20,7 +19,8 @@ function setJSButtonsOn() {
     for(var i =0; i< buttons.length;i++){
         var button = buttons[i];
         button.style.display = 'inline';
-        button.addEventListener("click", expandAll(e));
+        var cid = button.getAttribute("cid");
+        button.addEventListener("click", expandAll(cid), false);
     }
 }
 window.onload = setJSButtonsOn;
