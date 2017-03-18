@@ -8,6 +8,7 @@ htdoc=admin.pl
 task=refresh_uncommon.pl
 task=topic_popup_static.pl
 task=topic_tree_draw.pl
+imagejs=htdocs/images/admin.js
 image=images/L.png
 image=images/admin-topic-arrow-down.gif
 image=images/admin-topic-arrow-up.gif

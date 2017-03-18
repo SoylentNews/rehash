@@ -25,20 +25,9 @@ __template__
 <link rel="icon" type="image/png" href="[% constants.rootdir %]/favicon-soylentnews.png">
 <title>[% title | strip_notags %]</title>
 [% END %]
-[% IF user.is_admin %]
-<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/admin.css?[% constants.cvs_tag_currentcode %]">
-<script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.metadata.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.draggable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.tabs.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.autogrow.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% PROCESS after_jquery %]
-<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% END %]
+
+[% PROCESS html-header-js %]
+
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/base.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/comments.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/night.css?[% constants.cvs_tag_currentcode %]">
