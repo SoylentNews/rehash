@@ -2455,6 +2455,7 @@ sub dispCommentNoTemplate {
 
 		if($treeHiderOn) {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
+			$html_out .= "<label class=\"expandAll\" title=\"Show all comments in tree\" onclick=\"expandAll($args->{cid})\"></label>"; 
 		}
 	}
 
@@ -2466,8 +2467,6 @@ sub dispCommentNoTemplate {
 	}
 	my $time = timeCalc($args->{time});
 	
-	my $expandAll = "<button class=\"expandAll\" title=\"Show all comments in tree\" onclick=\"expandAll($args->{cid}\"></button>"; 
-	
 	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
 	my $noZooPN = !$args->{is_anon} ? "</a>" : "";
@@ -2476,7 +2475,7 @@ sub dispCommentNoTemplate {
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
 	
-	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n". $expandAll .
+	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
 	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"$treeHiderOffText><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
 	if($treeHiderOn) {
 		$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";

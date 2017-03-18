@@ -106,7 +106,7 @@ html > body .commentwrap table {
 {
 	color: #fff;
 	display: block;
-	padding: .3em .6em .3em 65px;
+	padding: .3em .6em .3em 93px;
 	overflow-y: hidden;
 }
 
@@ -453,11 +453,11 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.co
   display:none;
 }
 
-.expandAll {
-position:absolute;
+li.comment label.expandAll {
+	position:absolute;
 	width:18px;
 	min-height: 18px;
-	margin-left:10px;
+	margin-left: 65px;
 	padding-top: 0;
 	cursor: pointer;
 	z-index: 3;
