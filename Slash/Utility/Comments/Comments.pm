@@ -2385,7 +2385,7 @@ function expandAll(cid) {
 function setJSButtonsOn() {  
     var titles = document.querySelectorAll('.commentTop .title h4');
     for(var i =0; i< titles.length;i++){
-        var tilte = title[i];
+        var title = title[i];
         title.classList.remove("noJS");
     }
 
