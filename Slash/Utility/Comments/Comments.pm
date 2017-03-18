@@ -2368,7 +2368,7 @@ sub printCommComments {
 	else {
 		$html_out .= "</div>";
 	}
-		$html_out .= <<'EOF'	
+		$html_out .= <<'EOF';	
 <script>
 
 function expandAll(cid) {
