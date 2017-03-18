@@ -8,6 +8,7 @@ dump
 message_delete.pl
 message_delivery.pl
 messages.pl
+messages.js
 mysql_schema
 templates/dailyheadlines;messages;default
 templates/dailynews;messages;default
