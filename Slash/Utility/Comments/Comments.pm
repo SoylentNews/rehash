@@ -2381,6 +2381,20 @@ function expandAll(cid) {
         }
     }
 }
+
+function() {  
+    var titles = document.querySelectorAll('.commentTop .title h4');
+    for(var i =0; i< titles.length;i++){
+        var tilte = title[i];
+        title.classList.remove("noJS");
+    }
+
+    var buttons = document.querySelectorAll('.expandAll');
+    for(var i =0; i< buttons.length;i++){
+        var button = buttons[i];
+        button.style.display = 'inline';
+    }
+}
 </script>
 EOF
 
@@ -2421,7 +2435,8 @@ sub dispCommentNoTemplate {
 	}
 	
 	my $treeHiderOn = $user->{mode} ne 'flat' && ($args->{children} || $legacykids);
-	my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : "";
+	my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : " class=\"noJS\"";
+
 	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {

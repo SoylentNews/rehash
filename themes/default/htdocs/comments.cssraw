@@ -110,6 +110,11 @@ html > body .commentwrap table {
 	overflow-y: hidden;
 }
 
+.commentTop .title h4.noJS
+{
+  padding-left: 65px;
+}
+
 .commentTop .title h4.noTH
 {
   padding-left: 37px;
@@ -453,7 +458,7 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.co
   display:none;
 }
 
-li.comment label.expandAll {
+li.comment input[type="checkbox"] ~ label.expandAll {
 	position:absolute;
 	width:18px;
 	min-height: 18px;
@@ -463,7 +468,7 @@ li.comment label.expandAll {
 	z-index: 3;
 	background: url("[% constants.imagedir %]/plusplusplus.svg") no-repeat;
 	opacity: 0.9;
-
+	display: none;
 }
 
 .dimmed {
