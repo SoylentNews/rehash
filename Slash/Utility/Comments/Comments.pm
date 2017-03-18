@@ -2369,7 +2369,7 @@ sub printCommComments {
 		$html_out .= "</div>";
 	}
 		
-	$html_out .= "<script src=\"$constants->real_rootdir/expandAll.js\" type=\"text/javascript\"></script>";	
+	$html_out .= "<script src=\"$constants->{real_rootdir}/expandAll.js\" type=\"text/javascript\"></script>";	
 
 	return $html_out;
 }
