@@ -453,6 +453,19 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.co
   display:none;
 }
 
+.expandAll {
+position:absolute;
+	width:18px;
+	min-height: 18px;
+	margin-left:10px;
+	padding-top: 0;
+	cursor: pointer;
+	z-index: 3;
+	background: url("[% constants.imagedir %]/plusplusplus.svg") no-repeat;
+	opacity: 0.9;
+
+}
+
 .dimmed {
 	opacity: 0.75;
 }

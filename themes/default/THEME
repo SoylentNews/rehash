@@ -230,6 +230,7 @@ image=htdocs/images/cminus.png
 image=htdocs/images/cminusminus.png
 image=htdocs/images/plus.svg
 image=htdocs/images/plusplus.svg
+image=htdocs/images/plusplusplus.svg
 image=htdocs/images/minus.svg
 image=htdocs/images/minusminus.svg
 image=htdocs/images/contract.gif
