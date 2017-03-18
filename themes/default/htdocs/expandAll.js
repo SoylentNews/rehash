@@ -19,6 +19,8 @@ function setJSButtonsOn() {
     for(var i =0; i< buttons.length;i++){
         var button = buttons[i];
         button.style.display = 'inline';
+        var cid = button.getAttribute("cid");
+        button.addEventListener("click", expandAll(cid));
     }
 }
 window.onload = setJSButtonsOn;
