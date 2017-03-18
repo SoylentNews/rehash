@@ -364,6 +364,11 @@ input.commentBelow:checked ~ div.commentDiv
 	display: none;
 }
 
+input.commentBelow:checked ~ label.expandAll
+{
+	display: none !important;
+}
+
 input.commentBelow,
 input.commentBelow ~ div.commentbt,
 input.commentBelow ~ label.commentBelow
