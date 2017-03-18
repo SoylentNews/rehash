@@ -8,7 +8,7 @@ function setJSButtonsOn() {
     var buttons = document.querySelectorAll('.expandAll');
     for(var i =0; i< buttons.length;i++){
         var button = buttons[i];
-        if (button.parentElement.style.display != 'none') {
+        if (button.parentElement.offsetHeight > 0) {
 					button.style.display = 'inline';
 				}
         button.addEventListener("click", function(event){
