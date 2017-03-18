@@ -2382,7 +2382,7 @@ function expandAll(cid) {
     }
 }
 
-function() {  
+function setJSButtonsOn() {  
     var titles = document.querySelectorAll('.commentTop .title h4');
     for(var i =0; i< titles.length;i++){
         var tilte = title[i];
@@ -2395,6 +2395,7 @@ function() {
         button.style.display = 'inline';
     }
 }
+window.onload = setJSButtonsOn;
 </script>
 EOF
 
