@@ -63,7 +63,7 @@ __template__
 <!-- address book style -->
 <div id="[% name %]-ab-outer" class="hpts-outer">
   <div class="hpts-title" id="[% name %]-title">Select Topics</div>
-  <div class="hpts-inner">
+  <div id="[% name %]-ab-inner" class="hpts-inner">
 
 <table><tr><td><p>
 <input width="30" name="[% name %]_ab_searchfield" id="[% name %]-ab-searchfield" onkeyup="st_search_key_handler('ab', event);">
