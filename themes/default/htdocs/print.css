@@ -2,15 +2,19 @@ body
 {
         background: #fff;
 }
-#ostgnavbar, #topnav h4, #topnav ul, #links, #slashboxes, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table, div.storylinks, div.storylinks ul, div.storylinks div, .prev-next, #comments input, .commentwrap
+
+#ostgnavbar, #topnav h4, #topnav ul, #links, #slashboxes, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table, div.storylinks,
+div.storylinks ul, div.storylinks div, .prev-next, #comments input, .commentwrap, input[type=checkbox], label.commentTreeHider, .commentSub, #discussion_buttons
 {
         display: none;
 }
+
 /* Header */
 #slogan h2
 {
         color: #000;
 }
+
 .topic
 {
         margin: 0 .4em .4em 0;
@@ -18,9 +22,11 @@ body
         position: relative;
 }
 
-img {
-border: none;
+img
+{
+        border: none;
 }
+
 .topic img
 {
         display: block;

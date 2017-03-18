@@ -1912,7 +1912,7 @@ sub processCustomTagsPost {
 	# also support @blah: syntax
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		# The link here is just the nick. any decoration is done in base.css
-		$str =~ s/@([a-zA-Z0-9$_.+!*'(),\- ]+):[^\/]/_nick2Link($1,$constants,1)/ge;
+		$str =~ s/@([a-zA-Z0-9$_.+!*'(),\- ]+):([^\/])/_nick2Link($1,$constants,1).$2/ge;
 	}
 
 	# spoiler tags
