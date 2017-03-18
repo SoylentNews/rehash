@@ -1098,3 +1098,7 @@ abbr {
 	transition: height 0s, visibility 0s ease-in-out;
 	transition-delay: 1s;
 }
+
+#sabutton {
+	display: none;
+}

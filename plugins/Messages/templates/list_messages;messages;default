@@ -49,17 +49,9 @@ have been read or not.  After [% constants.message_web_expire || 31 %] days, the
   </tr>
 [% END %]
   <tr><td align="center"><input type="submit" value="Delete"></td>
-    <td align="left"><noscript>&nbsp;</noscript><script type="text/javascript" language="Javascript" charset="iso-8859-1">
-<!--
-[%# this JavaScript should not actually be a problem for anyone, but %]
-[%# if it is, it is easy to strip out ... %]
-function selectall (myform) {
-	for (var i = 0; i < myform.elements.length; i++)
-		myform.elements[i].checked = true;
-}
-document.write('<input type="button" value="Select All" onclick="selectall(this.form)"> ');
-//-->
-</script></td><td colspan="2">&nbsp;</td></tr>
+    <td align="left">
+<input id="sabutton" type="button" value="Select All">
+</td><td colspan="2">&nbsp;</td></tr>
 </table>
 
 <input type="hidden" name="op" value="deletemsgs">
