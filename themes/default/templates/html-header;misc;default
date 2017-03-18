@@ -26,7 +26,7 @@ __template__
 <title>[% title | strip_notags %]</title>
 [% END %]
 
-[% PROCESS html-header-js %]
+[% PROCESS html_header_js %]
 
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/base.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/comments.css?[% constants.cvs_tag_currentcode %]">
