@@ -69,7 +69,6 @@ sub upgradeDB() {
 		print "Upgrade complete";
 		$subscribe_schema_ver = 2;
 		$upgrades_done++;
-		};
 	}
 
 	if (!$upgrades_done) {
