@@ -93,9 +93,15 @@ ELSIF env.script_name.search('journal\.pl');
 
 
 ELSIF env.script_name.search('messages\.pl');
+	IF constants.plugin.Messages;
+		tmp = BLOCK -%]
+<script src="[% constants.real_rootdir %]/messages.js" type="text/javascript"></script>
+		[%- END; linkrels.push(tmp);
+	END;
 	IF !user.is_anon; tmp = BLOCK -%]
 <link rel="alternate" title="[% constants.sitename | strip_attribute %] Messages RSS" href="[% constants.real_rootdir %]/my/inbox/rss/[% Slash.getPublicLogToken() | fixparam %]" type="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
+
 ELSIF env.script_name.search('bookmark\.pl');
 	tmp = BLOCK -%]
 <link rel="alternate" title="[% constants.sitename | strip_attribute %] Popular Bookmarks" href="[% gSkin.rootdir %]/bookmarks_popular.rss" type="application/rss+xml">

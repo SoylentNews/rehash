@@ -238,6 +238,7 @@ plugins/Messages/dump
 plugins/Messages/message_delete.pl
 plugins/Messages/message_delivery.pl
 plugins/Messages/messages.pl
+plugins/Messages/messages.js
 plugins/Messages/mysql_schema
 plugins/Messages/templates/dailyheadlines;messages;default
 plugins/Messages/templates/dailynews;messages;default
