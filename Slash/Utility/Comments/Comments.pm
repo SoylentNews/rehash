@@ -2469,8 +2469,6 @@ sub dispCommentNoTemplate {
 		$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
 	}
 	unless(defined($user->{noscores}) && $user->{noscores}) {
-		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
-		my $modal_end = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "</a>" : "";
 		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
 		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
 	}
