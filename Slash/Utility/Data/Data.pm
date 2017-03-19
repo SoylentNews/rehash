@@ -1923,13 +1923,13 @@ sub processCustomTagsPost {
 		
 		my $id = sprintf("%08X", rand(0xFFFFFFFF));
 		
-		my $open_new = "<p class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
+		my $open_new = "<div class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
 									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n" .
 									"<label class=\"spoiler_on\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
-									"<span class=\"spoiler\">";
+									"<div class=\"spoiler_text\">";
 
 		$str =~ s/$open/$open_new/g;
-		$str =~ s/$close/<\/span><\/p>/g;
+		$str =~ s/$close/<\/div><\/div>/g;
 	}
 
 	return $str;
@@ -3032,7 +3032,7 @@ The 'approvedtags' entry in the vars table.
 	# NB: ECODE is excluded because it is handled elsewhere.
 
 	# tags that are indented, so we can make sure indentation level is not too great
-	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote spoiler quote);
+	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote quote spoiler);
 
 	# or sub-super level
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
