@@ -399,7 +399,8 @@ li.comment input.commentTreeHider {
 
 li.comment input[type=checkbox].commentHider ~ label.commentHider,
 li.comment input[type=checkbox].commentBelow ~ label.commentBelow,
-li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
+li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider,
+li.comment input[type="checkbox"] ~ label.expandAll{
 	background: url("[% constants.imagedir %]/minus.svg") no-repeat;
 	position:absolute;
 	width:18px;
@@ -456,15 +457,8 @@ li.comment input[type=checkbox].commentTreeHider:checked ~ div.commentDiv div.co
 }
 
 li.comment input[type="checkbox"] ~ label.expandAll {
-	position:absolute;
-	width:18px;
-	min-height: 18px;
-	margin-left: 65px;
-	padding-top: 0;
-	cursor: pointer;
-	z-index: 3;
 	background: url("[% constants.imagedir %]/plusplusplus.svg") no-repeat;
-	opacity: 0.9;
+	margin-left: 65px;
 }
 
 li.comment input[type="checkbox"] ~ label.noJS {
