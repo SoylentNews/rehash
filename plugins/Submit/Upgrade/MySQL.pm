@@ -63,7 +63,7 @@ sub upgradeDB() {
 			return 0
 		};
 		print "Set to version 2";
-		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Submit', 2, 'Version of submit plugin schema')")) {
+		if (!$slashdb->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_plugin_Submit'")) {
 			return 0;
 		};
 		print "Upgrade complete";
