@@ -55,6 +55,16 @@ sub upgradeDB() {
 		$subscribe_schema_ver = 1;
 		$upgrades_done++;
 	}
+	
+	if ($subscribe_schema_ver < 2 ) {
+		print "upgrading Submit to v2 ...\n";
+		print "Running: ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL;\n";
+		if(!$slashdb->sqlDo("ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL;")) {
+			return 0;
+		$subscribe_schema_ver = 2;
+		$upgrades_done++;
+		};
+	}
 
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for Submit\n";
