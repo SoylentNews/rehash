@@ -222,9 +222,22 @@ html > body .commentwrap table {
 	border-left-color: rgba(0,0,0, 0.4);
 }
 
-.commentBody blockquote p, .commentBody .quote p{
+.commentBody blockquote p,
+.commentBody blockquote div, 
+.commentBody .quote p
+{
 	padding-top: 0.25em;
 	padding-bottom: 0.25em;
+}
+
+.commentBody blockquote div p:first-child
+{
+	padding-top: 0;
+}
+
+.commentBody blockquote div p:last-child
+{
+	padding-bottom: 0;
 }
 
 #commentlisting {

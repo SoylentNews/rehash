@@ -586,10 +586,23 @@ overflow-y: hidden;
 	border-left-color: rgba(0,0,0, 0.2);
 }
 
-.article blockquote p,  .article .quote p {
+.article blockquote p,
+.article blockquote div, 
+.article .quote p
+{
 	margin: 0;
 	padding-top: .5em;
 	padding-bottom: .5em;
+}
+
+.article blockquote div p:first-child
+{
+	padding-top: 0;
+}
+
+.article blockquote div p:last-child
+{
+	padding-bottom: 0;
 }
 
 .article .details strong
@@ -1070,7 +1083,8 @@ abbr {
 
 blockquote.spoiler input[type=checkbox].spoiler ~ label
 {
-    display: inline;
+    display: block;
+    padding: 0.2em .1em;
     cursor: pointer;
     font-weight: normal;
 }
@@ -1087,27 +1101,14 @@ blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_off
 	display:none;
 }
 
-blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_on
-{
-	display:inline;
-}
-
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_on,
 blockquote.spoiler input[type=checkbox].spoiler:checked ~ div.spoiler_text
 {
 	display:block;
 }
 
 body blockquote.spoiler {
-	display: block;
-	padding-left: 0.6em;
-	padding-top: 0.1em;
-	padding-bottom: 0.1em;
-	margin: 0.6em;
 	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent 60%);
-	border-left: 2px solid;
-	border-top-left-radius: 10px;
-	border-bottom-left-radius: 5px;
-	border-left-color: rgba(0,0,0, 0.5);
 }
 
 span.spoiler {
