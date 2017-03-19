@@ -1097,7 +1097,7 @@ blockquote.spoiler input[type=checkbox].spoiler:checked ~ div.spoiler_text
 	display:block;
 }
 
-blockquote.spoiler {
+body blockquote.spoiler {
 	display: block;
 	padding-left: 0.6em;
 	padding-top: 0.1em;
