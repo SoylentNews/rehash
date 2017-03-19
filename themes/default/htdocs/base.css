@@ -1078,7 +1078,7 @@ input[type=checkbox].spoiler ~ label
 
 input[type=checkbox].spoiler,
 input[type=checkbox].spoiler ~ label.spoiler_on,
-span.spoiler
+p.spoiler
 {
 	display:none;
 }
@@ -1089,12 +1089,12 @@ input[type=checkbox].spoiler:checked ~ label.spoiler_off
 }
 
 input[type=checkbox].spoiler:checked ~ label.spoiler_on,
-input[type=checkbox].spoiler:checked ~ span.spoiler
+input[type=checkbox].spoiler:checked ~ p.spoiler
 {
 	display:inline;
 }
 
-p.spoiler {
+div.spoiler {
 	display: block;
 	padding-left: 0.6em;
 	padding-top: 0.1em;

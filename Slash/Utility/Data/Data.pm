@@ -1923,13 +1923,13 @@ sub processCustomTagsPost {
 		
 		my $id = sprintf("%08X", rand(0xFFFFFFFF));
 		
-		my $open_new = "<p class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
+		my $open_new = "<div class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
 									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n" .
 									"<label class=\"spoiler_on\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
-									"<span class=\"spoiler\">";
+									"<p class=\"spoiler\">";
 
 		$str =~ s/$open/$open_new/g;
-		$str =~ s/$close/<\/span><\/p>/g;
+		$str =~ s/$close/<\/p><\/div>/g;
 	}
 
 	return $str;
@@ -3038,7 +3038,7 @@ The 'approvedtags' entry in the vars table.
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
 
 	# block elements cannot be inside certain other elements; this defines which are which
-	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote div hr address h1 h2 h3 h4 h5 h6);
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote spoiler div hr address h1 h2 h3 h4 h5 h6);
 	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
 	# needs a <p> inside it
