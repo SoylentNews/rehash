@@ -21,7 +21,23 @@ function pageload_done( $, console, maybe ){
 	pageload.content_ready_time	= pageload.content_ready - pageload.before_content;
 	pageload.script_ready_time	= pageload.after_readycode - pageload.content_ready;
 	pageload.ready_time		= pageload.after_readycode - pageload.before_content;
+[%- IF user.is_admin %]
+	var	ready_time		= '' + (pageload.ready_time/1000.0) + 's',
+		content_time	= '' + (pageload.content_ready_time/1000.0) + 's',
+		script_time		= '' + (pageload.script_ready_time/1000.0) + 's',
+		report			= ready_time+' from <head> until all $(document).ready complete ['+
+							content_time+' for content; '+
+							script_time+' for $(code)]';
+	console && !maybe && console.log(report);
 
+	function seconds(n){ return n*1000; }
+
+	var key='pageload-display';
+	Slash.message({ key:key, content:$('<p id="'+key+'">').text('Initial page-load: '+report) });
+	setTimeout(function(){
+		$any(key).fadeOut(seconds(3), function(){ Slash.clear_message(key); });
+	}, seconds(15));
+[%- END %]
 	// Only report 1% of cases.
 	maybe || (Math.random()>0.01) || $.ajax({ data: {
 		op: 'page_profile',
