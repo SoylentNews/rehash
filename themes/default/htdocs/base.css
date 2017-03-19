@@ -1078,27 +1078,23 @@ input[type=checkbox].spoiler ~ label
 
 input[type=checkbox].spoiler,
 input[type=checkbox].spoiler ~ label.spoiler_on,
-input[type=checkbox].spoiler ~ div.spoiler_text
+span.spoiler
 {
-	display: none;
+	display:none;
 }
 
 input[type=checkbox].spoiler:checked ~ label.spoiler_off
 {
-	display: none;
+	display:none;
 }
 
-input[type=checkbox].spoiler:checked ~ label.spoiler_on
+input[type=checkbox].spoiler:checked ~ label.spoiler_on,
+input[type=checkbox].spoiler:checked ~ span.spoiler
 {
-	display: inline;
+	display:inline;
 }
 
-input[type=checkbox].spoiler:checked ~ div.spoiler_text
-{
-	display: block;
-}
-
-div.spoiler {
+p.spoiler {
 	display: block;
 	padding-left: 0.6em;
 	padding-top: 0.1em;
