@@ -15,8 +15,6 @@ default
 __template__
 [% IF user.is_admin %]
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/admin.css?[% constants.cvs_tag_currentcode %]">
-<script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% PROCESS after_jquery %]
 <script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END %]
 __seclev__

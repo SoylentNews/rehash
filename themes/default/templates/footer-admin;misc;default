@@ -67,7 +67,6 @@ __template__
 </div>
 [% Slash.currentAdminUsers() %]
 [% END %]
-[% PROCESS after_content %]
 </body>
 </html>
 
