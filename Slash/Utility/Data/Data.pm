@@ -3024,7 +3024,7 @@ The 'approvedtags' entry in the vars table.
 	# change the code for them.  in theory we could generalize it more,
 	# using vars for all this, but that is a low priority.
 	my %known_tags	= map { ( lc, 1 ) } qw(
-		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote
+		b i p br a ol ul li dl dt dd em strong tt blockquote spoiler div ecode quote
 		img hr big small sub sup span
 		q dfn code samp kbd var cite address ins del
 		h1 h2 h3 h4 h5 h6
@@ -3032,7 +3032,7 @@ The 'approvedtags' entry in the vars table.
 	# NB: ECODE is excluded because it is handled elsewhere.
 
 	# tags that are indented, so we can make sure indentation level is not too great
-	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote quote);
+	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote spoiler quote);
 
 	# or sub-super level
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
@@ -3065,7 +3065,8 @@ The 'approvedtags' entry in the vars table.
 		# blockquote not a list, but has similar semantics:
 		# everything in a blockquote needs to be in a block element,
 		# so we choose two that would fit the bill
-		blockquote	=> ['div'],
+		blockquote  => ['div'],
+		spoiler     => ['div'],
 	);
 	my %needs_list = (
 		dd		=> qr/dl/,
