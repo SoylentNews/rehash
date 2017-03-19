@@ -1928,11 +1928,23 @@ sub processCustomTagsPost {
 									"<label class=\"spoiler_on\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
 									"<div class=\"spoiler_text\">";
 
-		$str =~ s/$open/$open_new/g;
+		$str =~ s/$open/_newSpoilerHead()/ge;
 		$str =~ s/$close/<\/div><\/blockquote>/g;
 	}
 
 	return $str;
+}
+
+sub _newSpoilerHead {
+	
+	my $id = sprintf("%08X", rand(0xFFFFFFFF));
+		
+		my $open_new = "<blockquote class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
+									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n" .
+									"<label class=\"spoiler_on\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
+									"<div class=\"spoiler_text\">";
+
+	return $open_new;
 }
 
 sub _nick2Link {
