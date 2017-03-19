@@ -397,38 +397,34 @@ li.comment input.commentTreeHider {
 	display:none;
 }
 
-li.comment input[type=checkbox] ~ label{
+li.comment input[type=checkbox].commentHider ~ label.commentHider,
+li.comment input[type=checkbox].commentBelow ~ label.commentBelow,
+li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
+	background: url("[% constants.imagedir %]/minus.svg") no-repeat;
 	position:absolute;
 	width:18px;
 	min-height: 18px;
-	margin-left:10px;
-	margin-top: .4em;
 	padding-top: 0;
 	cursor: pointer;
-	z-index: 3;
-	background: url("[% constants.imagedir %]/minus.svg") no-repeat;
 	opacity: 0.9;
+	z-index: 3;
+	margin-top: .4em;
+	margin-left: 10px;
 }
 
 li.comment input[type=checkbox].commentTreeHider ~ label.commentTreeHider{
   background: url("[% constants.imagedir %]/minusminus.svg") no-repeat;
-	opacity: 0.9;
-	margin-left:37px;
-	z-index: 3;
+	position:absolute;
+	margin-left: 37px;
 }
 
 li.comment input[type=checkbox].commentHider:checked ~ label.commentHider,
 li.comment input[type=checkbox].commentBelow:checked ~ label.commentBelow{
 	background: url("[% constants.imagedir %]/plus.svg") no-repeat;
-	opacity: 0.9;
-	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentTreeHider{
   background: url("[% constants.imagedir %]/plusplus.svg") no-repeat;
-	opacity: 0.9;
-	margin-left:37px;
-	z-index: 3;
 }
 
 li.comment input[type=checkbox].commentTreeHider:checked ~ label.commentHider

@@ -1077,20 +1077,20 @@ input[type=checkbox].spoiler ~ label
     font-weight: normal;
 }
 
-input[type=checkbox].spoiler,
-input[type=checkbox].spoiler ~ label.spoiler_on,
+p.spoiler input[type=checkbox].spoiler,
+p.spoiler input[type=checkbox].spoiler ~ label.spoiler_on,
 span.spoiler
 {
 	display:none;
 }
 
-input[type=checkbox].spoiler:checked ~ label.spoiler_off
+p.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_off
 {
 	display:none;
 }
 
-input[type=checkbox].spoiler:checked ~ label.spoiler_on,
-input[type=checkbox].spoiler:checked ~ span.spoiler
+p.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_on,
+p.spoiler input[type=checkbox].spoiler:checked ~ span.spoiler
 {
 	display:inline;
 }
