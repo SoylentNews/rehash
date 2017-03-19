@@ -57,10 +57,16 @@ sub upgradeDB() {
 	}
 	
 	if ($subscribe_schema_ver < 2 ) {
-		print "upgrading Submit to v2 ...\n";
+		print "Upgrading Submit to v2 ...\n";
 		print "Running: ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL;\n";
 		if(!$slashdb->sqlDo("ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL;")) {
+			return 0
+		};
+		print "Set to version 2";
+		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Submit', 2, 'Version of submit plugin schema')")) {
 			return 0;
+		};
+		print "Upgrade complete";
 		$subscribe_schema_ver = 2;
 		$upgrades_done++;
 		};
