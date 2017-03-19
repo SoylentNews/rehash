@@ -1926,7 +1926,7 @@ sub processCustomTagsPost {
 		my $open_new = "<p class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
 									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n" .
 									"<label class=\"spoiler_on\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
-									"<span class=\"spoiler\"><br>";
+									"<span class=\"spoiler\">";
 
 		$str =~ s/$open/$open_new/g;
 		$str =~ s/$close/<\/span><\/p>/g;

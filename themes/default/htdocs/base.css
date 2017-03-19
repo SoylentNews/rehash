@@ -1074,6 +1074,7 @@ input[type=checkbox].spoiler ~ label
     margin: 0;
     display: inline;
     cursor: pointer;
+    font-weight: normal;
 }
 
 input[type=checkbox].spoiler,
@@ -1107,6 +1108,9 @@ p.spoiler {
 	border-left-color: rgba(0,0,0, 0.5);
 }
 
+span.spoiler {
+    padding-left: 0.6em;
+}
 
 #sabutton {
 	display: none;
