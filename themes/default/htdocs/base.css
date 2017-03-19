@@ -11,7 +11,6 @@ min-width: 720px;
 color: #000;
 position: relative;
 font-size:100%;
-overflow: wrap;
 word-wrap: break-word;
 }
 
@@ -1068,13 +1067,33 @@ abbr {
 	text-decoration: none;
 	border-bottom: 1px dotted #000;
 }
-.spoiler:before {
-	content: "*SPOILER*";
-	display:block !important;
-	visibility: visible !important;
+
+input[type=checkbox].spoiler ~ label
+{
+    padding: 0;
+    margin: 0;
+    display: inline;
 }
 
-.spoiler {
+input[type=checkbox].spoiler,
+input[type=checkbox].spoiler ~ label.spoiler_on,
+span.spoiler
+{
+	display:none;
+}
+
+input[type=checkbox].spoiler:checked ~ label.spoiler_off
+{
+	display:none;
+}
+
+input[type=checkbox].spoiler:checked ~ label.spoiler_on,
+span.spoiler
+{
+	display:inline;
+}
+
+p.spoiler {
 	display: block;
 	padding-left: 0.6em;
 	padding-top: 0.1em;
@@ -1087,17 +1106,6 @@ abbr {
 	border-left-color: rgba(0,0,0, 0.5);
 }
 
-.spoiler *  {
-	visibility: collapse;
-	height: 0;
-}
-
-.spoiler:hover * {
-	visibility: visible;
-	height:auto;
-	transition: height 0s, visibility 0s ease-in-out;
-	transition-delay: 1s;
-}
 
 #sabutton {
 	display: none;

@@ -1920,9 +1920,16 @@ sub processCustomTagsPost {
 		my $spoiler	= 'spoiler';
 		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
 		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
+		
+		my $id = sprintf("%08X", rand(0xFFFFFFFF));
+		
+		my$open_new = "<p class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
+									"<label class=\"spolier_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n " .
+									"<label class=\"spolier_on\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
+									"<span class=\"spoiler\">;
 
-		$str =~ s/$open/<p><div class="spoiler">/g;
-		$str =~ s/$close/<\/div><\/p>/g;
+		$str =~ s/$open/$open_new/g;
+		$str =~ s/$close/<\/span><\/p>/g;
 	}
 
 	return $str;
