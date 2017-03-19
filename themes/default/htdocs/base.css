@@ -1068,36 +1068,36 @@ abbr {
 	border-bottom: 1px dotted #000;
 }
 
-p.spoiler input[type=checkbox].spoiler ~ label
+blockquote.spoiler input[type=checkbox].spoiler ~ label
 {
     display: inline;
     cursor: pointer;
     font-weight: normal;
 }
 
-p.spoiler input[type=checkbox].spoiler,
-p.spoiler input[type=checkbox].spoiler ~ label.spoiler_on,
+blockquote.spoiler input[type=checkbox].spoiler,
+blockquote.spoiler input[type=checkbox].spoiler ~ label.spoiler_on,
 div.spoiler_text
 {
 	display:none;
 }
 
-p.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_off
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_off
 {
 	display:none;
 }
 
-p.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_on
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_on
 {
 	display:inline;
 }
 
-p.spoiler input[type=checkbox].spoiler:checked ~ div.spoiler_text
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ div.spoiler_text
 {
 	display:block;
 }
 
-p.spoiler {
+blockquote.spoiler {
 	display: block;
 	padding-left: 0.6em;
 	padding-top: 0.1em;
