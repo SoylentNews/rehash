@@ -67,6 +67,7 @@ BEGIN {
 
 our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
+	apply_rehash_tags
 	addDomainTags
 	createStoryTopicData
 	slashizeLinks
@@ -1872,6 +1873,25 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
+	# just fix the whitespace for blockquote to something that looks
+	# universally good
+	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
+		my $quote   = 'blockquote';
+		my $open    = qr[\s* <\s*  $quote \s*> \n*]xsio;
+		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
+
+		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
+	}
+
+	return $str;
+}
+
+sub apply_rehash_tags {
+	my($str) = @_;
+	my $constants = getCurrentStatic();
+		
+	# all of these must be in approvedtags
+	# support for sarcasm tags
 	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
 		my $long = 'sarcasm';
@@ -1890,17 +1910,7 @@ sub processCustomTagsPost {
 		$str =~ s/$open/&lt;$sarc&gt;/g;
 		$str =~ s/$close/&lt;\/$sarc&gt;/g;
 	}
-
-	# just fix the whitespace for blockquote to something that looks
-	# universally good
-	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
-		my $quote   = 'blockquote';
-		my $open    = qr[\s* <\s*  $quote \s*> \n*]xsio;
-		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
-
-		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
-	}
-
+	
 	# support for <user> tags
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -1909,6 +1919,7 @@ sub processCustomTagsPost {
 		my $close = qr[<\s* /$utag \s*> \n*]xsio;
 		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
 	}
+	
 	# also support @blah: syntax
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		# The link here is just the nick. any decoration is done in base.css

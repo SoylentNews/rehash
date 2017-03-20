@@ -1476,6 +1476,7 @@ sub postProcessComment {
 	}
 	
 	$comm->{comment} = parseDomainTags($comm->{comment}, !$comm->{anon} && $comm->{fakeemail});
+	$comm->{comment} = apply_rehash_tags($comm->{comment});
 
 	if (!$from_db) {
 		

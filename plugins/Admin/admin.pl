@@ -1193,6 +1193,7 @@ sub editStory {
 			$storyref->{$field} =~ s|</ol>|</ol>\n\n|g;
 			$storyref->{$field} =~ s|</ul>|</ul>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|</spoiler>|</spoiler>\n\n|g;			
 			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
 
@@ -1261,6 +1262,7 @@ sub editStory {
 			$storyref->{$field} =~ s|</ol>|</ol>\n\n|g;
 			$storyref->{$field} =~ s|</ul>|</ul>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|</spoiler>|</spoiler>\n\n|g;
 			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
 		

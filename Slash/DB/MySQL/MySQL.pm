@@ -9248,6 +9248,7 @@ sub getDiscussionParent {
 		$story->{atstorytime} = " on ".timeCalc($story->{time});
 		$parent->{type} = 'story';
 		$parent->{content} = $story->{bodytext} ? $story->{introtext}.$story->{bodytext} : $story->{introtext};
+		$parent->{content} = apply_rehash_tags($parent->{content});
 		$parent->{story} = $story;
 		$parent->{author} = $slashdb->getAuthor(
 			$story->{uid},
