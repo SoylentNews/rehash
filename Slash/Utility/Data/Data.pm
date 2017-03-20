@@ -3082,7 +3082,6 @@ The 'approvedtags' entry in the vars table.
 		# everything in a blockquote needs to be in a block element,
 		# so we choose two that would fit the bill
 		blockquote  => ['div'],
-		spoiler     => ['div'],
 	);
 	my %needs_list = (
 		dd		=> qr/dl/,
