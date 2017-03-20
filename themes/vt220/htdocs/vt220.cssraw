@@ -624,7 +624,6 @@ li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h
   color: #ffa200;
 }
 
-.spoiler {
+body blockquote.spoiler {
 	background: linear-gradient(to right, rgba(255, 162, 0, 0.3), transparent 60%);
-	border-left-color: rgba(255,162,0, 0.5);
 }

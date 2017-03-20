@@ -1081,9 +1081,9 @@ abbr {
 	border-bottom: 1px dotted #000;
 }
 
-/* Spoiler New */
+/* Spoilers */
 
-blockquote.spoiler_new input[type=checkbox].spoiler_new ~ label
+blockquote.spoiler input[type=checkbox].spoiler ~ label
 {
     display: block;
     padding: 0.2em .1em;
@@ -1091,62 +1091,28 @@ blockquote.spoiler_new input[type=checkbox].spoiler_new ~ label
     font-weight: normal;
 }
 
-blockquote.spoiler_new input[type=checkbox].spoiler_new,
-blockquote.spoiler_new input[type=checkbox].spoiler_new ~ label.spoiler_on,
+blockquote.spoiler input[type=checkbox].spoiler,
+blockquote.spoiler input[type=checkbox].spoiler ~ label.spoiler_on,
 div.spoiler_text
 {
 	display:none;
 }
 
-blockquote.spoiler_new input[type=checkbox].spoiler_new:checked ~ label.spoiler_off
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_off
 {
 	display:none;
 }
 
-blockquote.spoiler_new input[type=checkbox].spoiler_new:checked ~ label.spoiler_on,
-blockquote.spoiler_new input[type=checkbox].spoiler_new:checked ~ div.spoiler_text
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ label.spoiler_on,
+blockquote.spoiler input[type=checkbox].spoiler:checked ~ div.spoiler_text
 {
 	display:block;
 }
 
-body blockquote.spoiler_new {
+body blockquote.spoiler {
 	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent 60%);
 }
 
-
-
-/*  OLD Spoiler */
-
-.spoiler:before {
-	content: "*SPOILER*";
-	display:block !important;
-	visibility: visible !important;
-}
-
-.spoiler {
-	display: block;
-	padding-left: 0.6em;
-	padding-top: 0.1em;
-	padding-bottom: 0.1em;
-	margin: 0.6em;
-	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent 60%);
-	border-left: 2px solid;
-	border-top-left-radius: 10px;
-	border-bottom-left-radius: 5px;
-	border-left-color: rgba(0,0,0, 0.5);
-}
-
-.spoiler *  {
-	visibility: collapse;
-	height: 0;
-}
-
-.spoiler:hover * {
-	visibility: visible;
-	height:auto;
-	transition: height 0s, visibility 0s ease-in-out;
-	transition-delay: 1s;
-}
 
 
 #sabutton {
