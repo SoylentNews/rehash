@@ -11,7 +11,8 @@ function setJSButtonsOn() {
         button.classList.remove("noJS");
         button.addEventListener("click", function(event){
             var cid = event.target.getAttribute("cid");
-            var checks = document.querySelectorAll('#tree_' + cid + ' input[type="checkbox"]');
+            var checks = document.querySelectorAll('#tree_' + cid + ' input[type="checkbox"].commentHider, #tree_' + cid + ' input[type="checkbox"].commentTreeHider, #tree_' + cid + ' input[type="checkbox"].commentBelow');
+            
             for(var i =0; i< checks.length;i++){
                 var check = checks[i];
                 if(!check.disabled){
