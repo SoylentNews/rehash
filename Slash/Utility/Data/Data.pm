@@ -1898,8 +1898,8 @@ sub apply_rehash_tags {
 		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
 		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
-		$str =~ s/$open/ &lt;$long&gt;/g;
-		$str =~ s/$close/&lt;\/$long&gt; /g;
+		$str =~ s/$open/&lt;$long&gt;/g;
+		$str =~ s/$close/&lt;\/$long&gt;/g;
 	}
 
 	if (grep /^sarcasm$/i, @{$constants->{approvedtags}}) {
@@ -1907,8 +1907,8 @@ sub apply_rehash_tags {
 		my $open    = qr[<\s*  $sarc \s*> \n*]xsio;
 		my $close   = qr[<\s* /$sarc \s*> \n*]xsio;
 
-		$str =~ s/$open/ &lt;$sarc&gt;/g;
-		$str =~ s/$close/&lt;\/$sarc&gt; /g;
+		$str =~ s/$open/&lt;$sarc&gt;/g;
+		$str =~ s/$close/&lt;\/$sarc&gt;/g;
 	}
 	
 	# support for <user> tags
@@ -3048,13 +3048,13 @@ The 'approvedtags' entry in the vars table.
 	# NB: ECODE is excluded because it is handled elsewhere.
 
 	# tags that are indented, so we can make sure indentation level is not too great
-	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote quote spoiler);
+	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote quote);
 
 	# or sub-super level
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
 
 	# block elements cannot be inside certain other elements; this defines which are which
-	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote spoiler div hr address h1 h2 h3 h4 h5 h6);
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote div hr address h1 h2 h3 h4 h5 h6);
 	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
 	# needs a <p> inside it
