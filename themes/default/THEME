@@ -301,6 +301,12 @@ htdoc=../icicle/htdocs/favicon-icicle.png
 template=../icicle/templates/html-header;misc;icicle
 image=../icicle/htdocs/images/logo_icicle.png
 
+# nv theme files go here
+css=../nv/htdocs/nv.cssraw
+htdoc=../nv/htdocs/favicon-nv.png
+template=../nv/templates/html-header;misc;nv
+image=../nv/htdocs/images/logo_nv.png
+
 # pwnies theme files go here
 css=../pwnies/htdocs/pwnies.cssraw
 htdoc=../pwnies/htdocs/favicon-pwnies.png
