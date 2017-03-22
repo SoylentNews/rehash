@@ -55,6 +55,7 @@ __template__
 			'soylentnews'	=> 'SoylentNews',
 			'night' => 'Night Mode',
 			'icicle' => 'Black IcIcle',
+			'nv' => 'NV',
 			'pwnies' => 'OMG PWNIES',
 			'vomit'  => 'Vomit',
 			'vt100'	=> 'VT100',
