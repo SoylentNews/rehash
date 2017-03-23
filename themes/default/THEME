@@ -301,8 +301,8 @@ image=../chillax/htdocs/images/logo_chillax.png
 
 # soylentnews theme files go here
 css=../soylentnews/htdocs/soylentnews.cssraw
-htdoc=../nv/htdocs/favicon-soylentnews-16x16.png
-htdoc=../nv/htdocs/favicon-soylentnews-32x32.png
+htdoc=../soylentnews/htdocs/favicon-soylentnews-16x16.png
+htdoc=../soylentnews/htdocs/favicon-soylentnews-32x32.png
 template=../soylentnews/templates/html-header;misc;soylentnews
 image=../soylentnews/htdocs/images/logo_soylentnews.png
 
