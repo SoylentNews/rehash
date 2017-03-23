@@ -257,7 +257,22 @@ htdoc=htdocs/users.pl
 htdoc=htdocs/images/comments.jsraw
 htdoc=htdocs/images/dumper.js
 htdoc=htdocs/imgupload.pl
-htdoc=htdocs/favicon-default.png
+htdoc=htdocs/android-chrome-192x192.png
+htdoc=htdocs/android-chrome-256x256.png
+htdoc=htdocs/apple-touch-icon-60x60
+htdoc=htdocs/apple-touch-icon-76x76.png
+htdoc=htdocs/apple-touch-icon-120x120.png
+htdoc=htdocs/apple-touch-icon-152x152.png
+htdoc=htdocs/apple-touch-icon-180x180.png
+htdoc=htdocs/apple-touch-icon.png
+htdoc=htdocs/favicon-default-16x16.png
+htdoc=htdocs/favicon-default-32x32.png
+htdoc=htdocs/favicon.ico
+htdoc=htdocs/mstile-150x150.png
+htdoc=htdocs/mstile-310x310.png
+htdoc=htdocs/browserconfig.xml
+htdoc=htdocs/manifest.json
+htdoc=htdocs/safari-pinned-tab.svg
 glob=badgejs:htdocs/badge.js
 badgejs=htdocs/badge.js
 css=htdocs/admin.cssraw
@@ -286,7 +301,8 @@ image=../chillax/htdocs/images/logo_chillax.png
 
 # soylentnews theme files go here
 css=../soylentnews/htdocs/soylentnews.cssraw
-htdoc=../soylentnews/htdocs/favicon-soylentnews.png
+htdoc=../nv/htdocs/favicon-soylentnews-16x16.png
+htdoc=../nv/htdocs/favicon-soylentnews-32x32.png
 template=../soylentnews/templates/html-header;misc;soylentnews
 image=../soylentnews/htdocs/images/logo_soylentnews.png
 
@@ -303,7 +319,8 @@ image=../icicle/htdocs/images/logo_icicle.png
 
 # nv theme files go here
 css=../nv/htdocs/nv.cssraw
-htdoc=../nv/htdocs/favicon-nv.png
+htdoc=../nv/htdocs/favicon-nv-16x16.png
+htdoc=../nv/htdocs/favicon-nv-32x32.png
 template=../nv/templates/html-header;misc;nv
 image=../nv/htdocs/images/logo_nv.png
 

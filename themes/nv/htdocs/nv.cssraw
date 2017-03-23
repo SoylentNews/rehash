@@ -17,6 +17,7 @@ a:hover { color: #00a000; }
 	width: 115px;
 	height: 80px;
 	background: url("[% constants.imagedir %]/logo_nv.png") no-repeat;
+	background-size: 115px 80px;
 }
 
 #slogan h2, #slogan #head_message
