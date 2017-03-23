@@ -23,6 +23,7 @@ a:hover { color: #800;}
 	width: 115px;
 	height: 80px;
 	background: url("[% constants.imagedir %]/logo_night.png") no-repeat;
+	  background-size: 115px 80px;
 }
 
 #slogan h2, #slogan #head_message
@@ -36,9 +37,6 @@ a:hover { color: #800;}
 
 #section_banner  {     
 	background-color: #600;
-	background: -o-linear-gradient(#933, #600);
-	background: -webkit-linear-gradient(#933, #600);
-	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
 	border-radius: 8px;
 	font-size: 1.125em;
@@ -120,9 +118,6 @@ a:hover { color: #800;}
 
 .commentTop .title {
 	background-color: #600;
-	background: -o-linear-gradient(#933, #600);
-	background: -webkit-linear-gradient(#933, #600);
-	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
 	border-radius: 10px 10px 0 0;
 }
@@ -137,9 +132,6 @@ a:hover { color: #800;}
 {
 	border: 1px solid #aaa;
 	background-color: #444;
-	background: -o-linear-gradient(#444, #222);
-	background: -webkit-linear-gradient(#444, #222);
-	background: -moz-linear-gradient(#444, #222);
 	background: linear-gradient(#444, #222);	
 	color: #fff;
 }
@@ -243,9 +235,6 @@ text-decoration:none;
 
 .generaltitle div.title, .article div.title, .search-results h4 {
 	background-color: #600;
-	background: -o-linear-gradient(#933, #600);
-	background: -webkit-linear-gradient(#933, #600);
-	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
 	border-radius: 10px 10px 0 0;
 }
@@ -262,9 +251,6 @@ text-decoration:none;
 	font-weight: normal;
 	border: 1px solid #aaa;
 	background-color: #444;
-	background: -o-linear-gradient(#444, #222);
-	background: -webkit-linear-gradient(#444, #222);
-	background: -moz-linear-gradient(#444, #222);
 	background: linear-gradient(#444, #222);
 }
 
@@ -283,9 +269,6 @@ text-decoration:none;
 div.storylinks, .search-results .details
 {
 	background-color: #444;
-	background: -o-linear-gradient(#444, #222);
-	background: -webkit-linear-gradient(#444, #222);
-	background: -moz-linear-gradient(#444, #222);
 	background: linear-gradient(#444, #222);
 	border: 1px solid #aaa;
 	border-top: none;
@@ -452,9 +435,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 #usermenu ul.menu li a
 {
 	background-color: #600;
-	background: -o-linear-gradient(#933, #600);
-	background: -webkit-linear-gradient(#933, #600);
-	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
 	border-radius: .3em .3em 0 0;
 	border: none;
@@ -466,9 +446,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 #usermenu ul.menu li.selected a
 {
 	background-color: #777;
-	background: -o-linear-gradient(#777, #555);
-	background: -webkit-linear-gradient(#777, #555);
-	background: -moz-linear-gradient(#777, #555);
 	background: linear-gradient(#777, #555);	
 	text-decoration: none;
 	color: #fff;
@@ -502,9 +479,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 	color:#fff;
 	margin-bottom: .6em;
 	background-color: #600;
-	background: -o-linear-gradient(#933, #600);
-	background: -webkit-linear-gradient(#933, #600);
-	background: -moz-linear-gradient(#933, #600);
 	background: linear-gradient(#933, #600);
 	border-radius: 10px;
 }
@@ -532,9 +506,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #f00; }
 {
 	border: 1px solid #aaa;
 	background-color: #444;
-	background: -o-linear-gradient(#444, #222);
-	background: -webkit-linear-gradient(#444, #222);
-	background: -moz-linear-gradient(#444, #222);
 	background: linear-gradient(#444, #222);
 	color: #fff;
 }

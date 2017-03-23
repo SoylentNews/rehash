@@ -34,6 +34,7 @@ hr {
 	width: 115px;
 	height: 80px;
 	background: url("[% constants.imagedir %]/logo_vt100.png") no-repeat;
+		background-size: 115px 80px;
 }
 
 #slogan h2, #slogan #head_message

@@ -289,13 +289,15 @@ mysql_prep=sql/mysql/prep.sql
 
 # bada55 theme files go here
 css=../bada55/htdocs/bada55.cssraw
-htdoc=../bada55/htdocs/favicon-bada55.png
+htdoc=../bada55/htdocs/favicon-bada55-16x16.png
+htdoc=../bada55/htdocs/favicon-bada55-32x32.png
 template=../bada55/templates/html-header;misc;bada55
 image=../bada55/htdocs/images/logo_bada55.png
 
 # chillax theme files go here
 css=../chillax/htdocs/chillax.cssraw
-htdoc=../chillax/htdocs/favicon-chillax.png
+htdoc=../chillax/htdocs/favicon-chillax-16x16.png
+htdoc=../chillax/htdocs/favicon-chillax-32x32.png
 template=../chillax/templates/html-header;misc;chillax
 image=../chillax/htdocs/images/logo_chillax.png
 
@@ -313,7 +315,8 @@ image=../night/htdocs/images/logo_night.png
 
 # icicle theme files go here
 css=../icicle/htdocs/icicle.cssraw
-htdoc=../icicle/htdocs/favicon-icicle.png
+htdoc=../icicle/htdocs/favicon-icicle-16x16.png
+htdoc=../icicle/htdocs/favicon-icicle-32x32.png
 template=../icicle/templates/html-header;misc;icicle
 image=../icicle/htdocs/images/logo_icicle.png
 
@@ -326,13 +329,15 @@ image=../nv/htdocs/images/logo_nv.png
 
 # pwnies theme files go here
 css=../pwnies/htdocs/pwnies.cssraw
-htdoc=../pwnies/htdocs/favicon-pwnies.png
+htdoc=../pwnies/htdocs/favicon-pwnies-16x16.png
+htdoc=../pwnies/htdocs/favicon-pwnies-32x32.png
 template=../pwnies/templates/html-header;misc;pwnies
 image=../pwnies/htdocs/images/logo_pwnies.png
 
 # vomit theme files go here
 css=../vomit/htdocs/vomit.cssraw
-htdoc=../vomit/htdocs/favicon-vomit.png
+htdoc=../vomit/htdocs/favicon-vomit-16x16.png
+htdoc=../vomit/htdocs/favicon-vomit-32x32.png
 template=../vomit/templates/html-header;misc;vomit
 image=../vomit/htdocs/images/backgroundstars.gif
 image=../vomit/htdocs/images/logo_vomit.png
@@ -340,19 +345,22 @@ image=../vomit/htdocs/images/underconstruction.gif
 
 # vt100 theme files go here
 css=../vt100/htdocs/vt100.cssraw
-htdoc=../vt100/htdocs/favicon-vt100.png
+htdoc=../vt100/htdocs/favicon-vt100-16x16.png
+htdoc=../vt100/htdocs/favicon-vt100-32x32.png
 template=../vt100/templates/html-header;misc;vt100
 image=../vt100/htdocs/images/logo_vt100.png
 
 # vt220 theme files go here
 css=../vt220/htdocs/vt220.cssraw
-htdoc=../vt220/htdocs/favicon-vt220.png
+htdoc=../vt220/htdocs/favicon-vt220-16x16.png
+htdoc=../vt220/htdocs/favicon-vt220-32x32.png
 template=../vt220/templates/html-header;misc;vt220
 image=../vt220/htdocs/images/logo_vt220.png
 
 # grayscale theme files go here
 css=../grayscale/htdocs/grayscale.cssraw
-htdoc=../grayscale/htdocs/favicon-grayscale.png
+htdoc=../grayscale/htdocs/favicon-grayscale-16x16.png
+htdoc=../grayscale/htdocs/favicon-grayscale-32x32.png
 template=../grayscale/templates/html-header;misc;grayscale
 image=../grayscale/htdocs/images/logo_grayscale.png
 
