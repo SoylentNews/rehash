@@ -76,18 +76,17 @@ a:hover { color: #888;}
 	text-decoration-line: none !important;;
 	text-decoration-style: none !important;;
 	background: url("[% constants.imagedir %]/logo_vomit.png") no-repeat !important;
-		background-size: 115px 80px;
 }
 	 
 @keyframes scroll-left
 {
 	0%
 	{ 
-		transform: translateX(100%); 		
+		transform: translateX(100%);
 	}
 	100%
 	{ 
-		transform: translateX(80px); 
+		transform: translateX(80px);
 	}
 }
 
