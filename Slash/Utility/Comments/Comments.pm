@@ -2509,7 +2509,7 @@ sub dispCommentNoTemplate {
 		# 4-1 joke sigs
 		my $joketime = time;
 		if($joketime < 1491091260 && $joketime > 1491004800) {
-			$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">--<br />".getJokeSig($user->{uid})."</div> \n";
+			$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">--<br />".getJokeSig($args->{uid})."</div> \n";
 		}
 	}
 	
@@ -2768,11 +2768,13 @@ sub getJokeSig {
 	if($uid == 18) {
 		$sigout = "What, you thought I'd joke-sig myself?";
 	}
-	foreach(reverse(1..30)) {
-		if($uid % $_ == 0) {
-			my $here = $_ - 1;
-			$sigout = $jokesigs[$here];
-			last;
+	else {
+		foreach(reverse(1..30)) {
+			if($uid % $_ == 0) {
+				my $here = $_ - 1;
+				$sigout = $jokesigs[$here];
+				last;
+			}
 		}
 	}
 
