@@ -185,8 +185,11 @@ input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a,
     border-bottom: 1px solid #ffc200;
 }
 
-
 .commentBox { background: #181818; }
+
+.linkCommentPage {
+	background: #000;
+}
 
 
 /* FORMTABS */
