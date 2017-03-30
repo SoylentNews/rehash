@@ -67,6 +67,7 @@ BEGIN {
 
 our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
+	apply_rehash_tags
 	addDomainTags
 	createStoryTopicData
 	slashizeLinks
@@ -1872,6 +1873,25 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
+	# just fix the whitespace for blockquote to something that looks
+	# universally good
+	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
+		my $quote   = 'blockquote';
+		my $open    = qr[\s* <\s*  $quote \s*> \n*]xsio;
+		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
+
+		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
+	}
+
+	return $str;
+}
+
+sub apply_rehash_tags {
+	my($str) = @_;
+	my $constants = getCurrentStatic();
+		
+	# all of these must be in approvedtags
+	# support for sarcasm tags
 	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
 		my $long = 'sarcasm';
@@ -1890,17 +1910,7 @@ sub processCustomTagsPost {
 		$str =~ s/$open/&lt;$sarc&gt;/g;
 		$str =~ s/$close/&lt;\/$sarc&gt;/g;
 	}
-
-	# just fix the whitespace for blockquote to something that looks
-	# universally good
-	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
-		my $quote   = 'blockquote';
-		my $open    = qr[\s* <\s*  $quote \s*> \n*]xsio;
-		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
-
-		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
-	}
-
+	
 	# support for <user> tags
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -1909,6 +1919,7 @@ sub processCustomTagsPost {
 		my $close = qr[<\s* /$utag \s*> \n*]xsio;
 		$str =~ s/$open\s*(.*?)\s*$close/_nick2Link($1,$constants)/eg;
 	}
+	
 	# also support @blah: syntax
 	if (grep /^user$/i, @{$constants->{approvedtags}}) {
 		# The link here is just the nick. any decoration is done in base.css
@@ -1921,11 +1932,23 @@ sub processCustomTagsPost {
 		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
 		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
 
-		$str =~ s/$open/<p><div class="spoiler">/g;
-		$str =~ s/$close/<\/div><\/p>/g;
+		$str =~ s/$open/_newSpoilerHead()/ge;
+		$str =~ s/$close/<\/div><\/blockquote>/g;
 	}
 
 	return $str;
+}
+
+sub _newSpoilerHead {
+	
+	my $id = sprintf("%08X", rand(0xFFFFFFFF));
+		
+	my $open_new = "<blockquote class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
+									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n" .
+									"<label class=\"spoiler_on\" title=\"Hide spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
+									"<div class=\"spoiler_text\">";
+
+	return $open_new;
 }
 
 sub _nick2Link {
@@ -3017,7 +3040,7 @@ The 'approvedtags' entry in the vars table.
 	# change the code for them.  in theory we could generalize it more,
 	# using vars for all this, but that is a low priority.
 	my %known_tags	= map { ( lc, 1 ) } qw(
-		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote
+		b i p br a ol ul li dl dt dd em strong tt blockquote spoiler div ecode quote
 		img hr big small sub sup span
 		q dfn code samp kbd var cite address ins del
 		h1 h2 h3 h4 h5 h6
@@ -3031,11 +3054,11 @@ The 'approvedtags' entry in the vars table.
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
 
 	# block elements cannot be inside certain other elements; this defines which are which
-	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote div hr address h1 h2 h3 h4 h5 h6);
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote spoiler div hr address h1 h2 h3 h4 h5 h6);
 	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
 	# needs a <p> inside it
-	my %needs_p     = map { ( lc, 1 ) } qw(blockquote quote div);
+	my %needs_p     = map { ( lc, 1 ) } qw(quote div);
 
 	# when a style tag is cut off prematurely because of a newly introduced block
 	# element, we want to re-start the style inside the block; it is not perfect,
@@ -3058,7 +3081,7 @@ The 'approvedtags' entry in the vars table.
 		# blockquote not a list, but has similar semantics:
 		# everything in a blockquote needs to be in a block element,
 		# so we choose two that would fit the bill
-		blockquote	=> ['div'],
+		blockquote  => ['div'],
 	);
 	my %needs_list = (
 		dd		=> qr/dl/,

@@ -1,0 +1,23 @@
+__description__
+JS loads for the html header
+
+* title = title for TITLE tag
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+html_header_js
+__skin__
+default
+__template__
+[% IF user.is_admin %]
+<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/admin.css?[% constants.cvs_tag_currentcode %]">
+<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

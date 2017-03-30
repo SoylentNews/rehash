@@ -57,7 +57,7 @@ __template__
 	END %]
 		[% pretext = Slash.addDomainTags(subtext);
 			pretext = Slash.parseDomainTags(pretext); %]
-		[% pretext %]
+		[% pretext | apply_rehash_tags %]
 	</div>
 </div>
 </p>
