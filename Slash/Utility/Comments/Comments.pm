@@ -2509,11 +2509,14 @@ sub dispCommentNoTemplate {
 	
 		
 		$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n";
-		# 4-1 joke sigs
+	}
+
+	# 4/1/2017 sig joke
+	if($args->{uid} != 1) {
 		my $joketime = time;
-		if($joketime < 1491091260 && $joketime > 1491004800) {
-			$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">--<br />".getJokeSig($args->{uid})."</div> \n";
-		}
+                if($joketime < 1491091260 && $joketime > 1491004800) {
+                        $sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">--<br />".getJokeSig($args->{uid})."</div> \n";
+                }
 	}
 	
 	my $shrunk;
