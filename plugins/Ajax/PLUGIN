@@ -10,7 +10,6 @@ htdoc=htdocs/preferences.pl
 htdoc=htdocs/images/typeof.js
 imagejs=htdocs/images/javascript.js
 imagejs=htdocs/images/core.js
-imagejs=htdocs/images/admin.js
 imagejs=htdocs/images/common.jsraw
 imagejs=htdocs/images/slash.util.js
 imagejs=htdocs/images/slash.geometry.js

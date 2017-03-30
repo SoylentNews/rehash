@@ -107,9 +107,9 @@ END %]
 			# Look ye to parseDomainTags for the domaintags == [0-2] logic
 			%]
 			[% IF user.domaintags == "3" %]
-				[% story.introtext %]
+				[% story.introtext | apply_rehash_tags %]
 			[% ELSE %]
-				[% pretext = story.introtext;
+				[% pretext = story.introtext | apply_rehash_tags;
 				   pretext = Slash.addDomainTags(pretext);
 				   pretext = Slash.parseDomainTags(pretext, 1); %]
 				[% pretext %]
@@ -119,7 +119,7 @@ END %]
 				<input type="checkbox" id="more_[% story.sid %]" class="story_more" autocomplete="off" />
 				<label for="more_[% story.sid %]" class="story_more">[% constants.story_more %]</label>
 				<div class="story_more full">
-						[% story.bodytext %]
+						[% story.bodytext | apply_rehash_tags %]
 				</div>
 		[% END %]	
 
@@ -152,7 +152,7 @@ END %]
 
 [% IF full && story.bodytext %]
 		<div class="full">
-			[% story.bodytext %]
+			[% story.bodytext | apply_rehash_tags %]
 		</div>
 [% END %]
 	</div>
@@ -184,12 +184,9 @@ END;
 %]
 	[% title %]  [% IF story.commentcount %][% story.commentcount %] comment[% IF story.commentcount > 1 %]s[% END %][% END %] 
 	[% IF user.is_admin %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">(edit)</a>[% END %]
-	[% IF expandable %]
-	<a href="#" onclick="toggleIntro('intro-[% story.stoid %]','togglest-[% story.stoid %]'); return false"><span id="togglest-[% story.stoid %]">[+]</span></a>
-	[% END %]
 	[% IF getintro %]
 	<div class="introhide" id="intro-[% story.stoid %]">
-		[% story.introtext %]
+		[% story.introtext | apply_rehash_tags %]
 	</div>
 	[% END %]
 </div>
