@@ -2504,7 +2504,13 @@ sub dispCommentNoTemplate {
 	my $sig;
 	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
 	
-		$sig .= "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n"
+		
+		$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n";
+		# 4-1 joke sigs
+		my $joketime = time;
+		if($joketime < 1491091260 && $joketime > 1491004800) {
+			$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">--<br />".getJokeSig($user->{uid})."</div> \n";
+		}
 	}
 	
 	my $shrunk;
@@ -2721,6 +2727,56 @@ sub dispLinkComment {
 	}
 	if(!$args->{options}->{show_pieces}) { $html_out .= "</div>\n"; }
 	return $html_out;;
+}
+
+sub getJokeSig {
+	my $uid = shift;
+	my $sigout;
+	my @jokesigs = (
+		"Screw you guys, Greedo shot first.",
+		"I \x{2764} Moose Wang!",
+		"takyon is my babydaddy.",
+		"I'm a little teapot, short and stout...",
+		"They said OSX was idiot-proof but I sure showed them!",
+		"This joke is for the \x{1f595}s.",
+		"I'm not really this stupid. I'm just trying not to stand out from the rest of you.",
+		"The other night I was having sex and called out my mother's name. Boy was sis ever mad.",
+		"There is no sig, there is only Zuul.",
+		"No generalization is true, including this one.",
+		"I feel pretty, oh so pretty...",
+		"If ignorance is bliss, why am I so miserable?",
+		"Just because I don't wear pants doesn't mean I'm naked, -- SpallsHurgenson",
+		"paulej72 is the butt. -- crutchy",
+		"farticle: What you call one tiny bubble out of all the bubbles when you fart in the tub.",
+		"Python: Because perl is only for smart people.",
+		"Free of coffee is like being free of boobs. It is not a desirable state.",
+		"I'd be fine not having net neutrality if they weren't all so insistent on net-chaotic-evilly.",
+		"Information wants to be free. Or maybe it wants a taco and a beer. Who knows? Information about information is too meta and hurts my head. -- The Mighty Buzzard",
+		"Shit shit shit. -- NCommander",
+		"Lack of quote-age makes me sad. -- mechanicjay",
+		"I love putting 5 guys meat inside me. -- SirFinkus",
+		"When you cater to a crowd of nerds, you're asking for meaningless pedantic bitching totally missing the point of the discussion. -- Ethanol Fueled",
+		"I've already started muttering words no one can understand while I write my regex lines. -- Konomi",
+		"Sorry folks.. I'll be occupied the rest of the evening playing with my new appendages. -- cmn32480",
+		"Huh!  That worked?!! -- Bytram(martyb)",
+		"My code is perfect, it is the universe that it runs in that is all fucked up. -- paulej72",
+		"The placebo effect doesn't really work. People just think it does. -- chromas",
+		"You can never have to much lube though, right? -- Runaway1956",
+		"With no errors, It would not be credible as coming from this site. -- audioguy", 
+	);
+
+	if($uid == 18) {
+		$sigout = "What, you thought I'd joke-sig myself?";
+	}
+	foreach(reverse(1..30)) {
+		if($uid % $_ == 0) {
+			my $here = $_ - 1;
+			$sigout = $jokesigs[$here];
+			last;
+		}
+	}
+
+	return $sigout;
 }
 
 1;
