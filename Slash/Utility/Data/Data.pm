@@ -3058,7 +3058,7 @@ The 'approvedtags' entry in the vars table.
 	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
 	# needs a <p> inside it
-	my %needs_p     = map { ( lc, 1 ) } qw(quote div);
+	my %needs_p     = map { ( lc, 1 ) } qw(blockquote quote div);
 
 	# when a style tag is cut off prematurely because of a newly introduced block
 	# element, we want to re-start the style inside the block; it is not perfect,
