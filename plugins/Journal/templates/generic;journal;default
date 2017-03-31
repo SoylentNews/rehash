@@ -29,9 +29,9 @@ __template__
 					</div>
 					<div class="intro">
 					[% IF user.domaintags == "3" %]
-						[% diatribe.article %]
+						[% diatribe.article | apply_rehash_tags %]
 					[% ELSE %]
-						[% pretext = diatribe.article;
+						[% pretext = diatribe.article | apply_rehash_tags;
 						   pretext = Slash.addDomainTags(pretext);
 						   pretext = Slash.parseDomainTags(pretext); %]
 						[% pretext %]

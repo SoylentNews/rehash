@@ -19,7 +19,6 @@ $ && pageload && $(function(){
 });
 })(window.jQuery, window.pageload, window.pageload_done, window.console);
 </script>
-[% PROCESS more_experiments %]
 __seclev__
 10000
 __version__

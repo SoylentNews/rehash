@@ -77,7 +77,7 @@ __template__
 					<div class="topic">
 						<img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
 					</div>
-					[% subtext %]
+					[% subtext | apply_rehash_tags %]
 				</div>
 			</div>
 		</div>

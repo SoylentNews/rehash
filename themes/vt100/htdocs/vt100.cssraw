@@ -34,6 +34,7 @@ hr {
 	width: 115px;
 	height: 80px;
 	background: url("[% constants.imagedir %]/logo_vt100.png") no-repeat;
+		background-size: 115px 80px;
 }
 
 #slogan h2, #slogan #head_message
@@ -184,8 +185,11 @@ input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a,
     border-bottom: 1px solid #0f0;
 }
 
-
 .commentBox { background: #181818; }
+
+.linkCommentPage {
+	background: #000;
+}
 
 
 /* FORMTABS */
@@ -624,7 +628,6 @@ li.comment input[type=checkbox]:checked ~ div.commentDiv div.commentTop .title h
   color: #0c0;
 }
 
-.spoiler {
+body blockquote.spoiler {
 	background: linear-gradient(to right, rgba(0, 255, 0, 0.3), transparent 60%);
-	border-left-color: rgba(0,255,0, 0.5);
 }

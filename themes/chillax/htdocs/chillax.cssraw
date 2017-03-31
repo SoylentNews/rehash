@@ -17,6 +17,7 @@ a:hover { color: #008; }
 	width: 115px;
 	height: 80px;
 	background: url("[% constants.imagedir %]/logo_chillax.png") no-repeat;
+		background-size: 115px 80px;
 }
 
 #slogan h2, #slogan #head_message
@@ -29,9 +30,6 @@ a:hover { color: #008; }
 
 #section_banner  {     
 	background-color: #006;
-	background: -o-linear-gradient(#006, #339);
-	background: -webkit-linear-gradient(#006, #339);
-	background: -moz-linear-gradient(#006, #339);
 	background: linear-gradient(#006, #339);
 	border-radius: 8px;
 	font-size: 1.125em;
@@ -94,9 +92,6 @@ a:hover { color: #008; }
 
 .commentTop .title {     
   background-color: #006;
-	background: -o-linear-gradient(#006, #339);
-	background: -webkit-linear-gradient(#006, #339);
-	background: -moz-linear-gradient(#006, #339);
 	background: linear-gradient(#006, #339);
   border-radius: 10px 10px 0 0;
 }
@@ -110,9 +105,6 @@ a:hover { color: #008; }
 .commentTop .details {
 	border: 1px solid #aaa;
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
 	color: #000;
 }
@@ -203,9 +195,6 @@ a:hover { color: #008; }
 
 .generaltitle div.title, .article div.title, .search-results h4 {     
 	background-color: #006;
-	background: -o-linear-gradient(#006, #339);
-	background: -webkit-linear-gradient(#006, #339);
-	background: -moz-linear-gradient(#006, #339);
 	background: linear-gradient(#006, #339);
   border-radius: 10px 10px 0 0;
 }
@@ -222,9 +211,6 @@ a:hover { color: #008; }
 	font-weight: normal;
 	border: 1px solid #aaa;
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
 }
 
@@ -238,9 +224,6 @@ a:hover { color: #008; }
 div.storylinks, .search-results .details
 {
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
     border: 1px solid #aaa;
     border-top: none;
@@ -406,9 +389,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #006; }
 	color:#fff;
 	margin-bottom: .6em;
 	background-color: #006;
-	background: -o-linear-gradient(#006, #339);
-	background: -webkit-linear-gradient(#006, #339);
-	background: -moz-linear-gradient(#006, #339);
 	background: linear-gradient(#006, #339);
 	border-radius: 10px;
 }
@@ -435,9 +415,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #006; }
 {
 	border: 1px solid #aaa;
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
 	color: #000;
 }

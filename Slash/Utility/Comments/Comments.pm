@@ -1476,6 +1476,7 @@ sub postProcessComment {
 	}
 	
 	$comm->{comment} = parseDomainTags($comm->{comment}, !$comm->{anon} && $comm->{fakeemail});
+	$comm->{comment} = apply_rehash_tags($comm->{comment});
 
 	if (!$from_db) {
 		
@@ -2368,6 +2369,8 @@ sub printCommComments {
 	else {
 		$html_out .= "</div>";
 	}
+		
+	$html_out .= "<script src=\"$constants->{real_rootdir}/expandAll.js\" type=\"text/javascript\"></script>";	
 
 	return $html_out;
 }
@@ -2406,7 +2409,8 @@ sub dispCommentNoTemplate {
 	}
 	
 	my $treeHiderOn = $user->{mode} ne 'flat' && ($args->{children} || $legacykids);
-	my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : "";
+	my $treeHiderOffText = !$treeHiderOn ? " class=\"noTH\"" : " class=\"noJS\"";
+
 	
 	# Now shit starts getting squirrely.
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
@@ -2440,6 +2444,7 @@ sub dispCommentNoTemplate {
 
 		if($treeHiderOn) {
 			$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
+			$html_out .= "<label class=\"expandAll noJS\" title=\"Show all comments in tree\" cid=\"$args->{cid}\"></label>"; 
 		}
 	}
 
@@ -2465,10 +2470,8 @@ sub dispCommentNoTemplate {
 		$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
 	}
 	unless(defined($user->{noscores}) && $user->{noscores}) {
-		my $modal_begin = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "<a href=\"#\" onclick=\"getModalPrefs('modcommentlog', 'Moderation Comment Log', $args->{cid}); return false\">" : "";
-		my $modal_end = (defined($constants->{modal_prefs_active}) && $constants->{modal_prefs_active}) ? "</a>" : "";
 		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
-		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">($modal_begin"."Score: $points$modal_end$reason)</span> \n";
+		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">(Score: $points$reason)</span> \n";
 	}
 
 	$html_out .= "<span class=\"by\">$noZoo</span>\n";
