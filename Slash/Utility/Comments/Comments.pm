@@ -2471,7 +2471,7 @@ sub dispCommentNoTemplate {
 	}
 	unless(defined($user->{noscores}) && $user->{noscores}) {
 		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
-		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">(Score: $points $reason)</span> \n";
+		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">(Score: $points$reason)</span> \n";
 	}
 
 	$html_out .= "<span class=\"by\">$noZoo</span>\n";
