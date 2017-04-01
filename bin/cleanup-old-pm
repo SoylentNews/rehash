@@ -11,7 +11,9 @@ use Config;
 
 my @files = ("Slash/Edit.pm",
 						 "Slash/Remarks.pm",
-						 "Slash/Soap.pm");
+						 "Slash/SOAP.pm",
+						 "Slash/SOAP/Test.pm",
+						 "Slash/SOAP");
 
 foreach
  my $file(@files) {
