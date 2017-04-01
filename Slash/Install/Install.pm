@@ -565,6 +565,8 @@ sub _uninstall {
 	unless ($self->exists('plugin', $plugin->{name})) {
 		print STDERR "Plugin $plugin->{name} has already been uninstalled\n";
 		return;
+	} else {
+		print STDERR "Uninstalling Plugin $plugin->{name} \n";
 	}
 
 	my $driver = $self->getValue('db_driver');
