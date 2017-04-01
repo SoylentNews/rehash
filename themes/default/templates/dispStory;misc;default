@@ -126,7 +126,7 @@ END %]
 
 [% IF full && user.is_admin %]
 		<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;
-		[% user.acl.signoff_allowed %]
+		[% IF user.acl.signoff_allowed %]
 		  [% signed = Slash.db.hasUserSignedStory(stoid, user.uid); %]
 		  [% UNLESS signed %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ No Signoff ]</a>&nbsp;[% END %]
 		[% END %]
