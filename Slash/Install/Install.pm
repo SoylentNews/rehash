@@ -654,7 +654,7 @@ sub _uninstall {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== ($type $plugin->{name}) Failed on: $statement:\n";
+			print "=== Plugin $plugin->{name} Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
@@ -678,7 +678,7 @@ sub _uninstall {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== ($type $plugin->{name}) Failed on: $statement:\n";
+			print "=== Plugin $plugin->{name} Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
