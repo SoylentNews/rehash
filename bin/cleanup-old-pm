@@ -10,7 +10,8 @@ use strict;
 use Config;
 
 my @files = ("Slash/Edit.pm",
-						 "Slash/Remarks.pm");
+						 "Slash/Remarks.pm",
+						 "Slash/Soap.pm");
 
 foreach
  my $file(@files) {
