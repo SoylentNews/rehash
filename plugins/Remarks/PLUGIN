@@ -1,6 +1,8 @@
 # $Id$
 name=Remarks
 description="Remarks"
+mysql_unschema=mysql_unschema.sql
+mysql_undump=mysql_undump.sql
 htdocs=remarks.pl
 template=templates/data;remarks;default
 template=templates/display;remarks;default
