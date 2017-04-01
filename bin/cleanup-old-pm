@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2005 by Open Source Technology Group. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This is the Unneeded PM cleanup script script.
+
+use strict;
+use Config;
+
+my @files = ("Edit.pm");
+
+foreach
+ my $file(@files) {
+	$file = "$Config{installsitelib}/$file";
+	if (-e $file) {
+		print "Deleting $file\n";
+		unlink ($file);
+	}
+ }
+ print "Complete\n";
