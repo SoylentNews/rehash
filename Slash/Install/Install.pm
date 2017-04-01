@@ -199,7 +199,7 @@ sub uninstallPlugins {
 	for my $answer (@$answers) {
 		for (keys %$plugins) {
 			if ($answer eq $plugins->{$_}{order}) {
-				$self->_uninstall($plugins->{$_}, $symlink, 'plugin');
+				$self->_uninstall($plugins->{$_});
 			}
 		}
 	}
@@ -558,20 +558,13 @@ sub _install {
 
 
 sub _uninstall {
-	my($self, $hash, $symlink, $type) = @_;
+	my($self, $plugin) = @_;
 
 	# Yes, performance wise this is questionable, if getValue() was
 	# cached.... who cares this is the install. -Brian
-	unless ($self->exists('hash', $hash->{name})) {
-		print STDERR "Plugin $hash->{name} has already been uninstalled\n";
+	unless ($self->exists('plugin', $plugin->{name})) {
+		print STDERR "Plugin $plugin->{name} has already been uninstalled\n";
 		return;
-	}
-
-	if ($type eq 'plugin') {
-		return unless $self->exists('plugin', $hash->{name});
-
-		$self->deleteByDesc($hash->{'description'});
-		$self->deleteByDesc("$hash->{name} plugin files installed symlink?");
 	}
 
 	my $driver = $self->getValue('db_driver');
@@ -595,11 +588,11 @@ sub _uninstall {
 	);
 
 	for my $section (keys %stuff) {
-		next unless exists $hash->{$section} && @{$hash->{$section}};
+		next unless exists $plugin->{$section} && @{$plugin->{$section}};
 		my $instdir = "$prefix_site/$stuff{$section}[0]";
 		mkpath $instdir, 0, 0755;
 
-		for (@{$hash->{$section}}) {
+		for (@{$plugin->{$section}}) {
 			# I hope no one tries to embed spaces in their
 			# theme/plugin... heh!
 			# Yes, this should actually be specific, and not
@@ -623,7 +616,7 @@ sub _uninstall {
 			} else {
 				$dir = '';
 			}
-			my $old = "$hash->{dir}/$oldfilename";
+			my $old = "$plugin->{dir}/$oldfilename";
 			1 while $old =~ s{/[^/]+/\.\.}{};
 			my $new = "$instdir$dir/$filename";
 
@@ -643,8 +636,8 @@ sub _uninstall {
 		email		=> $self->getValue("adminmail"),
 		slash_prefix	=> $self->getValue("base_install_directory"),
 	};
-	if ($hash->{"${driver}_undump"}) {
-		my $undump_file = "$hash->{dir}/" . $hash->{"${driver}_undump"};
+	if ($plugin->{"${driver}_undump"}) {
+		my $undump_file = "$plugin->{dir}/" . $plugin->{"${driver}_undump"};
 		my $fh = gensym;
 		if (open($fh, "< $undump_file\0")) {
 			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 0 });
@@ -659,7 +652,7 @@ sub _uninstall {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== ($type $hash->{name}) Failed on: $statement:\n";
+			print "=== ($type $plugin->{name}) Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
@@ -667,8 +660,8 @@ sub _uninstall {
 
 	# Second, apply the unschema.
 
-	if ($hash->{"${driver}_unschema"}) {
-		my $unschema_file = "$hash->{dir}/" . $hash->{"${driver}_unschema"};
+	if ($plugin->{"${driver}_unschema"}) {
+		my $unschema_file = "$plugin->{dir}/" . $plugin->{"${driver}_unschema"};
 		my $fh = gensym;
 		if (open($fh, "< $unschema_file\0")) {
 			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 1 });
@@ -683,7 +676,7 @@ sub _uninstall {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== ($type $hash->{name}) Failed on: $statement:\n";
+			print "=== ($type $plugin->{name}) Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
@@ -691,9 +684,9 @@ sub _uninstall {
 	##############################
 
 
-	if ($hash->{'template'}) { 
+	if ($plugin->{'template'}) { 
 		# This is where we cleanup any templates that don't belong
-		for (@{$hash->{'template'}}) {
+		for (@{$plugin->{'template'}}) {
 			my($name, $page, $skin) = split /;/, $_;
 			my $tpid = $self->{slashdb}->getTemplateByName($name, {
 				values  => 'tpid',
@@ -703,6 +696,9 @@ sub _uninstall {
 			$self->{slashdb}->deleteTemplate($tpid) if $tpid;
 		}
 	}
+	
+	$self->deleteByDesc($plugin->{'description'});
+	$self->deleteByDesc("$plugin->{name} plugin files installed symlink?");
 }
 
 sub getPluginList {
