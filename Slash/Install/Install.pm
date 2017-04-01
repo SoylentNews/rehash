@@ -622,7 +622,7 @@ sub _uninstall {
 			1 while $old =~ s{/[^/]+/\.\.}{};
 			my $new = "$instdir$dir/$filename";
 
-
+			print "\tRemoving file $new \n";
 			unlink($new);
 		}
 	}
@@ -639,6 +639,7 @@ sub _uninstall {
 		slash_prefix	=> $self->getValue("base_install_directory"),
 	};
 	if ($plugin->{"${driver}_undump"}) {
+		print "Removing SQL data\n";
 		my $undump_file = "$plugin->{dir}/" . $plugin->{"${driver}_undump"};
 		my $fh = gensym;
 		if (open($fh, "< $undump_file\0")) {
@@ -661,8 +662,9 @@ sub _uninstall {
 
 
 	# Second, apply the unschema.
-
+	
 	if ($plugin->{"${driver}_unschema"}) {
+		print "\tRemoving SQL schema\n";
 		my $unschema_file = "$plugin->{dir}/" . $plugin->{"${driver}_unschema"};
 		my $fh = gensym;
 		if (open($fh, "< $unschema_file\0")) {
@@ -690,7 +692,8 @@ sub _uninstall {
 		# This is where we cleanup any templates that don't belong
 		for (@{$plugin->{'template'}}) {
 			my($name, $page, $skin) = split /;/, $_;
-			$name =~ s|template/||;
+			$name =~ s|templates/||;
+			print "\tRemoving template $_ \n";
 			my $tpid = $self->{slashdb}->getTemplateByName($name, {
 				values  => 'tpid',
 				page    => $page,
