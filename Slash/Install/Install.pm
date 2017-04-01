@@ -639,7 +639,7 @@ sub _uninstall {
 		slash_prefix	=> $self->getValue("base_install_directory"),
 	};
 	if ($plugin->{"${driver}_undump"}) {
-		print "Removing SQL data\n";
+		print "\tRemoving SQL data\n";
 		my $undump_file = "$plugin->{dir}/" . $plugin->{"${driver}_undump"};
 		my $fh = gensym;
 		if (open($fh, "< $undump_file\0")) {
@@ -653,9 +653,10 @@ sub _uninstall {
 	for my $statement (@sql) {
 		next unless $statement;
 		$statement =~ s/;\s*$//;
+		print "\tRunning SQL: $statement \n";
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== Plugin $plugin->{name} Failed on: $statement:\n";
+			print "=== Plugin $plugin->{name} Failed on: $statement \n";
 		}
 	}
 	@sql = ();
@@ -678,9 +679,10 @@ sub _uninstall {
 	for my $statement (@sql) {
 		next unless $statement;
 		$statement =~ s/;\s*$//;
+		print "\tRunning SQL: $statement \n";
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== Plugin $plugin->{name} Failed on: $statement:\n";
+			print "=== Plugin $plugin->{name} Failed on: $statement \n";
 		}
 	}
 	@sql = ();

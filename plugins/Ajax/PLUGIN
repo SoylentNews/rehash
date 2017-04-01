@@ -3,6 +3,8 @@ name=Ajax
 description="Ajax (Asynchronous Javascript and XML)"
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
+mysql_unschema=mysql_unschema.sql
+mysql_undump=mysql_undump.sql
 # ...until we make getCSS and symlink-tool smarter about css vs. images
 imagejs=htdocs/images/tag-ui.css
 htdoc=htdocs/ajax.pl
