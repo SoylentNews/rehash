@@ -690,6 +690,7 @@ sub _uninstall {
 		# This is where we cleanup any templates that don't belong
 		for (@{$plugin->{'template'}}) {
 			my($name, $page, $skin) = split /;/, $_;
+			$name =~ s|template/||;
 			my $tpid = $self->{slashdb}->getTemplateByName($name, {
 				values  => 'tpid',
 				page    => $page,
