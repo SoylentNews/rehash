@@ -30,7 +30,7 @@ __template__
 		<th>user</th>
 		<th>email</th>
 		<th>ts</th>
-		<th>payment_gross</th>
+		<th>payment_net</th>
 		<th>pages</th>
 		<th>trans_id</th>
 		<th>method</th>
@@ -44,7 +44,7 @@ __template__
 			sub.nickname | strip_literal %] ([% sub.uid %])</a></td>
 		<td align="left">[% sub.email | strip_literal %]</td>
 		<td align="left">[% sub.ts | strip_literal %]</td>
-		<td align="right">[% sub.payment_gross | strip_literal %]</td>
+		<td align="right" class="subs_net">[% sub.payment_net | strip_literal %]</td>
 		<td align="right">[% sub.pages | strip_literal %]</td>
 		<td align="left">[% sub.transaction_id | strip_literal %]</td>
 		<td align="left">[% sub.method | strip_literal %]</td>

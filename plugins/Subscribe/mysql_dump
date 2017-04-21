@@ -2,14 +2,6 @@
 # $Id$
 #
 
-INSERT INTO vars (name, value, description) VALUES ('bitpay_amount','20.00','How much a subscription costs, in U.S. dollars with two decimal places');
-INSERT INTO vars (name, value, description) VALUES ('bitpay_token','','Bitpay API auth token');
-INSERT INTO vars (name, value, description) VALUES ('bitpay_host','https://bitpay.com/api/','Bitpay api host. Should be either https://bitpay.com/api/ or https://test.bitpay.com/api/');
-INSERT INTO vars (name, value, description) VALUES ('bitpay_image_src','https://bitpay.com/img/button8.png','URL of button image to click on');
-INSERT INTO vars (name, value, description) VALUES ('bitpay_return','http://www.example.com/subscribe.pl','Return address for bitpay completion or cancel');
-INSERT INTO vars (name, value, description) VALUES ('bitpay_callback','https://www.example.com:2626/bitpay','Address Bitpay should send notifications to. Must be https if not using test.bitpay.com.');
-INSERT INTO vars (name, value, description) VALUES ('bitpay_num_days','365','How many days your bitpay_amount buys');
-INSERT INTO vars (name, value, description) VALUES ('bp_ipn_path','/bitpay','Bitpay ipn daemon listener path');
 INSERT INTO vars (name, value, description) VALUES ('comments_sub_speed_limit','0','Seconds delay before repeat posting for subscriber.');
 INSERT INTO vars (name, value, description) VALUES ('discussions_sub_speed_limit','0','Seconds delay before repeat discussion for subscriber.');
 INSERT INTO vars (name, value, description) VALUES ('formkey_timeframe_sub','0','The time frame that we check for a formkey for subscribers');

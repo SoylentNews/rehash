@@ -72,6 +72,15 @@ sub upgradeDB() {
 		$upgrades_done++;
 	}
 
+	if ($subscribe_schema_ver == 1) {
+		if(!$slashdb->sqlDo("DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'") {
+			return 0;
+		}
+
+		$subscribe_schema_ver = 2;
+		$upgrades_done++;
+	}
+
 	if (!$upgrades_done) {
 		print "No schema upgrades needed for Subscribe\n";
 	}
