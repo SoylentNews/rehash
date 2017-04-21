@@ -20,7 +20,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage() unless getopts('hvlu:L:', \%opts);
+usage() unless getopts('hvlu:L:U', \%opts);
 usage() if ($opts{'h'} || !keys %opts);
 version() if $opts{'v'};
 $opts{'u'} ||= 'slash';
@@ -51,7 +51,7 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 		if ($select =~ /^\d\,/) {
 			@answers = split(/\,/, $select);
 			last;
-		} elsif ($select eq 'a') {
+		} elsif ($select eq 'a' && !$opts{'U'}) {
 			for (keys %$plugins) {
 				push @answers, $plugins->{$_}{order};
 			}
@@ -66,7 +66,7 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 	my $symlink;
 	if ($opts{'L'}) {
 		$symlink = $opts{'L'} =~ /^n/i ? 0 : 1;
-	} else {
+	} elsif (!$opts{'U'}) {
 		print "
 Would you like to install all the files as symlinks
 to the original?  (If not, each file will be copied to
@@ -76,11 +76,19 @@ your Slash directories). [Y] ";
 		$symlink = $ans =~ /^\s*[Yy]/;
 	}
 
-	$install->installPlugins(\@answers, 0, $symlink);
-
-	print "\n\nInstalled.\n\n";
-	print "Please check to see if there are any README files for your site's\n";
-	print "plugins.  If so, now's a good time to read them.\n\n";
+	if ($opts{'U'}) {
+		$install->uninstallPlugins(\@answers, 0, $symlink);
+	
+		print "\n\nUninstalled.\n\n";
+		
+	} else {
+	
+		$install->installPlugins(\@answers, 0, $symlink);
+	
+		print "\n\nInstalled.\n\n";
+		print "Please check to see if there are any README files for your site's\n";
+		print "plugins.  If so, now's a good time to read them.\n\n";
+	}
 }
 
 sub usage {
@@ -98,6 +106,7 @@ Main options:
 	-u	Virtual user (default is "slash")
 	-l	Does not install plugins, just lists known plugins
 	-L	Install files in htdocs using symlinks [y/n]
+	-U	Uninstall plugins
 
 EOT
 	exit;

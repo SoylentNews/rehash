@@ -8314,18 +8314,6 @@ sub createSignoff {
 	$signoff_type ||= '';
 	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid, signoff_type => $signoff_type });
 	$self->setStory($stoid, { thumb_signoff_needed => 0 });
-
-	if ($send_message) {
-		my $s_user = $self->getUser($uid);
-		my $story = $self->getStory($stoid);
-		my $message = "$s_user->{nickname} $signoff_type $story->{title}";
-		my $remarks = getObject('Slash::Remarks');
-		$remarks->createRemark($message, {
-			uid	=> $uid,
-			stoid	=> $stoid,
-			type	=> 'system'
-		});
-	}
 }
 
 sub getUserSignoffHashForStoids {

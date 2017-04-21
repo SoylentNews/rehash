@@ -321,31 +321,6 @@ sub setUserMessagesBlock {
 }
 
 
-
-sub setRemarkAsMessage {
-	my ($self) = @_;
-
-	my $slashdb = getCurrentDB();
-	my $messages = getObject('Slash::Messages');
-	my $remarks_message_code = $slashdb->sqlSelect('code', 'message_codes', "type = 'Remarks'");
-	my $remarks_reader = getObject("Slash::Remarks");
-	return 0 if (!$messages or !$remarks_message_code or !$remarks_reader);
-
-	my $remarks = $remarks_reader->getRemarks( { max => 1 } );
-	foreach my $admin (@{$slashdb->currentAdmin()}) {
-		my $users = $messages->checkMessageCodes($remarks_message_code, [$admin->[5]]);
-		if (scalar @$users) {
-			my $data = {
-				template_name => 'remarks_msg',
-				template_page => 'dynamicblocks',
-				subject => { template_name => 'remarks_msg_subj', template_page => 'dynamicblocks'},
-				remark => $remarks->[0],
-			};
-			$messages->create($admin->[5], $remarks_message_code, $data);
-		}
-	}
-}
-
 # Returns a named block
 sub getDynamicBlock { 
 	my ($self, $name, $options) = @_;
