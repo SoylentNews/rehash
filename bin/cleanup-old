@@ -1,0 +1,117 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2005 by Open Source Technology Group. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This is the unneeded rehash file and directory cleanup script.
+
+use strict;
+use Config;
+use Getopt::Std;
+use File::Basename;
+use File::Path;
+use Slash;
+use Slash::Utility;
+
+my $PROGNAME = basename($0);
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage() unless getopts('hvu:C', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+
+createEnvironment($opts{'u'});
+my $constants = getCurrentStatic();
+
+if ($opts{'C'}) {
+	print "Cleaning files and directories\n";
+	
+	# Remove perl modules
+	my @files = ("Slash/Edit.pm",
+							 "Slash/Remarks.pm",
+							 "Slash/SOAP.pm",
+							 "Slash/SOAP/Test.pm");
+	foreach
+	 my $file(@files) {
+		$file = "$Config{installsitelib}/$file";
+		if (-e $file) {
+			print "\tDeleting file: $file\n";
+			unlink ($file);
+		}
+	}
+	 
+	# Remove perl directories
+	my @dirs = ("Slash/SOAP");
+	foreach
+	 my $dir(@dirs) {
+		$dir = "$Config{installsitelib}/$dir";
+		if (-e $dir) {
+			print "\tDeleting directory: $dir\n";
+			rmdir ($dir);
+		}
+	}
+	
+	# Remove rehash files
+	# needed when files have been renamed and need purging
+	my @rehash_files = ("bin/cleanup-old-pm");
+	foreach
+	 my $file(@rehash_files) {
+		$file = "$constants->{slashdir}/$file";
+		if (-e $file) {
+			print "\tDeleting file: $file\n";
+			unlink ($file);
+		}
+	}
+
+	# Remove rehash installed directories
+	# Use rmtree as there are too many files to delete manually first
+	my @rehash_dirs = ("plugins/SOAP");
+	foreach
+	 my $dir(@rehash_dirs) {
+		$dir = "$constants->{slashdir}/$dir";
+		if (-e $dir) {
+			print "\tDeleting directory: $dir\n";
+			rmtree ($dir);
+		}
+	}
+
+	print "Complete\n";
+
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS]
+
+Installs Slash plugins.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-C	Clean unneed files and directories
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME ver 1
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2005 by Open Source Technology Group. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

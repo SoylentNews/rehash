@@ -1914,10 +1914,6 @@ sub updateStory {
 		my $data = {};
 		if ($warn_skids{$st->{primaryskid}}) {
 			$data->{warn_skid} = $st->{primaryskid};
-			if ($constants->{plugin}{Remarks}) {
-				my $remarks = getObject("Slash::Remarks");
-				$remarks->createRemark("WARNING: $st->{sid} has a primaryskid of $st->{primaryskid}", { type => 'system' });
-			}
 		}
 		titlebar('100%', getTitle('updateStory-title', $data));
 
@@ -2416,10 +2412,6 @@ sub saveStory {
 		my $data = {};
 		if ($warn_skids{$st->{primaryskid}}) {
 			$data->{warn_skid} = $st->{primaryskid};
-			if ($constants->{plugin}{Remarks}) {
-				my $remarks = getObject("Slash::Remarks");
-				$remarks->createRemark("WARNING: $st->{sid} has a primaryskid of $st->{primaryskid}", { type => 'system' });
-			}
 		}
 		titlebar('100%', getTitle('saveStory-title', $data) );
 		$slashdb->createSignoff($stoid, $user->{uid}, "saved");

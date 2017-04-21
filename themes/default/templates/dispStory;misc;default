@@ -124,16 +124,14 @@ END %]
 		[% END %]	
 
 
-[% IF full && user.is_admin && !preview && env.script_name != '/admin.pl' %]<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;[% END %]
-[% IF full && !preview && env.script_name != '/admin.pl' %]
-	[% IF constants.plugin.Ajax %]
-		[% IF user.is_admin || user.acl.signoff_allowed %]
-			[% PROCESS signoff stoid = story.stoid %]
+[% IF full && user.is_admin %]
+		<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;
+		[% IF user.acl.signoff_allowed %]
+		  [% signed = Slash.db.hasUserSignedStory(stoid, user.uid); %]
+		  [% UNLESS signed %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ No Signoff ]</a>&nbsp;[% END %]
 		[% END %]
-		[% IF user.is_admin %]
-			[% PROCESS neverdisplay stoid = stoid %]
-		[% END %]
-	[% END %]
+		[% possndstory = Slash.db.getStory(stoid) %]
+		[% UNLESS possndstory.neverdisplay %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Display Enabled ]</a>[% END %]
 [% END %]
 
 [% IF story.is_future && !user.is_admin %]<p>See any serious problems with this story?

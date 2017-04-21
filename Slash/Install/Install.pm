@@ -46,6 +46,12 @@ sub delete {
 	$self->sqlDo($sql);
 }
 
+sub deleteByDesc {
+	my($self, $key) = @_;
+	my $sql = "DELETE from site_info WHERE description = " . $self->sqlQuote($key);
+	$self->sqlDo($sql);
+}
+
 sub deleteByID  {
 	my($self, $key) = @_;
 	my $sql = "DELETE from site_info WHERE param_id=$key";
@@ -186,24 +192,37 @@ sub installPlugins {
 	}
 }
 
+sub uninstallPlugins {
+	my($self, $answers, $plugins, $symlink) = @_;
+	$plugins ||= $self->{'_plugins'};
+
+	for my $answer (@$answers) {
+		for (keys %$plugins) {
+			if ($answer eq $plugins->{$_}{order}) {
+				$self->_uninstall($plugins->{$_});
+			}
+		}
+	}
+}
+
 sub installTagbox {
-        my($self, $answer, $tagboxes, $symlink) = @_;
-        $tagboxes ||= $self->{'_tagboxes'};
-    
-        $self->_install($tagboxes->{$answer}, $symlink, 'tagbox');
+	my($self, $answer, $tagboxes, $symlink) = @_;
+	$tagboxes ||= $self->{'_tagboxes'};
+
+	$self->_install($tagboxes->{$answer}, $symlink, 'tagbox');
 }
 
 sub installTagboxes {
-        my($self, $answers, $tagboxes, $symlink) = @_;
-        $tagboxes ||= $self->{'_tagboxes'};
+	my($self, $answers, $tagboxes, $symlink) = @_;
+	$tagboxes ||= $self->{'_tagboxes'};
 
-        for my $answer (@$answers) {
-                for (keys %$tagboxes) {
-                        if ($answer eq $tagboxes->{$_}{order}) {
-                                $self->_install($tagboxes->{$_}, $symlink, 'tagbox');
-                        }
-                }
-        }
+	for my $answer (@$answers) {
+		for (keys %$tagboxes) {
+			if ($answer eq $tagboxes->{$_}{order}) {
+				$self->_install($tagboxes->{$_}, $symlink, 'tagbox');
+			}
+		}
+	}
 }
 
 # Used internally by the _process_fh_into_sql method (which in
@@ -535,6 +554,159 @@ sub _install {
 			$self->{slashdb}->deleteTemplate($tpid) if $tpid;
 		}
 	}
+}
+
+
+sub _uninstall {
+	my($self, $plugin) = @_;
+
+	# Yes, performance wise this is questionable, if getValue() was
+	# cached.... who cares this is the install. -Brian
+	unless ($self->exists('plugin', $plugin->{name})) {
+		print STDERR "Plugin $plugin->{name} has already been uninstalled\n";
+		return;
+	} else {
+		print STDERR "Uninstalling Plugin $plugin->{name} \n";
+	}
+
+	my $driver = $self->getValue('db_driver');
+	my $prefix_site = $self->getValue('site_install_directory');
+
+	my %stuff = ( # [relative directory, executable]
+		css		=> ["htdocs",			1],
+		htdoc		=> ["htdocs",			1],
+		htdoc_code	=> ["htdocs/code",		0],
+		htdoc_faq	=> ["htdocs/faq",		0],
+		sbin		=> ["sbin",			1],
+		image		=> ["htdocs/images",		0],
+		imagejs		=> ["htdocs/images",		0],
+		jquery		=> ["htdocs/images/jquery",	0],
+		image_award	=> ["htdocs/images/awards",	0],
+		image_banner	=> ["htdocs/images/banners",	0],
+		image_faq	=> ["htdocs/images/faq",	0],
+		topic		=> ["htdocs/images/topics",	0],
+		task		=> ["tasks",			1],
+		misc		=> ["misc",			1],
+	);
+
+	for my $section (keys %stuff) {
+		next unless exists $plugin->{$section} && @{$plugin->{$section}};
+		my $instdir = "$prefix_site/$stuff{$section}[0]";
+		mkpath $instdir, 0, 0755;
+
+		for (@{$plugin->{$section}}) {
+			# I hope no one tries to embed spaces in their
+			# theme/plugin... heh!
+			# Yes, this should actually be specific, and not
+			# take shortcuts.  What is it trying to do? -- pudge
+			my($oldfilename, $dir) = split;
+			my $filename = $oldfilename;
+			$filename =~ s/^.*\/(.*)$/$1/;
+			$dir =~ s/\s*$// if $dir;
+			# Allow third parameter as relative directory
+			# for 'htdoc=' or 'image=' lines.
+			if ($dir && $section =~ /^(htdoc|image)$/) {
+				if ($dir !~ m{^topics/}) {
+					$dir =~ s{^([^/])}{/$1};
+					$dir =~ s{/$}{};
+					mkpath "$instdir$dir", 0, 0755 
+						if ! -d "$instdir/$dir";
+				} else {
+					# Uh-uh! Use 'topic=...'
+					$dir = '';
+				}
+			} else {
+				$dir = '';
+			}
+			my $old = "$plugin->{dir}/$oldfilename";
+			1 while $old =~ s{/[^/]+/\.\.}{};
+			my $new = "$instdir$dir/$filename";
+
+			print "\tRemoving file $new \n";
+			unlink($new);
+		}
+	}
+
+	##############################
+
+	my($sql, @sql, @create);
+
+	# First, apply the undump.
+
+	my $mldhr = {	# "mungeline data hashref"
+		hostname	=> $self->getValue("basedomain"),
+		email		=> $self->getValue("adminmail"),
+		slash_prefix	=> $self->getValue("base_install_directory"),
+	};
+	if ($plugin->{"${driver}_undump"}) {
+		print "\tRemoving SQL data\n";
+		my $undump_file = "$plugin->{dir}/" . $plugin->{"${driver}_undump"};
+		my $fh = gensym;
+		if (open($fh, "< $undump_file\0")) {
+			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 0 });
+			close $fh;
+		} else {
+			warn "Can't open $undump_file: $!";
+		}
+	}
+
+	for my $statement (@sql) {
+		next unless $statement;
+		$statement =~ s/;\s*$//;
+		print "\tRunning SQL: $statement \n";
+		my $rows = $self->sqlDo($statement);
+		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
+			print "=== Plugin $plugin->{name} Failed on: $statement \n";
+		}
+	}
+	@sql = ();
+
+
+	# Second, apply the unschema.
+	
+	if ($plugin->{"${driver}_unschema"}) {
+		print "\tRemoving SQL schema\n";
+		my $unschema_file = "$plugin->{dir}/" . $plugin->{"${driver}_unschema"};
+		my $fh = gensym;
+		if (open($fh, "< $unschema_file\0")) {
+			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 1 });
+			close $fh;
+		} else {
+ 			warn "Can't open $unschema_file: $!";
+ 		}
+ 	}
+
+	for my $statement (@sql) {
+		next unless $statement;
+		$statement =~ s/;\s*$//;
+		print "\tRunning SQL: $statement \n";
+		my $rows = $self->sqlDo($statement);
+		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
+			print "=== Plugin $plugin->{name} Failed on: $statement \n";
+		}
+	}
+	@sql = ();
+
+	##############################
+
+
+	if ($plugin->{'template'}) { 
+		# This is where we cleanup any templates that don't belong
+		for (@{$plugin->{'template'}}) {
+			my($name, $page, $skin) = split /;/, $_;
+			$name =~ s|templates/||;
+			print "\tRemoving template $_ \n";
+			my $tpid = $self->{slashdb}->getTemplateByName($name, {
+				values  => 'tpid',
+				page    => $page,
+				skin    => $skin
+			});
+			$self->{slashdb}->deleteTemplate($tpid) if $tpid;
+		}
+	}
+	
+	$self->deleteByDesc($plugin->{'description'});
+	$self->deleteByDesc("$plugin->{name} plugin files installed symlink?");
 }
 
 sub getPluginList {
