@@ -37,7 +37,6 @@ sub upgradeDB() {
 	my $slashdb = getCurrentDB();
 	my $schema_versions = $upgrade->getSchemaVersions();
 	my $subscribe_schema_ver = $schema_versions->{db_schema_plugin_Subscribe};
-	print STDERR "subscribe_schema_ver = $subscribe_schema_ver";
 	my $upgrades_done = 0;
 
 	if ($subscribe_schema_ver < 1) {
@@ -74,9 +73,16 @@ sub upgradeDB() {
 	}
 
 	if ($subscribe_schema_ver < 2) {
-		if(!$slashdb->sqlDo("DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'") {
+		print "upgrading Subscribe to v2 ...\n";
+		print "Running: DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'\n";
+		if(!$slashdb->sqlDo("DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'")) {
 			return 0;
 		}
+
+		print "Set to version 2.\n";
+		if (!$slashdb->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_plugin_Subscribe'")) {
+			return 0;
+		};
 
 		$subscribe_schema_ver = 2;
 		$upgrades_done++;
