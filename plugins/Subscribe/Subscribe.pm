@@ -538,6 +538,29 @@ sub stripeAddLog {
 	my $success = $slashdb->sqlInsert('stripe_log', $data);
         $slashdb->sqlErrorLog($success) unless $success;
 }
+
+sub stripeFee {
+	my ($self, $gross, $submethod) = @_;
+	my $fee;
+	if($submethod eq "BTC") {
+		# BTC
+		$fee = $gross * 0.008;
+		if($fee > 5) {
+			$fee = 5;
+		}
+		$fee = sprintf("%.2f", $fee);
+	}
+	elsif($submethod eq "CC") {
+		# CC
+		$fee = ($gross * 0.029) + 0.3;
+		$fee = sprintf("%.2f", $fee);
+	}
+	else {
+		# Placeholder for future transaction types
+		$fee = "0.00";
+	}
+	return $fee;
+}
 1;
 
 __END__

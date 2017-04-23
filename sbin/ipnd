@@ -272,15 +272,19 @@ $cbServer->on(request => sub {
 					$metaData->{$key} = $cipher->decrypt(decode_base64($metaData->{$key}));
 				}
 				$content->{data}->{object}->{metadata} = $metaData;
+				my $submethod = $content->{data}->{object}->{source}->{type} eq "bitcoin" ? "BTC" : "CC";
+				my $fee = $subscribe->stripeFee($content->{data}->{object}->{amount}, $submethod);
+				my $net = $content->{data}->{object}->{amount} - $fee;
 
 				my $payment = {
 					days => $metaData->{days},
 					uid     => $metaData->{uid},
-					payment_net   => $content->{data}->{object}->{amount},
+					payment_net   => $net,
 					payment_gross => $content->{data}->{object}->{amount},
 					payment_type  => $metaData->{type},
 					transaction_id => $content->{data}->{object}->{id},
 					method => 'stripe',
+					submethod => $submethod,
 					email => $metaData->{from},
 					raw_transaction  => encode_json($content),
 					puid => $metaData->{puid}

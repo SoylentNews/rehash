@@ -78,6 +78,10 @@ sub upgradeDB() {
 		if(!$slashdb->sqlDo("DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'")) {
 			return 0;
 		}
+		print "Running: ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method;\n";
+		if(!$slashdb->sqlDo("ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method") {
+			return 0;
+		}
 
 		print "Set to version 2.\n";
 		if (!$slashdb->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_plugin_Subscribe'")) {

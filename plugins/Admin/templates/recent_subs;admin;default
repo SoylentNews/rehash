@@ -31,9 +31,11 @@ __template__
 		<th>email</th>
 		<th>ts</th>
 		<th>payment_net</th>
+		<th>payment_gross</th>
 		<th>pages</th>
 		<th>trans_id</th>
 		<th>method</th>
+		<th>submethod</th>
 	</tr>
 
 	[% FOREACH sub = subs %]
@@ -44,10 +46,12 @@ __template__
 			sub.nickname | strip_literal %] ([% sub.uid %])</a></td>
 		<td align="left">[% sub.email | strip_literal %]</td>
 		<td align="left">[% sub.ts | strip_literal %]</td>
-		<td align="right" class="subs_net">[% sub.payment_net | strip_literal %][% IF sub.payment_method == "stripe" %]<b>*</b>[% END %]</td>
+		<td align="right" class="subs_net">[% sub.payment_net | strip_literal %]</td>
+		<td align="right">[% sub.payment_gross | strip_literal %]</td>
 		<td align="right">[% sub.pages | strip_literal %]</td>
 		<td align="left">[% sub.transaction_id | strip_literal %]</td>
 		<td align="left">[% sub.method | strip_literal %]</td>
+		<td align="left">[% sub.submethod | strip_literal %]</td>
 	</tr>
 	[% END %]
 
