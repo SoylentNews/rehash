@@ -2639,7 +2639,7 @@ The escaped data.
 
 sub fixnickforlink {
 	my $nick = shift;
-	$nick =~ s/+/%2B/g;
+	$nick =~ s/\+/%2B/g;
 	return $nick;
 }
 
