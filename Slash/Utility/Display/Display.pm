@@ -1766,7 +1766,7 @@ sub linkCommentMiscDefault {
 	if(!defined($args->{subject_only}) || !$args->{subject_only}) {
 		if(defined($args->{nickname}) && $args->{nickname}) {
 			if(defined($args->{adminflag}) && $args->{adminflag}) {
-				$html_out .= " by <a href=\"$gSkin->{rootdir}/users.pl?op=userinfo&fieldname=nickname&userfield=".strip_paramattr(fixnickforurl($args->{nickname})).
+				$html_out .= " by <a href=\"$gSkin->{rootdir}/users.pl?op=userinfo&fieldname=nickname&userfield=".strip_paramattr(fixnickforlink($args->{nickname})).
 				"\">".strip_literal($args->{nickname})."</a>";
 			}
 			else {

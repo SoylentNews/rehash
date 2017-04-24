@@ -28,7 +28,7 @@ __template__
 [% IF user.lowbandwidth %]
 	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])
 [% ELSE %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
 [% END %]
 
 [% CASE 'friendhead' %]
