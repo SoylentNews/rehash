@@ -352,6 +352,7 @@ my $strip_mode = sub {
 	fixparam		=> \&fixparam,
 	fixurl			=> \&fixurl,
 	fudgeurl		=> \&fudgeurl,
+	fixnickforlink		=> \&fixnickforlink,
 	strip_paramattr		=> \&strip_paramattr,
 	strip_paramattr_nonhttp	=> \&strip_paramattr_nonhttp,
 	strip_urlattr		=> \&strip_urlattr,

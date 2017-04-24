@@ -97,6 +97,7 @@ our @EXPORT  = qw(
 	fixint
 	fixparam
 	fixurl
+	fixnickforlink
 	fudgeurl
 	fullhost_to_domain
 	formatDate
@@ -1959,7 +1960,7 @@ sub _nick2Link {
 		my $user = $reader->getUser($uid);
 		$nick = $user->{nickname}  || $nick;
 	}
-	my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
+	my $href = $constants->{real_rootdir}."/~".strip_paramattr(fixnickforlink($nick));
 	
 	if($reader->nickExists($nick)) {
 		$nick = "<a href=\"$href\" class=\"commentUserLink\">$nick<\/a >";
@@ -2603,6 +2604,7 @@ sub fixparam {
 	$url = encode_utf8($url) if (getCurrentStatic('utf8') && is_utf8($url));
 	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
 	$url =~ s/ /+/g;
+	$url =~ s/%252B/%2B/ig;
 	return $url;
 }
 
