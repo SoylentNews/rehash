@@ -57,7 +57,7 @@ END %]
 			thisjournal = journal.get(story.journal_id);
 			IF thisjournal && thisjournal.uid;
 				thisuser    = Slash.db.getUser(thisjournal.uid); %]
-		Journal written by <a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"
+		Journal written by <a href="[% constants.real_rootdir %]/~[% thisuser.nickname | fixnickforlink | strip_paramattr %]/journal/"
 			>[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])</a> and [%
 			ELSIF story.by %]
 		Written by [% story.by | strip_literal %] and [%
@@ -67,7 +67,7 @@ END %]
 		[% IF author.homepage %]
 			<a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
 		[% ELSE %]
-			<a href="[% constants.real_rootdir %]/~[% author.nickname | strip_paramattr %]/">	[% author.nickname | strip_literal %]</a>
+			<a href="[% constants.real_rootdir %]/~[% author.nickname | fixnickforlink | strip_paramattr %]/">	[% author.nickname | strip_literal %]</a>
 		[% END %]
 		[% story.atstorytime %]
 		[% IF constants.plugin.Print %] 

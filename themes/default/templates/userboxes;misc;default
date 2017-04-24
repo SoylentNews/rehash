@@ -56,7 +56,7 @@ IF !useredit.is_anon;
 	title = title _ " ($useredit.uid)";
 	contents = BLOCK;
 		'<a href="'; constants.real_rootdir; '/~';
-			useredit.nickname | strip_paramattr; '/">';
+			useredit.nickname | fixnickforlink | strip_paramattr; '/">';
 			useredit.nickname | strip_literal; '</a> ';
 		PROCESS zoo_icons person=useredit.uid implied="";
 		IF user.uid == useredit.uid OR user.is_admin;

@@ -42,7 +42,7 @@ __template__
 	<tr>
 		<td align="right">[% sub.spid %]</td>
 		<td align="left"><a href="[% constants.real_rootdir
-			%]/~[% sub.nickname | strip_paramattr %]">[%
+			%]/~[% sub.nickname | fixnickforlink | strip_paramattr %]">[%
 			sub.nickname | strip_literal %] ([% sub.uid %])</a></td>
 		<td align="left">[% sub.email | strip_literal %]</td>
 		<td align="left">[% sub.ts | strip_literal %]</td>

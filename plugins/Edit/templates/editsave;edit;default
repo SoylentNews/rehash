@@ -55,7 +55,7 @@ __template__
 		<div class="message error block roundall">
 			<span id="modal_ok">Thanks for <a href="[% link_url %]">your submission to Slashdot</a> ([% id %]).
 								Help us <a href="[% constants.real_rootdir %]/recent">evaluate other recent submissions</a> if you have some spare time.
-								[% IF !user.is_anon %]<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/submissions">View your recent submissions</a>.[% END %]</span>
+								[% IF !user.is_anon %]<a href="[% constants.real_rootdir %]/~[% user.nickname | fixnickforlink | strip_paramattr %]/submissions">View your recent submissions</a>.[% END %]</span>
 			<div style="margin:.75em">
 						<a href="#" class="badgelink"><img src="[% constants.imagedir %]/sdit4n.png" style="padding:.5em 0 0 .5em;" >
 							<div class="message error roundall" style="background:none;font-weight:normal;top:-.75em">

@@ -50,7 +50,7 @@ by [% item.4 %]<br>
 <p>[% PROCESS titlebar title => 'Most Active Submitters' %]
 <div class="generalbody">
 [% FOREACH item = activesub %]
-<b>[% item.0 %]</b> <a href="[% constants.real_rootdir %]/~[% item.1 | strip_paramattr %]/">[% item.1 %]</a><br>
+<b>[% item.0 %]</b> <a href="[% constants.real_rootdir %]/~[% item.1 | fixnickforlink | strip_paramattr %]/">[% item.1 %]</a><br>
 [% END %]</p>
 </div>
 

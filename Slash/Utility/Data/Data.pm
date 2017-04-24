@@ -2607,6 +2607,43 @@ sub fixparam {
 }
 
 #========================================================================
+=head2 fixnickforlink(DATA)
+
+Prepares data to be a parameter in a URL.  Such as:
+
+=over 4
+
+	my $url = 'http://example.com/foo.pl?bar=' . fixnickforlink($data);
+
+=item Parameters
+
+=over 4
+
+=item DATA
+
+The data to be escaped.  B<NOTE>: C<+> characters are encoded as C<%2B>.
+This must be done on nicknames before fixparam.
+Note that this is designed for HTTP URIs, the most
+common scheme;  for other schemes, refer to the comments documenting
+strip_paramattr and strip_paramattr_nonhttp.
+
+=back
+
+=item Return value
+
+The escaped data.
+
+=back
+
+=cut
+
+sub fixnickforlink {
+	my $nick = shift;
+	$nick =~ s/+/%2B/g;
+	return $nick;
+}
+
+#========================================================================
 
 =head2 fixurl(DATA)
 

@@ -43,7 +43,7 @@ __template__
 			<h4><a name="[% cid %]">[% subject | strip_title %]</a>
 				[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]
 				<span class="by">by
-			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
+			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
 			[% IF !is_anon && subscriber_badge %]
 				<span class="zooicon"><a href="[% gSkin.rootdir %]/subscribe.pl"><img src="[% constants.imagedir %]/star.png" alt="Subscriber Badge" title="Subscriber Badge" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]"></a></span>
 			[% END %]

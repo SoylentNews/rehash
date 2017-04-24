@@ -33,10 +33,10 @@ __template__
 	uidB = uidsB.$i %]
 <tr class="data_hl1">
 <td>[% ordA.$uidA %].</td>
-<td><a href="[% constants.real_rootdir %]/~[% nickname.$uidA | strip_paramattr %]">[% nickname.$uidA | strip_nohtml %]</a></td>
+<td><a href="[% constants.real_rootdir %]/~[% nickname.$uidA | fixnickforlink | strip_paramattr %]">[% nickname.$uidA | strip_nohtml %]</a></td>
 <td>[% weightA.$uidA %]</td>
 <td>[% ordB.$uidB %].</td>
-<td><a href="[% constants.real_rootdir %]/~[% nickname.$uidB | strip_paramattr %]">[% nickname.$uidB | strip_nohtml %]</a></td>
+<td><a href="[% constants.real_rootdir %]/~[% nickname.$uidB | fixnickforlink | strip_paramattr %]">[% nickname.$uidB | strip_nohtml %]</a></td>
 <td>[% weightB.$uidB %]</td>
 </tr>
 [% END %]

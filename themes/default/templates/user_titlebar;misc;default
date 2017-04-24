@@ -20,11 +20,11 @@ __template__
 [% IF user.uid == uid && !user.is_anon;
 	thisnickname = user.nickname | strip_literal;
 	title = title || "$thisnickname (This is you!)";
-	url_nick = user.nickname | strip_paramattr;
+	url_nick = user.nickname | fixnickforlink | strip_paramattr;
 	PROCESS titlebar title=title;
 ELSE;
 	thisnickname = useredit.nickname | strip_literal;
-	url_nick = useredit.nickname | strip_paramattr;
+	url_nick = useredit.nickname | fixnickforlink | strip_paramattr;
 	zi = PROCESS zoo_icons person=uid implied="";
 	title = title ||
 		"<a href=\"$constants.real_rootdir/~$url_nick/\">$thisnickname ($uid)</a> $zi";

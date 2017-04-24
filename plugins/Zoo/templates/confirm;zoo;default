@@ -21,7 +21,7 @@ __template__
 	<table>
 		<tr>
 			<td>
-				So do you want to remove your relationship with <b><a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname %]</a></b>?
+				So do you want to remove your relationship with <b><a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname %]</a></b>?
 			</td>
 			<td>
 				<label><input type="radio" name="type" value="neutral"[% constants.markup_checked_attribute IF type == 'neutral' %]></label>
@@ -62,24 +62,24 @@ __template__
 <table width="100%">
 	<tr>
 		<td>
-			<b>Consider <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname %]</a> a Friend</b> <img src="[% constants.imagedir %]/fof.[% constants.badge_icon_ext %]" alt="Friends of Friends" title="Friends of Friends" width="[% constants.badge_icon_size_wide %]" height="[% constants.badge_icon_size %]">
+			<b>Consider <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname %]</a> a Friend</b> <img src="[% constants.imagedir %]/fof.[% constants.badge_icon_ext %]" alt="Friends of Friends" title="Friends of Friends" width="[% constants.badge_icon_size_wide %]" height="[% constants.badge_icon_size %]">
 			&nbsp;<a href="[% constants.real_rootdir %]/my/comments">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</a>
 		</td>
 		<td>
-			<b>Consider <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname %]</a> a Foe</b> <img src="[% constants.imagedir %]/eof.[% constants.badge_icon_ext %]" alt="Foes of Friends" title="Foes of Friends" width="[% constants.badge_icon_size_wide %]" height="[% constants.badge_icon_size %]">
+			<b>Consider <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname %]</a> a Foe</b> <img src="[% constants.imagedir %]/eof.[% constants.badge_icon_ext %]" alt="Foes of Friends" title="Foes of Friends" width="[% constants.badge_icon_size_wide %]" height="[% constants.badge_icon_size %]">
 			&nbsp;<a href="[% constants.real_rootdir %]/my/comments">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</a>
 		</td>
 	</tr>
 	<tr>
 		<td valign="top">
 		[% FOREACH geek = mutual.${Slash.FOF} %]
-			<a href="[% constants.real_rootdir %]/~[% uids_2_nicknames.$geek.nickname | strip_paramattr %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</a>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.FOF %]<br>
+			<a href="[% constants.real_rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixnickforlink | strip_paramattr %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</a>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.FOF %]<br>
 		[% END %]
 		&nbsp;
 		</td>
 		<td valign="top">
 		[% FOREACH geek = mutual.${Slash.EOF} %]
-			<a href="[% constants.real_rootdir %]/~[% uids_2_nicknames.$geek.nickname | strip_paramattr %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</a>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.EOF %]<br>
+			<a href="[% constants.real_rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixnickforlink | strip_paramattr %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</a>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.EOF %]<br>
 		[% END %]
 		&nbsp;
 		</td>

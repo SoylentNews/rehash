@@ -137,7 +137,7 @@ sub setUserCommentBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $comments_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/comments';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/comments';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Comments";
 		$block->{description} = 'Comments';
 	}
@@ -168,7 +168,7 @@ sub setUserJournalBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $journals_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/journal';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/journal';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Journal";
 		$block->{description} = 'Journal';
 	}
@@ -197,7 +197,7 @@ sub setUserBookmarksBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $bookmarks_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/bookmarks';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/bookmarks';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Bookmarks";
 		$block->{description} = 'Bookmarks';
 	}
@@ -225,7 +225,7 @@ sub setUserFriendsBlock {
 	foreach my $friend (@$friends) {
 		$friend->{nick} = $slashdb->sqlSelect('nickname', 'users', "uid = " . $friend->{person});
 		$friend->{displaynick} = $friend->{nick};
-		$friend->{nick} = strip_paramattr($friend->{nick});
+		$friend->{nick} = strip_paramattr(fixnickforlink($friend->{nick}));
 		$friend->{bio} = $slashdb->sqlSelect('bio', 'users_info', "uid = " . $friend->{person}) if $user->{u2_friends_bios};
 	}
 
@@ -237,7 +237,7 @@ sub setUserFriendsBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $friends_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/friends';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/friends';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Friends";
 		$block->{description} = 'Friends';
 	}
@@ -273,7 +273,7 @@ sub setUserSubmissionsBlock {
 				{ Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $submissions_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/submissions';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/submissions';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Submissions";
 		$block->{description} = 'Submissions';
 	}

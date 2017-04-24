@@ -52,7 +52,7 @@ __template__
 		thisjournal = journal.get(submission.journal_id);
 		IF thisjournal && thisjournal.uid;
 			thisuser    = Slash.db.getUser(thisjournal.uid); %]
-			<p>This submission comes from <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/">[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])'s journal</a></p>
+			<p>This submission comes from <a href="[% constants.rootdir %]/~[% thisuser.nickname | fixnickforlink | strip_paramattr %]/journal/">[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])'s journal</a></p>
 		[% END;
 	END %]
 		[% pretext = Slash.addDomainTags(subtext);

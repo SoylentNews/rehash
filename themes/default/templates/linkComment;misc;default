@@ -46,7 +46,7 @@ IF op.lower == "reply"  %]#post_comment[% ELSIF comment %]#commentwrap[% END %]"
 [% IF !subject_only %]
 	[% IF nickname %]
 		[% IF adminflag %]
-			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname | strip_paramattr %]">[% nickname | strip_literal; %]</a>
+			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname | fixnickforlink | strip_paramattr %]">[% nickname | strip_literal; %]</a>
 		[% ELSE %]
 			by [% nickname | strip_literal; %]
 		[% END %]

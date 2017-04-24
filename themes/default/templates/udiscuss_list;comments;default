@@ -25,7 +25,7 @@ __template__
 	[% nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
 	<li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
 IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</a>
-	created by <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname %]</a> on [% Slash.timeCalc(discussion.ts) %]
+	created by <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname %]</a> on [% Slash.timeCalc(discussion.ts) %]
 [% END %]
 </multicol>
 <p>

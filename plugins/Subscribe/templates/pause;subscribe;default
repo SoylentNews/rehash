@@ -31,7 +31,7 @@ but once you log in, your user page will display your current subscriber
 status, and the Subscription menu item will let you edit your settings.
 [% ELSE %]
 <p>For details on your current subscriber status, you may check
-<a href="/~[% user.nickname | strip_paramattr %]">your user page</a>
+<a href="/~[% user.nickname | fixnickforlink | strip_paramattr %]">your user page</a>
 at any time, and the
 <a href="[% constants.real_rootdir %]/subscribe.pl">Subscription</a> menu item above will let you
 edit your settings.

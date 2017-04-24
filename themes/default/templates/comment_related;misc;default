@@ -16,7 +16,7 @@ __template__
 [% thisskin = Slash.db.getSkin(discussion.primaryskid); %]
 [% IF thisskin; rootdir = thisskin.rootdir ; ELSE; rootdir = constants.real_rootdir; END %]
 <div class="briefarticle briefcomment">
-	<span class="storytitle"><a href="[% rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">[% comment.subject | strip_title %]</a></span> by [% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% comment_user.nickname | strip_paramattr %]">[% END %][% comment_user.nickname | strip_literal%][% IF !is_anon %] ([% comment_user.uid %])</a>[% END %]
+	<span class="storytitle"><a href="[% rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">[% comment.subject | strip_title %]</a></span> by [% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% comment_user.nickname | fixnickforlink | strip_paramattr %]">[% END %][% comment_user.nickname | strip_literal%][% IF !is_anon %] ([% comment_user.uid %])</a>[% END %]
 </div>
 __version__
 $Id$

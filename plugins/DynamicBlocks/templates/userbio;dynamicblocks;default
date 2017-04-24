@@ -15,7 +15,7 @@ __template__
 [% IF !only_inner_html %]<div class="block" id="userbio_self">[% END %]
         <div class="title" id="userbio_self-title">
                 <h4>
-                        <a href="[% gSkin.rootdir %]/~[% user.nickname | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
+                        <a href="[% gSkin.rootdir %]/~[% user.nickname | fixnickforlink | strip_paramattr %]" style="text-decoration:none;">[% user.nickname | strip_literal %] ([% user.uid %])</a>
                         [% IF !user.firehose_nographics %]
 				[% PROCESS zoo_icons person = user.uid implied="" %]
 				<span class="prefs" onclick="getModalPrefs('messages', 'Messages', 1); return false"><a href="#">Prefs</a></span>

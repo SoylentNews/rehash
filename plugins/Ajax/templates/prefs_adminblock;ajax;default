@@ -337,7 +337,7 @@ __template__
 
         [% IF lastjournal %]
                 [% lastjournal_title %]
-                <b><a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">[% lastjournal.description | strip_notags %]</a></b>,
+                <b><a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | fixnickforlink | strip_paramattr %]/journal/">[% lastjournal.description | strip_notags %]</a></b>,
                 [% Slash.timeCalc(useredit.journal_last_entry_date) %]
                 ([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
                 [% IF lastjournal.article_shrunk %]
