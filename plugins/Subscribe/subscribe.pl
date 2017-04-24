@@ -352,7 +352,7 @@ sub stripe {
 						"CC";
         my $stripe_fee = $subscribe->stripeFee($form->{amount}, $submethod);
 
-        my $net = $form->{amount} - $fee;
+        my $net = $form->{amount} - $stripe_fee;
 
         if( $response_data ne 0 ) {
                 $payment = {
