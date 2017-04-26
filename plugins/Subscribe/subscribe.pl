@@ -261,7 +261,7 @@ sub paypal {
 				method => 'paypal',
 				email => $pp_pdt->{custom}{from},
 				raw_transaction  => encode_json($pp_pdt),
-				puid => $pp_pdt->{custom}{puid}
+				puid => $pp_pdt->{custom}{puid},
 			};
 			
 			if (!$subscribe->paymentExists($txid)){
@@ -345,16 +345,25 @@ sub stripe {
 
 	$response_data = $subscribe->stripeDoCharge($tx);
         my $payment;
+	   my $submethod = defined($response_data->{source}) &&
+	   				defined($response_data->{source}->{type}) &&
+					$response_data->{source}->{type} eq "bitcoin" ?
+						"BTC" :
+						"CC";
+        my $stripe_fee = $subscribe->stripeFee($form->{amount}, $submethod);
+
+        my $net = $form->{amount} - $stripe_fee;
 
         if( $response_data ne 0 ) {
                 $payment = {
                         days            => $form->{days},
                         uid             => $form->{uid},
-                        payment_net     => $form->{amount},
+                        payment_net     => $net,
                         payment_gross   => $form->{amount},
                         payment_type    => $payment_type,
                         transaction_id  => $response_data->{id},
                         method          => "stripe",
+				    submethod		=> $submethod,
                         email           => $form->{stripeEmail},
                         puid            => $form->{puid},
                 };

@@ -26,16 +26,16 @@ __template__
 
 [% CASE 'userhead' %]
 [% IF user.lowbandwidth %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])
 [% ELSE %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/">Journal</a> of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
 [% END %]
 
 [% CASE 'friendhead' %]
 [% IF user.lowbandwidth %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a>'s <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/friends/">Friends</a>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a>'s <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/friends/">Friends</a>
 [% ELSE %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a>'s <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/friends/">Friends</a>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a>'s <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/friends/">Friends</a>
 [% END %]
 
 [% CASE 'noedit' %]

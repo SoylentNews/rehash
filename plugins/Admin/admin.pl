@@ -1193,6 +1193,7 @@ sub editStory {
 			$storyref->{$field} =~ s|</ol>|</ol>\n\n|g;
 			$storyref->{$field} =~ s|</ul>|</ul>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|</spoiler>|</spoiler>\n\n|g;			
 			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
 
@@ -1261,6 +1262,7 @@ sub editStory {
 			$storyref->{$field} =~ s|</ol>|</ol>\n\n|g;
 			$storyref->{$field} =~ s|</ul>|</ul>\n\n|g;
 			$storyref->{$field} =~ s|</blockquote>|</blockquote>\n\n|g;
+			$storyref->{$field} =~ s|</spoiler>|</spoiler>\n\n|g;
 			$storyref->{$field} =~ s|(</?h.>)\s*</p>|$1|g;
 		}
 		
@@ -1912,10 +1914,6 @@ sub updateStory {
 		my $data = {};
 		if ($warn_skids{$st->{primaryskid}}) {
 			$data->{warn_skid} = $st->{primaryskid};
-			if ($constants->{plugin}{Remarks}) {
-				my $remarks = getObject("Slash::Remarks");
-				$remarks->createRemark("WARNING: $st->{sid} has a primaryskid of $st->{primaryskid}", { type => 'system' });
-			}
 		}
 		titlebar('100%', getTitle('updateStory-title', $data));
 
@@ -2414,10 +2412,6 @@ sub saveStory {
 		my $data = {};
 		if ($warn_skids{$st->{primaryskid}}) {
 			$data->{warn_skid} = $st->{primaryskid};
-			if ($constants->{plugin}{Remarks}) {
-				my $remarks = getObject("Slash::Remarks");
-				$remarks->createRemark("WARNING: $st->{sid} has a primaryskid of $st->{primaryskid}", { type => 'system' });
-			}
 		}
 		titlebar('100%', getTitle('saveStory-title', $data) );
 		$slashdb->createSignoff($stoid, $user->{uid}, "saved");

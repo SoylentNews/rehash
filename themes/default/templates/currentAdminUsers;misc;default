@@ -30,7 +30,7 @@ __template__
 
 	<tr class="[% IF toggle %]data_hl2[% ELSE %]data_hl3[% END %]">
 	<td class="data_bgc1">
-		<a href="[% constants.real_rootdir %]/~[% id | strip_paramattr %]/"><b>[% id %]</b></a>
+		<a href="[% constants.real_rootdir %]/~[% id | fixnickforlink | strip_paramattr %]/"><b>[% id %]</b></a>
 	</td><td>
 		[% lastsecs %]
 		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;<a href="[% constants.absolutedir_secure %]/[% IF last_subid %]submit.pl?op=viewsub&amp;subid=[% last_subid %][% ELSIF last_sid %]/admin.pl?op=edit&amp;sid=[% last_sid %][% END %]">[% lasttitle | strip_title %]</a>

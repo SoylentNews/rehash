@@ -120,7 +120,7 @@ __template__
 				[% IF proxy_check.available || proxy_check.ipid %]
 					<label>Proxy Info</label>
 					[% IF proxy_check.available %]
-						<a href="[% gSkin.rootdir %]/users.pl?userfield=[% form.userfield | strip_paramattr %]&amp;check_proxy=1">Test [% form.userfield %] for open proxy</a> 
+						<a href="[% gSkin.rootdir %]/users.pl?userfield=[% form.userfield | fixnickforlink | strip_paramattr %]&amp;check_proxy=1">Test [% form.userfield %] for open proxy</a> 
 						[% IF proxy_check.results.defined %]
 							<b>
 								Test Results:

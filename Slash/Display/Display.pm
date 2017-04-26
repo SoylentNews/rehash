@@ -347,10 +347,12 @@ my $strip_mode = sub {
 # for a template and you don't want your tags running
 # up against each other.		- Cliff 8/1/01
 %FILTERS = (
+	apply_rehash_tags => \&apply_rehash_tags,
 	decode_entities		=> \&decode_entities,
 	fixparam		=> \&fixparam,
 	fixurl			=> \&fixurl,
 	fudgeurl		=> \&fudgeurl,
+	fixnickforlink		=> \&fixnickforlink,
 	strip_paramattr		=> \&strip_paramattr,
 	strip_paramattr_nonhttp	=> \&strip_paramattr_nonhttp,
 	strip_urlattr		=> \&strip_urlattr,

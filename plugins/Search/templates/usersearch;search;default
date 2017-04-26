@@ -15,7 +15,7 @@ __template__
 	[% FOREACH thisuser=users %]
 		<div class="search-results">
 			<h4>
-			<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/">[% thisuser.nickname | strip_literal %]</a>
+			<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | fixnickforlink | strip_paramattr %]/">[% thisuser.nickname | strip_literal %]</a>
 			[% IF thisuser.fakeemail %]
 				([% thisuser.uid %]) email: <a href="mailto:[% thisuser.fakeemail | strip_paramattr_nonhttp %]">[% thisuser.fakeemail | strip_literal %]</a>
 			[% ELSE %]
@@ -24,7 +24,7 @@ __template__
 			</h4>
 			[% IF thisuser.journal_last_entry_date %]
 				<div class="intro">
-					<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</a>
+					<a href="[% constants.real_rootdir %]/~[% thisuser.nickname | fixnickforlink | strip_paramattr %]/journal/"> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</a>
 				</div>
 			[% END %]
 			<div class="details">

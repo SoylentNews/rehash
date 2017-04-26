@@ -27,7 +27,7 @@ __template__
 		
 		<form method="post" action="[% constants.real_rootdir %]/subscribe.pl">
 			<fieldset>
-				You can buy a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and Stripe (for credit card payments). Currently we are not accepting BitCoin as BitPay has changed their API and we have not updated our processing systems to match. The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
+				You can buy a gift subscription for another user. Payments are handled by Stripe (for credit card payments and BitCoin) and PayPal (for PayPal payments and credit cards). The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
 				<br />
 				<input type="hidden" name="subscription_type" value="gift">
 				Buy Gift Subscription for UID <input type="text" name="uid" size="10" value="[% constants.subscribe_ac_default_gift %]"><br />	

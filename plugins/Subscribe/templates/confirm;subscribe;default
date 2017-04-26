@@ -36,7 +36,6 @@ __template__
 					<table border=0 cellpadding=2>
 						<tr><td align="right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
 						<tr><td align="right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
-						<!-- <tr><td align="right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr> -->
 						<tr><td align="right">[% PROCESS stripebut %] </td><td>Non-automatic renewal payments with Stripe</td></tr>
 					</table>
 				</center>
@@ -52,7 +51,6 @@ __template__
 						<table border=0 cellpadding=2>
 							<tr><td align="right">[% PROCESS paypalbut %] </td><td>Non-automatic renewal payments with PayPal</td></tr>
 							<tr><td align="right">[% PROCESS paypalsubbut %] </td><td>Automatic subscription renewal with PayPal</td></tr>
-							<!-- <tr><td align="right">[% PROCESS bitpaybut %] </td><td>Non-automatic renewal payments with BitPay</td></tr> -->
 							<tr><td align="right">[% PROCESS stripebut %] </td><td>Non-automatic renewal payments with Stripe</td></tr>
 						</table>
 					</center>

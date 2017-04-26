@@ -19,26 +19,21 @@ __template__
             "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-[% PROCESS before_content %]
 <meta http-equiv="Content-Type" content="[% constants.content_type_webpage %]">
 [% IF meta_desc %]<meta name="description" content="[% meta_desc | strip_attribute %]">[% END %]
-<link rel="icon" type="image/png" href="[% constants.rootdir %]/favicon-vt100.png">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="[% constants.rootdir %]/favicon-vt100-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="[% constants.rootdir %]/favicon-vt100-16x16.png" sizes="16x16">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#961a1d">
+<meta name="theme-color" content="#ffffff">
+
 <title>[% title | strip_notags %]</title>
 [% END %]
-[% IF user.is_admin %]
-<link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/admin.css?[% constants.cvs_tag_currentcode %]">
-<script src="[% constants.imagedir %]/jquery/jquery-1.3.2.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.metadata.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.draggable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/ui.tabs.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/jquery/jquery.autogrow.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% PROCESS after_jquery %]
-<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[% END %]
+
+[% PROCESS html_header_js %]
+
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/base.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/comments.css?[% constants.cvs_tag_currentcode %]">
 <link rel="stylesheet" type="text/css" media="screen, projection" href="[% constants.rootdir %]/vt100.css?[% constants.cvs_tag_currentcode %]">

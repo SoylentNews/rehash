@@ -17,6 +17,7 @@ a:hover { color: #ea97bc; }
 	width: 115px;
 	height: 80px;
 	background: url("[% constants.imagedir %]/logo_pwnies.png") no-repeat;
+		background-size: 115px 80px;
 }
 
 #slogan h2, #slogan #head_message
@@ -29,9 +30,6 @@ a:hover { color: #ea97bc; }
 
 #section_banner  {     
 	background-color: #c5618e;
-	background: -o-linear-gradient(#c5618e, #ea97bc);
-	background: -webkit-linear-gradient(#c5618e, #ea97bc);
-	background: -moz-linear-gradient(#c5618e, #ea97bc);
 	background: linear-gradient(#c5618e, #ea97bc);
 	border-radius: 8px;
 	font-size: 1.125em;
@@ -98,9 +96,6 @@ input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more 
 
 .commentTop .title {     
   background-color: #c5618e;
-	background: -o-linear-gradient(#c5618e, #ea97bc);
-	background: -webkit-linear-gradient(#c5618e, #ea97bc);
-	background: -moz-linear-gradient(#c5618e, #ea97bc);
 	background: linear-gradient(#c5618e, #ea97bc);
   border-radius: 10px 10px 0 0;
 }
@@ -114,9 +109,6 @@ input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more 
 .commentTop .details {
 	border: 1px solid #aaa;
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
 	color: #000;
 }
@@ -207,9 +199,6 @@ input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more 
 
 .generaltitle div.title, .article div.title, .search-results h4 {     
 	background-color: #c5618e;
-	background: -o-linear-gradient(#c5618e, #ea97bc);
-	background: -webkit-linear-gradient(#c5618e, #ea97bc);
-	background: -moz-linear-gradient(#c5618e, #ea97bc);
 	background: linear-gradient(#c5618e, #ea97bc);
   border-radius: 10px 10px 0 0;
 }
@@ -226,9 +215,6 @@ input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more 
 	font-weight: normal;
 	border: 1px solid #aaa;
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
 }
 
@@ -242,9 +228,6 @@ input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more 
 div.storylinks, .search-results .details
 {
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
     border: 1px solid #aaa;
     border-top: none;
@@ -418,9 +401,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #708333; }
 	color:#fff;
 	margin-bottom: .6em;
 	background-color: #c5618e;
-	background: -o-linear-gradient(#c5618e, #ea97bc);
-	background: -webkit-linear-gradient(#c5618e, #ea97bc);
-	background: -moz-linear-gradient(#c5618e, #ea97bc);
 	background: linear-gradient(#c5618e, #ea97bc);
 	border-radius: 10px;
 }
@@ -447,9 +427,6 @@ ul.menu li.selected a, ul.menu li a:hover { color: #708333; }
 {
 	border: 1px solid #aaa;
 	background-color: #ccc;
-	background: -o-linear-gradient(#ccc, #eee);
-	background: -webkit-linear-gradient(#ccc, #eee);
-	background: -moz-linear-gradient(#ccc, #eee);
 	background: linear-gradient(#ccc, #eee);
 	color: #000;
 }

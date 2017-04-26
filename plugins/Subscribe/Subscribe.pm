@@ -526,22 +526,6 @@ sub ppAddLog {
 	$slashdb->sqlErrorLog unless $success;
 }
 
-sub bpAddLog {
-	my ($self, $logthis) = @_;
-	my $slashdb = getCurrentDB();
-	my $data = {
-		remote_address		=> $logthis->{source},
-		raw_transaction		=> encode_json($logthis),
-		payment_status		=> $logthis->{status},
-		payment_net		=> $logthis->{price},
-		invoice_id		=> $logthis->{id},
-		uid			=> $logthis->{posData}{puid},
-	};
-
-	my $success = $slashdb->sqlInsert('bitpay_log', $data);
-	$slashdb->sqlErrorLog($success) unless $success;
-}
-
 sub stripeAddLog {
 	my ($self, $logthis) = @_;
 	my $slashdb = getCurrentDB();
@@ -555,59 +539,28 @@ sub stripeAddLog {
         $slashdb->sqlErrorLog($success) unless $success;
 }
 
-sub bpPrepareRequest {
-	my ($self, $api, $data) = @_;
-
-	my $uri = URI->new($self->{gateway});
-	$uri->userinfo($self->{key} . ':');
-	$uri->path($uri->path . $api);
-
-	my $method = 'GET';
-	if ($data) {
-		$method = 'POST';
-		$data   = encode_json $data;
+sub stripeFee {
+	my ($self, $gross, $submethod) = @_;
+	my $fee;
+	if($submethod eq "BTC") {
+		# BTC
+		$fee = $gross * 0.008;
+		if($fee > 5) {
+			$fee = 5;
+		}
+		$fee = sprintf("%.2f", $fee);
 	}
-
-	my $request = HTTP::Request->new(
-		$method => $uri, [
-			'User-Agent'   => 'bitpay api',
-			#'X-BitPay-Plugin-Info' => 'perl' . $VERSION,
-			'Content-Type' => 'application/json',
-		],
-		$data
-	);
-	return $request;
-}
-
-sub bpRequest {
-	my $self = shift;
-	
-	my $http_response = $self->{ua}->request($self->bpPrepareRequest(@_));
-	print STDERR "$http_response->status_line\n" unless $http_response->is_success;
-
-	my $response = decode_json($http_response->decoded_content);
-
-	if (my $error = $response->{error}) {
-		my $messages = $error->{messages};
-		print STDERR "$error->{message}: ",
-			join(', ', map {"$_ ($messages->{$_})"} keys %$messages);
+	elsif($submethod eq "CC") {
+		# CC
+		$fee = ($gross * 0.029) + 0.3;
+		$fee = sprintf("%.2f", $fee);
 	}
-	return $response;
+	else {
+		# Placeholder for future transaction types
+		$fee = "0.00";
+	}
+	return $fee;
 }
-
-
-sub bpCreateInvoice {
-    my ($self, %args) = @_;
-    unless(exists $args{price}){print STDERR "price missed\n"; return 0;}
-    unless(exists $args{currency}){print STDERR "currency missed\n"; return 0;}
-    return $self->bpRequest('invoice', \%args);
-}
-
-sub bpGetInvoice {
-	my ($self, $id) = @_;
-	return $self->bpRequest("invoice/$id");
-}
-
 1;
 
 __END__

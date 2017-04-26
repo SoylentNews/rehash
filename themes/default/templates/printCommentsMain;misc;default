@@ -28,7 +28,7 @@ __template__
 	<div class="article">
 		[% PROCESS titlebar title="<a href=\"$stripped_link\">$stripped_title</a>" %]
 		<div class="details">
-				Journal by <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/journal">[% parent.author.nickname | strip_literal %]</a>
+				Journal by <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | fixnickforlink | strip_paramattr %]/journal">[% parent.author.nickname | strip_literal %]</a>
 		</div>
 		<div class="body">
 			<div class="intro">[% parent.content %]</div>
@@ -47,7 +47,7 @@ __template__
 				[% IF parent.author.homepage %]
 					<a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
 				[% ELSE %]
-					<a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
+					<a href="[% constants.real_rootdir %]/~[% parent.author.nickname | fixnickforlink | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
 				[% END %]
 				[% parent.story.atstorytime %]
 				[% IF constants.plugin.Print %] 

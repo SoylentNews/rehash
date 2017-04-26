@@ -80,6 +80,9 @@ __template__
 
 [% CASE 'edit' %]
 	Edit
+	
+[% CASE 'nosign' %]
+	No Signoff
 
 [% CASE 'remark_thanks' %]
 	<p><b>Thanks for your remark to our editors!</b><p>

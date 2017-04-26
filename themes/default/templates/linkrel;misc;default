@@ -67,7 +67,7 @@ ELSIF env.script_name.search('article\.pl');
 
 ELSIF env.script_name.search('journal\.pl');
 	IF link.uid && link.nickname; tmp = BLOCK -%]
-<link rel="author"    title="[% link.nickname | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.nickname | strip_paramattr %]/">
+<link rel="author"    title="[% link.nickname | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.nickname | fixnickforlink | strip_paramattr %]/">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
 <link rel="alternate" title="[% link.nickname | strip_attribute %]'s Journal Atom" href="[% PROCESS rsslink_journal rsslink_style = 'journal' feed_type = 'atom' %]" type="application/atom+xml">
 <link rel="alternate" title="[% link.nickname | strip_attribute %]'s Journal RSS" href="[% PROCESS rsslink_journal rsslink_style = 'journal' %]" type="application/rss+xml">
@@ -121,7 +121,7 @@ ELSIF env.script_name.search('users2\.pl');
 
 ELSE; # default author link, where author is a nickname
 	    IF link.author; tmp = BLOCK -%]
-<link rel="author"    title="[% link.author | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.author | strip_paramattr %]/">
+<link rel="author"    title="[% link.author | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.author | fixnickforlink | strip_paramattr %]/">
 	[%- END; linkrels.push(tmp); END;
 
 END %]

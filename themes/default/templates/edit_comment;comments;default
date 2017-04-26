@@ -36,7 +36,7 @@ title = "<a href=\"$gSkin.rootdir/comments.pl?sid=$form.sid\">$stripped_title</a
 		 [% IF parent.author.homepage %]
 			 <a href="[% parent.author.homepage %]">[% parent.author.nickname | strip_literal %]</a>
 		 [% ELSE %]
-			 <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
+			 <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | fixnickforlink | strip_paramattr %]/">	[% parent.author.nickname | strip_literal %]</a>
 		 [% END %]
 		 [% parent.story.atstorytime %]
 		 [% IF constants.plugin.Print %] 
@@ -48,7 +48,7 @@ title = "<a href=\"$gSkin.rootdir/comments.pl?sid=$form.sid\">$stripped_title</a
 		 [% IF constants.use_dept && parent.story.dept %]<strong>from the <b>[% parent.story.dept %]</b> dept.</strong>[% END %]
 	 [% END %]
 	 [% IF parent.type == 'journal' %]
-		Journal by <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | strip_paramattr %]/journal">[% parent.author.nickname | strip_literal %]</a>
+		Journal by <a href="[% constants.real_rootdir %]/~[% parent.author.nickname | fixnickforlink | strip_paramattr %]/journal">[% parent.author.nickname | strip_literal %]</a>
 	 [% END %]
 	</div>
 	<div class="body">

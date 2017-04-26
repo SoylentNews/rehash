@@ -17,7 +17,7 @@ friendsview
 __template__
 <ul>
 [% FOR article = articles %]
-	<li><a href="[% constants.real_rootdir %]/~[% article.nickname | strip_paramattr %]/journal/[% article.id %]">[% article.description %]</a> - <a href="[% constants.real_rootdir %]/~[% article.nickname | strip_paramattr %]">[% article.nickname | strip_literal %]</a>
+	<li><a href="[% constants.real_rootdir %]/~[% article.nickname | fixnickforlink | strip_paramattr %]/journal/[% article.id %]">[% article.description %]</a> - <a href="[% constants.real_rootdir %]/~[% article.nickname | fixnickforlink | strip_paramattr %]">[% article.nickname | strip_literal %]</a>
 [% END %]
 </ul>
 __seclev__

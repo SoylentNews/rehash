@@ -12,7 +12,6 @@
 
 # Also:
 # * comments.pl::moderate()
-# * Slash::Moderation::ajaxModerateCid()
 
 package Slash::ResKey::Checks::Moderate;
 

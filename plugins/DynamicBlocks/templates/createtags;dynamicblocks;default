@@ -16,7 +16,7 @@ __template__
 <ul>
 [% FOREACH tags = tags %]
 <li>
-<a href="[% constants.real_rootdir %]/~[% nick | strip_paramattr %]/tags/[% tags.tagname %]">[% tags.tagname %]</a>&nbsp;([% tags.target %])
+<a href="[% constants.real_rootdir %]/~[% nick | fixnickforlink | strip_paramattr %]/tags/[% tags.tagname %]">[% tags.tagname %]</a>&nbsp;([% tags.target %])
 </li>
 [% END %]
 </ul>

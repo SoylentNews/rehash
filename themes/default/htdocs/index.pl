@@ -278,26 +278,6 @@ my $start_time = Time::HiRes::time;
 	my $title = getData('head', { skin => $skin_name });
 	header({ title => $title, link => $linkrel }, $skin_name) or return;
 
-	if ($form->{remark}
-		&& $user->{is_subscriber}
-		&& $form->{sid})
-	{
-		my $sid = $form->{sid};
-		my $story = $slashdb->getStory($sid);
-		my $remark = $form->{remark};
-		# If what's pasted in contains a substring that looks
-		# like a sid, yank it out and just use that.
-		my $targetsid = getSidFromRemark($remark);
-		$remark = $targetsid if $targetsid;
-		if ($story) {
-			my $remarks = getObject('Slash::Remarks');
-			$remarks->createRemark($remark, {
-				uid	=> $user->{uid},
-				stoid	=> $story->{stoid}
-			});
-			print getData('remark_thanks');
-		}
-	}
 
 	my $metamod_elig = 0;
 	if ($constants->{m2}) {
@@ -459,12 +439,6 @@ sub getDispModeForStory {
 	
 }
 
-sub getSidFromRemark {
-	my($remark) = @_;
-	my $regex = regexSid();
-	my($sid) = $remark =~ $regex;
-	return $sid || '';
-}
 
 sub do_rss {
 	my($reader, $constants, $user, $form, $stories, $gSkin) = @_;
@@ -750,9 +724,9 @@ sub displayStories {
 	
 			if ($user->{seclev} >= 100) {
 				push @links, [ "$gSkin->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('edit'), '', 'edit' ];
-				if ($constants->{plugin}{Ajax}) {
-					my $signoff =  slashDisplay("signoff", { stoid => $story->{stoid}, storylink => 1 }, { Return => 1 } ); 
-					push @links, $signoff;
+				my $signed = $reader->hasUserSignedStory($story->{stoid}, $user->{uid});
+				unless ($signed) {
+					push @links, [ "$gSkin->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('nosign'), '', 'edit' ];
 				}
 			}
 

@@ -137,7 +137,7 @@ sub setUserCommentBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $comments_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/comments';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/comments';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Comments";
 		$block->{description} = 'Comments';
 	}
@@ -168,7 +168,7 @@ sub setUserJournalBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $journals_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/journal';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/journal';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Journal";
 		$block->{description} = 'Journal';
 	}
@@ -197,7 +197,7 @@ sub setUserBookmarksBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $bookmarks_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/bookmarks';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/bookmarks';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Bookmarks";
 		$block->{description} = 'Bookmarks';
 	}
@@ -225,7 +225,7 @@ sub setUserFriendsBlock {
 	foreach my $friend (@$friends) {
 		$friend->{nick} = $slashdb->sqlSelect('nickname', 'users', "uid = " . $friend->{person});
 		$friend->{displaynick} = $friend->{nick};
-		$friend->{nick} = strip_paramattr($friend->{nick});
+		$friend->{nick} = strip_paramattr(fixnickforlink($friend->{nick}));
 		$friend->{bio} = $slashdb->sqlSelect('bio', 'users_info', "uid = " . $friend->{person}) if $user->{u2_friends_bios};
 	}
 
@@ -237,7 +237,7 @@ sub setUserFriendsBlock {
 			}, { Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $friends_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/friends';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/friends';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Friends";
 		$block->{description} = 'Friends';
 	}
@@ -273,7 +273,7 @@ sub setUserSubmissionsBlock {
 				{ Page => 'dynamicblocks', Return => 1 });
 
 		$block->{block} = $submissions_block;
-		$block->{url} = '~' . strip_paramattr($user->{nickname}) . '/submissions';
+		$block->{url} = '~' . strip_paramattr(fixnickforlink($user->{nickname})) . '/submissions';
 		$block->{title} = strip_literal($user->{nickname}) . "'s Submissions";
 		$block->{description} = 'Submissions';
 	}
@@ -320,31 +320,6 @@ sub setUserMessagesBlock {
 	return (keys %$block) ? $block : 0;
 }
 
-
-
-sub setRemarkAsMessage {
-	my ($self) = @_;
-
-	my $slashdb = getCurrentDB();
-	my $messages = getObject('Slash::Messages');
-	my $remarks_message_code = $slashdb->sqlSelect('code', 'message_codes', "type = 'Remarks'");
-	my $remarks_reader = getObject("Slash::Remarks");
-	return 0 if (!$messages or !$remarks_message_code or !$remarks_reader);
-
-	my $remarks = $remarks_reader->getRemarks( { max => 1 } );
-	foreach my $admin (@{$slashdb->currentAdmin()}) {
-		my $users = $messages->checkMessageCodes($remarks_message_code, [$admin->[5]]);
-		if (scalar @$users) {
-			my $data = {
-				template_name => 'remarks_msg',
-				template_page => 'dynamicblocks',
-				subject => { template_name => 'remarks_msg_subj', template_page => 'dynamicblocks'},
-				remark => $remarks->[0],
-			};
-			$messages->create($admin->[5], $remarks_message_code, $data);
-		}
-	}
-}
 
 # Returns a named block
 sub getDynamicBlock { 

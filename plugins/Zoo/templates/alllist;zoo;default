@@ -17,7 +17,7 @@ __template__
 [% FOREACH item = people %]
     <tr>
 	<td valign="top">
-		<a href="[% constants.real_rootdir %]/~[% item.1 | strip_paramattr %]/">[% item.1 %]</a>
+		<a href="[% constants.real_rootdir %]/~[% item.1 | fixnickforlink | strip_paramattr %]/">[% item.1 %]</a>
 	</td>
 	<td valign="top">
 		[% PROCESS zoo_icons person=item.0 %]

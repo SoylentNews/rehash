@@ -2,7 +2,6 @@
 name=Subscribe
 description="Subscription system"
 htdoc=subscribe.pl
-htdoc=bitpay.pl
 image=images/star.png
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema
@@ -17,6 +16,4 @@ template=templates/paypalbut;subscribe;default
 template=templates/paypalsubbut;subscribe;default
 template=templates/sub_low_msg;misc;default
 template=templates/sub_out_msg;misc;default
-template=templates/bp_redirect;misc;default
-template=templates/bitpaybut;subscribe;default
 template=templates/stripebut;subscribe;default

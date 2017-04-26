@@ -36,7 +36,7 @@ END %]
 
 	[% FOREACH journal = journals %]
 		<tr>
-			<td valign="top"><a href="[% constants.real_rootdir %]/~[% journal.1 | strip_paramattr %]/journal/">[% journal.1 | strip_literal %]</a></td>
+			<td valign="top"><a href="[% constants.real_rootdir %]/~[% journal.1 | fixnickforlink | strip_paramattr %]/journal/">[% journal.1 | strip_literal %]</a></td>
 			<td valign="top">[% journal.0 %]</td>
 			<td valign="top"><em>[% Slash.timeCalc(journal.3) %]</em></td>
 		</tr>
