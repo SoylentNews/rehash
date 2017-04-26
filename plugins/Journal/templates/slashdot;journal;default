@@ -31,7 +31,7 @@ __template__
 		[%- END; ELSIF user.uid == uid %]
 			<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a> |
 		[%- END %]
-			<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
+			<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
 		]
 	</div>
 

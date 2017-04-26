@@ -42,8 +42,8 @@ __template__
 	</ul>
 	[% ELSE %]
 	<ul class="menu">
-		<li><a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/friends/friends" class="begin">Friends of Friends</a></li>
-		<li><a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/friends/foes">Foes of Friends</a></li>
+		<li><a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/friends/friends" class="begin">Friends of Friends</a></li>
+		<li><a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/friends/foes">Foes of Friends</a></li>
 	</ul>
 	[% END %]
 [% END; END %]

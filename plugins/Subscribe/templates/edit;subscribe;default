@@ -65,7 +65,7 @@ __template__
 			<form method="post" action="[% constants.real_rootdir %]/subscribe.pl">
 				<fieldset>
 					<legend>Purchase Subscriptions</legend>
-					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by PayPal (for PayPal payments and credit cards) and Stripe (for credit card payments). Currently we are not accepting BitCoin as BitPay has changed their API and we have not updated our processing systems to match. The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
+					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by Stripe (for credit card payments and BitCoin) and PayPal (for PayPal payments and credit cards). The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
 					
 					<br />
 					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />

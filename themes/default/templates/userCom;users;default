@@ -41,7 +41,7 @@ __template__
 		<br>attached to <a href="[% comment.url %]">[% label %]</a>
 	[% END %]
 	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber)) && commentcount > n %]
-		<p><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | strip_paramattr %]&amp;min_comment=[% n %]"     >More Comments...</a>
+		<p><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | fixnickforlink | strip_paramattr %]&amp;min_comment=[% n %]"     >More Comments...</a>
 	[% END %]
 [% ELSE %]
 	[% title = useredit.nickname | strip_literal %]

@@ -51,6 +51,8 @@ __template__
 		data-panel-label="Subscribe"
 		data-allow-remember-me="false"
 		data-currency="USD"
+		data-bitcoin="true"
+		data-label="Pay with Card or BitCoin"
 		data-locale="auto">
 	</script>
 </form>

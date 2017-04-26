@@ -25,8 +25,8 @@ sub getRecentSubs {
 	my $subs = $slashdb->sqlSelectAllHashrefArray(
 		"spid, subscribe_payments.uid,
 		 nickname,
-		 email, ts, payment_gross, pages,
-		 transaction_id, method",
+		 email, ts, payment_net, payment_gross, pages,
+		 transaction_id, method, submethod",
 		"subscribe_payments, users",
 		"subscribe_payments.uid=users.uid",
 		"ORDER BY spid DESC

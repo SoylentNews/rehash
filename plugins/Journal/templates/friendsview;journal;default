@@ -18,8 +18,8 @@ __template__
 			<h3>[% diatribe.description | strip_title  %]</h3>
 		</div>
 		<div class="details">
-			Posted by <a href="[% constants.real_rootdir %]/~[% diatribe.nickname | strip_paramattr %]/journal/">[% diatribe.nickname | strip_literal %]</a> [% user.aton %]
-			<i>[% Slash.timeCalc(diatribe.date) %]</i> (<a href="[% constants.real_rootdir %]/~[% diatribe.nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>)
+			Posted by <a href="[% constants.real_rootdir %]/~[% diatribe.nickname | fixnickforlink | strip_paramattr %]/journal/">[% diatribe.nickname | strip_literal %]</a> [% user.aton %]
+			<i>[% Slash.timeCalc(diatribe.date) %]</i> (<a href="[% constants.real_rootdir %]/~[% diatribe.nickname | fixnickforlink | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>)
 			[% IF diatribe.discussion %]
 				<br>
 				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>

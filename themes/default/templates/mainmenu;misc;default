@@ -56,7 +56,7 @@ __template__
 			<div id="you">You</div>
 			<ul>
 				<li>
-					<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/">Info</a>
+					<a href="[% constants.real_rootdir %]/~[% user.nickname | fixnickforlink | strip_paramattr %]/">Info</a>
 				</li>
 				<li>
 					<a href="[% constants.real_rootdir %]/my/info">Preferences</a>

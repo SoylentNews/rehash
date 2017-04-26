@@ -20,7 +20,7 @@ __template__
 		[% FOREACH diatribe = article.article %]
 			<div class="article">
 				<div class="title">
-					<h3><a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">[% diatribe.description | strip_title  %]</a></h3>
+					<h3><a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/[% diatribe.id %]">[% diatribe.description | strip_title  %]</a></h3>
 				</div>
 				<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>   
 				<div class="body">
@@ -60,7 +60,7 @@ __template__
 									</li>
 								[%- END %]
 								<li [% IF show_discussion %]class="journalid"[% END %]>
-									<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
+									<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
 								</li>
 							</ul>
 						</div>

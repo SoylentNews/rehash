@@ -34,7 +34,7 @@ __template__
 				IF has_homepage %]
 				<a href="[% homepage %]" title="[% homepage %]" class="user_homepage_display">Homepage</a>
 				[% END ; IF has_journal %]
-				<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/" title="[% Slash.timeCalc(journal_last_entry_date) %]" class="user_journal_display">Journal</a>
+				<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/journal/" title="[% Slash.timeCalc(journal_last_entry_date) %]" class="user_journal_display">Journal</a>
 				[% END ; END %]
 			[% ipid_display %]
 			</small>

@@ -16,7 +16,7 @@ __template__
 <ul>
 [% FOREACH journal = journals %]
 <li>
-<a href="[% constants.real_rootdir %]/~[% nick | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a>
+<a href="[% constants.real_rootdir %]/~[% nick | fixnickforlink | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a>
 </li>
 [% END %]
 </ul>

@@ -53,7 +53,6 @@ setCurrentSkin(determineCurrentSkin());
 my $gSkin = getCurrentSkin();
 my @paths = (
 	$constants->{pp_ipn_path},
-	$constants->{bp_ipn_path},
 	$constants->{stripe_ipn_path}
 );
 
@@ -246,65 +245,6 @@ $cbServer->on(request => sub {
 		# log to paypal_log
 		$subscribe->ppAddLog($logthis);
 	}
-	elsif($reqPath eq $constants->{bp_ipn_path}) {
-		my $content;
-		eval { $content = decode_json($tx->req->content->asset->{content}); };
-		unless(ref($content) eq "HASH" && !$@) {
-			print "Malformed JSON in request\n".Dumper($tx->req->content);
-			return;
-		}
-		$content->{source} = $tx->{original_remote_address};
-		eval { $content->{posData} = decode_json($content->{posData}); };
-		unless(ref($content->{posData}) eq "HASH" && !$@) {
-			print "Malformed JSON in posData\n".Dumper($content);
-			return;
-		}
-
-		if(	($content->{status} eq 'paid') ||
-			($content->{status} eq 'complete') ||
-			($content->{status} eq 'confirmed'))
-		{
-			my $payment_type = $content->{posData}{type};
-			my $payment = {
-				days =>$content->{posData}{days},
-				uid	=> $content->{posData}{uid},
-				payment_net   => $content->{price},
-				payment_gross => $content->{price},
-				payment_type  => $payment_type,
-				transaction_id => $content->{id},
-				method => 'bitpay',
-				email => $content->{posData}{from},
-				raw_transaction  => encode_json($content),
-				puid => $content->{posData}{puid}
-			};
-			if(!$subscribe->paymentExists($content->{id})) {
-				my ($rows, $result, $warning);
-				$rows = $subscribe->insertPayment($payment);
-				if ($rows && $rows == 1) {
-					$result = $subscribe->addDaysToSubscriber($payment->{uid}, $payment->{days});
-					if ($result && $result == 1){
-						send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{days}, $payment->{email}) if $payment->{payment_type} eq "gift";
-					} else {
-						$warning = "DEBUG: Payment accepted but user subscription not updated!\n" . Dumper($payment);
-						print STDERR $warning;
-					}
-				} else {
-					$warning = "DEBUG: Payment accepted but record not added to payment table!\n" . Dumper($payment);
-					print STDERR $warning;
-				}
-			}
-		}
-		elsif(lc($content->{status}) eq 'invalid') {
-			# Looks like someone double spent some coins. Remove any previously paid for days and the transaction.
-			my $uid = $subscribe->txnToUID($content->{posData}{uid});
-			my $days = $subscribe->getDaysByTxn($content->{id});
-			$subscribe->removeDaysFromSubscriber($days, $content->{posData}{uid});
-			$subscribe->removePayment($content->{id});
-
-		}
-
-		$subscribe->bpAddLog($content);
-	}
 	elsif($reqPath eq $constants->{stripe_ipn_path}) {
 		my $content;
 		if(defined $tx->req->content->asset->{content}) {
@@ -332,15 +272,19 @@ $cbServer->on(request => sub {
 					$metaData->{$key} = $cipher->decrypt(decode_base64($metaData->{$key}));
 				}
 				$content->{data}->{object}->{metadata} = $metaData;
+				my $submethod = $content->{data}->{object}->{source}->{type} eq "bitcoin" ? "BTC" : "CC";
+				my $fee = $subscribe->stripeFee($content->{data}->{object}->{amount}, $submethod);
+				my $net = $content->{data}->{object}->{amount} - $fee;
 
 				my $payment = {
 					days => $metaData->{days},
 					uid     => $metaData->{uid},
-					payment_net   => $content->{data}->{object}->{amount},
+					payment_net   => $net,
 					payment_gross => $content->{data}->{object}->{amount},
 					payment_type  => $metaData->{type},
 					transaction_id => $content->{data}->{object}->{id},
 					method => 'stripe',
+					submethod => $submethod,
 					email => $metaData->{from},
 					raw_transaction  => encode_json($content),
 					puid => $metaData->{puid}

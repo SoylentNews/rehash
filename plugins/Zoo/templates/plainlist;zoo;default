@@ -20,17 +20,17 @@ __template__
 [% FOREACH somebody = people %]
     <tr>
 	<td valign="top">
-		<a href="[% constants.real_rootdir %]/~[% somebody.1 | strip_paramattr %]/">[% somebody.1 %] ([% somebody.0 %])</a>[% PROCESS zoo_icons person=somebody.0 implied="" %]&nbsp;&nbsp;
+		<a href="[% constants.real_rootdir %]/~[% somebody.1 | fixnickforlink | strip_paramattr %]/">[% somebody.1 %] ([% somebody.0 %])</a>[% PROCESS zoo_icons person=somebody.0 implied="" %]&nbsp;&nbsp;
 	</td>
 	<td valign="top">
-		<a href="[% constants.real_rootdir %]/~[% somebody.1 | strip_paramattr %]/friends/">friends</a>&nbsp;
+		<a href="[% constants.real_rootdir %]/~[% somebody.1 | fixnickforlink | strip_paramattr %]/friends/">friends</a>&nbsp;
 	</td>
 	<td valign="top">
-		<a href="[% constants.real_rootdir %]/~[% somebody.1 | strip_paramattr %]/fans/">fans</a>&nbsp;
+		<a href="[% constants.real_rootdir %]/~[% somebody.1 | fixnickforlink | strip_paramattr %]/fans/">fans</a>&nbsp;
 	</td>
 	<td valign="top">
 	[% IF somebody.2 %]
-		&nbsp;&nbsp;<a href="[% constants.real_rootdir %]/~[% somebody.1 | strip_paramattr %]/journal/">[% Slash.timeCalc(somebody.2) %]</a>
+		&nbsp;&nbsp;<a href="[% constants.real_rootdir %]/~[% somebody.1 | fixnickforlink | strip_paramattr %]/journal/">[% Slash.timeCalc(somebody.2) %]</a>
 	[% ELSE %]
 		&nbsp;&nbsp;
 	[% END %]

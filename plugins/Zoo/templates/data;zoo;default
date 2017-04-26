@@ -22,28 +22,28 @@ __template__
 	[% constants.sitename %] Friend/Foe System
 
 [% CASE 'confirm' %]
-	Your Relationship with <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Your Relationship with <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'nofriends' %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is all alone in the world.</div></div>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is all alone in the world.</div></div>
 
 [% CASE 'nofans' %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is either loved by all, or just invisible.</div></div>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is either loved by all, or just invisible.</div></div>
 
 [% CASE 'nofreaks' %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is hated by no one.</div></div>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is hated by no one.</div></div>
 
 [% CASE 'nofoes' %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) loves everyone or plays their cards very close to their chest.</div></div>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) loves everyone or plays their cards very close to their chest.</div></div>
 
 [% CASE 'nofriendsoffriends' %]
-	The friends of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) have no friends; they need better friends.</div></div>
+	The friends of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) have no friends; they need better friends.</div></div>
 
 [% CASE 'nofriendsenemies' %]
-	The friends of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) have no foes.</div></div>
+	The friends of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) have no foes.</div></div>
 
 [% CASE 'noall' %]
-	<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is unknown to the world.</div></div>
+	<a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) is unknown to the world.</div></div>
 
 [% CASE 'yournofriends' %]
 	[% returnme.data_constant = 1 %]
@@ -78,25 +78,25 @@ __template__
 	No one knows you exist.</div></div>
 
 [% CASE 'friendshead' %]
-	Friends of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Friends of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'foeshead' %]
-	Foes of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Foes of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'fanshead' %]
-	Fans of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Fans of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'freakshead' %]
-	Freaks of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Freaks of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'friendsenemieshead' %]
-	Foes of the Friends of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Foes of the Friends of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'friendsoffriendshead' %]
-	Friends of the Friends of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Friends of the Friends of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'allhead' %]
-	Relationships of <a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Relationships of <a href="[% constants.real_rootdir %]/~[% nickname | fixnickforlink | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'yourfriendshead' %]
 	[% returnme.data_constant = 1 %]

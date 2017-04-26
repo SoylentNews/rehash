@@ -97,6 +97,7 @@ our @EXPORT  = qw(
 	fixint
 	fixparam
 	fixurl
+	fixnickforlink
 	fudgeurl
 	fullhost_to_domain
 	formatDate
@@ -1959,7 +1960,7 @@ sub _nick2Link {
 		my $user = $reader->getUser($uid);
 		$nick = $user->{nickname}  || $nick;
 	}
-	my $href = $constants->{real_rootdir}."/~".strip_paramattr($nick);
+	my $href = $constants->{real_rootdir}."/~".strip_paramattr(fixnickforlink($nick));
 	
 	if($reader->nickExists($nick)) {
 		$nick = "<a href=\"$href\" class=\"commentUserLink\">$nick<\/a >";
@@ -2603,7 +2604,45 @@ sub fixparam {
 	$url = encode_utf8($url) if (getCurrentStatic('utf8') && is_utf8($url));
 	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
 	$url =~ s/ /+/g;
+	$url =~ s/%252B/%2B/ig;
 	return $url;
+}
+
+#========================================================================
+=head2 fixnickforlink(DATA)
+
+Prepares data to be a parameter in a URL.  Such as:
+
+=over 4
+
+	my $url = 'http://example.com/foo.pl?bar=' . fixnickforlink($data);
+
+=item Parameters
+
+=over 4
+
+=item DATA
+
+The data to be escaped.  B<NOTE>: C<+> characters are encoded as C<%2B>.
+This must be done on nicknames before fixparam.
+Note that this is designed for HTTP URIs, the most
+common scheme;  for other schemes, refer to the comments documenting
+strip_paramattr and strip_paramattr_nonhttp.
+
+=back
+
+=item Return value
+
+The escaped data.
+
+=back
+
+=cut
+
+sub fixnickforlink {
+	my $nick = shift;
+	$nick =~ s/\+/%2B/g;
+	return $nick;
 }
 
 #========================================================================

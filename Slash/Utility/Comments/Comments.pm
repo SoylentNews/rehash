@@ -2456,7 +2456,7 @@ sub dispCommentNoTemplate {
 	}
 	my $time = timeCalc($args->{time});
 	
-	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/\">" : "";
+	my $prenick = !$args->{is_anon} ? "<a href=\"$constants->{real_rootdir}/~".strip_paramattr(fixnickforlink($args->{nickname}))."/\">" : "";
 	my $postnick = !$args->{is_anon} ? " ($args->{uid})</a>" : "";
 	my $noZooPN = !$args->{is_anon} ? "</a>" : "";
 	my $noZoo = " by $prenick".strip_literal($args->{nickname})."$noZooPN on $time\n";
@@ -2506,10 +2506,9 @@ sub dispCommentNoTemplate {
 
 	my $sig;
 	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
-	
-		$sig .= "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n"
+		$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n";
 	}
-	
+
 	my $shrunk;
 	if ($args->{comment_shrunk}){
 		$shrunk = "<div id=\"comment_shrunk_$args->{cid}\" class=\"commentshrunk\">" . dispLinkComment({
@@ -2665,7 +2664,7 @@ sub dispCommentDetails {
 			$html_out .= " <a href=\"$args->{homepage}\" class=\"user_homepage_display\">Homepage</a>";
 		}
 		if($has_journal) {
-			$html_out .= " <a href=\"$constants->{real_rootdir}/~".strip_paramattr($args->{nickname})."/journal/\" title=\"".timeCalc($args->{journal_last_entry_date})."\">Journal</a>";
+			$html_out .= " <a href=\"$constants->{real_rootdir}/~".strip_paramattr(fixnickforlink($args->{nickname}))."/journal/\" title=\"".timeCalc($args->{journal_last_entry_date})."\">Journal</a>";
 		}
 	}
 
@@ -2725,7 +2724,6 @@ sub dispLinkComment {
 	if(!$args->{options}->{show_pieces}) { $html_out .= "</div>\n"; }
 	return $html_out;;
 }
-
 1;
 
 __END__

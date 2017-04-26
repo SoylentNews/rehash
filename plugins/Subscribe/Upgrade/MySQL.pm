@@ -39,7 +39,7 @@ sub upgradeDB() {
 	my $subscribe_schema_ver = $schema_versions->{db_schema_plugin_Subscribe};
 	my $upgrades_done = 0;
 
-	if ($subscribe_schema_ver == 0) {
+	if ($subscribe_schema_ver < 1) {
 		print "upgrading Subscribe to v1 ...\n";
 		# clean up here in case we have some of these already existing like could happen on dev or from a partially successful run of this version
 		$slashdb->sqlDo("DROP TABLE IF EXISTS stripe_log");
@@ -69,6 +69,26 @@ sub upgradeDB() {
 		};
 		$subscribe_schema_ver = 1;
 		
+		$upgrades_done++;
+	}
+
+	if ($subscribe_schema_ver < 2) {
+		print "upgrading Subscribe to v2 ...\n";
+		print "Running: DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'\n";
+		if(!$slashdb->sqlDo("DELETE FROM vars WHERE name = 'bitpay_amount' OR name = 'bitpay_token' OR name = 'bitpay_host' OR name = 'bitpay_image_src' OR name = 'bitpay_return' OR name = 'bitpay_callback' OR name = 'bp_ipn_path' OR name = 'bitpay_num_days'")) {
+			return 0;
+		}
+		print "Running: ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method;\n";
+		if(!$slashdb->sqlDo("ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method") {
+			return 0;
+		}
+
+		print "Set to version 2.\n";
+		if (!$slashdb->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_plugin_Subscribe'")) {
+			return 0;
+		};
+
+		$subscribe_schema_ver = 2;
 		$upgrades_done++;
 	}
 
