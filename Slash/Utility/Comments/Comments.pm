@@ -51,8 +51,7 @@ sub selectCommentsNew {
 	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	my($min, $max) = ($constants->{comment_minscore},
-			  $constants->{comment_maxscore});
+	my($min, $max) = ($constants->{comment_minscore}, $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
 	$cid ||= 0;
 
@@ -182,7 +181,7 @@ sub selectCommentsNew {
 	my $count = scalar(@$thisComment);
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
-	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
+	if(!$form->{noupdate} && !$form->{cid} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 
@@ -341,7 +340,7 @@ sub selectCommentsFlat {
 	my $count = scalar(@$thisComment);
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
-	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
+	if(!$form->{noupdate} && !$form->{cid} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 
@@ -558,7 +557,7 @@ sub selectComments {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
-	if(!$form->{noupdate} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
+	if(!$form->{noupdate} && !$form->{cid} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
 	}
 

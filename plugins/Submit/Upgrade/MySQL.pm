@@ -58,8 +58,8 @@ sub upgradeDB() {
 	
 	if ($subscribe_schema_ver < 2 ) {
 		print "Upgrading Submit to v2 ...\n";
-		print "Running: ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL;\n";
-		if(!$slashdb->sqlDo("ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL;")) {
+		print "Running: ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL \n";
+		if(!$slashdb->sqlDo("ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL")) {
 			return 0
 		};
 		print "Set to version 2";
@@ -68,6 +68,25 @@ sub upgradeDB() {
 		};
 		print "Upgrade complete";
 		$subscribe_schema_ver = 2;
+		$upgrades_done++;
+	}
+	
+		if ($subscribe_schema_ver < 3 ) {
+		print "Upgrading Submit to v3 ...\n";
+		print "Running: REPLACE INTO site_info (name, value, description) VALUES ('submissions_all_page_size', 250, 'Max number of submissions to show for admins and users') \n";
+		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('submissions_all_page_size', 250, 'Max number of submissions to show for admins and users')")) {
+			return 0;
+		};
+		print "Running: REPLACE INTO site_info (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page') \n";
+		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page')")) {
+			return 0;
+		};
+		print "Set to version 3";
+		if (!$slashdb->sqlDo("UPDATE site_info SET value = 3 WHERE name = 'db_schema_plugin_Submit'")) {
+			return 0;
+		};
+		print "Upgrade complete";
+		$subscribe_schema_ver = 3;
 		$upgrades_done++;
 	}
 
