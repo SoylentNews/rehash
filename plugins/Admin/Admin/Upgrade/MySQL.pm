@@ -51,7 +51,7 @@ sub upgradeDB() {
 	}
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Admin\n";
+		print "No upgrades needed for Admin V$admin_schema_ver \n";
 	}
 
 	return 1;

@@ -94,7 +94,7 @@ sub upgradeDB() {
 	}
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Subscribe\n";
+		print "No upgrades needed for Subscribe V$subscribe_schema_ver \n";
 	}
 
 	return 1;

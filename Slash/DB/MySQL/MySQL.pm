@@ -13665,7 +13665,8 @@ sub upgradeCoreDB() {
 	
 	
 	if ($core_ver < 3 ) {
-		print "Upgrading Submit to v3 ...\n";
+		print "Upgrading Core to v3 ...\n";
+		print "Running: UPDATE vars SET value = 'rehash_17_05' WHERE name = 'cvs_tag_currentcode' \n";
 		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_17_05' WHERE name = 'cvs_tag_currentcode'")) {
 			return 0;
 		}
@@ -13680,7 +13681,7 @@ sub upgradeCoreDB() {
 			
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Core\n";
+		print "No upgrades needed for Core V$core_ver\n";
 	}
 	return 1;
 }

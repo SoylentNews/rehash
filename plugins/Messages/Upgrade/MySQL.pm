@@ -76,7 +76,7 @@ sub upgradeDB() {
 	}
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Messages\n";
+		print "No upgrades needed for Messages V$messages_schema_ver \n";
 	}
 
 	return 1;
