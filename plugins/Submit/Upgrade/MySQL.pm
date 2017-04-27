@@ -38,7 +38,7 @@ sub upgradeDB() {
 	my ($self, $upgrade) = @_;
 	my $slashdb = getCurrentDB();
 	my $schema_versions = $upgrade->getSchemaVersions();
-	my $subscribe_schema_ver = $schema_versions->{db_schema_plugin_Submit};
+	my $submit_schema_ver = $schema_versions->{db_schema_plugin_Submit};
 	my $upgrades_done = 0;
 
 	if ($submit_schema_ver < 1 ) {
@@ -73,12 +73,12 @@ sub upgradeDB() {
 	
 		if ($submit_schema_ver < 3 ) {
 		print "Upgrading Submit to v3 ...\n";
-		print "Running: REPLACE INTO site_info (name, value, description) VALUES ('submissions_all_page_size', 250, 'Max number of submissions to show for admins and users') \n";
-		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('submissions_all_page_size', 250, 'Max number of submissions to show for admins and users')")) {
+		print "Running: REPLACE INTO vars (name, value, description) VALUES ('submissions_all_page_size', 250, 'Max number of submissions to show for admins and users') \n";
+		if (!$slashdb->sqlDo("REPLACE INTO vars (name, value, description) VALUES ('submissions_all_page_size', 250, 'Max number of submissions to show for admins and users')")) {
 			return 0;
 		};
-		print "Running: REPLACE INTO site_info (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page') \n";
-		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page')")) {
+		print "Running: REPLACE INTO vars (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page') \n";
+		if (!$slashdb->sqlDo("REPLACE INTO vars (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page')")) {
 			return 0;
 		};
 		print "Set to version 3 \n";
