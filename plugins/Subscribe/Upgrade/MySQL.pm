@@ -56,17 +56,18 @@ sub upgradeDB() {
 			return 0;
 		}
 		if(!$slashdb->sqlDo("INSERT INTO vars (name, value, description) VALUES ('stripe_public_key', NULL, 'Public key for generating stripe tokens')") ) {
-                        return 0;
-                }
+			return 0;
+		}
 		if(!$slashdb->sqlDo("INSERT INTO vars (name, value, description) VALUES ('stripe_ipn_path', '/stripe', 'Stripe ipn daemon listener path')") ) {
-                        return 0;
-                }
+			return 0;
+		}
 		if(!$slashdb->sqlDo("INSERT INTO vars (name, value, description) VALUES ('crypt_key', 'changeme', 'Key for (de|en)crypting metadata for sending to payment processors')") ) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$slashdb->sqlDo("INSERT INTO site_info (name, value, description) VALUES ('db_schema_plugin_Subscribe', 1, 'Version of subscribe plugin schema')")) {
 			return 0;
-		};
+		}
+		
 		$subscribe_schema_ver = 1;
 		
 		$upgrades_done++;

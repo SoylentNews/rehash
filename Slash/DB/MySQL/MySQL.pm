@@ -13681,7 +13681,7 @@ sub upgradeCoreDB() {
 			
 
 	if (!$upgrades_done) {
-		print "No upgrades needed for Core V$core_ver\n";
+		print "No upgrades needed for Core V$core_ver \n";
 	}
 	return 1;
 }
