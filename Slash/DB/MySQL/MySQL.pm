@@ -13569,7 +13569,7 @@ sub upgradeCoreDB() {
 			cid_now int(10) unsigned NOT NULL,
 			cid_new int(10) unsigned NOT NULL,
 			ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-		§	PRIMARY KEY (discussion_id, uid)
+			PRIMARY KEY (discussion_id, uid)
 			) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 		")) {
 			return 0;
@@ -13662,9 +13662,26 @@ sub upgradeCoreDB() {
 		$core_ver = 2;
 		$upgrades_done++;
 	}
+	
+	
+	if ($core_ver < 3 ) {
+		print "Upgrading Core to v3 ...\n";
+		print "Running: UPDATE vars SET value = 'rehash_17_05' WHERE name = 'cvs_tag_currentcode' \n";
+		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_17_05' WHERE name = 'cvs_tag_currentcode'")) {
+			return 0;
+		}
+		print "Set to version 3 \n";
+		if (!$self->sqlDo("UPDATE site_info SET value = 3 WHERE name = 'db_schema_core'")) {
+			return 0;
+		}
+		print "Upgrade complete \n";
+		$core_ver = 3;
+		$upgrades_done++;
+	}
+			
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Core\n";
+		print "No upgrades needed for Core V$core_ver \n";
 	}
 	return 1;
 }

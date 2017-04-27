@@ -52,9 +52,9 @@ sub upgradeDB() {
 			return 0;
 		}
 		if (!$slashdb->sqlDo("REPLACE INTO message_codes (code, type, seclev, send, subscribe, delivery_bvalue) VALUES (20, 'Admin to user message', 1, 'now', 0, 3)")) {
-                        print "Failed inserting 20 into message_codes.\n";
-                        return 0;
-                }
+			print "Failed inserting 20 into message_codes.\n";
+			return 0;
+		}
 		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('db_schema_plugin_Messages', 1, 'Version of messages plugin schema')")) {
 			print "Failed updating site_info.db_schema_plugin_Messages to 1.\n";
 			return 0;
@@ -65,8 +65,8 @@ sub upgradeDB() {
 				$badupdate = 1;
 			}
 			if (!$slashdb->sqlDo("REPLACE INTO users_messages (uid, code, mode) VALUES ('$uid', 19, 1)")) {
-                                $badupdate = 1;
-                        }
+			$badupdate = 1;
+			}
 		}
 		if($badupdate) {
 			print "There were problems updating everyone's preferences to web messages for rejected submission messages. This is not fatal though.\n";
@@ -76,7 +76,7 @@ sub upgradeDB() {
 	}
 
 	if (!$upgrades_done) {
-		print "No schema upgrades needed for Messages\n";
+		print "No upgrades needed for Messages V$messages_schema_ver \n";
 	}
 
 	return 1;
