@@ -62,11 +62,11 @@ sub upgradeDB() {
 		if(!$slashdb->sqlDo("ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NOT NULL")) {
 			return 0
 		};
-		print "Set to version 2";
+		print "Set to version 2 \n";
 		if (!$slashdb->sqlDo("UPDATE site_info SET value = 2 WHERE name = 'db_schema_plugin_Submit'")) {
 			return 0;
 		};
-		print "Upgrade complete";
+		print "Upgrade complete \n";
 		$subscribe_schema_ver = 2;
 		$upgrades_done++;
 	}
@@ -81,11 +81,11 @@ sub upgradeDB() {
 		if (!$slashdb->sqlDo("REPLACE INTO site_info (name, value, description) VALUES ('submissions_accepted_only_page_size', 250, 'Max number of submissions to show on other users page')")) {
 			return 0;
 		};
-		print "Set to version 3";
+		print "Set to version 3 \n";
 		if (!$slashdb->sqlDo("UPDATE site_info SET value = 3 WHERE name = 'db_schema_plugin_Submit'")) {
 			return 0;
 		};
-		print "Upgrade complete";
+		print "Upgrade complete \n";
 		$subscribe_schema_ver = 3;
 		$upgrades_done++;
 	}
