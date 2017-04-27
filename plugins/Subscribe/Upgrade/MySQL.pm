@@ -80,7 +80,7 @@ sub upgradeDB() {
 			return 0;
 		}
 		print "Running: ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method \n";
-		if(!$slashdb->sqlDo("ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method") {
+		if (!$slashdb->sqlDo("ALTER TABLE subscribe_payments ADD submethod VARCHAR(3) NULL DEFAULT NULL AFTER method")) {
 			return 0;
 		}
 

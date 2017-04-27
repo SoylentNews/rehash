@@ -75,7 +75,7 @@ createEnvironment($opts{'u'});
                     exit -1;
                 }
             } else {
-                print "No upgrade module for $key.\n";
+                print "No upgrade module for $key \n";
             }
         }
     }
