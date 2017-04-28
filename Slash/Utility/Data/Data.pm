@@ -113,9 +113,7 @@ our @EXPORT  = qw(
 	nick2matchname
 	noFollow
 	regexSid
-	revertQuote
 	parseDayBreakLevel
-	prepareQuoteReply
 	processSub
 	quoteFixIntrotext
 	root2abs
@@ -1865,15 +1863,13 @@ sub processCustomTagsPost {
 	my $constants = getCurrentStatic();
 
 	# all of these must be in approvedtags
+	
+	# Screw two styles of quoting
 	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
-		my $quote   = 'quote';
-		my $open    = qr[\n* <\s*  $quote \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
-
-		$str =~ s/$open/<p><div class="quote">/g;
-		$str =~ s/$close/<\/div><\/p>/g;
+		$str =~ s#<\s*quote\s*>#<blockquote>#ig;
+	     $str =~ s#<\s*/quote\s*>#</blockquote>#ig;
 	}
-
+	
 	# just fix the whitespace for blockquote to something that looks
 	# universally good
 	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
@@ -1892,6 +1888,7 @@ sub apply_rehash_tags {
 	my $constants = getCurrentStatic();
 		
 	# all of these must be in approvedtags
+
 	# support for sarcasm tags
 	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
@@ -1970,69 +1967,6 @@ sub _nick2Link {
 	}
 	return $nick;
 }
-
-# revert div class="quote" back to <quote>, handles nesting
-sub revertQuote {
-	my($str) = @_;
-
-	my $bail = 0;
-	while ($str =~ m|((<p>)?<div class="quote">)(.+)$|sig) {
-		my($found, $p, $rest) = ($1, $2, $3);
-		my $pos = pos($str) - (length($found) + length($rest));
-		substr($str, $pos, length($found)) = '<quote>';
-		pos($str) = $pos + length('<quote>');
-
-		my $c = 0;
-		$bail = 1;
-		while ($str =~ m|(<(/?)div.*?>(</p>)?)|sig) {
-			my($found, $end, $p2) = ($1, $2, $3);
-			if ($end && !$c) {
-				$bail = 0;  # if we don't get here, something is wrong
-				my $len = length($found);
-				# + 4 is for the </p>
-				my $pl = $p && $p2 ? 4 : 0;
-				substr($str, pos($str) - $len, $len + $pl) = '</quote>';
-				pos($str) = 0;
-				last;
-			} elsif ($end) {
-				$c--;
-			} else {
-				$c++;
-			}
-		}
-
-		if ($bail) {
-			use Data::Dumper;
-			warn "Stuck in endless loop: " . Dumper({
-				found	=> $found,
-				p	=> $p,
-				rest	=> $rest,
-				'pos'	=> $pos,
-				str	=> $str,
-			});
-			last;
-		}
-	}
-	return($str);
-}
-
-
-sub prepareQuoteReply {
-	my($reply) = @_;
-	my $pid_reply = $reply->{comment} = parseDomainTags($reply->{comment}, 0, 1, 1);
-	$pid_reply = revertQuote($pid_reply);
-
-	# prep for JavaScript
-	$pid_reply =~ s|\\|\\\\|g;
-	$pid_reply =~ s|'|\\'|g;
-	$pid_reply =~ s|([\r\n])|\\n|g;
-
-	$pid_reply =~ s{<nobr> <wbr></nobr>(\s*)} {$1 || ' '}gie;
-	#my $nick = strip_literal($reply->{nickname});
-	#$pid_reply = "<div>$nick ($reply->{uid}) wrote: <quote>$pid_reply</quote></div>";
-	$pid_reply = "<quote>$pid_reply</quote>";
-}
-
 
 #========================================================================
 
