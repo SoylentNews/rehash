@@ -1863,9 +1863,13 @@ sub processCustomTagsPost {
 	my $constants = getCurrentStatic();
 
 	# all of these must be in approvedtags
-	$str =~ s#<\s*quote\s*>#<blockquote>#ig;
-	$str =~ s#<\s*/quote\s*>#</blockquote>#ig;
-
+	
+	# Screw two styles of quoting
+	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
+		$str =~ s#<\s*quote\s*>#<blockquote>#ig;
+	     $str =~ s#<\s*/quote\s*>#</blockquote>#ig;
+	}
+	
 	# just fix the whitespace for blockquote to something that looks
 	# universally good
 	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
@@ -1884,9 +1888,6 @@ sub apply_rehash_tags {
 	my $constants = getCurrentStatic();
 		
 	# all of these must be in approvedtags
-
-	$str =~ s#<\s*quote\s*>#<blockquote>#ig;
-	$str =~ s#<\s*/quote\s*>#</blockquote>#ig;
 
 	# support for sarcasm tags
 	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
