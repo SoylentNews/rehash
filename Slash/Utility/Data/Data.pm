@@ -1890,14 +1890,6 @@ sub apply_rehash_tags {
 		
 	# all of these must be in approvedtags
 
-	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
-		my $open    = qr[\n* <\s*  quote \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /quote \s*> \n*]xsio;
-
-		$str =~ s/$open/<blockquote>/g;
-		$str =~ s/$close/<\/blockquote>/g;
-	}
-
 	# support for sarcasm tags
 	if (grep /^sarc$/i, @{$constants->{approvedtags}}) {
 		my $sarc = 'sarc';
