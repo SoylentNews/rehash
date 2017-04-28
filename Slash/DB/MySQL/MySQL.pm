@@ -6599,9 +6599,10 @@ sub getCommentTextCached {
 			my $this_len = $this_max_len;
 			if ($abbreviate) {
 				my $str = $abbrev_text;
-				# based on revertQuote() ... we replace the unused
-				# content with <<LEN>> and then we know how much we
-				# removed, and discard $str when done
+				# based on revertQuote() which no longer exists
+				# ... we replace the unused content with <<LEN>>
+				# and then we know how much we removed, and
+				# discard $str when done
 				my $bail = 0;
 				while ($str =~ m|((<p>)?<div class="quote">)(.+)$|sig) {
 					my($found, $p, $rest) = ($1, $2, $3);
@@ -13668,6 +13669,10 @@ sub upgradeCoreDB() {
 		print "Upgrading Core to v3 ...\n";
 		print "Running: UPDATE vars SET value = 'rehash_17_05' WHERE name = 'cvs_tag_currentcode' \n";
 		if (!$self->sqlDo("UPDATE vars SET value = 'rehash_17_05' WHERE name = 'cvs_tag_currentcode'")) {
+			return 0;
+		}
+		print "Running: UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|abbr|sarc|sarcasm|user|spoiler|del|s|strike' WHERE name = 'approvedtags' OR name = 'approvedtags_visible' \n";
+		if (!$self->sqlDo("UPDATE vars SET value = 'b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode|quote|sup|sub|abbr|sarc|sarcasm|user|spoiler|del|s|strike' WHERE name = 'approvedtags' OR name = 'approvedtags_visible'")) {
 			return 0;
 		}
 		print "Set to version 3 \n";

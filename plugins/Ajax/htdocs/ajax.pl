@@ -357,7 +357,8 @@ sub replyForm {
 	my($reply, $pid_reply);
 	my $discussion = $slashdb->getDiscussion($sid);
 	$reply = $slashdb->getCommentReply($sid, $pid) if $pid;
-	$pid_reply = prepareQuoteReply($reply) if $pid && $reply;
+	# Haha, I stole your sub
+	#$pid_reply = prepareQuoteReply($reply) if $pid && $reply;
 	preProcessReplyForm($form, $reply);
 
 	my $reskey = getObject('Slash::ResKey');
