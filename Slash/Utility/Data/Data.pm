@@ -1863,10 +1863,10 @@ sub processCustomTagsPost {
 	my $constants = getCurrentStatic();
 
 	# all of these must be in approvedtags
-	#if (grep /^quote$/i, @{$constants->{approvedtags}}) {
-	#	$str =~ s#\s*<\s*quote\s*>\n*#<blockquote>#ig;
-	#	$str =~ s#\s*<\s*/quote\s*>\n*#</blockquote>#ig;
-	#}
+	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
+		$str =~ s#\s*<\s*quote\s*>\n*#<blockquote>#ig;
+		$str =~ s#\s*<\s*/quote\s*>\n*#</blockquote>#ig;
+	}
 
 	# just fix the whitespace for blockquote to something that looks
 	# universally good
