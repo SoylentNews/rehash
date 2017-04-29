@@ -393,9 +393,6 @@ sub displayComments {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
 	$form->{pid} = 0 unless defined $form->{pid};
-	if(defined($form->{markunread}) && $form->{markunread}) {
-		$slashdb->clearCommentReadLog($discussion, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion, uid: $user->{uid}\n";
-	}
 	if ($form->{cid}) {
 		# Here is the deal, if a user who has a mode of nocomment asks for a 
 		# comment we give it to them and assume the default mode (which 
