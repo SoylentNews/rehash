@@ -65,20 +65,6 @@ __template__
 		[% Slash.linkComment(next, 1) %]&gt;&gt;
 	[% END %]
 	</div>
-	[% UNLESS constants.modal_prefs_active;
-	   m1_classname = "Slash::" _ constants.m1_pluginname;
-	   moddb = Slash.getObject(m1_classname);
-	   IF moddb;
-		   moddb.dispModCommentLog('cid', cid, {
-			show_m2s =>	  constants.m2 ? (form.show_m2s.defined
-							? form.show_m2s : user.m2_with_comm_mod)
-						: 0,
-			need_m2_form =>	  constants.m2 ? !moderate_form : 0,
-			need_m2_button => constants.m2,
-			title => " " });
-	   END;
-	   END; # constants.modal_prefs_active
-	%]
 [% END %]
 
 	[% lcp %]
@@ -109,7 +95,7 @@ __template__
 [% END %]
 
 [% IF !user.is_anon %]
-<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %]>Prefs</a></b></p></span>[% END %]
+<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/my/comments">Prefs</a></b></p></span>[% END %]
 
 [% IF (can_moderate || user.acl.candelcomments_always) %]
 <span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/faq.pl?op=moderation">Moderator Help</a></b></p></span>[% END %]

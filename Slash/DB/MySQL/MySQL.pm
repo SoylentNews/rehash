@@ -6846,6 +6846,32 @@ sub saveCommentReadLog {
 }
 
 #######################################################
+# Clears the read status of one discussion for one user
+sub clearCommentReadLog {
+	my($self, $discussion_id, $uid, $no_mcd) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	return 1 if isAnon($uid);
+
+	my($mcd, $mcdkey);
+	if(!$no_mcd) {
+		$mcd = $self->getMCD;
+		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
+	}
+
+	if ($mcd) {
+		$mcd->delete("$mcdkey:now");
+		$mcd->delete("$mcdkey:new");
+	}
+	
+	my $where = "discussion_id = $discussion_id AND uid = $uid";
+	if (!$self->sqlDelete("users_comments_read_log", $where)) {
+		return 0;
+	}
+	return 1;
+}
+
+#######################################################
 sub getCommentReadLog {
 	my($self, $discussion_id, $uid, $no_mcd) = @_;
 	my $cids = {};
@@ -13576,8 +13602,8 @@ sub upgradeCoreDB() {
 			return 0;
 		}
 		if (!$self->sqlDo("ALTER TABLE users_comments ADD highnew tinyint(4) NOT NULL default 1")) {
-                        return 0;
-                }
+			return 0;
+		}
 		if (!$self->sqlDo("ALTER TABLE users_comments ADD dimread tinyint(4) NOT NULL default 1")) {
 			return 0;
 		}
