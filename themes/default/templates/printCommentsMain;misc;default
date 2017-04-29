@@ -150,6 +150,11 @@ __template__
 					}) %]</b></p></span>
 				[% END %]
 				 <span class="nbutton"><p><b><a href="[% stripped_link %]">Mark All as Read</a></b></p></span>
+				[% IF parent.type == 'journal' %]
+						<span class="nbutton"><p><b><a href="[% stripped_link %]?markunread=1">Mark All as Unread</a></b></p></span>
+				[% ELSE %]
+						<span class="nbutton"><p><b><a href="[% stripped_link %]&markunread=1">Mark All as Unread</a></b></p></span>
+				[% END %]
 			</fieldset>
 		</form>
 		<div class="commentBox">
