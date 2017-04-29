@@ -411,6 +411,8 @@ sub displayComments {
 ##################################################################
 # Welcome to one of the ancient beast functions.  The comment editor
 # is the form in which you edit a comment.
+# This sub is badly outdated and needs to be rewritten.
+# Do not use it.
 sub editComment {
 	my($form, $slashdb, $user, $constants, $discussion, $gSkin, $error_message) = @_;
 
@@ -449,8 +451,6 @@ sub editComment {
 	if ($pid && !%$reply) {
 		print Slash::Utility::Comments::getError('no such parent');
 		return;
-	} elsif ($pid) {
-		$pid_reply = prepareQuoteReply($reply);
 	}
 
 	# calculate proper points value ... maybe this should be a public,

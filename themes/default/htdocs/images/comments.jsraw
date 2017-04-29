@@ -1237,6 +1237,8 @@ function getQuotedText(this_reply) {
 		this_reply = this_reply.replace(/<\/p>\n\n\n*<p>/g, "</p>\n\n<p>");
 	}
 	// <quote> parse code takes care of whitespace
+	// Deprecated. We no longer use quote tags as anything but blockquotes.
+	// Only leaving it in in case takyon uses this function.
 	this_reply = this_reply.replace(/\n*<quote>/g, "\n\n<quote>");
 	this_reply = this_reply.replace(/^\n+/g, "");
 	this_reply = this_reply.replace(/<\/quote>\n*/g, "</quote>\n\n");
