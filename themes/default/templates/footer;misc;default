@@ -92,7 +92,6 @@ __template__
 			[% Slash.currentAdminUsers() %]
 		[% END %]
 	</div>
-[% INCLUDE modal_footer %]
 </body>
 </html>
 

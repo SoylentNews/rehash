@@ -182,7 +182,7 @@ sub selectCommentsNew {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 	if(defined($form->{markunread}) && $form->{markunread}) {
-		$slashdb->clearCommentReadLog($discussion, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion, uid: $user->{uid}\n";
+		$slashdb->clearCommentReadLog($discussion->{id}, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion->{id}, uid: $user->{uid}\n";
 	}	
 	if(!$form->{noupdate} && !$form->{cid} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
@@ -344,7 +344,7 @@ sub selectCommentsFlat {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 	if(defined($form->{markunread}) && $form->{markunread}) {
-		$slashdb->clearCommentReadLog($discussion, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion, uid: $user->{uid}\n";
+		$slashdb->clearCommentReadLog($discussion->{id}, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion->{id}, uid: $user->{uid}\n";
 	}
 	if(!$form->{noupdate} && !$form->{cid} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
@@ -564,7 +564,7 @@ sub selectComments {
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 	
 	if(defined($form->{markunread}) && $form->{markunread}) {
-		$slashdb->clearCommentReadLog($discussion, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion, uid: $user->{uid}\n";
+		$slashdb->clearCommentReadLog($discussion->{id}, $user->{uid}) || print STDERR "\nclearCommentReadLog failed for discussion_id: $discussion->{id}, uid: $user->{uid}\n";
 	}
 	if(!$form->{noupdate} && !$form->{cid} && $count > 0 && !defined($form->{cchp}) && !(isAnon($user->{uid}))) {
 		$slashdb->saveCommentReadLog(\@cids, $discussion->{id}, $user->{uid}) or print STDERR "\nFIX ME: Could not saveCommentReadLog\n";
