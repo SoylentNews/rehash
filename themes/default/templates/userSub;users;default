@@ -14,15 +14,22 @@ en_US
 __name__
 userSub
 __template__
+
 [% nick_url = nick | fixnickforlink | strip_paramattr %]
 [% nick = nick | strip_literal %]
 [% IF nick_match %]
 	[% title = "Your Stories" %]
-[% ELSE %]
-	[% title = "$nick's stories" %]
 [% END %]
-[% PROCESS titlebar title=title %]
-<div class="generalbody">
+
+<div id="slashboxes">
+	[% PROCESS userboxes %]
+</div>
+<div id="users-blocks">
+	
+	[% PROCESS user_titlebar tab_selected='submissions' %]
+	<div class="generalbody">
+
+
 	<p>
 		<b>
 			[% IF nick_match %]
@@ -30,10 +37,9 @@ __template__
 			[% ELSE %]
 				[% nick %] has
 			[% END %] 
-			submitted [% storycount %] stories.
+			acepted [% storycount %] stories.
 		</b>
 	<p>
-	[% n = 0 %]
 	[% IF storycount %]
 	<p>
 		[% FOREACH story = stories %]

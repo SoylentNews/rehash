@@ -789,6 +789,9 @@ sub showSubmissions {
 		$nickname	= $user->{nickname};
 		$uid		= $user->{uid};
 	}
+				
+				
+	my $title = "Submissions of " . getTitle('userInfo_user_title', { nick => $nickname, uid => $uid });
 
 	my $storycount = $reader->countStoriesBySubmitter($uid);
 	
@@ -809,6 +812,7 @@ sub showSubmissions {
 		storycount 				=> $storycount,
 		page							=> $page,
 		pages							=> $pages,
+		title							=> $title,
 	});
 }
 
