@@ -21,15 +21,15 @@ __template__
 	[% title = "Your Stories" %]
 [% END %]
 
+[% orig_title = title %]
 <div id="slashboxes">
 	[% PROCESS userboxes %]
 </div>
-<div id="users-blocks">
+[% title = orig_title %]
 	
-	[% PROCESS user_titlebar tab_selected='submissions' %]
-	<div class="generalbody">
-
-
+[% PROCESS user_titlebar tab_selected='submissions' %]
+<div class="generalbody">
+	
 	<p>
 		<b>
 			[% IF nick_match %]
@@ -37,7 +37,7 @@ __template__
 			[% ELSE %]
 				[% nick %] has
 			[% END %] 
-			acepted [% storycount %] stories.
+			[% storycount %] acepted stories.
 		</b>
 	<p>
 	[% IF storycount %]
@@ -48,13 +48,12 @@ __template__
   </p>
 	[% END %]
 	
- [% IF pages && (user.seclev > constants.comments_more_seclev || (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
-		<p>
+  <p>
 		[% IF (page != 1) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions/[% page - 1 %]">Previous</a>[% END %]
 		Page [% page %]
 		[% IF (page != pages) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions/[% page + 1 %]">Next</a>[% END %]
-		</p>
- [% END %]
+  </p>
+
 </div>
 
 __seclev__
