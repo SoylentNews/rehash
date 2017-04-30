@@ -796,7 +796,7 @@ sub showSubmissions {
 	my $pages = 0;
 	my $page = $form->{page} || 0;
 
-	if $storycount {
+	if ($storycount) {
 		$pages = int($storycount/$constants->{user_submitter_display_default});
 		$stories = $reader->getStoriesBySubmitter($uid, $constants->{user_submitter_display_default}, $page * $constants->{user_submitter_display_default)
 	}
