@@ -798,7 +798,7 @@ sub showSubmissions {
 
 	if ($storycount) {
 		$pages = int($storycount/$constants->{user_submitter_display_default});
-		$stories = $reader->getStoriesBySubmitter($uid, $constants->{user_submitter_display_default}, $page * $constants->{user_submitter_display_default)
+		$stories = $reader->getStoriesBySubmitter($uid, $constants->{user_submitter_display_default}, $page * $constants->{user_submitter_display_default});
 	}
 
 	slashDisplay('userSub', {
