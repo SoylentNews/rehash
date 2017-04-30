@@ -37,7 +37,7 @@ __template__
 			[% ELSE %]
 				[% nick %] has
 			[% END %] 
-			[% storycount %] acepted stories.
+			[% storycount %] accepted stories.
 		</b>
 	<p>
 	[% IF storycount %]
