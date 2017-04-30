@@ -714,9 +714,8 @@ sub userdir_handler {
 						}
 					}
 
-				} elsif ($op eq 'tags') {
-					# XXX "!" is a 'reserved' char in URI, escape it here?
-					$r_args .= "&tagname=$extra" if $extra;
+				} elsif ($op eq 'submissions') {
+					$r_args .= "&page=$extra" if $extra;
 				}
 			}
 

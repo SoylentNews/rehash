@@ -44,9 +44,9 @@ __template__
 	
  [% IF pages && (user.seclev > constants.comments_more_seclev || (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
 		<p>
-		[% IF (page != 0) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions?page=[% page - 1 %]">Previous</a>[% END %]
-		Page [% page + 1 %]
-		[% IF (page != pages) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions?page=[% page + 1 %]">Next</a>[% END %]
+		[% IF (page != 0) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions/[% page - 1 %]">Previous</a>[% END %]
+		Page [% page %]
+		[% IF (page != pages) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions/[% page + 1 %]">Next</a>[% END %]
 		</p>
  [% END %]
 </div>

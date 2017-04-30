@@ -794,11 +794,11 @@ sub showSubmissions {
 	
 	my $stories = "";
 	my $pages = 0;
-	my $page = $form->{page} || 0;
+	my $page = $form->{page} || 1;
 
 	if ($storycount) {
-		$pages = int($storycount/$constants->{user_submitter_display_default});
-		$stories = $reader->getStoriesBySubmitter($uid, $constants->{user_submitter_display_default}, $page * $constants->{user_submitter_display_default});
+		$pages = int($storycount/$constants->{user_submitter_display_default}) + 1;
+		$stories = $reader->getStoriesBySubmitter($uid, $constants->{user_submitter_display_default}, ($page - 1) * $constants->{user_submitter_display_default});
 	}
 
 	slashDisplay('userSub', {
