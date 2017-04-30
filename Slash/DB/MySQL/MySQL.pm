@@ -7017,14 +7017,20 @@ sub countSubmissionsByNetID {
 # Be nice if we could just pull certain elements -Brian
 sub getStoriesBySubmitter {
 	my($self, $id, $limit, $offset) = @_;
-
+	
 	my $id_q = $self->sqlQuote($id);
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	my @nexuses = $self->getNexusTids();
 	my $nexus_clause = join ',', @nexuses, $mp_tid;
 
-	$limit = 'LIMIT ' . $limit if $limit;
-	$offset = 'OFFSET ' . $offset if $offset;
+	if ($limit) {
+		$limit = 'LIMIT ' . $limit;
+		$offset = $offset || 0;
+		$offset = 'OFFSET ' . $offset;
+	} else {
+		$offset = "";
+	}
+	
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'sid, title, time',
 		'stories, story_text, story_topics_rendered',

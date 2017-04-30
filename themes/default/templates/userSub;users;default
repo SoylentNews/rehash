@@ -35,17 +35,14 @@ __template__
 	[% n = 0 %]
 	[% IF storycount %]
 		[% FOREACH story = stories %]
-				<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
-					[% story.title %]
-				</a> 
-				on [% Slash.timeCalc(story.time) %]<br>
+		  <a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a> on [% Slash.timeCalc(story.time) %]<br>
 		[% END %]
 	[% END %]
 	
  [% IF pages && (user.seclev > constants.comments_more_seclev || (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
-		[% IF (page != 0) %]<a href="gSkin.rootdir _ "/users.pl?op=subscriptions&page=[% page - 1 %]">Previous</a>
+		[% IF (page != 0) %]<a href="gSkin.rootdir _ "/users.pl?op=subscriptions&page=[% page - 1 %]">Previous</a>[% END %]
 		Page [% page + 1 %]
-		[% IF (page != pages) %]<a href="gSkin.rootdir _ "/users.pl?op=subscriptions&page=[% page + 1 %]">Next</a>
+		[% IF (page != pages) %]<a href="gSkin.rootdir _ "/users.pl?op=subscriptions&page=[% page + 1 %]">Next</a>[% END %]
  [% END %]
 </div>
 
