@@ -7047,7 +7047,7 @@ sub countStoriesBySubmitter {
 
 	my($count) = $self->sqlSelect('count(*)',
 		'stories, story_topics_rendered',
-		"stories.stoid=story_topics_rendered.stoid',
+		"stories.stoid=story_topics_rendered.stoid
 		 AND submitter=$id_q AND time < NOW()
 		 AND story_topics_rendered.tid IN ($nexus_clause)
 		 AND in_trash = 'no'
