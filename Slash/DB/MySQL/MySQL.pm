@@ -7016,7 +7016,7 @@ sub countSubmissionsByNetID {
 # Needs to be more generic in the long run.
 # Be nice if we could just pull certain elements -Brian
 sub getStoriesBySubmitter {
-	my($self, $id, $limit) = @_;
+	my($self, $id, $limit, $offset) = @_;
 
 	my $id_q = $self->sqlQuote($id);
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
@@ -7024,6 +7024,7 @@ sub getStoriesBySubmitter {
 	my $nexus_clause = join ',', @nexuses, $mp_tid;
 
 	$limit = 'LIMIT ' . $limit if $limit;
+	$offset = 'OFFSET ' . $offset if $offset;
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'sid, title, time',
 		'stories, story_text, story_topics_rendered',
@@ -7032,7 +7033,7 @@ sub getStoriesBySubmitter {
 		 AND submitter=$id_q AND time < NOW()
 		 AND story_topics_rendered.tid IN ($nexus_clause)
 		 AND in_trash = 'no'",
-		"GROUP BY stories.stoid ORDER by time DESC $limit");
+		"GROUP BY stories.stoid ORDER by time DESC $limit $offset");
 	return $answer;
 }
 

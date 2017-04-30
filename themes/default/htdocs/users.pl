@@ -773,6 +773,7 @@ sub showSubmissions {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my($uid, $nickname);
+	
 
 	print createMenu("users", {
 		style		=> 'tabbed',
@@ -790,17 +791,24 @@ sub showSubmissions {
 	}
 
 	my $storycount = $reader->countStoriesBySubmitter($uid);
-	my $stories = $reader->getStoriesBySubmitter(
-		$uid,
-		$constants->{user_submitter_display_default}
-	) unless !$storycount;
+	
+	my $stories = "";
+	my $pages = 0;
+	my $page = $form->{page} || 0;
+
+	if $storycount {
+		$pages = int($storycount/$constants->{user_submitter_display_default});
+		$stories = $reader->getStoriesBySubmitter($uid, $constants->{user_submitter_display_default}, $page * $constants->{user_submitter_display_default)
+	}
 
 	slashDisplay('userSub', {
-		nick			=> $nickname,
-		uid			=> $uid,
+		nick							=> $nickname,
+		uid								=> $uid,
 		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
-		stories 		=> $stories,
-		storycount 		=> $storycount,
+		stories 					=> $stories,
+		storycount 				=> $storycount,
+		page							=> $page,
+		pages							=> $pages,
 	});
 }
 

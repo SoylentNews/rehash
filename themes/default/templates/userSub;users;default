@@ -30,19 +30,23 @@ __template__
 				[% nick %] has
 			[% END %] 
 			submitted [% storycount %] stories.
-			[% IF storycount > constants.user_submitter_display_default %] 
-			Below are the most recent [% form.min %] stories.
-			[% END %]
 		</b>
 	<p>
 	[% n = 0 %]
-	[% FOREACH story = stories %]
-		[% n = n + 1 %]
-			<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
-				[% story.title %]
-			</a> 
-			on [% Slash.timeCalc(story.time) %]<br>
+	[% IF storycount %]
+		[% FOREACH story = stories %]
+				<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+					[% story.title %]
+				</a> 
+				on [% Slash.timeCalc(story.time) %]<br>
+		[% END %]
 	[% END %]
+	
+ [% IF pages && (user.seclev > constants.comments_more_seclev || (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
+		[% IF (page != 0) %]<a href="gSkin.rootdir _ "/users.pl?op=subscriptions&page=[% page - 1 %]">Previous</a>
+		Page [% page + 1 %]
+		[% IF (page != pages) %]<a href="gSkin.rootdir _ "/users.pl?op=subscriptions&page=[% page + 1 %]">Next</a>
+ [% END %]
 </div>
 
 __seclev__
