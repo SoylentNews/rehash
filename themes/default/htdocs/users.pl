@@ -773,14 +773,8 @@ sub showSubmissions {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my($uid, $nickname);
+	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
 	
-
-	print createMenu("users", {
-		style		=> 'tabbed',
-		justify		=> 'right',
-		color		=> 'colored',
-		tab_selected	=> $hr->{tab_selected_1} || "",
-	});
 
 	if ($form->{uid} or $form->{nick}) {
 		$uid		= $form->{uid} || $reader->getUserUID($form->{nick});
@@ -789,28 +783,31 @@ sub showSubmissions {
 		$nickname	= $user->{nickname};
 		$uid		= $user->{uid};
 	}
-				
-				
+					
 	my $title = "Submissions of " . getTitle('userInfo_user_title', { nick => $nickname, uid => $uid });
-
-	my $storycount = $reader->countStoriesBySubmitter($uid);
 	
-	my $stories = "";
+	my $submissions = "";
 	my $pages = 0;
 	my $page = $form->{page} || 1;
-	my $count = $constants->{submissions_accepted_only_page_size};
+	my $count = ((($admin_flag || $user->{uid} == $uid) ? $constants->{submissions_all_page_size} : $constants->{submissions_accepted_only_page_size}) || "");
+	
+	$sub_options->{accepted_only} = 1 if !$admin_flag && $user->{uid} != $uid;
 
-	if ($storycount) {
+	my $subcount = $reader->countSubmissionsByUID($uid);
+	
+	if ($subcount) {
 		$pages = int($storycount/$count) + 1;
-		$stories = $reader->getStoriesBySubmitter($uid, $count, ($page - 1) * $count);
+		my $sub_limit = (($page - 1) * $count) . ", " . $count;
+		$submissions = $reader->getSubmissionsByUID($uid, $sub_limit, $sub_options);
 	}
+	
 
 	slashDisplay('userSub', {
 		nick							=> $nickname,
 		uid								=> $uid,
 		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
-		stories 					=> $stories,
-		storycount 				=> $storycount,
+		submissions				=> $submissions,
+		subcount					=> $subcount,
 		page							=> $page,
 		pages							=> $pages,
 		title							=> $title,
