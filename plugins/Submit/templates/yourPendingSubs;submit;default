@@ -16,7 +16,9 @@ __name__
 yourPendingSubs
 __template__
 
-[% cur_time = Slash.db.getTime() %]
+[% cur_time = Slash.db.getTime();
+approved = 0;
+total = 0 %]
 
 [% PROCESS titlebar title = "Your recent submissions" %]
 <div class="generalbody">

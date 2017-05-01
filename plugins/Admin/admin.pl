@@ -465,7 +465,7 @@ sub templateEdit {
 
 	$templateref = $slashdb->getTemplate($tpid, '', 1) if $tpid;
 
-	$seclev_flag = 0 if $templateref->{seclev} > $user->{seclev};
+	$seclev_flag = 0 if defined($templateref->{seclev}) && $templateref->{seclev} > $user->{seclev};
 
 	if ($form->{templatedelete}) {
 		$templatedelete_flag = 1;
