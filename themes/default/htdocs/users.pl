@@ -793,7 +793,7 @@ sub showSubmissions {
 	
 	my $sub_options->{accepted_only} = 1 if !$admin_flag && $user->{uid} != $uid;
 
-	my $subcount = $reader->countSubmissionsByUID($uid);
+	my $subcount = $reader->countSubmissionsByUID($uid, $sub_options);
 	
 	if ($subcount) {
 		$pages = int($subcount/$count) + 1;
