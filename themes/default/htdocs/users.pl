@@ -804,6 +804,7 @@ sub showSubmissions {
 
 	slashDisplay('userSub', {
 		nick							=> $nickname,
+		admin_flag				=> $admin_flag,
 		uid								=> $uid,
 		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
 		submissions				=> $submissions,
