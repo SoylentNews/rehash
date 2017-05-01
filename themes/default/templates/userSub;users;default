@@ -41,11 +41,21 @@ __template__
 		</b>
 	<p>
 	[% IF storycount %]
-	<p>
+	<table width="100%" border=0 cellpadding=3 cellspacing=0 class="data">
+		<tr class="data_head">
+			<th>Title</th>
+			<th>Datestamp</th>
+			<th>[% IF admin_flag || user.uid == submissions.0.uid %]<span class="admin_data_label">State</span>[% END %]</th>
+		</tr>
 		[% FOREACH story = stories %]
-		  <a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a> on [% Slash.timeCalc(story.time) %]<br>
+		<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %] [% IF admin_flag || nick_match %] status2 [% END %]">
+			[% bg_toggle = !bg_toggle %]
+			<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a></td>
+			<td>[% Slash.timeCalc(story.time) %]</td>
+			<td>Accepted</td>
+		</td>	
 		[% END %]
-  </p>
+  </table>
 	[% END %]
 	
   <p>
