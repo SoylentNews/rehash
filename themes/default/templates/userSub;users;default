@@ -91,7 +91,7 @@ IF nick_match %]
 		<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>
 		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
 		[% ELSIF user.uid != sub.uid %]
-		<tr class="data_hl1"><td colspan="5"><i>(Rejected submissions are not listed.)</i></td></tr>
+		<tr class="data_hl1"><td colspan="5"><i>(Rejected and pending submissions are not listed.)</i></td></tr>
 		[% END %]
   </table>
 	[% END %]
