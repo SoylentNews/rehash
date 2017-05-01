@@ -39,7 +39,7 @@ IF nick_match %]
 			[% ELSE %]
 				[% nick %] has
 			[% END %] 
-			[% subcount %] submissions.
+			[% subcount %] submission[% IF subcount != 1 %]s[% END %].
 		</b>
 	<p>
 	[% IF subcount %]
