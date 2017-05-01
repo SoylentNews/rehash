@@ -42,7 +42,7 @@ IF nick_match %]
 			[% subcount %] submissions.
 		</b>
 	<p>
-	[% IF storycount %]
+	[% IF subcount %]
 	<table width="100%" border=0 cellpadding=3 cellspacing=0 class="data">
 		<tr class="data_head">
 			<th>Title</th>
