@@ -81,6 +81,9 @@ IF nick_match %]
 					[%- END -%]
 			  [%-  END -%]
 			</td>
+			<td>
+				[% sub.story_time ? Slash.timeCalc(sub.story_time) : "" %]
+			</td>
 		</tr>
 		[% total = total + 1 %]
 		[% END %]
