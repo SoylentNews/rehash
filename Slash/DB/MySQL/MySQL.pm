@@ -6987,7 +6987,7 @@ sub countSubmissionsByUID {
 	my($self, $id, $options) = @_;
 	
 	my $where = "uid=$id";
-	$where .= "AND del = 2" if $options->{accepted_only};
+	$where .= " AND del = 2" if $options->{accepted_only};
 	my $count = $self->sqlCount('submissions', $where);
 	return $count;
 }
