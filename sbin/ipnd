@@ -273,6 +273,7 @@ $cbServer->on(request => sub {
 				}
 				$content->{data}->{object}->{metadata} = $metaData;
 				if(! ref($content->{data}->{object}->{source}) ne "HASH") {
+						print "\n".Dumper($content)."\n";
 						$tx->res->code(200);
 						$tx->res->headers->content_type('text/plain');
 						$tx->res->body("");
