@@ -544,6 +544,7 @@ sub userLogin {
 my %ops_my = (
 	inbox           => { args => 'op=show', uri => 'messages.pl' },
 	# XXX change messages to be same as /inbox, move this to /my/preferences/messages
+	submissions     => { args => 'op=usersubmissions' },
 	messages        => { args => 'op=display_prefs', uri => 'messages.pl' },
 	comments        => { args => 'op=editcomm' },
 	homepage        => { args => 'op=edithome' },
@@ -714,9 +715,8 @@ sub userdir_handler {
 						}
 					}
 
-				} elsif ($op eq 'tags') {
-					# XXX "!" is a 'reserved' char in URI, escape it here?
-					$r_args .= "&tagname=$extra" if $extra;
+				} elsif ($op eq 'submissions') {
+					$r_args .= "&page=$extra" if $extra;
 				}
 			}
 
@@ -828,11 +828,13 @@ sub userdir_handler {
 				$r_args =~ s/dp=tags/dp=usertag/ if $u2 && $extra;
 				# XXX "!" is a 'reserved' char in URI, escape it here?
 				$r_args .= "&tagname=$extra" if $extra;
-			} elsif ($u2 && ($op eq 'submissions' || $op eq 'bookmarks' || $op eq 'default' || $op eq 'journal' )) {
+			} elsif ($u2 && ($op eq 'bookmarks' || $op eq 'default' || $op eq 'journal')) {
 				if ($extra && $extra ne "rss") {
 					$r_args .= "&addfilter=$extra" if $extra;
 				}
-			}
+			} elsif ($op eq 'submissions') {
+					$r_args .= "&page=$extra" if $extra;
+				}
 		}
 
 		$r_args =~ s/__NICK__/$nick/;

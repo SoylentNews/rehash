@@ -62,6 +62,9 @@ __template__
 					<a href="[% constants.real_rootdir %]/my/info">Preferences</a>
 				</li>
 				<li>
+					<a href="[% constants.real_rootdir %]/~[% user.nickname | fixnickforlink | strip_paramattr %]/submissions">Submissions</a>
+				</li>
+				<li>
 					<a href="[% constants.real_rootdir %]/my/journal">Journal</a>
 				</li>
 				<li>

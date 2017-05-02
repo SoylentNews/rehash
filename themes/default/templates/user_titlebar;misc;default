@@ -34,67 +34,50 @@ END %]
 [% tabs = [ ];
 IF user.uid == uid;
 	tabs = [
-		{ link = "$constants.real_rootdir/~$url_nick/",	label = "Info",		sel_label = "info" },
+		{ link = "$constants.real_rootdir/~$url_nick/", label = "Info", sel_label = "info" }, 
+		{ link = "$constants.real_rootdir/~$url_nick/submissions/", label = "Submissions", sel_label = "submissions" }, 
 	];
-	IF constants.plugin.Journal; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
-	); END;
-	IF constants.plugin.Messages; tabs.push(
-		{ link = "$constants.real_rootdir/my/inbox/",		label = "Messages",	sel_label = "messages" },
-	); END;
-	IF constants.plugin.Zoo; tabs.push(
-		{ link = "$constants.real_rootdir/my/friends/",	label = "Friends",	sel_label = "friends" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/my/fans/",		label = "Fans",		sel_label = "fans" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/my/foes/",		label = "Foes",		sel_label = "foes" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/my/freaks/",		label = "Freaks",	sel_label = "freaks" },
-	); END;
-	IF constants.plugin.Bookmark; tabs.push(
-		{ link = "$constants.real_rootdir/my/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
-	); END;
+	IF constants.plugin.Journal;
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/journal/", label = "Journal", sel_label = "journal" }, );
+	END;
+	IF constants.plugin.Messages;
+		tabs.push({ link = "$constants.real_rootdir/my/inbox/", label = "Messages", sel_label = "messages" }, );
+	END;
+	IF constants.plugin.Zoo;
+		tabs.push({ link = "$constants.real_rootdir/my/friends/", label = "Friends", sel_label = "friends" }, );
+		tabs.push({ link = "$constants.real_rootdir/my/fans/", label = "Fans", sel_label = "fans" }, );
+		tabs.push({ link = "$constants.real_rootdir/my/foes/", label = "Foes", sel_label = "foes" }, );
+		tabs.push({ link = "$constants.real_rootdir/my/freaks/", label = "Freaks", sel_label = "freaks" }, );
+	END;
 ELSIF user.is_anon;
 	tabs = [
-		{ link = "$constants.real_rootdir/~$url_nick/",	label = "Info",		sel_label = "info" },
+		{ link = "$constants.real_rootdir/~$url_nick/", label = "Info", sel_label = "info" }, 
+		{ link = "$constants.real_rootdir/~$url_nick/submissions/", label = "Submissions", sel_label = "submissions" }, 
 	];
-	IF constants.plugin.Journal; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
-	); END;
-	IF constants.plugin.Zoo; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/fans/",	label = "Fans",		sel_label = "fans" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
-	); END;
-	IF constants.plugin.Bookmark; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
-	); END;
+	IF constants.plugin.Journal;
+		tabs.push( { link = "$constants.real_rootdir/~$url_nick/journal/", label = "Journal", sel_label = "journal" }, );
+  END;
+	IF constants.plugin.Zoo;
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/friends/", label = "Friends", sel_label = "friends" }, );
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/fans/", label = "Fans", sel_label = "fans" }, );
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/foes/", label = "Foes", sel_label = "foes" }, );
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/freaks/", label = "Freaks", sel_label = "freaks" }, );
+	END;
 ELSE;
 	tabs = [
-		{ link = "$constants.real_rootdir/~$url_nick/",	label = "Info",		sel_label = "info" },
+		{ link = "$constants.real_rootdir/~$url_nick/", label = "Info", sel_label = "info" }, 
+		{ link = "$constants.real_rootdir/~$url_nick/submissions/", label = "Submissions", sel_label = "submissions" }, 
 	];
-	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/zoo.pl?op=check&amp;uid=$uid", label = "Relation", sel_label = "relation" },
-	); END;
-	IF constants.plugin.Journal; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
-	); END;
-	IF constants.plugin.Zoo; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/fans/",	label = "Fans",		sel_label = "fans" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
-	); tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
-	); END;
-	IF constants.plugin.Bookmark; tabs.push(
-		{ link = "$constants.real_rootdir/~$url_nick/bookmarks/", label = "Bookmarks",	sel_label = "bookmarks" },
-	); END;
+	IF constants.plugin.Journal;
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/journal/", label = "Journal", sel_label = "journal" }, );
+  END;
+	IF constants.plugin.Zoo;
+		tabs.push({ link = "/zoo.pl?op=check&amp;uid=$uid", label = "Relation", sel_label = "relation" }, 	);
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/friends/", label = "Friends", sel_label = "friends" }, );
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/fans/", label = "Fans", sel_label = "fans" }, );
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/foes/", label = "Foes", sel_label = "foes" }, );
+		tabs.push({ link = "$constants.real_rootdir/~$url_nick/freaks/", label = "Freaks", sel_label = "freaks" }, );
+  END;
 END %]
 <div id="usermenu">
 [% PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]

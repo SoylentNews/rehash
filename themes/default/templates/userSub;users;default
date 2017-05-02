@@ -14,14 +14,24 @@ en_US
 __name__
 userSub
 __template__
-[% nick = nick | strip_literal %]
-[% IF nick_match %]
+
+[% nick_url = nick | fixnickforlink | strip_paramattr;
+nick = nick | strip_literal;
+approved = 0;
+total = 0;
+IF nick_match %]
 	[% title = "Your Stories" %]
-[% ELSE %]
-	[% title = "$nick's stories" %]
 [% END %]
-[% PROCESS titlebar title=title %]
+
+[% orig_title = title %]
+<div id="slashboxes">
+	[% PROCESS userboxes %]
+</div>
+[% title = orig_title %]
+	
+[% PROCESS user_titlebar tab_selected='submissions' %]
 <div class="generalbody">
+	
 	<p>
 		<b>
 			[% IF nick_match %]
@@ -29,21 +39,74 @@ __template__
 			[% ELSE %]
 				[% nick %] has
 			[% END %] 
-			submitted [% storycount %] stories.
-			[% IF storycount > constants.user_submitter_display_default %] 
-			Below are the most recent [% form.min %] stories.
-			[% END %]
+			[% subcount %] submission[% IF subcount != 1 %]s[% END %].
 		</b>
 	<p>
-	[% n = 0 %]
-	[% FOREACH story = stories %]
-		[% n = n + 1 %]
-			<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
-				[% story.title %]
-			</a> 
-			on [% Slash.timeCalc(story.time) %]<br>
+	[% IF subcount %]
+	<table width="100%" border=0 cellpadding=3 cellspacing=0 class="data">
+		<tr class="data_head">
+			<th>Title</th>
+			<th>[% IF admin_flag %]<span class="admin_data_label">IPID</span>[% END %]</th>
+			<th>Datestamp</th>
+			<th>[% IF admin_flag || user.uid == submissions.0.uid %]<span class="admin_data_label">State</span>[% END %]</th>
+			<th>Pub Date</th>
+		</tr>
+		
+		
+		[% FOREACH sub = submissions %]
+		[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]
+		[% link_sid = sub.del == 2 and sub.sid and story_viewable %]
+		<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %] [% IF admin_flag || user.uid == sub.uid %] status[%- sub.del %] [% END %]">
+			[% bg_toggle = !bg_toggle %]
+			<td>
+				[%- IF link_sid -%]
+					<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</a>
+				[%- ELSE -%]
+					<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj | strip_title %]</a>
+				[%- END -%]
+			</td>
+			<td>[% IF admin_flag %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</td>
+			<td>[% Slash.timeCalc(sub.time) %]</td>
+			<td>
+				[% IF admin_flag || user.uid == sub.uid %]
+					[% sub_del = sub.del %]
+					[% SWITCH sub_del %]
+						[%- CASE 0 -%]
+							Pending
+						[%- CASE 1 -%]
+							Rejected
+						[%- CASE 2 -%]
+							Accepted
+							[% approved = approved + 1; %]	
+					[%- END -%]
+			  [%-  END -%]
+			</td>
+			<td>
+				[% sub.story_time ? Slash.timeCalc(sub.story_time) : "" %]
+			</td>
+		</tr>
+		[% total = total + 1 %]
+		[% END %]
+		[% IF admin_flag || user.uid == sub.uid %]
+		<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>
+		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</b></td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
+		[% ELSIF user.uid != sub.uid %]
+		<tr class="data_hl1"><td colspan="5"><i>(Rejected and pending submissions are not listed.)</i></td></tr>
+		[% END %]
+  </table>
 	[% END %]
+	
+  <p>
+		[% IF (page != 1) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions/[% page - 1 %]">Previous</a>[% END %]
+		Page [% page %]
+		[% IF (page != pages) %]<a href="[% constants.real_rootdir %]/~[% nick_url %]/submissions/[% page + 1 %]">Next</a>[% END %]
+  </p>
+
 </div>
+
+[% BLOCK link_ipid %]
+<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
+[% END %]
 
 __seclev__
 500
