@@ -1334,9 +1334,6 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 		
-		my $subcount = $reader->countSubmissionsByUID($uid);
-	
-		my $submissions = $reader->getSubmissionsByUID($uid, $sub_limit, $sub_options);
 		my $metamods;
 		if ($constants->{m2} && $admin_flag) {
 			my $metamod_reader = getObject('Slash::Metamod', { db_type => 'reader' });
