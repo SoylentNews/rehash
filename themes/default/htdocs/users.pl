@@ -1360,8 +1360,8 @@ sub showInfo {
 			hr_hours_back		=> $ipid_hoursback,
 			cids_to_mods		=> $cids_to_mods,
 			comment_time		=> $comment_time,
-			submissions		=> $submissions,
-			subcount		=> $subcount,
+			submissions		=> "",
+			subcount		=> 0,
 			metamods		=> $metamods,
 		});
 	}
