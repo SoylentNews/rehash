@@ -31,7 +31,7 @@ total = 0;
 %]
 [% admin_link_user = admin_flag && !useredit.uid && !useredit.nickname %]
 [% admin_link_ipid = admin_flag && !useredit.ipid %]
-[% IF submissions.size > 0 %]
+[% IF subcount > 0 %]
 	[% PROCESS titlebar title = title -%]
 	<table width="100%" border=0 cellpadding=3 cellspacing=0 class="data">
 		<tr class="data_head">
