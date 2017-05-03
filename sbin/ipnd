@@ -272,6 +272,16 @@ $cbServer->on(request => sub {
 					$metaData->{$key} = $cipher->decrypt(decode_base64($metaData->{$key}));
 				}
 				$content->{data}->{object}->{metadata} = $metaData;
+				if(! ref($content->{data}->{object}->{source}) ne "HASH") {
+						print "\n".Dumper($content)."\n";
+						$tx->res->code(200);
+						$tx->res->headers->content_type('text/plain');
+						$tx->res->body("");
+
+						# Resume transaction
+						$tx->resume;
+					return;
+				}
 				my $submethod = $content->{data}->{object}->{source}->{type} eq "bitcoin" ? "BTC" : "CC";
 				my $fee = $subscribe->stripeFee($content->{data}->{object}->{amount}, $submethod);
 				my $net = $content->{data}->{object}->{amount} - $fee;
