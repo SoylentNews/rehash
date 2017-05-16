@@ -69,10 +69,10 @@ sub newUserForm {
 	header(getData('newuserformhead')) or return;
 
 	# This reskey is for the form's nickname availability button.
-	my $reskey = getObject('Slash::ResKey');
-	my $reskey_resource = 'ajax_base_modal_misc';
-	my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
-	$rkey->create;
+	#my $reskey = getObject('Slash::ResKey');
+	#my $reskey_resource = 'ajax_base_modal_misc';
+	#my $rkey = $reskey->key($reskey_resource, { nostate => 1 });
+	#$rkey->create;
 
 	if ($form->{sreg}) {
 		$form->{newusernick} = $form->{sreg}{nickname};
@@ -80,7 +80,8 @@ sub newUserForm {
 		$form->{tzcode} = $form->{sreg}{tz};
 	}
 
-	slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey });
+	slashDisplay('newUserForm', { note => $note });
+	#slashDisplay('newUserForm', { note => $note, nick_rkey => $rkey });
 	
 	footer();
 }
