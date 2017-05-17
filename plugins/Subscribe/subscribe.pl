@@ -331,7 +331,7 @@ sub stripe {
 	}
 
 	my $tx = {
-		amount			=> int(sprintf("%.2d", $form->{amount}) * 100),
+		amount			=> int($form->{amount} * 100),
 		description		=> $constants->{sitename}." subscription payment",
 		currency		=> defined $constants->{stripe_currency} ? $constants->{stripe_currency} : "USD",
 		'metadata[uid]'		=> $cryptValues->{uid},
