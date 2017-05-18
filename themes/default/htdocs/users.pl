@@ -406,7 +406,12 @@ sub main {
 
 	if($op eq "savehome") {
 		$ops->{$op}->{function}->();
-		redirect($constants->{real_rootdir}."/my/homepage");
+		if($user->{is_admin} && $form->{uid} != $user->{uid}) {
+			redirect($constants->{real_rootdir}."/users.pl?op=admin&uid=$form->{uid}");
+		}
+		else {
+			redirect($constants->{real_rootdir}."/my/homepage");
+		}
 		return;
 	}
 
