@@ -3015,7 +3015,6 @@ sub saveHome {
 	}
 
 	#editHome({ uid => $uid, note => $note });
-	redirect("$constants->{real_rootdir}/users.pl?op=userEdit", 301);
 }
 
 #################################################################
