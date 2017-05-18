@@ -107,7 +107,7 @@ sub edit {
 			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
 		}
 	} else {
-		$user_edit = $user;
+		$user_edit = $slashdb->getUser($user->{uid});
 	}
 	
 	my $admin_block = 	slashDisplay('getUserAdmin', {
