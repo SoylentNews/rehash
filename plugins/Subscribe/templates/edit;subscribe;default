@@ -65,7 +65,7 @@ __template__
 			<form method="post" action="[% constants.real_rootdir %]/subscribe.pl">
 				<fieldset>
 					<legend>Purchase Subscriptions</legend>
-					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by Stripe (for credit card payments and BitCoin) and PayPal (for PayPal payments and credit cards). The recipient of a gift subscription will be notified of your purchase through email. Information about subcriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
+					You can buy a subscription for yourself or a gift subscription for another user. Payments are handled by Stripe (for credit card payments and BitCoin) and PayPal (for PayPal payments and credit cards). The recipient of a gift subscription will be notified of your purchase through email. Information about subscriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.<br />
 					
 					<br />
 					<input type="radio" name="subscription_type" value="user"> Buy Subscription for [% user.nickname | strip_literal %]<br />
@@ -75,11 +75,10 @@ __template__
 					For gift subscriptions only:<br />
 					Who do you want the recipient to be told the gift is from?<br />
 					<input type="text" name="from" size="35" maxlength="35"> (35 character limit, defaults to your username if nothing is entered)<br />
-					<br />
-					Length of subscription and price.  Choose the length of the subscription and if you want you can purchase your subscription for custom price, in US dollars..  (Price must be equal or greater than the default minimum values.)<br />
-					<input type="radio" name="subscription_days" value="[% constants.subscribe_monthly_days %]"> [% constants.subscribe_monthly_days %] Day: <input type="text" name="monthly_amount" size="7" maxlength="7" value="[% constants.subscribe_monthly_amount %]"><br />
-					<input type="radio" name="subscription_days" value="[% constants.subscribe_semiannual_days %]"> [% constants.subscribe_semiannual_days %] Day: <input type="text" name="semiannual_amount" size="7" maxlength="7" value="[% constants.subscribe_semiannual_amount %]"><br />
-					<input type="radio" name="subscription_days" value="[% constants.subscribe_annual_days %]" checked="checked"> [% constants.subscribe_annual_days %] Day: <input type="text" name="annual_amount" size="7" maxlength="7" value="[% constants.subscribe_annual_amount %]"><br />
+					<p><b>Duration and price:</b> Choose a subscription duration and set the price you wish to pay for it. Defaults are the minimum for that duration but you can support SoylentNews even more, if you'd like to, by increasing the amount.</p>
+					<input type="radio" name="subscription_days" value="[% constants.subscribe_monthly_days %]"> [% constants.subscribe_monthly_days %] Day: <input type="text" name="monthly_amount" size="7" maxlength="7" value="[% constants.subscribe_monthly_amount %]"> USD<br />
+					<input type="radio" name="subscription_days" value="[% constants.subscribe_semiannual_days %]"> [% constants.subscribe_semiannual_days %] Day: <input type="text" name="semiannual_amount" size="7" maxlength="7" value="[% constants.subscribe_semiannual_amount %]"> USD<br />
+					<input type="radio" name="subscription_days" value="[% constants.subscribe_annual_days %]" checked="checked"> [% constants.subscribe_annual_days %] Day: <input type="text" name="annual_amount" size="7" maxlength="7" value="[% constants.subscribe_annual_amount %]"> USD<br />
 					<br />
 					<input type="hidden" name="op" value="confirm"><input type="submit" value="Continue">
 				</fieldset>

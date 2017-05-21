@@ -27,7 +27,7 @@ __template__
 	
 	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
 		<h3>How can I support SoylentNews?</h3>
-		<p>You could consider buying a <a href="[% constants.real_rootdir %]/subscribe.pl">subscription</a>.  Information about subcriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.</p>
+		<p>You could consider buying a <a href="[% constants.real_rootdir %]/subscribe.pl">subscription</a>.  Information about subscriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.</p>
 	[% END %]
 
 	<h3>How can I get involved with the project?</h3>
