@@ -404,6 +404,17 @@ sub main {
 		return;
 	}
 
+	if($op eq "savehome") {
+		$ops->{$op}->{function}->();
+		if($user->{is_admin} && $form->{uid} != $user->{uid}) {
+			redirect($constants->{real_rootdir}."/users.pl?op=admin&uid=$form->{uid}");
+		}
+		else {
+			redirect($constants->{real_rootdir}."/my/homepage");
+		}
+		return;
+	}
+
 	# Print the header and very top stuff on the page.  We have
 	# three ops that (may) end up routing into showInfo(), which
 	# needs to do some stuff before it calls header(), so for
@@ -3008,7 +3019,7 @@ sub saveHome {
 		$slashdb->setUser($uid, $user_edits_table);
 	}
 
-	editHome({ uid => $uid, note => $note });
+	#editHome({ uid => $uid, note => $note });
 }
 
 #################################################################
