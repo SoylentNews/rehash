@@ -2495,7 +2495,7 @@ sub dispCommentNoTemplate {
 	}
 
 	if($args->{marked_spam} && $user->{seclev} >= 500) {
-		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}&noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&sid=$args->{sid}&cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
+		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&amp;sid=$args->{sid}&amp;cid=$args->{cid}&amp;noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&amp;sid=$args->{sid}&amp;cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
 	}
 
 	my $details = dispCommentDetails({
@@ -2575,7 +2575,7 @@ sub zooIcons {
 			!$user->{people}->{FAN()}->{$args->{person}} && !$user->{people}->{FREAK()}->{$args->{person}} &&
 			!$user->{people}->{FOF()}->{$args->{person}} && !$user->{people}->{EOF()}->{$args->{person}} ) {
 
-			$html_out .= "<span class=\"zooicon neutral\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}&type=friend\"><img src=\"$constants->{imagedir}/neutral.$constants->{badge_icon_ext}\" alt=\"Neutral\" title=\"Neutral\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>";
+			$html_out .= "<span class=\"zooicon neutral\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}&amp;type=friend\"><img src=\"$constants->{imagedir}/neutral.$constants->{badge_icon_ext}\" alt=\"Neutral\" title=\"Neutral\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>";
 		}
 		else {
 			# Friend
@@ -2586,7 +2586,7 @@ sub zooIcons {
 				else {
 					$zootitle = "Friend";
 				}
-				$html_out .= "<span class=\"zooicon friend\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/friend.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+				$html_out .= "<span class=\"zooicon friend\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/friend.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 			# Foe
 			if($user->{people}->{FOE()}->{$args->{person}} && $implied != FOE() ) {
@@ -2596,7 +2596,7 @@ sub zooIcons {
 				else {
 					$zootitle = "Foe";
 				}
-				$html_out .= "<span class=\"zooicon foe\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/foe.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+				$html_out .= "<span class=\"zooicon foe\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/foe.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 			# Fan
 			if($user->{people}->{FAN()}->{$args->{person}} && $implied != FAN() ) {
@@ -2606,7 +2606,7 @@ sub zooIcons {
 				else {
 					$zootitle = "Fan";
 				}
-				$html_out .= "<span class=\"zooicon fan\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fan.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+				$html_out .= "<span class=\"zooicon fan\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/fan.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 			# Freak
 			if($user->{people}->{FREAK()}->{$args->{person}} && $implied != FREAK() ) {
@@ -2616,7 +2616,7 @@ sub zooIcons {
 				else {
 					$zootitle = "Freak";
 				}
-				$html_out .= "<span class=\"zooicon freak\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/freak.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+				$html_out .= "<span class=\"zooicon freak\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/freak.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 			# Friend of Friend
 			if($user->{people}->{FOF()}->{$args->{person}} && $implied != FOF() ) {
@@ -2626,7 +2626,7 @@ sub zooIcons {
 				else {
 					$zootitle = "Friend of Friend";
 				}
-				$html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+				$html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 			# Enemy of Friend
 			if($user->{people}->{EOF()}->{$args->{person}} && $implied != EOF() ) {
@@ -2636,7 +2636,7 @@ sub zooIcons {
 				else {
 					$zootitle = "Enemy of Friend";
 				}
-				$html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
+				$html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
 		}
 	}
