@@ -1118,3 +1118,30 @@ body blockquote.spoiler {
 #sabutton {
 	display: none;
 }
+
+.purchasesubscription legend + p {
+	margin-top: 0;
+}
+
+.purchasesubscription__type, .purchasesubscription__duration {
+	list-style: none;
+	padding: 0;
+	margin: 0:
+}
+
+.purchasesubscription__duration {
+	display: table;
+}
+
+.purchasesubscription__duration li {
+	display: table-row;
+}
+
+.purchasesubscription__duration li input, .purchasesubscription__duration li span {
+	text-align: right;
+}
+
+.purchasesubscription__duration li input, .purchasesubscription__duration li span {
+	display: table-cell;
+	padding: 0 0.2em;
+}
