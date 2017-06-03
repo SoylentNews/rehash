@@ -368,9 +368,9 @@ sub _buildargs {
 		my $x = "";
 		$x =  $form->{$_} if defined $form->{$_} && $x eq "";
 		$x =~ s/ /+/g;
-		$uri .= "$_=$x&" unless $x eq "";
+		$uri .= "$_=$x&amp;" unless $x eq "";
 	}
-	$uri =~ s/&$//;
+	$uri =~ s/&amp;$//;
 
 	return fixurl($uri);
 }
@@ -582,12 +582,12 @@ sub submitComment {
 
 	# Setup redirect to new comment
 	my $redirect = '';
-	$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
-	$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-	$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-	$redirect = $redirect."&mode=".$form->{mode} if defined($form->{mode});
-	$redirect = $redirect."&page=".$form->{page} if defined($form->{page});
-	$redirect = $redirect."&noupdate=1";
+	$redirect = $redirect."&amp;threshold=".$form->{threshold} if defined($form->{threshold});
+	$redirect = $redirect."&amp;highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+	$redirect = $redirect."&amp;commentsort=".$form->{commentsort} if defined($form->{commentsort});
+	$redirect = $redirect."&amp;mode=".$form->{mode} if defined($form->{mode});
+	$redirect = $redirect."&amp;page=".$form->{page} if defined($form->{page});
+	$redirect = $redirect."&amp;noupdate=1";
 	
 	# Check if url has parameters or is naked
 	# Add ? if naked
@@ -620,15 +620,15 @@ sub changeComment {
 
 	# Setup redirect to new comment
 	my $redirect = '';
-	$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
-	$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-	$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-	$redirect = $redirect."&mode=".$form->{mode} if defined($form->{mode});
-	$redirect = $redirect."&page=".$form->{page} if defined($form->{page});
-	$redirect = $redirect."&noupdate=1";	
+	$redirect = $redirect."&amp;threshold=".$form->{threshold} if defined($form->{threshold});
+	$redirect = $redirect."&amp;highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+	$redirect = $redirect."&amp;commentsort=".$form->{commentsort} if defined($form->{commentsort});
+	$redirect = $redirect."&amp;mode=".$form->{mode} if defined($form->{mode});
+	$redirect = $redirect."&amp;page=".$form->{page} if defined($form->{page});
+	$redirect = $redirect."&amp;noupdate=1";	
 	
 	if (defined($form->{cid})) {
-		$redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid}."&cid=".$form->{cid}.$redirect;
+		$redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid}."&amp;cid=".$form->{cid}.$redirect;
 	} else {	
 		# Check if url has parameters or is naked
 		# Add ? if naked
@@ -771,15 +771,15 @@ sub moderate {
 		
 		# Setup redirect to new comment
 		my $redirect = '';
-		$redirect = $redirect."&threshold=".$form->{threshold} if defined($form->{threshold});
-		$redirect = $redirect."&highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
-		$redirect = $redirect."&commentsort=".$form->{commentsort} if defined($form->{commentsort});
-		$redirect = $redirect."&mode=".$form->{mode} if defined($form->{mode});
-		$redirect = $redirect."&page=".$form->{page} if defined($form->{page});
-		$redirect = $redirect."&noupdate=1";
+		$redirect = $redirect."&amp;threshold=".$form->{threshold} if defined($form->{threshold});
+		$redirect = $redirect."&amp;highlightthresh=".$form->{highlightthresh} if defined($form->{highlightthresh});
+		$redirect = $redirect."&amp;commentsort=".$form->{commentsort} if defined($form->{commentsort});
+		$redirect = $redirect."&amp;mode=".$form->{mode} if defined($form->{mode});
+		$redirect = $redirect."&amp;page=".$form->{page} if defined($form->{page});
+		$redirect = $redirect."&amp;noupdate=1";
 		
 		if (defined($form->{cid})) {
-			$redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid}."&cid=".$form->{cid}.$redirect;
+			$redirect = $gSkin->{rootdir}."/comments.pl?sid=".$form->{sid}."&amp;cid=".$form->{cid}.$redirect;
 		} else {
 			# Check if url has parameters or is naked
 			# Add ? if naked
