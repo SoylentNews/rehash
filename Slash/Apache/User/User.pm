@@ -198,7 +198,8 @@ sub handler {
 					# For now, the code is just this text; later,
 					# I can change it to something else.
 					# -- pudge
-				  "&note=Please+change+your+password+now!&oldpass=" . fixparam($form->{upasswd})
+				  "&amp;note=Please+change+your+password+now!&amp;oldpass=" .
+				  fixparam($form->{upasswd})
 				: $form->{returnto}
 					? $form->{returnto}
 					: $uri),
@@ -568,40 +569,40 @@ my %ops_my = (
 $ops_my{$_}{uri} ||= 'users.pl' for (keys %ops_my);
 
 my %ops_u = (
-	pubkey          => { args => 'nick=__NICK__&uid=__UID__', uri  => 'pubkey.pl' },
-	submissions     => { args => 'nick=__NICK__&uid=__UID__&op=usersubmissions' },
-	comments        => { args => 'nick=__NICK__&uid=__UID__&op=usercomments' },
-	amigos          => { args => 'nick=__NICK__&uid=__UID__&op=friendview', uri  => 'journal.pl' },
-	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&op=showbookmarks' },
-	journal         => { args => 'nick=__NICK__&uid=__UID__&op=display', uri => 'journal.pl' },
-	tags            => { args => 'nick=__NICK__&uid=__UID__&op=showtags' },
+	pubkey          => { args => 'nick=__NICK__&amp;uid=__UID__', uri  => 'pubkey.pl' },
+	submissions     => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=usersubmissions' },
+	comments        => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=usercomments' },
+	amigos          => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=friendview', uri  => 'journal.pl' },
+	bookmarks       => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=showbookmarks' },
+	journal         => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=display', uri => 'journal.pl' },
+	tags            => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=showtags' },
 
-	friends         => { args => 'nick=__NICK__&uid=__UID__&op=friends', uri  => 'zoo.pl' },
-	fans            => { args => 'nick=__NICK__&uid=__UID__&op=fans', uri  => 'zoo.pl' },
-	freaks          => { args => 'nick=__NICK__&uid=__UID__&op=freaks', uri  => 'zoo.pl' },
-	foes            => { args => 'nick=__NICK__&uid=__UID__&op=foes', uri  => 'zoo.pl' },
-	zoo             => { args => 'nick=__NICK__&uid=__UID__&op=all', uri  => 'zoo.pl' },
+	friends         => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=friends', uri  => 'zoo.pl' },
+	fans            => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=fans', uri  => 'zoo.pl' },
+	freaks          => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=freaks', uri  => 'zoo.pl' },
+	foes            => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=foes', uri  => 'zoo.pl' },
+	zoo             => { args => 'nick=__NICK__&amp;uid=__UID__&amp;op=all', uri  => 'zoo.pl' },
 
-	default         => { args => 'nick=__NICK__&uid=__UID__' },
+	default         => { args => 'nick=__NICK__&amp;uid=__UID__' },
 );
 $ops_u{$_}{uri} ||= 'users.pl' for (keys %ops_u);
 
 my %ops_u2 = (
-	submissions     => { args => 'nick=__NICK__&uid=__UID__&dp=submissions' },
-	comments        => { args => 'nick=__NICK__&uid=__UID__&dp=comments' },
-	amigos          => { args => 'nick=__NICK__&uid=__UID__&dp=journalfriends' },
-	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&dp=bookmarks' },
-	admin           => { args => 'nick=__NICK__&uid=__UID__&dp=admin' },
-	journal         => { args => 'nick=__NICK__&uid=__UID__&dp=journal' },
-	tags            => { args => 'nick=__NICK__&uid=__UID__&dp=tags&op=userinfo' },
+	submissions     => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=submissions' },
+	comments        => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=comments' },
+	amigos          => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=journalfriends' },
+	bookmarks       => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=bookmarks' },
+	admin           => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=admin' },
+	journal         => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=journal' },
+	tags            => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=tags&amp;op=userinfo' },
 
-	friends         => { args => 'nick=__NICK__&uid=__UID__&dp=friends' },
-	fans            => { args => 'nick=__NICK__&uid=__UID__&dp=fans' },
-	freaks          => { args => 'nick=__NICK__&uid=__UID__&dp=freaks' },
-	foes            => { args => 'nick=__NICK__&uid=__UID__&dp=foes' },
-	zoo             => { args => 'nick=__NICK__&uid=__UID__&dp=all' },
+	friends         => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=friends' },
+	fans            => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=fans' },
+	freaks          => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=freaks' },
+	foes            => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=foes' },
+	zoo             => { args => 'nick=__NICK__&amp;uid=__UID__&amp;dp=all' },
 
-	default         => { args => 'nick=__NICK__&uid=__UID__' }
+	default         => { args => 'nick=__NICK__&amp;uid=__UID__' }
 );
 $ops_u2{$_}{uri} ||= 'users2.pl' for (keys %ops_u2);
 
@@ -692,15 +693,15 @@ sub userdir_handler {
 			if ($op eq 'inbox') {
 				if ($extra =~ m{^ (rss|atom) /? $}x) {
 					$r_args .= '_rss';
-					$r_args .= "&logtoken=$logtoken" if $try_login;
-					$r_args .= "&content_type=$1";
+					$r_args .= "&amp;logtoken=$logtoken" if $try_login;
+					$r_args .= "&amp;content_type=$1";
 				}
 
 			} elsif ($logged_in) {
 				if ($op eq 'journal') {
 					$extra .= '/';
 					if ($extra =~ /^(\d+)\/$/) {
-						$r_args = "id=$1&op=edit";
+						$r_args = "id=$1&amp;op=edit";
 					} elsif ($extra =~ s/^friends\///) {
 						$r_args = "op=friendview";
 					}
@@ -716,7 +717,7 @@ sub userdir_handler {
 					}
 
 				} elsif ($op eq 'submissions') {
-					$r_args .= "&page=$extra" if $extra;
+					$r_args .= "&amp;page=$extra" if $extra;
 				}
 			}
 
@@ -792,16 +793,16 @@ sub userdir_handler {
 					($r_args, $r_uri) = @{ $ops_u{journal} }{ qw(args uri) };
 
 					if ($extra =~ /^(\d+)\/$/) {
-						$r_args .= "&id=$1";
+						$r_args .= "&amp;id=$1";
 					} elsif ($extra =~ s/^friends\///) {
 						$r_args =~ s/display/friendview/;
 					}
 					if ($extra =~ m{^ (rss|atom) / ? $}x) {
-						$r_args .= "&logtoken=$logtoken" if $logtoken;
-						$r_args .= "&content_type=$1";
+						$r_args .= "&amp;logtoken=$logtoken" if $logtoken;
+						$r_args .= "&amp;content_type=$1";
 					}
 
-					$r_args .= "&$query";
+					$r_args .= "&amp;$query";
 				}
 
 			} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
@@ -820,20 +821,20 @@ sub userdir_handler {
 				}
 
 				if ($extra =~ m{^ (rss|atom) /?$}x) {
-					$r_args .= "&content_type=$1";
+					$r_args .= "&amp;content_type=$1";
 				}
 
 
 			} elsif ($op eq 'tags') {
 				$r_args =~ s/dp=tags/dp=usertag/ if $u2 && $extra;
 				# XXX "!" is a 'reserved' char in URI, escape it here?
-				$r_args .= "&tagname=$extra" if $extra;
+				$r_args .= "&amp;tagname=$extra" if $extra;
 			} elsif ($u2 && ($op eq 'bookmarks' || $op eq 'default' || $op eq 'journal')) {
 				if ($extra && $extra ne "rss") {
-					$r_args .= "&addfilter=$extra" if $extra;
+					$r_args .= "&amp;addfilter=$extra" if $extra;
 				}
 			} elsif ($op eq 'submissions') {
-					$r_args .= "&page=$extra" if $extra;
+					$r_args .= "&amp;page=$extra" if $extra;
 				}
 		}
 
