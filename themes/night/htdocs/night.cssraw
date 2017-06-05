@@ -332,7 +332,7 @@ div.storylinks ul li
 .story_main { background: #ccc;}
 
 
-input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a, .nbutton p b a:hover
+input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton b a, .nbutton b a:hover
 {
 	background-color: #666;
 }
