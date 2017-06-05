@@ -1,0 +1,80 @@
+__section__
+default
+__description__
+This template provides a (login sensitive) form for purchasing subscriptions.
+__title__
+purchaseform;subscribe;default
+__page__
+subscribe
+__lang__
+en_US
+__name__
+purchaseform
+__seclev__
+10000
+__template__
+<form method="post" action="[% constants.real_rootdir %]/subscribe.pl">
+	<fieldset class="purchasesubscription">
+	[% IF !user.is_anon %]
+		<legend>Purchase Subscription</legend>
+	[% END %]
+
+		<p>
+		[% IF user.is_anon %]
+			You can gift a subscription to another user.
+		[% ELSE %]
+			You can buy a subscription for yourself, or gift one to another user.
+		[% END %]
+			Payment is handled by Stripe (credit card/BitCoin) or PayPal (credit card/PayPal).
+			Information about subscriptions can be found in the <a href="/faq.pl?op=subscribe">Why Subscribe FAQ</a>.
+		</p>
+		<ul class="purchasesubscription__type">
+		[% IF !user.is_anon %]
+			<li>
+				<input type="radio" name="subscription_type" value="user">
+				Buy Subscription for [% user.nickname | strip_literal %]
+			</li>
+		[% END %]
+			<li>
+			[% IF user.is_anon %]
+				<input type="radio" name="subscription_type" value="gift" checked="checked">
+			[% ELSE %]
+				<input type="radio" name="subscription_type" value="gift">
+			[% END %]
+				Buy Gift Subscription for UID <input type="text" name="uid" size="10" value="[% constants.subscribe_ac_default_gift %]">
+			</li>
+		</ul>
+		<p>
+			The recipient of a gift subscription will be notified of your purchase through email.
+			Who do you want the recipient to be told the gift is from?
+			<input type="text" name="from" size="35" maxlength="35" value="[% user.nickname %]">
+			(35 character limit)
+		</p>
+		<p>
+			<b>Duration and price:</b> Choose a subscription duration and set the price you wish to pay for it.
+			Defaults are the minimum for that duration but you can support SoylentNews even more, if you'd like to, by increasing the amount.
+		</p>
+		<ul class="purchasesubscription__duration">
+			<li>
+				<input type="radio" name="subscription_days" value="[% constants.subscribe_monthly_days %]">
+				<span>[% constants.subscribe_monthly_days %] Day:</span>
+				<input type="text" name="monthly_amount" size="7" maxlength="7" value="[% constants.subscribe_monthly_amount %]">
+				<span>USD</span>
+			</li>
+			<li>
+				<input type="radio" name="subscription_days" value="[% constants.subscribe_semiannual_days %]">
+				<span>[% constants.subscribe_semiannual_days %] Day:</span>
+				<input type="text" name="semiannual_amount" size="7" maxlength="7" value="[% constants.subscribe_semiannual_amount %]">
+				<span>USD</span>
+			</li>
+			<li>
+				<input type="radio" name="subscription_days" value="[% constants.subscribe_annual_days %]" checked="checked">
+				<span>[% constants.subscribe_annual_days %] Day:</span>
+				<input type="text" name="annual_amount" size="7" maxlength="7" value="[% constants.subscribe_annual_amount %]">
+				<span>USD</span>
+			</li>
+		</ul>
+		<input type="hidden" name="op" value="confirm">
+		<input type="submit" value="Continue">
+	</fieldset>
+</form>

@@ -17,3 +17,4 @@ template=templates/paypalsubbut;subscribe;default
 template=templates/sub_low_msg;misc;default
 template=templates/sub_out_msg;misc;default
 template=templates/stripebut;subscribe;default
+template=templates/purchaseform;subscribe;default

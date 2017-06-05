@@ -60,7 +60,7 @@ __template__
 				[% END %]
 			[% END %]
 		[% ELSE %]
-			<p class='error'>Recognized subscription type not selected.</p>
+			<p class='error'>The subscription type was not recognized. Did you forget to select one?</p>
 		[% END %]
 	</div>
 </div>
