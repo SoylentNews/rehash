@@ -36,7 +36,7 @@ a:hover { color: #ea97bc; }
 	font-weight: bold;
 }
 
-input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more a, .nbutton p b a  {
+input[type="submit"], button[type=submit], .logout a, div.storylinks ul li.more a, .nbutton b a  {
 	background: none repeat scroll 0% 0% #c5618e;
 }
 

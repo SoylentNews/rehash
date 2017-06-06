@@ -310,13 +310,11 @@ ul#commentlisting
 	background: none;
 	margin:0;
 	white-space: nowrap;
-}
-.nbutton p{
 	display:inline;
 	padding: 0 0;
 }
 
-.nbutton p b a {
+.nbutton b a {
 	background: #555;
 	border-radius: .3em;
 	text-align:center;

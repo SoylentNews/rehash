@@ -59,7 +59,7 @@ hr {
 color: #0c0;
 }
 
-input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton p b a, .nbutton p b a:hover
+input[type=submit], button[type=submit], .logout a, div.storylinks ul li.more a, input[type=submit]:hover, button[type=submit]:hover, .logout a:hover, div.storylinks ul li.more a:hover, .nbutton b a, .nbutton b a:hover
 {
 	background: none repeat scroll 0% 0% #333; !important;
 	color: #0f0 !important;
@@ -541,7 +541,7 @@ color: #0c0;
 	color: #0f0;
 }
 
-.nbutton p b a {
+.nbutton b a {
 	color: #0f0 !important;
 	background: none repeat scroll 0% 0% #333 !important;
 }

@@ -61,19 +61,19 @@ in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
 		<div id="replyto_msg_[% pid %]" class="replyto_msg" style="display: none"></div>
 		<div class="replyto_buttons">
 			<span id="replyto_buttons_1_[% pid %]">
-				<span id="preview_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.previewReply([% pid %]); return false;">Preview</a></b></p></span>
+				<span id="preview_[% pid %]" class="nbutton"><b><a href="#" onclick="D2.previewReply([% pid %]); return false;">Preview</a></b></span>
 				[%- IF pid # not for root-level reply %]
-				<span id="quotereply_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.quoteReply([% pid %]); return false;">Quote Parent</a></b></p></span>[% END %]
+				<span id="quotereply_[% pid %]" class="nbutton"><b><a href="#" onclick="D2.quoteReply([% pid %]); return false;">Quote Parent</a></b></span>[% END %]
 				[%- UNLESS user.is_anon %]
-				<span id="prefs_[% pid %]" class="nbutton"><p><b><a href="#" onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false;">Options</a></b></p></span>[% END %]
+				<span id="prefs_[% pid %]" class="nbutton"><b><a href="#" onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false;">Options</a></b></span>[% END %]
 			</span>
 			<span id="replyto_buttons_2_[% pid %]" style="display: none">
-				<span id="submit_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.submitReply([% pid %]); return false;">Submit<span id="submit_countdown_[% pid %]"></span></a></b></p></span>
-				<span id="edit_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.editReply([% pid %]); return false;">Continue Editing</a></b></p></span>
+				<span id="submit_[% pid %]" class="nbutton"><b><a href="#" onclick="D2.submitReply([% pid %]); return false;">Submit<span id="submit_countdown_[% pid %]"></span></a></b></span>
+				<span id="edit_[% pid %]" class="nbutton"><b><a href="#" onclick="D2.editReply([% pid %]); return false;">Continue Editing</a></b></span>
 				<span class="state">Preview</span>
 			</span>
 			<span id="replyto_buttons_3_[% pid %]">
-				<span id="cancel_[% pid %]" class="nbutton"><p><b><a href="#" onclick="D2.cancelReply([% pid %]); return false;">Cancel</a></b></p></span>
+				<span id="cancel_[% pid %]" class="nbutton"><b><a href="#" onclick="D2.cancelReply([% pid %]); return false;">Cancel</a></b></span>
 			</span>
 		</div>
 	</form>

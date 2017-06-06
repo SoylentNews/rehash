@@ -141,19 +141,19 @@ __template__
 				[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
 				[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
 				[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-					<span class="nbutton"><p><b>[% Slash.linkComment({
+					<span class="nbutton"><b>[% Slash.linkComment({
 						sid          => sid,
 						pid          => cid,
 						op           => 'reply',
 						subject      => reply,
 						subject_only => 1,
-					}) %]</b></p></span>
+					}) %]</b></span>
 				[% END %]
-				 <span class="nbutton"><p><b><a href="[% stripped_link %]">Mark All as Read</a></b></p></span>
+				 <span class="nbutton"><b><a href="[% stripped_link %]">Mark All as Read</a></b></span>
 				[% IF parent.type == 'journal' %]
-						<span class="nbutton"><p><b><a href="[% stripped_link %]?markunread=1">Mark All as Unread</a></b></p></span>
+						<span class="nbutton"><b><a href="[% stripped_link %]?markunread=1">Mark All as Unread</a></b></span>
 				[% ELSE %]
-						<span class="nbutton"><p><b><a href="[% stripped_link %]&markunread=1">Mark All as Unread</a></b></p></span>
+						<span class="nbutton"><b><a href="[% stripped_link %]&markunread=1">Mark All as Unread</a></b></span>
 				[% END %]
 			</fieldset>
 		</form>

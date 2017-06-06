@@ -2342,7 +2342,7 @@ sub printCommComments {
 	$html_out .= $args->{lcp}."<div id=\"discussion_buttons\">\n";
 	
 	if(!$user->{state}->{discussion_archived} && !$user->{state}->{discussion_future_nopost}) {
-		$html_out .= "<span class=\"nbutton\"><p><b>".
+		$html_out .= "<span class=\"nbutton\"><b>".
 		linkComment({
 			sid => $args->{sid},
 			cid => $args->{cid},
@@ -2350,14 +2350,14 @@ sub printCommComments {
 			subject => 'Reply',
 			subject_only => 1
 		}).
-		"</b></p></span>\n";
+		"</b></span>\n";
 	}
 
 	if(!$user->{is_anon}) {
-		$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/my/comments\">Prefs</a></b></p></span>\n";
+		$html_out .= "<span class=\"nbutton\"><b><a href=\"$gSkin->{rootdir}/my/comments\">Prefs</a></b></span>\n";
 	}
 
-	$html_out .= "<span class=\"nbutton\"><p><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></p></span>\n";
+	$html_out .= "<span class=\"nbutton\"><b><a href=\"$gSkin->{rootdir}/faq.pl?op=moderation\">Moderator Help</a></b></span>\n";
 
 	if($moderate_form) {
 		$html_out .= "<input type=\"hidden\" name=\"op\" value=\"moderate\">\n";
@@ -2366,7 +2366,7 @@ sub printCommComments {
 		$html_out .= "<input type=\"hidden\" name=\"pid\" value=\"$args->{pid}\">\n" if $args->{pid};
 		$html_out .= "<button type=\"submit\" name=\"moderate\" value=\"discussion_buttons\">Moderate</button>\n";
 		if($can_del) {
-			$html_out .= "<span class=\"nbutton\"><p><b><a href=\"#\" onclick=\"\$('#commentform').submit(); return false\">Delete</a></b></p></span>\nChecked comments will be deleted!";
+			$html_out .= "<span class=\"nbutton\"><b><a href=\"#\" onclick=\"\$('#commentform').submit(); return false\">Delete</a></b></span>\nChecked comments will be deleted!";
 		}
 
 	}
@@ -2699,7 +2699,7 @@ sub dispLinkComment {
 	}
 	if(!$args->{options}->{pieces}) {
 		if(!$user->{state}->{discussion_archived} && !$user->{state}->{discussion_future_nopost}) {
-			$html_out .= "<span id=\"reply_link_$args->{cid}\" class=\"nbutton\"><p><b>".
+			$html_out .= "<span id=\"reply_link_$args->{cid}\" class=\"nbutton\"><b>".
 				linkComment({
 					sid => $args->{sid},
 					pid => $args->{pid},
@@ -2707,17 +2707,17 @@ sub dispLinkComment {
 					op => 'Reply',
 					subject => 'Reply to This',
 					subject_only => 1,
-				})."</b></p></span> \n";
+				})."</b></span> \n";
 		}
 		if($do_parent) {
-			$html_out .= "<span class=\"nbutton\"><p><b>".
+			$html_out .= "<span class=\"nbutton\"><b>".
 				linkComment({
 					sid => $args->{sid},
 					cid => $do_parent,
 					pid => $do_parent,
 					subject => 'Parent',
 					subject_only => 1,
-				}, 1)."</b></p></span> \n";
+				}, 1)."</b></span> \n";
 		}
 		if($args->{can_mod}) {
 			$html_out .= "<div id=\"reasondiv_$args->{cid}\" class=\"modsel\">\n"

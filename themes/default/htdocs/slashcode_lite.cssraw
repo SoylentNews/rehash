@@ -7,7 +7,7 @@ div#footer a,
 div.btmnav a
 { color: #00E !important; text-decoration: underline !important;}
 
-input[type=submit], .logout  a, div.storylinks ul li.more a, .nbutton p b a {
+input[type=submit], .logout  a, div.storylinks ul li.more a, .nbutton b a {
     color:#fff !important;
     text-decoration:none !important;
 }

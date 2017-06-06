@@ -20,22 +20,22 @@ __template__
 		[% IF !options.show_pieces %]<div class="commentSub" id="comment_sub_[% cid %]">[% END; IF !options.pieces %]
 
 		[% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
-			<span id="reply_link_[% cid %]" class="nbutton"><p><b>[% Slash.linkComment({
+			<span id="reply_link_[% cid %]" class="nbutton"><b>[% Slash.linkComment({
 				sid	=> sid,
 				pid	=> cid,
 				op	=> 'Reply',
 				subject	=> 'Reply to This',
 				subject_only => 1,
-			}) %]</b></p></span>
+			}) %]</b></span>
 		[% END %]
 
-		[% IF do_parent %]<span class="nbutton"><p><b>[% Slash.linkComment({
+		[% IF do_parent %]<span class="nbutton"><b>[% Slash.linkComment({
 			sid	=> sid,
 			cid	=> original_pid,
 			pid	=> original_pid,
 			subject	=> 'Parent',
 			subject_only => 1,
-		}, 1) %]</b></p></span>[% END %]
+		}, 1) %]</b></span>[% END %]
 		
 		[% IF can_mod %]
 		
