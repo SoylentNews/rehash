@@ -498,7 +498,7 @@ sub filterOk {
 			$regex .= $number_match;
 		}
 
-		$regex = $case eq 'i' ? qr/$regex/i : qr/$regex/;
+		$regex = $case eq 'i' ? qr/$regex/xi : qr/$regex/x;
 
 		# Some of our regexes may have nested quantifiers, which can chew
 		# CPU time exponentially.  To prevent a denial of service by posting
