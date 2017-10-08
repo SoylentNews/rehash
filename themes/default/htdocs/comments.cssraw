@@ -277,7 +277,7 @@ ul#commentlisting
 }
 
 #commentlisting .commentBody ol li{
-	list-style: decimal;
+	list-style: unset;
 }
 
 #commentlisting .commentBody ul li{
