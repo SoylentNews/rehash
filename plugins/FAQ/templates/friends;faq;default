@@ -47,7 +47,7 @@ __template__
 			<li><img src="/images/foe.gif" alt="foe"> Foe</li>
 			<li><img src="/images/freak.gif" alt="freak"> Freak</li>
 			<li><img src="/images/fof.gif" alt="Friend of Friend"> Friend of Friend</li>
-			<li><img src="/images/eof.gif" alt="Enemy of Friend"> Enemy of Friend</li>
+			<li><img src="/images/eof.gif" alt="Foe of Friend"> Foe of Friend</li>
 		</ul>
 	</div>
 </div>

@@ -2628,13 +2628,13 @@ sub zooIcons {
 				}
 				$html_out .= "<span class=\"zooicon fof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/fof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
-			# Enemy of Friend
+			# Foe of Friend
 			if($user->{people}->{EOF()}->{$args->{person}} && $implied != EOF() ) {
 				if($bonus && $user->{people_bonus_eof}) {
-					$zootitle = "Enemy of Friend ($user->{people_bonus_eof})";
+					$zootitle = "Foe of Friend ($user->{people_bonus_eof})";
 				}
 				else {
-					$zootitle = "Enemy of Friend";
+					$zootitle = "Foe of Friend";
 				}
 				$html_out .= "<span class=\"zooicon eof\"><a href=\"$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$args->{person}\"><img src=\"$constants->{imagedir}/eof.$constants->{badge_icon_ext}\" alt=\"$zootitle\" title=\"$zootitle\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span> ";
 			}
