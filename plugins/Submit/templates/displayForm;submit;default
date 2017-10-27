@@ -56,7 +56,7 @@ __template__
 	[% END %]
 [% END %]
 
-	<p>Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or decline the story. For more tips see the <a href="[% constants.real_rootdir %]/faq.pl?op=editorial">Submissions Guidlines</a>,
+	<p>Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or decline the story. For more tips see the <a href="[% constants.real_rootdir %]/faq.pl?op=editorial">Submissions Guidelines</a>.
 	</p>
 
 [%# username is the only of from, email, subj that needs to be filtered in %]
