@@ -9283,6 +9283,7 @@ sub getDiscussionParent {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
 		my $article = $journal_reader->get($jid);
 		$parent->{content} = $journal_reader->fixJournalText($article->{article}, $article->{posttype}, $article->{uid});
+		$parent->{content} = apply_rehash_tags($parent->{content});
 		$parent->{author} = $slashdb->getUser(
 			$article->{uid},
 			[qw( nickname fakeemail homepage )]
