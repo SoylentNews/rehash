@@ -3369,7 +3369,7 @@ print STDERR "_validateLists logic error, no entry for list '$list'\n" if !$insi
 		# the secondary loop finds either a tag, or text between tags
 		while ($content =~ m!\s*([^<]+|<([^\s>]+).*?>)!sig) {
 			my($whole, $tag) = ($1, $2);
-			next if $whole !~ /\S/;
+			next if $whole !~ /[^\h\v\p{Cc}\p{Cf}]/; # whitespace, control, and format characters
 			# we only care here if this is one that can be inside a list
 			if ($tag) {
 				# if open tag ...
