@@ -26,3 +26,4 @@ templates/pagination;journal;default
 templates/searchusers;journal;default
 templates/slashdot;journal;default
 test.pl
+Upgrade/MySQL.pm

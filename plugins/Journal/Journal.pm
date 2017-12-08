@@ -307,12 +307,15 @@ EOT
 sub topRecent {
 	my($self, $limit) = @_;
 	$limit ||= getCurrentStatic('journal_top') || 10;
+	my $min_karma = getCurrentStatic('journal_sb_min_karma') || 0;
 	$self->sqlConnect;
 
 	my $sql = <<EOT;
 SELECT count(j.id), u.nickname, u.uid, MAX(j.date) AS date, MAX(id)
-FROM journals AS j, users AS u
+FROM journals AS j, users AS u, users_info AS ui
 WHERE j.uid = u.uid
+AND j.uid = ui.uid
+AND ui.karma >= $min_karma
 GROUP BY u.nickname
 ORDER BY date DESC
 LIMIT $limit
