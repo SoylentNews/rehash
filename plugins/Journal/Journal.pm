@@ -307,7 +307,7 @@ EOT
 sub topRecent {
 	my($self, $limit) = @_;
 	$limit ||= getCurrentStatic('journal_top') || 10;
-	my $min_karma = getCurrentStatic('journal_sb_min_karma') || 10;
+	my $min_karma = getCurrentStatic('journal_sb_min_karma') || 0;
 	$self->sqlConnect;
 
 	my $sql = <<EOT;
