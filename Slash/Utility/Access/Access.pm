@@ -615,7 +615,7 @@ sub compressOk {
 		$content_slice = decode_entities($content_slice);
 		# TMB finally, convert all the multitude of non-displaying unicode chars to $nbsp_space
 		# to prevent using all of them and having a completely whitespace slice
-		$content_slice =~ s/[\h\p{Cc}\p{Cf}/$nbsp_space/g;
+		$content_slice =~ s/[\h\p{Cc}\p{Cf}]/$nbsp_space/g;
 
 		# The length we compare against for ratios is the length of the
 		# modified slice of the text.

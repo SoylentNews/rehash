@@ -516,7 +516,7 @@ function addComment(cid, comment, html, front) {
 				else
 					commtree.append(html);
 			} else {
-				tree.append('<ul id="commtree_' + pid + '">' + html + '</ul>');
+				tree.append('<ul id="commtree_' + pid + '" class="commtree">' + html + '</ul>');
 			}
 		}
 
@@ -1537,7 +1537,7 @@ function inlineAdInsert(cid) {
 		if (commtree.length)
 			commtree.prepend(html);
 		else
-			tree.append('<ul id="commtree_' + cid + '">' + html + '</ul>');
+			tree.append('<ul id="commtree_' + cid + '" class="commtree">' + html + '</ul>');
 		inlineAdReset(cid);
 	}
 }
