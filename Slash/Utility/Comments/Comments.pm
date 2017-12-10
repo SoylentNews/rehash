@@ -1327,7 +1327,7 @@ sub displayThread {
 			if (my $str = $thread->{data}) {
 				$below .= $const->{cagebegin} if $cagedkids;
 				if ($indent && $const->{indentbegin}) {
-					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
+					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid" class="commtree">/;
 					$below .= $indentbegin;
 				}
 				$below .= $str;
