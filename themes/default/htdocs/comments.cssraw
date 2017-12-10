@@ -196,17 +196,6 @@ html > body .commentwrap table {
 	font-size:0.875em;
 }
 
-
-#commentlisting .commentBody ul
-{
-	border-left: none;
-}
-
-#commentlisting .commentBody ul li
-{
-	list-style:none outside none;
-}
-
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
 .commentBody blockquote, .commentBody .quote {
@@ -263,7 +252,7 @@ html > body .commentwrap table {
 	margin-bottom:.5em;
 }
 
-ul#commentlisting 
+#commentlisting 
 {
 	margin-bottom: .5em;
 }
@@ -276,12 +265,11 @@ ul#commentlisting
 	margin-bottom:0;
 }
 
-#commentlisting .commentBody ol li{
-	list-style: unset;
-}
-
-#commentlisting .commentBody ul li{
-	list-style: disc;
+#commentlisting.commentBody ol, #commentlisting.commentBody ul {
+	list-style-type: unset;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	border-left: none;
 }
 
 #discussion_buttons
