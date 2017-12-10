@@ -60,7 +60,7 @@ SET txRows = 20 IF txRows < 20  %]
 
 			<table border="0" cellpadding="3" cellspacing="0" id="notes" style="width: 100%;">
 				<tr class="data_head"><td><b>Editors' Notes</b></td></tr>
-				<tr class="data_hl1"><td><textarea class="fullbox" rows="3" wrap="virual" maxlength="1023" name="notes" cols="[% user.textarea_cols || constants.textarea_cols %]">[% storyref.notes | strip_textarea %]</textarea></td></tr>
+				<tr class="data_hl1"><td><textarea class="fullbox" rows="3" wrap="virual" name="notes" cols="[% user.textarea_cols || constants.textarea_cols %]">[% storyref.notes | strip_textarea %]</textarea></td></tr>
 			</table>
 			<br>
 
