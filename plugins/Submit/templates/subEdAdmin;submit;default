@@ -124,7 +124,7 @@ BLOCK sub_display -%]
 			[% END %]
 		</td>
 	</tr>
-	<tr id ="sub_note_[% sub.subid | strip_attribute %]" class="sub_note"><td colspan="5"><textarea class="fullbox" wrap="virtual" maxlength="1023" name="comment_[% sub.subid | strip_attribute %]" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% sub.comment | strip_textarea %]</textarea></td><tr> 
+	<tr id ="sub_note_[% sub.subid | strip_attribute %]" class="sub_note"><td colspan="5"><textarea class="fullbox" wrap="virtual" name="comment_[% sub.subid | strip_attribute %]" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% sub.comment | strip_textarea %]</textarea></td><tr> 
 [% END %]
 </div>
 __seclev__

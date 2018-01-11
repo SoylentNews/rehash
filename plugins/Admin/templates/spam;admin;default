@@ -46,7 +46,7 @@ __template__
 		[% FOREACH comm = recent_comments %]
 		<tr>
 			<td align="right"><a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</a></td>
-			<td align="right"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=thread">[% comm.cid %]</a></td>
+			<td align="right"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=threadtng">[% comm.cid %]</a></td>
 			<td align="right"><a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[% comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</a></td>
 			<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
 				IF comm.uid != constants.anonymous_coward_uid %]<a href="[%
@@ -60,7 +60,7 @@ __template__
 			<td align="center">[% comm.num_mods %]</td>
 			<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
 			<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
-			<td align="left"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=thread">[% comm.subject_vis | strip_title %]</a></td>
+			<td align="left"><a href="[% gSkin.rootdir %]/comments.pl?sid=[% comm.sid | strip_attribute %]&amp;cid=[% comm.cid | strip_attribute %]&amp;threshold=-1&amp;commentsort=0&amp;mode=threadtng">[% comm.subject_vis | strip_title %]</a></td>
 		</tr>
 		<tr>
 			<td colspan="3" valign="top">

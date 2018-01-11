@@ -755,7 +755,7 @@ sub validate {
 		for ($preview->{title}, $preview->{introtext}) {
 			my $d = decode_entities($_);
 			$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
-			if ($d !~ /\S/) {		# require SOME non-whitespace
+			if ($d !~ /[^\h\v\p{Cc}\p{Cf}]/) {		# require SOME non-whitespace
 				$messages->{critical}{badintrotext} = getData('no_text', '', 'edit');
 			}
 		}

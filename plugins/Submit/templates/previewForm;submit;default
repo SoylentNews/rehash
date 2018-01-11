@@ -105,7 +105,7 @@ __template__
 			</b> at [% submission.time %] <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</a><br>
 			<br>
 			<label>Editors' Notes</label>
-			<textarea class="fullbox" wrap="virtual" maxlength="1023" name="comment_[% subid | strip_attribute %]" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% submission.comment | strip_textarea %]</textarea>
+			<textarea class="fullbox" wrap="virtual" name="comment_[% subid | strip_attribute %]" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% submission.comment | strip_textarea %]</textarea>
 	
 			[% 
 				this_note = submission.note || '';
@@ -137,7 +137,7 @@ __template__
 			<input type="hidden" name="topic_source" value="submission">
 			<input type="hidden" name="submitter" value="[% submitter.uid %]">
 			<label>Editors' Notes</label>
-			<textarea class="fullbox" wrap="virtual" maxlength="1023" name="notes" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% submission.comment | strip_textarea %]</textarea>
+			<textarea class="fullbox" wrap="virtual" name="notes" cols="[% user.textarea_cols || constants.textarea_cols %]" rows="3">[% submission.comment | strip_textarea %]</textarea>
 	
 			<label>Title&nbsp; <input type="text" name="title" value="[% submission.subj | strip_subject %]" size="75" MAXLENGTH="100"></label>
 			[% lockTest %]

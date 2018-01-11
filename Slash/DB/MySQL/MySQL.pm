@@ -9283,6 +9283,7 @@ sub getDiscussionParent {
 		my $journal_reader = getObject('Slash::Journal', { db_type => 'reader' });
 		my $article = $journal_reader->get($jid);
 		$parent->{content} = $journal_reader->fixJournalText($article->{article}, $article->{posttype}, $article->{uid});
+		$parent->{content} = apply_rehash_tags($parent->{content});
 		$parent->{author} = $slashdb->getUser(
 			$article->{uid},
 			[qw( nickname fakeemail homepage )]
@@ -13715,6 +13716,29 @@ sub upgradeCoreDB() {
 		}
 		print "Upgrade complete \n";
 		$core_ver = 3;
+		$upgrades_done++;
+	}
+
+	if ($core_ver < 4) {
+		print "Upgrading Core to v4 ...\n";
+		print "Running: REPLACE INTO vars VALUES ('filters_extended_regexes', 0, 'Use extended regexes in Filters or not. Any setting other than 0 or unset counts as TRUE')\n";
+		if(!$self->sqlDo("REPLACE INTO vars VALUES ('filters_extended_regexes', 0, 'Use extended regexes in Filters or not. Any setting other than 0 or unset counts as TRUE')")) {
+			return 0;
+		}
+		print "Running: ALTER TABLE stories CHANGE COLUMN notes notes TEXT NULL DEFAULT NULL\n";
+		if(!$self->sqlDo("ALTER TABLE stories CHANGE COLUMN notes notes TEXT NULL DEFAULT NULL")) {
+			return 0;
+		}
+		print "Running: ALTER TABLE submissions CHANGE COLUMN comment comment TEXT NULL DEFAULT NULL\n";
+		if(!$self->sqlDo("ALTER TABLE submissions CHANGE COLUMN comment comment TEXT NULL DEFAULT NULL")) {
+			return 0;
+		}
+		print "Set version to 4\n";
+		if (!$self->sqlDo("UPDATE site_info SET value = 4 WHERE name = 'db_schema_core'")) {
+			return 0;
+		}
+		print "Upgrade complete \n";
+		$core_ver = 4;
 		$upgrades_done++;
 	}
 			

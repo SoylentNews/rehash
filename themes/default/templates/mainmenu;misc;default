@@ -15,10 +15,10 @@ mainmenu
 __template__
 <ul>
 	<li>
-		<a href="[% gSkin.rootdir %]/about.pl">About</a>
+		<a href="[% constants.real_rootdir %]/about.pl">About</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/faq.pl">FAQ</a>
+		<a href="[% constants.real_rootdir %]/faq.pl">FAQ</a>
 	</li>
 	<li>
 		<a href="[% constants.real_rootdir %]/journal.pl">Journals</a>
@@ -30,16 +30,19 @@ __template__
 		<a href="[% constants.real_rootdir %]/authors.pl">Authors</a>
 	</li>	
 	<li>
-		<a href="[% gSkin.rootdir %]/search.pl">Search</a>
+		<a href="[% constants.real_rootdir %]/search.pl">Search</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/pollBooth.pl">Polls</a>
+		<a href="[% constants.real_rootdir %]/pollBooth.pl">Polls</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/hof.pl">Hall of Fame</a>
+		<a href="[% constants.real_rootdir %]/hof.pl">Hall of Fame</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
+		<a href="[% constants.real_rootdir %]/submit.pl">Submit Story</a>
+	</li>
+	<li>
+		<a href="[% constants.real_rootdir %]/submit.pl?op=list">Subs Queue</a>
 	</li>
 		[% IF user.is_anon %]
 		[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]

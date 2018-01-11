@@ -560,7 +560,7 @@ sub doSaveArticle {
 	for ($description, $form->{article}) {
 		my $d = decode_entities($_);
 		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
-		if ($d !~ /\S/) {		# require SOME non-whitespace
+		if ($d !~ /[^\h\v\p{Cc}\p{Cf}]/) {		# require SOME non-whitespace
 			return(getData('no_desc_or_article'), 1);
 		}
 	}

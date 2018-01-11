@@ -436,6 +436,7 @@ sub filterOk {
 
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	my $filters = $slashdb->getContentFilters($formname, $field);
 
@@ -497,8 +498,14 @@ sub filterOk {
 			# If no __NM__ in the text, it gets appended.
 			$regex .= $number_match;
 		}
-
-		$regex = $case eq 'i' ? qr/$regex/xi : qr/$regex/x;
+		
+		# Let the site admin(s) decide if they want extended regexes or not.
+		if(!defined($constants->{filters_extended_regexes}) || !$constants->{filters_extended_regexes}) {
+			$regex = $case eq 'i' ? qr/$regex/i : qr/$regex/;
+		}
+		else {
+			$regex = $case eq 'i' ? qr/$regex/xi : qr/$regex/x;
+		}
 
 		# Some of our regexes may have nested quantifiers, which can chew
 		# CPU time exponentially.  To prevent a denial of service by posting
@@ -591,8 +598,9 @@ sub compressOk {
 		substr($content, 0, $slice_size) = "";
 
 		# too short to bother?
+		# NO. Do this after we run all the conversions and decoding. -TMB
 		my $length = length($content_slice);
-		next if $length < 10;
+		# next if $length < 10;
 
 		# Runs of whitespace get increased in size for purposes of the
 		# compression check, since they are commonly used in ascii art
@@ -605,10 +613,15 @@ sub compressOk {
 		$content_slice =~ s/\&(nbsp|#160|#xa0);/$nbsp_space/gi;
 		# Other entities just get decoded before the compress check.
 		$content_slice = decode_entities($content_slice);
+		# TMB finally, convert all the multitude of non-displaying unicode chars to $nbsp_space
+		# to prevent using all of them and having a completely whitespace slice
+		$content_slice =~ s/[\h\p{Cc}\p{Cf}]/$nbsp_space/g;
 
 		# The length we compare against for ratios is the length of the
 		# modified slice of the text.
 		$length = length($content_slice);
+		# Oh hell no. Need an "everything is whitespace" check here too since there are so many kinds. -TMB
+		if($content_slice !~ /\S/) { return 0; }
 		next if $length < 10;
 
 		# compress doesn't like wide characters.  this could in theory

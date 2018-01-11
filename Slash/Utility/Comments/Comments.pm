@@ -1327,7 +1327,7 @@ sub displayThread {
 			if (my $str = $thread->{data}) {
 				$below .= $const->{cagebegin} if $cagedkids;
 				if ($indent && $const->{indentbegin}) {
-					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
+					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid" class="commtree">/;
 					$below .= $indentbegin;
 				}
 				$below .= $str;
@@ -2132,14 +2132,20 @@ sub validateComment {
 				* ($check_prefix_len - $kickin)
 				/ ($max_comment_len - $kickin); # /
 
-		my $check_notags = strip_nohtml($check_prefix);
+		##########
+		#	TMB Added decode_entities to prevent that specific kind of cheating.
+		my $check_notags = decode_entities(strip_nohtml($check_prefix));
 		# Don't count & or other chars used in entity tags;  don't count
 		# chars commonly used in ascii art.  Not that it matters much.
 		# Do count chars commonly used in source code.
 		##########
 		#	TMB Count anything but whitespace as this is NOT unicode happy.
 		#	my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]+='"@$-//;
-		my $num_chars = $check_notags =~ tr/ \t\r\n\f//c;
+		##########
+		#	TMB Testing a unicode-friendly version
+		#	Counts characters that aren't horizontal or vertical spaces, unicode control characters, or unicode formatting characters.
+		#	my $num_chars = $check_notags =~ tr/ \t\r\n\f//c;
+		my $num_chars = $check_notags =~ s/[^\h\v\p{Cc}\p{Cf}]//g;
 
 		# Note that approveTags() has already been called by this point,
 		# so all tags present are legal and uppercased.

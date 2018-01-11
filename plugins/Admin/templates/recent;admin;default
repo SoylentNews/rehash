@@ -68,7 +68,7 @@ Show only comments from section:
 		<td align="right"><a href="[% gSkin.rootdir
 			%]/comments.pl?sid=[% comm.sid | strip_attribute
 			%]&amp;cid=[% comm.cid | strip_attribute
-			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=thread">[%
+			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=threadtng">[%
 			comm.cid %]</a></td>
 		<td align="left"><a href="[% gSkin.rootdir
 			%]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[%
