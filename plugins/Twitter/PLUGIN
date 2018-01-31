@@ -1,0 +1,5 @@
+# $Id$
+name=twitter
+description="Twitter syndication support"
+mysql_schema=mysql_schema
+task=update_twitter.pl
