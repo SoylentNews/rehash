@@ -3,4 +3,4 @@ name=twitter
 description="Twitter syndication support"
 mysql_schema=mysql_schema
 mysql_prep=mysql_prep
-task=update_twitter.pl
+task=tasks/update_twitter.pl
