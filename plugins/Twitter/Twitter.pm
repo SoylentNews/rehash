@@ -43,7 +43,7 @@ sub log_story_pushed() {
 
 sub trim_stories_table() {
      my ($self, $slashdb, $constants) = @_;
-     #$slashdb->sqlDo("DELETE FROM twitter_log WHERE time < DATE_SUB(NOW(), INTERVAL $constants->{discussion_archive_delay} DAY)");
+     $slashdb->sqlDo("DELETE FROM twitter_log WHERE time < DATE_SUB(NOW(), INTERVAL $constants->{discussion_archive_delay} DAY)");
      return;
 }
 
