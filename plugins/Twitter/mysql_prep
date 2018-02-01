@@ -1,9 +1,0 @@
-#
-# $Id$
-#
-
-INSERT INTO vars (name, description, value) VALUES ('twit_consumer_key', 'Twitter consumer_key', 'FILL THIS IN https://apps.twitter.com/');
-INSERT INTO vars (name, description, value) VALUES ('twit_consumer_secret', 'Twitter consumer_secret', 'FILL THIS IN https://apps.twitter.com/');
-INSERT INTO vars (name, description, value) VALUES ('twit_access_token', 'Twitter access_token', 'FILL THIS IN https://apps.twitter.com/');
-INSERT INTO vars (name, description, value) VALUES ('twit_access_token_secret', 'Twitter access_token_secret', 'FILL THIS IN https://apps.twitter.com/');
-INSERT INTO vars (name, description, value) VALUES ('twit_max_items_outgoing', 'Max stories to flood Twitter with at once', '10');
