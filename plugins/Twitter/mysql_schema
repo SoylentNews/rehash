@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS twitter_log;
 CREATE TABLE twitter_log (
 	sid CHAR(16) NOT NULL,
 	title VARCHAR(100) NOT NULL,
-	time DATETIME,
-	shown BOOL DEFAULT false,
+	time DATETIME DEFAULT NOW(),
 	PRIMARY KEY (sid, title)
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

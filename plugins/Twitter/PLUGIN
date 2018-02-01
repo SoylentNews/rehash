@@ -1,5 +1,5 @@
 # $Id$
-name=twitter
+name=Twitter
 description="Twitter syndication support"
 mysql_schema=mysql_schema
 mysql_prep=mysql_prep
