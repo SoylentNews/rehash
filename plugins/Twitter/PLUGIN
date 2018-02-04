@@ -1,0 +1,4 @@
+# $Id$
+name=Twitter
+description="Twitter syndication support"
+task=tasks/update_twitter.pl
