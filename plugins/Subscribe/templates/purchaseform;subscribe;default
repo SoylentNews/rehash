@@ -31,7 +31,7 @@ __template__
 		<ul class="purchasesubscription__type">
 		[% IF !user.is_anon %]
 			<li>
-				<input type="radio" name="subscription_type" value="user">
+				<input type="radio" name="subscription_type" value="user" checked="checked">
 				Buy Subscription for [% user.nickname | strip_literal %]
 			</li>
 		[% END %]
