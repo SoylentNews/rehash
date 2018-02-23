@@ -81,7 +81,7 @@ __template__
 				Hidden <input type="checkbox" value="1" name="hidden" [% hidden_checked %]>
 			</label>
 			<label>
-				Alwasy On (Users can't disable) <input type="checkbox" value="1" name="always_on" [% always_on_checked %]>
+				Always On (Users can't disable) <input type="checkbox" value="1" name="always_on" [% always_on_checked %]>
 			</label>
 		[% IF blockref.type == 'portald' %]
 			<label>
