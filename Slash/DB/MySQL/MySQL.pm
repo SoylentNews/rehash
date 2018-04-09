@@ -7845,16 +7845,16 @@ sub getNetIDKarma {
 	my($self, $type, $id) = @_;
 	my($count, $karma);
 	if ($type eq "ipid") {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id' AND date > (NOW() - INTERVAL 1 MONTH)");
 		return wantarray ? ($karma, $count) : $karma;
 	} elsif ($type eq "subnetid") {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
 		return wantarray ? ($karma, $count) : $karma;
 	} else {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
 		return wantarray ? ($karma, $count) : $karma if $count;
 
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
 		return wantarray ? ($karma, $count) : $karma;
 	}
 }
