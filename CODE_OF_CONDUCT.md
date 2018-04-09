@@ -14,7 +14,7 @@ Examples of behavior that contributes to creating a positive environment include
 Examples of unacceptable behavior by participants include:
 
 * Using spaces instead of tabs for indentation.
-* Not letting people know on IRC when you are monekying with dev.
+* Not letting people know on IRC when you are monkeying with dev.
 * Using emacs.
 * Bitching about other people on the team.
 
