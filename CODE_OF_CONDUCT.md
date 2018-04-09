@@ -24,7 +24,7 @@ Project maintainers are responsible for clarifying the standards of acceptable b
 
 ## Scope
 
-This Code of Conduct applies in project areas only. We don't care if you're a transvestite Nazi that goes door to door preaching the greatness of Cthulu in your personal life.
+This Code of Conduct applies in project areas only. We don't care if you're a transvestite Nazi that goes door to door preaching the greatness of Cthulhu in your personal life.
 
 ## Enforcement
 
