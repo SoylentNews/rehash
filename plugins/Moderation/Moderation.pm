@@ -1462,10 +1462,10 @@ sub undoSingleModeration {
 	my $comm_karma_adj = $self->sqlSelect("karma", "modreasons", "id = $mod->{reason}");
 	$rows = $self->sqlUpdate(
 		"comments",
-		"karma = karma - $comm_karma_adj, karma_abs = abs(karma - $comm_karma_adj)",
+		"karma = karma - $comm_karma_adj, karma_abs = abs(karma)",
 		"cid=$mod->{cid}"
 	);
-
+	
 	print STDERR "\nWTF comment karma adjust fail\n" unless $rows;
 
 	return 1;
