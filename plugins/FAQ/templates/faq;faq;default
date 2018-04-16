@@ -16,41 +16,41 @@ __template__
 	[% PROCESS titlebar title => constants.sitename _ ' FAQ' %]
 	<div class="generalbody">
 
-	[#wits]
+<a href="#wits">&#128279;</a>
 	<h3 id="wits">What is this site?</h3>
 	<p>This is a community-driven news and discussion site, where you can submit interesting stories, our editors accept and post those stories they find appropriate, and everyone can comment on them.</p>
 	
-	[#wdicf]
+<a href="#wdicf">&#128279;</a>
 	<h3 id="wdicf">Where did it come from?</h3>
 	<p>We had become dissatisfied with existing "news for nerds" solutions (and unlike other project forks, we couldn't just change "open" to "libre"). In the spirit of Open Source, we set out to make a community-centric news site rather than just complain about corporate overlords. We forked a rather old public release of Slash, the code that runs Slashdot, and proceeded to modernize and improve upon it.</p>
 	
-	[#wri]
+<a href="#wri">&#128279;</a>
 	<h3 id="wri">Who runs it?</h3>
 	<p>It is currently managed by an ad-hoc group of <a href="http://wiki.soylentnews.org/wiki/WhosWho" target="_blank">volunteers</a> who maintain and operate the site. We've since incorporated as a Delaware Public Benefit Corporation (similar to a non-profit). Setting up a true non-profit organization is very expensive, but there are plans to place SoylentNews under a proper not-for-profit legal entity when funds allow.</p>
 	
 	[% IF constants.plugin.Subscribe && !constants.subscribe_admin_only %]
-		[#hciss]
-		<h3 id="hciss">How can I support SoylentNews?</h3>
+		<a href="#hcigiwtp">&#128279;</a>
+		<h3 id="hcigiwtp">How can I support SoylentNews?</h3>
 		<p>You could consider buying a <a href="[% constants.real_rootdir %]/subscribe.pl">subscription</a>.  Information about subscriptions can be found in the <a href="[% constants.real_rootdir %]/faq.pl?op=subscribe">Why Subscribe FAQ</a>.</p>
 	[% END %]
 
-	[#hcigiwtp]
+<a href="#hcigiwtp">&#128279;</a>
 	<h3 id="hcigiwtp">How can I get involved with the project?</h3>
 	<p>The simplest way to help the site is by <a href="[% gSkin.rootdir %]/submit.pl">submitting quality stories</a> and leaving interesting comments. Without these, the site has little to offer the community. If you'd like to become more directly involved, visit the <a href="http://wiki.soylentnews.org/wiki/TeamPages" target="_blank">team pages</a> and contact a team directly. Beyond that, hop on to our <a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="_blank">IRC</a> channels and get to know the staff and learn about what needs doing. Volunteering is how this site was brought about, and there is likely something that meshes with your talents. Check out the <a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved">Get Involved</a> section on the wiki for more information.</p>
 	
-	[#casas]
+<a href="#casas">&#128279;</a>
 	<h3 id="casas">Can anyone submit a story?</h3>
 	<p>Yes, of course anyone can <a href="[% gSkin.rootdir %]/submit.pl">submit a story</a>. Please read the <a href="[% gSkin.rootdir %]/faq.pl?op=editorial">submission guidelines</a> to increase the quality of your submission and subsequently improve its chances of being accepted.</p>
 	
-	[#cisasa]
+<a href="#cisasa">&#128279;</a>
 	<h3 id="cisasa">Can I submit a story anonymously?</h3>
 	<p>Yes.</p>
 	
-	[#dyowtn]
+<a href="#dyowtn">&#128279;</a>
 	<h3 id="dyowtn">Do you only want tech news?</h3>
 	<p>We aim for around 70% technology and science stories with the remainder being a mix of content with general interest to our community.</p>
 	
-	[#wdypms]
+<a href="#wdypms">&#128279;</a>
 	<h3 id="wdypms">Why didn't you post my story?</h3>
 	<p>This is a tough one.</p>
 	<p>We get many submissions every day. Our editors constantly go through these submissions, and try to select the most interesting, timely, and relevant items to post. There are probably as many reasons for stories to get declined as there are stories, but here are some of the more common ones:</p>
@@ -65,31 +65,31 @@ __template__
 	</ul>
 	<p> Although the editing team works hard to clean up some of the messier and incomplete submissions (we get many with just a link or two and no summary), editors do not wish to put words in the mouth of the submitter. If the article is interesting but the summary is terribly written, it puts the editors in a difficult position, we may choose to decline it in this case rather than writing up a whole new summary. In other cases we may add significantly to the summary, though we try to indicate when we do that to avoid confusion.</p>
 	
-	[#aacpaa]
+<a href="#aacpaa">&#128279;</a>
 	<h3 id="aacpaa">Are "Anonymous Coward" posts actually anonymous?</h3>
-	<p>When displayed to general readship accounts, yes. To accounts with site administration accounts, no. When an AC post is made by Soylent account holder X, its IP is hashed, and this is visible for up to about two weeks after the post is made to admin account holders. This hash matches the IP hash that appears with account X's <i>non</i>-anonymous posts, and so it is clear to the admin account holders that the AC is in fact Soylent user X. For this reason, when posting anonymously, if you actually want your post to be anonymous to everyone on Soylent, you should ensure that you make the post from a unique IP that is not the same IP you normally post from. <b>Note:</b> Just because a post can't be identified on Soylent to a particular account and IP, does <i>not</i> mean that the authorities can't association posts with specific individuals. "Anonymous" is very much a relative term.</p>
+	<p>When displayed to general readship accounts, yes. To accounts with site administration privileges, no. When an AC post is made by Soylent account holder X, its IP is hashed, and this is visible for up to about two weeks after the post is made to admin account holders. This hash matches the IP hash that appears with account X's <i>non</i>-anonymous posts, and so it is clear to the admin account holders that the AC is in fact Soylent user X. For this reason, when posting anonymously, if you actually want your post to be anonymous to everyone on Soylent, you should ensure that you make the post from a unique IP that is not the same IP you normally post from. <b>Note:</b> Just because a post can't be identified on Soylent to a particular account and IP, does <i>not</i> mean that the authorities can't associate posts with specific individuals. "Anonymous" is very much a relative term.</p>
 	
-	[#wiygssb]
+<a href="#wiygssb">&#128279;</a>
 	<h3 id="wiygssb">Why is your grammar/spelling so bad?</h3>
 	<p>We're more interested in getting the stories out than we are in making sure every post passes the white glove test.  We attempt to catch most of the spelling and grammar mistakes by having an additional editor sign off on each story, but with our limited resources that doesn't always happen, and certainly things do sometimes slip through. Feel free to point it out, we may even make corrections depending on the case.</p>
 	
-	[#whmsbaody]
+<a href="#whmsbaody">&#128279;</a>
 	<h3 id="whmsbaody">Why hasn't my story been accepted or declined yet?</h3>
 	<p>Usually stories are examined within a few hours of their submission. Sometimes, however, it might take longer before it closes. Usually with things that aren't time dependent, there may be some delay before a decision is made.</p>
 	
-	[#msswahcinsi]
+<a href="#msswahcinsi">&#128279;</a>
 	<h3 id="msswahcinsi">My story submission was "accepted"; how come I never saw it?</h3>
 	<p>Usually it's because you just need to be patient. Many stories are accepted, but not posted for a few hours for a variety of reasons (e.g. to give existing stories some time to be read and commented on, or to have a second author give a second opinion on some detail).</p>
 	
-	[#istama]
+<a href="#istama">&#128279;</a>
 	<h3 id="istama">I submitted that a month ago!</h3>
 	<p>A lot of times, we don't use a particular story on a particular day, but at some later point, someone else submits it, and it ends up getting used. We have many people from across the globe working together to post things on here. What one of us finds stupid, the others might find interesting. Or it just might be the rest of the stuff that's going on that day. There are a variety of factors: the personality of the post, the quality of the submission, or even the quantity of stories already posted when your submission entered the queue.</p>
 	
-	[#wdiscoutps]
+<a href="#wdiscoutps">&#128279;</a>
 	<h3 id="wdiscoutps">Where do I submit corrections or updates to previous stories?</h3>
 	<p>The best way to submit followups is just as if you were submitting any other news item: please use the web submission form (rather than email). However, if your story ties closely to a specific story that's already run (for instance, if you have an update about a situation which has changed since the last time it was mentioned), please include a link to the previous story to which you're referring, rather than merely alluding to it.</p>
 	
-	[#idwtlibmthivcwaim]
+<a href="#idwtlibmthivcwaim">&#128279;</a>
 	<h3 id="idwtlibmthivcwaim">I don't wish to log in because my tinfoil hat is very comfy, what am I missing?</h3>
 	<p>Logged in users have a variety of benefits on SoylentNews that are unavailable to users who don't bother logging in. Among these benefits are:</p>
 	<ul>
@@ -100,23 +100,23 @@ __template__
 		<li>Posting in Discussions at Score:1 instead of Score:0 means twice as many people will see your comments.</li>
 	</ul>
 	
-	[#wafaf]
+<a href="#wafaf">&#128279;</a>
 	<h3 id="wafaf">What are Friends and Foes?</h3>
 	<p>Information on Friends and Foes can be found in the <a href="/faq.pl?op=friends">Friends and Foes FAQ</a></p>
 
-	[#wiseunaomupm]
+<a href="#wiseunaomupm">&#128279;</a>
 	<h3 id="wiseunaomupm">Why is someone else's User Name appearing on my User Page's Menu?</h3>
 	<p>This is not a bug, it's a feature! That name is the last user page (besides your own) that you have visited. This is useful when you want to hop around between your user info, and someone else's (e.g. to compare friends and foes). Your account has not been hacked, this is totally by design.</p>
 
-	[#hdisb]
+<a href="#hdisb">&#128279;</a>
 	<h3 id="hdisb">How do I submit bugs?</h3>
 	<p>The bugs are tracked on github. You'll need a github account to <a href="https://github.com/SoylentNews/rehash/issues/new">submit a new bug</a>. You can also email admin@soylentnews.org and we can submit one on your behalf. Either way, please include as much relevant detail as you can (i.e. UID, time, browser and version, OS, error message, and screenshots).</p>
 	
-	[#wcilitw]
+<a href="#wcilitw">&#128279;</a>
 	<h3 id="wcilitw">Why can't I log into the Wiki?</h3>
 	<p>The wiki uses a separate account system from the main page, you'll need to create separate accounts on each site.</p>
 	
-	[#ihaqtinaitfwsid]
+<a href="#ihaqtinaitfwsid">&#128279;</a>
 	<h3 id="ihaqtinaitfwsid">I have a question that is not answered in this FAQ. What should I do?</h3>
 	<p>Join us on <a href="http://chat.soylentnews.org" targe="blank">IRC</a> (webchat) or email your questions to <a href="mailto:admin@soylentnews.org">admin@soylentnews.org</a>. We will get you an answer, and if it's a question we've seen before, we'll consider adding it to the FAQ.</p>
  </div>
