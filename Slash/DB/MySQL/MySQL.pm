@@ -13612,6 +13612,7 @@ sub upgradeCoreDB() {
 	my $schema_versions = $upgrade->getSchemaVersions();
 	my $core_ver = $schema_versions->{core};
 	my $upgrades_done = 0;
+	my $constants = getCurrentStatic();
 	
 	if ($core_ver == 0) {
 		# Every schema upgrade should have a comment as to why. In this case, initialize the
