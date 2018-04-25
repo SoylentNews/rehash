@@ -7844,19 +7844,51 @@ sub calcModval {
 sub getNetIDKarma {
 	my($self, $type, $id) = @_;
 	my($count, $karma);
-	if ($type eq "ipid") {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id' AND date > (NOW() - INTERVAL 1 MONTH)");
-		return wantarray ? ($karma, $count) : $karma;
-	} elsif ($type eq "subnetid") {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
-		return wantarray ? ($karma, $count) : $karma;
-	} else {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
-		return wantarray ? ($karma, $count) : $karma if $count;
+	my $constants = getCurrentStatic();
+	#if ($type eq "ipid") {
+	#	($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id' AND date > (NOW() - INTERVAL 1 MONTH)");
+	#	return wantarray ? ($karma, $count) : $karma;
+	#} elsif ($type eq "subnetid") {
+	#	($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
+	#	return wantarray ? ($karma, $count) : $karma;
+	#} else {
+	#	($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
+	#	return wantarray ? ($karma, $count) : $karma if $count;
+		# This was fucking retarded. You've already returned values by here and never executed the next two lines. --TMB
+	#	($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
+	#	return wantarray ? ($karma, $count) : $karma;
+	#}
 
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'  AND date > (NOW() - INTERVAL 1 MONTH)");
-		return wantarray ? ($karma, $count) : $karma;
+	my $typeclause = "";
+	if($type eq "ipid") {
+		$typeclause = "ipid = '$id'";
 	}
+	elsif($type eq "subnetid") {
+		$typeclause = "subnetid = '$id'";
+	}
+	else {
+		if($id) {
+			$typeclause = "ipid = '$id'";
+		}
+		else {return wantarray ? (0, 0) : 0;}
+	}
+
+	my ($fulldays, $halfdays, $quarterdays) = ($constants->{bad_karma_full_weight}, $constants->{bad_karma_half_weight}, $constants->{bad_karma_quarter_weight});
+
+	my $positive = "select ifnull(sum(karma), 0) from comments where $typeclause and karma > 0";
+	my $fullweight = "select ifnull(sum(karma), 0) from comments where $typeclause and karma < 0 and date >= (now() - interval $fulldays days)";
+	my $halfweight = "select ifnull(cast(sum(karma) / 2 as signed), 0) from comments where $typeclause and karma < 0 and date >= (now() - interval $halfdays days) and date < (now() - interval $fulldays days)";
+	my $quarterweight = "select ifnull(cast(sum(karma) / 4 as signed), 0) from comments where $typeclause and karma < 0 and date >= (now() - interval $quarterdays days) and date < (now() - interval $halfdays days)";
+	my $karmaclause = "($positive) + ($fullweight) + ($halfweight) + ($quarterweight)";
+	my $what = "count(*) as 'count', ($karmaclause) as karma";
+
+	($count, $karma) = $self->sqlSelect(
+		"$what",
+		"comments",
+		"$typeclause"
+	);
+
+	return wantarray ? ($karma, $count) : $karma;
 }
 
 ########################################################
@@ -13739,6 +13771,30 @@ sub upgradeCoreDB() {
 		}
 		print "Upgrade complete \n";
 		$core_ver = 4;
+		$upgrades_done++;
+	}
+
+	if ($core_ver < 5) {
+		my ($fulldays, $halfdays, $quarterdays) = ($constants->{bad_karma_full_weight}, $constants->{bad_karma_half_weight}, $constants->{bad_karma_quarter_weight});
+		print "Upgrading Core to v5 ...\n";
+		print "Running: REPLACE INTO vars VALUES ('bad_karma_full_weight', 7, 'Number of days comments negative karma should have full value for ipid/subnetid')\n";
+		if(!$self->sqlDo("REPLACE INTO vars VALUES ('bad_karma_full_weight', 7, 'Number of days comments negative karma should have full value for ipid/subnetid')")) {
+			return 0;
+		}
+		print "Running: REPLACE INTO vars VALUES ('bad_karma_half_weight', 14, 'Number of days comments negative karma should have half value for ipid/subnetid')\n";
+		if(!$self->sqlDo("REPLACE INTO vars VALUES ('bad_karma_full_weight', 14, 'Number of days comments negative karma should have half value for ipid/subnetid')")) {
+			return 0;
+		}
+		print "Running: REPLACE INTO vars VALUES ('bad_karma_quarter_weight', 30, 'Number of days comments negative karma should have quarter value for ipid/subnetid')\n";
+		if(!$self->sqlDo("REPLACE INTO vars VALUES ('bad_karma_quarter_weight', 30, 'Number of days comments negative karma should have quarter value for ipid/subnetid')")) {
+			return 0;
+		}
+		print "Set version to 5\n";
+		if (!$self->sqlDo("UPDATE site_info SET value = 5 WHERE name = 'db_schema_core'")) {
+			return 0;
+		}
+		print "Upgrade complete \n";
+		$core_ver = 5;
 		$upgrades_done++;
 	}
 			
