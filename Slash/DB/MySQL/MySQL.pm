@@ -7876,9 +7876,9 @@ sub getNetIDKarma {
 	my ($fulldays, $halfdays, $quarterdays, $stophere) = ($constants->{bad_karma_full_weight}, $constants->{bad_karma_half_weight}, $constants->{bad_karma_quarter_weight}, $constants->{bad_karma_zero_weight});
 
 	my $positive = "select ifnull(sum(karma), 0) from comments where $typeclause and karma > 0 and date >= now() - interval $stophere day";
-	my $fullweight = "select ifnull(sum(karma), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $fulldays day";
-	my $halfweight = "select ifnull(cast(sum(karma) / 2 as signed), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $halfdays day and date < now() - interval $fulldays day";
-	my $quarterweight = "select ifnull(cast(sum(karma) / 4 as signed), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $quarterdays day and date < now() - interval $halfdays day";
+	my $fullweight = "select ifnull(sum(karma), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $fulldays day and date >= now() - interval $stophere day";
+	my $halfweight = "select ifnull(cast(sum(karma) / 2 as signed), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $halfdays day and date < now() - interval $fulldays day and date >= now() - interval $stophere day";
+	my $quarterweight = "select ifnull(cast(sum(karma) / 4 as signed), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $quarterdays day and date < now() - interval $halfdays day and date >= now() - interval $stophere day";
 	my $karmaclause = "($positive) + ($fullweight) + ($halfweight) + ($quarterweight)";
 	my $what = "count(*) as 'count', ($karmaclause) as karma";
 
