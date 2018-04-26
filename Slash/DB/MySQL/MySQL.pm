@@ -7873,9 +7873,9 @@ sub getNetIDKarma {
 		else {return wantarray ? (0, 0) : 0;}
 	}
 
-	my ($fulldays, $halfdays, $quarterdays) = ($constants->{bad_karma_full_weight}, $constants->{bad_karma_half_weight}, $constants->{bad_karma_quarter_weight});
+	my ($fulldays, $halfdays, $quarterdays, $stophere) = ($constants->{bad_karma_full_weight}, $constants->{bad_karma_half_weight}, $constants->{bad_karma_quarter_weight}, $constants->{bad_karma_zero_weight});
 
-	my $positive = "select ifnull(sum(karma), 0) from comments where $typeclause and karma > 0";
+	my $positive = "select ifnull(sum(karma), 0) from comments where $typeclause and karma > 0 and date >= now() - interval $stophere day";
 	my $fullweight = "select ifnull(sum(karma), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $fulldays day";
 	my $halfweight = "select ifnull(cast(sum(karma) / 2 as signed), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $halfdays day and date < now() - interval $fulldays day";
 	my $quarterweight = "select ifnull(cast(sum(karma) / 4 as signed), 0) from comments where $typeclause and karma < 0 and date >= now() - interval $quarterdays day and date < now() - interval $halfdays day";
@@ -13788,6 +13788,10 @@ sub upgradeCoreDB() {
 		}
 		print "Running: REPLACE INTO vars VALUES ('bad_karma_quarter_weight', 30, 'Number of days comments negative karma should have quarter value for ipid/subnetid')\n";
 		if(!$self->sqlDo("REPLACE INTO vars VALUES ('bad_karma_quarter_weight', 30, 'Number of days comments negative karma should have quarter value for ipid/subnetid')")) {
+			return 0;
+		}
+		print "Running: REPLACE INTO vars VALUES ('bad_karma_zero_weight', 60, 'Number of days after which we stop reading ipid/subnetid karma, positive or negative')\n";
+		if(!$self->sqlDo("REPLACE INTO vars VALUES ('bad_karma_zero_weight', 60, 'Number of days after which we stop reading ipid/subnetid karma, positive or negative')")) {
 			return 0;
 		}
 		print "Set version to 5\n";
