@@ -516,9 +516,13 @@ sub confirm {
 	# Previously we were allowing infinite or zero decimal places.
 	$amount = sprintf("%.2f", $amount);
 
-	my $uid = $form->{uid} || $user->{uid};
-	my $sub_user = $slashdb->getUser($uid);
 	my $puid = $user->{uid};
+	my $uid = $form->{uid} || $user->{uid};
+	if($type == "user")
+	{
+		$uid = $puid;
+	}
+	my $sub_user = $slashdb->getUser($uid);
 	
 	if ($uid == $constants->{anonymous_coward_uid}) {
 		my $note = "<p class='error'>" . $constants->{anon_name_alt} . " cannot recieve a subscription.  Please choose another user to gift.</p>";
