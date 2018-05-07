@@ -1456,6 +1456,18 @@ sub undoSingleModeration {
 	
 	print STDERR "\nWTF comment adjust fail\n" unless $rows;
 
+	# Adjust comment karma as well. This is where ipid and subnetid karma
+	# get stored.
+	
+	my $comm_karma_adj = $self->sqlSelect("karma", "modreasons", "id = $mod->{reason}");
+	$rows = $self->sqlUpdate(
+		"comments",
+		"karma = karma - $comm_karma_adj, karma_abs = abs(karma)",
+		"cid=$mod->{cid}"
+	);
+	
+	print STDERR "\nWTF comment karma adjust fail\n" unless $rows;
+
 	return 1;
 	
 }
