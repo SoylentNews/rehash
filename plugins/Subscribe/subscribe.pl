@@ -516,9 +516,10 @@ sub confirm {
 	# Previously we were allowing infinite or zero decimal places.
 	$amount = sprintf("%.2f", $amount);
 
+	# puid = paying user, uid = user getting the sub
 	my $puid = $user->{uid};
 	my $uid = $form->{uid} || $user->{uid};
-	if($type == "user")
+	if($type eq "user")
 	{
 		$uid = $puid;
 	}
