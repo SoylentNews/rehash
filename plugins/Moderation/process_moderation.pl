@@ -61,7 +61,7 @@ $task{$me}{code} = sub {
      );
 
 	while(1) {
-		my @thisbatch = splice(@moderators, 0, 100);
+		my @thisbatch = splice(@moderators, 0, 1000);
 
           # remove unwilling moderators from the array
 		my $index = 0;
@@ -84,7 +84,8 @@ $task{$me}{code} = sub {
      	     );
 		}
 
-          sleep(1); # sleep for a second, just so we're not slamming the db as hard as possible
+		last;
+          sleep(10); # sleep for 10 seconds so users can get some pages loaded
 
 		last unless scalar @moderators > 0;
      }
