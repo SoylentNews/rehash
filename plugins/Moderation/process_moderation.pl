@@ -83,7 +83,6 @@ $task{$me}{code} = sub {
      	     );
 		}
 
-		last;
           sleep(10); # sleep for 10 seconds so users can get some pages loaded
 
 		last unless scalar @moderators > 0;
