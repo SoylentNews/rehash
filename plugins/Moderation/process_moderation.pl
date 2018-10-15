@@ -41,17 +41,31 @@ $task{$me}{code} = sub {
 	#$points_to_handout = determine_mod_points_to_be_issued($slashdb);
 	#distributeModPoints($constants, $slashdb, $points_to_handout);
 
-	# New method for the experiment
-	#use DateTime;
-	#use DateTime::Format::MySQL;
-	#my $dtNow = DateTime->now;
-	#my $now = DateTime::Format::MySQL->format_date($dtNow);
+	# New new method because the old new method was slower than fuck
 	my $acUID = $constants->{anonymous_coward_uid};
 	my $points = $constants->{m1_pointsgrant_arbitrary};
-	my $rows = $slashdb->sqlDo(
-		"update users_info join users_prefs on users_info.uid = users_prefs.uid  set points = $points, lastgranted = NOW() where created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() AND willing = 1;");
-	#my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID AND mod_banned < NOW()";
-	#$slashdb->sqlUpdate("users_info", { points => $constants->{m1_pointsgrant_arbitrary},  lastgranted => $now }, $where);
+
+	my $moderators = $slashdb->sqlSelectArrayRef(
+          'uid',
+          'users_info',
+          " created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() order by uid "
+     );
+     my $unwilling = $slashdb->sqlSelectAllHashref(
+          'uid',
+          'uid, willing',
+          'users_prefs',
+          ' willing <> 1 '
+     );
+
+     foreach my $moderator (@$moderators) {
+          next if exists $unwilling->{$moderator};
+          my $rows = $slashdb->sqlUpdate(
+               'users_info',
+               "points = $points, lastgranted = NOW()",
+               "uid = $moderator"
+          );
+          usleep(10000); # sleep for a hundredth of a second, just so we're not slamming the db as hard as possible
+     }
 	
 	return ;
 };
