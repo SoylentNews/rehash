@@ -46,33 +46,48 @@ $task{$me}{code} = sub {
 	my $acUID = $constants->{anonymous_coward_uid};
 	my $points = $constants->{m1_pointsgrant_arbitrary};
 
-	my $moderators = $slashdb->sqlSelectAllHashref(
+	my $modshr = $slashdb->sqlSelectAllHashref(
 		'uid',
           'uid, 1',
           'users_info',
           " created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() order by uid "
      );
-	print STDERR "moderators: ".scalar(keys(%$moderators))."\n";
+	my @moderators = sort(keys(%$modshr));
      my $unwilling = $slashdb->sqlSelectAllHashref(
           'uid',
           'uid, willing',
           'users_prefs',
           ' willing <> 1 '
      );
-	print STDERR "unwilling: ".scalar(keys(%$unwilling))."\n";
 
-	my $loops = 0;
-     foreach my $moderator (keys(%$moderators)) {
-          next if exists $unwilling->{$moderator};
-          my $rows = $slashdb->sqlUpdate(
-               'users_info',
-               { points => $points, lastgranted => "NOW()"},
-               "uid = $moderator"
-          );
-          usleep(100000); # sleep for a tenth of a second, just so we're not slamming the db as hard as possible
-		$loops++;
+	while(1) {
+		my @thisbatch = splice(@moderators, 0, 100);
+
+          # remove unwilling moderators from the array
+		my $index = 0;
+		foreach my $moderator (@thisbatch) {
+			if(exists $unwilling->{$moderator}) {
+				splice(@thisbatch, $index, 1);
+			}
+			$index++;
+		}
+
+		# it's technically possible all of one batch don't want to moderate, so...
+		if(scalar @thisbatch > 0) {
+		
+			my $where = join(" or uid = ", @thisbatch);
+		
+     	     my $rows = $slashdb->sqlUpdate(
+          	     'users_info',
+               	{ points => $points, lastgranted => "NOW()"},
+	               "uid = $where"
+     	     );
+		}
+
+          sleep(1); # sleep for a second, just so we're not slamming the db as hard as possible
+
+		last unless scalar @moderators > 0;
      }
-	print STDERR "$loops\n";
 	
 	return ;
 };
