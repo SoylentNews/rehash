@@ -46,27 +46,33 @@ $task{$me}{code} = sub {
 	my $acUID = $constants->{anonymous_coward_uid};
 	my $points = $constants->{m1_pointsgrant_arbitrary};
 
-	my $moderators = $slashdb->sqlSelectArrayRef(
-          'uid',
+	my $moderators = $slashdb->sqlSelectAllHashref(
+		'uid',
+          'uid, 1',
           'users_info',
           " created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() order by uid "
      );
+	print STDERR "moderators: ".scalar(keys(%$moderators))."\n";
      my $unwilling = $slashdb->sqlSelectAllHashref(
           'uid',
           'uid, willing',
           'users_prefs',
           ' willing <> 1 '
      );
+	print STDERR "unwilling: ".scalar(keys(%$unwilling))."\n";
 
-     foreach my $moderator (@$moderators) {
+	my $loops = 0;
+     foreach my $moderator (keys(%$moderators)) {
           next if exists $unwilling->{$moderator};
           my $rows = $slashdb->sqlUpdate(
                'users_info',
-               "points = $points, lastgranted = NOW()",
+               { points => $points, lastgranted => "NOW()"},
                "uid = $moderator"
           );
-          usleep(10000); # sleep for a hundredth of a second, just so we're not slamming the db as hard as possible
+          usleep(100000); # sleep for a tenth of a second, just so we're not slamming the db as hard as possible
+		$loops++;
      }
+	print STDERR "$loops\n";
 	
 	return ;
 };
