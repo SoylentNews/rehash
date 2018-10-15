@@ -9,6 +9,7 @@ use utf8;
 
 use Slash::Utility;
 use Slash::Constants qw( :messages :slashd );
+use Time::HiRes qw( usleep );
 
 use vars qw( %task $me $task_exit_flag );
 
