@@ -1927,10 +1927,10 @@ sub apply_rehash_tags {
 	# spoiler tags
 	if (grep /^spoiler$/i, @{$constants->{approvedtags}}) {
 		my $spoiler	= 'spoiler';
-		my $open	= qr[\n* <\s*  $spoiler \s*> \n*]xsio;
+		my $open	= qr[\n* <\s* $spoiler (?:\s+type=(["'])([^"']+)\1)? \s*> \n*]xsio;
 		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
 
-		$str =~ s/$open/_newSpoilerHead()/ge;
+		$str =~ s{$open}{_newSpoilerHead($2//'SPOILER')}ge;
 		$str =~ s/$close/<\/div><\/blockquote>/g;
 	}
 
@@ -1942,8 +1942,8 @@ sub _newSpoilerHead {
 	my $id = sprintf("%08X", rand(0xFFFFFFFF));
 		
 	my $open_new = "<blockquote class=\"spoiler\"><input id=\"spoiler_$id\" type=\"checkbox\" class=\"spoiler\" autocomplete=\"off\"/>\n" .
-									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*SPOILER* (click to show)</label>\n" .
-									"<label class=\"spoiler_on\" title=\"Hide spoiler\" for=\"spoiler_$id\">*SPOILER* (click to hide)</label>\n" .
+									"<label class=\"spoiler_off\" title=\"Show spoiler\" for=\"spoiler_$id\">*$_[0]* (click to show)</label>\n" .
+									"<label class=\"spoiler_on\" title=\"Hide spoiler\" for=\"spoiler_$id\">*$_[0]* (click to hide)</label>\n" .
 									"<div class=\"spoiler_text\">";
 
 	return $open_new;
