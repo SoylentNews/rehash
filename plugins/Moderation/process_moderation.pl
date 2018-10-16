@@ -41,17 +41,52 @@ $task{$me}{code} = sub {
 	#$points_to_handout = determine_mod_points_to_be_issued($slashdb);
 	#distributeModPoints($constants, $slashdb, $points_to_handout);
 
-	# New method for the experiment
-	#use DateTime;
-	#use DateTime::Format::MySQL;
-	#my $dtNow = DateTime->now;
-	#my $now = DateTime::Format::MySQL->format_date($dtNow);
+	# New new method because the old new method was slower than fuck
 	my $acUID = $constants->{anonymous_coward_uid};
 	my $points = $constants->{m1_pointsgrant_arbitrary};
-	my $rows = $slashdb->sqlDo(
-		"update users_info join users_prefs on users_info.uid = users_prefs.uid  set points = $points, lastgranted = NOW() where created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() AND willing = 1;");
-	#my $where = "created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND uid <> $acUID AND mod_banned < NOW()";
-	#$slashdb->sqlUpdate("users_info", { points => $constants->{m1_pointsgrant_arbitrary},  lastgranted => $now }, $where);
+
+	my $modshr = $slashdb->sqlSelectAllHashref(
+		'uid',
+          'uid, 1',
+          'users_info',
+          " created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH) AND users_info.uid <> $acUID AND mod_banned < NOW() order by uid "
+     );
+	my @moderators = sort(keys(%$modshr));
+     my $unwilling = $slashdb->sqlSelectAllHashref(
+          'uid',
+          'uid, willing',
+          'users_prefs',
+          ' willing <> 1 '
+     );
+
+	while(1) {
+		my @thisbatch = splice(@moderators, 0, 1000);
+
+          # remove unwilling moderators from the array
+		my $index = 0;
+		foreach my $moderator (@thisbatch) {
+			if(exists $unwilling->{$moderator}) {
+				splice(@thisbatch, $index, 1);
+			}
+			$index++;
+		}
+
+		# it's technically possible all of one batch don't want to moderate, so...
+		if(scalar @thisbatch > 0) {
+		
+			my $where = join(" or uid = ", @thisbatch);
+		
+     	     my $rows = $slashdb->sqlUpdate(
+          	     'users_info',
+               	{ points => $points, lastgranted => "NOW()"},
+	               "uid = $where"
+     	     );
+		}
+
+          sleep(10); # sleep for 10 seconds so users can get some pages loaded
+
+		last unless scalar @moderators > 0;
+     }
 	
 	return ;
 };
