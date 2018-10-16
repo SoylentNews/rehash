@@ -1926,6 +1926,7 @@ sub apply_rehash_tags {
 
 	# spoiler tags
 	if (grep /^spoiler$/i, @{$constants->{approvedtags}}) {
+		# spoiler:type needs to be added to approvedtags_attr in the vars table for spoilers to work
 		my $spoiler	= 'spoiler';
 		my $open	= qr[\n* <\s* $spoiler (?:\s+type=(["'])([^"']+)\1)? \s*> \n*]xsio;
 		my $close	= qr[\n* <\s* /$spoiler \s*> \n*]xsio;
