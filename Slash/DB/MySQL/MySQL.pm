@@ -7538,7 +7538,7 @@ sub getStoriesEssentials {
 			# If we are excluding any topics, then add a LEFT JOIN
 			# No Left JOIN, do a sub query --paulej72
 			my $tid_x_str = join(",", @$tid_x);
-			push @stories_where, "stories.stoid NOT IN (SELECT story_topics_rendered.stoid FROM story_topics_rendered WHERE story_topics_rendered.tid IN ($tid_x_str))";
+			push @stories_where, "stories.stoid NOT IN (SELECT story_topics_rendered.stoid FROM story_topics_rendered WHERE story_topics_rendered.tid IN ($tid_x_str) GROUP BY story_topics_rendered.stoid)";
 		}
 
 		# If we'd done multiple SELECTs, this logic would have been
