@@ -80,7 +80,7 @@ __template__
 			</form>
 		<div class="notes">
 			<b>Allowed HTML</b><br>
-				&lt;[% constants.approvedtags_visible.join("&gt; &lt;") %]&gt;
+				&lt;[% constants.approvedtags_visible.replace('|', ' | ') %]&gt;
 			[% IF constants.approvedtags.grep("ECODE").0 %]
 				(Use "ECODE" instead of "PRE" or "CODE".)
 			[% END %]
