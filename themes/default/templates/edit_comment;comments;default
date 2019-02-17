@@ -216,7 +216,7 @@ IF do_br %]<br>[% END %]
 [% END %]
 			<div class="notes">
 				<p><b>Allowed HTML</b><br/>
-				&lt;[% constants.approvedtags_visible.join("&gt; &lt;") %]&gt;
+				&lt;[% constants.approvedtags_visible.replace('|', ' | ') %]&gt;
 				[% IF constants.approvedtags.grep("ECODE").0 %]
 					(Use "ECODE" instead of "PRE" or "CODE".)
 				[% END %]
