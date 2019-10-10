@@ -436,8 +436,8 @@ sub getSingleJournal {
 	$journal->{nickname} = $slashdb->sqlSelect(
 				'nickname',
 				'users',
-				" uid = $journals->{$id}->{uid} ");
-	$journal->{link} = "$gSkin->{absolutedir}/~$journals->{$id}->{nickname}/journal/$id";
+				" uid = $journal->{uid} ");
+	$journal->{link} = "$gSkin->{absolutedir}/~$journal->{nickname}/journal/$journal->{id}";
 
 	my $json = JSON->new->utf8->allow_nonref;
 	return $json->pretty->encode($journal);
