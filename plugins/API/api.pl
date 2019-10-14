@@ -432,6 +432,12 @@ sub getSingleJournal {
 	my $journal = $journal_reader->get($form->{id});
 	delete $journal->{srcid_32};
 	delete $journal->{srcid_24};
+	
+	$journal->{nickname} = $slashdb->sqlSelect(
+				'nickname',
+				'users',
+				" uid = $journal->{uid} ");
+	$journal->{link} = "$gSkin->{absolutedir}/~$journal->{nickname}/journal/$journal->{id}";
 
 	my $json = JSON->new->utf8->allow_nonref;
 	return $json->pretty->encode($journal);
@@ -458,7 +464,7 @@ sub getLatestJournals {
 					'introtext, article',
 					'journals_text',
 					" id = $id ");
-		($journals->{$id}->{introtext}, $journals->{$id}->{artice}) = @$texts;
+		($journals->{$id}->{introtext}, $journals->{$id}->{article}) = @$texts;
 		
 		push @$items, $journals->{$id};
 	}
