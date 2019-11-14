@@ -528,7 +528,7 @@ sub getSingleComment {
 
 sub getDiscussion {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
-	my $discussion = $slashdb->getDiscussion($form->{id});
+	my $discussion = $slashdb->getDiscussion($form->{sid});
 	if (!$discussion || !$discussion->{commentcount} ||  $discussion->{commentstatus} eq 'disabled' ) { return; }
 
 	my($comments, $count) = selectComments($discussion);
