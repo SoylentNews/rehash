@@ -999,6 +999,14 @@ Leela:Do you have idiots on your planet?
 Leela:My old life wasn't as glamorous as my webpage made it look.
 Leela:No, Leela will show you out.
 Hermes:Without my body, I'm a nobody.
+Zoidberg:Friends, help! A guinea pig tricked me! 
+Zoidberg:If only it'd worked, you could go back and not waste your time on it. 
+Zoidberg:Hello? I'll take eight!
+Zoidberg:Once again, the conservative, sandwich-heavy portfolio pays off for the hungry investor!
+Zoidberg:One art please!
+Zoidberg:There's no part of that sentence I didn't like!
+Zoidberg:The box, says no.
+Zoidberg:I wasn't wearing it. I was eating it!
 EOT
 
 1;
