@@ -742,7 +742,7 @@ sub genChosenHashrefForTopics {
 sub getModReasons {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $json = JSON->new->utf8->allow_nonref;
-	my $wholeshebang = $slashdb->sqlSelectAllHashref("id", "id, name, val, ordered, needs_prior_mod", "modreasons", "id <=> 100");
+	my $wholeshebang = $slashdb->sqlSelectAllHashref("id", "id, name, val, ordered, needs_prior_mod", "modreasons", "id <> 100");
 
 
 	return $json->pretty->encode($wholeshebang);
