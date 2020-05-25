@@ -88,7 +88,7 @@ sub auth {
 
 sub mod {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
-	my $op = lc($form->{op};
+	my $op = lc($form->{op});
 
 	my $ops = {
 		default		=> {
