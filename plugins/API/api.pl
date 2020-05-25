@@ -41,6 +41,10 @@ sub main {
 			function	=> \&auth,
 			seclev		=> 1,
 		},
+		mod		=> {
+			function	=> \&mod,
+			seclev		=> 1,
+		},
 		default		=> {
 			function	=> \&nullop,
 			seclev		=> 1,
@@ -80,6 +84,26 @@ sub auth {
 	$op = 'default' unless $ops->{$op};
 
         return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub mod {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $op = lc($form->{op};
+
+	my $ops = {
+		default		=> {
+			function	=> \&nullop,
+			seclev		=> 0,
+		},
+		reasons		=> {
+			function	=> \&getModReasons,
+			seclev		=> 0,
+		},
+	};
+
+	$op = 'default' unless $ops->{$op};
+
+	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
 sub user {
@@ -715,6 +739,14 @@ sub genChosenHashrefForTopics {
 	return $chosen_hr;
 }
 
+sub getModReasons {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $json = JSON->new->utf8->allow_nonref;
+	my $wholeshebang = $slashdb->sqlSelectAllHashref("id", "id, name, val, ordered, needs_prior_mod", "modreasons", "id <=> 100");
+
+
+	return $json->pretty->encode($wholeshebang);
+}
 #createEnvironment();
 main();
 1;
