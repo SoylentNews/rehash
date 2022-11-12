@@ -336,7 +336,7 @@ sub ProxyRemoteAddr ($) {
 	# it appends the actual original IP to its value).
 	my $xf = undef;
 	$xf = $r->headers_in->{$trusted_header} if $trusted_header;
-	$xf ||= $r->headers_in->{'X-Forwarded-For'} | '';
+	$xf ||= $r->headers_in->{'X-Real-IP'} | '';
 	if ($xf) {
 		# This doesn't strictly speaking handle the case of multiple IPs in
 		# XFF, so this probably should be fixed.

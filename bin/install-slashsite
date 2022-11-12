@@ -562,7 +562,7 @@ $include
 
     # First Apache phase:  post-read-request
 
-    # if you have a frontend/backend setup and have X-Forwarded-For
+    # if you have a frontend/backend setup and have X-Real-IP
     # headers (such as from mod_proxy_add_forward), use this
     # to properly populate remote_ip for formkeys etc.
     #PerlPostReadRequestHandler Slash::Apache::ProxyRemoteAddr

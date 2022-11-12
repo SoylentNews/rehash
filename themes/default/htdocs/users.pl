@@ -755,7 +755,7 @@ sub mailPasswd {
 	# into parsing a plaintext email as HTML.
 	my $r = Apache2::RequestUtil->request;
 	my $remote_ip = $r->connection->remote_ip;
-	my $xff = $r->headers_in->{'X-Forwarded-For'} || '';
+	my $xff = $r->headers_in->{'X-Real-IP'} || '';
 	$xff =~ s/\s+/ /g;
 	$xff = substr(strip_notags($xff), 0, 20);
 	my $ua = $r->headers_in->{'User-Agent'} || '';

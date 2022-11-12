@@ -158,7 +158,7 @@ was [% remote_ip %].[% IF user_agent %]  Its user agent was
 "[% user_agent %]"
 (not that you should trust that value, but it might be interesting).[% END %]
 [% IF x_forwarded_for %]In case that's a properly-configured proxy,
-the value of its X-Forwarded-For header was "[% x_forwarded_for %]" --
+the value of its X-Real-IP header was "[% x_forwarded_for %]" --
 but don't trust that value unless you know a reason to (we don't).[% END %]
 
 If you don't use this new password within [% constants.mailpass_valid_days %] days, it will expire

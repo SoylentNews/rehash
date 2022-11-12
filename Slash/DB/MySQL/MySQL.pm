@@ -4563,7 +4563,7 @@ sub setKnownOpenProxy {
 	my $xff;
 	if ($port) {
 		my $r = Apache2::RequestUtil->request;
-		$xff = $r->headers_in->get('X-Forwarded-For') if $r;
+		$xff = $r->headers_in->get('X-Real-IP') if $r;
 #use Data::Dumper; print STDERR "sKOP headers_in: " . Dumper([ $r->headers_in ]) if $r;
 	}
 	$xff = undef unless $xff && length($xff) >= 7
