@@ -531,9 +531,9 @@ sub getReverseMods {
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"moderatorlog.uid AS muid,
 		 nickname, tokens, users_info.karma AS karma,
-		 ( SUM( IF( moderatorlog.val=-1,
-				IF(points=5, $down5, 0),
-				IF(points<=$upmax, $upsub-points*$upmul, 0) ) )
+		 ( SUM( IF( comments.moderatorlog.val=-1,
+				IF(comments.points=5, $down5, 0),
+				IF(comments.points<=$upmax, $upsub-comments.points*$upmul, 0) ) )
 		  +SUM( $m2able_score_clause )
 		 )/(COUNT(*)+$denomadd) AS score,
 		 IF(MAX(moderatorlog.ts) > DATE_SUB(NOW(), INTERVAL 24 HOUR),
