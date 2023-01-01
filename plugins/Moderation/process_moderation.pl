@@ -78,7 +78,7 @@ $task{$me}{code} = sub {
 		
      	     my $rows = $slashdb->sqlUpdate(
           	     'users_info',
-               	{ points => $points, lastgranted => "NOW()"},
+               	{ points => $points },
 	               "uid = $where"
      	     );
 		}
