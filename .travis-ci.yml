@@ -1,0 +1,4 @@
+language: perl
+
+before_install:
+  - docker build -t soylentnews/rehash .
