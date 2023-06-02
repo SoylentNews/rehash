@@ -104,12 +104,23 @@ RUN ${REHASH_CPANM} LWP::Parallel::UserAgent
 RUN ${REHASH_CPANM} LWP::UserAgent
 RUN ${REHASH_CPANM} Mail::Address
 RUN ${REHASH_CPANM} Mail::Bulkmail
-#RUN ${REHASH_CPANM} Mail::Sendmail
+
+# Disable tests on Mail::Sendmail because it works by sending an email to the author
+RUN ${REHASH_CPANM} Mail::Sendmail --notest
+
 RUN ${REHASH_CPANM} MIME::Types
 RUN ${REHASH_CPANM} Mojo::Server::Daemon
 RUN ${REHASH_CPANM} Net::IP
 RUN ${REHASH_CPANM} Net::Server
-#RUN ${REHASH_CPANM} Schedule::Cron
+
+# Time::ParseDate is a dependency of Schedule::Cron but has test problems
+#
+# This fails in Docker due to possibly missing tiemzone data, but rehash
+# assumes and expects to be running on UTC so bypassing the test failure
+
+RUN ${REHASH_CPANM} Time::ParseDate --notest
+RUN ${REHASH_CPANM} Schedule::Cron
+
 RUN ${REHASH_CPANM} SOAP::Lite
 RUN ${REHASH_CPANM} Sphinx::Search
 RUN ${REHASH_CPANM} URI::Encode
