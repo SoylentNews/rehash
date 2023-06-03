@@ -4,7 +4,8 @@ FROM ubuntu:22.04
 # Control variables
 ARG REHASH_REPO=https://github.com/SoylentNews/rehash.git
 ARG REHASH_PREFIX=/srv/soylentnews.org
-ARG REHASH_ROOT=/srv/soylentnews.org/rehash
+ARG REHASH_ROOT=/srv/soylentnews.org/
+ARG REHASH_SRC=/build/rehash
 
 ARG PERL_VERSION=5.30.0
 ARG PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
@@ -27,20 +28,10 @@ RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1
 # Unminimize the image since Perl's test suite requires it
 RUN yes | unminimize
 
-# Build Perl for Rehash
 WORKDIR /build
 RUN wget ${PERL_DOWNLOAD}
 RUN tar zxf perl-${PERL_VERSION}.tar.gz
 WORKDIR perl-${PERL_VERSION}
-
-# We need to patch Perl due to bitrot
-#RUN ls
-#COPY patches/perl/* .
-#RUN patch -p1 < 00_fix_libcrypt_build.patch
-#RUN patch -p1 < 01_fix_errno_test_failure.patch
-#RUN patch -p1 < 02_fix_time_local.patch
-#RUN patch -p1 < 03_h2ph_gcc_fix.patch
-#RUN patch -p1 < 04_h2ph_fix_hex_constants.patch
 
 RUN ./Configure -des -Dprefix=${REHASH_PREFIX}/perl -Duseshrplib -Dusethreads
 RUN make -j8
@@ -69,9 +60,9 @@ RUN make test
 RUN make install
 
 # Install CPAN Minus to make scriptable install possible
-WORKDIR ${REHASH_PREFIX}
+WORKDIR /build
 RUN git clone ${REHASH_REPO}
-RUN ${REHASH_PERL} ${REHASH_ROOT}/utils/cpanm App::cpanminus
+RUN ${REHASH_PERL} ${REHASH_SRC}/utils/cpanm App::cpanminus
 
 # The tests fail on Docker due to a connection upgrade inline issue.
 # This is probably good enough, and we shoudln't be depending on external
@@ -128,3 +119,12 @@ RUN ${REHASH_CPANM} Template
 RUN ${REHASH_CPANM} XML::Parser
 RUN ${REHASH_CPANM} XML::Parser::Expat
 RUN ${REHASH_CPANM} XML::RSS
+
+# DBIx::Password is ... uh ... not easy to deal with.
+# Just copy in a pregenerated version
+
+COPY DBIx/Password.pm ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/Password.pm
+
+WORKDIR ${REHASH_SRC}
+RUN make PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
+RUN make PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} install
