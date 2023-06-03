@@ -7,6 +7,12 @@ ARG REHASH_PREFIX=/srv/soylentnews.org
 ARG REHASH_ROOT=/srv/soylentnews.org/
 ARG REHASH_SRC=/build/rehash
 
+# MySQL Database Stuff
+ARG MYSQL_HOST=localhost
+ARG MYSQL_DATABASE=soylentnews
+ARG MYSQL_USER=soylentnews
+ARG MYSQL_PASSWORD=soylentnews
+
 ARG PERL_VERSION=5.30.0
 ARG PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
 
@@ -122,8 +128,11 @@ RUN ${REHASH_CPANM} XML::RSS
 
 # DBIx::Password is ... uh ... not easy to deal with.
 # Just copy in a pregenerated version
-
-COPY DBIx/Password.pm ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/Password.pm
+WORKDIR /build
+COPY DBIx/make_password_pm.sh .
+COPY DBIx/Password.pm.in .
+RUN mkdir -p ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/
+RUN sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/Password.pm
 
 WORKDIR ${REHASH_SRC}
 RUN make PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
