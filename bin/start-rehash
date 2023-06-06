@@ -1,4 +1,5 @@
 #!/bin/sh
-sudo -u slash /srv/soylentnews.org/apache/bin/apachectl -k start
-sudo -u slash DATADIR=/srv/soylentnews.org/rehash util/slash start
-sudo -u slash DATADIR=/srv/soylentnews.org/rehash util/ipnd start
+cd /rehash-prefix
+sudo -u slash bin/apachectl -k start
+sudo -u slash DATADIR=`pwd`/rehash util/slash start
+sudo -u slash DATADIR=`pwd`/rehash util/ipnd start

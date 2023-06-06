@@ -149,4 +149,5 @@ RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} 
 RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
 COPY bin/start-rehash /start-rehash
 RUN chmod +x /start-rehash
+RUN ln -s ${REHASH_PREFIX} /rehash-prefix
 CMD /start-rehash
