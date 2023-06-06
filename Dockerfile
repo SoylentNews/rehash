@@ -157,6 +157,6 @@ RUN ln -s ${REHASH_PREFIX} /rehash-prefix
 # So logs on production end up here, just create it and figure out
 # how the path gets created later
 RUN mkdir -p /srv/soylentnews.logs
-RUN chown slash:slash -R /srv/solyentnews.logs
+RUN chown slash:slash -R /srv/soylentnews.logs
 
 CMD /start-rehash
