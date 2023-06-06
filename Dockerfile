@@ -4,7 +4,7 @@ FROM ubuntu:22.04 AS rehash
 # Control variables
 ARG REHASH_REPO=https://github.com/SoylentNews/rehash.git
 ARG REHASH_PREFIX=/srv/soylentnews.org
-ARG REHASH_ROOT=/srv/soylentnews.org/
+ARG REHASH_ROOT=/srv/soylentnews.org/rehash
 ARG REHASH_SRC=/build/rehash
 
 # MySQL Database Stuff
@@ -153,5 +153,5 @@ RUN chown slash:slash -R /srv/soylentnews.org/apache/logs
 COPY bin/start-rehash /start-rehash
 RUN chmod +x /start-rehash
 RUN ln -s ${REHASH_PREFIX} /rehash-prefix
-
+RUN ln -s ${REHASH_ROOT} /reflash-root
 CMD /start-rehash
