@@ -1,5 +1,5 @@
 # Distribution Version
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS rehash
 
 # Control variables
 ARG REHASH_REPO=https://github.com/SoylentNews/rehash.git
@@ -27,6 +27,12 @@ ARG MOD_PERL_DOWNLOAD=https://archive.apache.org/dist/perl/mod_perl-2.0.9.tar.gz
 ENV REHASH_PERL=${REHASH_PREFIX}/perl/bin/perl
 ENV REHASH_CPANM=${REHASH_PREFIX}/perl/bin/cpanm
 
+# Open ports
+EXPOSE 80
+
+# for ipn
+EXPOSE 2626
+
 # Install system build dependencies
 RUN apt-get update
 RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget
@@ -37,7 +43,7 @@ RUN yes | unminimize
 WORKDIR /build
 RUN wget ${PERL_DOWNLOAD}
 RUN tar zxf perl-${PERL_VERSION}.tar.gz
-WORKDIR perl-${PERL_VERSION}
+WORKDIR /build/perl-${PERL_VERSION}
 
 RUN ./Configure -des -Dprefix=${REHASH_PREFIX}/perl -Duseshrplib -Dusethreads
 RUN make -j8
@@ -48,7 +54,7 @@ RUN make install
 WORKDIR /build
 RUN wget ${APACHE_DOWNLOAD}
 RUN tar zxf httpd-${APACHE_VERSION}.tar.gz
-WORKDIR httpd-${APACHE_VERSION}
+WORKDIR /build/httpd-${APACHE_VERSION}
 
 RUN ./configure --prefix=${REHASH_PREFIX}/apache --enable-mods-shared=most
 RUN make
@@ -58,7 +64,7 @@ RUN make install
 WORKDIR /build
 RUN wget ${MOD_PERL_DOWNLOAD}
 RUN tar zxf mod_perl-${MOD_PERL_VERSION}.tar.gz
-WORKDIR mod_perl-${MOD_PERL_VERSION}
+WORKDIR /build/mod_perl-${MOD_PERL_VERSION}
 
 RUN ${REHASH_PERL} Makefile.PL MP_APXS=${REHASH_PREFIX}/apache/bin/apxs
 RUN make
@@ -133,7 +139,12 @@ COPY DBIx/make_password_pm.sh .
 COPY DBIx/Password.pm.in .
 RUN mkdir -p ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/
 RUN sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/Password.pm
+RUN adduser --system --group --gecos "Slash" slash
 
 WORKDIR ${REHASH_SRC}
-RUN make PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
-RUN make PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} install
+RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
+RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} install
+
+# Create the slashsites files
+RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
+CMD ${REHASH_ROOT}/bin/start-rehash
