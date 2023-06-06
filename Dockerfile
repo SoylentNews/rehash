@@ -131,6 +131,7 @@ RUN ${REHASH_CPANM} Template
 RUN ${REHASH_CPANM} XML::Parser
 RUN ${REHASH_CPANM} XML::Parser::Expat
 RUN ${REHASH_CPANM} XML::RSS
+RUN ${REHASH_CPANM} Email::Valid
 
 # DBIx::Password is ... uh ... not easy to deal with.
 # Just copy in a pregenerated version
@@ -158,9 +159,5 @@ RUN ln -s ${REHASH_PREFIX} /rehash-prefix
 # how the path gets created later
 RUN mkdir -p /srv/soylentnews.logs
 RUN chown slash:slash -R /srv/soylentnews.logs
-
-# Copy the utils scripts
-COPY utils/slash ${REHASH_ROOT}/utils/slash
-COPY utils/ipn ${REHASH_ROOT}/utils/ipn
 
 CMD /start-rehash
