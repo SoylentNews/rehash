@@ -150,6 +150,7 @@ RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} 
 
 # Create the slashsites files
 RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
+RUN echo "sudo -u slash" > /srv/soylentnews.org/rehash/mysudo
 
 # Startup scripts and permissions
 COPY bin/start-rehash /start-rehash
