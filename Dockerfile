@@ -16,7 +16,7 @@ ARG MYSQL_PASSWORD=soylentnews
 ARG PERL_VERSION=5.30.0
 ARG PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
 
-ARG APACHE_VERSION=2.2.57
+ARG APACHE_VERSION=2.2.34
 ARG APACHE_DOWNLOAD=https://archive.apache.org/dist/httpd/httpd-${APACHE_VERSION}.tar.gz
 
 ARG MOD_PERL_VERSION=2.0.12
