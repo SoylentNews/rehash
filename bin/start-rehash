@@ -2,4 +2,4 @@
 cd /rehash-prefix
 sudo -u slash apache/bin/apachectl -k start
 sudo -u slash DATADIR=`pwd`/rehash rehash/utils/slash start
-sudo -u slash DATADIR=`pwd`/rehash rehash/utils/ipnd start
+sudo -u slash DATADIR=`pwd`/rehash rehash/utils/ipn start

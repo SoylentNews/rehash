@@ -159,4 +159,8 @@ RUN ln -s ${REHASH_PREFIX} /rehash-prefix
 RUN mkdir -p /srv/soylentnews.logs
 RUN chown slash:slash -R /srv/soylentnews.logs
 
+# Copy the utils scripts
+COPY utils/slash ${REHASH_ROOT}/utils/slash
+COPY utils/ipn ${REHASH_ROOT}/utils/ipn
+
 CMD /start-rehash
