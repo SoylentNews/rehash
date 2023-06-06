@@ -16,12 +16,11 @@ ARG MYSQL_PASSWORD=soylentnews
 ARG PERL_VERSION=5.30.0
 ARG PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
 
-ARG APACHE_VERSION=2.2.29
+ARG APACHE_VERSION=2.2.57
 ARG APACHE_DOWNLOAD=https://archive.apache.org/dist/httpd/httpd-${APACHE_VERSION}.tar.gz
 
-ARG MOD_PERL_VERSION=2.0.9
-#ARG MOD_PERL_DOWNLOAD=https://mirror.cogentco.com/pub/apache/perl/mod_perl-${MOD_PERL_VERSION}.tar.gz
-ARG MOD_PERL_DOWNLOAD=https://archive.apache.org/dist/perl/mod_perl-2.0.9.tar.gz
+ARG MOD_PERL_VERSION=2.0.12
+ARG MOD_PERL_DOWNLOAD=https://mirror.cogentco.com/pub/apache/perl/mod_perl-${MOD_PERL_VERSION}.tar.gz
 
 # rehash uses its own Perl, make we need to define that
 ENV REHASH_PERL=${REHASH_PREFIX}/perl/bin/perl
