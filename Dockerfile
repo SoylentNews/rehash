@@ -160,6 +160,7 @@ RUN mkdir -p /srv/soylentnews.logs
 RUN mkdir -p rehash/site/soylent-mainpage/logs/
 
 RUN chown slash:slash -R /srv/soylentnews.logs
-RUN chown slash:slash -R /srv/soylentnews.org
+RUN chown slash:slash -R /srv/soylentnews.org/rehash
+RUN chown slash:slash -R /srv/soylentnews.org/apache/logs
 
 CMD /start-rehash
