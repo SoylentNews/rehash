@@ -153,5 +153,4 @@ RUN chown slash:slash -R /srv/soylentnews.org/apache/logs
 COPY bin/start-rehash /start-rehash
 RUN chmod +x /start-rehash
 RUN ln -s ${REHASH_PREFIX} /rehash-prefix
-RUN ln -s ${REHASH_ROOT} /reflash-root
 CMD /start-rehash
