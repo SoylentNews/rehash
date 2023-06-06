@@ -35,7 +35,7 @@ EXPOSE 2626
 
 # Install system build dependencies
 RUN apt-get update
-RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget
+RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo
 
 # Unminimize the image since Perl's test suite requires it
 RUN yes | unminimize
