@@ -150,7 +150,6 @@ RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} 
 RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
 
 # Startup scripts and permissions
-RUN chown slash:slash -R /srv/soylentnews.org/apache/logs
 COPY bin/start-rehash /start-rehash
 RUN chmod +x /start-rehash
 RUN ln -s ${REHASH_PREFIX} /rehash-prefix
@@ -158,6 +157,9 @@ RUN ln -s ${REHASH_PREFIX} /rehash-prefix
 # So logs on production end up here, just create it and figure out
 # how the path gets created later
 RUN mkdir -p /srv/soylentnews.logs
+RUN mkdir -p rehash/site/soylent-mainpage/logs/
+
 RUN chown slash:slash -R /srv/soylentnews.logs
+RUN chown slash:slash -R /srv/soylentnews.org
 
 CMD /start-rehash
