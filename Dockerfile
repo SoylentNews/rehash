@@ -135,6 +135,8 @@ RUN ${REHASH_CPANM} XML::Parser::Expat
 RUN ${REHASH_CPANM} XML::RSS
 RUN ${REHASH_CPANM} Email::Valid
 
+RUN ${REHASH_CPANM} Crypt::CBC
+
 # DBIx::Password is ... uh ... not easy to deal with.
 # Just copy in a pregenerated version
 WORKDIR /build
@@ -161,7 +163,11 @@ RUN ln -s ${REHASH_PREFIX} /rehash-prefix
 # how the path gets created later
 RUN mkdir -p ${REHASH_ROOT}/site/soylent-mainpage/logs/
 
+# make the SN logs folder, hack for production
+RUN mkdir -p /srv/soylentnews.logs
+
 RUN chown slash:slash -R ${REHASH_PREFIX}/rehash
 RUN chown slash:slash -R ${REHASH_PREFIX}/apache/logs
+RUN chown slash:slash -R /srv/soylentnews.logs
 
 CMD /start-rehash
