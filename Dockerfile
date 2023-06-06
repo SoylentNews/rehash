@@ -147,7 +147,11 @@ RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} 
 
 # Create the slashsites files
 RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
+
+# Startup scripts and permissions
+RUN chown slash:slash -R /srv/soylentnews.org/apache/logs
 COPY bin/start-rehash /start-rehash
 RUN chmod +x /start-rehash
 RUN ln -s ${REHASH_PREFIX} /rehash-prefix
+
 CMD /start-rehash
