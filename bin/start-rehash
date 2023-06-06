@@ -1,5 +1,5 @@
 #!/bin/sh
 cd /rehash-prefix
-sudo -u slash bin/apachectl -k start
-sudo -u slash DATADIR=`pwd`/rehash util/slash start
-sudo -u slash DATADIR=`pwd`/rehash util/ipnd start
+sudo -u slash apache/bin/apachectl -k start
+sudo -u slash DATADIR=`pwd`/rehash rehash/util/slash start
+sudo -u slash DATADIR=`pwd`/rehash rehash/util/ipnd start
