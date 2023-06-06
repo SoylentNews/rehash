@@ -1,5 +1,8 @@
 #!/bin/sh
 cd /rehash-prefix
+sudo -u slash rehash/bin/symlink-tool -U
+sudo -u slash rehash/bin/template-tool -U
+
 sudo -u slash /etc/init.d/slash start
 sudo -u slash /etc/init.d/ipn start
 sudo -u slash apache/bin/apachectl -k start
