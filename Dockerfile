@@ -151,7 +151,7 @@ RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} 
 
 # Create the slashsites files
 RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
-RUN echo "sudo -u slash" > /srv/soylentnews.org/rehash/mysudo
+RUN echo "sudo -u slash" > ${REHASH_ROOT}/rehash/mysudo
 
 # Startup scripts and permissions
 COPY bin/start-rehash /start-rehash
@@ -169,4 +169,8 @@ RUN chown slash:slash -R ${REHASH_PREFIX}/rehash
 RUN chown slash:slash -R ${REHASH_PREFIX}/apache/logs
 RUN chown slash:slash -R /srv/soylentnews.logs
 
+RUN echo "LoadModule apreq_module modules/mod_apreq2.so" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN echo "LoadModule perl_module modules/mod_perl.so" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN echo "Include /rehash-prefix/rehash/httpd/slash.conf" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN echo "Include /rehash-prefix/rehash/httpd/site.conf" >> ${REHASH_PREFIX}/rehash/httpd/slash.conf
 CMD /start-rehash
