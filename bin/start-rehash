@@ -3,6 +3,7 @@ cd /rehash-prefix
 sudo -u slash rehash/bin/symlink-tool -U
 sudo -u slash rehash/bin/template-tool -U
 
+rm -f /srv/soylentnews.logs/slashd.pig
 /etc/init.d/slash start
 /etc/init.d/ipn start
 sudo -u slash apache/bin/apachectl -k start
