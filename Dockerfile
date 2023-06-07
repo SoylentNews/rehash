@@ -74,8 +74,8 @@ RUN make install
 
 # Install CPAN Minus to make scriptable install possible
 WORKDIR /build
-RUN git clone ${REHASH_REPO}
-RUN ${REHASH_PERL} ${REHASH_SRC}/utils/cpanm App::cpanminus
+COPY utils/cpanm /build/cpanm
+RUN ${REHASH_PERL} /build/cpanm App::cpanminus
 
 # The tests fail on Docker due to a connection upgrade inline issue.
 # This is probably good enough, and we shoudln't be depending on external
@@ -145,6 +145,8 @@ RUN mkdir -p ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/
 RUN sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/Password.pm
 RUN adduser --system --group --gecos "Slash" slash
 
+# Copy in the rehash source code
+ADD ./* ${REHASH_SRC}/*
 WORKDIR ${REHASH_SRC}
 RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
 RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} install
