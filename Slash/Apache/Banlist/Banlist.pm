@@ -30,7 +30,7 @@ sub handler {
 	Apache2::RequestUtil->request($r);
 
 	# Get some information about the IP this request is coming from.
-	my $hostip = $r->connection->remote_addr->ip_get;
+	my $hostip = $r->connection->client_addr->ip_get;
 	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
 		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
 	my($cur_srcid_ip, $cur_srcid_subnet) = get_srcids({ ip => $hostip },

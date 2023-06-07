@@ -1326,7 +1326,7 @@ sub createAccessLog {
 
 	my($ipid, $subnetid) = (getCurrentUser('ipid'), getCurrentUser('subnetid'));
 	if (!$ipid || !$subnetid) {
-		($ipid, $subnetid) = get_ipids($r->connection->remote_ip);
+		($ipid, $subnetid) = get_ipids($r->connection->client_ip);
 	}
 
 	if ( $op eq 'index' && $dat =~ m|^([^/]*)| ) {
@@ -1434,7 +1434,7 @@ sub createAccessLogAdmin {
 	##########
 
 	$self->sqlInsert('accesslog_admin', {
-		host_addr	=> $r->connection->remote_ip,
+		host_addr	=> $r->connection->client_ip,
 		dat		=> $dat,
 		uid		=> $uid,
 		skid		=> $skid,
@@ -1727,7 +1727,7 @@ sub createBadPasswordLog {
 	# the real owner is.
 	my $realemail = $self->getUser($uid, 'realemail') || '';
 
-	my($ip, $subnet) = get_ipids($r->connection->remote_ip, 1);
+	my($ip, $subnet) = get_ipids($r->connection->client_ip, 1);
 	$self->sqlInsert("badpasswords", {
 		uid =>          $uid,
 		password =>     $password_wrong,

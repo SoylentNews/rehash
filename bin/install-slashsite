@@ -532,8 +532,7 @@ sub apache_site_conf {
 <Directory $prefix_site/$sitename/htdocs>
     Options FollowSymLinks ExecCGI Includes Indexes
     AllowOverride None
-    Order allow,deny
-    Allow from all
+    Require All Granted
 </Directory>
 
 <VirtualHost $host_port>

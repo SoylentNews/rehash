@@ -1696,7 +1696,7 @@ sub prepareUser {
 	my $r;
 	if ($ENV{MOD_PERL}) {
 		$r = Apache2::RequestUtil->request;
-		$hostip = $r->connection->remote_ip;
+		$hostip = $r->connection->client_ip;
 	} else {
 		$hostip = '';
 	}
@@ -2987,6 +2987,7 @@ sub createEnvironment {
 	# changing later if a user is successfully authorized.
 	# Either is OK.
 	my $gSkin = getCurrentSkin();
+	print $gSkin;
 #print STDERR scalar(localtime) . " $$ createEnvironment gSkin->skid=$gSkin->{skid} ac_uid=$gSkin->{ac_uid}\n";
 	my $ac_uid = $gSkin->{ac_uid} || $constants->{anonymous_coward_uid};
 	$ENV{SLASH_USER} = $ac_uid;
@@ -3090,7 +3091,7 @@ sub get_ipids {
  
 	if (!$hostip && $ENV{MOD_PERL}) {
 		my $r = Apache2::RequestUtil->request;
-		$hostip = $r->connection->remote_ip;
+		$hostip = $r->connection->client_ip;
 	} elsif (!$hostip) {
 		# Can't use '' when in slashd ...
 		$hostip = '0.0.0.0';
@@ -3164,7 +3165,7 @@ more srcids.
 A hashref containing one or more of two possible fields:  (1) "uid",
 whose value is a user id;  and/or (2) "ip", whose value is a text string
 representing an IPv4 or IPv6 address in string form, or a false value
-which means to use the current Apache connection's remote_ip if invoked 
+which means to use the current Apache connection's client_ip if invoked 
 within Apache, or the dummy value "0.0.0.0" otherwise.
 
 =item OPTIONS
@@ -3236,7 +3237,7 @@ sub get_srcids {
 		if (!$ip) {
 			if ($ENV{MOD_PERL}) {
 				my $r = Apache2::RequestUtil->request;
-				$ip = $r->connection->remote_ip;
+				$ip = $r->connection->client_ip;
 			} elsif (!$ip) {
 				$ip = '0.0.0.0';
 			}
