@@ -148,7 +148,8 @@ RUN adduser --system --group --gecos "Slash" slash
 WORKDIR ${REHASH_SRC}
 RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
 RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} install
-COPY ${REHASH_SRC}/httpd/site.conf ${REHASH_ROOT}/httpd/site.conf
+RUN cp ${REHASH_SRC}/httpd/site.conf ${REHASH_ROOT}/httpd/site.conf
+
 # Create the slashsites files
 RUN echo "slash:slash:soylent-mainpage" > ${REHASH_ROOT}/slash.sites
 RUN echo "sudo -u slash" > ${REHASH_ROOT}/mysudo
