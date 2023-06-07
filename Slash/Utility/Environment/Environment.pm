@@ -2987,7 +2987,6 @@ sub createEnvironment {
 	# changing later if a user is successfully authorized.
 	# Either is OK.
 	my $gSkin = getCurrentSkin();
-	print $gSkin;
 #print STDERR scalar(localtime) . " $$ createEnvironment gSkin->skid=$gSkin->{skid} ac_uid=$gSkin->{ac_uid}\n";
 	my $ac_uid = $gSkin->{ac_uid} || $constants->{anonymous_coward_uid};
 	$ENV{SLASH_USER} = $ac_uid;
