@@ -146,7 +146,7 @@ RUN sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQ
 RUN adduser --system --group --gecos "Slash" slash
 
 # Copy in the rehash source code
-ADD ./* ${REHASH_SRC}/
+ADD . ${REHASH_SRC}/
 WORKDIR ${REHASH_SRC}
 RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT}
 RUN make USER=slash GROUP=slash PERL=${REHASH_PERL} SLASH_PREFIX=${REHASH_ROOT} install
