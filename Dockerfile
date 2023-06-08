@@ -135,6 +135,7 @@ RUN ${REHASH_CPANM} XML::RSS
 RUN ${REHASH_CPANM} Email::Valid
 
 RUN ${REHASH_CPANM} Crypt::CBC
+RUN ${REHASH_CPANM} HTML::PopupTreeSelect
 
 # DBIx::Password is ... uh ... not easy to deal with.
 # Just copy in a pregenerated version
