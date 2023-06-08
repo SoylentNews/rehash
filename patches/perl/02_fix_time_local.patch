@@ -1,0 +1,100 @@
+--- a/cpan/Time-Local/t/Local.t
++++ b/cpan/Time-Local/t/Local.t
+@@ -80,20 +80,18 @@
+
+ for (@time, @neg_time) {
+     my($year, $mon, $mday, $hour, $min, $sec) = @$_;
+-    $year -= 1900;
+     $mon--;
+
+     SKIP: {
+         skip '1970 test on VOS fails.', 12
+-            if $^O eq 'vos' && $year == 70;
++            if $^O eq 'vos' && $year == 1970;
+         skip 'this platform does not support negative epochs.', 12
+-            if $year < 70 && ! $neg_epoch_ok;
++            if $year < 1970 && ! $neg_epoch_ok;
+
+         # Test timelocal()
+         {
+             my $year_in = $year < 70 ? $year + 1900 : $year;
+-            my $time = timelocal($sec,$min,$hour,$mday,$mon,$year_in);
+-
++            my $time = timelocal( $sec, $min, $hour, $mday, $mon, $year );
+             my($s,$m,$h,$D,$M,$Y) = localtime($time);
+
+             is($s, int($sec), "timelocal second for @$_");
+@@ -101,14 +99,14 @@
+             is($h, $hour, "timelocal hour for @$_");
+             is($D, $mday, "timelocal day for @$_");
+             is($M, $mon, "timelocal month for @$_");
+-            is($Y, $year, "timelocal year for @$_");
++            is($Y, $year -1900, "timelocal year for @$_");
+         }
+
+
+         # Test timegm()
+         {
+             my $year_in = $year < 70 ? $year + 1900 : $year;
+-            my $time = timegm($sec,$min,$hour,$mday,$mon,$year_in);
++            my $time = timegm($sec,$min,$hour,$mday,$mon,$year);
+
+             my($s,$m,$h,$D,$M,$Y) = gmtime($time);
+
+@@ -117,7 +115,7 @@
+             is($h, $hour, "timegm hour for @$_");
+             is($D, $mday, "timegm day for @$_");
+             is($M, $mon, "timegm month for @$_");
+-            is($Y, $year, "timegm year for @$_");
++            is($Y, $year - 1900, "timegm year for @$_");
+         }
+     }
+ }
+@@ -125,7 +123,6 @@
+
+ for (@bad_time) {
+     my($year, $mon, $mday, $hour, $min, $sec) = @$_;
+-    $year -= 1900;
+     $mon--;
+
+     eval { timegm($sec,$min,$hour,$mday,$mon,$year) };
+@@ -145,6 +142,7 @@
+        '60 day difference between two calls to timegm');
+ }
+
++
+ # bugid #19393
+ # At a DST transition, the clock skips forward, eg from 01:59:59 to
+ # 03:00:00. In this case, 02:00:00 is an invalid time, and should be
+@@ -204,6 +202,31 @@
+         'can call timegm for 2**40 epoch seconds (on a 64-bit system)' );
+ }
+
++# 2-digit years
++{
++       my $current_year = ( localtime() )[5];
++       my $pre_break    = ( $current_year + 49 ) - 100;
++       my $break        = ( $current_year + 50 ) - 100;
++       my $post_break   = ( $current_year + 51 ) - 100;
++
++       is(
++               ( ( localtime( timelocal( 0, 0, 0, 1, 1, $pre_break ) ) )[5] ),
++               $pre_break + 100,
++               "year $pre_break is treated as next century",
++       );
++       is(
++               ( ( localtime( timelocal( 0, 0, 0, 1, 1, $break ) ) )[5] ),
++               $break + 100,
++               "year $break is treated as next century",
++       );
++       is(
++               ( ( localtime( timelocal( 0, 0, 0, 1, 1, $post_break ) ) )[5] ),
++               $post_break,
++               "year $post_break is treated as current century",
++       );
++}
++
++
+ SKIP:
+ {
+     skip 'These tests only run for the package maintainer.', 8

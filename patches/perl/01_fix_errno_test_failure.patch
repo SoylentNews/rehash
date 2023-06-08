@@ -1,0 +1,49 @@
+From 180f90af5a74169a7f016fe874f3c32d71eeaabf Mon Sep 17 00:00:00 2001
+From: Tony Cook <tony@develop-help.com>
+Date: Wed, 11 Feb 2015 15:29:05 +1100
+Subject: [PATCH] Fix Errno.pm generation for gcc-5.0
+
+gcc-5.0 -E interleaves now line numbers with expended macros, so that
+the generated errno.c will be preprocessed to
+
+EBFONT => [[
+           59
+                ]]
+
+which is hard to parse in in line-based reader.
+
+So probe for cpp with "-E -ftrack-macro-expansion=0" first, which
+will skip splitting the lines.
+
+It's tempting to use -P instead, but that breaks makedepend.
+
+Based on a patch by Reini Urban.
+---
+ Configure |   12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/Configure b/Configure
+index 034104f..6d21e2b 100755
+--- a/Configure
++++ b/Configure
+@@ -4826,6 +4826,18 @@ fi
+ 
+ if $ok; then
+ 	: nothing
++elif echo 'Maybe "'"$cc"' -E -ftrack-macro-expansion=0" will work...'; \
++	$cc -E -ftrack-macro-expansion=0 <testcpp.c >testcpp.out 2>&1; \
++	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
++	echo "Yup, it does."
++	x_cpp="$cc $cppflags -E -ftrack-macro-expansion=0"
++	x_minus='';
++elif echo 'Maybe "'"$cc"' -E -ftrack-macro-expansion=0 -" will work...'; \
++	$cc -E -ftrack-macro-expansion=0 - <testcpp.c >testcpp.out 2>&1; \
++	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
++	echo "Yup, it does."
++	x_cpp="$cc $cppflags -E -ftrack-macro-expansion=0"
++	x_minus='-';
+ elif echo 'Maybe "'"$cc"' -E" will work...'; \
+ 	$cc -E <testcpp.c >testcpp.out 2>&1; \
+ 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+-- 
+1.7.10.4
