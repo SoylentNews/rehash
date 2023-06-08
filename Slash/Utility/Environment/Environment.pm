@@ -830,14 +830,27 @@ sub getCurrentStatic {
 
 	my $constants;
 
-	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
-		my $const_cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
-		$constants = $want_secure
-			? $const_cfg->{constants_secure} : $const_cfg->{constants};
-	} else {
-		$constants = $want_secure
-			? $static_constants_secure : $static_constants;
-	}
+# MC: So on latest Apache 2.2, its complaining about trying to get a
+# global $r object right here, but still comes up correctly. I spent
+# some time poking it and the apache configs, but nothing seems to
+# influence it, but since it can get the statics without the Apache
+# context, let's just do that instead of depending on more mod_perl
+# voodooo
+
+# forceSecure is superseded by HSTS so it's not that big of a deal if the wants_secure
+# isn't quite working right ATM
+
+#	if ($ENV{MOD_PERL} && !$ENV{FORCE_SLASH_STATIC} && (my $r = Apache2::RequestUtil->request)) {
+#		my $const_cfg = Apache2::Module::get_config('Slash::Apache', $r->server, $r->per_dir_config);
+#		$constants = $want_secure
+#			? $const_cfg->{constants_secure} : $const_cfg->{constants};
+#	} else {
+#		$constants = $want_secure
+#			? $static_constants_secure : $static_constants;
+#	}
+
+	$constants = $want_secure
+		? $static_constants_secure : $static_constants;
 
 	return defined $value ? $constants->{$value} : $constants;
 }
