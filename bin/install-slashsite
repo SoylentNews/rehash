@@ -563,7 +563,7 @@ $include
 
     # if you have a frontend/backend setup and have X-Real-IP
     # headers (such as from mod_proxy_add_forward), use this
-    # to properly populate remote_ip for formkeys etc.
+    # to properly populate client_ip for formkeys etc.
     #PerlPostReadRequestHandler Slash::Apache::ProxyRemoteAddr
 
     # Second Apache phase:  URI translation

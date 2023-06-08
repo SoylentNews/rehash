@@ -317,7 +317,7 @@ sub _sendMailPasswd {
 	# aren't any "<>" chars which could fool a stupid mail client
 	# into parsing a plaintext email as HTML.
 	my $r = Apache2::RequestUtil->request;
-	my $remote_ip = $r->connection->remote_ip;
+	my $client_ip = $r->connection->client_ip;
 
 	my $xff = $r->headers_in->{'X-Real-IP'} || '';
 	$xff =~ s/\s+/ /g;
@@ -330,7 +330,7 @@ sub _sendMailPasswd {
 	my $msg = getData('mail_msg', {
 		newpasswd	=> $newpasswd,
 		tempnick	=> $tempnick,
-		remote_ip	=> $remote_ip,
+		client_ip	=> $client_ip,
 		x_forwarded_for	=> $xff,
 		user_agent	=> $ua,
 	});
