@@ -7,6 +7,11 @@ ARG REHASH_PREFIX=/srv/soylentnews.org
 ARG REHASH_ROOT=/srv/soylentnews.org/rehash
 ARG REHASH_SRC=/build/rehash
 
+# Mail smarthost
+ARG ENABLE_MAIL=false
+ARG MYHOSTNAME=soylentnews.org
+ARG RELAYHOST=postfix
+
 # MySQL Database Stuff
 ARG MYSQL_HOST=localhost
 ARG MYSQL_DATABASE=soylentnews
@@ -38,8 +43,7 @@ RUN apt-get update
 RUN yes | unminimize
 
 # Install system build dependencies
-RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo
-
+RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix
 
 WORKDIR /build
 RUN wget ${PERL_DOWNLOAD}
@@ -139,7 +143,7 @@ RUN ${REHASH_CPANM} HTML::PopupTreeSelect
 
 # DBIx::Password is ... uh ... not easy to deal with.
 # Just copy in a pregenerated version
-WORKDIR /build
+WORKDIR /
 COPY DBIx/make_password_pm.sh .
 COPY DBIx/Password.pm.in .
 RUN mkdir -p ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/
@@ -182,4 +186,5 @@ RUN echo "LoadModule apreq_module modules/mod_apreq2.so" >> ${REHASH_PREFIX}/apa
 RUN echo "LoadModule perl_module modules/mod_perl.so" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "Include /rehash-prefix/rehash/httpd/slash.conf" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "Include /rehash-prefix/rehash/httpd/site.conf" >> ${REHASH_PREFIX}/rehash/httpd/slash.conf
+COPY conf/postfix/main.cf /main.cf
 CMD /start-rehash
