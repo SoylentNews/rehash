@@ -1,8 +1,6 @@
 #!/bin/bash
-sleep 15s # ensure the database is up since the mariadb instance comes up too fast
-
 cd /
-sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > /rehash-prefix/perl/lib/5*/DBIx/Password.pm
+sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > /rehash-prefix/perl/lib/${PERL_VERSION}/DBIx/Password.pm
 
 if [ $ENABLE_MAIL -eq 'true' ]
 then

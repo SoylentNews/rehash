@@ -2,30 +2,30 @@
 FROM ubuntu:22.04 AS rehash
 
 # Control variables
-ARG REHASH_REPO=https://github.com/SoylentNews/rehash.git
-ARG REHASH_PREFIX=/srv/soylentnews.org
-ARG REHASH_ROOT=/srv/soylentnews.org/rehash
-ARG REHASH_SRC=/build/rehash
+ENV REHASH_REPO=https://github.com/SoylentNews/rehash.git
+ENV REHASH_PREFIX=/srv/soylentnews.org
+ENV REHASH_ROOT=/srv/soylentnews.org/rehash
+ENV REHASH_SRC=/build/rehash
 
 # Mail smarthost
-ARG ENABLE_MAIL=false
-ARG MYHOSTNAME=soylentnews.org
-ARG RELAYHOST=postfix
+ENV ENABLE_MAIL=false
+ENV MYHOSTNAME=soylentnews.org
+ENV RELAYHOST=postfix
 
 # MySQL Database Stuff
-ARG MYSQL_HOST=localhost
-ARG MYSQL_DATABASE=soylentnews
-ARG MYSQL_USER=soylentnews
-ARG MYSQL_PASSWORD=soylentnews
+ENV MYSQL_HOST=localhost
+ENV MYSQL_DATABASE=soylentnews
+ENV MYSQL_USER=soylentnews
+ENV MYSQL_PASSWORD=soylentnews
 
-ARG PERL_VERSION=5.36.1
-ARG PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
+ENV PERL_VERSION=5.36.1
+ENV PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
 
-ARG APACHE_VERSION=2.2.34
-ARG APACHE_DOWNLOAD=https://archive.apache.org/dist/httpd/httpd-${APACHE_VERSION}.tar.gz
+ENV APACHE_VERSION=2.2.34
+ENV APACHE_DOWNLOAD=https://archive.apache.org/dist/httpd/httpd-${APACHE_VERSION}.tar.gz
 
-ARG MOD_PERL_VERSION=2.0.12
-ARG MOD_PERL_DOWNLOAD=https://mirror.cogentco.com/pub/apache/perl/mod_perl-${MOD_PERL_VERSION}.tar.gz
+ENV MOD_PERL_VERSION=2.0.12
+ENV MOD_PERL_DOWNLOAD=https://mirror.cogentco.com/pub/apache/perl/mod_perl-${MOD_PERL_VERSION}.tar.gz
 
 # rehash uses its own Perl, make we need to define that
 ENV REHASH_PERL=${REHASH_PREFIX}/perl/bin/perl
