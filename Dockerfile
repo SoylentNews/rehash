@@ -173,6 +173,11 @@ RUN chown slash:slash -R ${REHASH_PREFIX}/rehash
 RUN chown slash:slash -R ${REHASH_PREFIX}/apache/logs
 RUN chown slash:slash -R /srv/soylentnews.logs
 
+RUN echo "KeepAlive on" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN echo "KeepAliveTimeout 600" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN echo "MaxKeepAliveRequests 0" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN echo "TraceEnable Off" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+
 RUN echo "LoadModule apreq_module modules/mod_apreq2.so" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "LoadModule perl_module modules/mod_perl.so" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "Include /rehash-prefix/rehash/httpd/slash.conf" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
