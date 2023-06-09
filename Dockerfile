@@ -43,7 +43,7 @@ RUN apt-get update
 RUN yes | unminimize
 
 # Install system build dependencies
-RUN apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix
 
 WORKDIR /build
 RUN wget ${PERL_DOWNLOAD}
