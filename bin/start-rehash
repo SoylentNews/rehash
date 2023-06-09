@@ -2,7 +2,7 @@
 cd /
 sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > /rehash-prefix/perl/lib/${PERL_VERSION}/DBIx/Password.pm
 
-if [ $ENABLE_MAIL -eq 'true' ]
+if [ $ENABLE_MAIL = "true" ]
 then
     cp /main.cf /etc/postfix/main.cf
     sed -e "s:MYHOSTNAME:$MYHOSTNAME:" -e "s:RELAYHOST:$RELAYHOST:" > /etc/postfix/main.cf
@@ -15,7 +15,7 @@ sudo -u slash rehash/bin/template-tool -U
 
 rm -f /srv/soylentnews.logs/slashd.pid
 rm -f /srv/soylentnews.logs/ipnd.pid
-chown slash:slash /srv/soylentnews.logs
+chown slash:slash -R /srv/soylentnews.logs
 
 /etc/init.d/slash start
 /etc/init.d/ipn start
