@@ -3,8 +3,8 @@ cd /
 sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > /rehash-prefix/perl/lib/5*/DBIx/Password.pm
 
 if [ $ENABLE_MAIL -eq 'true'  ] then
-    cp /main.cf /etc/postfix/main.cf
-    sed -e "s:MYHOSTNAME:$MYHOSTNAME:" -e "s:RELAYHOST:$RELAYHOST:" > /etc/postfix/main.cf
+    cp /main.cf /etc/postfix/main.cf && \
+    sed -e "s:MYHOSTNAME:$MYHOSTNAME:" -e "s:RELAYHOST:$RELAYHOST:" > /etc/postfix/main.cf && \
     /etc/init.d/postfix start
 fi
 
