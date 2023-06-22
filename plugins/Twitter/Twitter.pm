@@ -2,7 +2,7 @@ package Slash::Twitter;
 
 use strict;
 use warnings;
-use Net::Twitter;
+use Twitter::API;
 
 use base 'Slash::Plugin';
 
@@ -10,14 +10,14 @@ our $VERSION = $Slash::Constants::VERSION;
 
 sub push_story_to_twitter() {
      my ($self, $constants, $story) = @_;
-     my $nt = Net::Twitter->new(
-          traits => ['API::RESTv1_1', 'OAuth'],
+     my $nt = Twitter::API->new_with_traits(
+          traits => [ qw/Migration ApiMethods RetryOnError/ ],
           consumer_key => $constants->{twit_consumer_key},
           consumer_secret => $constants->{twit_consumer_secret},
           access_token => $constants->{twit_access_token},
           access_token_secret => $constants->{twit_access_token_secret},
      );
-     if(! $nt->authorized ) {
+     if(! $nt->verify_credentials ) {
           print "push_story_to_twitter(): Not authorized\n";
           return 0;
      }
@@ -46,5 +46,3 @@ sub trim_stories_table() {
      $slashdb->sqlDo("DELETE FROM twitter_log WHERE time < DATE_SUB(NOW(), INTERVAL $constants->{discussion_archive_delay} DAY)");
      return;
 }
-
-1;

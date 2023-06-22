@@ -436,7 +436,12 @@ stamp/install-date-calc:
 	-mkdir stamp
 	$(REHASH_CPANM) Date::Calc
 	touch stamp/install-date-calc
-
+	
+stamp/install-twitter-api:
+	-mkdir stamp
+	$(REHASH_CPANM) Twitter::API
+	touch stamp/install-twitter-api
+	
 stamp/install-date-format:
 	-mkdir stamp
 	$(REHASH_CPANM) Date::Format
