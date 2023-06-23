@@ -17,6 +17,8 @@ $task{$me}{code} = sub {
 	my $max_items = $constants->{twit_max_items_outgoing} || 10;
 	my $stories = $reader->getBackendStories({ limit => $max_items });
 
+	return;
+
 	if ($stories && @$stories) {
 		my $totalcount = $reader->sqlSelect(
 			"count(*)",
