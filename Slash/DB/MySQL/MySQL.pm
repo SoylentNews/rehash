@@ -16,6 +16,7 @@ use DateTime ();
 use Data::Dumper;
 use Storable qw(thaw nfreeze);
 use URI ();
+use APR::SockAddr ();
 
 use Slash::Utility;
 use Slash::Constants ':messages';

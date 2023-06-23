@@ -18,7 +18,7 @@ use Slash::Utility;
 use Slash::XML;
 
 our $VERSION = $Slash::Constants::VERSION;
-
+use APR::SockAddr ();
 sub handler {
 	my($r) = @_;
 
