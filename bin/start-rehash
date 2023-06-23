@@ -9,6 +9,13 @@ then
     /etc/init.d/postfix start
 fi
 
+if [[ -v BASE_URL ]]; then
+ test_path="/srv/${BASE_URL}"
+ if [ ! -e $test_path ]; then
+        ln -s /srv/soylentnews.org/ $test_path
+ fi
+fi
+
 cd /rehash-prefix
 sudo -u slash rehash/bin/symlink-tool -U
 sudo -u slash rehash/bin/template-tool -U
