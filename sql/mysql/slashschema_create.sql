@@ -32,8 +32,8 @@ CREATE TABLE abusers (
 DROP TABLE IF EXISTS accesslog; 
 CREATE TABLE accesslog (
 	id int UNSIGNED NOT NULL auto_increment,
-	host_addr char(32)	DEFAULT '' NOT NULL,
-	subnetid char(32)	DEFAULT '' NOT NULL,
+	host_addr char(39)	DEFAULT '' NOT NULL,
+	subnetid char(39)	DEFAULT '' NOT NULL,
 	op varchar(254) default NULL,
 	dat varchar(254) default NULL,
 	uid mediumint UNSIGNED NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE accesslog (
 DROP TABLE IF EXISTS accesslog_admin;
 CREATE TABLE accesslog_admin (
 	id int UNSIGNED NOT NULL auto_increment,
-	host_addr char(15)  DEFAULT '' NOT NULL,
+	host_addr char(39)  DEFAULT '' NOT NULL,
 	op varchar(254),
 	dat varchar(254),
 	uid mediumint UNSIGNED NOT NULL,
