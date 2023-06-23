@@ -49,8 +49,8 @@ DROP TABLE IF EXISTS `accesslog`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `subnetid` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `subnetid` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,
@@ -82,7 +82,7 @@ DROP TABLE IF EXISTS `accesslog_admin`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_admin` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(15) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,
@@ -153,8 +153,8 @@ DROP TABLE IF EXISTS `accesslog_temp`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_temp` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `subnetid` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `subnetid` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,
@@ -191,8 +191,8 @@ DROP TABLE IF EXISTS `accesslog_temp_errors`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_temp_errors` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `subnetid` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `subnetid` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,
@@ -224,7 +224,7 @@ DROP TABLE IF EXISTS `accesslog_temp_host_addr`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_temp_host_addr` (
-  `host_addr` char(32) NOT NULL,
+  `host_addr` char(39) NOT NULL,
   `anon` enum('no','yes') NOT NULL DEFAULT 'yes',
   PRIMARY KEY (`host_addr`,`anon`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -239,8 +239,8 @@ DROP TABLE IF EXISTS `accesslog_temp_other`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_temp_other` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `subnetid` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `subnetid` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,
@@ -273,8 +273,8 @@ DROP TABLE IF EXISTS `accesslog_temp_rss`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_temp_rss` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `subnetid` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `subnetid` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,
@@ -307,8 +307,8 @@ DROP TABLE IF EXISTS `accesslog_temp_subscriber`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accesslog_temp_subscriber` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `host_addr` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `subnetid` char(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `host_addr` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+  `subnetid` char(39) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `op` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `dat` varchar(254) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `uid` mediumint unsigned NOT NULL,

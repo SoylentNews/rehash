@@ -12,6 +12,10 @@ ENV ENABLE_MAIL=false
 ENV MYHOSTNAME=soylentnews.org
 ENV RELAYHOST=postfix
 
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
 # MySQL Database Stuff
 ENV MYSQL_HOST=localhost
 ENV MYSQL_DATABASE=soylentnews
@@ -44,6 +48,8 @@ RUN yes | unminimize
 
 # Install system build dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix
+RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 WORKDIR /build
 RUN wget ${PERL_DOWNLOAD}
@@ -140,6 +146,7 @@ RUN ${REHASH_CPANM} Email::Valid
 
 RUN ${REHASH_CPANM} Crypt::CBC
 RUN ${REHASH_CPANM} HTML::PopupTreeSelect
+RUN ${REHASH_CPANM} Twitter::API
 
 # DBIx::Password is ... uh ... not easy to deal with.
 # Just copy in a pregenerated version
@@ -186,5 +193,7 @@ RUN echo "LoadModule apreq_module modules/mod_apreq2.so" >> ${REHASH_PREFIX}/apa
 RUN echo "LoadModule perl_module modules/mod_perl.so" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "Include /rehash-prefix/rehash/httpd/slash.conf" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "Include /rehash-prefix/rehash/httpd/site.conf" >> ${REHASH_PREFIX}/rehash/httpd/slash.conf
+RUN echo "LogLevel Debug" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+
 COPY conf/postfix/main.cf /main.cf
 CMD /start-rehash
