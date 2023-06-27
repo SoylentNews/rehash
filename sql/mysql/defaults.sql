@@ -110,10 +110,9 @@ INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 7, '1024K');
 #
 
 INSERT INTO commentmodes (mode, name, description) VALUES ('flat','Flat','');
-INSERT INTO commentmodes (mode, name, description) VALUES ('nested','Nested','');
-INSERT INTO commentmodes (mode, name, description) VALUES ('thread','Threaded','');
+INSERT INTO commentmodes (mode, name, description) VALUES ('threadtos','Threaded-TOS','');
+INSERT INTO commentmodes (mode, name, description) VALUES ('threadtng','Threaded-TNG','');
 INSERT INTO commentmodes (mode, name, description) VALUES ('nocomment','No Comments','');
-INSERT INTO commentmodes (mode, name, description) VALUES ('improvedthreaded','Impoved Threaded','');
 
 #
 # Dumping data for table 'comments'
@@ -269,8 +268,8 @@ INSERT INTO shill_ids VALUES (2, 'ThinkGeek');
 #
 # Dumping data for table 'site_info'
 #
-INSERT INTO site_info VALUES ('','form','submissions','user submissions form');
-INSERT INTO site_info VALUES ('','form','comments','comments submission form');
+INSERT INTO site_info VALUES ('1','form','submissions','user submissions form');
+INSERT INTO site_info VALUES ('2','form','comments','comments submission form');
 
 
 #
@@ -788,7 +787,7 @@ INSERT INTO vars (name, value, description) VALUES ('basedomain','www.example.co
 INSERT INTO vars (name, value, description) VALUES ('block_expire','3600','Default expiration time for the block cache');
 INSERT INTO vars (name, value, description) VALUES ('body_bytes','0','Use Slashdot like byte message instead of word count on stories');
 INSERT INTO vars (name, value, description) VALUES ('breakhtml_wordlength','50','Maximum word length before whitespace is inserted in comments');
-INSERT INTO vars (name, value, description) VALUES ('breaking','100','Establishes the maximum number of comments the system will display when reading comments from a "live" discussion. For stories that exceed this number of comments, there will be "page breaks" printed at the bottom. This setting does not affect "archive" mode.');
+INSERT INTO vars (name, value, description) VALUES ('breaking','100','Establishes the maximum number of comments the system will display when reading comments from a "live" discussion. For stories that exceed this number of comments, there will be "page breaks" printed at the bottom. This setting does not affect "archive"');
 INSERT INTO vars (name, value, description) VALUES ('bytime_delay','120','days to go back for next/previous links on stories');
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled','1','Simple Boolean to determine if content is cached or not');
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1','If set, then template caching is still active even if var cache_enabled is turned off.');
