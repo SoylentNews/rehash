@@ -7,6 +7,13 @@ ENV REHASH_ROOT=/srv/soylentnews.org/rehash
 ENV REHASH_SRC=/build/rehash
 ENV REHASH_PERL=${REHASH_PREFIX}/perl/bin/perl
 
+# Perl version needs to be set here. This is also in the Makefile, but
+# for bare metal installs, DBIx::Password is done interactively. However,
+# for automated installs, we need to manually drop it into the right place
+
+# Bad things will happen if this number, and the one in the Makefile are out of sync
+ENV PERL_VERSION=5.36.1
+
 # Mail smarthost
 ENV ENABLE_MAIL=false
 ENV MYHOSTNAME=soylentnews.org
