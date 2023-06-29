@@ -87,5 +87,5 @@ RUN chown slash:slash -R ${REHASH_PREFIX}/rehash
 RUN chown slash:slash -R ${REHASH_PREFIX}/apache/logs
 RUN chown slash:slash -R /srv/soylentnews.logs
 
-COPY /main.cf /etc/postfix/main.cf
+COPY conf/postfix/main.cf /main.cf
 CMD /start-rehash
