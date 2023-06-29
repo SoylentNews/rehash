@@ -426,6 +426,7 @@ stamp/install-cpamn:
 
 stamp/install-perl-dependencies:
 	-mkdir stamp
+	NO_NETWORK_TESTING=1 ${REHASH_CPANM} Net::HTTP
 	$(REHASH_CPANM) Apache2::Upload
 	$(REHASH_CPANM) Cache::Memcached
 	$(REHASH_CPANM) Cache::Memcached::Fast
