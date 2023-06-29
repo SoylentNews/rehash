@@ -40,17 +40,20 @@ MAKE = make -s
 
 # Apache stuff
 APACHE_MIRROR=http://archive.apache.org/dist/httpd/
-APACHE_VER=2.2.29
+APACHE_VER=2.2.34
 APACHE_DIR=httpd-$(APACHE_VER)
 APACHE_FILE=$(APACHE_DIR).tar.bz2
+APACHE_PREFIX=$(ENVIRONMENT_PREFIX)/apache
+DO_APACHE_CONFIG=1
 
 # Perl stuff
 PERL_MIRROR=http://www.cpan.org/src/5.0/
-PERL_VER=5.20.0
+PERL_VER=5.36.1
 PERL_DIR=perl-$(PERL_VER)
 PERL_FILE=$(PERL_DIR).tar.gz
-REHASH_PERL=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/perl
-REHASH_CPANM=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/cpanm
+PERL_PREFIX=$(ENVIRONMENT_PREFIX)/perl
+REHASH_PERL=$(PERL_PREFIX)/bin/perl
+REHASH_CPANM=$(PERL_PREFIX)/bin/cpanm
 
 # mod_perl stuff
 # mod_perl 2.0.9 is for 2.4 apache, unclear if it
@@ -58,7 +61,7 @@ REHASH_CPANM=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/cpanm
 
 MOD_PERL_MIRROR=http://mirror.cogentco.com/pub/apache/perl/
 #MOD_PERL_VER=http://archive.apache.org/dist/perl/
-MOD_PERL_VER=2.0.9
+MOD_PERL_VER=2.0.12
 MOD_PERL_DIR=mod_perl-$(MOD_PERL_VER)
 MOD_PERL_FILE=$(MOD_PERL_DIR).tar.gz
 
@@ -338,7 +341,14 @@ manifest :
 rpm :
 	rpm -ba slash.spec
 
-build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload stamp/install-cache-memcached stamp/install-cache-memcached-fast stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search stamp/install-uri-encode stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss
+build-environment: stamp/apache-built \
+				   stamp/perl-built \
+				   stamp/mod-perl-built \
+				   stamp/install-cpamn \
+				   stamp/install-perl-dependencies \
+				   stamp/append-apache-config
+				   
+
 	@echo "Setting permissions on the $(ENVIRONMENT_PREFIX) directory"
 	chown $(USER):$(GROUP) -R $(ENVIRONMENT_PREFIX)
 	@echo ""
@@ -351,19 +361,6 @@ build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stam
 	@echo "perl: $(PERL_VER)"
 	@echo "mod_perl: $(MOD_PERL_VER)"
 	@echo ""
-	@echo "As well as the latest version of rehash's dependencies"
-	@echo "from CPAN. It's recommended everytime you upgrade"
-	@echo "your site, you re-run build-environment to update"
-	@echo "everything to the latest version."
-	@echo ""
-	@echo "If Upgrading:"
-	@echo "Your old apache/perl directories have been left in"
-	@echo "place; before switching over to the new versions,"
-	@echo "make sure you update httpd.conf and migrate"
-	@echo "DBIx::Password to your new perl directory. See INSTALL"
-	@echo "for more information."
-	@echo ""
-	@echo "For New Installs:"
 	@echo "Rehash has one final dependency not handled by this"
 	@echo "script: DBIx::Password. You can install it by running"
 	@echo "make install-dbi-password, but make sure to check "
@@ -384,7 +381,11 @@ dist/$(APACHE_FILE):
 stamp/apache-built: dist/$(APACHE_FILE)
 	-mkdir build stamp
 	-rm -rf build/$(APACHE_DIR)
-	cd build && tar jxf ../dist/$(APACHE_FILE); cd $(APACHE_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most && make && make install
+	cd build && \
+		tar jxf ../dist/$(APACHE_FILE) && \
+		cd $(APACHE_DIR) && ./configure --prefix=$(APACHE_PREFIX) --enable-mods-shared=most && \
+		make && \
+		make install
 	touch stamp/apache-built
 
 dist/$(PERL_FILE):
@@ -394,7 +395,12 @@ dist/$(PERL_FILE):
 stamp/perl-built: dist/$(PERL_FILE)
 	-mkdir build stamp
 	-rm -rf build/$(PERL_DIR)
-	cd build && tar zxf ../dist/$(PERL_FILE) && cd $(PERL_DIR) && ./Configure -des -Dprefix=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER) -Duseshrplib -Dusethreads && make && make check && make install
+	cd build && \
+		tar zxf ../dist/$(PERL_FILE) && \
+		cd $(PERL_DIR) && \
+		./Configure -des -Dprefix=$(PERL_PREFIX)  -Duseshrplib -Dusethreads && \
+		make && \
+		make install
 	touch stamp/perl-built
 
 dist/$(MOD_PERL_FILE):
@@ -404,7 +410,13 @@ dist/$(MOD_PERL_FILE):
 stamp/mod-perl-built: dist/$(MOD_PERL_FILE)
 	-mkdir build stamp
 	-rm -rf build/$(MOD_PERL_DIR)
-	cd build && tar xvf ../dist/$(MOD_PERL_FILE) && cd $(MOD_PERL_DIR) && $(REHASH_PERL) Makefile.PL MP_APXS=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER)/bin/apxs && make && make test && make install
+	cd build && \
+		tar xvf ../dist/$(MOD_PERL_FILE) && \
+		cd $(MOD_PERL_DIR) && \
+		$(REHASH_PERL) Makefile.PL MP_APXS=$(APACHE_PREFIX)/bin/apxs && \
+		make && \
+		make test && \
+		make install
 	touch stamp/mod-perl-built
 
 stamp/install-cpamn:
@@ -412,222 +424,70 @@ stamp/install-cpamn:
 	$(REHASH_PERL) utils/cpanm App::cpanminus
 	touch stamp/install-cpamn
 
-stamp/install-apache2-upload:
+stamp/install-perl-dependencies:
 	-mkdir stamp
+	NO_NETWORK_TESTING=1 ${REHASH_CPANM} Net::HTTP
 	$(REHASH_CPANM) Apache2::Upload
-	touch stamp/install-apache2-upload
-
-stamp/install-cache-memcached:
-	-mkdir stamp
 	$(REHASH_CPANM) Cache::Memcached
-	touch stamp/install-cache-memcached
-
-stamp/install-cache-memcached-fast:
-	-mkdir stammp
 	$(REHASH_CPANM) Cache::Memcached::Fast
-	touch stamp/install-cache-memcached-fast
-
-stamp/install-data-javascript-anon:
-	-mkdir stamp
 	$(REHASH_CPANM) Data::JavaScript::Anon
-	touch stamp/install-data-javascript-anon
-
-stamp/install-date-calc:
-	-mkdir stamp
 	$(REHASH_CPANM) Date::Calc
-	touch stamp/install-date-calc
-	
-stamp/install-twitter-api:
-	-mkdir stamp
-	$(REHASH_CPANM) Twitter::API
-	touch stamp/install-twitter-api
-	
-stamp/install-date-format:
-	-mkdir stamp
 	$(REHASH_CPANM) Date::Format
-	touch stamp/install-date-format
-
-stamp/install-date-language:
-	-mkdir stamp
 	$(REHASH_CPANM) Date::Language
-	touch stamp/install-date-language
-
-stamp/install-date-parse:
-	-mkdir stamp
 	$(REHASH_CPANM) Date::Parse
-	touch stamp/install-date-parse
-
-stamp/install-datetime-format-mysql:
-	-mkdir stamp
 	$(REHASH_CPANM) DateTime::Format::MySQL
-	touch stamp/install-datetime-format-mysql
-
-stamp/install-dbd-mysql:
-	-mkdir stamp
 	$(REHASH_CPANM) DBD::mysql
-	touch stamp/install-dbd-mysql
-
-stamp/install-digest-md5:
-	-mkdir stamp
 	$(REHASH_CPANM) Digest::MD5
-	touch stamp/install-digest-md5
-
-stamp/install-email-valid:
-	-mkdir stamp
 	$(REHASH_CPANM) Email::Valid
-	touch stamp/install-email-valid
-
-stamp/install-gd:
-	-mkdir stamp
 	$(REHASH_CPANM) GD
-	touch stamp/install-gd
-
-stamp/install-gd-text-align:
-	-mkdir stamp
 	$(REHASH_CPANM) GD::Text::Align
-	touch stamp/install-gd-text-align
-
-stamp/install-html-entities:
-	-mkdir stamp
 	$(REHASH_CPANM) HTML::Entities
-	touch stamp/install-html-entities
-
-stamp/install-html-formattext:
-	-mkdir stamp
 	$(REHASH_CPANM) HTML::FormatText
-	touch stamp/install-html-formattext
-
-stamp/install-html-tagset:
-	-mkdir stamp
 	$(REHASH_CPANM) HTML::Tagset
-	touch stamp/install-html-tagset
-
-stamp/install-html-tokeparser:
-	-mkdir stamp
 	$(REHASH_CPANM) HTML::TokeParser
-	touch stamp/install-html-tokeparser
-
-stamp/install-html-treebuilder:
-	-mkdir stamp
 	$(REHASH_CPANM) HTML::TreeBuilder
-	touch stamp/install-html-treebuilder
-
-stamp/install-http-request:
-	-mkdir stamp
 	$(REHASH_CPANM) HTTP::Request
-	touch stamp/install-http-request
-
-stamp/install-image-size:
-	-mkdir stamp
 	$(REHASH_CPANM) Image::Size
-	touch stamp/install-image-size
-
-stamp/install-javascript-minifier:
-	-mkdir stamp
 	$(REHASH_CPANM) JavaScript::Minifier
-	touch stamp/install-javascript-minifier
-
-stamp/install-json:
-	-mkdir stamp
 	$(REHASH_CPANM) JSON
-	touch stamp/install-json
-
-stamp/install-lingua-stem:
-	-mkdir stamp
 	$(REHASH_CPANM) Lingua::Stem
-	touch stamp/install-lingua-stem
-
-stamp/install-lwp-parallel-useragent:
-	-mkdir stamp
 	$(REHASH_CPANM) LWP::Parallel::UserAgent
-	touch stamp/install-lwp-parallel-useragent
-
-stamp/install-lwp-useragent:
-	-mkdir stamp
 	$(REHASH_CPANM) LWP::UserAgent
-	touch stamp/install-lwp-useragent
-
-stamp/install-mail-address:
-	-mkdir stamp
 	$(REHASH_CPANM) Mail::Address
-	touch stamp/install-mail-address
-
-stamp/install-mail-bulkmail:
-	-mkdir stamp
 	$(REHASH_CPANM) Mail::Bulkmail
-	touch stamp/install-mail-bulkmail
-
-stamp/install-mail-sendmail:
-	-mkdir stamp
-	$(REHASH_CPANM) Mail::Sendmail
-	touch stamp/install-mail-sendmail
-
-stamp/install-mime-types:
-	-mkdir stamp
+	$(REHASH_CPANM) Mail::Sendmail --notest
 	$(REHASH_CPANM) MIME::Types
-	touch stamp/install-mime-types
-
-stamp/install-mojo-server-daemon:
-	-mkdir stamp
 	$(REHASH_CPANM) Mojo::Server::Daemon
-	touch stamp/install-mojo-server-daemon
-
-stamp/install-net-ip:
-	-mkdir stamp
 	$(REHASH_CPANM) Net::IP
-	touch stamp/install-net-ip
-
-stamp/install-net-server:
-	-mkdir stamp
 	$(REHASH_CPANM) Net::Server
-	touch stamp/install-net-server
-
-stamp/install-schedule-cron:
-	-mkdir stamp
+	$(REHASH_CPANM) Time::ParseDate --notest
 	$(REHASH_CPANM) Schedule::Cron
-	touch stamp/install-schedule-cron
-
-stamp/install-soap-lite:
-	-mkdir stamp
 	$(REHASH_CPANM) SOAP::Lite
-	touch stamp/install-soap-lite
-
-stamp/install-sphinx-search:
-	-mkdir stamp
 	$(REHASH_CPANM) Sphinx::Search
-	touch stamp/install-sphinx-search
-
-stamp/install-uri-encode:
-	-mkdir stamp
 	$(REHASH_CPANM) URI::Encode
-	touch stamp/install-uri-encode
-
-stamp/install-template:
-	-mkdir stamp
 	$(REHASH_CPANM) Template
-	touch stamp/install-template
-
-stamp/install-xml-parser:
-	-mkdir stamp
 	$(REHASH_CPANM) XML::Parser
-	touch stamp/install-xml-parser
-
-stamp/install-xml-parser-expat:
-	-mkdir stamp
 	$(REHASH_CPANM) XML::Parser::Expat
-	touch stamp/install-xml-parser-expat
-
-stamp/install-xml-rss:
-	-mkdir stamp
 	$(REHASH_CPANM) XML::RSS
-	touch stamp/install-xml-rss
+	$(REHASH_CPANM) Crypt::CBC
+	$(REHASH_CPANM) HTML::PopupTreeSelect
+	$(REHASH_CPANM) Twitter::API
+	@touch stamp/install-perl-dependencies
 
 install-dbix-password:
 	$(REHASH_CPANM) --interactive DBIx::Password
 
 stamp/append-apache-config:
-	@echo "Appending Apache's configuration with necessary module configuration"
-	echo "LoadModule perl_module modules/mod_perl.so" >> $(ENVIRONMENT_PREFIX)/$(APACHE_DIR)/conf/httpd.conf
-	echo "LoadModule apreq_module modules/mod_apreq2.so"  >> $(ENVIRONMENT_PREFIX)/$(APACHE_DIR)/conf/httpd.conf
-	echo "Include $(SLASH_PREFIX)/httpd/slash.conf" >> $(ENVIRONMENT_PREFIX)/$(APACHE_DIR)/conf/httpd.conf
-	touch stamp/append-apache-config:
+	-mkdir stamp
+ifeq ($(DO_APACHE_CONFIG), 1)
+		echo "Appending Apache's configuration with necessary module configuration"
+		echo "KeepAlive on">> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "KeepAliveTimeout 600" >> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "MaxKeepAliveRequests 0" >> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "TraceEnable Off" >> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "LoadModule apreq_module modules/mod_apreq2.so">> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "LoadModule perl_module modules/mod_perl.so">> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "Include $(SLASH_PREFIX)/httpd/slash.conf">> $(APACHE_PREFIX)/conf/httpd.conf
+		echo "Include $(SLASH_PREFIX)/httpd/site.conf" >> $(APACHE_PREFIX)/conf/httpd.conf
+		touch stamp/append-apache-config;
+endif	
