@@ -37,7 +37,7 @@ CREATE TABLE `abusers` (
   KEY `subnetid` (`subnetid`),
   KEY `reason` (`reason`),
   KEY `ts` (`ts`)
-) ENGINE=InnoDB AUTO_INCREMENT=93281 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +70,7 @@ CREATE TABLE `accesslog` (
   KEY `host_addr_part` (`host_addr`),
   KEY `op_part` (`op`,`skid`),
   KEY `ts` (`ts`)
-) ENGINE=InnoDB AUTO_INCREMENT=259836157 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,7 +97,7 @@ CREATE TABLE `accesslog_admin` (
   PRIMARY KEY (`id`),
   KEY `host_addr` (`host_addr`),
   KEY `ts` (`ts`)
-) ENGINE=InnoDB AUTO_INCREMENT=3300637 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,7 +179,7 @@ CREATE TABLE `accesslog_temp` (
   KEY `referer` (`referer`(4)),
   KEY `ts` (`ts`),
   KEY `pagemark` (`pagemark`)
-) ENGINE=InnoDB AUTO_INCREMENT=259735417 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,7 +213,7 @@ CREATE TABLE `accesslog_temp_errors` (
   KEY `op_part` (`op`,`skid`),
   KEY `ts` (`ts`),
   KEY `status_op_skid` (`status`,`op`,`skid`)
-) ENGINE=InnoDB AUTO_INCREMENT=259735417 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,7 +261,7 @@ CREATE TABLE `accesslog_temp_other` (
   KEY `op_part` (`op`,`skid`),
   KEY `ts` (`ts`),
   KEY `skid` (`skid`)
-) ENGINE=InnoDB AUTO_INCREMENT=259735417 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -295,7 +295,7 @@ CREATE TABLE `accesslog_temp_rss` (
   KEY `op_part` (`op`,`skid`),
   KEY `ts` (`ts`),
   KEY `skid` (`skid`)
-) ENGINE=InnoDB AUTO_INCREMENT=259735417 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,7 +328,7 @@ CREATE TABLE `accesslog_temp_subscriber` (
   KEY `host_addr_part` (`host_addr`),
   KEY `op_part` (`op`,`skid`),
   KEY `skid` (`skid`)
-) ENGINE=InnoDB AUTO_INCREMENT=259735417 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -346,7 +346,7 @@ CREATE TABLE `achievements` (
   `increment` tinyint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`aid`),
   UNIQUE KEY `achievement` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -365,7 +365,7 @@ CREATE TABLE `ajax_ops` (
   `reskey_type` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `op` (`op`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -402,7 +402,7 @@ CREATE TABLE `al2_log` (
   KEY `ts` (`ts`),
   KEY `srcid_ts` (`srcid`,`ts`),
   KEY `al2tid_val_srcid` (`al2tid`,`val`,`srcid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1487 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -434,7 +434,7 @@ CREATE TABLE `al2_types` (
   PRIMARY KEY (`al2tid`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `bitpos` (`bitpos`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -453,7 +453,7 @@ CREATE TABLE `authors_cache` (
   `bio` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `author` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=6667 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -522,7 +522,7 @@ CREATE TABLE `bitpay_log` (
   `raw_transaction` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `remote_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`logid`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -579,7 +579,7 @@ CREATE TABLE `blocks` (
   UNIQUE KEY `bid` (`bid`),
   KEY `type` (`type`),
   KEY `skin` (`skin`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -612,7 +612,7 @@ CREATE TABLE `clout_types` (
   `class` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`clid`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -629,7 +629,7 @@ CREATE TABLE `code_param` (
   `name` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `code_key` (`type`,`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -738,7 +738,7 @@ CREATE TABLE `comments` (
   KEY `uid_date` (`uid`,`date`),
   KEY `date_sid` (`date`,`sid`),
   KEY `opid` (`opid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1310463 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -762,7 +762,7 @@ CREATE TABLE `content_filters` (
   KEY `form` (`form`),
   KEY `regex` (`regex`),
   KEY `field_key` (`field`)
-) ENGINE=InnoDB AUTO_INCREMENT=236 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -793,7 +793,7 @@ CREATE TABLE `css` (
   KEY `page_skin` (`page`,`skin`),
   KEY `skin_page` (`skin`,`page`),
   KEY `layout` (`layout`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -808,7 +808,7 @@ CREATE TABLE `css_type` (
   `name` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `ordernum` tinyint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`ctid`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -893,7 +893,7 @@ CREATE TABLE `discussion_kinds` (
   `name` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`dkid`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -928,7 +928,7 @@ CREATE TABLE `discussions` (
   KEY `topic` (`topic`),
   KEY `primaryskid` (`primaryskid`,`ts`),
   KEY `type` (`type`,`uid`,`ts`)
-) ENGINE=InnoDB AUTO_INCREMENT=55882 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -993,7 +993,7 @@ CREATE TABLE `dynamic_user_blocks` (
   UNIQUE KEY `idx_uid_name` (`uid`,`name`),
   KEY `idx_typeid` (`type_id`),
   KEY `idx_portalid` (`portal_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=94553 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1071,7 +1071,7 @@ CREATE TABLE `firehose` (
   KEY `uid` (`uid`),
   KEY `last_update` (`last_update`),
   KEY `type_srcid` (`type`,`srcid`)
-) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1196,7 +1196,7 @@ CREATE TABLE `firehose_tab` (
   `mode` enum('full','fulltitle') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT 'fulltitle',
   PRIMARY KEY (`tabid`),
   UNIQUE KEY `uid_tabname` (`uid`,`tabname`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1213,7 +1213,7 @@ CREATE TABLE `firehose_text` (
   `bodytext` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci,
   `media` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1290,7 +1290,7 @@ CREATE TABLE `firehose_view` (
   `addable` enum('no','yes') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT 'no',
   `removable` enum('no','yes') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT 'no',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1372,7 +1372,7 @@ CREATE TABLE `globj_types` (
   `maintable` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`gtid`),
   UNIQUE KEY `maintable` (`maintable`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1388,7 +1388,7 @@ CREATE TABLE `globj_urls` (
   `url_id` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `globjid_url_id` (`globjid`,`url_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1404,7 +1404,7 @@ CREATE TABLE `globjs` (
   `target_id` int unsigned NOT NULL,
   PRIMARY KEY (`globjid`),
   UNIQUE KEY `target` (`gtid`,`target_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1455,7 +1455,7 @@ CREATE TABLE `hooks` (
   `subroutine` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `hook_param` (`param`,`class`,`subroutine`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1473,7 +1473,7 @@ CREATE TABLE `humanconf` (
   PRIMARY KEY (`hcid`),
   UNIQUE KEY `formkey` (`formkey`),
   KEY `hcpid` (`hcpid`)
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1496,7 +1496,7 @@ CREATE TABLE `humanconf_pool` (
   PRIMARY KEY (`hcpid`),
   KEY `answer` (`answer`),
   KEY `lastused` (`lastused`)
-) ENGINE=InnoDB AUTO_INCREMENT=8001 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1512,7 +1512,7 @@ CREATE TABLE `humanconf_questions` (
   `urlprefix` char(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `question` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`hcqid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1527,7 +1527,7 @@ CREATE TABLE `journal_themes` (
   `name` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1572,7 +1572,7 @@ CREATE TABLE `journals` (
   KEY `tid` (`tid`),
   KEY `srcid_32` (`srcid_32`),
   KEY `srcid_24` (`srcid_24`)
-) ENGINE=InnoDB AUTO_INCREMENT=14766 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1609,7 +1609,7 @@ CREATE TABLE `menus` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `page_labels_un` (`menu`,`label`),
   KEY `page_labels` (`menu`,`label`)
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1664,7 +1664,7 @@ CREATE TABLE `message_drop` (
   `send` enum('now','defer','collective') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'now',
   `message` mediumblob NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1234105 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1770,7 +1770,7 @@ CREATE TABLE `moderatorlog` (
   KEY `uid` (`uid`),
   KEY `cuid` (`cuid`),
   KEY `ts_uid_sid` (`ts`,`uid`,`sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=933720 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1831,7 +1831,7 @@ CREATE TABLE `pagemark` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `pagemark` (`pagemark`),
   KEY `ts` (`ts`)
-) ENGINE=InnoDB AUTO_INCREMENT=30158 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1855,7 +1855,7 @@ CREATE TABLE `paypal_log` (
   `raw_transaction` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `remote_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`logid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2041 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1876,7 +1876,7 @@ CREATE TABLE `people` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `degree_of_separation` (`uid`,`person`),
   KEY `person` (`person`)
-) ENGINE=InnoDB AUTO_INCREMENT=8283 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1917,7 +1917,7 @@ CREATE TABLE `pollquestions` (
   PRIMARY KEY (`qid`),
   KEY `uid` (`uid`),
   KEY `discussion` (`discussion`)
-) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1971,7 +1971,7 @@ CREATE TABLE `preview_param` (
   `value` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `submission_key` (`preview_id`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2033,7 +2033,7 @@ CREATE TABLE `related_links` (
   `link` varchar(128) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `keyword` (`keyword`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2055,7 +2055,7 @@ CREATE TABLE `related_stories` (
   `fhid` mediumint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `stoid` (`stoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=81587 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2078,7 +2078,7 @@ CREATE TABLE `remarks` (
   KEY `stoid` (`stoid`),
   KEY `time` (`time`),
   KEY `priority` (`priority`)
-) ENGINE=InnoDB AUTO_INCREMENT=42518 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2124,7 +2124,7 @@ CREATE TABLE `reskey_resource_checks` (
   `ordernum` smallint unsigned DEFAULT '0',
   PRIMARY KEY (`rkrcid`),
   UNIQUE KEY `rkrid_name` (`rkrid`,`type`,`class`)
-) ENGINE=InnoDB AUTO_INCREMENT=151 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2139,7 +2139,7 @@ CREATE TABLE `reskey_resources` (
   `name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `static` enum('yes','no') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'no',
   PRIMARY KEY (`rkrid`)
-) ENGINE=InnoDB AUTO_INCREMENT=201 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2203,7 +2203,7 @@ CREATE TABLE `reskeys` (
   KEY `create_ts` (`create_ts`),
   KEY `last_ts` (`last_ts`),
   KEY `submit_ts` (`submit_ts`)
-) ENGINE=InnoDB AUTO_INCREMENT=18547001 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2249,7 +2249,7 @@ CREATE TABLE `sessions` (
   `last_action` varchar(16) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`session`),
   UNIQUE KEY `uid` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3966843 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2281,7 +2281,7 @@ CREATE TABLE `signoff` (
   `signoff_type` varchar(16) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`soid`),
   KEY `stoid` (`stoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=96867 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2298,7 +2298,7 @@ CREATE TABLE `site_info` (
   `description` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `site_keys` (`name`,`value`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2348,7 +2348,7 @@ CREATE TABLE `skins` (
   `theme` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT '',
   PRIMARY KEY (`skid`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2404,7 +2404,7 @@ CREATE TABLE `soap_methods` (
   `formkeys` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `soap_method` (`class`,`method`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2420,7 +2420,7 @@ CREATE TABLE `spamarmors` (
   `code` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci,
   `active` mediumint DEFAULT '1',
   PRIMARY KEY (`armor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2508,7 +2508,7 @@ CREATE TABLE `static_files` (
   `height` smallint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`sfid`),
   KEY `stoid` (`stoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2528,7 +2528,7 @@ CREATE TABLE `stats_daily` (
   UNIQUE KEY `day_key_pair` (`day`,`name`,`skid`),
   UNIQUE KEY `skid_day_name` (`skid`,`day`,`name`),
   KEY `name_day` (`name`,`day`)
-) ENGINE=InnoDB AUTO_INCREMENT=11181335 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2584,7 +2584,7 @@ CREATE TABLE `stories` (
   KEY `skidtid` (`primaryskid`,`tid`),
   KEY `discussion_stoid` (`discussion`,`stoid`),
   KEY `slowass` (`in_trash`,`time`)
-) ENGINE=InnoDB AUTO_INCREMENT=8108516 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2616,7 +2616,7 @@ CREATE TABLE `story_files` (
   PRIMARY KEY (`id`),
   KEY `stoid` (`stoid`),
   KEY `file_id` (`file_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=157 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2633,7 +2633,7 @@ CREATE TABLE `story_param` (
   `value` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `story_key` (`stoid`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=206230 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2712,7 +2712,7 @@ CREATE TABLE `string_param` (
   `name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `code_key` (`type`,`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=331 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2729,7 +2729,7 @@ CREATE TABLE `stripe_log` (
   `remote_address` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `raw_transaction` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`logid`)
-) ENGINE=InnoDB AUTO_INCREMENT=518 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2746,7 +2746,7 @@ CREATE TABLE `submission_param` (
   `value` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `submission_key` (`subid`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=83134 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2786,7 +2786,7 @@ CREATE TABLE `submissions` (
   KEY `primaryskid_tid` (`primaryskid`,`tid`),
   KEY `tid` (`tid`),
   KEY `time_emaildomain` (`time`,`emaildomain`)
-) ENGINE=InnoDB AUTO_INCREMENT=59897 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2803,7 +2803,7 @@ CREATE TABLE `submissions_notes` (
   `subnote` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci,
   `time` datetime DEFAULT NULL,
   PRIMARY KEY (`noid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2835,7 +2835,7 @@ CREATE TABLE `subscribe_payments` (
   KEY `uid` (`uid`),
   KEY `ts` (`ts`),
   KEY `puid` (`puid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1923 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2982,7 +2982,7 @@ CREATE TABLE `tagnames` (
   `tagname` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`tagnameid`),
   UNIQUE KEY `tagname` (`tagname`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3037,7 +3037,7 @@ CREATE TABLE `tags` (
   KEY `uid_globjid_tagnameid_inactivated` (`uid`,`globjid`,`tagnameid`,`inactivated`),
   KEY `uid_tagnameid_globjid_inactivated` (`uid`,`tagnameid`,`globjid`,`inactivated`),
   KEY `created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3173,7 +3173,7 @@ CREATE TABLE `templates` (
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`tpid`),
   UNIQUE KEY `true_template` (`name`,`page`,`skin`,`lang`)
-) ENGINE=InnoDB AUTO_INCREMENT=421 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3278,7 +3278,7 @@ CREATE TABLE `topics` (
   `usesprite` enum('no','yes') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'no',
   PRIMARY KEY (`tid`),
   UNIQUE KEY `keyword` (`keyword`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3354,7 +3354,7 @@ CREATE TABLE `urls` (
   PRIMARY KEY (`url_id`),
   UNIQUE KEY `url_digest` (`url_digest`),
   KEY `bfu` (`believed_fresh_until`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3372,7 +3372,7 @@ CREATE TABLE `user_achievement_streaks` (
   `last_hit` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `achievement` (`uid`,`aid`)
-) ENGINE=InnoDB AUTO_INCREMENT=4405 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3391,7 +3391,7 @@ CREATE TABLE `user_achievements` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `achievement` (`uid`,`aid`),
   KEY `aid_exponent` (`aid`,`exponent`)
-) ENGINE=InnoDB AUTO_INCREMENT=13094 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3423,7 +3423,7 @@ CREATE TABLE `users` (
   KEY `chk4matchname` (`matchname`),
   KEY `author_lookup` (`author`),
   KEY `seclev` (`seclev`)
-) ENGINE=InnoDB AUTO_INCREMENT=30461 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3640,7 +3640,7 @@ CREATE TABLE `users_logtokens` (
   KEY `locationid` (`locationid`),
   KEY `temp` (`temp`),
   KEY `public` (`public`)
-) ENGINE=InnoDB AUTO_INCREMENT=168774 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3657,7 +3657,7 @@ CREATE TABLE `users_messages` (
   `mode` tinyint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_key` (`uid`,`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=242734 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3709,7 +3709,7 @@ CREATE TABLE `users_param` (
   PRIMARY KEY (`param_id`),
   UNIQUE KEY `uid_key` (`uid`,`name`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=12218729 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

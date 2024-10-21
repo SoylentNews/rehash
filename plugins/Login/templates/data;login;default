@@ -154,7 +154,7 @@ password, so you can safely disregard this message.
 Thanks.
 
 In case you get multiple emails you didn't request, the requester's IP
-was [% remote_ip %].[% IF user_agent %]  Its user agent was
+was [% client_ip %].[% IF user_agent %]  Its user agent was
 "[% user_agent %]"
 (not that you should trust that value, but it might be interesting).[% END %]
 [% IF x_forwarded_for %]In case that's a properly-configured proxy,

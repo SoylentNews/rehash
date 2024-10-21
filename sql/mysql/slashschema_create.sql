@@ -1488,7 +1488,7 @@ CREATE TABLE users_comments (
 	commentspill smallint UNSIGNED DEFAULT '50' NOT NULL,
 	commentsort tinyint DEFAULT '0' NOT NULL,
 	noscores tinyint DEFAULT '0' NOT NULL,
-	mode ENUM('flat', 'nested', 'nocomment', 'thread','improvedthreaded') DEFAULT 'improvedthreaded' NOT NULL,
+	mode ENUM('flat', 'nocomment', 'threadtos','threadtng') DEFAULT 'threadtos' NOT NULL,
 	threshold tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1501,7 +1501,7 @@ DROP TABLE IF EXISTS users_comments_read_log;
 CREATE TABLE users_comments_read_log (
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	discussion_id MEDIUMINT UNSIGNED NOT NULL,
-	cid INT UNSIGNED NOT NULL,
+	cid INT UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
