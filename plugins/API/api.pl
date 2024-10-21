@@ -522,6 +522,7 @@ sub getLatestComments {
 		delete $comment->{time};
 		delete $comment->{ipid};
 		delete $comment->{signature};
+		delete $comment->{lastmod} if $comment->{lastmod};
 
 		$comment->{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
 		push(@$comments, $comment);
@@ -545,7 +546,7 @@ sub getSingleComment {
 	delete $comment->{time};
 	delete $comment->{ipid};
 	delete $comment->{signature};
-
+	delete $comment->{lastmod} if $comment->{lastmod};
 	my $json = JSON->new->utf8->allow_nonref;
 	return $json->pretty->encode($comment);
 }
@@ -565,6 +566,7 @@ sub getDiscussion {
 		delete $comments->{$cid}{has_read};
 		delete $comments->{$cid}{time};
 		delete $comments->{$cid}{ipid};
+		delete $comments->{$cid}{lastmod} if $comments->{$cid}{lastmod};
 		delete $comments->{signature} if $comments->{signature};
 	}
 

@@ -27,7 +27,7 @@ __template__
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" target="blank">Wiki - Main Page</a></li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews#Get_Involved" target="blank">Wiki - Get Involved</a> | Information on the many ways one can contribute to this project.</li>
 			<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews:IRC" target="blank">Wiki - IRC</a> | Information about how to join and get the most of the realtime discussion on our IRC network.</li>
-			<li><a href="http://chat.soylentnews.org" target="blank">IRC Web Chat</a> | Join the discussion right on your browser, no IRC client needed.</li>
+			<li><a href="https://irc.staging.soylentnews.org" target="blank">IRC Web Chat</a> | Join the discussion right on your browser, no IRC client needed.</li>
 			<li><a href="http://wiki.soylentnews.org/wiki/WhosWho" target="blank">Who's Who?</a> | A list of team contacts and staff members.</li>
 			<li><a href="https://github.com/SoylentNews/rehash/issues?labels=&page=1&state=open" target="blank">Bugs</a> | The list of open issues on Github.</li>
 			<li><a href="https://github.com/SoylentNews/rehash/issues/new" target="blank">Bugs - Submit a New Bug</a> | Please use as much relevant detail as you can (i.e. UID, when, browser and version, OS, error message, and screenshots).</li>

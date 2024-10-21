@@ -15,7 +15,7 @@ organisation
 __template__
 <ul>
 		<li><a href="https://twitter.com/soylentnews/" rel="nofollow">Twitter</a></li>
-		<li><a href="http://chat.soylentnews.org" rel="nofollow">IRC</a></li>
+		<li><a href="https://irc.staging.soylentnews.org" rel="nofollow">IRC</a></li>
 		<li><a href="http://wiki.soylentnews.org/wiki/SoylentNews" rel="nofollow">Wiki</a></li>
 		<li><a href="http://wiki.soylentnews.org/wiki/WhosWho" rel="nofollow">Who's Who?</a></li>
 		<li><a href="https://github.com/SoylentNews/rehash/issues" rel="nofollow">Bug List</a></li>
