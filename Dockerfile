@@ -28,7 +28,7 @@ ENV PERL_DOWNLOAD=https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
 ENV APACHE_VERSION=2.2.34
 ENV APACHE_DOWNLOAD=https://archive.apache.org/dist/httpd/httpd-${APACHE_VERSION}.tar.gz
 
-ENV MOD_PERL_VERSION=2.0.12
+ENV MOD_PERL_VERSION=2.0.13
 ENV MOD_PERL_DOWNLOAD=https://mirror.cogentco.com/pub/apache/perl/mod_perl-${MOD_PERL_VERSION}.tar.gz
 
 # rehash uses its own Perl, make we need to define that
