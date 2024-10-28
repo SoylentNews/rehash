@@ -99,7 +99,7 @@ RUN ${REHASH_CPANM} Data::JavaScript::Anon
 RUN ${REHASH_CPANM} Date::Calc
 RUN ${REHASH_CPANM} Date::Format
 RUN ${REHASH_CPANM} Date::Parse
-RUN ${REHASH_CPANM} DateTime::Format::MySQL
+RUN ${REHASH_CPANM} -T --notest DateTime::Format::MySQL
 RUN ${REHASH_CPANM} DBD::mysql
 RUN ${REHASH_CPANM} Digest::MD5
 RUN ${REHASH_CPANM} GD
@@ -155,7 +155,7 @@ COPY DBIx/make_password_pm.sh .
 COPY DBIx/Password.pm.in .
 RUN mkdir -p ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/
 RUN sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > ${REHASH_PREFIX}/perl/lib/${PERL_VERSION}/DBIx/Password.pm
-RUN adduser --system --group --gecos "Slash" slash
+RUN adduser --system --group --uid 50000 --gecos "Slash" slash
 
 # Copy in the rehash source code
 ADD . ${REHASH_SRC}/
