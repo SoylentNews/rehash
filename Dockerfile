@@ -47,7 +47,7 @@ RUN apt-get update
 RUN yes | unminimize
 
 # Install system build dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix fortune
 RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
