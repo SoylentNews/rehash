@@ -21,6 +21,11 @@ sub main {
 	my $endpoint = lc($form->{m});
 
 	my $endpoints = {
+		
+		admin		=> {
+			function	=> \&admin,
+			seclev		=> 0,
+		},
 		user		=> {
 			function	=> \&user,
 			seclev		=> 1,
@@ -39,7 +44,7 @@ sub main {
 		},
 		auth		=> {
 			function	=> \&auth,
-			seclev		=> 1,
+			seclev		=> 0,
 		},
 		mod		=> {
 			function	=> \&mod,
@@ -48,18 +53,29 @@ sub main {
 		default		=> {
 			function	=> \&nullop,
 			seclev		=> 1,
-		},
+		}
+
 
 	};
 
 	$endpoint = 'default' unless $endpoints->{$endpoint};
 
-	my $retval = $endpoints->{$endpoint}{function}->($form, $slashdb, $user, $constants, $gSkin);
+	  # Check security level
+    if ($user->{seclev} < $endpoints->{$endpoint}{seclev}) {
+        my $retval = encode_json({ error => 'Insufficient privileges' });
+        binmode(STDOUT, ':encoding(utf8)');
+        http_send({ content_type => 'application/json; charset=UTF-8',  cache_control => 'no-cache', pragma => 'no-cache' });
+        _utf8_on($retval);
+        print $retval;
+        return;
+    }
 
-	binmode(STDOUT, ':encoding(utf8)');
-	http_send({ content_type => 'application/json; charset=UTF-8',  cache_control => 'no-cache', pragma => 'no-cache' });
-	_utf8_on($retval);
-	print $retval;
+    my $retval = $endpoints->{$endpoint}{function}->($form, $slashdb, $user, $constants, $gSkin);
+
+    binmode(STDOUT, ':encoding(utf8)');
+    http_send({ content_type => 'application/json; charset=UTF-8',  cache_control => 'no-cache', pragma => 'no-cache' });
+    _utf8_on($retval);
+    print $retval;
 }
 
 sub auth {
@@ -83,6 +99,10 @@ sub auth {
 
 	$op = 'default' unless $ops->{$op};
 
+	if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
+
         return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -102,6 +122,10 @@ sub mod {
 	};
 
 	$op = 'default' unless $ops->{$op};
+
+	if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
@@ -134,6 +158,10 @@ sub user {
 	};
 
 	$op = 'default' unless $ops->{$op};
+
+	if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
 
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
@@ -179,6 +207,10 @@ sub story {
 
 	$op = 'default' unless $ops->{$op};
 
+	if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -215,6 +247,11 @@ sub comment {
 
 	$op = 'default' unless $ops->{$op};
 
+
+	if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 }
 
@@ -239,7 +276,85 @@ sub journal {
 
 	$op = 'default' unless $ops->{$op};
 
+	if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
+
 	return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+
+sub admin {
+    my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+    my $op = lc($form->{op});
+
+    my $ops = {
+        flag_spam	=> {
+            function	=> \&flag_spam,
+            seclev		=> 100,
+        },
+		  get_comments_audit => {
+            function => \&get_comments_audit,
+            seclev   => 0,
+        },
+        default		=> {
+            function	=> \&nullop,
+            seclev		=> 0,
+        },
+    };
+
+    $op = 'default' unless $ops->{$op};
+
+    # Check security level
+    if ($user->{seclev} < $ops->{$op}{seclev}) {
+        return encode_json({ error => 'Insufficient privileges' });
+    }
+
+    return $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
+}
+
+sub get_comments_audit {
+    my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+    my $cid = $form->{cid};
+    my $limit = $form->{limit};
+
+    # Call getCommentsAudit to retrieve the audit entries
+    my $sth = $slashdb->getCommentsAudit($cid, $limit);
+
+    # Fetch all rows
+    my @rows;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @rows, $row;
+    }
+
+    return encode_json({ success => 1, data => \@rows });
+}
+
+sub flag_spam {
+    my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+    my $cid = $form->{cid};
+    my $spam_flag = $form->{spam_flag};
+    my $mod_reason = $form->{mod_reason};
+
+    # Ensure cid, spam_flag, and mod_reason are provided
+    unless ($cid) {
+        return encode_json({ error => 'Comment ID not provided' });
+    }
+    unless (defined $spam_flag) {
+        return encode_json({ error => 'Spam flag value not provided' });
+    }
+    unless ($mod_reason) {
+        return encode_json({ error => 'Moderation reason not provided' });
+    }
+
+    # Call doFlagSpam to handle the database operations
+    my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason);
+
+    if ($result) {
+        return encode_json({ success => 'Comment spam flag updated' });
+    } else {
+        return encode_json({ error => 'Failed to update comment spam flag' });
+    }
 }
 
 sub getTopicsList {

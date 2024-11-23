@@ -78,3 +78,23 @@ ALTER TABLE stories MODIFY COLUMN notes VARCHAR(1023) NULL DEFAULT '';
 ALTER TABLE submissions MODIFY COLUMN comment VARCHAR(1023) NULL DEFAULT '';
 ALTER TABLE submissions MODIFY COLUMN note varchar(30) DEFAULT '' NULL;
 
+#######################################
+# SoylentNews Rehash 16_00            #
+#######################################
+
+UPDATE vars SET value = 'rehash_16_00' WHERE name = 'cvs_tag_currentcode';
+
+# comments_audit table added.
+CREATE TABLE `comments_audit` (
+  `logid` int unsigned NOT NULL AUTO_INCREMENT,
+  `cid` int unsigned NOT NULL,
+  `date` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  `mod_uid` mediumint unsigned NOT NULL,
+  `mod_reason` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `spam_flag` tinyint(1) NOT NULL,
+  PRIMARY KEY (`logid`)
+) AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
+# Spam flagging comments
+ALTER TABLE `comments` ADD COLUMN `spam_flag` TINYINT(1) NOT NULL DEFAULT 0;
+

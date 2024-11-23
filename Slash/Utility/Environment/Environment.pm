@@ -44,6 +44,7 @@ use Data::Dumper;
 use base 'Exporter';
 
 use feature 'state';
+use JSON;
 
 our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
@@ -501,6 +502,15 @@ sub getCurrentForm {
 			# we've already done this, so return stuff
 			return defined $value ? $form->{$value} : $form;
 		}
+
+		# Check Content-Type header
+        my $content_type = $r->headers_in->{'Content-Type'};
+        if ($content_type && $content_type eq 'application/json') {
+            # Read and decode JSON body
+            my $json_body;
+            $r->read($json_body, $r->headers_in->{'Content-Length'});
+            $form = decode_json($json_body);
+        }
 
 		# Else we need to build the initial form.
 		my @params = $req->param;

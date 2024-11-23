@@ -698,6 +698,20 @@ CREATE TABLE `commentmodes` (
 -- Table structure for table `comments`
 --
 
+DROP TABLE IF EXISTS `comments_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `comments_audit` (
+  `logid` int unsigned NOT NULL AUTO_INCREMENT,
+  `cid` int unsigned NOT NULL,
+  `date` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  `mod_uid` mediumint unsigned NOT NULL,
+  `mod_reason` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `spam_flag` tinyint(1) NOT NULL,
+  PRIMARY KEY (`logid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 DROP TABLE IF EXISTS `comments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -728,6 +742,7 @@ CREATE TABLE `comments` (
   `tweak_orig` tinyint NOT NULL DEFAULT '0',
   `tweak` tinyint NOT NULL DEFAULT '0',
   `badge_id` tinyint NOT NULL DEFAULT '0',
+  `spam_flag` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`cid`),
   KEY `display` (`sid`,`points`,`uid`),
   KEY `byname` (`uid`,`points`),
