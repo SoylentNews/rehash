@@ -1488,8 +1488,9 @@ sub postProcessComment {
 
 	# Check if spam_flag is set
     if ($comm->{spam_flag}) {
-        $comm->{subject} = '** Moderated **';
-        $comm->{comment} = '** Flagged as spam **';
+        $comm->{subject} = '** Flagged Comment **';
+        $comm->{comment} = '** This comment has been flagged for review. **';
+		$comm->{sig} = '';
     }
 
 	if (!$from_db) {
