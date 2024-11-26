@@ -1160,3 +1160,4 @@ INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whe
 INSERT INTO vars (name, value, description) VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
 INSERT INTO vars (name, value, description) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');
 INSERT INTO vars (name, value, description) VALUES ("downmod_karma_floor", "10", "Below this level of karma, users cannot use negative moderations");
+INSERT INTO vars (name, value, description) VALUES ("onion_location", "", "Location of the Onion server");

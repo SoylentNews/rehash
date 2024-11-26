@@ -33,12 +33,11 @@ __template__
 			<li><a href="https://github.com/SoylentNews/rehash/issues/new" target="blank">Bugs - Submit a New Bug</a> | Please use as much relevant detail as you can (i.e. UID, when, browser and version, OS, error message, and screenshots).</li>
 			<li><a href="https://github.com/SoylentNews/rehash/" target="blank">The Repo</a> | The rehash repository for SoylentNews on GitHub.</li>
 			<li><a href="http://status.soylentnews.org" target="blank">Site Status</a> | A static page used to relay information regarding downtime. It will be updated in cases of unexpected downtime.</li>
+			
 		</ul>
 		<h3>Tor .onion Links:</h3>
 		<ul>
-			<li><a href="http://7rmath4ro2of2a42.onion" target="blank">SoylentNews</a></li>
-			<li><a href="http://skgmctqnhyvfava3.onion" target="blank">Development Site</a></li>
-			<li><a href="http://kvs3xgkasyoqd4hx.onion" target="blank">Wiki</a></li>
+			<li><a href="http://soylentqarvi3ikkzpp7fn4m5pxeeonbv6kr4akgkczqethjfhmalhid.onion" target="blank">SoylentNews</a></li>
 		</ul></p>
 		<h3>Suggested Reading</h3>
 		<ul>
