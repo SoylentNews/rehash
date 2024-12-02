@@ -24,23 +24,23 @@ sub main {
 		
 		admin		=> {
 			function	=> \&admin,
-			seclev		=> 0,
+			seclev		=> 100,
 		},
 		user		=> {
 			function	=> \&user,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		comment		=> {
 			function	=> \&comment,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		story		=> {
 			function	=> \&story,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		journal		=> {
 			function	=> \&journal,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		auth		=> {
 			function	=> \&auth,
@@ -48,11 +48,11 @@ sub main {
 		},
 		mod		=> {
 			function	=> \&mod,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 100,
 		}
 
 
@@ -85,7 +85,7 @@ sub auth {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 0,
 		},
 		login		=> {
 			function	=> \&login,
@@ -93,7 +93,7 @@ sub auth {
 		},
 		logout		=> {
 			function	=> \&logout,
-			seclev		=> 1,
+			seclev		=> 0,
 		},
 	};
 
@@ -113,11 +113,11 @@ sub mod {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 0,
+			seclev		=> 100,
 		},
 		reasons		=> {
 			function	=> \&getModReasons,
-			seclev		=> 0,
+			seclev		=> 100,
 		},
 	};
 
@@ -137,23 +137,23 @@ sub user {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		max_uid		=> {
 			function	=> \&maxUid,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		get_uid		=> {
 			function	=> \&nameToUid,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		get_nick	=> {
 			function	=> \&uidToName,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		get_user	=> {
 			function	=> \&getPubUserInfo,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -173,35 +173,35 @@ sub story {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		latest		=> {
 			function	=> \&getLatestStories,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		single	=> {
 			function	=> \&getSingleStory,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		pending	=> {
 			function	=> \&getPendingBoth,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		post	=> {
 			function	=> \&postStory,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		reskey		=> {
 			function	=> \&getStoryReskey,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		nexuslist	=> {
 			function	=> \&getNexusList,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		topiclist	=> {
 			function	=> \&getTopicsList,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -221,27 +221,27 @@ sub comment {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		latest		=> {
 			function	=> \&getLatestComments,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		single		=> {
 			function	=> \&getSingleComment,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		discussion	=> {
 			function	=> \&getDiscussion,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		post		=> {
 			function	=> \&postComment,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		reskey		=> {
 			function	=> \&getCommentReskey,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -262,15 +262,15 @@ sub journal {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		latest		=> {
 			function	=> \&getLatestJournals,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		single		=> {
 			function	=> \&getSingleJournal,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -295,7 +295,7 @@ sub admin {
         },
 		  get_comments_audit => {
             function => \&get_comments_audit,
-            seclev   => 0,
+            seclev   => 100,
         },
         default		=> {
             function	=> \&nullop,
@@ -318,12 +318,26 @@ sub get_comments_audit {
     my $cid = $form->{cid};
     my $limit = $form->{limit};
 
+	if (defined $cid && $cid ne '') {
+		$cid =~ s/\D//g;
+	}
+
+	if (defined $limit && $limit ne '') {
+		$limit =~ s/\D//g;
+	}
+
     # Call getCommentsAudit to retrieve the audit entries
     my $sth = $slashdb->getCommentsAudit($cid, $limit);
 
     # Fetch all rows
     my @rows;
     while (my $row = $sth->fetchrow_hashref) {
+		 if ($row->{redacts}) {
+			my $redacts = decode_json($row->{redacts});
+			foreach my $pattern (@$redacts) {
+				$row->{comment} =~ s/($pattern)/'#' x length($1)/ge;
+			}
+		}
         push @rows, $row;
     }
 
@@ -335,6 +349,9 @@ sub flag_spam {
     my $cid = $form->{cid};
     my $spam_flag = $form->{spam_flag};
     my $mod_reason = $form->{mod_reason};
+	my $redacts = $form->{redacts};
+
+
 
     # Ensure cid, spam_flag, and mod_reason are provided
     unless ($cid) {
@@ -347,8 +364,42 @@ sub flag_spam {
         return encode_json({ error => 'Moderation reason not provided' });
     }
 
+	$cid =~ s/\D//g;
+	$spam_flag =~ s/\D//g;
+
+	    # Check if redacts is a scalar or an array reference
+    if ($redacts) {
+        if (ref($redacts) eq 'ARRAY') {
+            # Handle array of strings
+            foreach my $pattern (@$redacts) {
+                # Ensure each pattern is a valid regex string
+                eval { qr/$pattern/ };
+                if ($@) {
+                    return encode_json({ error => "Invalid regex pattern: $pattern" });
+                }
+            }
+        } elsif (!ref($redacts)) {
+            # Handle single string
+            eval { qr/$redacts/ };
+            if ($@) {
+                return encode_json({ error => "Invalid regex pattern: $redacts" });
+            }
+            # Convert single string to array
+            $redacts = [$redacts];
+        } else {
+            return encode_json({ error => 'Invalid redacts format' });
+        }
+    } else {
+        # If redacts is not provided, set it to an empty array
+        $redacts = [];
+    }
+
+    # Encode redacts as JSON
+    my $redacts_json =  $slashdb->sqlQuote(encode_json($redacts));
+
+
     # Call doFlagSpam to handle the database operations
-    my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason);
+    my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason, $redacts_json);
 
     if ($result) {
         return encode_json({ success => 'Comment spam flag updated' });
@@ -771,6 +822,7 @@ sub uidToName {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $json = JSON->new->utf8->allow_nonref;
 	my $uid = $form->{uid};
+	$uid =~ s/\D//g;
 	my $nick = {};
 	$nick->{nick} = $slashdb->sqlSelect(
 					'nickname',

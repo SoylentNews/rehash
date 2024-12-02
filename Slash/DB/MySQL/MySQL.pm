@@ -6275,7 +6275,7 @@ sub getThreadedCommentsForUser {
 		. "tweak, tweak_orig, subject_orig, children, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus, spam_flag, "
+		. "karma_bonus, spam_flag, redacts"
 		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
@@ -6344,7 +6344,7 @@ sub getFlatCommentsForUser {
 		. "tweak, tweak_orig, subject_orig, children, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus, spam_flag, "
+		. "karma_bonus, spam_flag, redacts "
 		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
@@ -6404,7 +6404,7 @@ sub getCommentsForUser {
 		. "tweak, tweak_orig, subject_orig, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus, spam_flag, "
+		. "karma_bonus, spam_flag, redacts"
 		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
@@ -13381,13 +13381,13 @@ sub logCommentPromotion {
 
 
 sub doFlagSpam {
-    my ($self, $cid, $spam_flag, $mod_uid, $mod_reason) = @_;
+    my ($self, $cid, $spam_flag, $mod_uid, $mod_reason, $redacts) = @_;
 
     # Begin transaction
     $self->sqlDo("SET AUTOCOMMIT=0");
 
     # Prepare the data for the update
-    my $data = { spam_flag => $spam_flag };
+    my $data = { spam_flag => $spam_flag, redacts=>$redacts };
     my $where = "cid = " . $self->sqlQuote($cid);
 
     # Update the spam flag using sqlUpdate
@@ -13429,9 +13429,11 @@ sub getCommentsAudit {
     # Default limit to 100 if not provided
     $limit = 100 unless defined $limit;
 
-    my $select = '*';
-    my $from = 'comments_audit';
-    my $where = $cid ? "cid = " . $self->sqlQuote($cid) : undef;
+    my $select = 'comments_audit.*, commment_text.comment, comment.redacts';
+    my $from = 'comments_audit, comment, comment_text';
+    my $where = 'comments_audit.cid = comment.cid AND comment.cid = comment_text.cid';
+	$where .= $cid ? " AND comments_audit.cid = " . $self->sqlQuote($cid) : '';
+
     my $other = $cid ? '' : "ORDER BY date DESC" . ($limit ? " LIMIT $limit" : '');
 
     return $self->sqlSelectMany($select, $from, $where, $other);
