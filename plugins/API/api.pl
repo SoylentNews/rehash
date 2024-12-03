@@ -341,7 +341,7 @@ sub get_comments_audit {
          my $current_time = gmtime;
         my $time_diff = $current_time - $last_date;
 
- if ($time_diff < $hidden_duration_seconds) {
+ 		if ($time_diff < $hidden_duration_seconds) {
             my $remaining_seconds = $hidden_duration_seconds - $time_diff;
             my $hours = int($remaining_seconds / 3600);
             my $minutes = int(($remaining_seconds % 3600) / 60);
@@ -412,7 +412,7 @@ sub flag_spam {
     }
 
     # Encode redacts as JSON
-    my $redacts_json =  $slashdb->sqlQuote(encode_json($redacts));
+    my $redacts_json =  encode_json($redacts);
 
 
     # Call doFlagSpam to handle the database operations
