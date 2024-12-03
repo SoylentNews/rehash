@@ -6275,7 +6275,7 @@ sub getThreadedCommentsForUser {
 		. "tweak, tweak_orig, subject_orig, children, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus, spam_flag, redacts"
+		. "karma_bonus, spam_flag, "
 		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
@@ -6344,7 +6344,7 @@ sub getFlatCommentsForUser {
 		. "tweak, tweak_orig, subject_orig, children, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus, spam_flag, redacts "
+		. "karma_bonus, spam_flag, "
 		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
@@ -6404,7 +6404,7 @@ sub getCommentsForUser {
 		. "tweak, tweak_orig, subject_orig, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus, spam_flag, redacts"
+		. "karma_bonus, spam_flag, "
 		. "len, badge_id, comment_text.comment as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
@@ -13428,10 +13428,15 @@ sub getCommentsAudit {
 
     # Default limit to 100 if not provided
     $limit = 100 unless defined $limit;
+	$limit = $limit =~ /^\d+$/ ? $limit : 100;
 
-    my $select = 'comments_audit.*, commment_text.comment, comment.redacts';
-    my $from = 'comments_audit, comment, comment_text';
-    my $where = 'comments_audit.cid = comment.cid AND comment.cid = comment_text.cid';
+    my $select = 'comments_audit.*, comment_text.comment, comments.redacts, last_dates.last_date';
+    my $from = 'comments_audit 
+                JOIN comment_text ON comments_audit.cid = comment_text.cid 
+                JOIN comments ON comments_audit.cid = comments.cid 
+                JOIN (SELECT cid, MAX(date) AS last_date FROM comments_audit GROUP BY cid) AS last_dates 
+                ON comments_audit.cid = last_dates.cid';
+    my $where = 'comments_audit.cid = comments.cid AND comments.cid = comment_text.cid';
 	$where .= $cid ? " AND comments_audit.cid = " . $self->sqlQuote($cid) : '';
 
     my $other = $cid ? '' : "ORDER BY date DESC" . ($limit ? " LIMIT $limit" : '');

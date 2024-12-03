@@ -9,6 +9,8 @@ use Slash::Utility;
 use Slash::Constants qw(:web :messages);
 use Data::Dumper;
 use Encode qw(_utf8_on);
+use Time::Piece;
+use Time::Seconds;
 
 sub main {
 	my $user = getCurrentUser();
@@ -24,23 +26,23 @@ sub main {
 		
 		admin		=> {
 			function	=> \&admin,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		user		=> {
 			function	=> \&user,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		comment		=> {
 			function	=> \&comment,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		story		=> {
 			function	=> \&story,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		journal		=> {
 			function	=> \&journal,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		auth		=> {
 			function	=> \&auth,
@@ -48,11 +50,11 @@ sub main {
 		},
 		mod		=> {
 			function	=> \&mod,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 100,
+			seclev		=> 1,
 		}
 
 
@@ -113,11 +115,11 @@ sub mod {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		reasons		=> {
 			function	=> \&getModReasons,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 	};
 
@@ -137,23 +139,23 @@ sub user {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		max_uid		=> {
 			function	=> \&maxUid,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		get_uid		=> {
 			function	=> \&nameToUid,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		get_nick	=> {
 			function	=> \&uidToName,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		get_user	=> {
 			function	=> \&getPubUserInfo,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 	};
 
@@ -173,35 +175,35 @@ sub story {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		latest		=> {
 			function	=> \&getLatestStories,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		single	=> {
 			function	=> \&getSingleStory,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		pending	=> {
 			function	=> \&getPendingBoth,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		post	=> {
 			function	=> \&postStory,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		reskey		=> {
 			function	=> \&getStoryReskey,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		nexuslist	=> {
 			function	=> \&getNexusList,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		topiclist	=> {
 			function	=> \&getTopicsList,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 	};
 
@@ -221,27 +223,27 @@ sub comment {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		latest		=> {
 			function	=> \&getLatestComments,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		single		=> {
 			function	=> \&getSingleComment,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		discussion	=> {
 			function	=> \&getDiscussion,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		post		=> {
 			function	=> \&postComment,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		reskey		=> {
 			function	=> \&getCommentReskey,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 	};
 
@@ -262,15 +264,15 @@ sub journal {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		latest		=> {
 			function	=> \&getLatestJournals,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		single		=> {
 			function	=> \&getSingleJournal,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 	};
 
@@ -291,11 +293,11 @@ sub admin {
     my $ops = {
         flag_spam	=> {
             function	=> \&flag_spam,
-            seclev		=> 100,
+            seclev		=> 1,
         },
 		  get_comments_audit => {
             function => \&get_comments_audit,
-            seclev   => 100,
+            seclev   	=> 0,
         },
         default		=> {
             function	=> \&nullop,
@@ -326,12 +328,27 @@ sub get_comments_audit {
 		$limit =~ s/\D//g;
 	}
 
+	my $hidden_duration_minutes = $constants->{comment_audit_hidden_duration} // 1440;
+    my $hidden_duration_seconds = $hidden_duration_minutes * 60;
+
     # Call getCommentsAudit to retrieve the audit entries
     my $sth = $slashdb->getCommentsAudit($cid, $limit);
 
     # Fetch all rows
     my @rows;
     while (my $row = $sth->fetchrow_hashref) {
+        my $last_date = Time::Piece->strptime($row->{last_date}, '%Y-%m-%d %H:%M:%S');
+         my $current_time = gmtime;
+        my $time_diff = $current_time - $last_date;
+
+ if ($time_diff < $hidden_duration_seconds) {
+            my $remaining_seconds = $hidden_duration_seconds - $time_diff;
+            my $hours = int($remaining_seconds / 3600);
+            my $minutes = int(($remaining_seconds % 3600) / 60);
+            delete $row->{redacts};
+            $row->{comment} = sprintf("%d hours and %d minutes until visible", $hours, $minutes);
+        }
+
 		 if ($row->{redacts}) {
 			my $redacts = decode_json($row->{redacts});
 			foreach my $pattern (@$redacts) {
