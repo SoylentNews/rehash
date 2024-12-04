@@ -26,7 +26,7 @@ sub main {
 		
 		admin		=> {
 			function	=> \&admin,
-			seclev		=> 1,
+			seclev		=> 0,
 		},
 		user		=> {
 			function	=> \&user,
@@ -342,11 +342,15 @@ sub get_comments_audit {
         my $time_diff = $current_time - $last_date;
 
  		if ($time_diff < $hidden_duration_seconds) {
-            my $remaining_seconds = $hidden_duration_seconds - $time_diff;
+			my $remaining_seconds = $hidden_duration_seconds - $time_diff;
             my $hours = int($remaining_seconds / 3600);
             my $minutes = int(($remaining_seconds % 3600) / 60);
-            delete $row->{redacts};
-            $row->{comment} = sprintf("%d hours and %d minutes until visible", $hours, $minutes);
+			if ( $user->{seclev} < 100 ) {
+				delete $row->{redacts};
+				$row->{comment} = sprintf("%d hours and %d minutes until visible", $hours, $minutes);
+			} else {
+				$row->{hold_expiry} = sprintf("%d hours and %d minutes until visible", $hours, $minutes);
+			}
         }
 
 		 if ($row->{redacts}) {
