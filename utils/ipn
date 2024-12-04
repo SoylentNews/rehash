@@ -129,7 +129,8 @@ case "$1" in
 			break_parts;
 			echo -n "Starting $PROGNAME $VIRTUAL_USER_NAME: ";
 			start_ipnd;
-			echo "$!" > ${RUNNINGPID};
+#			echo "$!" > ${RUNNINGPID};
+# 			idk why this is here, let it create its own pid file under its own user....
 			echo "ok PID = $!";
 		done
 		;;
