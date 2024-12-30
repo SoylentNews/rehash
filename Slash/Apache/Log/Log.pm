@@ -9,6 +9,10 @@ use utf8;
 use Slash::Utility;
 use Apache2::Const;
 
+use File::Spec;
+use Time::HiRes qw(gettimeofday);
+use Fcntl ':flock'; # Import LOCK_* constants
+
 our $VERSION = $Slash::Constants::VERSION;
 
 # AMY: Leela's gonna kill me.
@@ -73,13 +77,35 @@ sub handler {
 # count them for subscribers we will do them a disservice).
 #
 
+sub log_user_status_and_ip {
+    my ($user, $request_ip) = @_;
+
+    my $log_file = File::Spec->catfile('/srv/soylentnews.logs', 'user_log.txt');
+    open my $log_fh, '>>', $log_file or die "Cannot open $log_file: $!";
+
+    # Lock the file to handle multiple threads
+    flock($log_fh, LOCK_EX) or die "Cannot lock $log_file: $!";
+
+    my $high_res_time = gettimeofday;
+    print $log_fh "UID: $user->{uid}, IP: $request_ip, Time: $high_res_time\n";
+    #print $log_fh "User Status: " . join(", ", map { "$_: $user->{$_}" } keys %$user) . "\n";
+    # Unlock the file and close it
+    flock($log_fh, LOCK_UN) or die "Cannot unlock $log_file: $!";
+    close $log_fh;
+}
+
 sub UserLog {
 	my($r) = @_;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	return if !$user || !$user->{uid} || $user->{is_anon};
+	if (!$user || !$user->{uid} || $user->{is_anon}) {
+        log_user_status_and_ip({ uid => 0 }, $r->connection->remote_ip);
+        return;
+    }
+
+	log_user_status_and_ip($user, $r->connection->remote_ip);
 
 	my $user_update = undef;
 	my $slashdb = getCurrentDB();
@@ -194,3 +220,6 @@ database.
 Slash(3), Slash::Apache(3).
 
 =cut
+
+
+
