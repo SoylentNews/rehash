@@ -26,6 +26,7 @@ template=templates/dbsparkline;misc;default
 template=templates/default;portald;default
 template=templates/del_message;comments;default
 template=templates/deleted_cids;comments;default
+template=templates/flagged_cids;comments;default
 template=templates/discreate;comments;default
 template=templates/dispComment;misc;default
 template=templates/dispCommentDetails;misc;default

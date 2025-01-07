@@ -11,6 +11,7 @@ use Slash::Constants qw(:messages :strip);
 use Slash::Display;
 use Slash::Utility;
 use Slash::Hook;
+use JSON;
 
 ##################################################################
 sub main {
@@ -684,7 +685,8 @@ sub moderate {
 
 	for my $key (sort keys %{$form}) {
 		if ($can_del && $key =~ /^del_(\d+)$/) {
-			$total_deleted += deleteThread($sid, $1);
+			# $total_deleted += deleteThread($sid, $1);
+			$total_deleted += flagPost($sid, $1);
 		} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
 			my($cid, $can_mod, $ret_val, $comment) = (0, 0, 0);
 			$cid = $1;
@@ -823,6 +825,38 @@ sub metamod_if_necessary {
 		}
 	}
 	return $retstr;
+}
+
+sub flagPost {
+	
+	my($sid, $cid) = @_;
+	my $slashdb = getCurrentDB();
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+
+	$level ||= 0;
+	$redacts = [];
+
+	return unless ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
+        || $user->{acl}{candelcomments_always};
+    
+
+    # Encode redacts as JSON
+    my $redacts_json =  encode_json($redacts);
+
+	my $count = 0;
+
+    # Flag the specified comment as spam
+    $count += $slashdb->doFlagSpam($cid, 1, $user->{uid}, "From moderate form.", $redacts_json);
+
+    # SID remains for display purposes, only.
+    slashDisplay('flagged_cids', {
+        sid             => $sid,
+        count           => $count,
+        comments_flagged => [$cid],
+    });
+
+    return $count;
 }
 
 ##################################################################
