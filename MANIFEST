@@ -384,6 +384,7 @@ themes/slashcode/templates/delSectConfirm;sections;default
 themes/slashcode/templates/delSection;sections;default
 themes/slashcode/templates/del_message;comments;default
 themes/slashcode/templates/deleted_cids;comments;default
+themes/slashcode/templates/flagged_cids;comments;default
 themes/slashcode/templates/discreate;comments;default
 themes/slashcode/templates/dispComment;misc;default
 themes/slashcode/templates/dispComment;misc;light
