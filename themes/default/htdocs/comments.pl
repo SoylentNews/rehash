@@ -834,8 +834,8 @@ sub flagPost {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	$level ||= 0;
-	$redacts = [];
+	my $level ||= 0;
+	my $redacts = [];
 
 	return unless ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
         || $user->{acl}{candelcomments_always};
