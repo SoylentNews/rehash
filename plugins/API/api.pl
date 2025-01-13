@@ -9,6 +9,11 @@ use Slash::Utility;
 use Slash::Constants qw(:web :messages);
 use Data::Dumper;
 use Encode qw(_utf8_on);
+use Time::Piece;
+use Time::Seconds;
+use LWP::UserAgent;
+use MIME::Base64;
+
 
 sub main {
 	my $user = getCurrentUser();
@@ -231,6 +236,10 @@ sub comment {
 			function	=> \&getSingleComment,
 			seclev		=> 1,
 		},
+		singleasn => {
+			function => \&getSingleCommentAsn,
+			seclev => 100,
+		}
 		discussion	=> {
 			function	=> \&getDiscussion,
 			seclev		=> 1,
@@ -632,10 +641,14 @@ sub getLatestComments {
 		my $comment = $comments_h->{$cid};		
 		my $cid_q = $slashdb->sqlQuote($cid);
 
-		delete $comment->{subnetid};
+
+		
 		delete $comment->{has_read};
 		delete $comment->{time};
-		delete $comment->{ipid};
+		if ($user->{seclev} < 100) {
+			delete $comment->{ipid};
+			delete $comment->{subnetid};
+		}
 		delete $comment->{signature};
 		delete $comment->{lastmod} if $comment->{lastmod};
 
@@ -655,15 +668,58 @@ sub getSingleComment {
 	my $select = "* ";
 	my $comment = $slashdb->sqlSelectHashref($select, $tables, $where);
 	$comment->{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
-
-	delete $comment->{subnetid};
+	if ($user->{seclev} < 100) {
+		delete $comment->{subnetid};
+		delete $comment->{ipid};
+	}
 	delete $comment->{has_read};
 	delete $comment->{time};
-	delete $comment->{ipid};
 	delete $comment->{signature};
 	delete $comment->{lastmod} if $comment->{lastmod};
 	my $json = JSON->new->utf8->allow_nonref;
 	return $json->pretty->encode($comment);
+}
+
+
+sub getSingleCommentAsn {
+	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
+	my $tables = "comments";
+	my $cid_q = $slashdb->sqlQuote($form->{cid});
+	my $where = "cid=$cid_q ";
+	my $select = "* ";
+	my $comment = $slashdb->sqlSelectHashref($select, $tables, $where);
+	my $ipid = $comment->{ipid};
+
+
+	my $username = $ENV{IP_API_USER};
+    my $password = $ENV{IP_API_PASSWORD};
+
+    # Create a user agent
+    my $ua = LWP::UserAgent->new;
+
+    # Create the request URL
+    my $url = "http://ipid.soylentnews.org/query?ipid=$ipid";
+
+    # Create the request
+    my $req = HTTP::Request->new(GET => $url);
+
+    # Add basic authorization header
+    my $auth = encode_base64("$username:$password");
+    $req->header('Authorization' => "Basic $auth");
+
+    # Perform the request
+    my $res = $ua->request($req);
+
+	if ($res->is_success) {
+        return $res->decoded_content;
+    } else {
+    	my $error_response = {
+            error => "Error: " . $res->status_line
+        };
+        my $json = JSON->new->utf8->allow_nonref;
+        return $json->pretty->encode($error_response);
+  
+    }
 }
 
 sub getDiscussion {
@@ -677,10 +733,14 @@ sub getDiscussion {
 		next if $cid eq "0";
 		my $cid_q = $slashdb->sqlQuote($cid);
 		$comments->{$cid}{comment} = $slashdb->sqlSelect("comment", "comment_text", "cid = $cid_q");
-		delete $comments->{$cid}{subnetid};
+
+		if ($user->{seclev} < 100) {
+			delete $comments->{$cid}{subnetid};
+			delete $comments->{$cid}{ipid};
+		}
 		delete $comments->{$cid}{has_read};
 		delete $comments->{$cid}{time};
-		delete $comments->{$cid}{ipid};
+		
 		delete $comments->{$cid}{lastmod} if $comments->{$cid}{lastmod};
 		delete $comments->{signature} if $comments->{signature};
 	}
