@@ -6203,6 +6203,11 @@ sub getCommentReply {
 		 AND users.uid=comments.uid"
 	) || {};
 
+	if ($reply->{spam_flag}) {
+        $reply->{subject} = "** Flagged Comment **";
+		$reply->{comment_text} = "** This comment has been flagged for review. **";
+    }
+
 	# For a comment we're replying to, there's no need to mod.
 	$reply->{no_moderation} = 1 if %$reply;
 
