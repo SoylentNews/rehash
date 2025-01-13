@@ -239,7 +239,7 @@ sub comment {
 		singleasn => {
 			function => \&getSingleCommentAsn,
 			seclev => 100,
-		}
+		},
 		discussion	=> {
 			function	=> \&getDiscussion,
 			seclev		=> 1,
