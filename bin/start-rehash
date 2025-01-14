@@ -26,7 +26,7 @@ chown slash:slash -R /srv/soylentnews.logs
 
 /etc/init.d/slash start
 /etc/init.d/ipn start
-sudo -u slash apache/bin/apachectl -k start
+sudo -u slash env IP_API_USER="$IP_API_USER" IP_API_PASSWORD="$IP_API_PASSWORD" apache/bin/apachectl -k start
 
 # placeholder
 tail -f /dev/null

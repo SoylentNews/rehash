@@ -11,7 +11,7 @@ use Data::Dumper;
 use Encode qw(_utf8_on);
 use Time::Piece;
 use Time::Seconds;
-use LWP::UserAgent;
+use HTTP::Tiny;
 use MIME::Base64;
 
 
@@ -29,23 +29,23 @@ sub main {
 		
 		admin		=> {
 			function	=> \&admin,
-			seclev		=> 0,
+			seclev		=> 100,
 		},
 		user		=> {
 			function	=> \&user,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		comment		=> {
 			function	=> \&comment,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		story		=> {
 			function	=> \&story,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		journal		=> {
 			function	=> \&journal,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		auth		=> {
 			function	=> \&auth,
@@ -53,7 +53,7 @@ sub main {
 		},
 		mod		=> {
 			function	=> \&mod,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		default		=> {
 			function	=> \&nullop,
@@ -122,7 +122,7 @@ sub mod {
 		},
 		reasons		=> {
 			function	=> \&getModReasons,
-			seclev		=> 0,
+			seclev		=> 100,
 		},
 	};
 
@@ -146,19 +146,19 @@ sub user {
 		},
 		max_uid		=> {
 			function	=> \&maxUid,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		get_uid		=> {
 			function	=> \&nameToUid,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		get_nick	=> {
 			function	=> \&uidToName,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		get_user	=> {
 			function	=> \&getPubUserInfo,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -182,31 +182,31 @@ sub story {
 		},
 		latest		=> {
 			function	=> \&getLatestStories,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		single	=> {
 			function	=> \&getSingleStory,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		pending	=> {
 			function	=> \&getPendingBoth,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		post	=> {
 			function	=> \&postStory,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		reskey		=> {
 			function	=> \&getStoryReskey,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		nexuslist	=> {
 			function	=> \&getNexusList,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		topiclist	=> {
 			function	=> \&getTopicsList,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -230,11 +230,11 @@ sub comment {
 		},
 		latest		=> {
 			function	=> \&getLatestComments,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		single		=> {
 			function	=> \&getSingleComment,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		singleasn => {
 			function => \&getSingleCommentAsn,
@@ -242,15 +242,15 @@ sub comment {
 		},
 		discussion	=> {
 			function	=> \&getDiscussion,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		post		=> {
 			function	=> \&postComment,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		reskey		=> {
 			function	=> \&getCommentReskey,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -275,11 +275,11 @@ sub journal {
 		},
 		latest		=> {
 			function	=> \&getLatestJournals,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 		single		=> {
 			function	=> \&getSingleJournal,
-			seclev		=> 1,
+			seclev		=> 100,
 		},
 	};
 
@@ -694,31 +694,25 @@ sub getSingleCommentAsn {
 	my $username = $ENV{IP_API_USER};
     my $password = $ENV{IP_API_PASSWORD};
 
-    # Create a user agent
-    my $ua = LWP::UserAgent->new;
+  # Create a user agent
+    my $ua = HTTP::Tiny->new;
 
     # Create the request URL
     my $url = "http://ipid.soylentnews.org/query?ipid=$ipid";
 
-    # Create the request
-    my $req = HTTP::Request->new(GET => $url);
+    # Perform the request with basic authentication
+    my $response = $ua->get($url, {
+        headers => { 'Authorization' => 'Basic ' . encode_base64("$username:$password", '') }
+    });
 
-    # Add basic authorization header
-    my $auth = encode_base64("$username:$password");
-    $req->header('Authorization' => "Basic $auth");
-
-    # Perform the request
-    my $res = $ua->request($req);
-
-	if ($res->is_success) {
-        return $res->decoded_content;
+    if ($response->{success}) {
+        return $response->{content};
     } else {
-    	my $error_response = {
-            error => "Error: " . $res->status_line
+        my $error_response = {
+            error => "Error: " . $response->{status} . " " . $response->{reason}
         };
         my $json = JSON->new->utf8->allow_nonref;
         return $json->pretty->encode($error_response);
-  
     }
 }
 
