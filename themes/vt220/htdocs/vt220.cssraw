@@ -579,7 +579,9 @@ option {
 .data_hl2 {
 	background: none repeat scroll 0% 0% #241800;
 }
-
+tr.flagged * {
+	text-decoration: line-through;
+}
 .data_hl1 {
 	background: none repeat scroll 0% 0% #302400;
 }
