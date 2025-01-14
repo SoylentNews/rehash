@@ -635,9 +635,14 @@ sub getLatestComments {
 		$where = "cid > $cid_q ";
 	}
 
+	if($form->{uid}){
+		my $uid_q = $slashdb->sqlQuote($form->{uid});
+		$where .= "AND uid = $uid_q ";
+	}
+
 	my $comments_h = $slashdb->sqlSelectAllHashref($id, $select, $table, $where, $other);
 	my $comments = [];
-	foreach my $cid (sort sort {$a <=> $b} keys %$comments_h) {
+	foreach my $cid (sort sort {$b <=> $a} keys %$comments_h) {
 		my $comment = $comments_h->{$cid};		
 		my $cid_q = $slashdb->sqlQuote($cid);
 
