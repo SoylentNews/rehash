@@ -2471,6 +2471,10 @@ sub dispCommentNoTemplate {
 
 	my $points = defined($args->{points}) ? $args->{points} : "?";
 	my $no_collapse = defined($args->{options}->{noCollapse}) ? "noCollapse" : "";
+	my $spamflag = "";
+	if($args->{spam_flag}){
+		$spamflag = "flagged";
+	}
 	my $dimmed = "";
 	if($no_collapse ne "noCollapse" && $args->{cid} <= $args->{cid_now} && !$user->{is_anon} && $user->{dimread}) {
 		$dimmed = "dimmed";
@@ -2484,82 +2488,104 @@ sub dispCommentNoTemplate {
 	$postnick .= (!$args->{is_anon} && $args->{subscriber_badge}) ? " <span class=\"zooicon\"><a href=\"$gSkin->{rootdir}/subscribe.pl\"><img src=\"$constants->{imagedir}/star.png\" alt=\"Subscriber Badge\" title=\"Subscriber Badge\" width=\"$constants->{badge_icon_size}\" height=\"$constants->{badge_icon_size}\"></a></span>" : "";
 	$postnick .= !$args->{is_anon} ? zooIcons({ person => $args->{uid}, bonus => 1}) : "";
 	my $nick .= "by $prenick".strip_literal($args->{nickname})."$postnick \n";
+
+
 	
-	$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed\">\n".
-	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"$treeHiderOffText><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
-	if($treeHiderOn) {
-		$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
-	}
-	unless(defined($user->{noscores}) && $user->{noscores}) {
-		my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
-		$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">(Score: $points$reason)</span> \n";
-	}
-
-	$html_out .= "<span class=\"by\">$noZoo</span>\n";
 	
-	if($treeHiderOn) {
-		$html_out .= "<span class=\"commentTreeHider\">";
-		$html_out .= $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
-		$html_out .= "</span>\n";
-	}
+		$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed $spamflag\">\n".
+		"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"$treeHiderOffText><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+		if($treeHiderOn) {
+			$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+		}
+		unless(defined($user->{noscores}) && $user->{noscores}) {
+			my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
+			$html_out .= "<span id=\"comment_score_$args->{cid}\" class=\"score\">(Score: $points$reason)</span> \n";
+		}
 
-	if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
-		$html_out .= " <div class=\"newBadge\">*New*</div>";
-	}
+		$html_out .= "<span class=\"by\">$noZoo</span>\n";
+		
+		if($treeHiderOn) {
+			$html_out .= "<span class=\"commentTreeHider\">";
+			$html_out .= $args->{children} ? ( $args->{children} > 1 ? "($args->{children} children)" : "($args->{children} child)") : "";
+			$html_out .= "</span>\n";
+		}
 
-	if($args->{marked_spam} && $user->{seclev} >= 500) {
-		$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&amp;sid=$args->{sid}&amp;cid=$args->{cid}&amp;noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&amp;sid=$args->{sid}&amp;cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
-	}
+		if($args->{cid} > $args->{cid_now} && !$user->{is_anon} && $user->{highnew}) {
+			$html_out .= " <div class=\"newBadge\">*New*</div>";
+		}
 
-	my $details = dispCommentDetails({
-		is_anon => $args->{is_anon},
-		fakeemail => $args->{fakeemail},
-		fakeemail_vis => $args->{fakeemail_vis},
-		'time' => $time,
-		cid => $args->{cid},
-		sid => $args->{sid},
-		homepage => $args->{homepage},
-		journal_last_entry_date => $args->{journal_last_entry_date},
-		nickname => $args->{nickname},
-		ipid_display => $args->{ipid_display},
-	});
-	$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
+		if($args->{marked_spam} && $user->{seclev} >= 500) {
+			$html_out .= " <div class=\"spam\"> <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&amp;sid=$args->{sid}&amp;cid=$args->{cid}&amp;noban=1\">[Unspam-Only]</a> or <a href=\"$constants->{real_rootdir}/comments.pl?op=unspam&amp;sid=$args->{sid}&amp;cid=$args->{cid}\">[Unspam-AND-Ban]</a></div>\n";
+		}
 
-	my $sig;
-	if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
-		$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n";
-	}
-
-	my $shrunk;
-	if ($args->{comment_shrunk}){
-		$shrunk = "<div id=\"comment_shrunk_$args->{cid}\" class=\"commentshrunk\">" . dispLinkComment({
-			sid     => $args->{sid},
-			cid     => $args->{cid},
-			pid     => $args->{cid},
-			subject => 'Read the rest of this comment...',
-			subject_only => 1
-		}) . "</div> \n";
-	}
-
-	$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div> \n$sig$shrunk</div>\n";
-
-	$html_out .= dispLinkComment({
-			original_pid => $args->{original_pid},
+		my $details = dispCommentDetails({
+			is_anon => $args->{is_anon},
+			fakeemail => $args->{fakeemail},
+			fakeemail_vis => $args->{fakeemail_vis},
+			'time' => $time,
 			cid => $args->{cid},
-			pid => $args->{pid},
 			sid => $args->{sid},
-			options => $args->{options},
-			reasons_html => $args->{reasons_html},
-			can_mod => $args->{can_mod},
-		})."\n</div>\n\n";
+			homepage => $args->{homepage},
+			journal_last_entry_date => $args->{journal_last_entry_date},
+			nickname => $args->{nickname},
+			ipid_display => $args->{ipid_display},
+		});
 
-	if($user->{mode} eq 'flat') { $visible = 0; $visiblenopass = 0; }
-	my $return = {
-		data		=> $html_out,
-		visible		=> $visible,
-		visiblenopass	=> $visiblenopass,
-	};
-	return $return;
+			if($args->{spam_flag}) {
+
+	$html_out = "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed $spamflag\">".
+			     	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">".
+				 		"<div class=\"title\">".
+							"<div class=\"details\"><span class=\"flagged-comment\">Flagged Comment </span>$nick<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span></div></div></div></div>";
+
+
+		my $return = {
+			data		=> $html_out,
+			visible		=> $visible,
+			visiblenopass	=> $visiblenopass,
+		};
+		return $return;
+	}
+
+		$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
+
+		my $sig;
+		if ($args->{sig} && !$user->{nosigs} && !$args->{comment_shrunk}){
+			$sig = "<div id=\"comment_sig_$args->{cid}\" class=\"sig\">$args->{sig}</div> \n";
+		}
+
+		my $shrunk;
+		if ($args->{comment_shrunk}){
+			$shrunk = "<div id=\"comment_shrunk_$args->{cid}\" class=\"commentshrunk\">" . dispLinkComment({
+				sid     => $args->{sid},
+				cid     => $args->{cid},
+				pid     => $args->{cid},
+				subject => 'Read the rest of this comment...',
+				subject_only => 1
+			}) . "</div> \n";
+		}
+
+		$html_out .= "<div class=\"commentBody\">\n<div id=\"comment_body_$args->{cid}\">$args->{comment}</div> \n$sig$shrunk</div>\n";
+
+		$html_out .= dispLinkComment({
+				original_pid => $args->{original_pid},
+				cid => $args->{cid},
+				pid => $args->{pid},
+				sid => $args->{sid},
+				options => $args->{options},
+				reasons_html => $args->{reasons_html},
+				can_mod => $args->{can_mod},
+			})."\n</div>\n\n";
+
+		if($user->{mode} eq 'flat') { $visible = 0; $visiblenopass = 0; }
+		my $return = {
+			data		=> $html_out,
+			visible		=> $visible,
+			visiblenopass	=> $visiblenopass,
+		};
+		return $return;
+	
+
 }
 
 sub zooIcons {
