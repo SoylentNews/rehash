@@ -975,7 +975,9 @@ background: #006;
 {
 background: #ccc;
 }
-
+tr.flagged * {
+	text-decoration: line-through;
+}
 .data_hl2
 {
 background: #ddd;

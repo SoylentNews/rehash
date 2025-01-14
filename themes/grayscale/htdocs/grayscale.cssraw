@@ -374,6 +374,9 @@ input[type=text], input[type=password] {border: 1px solid #666; background: #111
 	background: #333;
 	color:#aaa;
 }
+tr.flagged * {
+	text-decoration: line-through;
+}
 
 .data_hl2 {
 	background: #2a2a2a;

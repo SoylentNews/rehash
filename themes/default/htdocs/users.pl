@@ -1251,6 +1251,7 @@ sub showInfo {
 			ipid_vis	=> $comment->{ipid_vis},
 			karma		=> $comment->{karma},
 			tweak		=> $comment->{tweak},
+			spam_flag	=> $comment->{spam_flag},
 			tweak_orig	=> $comment->{tweak_orig},
 		
 		};
