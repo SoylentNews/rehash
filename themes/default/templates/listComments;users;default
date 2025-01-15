@@ -114,11 +114,10 @@ row_class_3 = "data_hl3";
 		%]
 		[% IF prev_comm_sid && prev_comm_sid != comment.sid; %][% PROCESS attached_to_row the_comment = prev_com colspan=total_cols %] [% thread_toggle=!thread_toggle; END %]
 		<tr class="[% thread_toggle ? row_class_1 : row_class_2 %][% IF comment.spam_flag %] flagged[% END %]">
-			[% IF type == "netid" %]
-			<td valign="top"><nobr>
-			[% END %]
-		[% PROCESS nick_and_uid nickname=comment.nickname uid=comment.uid %]
 		[% IF type == "netid" %]
+		<td valign="top"><nobr>
+			
+		[% PROCESS nick_and_uid nickname=comment.nickname uid=comment.uid %]
     	</nobr></td>
     	[% END %]
 		[% IF admin_flag and comment.type!="archived" %]
