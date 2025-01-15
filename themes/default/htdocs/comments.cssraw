@@ -354,8 +354,8 @@ input.commentTreeHider:checked ~ div.commentDiv div.commentSub
 	display:none;
 }
 
-input.commentHider:checked ~ div.commentDiv div.commentTop div.details,
-input.commentTreeHider:checked ~ div.commentDiv div.commentTop div.details
+input.commentHider:checked ~ div.commentDiv:not(.flagged) div.commentTop div.details,
+input.commentTreeHider:checked ~ div.commentDiv:not(.flagged) div.commentTop div.details
 {
 	display:none;
 }

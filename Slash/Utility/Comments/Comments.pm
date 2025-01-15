@@ -2434,6 +2434,7 @@ sub dispCommentNoTemplate {
 
 	
 	# Now shit starts getting squirrely.
+	my $checked = "";
 	if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
 		if(defined($args->{points}) && $args->{points} >= $user->{threshold} && !$show && $user->{mode} eq 'threadtos') {
 			$visiblenopass = 1;
@@ -2442,7 +2443,7 @@ sub dispCommentNoTemplate {
 			$visible = 1;
 		}
 		
-		my $checked = "";
+		
 		if($treeHiderOn) {
 			if($args->{lvl} > 1 && $user->{mode} eq 'threadtos' && !$show) { $checked = "checked=\"checked\""; }
 			if($user->{mode} eq 'threadtos' && $args->{points} < $user->{threshold} && !$show) { $checked = "checked=\"checked\""; }
@@ -2493,9 +2494,12 @@ sub dispCommentNoTemplate {
 	
 	
 		$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed $spamflag\">\n".
-		"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">\n<div class=\"title\">\n<h4 id=\"$args->{cid}\"$treeHiderOffText><label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+						"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">".
+							"<div class=\"title\">".
+								"<h4 id=\"$args->{cid}\"$treeHiderOffText>".
+									"<label class=\"commentHider\" for=\"commentHider_$args->{cid}\">".strip_title($args->{subject})."</label>";
 		if($treeHiderOn) {
-			$html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
+				       $html_out .= "<label class=\"commentTreeHider\" for=\"commentTreeHider_$args->{cid}\">".strip_title($args->{subject})."</label>\n";
 		}
 		unless(defined($user->{noscores}) && $user->{noscores}) {
 			my $reason = (defined($args->{reasons}) && defined($args->{reason}) && $args->{reason}) ? ", ".$args->{reasons}->{$args->{reason}}->{name} : "";
@@ -2531,21 +2535,49 @@ sub dispCommentNoTemplate {
 			ipid_display => $args->{ipid_display},
 		});
 
-			if($args->{spam_flag}) {
+		if($args->{spam_flag}) {
+			$html_out = "";
+			if(!defined($args->{options}->{noCollapse}) || !$args->{options}->{noCollapse}) {
+				if($treeHiderOn) {
+					$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
+				}
+				# $html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
+				# if(defined($args->{points}) && $user->{mode} eq "threadtng" && $args->{points} < $user->{highlightthresh} && !$show && !$checked) {
+				#	$html_out .= " checked=\"checked\" ";
+				#}
+				#elsif($user->{mode} eq 'threadtos' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && $args->{lvl} > 1 && !$checked) {
+				#	$html_out .= " checked=\"checked\" ";
+				#}
+				#elsif($user->{mode} eq 'flat' && defined($args->{points}) && $args->{points} < $user->{highlightthresh} && !$show && !$checked) {
+				#	$html_out .= " checked=\"checked\"";
+				#}
+				# $html_out .= " autocomplete=\"off\" />\n<label class=\"commentHider\" title=\"Expand/Collapse comment\" for=\"commentHider_$args->{cid}\"> </label>";
 
-	$html_out = "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed $spamflag\">".
-			     	"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">".
-				 		"<div class=\"title\">".
-							"<div class=\"details\"><span class=\"flagged-comment\">Flagged Comment </span>$nick<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span></div></div></div></div>";
+				if($treeHiderOn) {
+					$html_out .= "<label class=\"commentTreeHider\" title=\"Show/Hide comment tree\" for=\"commentTreeHider_$args->{cid}\"> </label>\n";
+					$html_out .= "<label class=\"expandAll noJS\" title=\"Show all comments in tree\" cid=\"$args->{cid}\"></label>"; 
+				}
+			}
+			$html_out .= "<div id=\"comment_$args->{cid}\" class=\"commentDiv score$points $no_collapse $dimmed $spamflag\">".
+							"<div id=\"comment_top_$args->{cid}\" class=\"commentTop\">".
+								"<div class=\"title\">".
+								"<h4 id=\"$args->{cid}\"$treeHiderOffText>".
+									"<div class=\"details\">".
+									"<span class=\"flagged-comment\">".
+									"Flagged Comment ".
+									"</span>$nick<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">".
+									"$details".
+									"</span></div>".
+								"</h4></div></div></div>";
 
 
-		my $return = {
-			data		=> $html_out,
-			visible		=> $visible,
-			visiblenopass	=> $visiblenopass,
-		};
-		return $return;
-	}
+			my $return = {
+				data		=> $html_out,
+				visible		=> $visible,
+				visiblenopass	=> $visiblenopass,
+			};
+			return $return;
+		}
 
 		$html_out .= "</h4>\n</div>\n<div class=\"details\">$nick\n<span class=\"otherdetails\" id=\"comment_otherdetails_$args->{cid}\">$details</span>\n</div>\n</div>\n";
 
