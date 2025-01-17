@@ -236,8 +236,8 @@ sub comment {
 			function	=> \&getSingleComment,
 			seclev		=> 1,
 		},
-		singleasn => {
-			function => \&getSingleCommentAsn,
+		singleapi => {
+			function => \&getSingleCommentApi,
 			seclev => 100,
 		}
 		discussion	=> {
