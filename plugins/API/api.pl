@@ -686,7 +686,7 @@ sub getSingleComment {
 }
 
 
-sub getSingleCommentAsn {
+sub getSingleCommentApi {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $tables = "comments";
 	my $cid_q = $slashdb->sqlQuote($form->{cid});
