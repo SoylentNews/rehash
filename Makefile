@@ -40,13 +40,13 @@ MAKE = make -s
 
 # Apache stuff
 APACHE_MIRROR=http://archive.apache.org/dist/httpd/
-APACHE_VER=2.2.29
+APACHE_VER=2.4.57
 APACHE_DIR=httpd-$(APACHE_VER)
 APACHE_FILE=$(APACHE_DIR).tar.bz2
 
 # Perl stuff
 PERL_MIRROR=http://www.cpan.org/src/5.0/
-PERL_VER=5.20.0
+PERL_VER=5.36.0
 PERL_DIR=perl-$(PERL_VER)
 PERL_FILE=$(PERL_DIR).tar.gz
 REHASH_PERL=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/perl
@@ -56,11 +56,17 @@ REHASH_CPANM=$(ENVIRONMENT_PREFIX)/perl-$(PERL_VER)/bin/cpanm
 # mod_perl 2.0.9 is for 2.4 apache, unclear if it
 # works on 2.2, but we're not upgrading (yet)
 
-MOD_PERL_MIRROR=http://mirror.cogentco.com/pub/apache/perl/
+#MOD_PERL_MIRROR=http://mirror.cogentco.com/pub/apache/perl/
+MOD_PERL_MIRROR=https://archive.apache.org/dist/perl/
 #MOD_PERL_VER=http://archive.apache.org/dist/perl/
-MOD_PERL_VER=2.0.9
+MOD_PERL_VER=2.0.12
 MOD_PERL_DIR=mod_perl-$(MOD_PERL_VER)
 MOD_PERL_FILE=$(MOD_PERL_DIR).tar.gz
+
+MOD_APREQ_MIRROR=https://dlcdn.apache.org//httpd/libapreq/
+MOD_APREQ_VER=2.17
+MOD_APREQ_FILE=libapreq2-$(MOD_APREQ_VER).tar.gz
+MOD_APREQ_DIR=libapreq2-$(MOD_APREQ_VER)
 
 # Subdirectories excl. CVS in the current directory (like plugins/ or tagboxes/)
 SUBDIRS = `find . -maxdepth 1 -name CVS -prune -o -type d -name [a-zA-Z]\* -print`
@@ -189,7 +195,7 @@ install: slash pluginsandtagboxes
 		fi; \
 	done)
 
-	$(CP) sql/mysql/slashschema_create.sql $(SLASH_PREFIX)/sql/mysql/schema.sql
+	$(CP) sql/mysql/rehash_schema.sql $(SLASH_PREFIX)/sql/mysql/schema.sql
 	$(CP) sql/mysql/defaults.sql $(SLASH_PREFIX)/sql/mysql/defaults.sql
 
 	# This needs BSD support (and Solaris)...
@@ -338,7 +344,7 @@ manifest :
 rpm :
 	rpm -ba slash.spec
 
-build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload stamp/install-cache-memcached stamp/install-cache-memcached-fast stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search stamp/install-uri-encode stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss
+build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stamp/install-cpamn stamp/install-apache2-upload stamp/install-cache-memcached stamp/install-cache-memcached-fast stamp/install-data-javascript-anon stamp/install-date-calc stamp/install-date-format stamp/install-date-language stamp/install-date-parse stamp/install-datetime-format-mysql stamp/install-dbd-mysql stamp/install-digest-md5 stamp/install-email-valid stamp/install-gd stamp/install-gd-text-align stamp/install-html-entities stamp/install-html-formattext stamp/install-html-tagset stamp/install-html-tokeparser stamp/install-html-treebuilder stamp/install-http-request stamp/install-image-size stamp/install-javascript-minifier stamp/install-json stamp/install-lingua-stem stamp/install-lwp-parallel-useragent stamp/install-lwp-useragent stamp/install-mail-address stamp/install-mail-bulkmail  stamp/install-mail-sendmail stamp/install-mime-types stamp/install-mojo-server-daemon  stamp/install-net-ip stamp/install-net-server stamp/install-schedule-cron stamp/install-soap-lite stamp/install-sphinx-search stamp/install-uri-encode stamp/install-template stamp/install-xml-parser stamp/install-xml-parser-expat stamp/install-xml-rss stamp/install-html-popuptreeselect stamp/libapreq
 	@echo "Setting permissions on the $(ENVIRONMENT_PREFIX) directory"
 	chown $(USER):$(GROUP) -R $(ENVIRONMENT_PREFIX)
 	@echo ""
@@ -375,7 +381,7 @@ build-environment: stamp/apache-built stamp/perl-built stamp/mod-perl-built stam
 	@echo ""
 	@echo "Thanks for installing Rehash."
 
-get-rehash-dependencies: dist/$(APACHE_FILE) dist/$(PERL_FILE) dist/$(MOD_PERL_FILE)
+get-rehash-dependencies: dist/$(APACHE_FILE) dist/$(PERL_FILE) dist/$(MOD_PERL_FILE) dist/$(MOD_APREQ_FILE)
 
 dist/$(APACHE_FILE):
 	-mkdir dist
@@ -384,7 +390,7 @@ dist/$(APACHE_FILE):
 stamp/apache-built: dist/$(APACHE_FILE)
 	-mkdir build stamp
 	-rm -rf build/$(APACHE_DIR)
-	cd build && tar jxf ../dist/$(APACHE_FILE); cd $(APACHE_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most && make && make install
+	cd build && tar jxf ../dist/$(APACHE_FILE); cd $(APACHE_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER) --enable-mods-shared=most --with-mpm=prefork && make && make install
 	touch stamp/apache-built
 
 dist/$(PERL_FILE):
@@ -406,6 +412,16 @@ stamp/mod-perl-built: dist/$(MOD_PERL_FILE)
 	-rm -rf build/$(MOD_PERL_DIR)
 	cd build && tar xvf ../dist/$(MOD_PERL_FILE) && cd $(MOD_PERL_DIR) && $(REHASH_PERL) Makefile.PL MP_APXS=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER)/bin/apxs && make && make test && make install
 	touch stamp/mod-perl-built
+
+dist/$(MOD_APREQ_FILE):
+	-mkdir dist
+	cd dist; wget $(MOD_APREQ_MIRROR)/$(MOD_APREQ_FILE)
+
+stamp/libapreq: dist/$(MOD_APREQ_FILE)
+	-mkdir build stamp
+	-rm -rf build/$(MOD_APREQ_DIR)
+	cd build && tar xvf ../dist/$(MOD_APREQ_FILE); cd $(MOD_APREQ_DIR) && ./configure --prefix=$(ENVIRONMENT_PREFIX) --with-apache2-apxs=$(ENVIRONMENT_PREFIX)/apache-$(APACHE_VER)/bin/apxs && make && make install
+	touch stamp/libapreq
 
 stamp/install-cpamn:
 	-mkdir stamp
@@ -621,6 +637,11 @@ stamp/install-xml-rss:
 	-mkdir stamp
 	$(REHASH_CPANM) XML::RSS
 	touch stamp/install-xml-rss
+
+stamp/install-html-popuptreeselect:
+	-mkdir stamp
+	$(REHASH_CPANM) HTML::PopupTreeSelect
+	touch stamp/install-html-popuptreeselect
 
 install-dbix-password:
 	$(REHASH_CPANM) --interactive DBIx::Password

@@ -325,7 +325,7 @@ sub ProxyRemoteAddr ($) {
 	# skip the following processing.  An untrusted client could send
 	# any header with any value.
 	#if ($trusted_ip_regex eq '0'
-	#	|| $r->connection->remote_ip !~ $trusted_ip_regex) {
+	#	|| $r->connection->client_ip !~ $trusted_ip_regex) {
 	#	return OK;
 	#}
 
@@ -340,7 +340,7 @@ sub ProxyRemoteAddr ($) {
 	if ($xf) {
 		# This doesn't strictly speaking handle the case of multiple IPs in
 		# XFF, so this probably should be fixed.
-		$r->connection->remote_ip($xf);
+		$r->connection->client_ip($xf);
 	}
 
 	return OK;
@@ -388,7 +388,7 @@ sub ConnectionIsSecure {
 	# way of doing this would be to check this machine's routing
 	# tables.  Instead we have the admins set a regex in a var.)
 	my $r = Apache2::RequestUtil->request;
-	my $ip = $r->connection->remote_ip;
+	my $ip = $r->connection->client_ip;
 	my $constants = getCurrentStatic();
 	my $secure_ip_regex = $constants->{admin_secure_ip_regex};
 	# Check the IP against the regex.  Assume we don't need to wrap

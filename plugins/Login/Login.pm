@@ -191,7 +191,7 @@ sub sendMailPasswd {
 	my $newpasswd = $slashdb->getNewPasswd($uid);
 
 	my $r = Apache2::RequestUtil->request;
-	my $remote_ip = $r->connection->remote_ip;
+	my $client_ip = $r->connection->client_ip;
 
 	my $xff = $r->headers_in->{'X-Real-IP'} || '';
 	$xff =~ s/\s+/ /g;
@@ -206,7 +206,7 @@ sub sendMailPasswd {
 	my $msg = getData('mail_msg', {
 		newpasswd       => $newpasswd,
 		tempnick        => $user->{nickname},
-		remote_ip       => $remote_ip,
+		client_ip       => $client_ip,
 		x_forwarded_for => $xff,
 		user_agent      => $ua,
 	}, 'login');
