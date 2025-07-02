@@ -118,6 +118,7 @@ RUN ${REHASH_CPANM} LWP::Parallel::UserAgent
 RUN ${REHASH_CPANM} LWP::UserAgent
 RUN ${REHASH_CPANM} Mail::Address
 RUN ${REHASH_CPANM} Mail::Bulkmail
+RUN ${REHASH_CPANM} Crypto::Rijndael
 
 # Disable tests on Mail::Sendmail because it works by sending an email to the author
 RUN ${REHASH_CPANM} Mail::Sendmail --notest
