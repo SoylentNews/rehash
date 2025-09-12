@@ -1,6 +1,9 @@
 #!/bin/bash
 cd /
+
+# Dockerfile does this for us and is now redundant at start
 sh make_password_pm.sh  ${MYSQL_HOST} ${MYSQL_DATABASE} ${MYSQL_USER} ${MYSQL_PASSWORD} > /rehash-prefix/perl/lib/${PERL_VERSION}/DBIx/Password.pm
+
 
 if [ $ENABLE_MAIL = "true" ]
 then

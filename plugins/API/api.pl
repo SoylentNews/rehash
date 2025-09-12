@@ -378,61 +378,92 @@ sub flag_spam {
     my $spam_flag = $form->{spam_flag};
     my $mod_reason = $form->{mod_reason};
 	my $redacts = $form->{redacts};
+	my $response;
+
+	PROCESS_SPAM_FLAG:
+	do {
+        # Ensure cid, spam_flag, and mod_reason are provided
+        unless ($cid) {
+            $response = {error => 'Comment ID not provided'};
+            last PROCESS_SPAM_FLAG;
+        }
+        unless (defined $spam_flag) {
+            $response = {error => 'Spam flag value not provided'};
+            last PROCESS_SPAM_FLAG;
+        }
+        unless ($mod_reason) {
+            $response = {error => 'Moderation reason not provided'};
+            last PROCESS_SPAM_FLAG;
+        }
+
+        $cid =~ s/\D//g;
+        $spam_flag =~ s/\D//g;
 
 
-
-    # Ensure cid, spam_flag, and mod_reason are provided
-    unless ($cid) {
-        return encode_json({ error => 'Comment ID not provided' });
-    }
-    unless (defined $spam_flag) {
-        return encode_json({ error => 'Spam flag value not provided' });
-    }
-    unless ($mod_reason) {
-        return encode_json({ error => 'Moderation reason not provided' });
-    }
-
-	$cid =~ s/\D//g;
-	$spam_flag =~ s/\D//g;
-
-	    # Check if redacts is a scalar or an array reference
-    if ($redacts) {
-        if (ref($redacts) eq 'ARRAY') {
-            # Handle array of strings
-            foreach my $pattern (@$redacts) {
-                # Ensure each pattern is a valid regex string
-                eval { qr/$pattern/ };
-                if ($@) {
-                    return encode_json({ error => "Invalid regex pattern: $pattern" });
+	     # Check if redacts is a scalar or an array reference
+        if ($redacts) {
+            if (ref($redacts) eq 'ARRAY') {
+                # Handle array of strings
+                foreach my $pattern (@$redacts) {
+                    # Ensure each pattern is a valid regex string
+                    eval { qr/$pattern/ };
+                    if ($@) {
+                        $response = {error => "Invalid regex pattern: $pattern"};
+                        last PROCESS_SPAM_FLAG;
+                    }
                 }
             }
-        } elsif (!ref($redacts)) {
-            # Handle single string
-            eval { qr/$redacts/ };
-            if ($@) {
-                return encode_json({ error => "Invalid regex pattern: $redacts" });
+            elsif (!ref($redacts)) {
+                # Handle single string
+                eval { qr/$redacts/ };
+                if ($@) {
+                    $response = {error => "Invalid regex pattern: $redacts"};
+                    last PROCESS_SPAM_FLAG;
+                }
+                # Convert single string to array
+                $redacts = [$redacts];
             }
-            # Convert single string to array
-            $redacts = [$redacts];
-        } else {
-            return encode_json({ error => 'Invalid redacts format' });
+            else {
+                $response = {error => 'Invalid redacts format'};
+                last PROCESS_SPAM_FLAG;
+            }
         }
-    } else {
-        # If redacts is not provided, set it to an empty array
-        $redacts = [];
+        else {
+            # If redacts is not provided, set it to an empty array
+            $redacts = [];
+        }# Encode redacts as JSON
+        my $redacts_json = encode_json($redacts);
+
+        # Additional security check: user must have seclev >= 100 OR (seclev >= 1 AND own the journal)
+        unless ($user->{seclev} >= 100 ||
+            ($spam_flag && $user->{seclev} >= 1 && $slashdb->isCommentOnUserOwnedJournal($cid, $user->{uid}))) {
+            $response = {error => 'Insufficient privileges to flag this comment'};
+            last PROCESS_SPAM_FLAG;
+        }
+
+
+        # Call doFlagSpam to handle the database operations
+        my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason, $redacts_json);
+
+        if ($result) {
+            $response = {success => 'Comment spam flag updated'};
+        }
+        else {
+            $response = {error => 'Failed to update comment spam flag'};
+        }
     }
+    while (0);
 
-    # Encode redacts as JSON
-    my $redacts_json =  encode_json($redacts);
-
-
-    # Call doFlagSpam to handle the database operations
-    my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason, $redacts_json);
-
-    if ($result) {
-        return encode_json({ success => 'Comment spam flag updated' });
-    } else {
-        return encode_json({ error => 'Failed to update comment spam flag' });
+    # Check the Accept header to determine the request type
+    if ($ENV{HTTP_ACCEPT} && $ENV{HTTP_ACCEPT} =~ /application\/json/) {
+        # API request: return a JSON response
+        return encode_json($response);
+    }
+    else {
+        # Web browser request: redirect to the referring page
+        my $referer = $ENV{HTTP_REFERER} || $gSkin->{absolutedir} . '/';
+        http_send({status => 302, location => $referer});
+        exit 0;
     }
 }
 

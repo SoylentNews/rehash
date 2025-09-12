@@ -13878,6 +13878,27 @@ sub upgradeCoreDB() {
 	return 1;
 }
 
+
+########################################################
+# Check if a comment belongs to a journal owned by the specified user
+sub isCommentOnUserOwnedJournal {
+	my($self, $cid, $uid) = @_;
+	
+	# Get the comment's sid (discussion id)
+	my $sid = $self->sqlSelect('sid', 'comments', "cid = $cid");
+	return 0 unless $sid;
+	
+	# Check if this discussion is a journal discussion owned by the user
+	my $journal_owner = $self->sqlSelect('journals.uid', 
+		'journals, discussions', 
+		"discussions.id = $sid 
+		 AND discussions.kind = 'journal' 
+		 AND journals.discussion = discussions.id 
+		 AND journals.uid = $uid");
+		 
+	return $journal_owner ? 1 : 0;
+}
+
 1;
 
 __END__

@@ -654,14 +654,19 @@ sub moderate {
 	my $error = '';
 
 	my $moderate_check = $moddb->moderateCheck($form, $user, $constants, $discussion);
+	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
+		|| $user->{acl}{candelcomments_always}
+		|| ($discussion->{stoid} == 0 && $discussion->{uid} == $user->{uid});
 	if (!$moderate_check->{count} && $moderate_check->{msg}) {
-		$error .= $moderate_check->{msg} if $moderate_check->{msg};
-		header('Comments', $discussion->{section}) or return;
-		titlebar("100%", getData('moderating'));
-	  print $error;		
-		printComments($discussion, $form->{pid}, $form->{cid},
-			{ force_read_from_master => 1 } );
-		return;
+		if (!$can_del) {
+			$error .= $moderate_check->{msg} if $moderate_check->{msg};
+			header('Comments', $discussion->{section}) or return;
+			titlebar("100%", getData('moderating'));
+		print $error;		
+			printComments($discussion, $form->{pid}, $form->{cid},
+				{ force_read_from_master => 1 } );
+			return;
+		}
 	}
 
 
@@ -680,8 +685,7 @@ sub moderate {
 	# ascending, maybe also by val ascending, or some way to try to
 	# get the single-point-spends first and then to only do the
 	# multiple-point-spends if the user still has points.
-	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
-		|| $user->{acl}{candelcomments_always};
+
 
 	for my $key (sort keys %{$form}) {
 		if ($can_del && $key =~ /^del_(\d+)$/) {
@@ -741,11 +745,11 @@ sub moderate {
 	if ($hasPosted && !$total_deleted) {
 		$error .= $moderate_check->{msg}."<br/>";
 	} elsif ($user->{seclev} && $total_deleted) {
-		$error .= slashDisplay('del_message', {
-			total_deleted   => $total_deleted,
-			comment_count   => $slashdb->countCommentsBySid($sid),
-			Return => 1,
-		});
+		#$error .= slashDisplay('del_message', {
+		#	total_deleted   => $total_deleted,
+		#	comment_count   => $slashdb->countCommentsBySid($sid),
+	#		Return => 1,
+	#	});
 	}
   
 	
@@ -833,13 +837,14 @@ sub flagPost {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $discussion = $slashdb->getDiscussion($sid);
 
 	my $level ||= 0;
 	my $redacts = [];
 
 	return unless ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
-        || $user->{acl}{candelcomments_always};
-    
+        || $user->{acl}{candelcomments_always}
+        || ($discussion->{stoid} == 0 && $discussion->{uid} == $user->{uid});
 
     # Encode redacts as JSON
     my $redacts_json =  encode_json($redacts);
@@ -850,11 +855,11 @@ sub flagPost {
     $count += $slashdb->doFlagSpam($cid, 1, $user->{uid}, "From moderate form.", $redacts_json);
 
     # SID remains for display purposes, only.
-    slashDisplay('flagged_cids', {
-        sid             => $sid,
-        count           => $count,
-        comments_flagged => [$cid],
-    });
+    # slashDisplay('flagged_cids', {
+        #sid             => $sid,
+        #count           => $count,
+        #comments_flagged => [$cid],
+    #});
 
     return $count;
 }
