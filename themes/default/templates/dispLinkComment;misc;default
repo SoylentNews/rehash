@@ -45,7 +45,10 @@ __template__
 		}) %]</div><button type="submit" name="moderate" value="comment_[% cid %]">Moderate</button>[% END %]
 
 		[% IF can_del %]
-		<input type="checkbox" name="del_[% cid %]"> Check to Flag
+		<input type="checkbox" name="del_[% cid %]"> Flag Comment <button type="submit" name="flag" value="flag_[% cid %]">Flag</button>
+		[% END %]
+
+		[% END; IF !options.show_pieces %]</div>
 		[% END %]
 
 		[% END; IF !options.show_pieces %]</div>

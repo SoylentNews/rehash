@@ -2821,7 +2821,7 @@ sub dispLinkComment {
 		}
 
 		if($can_del) {
-			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Check to Flag";
+			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Flag Comment <button type=\"submit\" name=\"flag\" value=\"commflag_$args->{cid}\">Flag</button>";
 		}
 	}
 	if(!$args->{options}->{show_pieces}) { $html_out .= "</div>\n"; }
