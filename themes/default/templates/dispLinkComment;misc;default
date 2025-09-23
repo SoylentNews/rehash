@@ -16,7 +16,7 @@ __template__
 [% IF user.mode != 'metamod' && user.mode != 'archive' %]
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
 		[% do_parent = ( original_pid );
-		   can_del   = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always ) %]
+		   can_del   = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always || (user.uid == disc_uid && disc_stoid == 0) ) %]
 		[% IF !options.show_pieces %]<div class="commentSub" id="comment_sub_[% cid %]">[% END; IF !options.pieces %]
 
 		[% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
@@ -45,7 +45,10 @@ __template__
 		}) %]</div><button type="submit" name="moderate" value="comment_[% cid %]">Moderate</button>[% END %]
 
 		[% IF can_del %]
-		<input type="checkbox" name="del_[% cid %]"> Check to Delete
+		<input type="checkbox" name="del_[% cid %]"> Flag Comment <button type="submit" name="flag" value="flag_[% cid %]">Flag</button>
+		[% END %]
+
+		[% END; IF !options.show_pieces %]</div>
 		[% END %]
 
 		[% END; IF !options.show_pieces %]</div>

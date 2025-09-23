@@ -98,4 +98,5 @@ CREATE TABLE `comments_audit` (
 
 # Spam flagging comments
 ALTER TABLE `comments` ADD COLUMN `spam_flag` TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE `comments` ADD COLUMN `redacts` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL;
 

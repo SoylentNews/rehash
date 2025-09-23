@@ -1207,7 +1207,10 @@ sub printComments {
 		cc              => $cc,
 		lcp             => $lcp,
 		lvl             => $lvl,
-		anon_dump       => $anon_dump
+		anon_dump       => $anon_dump,
+		disc_stoid	  => $discussion->{stoid},
+		disc_uid	  => $discussion->{uid},
+
 	};
 	$comment_html .= printCommComments($pccArgs);
 
@@ -1867,6 +1870,7 @@ sub dispComment {
 	push @{$user->{state}{cids}}, $comment->{cid};
 
 	$comment->{class} ||= 'full';
+	my $discussion = $mod_reader->getDiscussion($comment->{sid});
 
 	if ($options->{show_pieces}) {
 		my @return;
@@ -1876,7 +1880,9 @@ sub dispComment {
 			reasons		=> $reasons,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
-			options		=> $options
+			options		=> $options, 
+			disc_stoid		=> $discussion->{stoid},
+			disc_uid 	=> $discussion->{uid}
 		}, { Return => 1, Nocomm => 1 });
 		push @return, slashDisplay('dispLinkComment', {
 			%$comment,
@@ -1885,13 +1891,15 @@ sub dispComment {
 			ordered		=> $ordered,
 			can_mod		=> $can_mod,
 			is_anon		=> isAnon($comment->{uid}),
-			options		=> $options
+			options		=> $options,
+			disc_stoid		=> $discussion->{stoid},
+			disc_uid 	=> $discussion->{uid}
 		}, { Return => 1, Nocomm => 1 });
 		return @return;
 	}
 
 	my $marked_spam = $mod_reader->getSpamCount($comment->{cid}, $reasons);
-	my $discussion = $mod_reader->getDiscussion($comment->{sid});
+	
 	my $dim = $mod_reader->getCommentReadLog($discussion->{id}, $user->{uid});
 
 	my $return;
@@ -2310,7 +2318,11 @@ sub printCommComments {
 	my $gSkin = getCurrentSkin();
 	my $html_out = "";
 	
-	my $can_del = ($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited}) || $user->{acl}->{candelcomments_always};
+	my $can_del = (
+		($constants->{authors_unlimited} && $user->{is_admin} && $user->{seclev} >= $constants->{authors_unlimited})
+		|| $user->{acl}->{candelcomments_always}
+		|| ($args->{disc_stoid} == 0 && $args->{disc_uid} == $user->{uid}) # journal/poll and is owner
+	);
 	my $moderate_form = $args->{can_moderate} || $can_del || $user->{acl}->{candelcomments_always};
 	my $moderate_button = $args->{can_moderate} && $user->{mode} ne 'archive' && ( !$user->{state}->{discussion_archived} || $constants->{comments_moddable_archived});
 	my $next_prev_links = nextPrevLinks($args->{next}, $args->{prev}, $args->{comment});
@@ -2420,6 +2432,9 @@ sub dispCommentNoTemplate {
 	my $visible = 0;
 	my $visiblenopass = 0;
 	my $legacykids = 0;
+
+	my $discussion = $slashdb->getDiscussion($args->{sid});
+
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
 	if($user->{mode} ne 'flat' && defined($args->{options}->{show}) && $args->{options}->{show}){ $show = 1; }
@@ -2533,6 +2548,8 @@ sub dispCommentNoTemplate {
 			journal_last_entry_date => $args->{journal_last_entry_date},
 			nickname => $args->{nickname},
 			ipid_display => $args->{ipid_display},
+			disc_stoid => $discussion->{stoid},
+			disc_uid => $discussion->{uid},
 		});
 
 		if($args->{spam_flag}) {
@@ -2593,7 +2610,9 @@ sub dispCommentNoTemplate {
 				cid     => $args->{cid},
 				pid     => $args->{cid},
 				subject => 'Read the rest of this comment...',
-				subject_only => 1
+				subject_only => 1,
+				disc_stoid => $discussion->{stoid},
+				disc_uid => $discussion->{uid},
 			}) . "</div> \n";
 		}
 
@@ -2607,6 +2626,8 @@ sub dispCommentNoTemplate {
 				options => $args->{options},
 				reasons_html => $args->{reasons_html},
 				can_mod => $args->{can_mod},
+				disc_stoid => $discussion->{stoid},
+				disc_uid => $discussion->{uid},
 			})."\n</div>\n\n";
 
 		if($user->{mode} eq 'flat') { $visible = 0; $visiblenopass = 0; }
@@ -2762,8 +2783,11 @@ sub dispLinkComment {
 	if(!$user->{is_admin} && !$args->{original_pid} && $user->{state}->{discussion_archived}) { return ""; }
 
 	my $do_parent = defined($args->{original_pid}) ? $args->{original_pid} : 0;
-	my $can_del = (defined($constants->{authors_unlimited}) && $user->{seclev} >= $constants->{authors_unlimited})
-			|| (defined($user->{acl}->{candelcomments_always}) && $user->{acl}->{candelcomments_always});
+	my $can_del = (
+		(defined($constants->{authors_unlimited}) && $user->{seclev} >= $constants->{authors_unlimited})
+		|| (defined($user->{acl}->{candelcomments_always}) && $user->{acl}->{candelcomments_always})
+		|| ($args->{disc_stoid} == 0 && $args->{disc_uid} == $user->{uid}) # journal/poll and is owner
+	);
 	
 	if(!$args->{options}->{show_pieces}) {
 		$html_out .= "<div class=\"commentSub\" id=\"comment_sub_$args->{cid}\">";
@@ -2797,7 +2821,7 @@ sub dispLinkComment {
 		}
 
 		if($can_del) {
-			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Check to Delete";
+			$html_out .= "<input type=\"checkbox\" name=\"del_$args->{cid}\"> Flag Comment <button type=\"submit\" name=\"flag\" value=\"commflag_$args->{cid}\">Flag</button>";
 		}
 	}
 	if(!$args->{options}->{show_pieces}) { $html_out .= "</div>\n"; }

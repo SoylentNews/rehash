@@ -316,6 +316,7 @@ CREATE TABLE comments (
 	tweak TINYINT NOT NULL DEFAULT 0,
     badge_id tinyint NOT NULL DEFAULT 0,
 	spam_flag tinyint NOT NULL DEFAULT 0,
+	redacts text default null
 	PRIMARY KEY (cid),
 	KEY display (sid,points,uid),
 	KEY byname (uid,points),

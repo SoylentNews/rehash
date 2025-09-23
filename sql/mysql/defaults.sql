@@ -798,6 +798,7 @@ INSERT INTO vars (name, value, description) VALUES ('checklist_length','255','Le
 INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_regex','^127\\.0\\.0\\.1$','IP addresses from which we will trust an X-Real-IP header');
 INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_header','','Name of HTTP request header to prefer over "X-Real-IP", if present');
 INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
+INSERT INTO vars (name, value, description) VALUES ('comment_audit_hidden_duration','1440','Number of minutes to remove comment text after being flagged as hidden/spam via API/Admin access.');
 INSERT INTO vars (name, value, description) VALUES ('comment_cache_max_hours','96','Discussion age at which comments are no longer cached');
 INSERT INTO vars (name, value, description) VALUES ('comment_compress_slice','500','Chars to slice comment into for compressOk');
 INSERT INTO vars (name, value, description) VALUES ('comment_homepage_disp','50','Chars of poster URL to show in comment header');
@@ -1039,6 +1040,7 @@ INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a
 INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '35', 'Max length of nickname, should correspond with schema for users.nickname');
 INSERT INTO vars (name, value, description) VALUES ('no_prerendered_stories','0','Turn off use of prerendered stories in display');
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
+INSERT INTO vars (name, value, description) VALUES ('onion_location', '', 'Location of the Onion server');
 INSERT INTO vars (name, value, description) VALUES ('openid_consumer_allow', '1', 'Allow users to authenticate using OpenID, and manage OpenID identities.');
 INSERT INTO vars (name, value, description) VALUES ('openid_consumer_secret', rand(), 'Consumer secret for OpenID');
 INSERT INTO vars (name, value, description) VALUES ('optipng', '', 'path to optipng if it is to be used for compressing thumbnails');
@@ -1160,4 +1162,3 @@ INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whe
 INSERT INTO vars (name, value, description) VALUES ('days_to_count_for_modpoints', '1', 'Number of days to use in counting comments for handing out modpoints');
 INSERT INTO vars (name, value, description) VALUES ('utf8_max_diacritics', '4', 'The threshold of diacritic marks on a single character at which they all get stripped off');
 INSERT INTO vars (name, value, description) VALUES ("downmod_karma_floor", "10", "Below this level of karma, users cannot use negative moderations");
-INSERT INTO vars (name, value, description) VALUES ("onion_location", "", "Location of the Onion server");

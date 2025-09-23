@@ -13386,13 +13386,13 @@ sub logCommentPromotion {
 
 
 sub doFlagSpam {
-    my ($self, $cid, $spam_flag, $mod_uid, $mod_reason) = @_;
+    my ($self, $cid, $spam_flag, $mod_uid, $mod_reason, $redacts) = @_;
 
     # Begin transaction
     $self->sqlDo("SET AUTOCOMMIT=0");
 
     # Prepare the data for the update
-    my $data = { spam_flag => $spam_flag };
+    my $data = { spam_flag => $spam_flag, redacts=>$redacts };
     my $where = "cid = " . $self->sqlQuote($cid);
 
     # Update the spam flag using sqlUpdate
@@ -13433,10 +13433,17 @@ sub getCommentsAudit {
 
     # Default limit to 100 if not provided
     $limit = 100 unless defined $limit;
+	$limit = $limit =~ /^\d+$/ ? $limit : 100;
 
-    my $select = '*';
-    my $from = 'comments_audit';
-    my $where = $cid ? "cid = " . $self->sqlQuote($cid) : undef;
+    my $select = 'comments_audit.*, comment_text.comment, comments.redacts, last_dates.last_date';
+    my $from = 'comments_audit 
+                JOIN comment_text ON comments_audit.cid = comment_text.cid 
+                JOIN comments ON comments_audit.cid = comments.cid 
+                JOIN (SELECT cid, MAX(date) AS last_date FROM comments_audit GROUP BY cid) AS last_dates 
+                ON comments_audit.cid = last_dates.cid';
+    my $where = 'comments_audit.cid = comments.cid AND comments.cid = comment_text.cid';
+	$where .= $cid ? " AND comments_audit.cid = " . $self->sqlQuote($cid) : '';
+
     my $other = $cid ? '' : "ORDER BY date DESC" . ($limit ? " LIMIT $limit" : '');
 
     return $self->sqlSelectMany($select, $from, $where, $other);
@@ -13874,6 +13881,27 @@ sub upgradeCoreDB() {
 		print "No upgrades needed for Core V$core_ver \n";
 	}
 	return 1;
+}
+
+
+########################################################
+# Check if a comment belongs to a journal owned by the specified user
+sub isCommentOnUserOwnedJournal {
+	my($self, $cid, $uid) = @_;
+	
+	# Get the comment's sid (discussion id)
+	my $sid = $self->sqlSelect('sid', 'comments', "cid = $cid");
+	return 0 unless $sid;
+	
+	# Check if this discussion is a journal discussion owned by the user
+	my $journal_owner = $self->sqlSelect('journals.uid', 
+		'journals, discussions', 
+		"discussions.id = $sid 
+		 AND discussions.kind = 'journal' 
+		 AND journals.discussion = discussions.id 
+		 AND journals.uid = $uid");
+		 
+	return $journal_owner ? 1 : 0;
 }
 
 1;

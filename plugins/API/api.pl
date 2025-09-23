@@ -90,7 +90,7 @@ sub auth {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 1,
+			seclev		=> 0,
 		},
 		login		=> {
 			function	=> \&login,
@@ -98,7 +98,7 @@ sub auth {
 		},
 		logout		=> {
 			function	=> \&logout,
-			seclev		=> 1,
+			seclev		=> 0,
 		},
 	};
 
@@ -118,7 +118,7 @@ sub mod {
 	my $ops = {
 		default		=> {
 			function	=> \&nullop,
-			seclev		=> 0,
+			seclev		=> 1,
 		},
 		reasons		=> {
 			function	=> \&getModReasons,
@@ -240,6 +240,10 @@ sub comment {
 			function => \&getSingleCommentApi,
 			seclev => 100,
 		},
+		singleapi => {
+			function => \&getSingleCommentApi,
+			seclev => 100,
+		}
 		discussion	=> {
 			function	=> \&getDiscussion,
 			seclev		=> 100,
@@ -300,11 +304,11 @@ sub admin {
     my $ops = {
         flag_spam	=> {
             function	=> \&flag_spam,
-            seclev		=> 100,
+            seclev		=> 1,
         },
 		  get_comments_audit => {
             function => \&get_comments_audit,
-            seclev   => 0,
+            seclev   	=> 0,
         },
         default		=> {
             function	=> \&nullop,
@@ -327,12 +331,45 @@ sub get_comments_audit {
     my $cid = $form->{cid};
     my $limit = $form->{limit};
 
+	if (defined $cid && $cid ne '') {
+		$cid =~ s/\D//g;
+	}
+
+	if (defined $limit && $limit ne '') {
+		$limit =~ s/\D//g;
+	}
+
+	my $hidden_duration_minutes = $constants->{comment_audit_hidden_duration} // 1440;
+    my $hidden_duration_seconds = $hidden_duration_minutes * 60;
+
     # Call getCommentsAudit to retrieve the audit entries
     my $sth = $slashdb->getCommentsAudit($cid, $limit);
 
     # Fetch all rows
     my @rows;
     while (my $row = $sth->fetchrow_hashref) {
+        my $last_date = Time::Piece->strptime($row->{last_date}, '%Y-%m-%d %H:%M:%S');
+         my $current_time = gmtime;
+        my $time_diff = $current_time - $last_date;
+
+ 		if ($time_diff < $hidden_duration_seconds) {
+			my $remaining_seconds = $hidden_duration_seconds - $time_diff;
+            my $hours = int($remaining_seconds / 3600);
+            my $minutes = int(($remaining_seconds % 3600) / 60);
+			if ( $user->{seclev} < 100 ) {
+				delete $row->{redacts};
+				$row->{comment} = sprintf("%d hours and %d minutes until visible", $hours, $minutes);
+			} else {
+				$row->{hold_expiry} = sprintf("%d hours and %d minutes until visible", $hours, $minutes);
+			}
+        }
+
+		 if ($row->{redacts}) {
+			my $redacts = decode_json($row->{redacts});
+			foreach my $pattern (@$redacts) {
+				$row->{comment} =~ s/($pattern)/'#' x length($1)/ge;
+			}
+		}
         push @rows, $row;
     }
 
@@ -344,25 +381,93 @@ sub flag_spam {
     my $cid = $form->{cid};
     my $spam_flag = $form->{spam_flag};
     my $mod_reason = $form->{mod_reason};
+	my $redacts = $form->{redacts};
+	my $response;
 
-    # Ensure cid, spam_flag, and mod_reason are provided
-    unless ($cid) {
-        return encode_json({ error => 'Comment ID not provided' });
-    }
-    unless (defined $spam_flag) {
-        return encode_json({ error => 'Spam flag value not provided' });
-    }
-    unless ($mod_reason) {
-        return encode_json({ error => 'Moderation reason not provided' });
-    }
+	PROCESS_SPAM_FLAG:
+	do {
+        # Ensure cid, spam_flag, and mod_reason are provided
+        unless ($cid) {
+            $response = {error => 'Comment ID not provided'};
+            last PROCESS_SPAM_FLAG;
+        }
+        unless (defined $spam_flag) {
+            $response = {error => 'Spam flag value not provided'};
+            last PROCESS_SPAM_FLAG;
+        }
+        unless ($mod_reason) {
+            $response = {error => 'Moderation reason not provided'};
+            last PROCESS_SPAM_FLAG;
+        }
 
-    # Call doFlagSpam to handle the database operations
-    my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason);
+        $cid =~ s/\D//g;
+        $spam_flag =~ s/\D//g;
 
-    if ($result) {
-        return encode_json({ success => 'Comment spam flag updated' });
-    } else {
-        return encode_json({ error => 'Failed to update comment spam flag' });
+
+	     # Check if redacts is a scalar or an array reference
+        if ($redacts) {
+            if (ref($redacts) eq 'ARRAY') {
+                # Handle array of strings
+                foreach my $pattern (@$redacts) {
+                    # Ensure each pattern is a valid regex string
+                    eval { qr/$pattern/ };
+                    if ($@) {
+                        $response = {error => "Invalid regex pattern: $pattern"};
+                        last PROCESS_SPAM_FLAG;
+                    }
+                }
+            }
+            elsif (!ref($redacts)) {
+                # Handle single string
+                eval { qr/$redacts/ };
+                if ($@) {
+                    $response = {error => "Invalid regex pattern: $redacts"};
+                    last PROCESS_SPAM_FLAG;
+                }
+                # Convert single string to array
+                $redacts = [$redacts];
+            }
+            else {
+                $response = {error => 'Invalid redacts format'};
+                last PROCESS_SPAM_FLAG;
+            }
+        }
+        else {
+            # If redacts is not provided, set it to an empty array
+            $redacts = [];
+        }# Encode redacts as JSON
+        my $redacts_json = encode_json($redacts);
+
+        # Additional security check: user must have seclev >= 100 OR (seclev >= 1 AND own the journal)
+        unless ($user->{seclev} >= 100 ||
+            ($spam_flag && $user->{seclev} >= 1 && $slashdb->isCommentOnUserOwnedJournal($cid, $user->{uid}))) {
+            $response = {error => 'Insufficient privileges to flag this comment'};
+            last PROCESS_SPAM_FLAG;
+        }
+
+
+        # Call doFlagSpam to handle the database operations
+        my $result = $slashdb->doFlagSpam($cid, $spam_flag, $user->{uid}, $mod_reason, $redacts_json);
+
+        if ($result) {
+            $response = {success => 'Comment spam flag updated'};
+        }
+        else {
+            $response = {error => 'Failed to update comment spam flag'};
+        }
+    }
+    while (0);
+
+    # Check the Accept header to determine the request type
+    if ($ENV{HTTP_ACCEPT} && $ENV{HTTP_ACCEPT} =~ /application\/json/) {
+        # API request: return a JSON response
+        return encode_json($response);
+    }
+    else {
+        # Web browser request: redirect to the referring page
+        my $referer = $ENV{HTTP_REFERER} || $gSkin->{absolutedir} . '/';
+        http_send({status => 302, location => $referer});
+        exit 0;
     }
 }
 
@@ -830,6 +935,7 @@ sub uidToName {
 	my ($form, $slashdb, $user, $constants, $gSkin) = @_;
 	my $json = JSON->new->utf8->allow_nonref;
 	my $uid = $form->{uid};
+	$uid =~ s/\D//g;
 	my $nick = {};
 	$nick->{nick} = $slashdb->sqlSelect(
 					'nickname',

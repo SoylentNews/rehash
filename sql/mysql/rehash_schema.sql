@@ -743,6 +743,7 @@ CREATE TABLE `comments` (
   `tweak` tinyint NOT NULL DEFAULT '0',
   `badge_id` tinyint NOT NULL DEFAULT '0',
   `spam_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `redacts` TEXT CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`cid`),
   KEY `display` (`sid`,`points`,`uid`),
   KEY `byname` (`uid`,`points`),
