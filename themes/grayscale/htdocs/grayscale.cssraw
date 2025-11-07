@@ -133,6 +133,10 @@ input[type="submit"], button, .logout a, div.storylinks ul li.more a {
 
 /* Commnets Pages */
 
+.flagged > .commentTop > .title {
+        background: none;
+}
+
 .commentTop .title {
 	background-color: #2a2a2a;
 	background: linear-gradient(#333, #222);

@@ -90,6 +90,10 @@ a:hover { color: #000; }
 
 /* Commnets Pages */
 
+.flagged > .commentTop > .title {
+        background: none;
+}
+
 .commentTop .title {     
   background-color: #000000;
 	background: linear-gradient(#000000, #404040);

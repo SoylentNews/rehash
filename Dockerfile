@@ -47,7 +47,7 @@ RUN apt-get update
 RUN yes | unminimize
 
 # Install system build dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix fortune
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgd-dev libmysqlclient-dev zlib1g zlib1g-dev libexpat1-dev git wget sudo postfix fortune curl
 RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
@@ -195,6 +195,10 @@ RUN echo "LoadModule perl_module modules/mod_perl.so" >> ${REHASH_PREFIX}/apache
 RUN echo "Include /rehash-prefix/rehash/httpd/slash.conf" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
 RUN echo "Include /rehash-prefix/rehash/httpd/site.conf" >> ${REHASH_PREFIX}/rehash/httpd/slash.conf
 RUN echo "LogLevel Debug" >> ${REHASH_PREFIX}/apache/conf/httpd.conf
+RUN sed -i 's/CustomLog logs\/access_log common/CustomLog logs\/access_log combined/' ${REHASH_PREFIX}/apache/conf/httpd.conf
+
+# Change Apache log format from common to combined (includes referrer and user agent)
+RUN sed -i 's/CustomLog logs\/access_log common/CustomLog logs\/access_log combined/' ${REHASH_PREFIX}/apache/conf/httpd.conf
 
 COPY conf/postfix/main.cf /main.cf
 CMD /start-rehash

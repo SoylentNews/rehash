@@ -29,7 +29,7 @@ sub main {
 		
 		admin		=> {
 			function	=> \&admin,
-			seclev		=> 100,
+			seclev		=> 1,
 		},
 		user		=> {
 			function	=> \&user,
@@ -240,10 +240,6 @@ sub comment {
 			function => \&getSingleCommentApi,
 			seclev => 100,
 		},
-		singleapi => {
-			function => \&getSingleCommentApi,
-			seclev => 100,
-		}
 		discussion	=> {
 			function	=> \&getDiscussion,
 			seclev		=> 100,
@@ -308,7 +304,7 @@ sub admin {
         },
 		  get_comments_audit => {
             function => \&get_comments_audit,
-            seclev   	=> 0,
+            seclev   	=> 100,
         },
         default		=> {
             function	=> \&nullop,
@@ -717,8 +713,13 @@ sub getLatestJournals {
 					'introtext, article',
 					'journals_text',
 					" id = $id ");
-		($journals->{$id}->{introtext}, $journals->{$id}->{article}) = @$texts;
-		
+		if ($texts) {
+	            ($journals->{$id}->{introtext}, $journals->{$id}->{article}) = @$texts;
+	        } else {
+	            # Explicitly set keys to avoid 'null' in JSON (optional, but good practice)
+	            $journals->{$id}->{introtext} = '';
+	            $journals->{$id}->{article}   = '';
+	        }		
 		push @$items, $journals->{$id};
 	}
 

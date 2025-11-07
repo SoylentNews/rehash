@@ -13883,7 +13883,6 @@ sub upgradeCoreDB() {
 	return 1;
 }
 
-
 ########################################################
 # Check if a comment belongs to a journal owned by the specified user
 sub isCommentOnUserOwnedJournal {
