@@ -9,9 +9,8 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
-
       - name: Push mirror to GitLab
         run: git push --mirror https://oauth2:${{ secrets.GITLAB_TOKEN }}@git.ennwise.com/soylentnews/rehash.git
