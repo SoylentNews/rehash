@@ -13,6 +13,4 @@ jobs:
         with:
           fetch-depth: 0
       - name: Push mirror to GitLab
-        run: git push --prune https://oauth2:${{ secrets.GITLAB_TOKEN }}@git.ennwise.com/soylentnews/rehash.git \
-          '+refs/heads/*:refs/heads/*' \
-          '+refs/tags/*:refs/tags/*'
+        run: git push --prune https://oauth2:${{ secrets.GITLAB_TOKEN }}@git.ennwise.com/soylentnews/rehash.git '+refs/heads/*:refs/heads/*' '+refs/tags/*:refs/tags/*'
