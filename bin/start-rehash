@@ -25,6 +25,11 @@ sudo -u slash rehash/bin/template-tool -U
 
 rm -f /srv/soylentnews.logs/slashd.pid
 rm -f /srv/soylentnews.logs/ipnd.pid
+# Apache's PID file is on a persistent volume and survives container restarts.
+# If the recorded PID happens to be reassigned to another process on startup
+# (e.g. an ipnd child), apachectl sees it as "already running" and refuses
+# to start — port 80 then has no listener and varnish returns 503.
+rm -f /srv/soylentnews.org/apache/logs/httpd.pid
 chown slash:slash -R /srv/soylentnews.logs
 
 /etc/init.d/slash start
