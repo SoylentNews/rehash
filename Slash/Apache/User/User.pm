@@ -156,7 +156,7 @@ sub handler {
 		# can't use values in $user because that doesn't get set
 		# up until prepareUser is called, later in this function).
 		my $read_only = 0;
-		my $hostip = $r->connection->remote_ip;
+		my $hostip = $r->connection->client_ip;
 		my $srcids = get_srcids({ ip => $hostip });
 		$read_only = 1 if $reader->checkAL2($srcids,
 			[qw( nopost nopostanon openproxy )]);
@@ -353,7 +353,7 @@ sub handler {
 		# dummy hashref with the bare minimum of values that we need,
 		# instead of going through prepareUser(), because this is
 		# much, much faster.
-		my $hostip = $r->connection->remote_ip;
+		my $hostip = $r->connection->client_ip;
 
 		#my($ipid, $subnetid) = get_ipids($hostip);
 		# I *really* depise perl's multiple returns

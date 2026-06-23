@@ -94,7 +94,7 @@ sub UserLog {
 		&& !$user->{admin_clearpass}) {
 		# This could be any value as long as it's true.
 		$user_update->{admin_clearpass} = join(" ",
-			$r->connection->remote_ip, scalar(gmtime));
+			$r->connection->client_ip, scalar(gmtime));
 	}
 
 	my($op) = getOpAndDatFromStatusAndURI($r->status, $r->uri);
