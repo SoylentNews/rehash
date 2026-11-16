@@ -16,7 +16,7 @@ __template__
 		<small><b>The Fine Print:</b> The following are owned by whoever posted them. We are not responsible for them in any way.</small>
 	</div>
 	[% FOREACH article = articles %]
-		<div class="journaldate">[% Slash.timeCalc(article.day,"%A %B %d, %y") %]</div>
+		<div class="journaldate">[% Slash.timeCalc(article.day,"%A %B %d, %Y") %]</div>
 		[% FOREACH diatribe = article.article %]
 			<div class="article">
 				<div class="title">
